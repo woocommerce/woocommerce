@@ -62,6 +62,14 @@ export const orderPageSaveChanges = async () => {
 };
 
 /**
+ * Save changes on Product page.
+ */
+ export const productPageSaveChanges = async () => {
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '#message' );
+};
+
+/**
  * Set checkbox.
  *
  * @param {string} selector
@@ -410,4 +418,17 @@ export async function verifyValueOfElementAttribute(
 ) {
 	const actualValue = await getSelectorAttribute( selector, attribute );
 	expect( actualValue ).toBe( expectedValue );
+}
+
+/**
+ * Clicks only if the element is enabled.
+ * Otherwise, it raises an error because element is disabled and therefore not clickable.
+ *
+ * @param {string} selector Selector of the element you want to click.
+ */
+ export async function click( selector ) {
+	const isDisabled = await page.$( selector + '[disabled]' ) !== null;
+	expect( isDisabled ).toBeFalsy();
+
+	await expect( page ).toClick( selector );
 }

@@ -12,8 +12,10 @@ const {
 	setCheckbox,
 	verifyValueOfInputField,
 	getSelectorAttribute,
+	productPageSaveChanges,
 	orderPageSaveChanges,
 	verifyValueOfElementAttribute,
+	click
 } = require( '../page-utils' );
 
 const {
@@ -47,10 +49,21 @@ const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) =>
 	baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
 
 // Reusable selectors
+const BTN_COPY_DOWNLOAD_LINK = '#copy-download-link';
 const INPUT_DOWNLOADS_REMAINING = 'input[name="downloads_remaining[0]"]';
 const INPUT_EXPIRATION_DATE = 'input[name="access_expires[0]"]';
+const MOST_RECENT_VARIATION = 'div.woocommerce_variations > div:nth-child(2)';
 const ORDER_DOWNLOADS = '#woocommerce-order-downloads';
-const BTN_COPY_DOWNLOAD_LINK = '#copy-download-link';
+const INPUT_VARIATION = {
+	SKU: '#variable_sku0',
+	REGULAR_PRICE : '#variable_regular_price_0',
+	SALE_PRICE: '#variable_sale_price0',
+	WEIGHT: '#variable_weight0',
+	LENGTH: '[name="variable_length[0]"]',
+	WIDTH: '[name="variable_width[0]"]',
+	HEIGHT: '[name="variable_height[0]"]',
+	DESCRIPTION: '#variable_description0'
+}
 
 const merchant = {
 	login: async () => {
@@ -357,6 +370,143 @@ const merchant = {
 
 		// Close tab
 		await page.close();
+	},
+
+	updateVariationDetails: async ( variationDetails ) => {
+		// View variations
+		await expect( page ).toClick( 'li.variations_options' );
+
+		// Display the details of the most recent variation
+		const variation = await expect( page ).toMatchElement( MOST_RECENT_VARIATION );
+		await expect( variation ).toClick( 'div.handlediv' );
+
+		// Verify variation details
+		if ( variationDetails.sku ) {
+			await clearAndFillInput( 
+				INPUT_VARIATION.SKU, 
+				variationDetails.sku 
+			);
+		}
+
+		if ( variationDetails.regularPrice ) {
+			await clearAndFillInput( 
+				INPUT_VARIATION.REGULAR_PRICE,
+				variationDetails.regularPrice
+			);
+		}
+
+		if ( variationDetails.salePrice ) {
+			await clearAndFillInput(
+				INPUT_VARIATION.SALE_PRICE,
+				variationDetails.salePrice
+			);
+		}
+
+		if ( variationDetails.weight ) {
+			await clearAndFillInput(
+				INPUT_VARIATION.WEIGHT,
+				variationDetails.weight
+			);
+		}
+
+		if ( variationDetails.length ) {
+			await clearAndFillInput(
+				INPUT_VARIATION.LENGTH,
+				variationDetails.length
+			);
+		}
+
+		if ( variationDetails.width ) {
+			await clearAndFillInput(
+				INPUT_VARIATION.WIDTH,
+				variationDetails.width
+			);
+		}
+
+		if ( variationDetails.height ) {
+			await clearAndFillInput(
+				INPUT_VARIATION.HEIGHT,
+				variationDetails.height
+			);
+		}
+
+		if ( variationDetails.description ) {
+			await clearAndFillInput(
+				INPUT_VARIATION.DESCRIPTION,
+				variationDetails.description
+			);
+		}
+
+		await click( 'button.save-variation-changes' );
+		
+		// Save product changes
+		await productPageSaveChanges();
+	},
+
+	verifyVariationDetails: async ( expectedVariationDetails ) => {
+		// View variations
+		await expect( page ).toClick( 'li.variations_options' );
+
+		// Display latest variation details
+		const variation = await expect( page ).toMatchElement( MOST_RECENT_VARIATION );
+		await expect( variation ).toClick( 'div.handlediv' );
+		
+		// Verify variation details
+		if ( expectedVariationDetails.sku ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.SKU,
+				expectedVariationDetails.sku
+			);
+		}
+
+		if ( expectedVariationDetails.regularPrice ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.REGULAR_PRICE,
+				expectedVariationDetails.regularPrice
+			);
+		}
+
+		if ( expectedVariationDetails.salePrice ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.SALE_PRICE,
+				expectedVariationDetails.salePrice
+			);
+		}
+
+		if ( expectedVariationDetails.weight ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.WEIGHT,
+				expectedVariationDetails.weight
+			);
+		}
+
+		if ( expectedVariationDetails.length ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.LENGTH,
+				expectedVariationDetails.length
+			);
+		}
+
+		if ( expectedVariationDetails.width ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.WIDTH,
+				expectedVariationDetails.width
+			);
+		}
+
+		if ( expectedVariationDetails.height ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.HEIGHT,
+				expectedVariationDetails.height
+			);
+		}
+
+		if ( expectedVariationDetails.description ) {
+			await verifyValueOfInputField(
+				INPUT_VARIATION.DESCRIPTION,
+				expectedVariationDetails.description
+			);
+		}
 	},
 
 	openNewShipping: async () => {
