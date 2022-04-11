@@ -12,9 +12,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 10
-
-      - uses: ./.github/actions/deepen-to-merge-base
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
