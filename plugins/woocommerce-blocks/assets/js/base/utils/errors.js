@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Given a JS error or a fetch response error, parse and format it so it can be displayed to the user.
@@ -48,11 +49,10 @@ export const formatStoreApiErrorMessage = ( response ) => {
 		}
 	}
 
-	return (
-		response?.message ||
-		__(
-			'Something went wrong. Please contact us to get assistance.',
-			'woo-gutenberg-products-block'
-		)
-	);
+	return response?.message
+		? decodeEntities( response.message )
+		: __(
+				'Something went wrong. Please contact us to get assistance.',
+				'woo-gutenberg-products-block'
+		  );
 };
