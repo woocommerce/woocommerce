@@ -10,39 +10,32 @@ import { __ } from '@wordpress/i18n';
  */
 import Visa from '../images/cards/visa.js';
 import MasterCard from '../images/cards/mastercard.js';
+import Maestro from '../images/cards/maestro.js';
 import Amex from '../images/cards/amex.js';
 import ApplePay from '../images/cards/applepay.js';
-import GooglePay from '../images/cards/googlepay.js';
 import CB from '../images/cards/cb.js';
 import DinersClub from '../images/cards/diners.js';
 import Discover from '../images/cards/discover.js';
 import JCB from '../images/cards/jcb.js';
 import UnionPay from '../images/cards/unionpay.js';
-import GiroPay from '../images/cards/giropay.js';
-import Sofort from '../images/cards/sofort.js';
 
 export const WCPayAcceptedMethods = () => (
-	<div className="woocommerce-task-payment-wcpay__accepted-section">
-		<Text as="h3" variant="label" size="12" lineHeight="16px">
-			{ __( 'Accepted payment methods include:', 'woocommerce' ) }
+	<>
+		<Text as="h3" variant="label" weight="600" size="12" lineHeight="16px">
+			{ __( 'Accepted payment methods', 'woocommerce' ) }
 		</Text>
 
-		<div className="woocommerce-task-payment-wcpay__accepted-icons">
+		<div className="woocommerce-task-payment-wcpay__accepted">
 			<Visa />
 			<MasterCard />
+			<Maestro />
 			<Amex />
-			<ApplePay />
-			<GooglePay />
-			<CB />
-			<GiroPay />
 			<DinersClub />
+			<CB />
 			<Discover />
 			<UnionPay />
 			<JCB />
-			<Sofort />
-			<div className="woocommerce-task-payment-wcpay__accepted-and-more">
-				& more.
-			</div>
+			<ApplePay />
 		</div>
-	</div>
+	</>
 );

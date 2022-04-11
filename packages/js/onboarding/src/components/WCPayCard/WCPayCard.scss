@@ -1,126 +1,43 @@
-.woocommerce-task-payments {
-	.woocommerce-task-payment-wcpay {
-		.vstack,
-		.hstack {
-			display: flex;
+.woocommerce-task-payments .woocommerce-task-payment-wcpay {
+	.woocommerce-task-payment-wcpay__description {
+		font-size: 16px;
+		margin-bottom: $gap-large;
+	}
 
-			&.content-center {
-				justify-content: center;
-			}
+	.components-card__header {
+		margin-bottom: $gap-small;
+		justify-content: flex-start;
+		padding: 25px;
 
-			&.content-around {
-				justify-content: space-around;
-			}
-
-			&.flex-1 {
-				flex: 1;
-			}
-		}
-
-		.vstack {
-			flex-direction: column;
-		}
-
-		.hstack {
-			flex-direction: row;
-		}
-
-		.woocommerce-task-payment-wcpay__hero-image-container {
-			display: flex;
-			flex-direction: column;
-			justify-content: flex-end;
-
-			svg {
-				margin-right: -32px;
-				margin-bottom: -24px;
-			}
-
-			@media screen and (max-width: 600px) {
-				max-width: 200px;
-			}
-		}
-
-		.woocommerce-task-payment-wcpay__heading {
-			letter-spacing: 0.6px;
-			max-width: 250px;
-			margin-right: $gap-small;
-			margin-bottom: $gap;
-		}
-
-		.woocommerce-task-payment-wcpay__description {
-			font-size: 13px;
-			max-width: 325px;
-			margin-right: $gap-small;
-			margin-bottom: $gap-large;
-		}
-
-		.components-card__header {
-			margin-bottom: $gap-small;
-			justify-content: flex-start;
-			padding: 25px;
-
-			.woocommerce-pill {
-				margin-left: $gap-small;
-			}
-		}
-
-		.components-card__footer {
-			flex-direction: column;
-			align-items: flex-start;
-
-			.components-button {
-				margin-top: $gap;
-				margin-left: 0;
-			}
-
-			&,
-			h3 {
-				color: #757575;
-			}
-
-			svg {
-				height: 24px;
-			}
-		}
-
-		.components-card__body {
-			h2 {
-				margin: 0 0 20px 0;
-			}
-		}
-
-		.woocommerce-task-payment-wcpay__accepted-icons {
-			h3 {
-				color: #40464d;
-			}
-
-			display: flex;
-			flex-wrap: wrap;
-			margin-top: $gap-small;
-			margin-left: 0;
-			gap: 8px;
-			justify-content: flex-start;
-			align-items: flex-end;
-		}
-
-		.woocommerce-task-payment-wcpay__benefit {
-			svg {
-				margin: 0 auto;
-			}
-
-			max-width: 170px;
-			text-align: center;
-			font-size: 15px;
-			line-height: 24px;
-			letter-spacing: normal;
-		}
-
-		.woocommerce-task-payment-wcpay__accepted-and-more {
-			white-space: nowrap;
+		.woocommerce-pill {
+			margin-left: $gap-small;
 		}
 	}
 
-	.woocommerce-task-payment-wcpay__benefits-card {
-		margin-bottom: 0;
+	.components-card__footer {
+		flex-direction: column;
+		align-items: flex-start;
+
+		.components-button {
+			margin-top: $gap;
+			margin-left: 0;
+		}
+	}
+
+	.components-card__body {
+		h2 {
+			margin: 0 0 20px 0;
+		}
+	}
+
+	.woocommerce-task-payment-wcpay__accepted {
+		display: flex;
+		margin-top: $gap-small;
+		flex-wrap: wrap;
+		gap: $gap-small;
+
+		h3 {
+			color: #40464d;
+		}
 	}
 }

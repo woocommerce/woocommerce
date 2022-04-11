@@ -2,12 +2,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link, Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
 import {
 	WCPayCard,
+	WCPayCardHeader,
 	WCPayCardFooter,
 	WCPayCardBody,
-	WCPayBenefitCard,
+	SetupRequired,
 } from '@woocommerce/onboarding';
 import { useDispatch } from '@wordpress/data';
 
@@ -18,8 +22,26 @@ import { useDispatch } from '@wordpress/data';
 import { Action } from '../Action';
 import { connectWcpay } from './utils';
 
+const TosPrompt = () =>
+	interpolateComponents( {
+		mixedString: __(
+			'Upon clicking "Get started", you agree to the {{link}}Terms of service{{/link}}. Next we’ll ask you to share a few details about your business to create your account.',
+			'woocommerce'
+		),
+		components: {
+			link: (
+				<Link
+					href={ 'https://wordpress.com/tos/' }
+					target="_blank"
+					type="external"
+				/>
+			),
+		},
+	} );
+
 export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const {
+		description,
 		id,
 		needsSetup,
 		installed,
@@ -40,14 +62,27 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	}
 
 	return (
-		<>
-			<WCPayCard>
-				<WCPayCardBody
-					heading={ 'Accept payments and manage your business.' }
-					onLinkClick={ () => {
-						recordEvent( 'tasklist_payment_learn_more' );
-					} }
-				>
+		<WCPayCard>
+			<WCPayCardHeader>
+				{ installed && needsSetup ? (
+					<SetupRequired />
+				) : (
+					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
+				) }
+			</WCPayCardHeader>
+
+			<WCPayCardBody
+				description={ description }
+				onLinkClick={ () => {
+					recordEvent( 'tasklist_payment_learn_more' );
+				} }
+			/>
+
+			<WCPayCardFooter>
+				<>
+					<Text lineHeight="1.5em">
+						<TosPrompt />
+					</Text>
 					<Action
 						id={ id }
 						hasSetup={ true }
@@ -56,17 +91,11 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 						isRecommended={ true }
 						isInstalled={ isInstalled }
 						hasPlugins={ true }
-						setupButtonText={
-							installed && needsSetup
-								? __( 'Finish setup', 'woocommerce' )
-								: __( 'Install', 'woocommerce' )
-						}
+						setupButtonText={ __( 'Get started', 'woocommerce' ) }
 						onSetupCallback={ onSetupCallback }
 					/>
-				</WCPayCardBody>
-				<WCPayCardFooter />
-			</WCPayCard>
-			<WCPayBenefitCard />
-		</>
+				</>
+			</WCPayCardFooter>
+		</WCPayCard>
 	);
 };
