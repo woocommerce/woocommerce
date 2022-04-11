@@ -2,11 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { createInterpolateElement } from '@wordpress/element';
-import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
 import { getAdminLink } from '@woocommerce/settings';
+import {
+	Disabled,
+	PanelBody,
+	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -64,41 +71,40 @@ const Edit = ( { attributes, setAttributes } ) => {
 						}
 					/>
 					{ showSaleBadge && (
-						<ToggleButtonControl
+						<ToggleGroupControl
 							label={ __(
 								'Sale Badge Alignment',
 								'woo-gutenberg-products-block'
 							) }
 							value={ saleBadgeAlign }
-							options={ [
-								{
-									label: __(
-										'Left',
-										'woo-gutenberg-products-block'
-									),
-									value: 'left',
-								},
-								{
-									label: __(
-										'Center',
-										'woo-gutenberg-products-block'
-									),
-									value: 'center',
-								},
-								{
-									label: __(
-										'Right',
-										'woo-gutenberg-products-block'
-									),
-									value: 'right',
-								},
-							] }
 							onChange={ ( value ) =>
 								setAttributes( { saleBadgeAlign: value } )
 							}
-						/>
+						>
+							<ToggleGroupControlOption
+								value="left"
+								label={ __(
+									'Left',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+							<ToggleGroupControlOption
+								value="center"
+								label={ __(
+									'Center',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+							<ToggleGroupControlOption
+								value="right"
+								label={ __(
+									'Right',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+						</ToggleGroupControl>
 					) }
-					<ToggleButtonControl
+					<ToggleGroupControl
 						label={ __(
 							'Image Sizing',
 							'woo-gutenberg-products-block'
@@ -122,26 +128,25 @@ const Edit = ( { attributes, setAttributes } ) => {
 							}
 						) }
 						value={ imageSizing }
-						options={ [
-							{
-								label: __(
-									'Full Size',
-									'woo-gutenberg-products-block'
-								),
-								value: 'full-size',
-							},
-							{
-								label: __(
-									'Cropped',
-									'woo-gutenberg-products-block'
-								),
-								value: 'cropped',
-							},
-						] }
 						onChange={ ( value ) =>
 							setAttributes( { imageSizing: value } )
 						}
-					/>
+					>
+						<ToggleGroupControlOption
+							value="full-size"
+							label={ __(
+								'Full Size',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+						<ToggleGroupControlOption
+							value="cropped"
+							label={ __(
+								'Cropped',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					</ToggleGroupControl>
 				</PanelBody>
 			</InspectorControls>
 			<Disabled>
