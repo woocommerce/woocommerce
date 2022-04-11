@@ -435,6 +435,7 @@ class ProductSchema extends AbstractSchema {
 					],
 				],
 			],
+			self::EXTENDING_KEY   => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
 
@@ -479,6 +480,8 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
+			self::EXTENDING_KEY   => $this->get_extended_data( self::IDENTIFIER, $product ),
+
 		];
 	}
 
