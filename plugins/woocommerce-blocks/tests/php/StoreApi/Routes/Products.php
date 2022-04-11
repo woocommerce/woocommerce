@@ -89,6 +89,7 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'is_purchasable', $data[0] );
 		$this->assertArrayHasKey( 'is_in_stock', $data[0] );
 		$this->assertArrayHasKey( 'add_to_cart', $data[0] );
+		$this->assertArrayHasKey( 'extensions', $data[0] );
 	}
 
 	/**

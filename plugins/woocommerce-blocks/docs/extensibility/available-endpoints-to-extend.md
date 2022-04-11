@@ -30,6 +30,19 @@ The items endpoint, which is also available on `wc/store/cart` inside the `items
 
 -   `CartItemSchema::IDENTIFIER`
 
+## `wc/store/products`
+
+The main products endpoint is extensible via ExtendSchema. The data is available via the `extensions` key for each `product` in the response array.
+
+### Passed Parameters:
+
+-   `data_callback`: `$product`.
+-   `schema_callback` none.
+
+### Key:
+
+-   `ProductSchema::IDENTIFIER`
+
 <!-- FEEDBACK -->
 ---
 
