@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
-class MetaToMetaTableMigrator {
+abstract class MetaToMetaTableMigrator {
 
 	/**
 	 * Schema config, see __construct for more details.
@@ -24,14 +24,29 @@ class MetaToMetaTableMigrator {
 	private $schema_config;
 
 	/**
-	 * MetaToMetaTableMigrator constructor.
+	 * Store errors along with entity IDs from migrations.
 	 *
-	 * @param array $schema_config This parameters provides general but essential information about tables under migrations. Must be of the form-
-	 * TODO: Add structure.
+	 * @var array
 	 */
-	public function __construct( $schema_config ) {
-		// TODO: Validate params.
-		$this->schema_config = $schema_config;
+	protected $errors;
+
+	public abstract function get_meta_config();
+
+	public function __construct() {
+		$this->schema_config = $this->get_meta_config();
+		$this->errors = array();
+	}
+
+	public function process_migration_batch_for_ids( $entity_ids ) {
+		global $wpdb;
+		$data_to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
+		$insert_queries  = $this->generate_insert_sql_for_batch( $data_to_migrate['data'], 'insert' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $insert_queries should already be escaped in the generating function.
+		$result = $wpdb->query( $insert_queries );
+		if ( count( $data_to_migrate['data'] ) !== $result ) {
+			// TODO: Find and log entity ids that were not inserted.
+			echo 'error';
+		}
 	}
 
 	/**
