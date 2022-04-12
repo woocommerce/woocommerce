@@ -38,5 +38,3 @@ export const Toggle = ( { children, heading, onToggle } ) => {
 		</div>
 	);
 };
-
-// export default Toggle;

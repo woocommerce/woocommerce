@@ -19,7 +19,7 @@ export const List = ( {
 } ) => {
 	return (
 		<Card>
-			{ heading ? <CardHeader as="h2">{ heading }</CardHeader> : null }
+			{ heading && <CardHeader as="h2">{ heading }</CardHeader> }
 			{ paymentGateways.map( ( paymentGateway ) => {
 				const { id } = paymentGateway;
 				return (
@@ -31,10 +31,8 @@ export const List = ( {
 					/>
 				);
 			} ) }
-			{ footerLink ? (
+			{ footerLink && (
 				<CardFooter isBorderless>{ footerLink }</CardFooter>
-			) : (
-				''
 			) }
 		</Card>
 	);
