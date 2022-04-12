@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Enable "Save changes" for variations on the admin when a textfield receives input.
+Enable the "Save changes" button within the variations panel when a textfield receives input.
