@@ -167,11 +167,19 @@ jobs:
                   path: ${{ env.API_TEST_REPORT_DIR }}
 
             - name: Publish API test report
-              working-directory: ${{ env.API_TEST_REPORT_DIR }}
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.number }}
+                  RUN_ID: ${{ github.run_id }}
+                  ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
               run: |
-                  ls -R $GITHUB_WORKSPACE
-                  ls -R $API_TEST_REPORT_DIR
-                  pwd
+                  gh workflow run publish-report.yml \
+                    -f test_workflow=pr \
+                    -f test_type=api \
+                    -f run_id=$RUN_ID \
+                    -f artifact_name=$ARTIFACT_NAME \
+                    -f pr_number=$PR_NUMBER \
+                    --repo woocommerce/woocommerce-test-reports
 
     k6-tests-run:
         name: Runs k6 Performance tests
