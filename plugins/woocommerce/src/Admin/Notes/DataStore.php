@@ -326,7 +326,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	/**
 	 * Return an ordered list of notes.
 	 *
-	 * @param array $args Query arguments.
+	 * @param array  $args Query arguments.
 	 * @param string $context Optional argument that the woocommerce_note_where_clauses filter can use to determine whether to apply extra conditions. Extensions should define their own contexts and use them to avoid adding to notes where clauses when not needed.
 	 * @return array An array of objects containing a note id.
 	 */
@@ -431,7 +431,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	 * Applies woocommerce_note_where_clauses filter.
 	 *
 	 * @uses args_to_where_clauses
-	 *  @param array $args Array of args to pass.
+	 * @param array  $args Array of args to pass.
 	 * @param string $context Optional argument that the woocommerce_note_where_clauses filter can use to determine whether to apply extra conditions. Extensions should define their own contexts and use them to avoid adding to notes where clauses when not needed.
 	 * @return string Where clauses for the query.
 	 */
