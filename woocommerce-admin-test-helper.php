@@ -54,7 +54,15 @@ function add_extension_register_script() {
 	wp_enqueue_style( 'woocommerce-admin-test-helper' );
 }
 
-add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
+add_action( 'plugins_loaded', function() {
+	if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
+		return;
+	}
+	
+	add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
 
-// Load the plugin
-require( 'plugin.php' );
+	// Load the plugin
+	require( 'plugin.php' );
+});
+
+
