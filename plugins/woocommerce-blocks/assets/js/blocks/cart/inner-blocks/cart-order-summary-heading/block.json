@@ -17,7 +17,7 @@
 		},
 		"content": {
 			"type": "string",
-			"default": "Heading"
+			"default": "Cart totals"
 		},
 		"lock": {
 			"type": "object",
