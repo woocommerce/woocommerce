@@ -17,13 +17,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_columns() {
 		$this->assertSame( [
-			'cb' => '<input type="checkbox" />',
-			'type' => _x( 'Type', 'review type', 'woocommerce' ),
-			'author' => __( 'Author', 'woocommerce' ),
-			'rating' => __( 'Rating', 'woocommerce' ),
-			'comment' => _x( 'Review', 'column name', 'woocommerce' ),
+			'cb'       => '<input type="checkbox" />',
+			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
+			'author'   => __( 'Author', 'woocommerce' ),
+			'rating'   => __( 'Rating', 'woocommerce' ),
+			'comment'  => _x( 'Review', 'column name', 'woocommerce' ),
 			'response' => __( 'Product', 'woocommerce' ),
-			'date' => _x( 'Submitted on', 'column name', 'woocommerce' ),
+			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 		], ( new ReviewsListTable() )->get_columns() );
 	}
 

@@ -19,13 +19,13 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	public function get_columns() {
 		return [
-			'cb' => '<input type="checkbox" />',
-			'type' => _x( 'Type', 'review type', 'woocommerce' ),
-			'author' => __( 'Author', 'woocommerce' ),
-			'rating' => __( 'Rating', 'woocommerce' ),
-			'comment' => _x( 'Review', 'column name', 'woocommerce' ),
+			'cb'       => '<input type="checkbox" />',
+			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
+			'author'   => __( 'Author', 'woocommerce' ),
+			'rating'   => __( 'Rating', 'woocommerce' ),
+			'comment'  => _x( 'Review', 'column name', 'woocommerce' ),
 			'response' => __( 'Product', 'woocommerce' ),
-			'date' => _x( 'Submitted on', 'column name', 'woocommerce' ),
+			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 		];
 	}
 
