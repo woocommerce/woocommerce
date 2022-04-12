@@ -242,13 +242,15 @@ describe( 'Shopper → Checkout', () => {
 	describe( 'Coupons', () => {
 		beforeAll( async () => {
 			coupon = await createCoupon( { usageLimit: 1 } );
+			await merchant.login();
 		} );
 
 		afterAll( async () => {
 			await withRestApi.deleteCoupon( coupon.id );
+			await merchant.logout();
 		} );
 
-		it( 'User can apply single-use coupon once', async () => {
+		it( 'Logged in user can apply single-use coupon and place order', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await shopper.block.goToCheckout();
@@ -272,7 +274,6 @@ describe( 'Shopper → Checkout', () => {
 					text: coupon.code,
 				}
 			);
-
 			await shopper.block.placeOrder();
 			await expect( page ).toMatch( 'Your order has been received.' );
 
@@ -286,7 +287,7 @@ describe( 'Shopper → Checkout', () => {
 			);
 		} );
 
-		it( 'User cannot apply single-use coupon twice', async () => {
+		it( 'Logged in user cannot apply single-use coupon twice', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await shopper.block.goToCheckout();
