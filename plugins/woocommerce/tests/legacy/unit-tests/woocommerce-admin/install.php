@@ -161,4 +161,54 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		WC_Install::install();
 		$this->assertEquals( get_option( self::VERSION_OPTION ), WC_ADMIN_VERSION_NUMBER );
 	}
+
+	/**
+	 * Test the following options are created.
+	 *
+	 * - woocommerce_admin_install_timestamp
+	 *
+	 * @return void
+	 */
+	public function test_options_are_set() {
+		delete_transient( 'wc_installing' );
+		WC_Install::install();
+		$options = array( 'woocommerce_admin_install_timestamp' );
+		foreach ( $options as $option ) {
+			$this->assertNotFalse( get_option( $option ) );
+		}
+	}
+
+	/**
+	 * Test woocommerce_admin_installed action.
+	 * @return void
+	 */
+	public function test_woocommerce_admin_installed_action() {
+		delete_transient( 'wc_installing' );
+		WC_Install::install();
+		$this->assertTrue( did_action( 'woocommerce_admin_installed' ) > 0 );
+	}
+
+	/**
+	 * Test woocommerce_updated action gets fired.
+	 *
+	 * @return void
+	 */
+	public function test_woocommerce_updated_action() {
+		$versions     = array_keys( WC_Install::get_db_update_callbacks() );
+		$prev_version = $versions[ count( $versions ) - 2 ];
+		update_option( 'woocommerce_version', $prev_version );
+		WC_Install::check_version();
+		$this->assertTrue( did_action( 'woocommerce_updated' ) > 0 );
+	}
+
+	/**
+	 * Test woocommerce_newly_installed action gets fired.
+	 * @return void
+	 */
+	public function test_woocommerce_newly_installed_action() {
+		delete_option( 'woocommerce_version' );
+		WC_Install::check_version();
+		$this->assertTrue( did_action( 'woocommerce_newly_installed' ) > 0 );
+	}
+
 }
