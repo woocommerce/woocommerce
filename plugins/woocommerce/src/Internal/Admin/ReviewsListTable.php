@@ -102,7 +102,24 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_rating( $item ) {
-		// @TODO Implement in MWC-5333 {agibson 2022-04-12}
+		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
+
+		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
+			$accessibility_label = sprintf(
+				/* translators: 1: number representing a rating */
+				__( '%1$s out of 5', 'woocommerce' ),
+				$rating
+			);
+			?>
+			<span aria-label="<?php echo esc_attr( $accessibility_label ); ?>">
+			<?php
+			for ( $count = 0; $count < $rating; $count++ ) {
+				echo '&#9733;';
+			}
+			?>
+			</span>
+			<?php
+		}
 	}
 
 	/**
