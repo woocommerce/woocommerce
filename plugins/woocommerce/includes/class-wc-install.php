@@ -242,10 +242,6 @@ class WC_Install {
 			if ( ! $wc_version ) {
 				do_action( 'woocommerce_newly_installed' );
 				do_action_deprecated( 'woocommerce_admin_newly_installed', array(), $wc_code_version, 'woocommerce_newly_installed' );
-			} else {
-				// if there is already a version and we're install, we're updating an existing install.
-				do_action( 'woocommerce_updated_existing' );
-				do_action_deprecated( 'woocommerce_admin_updated_existing', array(), $wc_code_version, 'woocommerce_updated_existing' );
 			}
 		}
 	}
