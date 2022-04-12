@@ -15,7 +15,7 @@
 		"build-storybook": "build-storybook  -c ./storybook/.storybook",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"build:packages": "cross-env NODE_ENV=production pnpm run:packages -- build",
-		"clean": "rimraf ./dist && pnpm run:packages -- clean --parallel",
+		"clean": "rimraf ../woocommerce/assets/client/admin/* && pnpm run:packages -- clean --parallel",
 		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
 		"create-hook-reference": "node ./bin/hook-reference/index.js",
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
