@@ -14,6 +14,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
+	 * @TODO Change the `screen` to be our page when it gets created in MWC-5330
 	 */
 	public function test_get_columns() {
 		$this->assertSame(
@@ -26,7 +27,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				'response' => __( 'Product', 'woocommerce' ),
 				'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 			],
-			( new ReviewsListTable() )->get_columns()
+			( new ReviewsListTable( [ 'screen' => 'comments' ] ) )->get_columns()
 		);
 	}
 
