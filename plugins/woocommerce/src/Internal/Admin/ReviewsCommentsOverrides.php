@@ -46,12 +46,10 @@ class ReviewsCommentsOverrides {
 	 */
 	public function exclude_reviews_from_comments( $args ) {
 
-		$post_types = get_post_types();
-
-		if ( ! empty( $args['post_type'] ) ) {
-			if ( 'any' !== $args['post_type'] ) {
-				$post_types = (array) $args['post_type'];
-			}
+		if ( ! empty( $args['post_type'] ) && 'any' !== $args['post_type'] ) {
+			$post_types = (array) $args['post_type'];
+		} else {
+			$post_types = get_post_types();
 		}
 
 		$index = array_search( 'product', $post_types );
