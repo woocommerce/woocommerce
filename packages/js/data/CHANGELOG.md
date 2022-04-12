@@ -1,7 +1,7 @@
 # Unreleased
 
 -   Update dependency `@wordpress/hooks` to ^3.5.0
--   Add `is_offline` attribute for `Plugin` type
+-   Add `is_offline` attribute for `Plugin` type. #32467
 
 # 3.1.0
 
