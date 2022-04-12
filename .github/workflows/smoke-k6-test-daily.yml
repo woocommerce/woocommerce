@@ -1,9 +1,34 @@
 name: Smoke k6 test daily
-on: pull_request
+on:
+  workflow_dispatch:
 jobs:
+  build:
+    name: Build WooCommerce zip
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+
+        - name: Build
+          id: build
+          uses: woocommerce/action-build@trunk
+          env:
+              BUILD_ENV: e2e
+
+        - name: Upload WC zip
+          uses: actions/upload-artifact@v2
+          env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+              name: woocommerce
+              path: ${{ steps.build.outputs.zip_path }}
+              retention-days: 7
+
+
   update-woocommerce:
-    name: Daily k6 smoke test on trunk.
+    name: Run k6 smoke test using trunk on ext site.
     runs-on: ubuntu-18.04
+    needs: [build]
     steps:
 
       - name: Create dirs.
@@ -45,26 +70,3 @@ jobs:
           DEFAULT_TIMEOUT_OVERRIDE: 120000
         run: |
               pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
-
-  build:
-    name: Build zip for PR
-    runs-on: ubuntu-latest
-    steps:
-        - name: Checkout code
-          uses: actions/checkout@v2
-
-        - name: Build
-          id: build
-          uses: woocommerce/action-build@trunk
-          env:
-              BUILD_ENV: e2e
-
-        - name: Upload PR zip
-          uses: actions/upload-artifact@v2
-          env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-              name: woocommerce
-              path: ${{ steps.build.outputs.zip_path }}
-              retention-days: 7
-    
