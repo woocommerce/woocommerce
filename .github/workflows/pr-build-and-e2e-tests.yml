@@ -162,7 +162,7 @@ jobs:
 
             - name: Publish API test report
               env:
-                  GITHUB_TOKEN: ${{ github.token }}
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.number }}
                   RUN_ID: ${{ github.run_id }}
                   ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
