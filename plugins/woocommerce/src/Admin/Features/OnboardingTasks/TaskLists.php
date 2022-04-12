@@ -70,6 +70,7 @@ class TaskLists {
 		self::init_default_lists();
 		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_tasks' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'menu_task_count' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'task_list_preloaded_settings' ), 20 );
 	}
 
@@ -459,6 +460,55 @@ class TaskLists {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Return number of setup tasks remaining
+	 *
+	 * @return number
+	 */
+	public static function setup_tasks_remaining () {
+		if(!Features::is_enabled( 'tasklist-setup-experiment-1' )) {
+			return;
+		}
+
+		$setup_list = self::get_list('setup_experiment_1');
+
+		if($setup_list->is_hidden() || $setup_list->is_complete()) {
+			return;
+		}
+
+		$remaining_tasks = array_values(
+			array_filter(
+				$setup_list->get_viewable_tasks(),
+				function( $task ) {
+					return ! $task->is_complete();
+				}
+			)
+		);
+
+		return count($remaining_tasks);
+	}
+
+	/**
+	 * Add badge to homescreen menu item for remaining tasks
+	 */
+	public static function menu_task_count() {
+		global $submenu;
+
+		$tasks_count = self::setup_tasks_remaining();
+
+		if(!$tasks_count) {
+			return;
+		}
+
+		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $tasks_count ) . '">' . number_format_i18n( $tasks_count ) . '</span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				break;
+			}
+		}
+
 	}
 
 	/**
