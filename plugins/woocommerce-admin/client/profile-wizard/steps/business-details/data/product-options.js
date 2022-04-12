@@ -16,7 +16,7 @@ export const getNumberRangeString = (
 ) => {
 	if ( ! max ) {
 		return sprintf(
-			_x( '%s+', 'store product count or revenue', 'woocommerce-admin' ),
+			_x( '%s+', 'store product count or revenue', 'woocommerce' ),
 			formatAmount( numberConfig, min )
 		);
 	}
@@ -25,7 +25,7 @@ export const getNumberRangeString = (
 		_x(
 			'%1$s - %2$s',
 			'store product count or revenue range',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		formatAmount( numberConfig, min ),
 		formatAmount( numberConfig, max )
@@ -35,7 +35,7 @@ export const getNumberRangeString = (
 export const getProductCountOptions = ( numberConfig ) => [
 	{
 		key: '0',
-		label: __( "I don't have any products yet.", 'woocommerce-admin' ),
+		label: __( "I don't have any products yet.", 'woocommerce' ),
 	},
 	{
 		key: '1-10',

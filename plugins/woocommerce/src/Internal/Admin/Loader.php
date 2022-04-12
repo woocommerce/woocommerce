@@ -101,7 +101,7 @@ class Loader {
 						echo '<div class="error"><p>';
 						printf(
 							/* translators: %s: is referring to the plugin's name. */
-							esc_html__( 'You have the %s plugin activated but it is not being used.', 'woocommerce-admin' ),
+							esc_html__( 'You have the %s plugin activated but it is not being used.', 'woocommerce' ),
 							'<code>WooCommerce Admin</code>'
 						);
 						echo '</p></div>';
@@ -274,7 +274,7 @@ class Loader {
 		$title  = implode( ' &lsaquo; ', $pieces );
 
 		/* translators: %1$s: updated title, %2$s: blog info name */
-		return sprintf( __( '%1$s &lsaquo; %2$s', 'woocommerce-admin' ), $title, get_bloginfo( 'name' ) );
+		return sprintf( __( '%1$s &lsaquo; %2$s', 'woocommerce' ), $title, get_bloginfo( 'name' ) );
 	}
 
 	/**
@@ -376,7 +376,7 @@ class Loader {
 		// Plugins that depend on changing the translation work on the server but not the client -
 		// WooCommerce Branding is an example of this - so pass through the translation of
 		// 'WooCommerce' to wcSettings.
-		$settings['woocommerceTranslation'] = __( 'WooCommerce', 'woocommerce-admin' );
+		$settings['woocommerceTranslation'] = __( 'WooCommerce', 'woocommerce' );
 		// We may have synced orders with a now-unregistered status.
 		// E.g An extension that added statuses is now inactive or removed.
 		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
@@ -447,8 +447,8 @@ class Loader {
 	public static function add_settings_group( $groups ) {
 		$groups[] = array(
 			'id'          => 'wc_admin',
-			'label'       => __( 'WooCommerce Admin', 'woocommerce-admin' ),
-			'description' => __( 'Settings for WooCommerce admin reporting.', 'woocommerce-admin' ),
+			'label'       => __( 'WooCommerce Admin', 'woocommerce' ),
+			'description' => __( 'Settings for WooCommerce admin reporting.', 'woocommerce' ),
 		);
 		return $groups;
 	}
@@ -467,8 +467,8 @@ class Loader {
 		$settings[] = array(
 			'id'          => 'woocommerce_excluded_report_order_statuses',
 			'option_key'  => 'woocommerce_excluded_report_order_statuses',
-			'label'       => __( 'Excluded report order statuses', 'woocommerce-admin' ),
-			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce-admin' ),
+			'label'       => __( 'Excluded report order statuses', 'woocommerce' ),
+			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce' ),
 			'default'     => array( 'pending', 'cancelled', 'failed' ),
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
@@ -476,8 +476,8 @@ class Loader {
 		$settings[] = array(
 			'id'          => 'woocommerce_actionable_order_statuses',
 			'option_key'  => 'woocommerce_actionable_order_statuses',
-			'label'       => __( 'Actionable order statuses', 'woocommerce-admin' ),
-			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce-admin' ),
+			'label'       => __( 'Actionable order statuses', 'woocommerce' ),
+			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce' ),
 			'default'     => array( 'processing', 'on-hold' ),
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
@@ -485,8 +485,8 @@ class Loader {
 		$settings[] = array(
 			'id'          => 'woocommerce_default_date_range',
 			'option_key'  => 'woocommerce_default_date_range',
-			'label'       => __( 'Default Date Range', 'woocommerce-admin' ),
-			'description' => __( 'Default Date Range', 'woocommerce-admin' ),
+			'label'       => __( 'Default Date Range', 'woocommerce' ),
+			'description' => __( 'Default Date Range', 'woocommerce' ),
 			'default'     => 'period=month&compare=previous_year',
 			'type'        => 'text',
 		);

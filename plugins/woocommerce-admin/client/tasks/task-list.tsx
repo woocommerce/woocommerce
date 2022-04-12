@@ -91,11 +91,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			'Show %d more task.',
 			'Show %d more tasks.',
 			visibleTasks.length - 2,
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		visibleTasks.length - 2
 	);
-	const collapseLabel = __( 'Show less', 'woocommerce-admin' );
+	const collapseLabel = __( 'Show less', 'woocommerce' );
 	const ListComp = isCollapsible ? CollapsibleList : List;
 
 	const listProps = isCollapsible

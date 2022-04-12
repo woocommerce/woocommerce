@@ -69,31 +69,25 @@ export function getStoreAddressValidator( locale = {} ) {
 			isAddressFieldRequired( 'address_1', locale ) &&
 			! values.addressLine1.trim().length
 		) {
-			errors.addressLine1 = __(
-				'Please add an address',
-				'woocommerce-admin'
-			);
+			errors.addressLine1 = __( 'Please add an address', 'woocommerce' );
 		}
 		if ( ! values.countryState.trim().length ) {
 			errors.countryState = __(
 				'Please select a country / region',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 		if (
 			isAddressFieldRequired( 'city', locale ) &&
 			! values.city.trim().length
 		) {
-			errors.city = __( 'Please add a city', 'woocommerce-admin' );
+			errors.city = __( 'Please add a city', 'woocommerce' );
 		}
 		if (
 			isAddressFieldRequired( 'postcode', locale ) &&
 			! values.postCode.trim().length
 		) {
-			errors.postCode = __(
-				'Please add a post code',
-				'woocommerce-admin'
-			);
+			errors.postCode = __( 'Please add a post code', 'woocommerce' );
 		}
 
 		return errors;
@@ -390,7 +384,7 @@ export function StoreAddress( {
 				<TextControl
 					label={
 						locale?.address_1?.label ||
-						__( 'Address line 1', 'woocommerce-admin' )
+						__( 'Address line 1', 'woocommerce' )
 					}
 					required={ isAddressFieldRequired( 'address_1', locale ) }
 					autoComplete="address-line1"
@@ -402,7 +396,7 @@ export function StoreAddress( {
 				<TextControl
 					label={
 						locale?.address_2?.label ||
-						__( 'Address line 2 (optional)', 'woocommerce-admin' )
+						__( 'Address line 2 (optional)', 'woocommerce' )
 					}
 					required={ isAddressFieldRequired( 'address_2', locale ) }
 					autoComplete="address-line2"
@@ -411,7 +405,7 @@ export function StoreAddress( {
 			) }
 
 			<SelectControl
-				label={ __( 'Country / Region', 'woocommerce-admin' ) }
+				label={ __( 'Country / Region', 'woocommerce' ) }
 				required
 				autoComplete="new-password" // disable autocomplete and autofill
 				options={ countryStateOptions }
@@ -426,9 +420,7 @@ export function StoreAddress( {
 
 			{ ! locale?.city?.hidden && (
 				<TextControl
-					label={
-						locale?.city?.label || __( 'City', 'woocommerce-admin' )
-					}
+					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
 					required={ isAddressFieldRequired( 'city', locale ) }
 					{ ...getInputProps( 'city' ) }
 					autoComplete="address-level2"
@@ -439,7 +431,7 @@ export function StoreAddress( {
 				<TextControl
 					label={
 						locale?.postcode?.label ||
-						__( 'Post code', 'woocommerce-admin' )
+						__( 'Post code', 'woocommerce' )
 					}
 					required={ isAddressFieldRequired( 'postcode', locale ) }
 					autoComplete="postal-code"

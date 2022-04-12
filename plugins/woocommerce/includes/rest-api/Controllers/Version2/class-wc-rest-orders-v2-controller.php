@@ -258,6 +258,25 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Expand meta_data to include user-friendly values.
 		$formatted_meta_data = $item->get_all_formatted_meta_data( null );
+
+		// Filter out product variations.
+		if ( isset( $product ) && 'true' === $this->request['order_item_display_meta'] ) {
+			$order_item_name   = $data['name'];
+			$data['meta_data'] = array_filter(
+				$data['meta_data'],
+				function( $meta ) use ( $product, $order_item_name ) {
+					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
+
+					// Skip items with values already in the product details area of the product name.
+					if ( $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+						return false;
+					}
+
+					return true;
+				}
+			);
+		}
+
 		$data['meta_data'] = array_map(
 			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
 			$data['meta_data'],
@@ -1877,6 +1896,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['order_item_display_meta'] = array(
+			'default' => false,
+			'description' => __( 'Only show meta which is meant to be displayed for an order.', 'woocommerce' ),
+			'type' => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

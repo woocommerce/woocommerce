@@ -14,13 +14,13 @@ type ConfirmationModalProps = {
 export const InboxDismissConfirmationModal: React.FC< ConfirmationModalProps > = ( {
 	onClose,
 	onDismiss,
-	buttonLabel = __( "Yes, I'm sure", 'woocommerce-admin' ),
+	buttonLabel = __( "Yes, I'm sure", 'woocommerce' ),
 } ) => {
 	const [ inAction, setInAction ] = useState( false );
 
 	return (
 		<Modal
-			title={ __( 'Are you sure?', 'woocommerce-admin' ) }
+			title={ __( 'Are you sure?', 'woocommerce' ) }
 			onRequestClose={ () => onClose() }
 			className="woocommerce-inbox-dismiss-confirmation_modal"
 		>
@@ -28,12 +28,12 @@ export const InboxDismissConfirmationModal: React.FC< ConfirmationModalProps > =
 				<p>
 					{ __(
 						'Dismissed messages cannot be viewed again',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<div className="woocommerce-inbox-dismiss-confirmation_buttons">
 					<Button isSecondary onClick={ () => onClose() }>
-						{ __( 'Cancel', 'woocommerce-admin' ) }
+						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
 						isSecondary

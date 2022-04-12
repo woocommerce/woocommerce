@@ -31,7 +31,7 @@ const Menu = ( { label, orientation, itemCount, items } ) => {
 				{ __(
 					'List of data points available for filtering. Use arrow keys to cycle through ' +
 						'the list. Click a data point for a detailed report.',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			</p>
 			<ul className={ classes }>{ items }</ul>

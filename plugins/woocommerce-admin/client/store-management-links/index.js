@@ -28,10 +28,10 @@ import { getAdminSetting } from '~/utils/admin-settings';
 export function getItemsByCategory( shopUrl ) {
 	return [
 		{
-			title: __( 'Marketing & Merchandising', 'woocommerce-admin' ),
+			title: __( 'Marketing & Merchandising', 'woocommerce' ),
 			items: [
 				{
-					title: __( 'Marketing', 'woocommerce-admin' ),
+					title: __( 'Marketing', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wc-admin',
 						path: 'marketing',
@@ -40,7 +40,7 @@ export function getItemsByCategory( shopUrl ) {
 					listItemTag: 'marketing',
 				},
 				{
-					title: __( 'Add products', 'woocommerce-admin' ),
+					title: __( 'Add products', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wp-admin',
 						path: 'post-new.php?post_type=product',
@@ -49,7 +49,7 @@ export function getItemsByCategory( shopUrl ) {
 					listItemTag: 'add-products',
 				},
 				{
-					title: __( 'Personalize my store', 'woocommerce-admin' ),
+					title: __( 'Personalize my store', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wp-admin',
 						path: 'customize.php',
@@ -58,7 +58,7 @@ export function getItemsByCategory( shopUrl ) {
 					listItemTag: 'personalize-store',
 				},
 				{
-					title: __( 'View my store', 'woocommerce-admin' ),
+					title: __( 'View my store', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'external',
 						href: shopUrl,
@@ -69,10 +69,10 @@ export function getItemsByCategory( shopUrl ) {
 			],
 		},
 		{
-			title: __( 'Settings', 'woocommerce-admin' ),
+			title: __( 'Settings', 'woocommerce' ),
 			items: [
 				{
-					title: __( 'Store details', 'woocommerce-admin' ),
+					title: __( 'Store details', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wc-settings',
 						tab: 'general',
@@ -81,7 +81,7 @@ export function getItemsByCategory( shopUrl ) {
 					listItemTag: 'edit-store-details',
 				},
 				{
-					title: __( 'Payments', 'woocommerce-admin' ),
+					title: __( 'Payments', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wc-settings',
 						tab: 'checkout',
@@ -90,7 +90,7 @@ export function getItemsByCategory( shopUrl ) {
 					listItemTag: 'payment-settings',
 				},
 				{
-					title: __( 'Tax', 'woocommerce-admin' ),
+					title: __( 'Tax', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wc-settings',
 						tab: 'tax',
@@ -99,7 +99,7 @@ export function getItemsByCategory( shopUrl ) {
 					listItemTag: 'tax-settings',
 				},
 				{
-					title: __( 'Shipping', 'woocommerce-admin' ),
+					title: __( 'Shipping', 'woocommerce' ),
 					link: getLinkTypeAndHref( {
 						type: 'wc-settings',
 						tab: 'shipping',
@@ -180,7 +180,7 @@ export const StoreManagementLinks = () => {
 	const itemCategories = getItemsByCategory( shopUrl );
 
 	const extensionCategory = {
-		title: __( 'Extensions', 'woocommerce-admin' ),
+		title: __( 'Extensions', 'woocommerce' ),
 		items: extensionQuickLinks,
 	};
 
@@ -192,7 +192,7 @@ export const StoreManagementLinks = () => {
 		<Card size="medium">
 			<CardHeader size="medium">
 				<Text variant="title.small" size="20" lineHeight="28px">
-					{ __( 'Store management', 'woocommerce-admin' ) }
+					{ __( 'Store management', 'woocommerce' ) }
 				</Text>
 			</CardHeader>
 			<CardBody

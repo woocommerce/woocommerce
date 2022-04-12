@@ -24,7 +24,7 @@ export const Action = ( {
 	markConfigured,
 	onSetUp = () => {},
 	onSetupCallback,
-	setupButtonText = __( 'Set up', 'woocommerce-admin' ),
+	setupButtonText = __( 'Set up', 'woocommerce' ),
 } ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
 
@@ -67,7 +67,7 @@ export const Action = ( {
 			href={ manageUrl }
 			onClick={ () => recordEvent( 'tasklist_payment_manage', { id } ) }
 		>
-			{ __( 'Manage', 'woocommerce-admin' ) }
+			{ __( 'Manage', 'woocommerce' ) }
 		</Button>
 	);
 
@@ -92,7 +92,7 @@ export const Action = ( {
 					isSecondary
 					onClick={ () => markConfigured( id ) }
 				>
-					{ __( 'Enable', 'woocommerce-admin' ) }
+					{ __( 'Enable', 'woocommerce' ) }
 				</Button>
 			);
 		}
@@ -123,7 +123,7 @@ export const Action = ( {
 				disabled={ isBusy }
 				onClick={ () => handleClick() }
 			>
-				{ __( 'Finish setup', 'woocommerce-admin' ) }
+				{ __( 'Finish setup', 'woocommerce' ) }
 			</Button>
 		);
 	}

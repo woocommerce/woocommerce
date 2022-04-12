@@ -11,7 +11,7 @@ export const SetupRequired = () => {
 		<span className="woocommerce-task-payment__setup_required">
 			<NoticeOutlineIcon />
 			<Text variant="small" size="14" lineHeight="20px">
-				{ __( 'Setup required', 'woocommerce-admin' ) }
+				{ __( 'Setup required', 'woocommerce' ) }
 			</Text>
 		</span>
 	);

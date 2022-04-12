@@ -141,7 +141,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		}
 
 		if ( 200 !== $response->get_status() ) {
-			return new \WP_Error( 'woocommerce_analytics_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'woocommerce_analytics_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce' ) );
 		}
 
 		$endpoints = $response->get_data();
@@ -223,13 +223,13 @@ class Controller extends \WC_REST_Reports_Controller {
 			'woocommerce_rest_performance_indicators_jetpack_items',
 			array(
 				'stats/visitors' => array(
-					'label'      => __( 'Visitors', 'woocommerce-admin' ),
+					'label'      => __( 'Visitors', 'woocommerce' ),
 					'permission' => 'view_stats',
 					'format'     => 'number',
 					'module'     => 'stats',
 				),
 				'stats/views'    => array(
-					'label'      => __( 'Views', 'woocommerce-admin' ),
+					'label'      => __( 'Views', 'woocommerce' ),
 					'permission' => 'view_stats',
 					'format'     => 'number',
 					'module'     => 'stats',
@@ -405,7 +405,7 @@ class Controller extends \WC_REST_Reports_Controller {
 
 		$query_args = $this->prepare_reports_query( $request );
 		if ( empty( $query_args['stats'] ) ) {
-			return new \WP_Error( 'woocommerce_analytics_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce-admin' ), 400 );
+			return new \WP_Error( 'woocommerce_analytics_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce' ), 400 );
 		}
 
 		$stats = array();
@@ -594,33 +594,33 @@ class Controller extends \WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'stat'   => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-admin' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'enum'        => $allowed_stats,
 				),
 				'chart'  => array(
-					'description' => __( 'The specific chart this stat referrers to.', 'woocommerce-admin' ),
+					'description' => __( 'The specific chart this stat referrers to.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'label'  => array(
-					'description' => __( 'Human readable label for the stat.', 'woocommerce-admin' ),
+					'description' => __( 'Human readable label for the stat.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'format' => array(
-					'description' => __( 'Format of the stat.', 'woocommerce-admin' ),
+					'description' => __( 'Format of the stat.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'enum'        => array( 'number', 'currency' ),
 				),
 				'value'  => array(
-					'description' => __( 'Value of the stat. Returns null if the stat does not exist or cannot be loaded.', 'woocommerce-admin' ),
+					'description' => __( 'Value of the stat. Returns null if the stat does not exist or cannot be loaded.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -651,7 +651,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_collection_params() {
 		$indicator_data = $this->get_indicator_data();
 		if ( is_wp_error( $indicator_data ) ) {
-			$allowed_stats = __( 'There was an issue loading the report endpoints', 'woocommerce-admin' );
+			$allowed_stats = __( 'There was an issue loading the report endpoints', 'woocommerce' );
 		} else {
 			$allowed_stats = implode( ', ', $this->allowed_stats );
 		}
@@ -661,7 +661,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params['stats']   = array(
 			'description'       => sprintf(
 				/* translators: Allowed values is a list of stat endpoints. */
-				__( 'Limit response to specific report stats. Allowed values: %s.', 'woocommerce-admin' ),
+				__( 'Limit response to specific report stats. Allowed values: %s.', 'woocommerce' ),
 				$allowed_stats
 			),
 			'type'              => 'array',
@@ -673,13 +673,13 @@ class Controller extends \WC_REST_Reports_Controller {
 			'default'           => $this->allowed_stats,
 		);
 		$params['after']   = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']  = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',

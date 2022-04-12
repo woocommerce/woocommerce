@@ -19,7 +19,7 @@ import GetPaid from './illustrations/get-paid';
 const connect = ( createNotice, setIsBusy ) => {
 	const errorMessage = __(
 		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
-		'woocommerce-admin'
+		'woocommerce'
 	);
 	setIsBusy( true );
 	apiFetch( {
@@ -47,18 +47,18 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 		<div className="woocommerce-task-header__contents-container">
 			<GetPaid className="svg-background" />
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( "It's time to get paid", 'woocommerce-admin' ) }</h1>
+				<h1>{ __( "It's time to get paid", 'woocommerce' ) }</h1>
 				<p>
 					{ __(
 						"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<p>
 					{ interpolateComponents( {
 						mixedString: __(
 							'By clicking "Verify Details", you agree to the {{link}}Terms of Service{{/link}}',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						components: {
 							link: (
@@ -79,7 +79,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 					disabled={ isBusy }
 					onClick={ onClick }
 				>
-					{ __( 'Verify details', 'woocommerce-admin' ) }
+					{ __( 'Verify details', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }

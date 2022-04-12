@@ -252,7 +252,7 @@ class Control extends Component {
 						>
 							{ __(
 								'Move backward for selected items',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</span>
 					) }

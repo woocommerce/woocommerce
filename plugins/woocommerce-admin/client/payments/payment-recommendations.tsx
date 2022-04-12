@@ -134,7 +134,7 @@ const PaymentRecommendations: React.FC = () => {
 				'error',
 				__(
 					'There was a problem hiding the "Additional ways to get paid" card.',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -174,9 +174,7 @@ const PaymentRecommendations: React.FC = () => {
 					<>
 						{ plugin.title }
 						{ plugin.recommended && (
-							<Pill>
-								{ __( 'Recommended', 'woocommerce-admin' ) }
-							</Pill>
+							<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 						) }
 					</>
 				),
@@ -189,7 +187,7 @@ const PaymentRecommendations: React.FC = () => {
 						disabled={ !! installingPlugin }
 					>
 						{ plugin.actionText ||
-							__( 'Get started', 'woocommerce-admin' ) }
+							__( 'Get started', 'woocommerce' ) }
 					</Button>
 				),
 				before: (
@@ -208,10 +206,7 @@ const PaymentRecommendations: React.FC = () => {
 						size="20"
 						lineHeight="28px"
 					>
-						{ __(
-							'Additional ways to get paid',
-							'woocommerce-admin'
-						) }
+						{ __( 'Additional ways to get paid', 'woocommerce' ) }
 					</Text>
 					<Text
 						className={
@@ -224,19 +219,19 @@ const PaymentRecommendations: React.FC = () => {
 					>
 						{ __(
 							'We recommend adding one of the following payment extensions to your store. The extension will be installed and activated for you when you click "Get started".',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 				</div>
 				<div className="woocommerce-card__menu woocommerce-card__header-item">
 					<EllipsisMenu
-						label={ __( 'Task List Options', 'woocommerce-admin' ) }
+						label={ __( 'Task List Options', 'woocommerce' ) }
 						renderContent={ () => (
 							<div className="woocommerce-review-activity-card__section-controls">
 								<Button
 									onClick={ dismissPaymentRecommendations }
 								>
-									{ __( 'Hide this', 'woocommerce-admin' ) }
+									{ __( 'Hide this', 'woocommerce' ) }
 								</Button>
 							</div>
 						) }
@@ -246,7 +241,7 @@ const PaymentRecommendations: React.FC = () => {
 			<List items={ pluginsList } />
 			<CardFooter>
 				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
-					{ __( 'See more options', 'woocommerce-admin' ) }
+					{ __( 'See more options', 'woocommerce' ) }
 					<ExternalIcon size={ 18 } />
 				</Button>
 			</CardFooter>

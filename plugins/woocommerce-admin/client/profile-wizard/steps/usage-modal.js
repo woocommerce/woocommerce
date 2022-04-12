@@ -53,7 +53,7 @@ class UsageModal extends Component {
 				'error',
 				__(
 					'There was a problem updating your preferences',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			onClose();
@@ -110,12 +110,12 @@ class UsageModal extends Component {
 
 		const {
 			isRequesting,
-			title = __( 'Build a better WooCommerce', 'woocommerce-admin' ),
+			title = __( 'Build a better WooCommerce', 'woocommerce' ),
 			message = interpolateComponents( {
 				mixedString: __(
 					'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
 						'that shows us how WooCommerce is used. No personal data is tracked or stored.',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				components: {
 					link: (
@@ -127,8 +127,8 @@ class UsageModal extends Component {
 					),
 				},
 			} ),
-			dismissActionText = __( 'No thanks', 'woocommerce-admin' ),
-			acceptActionText = __( 'Yes, count me in!', 'woocommerce-admin' ),
+			dismissActionText = __( 'No thanks', 'woocommerce' ),
+			acceptActionText = __( 'Yes, count me in!', 'woocommerce' ),
 		} = this.props;
 
 		const { isRequestStarted } = this.state;

@@ -52,5 +52,11 @@
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

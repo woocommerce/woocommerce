@@ -22,7 +22,7 @@ const ViewMoreList = ( { items } ) => {
 		<Tag
 			className="woocommerce-view-more-list"
 			label={ sprintf(
-				__( '+%d more', 'woocommerce-admin' ),
+				__( '+%d more', 'woocommerce' ),
 				items.length - 1
 			) }
 			popoverContents={

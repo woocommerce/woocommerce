@@ -51,14 +51,14 @@ class ManageStoreActivityFromHomeScreen {
 
 		$note = new Note();
 
-		$note->set_title( __( 'New! Manage your store activity from the Home screen', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Start your day knowing the next steps you need to take with your orders, products, and customer feedback.<br/><br/>Read more about how to use the activity panels on the Home screen.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'New! Manage your store activity from the Home screen', 'woocommerce' ) );
+		$note->set_content( __( 'Start your day knowing the next steps you need to take with your orders, products, and customer feedback.<br/><br/>Read more about how to use the activity panels on the Home screen.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/document/home-screen/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

@@ -87,7 +87,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -101,7 +101,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot edit this resource.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -162,7 +162,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 
 		$result = array(
 			'status'  => 'success',
-			'message' => __( 'Onboarding profile data has been updated.', 'woocommerce-admin' ),
+			'message' => __( 'Onboarding profile data has been updated.', 'woocommerce' ),
 		);
 
 		$response = $this->prepare_item_for_response( $result, $request );
@@ -263,21 +263,21 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 		$properties = array(
 			'completed'           => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the profile was completed.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not the profile was completed.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'skipped'             => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the profile was skipped.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not the profile was skipped.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'industry'            => array(
 				'type'              => 'array',
-				'description'       => __( 'Industry.', 'woocommerce-admin' ),
+				'description'       => __( 'Industry.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -287,7 +287,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'product_types'       => array(
 				'type'              => 'array',
-				'description'       => __( 'Types of products sold.', 'woocommerce-admin' ),
+				'description'       => __( 'Types of products sold.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'wp_parse_slug_list',
@@ -299,7 +299,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'product_count'       => array(
 				'type'              => 'string',
-				'description'       => __( 'Number of products to be added.', 'woocommerce-admin' ),
+				'description'       => __( 'Number of products to be added.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -313,7 +313,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'selling_venues'      => array(
 				'type'              => 'string',
-				'description'       => __( 'Other places the store is selling products.', 'woocommerce-admin' ),
+				'description'       => __( 'Other places the store is selling products.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -327,7 +327,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'number_employees'    => array(
 				'type'              => 'string',
-				'description'       => __( 'Number of employees of the store.', 'woocommerce-admin' ),
+				'description'       => __( 'Number of employees of the store.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -342,7 +342,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'revenue'             => array(
 				'type'              => 'string',
-				'description'       => __( 'Current annual revenue of the store.', 'woocommerce-admin' ),
+				'description'       => __( 'Current annual revenue of the store.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -358,7 +358,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'other_platform'      => array(
 				'type'              => 'string',
-				'description'       => __( 'Name of other platform used to sell.', 'woocommerce-admin' ),
+				'description'       => __( 'Name of other platform used to sell.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -376,14 +376,14 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'other_platform_name' => array(
 				'type'              => 'string',
-				'description'       => __( 'Name of other platform used to sell (not listed).', 'woocommerce-admin' ),
+				'description'       => __( 'Name of other platform used to sell (not listed).', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'business_extensions' => array(
 				'type'              => 'array',
-				'description'       => __( 'Extra business extensions to install.', 'woocommerce-admin' ),
+				'description'       => __( 'Extra business extensions to install.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'wp_parse_slug_list',
@@ -404,7 +404,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'theme'               => array(
 				'type'              => 'string',
-				'description'       => __( 'Selected store theme.', 'woocommerce-admin' ),
+				'description'       => __( 'Selected store theme.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'sanitize_title_with_dashes',
@@ -412,28 +412,28 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 			'setup_client'        => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not this store was setup for a client.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not this store was setup for a client.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'wccom_connected'     => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the store was connected to WooCommerce.com during the extension flow.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not the store was connected to WooCommerce.com during the extension flow.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'is_agree_marketing'  => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not this store agreed to receiving marketing contents from WooCommerce.com.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not this store agreed to receiving marketing contents from WooCommerce.com.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'store_email'         => array(
 				'type'              => 'string',
-				'description'       => __( 'Store email address.', 'woocommerce-admin' ),
+				'description'       => __( 'Store email address.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => array( __CLASS__, 'rest_validate_marketing_email' ),
@@ -456,7 +456,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 		if (
 			( $is_agree_marketing || ! empty( $value ) ) &&
 			! is_email( $value ) ) {
-			return new \WP_Error( 'rest_invalid_email', __( 'Invalid email address', 'woocommerce-admin' ) );
+			return new \WP_Error( 'rest_invalid_email', __( 'Invalid email address', 'woocommerce' ) );
 		};
 		return true;
 	}

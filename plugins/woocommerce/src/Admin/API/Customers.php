@@ -48,7 +48,7 @@ class Customers extends \Automattic\WooCommerce\Admin\API\Reports\Customers\Cont
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique ID for the resource.', 'woocommerce-admin' ),
+						'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),

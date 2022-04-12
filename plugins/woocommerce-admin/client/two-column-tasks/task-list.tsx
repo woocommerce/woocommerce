@@ -104,7 +104,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		createNotice( 'success', __( 'Task dismissed' ), {
 			actions: [
 				{
-					label: __( 'Undo', 'woocommerce-admin' ),
+					label: __( 'Undo', 'woocommerce' ),
 					onClick: () => undoDismissTask( taskId ),
 				},
 			],
@@ -134,7 +134,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			<div className="woocommerce-card__menu woocommerce-card__header-item">
 				<EllipsisMenu
 					className={ id }
-					label={ __( 'Task List Options', 'woocommerce-admin' ) }
+					label={ __( 'Task List Options', 'woocommerce' ) }
 					renderContent={ ( {
 						onToggle,
 					}: {
@@ -151,7 +151,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 									}
 								} }
 							>
-								{ __( 'Hide this', 'woocommerce-admin' ) }
+								{ __( 'Hide this', 'woocommerce' ) }
 							</Button>
 						</div>
 					) }

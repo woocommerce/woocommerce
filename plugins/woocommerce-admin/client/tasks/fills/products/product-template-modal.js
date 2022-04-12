@@ -28,34 +28,34 @@ export const ONBOARDING_PRODUCT_TEMPLATES_FILTER =
 const getProductTemplates = () => [
 	{
 		key: 'physical',
-		title: __( 'Physical product', 'woocommerce-admin' ),
+		title: __( 'Physical product', 'woocommerce' ),
 		subtitle: __(
 			'Tangible items that get delivered to customers',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	},
 	{
 		key: 'digital',
-		title: __( 'Digital product', 'woocommerce-admin' ),
+		title: __( 'Digital product', 'woocommerce' ),
 		subtitle: __(
 			'Items that customers download or access through your website',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	},
 	{
 		key: 'variable',
-		title: __( 'Variable product', 'woocommerce-admin' ),
+		title: __( 'Variable product', 'woocommerce' ),
 		subtitle: __(
 			'Products with several versions that customers can choose from',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	},
 	{
 		key: 'subscription',
-		title: __( 'Subscription product', 'woocommerce-admin' ),
+		title: __( 'Subscription product', 'woocommerce' ),
 		subtitle: __(
 			'Products that customers receive or gain access to regularly by paying in advance',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	},
 ];

@@ -103,13 +103,13 @@ class WooCommercePayments {
 	 */
 	public static function get_note() {
 		$note = new Note();
-		$note->set_title( __( 'Try the new way to get paid', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Try the new way to get paid', 'woocommerce' ) );
 		$note->set_content(
-			__( 'Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with <strong>WooCommerce Payments</strong>.', 'woocommerce-admin' ) .
+			__( 'Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with <strong>WooCommerce Payments</strong>.', 'woocommerce' ) .
 			'<br><br>' .
 			sprintf(
 				/* translators: 1: opening link tag, 2: closing tag */
-				__( 'By clicking "Get started", you agree to our %1$sTerms of Service%2$s', 'woocommerce-admin' ),
+				__( 'By clicking "Get started", you agree to our %1$sTerms of Service%2$s', 'woocommerce' ),
 				'<a href="https://wordpress.com/tos/" target="_blank">',
 				'</a>'
 			)
@@ -118,8 +118,8 @@ class WooCommercePayments {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/payments/?utm_medium=product', Note::E_WC_ADMIN_NOTE_UNACTIONED );
-		$note->add_action( 'get-started', __( 'Get started', 'woocommerce-admin' ), wc_admin_url( '&action=setup-woocommerce-payments' ), Note::E_WC_ADMIN_NOTE_ACTIONED, true );
+		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce' ), 'https://woocommerce.com/payments/?utm_medium=product', Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note->add_action( 'get-started', __( 'Get started', 'woocommerce' ), wc_admin_url( '&action=setup-woocommerce-payments' ), Note::E_WC_ADMIN_NOTE_ACTIONED, true );
 		$note->add_nonce_to_action( 'get-started', 'setup-woocommerce-payments', '' );
 
 		// Create the note as "actioned" if the plugin is already installed.

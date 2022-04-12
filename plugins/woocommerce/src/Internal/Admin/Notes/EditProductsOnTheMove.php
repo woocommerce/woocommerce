@@ -54,15 +54,15 @@ class EditProductsOnTheMove {
 
 		$note = new Note();
 
-		$note->set_title( __( 'Edit products on the move', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Edit and create new products from your mobile devices with the Woo app', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Edit products on the move', 'woocommerce' ) );
+		$note->set_content( __( 'Edit and create new products from your mobile devices with the Woo app', 'woocommerce' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/mobile/?utm_source=inbox&utm_medium=product'
 		);
 

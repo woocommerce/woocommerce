@@ -38,12 +38,12 @@ const ReminderText: React.FC< ReminderTextProps > = ( { remainingCount } ) => {
 			? /* translators: 1: remaining tasks count */
 			  __(
 					'🎉 Almost there. Only {{strongText}}%1$d step left{{/strongText}} get your store up and running. {{setupLink}}Finish setup{{/setupLink}}',
-					'woocommerce-admin'
+					'woocommerce'
 			  )
 			: /* translators: 1: remaining tasks count */
 			  __(
 					"🚀 You're doing great! {{strongText}}%1$d steps left{{/strongText}} to get your store up and running. {{setupLink}}Continue setup{{/setupLink}}",
-					'woocommerce-admin'
+					'woocommerce'
 			  );
 
 	return (

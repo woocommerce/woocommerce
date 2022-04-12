@@ -50,9 +50,9 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'is_dismissed' => array(
-				'title'   => __( 'Dismiss', 'woocommerce-admin' ),
+				'title'   => __( 'Dismiss', 'woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Dismiss the gateway', 'woocommerce-admin' ),
+				'label'   => __( 'Dismiss the gateway', 'woocommerce' ),
 				'default' => 'no',
 			),
 		);

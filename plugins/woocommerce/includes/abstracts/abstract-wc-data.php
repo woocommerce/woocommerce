@@ -640,7 +640,7 @@ abstract class WC_Data {
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
-			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+			$cache_key = self::generate_meta_cache_key( $this->get_id(), $this->cache_group );
 			wp_cache_delete( $cache_key, $this->cache_group );
 		}
 	}

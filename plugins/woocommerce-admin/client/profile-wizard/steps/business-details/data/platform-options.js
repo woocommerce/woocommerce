@@ -6,38 +6,38 @@ import { __ } from '@wordpress/i18n';
 export const platformOptions = [
 	{
 		key: 'shopify',
-		label: __( 'Shopify', 'woocommerce-admin' ),
+		label: __( 'Shopify', 'woocommerce' ),
 	},
 	{
 		key: 'bigcommerce',
-		label: __( 'BigCommerce', 'woocommerce-admin' ),
+		label: __( 'BigCommerce', 'woocommerce' ),
 	},
 	{
 		key: 'magento',
-		label: __( 'Magento', 'woocommerce-admin' ),
+		label: __( 'Magento', 'woocommerce' ),
 	},
 	{
 		key: 'wix',
-		label: __( 'Wix', 'woocommerce-admin' ),
+		label: __( 'Wix', 'woocommerce' ),
 	},
 	{
 		key: 'amazon',
-		label: __( 'Amazon', 'woocommerce-admin' ),
+		label: __( 'Amazon', 'woocommerce' ),
 	},
 	{
 		key: 'ebay',
-		label: __( 'eBay', 'woocommerce-admin' ),
+		label: __( 'eBay', 'woocommerce' ),
 	},
 	{
 		key: 'etsy',
-		label: __( 'Etsy', 'woocommerce-admin' ),
+		label: __( 'Etsy', 'woocommerce' ),
 	},
 	{
 		key: 'squarespace',
-		label: __( 'Squarespace', 'woocommerce-admin' ),
+		label: __( 'Squarespace', 'woocommerce' ),
 	},
 	{
 		key: 'other',
-		label: __( 'Other', 'woocommerce-admin' ),
+		label: __( 'Other', 'woocommerce' ),
 	},
 ];

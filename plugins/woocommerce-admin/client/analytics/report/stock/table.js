@@ -31,25 +31,25 @@ class StockReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product / Variation', 'woocommerce-admin' ),
+				label: __( 'Product / Variation', 'woocommerce' ),
 				key: 'title',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'SKU', 'woocommerce-admin' ),
+				label: __( 'SKU', 'woocommerce' ),
 				key: 'sku',
 				isSortable: true,
 			},
 			{
-				label: __( 'Status', 'woocommerce-admin' ),
+				label: __( 'Status', 'woocommerce' ),
 				key: 'stock_status',
 				isSortable: true,
 				defaultSort: true,
 			},
 			{
-				label: __( 'Stock', 'woocommerce-admin' ),
+				label: __( 'Stock', 'woocommerce' ),
 				key: 'stock_quantity',
 				isSortable: true,
 			},
@@ -100,7 +100,7 @@ class StockReportTable extends Component {
 					{ _x(
 						'Low',
 						'Indication of a low quantity',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</Link>
 			) : (
@@ -129,7 +129,7 @@ class StockReportTable extends Component {
 								'number',
 								stockQuantity
 						  )
-						: __( 'N/A', 'woocommerce-admin' ),
+						: __( 'N/A', 'woocommerce' ),
 					value: stockQuantity,
 				},
 			];
@@ -147,28 +147,23 @@ class StockReportTable extends Component {
 		const currency = this.context.getCurrencyConfig();
 		return [
 			{
-				label: _n(
-					'Product',
-					'Products',
-					products,
-					'woocommerce-admin'
-				),
+				label: _n( 'Product', 'Products', products, 'woocommerce' ),
 				value: formatValue( currency, 'number', products ),
 			},
 			{
-				label: __( 'Out of stock', 'woocommerce-admin' ),
+				label: __( 'Out of stock', 'woocommerce' ),
 				value: formatValue( currency, 'number', outofstock ),
 			},
 			{
-				label: __( 'Low stock', 'woocommerce-admin' ),
+				label: __( 'Low stock', 'woocommerce' ),
 				value: formatValue( currency, 'number', lowstock ),
 			},
 			{
-				label: __( 'On backorder', 'woocommerce-admin' ),
+				label: __( 'On backorder', 'woocommerce' ),
 				value: formatValue( currency, 'number', onbackorder ),
 			},
 			{
-				label: __( 'In stock', 'woocommerce-admin' ),
+				label: __( 'In stock', 'woocommerce' ),
 				value: formatValue( currency, 'number', instock ),
 			},
 		];
@@ -196,7 +191,7 @@ class StockReportTable extends Component {
 					order: query.order || 'asc',
 					type: query.type || 'all',
 				} }
-				title={ __( 'Stock', 'woocommerce-admin' ) }
+				title={ __( 'Stock', 'woocommerce' ) }
 				filters={ filters }
 				advancedFilters={ advancedFilters }
 			/>

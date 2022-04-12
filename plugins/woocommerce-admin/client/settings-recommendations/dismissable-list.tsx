@@ -37,11 +37,11 @@ export const DismissableListHeading: React.FC< {
 			</div>
 			<div>
 				<EllipsisMenu
-					label={ __( 'Task List Options', 'woocommerce-admin' ) }
+					label={ __( 'Task List Options', 'woocommerce' ) }
 					renderContent={ () => (
 						<div className="woocommerce-dismissable-list__controls">
 							<Button onClick={ handleDismissClick }>
-								{ __( 'Hide this', 'woocommerce-admin' ) }
+								{ __( 'Hide this', 'woocommerce' ) }
 							</Button>
 						</div>
 					) }

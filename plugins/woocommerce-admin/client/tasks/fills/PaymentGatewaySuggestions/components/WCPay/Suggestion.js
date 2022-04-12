@@ -26,7 +26,7 @@ const TosPrompt = () =>
 	interpolateComponents( {
 		mixedString: __(
 			'Upon clicking "Get started", you agree to the {{link}}Terms of service{{/link}}. Next we’ll ask you to share a few details about your business to create your account.',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		components: {
 			link: (
@@ -67,7 +67,7 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 				{ installed && needsSetup ? (
 					<SetupRequired />
 				) : (
-					<Pill>{ __( 'Recommended', 'woocommerce-admin' ) }</Pill>
+					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 				) }
 			</WCPayCardHeader>
 
@@ -91,10 +91,7 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 						isRecommended={ true }
 						isInstalled={ isInstalled }
 						hasPlugins={ true }
-						setupButtonText={ __(
-							'Get started',
-							'woocommerce-admin'
-						) }
+						setupButtonText={ __( 'Get started', 'woocommerce' ) }
 						onSetupCallback={ onSetupCallback }
 					/>
 				</>

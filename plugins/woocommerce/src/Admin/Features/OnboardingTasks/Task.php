@@ -190,7 +190,7 @@ abstract class Task {
 	 * @return string
 	 */
 	public function get_action_label() {
-		return __( "Let's go", 'woocommerce-admin' );
+		return __( "Let's go", 'woocommerce' );
 	}
 
 	/**
@@ -358,10 +358,6 @@ abstract class Task {
 	 * Track task completion if task is viewable.
 	 */
 	public function possibly_track_completion() {
-		if ( ! $this->can_view() ) {
-			return;
-		}
-
 		if ( ! $this->is_complete() ) {
 			return;
 		}

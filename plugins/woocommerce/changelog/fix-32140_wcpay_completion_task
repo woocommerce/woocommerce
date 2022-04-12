@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issue where some tasks where not being tracked as completed, when tracking is enabled. #32493

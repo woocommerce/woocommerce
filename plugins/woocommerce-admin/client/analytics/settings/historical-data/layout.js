@@ -41,10 +41,7 @@ class HistoricalDataLayout extends Component {
 		return (
 			<Fragment>
 				<SectionHeader
-					title={ __(
-						'Import historical data',
-						'woocommerce-admin'
-					) }
+					title={ __( 'Import historical data', 'woocommerce' ) }
 				/>
 				<div className="woocommerce-settings__wrapper">
 					<div className="woocommerce-setting">
@@ -53,7 +50,7 @@ class HistoricalDataLayout extends Component {
 								{ __(
 									'This tool populates historical analytics data by processing customers ' +
 										'and orders created prior to activating WooCommerce Admin.',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							</span>
 							{ status !== 'finished' && (
@@ -70,7 +67,7 @@ class HistoricalDataLayout extends Component {
 									<HistoricalDataProgress
 										label={ __(
 											'Registered Customers',
-											'woocommerce-admin'
+											'woocommerce'
 										) }
 										progress={ customersProgress }
 										total={ customersTotal }
@@ -78,7 +75,7 @@ class HistoricalDataLayout extends Component {
 									<HistoricalDataProgress
 										label={ __(
 											'Orders and Refunds',
-											'woocommerce-admin'
+											'woocommerce'
 										) }
 										progress={ ordersProgress }
 										total={ ordersTotal }

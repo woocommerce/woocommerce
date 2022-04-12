@@ -44,15 +44,15 @@ class WooCommerceSubscriptions {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Do you need more info about WooCommerce Subscriptions?', 'woocommerce-admin' ) );
-		$note->set_content( __( 'WooCommerce Subscriptions allows you to introduce a variety of subscriptions for physical or virtual products and services. Create product-of-the-month clubs, weekly service subscriptions or even yearly software billing packages. Add sign-up fees, offer free trials, or set expiration periods.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Do you need more info about WooCommerce Subscriptions?', 'woocommerce' ) );
+		$note->set_content( __( 'WooCommerce Subscriptions allows you to introduce a variety of subscriptions for physical or virtual products and services. Create product-of-the-month clubs, weekly service subscriptions or even yearly software billing packages. Add sign-up fees, offer free trials, or set expiration periods.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn More', 'woocommerce-admin' ),
+			__( 'Learn More', 'woocommerce' ),
 			'https://woocommerce.com/products/woocommerce-subscriptions/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			true

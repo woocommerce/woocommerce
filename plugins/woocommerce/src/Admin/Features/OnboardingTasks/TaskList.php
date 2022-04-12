@@ -236,7 +236,7 @@ class TaskList {
 		if ( ! is_subclass_of( $task, 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task' ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_invalid_task',
-				__( 'Task is not a subclass of `Task`', 'woocommerce-admin' )
+				__( 'Task is not a subclass of `Task`', 'woocommerce' )
 			);
 		}
 		if ( array_search( $task, $this->tasks, true ) ) {
@@ -330,6 +330,15 @@ class TaskList {
 	}
 
 	/**
+	 * Returns option to keep completed task list.
+	 *
+	 * @return string
+	 */
+	public function get_keep_completed_task_list() {
+		return get_option( 'woocommerce_task_list_keep_completed', 'no' );
+	}
+
+	/**
 	 * Remove reminder bar four weeks after store creation.
 	 */
 	public static function possibly_remove_reminder_bar() {
@@ -350,20 +359,24 @@ class TaskList {
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
+		$tasks_json = array();
+		foreach ( $this->tasks as $task ) {
+			$json = $task->get_json();
+			if ( $json['canView'] ) {
+				$tasks_json[] = $json;
+			}
+		}
+
 		return array(
 			'id'                    => $this->get_list_id(),
 			'title'                 => $this->title,
 			'isHidden'              => $this->is_hidden(),
 			'isVisible'             => $this->is_visible(),
 			'isComplete'            => $this->is_complete(),
-			'tasks'                 => array_map(
-				function( $task ) {
-					return $task->get_json();
-				},
-				$this->get_viewable_tasks()
-			),
+			'tasks'                 => $tasks_json,
 			'eventPrefix'           => $this->prefix_event( '' ),
 			'displayProgressHeader' => $this->display_progress_header,
+			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 		);
 	}
 }

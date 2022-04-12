@@ -129,7 +129,7 @@ class CustomerEffortScoreTracks {
 				3
 			);
 		}
-		$this->onsubmit_label = __( 'Thank you for your feedback!', 'woocommerce-admin' );
+		$this->onsubmit_label = __( 'Thank you for your feedback!', 'woocommerce' );
 	}
 
 	/**
@@ -273,7 +273,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::SEARCH_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to use search?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => $page_now,
@@ -339,7 +339,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::PRODUCT_ADD_PUBLISH_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to add a product?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'product',
@@ -364,7 +364,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::PRODUCT_UPDATE_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to edit your product?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'product',
@@ -389,7 +389,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::SHOP_ORDER_UPDATE_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to update an order?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'shop_order',
@@ -447,7 +447,7 @@ class CustomerEffortScoreTracks {
 		wc_enqueue_js(
 			$this->get_script_track_edit_php(
 				self::ADD_PRODUCT_CATEGORIES_ACTION_NAME,
-				__( 'How easy was it to add product category?', 'woocommerce-admin' )
+				__( 'How easy was it to add product category?', 'woocommerce' )
 			)
 		);
 	}
@@ -463,7 +463,7 @@ class CustomerEffortScoreTracks {
 		wc_enqueue_js(
 			$this->get_script_track_edit_php(
 				self::ADD_PRODUCT_TAGS_ACTION_NAME,
-				__( 'How easy was it to add a product tag?', 'woocommerce-admin' )
+				__( 'How easy was it to add a product tag?', 'woocommerce' )
 			)
 		);
 	}
@@ -486,7 +486,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::IMPORT_PRODUCTS_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to import products?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'product_page_product_importer',
@@ -521,7 +521,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::SETTINGS_CHANGE_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to update your settings?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'woocommerce_page_wc-settings',
@@ -544,7 +544,7 @@ class CustomerEffortScoreTracks {
 				'action'         => self::ADD_PRODUCT_ATTRIBUTES_ACTION_NAME,
 				'label'          => __(
 					'How easy was it to add a product attribute?',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
 				'pagenow'        => 'product_page_product_attributes',

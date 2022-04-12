@@ -39,8 +39,8 @@ class InsightFirstSale {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Did you know?', 'woocommerce-admin' ) );
-		$note->set_content( __( 'A WooCommerce powered store needs on average 31 days to get the first sale. You\'re on the right track! Do you find this type of insight useful?', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Did you know?', 'woocommerce' ) );
+		$note->set_content( __( 'A WooCommerce powered store needs on average 31 days to get the first sale. You\'re on the right track! Do you find this type of insight useful?', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_SURVEY );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
@@ -51,19 +51,19 @@ class InsightFirstSale {
 		// sent in NoteActions.
 		$note->add_action(
 			'affirm-insight-first-sale',
-			__( 'Yes', 'woocommerce-admin' ),
+			__( 'Yes', 'woocommerce' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			false,
-			__( 'Thanks for your feedback', 'woocommerce-admin' )
+			__( 'Thanks for your feedback', 'woocommerce' )
 		);
 		$note->add_action(
 			'deny-insight-first-sale',
-			__( 'No', 'woocommerce-admin' ),
+			__( 'No', 'woocommerce' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			false,
-			__( 'Thanks for your feedback', 'woocommerce-admin' )
+			__( 'Thanks for your feedback', 'woocommerce' )
 		);
 
 		return $note;

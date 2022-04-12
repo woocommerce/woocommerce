@@ -10,16 +10,13 @@ const DismissModal = ( {
 	hideTasks,
 } ) => {
 	const closeModal = () => setShowDismissModal( false );
-	const title = __( 'Hide store setup tasks', 'woocommerce-admin' );
+	const title = __( 'Hide store setup tasks', 'woocommerce' );
 	const message = __(
 		'Are you sure? These tasks are required for all stores.',
-		'woocommerce-admin'
+		'woocommerce'
 	);
-	const dismissActionText = __( 'Cancel', 'woocommerce-admin' );
-	const acceptActionText = __(
-		'Yes, hide store setup tasks',
-		'woocommerce-admin'
-	);
+	const dismissActionText = __( 'Cancel', 'woocommerce' );
+	const acceptActionText = __( 'Yes, hide store setup tasks', 'woocommerce' );
 	return (
 		<>
 			{ showDismissModal && (

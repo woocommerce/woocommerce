@@ -9,7 +9,7 @@ const ReadBlogMessage = () => {
 	return interpolateComponents( {
 		mixedString: __(
 			'Read {{link}}the WooCommerce blog{{/link}} for more tips on marketing your store',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		components: {
 			link: (

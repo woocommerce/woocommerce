@@ -23,25 +23,25 @@ function wc_admin_get_core_pages_to_connect() {
 
 	return array(
 		'wc-addons'   => array(
-			'title' => __( 'Extensions', 'woocommerce-admin' ),
+			'title' => __( 'Extensions', 'woocommerce' ),
 			'tabs'  => array(),
 		),
 		'wc-reports'  => array(
-			'title' => __( 'Reports', 'woocommerce-admin' ),
+			'title' => __( 'Reports', 'woocommerce' ),
 			'tabs'  => $report_tabs,
 		),
 		'wc-settings' => array(
-			'title' => __( 'Settings', 'woocommerce-admin' ),
+			'title' => __( 'Settings', 'woocommerce' ),
 			'tabs'  => apply_filters( 'woocommerce_settings_tabs_array', array() ),
 		),
 		'wc-status'   => array(
-			'title' => __( 'Status', 'woocommerce-admin' ),
+			'title' => __( 'Status', 'woocommerce' ),
 			'tabs'  => apply_filters(
 				'woocommerce_admin_status_tabs',
 				array(
-					'status' => __( 'System status', 'woocommerce-admin' ),
-					'tools'  => __( 'Tools', 'woocommerce-admin' ),
-					'logs'   => __( 'Logs', 'woocommerce-admin' ),
+					'status' => __( 'System status', 'woocommerce' ),
+					'tools'  => __( 'Tools', 'woocommerce' ),
+					'logs'   => __( 'Logs', 'woocommerce' ),
 				)
 			),
 		),
@@ -59,7 +59,7 @@ function wc_admin_filter_core_page_breadcrumbs( $breadcrumbs ) {
 	$pages_to_connect       = wc_admin_get_core_pages_to_connect();
 	$woocommerce_breadcrumb = array(
 		'admin.php?page=wc-admin',
-		__( 'WooCommerce', 'woocommerce-admin' ),
+		__( 'WooCommerce', 'woocommerce' ),
 	);
 
 	foreach ( $pages_to_connect as $page_id => $page_data ) {
@@ -129,7 +129,7 @@ wc_admin_connect_page(
 	array(
 		'id'        => 'woocommerce-orders',
 		'screen_id' => 'edit-shop_order',
-		'title'     => __( 'Orders', 'woocommerce-admin' ),
+		'title'     => __( 'Orders', 'woocommerce' ),
 		'path'      => add_query_arg( 'post_type', 'shop_order', $posttype_list_base ),
 	)
 );
@@ -140,7 +140,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-add-order',
 		'parent'    => 'woocommerce-orders',
 		'screen_id' => 'shop_order-add',
-		'title'     => __( 'Add New', 'woocommerce-admin' ),
+		'title'     => __( 'Add New', 'woocommerce' ),
 	)
 );
 
@@ -150,7 +150,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-edit-order',
 		'parent'    => 'woocommerce-orders',
 		'screen_id' => 'shop_order',
-		'title'     => __( 'Edit Order', 'woocommerce-admin' ),
+		'title'     => __( 'Edit Order', 'woocommerce' ),
 	)
 );
 
@@ -160,7 +160,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-coupons',
 		'parent'    => Features::is_enabled( 'coupons' ) ? 'woocommerce-marketing' : null,
 		'screen_id' => 'edit-shop_coupon',
-		'title'     => __( 'Coupons', 'woocommerce-admin' ),
+		'title'     => __( 'Coupons', 'woocommerce' ),
 		'path'      => add_query_arg( 'post_type', 'shop_coupon', $posttype_list_base ),
 	)
 );
@@ -171,7 +171,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-add-coupon',
 		'parent'    => 'woocommerce-coupons',
 		'screen_id' => 'shop_coupon-add',
-		'title'     => __( 'Add New', 'woocommerce-admin' ),
+		'title'     => __( 'Add New', 'woocommerce' ),
 	)
 );
 
@@ -181,7 +181,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-edit-coupon',
 		'parent'    => 'woocommerce-coupons',
 		'screen_id' => 'shop_coupon',
-		'title'     => __( 'Edit Coupon', 'woocommerce-admin' ),
+		'title'     => __( 'Edit Coupon', 'woocommerce' ),
 	)
 );
 
@@ -190,7 +190,7 @@ wc_admin_connect_page(
 	array(
 		'id'        => 'woocommerce-products',
 		'screen_id' => 'edit-product',
-		'title'     => __( 'Products', 'woocommerce-admin' ),
+		'title'     => __( 'Products', 'woocommerce' ),
 		'path'      => add_query_arg( 'post_type', 'product', $posttype_list_base ),
 	)
 );
@@ -201,7 +201,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-add-product',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product-add',
-		'title'     => __( 'Add New', 'woocommerce-admin' ),
+		'title'     => __( 'Add New', 'woocommerce' ),
 	)
 );
 
@@ -211,7 +211,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-edit-product',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product',
-		'title'     => __( 'Edit Product', 'woocommerce-admin' ),
+		'title'     => __( 'Edit Product', 'woocommerce' ),
 	)
 );
 
@@ -221,7 +221,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-import-products',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product_importer',
-		'title'     => __( 'Import Products', 'woocommerce-admin' ),
+		'title'     => __( 'Import Products', 'woocommerce' ),
 	)
 );
 
@@ -231,7 +231,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-export-products',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product_exporter',
-		'title'     => __( 'Export Products', 'woocommerce-admin' ),
+		'title'     => __( 'Export Products', 'woocommerce' ),
 	)
 );
 
@@ -241,7 +241,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-product-categories',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'edit-product_cat',
-		'title'     => __( 'Product categories', 'woocommerce-admin' ),
+		'title'     => __( 'Product categories', 'woocommerce' ),
 	)
 );
 
@@ -251,7 +251,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-product-edit-category',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_cat',
-		'title'     => __( 'Edit category', 'woocommerce-admin' ),
+		'title'     => __( 'Edit category', 'woocommerce' ),
 	)
 );
 
@@ -261,7 +261,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-product-tags',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'edit-product_tag',
-		'title'     => __( 'Product tags', 'woocommerce-admin' ),
+		'title'     => __( 'Product tags', 'woocommerce' ),
 	)
 );
 
@@ -271,7 +271,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-product-edit-tag',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_tag',
-		'title'     => __( 'Edit tag', 'woocommerce-admin' ),
+		'title'     => __( 'Edit tag', 'woocommerce' ),
 	)
 );
 
@@ -281,7 +281,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-product-attributes',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product_attributes',
-		'title'     => __( 'Attributes', 'woocommerce-admin' ),
+		'title'     => __( 'Attributes', 'woocommerce' ),
 	)
 );
 
@@ -291,6 +291,6 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-product-edit-attribute',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product_attribute-edit',
-		'title'     => __( 'Edit attribute', 'woocommerce-admin' ),
+		'title'     => __( 'Edit attribute', 'woocommerce' ),
 	)
 );

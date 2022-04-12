@@ -67,11 +67,11 @@ class Tax extends Task {
 	public function get_title() {
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added tax rates', 'woocommerce-admin' );
+				return __( 'You added tax rates', 'woocommerce' );
 			}
-			return __( 'Add tax rates', 'woocommerce-admin' );
+			return __( 'Add tax rates', 'woocommerce' );
 		}
-		return __( 'Set up tax', 'woocommerce-admin' );
+		return __( 'Set up tax', 'woocommerce' );
 	}
 
 	/**
@@ -83,11 +83,11 @@ class Tax extends Task {
 		return self::can_use_automated_taxes()
 			? __(
 				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 			: __(
 				'Set your store location and configure tax rate settings.',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 	}
 
@@ -97,7 +97,7 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce-admin' );
+		return __( '1 minute', 'woocommerce' );
 	}
 
 	/**
@@ -107,8 +107,8 @@ class Tax extends Task {
 	 */
 	public function get_action_label() {
 		return self::can_use_automated_taxes()
-			? __( 'Yes please', 'woocommerce-admin' )
-			: __( "Let's go", 'woocommerce-admin' );
+			? __( 'Yes please', 'woocommerce' )
+			: __( "Let's go", 'woocommerce' );
 	}
 
 	/**

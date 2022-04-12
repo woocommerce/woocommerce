@@ -70,6 +70,7 @@ class TaskLists {
 		self::init_default_lists();
 		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_tasks' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'task_list_preloaded_settings' ), 20 );
 	}
 
 	/**
@@ -79,7 +80,7 @@ class TaskLists {
 		self::add_list(
 			array(
 				'id'           => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'        => array(
 					'StoreDetails',
 					'Purchase',
@@ -100,7 +101,7 @@ class TaskLists {
 			array(
 				'id'                      => 'setup_experiment_1',
 				'hidden_id'               => 'setup',
-				'title'                   => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'                   => array(
 					'StoreDetails',
 					'Products',
@@ -123,7 +124,7 @@ class TaskLists {
 		self::add_list(
 			array(
 				'id'      => 'extended',
-				'title'   => __( 'Things to do next', 'woocommerce-admin' ),
+				'title'   => __( 'Things to do next', 'woocommerce' ),
 				'sort_by' => array(
 					array(
 						'key'   => 'is_complete',
@@ -143,7 +144,7 @@ class TaskLists {
 			array(
 				'id'           => 'setup_two_column',
 				'hidden_id'    => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'        => array(
 					'Products',
 					'WooCommercePayments',
@@ -160,7 +161,7 @@ class TaskLists {
 			array(
 				'id'           => 'extended_two_column',
 				'hidden_id'    => 'extended',
-				'title'        => __( 'Things to do next', 'woocommerce-admin' ),
+				'title'        => __( 'Things to do next', 'woocommerce' ),
 				'sort_by'      => array(
 					array(
 						'key'   => 'is_complete',
@@ -227,7 +228,7 @@ class TaskLists {
 		if ( isset( self::$lists[ $args['id'] ] ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_exists',
-				__( 'Task list ID already exists', 'woocommerce-admin' )
+				__( 'Task list ID already exists', 'woocommerce' )
 			);
 		}
 
@@ -246,7 +247,7 @@ class TaskLists {
 		if ( ! isset( self::$lists[ $list_id ] ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_invalid_list',
-				__( 'Task list ID does not exist', 'woocommerce-admin' )
+				__( 'Task list ID does not exist', 'woocommerce' )
 			);
 		}
 
@@ -321,7 +322,7 @@ class TaskLists {
 		return array_filter(
 			self::get_lists(),
 			function ( $task_list ) {
-				return ! $task_list->is_hidden();
+				return $task_list->is_visible();
 			}
 		);
 	}
@@ -372,5 +373,18 @@ class TaskLists {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Add visible list ids to component settings.
+	 *
+	 * @param array $settings Component settings.
+	 *
+	 * @return array
+	 */
+	public static function task_list_preloaded_settings( $settings ) {
+		$settings['visibleTaskListIds'] = array_keys( self::get_visible() );
+
+		return $settings;
 	}
 }

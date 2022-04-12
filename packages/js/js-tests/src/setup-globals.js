@@ -107,7 +107,7 @@ wooCommercePackages.forEach( ( lib ) => {
 	} );
 } );
 
-const config = require( '../../../../plugins/woocommerce-admin/config/development.json' );
+const config = require( '../../../../plugins/woocommerce/client/admin/config/development.json' );
 
 // Check if test is jsdom or node
 if ( global.window ) {
@@ -115,8 +115,8 @@ if ( global.window ) {
 }
 
 setLocaleData(
-	{ '': { domain: 'woocommerce-admin', lang: 'en_US' } },
-	'woocommerce-admin'
+	{ '': { domain: 'woocommerce', lang: 'en_US' } },
+	'woocommerce'
 );
 
 // Mock core/notices store for components dispatching core notices

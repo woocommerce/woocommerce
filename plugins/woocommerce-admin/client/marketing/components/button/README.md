@@ -11,7 +11,7 @@ This component creates simple reusable html `<button></button>` element.
 	onClick={ this.onActivateClick }
 	disabled={ isLoading }
 >
-	{ __( 'Activate', 'woocommerce-admin' ) }
+	{ __( 'Activate', 'woocommerce' ) }
 </Button>
 ```
 

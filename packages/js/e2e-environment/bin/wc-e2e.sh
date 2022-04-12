@@ -49,7 +49,7 @@ fi
 # Run scripts
 case $1 in
 	'docker:up')
-		./bin/docker-compose.sh up $2
+		./bin/docker-compose.sh up $2 && ./bin/wait-for-build.sh
 		;;
 	'docker:wait')
 		./bin/wait-for-build.sh
