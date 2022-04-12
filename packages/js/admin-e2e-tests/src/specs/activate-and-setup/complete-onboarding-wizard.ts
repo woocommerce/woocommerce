@@ -597,7 +597,7 @@ const testBusinessDetailsForm = () => {
 	} );
 };
 
-const testAdminHomescreenWelcomeModal = () => {
+const testAdminHomescreen = () => {
 	describe( 'Homescreen', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -629,5 +629,5 @@ module.exports = {
 	testDifferentStoreCurrenciesWCPay,
 	testSubscriptionsInclusion,
 	testBusinessDetailsForm,
-	testAdminHomescreenWelcomeModal,
+	testAdminHomescreen,
 };

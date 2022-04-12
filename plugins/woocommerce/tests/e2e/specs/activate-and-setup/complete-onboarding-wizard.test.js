@@ -4,7 +4,7 @@ const {
 	testDifferentStoreCurrenciesWCPay,
 	testSubscriptionsInclusion,
 	testBusinessDetailsForm,
-	testAdminHomescreenWelcomeModal,
+	testAdminHomescreen,
 } = require( '@woocommerce/admin-e2e-tests' );
 const { withRestApi, IS_RETEST_MODE } = require( '@woocommerce/e2e-utils' );
 
@@ -18,4 +18,4 @@ testSelectiveBundleWCPay();
 testDifferentStoreCurrenciesWCPay();
 testSubscriptionsInclusion();
 testBusinessDetailsForm();
-testAdminHomescreenWelcomeModal();
+testAdminHomescreen();
