@@ -148,8 +148,7 @@ class WPPostToCOTMigrator {
 		$this->billing_address_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		$this->shipping_address_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		$this->operation_data_table_migrator->process_migration_batch_for_ids( $order_post_ids );
-		// TODO: Add resilience for meta migrations.
-		// $this->process_meta_migration( $order_post_ids );
+		$this->process_meta_migration( $order_post_ids );
 		// TODO: Return merged error array.
 	}
 
