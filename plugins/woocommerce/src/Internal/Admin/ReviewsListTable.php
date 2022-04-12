@@ -30,6 +30,15 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the name of the default primary column.
+	 *
+	 * @return string Name of the primary colum.
+	 */
+	protected function get_primary_column_name() {
+		return 'comment';
+	}
+
+	/**
 	 * Renders the checkbox column.
 	 *
 	 * @param object|array $item Review or reply being rendered.
