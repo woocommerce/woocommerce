@@ -41,7 +41,8 @@ const entryPoints = {};
 wcAdminPackages.forEach( ( name ) => {
 	entryPoints[ name ] = `../../packages/js/${ name }`;
 } );
-
+// wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
+// See ./client/wp-admin-scripts/README.md for more details
 const wpAdminScripts = [
 	'marketing-coupons',
 	'navigation-opt-out',
@@ -67,14 +68,18 @@ const webpackConfig = {
 	},
 	output: {
 		filename: ( data ) => {
+			// Output wpAdminScripts to wp-admin-scripts folder
+			// See https://github.com/woocommerce/woocommerce-admin/pull/3061
 			return wpAdminScripts.includes( data.chunk.name )
 				? `wp-admin-scripts/[name]${ suffix }.js`
 				: `[name]/index${ suffix }.js`;
 		},
 		chunkFilename: `chunks/[name]${ suffix }.js`,
 		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
+		// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'window',
+		// A unique name of the webpack build to avoid multiple webpack runtimes to conflict when using globals.
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
@@ -82,6 +87,8 @@ const webpackConfig = {
 			{
 				test: /\.js$/,
 				parser: {
+					// Disable AMD to fix an issue where underscore and lodash where clashing
+					// See https://github.com/woocommerce/woocommerce-admin/pull/1004 and https://github.com/Automattic/woocommerce-services/pull/1522
 					amd: false,
 				},
 			},
@@ -101,6 +108,8 @@ const webpackConfig = {
 							[
 								'@babel/preset-env',
 								{
+									// Add polyfills such as Array.flat based on their usage in the code
+									// See https://github.com/woocommerce/woocommerce-admin/pull/6411/
 									corejs: '3',
 									useBuiltIns: 'usage',
 								},
@@ -119,8 +128,10 @@ const webpackConfig = {
 		],
 	},
 	resolve: {
-		fallback:{
-			'crypto': 'empty'
+		fallback: {
+			// Reduce bundle size by omitting Node crypto library.
+			// See https://github.com/woocommerce/woocommerce-admin/pull/5768
+			crypto: 'empty',
 		},
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
@@ -133,11 +144,14 @@ const webpackConfig = {
 	},
 	plugins: [
 		...styleConfig.plugins,
+		// Runs TypeScript type checker on a separate process.
 		new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
 				if ( entryName ) {
+					// Convert the dash-case name to a camel case module name.
+					// For example, 'csv-export' -> 'csvExport'
 					return entryName.replace( /-([a-z])/g, ( match, letter ) =>
 						letter.toUpperCase()
 					);
@@ -145,26 +159,31 @@ const webpackConfig = {
 				return outputPath;
 			},
 		} ),
-		new CopyWebpackPlugin({
-
+		// The package build process doesn't handle extracting CSS from JS files, so we copy them separately.
+		new CopyWebpackPlugin( {
 			patterns: wcAdminPackages.map( ( packageName ) => ( {
 				from: `../../packages/js/${ packageName }/build-style/*.css`,
 				to: `./${ packageName }/[name][ext]`,
-				noErrorOnMissing: true
-			} ) )
-		}
-		),
+				noErrorOnMissing: true,
+			} ) ),
+		} ),
 
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin(),
+		// Reduces data for moment-timezone.
 		new MomentTimezoneDataPlugin( {
-			startYear: 2000, // This strips out timezone data before the year 2000 to make a smaller file.
+			// This strips out timezone data before the year 2000 to make a smaller file.
+			startYear: 2000,
 		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
-		// Partially replace with __webpack_get_script_filename__ in app once using Webpack 5.x.
+		// Adds the script version parameter to the chunk URLs for cache busting
+		// TODO: Partially replace with __webpack_get_script_filename__ in app with Webpack 5.x.
 		// The CSS chunk portion will need to remain, as it originates in MiniCssExtractPlugin.
 		new AsyncChunkSrcVersionParameterPlugin(),
+		// Generate unminified files to load the unminified version when `define( 'SCRIPT_DEBUG', true );` is set in wp-config.
+		// This is also required to publish human readeable code in the deployed "plugin".
+		// See https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#4-code-must-be-mostly-human-readable
 		WC_ADMIN_PHASE !== 'core' &&
 			new UnminifyWebpackPlugin( {
 				test: /\.js($|\?)/i,
@@ -174,8 +193,10 @@ const webpackConfig = {
 	optimization: {
 		minimize: NODE_ENV !== 'development',
 		splitChunks: {
-			name: false
-		}
+			// Not to generate chunk names because it caused a stressful workflow when deploying the plugin to WP.org
+			// See https://github.com/woocommerce/woocommerce-admin/pull/5229
+			name: false,
+		},
 	},
 };
 
