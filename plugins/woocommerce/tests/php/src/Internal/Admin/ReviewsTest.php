@@ -9,7 +9,6 @@ use WC_Unit_Test_Case;
  *
  * @covers \Automattic\WooCommerce\Internal\Admin\Reviews
  */
-class ReviewsTest extends WC_Unit_Test_Case
-{
+class ReviewsTest extends WC_Unit_Test_Case {
 
 }
