@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Enable "Save changes" for variations on the admin when a textfield receives input.
