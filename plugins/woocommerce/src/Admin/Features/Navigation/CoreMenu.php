@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\Features\Navigation;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 /**
  * CoreMenu class. Handles registering Core menu items.
@@ -196,6 +197,7 @@ class CoreMenu {
 				'url'             => \Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG,
 				'order'           => 0,
 				'matchExpression' => 'page=wc-admin((?!path=).)*$',
+				'badge'		=> TaskLists::setup_tasks_remaining(),
 			);
 		}
 

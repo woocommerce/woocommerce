@@ -468,13 +468,13 @@ class TaskLists {
 	 * @return number
 	 */
 	public static function setup_tasks_remaining () {
-		if(!Features::is_enabled( 'tasklist-setup-experiment-1' )) {
+		if( ! Features::is_enabled( 'tasklist-setup-experiment-1' )) {
 			return;
 		}
 
-		$setup_list = self::get_list('setup_experiment_1');
+		$setup_list = self::get_list( 'setup_experiment_1' );
 
-		if($setup_list->is_hidden() || $setup_list->is_complete()) {
+		if( $setup_list->is_hidden() || $setup_list->is_complete() ) {
 			return;
 		}
 
@@ -487,7 +487,7 @@ class TaskLists {
 			)
 		);
 
-		return count($remaining_tasks);
+		return count( $remaining_tasks );
 	}
 
 	/**
@@ -498,7 +498,7 @@ class TaskLists {
 
 		$tasks_count = self::setup_tasks_remaining();
 
-		if(!$tasks_count) {
+		if( !$tasks_count ) {
 			return;
 		}
 
