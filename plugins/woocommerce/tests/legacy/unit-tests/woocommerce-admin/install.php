@@ -211,4 +211,36 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		$this->assertTrue( did_action( 'woocommerce_newly_installed' ) > 0 );
 	}
 
+	/**
+	 * Test migrate_options();
+	 * @return void
+	 */
+	public function test_migrate_options() {
+		delete_transient( 'wc_installing' );
+		WC_Install::install();
+		$this->assertTrue( defined( 'WC_ADMIN_MIGRATING_OPTIONS' ) );
+		$migrated_options = array(
+			'woocommerce_onboarding_profile'           => 'wc_onboarding_profile',
+			'woocommerce_admin_install_timestamp'      => 'wc_admin_install_timestamp',
+			'woocommerce_onboarding_opt_in'            => 'wc_onboarding_opt_in',
+			'woocommerce_admin_import_stats'           => 'wc_admin_import_stats',
+			'woocommerce_admin_version'                => 'wc_admin_version',
+			'woocommerce_admin_last_orders_milestone'  => 'wc_admin_last_orders_milestone',
+			'woocommerce_admin-wc-helper-last-refresh' => 'wc-admin-wc-helper-last-refresh',
+			'woocommerce_admin_report_export_status'   => 'wc_admin_report_export_status',
+			'woocommerce_task_list_complete'           => 'woocommerce_task_list_complete',
+			'woocommerce_task_list_hidden'             => 'woocommerce_task_list_hidden',
+			'woocommerce_extended_task_list_complete'  => 'woocommerce_extended_task_list_complete',
+			'woocommerce_extended_task_list_hidden'    => 'woocommerce_extended_task_list_hidden',
+		);
+
+		foreach ( $migrated_options as $new_option => $old_option ) {
+			$old_option_value = get_option( $old_option );
+			if ( false === $old_option_value ) {
+				continue;
+			}
+			$this->assertNotFalse( get_option( $new_option ), $new_option );
+		}
+	}
+
 }
