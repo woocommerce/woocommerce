@@ -95,8 +95,8 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders any custom columns.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
-	 * @param string $column_name Name of the column being rendered.
+	 * @param object|array $item        Comment or reply being rendered.
+	 * @param string       $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
