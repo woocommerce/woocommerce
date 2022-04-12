@@ -277,7 +277,7 @@ class WC_Download_Handler {
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
 			$file_path = ( is_ssl() ? 'https:' : 'http:' ) . $file_path;
-			
+
 			/**
 			 * Filter the remote filepath for download.
 			 *
@@ -304,7 +304,7 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = $parsed_file_path['path'];
 		}
-		
+
 		/**
 		* Filter the filepath for download.
 		*
@@ -314,7 +314,7 @@ class WC_Download_Handler {
 		*/
 		return array(
 			'remote_file' => $remote_file,
-			'file_path'   => apply_filters( 'woocommerce_download_parse_file_path', $file_path, $remote_file )
+			'file_path'   => apply_filters( 'woocommerce_download_parse_file_path', $file_path, $remote_file ),
 		);
 	}
 
