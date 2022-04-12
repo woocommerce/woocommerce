@@ -204,6 +204,19 @@ $fontSizes: (
 	}
 }
 
+// Positions an element absolutely and stretches it over the container
+@mixin absolute-stretch() {
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+}
+
 // Converts a px unit to em.
 @function em($size, $base: 16px) {
 	@return math.div($size, $base) * 1em;

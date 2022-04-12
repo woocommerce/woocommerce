@@ -11,6 +11,7 @@ export const example = {
 		editMode: false,
 		height: getSetting( 'default_height', 500 ),
 		mediaSrc: '',
+		overlayColor: '#000000',
 		showDesc: true,
 		productId: 'preview',
 		previewProduct: previewProducts[ 0 ],
