@@ -38,7 +38,21 @@ registerBlockType( 'woocommerce/featured-product', {
 	supports: {
 		align: [ 'wide', 'full' ],
 		html: false,
-		color: true,
+		color: {
+			__experimentalDuotone:
+				'.wc-block-featured-product__background-image',
+			background: false,
+			text: true,
+		},
+		spacing: {
+			padding: true,
+			...( isFeaturePluginBuild() && {
+				__experimentalDefaultControls: {
+					padding: true,
+				},
+				__experimentalSkipSerialization: true,
+			} ),
+		},
 		...( isFeaturePluginBuild() && {
 			__experimentalBorder: {
 				color: true,
@@ -82,11 +96,14 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
-		 * A fixed height for the block.
+		 * Whether the image should fit the container or not be resized
+		 *
+		 * Note: when the image is resized to fit the container, the user loses
+		 * the ability to have full control over the focus.
 		 */
-		height: {
-			type: 'number',
-			default: getSetting( 'default_height', 500 ),
+		imageFit: {
+			type: 'string',
+			default: 'none',
 		},
 
 		/**
@@ -106,6 +123,20 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
+		 * A minimum height for the block.
+		 *
+		 * Note: if padding is increased, this way the inner content will never
+		 * overflow, but instead will resize the container.
+		 *
+		 * It was decided to change this to make this block more in line with
+		 * the “Cover” block.
+		 */
+		minHeight: {
+			type: 'number',
+			default: getSetting( 'default_height', 500 ),
+		},
+
+		/**
 		 * Text for the product link.
 		 */
 		linkText: {
@@ -114,10 +145,33 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
+		 * Color for the overlay layer on top of the product image.
+		 */
+		overlayColor: {
+			type: 'string',
+			default: '#000000',
+		},
+
+		/**
+		 * Gradient for the overlay layer on top of the product image.
+		 */
+		overlayGradient: {
+			type: 'string',
+		},
+
+		/**
 		 * The product ID to display.
 		 */
 		productId: {
 			type: 'number',
+		},
+
+		/**
+		 * Product preview.
+		 */
+		previewProduct: {
+			type: 'object',
+			default: null,
 		},
 
 		/**
@@ -134,14 +188,6 @@ registerBlockType( 'woocommerce/featured-product', {
 		showPrice: {
 			type: 'boolean',
 			default: true,
-		},
-
-		/**
-		 * Product preview.
-		 */
-		previewProduct: {
-			type: 'object',
-			default: null,
 		},
 	},
 

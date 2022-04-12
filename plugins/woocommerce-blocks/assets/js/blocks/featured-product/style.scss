@@ -1,9 +1,21 @@
 .wp-block-woocommerce-featured-product {
-	background-color: $gray-900;
+	background-color: transparent;
 	border-color: transparent;
 	color: #fff;
-	overflow: hidden;
 	box-sizing: border-box;
+
+	.components-resizable-box__container {
+		position: absolute !important;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		min-height: 50px;
+
+		&:not(.is-resizing) {
+			height: auto !important;
+		}
+	}
 }
 
 .wc-block-featured-product {
@@ -101,25 +113,34 @@
 		}
 	}
 
+	.wc-block-featured-product__background-image {
+		@include absolute-stretch();
+		object-fit: none;
+	}
+
 	.wp-block-button.aligncenter {
 		text-align: center;
 	}
 
-	&.has-background-dim::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		bottom: 0;
-		right: 0;
-		background-color: inherit;
-		opacity: 0.5;
-		z-index: 1;
+	&.has-background-dim {
+		.wc-block-featured-product__overlay::before {
+			background: inherit;
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			opacity: 0.5;
+			z-index: 1;
+		}
 	}
 
 	@for $i from 1 through 10 {
-		&.has-background-dim.has-background-dim-#{ $i * 10 }::before {
-			opacity: $i * 0.1;
+		&.has-background-dim.has-background-dim-#{ $i * 10 } {
+			.wc-block-featured-product__overlay::before {
+				opacity: $i * 0.1;
+			}
 		}
 	}
 
