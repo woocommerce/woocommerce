@@ -139,7 +139,8 @@ jobs:
                   USER_SECRET: password
               run: pnpx wc-api-tests test api
 
-            - name: Upload API test report
+            - name: Archive API test report
+              if: always()
               uses: actions/upload-artifact@v2
               with:
                   name: api-test-report---pr-${{ github.event.number }}
