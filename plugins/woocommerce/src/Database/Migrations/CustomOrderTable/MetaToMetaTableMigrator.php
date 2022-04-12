@@ -117,7 +117,7 @@ class MetaToMetaTableMigrator {
 	/**
 	 * Helper method to build query used to fetch data from source meta table.
 	 *
-	 * @param string $entity_ids List of entity IDs to build meta query for.
+	 * @param array $entity_ids List of entity IDs to build meta query for.
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
@@ -127,9 +127,9 @@ class MetaToMetaTableMigrator {
 		$source_meta_key_column   = $this->schema_config['source']['meta']['meta_key_column'];
 		$source_meta_value_column = $this->schema_config['source']['meta']['meta_value_column'];
 		$source_entity_id_column  = $this->schema_config['source']['meta']['entity_id_column'];
-		$order_by                 = "$source_entity_id_column ASC";
+		$order_by                 = "source.$source_entity_id_column ASC";
 
-		$where_clause = "$source_entity_id_column IN (" . implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) ) . ')';
+		$where_clause = "source.`$source_entity_id_column` IN (" . implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) ) . ')';
 
 		$destination_entity_table             = $this->schema_config['destination']['entity']['table_name'];
 		$destination_entity_id_column         = $this->schema_config['destination']['entity']['id_column'];
