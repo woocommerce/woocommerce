@@ -51,6 +51,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 		$this->assert_core_data_is_migrated( $order );
 		$this->assert_order_addresses_are_migrated( $order );
 		$this->assert_order_op_data_is_migrated( $order );
+		$this->assert_metadata_is_migrated( $order );
 	}
 
 	/**
@@ -149,7 +150,7 @@ WHERE order_id = {$order_id}
 	/**
 	 * Helper method to get address details from DB.
 	 *
-	 * @param int    $order_id Order ID.
+	 * @param int $order_id Order ID.
 	 * @param string $address_type Address Type.
 	 *
 	 * @return array|object|void|null DB object.
@@ -175,6 +176,13 @@ WHERE order_id = {$order_id}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_row( "SELECT * FROM $operational_data_table WHERE order_id = $order_id;" );
+	}
+
+	private function get_meta_data_from_cot( $order_id ) {
+		global $wpdb;
+		$metadata_table = $this->data_store::get_meta_table_name();
+
+		return $wpdb->get_results( "SELECT * FROM $metadata_table WHERE order_id = $order_id;" );
 	}
 
 	/**
@@ -244,6 +252,9 @@ WHERE order_id = {$order_id}
 		$order->set_date_completed( time() );
 		$order->calculate_shipping();
 
+		$order->add_meta_data( 'unique_key_1', 'unique_value_1', true );
+		$order->add_meta_data( 'non_unique_key_1', 'non_unique_value_1', false );
+		$order->add_meta_data( 'non_unique_key_1', 'non_unique_value_2', false );
 		$order->save();
 		$order->save_meta_data();
 
@@ -350,6 +361,27 @@ WHERE order_id = {$order_id}
 		$this->assertEquals( (float) $order->get_shipping_total(), (float) $db_order_op_data->shipping_total_amount );
 		$this->assertEquals( (float) $order->get_discount_tax(), (float) $db_order_op_data->discount_tax_amount );
 		$this->assertEquals( (float) $order->get_discount_total(), (float) $db_order_op_data->discount_total_amount );
+	}
+
+	private function assert_metadata_is_migrated( $order ) {
+		$db_order  = $this->get_order_from_cot( $order );
+		$meta_data = $this->get_meta_data_from_cot( $db_order->id );
+
+		$unique_row = array_filter( $meta_data, function ( $meta_row ) {
+			return 'unique_key_1' === $meta_row->meta_key;
+		} );
+
+		$this->assertEquals( 1, count( $unique_row ) );
+		$this->assertEquals( 'unique_value_1', array_values( $unique_row)[0]->meta_value );
+
+		$non_unique_rows = array_filter( $meta_data, function ( $meta_row ) {
+			return 'non_unique_key_1' === $meta_row->meta_key;
+		} );
+		$this->assertEquals( 2, count( $non_unique_rows ) );
+		$this->assertEquals( array(
+			'non_unique_value_1',
+			'non_unique_value_2'
+		), array_column( $non_unique_rows, 'meta_value' ) );
 	}
 
 	/**
