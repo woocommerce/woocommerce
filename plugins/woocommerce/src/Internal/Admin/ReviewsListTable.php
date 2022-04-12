@@ -32,7 +32,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the checkbox column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
 		// @TODO Implement in MWC-5335 {agibson 2022-04-12}
@@ -41,7 +41,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the review column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_comment( $item ) {
 		// @TODO Implement in MWC-5339 {agibson 2022-04-12}
@@ -50,7 +50,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the author column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_author( $item ) {
 		// @TODO Implement in MWC-5336 {agibson 2022-04-12}
@@ -59,7 +59,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the "submitted on" column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_date( $item ) {
 		// @TODO Implement in MWC-5338 {agibson 2022-04-12}
@@ -68,7 +68,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the product column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_response( $item ) {
 		// @TODO Implement in MWC-5337 {agibson 2022-04-12}
@@ -77,7 +77,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the type column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
 		// @TODO Implement in MWC-5334 {agibson 2022-04-12}
@@ -86,7 +86,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the rating column.
 	 *
-	 * @param object|array $item Comment or reply being rendered.
+	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_rating( $item ) {
 		// @TODO Implement in MWC-5333 {agibson 2022-04-12}
@@ -95,7 +95,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders any custom columns.
 	 *
-	 * @param object|array $item        Comment or reply being rendered.
+	 * @param object|array $item        Review or reply being rendered.
 	 * @param string       $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
@@ -103,7 +103,7 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Prepare reviews for display
+	 * Prepares reviews for display.
 	 */
 	public function prepare_items() {
 
