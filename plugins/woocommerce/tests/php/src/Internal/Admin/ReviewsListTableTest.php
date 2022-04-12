@@ -15,12 +15,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Returns a new instance of the ReviewsListTable class.
-	 * @TODO Change the `screen` to be our page when it gets created in MWC-5330 {agibson 2022-04-12}
 	 *
 	 * @return ReviewsListTable
 	 */
 	protected function get_reviews_list_table() : ReviewsListTable {
-		return new ReviewsListTable( [ 'screen' => 'comments' ] );
+		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 	}
 
 	/**
