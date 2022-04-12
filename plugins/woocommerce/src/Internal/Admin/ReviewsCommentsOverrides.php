@@ -41,8 +41,6 @@ class ReviewsCommentsOverrides {
 	/**
 	 * Excludes product reviews from showing in the comments page.
 	 *
-	 * @internal
-	 *
 	 * @param array $args {@see WP_Comment_Query} query args.
 	 * @return array
 	 */
