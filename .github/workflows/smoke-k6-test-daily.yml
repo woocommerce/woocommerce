@@ -1,6 +1,5 @@
 name: Smoke k6 test daily
-on:
-  workflow_dispatch:
+on: pull_request
 jobs:
   build:
     name: Build WooCommerce zip
