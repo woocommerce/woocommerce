@@ -124,6 +124,16 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
+	metadata: metadata.CHECKOUT_ORDER_SUMMARY_CART_ITEMS,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "checkout-blocks/order-summary-cart-items" */
+			'./checkout-order-summary-cart-items/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_SUBTOTAL,
 	component: lazy( () =>
 		import(
@@ -154,16 +164,6 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CHECKOUT_ORDER_SUMMARY_SHIPPING,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "checkout-blocks/order-summary-shipping" */
-			'./checkout-order-summary-shipping/frontend'
-		)
-	),
-} );
-
-registerCheckoutBlock( {
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_COUPON_FORM,
 	component: lazy( () =>
 		import(
@@ -174,21 +174,21 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CHECKOUT_ORDER_SUMMARY_TAXES,
+	metadata: metadata.CHECKOUT_ORDER_SUMMARY_SHIPPING,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "checkout-blocks/order-summary-taxes" */
-			'./checkout-order-summary-taxes/frontend'
+			/* webpackChunkName: "checkout-blocks/order-summary-shipping" */
+			'./checkout-order-summary-shipping/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CHECKOUT_ORDER_SUMMARY_CART_ITEMS,
+	metadata: metadata.CHECKOUT_ORDER_SUMMARY_TAXES,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "checkout-blocks/order-summary-cart-items" */
-			'./checkout-order-summary-cart-items/frontend'
+			/* webpackChunkName: "checkout-blocks/order-summary-taxes" */
+			'./checkout-order-summary-taxes/frontend'
 		)
 	),
 } );

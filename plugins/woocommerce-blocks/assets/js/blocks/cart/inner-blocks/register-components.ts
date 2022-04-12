@@ -105,6 +105,16 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_HEADING,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-heading" */
+			'./cart-order-summary-heading/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_SUBTOTAL,
 	component: lazy( () =>
 		import(
@@ -135,21 +145,21 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CART_ORDER_SUMMARY_SHIPPING,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "cart-blocks/order-summary-shipping" */
-			'./cart-order-summary-shipping/frontend'
-		)
-	),
-} );
-
-registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM,
 	component: lazy( () =>
 		import(
 			/* webpackChunkName: "cart-blocks/order-summary-coupon-form" */
 			'./cart-order-summary-coupon-form/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_SHIPPING,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-shipping" */
+			'./cart-order-summary-shipping/frontend'
 		)
 	),
 } );
