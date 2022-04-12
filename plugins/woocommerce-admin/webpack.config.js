@@ -36,11 +36,6 @@ const wcAdminPackages = [
 	'tracks',
 	'onboarding',
 ];
-
-const entryPoints = {};
-wcAdminPackages.forEach( ( name ) => {
-	entryPoints[ name ] = `../../packages/js/${ name }`;
-} );
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
 const wpAdminScripts = [
@@ -54,51 +49,54 @@ const wpAdminScripts = [
 	'beta-features-tracking-modal',
 	'payment-method-promotions',
 ];
-wpAdminScripts.forEach( ( name ) => {
-	entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
-} );
+const getEntryPoints = () => {
+	const entryPoints = {
+		app: './client/index.js',
+	};
+	wcAdminPackages.forEach( ( name ) => {
+		entryPoints[ name ] = `../../packages/js/${ name }`;
+	} );
+	wpAdminScripts.forEach( ( name ) => {
+		entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
+	} );
+	return entryPoints;
+};
 
-const suffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
+const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
 const webpackConfig = {
 	mode: NODE_ENV,
-	entry: {
-		app: './client/index.js',
-		...entryPoints,
-	},
+	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
 			// Output wpAdminScripts to wp-admin-scripts folder
 			// See https://github.com/woocommerce/woocommerce-admin/pull/3061
 			return wpAdminScripts.includes( data.chunk.name )
-				? `wp-admin-scripts/[name]${ suffix }.js`
-				: `[name]/index${ suffix }.js`;
+				? `wp-admin-scripts/[name]${ outputSuffix }.js`
+				: `[name]/index${ outputSuffix }.js`;
 		},
-		chunkFilename: `chunks/[name]${ suffix }.js`,
+		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
 		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
-		// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
-		library: [ 'wc', '[modulename]' ],
-		libraryTarget: 'window',
+		library: {
+			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
+			name: [ 'wc', '[modulename]' ],
+			type: 'window',
+		},
 		// A unique name of the webpack build to avoid multiple webpack runtimes to conflict when using globals.
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
 		rules: [
 			{
-				test: /\.js$/,
+				test: /\.(t|j)sx?$/,
 				parser: {
 					// Disable AMD to fix an issue where underscore and lodash where clashing
 					// See https://github.com/woocommerce/woocommerce-admin/pull/1004 and https://github.com/Automattic/woocommerce-services/pull/1522
 					amd: false,
 				},
-			},
-			{
-				test: /\.(t|j)sx?$/,
 				exclude: [
-					// Exclude node_modules/ but not node_modules/debug* and node_modules/explat-client-react-helpers
-					// explat-client-react-helpers module contains optional chaining operators which need to be processed via babel loader for webpack 4.
-					// see webpack issue for details: https://github.com/webpack/webpack/issues/10227#issue-547480527
-					/node_modules(\/|\\)\.pnpm(\/|\\)(?!(debug|\@automattic\+explat-client-react-helpers))/,
+					// Exclude node_modules/.pnpm but not node_modules/.pnpm/debug*
+					/node_modules(\/|\\)\.pnpm(\/|\\)(?!(debug))/,
 				],
 				use: {
 					loader: 'babel-loader',
@@ -136,10 +134,6 @@ const webpackConfig = {
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
 			'~': path.resolve( __dirname + '/client' ),
-			'gutenberg-components': path.resolve(
-				__dirname,
-				'node_modules/@wordpress/components/src'
-			),
 		},
 	},
 	plugins: [
