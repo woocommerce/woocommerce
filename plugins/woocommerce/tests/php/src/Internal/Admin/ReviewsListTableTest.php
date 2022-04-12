@@ -25,6 +25,26 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Returns a test review object.
+	 *
+	 * @return WP_Comment|null
+	 */
+	protected function get_test_review() {
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$review_id = ProductHelper::create_product_review( $product->get_id() );
+
+		$reviews = get_comments(
+			[
+				'id' => $review_id,
+			]
+		);
+
+		return ! empty( $reviews ) ? current( $reviews ) : null;
+	}
+
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
 	 */
 	public function test_get_columns() {
@@ -65,17 +85,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_type' );
 		$method->setAccessible( true );
 
-		$product = WC_Helper_Product::create_simple_product();
-
-		$review_id = ProductHelper::create_product_review( $product->get_id() );
-
-		$reviews = get_comments(
-			[
-				'id' => $review_id,
-			]
-		);
-
-		$review = ! empty( $reviews ) ? current( $reviews ) : null;
+		$review = $this->get_test_review();
 		$review->comment_type = $comment_type;
 
 		ob_start();
