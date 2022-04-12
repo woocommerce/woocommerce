@@ -112,6 +112,25 @@ WHERE order_id = {$order_id}
 "
 			)
 		);
+
+		$this->assertEquals(
+			1,
+			$wpdb->get_var(
+				"
+SELECT COUNT(*) FROM {$this->data_store::get_meta_table_name()}
+WHERE order_id = {$order_id} AND meta_key = 'unique_key_1'
+"
+			)
+		);
+		$this->assertEquals(
+			2,
+			$wpdb->get_var(
+				"
+SELECT COUNT(*) FROM {$this->data_store::get_meta_table_name()}
+WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1'
+"
+			)
+		);
 		// phpcs:enable
 	}
 
