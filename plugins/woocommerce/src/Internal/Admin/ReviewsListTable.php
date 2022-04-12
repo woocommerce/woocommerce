@@ -105,22 +105,16 @@ class ReviewsListTable extends WP_List_Table {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
 
 		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
+			$rating = (int) $rating;
 			$accessibility_label = sprintf(
 				/* translators: 1: number representing a rating */
 				__( '%1$s out of 5', 'woocommerce' ),
 				$rating
 			);
+			$stars = str_repeat( '&#9733;', $rating );
+			$stars .= str_repeat( '&#9734;', 5 - $rating );
 			?>
-			<span aria-label="<?php echo esc_attr( $accessibility_label ); ?>">
-			<?php
-			for ( $count = 0; $count < $rating; $count++ ) {
-				echo '&#9733;';
-			}
-			for ( $count = 0; $count < 5 - $rating; $count++ ) {
-				echo '&#9734;';
-			}
-			?>
-			</span>
+			<span aria-label="<?php echo esc_attr( $accessibility_label ); ?>"><?php echo esc_html( $stars ); ?></span>
 			<?php
 		}
 	}
