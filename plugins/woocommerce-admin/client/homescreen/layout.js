@@ -64,6 +64,8 @@ export const Layout = ( {
 	query,
 	taskListComplete,
 	hasTaskList,
+	showingProgressHeader,
+	isLoadingTaskLists,
 	shouldShowWelcomeModal,
 	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
@@ -141,7 +143,9 @@ export const Layout = ( {
 				<Column shouldStick={ shouldStickColumns }>
 					{ ! isLoadingExperimentAssignment &&
 						! isLoadingTwoColExperimentAssignment &&
-						! isRunningTaskListExperiment && (
+						! isRunningTaskListExperiment &&
+						! isLoadingTaskLists &&
+						! showingProgressHeader && (
 							<ActivityHeader
 								className="your-store-today"
 								title={ __(
@@ -286,7 +290,13 @@ export default compose(
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);
-		const { getTaskList } = select( ONBOARDING_STORE_NAME );
+		const {
+			getTaskList,
+			getTaskLists,
+			hasFinishedResolution: taskListFinishResolution,
+		} = select( ONBOARDING_STORE_NAME );
+		const taskLists = getTaskLists();
+		const isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
 
 		const welcomeFromCalypsoModalDismissed =
 			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
@@ -336,8 +346,12 @@ export default compose(
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
+			isLoadingTaskLists,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
 			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
+			showingProgressHeader: !! taskLists.find(
+				( list ) => list.isVisible && list.displayProgressHeader
+			),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
 			installTimestamp,
 			installTimestampHasResolved,
