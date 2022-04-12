@@ -104,7 +104,7 @@ class DefaultFreeExtensions {
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'aaaa Inspire shoppers with %1$sPinterest for WooCommerce%2$s', 'woocommerce' ),
+					__( 'Inspire shoppers with %1$sPinterest for WooCommerce%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/pinterest-for-woocommerce" target="_blank">',
 					'</a>'
 				),
