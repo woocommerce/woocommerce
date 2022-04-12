@@ -185,12 +185,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		return gateway;
 	}, [ isResolving, query, paymentGateways ] );
 
-	const [
-		wcPayGateway,
-		enabledGateways,
-		offlineGateways,
-		additionalGateways,
-	] = useMemo(
+	const [ wcPayGateway, offlineGateways, additionalGateways ] = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
 				.sort( ( a, b ) => {
@@ -207,7 +202,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				} )
 				.reduce(
 					( all, gateway ) => {
-						const [ wcPay, enabled, offline, additional ] = all;
+						const [ wcPay, offline, additional ] = all;
 
 						// WCPay is handled separately when not installed and configured
 						if (
@@ -216,8 +211,6 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							! ( gateway.installed && ! gateway.needsSetup )
 						) {
 							wcPay.push( gateway );
-						} else if ( gateway.enabled ) {
-							enabled.push( gateway );
 						} else if ( gateway.is_offline ) {
 							offline.push( gateway );
 						} else {
@@ -226,7 +219,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 						return all;
 					},
-					[ [], [], [], [] ]
+					[ [], [], [] ]
 				),
 		[ paymentGateways ]
 	);
@@ -257,14 +250,6 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			/>
 		);
 	}
-
-	const enabledSection = !! enabledGateways.length && (
-		<List
-			heading={ __( 'Enabled payment gateways', 'woocommerce' ) }
-			recommendation={ recommendation }
-			paymentGateways={ enabledGateways }
-		/>
-	);
 
 	const additionalSection = !! additionalGateways.length && (
 		<List
@@ -312,14 +297,12 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 					>
 						{ additionalSection }
 						{ offlineSection }
-						{ enabledSection }
 					</Toggle>
 				</>
 			) : (
 				<>
 					{ additionalSection }
 					{ offlineSection }
-					{ enabledSection }
 				</>
 			) }
 		</div>
