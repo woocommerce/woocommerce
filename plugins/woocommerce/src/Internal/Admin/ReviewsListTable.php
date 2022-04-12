@@ -35,7 +35,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_cb( $item ) {
-		//@TODO Implement in MWC-5335 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5335 {agibson 2022-04-12}
 	}
 
 	/**
@@ -44,7 +44,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_comment( $item ) {
-		//@TODO Implement in MWC-5339 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5339 {agibson 2022-04-12}
 	}
 
 	/**
@@ -53,7 +53,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_author( $item ) {
-		//@TODO Implement in MWC-5336 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5336 {agibson 2022-04-12}
 	}
 
 	/**
@@ -62,7 +62,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_date( $item ) {
-		//@TODO Implement in MWC-5338 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5338 {agibson 2022-04-12}
 	}
 
 	/**
@@ -71,7 +71,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_response( $item ) {
-		//@TODO Implement in MWC-5337 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5337 {agibson 2022-04-12}
 	}
 
 	/**
@@ -80,7 +80,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_type( $item ) {
-		//@TODO Implement in MWC-5334 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5334 {agibson 2022-04-12}
 	}
 
 	/**
@@ -89,7 +89,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item
 	 */
 	protected function column_rating( $item ) {
-		//@TODO Implement in MWC-5333 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5333 {agibson 2022-04-12}
 	}
 
 	/**
@@ -99,7 +99,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string $column_name
 	 */
 	protected function column_default( $item, $column_name ) {
-		//@TODO Implement in MWC-5362 {agibson 2022-04-12}
+		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
 	}
 
 	/**
