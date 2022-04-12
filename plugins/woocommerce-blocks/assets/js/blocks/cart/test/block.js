@@ -25,6 +25,7 @@ import OrderSummaryBlock from '../inner-blocks/cart-order-summary-block/frontend
 import ExpressPaymentBlock from '../inner-blocks/cart-express-payment-block/block';
 import ProceedToCheckoutBlock from '../inner-blocks/proceed-to-checkout-block/block';
 import AcceptedPaymentMethodsIcons from '../inner-blocks/cart-accepted-payment-methods-block/block';
+import OrderSummaryHeadingBlock from '../inner-blocks/cart-order-summary-heading/frontend';
 import OrderSummarySubtotalBlock from '../inner-blocks/cart-order-summary-subtotal/frontend';
 import OrderSummaryShippingBlock from '../inner-blocks/cart-order-summary-shipping/frontend';
 import OrderSummaryTaxesBlock from '../inner-blocks/cart-order-summary-taxes/frontend';
@@ -49,6 +50,7 @@ const CartBlock = ( {
 				</ItemsBlock>
 				<TotalsBlock>
 					<OrderSummaryBlock>
+						<OrderSummaryHeadingBlock />
 						<OrderSummarySubtotalBlock />
 						<OrderSummaryShippingBlock
 							isShippingCalculatorEnabled={
@@ -93,6 +95,7 @@ describe( 'Testing cart', () => {
 	it( 'renders cart if there are items in the cart', async () => {
 		render( <CartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
 		expect(
 			screen.getByText( /Proceed to Checkout/i )
 		).toBeInTheDocument();
@@ -108,6 +111,20 @@ describe( 'Testing cart', () => {
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Tax/i ) ).toBeInTheDocument();
+	} );
+
+	it( 'Contains a Order summary header', async () => {
+		render( <CartBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument();
+	} );
+
+	it( 'Contains a Order summary Subtotal section', async () => {
+		render( <CartBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument();
 	} );
 
 	it( 'Shows individual tax lines if the store is set to do so', async () => {
