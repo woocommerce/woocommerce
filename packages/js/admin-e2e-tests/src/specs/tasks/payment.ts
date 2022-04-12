@@ -53,6 +53,7 @@ const testAdminPaymentSetupTask = () => {
 		} );
 
 		it( 'Saving valid bank account transfer details enables the payment method', async () => {
+			await paymentsSetup.showOtherPaymentMethods();
 			await paymentsSetup.goToPaymentMethodSetup( 'bacs' );
 			await bankTransferSetup.saveAccountDetails( {
 				accountNumber: '1234',
@@ -62,13 +63,11 @@ const testAdminPaymentSetupTask = () => {
 				iban: '12 3456 7890',
 				swiftCode: 'ABBA',
 			} );
-
-			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
-			await homeScreen.clickOnTaskList( 'Set up payments' );
-			await paymentsSetup.isDisplayed();
-			await paymentsSetup.toggleOtherPaymentMethods();
-			await paymentsSetup.methodHasBeenSetup( 'bacs' );
+			expect( await settings.paymentMethodIsEnabled( 'bacs' ) ).toBe(
+				true
+			);
+			await homeScreen.navigate();
 		} );
 
 		it( 'Enabling cash on delivery enables the payment method', async () => {
@@ -78,14 +77,12 @@ const testAdminPaymentSetupTask = () => {
 			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
-			await paymentsSetup.toggleOtherPaymentMethods();
+			await paymentsSetup.showOtherPaymentMethods();
 			await paymentsSetup.enableCashOnDelivery();
-			await homeScreen.navigate();
-			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
-			await homeScreen.clickOnTaskList( 'Set up payments' );
-			await paymentsSetup.isDisplayed();
-			await paymentsSetup.methodHasBeenSetup( 'cod' );
+			expect( await settings.paymentMethodIsEnabled( 'cod' ) ).toBe(
+				true
+			);
 		} );
 	} );
 };
