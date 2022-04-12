@@ -109,7 +109,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		$comments = get_comments(
 			[
-				'post_type'  => 'product',
+				'post_type' => 'product',
 			]
 		);
 
