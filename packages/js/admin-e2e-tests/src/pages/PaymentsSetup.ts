@@ -25,6 +25,10 @@ export class PaymentsSetup extends BasePage {
 		await this.clickButtonWithText( 'Got it' );
 	}
 
+	async toggleOtherPaymentMethods(): Promise< void > {
+		await this.clickButtonWithText( 'Other payment methods' );
+	}
+
 	async goToPaymentMethodSetup(
 		method: PaymentMethodWithSetupButton
 	): Promise< void > {

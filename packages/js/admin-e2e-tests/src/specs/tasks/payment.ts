@@ -67,6 +67,7 @@ const testAdminPaymentSetupTask = () => {
 			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
+			await paymentsSetup.toggleOtherPaymentMethods();
 			await paymentsSetup.methodHasBeenSetup( 'bacs' );
 		} );
 
@@ -76,6 +77,8 @@ const testAdminPaymentSetupTask = () => {
 			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
+			await paymentsSetup.isDisplayed();
+			await paymentsSetup.toggleOtherPaymentMethods();
 			await paymentsSetup.enableCashOnDelivery();
 			await homeScreen.navigate();
 			await homeScreen.isDisplayed();
