@@ -116,6 +116,9 @@ class ReviewsListTable extends WP_List_Table {
 			for ( $count = 0; $count < $rating; $count++ ) {
 				echo '&#9733;';
 			}
+			for ( $count = 0; $count < 5 - $rating; $count++ ) {
+				echo '&#9734;';
+			}
 			?>
 			</span>
 			<?php
