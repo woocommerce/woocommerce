@@ -233,7 +233,7 @@ class ReviewsListTable extends WP_List_Table {
 				$post_link = get_the_title( $product_post->ID );
 			endif;
 
-			echo esc_html( $post_link );
+			echo wp_kses( $post_link, [ 'a' => [ 'href', 'class' ] ] );
 
 			$post_type_object = get_post_type_object( $product_post->post_type );
 
