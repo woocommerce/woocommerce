@@ -30,9 +30,9 @@ class DeprecatedOptions {
 	 * @return string
 	 */
 	public static function get_deprecated_options( $pre_option, $option ) {
-		if ( WC_Install::is_installing() ) {
+		if ( defined( 'WC_INSTALLING' ) && WC_INSTALLING === true ) {
 			return $pre_option;
-		};
+		}
 
 		$hidden = get_option( 'woocommerce_task_list_hidden_lists', array() );
 		switch ( $option ) {

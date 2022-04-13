@@ -388,7 +388,7 @@ class WC_Install {
 	 *
 	 * @return bool
 	 */
-	public static function is_installing() {
+	private static function is_installing() {
 		return 'yes' === get_transient( 'wc_installing' );
 	}
 
