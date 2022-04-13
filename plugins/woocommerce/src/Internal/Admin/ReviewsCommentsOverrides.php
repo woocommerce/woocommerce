@@ -29,7 +29,22 @@ class ReviewsCommentsOverrides {
 	/**
 	 * Renders admin notices.
 	 */
-	public function display_notices() {}
+	public function display_notices() {
+		$screen = get_current_screen();
+
+		if ( empty( $screen ) || 'edit-comments' !== $screen->base ) {
+			return;
+		}
+
+		$this->display_reviews_moved_notice();
+	}
+
+	/**
+	 * Renders an admin notice informing the user that reviews were moved to a new page.
+	 */
+	public function display_reviews_moved_notice() {
+
+	}
 
 	/**
 	 * Gets the class instance.
