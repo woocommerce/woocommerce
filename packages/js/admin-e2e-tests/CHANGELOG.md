@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Add E2E tests to disabled welcome modal #32505
+
 -   Update test for payment task. #32467
 
 # 1.0.0
