@@ -10,5 +10,8 @@ export const merchant = {
 		await visitAdminPage( 'options-general.php' );
 		await page.select( 'select#WPLANG', language );
 		await page.click( 'input[type="submit"]' );
+		await page.waitForSelector( '#setting-error-settings_updated', {
+			visible: true,
+		} );
 	},
 };
