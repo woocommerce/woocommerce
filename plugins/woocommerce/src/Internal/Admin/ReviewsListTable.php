@@ -22,6 +22,24 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_user_can_edit_review = false;
 
 	/**
+	 * Memoization flag to determine if the current user can moderate reviews.
+	 *
+	 * @var bool
+	 */
+	private $current_user_can_moderate_reviews;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param array|string $args Array or string of arguments.
+	 */
+	public function __construct( $args = [] ) {
+		parent::__construct( $args );
+
+		$this->current_user_can_moderate_reviews = current_user_can( 'moderate_comments' );
+	}
+
+	/**
 	 * Sets the `$comment_status` global based on the current request.
 	 *
 	 * @return void
@@ -499,15 +517,10 @@ class ReviewsListTable extends WP_List_Table {
 	 * @global string $comment_status
 	 * @global string $comment_type
 	 *
-	 * @param string $which Unused.
+	 * @param string $which Position (top or bottom).
 	 */
 	protected function extra_tablenav( $which ) {
 		global $comment_status, $comment_type;
-		static $has_items;
-
-		if ( ! isset( $has_items ) ) {
-			$has_items = $this->has_items();
-		}
 
 		echo '<div class="alignleft actions">';
 
@@ -524,9 +537,7 @@ class ReviewsListTable extends WP_List_Table {
 			}
 		}
 
-		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $has_items
-			&& current_user_can( 'moderate_comments' )
-		) {
+		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $this->has_items() && $this->current_user_can_moderate_reviews ) {
 			wp_nonce_field( 'bulk-destroy', '_destroy_nonce' );
 			$title = ( 'spam' === $comment_status ) ? esc_attr__( 'Empty Spam', 'woocommerce' ) : esc_attr__( 'Empty Trash', 'woocommerce' );
 			submit_button( $title, 'apply', 'delete_all', false );
