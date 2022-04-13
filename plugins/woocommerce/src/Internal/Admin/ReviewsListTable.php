@@ -50,7 +50,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		// Overrides the comment global for properly rendering rows.
 		$comment           = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$the_comment_class = wp_get_comment_status( $comment->comment_ID ) ?: '';
+		$the_comment_class = (string) wp_get_comment_status( $comment->comment_ID );
 		$the_comment_class = implode( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
 		// Sets the post for the product in context.
 		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -121,9 +121,15 @@ class ReviewsListTable extends WP_List_Table {
 		$author_url = $this->get_item_author_url();
 		$author_url_display = $this->get_item_author_url_for_display( $author_url );
 
-		?>
-		<strong><?php comment_author(); ?></strong><br />
-		<?php
+		if ( get_option( 'show_avatars' ) ) {
+			$author_avatar = get_avatar( $item, 32, 'mystery' );
+		} else {
+			$author_avatar = '';
+		}
+
+		echo '<strong>' . $author_avatar; // // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		comment_author();
+		echo '</strong><br>';
 
 		if ( ! empty( $author_url ) ) :
 
