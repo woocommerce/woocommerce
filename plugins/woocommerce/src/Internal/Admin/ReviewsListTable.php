@@ -93,7 +93,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the checkbox column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
 		// @TODO Implement in MWC-5335 {agibson 2022-04-12}
@@ -248,7 +248,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the type column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
 		echo esc_html(
@@ -261,7 +261,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the rating column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_rating( $item ) {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
@@ -284,8 +284,8 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders any custom columns.
 	 *
-	 * @param object|array $item        Review or reply being rendered.
-	 * @param string       $column_name Name of the column being rendered.
+	 * @param WP_Comment $item        Review or reply being rendered.
+	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
