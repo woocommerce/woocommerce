@@ -18,6 +18,40 @@ use WP_Comment;
 class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Tests that can process the row output for a review or reply.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::single_row()
+	 */
+	public function test_single_row() {
+		$post_id = $this->factory()->post->create();
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_post_ID'  => $post_id,
+			]
+		);
+
+		$reviews_list_table = $this->get_reviews_list_table();
+
+		ob_start();
+
+		$reviews_list_table->single_row( $review );
+
+		$row_output = trim( ob_get_clean() );
+
+		$this->assertStringStartsWith( '<tr id="comment-' . $review->comment_ID . '"', $row_output );
+
+		foreach ( $reviews_list_table->get_columns() as $column_id => $column_name ) {
+			if ( 'cb' !== $column_id ) {
+				$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
+			} else {
+				$this->assertStringContainsString( '<th scope="row" class="check-column"></th>', $row_output );
+			}
+		}
+
+		$this->assertStringEndsWith( '</tr>', $row_output );
+	}
+
+	/**
 	 * Tests that can get the product reviews' page columns.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
