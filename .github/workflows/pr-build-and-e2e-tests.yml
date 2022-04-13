@@ -212,7 +212,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             PR_NUMBER: ${{ github.event.number }}
             RUN_ID: ${{ github.run_id }}
-            COMMIT_SHA: ${{ github.event.pull_number.head.sha }}
+            COMMIT_SHA: ${{ github.sha }}
         steps:
             - name: Publish API test report
               env:
