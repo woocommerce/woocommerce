@@ -232,7 +232,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the review or reply content.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_content()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_comment()
 	 *
 	 * @throws ReflectionException If the method does not exist.
 	 */
@@ -254,7 +254,25 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$column_content = ob_get_clean();
 
+		$this->assertStringNotContainsString( 'In reply to', $column_content );
 		$this->assertStringContainsString( '<div class="comment-text">Test review</div>', $column_content );
+
+		$reply = $this->factory()->comment->create_and_get(
+			[
+				'comment_content' => 'Test reply',
+				'comment_parent'  => $review->comment_ID,
+			]
+		);
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $reply ] );
+
+		$column_content = ob_get_clean();
+
+		$this->assertStringContainsString( 'In reply to', $column_content );
+		$this->assertStringContainsString( '<div class="comment-text">Test reply</div>', $column_content );
+
 	}
 
 	/**

@@ -108,16 +108,18 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	protected function column_comment( $item ) {
-
 		$in_reply_to = $this->get_in_reply_to_review_text( $item );
 
-		echo $in_reply_to ? $in_reply_to . '<br><br>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( $in_reply_to ) {
+			echo $in_reply_to . '<br><br>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 
-		?>
-		<div class="comment-text">
-			<?php echo get_comment_text( $item->comment_ID ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		</div>
-		<?php
+		printf(
+			'%1$s%2$s%3$s',
+			'<div class="comment-text">',
+			get_comment_text( $item->comment_ID ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			'</div>'
+		);
 	}
 
 	/**
