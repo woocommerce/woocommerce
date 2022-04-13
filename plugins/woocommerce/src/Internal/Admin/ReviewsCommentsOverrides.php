@@ -43,7 +43,27 @@ class ReviewsCommentsOverrides {
 	 * Renders an admin notice informing the user that reviews were moved to a new page.
 	 */
 	public function display_reviews_moved_notice() {
+		?>
 
+		<div class="notice notice-info is-dismissible">
+			<p>
+				<strong><?php esc_html_e( 'Product reviews have moved!', 'woocommerce' ); ?></strong>
+			</p>
+			<p>
+				<?php esc_html_e( 'Product reviews can now be managed from Products > Reviews.', 'woocommerce' ); ?>
+			</p>
+			<p class="submit">
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary">
+					<?php esc_html_e( 'Visit new location', 'woocommerce' ); ?>
+				</a>
+				<?php // @TODO: update the URL ?>
+				<a href="#" class="button-secondary">
+					<?php esc_html_e( 'Learn more about product reviews', 'woocommerce' ); ?>
+				</a>
+			</p>
+		</div>
+
+		<?php
 	}
 
 	/**
