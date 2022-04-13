@@ -50,7 +50,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		// Overrides the comment global for properly rendering rows.
 		$comment           = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$the_comment_class = wp_get_comment_status( $comment->comment_ID );
+		$the_comment_class = wp_get_comment_status( $comment->comment_ID ) ?: '';
 		$the_comment_class = implode( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
 		// Sets the post for the product in context.
 		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
