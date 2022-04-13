@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
-use Gettext\Generators\Generator;
+use Generator;
 use ReflectionClass;
 use ReflectionException;
 use WC_Helper_Product;
@@ -199,7 +199,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_sort_arguments */
-	public function provider_get_sort_arguments() : \Generator {
+	public function provider_get_sort_arguments() : Generator {
 		yield 'order by comment_author desc' => [
 			'comment_author',
 			'desc',
