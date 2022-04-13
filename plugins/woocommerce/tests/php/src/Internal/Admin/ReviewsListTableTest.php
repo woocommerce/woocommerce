@@ -241,6 +241,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$review = $this->factory()->comment->create_and_get(
 			[
 				'comment_content' => 'Test review',
+				'comment_parent'  => 0,
 			]
 		);
 
@@ -272,7 +273,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'In reply to', $column_content );
 		$this->assertStringContainsString( '<div class="comment-text">Test reply</div>', $column_content );
-
 	}
 
 	/**
@@ -287,7 +287,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_in_reply_to_review_text' );
 		$method->setAccessible( true );
 
-		$review = $this->factory()->comment->create_and_get();
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_parent' => 0,
+			]
+		);
 
 		$output = $method->invokeArgs( $list_table, [ $review ] );
 
