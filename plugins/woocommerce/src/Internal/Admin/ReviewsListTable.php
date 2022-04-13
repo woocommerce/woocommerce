@@ -130,9 +130,26 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Sets the `$comment_status` global based on the current request.
+	 *
+	 * @return void
+	 */
+	protected function set_review_status() {
+		global $comment_status;
+
+		$comment_status = sanitize_text_field( wp_unslash( $_REQUEST['comment_status'] ?? 'all' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		if ( ! in_array( $comment_status, [ 'all', 'moderated', 'approved', 'spam', 'trash' ], true ) ) {
+			$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
 	 * Prepares reviews for display.
 	 */
 	public function prepare_items() {
+
+		$this->set_review_status();
 
 		$comments = get_comments(
 			[
