@@ -102,7 +102,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the review column.
 	 *
+	 * @see WP_Comments_List_Table::column_comment() for consistency.
+	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_comment( $item ) {
 
@@ -147,6 +150,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @see WP_Comments_List_Table::column_author() for consistency.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_author( $item ) {
 		global $comment_status;
