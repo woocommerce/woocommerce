@@ -410,6 +410,43 @@ class DefaultPaymentGateways {
 				'category_other' => array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'FI' ),
 				'category_additional' => array(),
 			),
+			array(
+				'id'         => 'afterpay',
+				'title'      => __( 'Afterpay', 'woocommerce' ),
+				'content'    => __( 'Afterpay allows customers to receive products immediately and pay for purchases over four installments, always interest-free.', 'woocommerce' ),
+				'image'      => WC()->plugin_url() . '/assets/images/payment_methods/72x72/afterpay.png',
+				'plugins'    => array( 'afterpay-gateway-for-woocommerce' ),
+				'is_visible' => array(
+					self::get_rules_for_countries( array( 'US', 'CA' ) ),
+				),
+				'category_other' => array(),
+				'category_additional' => array( 'US', 'CA' ),
+			),
+			array(
+				'id'         => 'amazon_payments_advanced',
+				'title'      => __( 'Amazon Pay', 'woocommerce' ),
+				'content'    => __( 'Enable a familiar, fast checkout for hundreds of millions of active Amazon customers globally.', 'woocommerce' ),
+				'image'      => WC()->plugin_url() . '/assets/images/payment_methods/72x72/amazonpay.png',
+				'plugins'    => array( 'woocommerce-gateway-amazon-payments-advanced' ),
+				'is_visible' => array(
+					self::get_rules_for_countries( array( 'US', 'CA' ) ),
+				),
+				'category_other' => array(),
+				'category_additional' => array( 'US', 'CA' ),
+			),
+			array(
+				'id'         => 'affirm',
+				'title'      => __( 'Affirm', 'woocommerce' ),
+				'content'    => __( 'Affirm’s tailored Buy Now Pay Later programs remove price as a barrier, turning browsers into buyers, increasing average order value, and expanding your customer base.', 'woocommerce' ),
+				'image'      => WC()->plugin_url() . '/assets/images/payment_methods/72x72/affirm.png',
+				'plugins'    => array(),
+				'external_link' => 'https://woocommerce.com/products/woocommerce-gateway-affirm',
+				'is_visible' => array(
+					self::get_rules_for_countries( array( 'US', 'CA' ) ),
+				),
+				'category_other' => array(),
+				'category_additional' => array( 'US', 'CA' ),
+			),
 		);
 	}
 
