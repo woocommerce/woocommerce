@@ -127,6 +127,44 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can get the item author URL.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_item_author_url()
+	 * @dataProvider data_provider_test_get_item_author_url
+	 *
+	 * @param string $comment_author_url The comment author URL.
+	 * @param string $expected_author_url The expected author URL.
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_get_item_author_url( $comment_author_url, $expected_author_url ) {
+		global $comment;
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url' );
+		$method->setAccessible( true );
+
+		$the_comment = $this->factory()->comment->create_and_get(
+			[
+				'comment_author_url' => $comment_author_url,
+			]
+		);
+
+		$comment = $the_comment; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertSame( $expected_author_url, $method->invoke( $list_table ) );
+	}
+
+	/** @see test_get_item_author_url() */
+	public function data_provider_test_get_item_author_url() {
+		return [
+			'No URL' => [ '', '' ],
+			'Empty URL (http)' => [ 'http://', '' ],
+			'Empty URL (https)' => [ 'https://', '' ],
+			'Valid URL' => [ 'https://example.com', 'https://example.com' ],
+		];
+	}
+
+	/**
 	 * Tests that can get a review author url for display.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_item_author_url_for_display()
@@ -137,9 +175,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_get_item_author_url_for_display( $author_url, $author_url_for_display ) {
-
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url_for_display' );
+		$method->setAccessible( true );
 
 		$this->assertSame( $author_url_for_display, $method->invokeArgs( $list_table, [ $author_url ] ) );
 	}
@@ -152,8 +190,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'Empty URL' => [ '', '' ],
 			'Empty URL (http)' => [ 'http://', '' ],
 			'Empty URL (https)' => [ 'https://', '' ],
-			'Regular URL' => [ 'https://www.example.com', 'https://www.example.com' ],
-			'Very long URL' => [ $very_long_url, substr( $very_long_url, 0, 49 ) . '&hellip;' ],
+			'Regular URL' => [ 'https://www.example.com', 'www.example.com' ],
+			'Very long URL' => [ $very_long_url, substr( str_replace( 'https://', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
 		];
 	}
 
