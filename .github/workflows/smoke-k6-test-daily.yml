@@ -44,8 +44,12 @@ jobs:
           UPDATE_WC: 1
           DEFAULT_TIMEOUT_OVERRIDE: 120000
         run: |
-              pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
-              pwd
-              ls
-              ls tests/e2e
-              ls tests/e2e/plugins
+          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
+      - name: debugging
+        if: always()
+        working-directory: package/woocommerce/plugins/woocommerce 
+        run: |
+          pwd
+          ls
+          ls tests/e2e
+          ls tests/e2e/plugins
