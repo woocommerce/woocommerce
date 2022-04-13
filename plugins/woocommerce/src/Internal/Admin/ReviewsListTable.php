@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use WP_Comment;
+use WP_Comments_List_Table;
 use WP_List_Table;
 
 /**
@@ -110,6 +111,8 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the author column.
 	 *
+	 * @see WP_Comments_List_Table::column_author() for consistency.
+	 *
 	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_author( $item ) {
@@ -125,7 +128,7 @@ class ReviewsListTable extends WP_List_Table {
 		if ( ! empty( $author_url ) ) :
 
 			?>
-			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_attr( $author_url ); ?>"><?php echo esc_html( $author_url_display ); ?></a>
+			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_attr( $author_url ); ?>" rel="noopener noreferrer"><?php echo esc_html( $author_url_display ); ?></a>
 			<br>
 			<?php
 
@@ -134,8 +137,12 @@ class ReviewsListTable extends WP_List_Table {
 		if ( $this->current_user_can_edit ) :
 
 			if ( ! empty( $item->comment_author_email ) ) :
-				comment_author_email_link();
-				echo '<br>';
+				/** This filter is documented in wp-includes/comment-template.php */
+				$email = apply_filters( 'comment_email', $item->comment_author_email, $item );
+
+				if ( ! empty( $email ) && '@' !== $email ) {
+					printf( '<a href="%1$s">%2$s</a><br />', esc_url( 'mailto:' . $email ), esc_html( $email ) );
+				}
 			endif;
 
 			$link = add_query_arg(
@@ -183,10 +190,10 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	private function get_item_author_url_for_display( $author_url ) {
 
-		$author_url_display = str_replace( [ 'http://', 'https://' ], '', $author_url );
+		$author_url_display = untrailingslashit( preg_replace( '|^http(s)?://(www\.)?|i', '', $author_url ) );
 
 		if ( strlen( $author_url_display ) > 50 ) {
-			$author_url_display = substr( $author_url_display, 0, 49 ) . '&hellip;';
+			$author_url_display = wp_html_excerpt( $author_url_display, 49, '&hellip;' );
 		}
 
 		return $author_url_display;

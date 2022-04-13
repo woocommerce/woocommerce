@@ -190,8 +190,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'Empty URL' => [ '', '' ],
 			'Empty URL (http)' => [ 'http://', '' ],
 			'Empty URL (https)' => [ 'https://', '' ],
-			'Regular URL' => [ 'https://www.example.com', 'www.example.com' ],
-			'Very long URL' => [ $very_long_url, substr( str_replace( 'https://', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
+			'Regular URL' => [ 'https://www.example.com', 'example.com' ],
+			'Very long URL' => [ $very_long_url, substr( str_replace( 'https://www.', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
 		];
 	}
 
