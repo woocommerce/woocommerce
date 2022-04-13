@@ -170,7 +170,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	private function get_item_author_url() {
+	private function get_item_author_url() : string {
 
 		$author_url = get_comment_author_url();
 		$protocols = [ 'https://', 'http://' ];
