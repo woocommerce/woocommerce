@@ -394,15 +394,16 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return string
 	 */
 	protected function convert_status_string_to_comment_approved( string $status ) : string {
+		// These keys exactly match the database column.
+		if ( in_array( $status, [ 'spam', 'trash' ], true ) ) {
+			return $status;
+		}
+
 		switch ( $status ) {
 			case 'moderated':
 				return '0';
 			case 'approved':
 				return '1';
-			case 'spam':
-				return 'spam';
-			case 'trash':
-				return 'trash';
 			default:
 				return 'all';
 		}
