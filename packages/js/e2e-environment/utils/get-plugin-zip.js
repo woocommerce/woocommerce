@@ -20,11 +20,16 @@ const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
 	const fileName = fileUrl.split( '/' ).pop();
 	let filePath = path.join( savePath, fileName );
 
+	console.log( 'filePath in getRemotePluginZip before download is: ' + filePath );
+	console.log( 'fileUrl in getRemotePluginZip before download is: ' + fileUrl );
+
 	// First, download the zip file
 	await downloadZip( fileUrl, filePath, authorizationToken );
 
 	// Check for a nested zip and update the filepath
 	filePath = await checkNestedZip( filePath, savePath );
+
+	console.log( 'filePath in getRemotePluginZip after download is: ' + filePath );
 
 	return filePath;
 };

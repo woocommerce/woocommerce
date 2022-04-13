@@ -417,6 +417,8 @@ const merchant = {
 
 	   const uploader = await page.$( 'input[type=file]' );
 
+	   console.log( 'pluginFilePath in uploadAndActivatePlugin before upload is: ' + pluginFilePath );
+
 	   await uploader.uploadFile( pluginFilePath );
 
 	   // Manually update the button to `enabled` so we can submit the file
