@@ -21,6 +21,24 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_user_can_edit = false;
 
 	/**
+	 * Prepares reviews for display.
+	 *
+	 * @return void
+	 */
+	public function prepare_items() {
+
+		$comments = get_comments(
+			[
+				'post_type' => 'product',
+			]
+		);
+
+		update_comment_cache( $comments );
+
+		$this->items = $comments;
+	}
+
+	/**
 	 * Render a single row HTML.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
@@ -221,24 +239,6 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	protected function column_default( $item, $column_name ) {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
-	}
-
-	/**
-	 * Prepares reviews for display.
-	 *
-	 * @return void
-	 */
-	public function prepare_items() {
-
-		$comments = get_comments(
-			[
-				'post_type' => 'product',
-			]
-		);
-
-		update_comment_cache( $comments );
-
-		$this->items = $comments;
 	}
 
 }
