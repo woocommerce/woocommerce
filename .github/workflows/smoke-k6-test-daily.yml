@@ -1,5 +1,5 @@
 name: Smoke k6 test daily
-on: pull_request
+on: push
 jobs:
   update-woocommerce:
     name: Run k6 smoke test using trunk on ext site.
