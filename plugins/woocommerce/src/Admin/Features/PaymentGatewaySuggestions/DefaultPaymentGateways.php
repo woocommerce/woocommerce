@@ -28,13 +28,11 @@ class DefaultPaymentGateways {
 				'image'      => WC()->plugin_url() . '/assets/images/payment_methods/72x72/payfast.png',
 				'plugins'    => array( 'woocommerce-payfast-gateway' ),
 				'is_visible' => array(
-					(object) array(
-						'type'      => 'base_location_country',
-						'value'     => 'ZA',
-						'operation' => '=',
-					),
+					self::get_rules_for_countries( array( 'ZA', 'GH', 'NG' ) ),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'ZA', 'GH', 'NG' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'                      => 'stripe',
@@ -86,7 +84,6 @@ class DefaultPaymentGateways {
 							'GB',
 							'US',
 							'PR',
-							'UK',
 							'HU',
 							'SL',
 							'ID',
@@ -94,7 +91,7 @@ class DefaultPaymentGateways {
 					),
 					self::get_rules_for_cbd( false ),
 				),
-				'category_other' => array( 'US', 'CA', 'UK', 'AT', 'BE', 'BG', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AU', 'NZ', 'HK', 'JP', 'SG', 'ID', 'IN' ),
+				'category_other' => array( 'US', 'CA', 'AT', 'BE', 'BG', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AU', 'NZ', 'HK', 'JP', 'SG', 'ID', 'IN' ),
 				'category_additional' => array(),
 				'recommendation_priority' => 3,
 			),
@@ -108,6 +105,8 @@ class DefaultPaymentGateways {
 					self::get_rules_for_countries( array( 'ZA', 'GH', 'NG' ) ),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'ZA', 'GH', 'NG' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'         => 'kco',
@@ -119,6 +118,8 @@ class DefaultPaymentGateways {
 					self::get_rules_for_countries( array( 'SE', 'FI', 'NO' ) ),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'SE', 'FI', 'NO' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'         => 'klarna_payments',
@@ -140,7 +141,6 @@ class DefaultPaymentGateways {
 							'FR',
 							'IT',
 							'GB',
-							'UK',
 							'ES',
 							'FI',
 							'NO',
@@ -150,7 +150,7 @@ class DefaultPaymentGateways {
 					self::get_rules_for_cbd( false ),
 				),
 				'category_other' => array(),
-				'category_additional' => array( 'UK', 'AT', 'BE', 'CH', 'DK', 'ES', 'FI', 'FR', 'DE', 'GB', 'IT', 'NL', 'NO', 'PL', 'SE' ),
+				'category_additional' => array( 'AT', 'BE', 'CH', 'DK', 'ES', 'FI', 'FR', 'DE', 'GB', 'IT', 'NL', 'NO', 'PL', 'SE' ),
 			),
 			array(
 				'id'         => 'mollie_wc_gateway_banktransfer',
@@ -175,6 +175,8 @@ class DefaultPaymentGateways {
 						)
 					),
 				),
+				'category_other' => array( 'FR', 'DE', 'GB', 'AT', 'CH', 'ES', 'IT', 'PL', 'FI', 'NL', 'BE' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'                      => 'woo-mercado-pago-custom',
@@ -187,6 +189,8 @@ class DefaultPaymentGateways {
 				),
 				'recommendation_priority' => 2,
 				'is_local_partner'        => true,
+				'category_other' => array( 'AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'         => 'ppcp-gateway',
@@ -202,8 +206,8 @@ class DefaultPaymentGateways {
 					),
 					self::get_rules_for_cbd( false ),
 				),
-				'category_other' => array( 'US', 'CA', 'UK', 'AT', 'BE', 'BG', 'HR', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AR', 'CL', 'CO', 'EC', 'PE', 'UY', 'VE', 'AU', 'NZ', 'HK', 'JP', 'SG', 'CN', 'ID', 'ZA', 'NG', 'GH' ),
-				'category_additional' => array( 'US', 'CA', 'UK', 'AT', 'BE', 'BG', 'HR', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AR', 'CL', 'CO', 'EC', 'PE', 'UY', 'VE', 'AU', 'NZ', 'HK', 'JP', 'SG', 'CN', 'ID', 'IN', 'ZA', 'NG', 'GH' ),
+				'category_other' => array( 'US', 'CA', 'AT', 'BE', 'BG', 'HR', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AR', 'CL', 'CO', 'EC', 'PE', 'UY', 'VE', 'AU', 'NZ', 'HK', 'JP', 'SG', 'CN', 'ID', 'ZA', 'NG', 'GH' ),
+				'category_additional' => array( 'US', 'CA', 'AT', 'BE', 'BG', 'HR', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AR', 'CL', 'CO', 'EC', 'PE', 'UY', 'VE', 'AU', 'NZ', 'HK', 'JP', 'SG', 'CN', 'ID', 'IN', 'ZA', 'NG', 'GH' ),
 			),
 			array(
 				'id'         => 'cod',
@@ -349,6 +353,8 @@ class DefaultPaymentGateways {
 					),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'IN' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'         => 'payubiz',
@@ -364,6 +370,8 @@ class DefaultPaymentGateways {
 					),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'IN' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'         => 'eway',
@@ -393,13 +401,13 @@ class DefaultPaymentGateways {
 								self::get_rules_for_cbd( true ),
 							),
 							array(
-								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'UK', 'FI' ) ),
+								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'FI' ) ),
 								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
 							),
 						),
 					),
 				),
-				'category_other' => array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'UK', 'FI' ),
+				'category_other' => array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'FI' ),
 				'category_additional' => array(),
 			),
 		);
