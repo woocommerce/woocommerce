@@ -31,6 +31,8 @@ const paymentGatewaySuggestions = [
 		plugins: [ 'woocommerce-gateway-stripe' ],
 		is_visible: true,
 		recommendation_priority: 3,
+		category_other: [ 'US' ],
+		category_additional: [],
 	},
 	{
 		id: 'ppcp-gateway',
@@ -41,6 +43,8 @@ const paymentGatewaySuggestions = [
 			'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 		plugins: [ 'woocommerce-paypal-payments' ],
 		is_visible: true,
+		category_other: [ 'US' ],
+		category_additional: [ 'US' ],
 	},
 	{
 		id: 'cod',
@@ -212,6 +216,48 @@ describe( 'PaymentGatewaySuggestions', () => {
 
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
+
+	test( 'should show "category_additional" gateways only after WCPay is set up', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions,
+			installedPaymentGateways: [
+				{
+					id: 'woocommerce_payments',
+					title: 'WooCommerce Payments',
+					plugins: [ 'woocommerce-payments' ],
+					is_visible: true,
+					needs_setup: false,
+				},
+			],
+			countryCode: 'US',
+		} ) );
+
+		const { container } = render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		const paymentTitleElements = container.querySelectorAll(
+			'.woocommerce-task-payment__title'
+		);
+
+		const paymentTitles = Array.from( paymentTitleElements ).map(
+			( e ) => e.textContent
+		);
+
+		expect( paymentTitles ).toEqual( [
+			'PayPal Payments',
+			'Cash on delivery',
+			'Direct bank transfer',
+		] );
+	} );
+
 	test( 'should record event correctly when finish setup is clicked', () => {
 		const onComplete = jest.fn();
 		const query = {};
