@@ -50,7 +50,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		// Overrides the comment global for properly rendering rows.
 		$comment           = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$the_comment_class = wp_get_comment_status( $comment->comment_ID );
+		$the_comment_class = (string) wp_get_comment_status( $comment->comment_ID );
 		$the_comment_class = implode( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
 		// Sets the post for the product in context.
 		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -93,7 +93,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the checkbox column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
 		// @TODO Implement in MWC-5335 {agibson 2022-04-12}
@@ -121,14 +121,20 @@ class ReviewsListTable extends WP_List_Table {
 		$author_url = $this->get_item_author_url();
 		$author_url_display = $this->get_item_author_url_for_display( $author_url );
 
-		?>
-		<strong><?php comment_author(); ?></strong><br />
-		<?php
+		if ( get_option( 'show_avatars' ) ) {
+			$author_avatar = get_avatar( $item, 32, 'mystery' );
+		} else {
+			$author_avatar = '';
+		}
+
+		echo '<strong>' . $author_avatar; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		comment_author();
+		echo '</strong><br>';
 
 		if ( ! empty( $author_url ) ) :
 
 			?>
-			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_attr( $author_url ); ?>" rel="noopener noreferrer"><?php echo esc_html( $author_url_display ); ?></a>
+			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_url( $author_url ); ?>" rel="noopener noreferrer"><?php echo esc_html( $author_url_display ); ?></a>
 			<br>
 			<?php
 
@@ -147,7 +153,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$link = add_query_arg(
 				[
-					's'    => get_comment_author_IP( $item->comment_ID ),
+					's'    => urlencode( get_comment_author_IP( $item->comment_ID ) ),
 					'page' => Reviews::MENU_SLUG,
 					'mode' => 'detail',
 				],
@@ -170,7 +176,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	private function get_item_author_url() {
+	private function get_item_author_url() : string {
 
 		$author_url = get_comment_author_url();
 		$protocols = [ 'https://', 'http://' ];
@@ -188,7 +194,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string $author_url The review or reply author URL (raw).
 	 * @return string
 	 */
-	private function get_item_author_url_for_display( $author_url ) {
+	private function get_item_author_url_for_display( $author_url ) : string {
 
 		$author_url_display = untrailingslashit( preg_replace( '|^http(s)?://(www\.)?|i', '', $author_url ) );
 
@@ -202,10 +208,39 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the "submitted on" column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * Note that the output is consistent with {@see WP_Comments_List_Table::column_date()}.
+	 *
+	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_date( $item ) {
-		// @TODO Implement in MWC-5338 {agibson 2022-04-12}
+
+		$submitted = sprintf(
+			/* translators: 1 - Product review date, 2: Product review time. */
+			__( '%1$s at %2$s', 'woocommerce' ),
+			/* translators: Review date format. See https://www.php.net/manual/datetime.format.php */
+			get_comment_date( __( 'Y/m/d', 'woocommerce' ), $item ),
+			/* translators: Review time format. See https://www.php.net/manual/datetime.format.php */
+			get_comment_date( __( 'g:i a', 'woocommerce' ), $item )
+		);
+
+		?>
+		<div class="submitted-on">
+			<?php
+
+			if ( 'approved' === wp_get_comment_status( $item ) && ! empty( $item->comment_post_ID ) ) :
+				printf(
+					'<a href="%1$s">%2$s</a>',
+					esc_url( get_comment_link( $item ) ),
+					esc_html( $submitted )
+				);
+			else :
+				echo esc_html( $submitted );
+			endif;
+
+			?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -251,7 +286,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the type column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
 		echo esc_html(
@@ -264,7 +299,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the rating column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_rating( $item ) {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
@@ -287,8 +322,8 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders any custom columns.
 	 *
-	 * @param object|array $item        Review or reply being rendered.
-	 * @param string       $column_name Name of the column being rendered.
+	 * @param WP_Comment $item        Review or reply being rendered.
+	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
