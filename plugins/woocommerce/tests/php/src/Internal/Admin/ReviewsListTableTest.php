@@ -87,6 +87,46 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_rating()
+	 *
+	 * @dataProvider data_provider_test_column_rating()
+	 * @param string $meta_value The comment meta value for rating.
+	 * @param string $expected_output The expected output.
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_rating( $meta_value, $expected_output ) {
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
+		$method->setAccessible( true );
+
+		$review = $this->get_test_review();
+
+		if ( ! empty( $meta_value ) ) {
+			update_comment_meta( $review->comment_ID, 'rating', $meta_value );
+		}
+
+		ob_start();
+		$method->invokeArgs( $list_table, [ $review ] );
+		$output = trim( ob_get_clean() );
+
+		$this->assertSame( $expected_output, $output );
+	}
+
+	/** @see test_column_rating() */
+	public function data_provider_test_column_rating() {
+		return [
+			'no rating' => [ '', '' ],
+			'1 star' => [ '1', '<span aria-label="1 out of 5">&#9733;&#9734;&#9734;&#9734;&#9734;</span>' ],
+			'2 stars' => [ '2', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ],
+			'3 stars' => [ '3', '<span aria-label="3 out of 5">&#9733;&#9733;&#9733;&#9734;&#9734;</span>' ],
+			'4 stars' => [ '4', '<span aria-label="4 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span>' ],
+			'5 stars' => [ '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ],
+			'2.5 stars (rounds down)' => [ '2.5', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ],
+		];
+	}
+
+	/**
 	 * Tests that can get a review author url for display.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_item_author_url_for_display()
@@ -145,4 +185,5 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		return ! empty( $reviews ) ? current( $reviews ) : null;
 	}
+
 }
