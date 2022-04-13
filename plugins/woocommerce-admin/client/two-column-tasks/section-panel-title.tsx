@@ -35,16 +35,15 @@ export const SectionPanelTitle: React.FC< SectionPanelTitleProps > = ( {
 	const uncompletedTasksCount = tasks.filter(
 		( task ) => ! task.isComplete && section.tasks.includes( task.id )
 	).length;
+	const isComplete = section.isComplete || uncompletedTasksCount === 0;
 
 	return (
 		<>
 			<Text variant="title.small" size="20" lineHeight="28px">
 				{ section.title }
 			</Text>
-			{ ! section.isComplete && (
-				<Badge count={ uncompletedTasksCount } />
-			) }
-			{ section.isComplete && (
+			{ ! isComplete && <Badge count={ uncompletedTasksCount } /> }
+			{ isComplete && (
 				<div className="woocommerce-task__icon">
 					<Icon icon={ check } />
 				</div>
