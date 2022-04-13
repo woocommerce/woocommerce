@@ -11,6 +11,11 @@ namespace Automattic\WooCommerce\Internal\Admin;
 class Reviews {
 
 	/**
+	 * Admin page identifier.
+	 */
+	const MENU_SLUG = 'product-reviews';
+
+	/**
 	 * Class instance.
 	 *
 	 * @var Reviews|null instance
@@ -62,7 +67,7 @@ class Reviews {
 			__( 'Reviews', 'woocommerce' ),
 			__( 'Reviews', 'woocommerce' ),
 			'moderate_comments',
-			'product-reviews',
+			static::MENU_SLUG,
 			[ $this, 'render_reviews_list_table' ]
 		);
 
