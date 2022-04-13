@@ -45,11 +45,14 @@ class ReviewsListTable extends WP_List_Table {
 
 		$this->set_review_status();
 
-		$comments = get_comments(
-			[
-				'post_type' => 'product',
-			]
-		);
+		$args = [
+			'post_type' => 'product',
+		];
+
+		// Include the order & orderby arguments.
+		$args = wp_parse_args( $this->get_sort_arguments(), $args );
+
+		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
 
@@ -135,6 +138,57 @@ class ReviewsListTable extends WP_List_Table {
 			'response' => __( 'Product', 'woocommerce' ),
 			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 		];
+	}
+
+	/**
+	 * Returns a list of sortable columns. Key is the column ID and value is which database column
+	 * we perform the sorting on. (`rating` uses a unique key instead, as that requires sorting
+	 * by meta value.)
+	 *
+	 * @return array
+	 */
+	protected function get_sortable_columns() {
+		return [
+			'author'   => 'comment_author',
+			'response' => 'comment_post_ID',
+			'date'     => 'comment_date_gmt',
+			'type'     => 'comment_type',
+			'rating'   => 'rating',
+		];
+	}
+
+	/**
+	 * Builds the `orderby` and `order` arguments based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_sort_arguments() : array {
+		$orderby = sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ?? '' ) );
+		$order   = sanitize_text_field( wp_unslash( $_REQUEST['order'] ?? '' ) );
+
+		$args = [];
+
+		if ( ! in_array( $orderby, $this->get_sortable_columns(), true ) ) {
+			$orderby = 'comment_date_gmt';
+		}
+
+		// If ordering by "rating", then we need to adjust to sort by meta value.
+		if ( 'rating' === $orderby ) {
+			$orderby          = 'meta_value_num';
+			$args['meta_key'] = 'rating';
+		}
+
+		if ( ! in_array( strtolower( $order ), [ 'asc', 'desc' ], true ) ) {
+			$order = 'desc';
+		}
+
+		return wp_parse_args(
+			[
+				'orderby' => $orderby,
+				'order'   => strtolower( $order ),
+			],
+			$args
+		);
 	}
 
 	/**
