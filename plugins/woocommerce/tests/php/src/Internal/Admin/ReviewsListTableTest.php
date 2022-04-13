@@ -230,6 +230,34 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output the review or reply content.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_content()
+	 *
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_comment() {
+
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_content' => 'Test review',
+			]
+		);
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_comment' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $review ] );
+
+		$column_content = ob_get_clean();
+
+		$this->assertStringContainsString( '<div class="comment-text">Test review</div>', $column_content );
+	}
+
+	/**
 	 * Returns a new instance of the {@see ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable
