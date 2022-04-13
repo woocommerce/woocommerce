@@ -41,6 +41,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can get the primary column name.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_primary_column_name()
+	 *
+	 * @throws ReflectionException
 	 */
 	public function test_get_primary_column_name() {
 		$list_table = $this->get_reviews_list_table();
