@@ -368,6 +368,29 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_filters()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_status_filters() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_filters' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			[
+				'all'       => 'All',
+				'moderated' => 'Pending',
+				'approved'  => 'Approved',
+				'spam'      => 'Spam',
+				'trash'     => 'Trash',
+			],
+			$method->invoke( $list_table )
+		);
+	}
+
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::convert_status_to_query_value()
 	 * @dataProvider provider_convert_status_string_to_comment_approved
 	 *

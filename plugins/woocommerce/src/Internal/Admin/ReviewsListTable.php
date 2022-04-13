@@ -305,11 +305,11 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	protected function get_status_filters() : array {
 		return [
-			'all' => _x( 'All', 'product reviews', 'woocommerce' ),
+			'all'       => _x( 'All', 'product reviews', 'woocommerce' ),
 			'moderated' => _x( 'Pending', 'product reviews', 'woocommerce' ),
-			'approved' => _x( 'Approved', 'product reviews', 'woocommerce' ),
-			'spam' => _x( 'Spam', 'product reviews', 'woocommerce' ),
-			'trash' => _x( 'Trash', 'product reviews', 'woocommerce' ),
+			'approved'  => _x( 'Approved', 'product reviews', 'woocommerce' ),
+			'spam'      => _x( 'Spam', 'product reviews', 'woocommerce' ),
+			'trash'     => _x( 'Trash', 'product reviews', 'woocommerce' ),
 		];
 	}
 
