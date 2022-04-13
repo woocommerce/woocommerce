@@ -130,7 +130,7 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	private function get_in_reply_to_review_text( $reply ) {
 
-		$review = get_comment( $reply->comment_parent );
+		$review = $reply->comment_parent ? get_comment( $reply->comment_parent ) : null;
 
 		if ( ! $review ) {
 			return '';
