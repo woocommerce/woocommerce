@@ -258,6 +258,35 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can get the in reply to review text message for the review content column.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_in_reply_to_review_text()
+	 *
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_get_in_reply_to_review_text() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_in_reply_to_review_text' );
+		$method->setAccessible( true );
+
+		$review = $this->factory()->comment->create_and_get();
+
+		$output = $method->invokeArgs( $list_table, [ $review ] );
+
+		$this->assertSame( '', $output );
+
+		$reply = $this->factory()->comment->create_and_get(
+			[
+				'comment_parent' => $review->comment_ID,
+			]
+		);
+
+		$output = $method->invokeArgs( $list_table, [ $reply ] );
+
+		$this->assertSame( 'In reply to <a href="' . get_comment_link( $review ) . '">' . get_comment_author( $review ) . '</a>.', $output );
+	}
+
+	/**
 	 * Returns a new instance of the {@see ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable
