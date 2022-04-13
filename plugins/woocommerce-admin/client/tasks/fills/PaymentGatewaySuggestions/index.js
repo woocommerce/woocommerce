@@ -7,6 +7,7 @@ import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useMemo, useCallback, useEffect } from '@wordpress/element';
@@ -24,6 +25,7 @@ import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
 import { Toggle } from './components/Toggle/Toggle';
 import { WCPaySuggestion } from './components/WCPay';
 import { getPluginSlug } from '~/utils';
+import { getCountryCode } from '~/dashboard/utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
 
@@ -40,7 +42,10 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		paymentGatewaySuggestions,
 		installedPaymentGateways,
 		isResolving,
+		countryCode,
 	} = useSelect( ( select ) => {
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: settings = {} } = getSettings( 'general' );
 		return {
 			getPaymentGateway: select( PAYMENT_GATEWAYS_STORE_NAME )
 				.getPaymentGateway,
@@ -54,6 +59,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			paymentGatewaySuggestions: select(
 				ONBOARDING_STORE_NAME
 			).getPaymentGatewaySuggestions(),
+			countryCode: getCountryCode( settings.woocommerce_default_country ),
 		};
 	}, [] );
 
@@ -185,6 +191,37 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		return gateway;
 	}, [ isResolving, query, paymentGateways ] );
 
+	const isWCPayOrOtherCategory = useMemo( () => {
+		for ( const [ , gateway ] of paymentGateways.entries() ) {
+			if ( ! gateway.installed || gateway.needsSetup ) {
+				continue;
+			}
+
+			if (
+				gateway.plugins?.length === 1 &&
+				gateway.plugins[ 0 ] === 'woocommerce-payments'
+			) {
+				return true;
+			}
+
+			if (
+				gateway.category_other &&
+				gateway.category_other.indexOf( countryCode ) !== -1
+			) {
+				return true;
+			}
+		}
+		return false;
+	}, [ countryCode, paymentGateways ] );
+
+	const isEligibleWCPay =
+		Array.from( paymentGateways.values() ).findIndex( ( gateway ) => {
+			return (
+				gateway.plugins?.length === 1 &&
+				gateway.plugins[ 0 ] === 'woocommerce-payments'
+			);
+		} ) !== -1;
+
 	const [ wcPayGateway, offlineGateways, additionalGateways ] = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
@@ -213,6 +250,22 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							wcPay.push( gateway );
 						} else if ( gateway.is_offline ) {
 							offline.push( gateway );
+						} else if ( gateway.enabled ) {
+							// Enabled gateways should be ignored.
+						} else if (
+							isEligibleWCPay &&
+							isWCPayOrOtherCategory
+						) {
+							// If WCPay or "other" gateway is enabled in an WCPay-eligible country, only
+							// allow to list "additional" gateways or the ones without it defined.
+							if (
+								gateway.category_additional &&
+								gateway.category_additional.indexOf(
+									countryCode
+								) !== -1
+							) {
+								additional.push( gateway );
+							}
 						} else {
 							additional.push( gateway );
 						}
@@ -221,10 +274,13 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 					},
 					[ [], [], [] ]
 				),
-		[ paymentGateways ]
+		[
+			countryCode,
+			isEligibleWCPay,
+			isWCPayOrOtherCategory,
+			paymentGateways,
+		]
 	);
-
-	const isEligibleWCPay = !! wcPayGateway.length;
 
 	const trackSeeMore = () => {
 		recordEvent( 'tasklist_payment_see_more', {} );
@@ -254,23 +310,24 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const additionalSection = !! additionalGateways.length && (
 		<List
 			heading={
-				isEligibleWCPay
-					? null
-					: __( 'Choose a payment provider', 'woocommerce' )
+				! wcPayGateway.length &&
+				__( 'Choose a payment provider', 'woocommerce' )
 			}
 			recommendation={ recommendation }
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
-				<Button
-					href={ SEE_MORE_LINK }
-					target="_blank"
-					onClick={ trackSeeMore }
-					isTertiary
-				>
-					{ __( 'See more', 'woocommerce' ) }
-					<ExternalIcon size={ 18 } />
-				</Button>
+				! isWCPayOrOtherCategory && (
+					<Button
+						href={ SEE_MORE_LINK }
+						target="_blank"
+						onClick={ trackSeeMore }
+						isTertiary
+					>
+						{ __( 'See more', 'woocommerce' ) }
+						<ExternalIcon size={ 18 } />
+					</Button>
+				)
 			}
 		></List>
 	);
@@ -288,7 +345,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		<div className="woocommerce-task-payments">
 			{ ! paymentGateways.size && <ListPlaceholder /> }
 
-			{ isEligibleWCPay ? (
+			{ wcPayGateway.length ? (
 				<>
 					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
 					<Toggle
