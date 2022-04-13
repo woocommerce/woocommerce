@@ -191,7 +191,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		return gateway;
 	}, [ isResolving, query, paymentGateways ] );
 
-	const isWCPayOrOtherCategory = useMemo( () => {
+	const isWCPayOrOtherCategoryDoneSetup = useMemo( () => {
 		for ( const [ , gateway ] of paymentGateways.entries() ) {
 			if ( ! gateway.installed || gateway.needsSetup ) {
 				continue;
@@ -252,12 +252,12 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							offline.push( gateway );
 						} else if ( gateway.enabled ) {
 							// Enabled gateways should be ignored.
-						} else if (
-							isEligibleWCPay &&
-							isWCPayOrOtherCategory
-						) {
+						} else if ( ! isEligibleWCPay ) {
+							// When WCPay-ineligible, just show all gateways.
+							additional.push( gateway );
+						} else if ( isWCPayOrOtherCategoryDoneSetup ) {
 							// If WCPay or "other" gateway is enabled in an WCPay-eligible country, only
-							// allow to list "additional" gateways or the ones without it defined.
+							// allow to list "additional" gateways.
 							if (
 								gateway.category_additional &&
 								gateway.category_additional.indexOf(
@@ -266,7 +266,11 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							) {
 								additional.push( gateway );
 							}
-						} else {
+						} else if (
+							gateway.category_other &&
+							gateway.category_other.indexOf( countryCode ) !== -1
+						) {
+							// When nothing is set up and eligible for WCPay, only show "other" gateways.
 							additional.push( gateway );
 						}
 
@@ -277,7 +281,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[
 			countryCode,
 			isEligibleWCPay,
-			isWCPayOrOtherCategory,
+			isWCPayOrOtherCategoryDoneSetup,
 			paymentGateways,
 		]
 	);
@@ -317,7 +321,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
-				! isWCPayOrOtherCategory && (
+				! isWCPayOrOtherCategoryDoneSetup && (
 					<Button
 						href={ SEE_MORE_LINK }
 						target="_blank"

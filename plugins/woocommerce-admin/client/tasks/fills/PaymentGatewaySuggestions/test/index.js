@@ -86,6 +86,8 @@ const paymentGatewaySuggestions = [
 			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/eway.png',
 		plugins: [ 'woocommerce-gateway-eway' ],
 		is_visible: true,
+		category_other: [ 'US' ],
+		category_additional: [ 'US' ],
 	},
 ];
 
@@ -253,6 +255,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 
 		expect( paymentTitles ).toEqual( [
 			'PayPal Payments',
+			'Eway',
 			'Cash on delivery',
 			'Direct bank transfer',
 		] );
@@ -300,6 +303,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions,
 			installedPaymentGateways: [],
+			countryCode: 'US',
 		} ) );
 
 		render(
@@ -312,13 +316,16 @@ describe( 'PaymentGatewaySuggestions', () => {
 		fireEvent.click( screen.getByText( 'Other payment methods' ) );
 
 		// By default it's hidden, so when toggle it shows.
-		expect( recordEvent ).toHaveBeenCalledWith(
+		// Second call after "tasklist_payments_options".
+		expect(
+			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
+		).toEqual( [
 			'tasklist_payment_show_toggle',
 			{
 				toggle: 'show',
 				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "other payment methods".
-			}
-		);
+			},
+		] );
 	} );
 
 	test( 'should record event correctly when see more is clicked', () => {
@@ -329,6 +336,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions,
 			installedPaymentGateways: [],
+			countryCode: 'US',
 		} ) );
 
 		render(
@@ -340,10 +348,8 @@ describe( 'PaymentGatewaySuggestions', () => {
 
 		fireEvent.click( screen.getByText( 'Other payment methods' ) );
 		fireEvent.click( screen.getByText( 'See more' ) );
-
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'tasklist_payment_see_more',
-			{}
-		);
+		expect(
+			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
+		).toEqual( [ 'tasklist_payment_see_more', {} ] );
 	} );
 } );
