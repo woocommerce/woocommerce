@@ -128,7 +128,7 @@ class ReviewsListTable extends WP_List_Table {
 		if ( ! empty( $author_url ) ) :
 
 			?>
-			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_attr( $author_url ); ?>" rel="noopener noreferrer"><?php echo esc_html( $author_url_display ); ?></a>
+			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_url( $author_url ); ?>" rel="noopener noreferrer"><?php echo esc_html( $author_url_display ); ?></a>
 			<br>
 			<?php
 
