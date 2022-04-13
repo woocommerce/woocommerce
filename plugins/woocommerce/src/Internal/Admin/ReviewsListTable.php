@@ -205,6 +205,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * Note that the output is consistent with {@see WP_Comments_List_Table::column_date()}.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_date( $item ) {
 
