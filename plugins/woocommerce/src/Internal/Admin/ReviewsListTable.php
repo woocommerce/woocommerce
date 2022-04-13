@@ -226,7 +226,7 @@ class ReviewsListTable extends WP_List_Table {
 		<div class="response-links">
 			<?php
 
-			if ( current_user_can( 'edit_post', $product_post->ID ) ) :
+			if ( current_user_can( 'edit_product', $product_post->ID ) ) :
 				$post_link  = "<a href='" . get_edit_post_link( $product_post->ID ) . "' class='comments-edit-item-link'>";
 				$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
 			else :
