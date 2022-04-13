@@ -24,7 +24,7 @@ export const Action = ( {
 	markConfigured,
 	onSetUp = () => {},
 	onSetupCallback,
-	setupButtonText = __( 'Set up', 'woocommerce' ),
+	setupButtonText = __( 'Get started', 'woocommerce' ),
 } ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
 

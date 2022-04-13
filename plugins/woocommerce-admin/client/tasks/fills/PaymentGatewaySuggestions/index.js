@@ -13,16 +13,22 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath } from '@woocommerce/navigation';
+import { Button } from '@wordpress/components';
+import ExternalIcon from 'gridicons/dist/external';
 
 /**
  * Internal dependencies
  */
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
+import { Toggle } from './components/Toggle/Toggle';
 import { WCPaySuggestion } from './components/WCPay';
 import { getPluginSlug } from '~/utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
+
+const SEE_MORE_LINK =
+	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 
 const comparePaymentGatewaysByPriority = ( a, b ) =>
 	a.recommendation_priority - b.recommendation_priority;
@@ -179,7 +185,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		return gateway;
 	}, [ isResolving, query, paymentGateways ] );
 
-	const [ wcPayGateway, enabledGateways, additionalGateways ] = useMemo(
+	const [ wcPayGateway, offlineGateways, additionalGateways ] = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
 				.sort( ( a, b ) => {
@@ -196,7 +202,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				} )
 				.reduce(
 					( all, gateway ) => {
-						const [ wcPay, enabled, additional ] = all;
+						const [ wcPay, offline, additional ] = all;
 
 						// WCPay is handled separately when not installed and configured
 						if (
@@ -205,8 +211,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							! ( gateway.installed && ! gateway.needsSetup )
 						) {
 							wcPay.push( gateway );
-						} else if ( gateway.enabled ) {
-							enabled.push( gateway );
+						} else if ( gateway.is_offline ) {
+							offline.push( gateway );
 						} else {
 							additional.push( gateway );
 						}
@@ -217,6 +223,20 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				),
 		[ paymentGateways ]
 	);
+
+	const isEligibleWCPay = !! wcPayGateway.length;
+
+	const trackSeeMore = () => {
+		recordEvent( 'tasklist_payment_see_more', {} );
+	};
+
+	const trackToggle = ( isShow ) => {
+		recordEvent( 'tasklist_payment_show_toggle', {
+			toggle: isShow ? 'hide' : 'show',
+			payment_method_count:
+				offlineGateways.length + additionalGateways.length,
+		} );
+	};
 
 	if ( query.id && ! currentGateway ) {
 		return <SetupPlaceholder />;
@@ -231,32 +251,59 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		);
 	}
 
+	const additionalSection = !! additionalGateways.length && (
+		<List
+			heading={
+				isEligibleWCPay
+					? null
+					: __( 'Choose a payment provider', 'woocommerce' )
+			}
+			recommendation={ recommendation }
+			paymentGateways={ additionalGateways }
+			markConfigured={ markConfigured }
+			footerLink={
+				<Button
+					href={ SEE_MORE_LINK }
+					target="_blank"
+					onClick={ trackSeeMore }
+					isTertiary
+				>
+					{ __( 'See more', 'woocommerce' ) }
+					<ExternalIcon size={ 18 } />
+				</Button>
+			}
+		></List>
+	);
+
+	const offlineSection = !! offlineGateways.length && (
+		<List
+			heading={ __( 'Offline payment methods', 'woocommerce' ) }
+			recommendation={ recommendation }
+			paymentGateways={ offlineGateways }
+			markConfigured={ markConfigured }
+		/>
+	);
+
 	return (
 		<div className="woocommerce-task-payments">
 			{ ! paymentGateways.size && <ListPlaceholder /> }
 
-			{ !! wcPayGateway.length && (
-				<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
-			) }
-
-			{ !! enabledGateways.length && (
-				<List
-					heading={ __( 'Enabled payment gateways', 'woocommerce' ) }
-					recommendation={ recommendation }
-					paymentGateways={ enabledGateways }
-				/>
-			) }
-
-			{ !! additionalGateways.length && (
-				<List
-					heading={ __(
-						'Additional payment gateways',
-						'woocommerce'
-					) }
-					recommendation={ recommendation }
-					paymentGateways={ additionalGateways }
-					markConfigured={ markConfigured }
-				/>
+			{ isEligibleWCPay ? (
+				<>
+					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
+					<Toggle
+						heading={ __( 'Other payment methods', 'woocommerce' ) }
+						onToggle={ trackToggle }
+					>
+						{ additionalSection }
+						{ offlineSection }
+					</Toggle>
+				</>
+			) : (
+				<>
+					{ additionalSection }
+					{ offlineSection }
+				</>
 			) }
 		</div>
 	);
