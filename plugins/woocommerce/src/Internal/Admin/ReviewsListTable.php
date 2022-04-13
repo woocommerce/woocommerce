@@ -209,11 +209,11 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_date( $item ) {
 
 		$submitted = sprintf(
-			/* translators: 1 - Comment date, 2: Comment time. */
+			/* translators: 1 - Product review date, 2: Product review time. */
 			__( '%1$s at %2$s', 'woocommerce' ),
-			/* translators: Comment date format. See https://www.php.net/manual/datetime.format.php */
+			/* translators: Review date format. See https://www.php.net/manual/datetime.format.php */
 			get_comment_date( __( 'Y/m/d', 'woocommerce' ), $item ),
-			/* translators: Comment time format. See https://www.php.net/manual/datetime.format.php */
+			/* translators: Review time format. See https://www.php.net/manual/datetime.format.php */
 			get_comment_date( __( 'g:i a', 'woocommerce' ), $item )
 		);
 
