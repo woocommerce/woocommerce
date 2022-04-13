@@ -30,6 +30,15 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the name of the default primary column.
+	 *
+	 * @return string Name of the primary colum.
+	 */
+	protected function get_primary_column_name() {
+		return 'comment';
+	}
+
+	/**
 	 * Renders the checkbox column.
 	 *
 	 * @param object|array $item Review or reply being rendered.
@@ -80,7 +89,11 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
-		// @TODO Implement in MWC-5334 {agibson 2022-04-12}
+		echo esc_html(
+			'review' === $item->comment_type ?
+			'&#9734;&nbsp;' . __( 'Review', 'woocommerce' ) :
+			__( 'Reply', 'woocommerce' )
+		);
 	}
 
 	/**
@@ -89,7 +102,21 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_rating( $item ) {
-		// @TODO Implement in MWC-5333 {agibson 2022-04-12}
+		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
+
+		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
+			$rating = (int) $rating;
+			$accessibility_label = sprintf(
+				/* translators: 1: number representing a rating */
+				__( '%1$s out of 5', 'woocommerce' ),
+				$rating
+			);
+			$stars = str_repeat( '&#9733;', $rating );
+			$stars .= str_repeat( '&#9734;', 5 - $rating );
+			?>
+			<span aria-label="<?php echo esc_attr( $accessibility_label ); ?>"><?php echo esc_html( $stars ); ?></span>
+			<?php
+		}
 	}
 
 	/**
