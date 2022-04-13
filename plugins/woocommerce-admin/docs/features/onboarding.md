@@ -110,14 +110,3 @@ Logic for the Calypso flows are gated behind two separate [Calypso feature flags
 ### Testing
 
 If you are running the development version of WooCommerce Admin, and have [`WP_DEBUG`](https://codex.wordpress.org/WP_DEBUG) set to `true`, two Calypso connection buttons are displayed under the `WooCommerce > Settings > Help > Setup Wizard` menu, making it easier to access and test the flows.
-
-## Building the onboarding feature plugin
-
-The `onboarding` feature flag is enabled in the main WooCommerce Admin plugin build. That means the published version of the plugin on WordPress.org contains the onboarding feature, but it is visually off by default. See the "enable onboarding" section above.
-
-Sometimes, it may be necessary to generate a separate build of the plugin between public releases for internal testing or debugging. This can be done using the [building custom plugin builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/docs/features/feature-flags.md#building-custom-plugin-builds) feature of our build system.
-
-* Switch to the latest `main` branch and pull down any changes
-* Run `pnpm run build:release -- --slug onboarding --features '{"onboarding":true}'`
-* A special `woocommerce-admin-onboarding.zip` release will be generated, containing the latest onboarding code
-* Make sure to follow the directions in the "enabling onboarding" section above to properly use the build

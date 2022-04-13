@@ -7,24 +7,14 @@ We currently support the following environments:
 | Environment | Description                                                                                                                                                            |
 |-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | development | Development - All features should be enabled in development. These flags are also used in both JS and PHP tests. Ran using `pnpm start`.                                |
-| plugin      | Plugin - A packaged release of the featured plugin, for GitHub WordPress.org. Ran using `pnpm run-script build:release`. |                                    |
-| core        | Core - assets/files ready and stable enough for core merge. Ran using `pnpm pack`. (@todo update this with publish command).
+| plugin      | Plugin - A packaged release of the featured plugin, for GitHub WordPress.org. |                                    |
+| core        | Core - assets/files ready and stable enough for core merge. Ran using `pnpm pack`. (@todo).
 
 
 ## Adding a new flag
 
 Flags can be added to the files located in the `config/` directory. Make sure to add a flag for each environment and explicitly set the flag to false.
 Please add new feature flags alphabetically so they are easy to find.
-
-## Building custom plugin builds
-
-Sometimes it is useful to create a test zip of a plugin, separate from the released WordPress.org version. This makes internal testing easier for non developers, removing the requirment of using Git and NPM commands. These releases are usually uploaded to GitHub releases as a pre release.
-
-You can use the `build:release` command with the `--slug` and `--features` arguments to create a custom build. Base feature flags will be pulled from `config/plugin.json` and your additional changes are overlaid on top. When the build is complete, a `woocommerce-admin-$slug.zip` file will be generated.
-
-For example, to create a `woocommerce-admin-onboarding.zip` build by enabling onboarding in addition to the feature flags defined in `config/plugin.json`, you would run:
-
-`pnpm run build:release -- --slug onboarding --features '{"onboarding":true}'`.
 
 ## Basic Use - Client
 
