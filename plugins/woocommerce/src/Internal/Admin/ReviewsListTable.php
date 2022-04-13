@@ -228,12 +228,12 @@ class ReviewsListTable extends WP_List_Table {
 
 			if ( current_user_can( 'edit_product', $product_post->ID ) ) :
 				$post_link  = "<a href='" . esc_url( get_edit_post_link( $product_post->ID ) ) . "' class='comments-edit-item-link'>";
-				$post_link .= get_the_title( $product_post->ID ) . '</a>';
+				$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
 			else :
-				$post_link = get_the_title( $product_post->ID );
+				$post_link = esc_html( get_the_title( $product_post->ID ) );
 			endif;
 
-			echo esc_html( $post_link );
+			echo $post_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 			$post_type_object = get_post_type_object( $product_post->post_type );
 
