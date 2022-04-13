@@ -399,4 +399,108 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		return ! empty( $reviews ) ? current( $reviews ) : null;
 	}
 
+	/**
+	 * @dataProvider provider_get_bulk_actions
+	 *
+	 * @param string $current_comment_status Currently set status.
+	 * @param array  $expected_actions       Keys of the expected actions.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_bulk_actions( string $current_comment_status, array $expected_actions ) {
+		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
+		$method->setAccessible( true );
+
+		global $comment_status;
+		$comment_status = $current_comment_status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertEqualsCanonicalizing(
+			$expected_actions,
+			array_keys( $method->invoke( $list_table ) )
+		);
+	}
+
+	/** @see test_get_bulk_actions */
+	public function provider_get_bulk_actions() : Generator {
+		yield 'all statuses' => [
+			'current_comment_status' => 'all',
+			'expected_actions' => [
+				'unapprove',
+				'approve',
+				'spam',
+				'trash',
+			],
+		];
+
+		yield 'approved status' => [
+			'current_comment_status' => 'approved',
+			'expected_actions' => [
+				'unapprove',
+				'spam',
+				'trash',
+			],
+		];
+
+		yield 'moderated status' => [
+			'current_comment_status' => 'moderated',
+			'expected_actions' => [
+				'approve',
+				'spam',
+				'trash',
+			],
+		];
+
+		yield 'trash status' => [
+			'current_comment_status' => 'trash',
+			'expected_actions' => [
+				'spam',
+				'untrash',
+				'delete',
+			],
+		];
+
+		yield 'spam status' => [
+			'current_comment_status' => 'spam',
+			'expected_actions' => [
+				'unspam',
+				'delete',
+			],
+		];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_status()
+	 * @dataProvider provider_set_review_status
+	 *
+	 * @param string|null $request_status          Status that's in the request.
+	 * @param string      $expected_comment_status Expected value for the global variable.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_set_review_status( ?string $request_status, string $expected_comment_status ) {
+		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
+		$method->setAccessible( true );
+
+		$_REQUEST['comment_status'] = $request_status;
+
+		$method->invoke( $list_table );
+
+		global $comment_status;
+
+		$this->assertSame( $expected_comment_status, $comment_status );
+	}
+
+	/** @see test_set_review_status */
+	public function provider_set_review_status() : Generator {
+		yield 'not set' => [ null, 'all' ];
+		yield 'invalid status' => [ 'invalid', 'all' ];
+		yield 'moderated status' => [ 'moderated', 'moderated' ];
+		yield 'all status' => [ 'all', 'all' ];
+		yield 'approved status' => [ 'approved', 'approved' ];
+		yield 'spam status' => [ 'spam', 'spam' ];
+		yield 'trash status' => [ 'trash', 'trash' ];
+	}
+
 }
