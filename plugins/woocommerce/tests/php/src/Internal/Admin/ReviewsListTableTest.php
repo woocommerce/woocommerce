@@ -685,4 +685,30 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::no_items()
+	 * @dataProvider provider_no_items
+	 *
+	 * @param string $status   Filtered status.
+	 * @param string $expected Expected text.
+	 * @return void
+	 */
+	public function test_no_items( string $status, string $expected ) {
+		global $comment_status;
+		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		ob_start();
+
+		$this->get_reviews_list_table()->no_items();
+
+		$this->assertSame( $expected, ob_get_clean() );
+	}
+
+	/** @see test_no_items */
+	public function provider_no_items() : \Generator {
+		yield 'moderated filter' => [ 'moderated', 'No reviews awaiting moderation.' ];
+		yield 'no filter' => [ '', 'No reviews found.' ];
+		yield 'spam filter' => [ 'spam', 'No reviews found.' ];
+	}
+
 }

@@ -201,6 +201,21 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * The text to display when there are no reviews to display.
+	 *
+	 * @see WP_List_Table::no_items()
+	 */
+	public function no_items() {
+		global $comment_status;
+
+		if ( 'moderated' === $comment_status ) {
+			esc_html_e( 'No reviews awaiting moderation.', 'woocommerce' );
+		} else {
+			esc_html_e( 'No reviews found.', 'woocommerce' );
+		}
+	}
+
+	/**
 	 * Renders the checkbox column.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
