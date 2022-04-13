@@ -36,6 +36,7 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
+					self::get_plugin( 'pinterest-for-woocommerce' ),
 				],
 			],
 			[
@@ -52,6 +53,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
+					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 				],
 			],
 		];
@@ -76,7 +78,7 @@ class DefaultFreeExtensions {
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 				'is_visible'     => [
@@ -94,28 +96,58 @@ class DefaultFreeExtensions {
 			'google-listings-and-ads:alt'       => [
 				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
-				'image_url'      => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
+			],
+			'pinterest-for-woocommerce'         => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'Inspire shoppers with %1$sPinterest for WooCommerce%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/products/pinterest-for-woocommerce" target="_blank">',
+					'</a>'
+				),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=pinterest-for-woocommerce',
+				'is_visible'     => [
+					[
+						'type'    => 'not',
+						'operand' => [
+							[
+								'type'    => 'plugins_activated',
+								'plugins' => [ 'pinterest-for-woocommerce' ],
+							],
+						],
+					],
+				],
+				'is_built_by_wc' => false,
+			],
+			'pinterest-for-woocommerce:alt'     => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => false,
 			],
 			'mailpoet'                          => [
 				'name'           => __( 'MailPoet', 'woocommerce' ),
 				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
-				'image_url'      => plugins_url( 'images/onboarding/mailpoet.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			],
 			'mailchimp-for-woocommerce'         => [
 				'name'           => __( 'Mailchimp', 'woocommerce' ),
 				'description'    => __( 'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.', 'woocommerce' ),
-				'image_url'      => plugins_url( 'images/onboarding/mailchimp-for-woocommerce.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailchimp-for-woocommerce.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailchimp-woocommerce',
 				'is_built_by_wc' => false,
 			],
 			'creative-mail-by-constant-contact' => [
 				'name'           => __( 'Creative Mail for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.', 'woocommerce' ),
-				'image_url'      => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=creativemail',
 				'is_built_by_wc' => false,
 			],
@@ -449,7 +481,7 @@ class DefaultFreeExtensions {
 			'mailpoet:alt'                      => [
 				'name'           => __( 'MailPoet', 'woocommerce' ),
 				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
-				'image_url'      => plugins_url( 'images/onboarding/mailpoet.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			],

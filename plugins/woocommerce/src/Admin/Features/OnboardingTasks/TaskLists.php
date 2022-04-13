@@ -70,6 +70,7 @@ class TaskLists {
 		self::init_default_lists();
 		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_tasks' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'task_list_preloaded_settings' ), 20 );
 	}
 
 	/**
@@ -92,7 +93,7 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ),
+				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ) && ! Features::is_enabled( 'tasklist-setup-experiment-2' ),
 			)
 		);
 
@@ -117,6 +118,63 @@ class TaskLists {
 					'use_completed_title' => true,
 				),
 				'visible'                 => Features::is_enabled( 'tasklist-setup-experiment-1' ),
+			)
+		);
+
+		self::add_list(
+			array(
+				'id'           => 'setup_experiment_2',
+				'hidden_id'    => 'setup',
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
+				'tasks'        => array(
+					'StoreCreation',
+					'StoreDetails',
+					'Products',
+					'WooCommercePayments',
+					'Payments',
+					'Tax',
+					'Shipping',
+					'Marketing',
+					'Appearance',
+				),
+				'event_prefix' => 'tasklist_',
+				'visible'      => Features::is_enabled( 'tasklist-setup-experiment-2' ),
+				'options'      => array(
+					'use_completed_title' => true,
+				),
+				'display_progress_header' => true,
+				'sections'     => array(
+					array(
+						'id'          => 'basics',
+						'title'       => __( 'Cover the basics', 'woocommerce' ),
+						'description' => __( 'Make sure you’ve got everything you need to start selling—from business details to products.', 'woocommerce' ),
+						'image'       => plugins_url(
+							'/assets/images/task_list/basics-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'StoreCreation', 'StoreDetails', 'Products', 'Payments', 'WooCommercePayments' ),
+					),
+					array(
+						'id'          => 'sales',
+						'title'       => __( 'Get ready to sell', 'woocommerce' ),
+						'description' => __( 'Easily set up the backbone of your store’s operations and get ready to accept first orders.', 'woocommerce' ),
+						'image'       => plugins_url(
+							'/assets/images/task_list/sales-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'Shipping', 'Tax' ),
+					),
+					array(
+						'id'          => 'expand',
+						'title'       => __( 'Customize & expand', 'woocommerce' ),
+						'description' => __( 'Personalize your store’s design and grow your business by enabling new sales channels.', 'woocommerce' ),
+						'image'       => plugins_url(
+							'/assets/images/task_list/expand-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'Appearance', 'Marketing' ),
+					),
+				),
 			)
 		);
 
@@ -321,7 +379,7 @@ class TaskLists {
 		return array_filter(
 			self::get_lists(),
 			function ( $task_list ) {
-				return ! $task_list->is_hidden();
+				return $task_list->is_visible();
 			}
 		);
 	}
@@ -372,5 +430,18 @@ class TaskLists {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Add visible list ids to component settings.
+	 *
+	 * @param array $settings Component settings.
+	 *
+	 * @return array
+	 */
+	public static function task_list_preloaded_settings( $settings ) {
+		$settings['visibleTaskListIds'] = array_keys( self::get_visible() );
+
+		return $settings;
 	}
 }

@@ -45,5 +45,10 @@
     "build": "pnpm run clean && pnpm run compile",
     "prepare": "pnpm run build",
     "lint": "eslint src"
+  },
+  "lint-staged": {
+	"*.(t|j)s?(x)": [
+		"eslint --fix"
+	]
   }
 }

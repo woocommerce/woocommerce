@@ -38,8 +38,7 @@ class WC_Admin_Addons {
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce Addons Page',
+					'headers' => $headers,
 				)
 			);
 
@@ -82,8 +81,7 @@ class WC_Admin_Addons {
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
 				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce Addons Page',
+					'headers' => $headers,
 				)
 			);
 
@@ -106,6 +104,7 @@ class WC_Admin_Addons {
 				/* translators: %d: HTTP error code. */
 				$message = sprintf(
 					esc_html(
+						/* translators: Error code  */
 						__(
 							'Our request to the featured API got error code %d.',
 							'woocommerce'
@@ -136,6 +135,13 @@ class WC_Admin_Addons {
 		self::output_featured( $featured );
 	}
 
+	/**
+	 * Check if the error is due to an SSL error
+	 *
+	 * @param string $error_message Error message.
+	 *
+	 * @return bool True if SSL error, false otherwise
+	 */
 	public static function is_ssl_error( $error_message ) {
 		return false !== stripos( $error_message, 'cURL error 35' );
 	}
@@ -192,14 +198,23 @@ class WC_Admin_Addons {
 		$response_code = (int) wp_remote_retrieve_response_code( $raw_extensions );
 		if ( 200 !== $response_code ) {
 			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
-			return new WP_Error( 'error', __( "Our request to the search API got response code $response_code.", 'woocommerce' ) );
+			return new WP_Error(
+				'error',
+				sprintf(
+					esc_html(
+						/* translators: Error code  */
+						__( 'Our request to the search API got response code %s.', 'woocommerce' )
+					),
+					$response_code
+				)
+			);
 		}
 
 		$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
 
 		if ( ! is_object( $addons ) || ! isset( $addons->products ) ) {
 			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-			return new WP_Error( 'error', __( "Our request to the search API got a malformed response.", 'woocommerce' ) );
+			return new WP_Error( 'error', __( 'Our request to the search API got a malformed response.', 'woocommerce' ) );
 		}
 
 		return $addons;
@@ -258,7 +273,7 @@ class WC_Admin_Addons {
 		if ( ! empty( $section->endpoint ) ) {
 			$section_data = get_transient( 'wc_addons_section_' . $section_id );
 			if ( false === $section_data ) {
-				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
+				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ) );
 
 				if ( ! is_wp_error( $raw_section ) ) {
 					$section_data = json_decode( wp_remote_retrieve_body( $raw_section ) );
@@ -963,6 +978,13 @@ class WC_Admin_Addons {
 		<?php
 	}
 
+	/**
+	 * Output HTML for a promotion action if data couldn't be fetched.
+	 *
+	 * @param string $message Error message.
+	 *
+	 * @return void
+	 */
 	public static function output_empty( $message = '' ) {
 		?>
 		<div class="wc-addons__empty">
@@ -972,9 +994,9 @@ class WC_Admin_Addons {
 			<?php endif; ?>
 			<p>
 				<?php
-				/* translators: a url */
 				printf(
 					wp_kses_post(
+						/* translators: a url */
 						__(
 							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'

@@ -6,7 +6,11 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { Card, CardHeader } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
-import { ONBOARDING_STORE_NAME, TaskListType } from '@woocommerce/data';
+import {
+	getVisibleTasks,
+	ONBOARDING_STORE_NAME,
+	TaskListType,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text, List, CollapsibleList } from '@woocommerce/experimental';
 
@@ -45,12 +49,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		};
 	} );
 	const prevQueryRef = useRef( query );
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
+	const visibleTasks = getVisibleTasks( tasks );
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed

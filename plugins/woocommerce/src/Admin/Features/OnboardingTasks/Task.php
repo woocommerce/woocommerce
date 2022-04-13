@@ -358,10 +358,6 @@ abstract class Task {
 	 * Track task completion if task is viewable.
 	 */
 	public function possibly_track_completion() {
-		if ( ! $this->can_view() ) {
-			return;
-		}
-
 		if ( ! $this->is_complete() ) {
 			return;
 		}
@@ -405,6 +401,15 @@ abstract class Task {
 	 */
 	public function can_view() {
 		return true;
+	}
+
+	/**
+	 * Check if task is disabled.
+	 *
+	 * @return bool
+	 */
+	public function is_disabled() {
+		return false;
 	}
 
 	/**
@@ -455,6 +460,7 @@ abstract class Task {
 			'isSnoozed'      => $this->is_snoozed(),
 			'isSnoozeable'   => $this->is_snoozeable(),
 			'isVisited'      => $this->is_visited(),
+			'isDisabled'     => $this->is_disabled(),
 			'snoozedUntil'   => $this->get_snoozed_until(),
 			'additionalData' => self::convert_object_to_camelcase( $this->get_additional_data() ),
 			'eventPrefix'    => $this->prefix_event( '' ),

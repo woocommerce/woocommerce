@@ -201,7 +201,10 @@ class BusinessDetails extends Component {
 
 		const promises = [
 			this.persistProfileItems( {
-				business_extensions: businessExtensions,
+				business_extensions: [
+					...businessExtensions,
+					...alreadyActivatedExtensions,
+				],
 			} ),
 		];
 

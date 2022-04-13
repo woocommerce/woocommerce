@@ -6,14 +6,15 @@
 	overflow: hidden;
 
 	.components-card__media {
-		width: 170px;
+		width: 85px;
 		flex-shrink: 0;
+		align-self: flex-start;
 
 		img,
 		svg,
 		.is-placeholder {
 			margin: auto;
-			max-width: 100px;
+			max-width: 36px;
 			display: block;
 		}
 

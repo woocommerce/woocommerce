@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Add a context param with a default value of global to Admin\Notes\DataStore::get_notes(), get_notes_count(), and get_notes_where_clauses(). #32574

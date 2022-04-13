@@ -126,8 +126,6 @@ class FeaturePlugin {
 	 * @return void
 	 */
 	public function on_plugins_loaded() {
-		$this->load_plugin_textdomain();
-
 		$this->hooks();
 		$this->includes();
 	}
@@ -150,13 +148,6 @@ class FeaturePlugin {
 		 * @var string
 		 */
 		define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
-	}
-
-	/**
-	 * Load Localisation files.
-	 */
-	protected function load_plugin_textdomain() {
-		load_plugin_textdomain( 'woocommerce-admin', false, basename( dirname( __DIR__ ) ) . '/languages' );
 	}
 
 	/**
