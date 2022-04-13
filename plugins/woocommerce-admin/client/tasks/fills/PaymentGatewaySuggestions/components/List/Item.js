@@ -27,6 +27,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 		requiredSettings,
 		settingsUrl: manageUrl,
 		is_local_partner: isLocalPartner,
+		external_link: externalLink,
 	} = paymentGateway;
 
 	const connectSlot = useSlot(
@@ -39,7 +40,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 		Boolean( setupSlot?.fills?.length );
 
 	const hasSetup = Boolean(
-		plugins.length || requiredSettings.length || hasFills
+		plugins.length || requiredSettings.length || hasFills || externalLink
 	);
 	const showRecommendedRibbon = isRecommended && needsSetup;
 
@@ -85,6 +86,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 						isRecommended={ isRecommended }
 						isLoading={ loading }
 						markConfigured={ markConfigured }
+						externalLink={ externalLink }
 					/>
 				</div>
 			</CardBody>
