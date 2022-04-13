@@ -157,6 +157,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		ob_start();
 
+		$this->get_reviews_list_table()->no_items();
+
 		$this->assertSame( $expected, ob_get_clean() );
 	}
 
