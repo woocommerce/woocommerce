@@ -5,12 +5,43 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use WP_Comment;
 use WP_List_Table;
 
 /**
  * Handles the Product Reviews page.
  */
 class ReviewsListTable extends WP_List_Table {
+
+	/**
+	 * Memoization flag to determine if the current user can edit the current review.
+	 *
+	 * @var bool
+	 */
+	private $current_user_can_edit = false;
+
+	/**
+	 * Render a single row HTML.
+	 *
+	 * @param WP_Comment $item Review or reply being rendered.
+	 */
+	public function single_row( $item ) {
+		global $post, $comment;
+
+		$comment           = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$the_comment_class = wp_get_comment_status( $comment->comment_ID );
+		$the_comment_class = implode( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
+
+		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->current_user_can_edit = current_user_can( 'edit_comment', $comment->comment_ID );
+
+		?>
+		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="<?php echo esc_attr( $the_comment_class ); ?>">
+			<?php $this->single_row_columns( $comment ); ?>
+		</tr>
+		<?php
+	}
 
 	/**
 	 * Returns the columns for the table.
@@ -59,10 +90,86 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the author column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_author( $item ) {
-		// @TODO Implement in MWC-5336 {agibson 2022-04-12}
+		global $comment_status;
+
+		$author_url = $this->get_review_author_url();
+		$author_url_display = $this->get_review_author_url_for_display( $author_url );
+
+		?>
+		<strong><?php comment_author(); ?></strong><br />
+		<?php
+
+		if ( ! empty( $author_url ) ) :
+
+			?>
+			<a title="<?php echo esc_attr( $author_url ); ?>" href="<?php echo esc_attr( $author_url ); ?>"><?php echo esc_html( $author_url_display ); ?></a>
+			<br>
+			<?php
+
+		endif;
+
+		if ( $this->current_user_can_edit ) :
+
+			if ( ! empty( $item->comment_author_email ) ) :
+				comment_author_email_link();
+				echo '<br>';
+			endif;
+
+			$link = add_query_arg(
+				[
+					's'    => get_comment_author_IP( $item->comment_ID ),
+					'page' => Reviews::MENU_SLUG,
+					'mode' => 'detail',
+				],
+				'admin.php'
+			);
+
+			if ( 'spam' === $comment_status ) :
+				$link = add_query_arg( [ 'comment_status' => 'spam' ], $link );
+			endif;
+
+			?>
+			<a href="<?php echo esc_url( $link ); ?>"><?php comment_author_IP( $item->comment_ID ); ?></a>
+			<?php
+
+		endif;
+	}
+
+	/**
+	 * Gets the review author URL.
+	 *
+	 * @return string
+	 */
+	private function get_review_author_url() {
+
+		$author_url = get_comment_author_url();
+		$protocols = [ 'https://', 'http://' ];
+
+		if ( in_array( $author_url, $protocols ) ) {
+			$author_url = '';
+		}
+
+		return $author_url;
+	}
+
+	/**
+	 * Gets the review author URL for display.
+	 *
+	 * @param string $author_url The review author URL (raw).
+	 * @return string
+	 */
+	private function get_review_author_url_for_display( $author_url ) {
+
+		$author_url_display = str_replace( [ 'http://', 'https://' ], '', $author_url );
+
+		if ( strlen( $author_url_display ) > 50 ) {
+			$author_url_display = substr( $author_url_display, 0, 49 ) . '&hellip;';
+		}
+
+		return $author_url_display;
 	}
 
 	/**
