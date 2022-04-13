@@ -4,7 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, TaskListType } from '@woocommerce/data';
+import {
+	getVisibleTasks,
+	ONBOARDING_STORE_NAME,
+	TaskListType,
+} from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -33,12 +37,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 		const finishedResolution = select(
 			ONBOARDING_STORE_NAME
 		).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-		const nowTimestamp = Date.now();
-		const visibleTasks = taskList?.tasks.filter(
-			( task ) =>
-				! task.isDismissed &&
-				( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-		);
+		const visibleTasks = getVisibleTasks( taskList?.tasks );
 
 		return {
 			loading: ! finishedResolution,

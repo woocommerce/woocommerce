@@ -16,11 +16,13 @@ const SectionHeader: React.FC< Props > = ( { title, description, image } ) => {
 				<h1>{ title }</h1>
 				<p>{ description }</p>
 			</div>
-			<img
-				src={ image }
-				alt={ title }
-				className="illustration-background"
-			/>
+			<div className="woocommerce-task-header__illustration">
+				<img
+					src={ image }
+					alt={ title }
+					className="illustration-background"
+				/>
+			</div>
 		</div>
 	);
 };

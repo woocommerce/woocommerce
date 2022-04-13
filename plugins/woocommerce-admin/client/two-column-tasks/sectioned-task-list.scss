@@ -11,9 +11,17 @@
 		background: #fff;
 		border: 1px solid $gray-200;
 
+		&.is-opened {
+			padding-bottom: 0;
+		}
+
 		.components-panel__body-title {
 			margin-bottom: 0;
 			border-bottom: 1px solid #e0e0e0;
+
+			&:hover {
+				border-bottom: 1px solid #e0e0e0;
+			}
 
 			> .components-button {
 				font-size: 20px;
@@ -51,16 +59,16 @@
 		padding-top: $gap;
 		padding-bottom: $gap;
 
-		&.task-disabled {
+		&.is-disabled {
 			pointer-events: none;
 		}
 
-		&:not(.complete) .woocommerce-task-list__item-before .woocommerce-task__icon {
+		&:not(.is-complete) .woocommerce-task-list__item-before .woocommerce-task__icon {
 			border-color: $gray-300;
 		}
 	}
 
-	.woocommerce-task-list__item.complete .woocommerce-task__icon {
+	.woocommerce-task-list__item.is-complete .woocommerce-task__icon {
 		background-color: $alert-green;
 	}
 

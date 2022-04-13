@@ -5,17 +5,15 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { Icon, check } from '@wordpress/icons';
 import { updateQueryString } from '@woocommerce/navigation';
-import { Badge } from '@woocommerce/components';
 import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
-	TaskListSection,
+	getVisibleTasks,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { List, TaskItem, Text } from '@woocommerce/experimental';
+import { List, TaskItem } from '@woocommerce/experimental';
 import classnames from 'classnames';
 
 /**
@@ -25,8 +23,8 @@ import '../tasks/task-list.scss';
 import './sectioned-task-list.scss';
 import TaskListCompleted from './completed';
 import { TaskListProps } from '~/tasks/task-list';
-import SectionHeader from './headers/section-header';
 import { ProgressHeader } from '~/task-lists/progress-header';
+import { SectionPanelTitle } from './section-panel-title';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
@@ -61,12 +59,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 
 	const prevQueryRef = useRef( query );
 
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
+	const visibleTasks = getVisibleTasks( tasks );
 
 	const recordTaskListView = () => {
 		if ( query.task ) {
@@ -93,7 +86,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		}
 	}, [ query ] );
 
-	const onDismissTask = ( taskId: string, onDismiss?: () => void ) => {
+	const onDismissTask = ( taskId: string ) => {
 		dismissTask( taskId );
 		createNotice( 'success', __( 'Task dismissed' ), {
 			actions: [
@@ -103,10 +96,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 				},
 			],
 		} );
-
-		if ( onDismiss ) {
-			onDismiss();
-		}
 	};
 
 	const hideTasks = () => {
@@ -153,36 +142,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		);
 	};
 
-	const getPanelTitle = ( section: TaskListSection ) => {
-		if ( openPanel === section.id ) {
-			return (
-				<div className="wooocommerce-task-card__header-container">
-					<div className="wooocommerce-task-card__header">
-						<SectionHeader { ...section } />
-					</div>
-				</div>
-			);
-		}
-		const completedTasksCount = tasks.filter(
-			( task ) => ! task.isComplete && section.tasks.includes( task.id )
-		).length;
-		return (
-			<>
-				<Text variant="title.small" size="20" lineHeight="28px">
-					{ section.title }
-				</Text>
-				{ ! section.isComplete && (
-					<Badge count={ completedTasksCount } />
-				) }
-				{ section.isComplete && (
-					<div className="woocommerce-task__icon">
-						<Icon icon={ check } />
-					</div>
-				) }
-			</>
-		);
-	};
-
 	if ( ! visibleTasks.length ) {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
@@ -213,7 +172,13 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 					{ ( sections || [] ).map( ( section ) => (
 						<PanelBodyWithUpdatedType
 							key={ section.id }
-							title={ getPanelTitle( section ) }
+							title={
+								<SectionPanelTitle
+									section={ section }
+									tasks={ tasks }
+									active={ openPanel === section.id }
+								/>
+							}
 							opened={ openPanel === section.id }
 							onToggle={ ( isOpen: boolean ) => {
 								if ( ! isOpen && openPanel === section.id ) {
@@ -231,8 +196,9 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 											const className = classnames(
 												'woocommerce-task-list__item',
 												{
-													complete: task.isComplete,
-													'task-disabled':
+													'is-complete':
+														task.isComplete,
+													'is-disabled':
 														task.isDisabled,
 												}
 											);

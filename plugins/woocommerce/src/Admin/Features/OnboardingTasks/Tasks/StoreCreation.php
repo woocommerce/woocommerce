@@ -25,10 +25,8 @@ class StoreCreation extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( $this->is_complete() ) {
-			/* translators: Store name */
-			return sprintf( __( 'You created %s', 'woocommerce' ), get_bloginfo( 'name' ) );
-		}
+		/* translators: Store name */
+		return sprintf( __( 'You created %s', 'woocommerce' ), get_bloginfo( 'name' ) );
 	}
 
 	/**

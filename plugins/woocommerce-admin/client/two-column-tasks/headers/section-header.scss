@@ -1,10 +1,17 @@
 .woocommerce-task-section-header__container {
 	display: flex;
 
-	.illustration-background {
+	.woocommerce-task-header__illustration {
 		max-width: 150px;
+		width: 34%;
 		margin-left: auto;
-		margin-right: 44px;
+		margin-right: 7%;
+		display: flex;
+		align-items: center;
+
+		.illustration-background {
+			max-width: 100%;
+		}
 	}
 
 	.woocommerce-task-header__contents p {
