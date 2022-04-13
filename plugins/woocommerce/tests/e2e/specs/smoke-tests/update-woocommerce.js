@@ -30,12 +30,13 @@ utils.describeIf( UPDATE_WC )( 'WooCommerce plugin can be uploaded and activated
 		}
 
 		pluginPath = await getRemotePluginZip( zipUrl );
+		console.log( 'pluginPath is:' + pluginPath );
 		await merchant.login();
 	});
 
 	afterAll( async () => {
 		await merchant.logout();
-		await deleteDownloadedPluginFiles();
+		//await deleteDownloadedPluginFiles();
 	});
 
 	it( 'can upload and activate the WooCommerce plugin', async () => {

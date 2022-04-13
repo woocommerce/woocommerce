@@ -52,4 +52,5 @@ jobs:
           pwd
           ls
           ls tests/e2e
+          echo "about to check plugins folder"
           ls tests/e2e/plugins
