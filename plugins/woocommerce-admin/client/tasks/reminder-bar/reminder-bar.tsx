@@ -14,6 +14,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { close as closeIcon } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { useEffect } from '@wordpress/element';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -66,7 +67,6 @@ const ReminderText: React.FC< ReminderTextProps > = ( { remainingCount } ) => {
 
 export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 	taskListId = 'setup_experiment_1',
-	pageTitle,
 	updateBodyMargin,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -119,20 +119,18 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		};
 	} );
 
+	const isHomescreen =
+		getQuery().page && getQuery().page === 'wc-admin' && ! getQuery().path;
+	const isActiveTaskPage = Boolean( getQuery().wc_onboarding_active_task );
+
 	const hideReminderBar =
 		loading ||
 		taskListHidden ||
 		taskListComplete ||
 		reminderBarHidden ||
 		completedTasksCount === 0 ||
-		[
-			'Home',
-			'Shipping',
-			'Tax',
-			'Payments',
-			'Edit Product',
-			'Add New',
-		].includes( pageTitle );
+		isHomescreen ||
+		isActiveTaskPage;
 
 	useEffect( () => {
 		updateBodyMargin();
