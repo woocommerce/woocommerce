@@ -367,4 +367,31 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		return ! empty( $reviews ) ? current( $reviews ) : null;
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::convert_status_to_query_value()
+	 * @dataProvider provider_convert_status_string_to_comment_approved
+	 *
+	 * @param string $status              Status to pass in to the method.
+	 * @param string $expected_conversion Expected result.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_convert_status_string_to_comment_approved( string $status, string $expected_conversion ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'convert_status_to_query_value' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_conversion, $method->invoke( $list_table, $status ) );
+	}
+
+	/** @see test_convert_status_string_to_comment_approved */
+	public function provider_convert_status_string_to_comment_approved() : Generator {
+		yield 'spam' => [ 'spam', 'spam' ];
+		yield 'trash' => [ 'trash', 'trash' ];
+		yield 'moderated' => [ 'moderated', '0' ];
+		yield 'approved' => [ 'approved', '1' ];
+		yield 'all' => [ 'all', 'all' ];
+		yield 'empty string' => [ '', 'all' ];
+	}
+
 }

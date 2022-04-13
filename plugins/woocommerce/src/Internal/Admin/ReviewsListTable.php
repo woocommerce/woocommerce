@@ -379,7 +379,7 @@ class ReviewsListTable extends WP_List_Table {
 		return (int) get_comments(
 			[
 				'type__in'  => [ 'review', 'comment' ],
-				'status'    => $this->convert_status_string_to_comment_approved( $status ),
+				'status'    => $this->convert_status_to_query_value( $status ),
 				'post_type' => 'product',
 				'post_id'   => $product_id,
 				'count'     => true,
@@ -393,7 +393,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string $status Status key from {@see ReviewsListTable::get_status_filters()}.
 	 * @return string
 	 */
-	protected function convert_status_string_to_comment_approved( string $status ) : string {
+	protected function convert_status_to_query_value( string $status ) : string {
 		// These keys exactly match the database column.
 		if ( in_array( $status, [ 'spam', 'trash' ], true ) ) {
 			return $status;
