@@ -17,7 +17,7 @@ use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
  *
  * @deprecated since 1.7.0, use Note
  */
-class WC_Admin_Note extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Note extends DeprecatedClassFacade {
 	// These constants must be redeclared as to not break plugins that use them.
 	const E_WC_ADMIN_NOTE_ERROR         = Note::E_WC_ADMIN_NOTE_ERROR;
 	const E_WC_ADMIN_NOTE_WARNING       = Note::E_WC_ADMIN_NOTE_WARNING;
@@ -60,7 +60,7 @@ class WC_Admin_Note extends DeprecatedClassFacade { // phpcs:ignore
  *
  * @deprecated since 1.7.0, use Notes
  */
-class WC_Admin_Notes extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -81,7 +81,7 @@ class WC_Admin_Notes extends DeprecatedClassFacade { // phpcs:ignore
  *
  * @deprecated since 1.7.0, use CouponPageMoved
  */
-class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -102,7 +102,7 @@ class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade { // phpcs:
  *
  * @deprecated since 1.7.0, use CustomizeStoreWithBlocks
  */
-class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -123,7 +123,7 @@ class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
  *
  * @deprecated since 1.7.0, use EditProductsOnTheMove
  */
-class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -144,7 +144,7 @@ class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade { /
  *
  * @deprecated since 1.7.0, use EUVATNumber
  */
-class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -165,7 +165,7 @@ class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade { // phpcs:igno
  *
  * @deprecated since 1.7.0, use FacebookMarketingExpert
  */
-class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -186,7 +186,7 @@ class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade { /
  *
  * @deprecated since 1.7.0, use FirstProduct
  */
-class WC_Admin_Notes_First_Product extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -207,7 +207,7 @@ class WC_Admin_Notes_First_Product extends DeprecatedClassFacade { // phpcs:igno
  *
  * @deprecated since 1.7.0, use GivingFeedbackNotes
  */
-class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -228,7 +228,7 @@ class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade { // ph
  *
  * @deprecated since 1.7.0, use InsightFirstSale
  */
-class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -249,7 +249,7 @@ class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade { // phpcs
  *
  * @deprecated since 1.7.0, use InstallJPAndWCSPlugins
  */
-class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -270,7 +270,7 @@ class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade { 
  *
  * @deprecated since 1.7.0, use LaunchChecklist
  */
-class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -291,7 +291,7 @@ class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade { // phpcs:i
  *
  * @deprecated since 1.7.0, use MigrateFromShopify
  */
-class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -312,7 +312,7 @@ class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade { // php
  *
  * @deprecated since 1.7.0, use MobileApp
  */
-class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -333,7 +333,7 @@ class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade { // phpcs:ignore
  *
  * @deprecated since 1.7.0, use NewSalesRecord
  */
-class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -354,7 +354,7 @@ class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade { // phpcs:i
  *
  * @deprecated since 1.7.0, use OnboardingEmailMarketing
  */
-class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -375,7 +375,7 @@ class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade { 
  *
  * @deprecated since 1.7.0, use OnboardingPayments
  */
-class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -396,7 +396,7 @@ class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade { // phpc
  *
  * @deprecated since 1.7.0, use OnlineClothingStore
  */
-class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -417,7 +417,7 @@ class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade { // ph
  *
  * @deprecated since 1.7.0, use OrderMilestones
  */
-class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -438,7 +438,7 @@ class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade { // phpcs:i
  *
  * @deprecated since 1.7.0, use PerformanceOnMobile
  */
-class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -459,7 +459,7 @@ class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade { // ph
  *
  * @deprecated since 1.7.0, use PersonalizeStore
  */
-class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -480,7 +480,7 @@ class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade { // phpcs:
  *
  * @deprecated since 1.7.0, use RealTimeOrderAlerts
  */
-class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -501,7 +501,7 @@ class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade { // p
  *
  * @deprecated since 1.7.0, use SellingOnlineCourses
  */
-class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -522,7 +522,7 @@ class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade { // p
  *
  * @deprecated since 1.7.0, use SetUpAdditionalPaymentTypes
  */
-class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -543,7 +543,7 @@ class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFaca
  *
  * @deprecated since 1.7.0, use TestCheckout
  */
-class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -564,7 +564,7 @@ class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade { // phpcs:igno
  *
  * @deprecated since 1.7.0, use TrackingOptIn
  */
-class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -585,7 +585,7 @@ class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade { // phpcs:ig
  *
  * @deprecated since 1.7.0, use WooSubscriptionsNotes
  */
-class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -606,7 +606,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade { // 
  *
  * @deprecated since 1.7.0, use WooCommercePayments
  */
-class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
@@ -627,7 +627,7 @@ class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade { // php
  *
  * @deprecated since 1.7.0, use WooCommerceSubscriptions
  */
-class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade { // phpcs:ignore
+class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade {
 	/**
 	 * The name of the non-deprecated class that this facade covers.
 	 *
