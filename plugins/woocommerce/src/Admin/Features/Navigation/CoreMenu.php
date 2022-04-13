@@ -92,43 +92,43 @@ class CoreMenu {
 		$analytics_enabled = Features::is_enabled( 'analytics' );
 		return array(
 			array(
-				'title' => __( 'Orders', 'woocommerce-admin' ),
+				'title' => __( 'Orders', 'woocommerce' ),
 				'id'    => 'woocommerce-orders',
 				'badge' => self::get_shop_order_count(),
 				'order' => 10,
 			),
 			array(
-				'title' => __( 'Products', 'woocommerce-admin' ),
+				'title' => __( 'Products', 'woocommerce' ),
 				'id'    => 'woocommerce-products',
 				'order' => 20,
 			),
 			$analytics_enabled ?
 			array(
-				'title' => __( 'Analytics', 'woocommerce-admin' ),
+				'title' => __( 'Analytics', 'woocommerce' ),
 				'id'    => 'woocommerce-analytics',
 				'order' => 30,
 			) : null,
 			$analytics_enabled ?
 			array(
-				'title'  => __( 'Reports', 'woocommerce-admin' ),
+				'title'  => __( 'Reports', 'woocommerce' ),
 				'id'     => 'woocommerce-reports',
 				'parent' => 'woocommerce-analytics',
 				'order'  => 200,
 			) : null,
 			array(
-				'title' => __( 'Marketing', 'woocommerce-admin' ),
+				'title' => __( 'Marketing', 'woocommerce' ),
 				'id'    => 'woocommerce-marketing',
 				'order' => 40,
 			),
 			array(
-				'title'  => __( 'Settings', 'woocommerce-admin' ),
+				'title'  => __( 'Settings', 'woocommerce' ),
 				'id'     => 'woocommerce-settings',
 				'menuId' => 'secondary',
 				'order'  => 20,
 				'url'    => 'admin.php?page=wc-settings',
 			),
 			array(
-				'title'  => __( 'Tools', 'woocommerce-admin' ),
+				'title'  => __( 'Tools', 'woocommerce' ),
 				'id'     => 'woocommerce-tools',
 				'menuId' => 'secondary',
 				'order'  => 30,
@@ -192,7 +192,7 @@ class CoreMenu {
 		if ( defined( '\Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG' ) ) {
 			$home_item = array(
 				'id'              => 'woocommerce-home',
-				'title'           => __( 'Home', 'woocommerce-admin' ),
+				'title'           => __( 'Home', 'woocommerce' ),
 				'url'             => \Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG,
 				'order'           => 0,
 				'matchExpression' => 'page=wc-admin((?!path=).)*$',
@@ -203,7 +203,7 @@ class CoreMenu {
 		if ( Features::is_enabled( 'analytics' ) ) {
 			$customers_item = array(
 				'id'    => 'woocommerce-analytics-customers',
-				'title' => __( 'Customers', 'woocommerce-admin' ),
+				'title' => __( 'Customers', 'woocommerce' ),
 				'url'   => 'wc-admin&path=/customers',
 				'order' => 50,
 			);
@@ -220,7 +220,7 @@ class CoreMenu {
 				$product_tag_items['default'],
 				array(
 					'id'              => 'woocommerce-product-attributes',
-					'title'           => __( 'Attributes', 'woocommerce-admin' ),
+					'title'           => __( 'Attributes', 'woocommerce' ),
 					'url'             => 'edit.php?post_type=product&page=product_attributes',
 					'capability'      => 'manage_product_terms',
 					'order'           => 40,
@@ -231,7 +231,7 @@ class CoreMenu {
 				$coupon_items['default'],
 				// Marketplace category.
 				array(
-					'title'      => __( 'Marketplace', 'woocommerce-admin' ),
+					'title'      => __( 'Marketplace', 'woocommerce' ),
 					'capability' => 'manage_woocommerce',
 					'id'         => 'woocommerce-marketplace',
 					'url'        => 'wc-addons',
@@ -257,9 +257,9 @@ class CoreMenu {
 	 */
 	public static function get_tool_items() {
 		$tabs = array(
-			'status' => __( 'System status', 'woocommerce-admin' ),
-			'tools'  => __( 'Utilities', 'woocommerce-admin' ),
-			'logs'   => __( 'Logs', 'woocommerce-admin' ),
+			'status' => __( 'System status', 'woocommerce' ),
+			'tools'  => __( 'Utilities', 'woocommerce' ),
+			'logs'   => __( 'Logs', 'woocommerce' ),
 		);
 		$tabs = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 
@@ -267,7 +267,7 @@ class CoreMenu {
 		$items = array(
 			array(
 				'parent'     => 'woocommerce-tools',
-				'title'      => __( 'Import / Export', 'woocommerce-admin' ),
+				'title'      => __( 'Import / Export', 'woocommerce' ),
 				'capability' => 'import',
 				'id'         => 'tools-import-export',
 				'url'        => 'import.php',

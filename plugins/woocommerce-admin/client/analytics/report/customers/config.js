@@ -32,14 +32,14 @@ const CUSTOMERS_REPORT_ADVANCED_FILTERS_FILTER =
  */
 export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Customers', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All Customers', 'woocommerce' ), value: 'all' },
 			{
-				label: __( 'Single Customer', 'woocommerce-admin' ),
+				label: __( 'Single Customer', 'woocommerce' ),
 				value: 'select_customer',
 				chartMode: 'item-comparison',
 				subFilters: [
@@ -55,19 +55,16 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 							labels: {
 								placeholder: __(
 									'Type to search for a customer',
-									'woocommerce-admin'
+									'woocommerce'
 								),
-								button: __(
-									'Single Customer',
-									'woocommerce-admin'
-								),
+								button: __( 'Single Customer', 'woocommerce' ),
 							},
 						},
 					},
 				],
 			},
 			{
-				label: __( 'Advanced filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce' ),
 				value: 'advanced',
 			},
 		],
@@ -89,27 +86,24 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Customers match {{select /}} filters',
 			'A sentence describing filters for Customers. See screen shot for context: https://cloudup.com/cCsm3GeXJbE',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		filters: {
 			name: {
 				labels: {
-					add: __( 'Name', 'woocommerce-admin' ),
-					placeholder: __( 'Search', 'woocommerce-admin' ),
-					remove: __(
-						'Remove customer name filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Name', 'woocommerce' ),
+					placeholder: __( 'Search', 'woocommerce' ),
+					remove: __( 'Remove customer name filter', 'woocommerce' ),
 					rule: __(
 						'Select a customer name filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
 						'{{title}}Name{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select customer name', 'woocommerce-admin' ),
+					filter: __( 'Select customer name', 'woocommerce' ),
 				},
 				rules: [
 					{
@@ -118,7 +112,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Includes',
 							'customer names',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -127,7 +121,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Excludes',
 							'customer names',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -145,44 +139,33 @@ export const advancedFilters = applyFilters(
 			},
 			country: {
 				labels: {
-					add: __( 'Country / Region', 'woocommerce-admin' ),
-					placeholder: __( 'Search', 'woocommerce-admin' ),
+					add: __( 'Country / Region', 'woocommerce' ),
+					placeholder: __( 'Search', 'woocommerce' ),
 					remove: __(
 						'Remove country / region filter',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					rule: __(
 						'Select a country / region filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
 						'{{title}}Country / Region{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __(
-						'Select country / region',
-						'woocommerce-admin'
-					),
+					filter: __( 'Select country / region', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to countries including a given country or countries. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x(
-							'Includes',
-							'countries',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'countries', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to countries excluding a given country or countries. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x(
-							'Excludes',
-							'countries',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'countries', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -207,28 +190,25 @@ export const advancedFilters = applyFilters(
 			},
 			username: {
 				labels: {
-					add: __( 'Username', 'woocommerce-admin' ),
+					add: __( 'Username', 'woocommerce' ),
 					placeholder: __(
 						'Search customer username',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					remove: __(
 						'Remove customer username filter',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					rule: __(
 						'Select a customer username filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
 						'{{title}}Username{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __(
-						'Select customer username',
-						'woocommerce-admin'
-					),
+					filter: __( 'Select customer username', 'woocommerce' ),
 				},
 				rules: [
 					{
@@ -237,7 +217,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Includes',
 							'customer usernames',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -246,7 +226,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Excludes',
 							'customer usernames',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -258,25 +238,19 @@ export const advancedFilters = applyFilters(
 			},
 			email: {
 				labels: {
-					add: __( 'Email', 'woocommerce-admin' ),
-					placeholder: __(
-						'Search customer email',
-						'woocommerce-admin'
-					),
-					remove: __(
-						'Remove customer email filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Email', 'woocommerce' ),
+					placeholder: __( 'Search customer email', 'woocommerce' ),
+					remove: __( 'Remove customer email filter', 'woocommerce' ),
 					rule: __(
 						'Select a customer email filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a customer email filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
 						'{{title}}Email{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select customer email', 'woocommerce-admin' ),
+					filter: __( 'Select customer email', 'woocommerce' ),
 				},
 				rules: [
 					{
@@ -285,7 +259,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Includes',
 							'customer emails',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -294,7 +268,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Excludes',
 							'customer emails',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -312,15 +286,15 @@ export const advancedFilters = applyFilters(
 			},
 			orders_count: {
 				labels: {
-					add: __( 'No. of Orders', 'woocommerce-admin' ),
-					remove: __( 'Remove order filter', 'woocommerce-admin' ),
+					add: __( 'No. of Orders', 'woocommerce' ),
+					remove: __( 'Remove order filter', 'woocommerce' ),
 					rule: __(
 						'Select an order count filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					title: __(
 						'{{title}}No. of Orders{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 				},
 				rules: [
@@ -330,7 +304,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Less Than',
 							'number of orders',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -339,7 +313,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'More Than',
 							'number of orders',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -348,7 +322,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Between',
 							'number of orders',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -358,18 +332,15 @@ export const advancedFilters = applyFilters(
 			},
 			total_spend: {
 				labels: {
-					add: __( 'Total Spend', 'woocommerce-admin' ),
-					remove: __(
-						'Remove total spend filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Total Spend', 'woocommerce' ),
+					remove: __( 'Remove total spend filter', 'woocommerce' ),
 					rule: __(
 						'Select a total spend filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					title: __(
 						'{{title}}Total Spend{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 				},
 				rules: [
@@ -379,7 +350,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Less Than',
 							'total spend by customer',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -388,7 +359,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'More Than',
 							'total spend by customer',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -397,7 +368,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Between',
 							'total spend by customer',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -407,18 +378,18 @@ export const advancedFilters = applyFilters(
 			},
 			avg_order_value: {
 				labels: {
-					add: __( 'AOV', 'woocommerce-admin' ),
+					add: __( 'AOV', 'woocommerce' ),
 					remove: __(
 						'Remove average order value filter',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					rule: __(
 						'Select an average order value filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					title: __(
 						'{{title}}AOV{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 				},
 				rules: [
@@ -428,7 +399,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Less Than',
 							'average order value of customer',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -438,7 +409,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'More Than',
 							'average order value of customer',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 					{
@@ -447,7 +418,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Between',
 							'average order value of customer',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -457,37 +428,34 @@ export const advancedFilters = applyFilters(
 			},
 			registered: {
 				labels: {
-					add: __( 'Registered', 'woocommerce-admin' ),
-					remove: __(
-						'Remove registered filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Registered', 'woocommerce' ),
+					remove: __( 'Remove registered filter', 'woocommerce' ),
 					rule: __(
 						'Select a registered filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
 						'{{title}}Registered{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select registered date', 'woocommerce-admin' ),
+					filter: __( 'Select registered date', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'before',
 						/* translators: Sentence fragment, logical, "Before" refers to customers registered before a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x( 'Before', 'date', 'woocommerce-admin' ),
+						label: _x( 'Before', 'date', 'woocommerce' ),
 					},
 					{
 						value: 'after',
 						/* translators: Sentence fragment, logical, "after" refers to customers registered after a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x( 'After', 'date', 'woocommerce-admin' ),
+						label: _x( 'After', 'date', 'woocommerce' ),
 					},
 					{
 						value: 'between',
 						/* translators: Sentence fragment, logical, "Between" refers to average order value of a customer, between two given amounts. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x( 'Between', 'date', 'woocommerce-admin' ),
+						label: _x( 'Between', 'date', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -496,37 +464,34 @@ export const advancedFilters = applyFilters(
 			},
 			last_active: {
 				labels: {
-					add: __( 'Last active', 'woocommerce-admin' ),
-					remove: __(
-						'Remove last active filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Last active', 'woocommerce' ),
+					remove: __( 'Remove last active filter', 'woocommerce' ),
 					rule: __(
 						'Select a last active filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
 						'{{title}}Last active{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select registered date', 'woocommerce-admin' ),
+					filter: __( 'Select registered date', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'before',
 						/* translators: Sentence fragment, logical, "Before" refers to customers registered before a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x( 'Before', 'date', 'woocommerce-admin' ),
+						label: _x( 'Before', 'date', 'woocommerce' ),
 					},
 					{
 						value: 'after',
 						/* translators: Sentence fragment, logical, "after" refers to customers registered after a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x( 'After', 'date', 'woocommerce-admin' ),
+						label: _x( 'After', 'date', 'woocommerce' ),
 					},
 					{
 						value: 'between',
 						/* translators: Sentence fragment, logical, "Between" refers to average order value of a customer, between two given amounts. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
-						label: _x( 'Between', 'date', 'woocommerce-admin' ),
+						label: _x( 'Between', 'date', 'woocommerce' ),
 					},
 				],
 				input: {

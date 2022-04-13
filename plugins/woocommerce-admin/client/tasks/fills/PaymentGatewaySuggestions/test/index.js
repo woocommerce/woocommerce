@@ -49,6 +49,7 @@ const paymentGatewaySuggestions = [
 		image:
 			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/cod.svg',
 		is_visible: true,
+		is_offline: true,
 	},
 	{
 		id: 'bacs',
@@ -57,6 +58,7 @@ const paymentGatewaySuggestions = [
 		image:
 			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/bacs.svg',
 		is_visible: true,
+		is_offline: true,
 	},
 	{
 		id: 'woocommerce_payments:non-us',
@@ -83,14 +85,50 @@ const paymentGatewaySuggestions = [
 	},
 ];
 
+const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
+	( p ) => p.title !== 'WooCommerce Payments'
+);
+
 describe( 'PaymentGatewaySuggestions', () => {
-	test( 'should render payment gateway lists', () => {
+	test( 'should render only WCPay if its suggested', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions,
+			installedPaymentGateways: [],
+		} ) );
+
+		const { container } = render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		const paymentTitleElements = container.querySelectorAll(
+			'.woocommerce-task-payment__title'
+		);
+
+		const paymentTitles = Array.from( paymentTitleElements ).map(
+			( e ) => e.textContent
+		);
+
+		expect( paymentTitles ).toEqual( [] );
+
+		expect(
+			container.getElementsByTagName( 'title' )[ 0 ].textContent
+		).toBe( 'WooCommerce Payments' );
+	} );
+
+	test( 'should render all payment gateways if no WCPay', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			installedPaymentGateways: [],
 		} ) );
 
@@ -116,10 +154,6 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'Cash on delivery',
 			'Direct bank transfer',
 		] );
-
-		expect(
-			container.getElementsByTagName( 'title' )[ 0 ].textContent
-		).toBe( 'WooCommerce Payments' );
 	} );
 
 	test( 'should the payment gateway offline options at the bottom', () => {
@@ -128,7 +162,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
-			paymentGatewaySuggestions,
+			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			installedPaymentGateways: [],
 		} ) );
 
@@ -154,7 +188,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
-			paymentGatewaySuggestions,
+			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			installedPaymentGateways: [
 				{
 					id: 'ppcp-gateway',
@@ -184,7 +218,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
-			paymentGatewaySuggestions,
+			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			installedPaymentGateways: [
 				{
 					id: 'ppcp-gateway',
@@ -210,5 +244,60 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_payment_setup', {
 			selected: 'ppcp_gateway',
 		} );
+	} );
+
+	test( 'should record event correctly when other payment methods is clicked', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions,
+			installedPaymentGateways: [],
+		} ) );
+
+		render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		fireEvent.click( screen.getByText( 'Other payment methods' ) );
+
+		// By default it's hidden, so when toggle it shows.
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'tasklist_payment_show_toggle',
+			{
+				toggle: 'show',
+				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "other payment methods".
+			}
+		);
+	} );
+
+	test( 'should record event correctly when see more is clicked', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions,
+			installedPaymentGateways: [],
+		} ) );
+
+		render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		fireEvent.click( screen.getByText( 'Other payment methods' ) );
+		fireEvent.click( screen.getByText( 'See more' ) );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'tasklist_payment_see_more',
+			{}
+		);
 	} );
 } );

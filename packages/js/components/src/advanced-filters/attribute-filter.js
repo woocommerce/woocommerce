@@ -59,7 +59,7 @@ const getScreenReaderText = ( {
 		/* translators: Sentence fragment describing a product attribute match. Example: "Color Is Not Blue" - attribute = Color, equals = Is Not, value = Blue */
 		mixedString: __(
 			'{{attribute /}} {{equals /}} {{value /}}',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		components: {
 			attribute: <Fragment>{ attributeName }</Fragment>,
@@ -202,14 +202,14 @@ const AttributeFilter = ( props ) => {
 										type="attributes"
 										placeholder={ __(
 											'Attribute name',
-											'woocommerce-admin'
+											'woocommerce'
 										) }
 										multiple={ false }
 										selected={ selectedAttribute }
 										inlineTags
 										aria-label={ __(
 											'Attribute name',
-											'woocommerce-admin'
+											'woocommerce'
 										) }
 									/>
 								) : (
@@ -225,7 +225,7 @@ const AttributeFilter = ( props ) => {
 												className="woocommerce-filters-advanced__input woocommerce-search"
 												placeholder={ __(
 													'Attribute value',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												inlineTags
 												isSearchable

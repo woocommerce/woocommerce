@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `order_item_display_meta` option to orders endpoint (REST API), to osupport filtering out variation meta.

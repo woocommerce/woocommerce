@@ -107,32 +107,29 @@ export const IntroModal = () => {
 			onFinish={ dismissModal }
 			pages={ [
 				getPage(
-					__(
-						'A new navigation for WooCommerce',
-						'woocommerce-admin'
-					),
+					__( 'A new navigation for WooCommerce', 'woocommerce' ),
 					__(
 						'All of your store management features in one place',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					NavInto1
 				),
 				getPage(
-					__( 'Focus on managing your store', 'woocommerce-admin' ),
+					__( 'Focus on managing your store', 'woocommerce' ),
 					__(
 						'Give your attention to key areas of WooCommerce with little distraction',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					NavInto2
 				),
 				getPage(
 					__(
 						'Easily find and favorite your extensions',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					__(
 						"They'll appear in the top level of the navigation for quick access",
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					NavInto3
 				),

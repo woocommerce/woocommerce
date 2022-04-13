@@ -213,10 +213,7 @@ export class StoreDetails extends Component {
 		}
 		createNotice(
 			'error',
-			__(
-				'There was a problem saving your store details',
-				'woocommerce-admin'
-			)
+			__( 'There was a problem saving your store details', 'woocommerce' )
 		);
 
 		errorMessages.forEach( ( message ) =>
@@ -231,10 +228,7 @@ export class StoreDetails extends Component {
 		const errors = validateAddress( values );
 
 		if ( values.storeEmail && ! isEmail( values.storeEmail ) ) {
-			errors.storeEmail = __(
-				'Invalid email address',
-				'woocommerce-admin'
-			);
+			errors.storeEmail = __( 'Invalid email address', 'woocommerce' );
 		}
 
 		return errors;
@@ -258,12 +252,12 @@ export class StoreDetails extends Component {
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
 			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 
 		const configureCurrencyText = __(
 			'Your store address will help us configure currency\n options and shipping rules automatically.\n This information will not be publicly visible and can\n easily be changed later.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
 
@@ -284,19 +278,19 @@ export class StoreDetails extends Component {
 						size="20"
 						lineHeight="28px"
 					>
-						{ __( 'Welcome to WooCommerce', 'woocommerce-admin' ) }
+						{ __( 'Welcome to WooCommerce', 'woocommerce' ) }
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
 							"Tell us about your store and we'll get you set up in no time",
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 
 						<Button
 							isTertiary
 							label={ __(
 								'Learn more about store details',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 							onClick={ () =>
 								this.setState( {
@@ -368,11 +362,11 @@ export class StoreDetails extends Component {
 										values.isAgreeMarketing
 											? __(
 													'Email address',
-													'woocommerce-admin'
+													'woocommerce'
 											  )
 											: __(
 													'Email address (Optional)',
-													'woocommerce-admin'
+													'woocommerce'
 											  )
 									}
 									required={ values.isAgreeMarketing }
@@ -385,7 +379,7 @@ export class StoreDetails extends Component {
 										<div className="woocommerce-profile-wizard__store-details-error">
 											{ __(
 												'Please enter your email address to subscribe',
-												'woocommerce-admin'
+												'woocommerce'
 											) }
 										</div>
 									) }
@@ -396,12 +390,12 @@ export class StoreDetails extends Component {
 												<>
 													{ __(
 														'Get tips, product updates and inspiration straight to your mailbox.',
-														'woocommerce-admin'
+														'woocommerce'
 													) }{ ' ' }
 													<span className="woocommerce-profile-wizard__powered-by-mailchimp">
 														{ __(
 															'Powered by Mailchimp',
-															'woocommerce-admin'
+															'woocommerce'
 														) }
 													</span>
 												</>
@@ -421,7 +415,7 @@ export class StoreDetails extends Component {
 									isBusy={ isBusy }
 									disabled={ ! isValidForm || isBusy }
 								>
-									{ __( 'Continue', 'woocommerce-admin' ) }
+									{ __( 'Continue', 'woocommerce' ) }
 								</Button>
 							</CardFooter>
 						</Card>
@@ -442,10 +436,7 @@ export class StoreDetails extends Component {
 							return false;
 						} }
 					>
-						{ __(
-							'Skip setup store details',
-							'woocommerce-admin'
-						) }
+						{ __( 'Skip setup store details', 'woocommerce' ) }
 					</Button>
 					<Button
 						isTertiary

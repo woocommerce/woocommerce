@@ -31,27 +31,27 @@ export const defaultDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
  */
 
 export const presetValues = [
-	{ value: 'today', label: __( 'Today', 'woocommerce-admin' ) },
-	{ value: 'yesterday', label: __( 'Yesterday', 'woocommerce-admin' ) },
-	{ value: 'week', label: __( 'Week to date', 'woocommerce-admin' ) },
-	{ value: 'last_week', label: __( 'Last week', 'woocommerce-admin' ) },
-	{ value: 'month', label: __( 'Month to date', 'woocommerce-admin' ) },
-	{ value: 'last_month', label: __( 'Last month', 'woocommerce-admin' ) },
-	{ value: 'quarter', label: __( 'Quarter to date', 'woocommerce-admin' ) },
-	{ value: 'last_quarter', label: __( 'Last quarter', 'woocommerce-admin' ) },
-	{ value: 'year', label: __( 'Year to date', 'woocommerce-admin' ) },
-	{ value: 'last_year', label: __( 'Last year', 'woocommerce-admin' ) },
-	{ value: 'custom', label: __( 'Custom', 'woocommerce-admin' ) },
+	{ value: 'today', label: __( 'Today', 'woocommerce' ) },
+	{ value: 'yesterday', label: __( 'Yesterday', 'woocommerce' ) },
+	{ value: 'week', label: __( 'Week to date', 'woocommerce' ) },
+	{ value: 'last_week', label: __( 'Last week', 'woocommerce' ) },
+	{ value: 'month', label: __( 'Month to date', 'woocommerce' ) },
+	{ value: 'last_month', label: __( 'Last month', 'woocommerce' ) },
+	{ value: 'quarter', label: __( 'Quarter to date', 'woocommerce' ) },
+	{ value: 'last_quarter', label: __( 'Last quarter', 'woocommerce' ) },
+	{ value: 'year', label: __( 'Year to date', 'woocommerce' ) },
+	{ value: 'last_year', label: __( 'Last year', 'woocommerce' ) },
+	{ value: 'custom', label: __( 'Custom', 'woocommerce' ) },
 ];
 
 export const periods = [
 	{
 		value: 'previous_period',
-		label: __( 'Previous period', 'woocommerce-admin' ),
+		label: __( 'Previous period', 'woocommerce' ),
 	},
 	{
 		value: 'previous_year',
-		label: __( 'Previous year', 'woocommerce-admin' ),
+		label: __( 'Previous year', 'woocommerce' ),
 	},
 ];
 
@@ -109,7 +109,7 @@ export function getRangeLabel( after, before ) {
 	const isSameMonth = isSameYear && after.month() === before.month();
 	const isSameDay =
 		isSameYear && isSameMonth && after.isSame( before, 'day' );
-	const fullDateFormat = __( 'MMM D, YYYY', 'woocommerce-admin' );
+	const fullDateFormat = __( 'MMM D, YYYY', 'woocommerce' );
 
 	if ( isSameDay ) {
 		return after.format( fullDateFormat );
@@ -119,7 +119,7 @@ export function getRangeLabel( after, before ) {
 			.format( fullDateFormat )
 			.replace( afterDate, `${ afterDate } - ${ before.date() }` );
 	} else if ( isSameYear ) {
-		const monthDayFormat = __( 'MMM D', 'woocommerce-admin' );
+		const monthDayFormat = __( 'MMM D', 'woocommerce' );
 		return `${ after.format( monthDayFormat ) } - ${ before.format(
 			fullDateFormat
 		) }`;
@@ -646,15 +646,9 @@ export function getDateFormatsForIntervalD3( interval, ticks = 0 ) {
 				x2Format = '%Y';
 			}
 			// eslint-disable-next-line @wordpress/i18n-translator-comments
-			screenReaderFormat = __(
-				'Week of %B %-d, %Y',
-				'woocommerce-admin'
-			);
+			screenReaderFormat = __( 'Week of %B %-d, %Y', 'woocommerce' );
 			// eslint-disable-next-line @wordpress/i18n-translator-comments
-			tooltipLabelFormat = __(
-				'Week of %B %-d, %Y',
-				'woocommerce-admin'
-			);
+			tooltipLabelFormat = __( 'Week of %B %-d, %Y', 'woocommerce' );
 			break;
 		case 'quarter':
 		case 'month':
@@ -720,10 +714,10 @@ export function getDateFormatsForIntervalPhp( interval, ticks = 0 ) {
 			}
 
 			// Since some alphabet letters have php associated formats, we need to escape them first.
-			const escapedWeekOfStr = __(
-				'Week of',
-				'woocommerce-admin'
-			).replace( /(\w)/g, '\\$1' );
+			const escapedWeekOfStr = __( 'Week of', 'woocommerce' ).replace(
+				/(\w)/g,
+				'\\$1'
+			);
 
 			screenReaderFormat = `${ escapedWeekOfStr } F j, Y`;
 			tooltipLabelFormat = `${ escapedWeekOfStr } F j, Y`;
@@ -765,11 +759,11 @@ export function loadLocaleData( { userLocale, weekdaysShort } ) {
 	if ( moment.locale() !== 'en' ) {
 		moment.updateLocale( userLocale, {
 			longDateFormat: {
-				L: __( 'MM/DD/YYYY', 'woocommerce-admin' ),
-				LL: __( 'MMMM D, YYYY', 'woocommerce-admin' ),
-				LLL: __( 'D MMMM YYYY LT', 'woocommerce-admin' ),
-				LLLL: __( 'dddd, D MMMM YYYY LT', 'woocommerce-admin' ),
-				LT: __( 'HH:mm', 'woocommerce-admin' ),
+				L: __( 'MM/DD/YYYY', 'woocommerce' ),
+				LL: __( 'MMMM D, YYYY', 'woocommerce' ),
+				LLL: __( 'D MMMM YYYY LT', 'woocommerce' ),
+				LLLL: __( 'dddd, D MMMM YYYY LT', 'woocommerce' ),
+				LT: __( 'HH:mm', 'woocommerce' ),
 			},
 			weekdaysMin: weekdaysShort,
 		} );
@@ -777,16 +771,10 @@ export function loadLocaleData( { userLocale, weekdaysShort } ) {
 }
 
 export const dateValidationMessages = {
-	invalid: __( 'Invalid date', 'woocommerce-admin' ),
-	future: __( 'Select a date in the past', 'woocommerce-admin' ),
-	startAfterEnd: __(
-		'Start date must be before end date',
-		'woocommerce-admin'
-	),
-	endBeforeStart: __(
-		'Start date must be before end date',
-		'woocommerce-admin'
-	),
+	invalid: __( 'Invalid date', 'woocommerce' ),
+	future: __( 'Select a date in the past', 'woocommerce' ),
+	startAfterEnd: __( 'Start date must be before end date', 'woocommerce' ),
+	endBeforeStart: __( 'Start date must be before end date', 'woocommerce' ),
 };
 
 /**

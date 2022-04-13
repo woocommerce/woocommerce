@@ -3,6 +3,9 @@
  */
 import { httpClient } from './http-client';
 
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { utils } = require( '@woocommerce/e2e-utils' );
+
 const wpPluginsEndpoint = '/wp/v2/plugins';
 
 type Plugin = {
@@ -47,12 +50,15 @@ async function deactivateAndDeletePlugin( pluginName: string ) {
 }
 export async function deactivateAndDeleteAllPlugins( except: string[] = [] ) {
 	let plugins = await getPlugins();
-	let skippedPlugins = [];
+	const skippedPlugins = [];
 	const promises = [];
 	for ( const plugin of plugins ) {
 		const splitPluginName = plugin.plugin.split( '/' );
 		const slug = splitPluginName[ 1 ] || splitPluginName[ 0 ];
-		if ( ! except.includes( slug ) ) {
+		const slugFromName = utils.getSlug(
+			plugin.name.replace( ' &amp;', '' )
+		);
+		if ( ! except.includes( slug ) && ! except.includes( slugFromName ) ) {
 			promises.push( deactivateAndDeletePlugin( plugin.plugin ) );
 		} else {
 			skippedPlugins.push( slug );

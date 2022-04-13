@@ -104,8 +104,8 @@ export class ReportSummary extends Component {
 						reverseTrend={ isReverseTrend }
 						prevLabel={
 							compare === 'previous_period'
-								? __( 'Previous period:', 'woocommerce-admin' )
-								: __( 'Previous year:', 'woocommerce-admin' )
+								? __( 'Previous period:', 'woocommerce' )
+								: __( 'Previous year:', 'woocommerce' )
 						}
 						prevValue={ prevValue }
 						selected={ isSelected }

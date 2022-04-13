@@ -6,12 +6,17 @@ import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
-import { updateQueryString, getHistory, getNewPath } from '@woocommerce/navigation';
+import {
+	updateQueryString,
+	getHistory,
+	getNewPath,
+} from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
-	useUserPreferences
+	useUserPreferences,
+	getVisibleTasks,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
@@ -59,12 +64,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	const prevQueryRef = useRef( query );
 
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
+	const visibleTasks = getVisibleTasks( tasks );
 
 	const recordTaskListView = () => {
 		if ( query.task ) {
@@ -100,7 +100,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		createNotice( 'success', __( 'Task dismissed' ), {
 			actions: [
 				{
-					label: __( 'Undo', 'woocommerce-admin' ),
+					label: __( 'Undo', 'woocommerce' ),
 					onClick: () => undoDismissTask( taskId ),
 				},
 			],
@@ -130,7 +130,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			<div className="woocommerce-card__menu woocommerce-card__header-item">
 				<EllipsisMenu
 					className={ id }
-					label={ __( 'Task List Options', 'woocommerce-admin' ) }
+					label={ __( 'Task List Options', 'woocommerce' ) }
 					renderContent={ ( {
 						onToggle,
 					}: {
@@ -147,7 +147,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 									}
 								} }
 							>
-								{ __( 'Hide this', 'woocommerce-admin' ) }
+								{ __( 'Hide this', 'woocommerce' ) }
 							</Button>
 						</div>
 					) }
@@ -291,7 +291,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 							const className = classnames(
 								'woocommerce-task-list__item index-' + index,
 								{
-									complete: task.isComplete,
+									'is-complete': task.isComplete,
 									'is-active': task.id === activeTaskId,
 								}
 							);

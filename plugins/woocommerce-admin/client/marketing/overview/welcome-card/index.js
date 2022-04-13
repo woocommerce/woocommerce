@@ -32,7 +32,7 @@ const WelcomeCard = ( { isHidden, updateOptions } ) => {
 		<Card className="woocommerce-marketing-overview-welcome-card">
 			<CardBody>
 				<Button
-					label={ __( 'Hide', 'woocommerce-admin' ) }
+					label={ __( 'Hide', 'woocommerce' ) }
 					onClick={ hide }
 					className="woocommerce-marketing-overview-welcome-card__hide-button"
 				>
@@ -42,7 +42,7 @@ const WelcomeCard = ( { isHidden, updateOptions } ) => {
 				<h3>
 					{ __(
 						'Grow your customer base and increase your sales with marketing tools built for WooCommerce',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</h3>
 			</CardBody>

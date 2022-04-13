@@ -60,7 +60,7 @@ class Themes extends \WC_REST_Data_Controller {
 	 */
 	public function upload_theme_permissions_check( $request ) {
 		if ( ! current_user_can( 'upload_themes' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you are not allowed to install themes on this site.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you are not allowed to install themes on this site.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -75,7 +75,7 @@ class Themes extends \WC_REST_Data_Controller {
 	public function upload_theme( $request ) {
 		if (
 			! isset( $_FILES['pluginzip'] ) || ! isset( $_FILES['pluginzip']['tmp_name'] ) || ! is_uploaded_file( $_FILES['pluginzip']['tmp_name'] ) || ! is_file( $_FILES['pluginzip']['tmp_name'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,  WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			return new \WP_Error( 'woocommerce_rest_invalid_file', __( 'Specified file failed upload test.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_file', __( 'Specified file failed upload test.', 'woocommerce' ) );
 		}
 
 		include_once ABSPATH . 'wp-admin/includes/file.php';
@@ -163,19 +163,19 @@ class Themes extends \WC_REST_Data_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'status'  => array(
-					'description' => __( 'Theme installation status.', 'woocommerce-admin' ),
+					'description' => __( 'Theme installation status.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'message' => array(
-					'description' => __( 'Theme installation message.', 'woocommerce-admin' ),
+					'description' => __( 'Theme installation message.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'theme'   => array(
-					'description' => __( 'Uploaded theme.', 'woocommerce-admin' ),
+					'description' => __( 'Uploaded theme.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -194,7 +194,7 @@ class Themes extends \WC_REST_Data_Controller {
 	public function get_collection_params() {
 		$params['context']   = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['pluginzip'] = array(
-			'description'       => __( 'A zip file of the theme to be uploaded.', 'woocommerce-admin' ),
+			'description'       => __( 'A zip file of the theme to be uploaded.', 'woocommerce' ),
 			'type'              => 'file',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

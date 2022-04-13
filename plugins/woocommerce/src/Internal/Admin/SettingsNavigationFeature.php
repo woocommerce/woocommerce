@@ -84,10 +84,10 @@ class SettingsNavigationFeature {
 	 */
 	public static function add_feature_toggle( $features ) {
 		$features[] = array(
-			'title' => __( 'Settings', 'woocommerce-admin' ),
+			'title' => __( 'Settings', 'woocommerce' ),
 			'desc'  => __(
 				'Adds the new WooCommerce settings UI.',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			'id'    => 'woocommerce_settings_enabled',
 			'type'  => 'checkbox',

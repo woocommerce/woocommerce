@@ -152,19 +152,19 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'type'       => 'object',
 			'properties' => array(
 				'coupon_id'     => array(
-					'description' => __( 'Coupon ID.', 'woocommerce-admin' ),
+					'description' => __( 'Coupon ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'amount'        => array(
-					'description' => __( 'Net discount amount.', 'woocommerce-admin' ),
+					'description' => __( 'Net discount amount.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count'  => array(
-					'description' => __( 'Number of orders.', 'woocommerce-admin' ),
+					'description' => __( 'Number of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -174,38 +174,38 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon code.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon code.', 'woocommerce' ),
 					),
 					'date_created'     => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon creation date.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon creation date.', 'woocommerce' ),
 					),
 					'date_created_gmt' => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon creation date in GMT.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon creation date in GMT.', 'woocommerce' ),
 					),
 					'date_expires'     => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon expiration date.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon expiration date.', 'woocommerce' ),
 					),
 					'date_expires_gmt' => array(
 						'type'        => 'date-time',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Coupon expiration date in GMT.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon expiration date in GMT.', 'woocommerce' ),
 					),
 					'discount_type'    => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'enum'        => array_keys( wc_get_coupon_types() ),
-						'description' => __( 'Coupon discount type.', 'woocommerce-admin' ),
+						'description' => __( 'Coupon discount type.', 'woocommerce' ),
 					),
 				),
 			),
@@ -223,7 +223,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$params                  = array();
 		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']          = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -231,7 +231,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'minimum'           => 1,
 		);
 		$params['per_page']      = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -240,26 +240,26 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']         = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']        = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']         = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']       = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'coupon_id',
 			'enum'              => array(
@@ -271,7 +271,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['coupons']       = array(
-			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -280,7 +280,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			),
 		);
 		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce-admin' ),
+			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
@@ -297,12 +297,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'code'         => __( 'Coupon code', 'woocommerce-admin' ),
-			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
-			'amount'       => __( 'Amount discounted', 'woocommerce-admin' ),
-			'created'      => __( 'Created', 'woocommerce-admin' ),
-			'expires'      => __( 'Expires', 'woocommerce-admin' ),
-			'type'         => __( 'Type', 'woocommerce-admin' ),
+			'code'         => __( 'Coupon code', 'woocommerce' ),
+			'orders_count' => __( 'Orders', 'woocommerce' ),
+			'amount'       => __( 'Amount discounted', 'woocommerce' ),
+			'created'      => __( 'Created', 'woocommerce' ),
+			'expires'      => __( 'Expires', 'woocommerce' ),
+			'type'         => __( 'Type', 'woocommerce' ),
 		);
 
 		/**
@@ -325,7 +325,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function prepare_item_for_export( $item ) {
 		$date_expires = empty( $item['extended_info']['date_expires'] )
-			? __( 'N/A', 'woocommerce-admin' )
+			? __( 'N/A', 'woocommerce' )
 			: $item['extended_info']['date_expires'];
 
 		$export_item = array(

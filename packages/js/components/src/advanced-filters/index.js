@@ -32,8 +32,8 @@ import AdvancedFilterItem from './item';
 import { Text } from '../experimental';
 
 const matches = [
-	{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },
-	{ value: 'any', label: __( 'Any', 'woocommerce-admin' ) },
+	{ value: 'all', label: __( 'All', 'woocommerce' ) },
+	{ value: 'any', label: __( 'Any', 'woocommerce' ) },
 ];
 
 /**
@@ -154,7 +154,7 @@ class AdvancedFilters extends Component {
 						onChange={ this.onMatchChange }
 						aria-label={ __(
 							'Choose to apply any or all filters',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					/>
 				),
@@ -330,10 +330,7 @@ class AdvancedFilters extends Component {
 										aria-expanded={ isOpen }
 									>
 										<AddOutlineIcon />
-										{ __(
-											'Add a Filter',
-											'woocommerce-admin'
-										) }
+										{ __( 'Add a Filter', 'woocommerce' ) }
 									</Button>
 								) }
 								renderContent={ ( { onClose } ) => (
@@ -364,7 +361,7 @@ class AdvancedFilters extends Component {
 					<div className="woocommerce-filters-advanced__controls">
 						{ updateDisabled && (
 							<Button isPrimary disabled>
-								{ __( 'Filter', 'woocommerce-admin' ) }
+								{ __( 'Filter', 'woocommerce' ) }
 							</Button>
 						) }
 						{ ! updateDisabled && (
@@ -374,7 +371,7 @@ class AdvancedFilters extends Component {
 								href={ updateHref }
 								onClick={ this.onFilter }
 							>
-								{ __( 'Filter', 'woocommerce-admin' ) }
+								{ __( 'Filter', 'woocommerce' ) }
 							</Link>
 						) }
 						{ activeFilters.length > 0 && (
@@ -383,10 +380,7 @@ class AdvancedFilters extends Component {
 								href={ this.getUpdateHref( [] ) }
 								onClick={ this.clearFilters }
 							>
-								{ __(
-									'Clear all filters',
-									'woocommerce-admin'
-								) }
+								{ __( 'Clear all filters', 'woocommerce' ) }
 							</Link>
 						) }
 					</div>

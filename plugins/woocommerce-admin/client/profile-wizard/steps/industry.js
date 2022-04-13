@@ -114,7 +114,7 @@ class Industry extends Component {
 				'error',
 				__(
 					'There was a problem updating your industries',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 
@@ -127,7 +127,7 @@ class Industry extends Component {
 	async validateField() {
 		const error = this.state.selected.length
 			? null
-			: __( 'Please select at least one industry', 'woocommerce-admin' );
+			: __( 'Please select at least one industry', 'woocommerce' );
 		this.setState( { error } );
 	}
 
@@ -225,11 +225,11 @@ class Industry extends Component {
 					>
 						{ __(
 							'In which industry does the store operate?',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 					<Text variant="body" as="p">
-						{ __( 'Choose any that apply', 'woocommerce-admin' ) }
+						{ __( 'Choose any that apply', 'woocommerce' ) }
 					</Text>
 				</div>
 				<Card>
@@ -276,7 +276,7 @@ class Industry extends Component {
 								! selected.length || isProfileItemsRequesting
 							}
 						>
-							{ __( 'Continue', 'woocommerce-admin' ) }
+							{ __( 'Continue', 'woocommerce' ) }
 						</Button>
 					</CardFooter>
 				</Card>

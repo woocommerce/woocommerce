@@ -39,13 +39,16 @@ class Appearance extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
+			return __( 'Make your store stand out with unique design', 'woocommerce' );
+		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You personalized your store', 'woocommerce-admin' );
+				return __( 'You personalized your store', 'woocommerce' );
 			}
-			return __( 'Personalize your store', 'woocommerce-admin' );
+			return __( 'Personalize your store', 'woocommerce' );
 		}
-		return __( 'Personalize my store', 'woocommerce-admin' );
+		return __( 'Personalize my store', 'woocommerce' );
 	}
 
 	/**
@@ -54,9 +57,12 @@ class Appearance extends Task {
 	 * @return string
 	 */
 	public function get_content() {
+		if ( count( $this->task_list->get_sections() ) > 0 ) {
+			return __( 'Upload your logo to adapt the store to your brand’s personality.', 'woocommerce' );
+		}
 		return __(
 			'Add your logo, create a homepage, and start designing your store.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -66,7 +72,7 @@ class Appearance extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce-admin' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**

@@ -33,21 +33,21 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( CATEGORY_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -69,18 +69,18 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Categories match {{select /}} filters',
 			'A sentence describing filters for Categories. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	}
 );
 
 const filterValues = [
 	{
-		label: __( 'All categories', 'woocommerce-admin' ),
+		label: __( 'All categories', 'woocommerce' ),
 		value: 'all',
 	},
 	{
-		label: __( 'Single category', 'woocommerce-admin' ),
+		label: __( 'Single category', 'woocommerce' ),
 		value: 'select_category',
 		chartMode: 'item-comparison',
 		subFilters: [
@@ -96,16 +96,16 @@ const filterValues = [
 					labels: {
 						placeholder: __(
 							'Type to search for a category',
-							'woocommerce-admin'
+							'woocommerce'
 						),
-						button: __( 'Single Category', 'woocommerce-admin' ),
+						button: __( 'Single Category', 'woocommerce' ),
 					},
 				},
 			},
 		],
 	},
 	{
-		label: __( 'Comparison', 'woocommerce-admin' ),
+		label: __( 'Comparison', 'woocommerce' ),
 		value: 'compare-categories',
 		chartMode: 'item-comparison',
 		settings: {
@@ -115,14 +115,14 @@ const filterValues = [
 			labels: {
 				helpText: __(
 					'Check at least two categories below to compare',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				placeholder: __(
 					'Search for categories to compare',
-					'woocommerce-admin'
+					'woocommerce'
 				),
-				title: __( 'Compare Categories', 'woocommerce-admin' ),
-				update: __( 'Compare', 'woocommerce-admin' ),
+				title: __( 'Compare Categories', 'woocommerce' ),
+				update: __( 'Compare', 'woocommerce' ),
 			},
 			onClick: addCesSurveyForAnalytics,
 		},
@@ -131,7 +131,7 @@ const filterValues = [
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'Advanced filters', 'woocommerce-admin' ),
+		label: __( 'Advanced filters', 'woocommerce' ),
 		value: 'advanced',
 	} );
 }
@@ -148,7 +148,7 @@ if ( Object.keys( advancedFilters.filters ).length ) {
  */
 export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,

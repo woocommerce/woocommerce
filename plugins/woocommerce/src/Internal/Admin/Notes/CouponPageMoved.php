@@ -73,15 +73,15 @@ class CouponPageMoved {
 	 */
 	public static function get_note() {
 		$note = new Note();
-		$note->set_title( __( 'Coupon management has moved!', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Coupons can now be managed from Marketing > Coupons. Click the button below to remove the legacy WooCommerce > Coupons menu item.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Coupon management has moved!', 'woocommerce' ) );
+		$note->set_content( __( 'Coupons can now be managed from Marketing > Coupons. Click the button below to remove the legacy WooCommerce > Coupons menu item.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_UPDATE );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( new stdClass() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'remove-legacy-coupon-menu',
-			__( 'Remove legacy coupon menu', 'woocommerce-admin' ),
+			__( 'Remove legacy coupon menu', 'woocommerce' ),
 			wc_admin_url( '&action=remove-coupon-menu' ),
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

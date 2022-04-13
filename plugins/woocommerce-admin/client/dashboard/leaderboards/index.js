@@ -110,12 +110,12 @@ const Leaderboards = ( props ) => {
 		<EllipsisMenu
 			label={ __(
 				'Choose which leaderboards to display and other settings',
-				'woocommerce-admin'
+				'woocommerce'
 			) }
 			renderContent={ ( { onToggle } ) => (
 				<Fragment>
 					<MenuTitle>
-						{ __( 'Leaderboards', 'woocommerce-admin' ) }
+						{ __( 'Leaderboards', 'woocommerce' ) }
 					</MenuTitle>
 					{ renderLeaderboardToggles( {
 						allLeaderboards,
@@ -124,7 +124,7 @@ const Leaderboards = ( props ) => {
 					} ) }
 					<SelectControl
 						className="woocommerce-dashboard__dashboard-leaderboards__select"
-						label={ __( 'Rows per table', 'woocommerce-admin' ) }
+						label={ __( 'Rows per table', 'woocommerce' ) }
 						value={ rowsPerTable }
 						options={ Array.from( { length: 20 }, ( v, key ) => ( {
 							v: key + 1,
@@ -151,7 +151,7 @@ const Leaderboards = ( props ) => {
 		<Fragment>
 			<div className="woocommerce-dashboard__dashboard-leaderboards">
 				<SectionHeader
-					title={ title || __( 'Leaderboards', 'woocommerce-admin' ) }
+					title={ title || __( 'Leaderboards', 'woocommerce' ) }
 					menu={ renderMenu() }
 				/>
 				<div className="woocommerce-dashboard__columns">

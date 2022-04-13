@@ -261,7 +261,7 @@ class Features {
 			return $sections;
 		}
 
-		$sections['features'] = __( 'Features', 'woocommerce-admin' );
+		$sections['features'] = __( 'Features', 'woocommerce' );
 		return $sections;
 	}
 
@@ -288,8 +288,8 @@ class Features {
 			return $settings;
 		}
 
-		$desc          = __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce-admin' );
-		$disabled_desc = __( 'WooCommerce features have been disabled.', 'woocommerce-admin' );
+		$desc          = __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce' );
+		$disabled_desc = __( 'WooCommerce features have been disabled.', 'woocommerce' );
 
 		if ( $features_disabled ) {
 			$GLOBALS['hide_save_button'] = true;
@@ -298,7 +298,7 @@ class Features {
 		return array_merge(
 			array(
 				array(
-					'title' => __( 'Features', 'woocommerce-admin' ),
+					'title' => __( 'Features', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => $features_disabled ? $disabled_desc : $desc,
 					'id'    => 'features_options',

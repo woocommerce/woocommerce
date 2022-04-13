@@ -50,13 +50,10 @@ export const FavoriteButton = ( { id } ) => {
 			onClick={ toggleFavorite }
 			aria-label={
 				isFavorited
-					? __(
-							'Add this item to your favorites.',
-							'woocommerce-admin'
-					  )
+					? __( 'Add this item to your favorites.', 'woocommerce' )
 					: __(
 							'Remove this item from your favorites.',
-							'woocommerce-admin'
+							'woocommerce'
 					  )
 			}
 		>

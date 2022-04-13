@@ -32,7 +32,7 @@ export function* getRecommendedPlugins( category ) {
 			error,
 			__(
 				'There was an error loading recommended extensions.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 	}

@@ -93,13 +93,13 @@ export class ProductStockCard extends Component {
 				'success',
 				sprintf(
 					/* translators: %s = name of the product having stock updated */
-					__( '%s stock updated', 'woocommerce-admin' ),
+					__( '%s stock updated', 'woocommerce' ),
 					product.name
 				),
 				{
 					actions: [
 						{
-							label: __( 'Undo', 'woocommerce-admin' ),
+							label: __( 'Undo', 'woocommerce' ),
 							onClick: () => {
 								updateProductStock(
 									product,
@@ -117,7 +117,7 @@ export class ProductStockCard extends Component {
 				'error',
 				sprintf(
 					/* translators: %s = name of the product having stock updated */
-					__( '%s stock could not be updated', 'woocommerce-admin' ),
+					__( '%s stock could not be updated', 'woocommerce' ),
 					product.name
 				)
 			);
@@ -134,17 +134,17 @@ export class ProductStockCard extends Component {
 		if ( editing ) {
 			return [
 				<Button key="save" type="submit" isPrimary>
-					{ __( 'Save', 'woocommerce-admin' ) }
+					{ __( 'Save', 'woocommerce' ) }
 				</Button>,
 				<Button key="cancel" type="reset">
-					{ __( 'Cancel', 'woocommerce-admin' ) }
+					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>,
 			];
 		}
 
 		return [
 			<Button key="update" isSecondary onClick={ this.beginEdit }>
-				{ __( 'Update stock', 'woocommerce-admin' ) }
+				{ __( 'Update stock', 'woocommerce' ) }
 			</Button>,
 		];
 	}
@@ -168,7 +168,7 @@ export class ProductStockCard extends Component {
 							} }
 						/>
 					</BaseControl>
-					<span>{ __( 'in stock', 'woocommerce-admin' ) }</span>
+					<span>{ __( 'in stock', 'woocommerce' ) }</span>
 				</Fragment>
 			);
 		}
@@ -184,7 +184,7 @@ export class ProductStockCard extends Component {
 			>
 				{ sprintf(
 					/* translators: %d = stock quantity of the product being updated */
-					__( '%d in stock', 'woocommerce-admin' ),
+					__( '%d in stock', 'woocommerce' ),
 					product.stock_quantity
 				) }
 			</span>
@@ -205,7 +205,7 @@ export class ProductStockCard extends Component {
 		const lastOrderDate = product.last_order_date
 			? sprintf(
 					/* translators: %s = time since last product order. e.g.: "10 minutes ago" - translated. */
-					__( 'Last ordered %s', 'woocommerce-admin' ),
+					__( 'Last ordered %s', 'woocommerce' ),
 					moment.utc( product.last_order_date ).fromNow()
 			  )
 			: null;

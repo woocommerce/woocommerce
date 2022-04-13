@@ -30,14 +30,14 @@ export const TaskListCompleted = ( { twoColumns, hideTasks, keepTasks } ) => {
 							<h2>
 								{ __(
 									"You've completed store setup",
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							</h2>
 							<Button isSecondary onClick={ keepTasks }>
-								{ __( 'Keep list', 'woocommerce-admin' ) }
+								{ __( 'Keep list', 'woocommerce' ) }
 							</Button>
 							<Button isPrimary onClick={ hideTasks }>
-								{ __( 'Hide this list', 'woocommerce-admin' ) }
+								{ __( 'Hide this list', 'woocommerce' ) }
 							</Button>
 						</div>
 					</CardHeader>

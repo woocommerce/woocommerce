@@ -16,17 +16,17 @@ class Synchronize {
 	/**
 	 * Scheduled action hook used to facilitate scanning the product catalog for downloadable products.
 	 */
-	const SYNC_TASK = 'woocommerce_download_dir_sync';
+	public const SYNC_TASK = 'woocommerce_download_dir_sync';
 
 	/**
 	 * The group under which synchronization tasks run (our standard 'woocommerce-db-updates' group).
 	 */
-	const SYNC_TASK_GROUP = 'woocommerce-db-updates';
+	public const SYNC_TASK_GROUP = 'woocommerce-db-updates';
 
 	/**
 	 * Used to track progress throughout the sync process.
 	 */
-	const SYNC_TASK_PAGE = 'wc_product_download_dir_sync_page';
+	public const SYNC_TASK_PAGE = 'wc_product_download_dir_sync_page';
 
 	/**
 	 * Used to record an estimation of progress on the current synchronization process. 0 means 0%,
@@ -34,12 +34,12 @@ class Synchronize {
 	 *
 	 * @param int
 	 */
-	const SYNC_TASK_PROGRESS = 'wc_product_download_dir_sync_progress';
+	public const SYNC_TASK_PROGRESS = 'wc_product_download_dir_sync_progress';
 
 	/**
 	 * Number of downloadable products to be processed in each atomic sync task.
 	 */
-	const SYNC_TASK_BATCH_SIZE = 20;
+	public const SYNC_TASK_BATCH_SIZE = 20;
 
 	/**
 	 * WC Queue.
@@ -219,7 +219,18 @@ class Synchronize {
 			$parent_url = _x( 'invalid URL', 'Approved product download URLs migration', 'woocommerce' );
 
 			try {
-				$parent_url = ( new URL( $downloadable->get_file() ) )->get_parent_url();
+				$download_file = $downloadable->get_file();
+
+				/**
+				 * Controls whether shortcodes should be resolved and validated using the Approved Download Directory feature.
+				 *
+				 * @param bool $should_validate
+				 */
+				if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $downloadable->get_type_of_file_path() ) {
+					$download_file = do_shortcode( $download_file );
+				}
+
+				$parent_url = ( new URL( $download_file ) )->get_parent_url();
 				$this->register->add_approved_directory( $parent_url, false );
 			} catch ( Exception $e ) {
 				wc_get_logger()->log(

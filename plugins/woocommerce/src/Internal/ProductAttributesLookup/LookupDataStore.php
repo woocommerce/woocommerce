@@ -18,10 +18,10 @@ class LookupDataStore {
 	 * Types of updates to perform depending on the current changest
 	 */
 
-	const ACTION_NONE         = 0;
-	const ACTION_INSERT       = 1;
-	const ACTION_UPDATE_STOCK = 2;
-	const ACTION_DELETE       = 3;
+	public const ACTION_NONE         = 0;
+	public const ACTION_INSERT       = 1;
+	public const ACTION_UPDATE_STOCK = 2;
+	public const ACTION_DELETE       = 3;
 
 	/**
 	 * The lookup table name.

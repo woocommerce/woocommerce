@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix Google Listings plugin is always shown in free features despite already activated. #8330

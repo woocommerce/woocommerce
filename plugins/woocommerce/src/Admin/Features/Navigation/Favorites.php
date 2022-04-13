@@ -55,7 +55,7 @@ class Favorites {
 		if ( in_array( $item_id, $all_favorites, true ) ) {
 			return new \WP_Error(
 				'woocommerce_favorites_already_exists',
-				__( 'Favorite already exists', 'woocommerce-admin' )
+				__( 'Favorite already exists', 'woocommerce' )
 			);
 		}
 
@@ -79,7 +79,7 @@ class Favorites {
 		if ( ! in_array( $item_id, $all_favorites, true ) ) {
 			return new \WP_Error(
 				'woocommerce_favorites_does_not_exist',
-				__( 'Favorite item not found', 'woocommerce-admin' )
+				__( 'Favorite item not found', 'woocommerce' )
 			);
 		}
 

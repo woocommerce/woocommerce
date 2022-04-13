@@ -89,16 +89,16 @@ class TestCheckout {
 			return;
 		}
 
-		$content = __( 'Make sure that your checkout is working properly before you launch your store. Go through your checkout process in its entirety: from adding a product to your cart, choosing a shipping location, and making a payment.', 'woocommerce-admin' );
+		$content = __( 'Make sure that your checkout is working properly before you launch your store. Go through your checkout process in its entirety: from adding a product to your cart, choosing a shipping location, and making a payment.', 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Don\'t forget to test your checkout', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Don\'t forget to test your checkout', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'test-checkout', __( 'Test checkout', 'woocommerce-admin' ), wc_get_page_permalink( 'shop' ) );
+		$note->add_action( 'test-checkout', __( 'Test checkout', 'woocommerce' ), wc_get_page_permalink( 'shop' ) );
 		return $note;
 	}
 }

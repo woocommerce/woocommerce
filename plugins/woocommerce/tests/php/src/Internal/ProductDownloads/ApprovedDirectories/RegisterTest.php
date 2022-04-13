@@ -19,7 +19,7 @@ class RegisterTest extends WC_Unit_Test_Case {
 	 * Create a Whitelist with representative paths including a URL with a port number,
 	 * a regular URL and an absolute filepath.
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
 		static::$sut = new Register();

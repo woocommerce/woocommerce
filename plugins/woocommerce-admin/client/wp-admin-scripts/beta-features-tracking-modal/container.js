@@ -65,21 +65,21 @@ const BetaFeaturesTrackingModal = ( { updateOptions } ) => {
 
 	return (
 		<Modal
-			title={ __( 'Build a Better WooCommerce', 'woocommerce-admin' ) }
+			title={ __( 'Build a Better WooCommerce', 'woocommerce' ) }
 			onRequestClose={ () => setIsModalOpen( false ) }
 			className="woocommerce-beta-features-tracking-modal"
 		>
 			<p>
 				{ __(
 					'Testing new features requires sharing non-sensitive data via ',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 				<a href="https://woocommerce.com/usage-tracking?utm_medium=product">
-					{ __( 'usage tracking', 'woocommerce-admin' ) }
+					{ __( 'usage tracking', 'woocommerce' ) }
 				</a>
 				{ __(
 					'. Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. No personal data is tracked or stored and you can opt-out at any time.',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			</p>
 			<div className="woocommerce-beta-features-tracking-modal__checkbox">
@@ -102,7 +102,7 @@ const BetaFeaturesTrackingModal = ( { updateOptions } ) => {
 						setIsModalOpen( false );
 					} }
 				>
-					{ __( 'Save', 'woocommerce-admin' ) }
+					{ __( 'Save', 'woocommerce' ) }
 				</Button>
 			</div>
 		</Modal>

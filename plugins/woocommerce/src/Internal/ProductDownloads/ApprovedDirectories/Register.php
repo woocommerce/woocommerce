@@ -15,13 +15,13 @@ class Register {
 	/**
 	 * Used to indicate the current mode.
 	 */
-	const MODES = array(
+	private const MODES = array(
 		self::MODE_DISABLED,
 		self::MODE_ENABLED,
 	);
 
-	const MODE_DISABLED  = 'disabled';
-	const MODE_ENABLED   = 'enabled';
+	public const MODE_DISABLED  = 'disabled';
+	public const MODE_ENABLED   = 'enabled';
 
 	/**
 	 * Name of the option used to store the current mode. See self::MODES for a

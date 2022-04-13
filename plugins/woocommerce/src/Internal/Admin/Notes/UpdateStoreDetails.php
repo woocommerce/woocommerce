@@ -43,15 +43,15 @@ class UpdateStoreDetails {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Edit your store details if you need to', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Nice work completing your store profile! You can always go back and edit the details you just shared, as needed.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Edit your store details if you need to', 'woocommerce' ) );
+		$note->set_content( __( 'Nice work completing your store profile! You can always go back and edit the details you just shared, as needed.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'update-store-details',
-			__( 'Update store details', 'woocommerce-admin' ),
+			__( 'Update store details', 'woocommerce' ),
 			wc_admin_url( '&path=/setup-wizard' )
 		);
 

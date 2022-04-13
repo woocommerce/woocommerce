@@ -54,7 +54,7 @@ class Products extends \WC_REST_Products_Controller {
 		}
 
 		$schema['properties']['last_order_date'] = array(
-			'description' => __( "The date the last order for this product was placed, in the site's timezone.", 'woocommerce-admin' ),
+			'description' => __( "The date the last order for this product was placed, in the site's timezone.", 'woocommerce' ),
 			'type'        => 'date-time',
 			'context'     => array( 'view', 'edit' ),
 			'readonly'    => true,
@@ -71,13 +71,13 @@ class Products extends \WC_REST_Products_Controller {
 	public function get_collection_params() {
 		$params                 = parent::get_collection_params();
 		$params['low_in_stock'] = array(
-			'description'       => __( 'Limit result set to products that are low or out of stock. (Deprecated)', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to products that are low or out of stock. (Deprecated)', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
 		);
 		$params['search']       = array(
-			'description'       => __( 'Search by similar product name or sku.', 'woocommerce-admin' ),
+			'description'       => __( 'Search by similar product name or sku.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

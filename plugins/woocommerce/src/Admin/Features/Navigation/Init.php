@@ -47,14 +47,14 @@ class Init {
 	public static function add_feature_toggle( $features ) {
 		$description  = __(
 			'Adds the new WooCommerce navigation experience to the dashboard',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 		$update_text  = '';
 		$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
 		if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 			$update_text = sprintf(
 				/* translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag. */
-				__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce-admin' ),
+				__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce' ),
 				'<br/>',
 				'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',
 				'</a>'
@@ -62,7 +62,7 @@ class Init {
 		}
 
 		$features[] = array(
-			'title' => __( 'Navigation', 'woocommerce-admin' ),
+			'title' => __( 'Navigation', 'woocommerce' ),
 			'desc'  => $description . $update_text,
 			'id'    => self::TOGGLE_OPTION_NAME,
 			'type'  => 'checkbox',

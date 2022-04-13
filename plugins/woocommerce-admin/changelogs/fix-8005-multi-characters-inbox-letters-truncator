@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix inbox letters truncator to support multi characters. #8404

@@ -121,7 +121,7 @@ export default {
 				{ interpolateComponents( {
 					mixedString: __(
 						'All taxes with codes that include {{query /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					components: {
 						query: (

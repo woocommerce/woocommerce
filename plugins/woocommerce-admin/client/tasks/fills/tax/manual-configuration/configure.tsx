@@ -39,7 +39,7 @@ export const Configure: React.FC< TaxChildProps > = ( {
 					onManual();
 				} }
 			>
-				{ __( 'Configure', 'woocommerce-admin' ) }
+				{ __( 'Configure', 'woocommerce' ) }
 			</Button>
 			<p>
 				{ generalSettings.woocommerce_calc_taxes !== 'yes' &&
@@ -47,8 +47,7 @@ export const Configure: React.FC< TaxChildProps > = ( {
 						mixedString: __(
 							/*eslint-disable max-len*/
 							'By clicking "Configure" you\'re enabling tax rates and calculations. More info {{link}}here{{/link}}.',
-							/*eslint-enable max-len*/
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						components: {
 							link: (

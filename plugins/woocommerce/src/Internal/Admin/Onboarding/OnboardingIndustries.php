@@ -28,44 +28,44 @@ class OnboardingIndustries {
 			'woocommerce_admin_onboarding_industries',
 			array(
 				'fashion-apparel-accessories'     => array(
-					'label'             => __( 'Fashion, apparel, and accessories', 'woocommerce-admin' ),
+					'label'             => __( 'Fashion, apparel, and accessories', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'health-beauty'                   => array(
-					'label'             => __( 'Health and beauty', 'woocommerce-admin' ),
+					'label'             => __( 'Health and beauty', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'electronics-computers'           => array(
-					'label'             => __( 'Electronics and computers', 'woocommerce-admin' ),
+					'label'             => __( 'Electronics and computers', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'food-drink'                      => array(
-					'label'             => __( 'Food and drink', 'woocommerce-admin' ),
+					'label'             => __( 'Food and drink', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'home-furniture-garden'           => array(
-					'label'             => __( 'Home, furniture, and garden', 'woocommerce-admin' ),
+					'label'             => __( 'Home, furniture, and garden', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'cbd-other-hemp-derived-products' => array(
-					'label'             => __( 'CBD and other hemp-derived products', 'woocommerce-admin' ),
+					'label'             => __( 'CBD and other hemp-derived products', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'education-and-learning'          => array(
-					'label'             => __( 'Education and learning', 'woocommerce-admin' ),
+					'label'             => __( 'Education and learning', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
 				'other'                           => array(
-					'label'             => __( 'Other', 'woocommerce-admin' ),
+					'label'             => __( 'Other', 'woocommerce' ),
 					'use_description'   => true,
-					'description_label' => __( 'Description', 'woocommerce-admin' ),
+					'description_label' => __( 'Description', 'woocommerce' ),
 				),
 			)
 		);

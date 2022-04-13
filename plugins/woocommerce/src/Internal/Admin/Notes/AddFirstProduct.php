@@ -64,10 +64,10 @@ class AddFirstProduct {
 		$content_lines = array(
 			'{greetings}<br/><br/>',
 			/* translators: %s: line break */
-			sprintf( __( 'Nice one; you\'ve created a WooCommerce store! Now it\'s time to add your first product and get ready to start selling.%s', 'woocommerce-admin' ), '<br/><br/>' ),
-			__( 'There are three ways to add your products: you can <strong>create products manually, import them at once via CSV file</strong>, or <strong>migrate them from another service</strong>.<br/><br/>', 'woocommerce-admin' ),
+			sprintf( __( 'Nice one; you\'ve created a WooCommerce store! Now it\'s time to add your first product and get ready to start selling.%s', 'woocommerce' ), '<br/><br/>' ),
+			__( 'There are three ways to add your products: you can <strong>create products manually, import them at once via CSV file</strong>, or <strong>migrate them from another service</strong>.<br/><br/>', 'woocommerce' ),
 			/* translators: %1$s is an open anchor tag (<a>) and %2$s is a close link tag (</a>). */
-			sprintf( __( '%1$1sExplore our docs%2$2s for more information, or just get started!', 'woocommerce-admin' ), '<a href="https://woocommerce.com/document/managing-products/?utm_source=help_panel&utm_medium=product">', '</a>' ),
+			sprintf( __( '%1$1sExplore our docs%2$2s for more information, or just get started!', 'woocommerce' ), '<a href="https://woocommerce.com/document/managing-products/?utm_source=help_panel&utm_medium=product">', '</a>' ),
 		);
 
 		$additional_data = array(
@@ -75,7 +75,7 @@ class AddFirstProduct {
 		);
 
 		$note = new Note();
-		$note->set_title( __( 'Add your first product', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Add your first product', 'woocommerce' ) );
 		$note->set_content( implode( '', $content_lines ) );
 		$note->set_content_data( (object) $additional_data );
 		$note->set_image(
@@ -87,7 +87,7 @@ class AddFirstProduct {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_EMAIL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'add-first-product', __( 'Add a product', 'woocommerce-admin' ), admin_url( 'admin.php?page=wc-admin&task=products' ) );
+		$note->add_action( 'add-first-product', __( 'Add a product', 'woocommerce' ), admin_url( 'admin.php?page=wc-admin&task=products' ) );
 		return $note;
 	}
 }

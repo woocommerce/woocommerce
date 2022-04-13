@@ -32,11 +32,11 @@ class UnsecuredReportFiles {
 	 */
 	public static function get_note() {
 		$note = new Note();
-		$note->set_title( __( 'Potentially unsecured files were found in your uploads directory', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Potentially unsecured files were found in your uploads directory', 'woocommerce' ) );
 		$note->set_content(
 			sprintf(
 				/* translators: 1: opening analytics docs link tag. 2: closing link tag */
-				__( 'Files that may contain %1$sstore analytics%2$s reports were found in your uploads directory - we recommend assessing and deleting any such files.', 'woocommerce-admin' ),
+				__( 'Files that may contain %1$sstore analytics%2$s reports were found in your uploads directory - we recommend assessing and deleting any such files.', 'woocommerce' ),
 				'<a href="https://woocommerce.com/document/woocommerce-analytics/" target="_blank">',
 				'</a>'
 			)
@@ -47,14 +47,14 @@ class UnsecuredReportFiles {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://developer.woocommerce.com/?p=10410',
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			true
 		);
 		$note->add_action(
 			'dismiss',
-			__( 'Dismiss', 'woocommerce-admin' ),
+			__( 'Dismiss', 'woocommerce' ),
 			wc_admin_url(),
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			false

@@ -52,7 +52,7 @@ class TrackingOptIn {
 		/* translators: 1: open link to WooCommerce.com settings, 2: open link to WooCommerce.com tracking documentation, 3: close link tag. */
 		$content_format = __(
 			'Gathering usage data allows us to improve WooCommerce. Your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. You can always visit the %1$sSettings%3$s and choose to stop sharing data. %2$sRead more%3$s about what data we collect.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 
 		$note_content = sprintf(
@@ -63,13 +63,13 @@ class TrackingOptIn {
 		);
 
 		$note = new Note();
-		$note->set_title( __( 'Help WooCommerce improve with usage tracking', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Help WooCommerce improve with usage tracking', 'woocommerce' ) );
 		$note->set_content( $note_content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'tracking-opt-in', __( 'Activate usage tracking', 'woocommerce-admin' ), false, Note::E_WC_ADMIN_NOTE_ACTIONED, true );
+		$note->add_action( 'tracking-opt-in', __( 'Activate usage tracking', 'woocommerce' ), false, Note::E_WC_ADMIN_NOTE_ACTIONED, true );
 		return $note;
 	}
 

@@ -28,7 +28,6 @@
 	"dependencies": {
 		"@typescript-eslint/parser": "^5.14.0",
 		"@wordpress/eslint-plugin": "^11.0.0",
-		"eslint": "^8.10.0",
 		"eslint-plugin-react-hooks": "^4.3.0",
 		"eslint-plugin-testing-library": "^5.1.0",
 		"requireindex": "^1.2.0"
@@ -36,8 +35,12 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"scripts": {
+		"lint": "eslint ./rules ./configs"
+	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"eslint": "^8.11.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"rimraf": "^3.0.2",

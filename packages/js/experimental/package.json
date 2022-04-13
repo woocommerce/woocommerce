@@ -29,7 +29,7 @@
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/element": "^4.1.1",
 		"@wordpress/i18n": "^4.3.1",
-		"@wordpress/icons": "^6.3.0",
+		"@wordpress/icons": "^8.1.0",
 		"@wordpress/keycodes": "^3.3.1",
 		"classnames": "^2.3.1",
 		"dompurify": "^2.3.6",
@@ -54,8 +54,10 @@
 		"@types/react-transition-group": "^4.4.4",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
+		"@wordpress/eslint-plugin": "^11.0.0",
 		"concurrently": "^7.0.0",
 		"css-loader": "^3.6.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"postcss-loader": "^3.0.0",
@@ -77,8 +79,15 @@
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
+		"lint": "eslint src",
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

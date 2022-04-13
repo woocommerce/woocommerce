@@ -97,7 +97,6 @@ class WC_Admin_Unit_Tests_Bootstrap {
 
 		require_once $this->wc_core_dir . '/woocommerce.php';
 		require $this->plugin_dir . '/vendor/autoload.php';
-		require $this->plugin_dir . '/woocommerce-admin.php';
 	}
 
 	/**

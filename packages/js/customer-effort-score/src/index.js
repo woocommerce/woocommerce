@@ -49,7 +49,7 @@ export function CustomerEffortScore( {
 		createNotice( 'success', label, {
 			actions: [
 				{
-					label: __( 'Give feedback', 'woocommerce-admin' ),
+					label: __( 'Give feedback', 'woocommerce' ),
 					onClick: () => {
 						setVisible( true );
 						onModalShownCallback();

@@ -1,3 +1,4 @@
+@import 'node_modules/@wordpress/base-styles/colors.native';
 // By using CSS variables, we can switch the spacing rhythm using a single media query.
 :root {
 	--large-gap: 40px;
@@ -36,6 +37,14 @@
 	select.components-select-control__input {
 		max-width: 100%;
 		line-height: 1;
+	}
+
+	.components-panel__body > .components-panel__body-title,
+	.woocommerce-experimental-list__item,
+	.woocommerce-inbox-message {
+		&:hover {
+			background: $gray-0;
+		}
 	}
 }
 

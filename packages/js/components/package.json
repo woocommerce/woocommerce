@@ -39,10 +39,10 @@
 		"@wordpress/deprecated": "^3.3.1",
 		"@wordpress/dom": "^3.3.2",
 		"@wordpress/element": "^4.1.1",
-		"@wordpress/hooks": "^2.12.3",
+		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/html-entities": "^3.3.1",
 		"@wordpress/i18n": "^4.3.1",
-		"@wordpress/icons": "^6.3.0",
+		"@wordpress/icons": "^8.1.0",
 		"@wordpress/keycodes": "^3.3.1",
 		"@wordpress/url": "^3.4.1",
 		"@wordpress/viewport": "^4.1.2",
@@ -77,6 +77,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@babel/runtime": "^7.17.2",
 		"@storybook/addon-actions": "^6.4.0",
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/addon-controls": "^6.4.19",
@@ -95,9 +96,11 @@
 		"@testing-library/user-event": "^13.5.0",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
+		"@wordpress/eslint-plugin": "^11.0.0",
 		"@wordpress/scripts": "^12.6.1",
 		"concurrently": "^7.0.0",
 		"css-loader": "^3.6.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"postcss-loader": "^3.0.0",
@@ -113,11 +116,18 @@
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"lint": "eslint src --ext=js,ts,tsx",
 		"prepack": "pnpm run clean && pnpm run build",
 		"start": "concurrently \"tsc --build ./tsconfig.json --watch\" \"webpack --watch\"",
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test:update-snapshots": "pnpm run test:nobuild -- --updateSnapshot",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

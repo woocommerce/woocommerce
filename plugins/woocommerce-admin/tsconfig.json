@@ -17,11 +17,11 @@
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types",
-			"packages/**/node_modules/@types"
+			"../../packages/js/**/node_modules/@types"
 		],
 		"baseUrl": "./",
 		"paths": {
-			"@woocommerce/*": [ "packages/*/src" ],
+			"@woocommerce/*": [ "../../packages/js/*/src" ],
 			"~/*": [ "client/*" ]
 		}
 	},
@@ -29,20 +29,20 @@
 	"files": [],
 	"references": [
 		{ "path": "client/" },
-		{ "path": "packages/admin-e2e-tests" },
-        { "path": "packages/components" },
-		{ "path": "packages/csv-export" },
-		{ "path": "packages/currency" },
-		{ "path": "packages/customer-effort-score" },
-		{ "path": "packages/data" },
-		{ "path": "packages/date" },
-		{ "path": "packages/experimental" },
-		{ "path": "packages/explat" },
-		{ "path": "packages/js-tests" },
-		{ "path": "packages/navigation" },
-		{ "path": "packages/notices" },
-		{ "path": "packages/number" },
-		{ "path": "packages/onboarding" },
-		{ "path": "packages/tracks" },
+		{ "path": "../../packages/js/admin-e2e-tests" },
+		{ "path": "../../packages/js/components" },
+		{ "path": "../../packages/js/csv-export" },
+		{ "path": "../../packages/js/currency" },
+		{ "path": "../../packages/js/customer-effort-score" },
+		{ "path": "../../packages/js/data" },
+		{ "path": "../../packages/js/date" },
+		{ "path": "../../packages/js/experimental" },
+		{ "path": "../../packages/js/explat" },
+		{ "path": "../../packages/js/js-tests" },
+		{ "path": "../../packages/js/navigation" },
+		{ "path": "../../packages/js/notices" },
+		{ "path": "../../packages/js/number" },
+		{ "path": "../../packages/js/onboarding" },
+		{ "path": "../../packages/js/tracks" },
     ]
 }

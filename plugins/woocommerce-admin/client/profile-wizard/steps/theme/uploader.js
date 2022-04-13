@@ -101,22 +101,19 @@ class ThemeUploader extends Component {
 							>
 								<CloudUploadIcon />
 								<H className="woocommerce-theme-uploader__title">
-									{ __(
-										'Upload a theme',
-										'woocommerce-admin'
-									) }
+									{ __( 'Upload a theme', 'woocommerce' ) }
 								</H>
 								<p>
 									{ __(
 										'Drop a theme zip file here to upload',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</p>
 							</FormFileUpload>
 							<DropZone
 								label={ __(
 									'Drop your theme zip file here',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 								onFilesDrop={ this.handleFilesDrop }
 							/>
@@ -125,12 +122,12 @@ class ThemeUploader extends Component {
 						<Fragment>
 							<Spinner />
 							<H className="woocommerce-theme-uploader__title">
-								{ __( 'Uploading theme', 'woocommerce-admin' ) }
+								{ __( 'Uploading theme', 'woocommerce' ) }
 							</H>
 							<p>
 								{ __(
 									'Your theme is being uploaded',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							</p>
 						</Fragment>

@@ -14,22 +14,27 @@
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },
   "scripts": {
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm git:update-hooks",
+    "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install"
   },
   "devDependencies": {
     "@automattic/nx-composer": "^0.1.0",
     "@nrwl/cli": "^13.3.4",
-    "@nrwl/linter": "^13.3.4",
     "@nrwl/devkit": "^13.1.4",
+    "@nrwl/linter": "^13.3.4",
     "@nrwl/tao": "13.3.4",
     "@nrwl/web": "^13.3.4",
     "@nrwl/workspace": "^13.3.4",
     "@types/node": "14.14.33",
-    "@woocommerce/eslint-plugin": "^1.3.0",
+    "@woocommerce/eslint-plugin": "workspace:*",
+    "@wordpress/eslint-plugin": "^11.0.0",
     "@wordpress/prettier-config": "^1.1.1",
     "chalk": "^4.1.2",
     "glob": "^7.2.0",
+    "husky": "^7.0.4",
     "jest": "^27.3.1",
+    "lint-staged": "^12.3.7",
     "mkdirp": "^1.0.4",
     "node-stream-zip": "^1.15.0",
     "prettier": "npm:wp-prettier@^2.2.1-beta-1",

@@ -72,12 +72,12 @@ class Options extends \WC_REST_Data_Controller {
 		$params = explode( ',', $request['options'] );
 
 		if ( ! isset( $request['options'] ) || ! is_array( $params ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'You must supply an array of options.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'You must supply an array of options.', 'woocommerce' ), 500 );
 		}
 
 		foreach ( $params as $option ) {
 			if ( ! $this->user_has_permission( $option, $request ) ) {
-				return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view these options.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+				return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view these options.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 		}
 
@@ -113,12 +113,12 @@ class Options extends \WC_REST_Data_Controller {
 		$params = $request->get_json_params();
 
 		if ( ! is_array( $params ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'You must supply an array of options and values.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'You must supply an array of options and values.', 'woocommerce' ), 500 );
 		}
 
 		foreach ( $params as $option_name => $option_value ) {
 			if ( ! $this->user_has_permission( $option_name, $request, true ) ) {
-				return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage these options.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+				return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage these options.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 		}
 
@@ -248,7 +248,7 @@ class Options extends \WC_REST_Data_Controller {
 			'properties' => array(
 				'options' => array(
 					'type'        => 'array',
-					'description' => __( 'Array of options with associated values.', 'woocommerce-admin' ),
+					'description' => __( 'Array of options with associated values.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),

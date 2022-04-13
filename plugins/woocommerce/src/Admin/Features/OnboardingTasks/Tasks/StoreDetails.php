@@ -26,11 +26,11 @@ class StoreDetails extends Task {
 	public function get_title() {
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added store details', 'woocommerce-admin' );
+				return __( 'You added store details', 'woocommerce' );
 			}
-			return __( 'Add store details', 'woocommerce-admin' );
+			return __( 'Add store details', 'woocommerce' );
 		}
-		return __( 'Store details', 'woocommerce-admin' );
+		return __( 'Store details', 'woocommerce' );
 	}
 
 	/**
@@ -41,7 +41,7 @@ class StoreDetails extends Task {
 	public function get_content() {
 		return __(
 			'Your store address is required to set the origin country for shipping, currencies, and payment options.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -51,7 +51,7 @@ class StoreDetails extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '4 minutes', 'woocommerce-admin' );
+		return __( '4 minutes', 'woocommerce' );
 	}
 
 	/**

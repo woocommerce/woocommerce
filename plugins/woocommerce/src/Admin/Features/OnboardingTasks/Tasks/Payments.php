@@ -25,13 +25,16 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
+			return __( 'Add a way to get paid', 'woocommerce' );
+		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You set up payments', 'woocommerce-admin' );
+				return __( 'You set up payments', 'woocommerce' );
 			}
-			return __( 'Set up payments', 'woocommerce-admin' );
+			return __( 'Set up payments', 'woocommerce' );
 		}
-		return __( 'Set up payments', 'woocommerce-admin' );
+		return __( 'Set up payments', 'woocommerce' );
 	}
 
 	/**
@@ -40,9 +43,12 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_content() {
+		if ( count( $this->task_list->get_sections() ) > 0 ) {
+			return __( 'Let your customers pay the way they like.', 'woocommerce' );
+		}
 		return __(
 			'Choose payment providers and enable payment methods at checkout.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -52,7 +58,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce-admin' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**

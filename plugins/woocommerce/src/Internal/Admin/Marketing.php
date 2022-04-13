@@ -72,8 +72,8 @@ class Marketing {
 	public function add_parent_menu_item() {
 		if ( ! Features::is_enabled( 'navigation' ) ) {
 			add_menu_page(
-				__( 'Marketing', 'woocommerce-admin' ),
-				__( 'Marketing', 'woocommerce-admin' ),
+				__( 'Marketing', 'woocommerce' ),
+				__( 'Marketing', 'woocommerce' ),
 				'manage_woocommerce',
 				'woocommerce-marketing',
 				null,
@@ -134,7 +134,7 @@ class Marketing {
 		PageController::get_instance()->register_page(
 			[
 				'id'       => 'woocommerce-marketing-overview',
-				'title'    => __( 'Overview', 'woocommerce-admin' ),
+				'title'    => __( 'Overview', 'woocommerce' ),
 				'path'     => 'wc-admin&path=/marketing',
 				'parent'   => 'woocommerce-marketing',
 				'nav_args' => array(

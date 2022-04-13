@@ -240,7 +240,7 @@ class CustomersScheduler extends ImportScheduler {
 		}
 
 		// Long form query because $wpdb->update rejects [deleted].
-		$deleted_text = __( '[deleted]', 'woocommerce-admin' );
+		$deleted_text = __( '[deleted]', 'woocommerce' );
 		$updated      = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}wc_customer_lookup
