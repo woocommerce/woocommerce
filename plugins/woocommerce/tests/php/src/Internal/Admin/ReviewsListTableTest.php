@@ -261,7 +261,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$submitted_on = sprintf(
 			'%1$s at %2$s',
 			get_comment_date( 'Y/m/d', $review ),
-			get_comment_date( 'g:i a', $review ),
+			get_comment_date( 'g:i a', $review )
 		);
 
 		$this->assertStringContainsString( $submitted_on, $date_output );
