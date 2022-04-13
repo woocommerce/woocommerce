@@ -42,7 +42,7 @@ class ReviewsCommentsOverrides {
 	/**
 	 * Renders an admin notice informing the user that reviews were moved to a new page.
 	 */
-	public function display_reviews_moved_notice() {
+	protected function display_reviews_moved_notice() {
 		?>
 
 		<div class="notice notice-info is-dismissible">
