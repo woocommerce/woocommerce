@@ -100,10 +100,43 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the review column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_comment( $item ) {
-		// @TODO Implement in MWC-5339 {agibson 2022-04-12}
+
+		$in_reply_to = $this->get_in_reply_to_review_text( $item );
+
+		echo $in_reply_to ? $in_reply_to . '<br><br>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		?>
+		<div class="comment-text">
+			<?php echo get_comment_text( $item->comment_ID ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Gets the in-reply-to-review text.
+	 *
+	 * @param WP_Comment $reply Reply to review.
+	 * @return string
+	 */
+	private function get_in_reply_to_review_text( $reply ) {
+
+		$review = get_comment( $reply->comment_parent );
+
+		if ( ! $review ) {
+			return '';
+		}
+
+		$parent_review_link = esc_url( get_comment_link( $review ) );
+		$review_author_name = get_comment_author( $review );
+
+		return sprintf(
+			/* translators: %s: Parent review link with review author name. */
+			ent2ncr( __( 'In reply to %s.', 'woocommerce' ) ),
+			'<a href="' . esc_url( $parent_review_link ) . '">' . esc_html( $review_author_name ) . '</a>'
+		);
 	}
 
 	/**
