@@ -147,7 +147,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$link = add_query_arg(
 				[
-					's'    => get_comment_author_IP( $item->comment_ID ),
+					's'    => urlencode( get_comment_author_IP( $item->comment_ID ) ),
 					'page' => Reviews::MENU_SLUG,
 					'mode' => 'detail',
 				],
