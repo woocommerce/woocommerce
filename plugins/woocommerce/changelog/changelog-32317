@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add woocommerce_download_parse_remote_file_path and woocommerce_download_parse_file_path filters to modify the parse_file_path method file_path return. #32317

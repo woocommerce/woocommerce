@@ -1,4 +1,4 @@
-name: Run lint checks potentially affected projects across the monorepo
+name: Run lint checks potentially affecting projects across the monorepo
 on: pull_request
 concurrency:
   group: changelogger-${{ github.event_name }}-${{ github.ref }}
@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 10
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

@@ -7,6 +7,7 @@
 
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\Note;
+use \Automattic\WooCommerce\Admin\Notes\DataStore;
 
 /**
  * Class WC_Admin_Tests_Notes_Data_Store
@@ -342,6 +343,92 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 
 		// The first note in each result set should be the same.
 		$this->assertEquals( $lookup_note_zero->get_id(), $get_note_zero->get_id() );
+	}
+
+	/**
+	 * Test that get_notes properly handles the $context parameter
+	 */
+	public function test_get_notes_context_param() {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		// Create two Notes: one in context and one out of it.
+		$test_context        = self::class;
+		$global_context      = DataStore::WC_ADMIN_NOTE_OPER_GLOBAL;
+		$context_name        = 'PHP_UNIT_IN_CONTEXT_TEST_NOTE';
+		$out_of_context_name = 'PHP_UNIT_OUT_OF_CONTEXT_TEST_NOTE';
+
+		foreach ( array( $context_name, $out_of_context_name ) as $note_name ) {
+			$note = new Note();
+			$note->set_name( $note_name );
+			$note->set_title( 'PHPUNIT_CONTEXT_TEST_NOTE' );
+			$note->set_content( 'PHPUNIT_CONTEXT_TEST_NOTE_CONTENT' );
+			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_source( 'PHPUNIT_TEST' );
+			$note->set_is_snoozable( false );
+			$note->set_layout( 'plain' );
+			$note->set_image( '' );
+			$note->add_action(
+				'PHPUNIT_TEST_ACTION_SLUG',
+				'PHPUNIT_TEST_ACTION_LABEL',
+				'?s=PHPUNIT_TEST_ACTION_URL'
+			);
+			$note->set_is_deleted( false );
+			$note->save();
+		}
+
+		// Add filter for 'woocommerce_note_where_clauses' that applies only in context.
+		$context_filter_hit_count = 0;
+		$context_filter_callback  = function( $where_clauses, $args, $context ) use ( $test_context, $global_context, $context_name, &$context_filter_hit_count ) {
+			if ( $context === $test_context ) {
+				$context_filter_hit_count++;
+				$where_clauses .= ' AND name = "' . $context_name . '"';
+			}
+			return $where_clauses;
+		};
+		add_filter( 'woocommerce_note_where_clauses', $context_filter_callback, 10, 3 );
+
+		// Add filter for 'woocommerce_note_where_clauses' that applies in any context.
+		$no_context_filter_hit_count = 0;
+		$global_context_received     = null;
+		$no_context_filter_callback  = function( $where_clauses, $args, $context ) use ( $test_context, &$global_context_received, &$no_context_filter_hit_count ) {
+			// Record the context we get passed in.
+			if ( $test_context !== $context ) {
+				$global_context_received = $context;
+			}
+
+			// Record that we're here.
+			$no_context_filter_hit_count++;
+			$where_clauses .= ' AND source = "PHPUNIT_TEST"';
+			return $where_clauses;
+		};
+		add_filter( 'woocommerce_note_where_clauses', $no_context_filter_callback, 10, 3 );
+
+		// Get note counts.
+		$no_context_note_count   = $data_store->get_notes_count( array( Note::E_WC_ADMIN_NOTE_INFORMATIONAL ), array() );
+		$test_context_note_count = $data_store->get_notes_count( array( Note::E_WC_ADMIN_NOTE_INFORMATIONAL ), array(), $test_context );
+
+		// The no context filter should have been hit twice, the context filter once.
+		$this->assertEquals( 2, $no_context_filter_hit_count );
+		$this->assertEquals( 1, $context_filter_hit_count );
+
+		// There should be only one note that satisfies the context filter.
+		$this->assertEquals( 1, $test_context_note_count );
+
+		// There should be more than one note that satisfies the no-context filter.
+		$this->assertGreaterThan( 1, $no_context_note_count );
+
+		// Same tests with get_notes().
+		$no_context_get_notes   = $data_store->get_notes( array( 'type' => array( Note::E_WC_ADMIN_NOTE_INFORMATIONAL ) ) );
+		$test_context_get_notes = $data_store->get_notes( array( 'type' => array( Note::E_WC_ADMIN_NOTE_INFORMATIONAL ) ), $test_context );
+
+		// There should only be one note in the context result set.
+		$this->assertEquals( 1, count( $test_context_get_notes ) );
+
+		// There should be more than one note in the no-context result set.
+		$this->assertGreaterThan( 1, count( $no_context_get_notes ) );
+
+		// When not explicitly passed, context should default to WC_ADMIN_NOTE_OPER_GLOBAL.
+		$this->assertEquals( $global_context, $global_context_received );
 	}
 
 	/**

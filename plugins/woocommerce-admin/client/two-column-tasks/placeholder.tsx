@@ -8,7 +8,15 @@ import classnames from 'classnames';
  */
 import './style.scss';
 
-const TaskListPlaceholder = ( props ) => {
+type TasksPlaceholderProps = {
+	numTasks?: number;
+	twoColumns?: boolean;
+	query: {
+		task?: string;
+	};
+};
+
+const TaskListPlaceholder: React.FC< TasksPlaceholderProps > = ( props ) => {
 	const { numTasks = 5, twoColumns = false } = props;
 
 	return (

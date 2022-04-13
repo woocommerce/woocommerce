@@ -100,6 +100,10 @@ function getMarketingItems( props ) {
 			link:
 				'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
 		},
+		activePlugins.includes( 'pinterest-for-woocommerce' ) && {
+			title: __( 'Set up Pinterest for WooCommerce', 'woocommerce' ),
+			link: 'https://woocommerce.com/products/pinterest-for-woocommerce/',
+		},
 		activePlugins.includes( 'mailchimp-for-woocommerce' ) && {
 			title: __( 'Connect Mailchimp for WooCommerce', 'woocommerce' ),
 			link:

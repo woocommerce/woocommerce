@@ -614,6 +614,11 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 			$download_file = $_product->get_file( $result->download_id );
 
+			// If the downloadable file has been disabled (it may be located in an untrusted location) then do not return it.
+			if ( ! $download_file->get_enabled() ) {
+				continue;
+			}
+
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',

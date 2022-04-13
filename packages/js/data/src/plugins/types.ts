@@ -39,6 +39,7 @@ export type Plugin = {
 	recommendation_priority?: number;
 	is_visible?: boolean;
 	is_local_partner?: boolean;
+	is_offline?: boolean;
 };
 
 type PaypalOnboardingState = 'unknown' | 'start' | 'progressive' | 'onboarded';
