@@ -298,4 +298,114 @@ class ReviewsListTable extends WP_List_Table {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
 	}
 
+	/**
+	 * Returns an array of supported statuses and their labels.
+	 *
+	 * @return array
+	 */
+	protected function get_status_filters() : array {
+		return [
+			'all' => _x( 'All', 'product reviews', 'woocommerce' ),
+			'moderated' => _x( 'Pending', 'product reviews', 'woocommerce' ),
+			'approved' => _x( 'Approved', 'product reviews', 'woocommerce' ),
+			'spam' => _x( 'Spam', 'product reviews', 'woocommerce' ),
+			'trash' => _x( 'Trash', 'product reviews', 'woocommerce' ),
+		];
+	}
+
+	/**
+	 * Renders the available status filters.
+	 *
+	 * @see WP_Comments_List_Table::get_views() for consistency.
+	 */
+	protected function get_views() {
+		global $post_id, $comment_status, $comment_type;
+
+		$status_links = [];
+
+		$status_link_labels = $this->get_status_filters();
+
+		if ( ! EMPTY_TRASH_DAYS ) {
+			unset( $status_link_labels['trash'] );
+		}
+
+		$link = add_query_arg(
+			[
+				'post_type' => 'product',
+				'page'      => Reviews::MENU_SLUG,
+			],
+			admin_url( 'edit.php' )
+		);
+
+		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
+			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
+		}
+
+		foreach ( $status_link_labels as $status => $label ) {
+			$current_link_attributes = '';
+
+			if ( $status === $comment_status ) {
+				$current_link_attributes = ' class="current" aria-current="page"';
+			}
+
+			$link = add_query_arg( 'comment_status', $status, $link );
+
+			if ( $post_id ) {
+				$link = add_query_arg( 'p', absint( $post_id ), $link );
+			}
+
+			$count_html = sprintf(
+				'<span class="count">(<span class="%s-count">%s</span>)</span>',
+				( 'moderated' === $status ) ? 'pending' : $status,
+				number_format_i18n( $this->get_review_count( $status, (int) $post_id ) )
+			);
+
+			$status_links[ $status ] = '<a href="' . esc_url( $link ) . '"' . $current_link_attributes . '>' . $label . ' ' . $count_html . '</a>';
+		}
+
+		/** This filter is documented in wp-admin/includes/class-wp-comments-list-table.php */
+		return apply_filters( 'comment_status_links', $status_links );
+	}
+
+	/**
+	 * Returns the number of reviews (including review replies) for a given status.
+	 *
+	 * @param string $status     Status key from {@see ReviewsListTable::get_status_filters()}.
+	 * @param int    $product_id ID of the product if we're filtering by product in this request. Otherwise `0` for
+	 *                           no product filter.
+	 * @return int
+	 */
+	protected function get_review_count( string $status, int $product_id ) : int {
+		return (int) get_comments(
+			[
+				'type__in'  => [ 'review', 'comment' ],
+				'status'    => $this->convert_status_string_to_comment_approved( $status ),
+				'post_type' => 'product',
+				'post_id'   => $product_id,
+				'count'     => true,
+			]
+		);
+	}
+
+	/**
+	 * Converts a status key into its equivalent `comment_approved` database column value.
+	 *
+	 * @param string $status Status key from {@see ReviewsListTable::get_status_filters()}.
+	 * @return string
+	 */
+	protected function convert_status_string_to_comment_approved( string $status ) : string {
+		switch ( $status ) {
+			case 'moderated':
+				return '0';
+			case 'approved':
+				return '1';
+			case 'spam':
+				return 'spam';
+			case 'trash':
+				return 'trash';
+			default:
+				return 'all';
+		}
+	}
+
 }
