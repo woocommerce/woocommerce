@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use ReflectionClass;
+use ReflectionException;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -141,5 +142,28 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'5 stars' => [ '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ],
 			'2.5 stars (rounds down)' => [ '2.5', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ],
 		];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sortable_columns()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_sortable_columns() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sortable_columns' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			[
+				'author'   => 'comment_author',
+				'response' => 'comment_post_ID',
+				'date'     => 'comment_date',
+				'type'     => 'comment_type',
+				'rating'   => 'meta_value_num',
+			],
+			$method->invoke( $list_table )
+		);
 	}
 }

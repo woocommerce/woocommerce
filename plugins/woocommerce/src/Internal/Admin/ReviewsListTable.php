@@ -130,6 +130,22 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Returns a list of sortable columns. Key is the column ID and value is which database column
+	 * we perform the sorting on.
+	 *
+	 * @return array
+	 */
+	protected function get_sortable_columns() {
+		return [
+			'author'   => 'comment_author',
+			'response' => 'comment_post_ID',
+			'date'     => 'comment_date',
+			'type'     => 'comment_type',
+			'rating'   => 'meta_value_num',
+		];
+	}
+
+	/**
 	 * Prepares reviews for display.
 	 */
 	public function prepare_items() {
