@@ -137,9 +137,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_get_item_author_url_for_display( $author_url, $author_url_for_display ) {
-
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url_for_display' );
+		$method->setAccessible( true );
 
 		$this->assertSame( $author_url_for_display, $method->invokeArgs( $list_table, [ $author_url ] ) );
 	}
