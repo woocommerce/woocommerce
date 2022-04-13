@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Generator;
 use ReflectionClass;
 use ReflectionException;
 use WC_Helper_Product;
@@ -164,10 +165,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can output the author information.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_author()
+	 * @dataProvider provider_column_author
+	 *
+	 * @param bool $show_avatars          Value for the `show_avatars` option.
+	 * @param bool $should_contain_avatar If the HTML should contain an avatar.
 	 *
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_author() {
+	public function test_column_author( bool $show_avatars, bool $should_contain_avatar ) {
 		global $comment;
 
 		$review = $this->factory()->comment->create_and_get(
@@ -182,6 +187,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_author' );
 		$method->setAccessible( true );
 
+		update_option( 'show_avatars', $show_avatars );
+
 		ob_start();
 
 		$method->invokeArgs( $list_table, [ $review ] );
@@ -190,8 +197,23 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$author = get_comment_author( $review->comment_ID );
 
-		$this->assertStringContainsString( '<strong>' . $author . '</strong>', $author_output );
+		$this->assertStringContainsString( $author, $author_output );
+
+		if ( $should_contain_avatar ) {
+			$this->assertStringContainsString( "<img alt='' src='", $author_output );
+			$this->assertStringContainsString( 'gravatar.com/avatar/', $author_output );
+		} else {
+			$this->assertStringNotContainsString( "<img alt='' src='", $author_output );
+			$this->assertStringNotContainsString( 'gravatar.com/avatar/', $author_output );
+		}
+
 		$this->assertStringContainsString( '<a title="https://example.com" href="https://example.com" rel="noopener noreferrer">example.com</a>', $author_output );
+	}
+
+	/** @see test_column_author */
+	public function provider_column_author() : Generator {
+		yield 'avatars disabled' => [ false, false ];
+		yield 'avatars enabled' => [ true, true ];
 	}
 
 	/**
