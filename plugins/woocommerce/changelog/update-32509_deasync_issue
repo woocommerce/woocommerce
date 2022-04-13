@@ -1,5 +1,5 @@
 Significance: patch
 Type: update
-Comment: Simply updating a patch version of the deasync package
+Updating deasync package to resolve install script issue with Linux
 
 
