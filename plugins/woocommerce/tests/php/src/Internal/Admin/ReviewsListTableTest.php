@@ -158,9 +158,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
 		$method->setAccessible( true );
 
-		// @TODO PHPCS doesn't like this {agibson 2022-04-12}
-		// global $comment_status;
-		// $comment_status = $current_comment_status;
+		global $comment_status;
+		$comment_status = $current_comment_status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$this->assertEqualsCanonicalizing(
 			$expected_actions,
@@ -177,6 +176,41 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				'approve',
 				'spam',
 				'trash',
+			],
+		];
+
+		yield 'approved status' => [
+			'current_comment_status' => 'approved',
+			'expected_actions' => [
+				'unapprove',
+				'spam',
+				'trash',
+			],
+		];
+
+		yield 'moderated status' => [
+			'current_comment_status' => 'moderated',
+			'expected_actions' => [
+				'approve',
+				'spam',
+				'trash',
+			],
+		];
+
+		yield 'trash status' => [
+			'current_comment_status' => 'trash',
+			'expected_actions' => [
+				'spam',
+				'untrash',
+				'delete',
+			],
+		];
+
+		yield 'spam status' => [
+			'current_comment_status' => 'spam',
+			'expected_actions' => [
+				'unspam',
+				'delete',
 			],
 		];
 	}
