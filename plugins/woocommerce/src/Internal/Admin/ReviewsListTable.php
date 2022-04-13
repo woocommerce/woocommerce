@@ -114,8 +114,8 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_author( $item ) {
 		global $comment_status;
 
-		$author_url = $this->get_review_author_url();
-		$author_url_display = $this->get_review_author_url_for_display( $author_url );
+		$author_url = $this->get_item_author_url();
+		$author_url_display = $this->get_item_author_url_for_display( $author_url );
 
 		?>
 		<strong><?php comment_author(); ?></strong><br />
@@ -158,11 +158,11 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Gets the review author URL.
+	 * Gets the item author URL.
 	 *
 	 * @return string
 	 */
-	private function get_review_author_url() {
+	private function get_item_author_url() {
 
 		$author_url = get_comment_author_url();
 		$protocols = [ 'https://', 'http://' ];
@@ -175,12 +175,12 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Gets the review author URL for display.
+	 * Gets the item author URL for display.
 	 *
-	 * @param string $author_url The review author URL (raw).
+	 * @param string $author_url The review or reply author URL (raw).
 	 * @return string
 	 */
-	private function get_review_author_url_for_display( $author_url ) {
+	private function get_item_author_url_for_display( $author_url ) {
 
 		$author_url_display = str_replace( [ 'http://', 'https://' ], '', $author_url );
 
