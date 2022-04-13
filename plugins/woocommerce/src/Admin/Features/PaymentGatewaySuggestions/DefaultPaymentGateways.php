@@ -86,10 +86,16 @@ class DefaultPaymentGateways {
 							'GB',
 							'US',
 							'PR',
+							'UK',
+							'HU',
+							'SL',
+							'ID',
 						)
 					),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'US', 'CA', 'UK', 'AT', 'BE', 'BG', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AU', 'NZ', 'HK', 'JP', 'SG', 'ID', 'IN' ),
+				'category_additional' => array(),
 				'recommendation_priority' => 3,
 			),
 			array(
@@ -134,10 +140,17 @@ class DefaultPaymentGateways {
 							'FR',
 							'IT',
 							'GB',
+							'UK',
+							'ES',
+							'FI',
+							'NO',
+							'SE',
 						)
 					),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array(),
+				'category_additional' => array( 'UK', 'AT', 'BE', 'CH', 'DK', 'ES', 'FI', 'FR', 'DE', 'GB', 'IT', 'NL', 'NO', 'PL', 'SE' ),
 			),
 			array(
 				'id'         => 'mollie_wc_gateway_banktransfer',
@@ -189,6 +202,8 @@ class DefaultPaymentGateways {
 					),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'US', 'CA', 'UK', 'AT', 'BE', 'BG', 'HR', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AR', 'CL', 'CO', 'EC', 'PE', 'UY', 'VE', 'AU', 'NZ', 'HK', 'JP', 'SG', 'CN', 'ID', 'ZA', 'NG', 'GH' ),
+				'category_additional' => array( 'US', 'CA', 'UK', 'AT', 'BE', 'BG', 'HR', 'CH', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'DE', 'GB', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SL', 'SE', 'MX', 'BR', 'AR', 'CL', 'CO', 'EC', 'PE', 'UY', 'VE', 'AU', 'NZ', 'HK', 'JP', 'SG', 'CN', 'ID', 'IN', 'ZA', 'NG', 'GH' ),
 			),
 			array(
 				'id'         => 'cod',
@@ -360,6 +375,8 @@ class DefaultPaymentGateways {
 					self::get_rules_for_countries( array( 'AU', 'NZ' ) ),
 					self::get_rules_for_cbd( false ),
 				),
+				'category_other' => array( 'AU', 'NZ' ),
+				'category_additional' => array(),
 			),
 			array(
 				'id'         => 'square_credit_card',
@@ -376,12 +393,14 @@ class DefaultPaymentGateways {
 								self::get_rules_for_cbd( true ),
 							),
 							array(
-								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES' ) ),
+								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'UK', 'FI' ) ),
 								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
 							),
 						),
 					),
 				),
+				'category_other' => array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES', 'UK', 'FI' ),
+				'category_additional' => array(),
 			),
 		);
 	}
