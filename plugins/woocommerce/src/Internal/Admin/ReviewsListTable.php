@@ -162,7 +162,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return string
 	 */
-	private function get_item_author_url() {
+	protected function get_item_author_url() {
 
 		$author_url = get_comment_author_url();
 		$protocols = [ 'https://', 'http://' ];
@@ -180,7 +180,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string $author_url The review or reply author URL (raw).
 	 * @return string
 	 */
-	private function get_item_author_url_for_display( $author_url ) {
+	protected function get_item_author_url_for_display( $author_url ) {
 
 		$author_url_display = str_replace( [ 'http://', 'https://' ], '', $author_url );
 
