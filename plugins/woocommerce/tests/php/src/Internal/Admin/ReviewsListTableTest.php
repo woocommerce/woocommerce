@@ -286,6 +286,59 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output the review or reply date column.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_date()
+	 * @dataProvider data_provider_test_column_date
+	 *
+	 * @param bool $has_product   Whether the review is for a valid product object.
+	 * @param int  $approved_flag The review (comment) approved flag.
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_date( $has_product, $approved_flag ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_date' );
+		$method->setAccessible( true );
+
+		$post_id = $has_product ? $this->factory()->post->create() : 0;
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => (string) $approved_flag,
+			]
+		);
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $review ] );
+
+		$date_output = ob_get_clean();
+
+		$submitted_on = sprintf(
+			'%1$s at %2$s',
+			get_comment_date( 'Y/m/d', $review ),
+			get_comment_date( 'g:i a', $review )
+		);
+
+		$this->assertStringContainsString( $submitted_on, $date_output );
+
+		if ( $has_product && $approved_flag ) {
+			$this->assertStringContainsString( get_comment_link( $review ), $date_output );
+		} else {
+			$this->assertStringNotContainsString( get_comment_link( $review ), $date_output );
+		}
+	}
+
+	/** @see test_column_date() */
+	public function data_provider_test_column_date() {
+		return [
+			'No product' => [ false, 1 ],
+			'Not approved' => [ true, 0 ],
+			'Approved' => [ true, 1 ],
+		];
+	}
+
+	/**
 	 * Returns a new instance of the {@see ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable

@@ -93,7 +93,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the checkbox column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
 		// @TODO Implement in MWC-5335 {agibson 2022-04-12}
@@ -208,10 +208,39 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the "submitted on" column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * Note that the output is consistent with {@see WP_Comments_List_Table::column_date()}.
+	 *
+	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_date( $item ) {
-		// @TODO Implement in MWC-5338 {agibson 2022-04-12}
+
+		$submitted = sprintf(
+			/* translators: 1 - Product review date, 2: Product review time. */
+			__( '%1$s at %2$s', 'woocommerce' ),
+			/* translators: Review date format. See https://www.php.net/manual/datetime.format.php */
+			get_comment_date( __( 'Y/m/d', 'woocommerce' ), $item ),
+			/* translators: Review time format. See https://www.php.net/manual/datetime.format.php */
+			get_comment_date( __( 'g:i a', 'woocommerce' ), $item )
+		);
+
+		?>
+		<div class="submitted-on">
+			<?php
+
+			if ( 'approved' === wp_get_comment_status( $item ) && ! empty( $item->comment_post_ID ) ) :
+				printf(
+					'<a href="%1$s">%2$s</a>',
+					esc_url( get_comment_link( $item ) ),
+					esc_html( $submitted )
+				);
+			else :
+				echo esc_html( $submitted );
+			endif;
+
+			?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -226,7 +255,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the type column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
 		echo esc_html(
@@ -239,7 +268,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the rating column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_rating( $item ) {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
@@ -262,8 +291,8 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders any custom columns.
 	 *
-	 * @param object|array $item        Review or reply being rendered.
-	 * @param string       $column_name Name of the column being rendered.
+	 * @param WP_Comment $item        Review or reply being rendered.
+	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
