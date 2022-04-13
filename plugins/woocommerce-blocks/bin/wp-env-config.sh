@@ -20,4 +20,10 @@ wp plugin list
 wp theme activate storefront
 wp wc customer update 1 --user=1 --billing='{"first_name":"John","last_name":"Doe","company":"Automattic","country":"US","address_1":"addr 1","address_2":"addr 2","city":"San Francisco","state":"CA","postcode":"94107","phone":"123456789"}' --shipping='{"first_name":"John","last_name":"Doe","company":"Automattic","country":"US","address_1":"addr 1","address_2":"addr 2","city":"San Francisco","state":"CA","postcode":"94107","phone":"123456789"}'
 
+## Prepare translation for the test suite
+wp language core install nl_NL
+wp language plugin install woo-gutenberg-products-block nl_NL
+# We need to run update after installing the langauge to update it to the latest version. Otherwise, new strings won't be available.
+wp language plugin update woo-gutenberg-products-block nl_NL
+
 exit $EXIT_CODE
