@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use WP_Comment;
+use WP_Comments_List_Table;
 use WP_List_Table;
 
 /**
@@ -195,10 +196,38 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the "submitted on" column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * Note that the output is consistent with {@see WP_Comments_List_Table::column_date()}.
+	 *
+	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_date( $item ) {
-		// @TODO Implement in MWC-5338 {agibson 2022-04-12}
+
+		$submitted = sprintf(
+			/* translators: 1 - Comment date, 2: Comment time. */
+			__( '%1$s at %2$s', 'woocommerce' ),
+			/* translators: Comment date format. See https://www.php.net/manual/datetime.format.php */
+			get_comment_date( __( 'Y/m/d', 'woocommerce' ), $item ),
+			/* translators: Comment time format. See https://www.php.net/manual/datetime.format.php */
+			get_comment_date( __( 'g:i a', 'woocommerce' ), $item )
+		);
+
+		?>
+		<div class="submitted-on">
+			<?php
+
+			if ( 'approved' === wp_get_comment_status( $item ) && ! empty( $item->comment_post_ID ) ) :
+				printf(
+					'<a href="%s">%s</a>',
+					esc_url( get_comment_link( $item ) ),
+					esc_html( $submitted )
+				);
+			else :
+				echo esc_html( $submitted );
+			endif;
+
+			?>
+		</div>
+		<?php
 	}
 
 	/**
