@@ -157,7 +157,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		$args = [];
 
-		if ( ! in_array( strtolower( $orderby ), $this->get_sortable_columns(), true ) ) {
+		if ( ! in_array( $orderby, $this->get_sortable_columns(), true ) ) {
 			$orderby = 'comment_date_gmt';
 		}
 
@@ -174,7 +174,7 @@ class ReviewsListTable extends WP_List_Table {
 		return wp_parse_args(
 			[
 				'orderby' => $orderby,
-				'order'   => $order,
+				'order'   => strtolower( $order ),
 			],
 			$args
 		);

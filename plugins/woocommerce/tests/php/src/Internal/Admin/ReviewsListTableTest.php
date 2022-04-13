@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Gettext\Generators\Generator;
 use ReflectionClass;
 use ReflectionException;
 use WC_Helper_Product;
@@ -159,11 +160,108 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			[
 				'author'   => 'comment_author',
 				'response' => 'comment_post_ID',
-				'date'     => 'comment_date',
+				'date'     => 'comment_date_gmt',
 				'type'     => 'comment_type',
-				'rating'   => 'meta_value_num',
+				'rating'   => 'rating',
 			],
 			$method->invoke( $list_table )
 		);
+	}
+
+	/**
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sort_arguments()
+	 * @dataProvider provider_get_sort_arguments
+	 *
+	 * @param string|null $orderby       The orderby value that's set in the request.
+	 * @param string|null $order         The order value that's set in the request.
+	 * @param array       $expected_args Expected arguments.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_sort_arguments( ?string $orderby, ?string $order, array $expected_args ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
+		$method->setAccessible( true );
+
+		if ( ! is_null( $orderby ) ) {
+			$_REQUEST['orderby'] = $orderby;
+		} else {
+			unset( $_REQUEST['orderby'] );
+		}
+
+		if ( ! is_null( $order ) ) {
+			$_REQUEST['order'] = $order;
+		} else {
+			unset( $_REQUEST['order'] );
+		}
+
+		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
+	}
+
+	/** @see test_get_sort_arguments */
+	public function provider_get_sort_arguments() : \Generator {
+		yield 'order by comment_author desc' => [
+			'comment_author',
+			'desc',
+			[
+				'orderby' => 'comment_author',
+				'order'   => 'desc',
+			],
+		];
+
+		yield 'order by comment_post_ID asc' => [
+			'comment_post_ID',
+			'asc',
+			[
+				'orderby' => 'comment_post_ID',
+				'order'   => 'asc',
+			],
+		];
+
+		yield 'order by rating desc' => [
+			'rating',
+			'desc',
+			[
+				'meta_key' => 'rating',
+				'orderby'  => 'meta_value_num',
+				'order'    => 'desc',
+			],
+		];
+
+		yield 'order by comment type desc' => [
+			'comment_type',
+			'desc',
+			[
+				'orderby' => 'comment_type',
+				'order'   => 'desc',
+			],
+		];
+
+		yield 'order by comment date ASC uppercase' => [
+			'comment_date_gmt',
+			'ASC',
+			[
+				'orderby' => 'comment_date_gmt',
+				'order'   => 'asc',
+			],
+		];
+
+		yield 'invalid orderby, invalid order' => [
+			'invalid-orderby',
+			'invalid-order',
+			[
+				'orderby' => 'comment_date_gmt',
+				'order'   => 'desc',
+			],
+		];
+
+		yield 'missing orderby, missing order' => [
+			null,
+			null,
+			[
+				'orderby' => 'comment_date_gmt',
+				'order'   => 'desc',
+			],
+		];
 	}
 }
