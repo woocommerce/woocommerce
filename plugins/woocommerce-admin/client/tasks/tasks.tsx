@@ -19,6 +19,7 @@ import { TasksPlaceholder, TasksPlaceholderProps } from './placeholder';
 import './tasks.scss';
 import { TaskListProps, TaskList } from './task-list';
 import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
+import { SectionedTaskList } from '../two-column-tasks/sectioned-task-list';
 import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -31,6 +32,8 @@ function getTaskListComponent( taskListId: string ): React.FC< TaskListProps > {
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
 			return TwoColumnTaskList;
+		case 'setup_experiment_2':
+			return SectionedTaskList;
 		default:
 			return TaskList;
 	}
