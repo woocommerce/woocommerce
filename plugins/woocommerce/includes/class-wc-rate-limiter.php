@@ -101,7 +101,7 @@ class WC_Rate_Limiter {
 				$wpdb->prepare(
 					"
 						SELECT rate_limit_expiry
-						FROM {$wpdb->prefix}woocommerce_rate_limits
+						FROM {$wpdb->prefix}wc_rate_limits
 						WHERE rate_limit_key = %s
 					",
 					$action_id
@@ -138,7 +138,7 @@ class WC_Rate_Limiter {
 		$next_try_allowed_at = time() + $delay;
 
 		$result = $wpdb->replace(
-			$wpdb->prefix . 'woocommerce_rate_limits',
+			$wpdb->prefix . 'wc_rate_limits',
 			array(
 				'rate_limit_key'    => $action_id,
 				'rate_limit_expiry' => $next_try_allowed_at,
@@ -159,7 +159,7 @@ class WC_Rate_Limiter {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}woocommerce_rate_limits WHERE rate_limit_expiry < %d",
+				"DELETE FROM {$wpdb->prefix}wc_rate_limits WHERE rate_limit_expiry < %d",
 				time()
 			)
 		);

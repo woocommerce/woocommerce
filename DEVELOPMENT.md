@@ -10,6 +10,10 @@ The following command installs WP-ENV globally.
 
 `npm -g i @wordpress/env`
 
+If you don't already have [pnpm](https://pnpm.io/installation) installed, you can quickly add it using NPM.
+
+`npm install -g pnpm`
+
 ## Starting WP-ENV
 
 1. Navigate to the root of WooCommerce source code.
@@ -29,17 +33,32 @@ The port # might be different depending on your `.wp-env.override.json` configur
 
 Once you have WP-ENV container up, we need to run a few commands to start developing.
 
-1. Run `npm install` to install npm modules.
-2. Run `npm run dev`
-3. Run `composer install` to install PHP dependencies.
+1. Run `pnpm install` to install npm modules.
+2. Run `pnpm nx build woocommerce` to build core.
+3. Run `pnpm nx composer-install woocommerce` to install PHP dependencies.
 
 If you don't have Composer available locally, run the following command. It runs the command in WP-ENV container.
 
 `wp-env run composer composer install`
 
-You might also want to run `npm start` to watch your CSS and JS changes if you are working on the frontend.
+You might also want to run `pnpm start` to watch your CSS and JS changes if you are working on the frontend.
 
 You're now ready to develop!
+
+### Typescript Checking
+
+Typescript is progressively being implemented in this repository, and you might come across some files that are `.ts` or `.tsx`. By default, a VSCode environment will run type checking on such files that are currently open. 
+
+As of now, some parts of the codebase that were imported from the Woocommerce-Admin repository, into the `plugins/woocommerce-admin/client` directory, still fail Typescript checking. This has been scheduled on the team's backlog to be fixed.
+
+In order to run type checking across the entire repository, you can run this command in your shell, from the root of this repository:
+
+```sh
+pnpm tsc -b tsconfig.base.json
+```
+
+For better developer experience, the folder `.vscode/tasks.json` has two VSCode tasks to run these commands automatically as well as to parse the output and highlight the errors in the `Problems` tab and in the file explorer pane. The first task runs it once, the second one runs it in the background upon saving of any modified files. This task is also automatically prompted by VSCode to be run upon opening the folder.
+
 
 ## Using Xdebug
 
@@ -98,13 +117,12 @@ You can get the current MySQL port from the output of `wp-env start` command.
 
 1. Open your choice of MySQL tool.
 2. Use the following values to access the MySQL container.
-3. You can omit the username and password.
 
 | Name     | Value                 |
 | -------- | --------------------- |
 | Host     | 127.0.0.1             |
-| Username |                       |
-| Password |                       |
+| Username | root                  |
+| Password | password              |
 | Port     | Port from the command |
 
 ## HOWTOs

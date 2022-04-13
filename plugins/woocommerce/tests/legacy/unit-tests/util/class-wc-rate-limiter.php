@@ -15,14 +15,14 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 	/**
 	 * Run setup code for unit tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 	}
 
 	/**
 	 * Run tear down code for unit tests.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 	}
 
@@ -93,7 +93,7 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 		wc_update_600_migrate_rate_limit_options();
 
 		// Ensure that only the _123 limit was migrated.
-		$migrated = $wpdb->get_col( "SELECT rate_limit_key FROM {$wpdb->prefix}woocommerce_rate_limits" );
+		$migrated = $wpdb->get_col( "SELECT rate_limit_key FROM {$wpdb->prefix}wc_rate_limits" );
 
 		$this->assertCount( 1, $migrated );
 		$this->assertEquals( 'add_payment_method_123', $migrated[0] );

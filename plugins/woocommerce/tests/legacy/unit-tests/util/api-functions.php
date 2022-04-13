@@ -29,7 +29,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Run setup code for unit tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
@@ -44,7 +44,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Run tear down code for unit tests.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		// remove files created in the wc_rest_upload_image_from_url() tests.
@@ -82,7 +82,8 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_rest_upload_image_from_url_should_return_error_when_invalid_image_is_passed() {
 		// empty file.
-		if ( version_compare( get_bloginfo( 'version' ), '5.4-alpha', '>=' ) ) {
+		$wp_version = get_bloginfo( 'version' );
+		if ( version_compare( $wp_version, '5.4-alpha', '>=' ) ) {
 			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini file or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
 		} else {
 			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
@@ -93,7 +94,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_error_message, $result->get_error_message() );
 
 		// unsupported mime type.
-		$expected_error_message = 'Invalid image: Sorry, this file type is not permitted for security reasons.';
+		$expected_error_message = version_compare( $wp_version, '5.9-alpha', '>=' ) ? 'Invalid image: Sorry, you are not allowed to upload this file type.' : 'Invalid image: Sorry, this file type is not permitted for security reasons.';
 		$result                 = wc_rest_upload_image_from_url( 'http://somedomain.com/invalid-image-2.png' );
 
 		$this->assertWPError( $result );
@@ -123,8 +124,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_set_uploaded_image_as_attachment() {
-		$this->assertInternalType(
-			'int',
+		$this->assertIsInt(
 			wc_rest_set_uploaded_image_as_attachment(
 				array(
 					'file' => '',

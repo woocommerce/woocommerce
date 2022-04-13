@@ -150,6 +150,54 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to read an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( ( ! $object || 0 === $object->get_id() ) && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return parent::get_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( ( ! $object || 0 === $object->get_id() ) && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return parent::update_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( ( ! $object || 0 === $object->get_id() ) && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return parent::delete_item_permissions_check( $request );
+	}
+
+	/**
 	 * Expands an order item to get its data.
 	 *
 	 * @param WC_Order_item $item Order item data.
@@ -209,7 +257,26 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		unset( $data['type'] );
 
 		// Expand meta_data to include user-friendly values.
-		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
+		$formatted_meta_data = $item->get_all_formatted_meta_data( null );
+
+		// Filter out product variations.
+		if ( isset( $product ) && 'true' === $this->request['order_item_display_meta'] ) {
+			$order_item_name   = $data['name'];
+			$data['meta_data'] = array_filter(
+				$data['meta_data'],
+				function( $meta ) use ( $product, $order_item_name ) {
+					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
+
+					// Skip items with values already in the product details area of the product name.
+					if ( $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+						return false;
+					}
+
+					return true;
+				}
+			);
+		}
+
 		$data['meta_data'] = array_map(
 			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
 			$data['meta_data'],
@@ -224,7 +291,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * {@link WC_Meta_Data}. Returns the merged array.
 	 *
 	 * @param WC_Meta_Data $meta_item           An object from {@link WC_Order_Item::get_meta_data()}.
-	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_all_formatted_meta_data}.
 	 * The keys are the IDs of {@link WC_Meta_Data}.
 	 *
 	 * @return array
@@ -257,7 +324,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $order ) {
-		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds' );
+		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url' );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		// These fields are dependent on other fields.
@@ -316,6 +383,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
 						);
 					}
+					break;
+				case 'payment_url':
+					$data['payment_url'] = $order->get_checkout_payment_url();
 					break;
 			}
 		}
@@ -382,6 +452,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'fee_lines',
 			'coupon_lines',
 			'refunds',
+			'payment_url',
 		);
 
 		$data = array_intersect_key( $data, array_flip( $allowed_fields ) );
@@ -924,7 +995,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_order_statuses() {
-		$order_statuses = array();
+		$order_statuses = array( 'auto-draft' );
 
 		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
 			$order_statuses[] = str_replace( 'wc-', '', $status );
@@ -1774,6 +1845,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						),
 					),
 				),
+				'payment_url' => array(
+					'description' => __( 'Order payment URL.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'set_paid'             => array(
 					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
 					'type'        => 'boolean',
@@ -1819,6 +1896,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['order_item_display_meta'] = array(
+			'default' => false,
+			'description' => __( 'Only show meta which is meant to be displayed for an order.', 'woocommerce' ),
+			'type' => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

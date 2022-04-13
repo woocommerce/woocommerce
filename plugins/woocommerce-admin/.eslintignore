@@ -1,0 +1,21 @@
+bin/*
+!bin/generate-docs
+!.eslintrc.js
+build
+build-module
+coverage
+languages
+node_modules
+vendor
+legacy
+tests/e2e
+build-types
+
+# These packages have their own eslint config and command
+api
+e2e-environment
+e2e-utils
+
+# These packages don't have their eslint setup, but have many lint errors.
+api-core-tests
+e2e-core-tests

@@ -261,6 +261,7 @@ if ( ! function_exists( 'is_ajax' ) ) {
 	/**
 	 * Is_ajax - Returns true when the page is loaded via ajax.
 	 *
+	 * @see wp_doing_ajax() for an equivalent function provided by WordPress since 4.7.0
 	 * @return bool
 	 */
 	function is_ajax() {
@@ -464,9 +465,10 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 	 * Filter check for CSV file path.
 	 *
 	 * @since 3.6.4
-	 * @param bool $check_import_file_path If requires file path check. Defaults to true.
+	 * @param bool   $check_import_file_path If requires file path check. Defaults to true.
+	 * @param string $file                   Path of the file to be checked.
 	 */
-	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true );
+	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true, $file );
 
 	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
 		return false;
@@ -494,3 +496,31 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 
 	return false;
 }
+
+/**
+ * Check if the current theme is a block theme.
+ *
+ * @since x.x.x
+ * @return bool
+ */
+function wc_current_theme_is_fse_theme() {
+	if ( function_exists( 'wp_is_block_theme' ) ) {
+		return (bool) wp_is_block_theme();
+	}
+	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
+		return (bool) gutenberg_is_fse_theme();
+	}
+
+	return false;
+}
+
+/**
+ * Check if the current theme has WooCommerce support or is a FSE theme.
+ *
+ * @since x.x.x
+ * @return bool
+ */
+function wc_current_theme_supports_woocommerce_or_fse() {
+	return (bool) current_theme_supports( 'woocommerce' ) || wc_current_theme_is_fse_theme();
+}
+

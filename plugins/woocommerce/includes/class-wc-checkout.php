@@ -247,19 +247,21 @@ class WC_Checkout {
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
-				'type'        => 'text',
-				'label'       => __( 'Account username', 'woocommerce' ),
-				'required'    => true,
-				'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
+				'type'         => 'text',
+				'label'        => __( 'Account username', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
+				'autocomplete' => 'username',
 			);
 		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
 			$this->fields['account']['account_password'] = array(
-				'type'        => 'password',
-				'label'       => __( 'Create account password', 'woocommerce' ),
-				'required'    => true,
-				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
+				'type'         => 'password',
+				'label'        => __( 'Create account password', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
+				'autocomplete' => 'new-password',
 			);
 		}
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
@@ -831,7 +833,7 @@ class WC_Checkout {
 
 				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ), array( 'id' => $key ) );
+					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label, $key ), array( 'id' => $key ) );
 				}
 			}
 		}
@@ -985,7 +987,7 @@ class WC_Checkout {
 
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
-			if ( ! is_ajax() ) {
+			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
 				exit;
@@ -1006,7 +1008,7 @@ class WC_Checkout {
 		$order->payment_complete();
 		wc_empty_cart();
 
-		if ( ! is_ajax() ) {
+		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(
 				apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order )
 			);
@@ -1106,7 +1108,7 @@ class WC_Checkout {
 	 * If checkout failed during an AJAX call, send failure response.
 	 */
 	protected function send_ajax_failure_response() {
-		if ( is_ajax() ) {
+		if ( wp_doing_ajax() ) {
 			// Only print notices if not reloading the checkout, otherwise they're lost in the page reload.
 			if ( ! isset( WC()->session->reload_checkout ) ) {
 				$messages = wc_print_notices( true );
@@ -1132,9 +1134,19 @@ class WC_Checkout {
 	 */
 	public function process_checkout() {
 		try {
-			$nonce_value = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // phpcs:ignore
+			$nonce_value    = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // phpcs:ignore
+			$expiry_message = sprintf(
+				/* translators: %s: shop cart url */
+				__( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ),
+				esc_url( wc_get_page_permalink( 'shop' ) )
+			);
 
 			if ( empty( $nonce_value ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-process_checkout' ) ) {
+				// If the cart is empty, the nonce check failed because of session expiry.
+				if ( WC()->cart->is_empty() ) {
+					throw new Exception( $expiry_message );
+				}
+
 				WC()->session->set( 'refresh_totals', true );
 				throw new Exception( __( 'We were unable to process your order, please try again.', 'woocommerce' ) );
 			}
@@ -1145,8 +1157,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_before_checkout_process' );
 
 			if ( WC()->cart->is_empty() ) {
-				/* translators: %s: shop cart url */
-				throw new Exception( sprintf( __( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ), esc_url( wc_get_page_permalink( 'shop' ) ) ) );
+				throw new Exception( $expiry_message );
 			}
 
 			do_action( 'woocommerce_checkout_process' );

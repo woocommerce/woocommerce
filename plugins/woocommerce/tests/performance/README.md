@@ -54,7 +54,7 @@ Alternatively the k6 docker image can be used to execute tests.
 
 Before using the tests a test environment is needed to run against.
 
-In the WooCommerce e2e tests there is a Docker Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/docker/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this to just see the tests in action.
+In the WooCommerce e2e tests there is a Docker Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/docker/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this to just see the tests in action.
 
 `npx wc-e2e docker:up ./tests/e2e/docker/init-sample-products.sh`
 
@@ -82,6 +82,7 @@ product_sku | SKU of product to be used in cart and checkout flow | yes `__ENV.P
 product_url | the `product-name` portion of product permalink of the product to be used in cart and checkout flow | yes `__ENV.P_URL`
 product_id | the product ID of of product to be used in cart and checkout flow | yes `__ENV.P_ID`
 product_search_term | search term to return product to be used in cart and checkout flow | yes `__ENV.P_TERM`
+product_category | category of product to be used for browsing category products | yes `__ENV.P_CAT`
 coupon_code | coupon code to be used in applying coupon flow | yes `__ENV.P_COUPON`
 add_product_title | title of product to be added in merchant add product flow | no
 add_product_regular_price | regular price of product to be added in merchant add product flow | no
@@ -102,7 +103,7 @@ To execute an individual test file (for example `requests/shopper/shop-page.js`)
 
 CLI `k6 run requests/shopper/shop-page.js`
 
-Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/requests:/requests -it loadimpact/k6 run /requests/shopper/shop-page.js`
+Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/tests:/tests -it loadimpact/k6 run /tests/performance/requests/shopper/shop-page.js`
 
 This will run the individual test for 1 iteration. 
 

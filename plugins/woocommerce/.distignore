@@ -5,17 +5,16 @@
 *.zip
 /bin/
 /build/
+/changelog/
 /node_modules/
 /tests/
 babel.config.js
 changelog.txt
 composer.*
-tsconfig.*
 contributors.html
 docker-compose.yaml
 Dockerfile
 Gruntfile.js
-lerna.json
 none
 package-lock.json
 package.json
@@ -23,6 +22,8 @@ packages/woocommerce-admin/docs
 phpcs.xml
 phpunit.xml
 phpunit.xml.dist
+project.json
 README.md
 renovate.json
+tsconfig.*
 webpack.config.js

@@ -4,11 +4,32 @@ Thumbs.db
 
 # IDE files
 .idea
-.vscode/
+.vscode/*
+project.xml
+project.properties
+.project
+.settings*
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
+
+# Excluded IDE Files for developer experience tooling within workspace
+!.vscode/tasks.json
+
+# Grunt
+none
+
+# Sass
+.sass-cache/
+
+# Logs
+logs/
+
+# Eslint Cache
+.eslintcache
 
 # Environment files
 wp-cli.local.yml
-.wp-env.override.json
 yarn-error.log
 npm-debug.log
 .pnpm-debug.log
@@ -22,6 +43,8 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-types/
+dist/
 
 # Project files
 node_modules/
@@ -30,5 +53,33 @@ vendor/
 # TypeScript files
 tsconfig.tsbuildinfo
 
+# Node Package Dependencies
+package-lock.json
+
 # wp-env config
 .wp-env.override.json
+
+# Unit tests
+tmp/
+
+# Composer
+vendor/
+bin/composer/**/vendor/
+lib/vendor/
+contributors.md
+contributors.html
+
+# Yarn
+yarn.lock
+
+# Editors
+nbproject/private/
+
+# Test Results
+test-results.json
+
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php
+
+# PHP lint
+phpcs-report.xml

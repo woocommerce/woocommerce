@@ -23,7 +23,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	/**
 	 * Initialize a WC_Settings_Page for testing
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$mock_page = $this->getMockBuilder( 'WC_Settings_General' )->getMock();

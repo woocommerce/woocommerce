@@ -45,10 +45,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'             => 'http://api.ipify.org/',
-		'ipecho'            => 'http://ipecho.net/plain',
-		'ident'             => 'http://ident.me',
-		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
+		'ipify'  => 'http://api.ipify.org/',
+		'ipecho' => 'http://ipecho.net/plain',
+		'ident'  => 'http://ident.me',
+		'tnedi'  => 'http://tnedi.me',
 	);
 
 	/**
@@ -149,10 +149,9 @@ class WC_Geolocation {
 		}
 
 		if ( empty( $ip_address ) ) {
-			$ip_address = self::get_ip_address();
+			$ip_address   = self::get_ip_address();
+			$country_code = self::get_country_code_from_headers();
 		}
-
-		$country_code = self::get_country_code_from_headers();
 
 		/**
 		 * Get geolocation filter.

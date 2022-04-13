@@ -11,6 +11,11 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+            access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -35,8 +40,13 @@ jobs:
             ./vendor
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
+      - name: Install PNPM and install dependencies
+        run: |
+            npm install -g pnpm
+            pnpm install
+
       - name: Setup and install composer
-        run: composer install
+        run: pnpm nx composer-install woocommerce
 
       - name: Run code sniff
         continue-on-error: true

@@ -1,3 +1,4 @@
 module.exports = {
-	extends: ["plugin:@woocommerce/eslint-plugin/recommended"],
+	root: true,
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 };

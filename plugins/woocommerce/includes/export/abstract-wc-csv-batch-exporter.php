@@ -184,6 +184,6 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @return int
 	 */
 	public function get_percent_complete() {
-		return $this->total_rows ? floor( ( $this->get_total_exported() / $this->total_rows ) * 100 ) : 100;
+		return $this->total_rows ? (int) floor( ( $this->get_total_exported() / $this->total_rows ) * 100 ) : 100;
 	}
 }

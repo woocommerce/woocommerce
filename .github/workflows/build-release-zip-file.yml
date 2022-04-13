@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name). The resulting file will be available as an artifact on the workflow run.'
+        description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name or refs/heads/release/x.x). The resulting file will be available as an artifact on the workflow run.'
         required: false
         default: ''
 jobs:
@@ -17,7 +17,7 @@ jobs:
           ref: ${{ github.event.inputs.ref || github.ref }}
       - name: Build the zip file
         id: build
-        uses: woocommerce/action-build@v2
+        uses: woocommerce/action-build@trunk
       - name: Unzip the file (prevents double zip problem)
         run: unzip ${{ steps.build.outputs.zip_path }} -d zipfile
       - name: Upload the zip file as an artifact

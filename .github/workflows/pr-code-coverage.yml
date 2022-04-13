@@ -8,7 +8,7 @@ defaults:
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     services:
       database:
@@ -19,6 +19,11 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+            access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -45,15 +50,25 @@ jobs:
             ./vendor
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
+      - name: Install PNPM and install dependencies
+        run: |
+            npm install -g pnpm
+            pnpm install
+
       - name: Setup and install composer
-        run: composer install
+        run: pnpm nx composer-install woocommerce
+        
+      - name: Build Admin feature config
+        working-directory: ./
+        run: |
+          pnpm nx build:feature-config woocommerce
 
       - name: Init DB and WP
-        run: ./tests/bin/install.sh woo_test root root 127.0.0.1 latest
+        run: pnpm nx install-unit-test-db woocommerce
 
       - name: Run unit tests with code coverage. Allow to fail.
         run: |
-          RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh
+          pnpm nx test-code-coverage woocommerce
           exit 0
       
       - name: Send code coverage to Codecov.

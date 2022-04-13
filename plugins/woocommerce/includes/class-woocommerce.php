@@ -9,9 +9,11 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -27,7 +29,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '6.0.0';
+	public $version = '6.5.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -211,11 +213,13 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
 		// These classes set up hooks on instantiation.
+		wc_get_container()->get( ProductDownloadDirectories::class );
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
 		wc_get_container()->get( AssignDefaultCategory::class );
 		wc_get_container()->get( DataRegenerator::class );
 		wc_get_container()->get( LookupDataStore::class );
 		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
+		wc_get_container()->get( CustomOrdersTableController::class );
 	}
 
 	/**
@@ -570,6 +574,9 @@ final class WooCommerce {
 					break;
 				case 'twentytwentyone':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-one.php';
+					break;
+				case 'twentytwentytwo':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-two.php';
 					break;
 			}
 		}
@@ -932,7 +939,7 @@ final class WooCommerce {
 			return;
 		}
 
-		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>grunt assets</code> to build and minify assets.', 'woocommerce' );
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm nx build woocommerce-legacy-assets</code> to build and minify assets.', 'woocommerce' );
 		$message_two = sprintf(
 			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
 			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),

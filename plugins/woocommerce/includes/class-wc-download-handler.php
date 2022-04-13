@@ -262,22 +262,31 @@ class WC_Download_Handler {
 		 * via filters we can still do the string replacement on a HTTP file.
 		 */
 		$replacements = array(
-			$wp_uploads_url                  => $wp_uploads_dir,
-			network_site_url( '/', 'https' ) => ABSPATH,
+			$wp_uploads_url                                                   => $wp_uploads_dir,
+			network_site_url( '/', 'https' )                                  => ABSPATH,
 			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
-			site_url( '/', 'https' )         => ABSPATH,
-			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
+			site_url( '/', 'https' )                                          => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
 		);
 
-		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
+		$count            = 0;
+		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path, $count );
 		$parsed_file_path = wp_parse_url( $file_path );
-		$remote_file      = true;
+		$remote_file      = null === $count || 0 === $count; // Remote file only if there were no replacements.
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
+			$file_path = ( is_ssl() ? 'https:' : 'http:' ) . $file_path;
+
+			/**
+			 * Filter the remote filepath for download.
+			 *
+			 * @since 6.5.0
+			 * @param string $file_path File path.
+			 */
 			return array(
 				'remote_file' => true,
-				'file_path'   => is_ssl() ? 'https:' . $file_path : 'http:' . $file_path,
+				'file_path'   => apply_filters( 'woocommerce_download_parse_remote_file_path', $file_path ),
 			);
 		}
 
@@ -291,14 +300,21 @@ class WC_Download_Handler {
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
 
 			// Check if we have an absolute path.
-		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
+		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) ) {
 			$remote_file = false;
 			$file_path   = $parsed_file_path['path'];
 		}
 
+		/**
+		* Filter the filepath for download.
+		*
+		* @since 6.5.0
+		* @param string  $file_path File path.
+		* @param bool $remote_file Remote File Indicator.
+		*/
 		return array(
 			'remote_file' => $remote_file,
-			'file_path'   => $file_path,
+			'file_path'   => apply_filters( 'woocommerce_download_parse_file_path', $file_path, $remote_file ),
 		);
 	}
 

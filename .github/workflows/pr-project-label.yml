@@ -1,0 +1,20 @@
+name: 'Label Pull Request Project'
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  label_project:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.7.0
+      with:
+          access_token: ${{ github.token }}
+
+    - uses: actions/labeler@v3
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        configuration-path: .github/project-pr-labeler.yml

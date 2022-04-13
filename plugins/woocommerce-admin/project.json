@@ -1,0 +1,42 @@
+{
+	"root": "plugins/woocommerce-admin/",
+	"sourceRoot": "plugins/woocommerce-admin",
+	"projectType": "application",
+	"targets": {
+		"changelog": {
+			"executor": "./tools/executors/changelogger:changelog",
+			"options": {
+				"action": "add",
+				"cwd": "plugins/woocommerce"
+			}
+		},
+		"build": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "build"
+			}
+		},
+		"build-watch": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"WC_ADMIN_PHASE=development pnpm nx dev woocommerce-admin",
+					"pnpm nx watch woocommerce-admin"
+				],
+				"parallel": false
+			}
+		},
+		"watch": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"command": "pnpm nx client:watch woocommerce-admin"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "lint"
+			}
+		}
+	}
+}

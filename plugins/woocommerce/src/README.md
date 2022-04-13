@@ -26,9 +26,9 @@
 
 This directory is home to new WooCommerce class files under the `Automattic\WooCommerce` namespace using [PSR-4](https://www.php-fig.org/psr/psr-4/) file naming. This is to take full advantage of autoloading.
 
-Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
+Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
 
-A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src`directory in general) in a way that makes it easy to write unit tests. 
+A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src` directory in general) in a way that makes it easy to write unit tests. 
 
 
 ## Installing Composer
@@ -147,7 +147,7 @@ For a class to be resolvable using the container, it needs to have been previous
 
 The `Container` class is "read-only", in that it has a `get` method to resolve classes but it doesn't have any method to register classes. Instead, class registration is done by using [service providers](https://container.thephpleague.com/3.x/service-providers/). That's how the whole process would go when creating a new class:  
 
-First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Atuomattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
+First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Automattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
 
 Example of such a class:
 
@@ -177,13 +177,13 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 
 class TheClassServiceProvider extends AbstractServiceProvider {
 
-	protected $provides = array(
-		TheClass::class
-	);
+    protected $provides = array(
+        TheClass::class
+    );
 
-	public function register() {
-		$this->add( TheClass::class )->addArgument( TheDependencyClass::class );
-	}
+    public function register() {
+        $this->add( TheClass::class )->addArgument( TheDependencyClass::class );
+    }
 }
 ```
 
@@ -209,15 +209,15 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 
 class TheClassServiceProvider extends AbstractServiceProvider {
 
-	protected $provides = array(
-		TheClass::class,
+    protected $provides = array(
+        TheClass::class,
         TheDependencyClass::class
-	);
+    );
 
-	public function register() {
+    public function register() {
         $this->share( TheDependencyClass::class );
-		$this->share_with_auto_arguments( ActionsProxy::class );
-	}
+        $this->share_with_auto_arguments( ActionsProxy::class );
+    }
 }
 ```
 
@@ -235,7 +235,7 @@ $this->add( TheInterface::class, TheClassImplementingTheInterface::class );
 
 * An object
 
-The supplied object will be returned then the registerd class name is resolved. Example:
+The supplied object will be returned then the registered class name is resolved. Example:
 
 ```php
 $instance = new TheClass();
@@ -244,7 +244,7 @@ $this->add( TheClass::class, $instance );
 
 * A closure
 
-The closure will be executed and the result value will be returned when the registerd class name is resolved. Example:
+The closure will be executed and the result value will be returned when the registered class name is resolved. Example:
 
 ```php
 $factory = function( TheDependencyClass $dependency ) {
@@ -271,7 +271,7 @@ Classes in `Automattic\WooCommerce\Internal` are meant to be WooCommerce infrast
 
 What this implies for you as developer depends on what type of contribution are you making:
 
-* **If you are woking on WooCommerce core:** When you need to add a new class please think carefully if the class could be useful for plugins. If you really think so, add it to the appropriate namespace rooted at `Automattic\WooCommerce`. If not, add it to the appropriate namespace but rooted at `Automattic\WooCommerce\Internal`.
+* **If you are working on WooCommerce core:** When you need to add a new class please think carefully if the class could be useful for plugins. If you really think so, add it to the appropriate namespace rooted at `Automattic\WooCommerce`. If not, add it to the appropriate namespace but rooted at `Automattic\WooCommerce\Internal`.
   * When in doubt, always make the code internal. If an internal class is later deemed to be worth being made public, the change can be made easily (by just changing the class namespace) and nothing will break. Turning a public class into an internal class, on the other hand, is impossible since it could break existing plugins.
 
 * **If you are a plugin developer:** You should **never** use code from the `Automattic\WooCommerce\Internal` namespace in your plugins. Doing so might cause your plugin to break in future versions of WooCommerce.
@@ -281,7 +281,7 @@ What this implies for you as developer depends on what type of contribution are 
 
 Here by "legacy code" we refer mainly to the old WooCommerce code in the `includes` directory, but the mechanisms described in this section are useful for dealing with any code outside the `src` directory.
 
-The code in the `src` directory can for sure interact directly with legacy code. A function needs to be called? Call it. You need an instance of an object? Instantiate it. The problem is that this makes the code difficult to test: it's not easy to mock functions (unless you use [hacks](https://github.com/woocommerce/woocommerce/blob/trunk/tests/Tools/CodeHacking/README.md), or objects that are instantiated directly with `new` or whose instance is retrieved via a `TheClass::instance()` method).
+The code in the `src` directory can for sure interact directly with legacy code. A function needs to be called? Call it. You need an instance of an object? Instantiate it. The problem is that this makes the code difficult to test: it's not easy to mock functions (unless you use [hacks](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/Tools/CodeHacking/README.md), or objects that are instantiated directly with `new` or whose instance is retrieved via a `TheClass::instance()` method).
 
 But we want the WooCommerce code base (and especially the code in `src`) to be well covered by unit tests, and so there are mechanisms in place to interact with legacy code while keeping the code testable.
 
@@ -355,7 +355,7 @@ $this->register_legacy_proxy_function_mocks(
 
 Of course, for the cases where no mocks are defined `MockableLegacyProxy` works the same way as `LegacyProxy`.
 
-Please see [the code of the MockableLegacyProxy class](https://github.com/woocommerce/woocommerce/blob/trunk/tests/Tools/DependencyManagement/MockableLegacyProxy.php) and [its unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/tests/php/src/Proxies/MockableLegacyProxyTest.php) for more detailed usage instructions and examples.
+Please see [the code of the MockableLegacyProxy class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/Tools/DependencyManagement/MockableLegacyProxy.php) and [its unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/php/src/Proxies/MockableLegacyProxyTest.php) for more detailed usage instructions and examples.
 
 ### But how does `get_instance_of` work?
 
@@ -363,7 +363,7 @@ We use a container to resolve instances of classes in the `src` directory, but h
 
 This is a mostly ad-hoc process. When a class has a special way to be instantiated or retrieved (e.g. a static `instance` method), then that is used; otherwise the method fallbacks to simply creating a new instance of the class using `new`.
 
-This means that the `get_instance_of` method will most likely need to evolve over time to cover additional special cases. Take a look at the method code in [LegacyProxy](https://github.com/woocommerce/woocommerce/blob/trunk/src/Proxies/LegacyProxy.php) for details on how to properly make changes to the method.
+This means that the `get_instance_of` method will most likely need to evolve over time to cover additional special cases. Take a look at the method code in [LegacyProxy](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Proxies/LegacyProxy.php) for details on how to properly make changes to the method.
 
 ### Creating specialized proxies
 
@@ -405,7 +405,7 @@ Unit tests are a fundamental tool to keep the code reliable and reasonably safe 
 
 ### Mocking dependencies
 
-Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.2/test-doubles.html):
+Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.5/test-doubles.html):
 
 ```php
 $dependency_mock = somehow_create_mock();

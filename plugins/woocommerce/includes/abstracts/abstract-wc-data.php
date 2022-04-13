@@ -305,7 +305,7 @@ abstract class WC_Data {
 			return false;
 		}
 
-		$has_setter_or_getter = is_callable( array( $this, 'set_' . $key ) ) || is_callable( array( $this, 'get_' . $key ) );
+		$has_setter_or_getter = is_callable( array( $this, 'set_' . ltrim( $key, '_' ) ) ) || is_callable( array( $this, 'get_' . ltrim( $key, '_' ) ) );
 
 		if ( ! $has_setter_or_getter ) {
 			return false;
@@ -327,7 +327,7 @@ abstract class WC_Data {
 	 */
 	public function get_meta( $key = '', $single = true, $context = 'view' ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
-			$function = 'get_' . $key;
+			$function = 'get_' . ltrim( $key, '_' );
 
 			if ( is_callable( array( $this, $function ) ) ) {
 				return $this->{$function}();
@@ -403,7 +403,7 @@ abstract class WC_Data {
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
-			$function = 'set_' . $key;
+			$function = 'set_' . ltrim( $key, '_' );
 
 			if ( is_callable( array( $this, $function ) ) ) {
 				return $this->{$function}( $value );
@@ -433,7 +433,7 @@ abstract class WC_Data {
 	 */
 	public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
-			$function = 'set_' . $key;
+			$function = 'set_' . ltrim( $key, '_' );
 
 			if ( is_callable( array( $this, $function ) ) ) {
 				return $this->{$function}( $value );
@@ -590,14 +590,14 @@ abstract class WC_Data {
 		if ( ! $force_read ) {
 			if ( ! empty( $this->cache_group ) ) {
 				$cached_meta  = wp_cache_get( $cache_key, $this->cache_group );
-				$cache_loaded = ! empty( $cached_meta );
+				$cache_loaded = is_array( $cached_meta );
 			}
 		}
 
 		// We filter the raw meta data again when loading from cache, in case we cached in an earlier version where filter conditions were different.
 		$raw_meta_data = $cache_loaded ? $this->data_store->filter_raw_meta_data( $this, $cached_meta ) : $this->data_store->read_meta( $this );
 
-		if ( $raw_meta_data ) {
+		if ( is_array( $raw_meta_data ) ) {
 			foreach ( $raw_meta_data as $meta ) {
 				$this->meta_data[] = new WC_Meta_Data(
 					array(
@@ -640,7 +640,7 @@ abstract class WC_Data {
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
-			$cache_key = WC_Cache_Helper::get_cache_prefix( $this->cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $this->get_id() ) . 'object_meta_' . $this->get_id();
+			$cache_key = self::generate_meta_cache_key( $this->get_id(), $this->cache_group );
 			wp_cache_delete( $cache_key, $this->cache_group );
 		}
 	}

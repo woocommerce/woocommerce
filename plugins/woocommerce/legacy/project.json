@@ -1,0 +1,40 @@
+{
+	"root": "plugins/woocommerce/legacy",
+	"sourceRoot": "plugins/woocommerce/legacy",
+	"type": "application",
+	"implicitDependencies": [],
+	"targets": {
+		"build": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					{
+						"command": "pnpx grunt assets",
+						"forwardAllArgs": false
+					}
+				],
+				"cwd": "plugins/woocommerce/legacy"
+			},
+			"outputs": [
+				"plugins/woocommerce/assets/css",
+				"plugins/woocommerce/assets/js"
+			]
+		},
+		"lint": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					{
+						"command": "pnpx grunt eslint",
+						"forwardAllArgs": false
+					},
+					{
+						"command": "pnpx grunt stylelint",
+						"forwardAllArgs": false
+					}
+				],
+				"cwd": "plugins/woocommerce/legacy"
+			}
+		}
+	}
+}

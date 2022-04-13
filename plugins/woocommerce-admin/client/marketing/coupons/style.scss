@@ -1,0 +1,44 @@
+.woocommerce-marketing-coupons {
+	padding-top: $gap;
+
+	* {
+		box-sizing: border-box;
+	}
+
+	.components-card {
+		margin-bottom: 24px;
+	}
+
+	.woocommerce-marketing-recommended-extensions-item {
+		.woocommerce-admin-marketing-product-icon {
+			background: $studio-white;
+			color: $studio-white;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background 0.2s ease;
+
+			&:not(.is-placeholder) {
+				border: 1px solid var(--wp-admin-theme-color);
+			}
+
+			svg {
+				width: 24px;
+				height: 24px;
+				transition: fill 0.2s ease;
+				fill: var(--wp-admin-theme-color);
+			}
+		}
+
+		&:hover {
+			.woocommerce-admin-marketing-product-icon:not(.is-placeholder) {
+				background: var(--wp-admin-theme-color) !important;
+
+				svg {
+					fill: #fff !important;
+				}
+			}
+		}
+	}
+}

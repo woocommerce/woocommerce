@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
-Requires at least: 5.6
-Tested up to: 5.8
+Requires at least: 5.7
+Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 5.8.0
+Stable tag: 6.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -140,7 +140,7 @@ Visit the [WooCommerce server requirements documentation](https://docs.woocommer
 
 = Automatic installation =
 
-Automatic installation is the easiest option -- WordPress will handles the file transfer, and you won’t need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu, and click “Add New.”
+Automatic installation is the easiest option -- WordPress will handle the file transfer, and you won’t need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu, and click “Add New.”
  
 In the search field type “WooCommerce,” then click “Search Plugins.” Once you’ve found us,  you can view details about it such as the point release, rating, and description. Most importantly of course, you can install it by! Click “Install Now,” and WordPress will take it from there.
 
@@ -160,51 +160,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.9.0 beta 2021-10-19 =
-
-**WooCommerce**
-
-* Fix - Variable product price caching bug with VAT exemption. #30889
-* Fix - Allow to pass null as the email for billing addresses in REST API. #30850
-* Fix - Ensure woocommerce_cancel_unpaid_orders event is always re-scheduled. #30830
-* Fix - Use a more standard way to check if the product attributes lookup table exists. #30745
-* Fix - Undefined variable notice when trying to add product in orders without specifying a product. #30739
-* Fix - Use proper location for taxes when adding products via admin. #30692
-* Dev - Add mobile data to WCTracker. #30415
-* Tweak - Remove hardcode category banners in Settings > Marketplace and use the WooCommerce.com API instead. #30938
-* Tweak - Show a search again message when marketplace results are empty. #30642
-* Enhancement - Add ratings, reviews and icons into Marketplace's Product Cards. #30840
-* Enhancement - Update Storefront banner width and track links in the marketplace page. #30882
-* Enhancement - Revamp the WooCommerce Marketplace page. #30900
-
-**WooCommerce Admin - 2.8.0 RC 2**
-
-* Add - Store Profiler and Product task - include Subscriptions. #7734
-* Fix - Fixed navigation menu text color after Gutenberg 11.6.0. #7771
-* Fix - Add status param to notes/delete/all REST endpoint, to correctly delete all notes. #7743
-* Fix - Allow already installed marketing extensions to be activated. #7740
-* Fix - Add missing title text for marketing task. #7640
-* Fix - Assign parent order status as children order status if refund order. #7253
-* Fix - Fix category lookup logic to update children correctly. #7709
-* Fix - Fixing an unwanted page refresh when using Woo Navigation. #7615
-* Fix - Fix naming of event names and properties. #7677
-* Fix - Fix white screen for variation analytic data without a name. #7686
-* Update - Update back up copy of free extension for Google Listing & Ads plugin. #7798
-* Update - Update Eway payment gateway capitalization (was eWAY). #7678
-* Update - Enable Square in France. #7679
-* Enhancement - Add experiment for promoting WooCommerce Payments in payment methods table. #7666
-
-**WooCommerce Blocks - 6.0.0 & 6.0.1 & 6.0.2 & 6.1.0**
-
-* Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816
-* Fix - Update All Reviews block so it honors 'ratings enabled' and 'show avatars' preferences. #4764
-* Fix - Products by Category: Moved renderEmptyResponsePlaceholder to separate method to prevent unnecessary rerender. #4751
-* Fix - Calculation of number of reviews in the Reviews by Category block. #4729
-* Fix - Dropdown list in Product Category List Block for nested categories #4920
-* Fix - String translations within the All Products Block. #4897
-* Fix - Filter By Price: Update aria values to be more representative of the actual values presented. #4839
-* Fix - Filter button from Filter Products by Attribute block is not aligned with the input field. #4814
-* Fix - Remove IntersectionObserver shim in favor of dropping IE11 support. #4808
-* Enhancement - Added global styles to All Reviews, Reviews by Category and Reviews by Product blocks. Now it's possible to change the text color and font size of those blocks. #4323
+= 6.5.0 2022-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

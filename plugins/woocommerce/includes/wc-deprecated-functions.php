@@ -45,7 +45,7 @@ function wc_do_deprecated_action( $tag, $args, $version, $replacement = null, $m
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
 	// @codingStandardsIgnoreStart
-	if ( is_ajax() || WC()->is_rest_api_request() ) {
+	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_function_run', $function, $replacement, $version );
 		$log_string  = "The {$function} function is deprecated since version {$version}.";
 		$log_string .= $replacement ? " Replace with {$replacement}." : '';
@@ -67,7 +67,7 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  */
 function wc_deprecated_hook( $hook, $version, $replacement = null, $message = null ) {
 	// @codingStandardsIgnoreStart
-	if ( is_ajax() || WC()->is_rest_api_request() ) {
+	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
 
 		$message    = empty( $message ) ? '' : ' ' . $message;
@@ -111,7 +111,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
 	// @codingStandardsIgnoreStart
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
 
-	if ( is_ajax() || WC()->is_rest_api_request() ) {
+	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
 	} else {
@@ -129,7 +129,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  * @param  string $replacement
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
-	if ( is_ajax() || WC()->is_rest_api_request() ) {
+	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {

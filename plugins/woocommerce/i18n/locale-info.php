@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$locales = include WC()->plugin_path() . '/i18n/currency-info.php';
+$locales = include 'currency-info.php';
 
 return array(
 	'AD' => array(

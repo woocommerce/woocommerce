@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WooCommerce Payments task not showing up in some supported countries. #32496

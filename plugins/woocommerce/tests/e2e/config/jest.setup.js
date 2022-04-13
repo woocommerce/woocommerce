@@ -7,11 +7,13 @@ import {
 
 const config = require( 'config' );
 const { HTTPClientFactory } = require( '@woocommerce/api' );
-const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
+const { addConsoleSuppression, updateReadyPageStatus, setupJestRetries } = require( '@woocommerce/e2e-environment' );
 const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
-addConsoleSuppression( 'woocommerce_shared_settings', false );
+addConsoleSuppression('woocommerce_shared_settings', false);
+// @todo: remove this once https://github.com/woocommerce/woocommerce/issues/31867 has been addressed
+addConsoleSuppression('wp.compose.withState', false);
 
 /**
  * Uses the WordPress API to delete all existing posts
@@ -40,6 +42,8 @@ async function trashExistingPosts() {
 // each other's side-effects.
 beforeAll(async () => {
 
+	setupJestRetries( 2 );
+
 	if ( DEFAULT_TIMEOUT_OVERRIDE ) {
 		page.setDefaultNavigationTimeout( DEFAULT_TIMEOUT_OVERRIDE );
 		page.setDefaultTimeout( DEFAULT_TIMEOUT_OVERRIDE );
@@ -58,7 +62,10 @@ beforeAll(async () => {
 
 	await page.goto(WP_ADMIN_LOGIN);
 	await clearLocalStorage();
-	await setBrowserViewport('large');
+	await setBrowserViewport( {
+		width: 1280,
+		height: 800,
+	});
 });
 
 // Clear browser cookies and cache using DevTools.

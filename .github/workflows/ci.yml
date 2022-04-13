@@ -11,20 +11,20 @@ defaults:
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0' ]
+        php: [ '7.2', '7.3', '7.4', '8.0' ]
         wp: [ 'latest' ]
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.7'
+          - wp: '5.8'
             php: 7.2
-          - wp: '5.6'
+          - wp: '5.7'
             php: 7.2
     services:
       database:
@@ -59,8 +59,17 @@ jobs:
             ./vendor
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
+      - name: Install PNPM and install dependencies
+        run: |
+            npm install -g pnpm
+            pnpm install
+
       - name: Setup and install composer
-        run: composer install
+        run: pnpm nx composer-install woocommerce
+
+      - name: Build Admin feature config
+        working-directory: ./
+        run: pnpm nx build:feature-config woocommerce
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -71,11 +80,11 @@ jobs:
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
              rm -rf ./vendor/phpunit/
-             composer dump-autoload
+             pnpm nx composer-dump-autoload woocommerce
            fi
 
       - name: Init DB and WP
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: ./vendor/bin/phpunit -c ./phpunit.xml
+        run: pnpm nx test-unit woocommerce

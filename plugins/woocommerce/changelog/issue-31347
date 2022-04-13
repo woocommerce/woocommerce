@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Enable the "Save changes" button within the variations panel when a textfield receives input.

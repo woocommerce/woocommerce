@@ -419,7 +419,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		$order_by = ' ORDER BY tax_rate_order';
 
 		// Pagination
-		$per_page   = isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : get_option( 'posts_per_page' );
+		$per_page   = absint( isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : get_option( 'posts_per_page' ) );
 		$offset     = 1 < $args['paged'] ? ( $args['paged'] - 1 ) * $per_page : 0;
 		$pagination = sprintf( ' LIMIT %d, %d', $offset, $per_page );
 

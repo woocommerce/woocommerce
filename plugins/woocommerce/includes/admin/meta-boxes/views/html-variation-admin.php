@@ -57,8 +57,9 @@ defined( 'ABSPATH' ) || exit;
 		 * @since 3.6.0
 		 *
 		 * @param WP_Post $variation Post data.
+		 * @param int     $loop      Position in the loop.
 		 */
-		do_action( 'woocommerce_variation_header', $variation );
+		do_action( 'woocommerce_variation_header', $variation, $loop );
 		?>
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
@@ -403,10 +404,13 @@ defined( 'ABSPATH' ) || exit;
 						</thead>
 						<tbody>
 							<?php
-							$downloads = $variation_object->get_downloads( 'edit' );
+							$downloadable_files       = $variation_object->get_downloads( 'edit' );
+							$disabled_downloads_count = 0;
 
-							if ( $downloads ) {
-								foreach ( $downloads as $key => $file ) {
+							if ( $downloadable_files ) {
+								foreach ( $downloadable_files as $key => $file ) {
+									$disabled_download = isset( $file['enabled'] ) && false === $file['enabled'];
+									$disabled_downloads_count += (int) $disabled_download;
 									include __DIR__ . '/html-product-variation-download.php';
 								}
 							}
@@ -414,7 +418,7 @@ defined( 'ABSPATH' ) || exit;
 						</tbody>
 						<tfoot>
 							<div>
-								<th colspan="4">
+								<th colspan="1">
 									<a href="#" class="button insert" data-row="
 									<?php
 									$key  = '';
@@ -422,11 +426,25 @@ defined( 'ABSPATH' ) || exit;
 										'file' => '',
 										'name' => '',
 									);
+									$disabled_download = false;
 									ob_start();
 									require __DIR__ . '/html-product-variation-download.php';
 									echo esc_attr( ob_get_clean() );
 									?>
 									"><?php esc_html_e( 'Add file', 'woocommerce' ); ?></a>
+								</th>
+								<th colspan="3">
+									<?php if ( $disabled_downloads_count ) : ?>
+										<span class="disabled">*</span>
+										<?php
+										printf(
+											/* translators: 1: opening link tag, 2: closing link tag. */
+											esc_html__( 'The indicated downloads have been disabled (invalid location or filetype&mdash;%1$slearn more%2$s).', 'woocommerce' ),
+											'<a href="https://woocommerce.com/document/approved-download-directories" target="_blank">',
+											'</a>'
+										);
+										?>
+									<?php endif; ?>
 								</th>
 							</div>
 						</tfoot>

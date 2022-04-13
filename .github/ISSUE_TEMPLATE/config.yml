@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🔒 Security issue
+    url: https://hackerone.com/automattic/
+    about: For security reasons, please report all security issues via HackerOne. If the issue is valid, a bug bounty will be paid out to you. Please disclose responsibly and not via GitHub (which allows for exploiting issues in the wild before the patch is released).
+  - name: ❓ Support Question
+    url: https://woocommerce.com/document/woocommerce-self-service-guide/
+    about: If you have a question please see our docs or use our forums, helpdesk, or Slack community!
+  - name: WooCommerce Blocks
+    url: https://github.com/woocommerce/woocommerce-gutenberg-products-block
+    about: Please report issues for WooCommerce Blocks directly to it's repository.

@@ -8,7 +8,7 @@
 /**
  * Class WC_AJAX_Test file.
  */
-class WC_AJAX_Test extends \WC_Unit_Test_Case {
+class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
@@ -83,5 +83,33 @@ class WC_AJAX_Test extends \WC_Unit_Test_Case {
 				$this->assertEquals( 10, $line_item->get_meta( '_reduced_stock', true ) );
 			}
 		}
+	}
+
+	/**
+	 * Creating an API Key with too long of a description should report failure.
+	 */
+	public function test_create_api_key_long_description_failure() {
+		$this->_setRole( 'administrator' );
+
+		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
+		$description .= $description;
+
+		$_POST['security'] = wp_create_nonce( 'update-api-key' );
+		$_POST['key_id']      = 0;
+		$_POST['user']        = 1;
+		$_POST['permissions'] = 'read';
+		$_POST['description'] = $description;
+
+		try {
+			$this->_handleAjax( 'woocommerce_update_api_key' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			// wp_die() doesn't actually occur, so we need to clean up WC_AJAX::update_api_key's output buffer.
+			ob_end_clean();
+		}
+
+		$response = json_decode( $this->_last_response, true );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertEquals( $response['data']['message'], 'There was an error generating your API Key.' );
 	}
 }

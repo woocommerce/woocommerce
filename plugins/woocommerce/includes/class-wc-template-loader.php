@@ -37,13 +37,18 @@ class WC_Template_Loader {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		self::$theme_support = current_theme_supports( 'woocommerce' );
+		self::$theme_support = wc_current_theme_supports_woocommerce_or_fse();
 		self::$shop_page_id  = wc_get_page_id( 'shop' );
 
 		// Supported themes.
 		if ( self::$theme_support ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+
+			// Loads gallery scripts on Product page for FSE themes.
+			if ( wc_current_theme_is_fse_theme() ) {
+				self::add_support_for_product_page_gallery();
+			}
 		} else {
 			// Unsupported themes.
 			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );
@@ -98,6 +103,9 @@ class WC_Template_Loader {
 	/**
 	 * Checks whether a block template with that name exists.
 	 *
+	 * **Note: ** This checks both the `templates` and `block-templates` directories
+	 * as both conventions should be supported.
+	 *
 	 * @since  5.5.0
 	 * @param string $template_name Template to check.
 	 * @return boolean
@@ -107,9 +115,41 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		return is_readable(
-			get_stylesheet_directory() . '/block-templates/' . $template_name . '.html'
+		$has_template            = false;
+		$template_filename       = $template_name . '.html';
+		// Since Gutenberg 12.1.0, the conventions for block templates directories have changed,
+		// we should check both these possible directories for backwards-compatibility.
+		$possible_templates_dirs = array( 'templates', 'block-templates' );
+
+		// Combine the possible root directory names with either the template directory
+		// or the stylesheet directory for child themes, getting all possible block templates
+		// locations combinations.
+		$filepath        = DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$legacy_filepath = DIRECTORY_SEPARATOR . 'block-templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$possible_paths  = array(
+			get_stylesheet_directory() . $filepath,
+			get_stylesheet_directory() . $legacy_filepath,
+			get_template_directory() . $filepath,
+			get_template_directory() . $legacy_filepath,
 		);
+
+		// Check the first matching one.
+		foreach ( $possible_paths as $path ) {
+			if ( is_readable( $path ) ) {
+				$has_template = true;
+				break;
+			}
+		}
+
+		/**
+		 * Filters the value of the result of the block template check.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param boolean $has_template value to be filtered.
+		 * @param string $template_name The name of the template.
+		 */
+		return (bool) apply_filters( 'woocommerce_has_block_template', $has_template, $template_name );
 	}
 
 	/**
@@ -119,6 +159,7 @@ class WC_Template_Loader {
 	 * @since  3.0.0
 	 * @since  5.5.0 If a block template with the same name exists, return an
 	 * empty string.
+	 * @since  6.3.0 It checks custom product taxonomies
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
@@ -130,14 +171,16 @@ class WC_Template_Loader {
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
-			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
-					$default_file = '';
-				} else {
+			if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
+				$default_file = '';
+			} else {
+				if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
+				} elseif ( ! self::has_block_template( 'archive-product' ) ) {
+					$default_file = 'archive-product.php';
+				} else {
+					$default_file = '';
 				}
-			} elseif ( ! self::has_block_template( 'archive-product' ) ) {
-				$default_file = 'archive-product.php';
 			}
 		} elseif (
 			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
@@ -284,6 +327,15 @@ class WC_Template_Loader {
 		add_filter( 'woocommerce_product_tabs', array( __CLASS__, 'unsupported_theme_remove_review_tab' ) );
 		remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
 		remove_action( 'woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10 );
+		self::add_support_for_product_page_gallery();
+	}
+
+	/**
+	 * Add theme support for Product page gallery.
+	 *
+	 * @since x.x.x
+	 */
+	private static function add_support_for_product_page_gallery() {
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );

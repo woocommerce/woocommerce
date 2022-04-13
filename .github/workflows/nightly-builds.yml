@@ -18,7 +18,7 @@ jobs:
           ref: ${{ matrix.build }}
       - name: Build
         id: build
-        uses: woocommerce/action-build@v2
+        uses: woocommerce/action-build@trunk
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.1.0
         env:
