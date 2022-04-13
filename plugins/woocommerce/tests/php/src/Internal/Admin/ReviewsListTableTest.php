@@ -127,6 +127,40 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output the author information.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_author()
+	 *
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_author() {
+		global $comment;
+
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_author_url' => 'https://example.com',
+			]
+		);
+
+		$comment = $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_author' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $review ] );
+
+		$author_output = ob_get_clean();
+
+		$author = get_comment_author( $review->comment_ID );
+
+		$this->assertStringContainsString( '<strong>' . $author . '</strong>', $author_output );
+		$this->assertStringContainsString( '<a title="https://example.com" href="https://example.com" rel="noopener noreferrer">example.com</a>', $author_output );
+	}
+
+	/**
 	 * Tests that can get the item author URL.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_item_author_url()
@@ -190,8 +224,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'Empty URL' => [ '', '' ],
 			'Empty URL (http)' => [ 'http://', '' ],
 			'Empty URL (https)' => [ 'https://', '' ],
-			'Regular URL' => [ 'https://www.example.com', 'www.example.com' ],
-			'Very long URL' => [ $very_long_url, substr( str_replace( 'https://', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
+			'Regular URL' => [ 'https://www.example.com', 'example.com' ],
+			'Very long URL' => [ $very_long_url, substr( str_replace( 'https://www.', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
 		];
 	}
 
