@@ -100,9 +100,9 @@ export const shopper = {
 
 			await page.waitForSelector( '.woocommerce-info' );
 			// eslint-disable-next-line jest/no-standalone-expect
-			await expect( page ).toMatchElement( '.woocommerce-info', {
-				text: 'Your cart is currently empty.',
-			} );
+			await expect( page ).toMatchElement(
+				'.woocommerce-info.cart-empty'
+			);
 		},
 
 		placeOrder: async () => {
