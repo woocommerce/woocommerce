@@ -53,7 +53,17 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry ) {
 		parent::__construct( $asset_api, $asset_data_registry, $integration_registry, $this->block_name );
+	}
 
+	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 	}
 
 	/**
@@ -485,5 +495,19 @@ class MiniCart extends AbstractBlock {
 		$translations = array_filter( $translations );
 
 		return implode( '', $translations );
+	}
+
+	/**
+	 * Register block pattern for Empty Cart Message to make it translatable.
+	 */
+	public function register_empty_cart_message_block_pattern() {
+		register_block_pattern(
+			'woocommerce/mini-cart-empty-cart-message',
+			array(
+				'title'    => __( 'Mini Cart Empty Cart Message', 'woo-gutenberg-products-block' ),
+				'inserter' => false,
+				'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</strong></p><!-- /wp:paragraph -->',
+			)
+		);
 	}
 }
