@@ -93,30 +93,21 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @param string $expected_output The expected output.
 	 */
 	public function test_column_cb( bool $current_user_can_edit, string $expected_output ) {
-
-		$this->register_legacy_proxy_function_mocks(
-			[
-				'current_user_can' => function( $capability, ...$args ) use ( $current_user_can_edit ) {
-					return 'edit_comment' === $capability ?
-						$current_user_can_edit :
-						current_user_can( $capability, ...$args );
-				},
-			]
-		);
-
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_cb' );
 		$method->setAccessible( true );
 
-		$review = $this->factory()->comment->create_and_get(
-			[
-				'comment_ID' => 123,
-			]
-		);
+		$property = ( new ReflectionClass( $list_table ) )->getProperty( 'current_user_can_edit_review' );
+		$property->setAccessible( true );
+		$property->setValue( $list_table, $current_user_can_edit );
+
+		$review = $this->factory()->comment->create_and_get();
+
+		$review->comment_ID = 123;
 
 		ob_start();
 		$method->invokeArgs( $list_table, [ $review ] );
-		$output = ob_get_clean();
+		$output = trim( ob_get_clean() );
 
 		$this->assertSame( $expected_output, $output );
 	}
