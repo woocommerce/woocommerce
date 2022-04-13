@@ -24,6 +24,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * Render a single row HTML.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	public function single_row( $item ) {
 		global $post, $comment;
@@ -224,6 +225,8 @@ class ReviewsListTable extends WP_List_Table {
 
 	/**
 	 * Prepares reviews for display.
+	 *
+	 * @return void
 	 */
 	public function prepare_items() {
 
