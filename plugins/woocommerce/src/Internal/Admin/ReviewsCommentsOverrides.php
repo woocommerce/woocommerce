@@ -21,8 +21,15 @@ class ReviewsCommentsOverrides {
 	 */
 	public function __construct() {
 
+		add_action( 'admin_notices', [ $this, 'display_notices' ] );
+
 		add_filter( 'comments_list_table_query_args', [ $this, 'exclude_reviews_from_comments' ] );
 	}
+
+	/**
+	 * Renders admin notices.
+	 */
+	public function display_notices() {}
 
 	/**
 	 * Gets the class instance.
