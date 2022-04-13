@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/check-tag-names */
 const { shippingMethodsApi } = require( '../../endpoints' );
 const { getShippingMethodExample } = require( '../../data' );
 
@@ -40,7 +39,7 @@ describe( 'Shipping methods API tests', () => {
 			expect( status ).toEqual( shippingMethodsApi.create.responseCode );
 			expect( typeof body.id ).toEqual( 'number' );
 			expect( body.method_id ).toEqual( methodId );
-			expect( body.method_title ).toEqual( 'methodTitle' );
+			expect( body.method_title ).toEqual( methodTitle );
 			expect( body.enabled ).toEqual( true );
 
 			if ( [ 'flat_rate', 'local_pickup' ].includes( methodId ) ) {
