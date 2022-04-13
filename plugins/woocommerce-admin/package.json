@@ -21,7 +21,6 @@
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
 		"predev": "pnpm run -s install-if-deps-outdated",
 		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm run build:packages && cross-env WC_ADMIN_PHASE=development webpack",
-		"docs": "./bin/import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true pnpm exec build-storybook -c storybook/.storybook -o ./docs/components/storybook",
 		"example": "webpack --config docs/examples/extensions/examples.config.js --watch",
 		"preinstall": "npx only-allow pnpm",
 		"install-if-deps-outdated": "node bin/install-if-deps-outdated.js",
