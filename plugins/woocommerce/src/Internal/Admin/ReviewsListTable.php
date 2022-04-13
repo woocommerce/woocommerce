@@ -127,7 +127,7 @@ class ReviewsListTable extends WP_List_Table {
 			$author_avatar = '';
 		}
 
-		echo '<strong>' . $author_avatar; // // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<strong>' . $author_avatar; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		comment_author();
 		echo '</strong><br>';
 
