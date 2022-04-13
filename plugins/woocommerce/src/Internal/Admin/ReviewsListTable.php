@@ -493,4 +493,55 @@ class ReviewsListTable extends WP_List_Table {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
 	}
 
+	/**
+	 * Renders the extra controls to be displayed between bulk actions and pagination.
+	 *
+	 * @global string $comment_status
+	 * @global string $comment_type
+	 *
+	 * @param string $which Unused.
+	 */
+	protected function extra_tablenav( $which ) {
+		global $comment_status, $comment_type;
+		static $has_items;
+
+		if ( ! isset( $has_items ) ) {
+			$has_items = $this->has_items();
+		}
+
+		echo '<div class="alignleft actions">';
+
+		if ( 'top' === $which ) {
+			ob_start();
+
+			$this->comment_type_dropdown( $comment_type );
+
+			$output = ob_get_clean();
+
+			if ( ! empty( $output ) && $this->has_items() ) {
+				echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, [ 'id' => 'post-query-submit' ] );
+			}
+		}
+
+		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $has_items
+			&& current_user_can( 'moderate_comments' )
+		) {
+			wp_nonce_field( 'bulk-destroy', '_destroy_nonce' );
+			$title = ( 'spam' === $comment_status ) ? esc_attr__( 'Empty Spam', 'woocommerce' ) : esc_attr__( 'Empty Trash', 'woocommerce' );
+			submit_button( $title, 'apply', 'delete_all', false );
+		}
+
+		echo '</div>';
+	}
+
+	/**
+	 * Displays a comment type drop-down for filtering on the Comments list table.
+	 *
+	 * @param string $comment_type The current comment type slug.
+	 */
+	protected function comment_type_dropdown( $comment_type ) {
+		// @TODO Implement the Type filter - MWC-5343 {dmagalhaes 2022-04-13}
+		echo '&nbsp;';
+	}
 }
