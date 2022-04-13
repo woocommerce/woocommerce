@@ -212,6 +212,8 @@ class ReviewsListTable extends WP_List_Table {
 	 * Renders the product column.
 	 *
 	 * @see WP_Comments_List_Table::column_response() for consistency.
+	 *
+	 * @return void
 	 */
 	protected function column_response() {
 		$product_post = get_post();
