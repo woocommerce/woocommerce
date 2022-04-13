@@ -89,7 +89,11 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param object|array $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
-		// @TODO Implement in MWC-5334 {agibson 2022-04-12}
+		echo esc_html(
+			'review' === $item->comment_type ?
+			'&#9734;&nbsp;' . __( 'Review', 'woocommerce' ) :
+			__( 'Reply', 'woocommerce' )
+		);
 	}
 
 	/**
