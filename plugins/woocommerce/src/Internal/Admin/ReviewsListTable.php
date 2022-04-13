@@ -188,7 +188,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string $author_url The review or reply author URL (raw).
 	 * @return string
 	 */
-	private function get_item_author_url_for_display( $author_url ) {
+	private function get_item_author_url_for_display( $author_url ) : string {
 
 		$author_url_display = untrailingslashit( preg_replace( '|^http(s)?://(www\.)?|i', '', $author_url ) );
 
