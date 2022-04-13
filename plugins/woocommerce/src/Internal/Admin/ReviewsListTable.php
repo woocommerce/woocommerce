@@ -223,7 +223,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			if ( 'approved' === wp_get_comment_status( $item ) && ! empty( $item->comment_post_ID ) ) :
 				printf(
-					'<a href="%s">%s</a>',
+					'<a href="%1$s">%2$s</a>',
 					esc_url( get_comment_link( $item ) ),
 					esc_html( $submitted )
 				);

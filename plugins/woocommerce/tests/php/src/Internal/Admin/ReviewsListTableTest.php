@@ -235,11 +235,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_date()
 	 * @dataProvider data_provider_test_column_date
 	 *
-	 * @param bool   $has_product    Whether the review is for a valid product object.
-	 * @param string $comment_status The review (comment) status.
+	 * @param bool $has_product      Whether the review is for a valid product object.
+	 * @param int  $comment_approved The review (comment) approved flag.
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_date( $has_product, $comment_status ) {
+	public function test_column_date( $has_product, $comment_approved ) {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_date' );
 		$method->setAccessible( true );
@@ -248,9 +248,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$review = $this->factory()->comment->create_and_get(
 			[
 				'comment_post_ID'  => $post_id,
-				'comment_date'     => '2022-13-04 13:53:00',
-				'comment_status'   => $comment_status,
-				'comment_approved' => (int) 'approved' === $comment_status,
+				'comment_date'     => gmdate( 'Y-m-d H:i:s', time() ),
+				'comment_approved' => $comment_approved,
 			]
 		);
 
@@ -266,9 +265,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			get_comment_date( 'g:i a', $review ),
 		);
 
-		if ( $post_id && 'approved' === $comment_status ) {
+		if ( $post_id && $comment_approved ) {
 			$submitted_on = sprintf(
-				'<a href="%s">%s</a>',
+				'<a href="%1$s">%2$s</a>',
 				get_comment_link( $review ),
 				$submitted_on
 			);
@@ -280,9 +279,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_column_date() */
 	public function data_provider_test_column_date() {
 		return [
-			'No product' => [ false, 'approved' ],
-			'Not approved' => [ true, 'hold' ],
-			'Approved' => [ true, 'approved' ],
+			'No product' => [ false, 1 ],
+			'Not approved' => [ true, 0 ],
+			'Approved' => [ true, 1 ],
 		];
 	}
 
