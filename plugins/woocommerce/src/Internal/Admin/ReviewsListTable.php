@@ -19,7 +19,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @var bool
 	 */
-	private $current_user_can_edit = false;
+	private $current_user_can_edit_review = false;
 
 	/**
 	 * Prepares reviews for display.
@@ -55,7 +55,7 @@ class ReviewsListTable extends WP_List_Table {
 		// Sets the post for the product in context.
 		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$this->current_user_can_edit = current_user_can( 'edit_comment', $comment->comment_ID );
+		$this->current_user_can_edit_review = current_user_can( 'edit_comment', $comment->comment_ID );
 
 		?>
 		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="<?php echo esc_attr( $the_comment_class ); ?>">
@@ -140,7 +140,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		endif;
 
-		if ( $this->current_user_can_edit ) :
+		if ( $this->current_user_can_edit_review ) :
 
 			if ( ! empty( $item->comment_author_email ) ) :
 				/** This filter is documented in wp-includes/comment-template.php */
@@ -246,10 +246,41 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the product column.
 	 *
-	 * @param object|array $item Review or reply being rendered.
+	 * @see WP_Comments_List_Table::column_response() for consistency.
+	 *
+	 * @return void
 	 */
-	protected function column_response( $item ) {
-		// @TODO Implement in MWC-5337 {agibson 2022-04-12}
+	protected function column_response() {
+		$product_post = get_post();
+
+		if ( ! $product_post ) {
+			return;
+		}
+
+		?>
+		<div class="response-links">
+			<?php
+
+			if ( current_user_can( 'edit_product', $product_post->ID ) ) :
+				$post_link  = "<a href='" . esc_url( get_edit_post_link( $product_post->ID ) ) . "' class='comments-edit-item-link'>";
+				$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
+			else :
+				$post_link = esc_html( get_the_title( $product_post->ID ) );
+			endif;
+
+			echo $post_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			$post_type_object = get_post_type_object( $product_post->post_type );
+
+			?>
+			<a href="<?php echo esc_url( get_permalink( $product_post->ID ) ); ?>" class="comments-view-item-link">
+				<?php echo esc_html( $post_type_object->labels->view_item ); ?>
+			</a>
+			<span class="post-com-count-wrapper post-com-count-<?php echo esc_attr( $product_post->ID ); ?>">
+				<?php $this->comments_bubble( $product_post->ID, get_pending_comments_num( $product_post->ID ) ); ?>
+			</span>
+		</div>
+		<?php
 	}
 
 	/**

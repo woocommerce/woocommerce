@@ -339,6 +339,38 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that it will output the product information for the corresponding review column.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_response()
+	 *
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_response() {
+		global $post;
+
+		$product = $this->factory()->post->create_and_get(
+			[
+				'post_title' => 'Test product',
+				'post_type'  => 'product',
+			]
+		);
+
+		$post = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_response' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invoke( $list_table );
+
+		$product_output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Test product', $product_output );
+	}
+
+	/**
 	 * Returns a new instance of the {@see ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable
