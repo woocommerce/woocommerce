@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use WC_Product;
 use WP_Comment;
 use WP_Comments_List_Table;
 use WP_List_Table;
@@ -30,6 +31,13 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_user_can_moderate_reviews;
 
 	/**
+	 * Current product the reviews should be displayed for.
+	 *
+	 * @var int|null Product ID or null for all products.
+	 */
+	private $current_product_for_reviews;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array|string $args Array or string of arguments.
@@ -46,6 +54,8 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function prepare_items() {
+
+		$this->current_product_for_reviews = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
 
 		$this->set_review_status();
 		$this->set_review_type();
@@ -611,6 +621,7 @@ class ReviewsListTable extends WP_List_Table {
 			ob_start();
 
 			$this->review_type_dropdown( $comment_type );
+			$this->product_search( $this->current_product_for_reviews );
 
 			$output = ob_get_clean();
 
@@ -658,6 +669,33 @@ class ReviewsListTable extends WP_List_Table {
 			<?php foreach ( $item_types as $type => $label ) : ?>
 				<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $item_type ); ?>><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Displays a product search input for filtering reviews by product in the Product Reviews list table.
+	 *
+	 * @param int|null $current_product_id The current product ID (or null when displaying all reviews).
+	 * @return void
+	 */
+	protected function product_search( $current_product_id ) {
+
+		$current_product = $current_product_id ? wc_get_product( (int) $current_product_id ) : null;
+
+		?>
+		<label class="screen-reader-text" for="filter-by-product"><?php esc_html_e( 'Filter by product', 'woocommerce' ); ?></label>
+		<select
+			id="filter-by-product"
+			class="wc-product-search"
+			name="product_id"
+			style="width: 200px;"
+			data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>"
+			data-action="woocommerce_json_search_products"
+			data-allow_clear="true">
+			<?php if ( $current_product instanceof WC_Product ) : ?>
+				<option value="<?php echo esc_attr( $current_product ); ?>" selected="selected"><?php echo esc_html( $current_product->get_formatted_name() ); ?></option>
+			<?php endif; ?>
 		</select>
 		<?php
 	}
