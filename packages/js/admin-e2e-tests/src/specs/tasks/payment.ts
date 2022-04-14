@@ -48,15 +48,12 @@ const testAdminPaymentSetupTask = () => {
 
 		it( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async () => {
 			await homeScreen.clickOnTaskList( 'Set up payments' );
-			await paymentsSetup.closeHelpModal();
+			await paymentsSetup.possiblyCloseHelpModal();
 			await paymentsSetup.isDisplayed();
 		} );
 
 		it( 'Saving valid bank account transfer details enables the payment method', async () => {
 			await paymentsSetup.showOtherPaymentMethods();
-			await takeScreenshotFor(
-				'Payment setup task show other payment methods'
-			);
 			await waitForTimeout( 500 );
 			await paymentsSetup.goToPaymentMethodSetup( 'bacs' );
 			await bankTransferSetup.saveAccountDetails( {
@@ -80,12 +77,10 @@ const testAdminPaymentSetupTask = () => {
 			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
+			await paymentsSetup.possiblyCloseHelpModal();
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.showOtherPaymentMethods();
 			await waitForTimeout( 500 );
-			await takeScreenshotFor(
-				'Payment setup task show other payment methods'
-			);
 			await paymentsSetup.enableCashOnDelivery();
 			await waitForTimeout( 1500 );
 			expect( await settings.paymentMethodIsEnabled( 'cod' ) ).toBe(
