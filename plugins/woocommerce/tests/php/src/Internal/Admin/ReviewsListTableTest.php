@@ -882,7 +882,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$product = WC_Helper_Product::create_simple_product( true );
 
-		$property->setValue( $product );
+		$property->setValue( $list_table, $product );
 
 		$this->assertSame( [ 'post_id' => $product->get_id() ], $method->invoke( $list_table ) );
 
