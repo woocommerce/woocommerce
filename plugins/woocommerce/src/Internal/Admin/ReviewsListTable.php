@@ -650,7 +650,14 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
-		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
+		/**
+		 * Fires when the default column output is displayed for a single row.
+		 * This action can be used to render custom columns that have been added.
+		 *
+		 * @param string $column_name The custom column's name.
+		 * @param string $comment_id  The review ID as a numeric string.
+		 */
+		do_action( 'woocommerce_product_reviews_table_custom_column', $column_name, $item->comment_ID );
 	}
 
 	/**

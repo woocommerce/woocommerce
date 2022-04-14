@@ -1280,6 +1280,51 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
+	 * @dataProvider provider_column_default
+	 *
+	 * @param callable|null $hook_callback   Optional callback to add to the action.
+	 * @param string        $expected_output Expected output from the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_column_default( ?callable $hook_callback, string $expected_output ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
+		$method->setAccessible( true );
+
+		$comment = new \WP_Comment(
+			(object) [
+				'comment_ID' => '123',
+			]
+		);
+
+		if ( ! empty( $hook_callback ) ) {
+			add_action( 'woocommerce_product_reviews_table_custom_column', $hook_callback, 10, 2 );
+		} else {
+			remove_all_actions( 'woocommerce_product_reviews_table_custom_column' );
+		}
+
+		ob_start();
+
+		$method->invoke( $list_table, $comment, 'column-name' );
+
+		$this->assertSame( $expected_output, ob_get_clean() );
+	}
+
+	/** @see test_column_default */
+	public function provider_column_default() : Generator {
+		yield 'no callback' => [ null, '' ];
+
+		yield 'custom callback' => [
+			'hook_callback' => static function ( $column_name, $review_id ) {
+				echo 'Column name: ' . $column_name . ' for ID ' . $review_id . '.'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			},
+			'expected_output' => 'Column name: column-name for ID 123.',
+		];
+	}
+
+	/**
 	 * Tests that can output a product search field for the product in context.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::product_search()
