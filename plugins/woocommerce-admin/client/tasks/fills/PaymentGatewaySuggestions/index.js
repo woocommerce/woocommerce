@@ -321,7 +321,9 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			footerLink={
 				! isWCPayOrOtherCategoryDoneSetup && (
 					<Button
-						href={ getAdminLink( 'admin.php?page=wc-addons' ) }
+						href={ getAdminLink(
+							'admin.php?page=wc-addons&section=payment-gateways'
+						) }
 						target="_blank"
 						onClick={ trackSeeMore }
 						isTertiary

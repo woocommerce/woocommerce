@@ -215,7 +215,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
 							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
-							echo "<a id='settings-other-payment-methods' href='" . esc_url( admin_url( 'admin.php?page=wc-addons' ) ) . "' target='_blank' class='components-button is-tertiary'>";
+							echo "<a id='settings-other-payment-methods' href='" . esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) ) . "' target='_blank' class='components-button is-tertiary'>";
 							// phpcs:ignore
 							echo $link_text;
 							// phpcs:ignore
