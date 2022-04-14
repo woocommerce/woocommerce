@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -590,6 +591,39 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				'delete',
 			],
 		];
+	}
+
+	/**
+	 * Tests that can set the product to filter reviews by.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_product()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method or the property do not exist.
+	 */
+	public function test_set_review_product() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'set_review_product' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_product_for_reviews' );
+		$property->setAccessible( true );
+
+		$_REQUEST['product_id'] = 0;
+
+		$method->invoke( $list_table );
+
+		$this->assertNull( $property->getValue( $list_table ) );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		$_REQUEST['product_id'] = $product->get_id();
+
+		$method->invoke( $list_table );
+
+		$this->assertSame( $product->get_id(), $property->getValue( $list_table )->get_id() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**

@@ -84,7 +84,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function set_review_product() {
+	protected function set_review_product() {
 
 		$product_id = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
 		$product = $product_id ? wc_get_product( $product_id ) : null;
