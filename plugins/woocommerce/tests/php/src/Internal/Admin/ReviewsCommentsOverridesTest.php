@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides;
+use ReflectionClass;
 use WC_Unit_Test_Case;
 
 /**
@@ -44,6 +45,38 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		yield 'Comments page' => [ 'edit-comments', true ];
 		yield 'Posts page' => [ 'edit', false ];
 		yield 'Product Reviews page' => [ 'product_page_product-reviews', false ];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_reviews_moved_notice()
+	 */
+	public function test_display_reviews_moved_notice() {
+		$overrides = new ReviewsCommentsOverrides();
+		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'display_reviews_moved_notice' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invoke( $overrides );
+
+		$output = trim( ob_get_clean() );
+
+		$this->assertSame(
+			'<div class="notice notice-info is-dismissible">
+			<p>
+				<strong>Product reviews have moved!</strong>
+			</p>
+			<p>
+				Product reviews can now be managed from Products &gt; Reviews.			</p>
+			<p class="submit">
+				<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">
+					Visit new location				</a>
+								<a href="#" class="button-secondary">
+					Learn more about product reviews				</a>
+			</p>
+		</div>',
+			$output
+		);
 	}
 
 	/**
