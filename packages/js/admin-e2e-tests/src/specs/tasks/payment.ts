@@ -57,6 +57,7 @@ const testAdminPaymentSetupTask = () => {
 			await takeScreenshotFor(
 				'Payment setup task show other payment methods'
 			);
+			await waitForTimeout( 500 );
 			await paymentsSetup.goToPaymentMethodSetup( 'bacs' );
 			await bankTransferSetup.saveAccountDetails( {
 				accountNumber: '1234',
@@ -81,6 +82,7 @@ const testAdminPaymentSetupTask = () => {
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.showOtherPaymentMethods();
+			await waitForTimeout( 500 );
 			await takeScreenshotFor(
 				'Payment setup task show other payment methods'
 			);
