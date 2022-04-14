@@ -49,6 +49,7 @@ class ReviewsListTable extends WP_List_Table {
 	public function prepare_items() {
 
 		$this->set_review_status();
+		$this->set_item_type();
 
 		$args = [
 			'post_type' => 'product',
@@ -81,6 +82,23 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( ! in_array( $comment_status, [ 'all', 'moderated', 'approved', 'spam', 'trash' ], true ) ) {
 			$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * Sets the `$comment_type` global based on the current request.
+	 *
+	 * @global string $comment_type
+	 *
+	 * @return void
+	 */
+	protected function set_item_type() {
+		global $comment_type;
+
+		$item_type = sanitize_text_field( wp_unslash( $_REQUEST['item_type'] ?? 'all' ) );
+
+		if ( 'all' !== $item_type ) {
+			$comment_type = $item_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
@@ -150,8 +168,8 @@ class ReviewsListTable extends WP_List_Table {
 
 			// Reviews and other review types.
 			case 'review':
-			default:
 				$args['comment_type'] = $item_type;
+				$args['parent__in']   = [ 0 ];
 
 				break;
 		}
