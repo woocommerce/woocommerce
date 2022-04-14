@@ -63,17 +63,9 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			'<div class="notice notice-info is-dismissible">
-			<p>
-				<strong>Product reviews have moved!</strong>
-			</p>
-			<p>
-				Product reviews can now be managed from Products &gt; Reviews.			</p>
-			<p class="submit">
-				<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">
-					Visit new location				</a>
-								<a href="#" class="button-secondary">
-					Learn more about product reviews				</a>
-			</p>
+			<p><strong>Product reviews have moved!</strong></p>
+			<p>Product reviews can now be managed from Products &gt; Reviews.</p>
+			<p class="submit"><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">Visit new location</a></p>
 		</div>',
 			$output
 		);
