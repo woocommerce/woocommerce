@@ -531,7 +531,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_get_bulk_actions( string $current_comment_status, array $expected_actions ) {
-		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
 		$method->setAccessible( true );
 
@@ -604,7 +604,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_set_review_status( ?string $request_status, string $expected_comment_status ) {
-		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
 		$method->setAccessible( true );
 
