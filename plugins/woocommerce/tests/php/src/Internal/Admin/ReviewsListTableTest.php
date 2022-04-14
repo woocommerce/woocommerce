@@ -28,6 +28,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can process the row output for a review or reply.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::single_row()
+	 *
+	 * @return void
 	 */
 	public function test_single_row() {
 		$post_id = $this->factory()->post->create();
@@ -62,6 +64,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can get the product reviews' page columns.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
+	 *
+	 * @return void
 	 */
 	public function test_get_columns() {
 		$this->assertSame(
@@ -83,6 +87,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_primary_column_name()
 	 *
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_get_primary_column_name() {
@@ -99,6 +104,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @dataProvider data_provider_test_column_cb()
 	 * @param bool   $current_user_can_edit Whether the current user has the capability to edit this review.
 	 * @param string $expected_output The expected output.
+	 * @return void
+	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_cb( bool $current_user_can_edit, string $expected_output ) {
 		$list_table = $this->get_reviews_list_table();
@@ -145,6 +152,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $comment_type The comment type (usually review or comment).
 	 * @param string $expected_output The expected output.
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_type( $comment_type, $expected_output ) {
@@ -175,11 +183,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_rating()
+	 * Tests that can generate the column rating HTML output.
 	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_rating()
 	 * @dataProvider data_provider_test_column_rating()
+	 *
 	 * @param string $meta_value The comment meta value for rating.
 	 * @param string $expected_output The expected output.
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_rating( $meta_value, $expected_output ) {
@@ -202,7 +213,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_column_rating() */
-	public function data_provider_test_column_rating() {
+	public function data_provider_test_column_rating() : array {
 		return [
 			'no rating' => [ '', '' ],
 			'1 star' => [ '1', '<span aria-label="1 out of 5">&#9733;&#9734;&#9734;&#9734;&#9734;</span>' ],
@@ -222,7 +233,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $show_avatars          Value for the `show_avatars` option.
 	 * @param bool $should_contain_avatar If the HTML should contain an avatar.
-	 *
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_author( bool $show_avatars, bool $should_contain_avatar ) {
@@ -266,7 +277,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_column_author */
 	public function provider_column_author() : Generator {
 		yield 'avatars disabled' => [ false, false ];
-		yield 'avatars enabled' => [ true, true ];
+		yield 'avatars enabled'  => [ true, true ];
 	}
 
 	/**
@@ -277,6 +288,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $comment_author_url The comment author URL.
 	 * @param string $expected_author_url The expected author URL.
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_get_item_author_url( $comment_author_url, $expected_author_url ) {
@@ -315,6 +327,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $author_url The author URL.
 	 * @param string $author_url_for_display The author URL for display.
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_get_item_author_url_for_display( $author_url, $author_url_for_display ) {
@@ -346,6 +359,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $has_product   Whether the review is for a valid product object.
 	 * @param int  $approved_flag The review (comment) approved flag.
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_date( $has_product, $approved_flag ) {
@@ -385,9 +399,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_column_date() */
 	public function data_provider_test_column_date() {
 		return [
-			'No product' => [ false, 1 ],
+			'No product'   => [ false, 1 ],
 			'Not approved' => [ true, 0 ],
-			'Approved' => [ true, 1 ],
+			'Approved'     => [ true, 1 ],
 		];
 	}
 
@@ -396,6 +410,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_response()
 	 *
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_response() {
@@ -428,6 +443,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_comment()
 	 *
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_column_comment() {
@@ -474,6 +490,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_in_reply_to_review_text()
 	 *
+	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
 	public function test_get_in_reply_to_review_text() {
@@ -576,7 +593,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can set the review status when preparing items.
+	 * Tests that can set the review status for the current request.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_status()
 	 * @dataProvider provider_set_review_status
@@ -602,13 +619,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/** @see test_set_review_status */
 	public function provider_set_review_status() : Generator {
-		yield 'not set' => [ null, 'all' ];
-		yield 'invalid status' => [ 'invalid', 'all' ];
+		yield 'not set'          => [ null, 'all' ];
+		yield 'invalid status'   => [ 'invalid', 'all' ];
 		yield 'moderated status' => [ 'moderated', 'moderated' ];
-		yield 'all status' => [ 'all', 'all' ];
-		yield 'approved status' => [ 'approved', 'approved' ];
-		yield 'spam status' => [ 'spam', 'spam' ];
-		yield 'trash status' => [ 'trash', 'trash' ];
+		yield 'all statuses'     => [ 'all', 'all' ];
+		yield 'approved status'  => [ 'approved', 'approved' ];
+		yield 'spam status'      => [ 'spam', 'spam' ];
+		yield 'trash status'     => [ 'trash', 'trash' ];
 	}
 
 	/**
@@ -648,6 +665,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can get the sortable columns for the reviews table.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sortable_columns()
 	 *
 	 * @return void
@@ -804,6 +823,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output the text for when no reviews are found.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::no_items()
 	 * @dataProvider provider_no_items
 	 *
@@ -825,8 +846,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_no_items */
 	public function provider_no_items() : \Generator {
 		yield 'moderated filter' => [ 'moderated', 'No reviews awaiting moderation.' ];
-		yield 'no filter' => [ '', 'No reviews found.' ];
-		yield 'spam filter' => [ 'spam', 'No reviews found.' ];
+		yield 'no filter'        => [ '', 'No reviews found.' ];
+		yield 'spam filter'      => [ 'spam', 'No reviews found.' ];
 	}
 
 	/**
