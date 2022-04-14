@@ -202,6 +202,14 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 									}
 									setOpenPanel( section.id );
 								}
+								if ( isOpen ) {
+									recordEvent(
+										`${ eventPrefix }section_opened`,
+										{
+											id: section.id,
+										}
+									);
+								}
 							} }
 							initialOpen={ false }
 						>
