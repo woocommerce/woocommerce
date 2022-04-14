@@ -842,6 +842,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		if ( null !== ( $review_type ) ) {
 			$_REQUEST['review_type'] = $review_type;
+		} else {
+			unset( $_REQUEST['review_type'] );
 		}
 
 		$args = $method->invoke( $list_table );
