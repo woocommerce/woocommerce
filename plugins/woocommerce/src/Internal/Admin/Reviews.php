@@ -25,14 +25,14 @@ class Reviews {
 	/**
 	 * Reviews page hook name.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	protected $reviews_page_hook;
 
 	/**
 	 * Reviews list table instance.
 	 *
-	 * @var ReviewsListTable
+	 * @var ReviewsListTable|null
 	 */
 	protected $reviews_list_table;
 
@@ -57,7 +57,7 @@ class Reviews {
 	}
 
 	/**
-	 * Registers the Reviews submenu page.
+	 * Registers the Product Reviews submenu page.
 	 *
 	 * @return void
 	 */
