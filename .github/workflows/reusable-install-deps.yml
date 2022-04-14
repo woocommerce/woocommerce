@@ -1,0 +1,44 @@
+name: Install Dependencies (Reusable)
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        required: false
+        default: ./
+        type: string
+
+jobs:
+  install-deps:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+            access_token: ${{ github.token }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pnpm
+            plugins/woocommerce/node_modules
+            plugins/woocommerce/vendor
+          key: ${{ runner.os }}-build-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm
+
+      - name: Install node dependencies
+        working-directory: ${{ inputs.working_directory }}
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: pnpm install
+
+      - name: Install Composer
+        working-directory: ${{ inputs.working_directory }}
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: pnpm nx composer-install woocommerce
