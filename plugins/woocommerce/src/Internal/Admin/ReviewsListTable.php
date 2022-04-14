@@ -181,7 +181,6 @@ class ReviewsListTable extends WP_List_Table {
 		$untrash_url   = esc_url( $url . "&action=untrashcomment&$del_nonce" );
 		$delete_url    = esc_url( $url . "&action=deletecomment&$del_nonce" );
 
-		// Pre-ordered actions: Approve/Unapprove | Reply | Quick Edit | Edit | Spam/Unspam | Trash/Untrash/Delete Permanently.
 		$actions = [
 			'approve'   => '',
 			'unapprove' => '',
@@ -312,13 +311,7 @@ class ReviewsListTable extends WP_List_Table {
 		/** This filter is documented in wp-admin/includes/dashboard.php */
 		$actions = apply_filters( 'comment_row_actions', array_filter( $actions ), $review );
 
-		$always_visible = false;
-
-		$mode = get_user_setting( 'posts_list_mode', 'list' );
-
-		if ( 'excerpt' === $mode ) {
-			$always_visible = true;
-		}
+		$always_visible = 'excerpt' === get_user_setting( 'posts_list_mode', 'list' );
 
 		$output = '<div class="' . ( $always_visible ? 'row-actions visible' : 'row-actions' ) . '">';
 
@@ -333,7 +326,6 @@ class ReviewsListTable extends WP_List_Table {
 				$sep = ' | ';
 			}
 
-			// Reply and quickedit need a hide-if-no-js span when not added with Ajax.
 			if ( ( 'reply' === $action || 'quickedit' === $action ) && ! wp_doing_ajax() ) {
 				$action .= ' hide-if-no-js';
 			} elseif ( ( 'untrash' === $action && 'trash' === $review_status ) || ( 'unspam' === $action && 'spam' === $review_status ) ) {
