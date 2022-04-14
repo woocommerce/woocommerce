@@ -567,10 +567,26 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Displays a comment type drop-down for filtering on the Comments list table.
 	 *
-	 * @param string $comment_type The current comment type slug.
+	 * @see WP_Comments_List_Table::comment_type_dropdown() for consistency.
+	 *
+	 * @param string $item_type The current comment item type slug.
 	 */
-	protected function comment_type_dropdown( $comment_type ) {
-		// @TODO Implement the Type filter - MWC-5343 {dmagalhaes 2022-04-13}
-		echo '&nbsp;';
+	protected function comment_type_dropdown( $item_type ) {
+
+		$item_types = [
+			'all'    => __( 'All', 'woocommerce' ),
+			'reply'  => __( 'Replies', 'woocommerce' ),
+			'review' => __( 'Reviews', 'woocommerce' ),
+		];
+
+		?>
+		<label class="screen-reader-text" for="filter-by-item-type"><?php esc_html_e( 'Filter by type', 'woocommerce' ); ?></label>
+		<select id="filter-by-item-type" name="item_type">
+			<?php foreach ( $item_types as $type => $label ) : ?>
+				<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $item_type ); ?>><?php echo esc_html( $label ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php
 	}
+
 }
