@@ -581,7 +581,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param int    $post_id      Current post ID.
 	 * @return string
 	 */
-	protected function get_view_url( $comment_type, $post_id ) : string {
+	protected function get_view_url( string $comment_type, int $post_id ) : string {
 		$link = add_query_arg(
 			[
 				'post_type' => 'product',
@@ -616,7 +616,7 @@ class ReviewsListTable extends WP_List_Table {
 			unset( $status_labels['trash'] );
 		}
 
-		$link = $this->get_view_url( $comment_type, $post_id );
+		$link = $this->get_view_url( (string) $comment_type, (int) $post_id );
 
 		foreach ( $status_labels as $status => $label ) {
 			$current_link_attributes = '';
