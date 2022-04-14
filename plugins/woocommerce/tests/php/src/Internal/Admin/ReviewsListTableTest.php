@@ -1214,4 +1214,30 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertSame( 5, $method->invoke( $list_table, 'all', $product_id ) );
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_views()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_views() {
+		global $comment_status;
+		$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_views' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			[
+				'all'       => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
+				'moderated' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
+				'approved'  => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
+				'spam'      => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
+				'trash'     => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
+			],
+			$method->invoke( $list_table )
+		);
+	}
+
 }
