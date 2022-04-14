@@ -2,3 +2,4 @@ packages:
     - 'packages/js/**'
     - 'plugins/**'
     - 'tools/monorepo-merge'
+    - 'tools/code-analyzer'

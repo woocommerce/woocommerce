@@ -1572,6 +1572,33 @@ importers:
       sass: 1.45.0
       stylelint: 13.8.0
 
+  tools/code-analyzer:
+    specifiers:
+      '@oclif/core': ^1
+      '@oclif/plugin-help': ^5
+      '@oclif/plugin-plugins': ^2.0.1
+      '@types/node': ^16.9.4
+      eslint: ^7.32.0
+      globby: ^11
+      oclif: ^2
+      shx: ^0.3.3
+      ts-node: ^10.2.1
+      tslib: ^2.3.1
+      typescript: ^4.4.3
+    dependencies:
+      '@oclif/core': 1.3.4
+      '@oclif/plugin-help': 5.1.11
+      '@oclif/plugin-plugins': 2.1.0
+    devDependencies:
+      '@types/node': 16.10.3
+      eslint: 7.32.0
+      globby: 11.1.0
+      oclif: 2.4.5
+      shx: 0.3.4
+      ts-node: 10.5.0_506ca6ef959d35afcce359030b1bc9ff
+      tslib: 2.3.1
+      typescript: 4.6.2
+
   tools/monorepo-merge:
     specifiers:
       '@oclif/core': ^1
@@ -1699,7 +1726,7 @@ packages:
   /@babel/code-frame/7.12.11:
     resolution: {integrity: sha512-Zt1yodBx1UcyiePMSkWnU4hPqhwq7hGi2nFL1LeA3EUl+q2LQx16MISgJ0+z7dnmgvP9QtIleuETGOiOH1RcIw==}
     dependencies:
-      '@babel/highlight': 7.16.0
+      '@babel/highlight': 7.16.10
     dev: true
 
   /@babel/code-frame/7.16.0:
@@ -6642,7 +6669,7 @@ packages:
       ignore: 4.0.6
       import-fresh: 3.3.0
       js-yaml: 3.14.1
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -6740,7 +6767,7 @@ packages:
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
       debug: 4.3.3
-      minimatch: 3.0.4
+      minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8592,7 +8619,7 @@ packages:
       react-refresh: 0.11.0
       schema-utils: 3.1.1
       source-map: 0.7.3
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_92cb4b81c6b9f71cf92f0bdb85e4210c:
@@ -8980,7 +9007,7 @@ packages:
     peerDependencies:
       '@storybook/addon-actions': '*'
     dependencies:
-      '@storybook/addon-actions': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@storybook/addon-actions': 6.4.19
       global: 4.4.0
     dev: true
 
@@ -11293,7 +11320,7 @@ packages:
       react-docgen-typescript: 2.2.2_typescript@4.6.2
       tslib: 2.3.1
       typescript: 4.6.2
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -21553,7 +21580,7 @@ packages:
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       natural-compare: 1.4.0
       optionator: 0.9.1
       progress: 2.0.3
@@ -21561,7 +21588,7 @@ packages:
       semver: 7.3.5
       strip-ansi: 6.0.1
       strip-json-comments: 3.1.1
-      table: 6.7.3
+      table: 6.8.0
       text-table: 0.2.0
       v8-compile-cache: 2.3.0
     transitivePeerDependencies:
@@ -22331,7 +22358,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /file-loader/6.2.0_webpack@5.64.1:
@@ -24205,7 +24232,7 @@ packages:
       pretty-error: 2.1.2
       tapable: 1.1.3
       util.promisify: 1.0.0
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /html-webpack-plugin/5.5.0_webpack@5.70.0:
@@ -31288,7 +31315,7 @@ packages:
       postcss: 7.0.39
       schema-utils: 3.1.1
       semver: 7.3.5
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /postcss-loader/6.2.0_postcss@8.3.0+webpack@5.64.1:
@@ -32761,7 +32788,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /raw-loader/4.0.2_webpack@5.64.1:
@@ -35743,7 +35770,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /style-loader/2.0.0_webpack@5.70.0:
@@ -36489,7 +36516,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.10.0_acorn@7.4.1
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - acorn
@@ -36509,7 +36536,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.10.0
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - acorn
@@ -37131,6 +37158,37 @@ packages:
       webpack: 5.64.1
     dev: true
 
+  /ts-node/10.5.0_506ca6ef959d35afcce359030b1bc9ff:
+    resolution: {integrity: sha512-6kEJKwVxAJ35W4akuiysfKwKmjkbYxwQMTBaAxo9KKAx/Yd26mPUyhGz3ji+EsJoAgrLqVsYHNuuYwQe22lbtw==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.7.0
+      '@tsconfig/node10': 1.0.8
+      '@tsconfig/node12': 1.0.9
+      '@tsconfig/node14': 1.0.1
+      '@tsconfig/node16': 1.0.2
+      '@types/node': 16.10.3
+      acorn: 8.7.0
+      acorn-walk: 8.2.0
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.6.2
+      v8-compile-cache-lib: 3.0.0
+      yn: 3.1.1
+    dev: true
+
   /ts-node/10.5.0_e0d88945dfc7787883e9c330c9196a96:
     resolution: {integrity: sha512-6kEJKwVxAJ35W4akuiysfKwKmjkbYxwQMTBaAxo9KKAx/Yd26mPUyhGz3ji+EsJoAgrLqVsYHNuuYwQe22lbtw==}
     hasBin: true
@@ -37151,7 +37209,7 @@ packages:
       '@tsconfig/node14': 1.0.1
       '@tsconfig/node16': 1.0.2
       '@types/node': 16.10.3
-      acorn: 8.5.0
+      acorn: 8.7.0
       acorn-walk: 8.2.0
       arg: 4.1.3
       create-require: 1.1.1
@@ -37754,7 +37812,7 @@ packages:
       loader-utils: 2.0.2
       mime-types: 2.1.34
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /url-parse-lax/1.0.0:
@@ -38302,7 +38360,7 @@ packages:
       mime: 2.5.2
       mkdirp: 0.5.5
       range-parser: 1.2.1
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
       webpack-log: 2.0.0
     dev: true
 
@@ -38385,7 +38443,7 @@ packages:
     peerDependencies:
       webpack: ^2.0.0 || ^3.0.0 || ^4.0.0
     dependencies:
-      webpack: 4.46.0_webpack-cli@4.9.2
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /webpack-fix-style-only-entries/0.6.1:
@@ -38569,7 +38627,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5_webpack@4.46.0
       watchpack: 1.7.5
-      webpack-cli: 3.3.12_webpack@4.46.0
+      webpack-cli: 3.3.12_webpack@5.70.0
       webpack-sources: 1.4.3
     dev: true
 
