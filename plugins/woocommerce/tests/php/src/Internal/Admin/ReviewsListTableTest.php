@@ -1095,9 +1095,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<select id="filter-by-review-type" name="review_type">', $output );
 
 		if ( ! in_array( $chosen_type, [ 'all', 'comment', 'review' ], true ) ) {
-			$this->assertStringNotContainsString( '<option value="' . $chosen_type . '" selected', $output );
+			$this->assertStringNotContainsString( '<option value="' . $chosen_type . '"  selected', $output );
 		} else {
-			$this->assertStringContainsString( '<option value="' . $chosen_type . '" selected', $output );
+			$this->assertStringContainsString( '<option value="' . $chosen_type . '"  selected', $output );
 		}
 	}
 
