@@ -54,6 +54,9 @@ const testAdminPaymentSetupTask = () => {
 
 		it( 'Saving valid bank account transfer details enables the payment method', async () => {
 			await paymentsSetup.showOtherPaymentMethods();
+			await takeScreenshotFor(
+				'Payment setup task show other payment methods'
+			);
 			await paymentsSetup.goToPaymentMethodSetup( 'bacs' );
 			await bankTransferSetup.saveAccountDetails( {
 				accountNumber: '1234',
@@ -78,6 +81,9 @@ const testAdminPaymentSetupTask = () => {
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.showOtherPaymentMethods();
+			await takeScreenshotFor(
+				'Payment setup task show other payment methods'
+			);
 			await paymentsSetup.enableCashOnDelivery();
 			await waitForTimeout( 1500 );
 			expect( await settings.paymentMethodIsEnabled( 'cod' ) ).toBe(

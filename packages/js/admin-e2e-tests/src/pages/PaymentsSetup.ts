@@ -32,6 +32,7 @@ export class PaymentsSetup extends BasePage {
 			`${ selector }[aria-expanded=false]`
 		);
 		await toggleButton?.click();
+		await waitForElementByText( 'h2', 'Offline payment methods' );
 	}
 
 	async goToPaymentMethodSetup(
