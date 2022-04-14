@@ -130,8 +130,8 @@ class Marketing extends Task {
 			return true;
 		}
 
-		// Make sure the task has been actioned and at least one extension is installed.
-		if ( count( $installed ) > 0 && Task::is_task_actioned( 'marketing' ) ) {
+		// Make sure the task has been actioned or at least one extension is installed.
+		if ( count( $installed ) > 0 || Task::is_task_actioned( 'marketing' ) ) {
 			return true;
 		}
 
