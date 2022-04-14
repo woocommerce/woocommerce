@@ -229,7 +229,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can output the author information.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_author()
-	 * @dataProvider provider_column_author
+	 * @dataProvider data_provider_column_author
 	 *
 	 * @param bool $show_avatars          Value for the `show_avatars` option.
 	 * @param bool $should_contain_avatar If the HTML should contain an avatar.
@@ -275,7 +275,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_column_author */
-	public function provider_column_author() : Generator {
+	public function data_provider_column_author() : Generator {
 		yield 'avatars disabled' => [ false, false ];
 		yield 'avatars enabled'  => [ true, true ];
 	}
@@ -523,7 +523,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can get the product reviews bulk actions.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_bulk_actions()
-	 * @dataProvider provider_get_bulk_actions
+	 * @dataProvider data_provider_get_bulk_actions
 	 *
 	 * @param string $current_comment_status Currently set status.
 	 * @param array  $expected_actions       Keys of the expected actions.
@@ -545,7 +545,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_bulk_actions */
-	public function provider_get_bulk_actions() : Generator {
+	public function data_provider_get_bulk_actions() : Generator {
 		yield 'all statuses' => [
 			'current_comment_status' => 'all',
 			'expected_actions' => [
@@ -596,7 +596,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can set the review status for the current request.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_status()
-	 * @dataProvider provider_set_review_status
+	 * @dataProvider data_provider_set_review_status
 	 *
 	 * @param string|null $request_status          Status that's in the request.
 	 * @param string      $expected_comment_status Expected value for the global variable.
@@ -618,7 +618,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_set_review_status */
-	public function provider_set_review_status() : Generator {
+	public function data_provider_set_review_status() : Generator {
 		yield 'not set'          => [ null, 'all' ];
 		yield 'invalid status'   => [ 'invalid', 'all' ];
 		yield 'moderated status' => [ 'moderated', 'moderated' ];
@@ -826,7 +826,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can output the text for when no reviews are found.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::no_items()
-	 * @dataProvider provider_no_items
+	 * @dataProvider data_provider_no_items
 	 *
 	 * @param string $status   Filtered status.
 	 * @param string $expected Expected text.
@@ -844,7 +844,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_no_items */
-	public function provider_no_items() : \Generator {
+	public function data_provider_no_items() : \Generator {
 		yield 'moderated filter' => [ 'moderated', 'No reviews awaiting moderation.' ];
 		yield 'no filter'        => [ '', 'No reviews found.' ];
 		yield 'spam filter'      => [ 'spam', 'No reviews found.' ];
@@ -854,7 +854,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * Tests that can render the extra controls for the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::extra_tablenav()
-	 * @dataProvider provider_test_extra_tablenav()
+	 * @dataProvider data_provider_test_extra_tablenav()
 	 *
 	 * @param string   $position                  Position (top or bottom).
 	 * @param bool     $has_items                 Whether the table has items.
@@ -904,7 +904,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_extra_tablenav() */
-	public function provider_test_extra_tablenav() : Generator {
+	public function data_provider_test_extra_tablenav() : Generator {
 		yield 'no items top' => [
 			'position' => 'top',
 			'has_items' => false,
