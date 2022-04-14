@@ -50,7 +50,15 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param array|string $args Array or string of arguments.
 	 */
 	public function __construct( $args = [] ) {
-		parent::__construct( $args );
+		parent::__construct(
+			wp_parse_args(
+				$args,
+				[
+					'plural'   => 'product-reviews',
+					'singular' => 'product-review',
+				]
+			)
+		);
 
 		$this->current_user_can_moderate_reviews = current_user_can( 'moderate_comments' );
 	}
@@ -767,6 +775,35 @@ class ReviewsListTable extends WP_List_Table {
 			<?php endforeach; ?>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Processes the bulk actions.
+	 *
+	 * @return void
+	 */
+	public function process_bulk_action() {
+		if ( ! $this->current_user_can_moderate_reviews ) {
+			return;
+		}
+
+		if ( $this->current_action() ) {
+			check_admin_referer( 'bulk-product-reviews' );
+
+			$query_string = remove_query_arg( [ 'page', '_wpnonce' ], wp_unslash( ( $_SERVER['QUERY_STRING'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			// Replace current nonce with bulk-comments nonce.
+			$comments_nonce = wp_create_nonce( 'bulk-comments' );
+			$query_string   = add_query_arg( '_wpnonce', $comments_nonce, $query_string );
+
+			// Redirect to edit-comments.php, which will handle processing the action for us.
+			wp_safe_redirect( esc_url_raw( admin_url( 'edit-comments.php?' . $query_string ) ) );
+			exit;
+		} elseif ( ! empty( $_GET['_wp_http_referer'] ) ) {
+
+			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
+			exit;
+		}
 	}
 
 	/**
