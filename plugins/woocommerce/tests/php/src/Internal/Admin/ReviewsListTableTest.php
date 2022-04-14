@@ -1175,4 +1175,30 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'Replies'      => [ 'comment' ];
 		yield 'Reviews'      => [ 'review' ];
 	}
+
+	/**
+	 * Tests that can output a product search field for the product in context.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::product_search()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_product_search() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'product_search' );
+		$method->setAccessible( true );
+
+		$product = WC_Helper_Product::create_simple_product( false );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $product ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
+		$this->assertStringContainsString( '<select id="filter-by-product" name="product_id">', $output );
+		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"  selected', $output );
+	}
 }
