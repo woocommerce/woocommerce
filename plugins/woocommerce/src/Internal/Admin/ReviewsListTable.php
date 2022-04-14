@@ -168,7 +168,7 @@ class ReviewsListTable extends WP_List_Table {
 		 *
 		 * @param array $columns
 		 */
-		return apply_filters( 'woocommerce_product_review_table_columns', $columns );
+		return apply_filters( 'woocommerce_product_reviews_table_columns', $columns );
 	}
 
 	/**

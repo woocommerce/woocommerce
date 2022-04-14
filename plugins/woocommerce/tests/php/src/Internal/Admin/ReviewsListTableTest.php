@@ -96,7 +96,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			];
 		};
 
-		add_filter( 'woocommerce_product_review_table_columns', $filter_callback );
+		add_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
 
 		$this->assertSame(
 			[
@@ -105,7 +105,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			$this->get_reviews_list_table()->get_columns()
 		);
 
-		remove_filter( 'woocommerce_product_review_table_columns', $filter_callback );
+		remove_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
 	}
 
 	/**
