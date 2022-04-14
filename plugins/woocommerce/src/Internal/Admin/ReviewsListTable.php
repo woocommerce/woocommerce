@@ -264,7 +264,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return array Table columns and their headings.
 	 */
 	public function get_columns() {
-		return [
+		$columns = [
 			'cb'       => '<input type="checkbox" />',
 			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
 			'author'   => __( 'Author', 'woocommerce' ),
@@ -273,6 +273,13 @@ class ReviewsListTable extends WP_List_Table {
 			'response' => __( 'Product', 'woocommerce' ),
 			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 		];
+
+		/**
+		 * Filters the table columns.
+		 *
+		 * @param array $columns
+		 */
+		return apply_filters( 'woocommerce_product_reviews_table_columns', $columns );
 	}
 
 	/**

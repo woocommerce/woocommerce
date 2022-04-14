@@ -84,6 +84,32 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can get the product reviews' page columns when a filter is applied.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
+	 *
+	 * @return void
+	 */
+	public function test_get_columns_filtered() {
+		$filter_callback = function( $columns ) {
+			return [
+				'custom_column' => 'Custom column',
+			];
+		};
+
+		add_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
+
+		$this->assertSame(
+			[
+				'custom_column' => 'Custom column',
+			],
+			$this->get_reviews_list_table()->get_columns()
+		);
+
+		remove_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
+	}
+
+	/**
 	 * Tests that can get the primary column name.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_primary_column_name()
