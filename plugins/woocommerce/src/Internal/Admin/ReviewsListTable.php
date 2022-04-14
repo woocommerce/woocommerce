@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use WP_Comment;
 use WP_Comments_List_Table;
 use WP_List_Table;
+use WP_Post;
 
 /**
  * Handles the Product Reviews page.
@@ -41,6 +42,8 @@ class ReviewsListTable extends WP_List_Table {
 
 	/**
 	 * Sets the `$comment_status` global based on the current request.
+	 *
+	 * @global string $comment_status
 	 *
 	 * @return void
 	 */
@@ -118,6 +121,9 @@ class ReviewsListTable extends WP_List_Table {
 
 	/**
 	 * Render a single row HTML.
+	 *
+	 * @global WP_Post $post
+	 * @global WP_Comment $comment
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
 	 * @return void
@@ -220,6 +226,8 @@ class ReviewsListTable extends WP_List_Table {
 
 	/**
 	 * The text to display when there are no reviews to display.
+	 *
+	 * @global string $comment_status
 	 *
 	 * @see WP_List_Table::no_items()
 	 */
