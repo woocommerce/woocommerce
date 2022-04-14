@@ -23,6 +23,7 @@ import { SectionedTaskList } from '../two-column-tasks/sectioned-task-list';
 import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-list-placeholder';
 
 export type TasksProps = {
 	query: { task?: string };
@@ -45,6 +46,8 @@ function getTaskListPlaceholderComponent(
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
 			return TwoColumnTaskListPlaceholder;
+		case 'setup_experiment_2':
+			return SectionedTaskListPlaceholder;
 		default:
 			return TasksPlaceholder;
 	}

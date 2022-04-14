@@ -63,7 +63,9 @@
 			pointer-events: none;
 		}
 
-		&:not(.is-complete) .woocommerce-task-list__item-before .woocommerce-task__icon {
+		&:not(.is-complete)
+		.woocommerce-task-list__item-before
+		.woocommerce-task__icon {
 			border-color: $gray-300;
 		}
 	}
@@ -86,6 +88,33 @@
 			svg {
 				fill: #fff;
 				position: relative;
+			}
+		}
+	}
+
+	> .is-loading {
+		border: none;
+		margin-bottom: 8px;
+
+		.woocommerce-task-list__item .woocommerce-task-list__item-before {
+			padding: 0 0 0 $gap-large;
+		}
+
+		&.components-panel__body .components-panel__body-title .woocommerce-task-list__item-text {
+			width: 50%;
+
+			.is-placeholder {
+				width: 100%;
+			}
+		}
+
+		&.components-panel__body .woocommerce-task-list__item-after {
+			margin-left: $gap;
+
+			.is-placeholder {
+				height: 24px;
+				width: 24px;
+				border-radius: 50%;
 			}
 		}
 	}
