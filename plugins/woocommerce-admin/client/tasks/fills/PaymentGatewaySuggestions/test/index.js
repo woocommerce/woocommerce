@@ -146,7 +146,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		const paymentTitleElements = container.querySelectorAll(
-			'.woocommerce-task-payment__title'
+			'.woocommerce-task-payment__title > span:first-child'
 		);
 
 		const paymentTitles = Array.from( paymentTitleElements ).map(

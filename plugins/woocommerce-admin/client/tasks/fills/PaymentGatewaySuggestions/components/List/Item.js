@@ -4,8 +4,10 @@
 import classnames from 'classnames';
 import { Fragment } from '@wordpress/element';
 import { CardBody, CardMedia, CardDivider } from '@wordpress/components';
-import { RecommendedRibbon, SetupRequired } from '@woocommerce/onboarding';
+import { SetupRequired } from '@woocommerce/onboarding';
+import { Pill } from '@woocommerce/components';
 import { Text, useSlot } from '@woocommerce/experimental';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -42,7 +44,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 	const hasSetup = Boolean(
 		plugins.length || requiredSettings.length || hasFills || externalLink
 	);
-	const showRecommendedRibbon = isRecommended && needsSetup;
+	const showRecommended = isRecommended && needsSetup;
 
 	const classes = classnames(
 		'woocommerce-task-payment',
@@ -61,11 +63,17 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 					<img src={ image72x72 } alt={ title } />
 				</CardMedia>
 				<div className="woocommerce-task-payment__description">
-					{ showRecommendedRibbon && (
-						<RecommendedRibbon isLocalPartner={ isLocalPartner } />
-					) }
 					<Text as="h3" className="woocommerce-task-payment__title">
-						{ title }
+						<span>{ title }</span>
+						{ showRecommended && (
+							<Pill
+								className={ ! isLocalPartner && 'pill-green' }
+							>
+								{ isLocalPartner
+									? __( 'Local Partner', 'woocommerce' )
+									: __( 'Recommended', 'woocommerce' ) }
+							</Pill>
+						) }
 						{ isInstalled && needsSetup && !! plugins.length && (
 							<SetupRequired />
 						) }
