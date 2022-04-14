@@ -118,6 +118,10 @@ export const Action = ( {
 	}
 
 	if ( ! needsSetup ) {
+		if ( ! isEnabled ) {
+			return <EnableButton />;
+		}
+
 		return <ManageButton />;
 	}
 
