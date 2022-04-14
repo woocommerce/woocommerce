@@ -35,7 +35,6 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param array|string $args Array or string of arguments.
 	 */
 	public function __construct( $args = [] ) {
-
 		parent::__construct( $args );
 
 		$this->current_user_can_moderate_reviews = current_user_can( 'moderate_comments' );
