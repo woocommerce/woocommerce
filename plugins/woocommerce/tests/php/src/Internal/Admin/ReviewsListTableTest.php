@@ -16,6 +16,15 @@ use WC_Unit_Test_Case;
 class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Returns a new instance of the {@see ReviewsListTable} class.
+	 *
+	 * @return ReviewsListTable
+	 */
+	private function get_reviews_list_table() : ReviewsListTable {
+		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+	}
+
+	/**
 	 * Tests that can process the row output for a review or reply.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::single_row()
@@ -412,15 +421,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$product_output = ob_get_clean();
 
 		$this->assertStringContainsString( 'Test product', $product_output );
-	}
-
-	/**
-	 * Returns a new instance of the {@see ReviewsListTable} class.
-	 *
-	 * @return ReviewsListTable
-	 */
-	protected function get_reviews_list_table() : ReviewsListTable {
-		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 	}
 
 	/**
@@ -830,6 +830,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can render the extra controls for the product reviews page.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::extra_tablenav()
 	 * @dataProvider provider_test_extra_tablenav()
 	 *
@@ -841,6 +843,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @param string[] $expected_elements         Output should contain these elements.
 	 * @param string   $expected_end              Output should end with this string.
 	 * @param string[] $not_expected_elements     Output should not contain these elements.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_extra_tablenav( string $position, bool $has_items, bool $current_user_can_moderate, string $status, string $expected_start, array $expected_elements, string $expected_end, array $not_expected_elements ) {
 		global $comment_status;
@@ -1045,4 +1049,42 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 	}
 
+	/**
+	 * Tests that can output a filter by review type dropdown element.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_type_dropdown()
+	 * @dataProvider data_provider_test_review_type_dropdown
+	 *
+	 * @param string $chosen_type The chosen review type to filter for.
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_review_type_dropdown( $chosen_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_type_dropdown' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $chosen_type ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-review-type">Filter by review type</label>', $output );
+		$this->assertStringContainsString( '<select id="filter-by-review-type" name="review_type">', $output );
+
+		if ( ! in_array( $chosen_type, [ 'all', 'comment', 'review' ], true ) ) {
+			$this->assertStringNotContainsString( '<option value="' . $chosen_type . '" selected', $output );
+		} else {
+			$this->assertStringContainsString( '<option value="' . $chosen_type . '" selected', $output );
+		}
+	}
+
+	/** @see test_review_type_dropdown */
+	public function data_provider_test_review_type_dropdown() : Generator {
+		yield 'Unknown type' => [ 'invalid' ];
+		yield 'All'          => [ 'all' ];
+		yield 'Replies'      => [ 'comment' ];
+		yield 'Reviews'      => [ 'review' ];
+	}
 }
