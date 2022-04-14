@@ -731,9 +731,7 @@ class ReviewsListTable extends WP_List_Table {
 			return;
 		}
 
-		$do_action = $this->current_action();
-
-		if ( $do_action ) {
+		if ( $this->current_action() ) {
 			check_admin_referer( 'bulk-product-reviews' );
 
 			$query_string = remove_query_arg( [ 'page', '_wpnonce' ], wp_unslash( ( $_SERVER['QUERY_STRING'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
