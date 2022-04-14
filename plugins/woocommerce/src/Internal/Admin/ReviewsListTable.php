@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use WC_Product;
 use WP_Comment;
 use WP_Comments_List_Table;
 use WP_List_Table;
@@ -37,6 +38,13 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_reviews_rating = 0;
 
 	/**
+	 * Current product the reviews should be displayed for.
+	 *
+	 * @var WC_Product|null Product or null for all products.
+	 */
+	private $current_product_for_reviews;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array|string $args Array or string of arguments.
@@ -62,10 +70,10 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		$this->current_reviews_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
-
 		$this->set_review_status();
 		$this->set_review_type();
+		$this->current_reviews_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
+		$this->set_review_product();
 
 		$args = [
 			'post_type' => 'product',
@@ -77,12 +85,29 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_type_arguments(), $args );
 		// Handle the reviews rating filter.
 		$args = wp_parse_args( $this->get_filter_rating_arguments(), $args );
+		// Handle the review product filter.
+		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
 
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
 
 		$this->items = $comments;
+	}
+
+	/**
+	 * Sets the product to filter reviews by.
+	 *
+	 * @return void
+	 */
+	protected function set_review_product() {
+
+		$product_id = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
+		$product = $product_id ? wc_get_product( $product_id ) : null;
+
+		if ( $product instanceof WC_Product ) {
+			$this->current_product_for_reviews = $product;
+		}
 	}
 
 	/**
@@ -198,6 +223,22 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the `post_id` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	public function get_filter_product_arguments() : array {
+
+		$args = [];
+
+		if ( $this->current_product_for_reviews instanceof WC_Product ) {
+			$args['post_id'] = $this->current_product_for_reviews->get_id();
+		}
+
+		return $args;
+	}
+
+	/**
 	 * Render a single row HTML.
 	 *
 	 * @global WP_Post $post
@@ -231,7 +272,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return array Table columns and their headings.
 	 */
 	public function get_columns() {
-		return [
+		$columns = [
 			'cb'       => '<input type="checkbox" />',
 			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
 			'author'   => __( 'Author', 'woocommerce' ),
@@ -240,6 +281,13 @@ class ReviewsListTable extends WP_List_Table {
 			'response' => __( 'Product', 'woocommerce' ),
 			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 		];
+
+		/**
+		 * Filters the table columns.
+		 *
+		 * @param array $columns
+		 */
+		return apply_filters( 'woocommerce_product_reviews_table_columns', $columns );
 	}
 
 	/**
@@ -610,7 +658,14 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
-		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
+		/**
+		 * Fires when the default column output is displayed for a single row.
+		 * This action can be used to render custom columns that have been added.
+		 *
+		 * @param string $column_name The custom column's name.
+		 * @param string $comment_id  The review ID as a numeric string.
+		 */
+		do_action( 'woocommerce_product_reviews_table_custom_column', $column_name, $item->comment_ID );
 	}
 
 	/**
@@ -632,6 +687,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$this->review_type_dropdown( $comment_type );
 			$this->review_rating_dropdown( $this->current_reviews_rating );
+			$this->product_search( $this->current_product_for_reviews );
 
 			$output = ob_get_clean();
 
@@ -748,6 +804,30 @@ class ReviewsListTable extends WP_List_Table {
 			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
 			exit;
 		}
+  }
+    
+	/**
+	 * Displays a product search input for filtering reviews by product in the Product Reviews list table.
+	 *
+	 * @param WC_Product|null $current_product The current product (or null when displaying all reviews).
+	 * @return void
+	 */
+	protected function product_search( $current_product ) {
+		?>
+		<label class="screen-reader-text" for="filter-by-product"><?php esc_html_e( 'Filter by product', 'woocommerce' ); ?></label>
+		<select
+			id="filter-by-product"
+			class="wc-product-search"
+			name="product_id"
+			style="width: 200px;"
+			data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>"
+			data-action="woocommerce_json_search_products"
+			data-allow_clear="true">
+			<?php if ( $current_product instanceof WC_Product ) : ?>
+				<option value="<?php echo esc_attr( $current_product->get_id() ); ?>" selected="selected"><?php echo esc_html( $current_product->get_formatted_name() ); ?></option>
+			<?php endif; ?>
+		</select>
+		<?php
 	}
 
 }

@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -80,6 +81,32 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			],
 			$this->get_reviews_list_table()->get_columns()
 		);
+	}
+
+	/**
+	 * Tests that can get the product reviews' page columns when a filter is applied.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
+	 *
+	 * @return void
+	 */
+	public function test_get_columns_filtered() {
+		$filter_callback = function( $columns ) {
+			return [
+				'custom_column' => 'Custom column',
+			];
+		};
+
+		add_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
+
+		$this->assertSame(
+			[
+				'custom_column' => 'Custom column',
+			],
+			$this->get_reviews_list_table()->get_columns()
+		);
+
+		remove_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
 	}
 
 	/**
@@ -593,6 +620,41 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can set the product to filter reviews by.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_product()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method or the property do not exist.
+	 */
+	public function test_set_review_product() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'set_review_product' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_product_for_reviews' );
+		$property->setAccessible( true );
+
+		$_REQUEST['product_id'] = 0;
+
+		$method->invoke( $list_table );
+
+		$this->assertNull( $property->getValue( $list_table ) );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		$_REQUEST['product_id'] = $product->get_id();
+
+		$method->invoke( $list_table );
+
+		$this->assertSame( $product->get_id(), $property->getValue( $list_table )->get_id() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		unset( $_REQUEST['product_id'] );
+	}
+
+	/**
 	 * Tests that can set the review status for the current request.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_status()
@@ -865,6 +927,33 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			],
 			$args
 		);
+	}
+
+	/**
+	 * Tests that can get the post ID argument for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_product_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method or the property don't exist.
+	 */
+	public function test_get_filter_product_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'get_filter_product_arguments' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_product_for_reviews' );
+		$property->setAccessible( true );
+
+		$this->assertSame( [], $method->invoke( $list_table ) );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		$property->setValue( $list_table, $product );
+
+		$this->assertSame( [ 'post_id' => $product->get_id() ], $method->invoke( $list_table ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -1188,5 +1277,75 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield '3 stars'        => [ 3 ];
 		yield '4 stars'        => [ 4 ];
 		yield '5 stars'        => [ 5 ];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
+	 * @dataProvider provider_column_default
+	 *
+	 * @param callable|null $hook_callback   Optional callback to add to the action.
+	 * @param string        $expected_output Expected output from the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_column_default( ?callable $hook_callback, string $expected_output ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
+		$method->setAccessible( true );
+
+		$comment = new \WP_Comment(
+			(object) [
+				'comment_ID' => '123',
+			]
+		);
+
+		if ( ! empty( $hook_callback ) ) {
+			add_action( 'woocommerce_product_reviews_table_custom_column', $hook_callback, 10, 2 );
+		} else {
+			remove_all_actions( 'woocommerce_product_reviews_table_custom_column' );
+		}
+
+		ob_start();
+
+		$method->invoke( $list_table, $comment, 'column-name' );
+
+		$this->assertSame( $expected_output, ob_get_clean() );
+	}
+
+	/** @see test_column_default */
+	public function provider_column_default() : Generator {
+		yield 'no callback' => [ null, '' ];
+
+		yield 'custom callback' => [
+			'hook_callback' => static function ( $column_name, $review_id ) {
+				echo 'Column name: ' . $column_name . ' for ID ' . $review_id . '.'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			},
+			'expected_output' => 'Column name: column-name for ID 123.',
+		];
+	}
+
+	/**
+	 * Tests that can output a product search field for the product in context.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::product_search()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_product_search() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'product_search' );
+		$method->setAccessible( true );
+
+		$product = WC_Helper_Product::create_simple_product( false );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $product ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
+		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
 }
