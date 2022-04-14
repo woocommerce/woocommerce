@@ -504,6 +504,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can get the product reviews bulk actions.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_bulk_actions()
 	 * @dataProvider provider_get_bulk_actions
 	 *
 	 * @param string $current_comment_status Currently set status.
@@ -512,7 +515,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_get_bulk_actions( string $current_comment_status, array $expected_actions ) {
-		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
 		$method->setAccessible( true );
 
@@ -574,6 +577,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can set the review status when preparing items.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_status()
 	 * @dataProvider provider_set_review_status
 	 *
@@ -583,7 +588,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_set_review_status( ?string $request_status, string $expected_comment_status ) {
-		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
 		$method->setAccessible( true );
 
@@ -605,6 +610,39 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'approved status' => [ 'approved', 'approved' ];
 		yield 'spam status' => [ 'spam', 'spam' ];
 		yield 'trash status' => [ 'trash', 'trash' ];
+	}
+
+	/**
+	 * Tests that can set the review type when preparing items.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_type()
+	 * @dataProvider data_provider_set_review_type
+	 *
+	 * @param string $review_type          Review type.
+	 * @param string $expected_review_type Expected review type to be set.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_set_review_type( $review_type, $expected_review_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
+		$method->setAccessible( true );
+
+		$_REQUEST['review_type'] = $review_type;
+
+		$method->invoke( $list_table );
+
+		global $comment_type;
+
+		$this->assertSame( $expected_review_type, $comment_type );
+	}
+
+	/** @see test_set_review_type */
+	public function data_provider_set_review_type() : Generator {
+		yield 'Type not set' => [ null, 'all' ];
+		yield 'Replies'      => [ 'comment', 'comment' ];
+		yield 'Reviews'      => [ 'review', 'review' ];
+		yield 'Other'        => [ 'other', 'other' ];
 	}
 
 	/**

@@ -49,7 +49,7 @@ class ReviewsListTable extends WP_List_Table {
 	public function prepare_items() {
 
 		$this->set_review_status();
-		$this->set_item_type();
+		$this->set_review_type();
 
 		$args = [
 			'post_type' => 'product',
@@ -92,10 +92,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	protected function set_item_type() {
+	protected function set_review_type() {
 		global $comment_type;
 
-		$item_type = sanitize_text_field( wp_unslash( $_REQUEST['item_type'] ?? 'all' ) );
+		$item_type = sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ?? 'all' ) );
 
 		if ( 'all' !== $item_type ) {
 			$comment_type = $item_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -610,7 +610,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			ob_start();
 
-			$this->comment_type_dropdown( $comment_type );
+			$this->review_type_dropdown( $comment_type );
 
 			$output = ob_get_clean();
 
@@ -643,7 +643,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @param string $item_type The current comment item type slug.
 	 */
-	protected function comment_type_dropdown( $item_type ) {
+	protected function review_type_dropdown( $item_type ) {
 
 		$item_types = [
 			'all'     => __( 'All', 'woocommerce' ),
@@ -652,8 +652,8 @@ class ReviewsListTable extends WP_List_Table {
 		];
 
 		?>
-		<label class="screen-reader-text" for="filter-by-item-type"><?php esc_html_e( 'Filter by type', 'woocommerce' ); ?></label>
-		<select id="filter-by-item-type" name="item_type">
+		<label class="screen-reader-text" for="filter-by-review-type"><?php esc_html_e( 'Filter by review type', 'woocommerce' ); ?></label>
+		<select id="filter-by-review-type" name="review_type">
 			<?php foreach ( $item_types as $type => $label ) : ?>
 				<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $item_type ); ?>><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
