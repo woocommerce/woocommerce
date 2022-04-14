@@ -37,7 +37,7 @@ add_filter(
 
 	    $data = $response->get_data();
 
-	    foreach ( $filters as $filter ) {
+		foreach ( $filters as $filter ) {
 			array_dot_set( $data, $filter['dot_notation'], $filter['replacement'] );
 		}
 
