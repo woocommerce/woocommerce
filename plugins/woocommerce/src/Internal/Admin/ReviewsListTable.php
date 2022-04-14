@@ -144,7 +144,7 @@ class ReviewsListTable extends WP_List_Table {
 	protected function get_filter_type_arguments() : array {
 
 		$args      = [];
-		$item_type = isset( $_REQUEST['item_type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['item_type'] ) ) : 'all';
+		$item_type = isset( $_REQUEST['review_type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ) ) : 'all';
 
 		switch ( $item_type ) {
 
@@ -168,6 +168,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			// Reviews and other review types.
 			case 'review':
+			default:
 				$args['comment_type'] = $item_type;
 				$args['parent__in']   = [ 0 ];
 

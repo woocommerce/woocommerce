@@ -671,8 +671,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sort_arguments()
-	 * @dataProvider provider_get_sort_arguments
+	 * Tests that can get the sort arguments for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sort_arguments()
+	 * @dataProvider data_provider_get_sort_arguments
 	 *
 	 * @param string|null $orderby       The orderby value that's set in the request.
 	 * @param string|null $order         The order value that's set in the request.
@@ -685,13 +687,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
 		$method->setAccessible( true );
 
-		if ( ! is_null( $orderby ) ) {
+		if ( null !== $orderby ) {
 			$_REQUEST['orderby'] = $orderby;
 		} else {
 			unset( $_REQUEST['orderby'] );
 		}
 
-		if ( ! is_null( $order ) ) {
+		if ( null !== $order ) {
 			$_REQUEST['order'] = $order;
 		} else {
 			unset( $_REQUEST['order'] );
@@ -701,7 +703,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_sort_arguments */
-	public function provider_get_sort_arguments() : Generator {
+	public function data_provider_get_sort_arguments() : Generator {
 		yield 'order by comment_author desc' => [
 			'comment_author',
 			'desc',
@@ -765,6 +767,40 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				'order'   => 'desc',
 			],
 		];
+	}
+
+	/**
+	 * Tests that can get the comment type argument for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_type_arguments()
+	 * @dataProvider data_provider_get_filter_type_arguments
+	 *
+	 * @param string $review_type  The requested review type.
+	 * @param string $comment_type The resulting comment type.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_filter_type_arguments( $review_type, $comment_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
+		$method->setAccessible( true );
+
+		if ( null !== ( $review_type ) ) {
+			$_REQUEST['review_type'] = $review_type;
+		}
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertSame( $comment_type, $args['comment_type'] ?? null );
+	}
+
+	/** @see test_get_filter_type_arguments */
+	public function data_provider_get_filter_type_arguments() : Generator {
+		yield 'No requested type' => [ null, null ];
+		yield 'All types'         => [ 'all', null ];
+		yield 'Replies'           => [ 'comment', 'comment' ];
+		yield 'Reviews'           => [ 'review', 'review' ];
+		yield 'Other'             => [ 'other', 'other' ];
 	}
 
 	/**
