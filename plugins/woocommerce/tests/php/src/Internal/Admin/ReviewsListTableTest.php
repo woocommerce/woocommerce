@@ -670,13 +670,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
 		$method->setAccessible( true );
 
-		if ( ! is_null( $orderby ) ) {
+		if ( null !== $orderby ) {
 			$_REQUEST['orderby'] = $orderby;
 		} else {
 			unset( $_REQUEST['orderby'] );
 		}
 
-		if ( ! is_null( $order ) ) {
+		if ( null !== $order ) {
 			$_REQUEST['order'] = $order;
 		} else {
 			unset( $_REQUEST['order'] );
