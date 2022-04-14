@@ -29,6 +29,14 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	private $current_user_can_moderate_reviews;
 
+
+	/**
+	 * Current rating of reviews to display.
+	 *
+	 * @var string
+	 */
+	private $current_rating = '0';
+
 	/**
 	 * Constructor.
 	 *
@@ -46,6 +54,8 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function prepare_items() {
+
+		$this->current_rating = (string) isset( $_REQUEST['rating'] ) ? wc_clean( wp_unslash( $_REQUEST['rating'] ) ) : 0;
 
 		$this->set_review_status();
 		$this->set_review_type();
@@ -612,6 +622,8 @@ class ReviewsListTable extends WP_List_Table {
 
 			$this->review_type_dropdown( $comment_type );
 
+			$this->rating_dropdown();
+
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) && $this->has_items() ) {
@@ -637,11 +649,12 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Displays a comment type drop-down for filtering on the Comments list table.
+	 * Displays a review type drop-down for filtering reviews in the Product Reviews list table.
 	 *
 	 * @see WP_Comments_List_Table::comment_type_dropdown() for consistency.
 	 *
 	 * @param string $item_type The current comment item type slug.
+	 * @return void
 	 */
 	protected function review_type_dropdown( $item_type ) {
 
@@ -656,6 +669,32 @@ class ReviewsListTable extends WP_List_Table {
 		<select id="filter-by-review-type" name="review_type">
 			<?php foreach ( $item_types as $type => $label ) : ?>
 				<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $item_type ); ?>><?php echo esc_html( $label ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Displays a review rating drop-down for filtering reviews in the Product Reviews list table.
+	 *
+	 * @return void
+	 */
+	public function rating_dropdown() {
+
+		$rating_options = [
+			'0' => __( 'All ratings', 'woocommerce' ),
+			'1' => '&#9733;',
+			'2' => '&#9733;&#9733;',
+			'3' => '&#9733;&#9733;&#9733;',
+			'4' => '&#9733;&#9733;&#9733;&#9733;',
+			'5' => '&#9733;&#9733;&#9733;&#9733;&#9733;',
+		];
+
+		?>
+		<label class="screen-reader-text" for="filter-by-review-rating"><?php esc_html_e( 'Filter by review rating', 'woocommerce' ); ?></label>
+		<select id="filter-by-review-rating" name="review_rating">
+			<?php foreach ( $rating_options as $rating => $label ) : ?>
+				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $this->current_rating, $rating ); ?>><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
 		</select>
 		<?php
