@@ -52,9 +52,6 @@ class Package {
 		$this->version        = $version;
 		$this->path           = $plugin_path;
 		$this->feature_gating = $feature_gating;
-
-		// Append index.php so WP does not return the parent directory.
-		$this->plugin_dir_url = plugin_dir_url( $this->path . '/index.php' );
 	}
 
 	/**
@@ -87,6 +84,11 @@ class Package {
 	 * @return string
 	 */
 	public function get_url( $relative_url = '' ) {
+		if ( ! $this->plugin_dir_url ) {
+			// Append index.php so WP does not return the parent directory.
+			$this->plugin_dir_url = plugin_dir_url( $this->path . '/index.php' );
+		}
+
 		return $this->plugin_dir_url . $relative_url;
 	}
 
