@@ -1,14 +1,13 @@
 # Feature Flags
 
-Features inside the `woocommerce-admin` repository can be in various states of completeness. In addition to the development copy of `woocommerce-admin`, feature plugin versions are bundled, and code is merged to WooCommerce core. To provide a way for improved control over how these features are released in these different environments, `woocommerce-admin` has a system for feature flags.
+Features inside the `woocommerce` repository can be in various states of completeness. To provide a way for improved control over how these features are released in these different environments, `woocommerce` has a system for feature flags.
 
 We currently support the following environments:
 
 | Environment | Description                                                                                                                                                            |
 |-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| development | Development - All features should be enabled in development. These flags are also used in both JS and PHP tests. Ran using `pnpm start`.                                |
-| plugin      | Plugin - A packaged release of the featured plugin, for GitHub WordPress.org. Ran using `pnpm run-script build:release`. |                                    |
-| core        | Core - assets/files ready and stable enough for core merge. Ran using `pnpm pack`. (@todo update this with publish command).
+| development | Development - All features should be enabled in development. These flags are also used in both JS and PHP tests. Ran using `pnpm start`.                                |                              |
+| core        | Core - assets/files ready and stable enough. Ran using `WC_ADMIN_PHASE=core pnpm build` & `pnpm pack`.
 
 
 ## Adding a new flag
