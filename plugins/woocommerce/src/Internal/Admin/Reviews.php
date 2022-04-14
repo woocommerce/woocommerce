@@ -81,6 +81,7 @@ class Reviews {
 	 */
 	public function load_reviews_screen() {
 		$this->reviews_list_table = new ReviewsListTable( [ 'screen' => $this->reviews_page_hook ] );
+		$this->reviews_list_table->process_bulk_action();
 	}
 
 	/**
