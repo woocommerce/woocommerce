@@ -844,7 +844,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( [], $args );
 
-		$property->setValue( $list_table, 1 );
+		$property->setValue( $list_table, 5 );
 
 		$args = $method->invoke( $list_table );
 
