@@ -89,7 +89,9 @@ class Reviews {
 	 * @return void
 	 */
 	public function render_reviews_list_table() {
+
 		$this->reviews_list_table->prepare_items();
+
 		?>
 		<div class="wrap">
 			<h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
@@ -98,7 +100,7 @@ class Reviews {
 
 			<form id="reviews-filter" method="get">
 
-				<input type="hidden" name="page" value="product-reviews" />
+				<input type="hidden" name="page" value="<?php echo esc_html( static::MENU_SLUG ); ?>" />
 
 				<?php $this->reviews_list_table->search_box( __( 'Search reviews', 'woocommerce' ), 'reviews' ); ?>
 

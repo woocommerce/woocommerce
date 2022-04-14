@@ -35,26 +35,10 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param array|string $args Array or string of arguments.
 	 */
 	public function __construct( $args = [] ) {
+
 		parent::__construct( $args );
 
 		$this->current_user_can_moderate_reviews = current_user_can( 'moderate_comments' );
-	}
-
-	/**
-	 * Sets the `$comment_status` global based on the current request.
-	 *
-	 * @global string $comment_status
-	 *
-	 * @return void
-	 */
-	protected function set_review_status() {
-		global $comment_status;
-
-		$comment_status = sanitize_text_field( wp_unslash( $_REQUEST['comment_status'] ?? 'all' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		if ( ! in_array( $comment_status, [ 'all', 'moderated', 'approved', 'spam', 'trash' ], true ) ) {
-			$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
 	}
 
 	/**
@@ -73,11 +57,31 @@ class ReviewsListTable extends WP_List_Table {
 		// Include the order & orderby arguments.
 		$args = wp_parse_args( $this->get_sort_arguments(), $args );
 
+		// Handle the item types filter.
+		$args = wp_parse_args( $this->get_filter_type_arguments(), $args );
+
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
 
 		$this->items = $comments;
+	}
+
+	/**
+	 * Sets the `$comment_status` global based on the current request.
+	 *
+	 * @global string $comment_status
+	 *
+	 * @return void
+	 */
+	protected function set_review_status() {
+		global $comment_status;
+
+		$comment_status = sanitize_text_field( wp_unslash( $_REQUEST['comment_status'] ?? 'all' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		if ( ! in_array( $comment_status, [ 'all', 'moderated', 'approved', 'spam', 'trash' ], true ) ) {
+			$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 	}
 
 	/**
@@ -213,6 +217,43 @@ class ReviewsListTable extends WP_List_Table {
 			],
 			$args
 		);
+	}
+
+	/**
+	 * Builds the `comment_type` and `parent__in` arguments based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_filter_type_arguments() : array {
+
+		$args      = [];
+		$item_type = isset( $_REQUEST['item_type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['item_type'] ) ) : 'all';
+
+		switch ( $item_type ) {
+
+			case 'all':
+				return $args;
+
+			case 'reply':
+				$parents = get_comments(
+					[
+						'type'   => 'review',
+						'fields' => 'ids',
+						'paged'  => -1,
+					]
+				);
+
+				$args['comment_type'] = 'comment';
+				$args['parent__in'] = ! empty( $parents ) ? (array) $parents : [ 0 ];
+
+				return $args;
+
+			case 'review':
+			default:
+				$args['comment_type'] = $item_type;
+
+				return $args;
+		}
 	}
 
 	/**
@@ -543,6 +584,7 @@ class ReviewsListTable extends WP_List_Table {
 		echo '<div class="alignleft actions">';
 
 		if ( 'top' === $which ) {
+
 			ob_start();
 
 			$this->comment_type_dropdown( $comment_type );
@@ -550,14 +592,21 @@ class ReviewsListTable extends WP_List_Table {
 			$output = ob_get_clean();
 
 			if ( ! empty( $output ) && $this->has_items() ) {
+
 				echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, [ 'id' => 'post-query-submit' ] );
 			}
 		}
 
 		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $this->has_items() && $this->current_user_can_moderate_reviews ) {
+
 			wp_nonce_field( 'bulk-destroy', '_destroy_nonce' );
-			$title = ( 'spam' === $comment_status ) ? esc_attr__( 'Empty Spam', 'woocommerce' ) : esc_attr__( 'Empty Trash', 'woocommerce' );
+
+			$title = 'spam' === $comment_status
+				? esc_attr__( 'Empty Spam', 'woocommerce' )
+				: esc_attr__( 'Empty Trash', 'woocommerce' );
+
 			submit_button( $title, 'apply', 'delete_all', false );
 		}
 
