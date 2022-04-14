@@ -1198,8 +1198,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
-		$this->assertStringContainsString( '<select id="filter-by-product" name="product_id">', $output );
-		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"  selected', $output );
+		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
 
 }

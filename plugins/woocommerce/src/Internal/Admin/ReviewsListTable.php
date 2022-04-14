@@ -724,7 +724,7 @@ class ReviewsListTable extends WP_List_Table {
 			data-action="woocommerce_json_search_products"
 			data-allow_clear="true">
 			<?php if ( $current_product instanceof WC_Product ) : ?>
-				<option value="<?php echo esc_attr( $current_product ); ?>" selected="selected"><?php echo esc_html( $current_product->get_formatted_name() ); ?></option>
+				<option value="<?php echo esc_attr( $current_product->get_id() ); ?>" selected="selected"><?php echo esc_html( $current_product->get_formatted_name() ); ?></option>
 			<?php endif; ?>
 		</select>
 		<?php
