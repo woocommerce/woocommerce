@@ -624,6 +624,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertSame( $product->get_id(), $property->getValue( $list_table )->get_id() );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
+
+		unset( $_REQUEST['product_id'] );
 	}
 
 	/**
@@ -858,6 +860,33 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'Replies'           => [ 'comment', 'comment' ];
 		yield 'Reviews'           => [ 'review', 'review' ];
 		yield 'Other'             => [ 'other', 'other' ];
+	}
+
+	/**
+	 * Tests that can get the post ID argument for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_product_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method or the property don't exist.
+	 */
+	public function test_get_filter_product_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'get_filter_product_arguments' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_product_for_reviews' );
+		$property->setAccessible( true );
+
+		$this->assertSame( [], $method->invoke( $list_table ) );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		$property->setValue( $product );
+
+		$this->assertSame( [ 'post_id' => $product->get_id() ], $method->invoke( $list_table ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
