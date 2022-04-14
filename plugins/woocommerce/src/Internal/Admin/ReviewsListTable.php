@@ -719,7 +719,18 @@ class ReviewsListTable extends WP_List_Table {
 		<label class="screen-reader-text" for="filter-by-review-rating"><?php esc_html_e( 'Filter by review rating', 'woocommerce' ); ?></label>
 		<select id="filter-by-review-rating" name="review_rating">
 			<?php foreach ( $rating_options as $rating => $label ) : ?>
-				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $rating, (string) $current_rating ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php
+
+				$title = 0 === (int) $rating
+					? $label
+					: sprintf(
+						/* translators: %s: Star rating. */
+						__( '%s-star reviews', 'woocommerce' ),
+						$rating
+					);
+
+				?>
+				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $rating, (string) $current_rating ); ?> title="<?php echo esc_html( $title ); ?>"><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
 		</select>
 		<?php
