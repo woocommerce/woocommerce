@@ -730,7 +730,7 @@ class ReviewsListTable extends WP_List_Table {
 					);
 
 				?>
-				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $rating, (string) $current_rating ); ?> title="<?php echo esc_html( $title ); ?>"><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $rating, (string) $current_rating ); ?> title="<?php echo esc_attr( $title ); ?>"><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
 		</select>
 		<?php
