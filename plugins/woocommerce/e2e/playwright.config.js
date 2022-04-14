@@ -7,6 +7,7 @@ const config = {
 	timeout: 15000,
 	outputDir: './report',
 	globalSetup: require.resolve('./global-setup'),
+	globalTeardown: require.resolve('./global-teardown'),
 	testDir: 'tests',
 	retries: 1,
 	reporter: [['list'], ['html', { outputFolder: 'e2e/output' }]],
