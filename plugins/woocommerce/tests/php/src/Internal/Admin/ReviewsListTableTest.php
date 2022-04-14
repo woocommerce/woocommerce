@@ -431,6 +431,54 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_view_url()
+	 * @dataProvider provider_get_view_url
+	 *
+	 * @param string $comment_type Current type filter.
+	 * @param int    $post_id      Current post ID filter.
+	 * @param string $expected     Expected URL from the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_view_url( string $comment_type, int $post_id, string $expected ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_view_url' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $list_table, $comment_type, $post_id )
+		);
+	}
+
+	/** @see test_get_view_url */
+	public function provider_get_view_url() : Generator {
+		yield 'empty type, empty post ID' => [
+			'comment_type' => '',
+			'post_id'      => 0,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews',
+		];
+
+		yield 'review type, empty post ID' => [
+			'comment_type' => 'review',
+			'post_id'      => 0,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=review',
+		];
+
+		yield 'reply type, with post ID' => [
+			'comment_type' => 'reply',
+			'post_id'      => 123,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=reply&p=123',
+		];
+
+		yield 'all type, with post ID' => [
+			'comment_type' => 'all',
+			'post_id'      => 123,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&p=123',
+		];
+	}
+
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::convert_status_to_query_value()
 	 * @dataProvider provider_convert_status_string_to_comment_approved
 	 *

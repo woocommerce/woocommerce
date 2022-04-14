@@ -344,6 +344,32 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Returns the base URL for a view, excluding the status (that should be appended).
+	 *
+	 * @param string $comment_type Comment type filter.
+	 * @param int    $post_id      Current post ID.
+	 * @return string
+	 */
+	protected function get_view_url( $comment_type, $post_id ) : string {
+		$link = add_query_arg(
+			[
+				'post_type' => 'product',
+				'page'      => Reviews::MENU_SLUG,
+			],
+			admin_url( 'edit.php' )
+		);
+
+		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
+			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
+		}
+		if ( ! empty( $post_id ) ) {
+			$link = add_query_arg( 'p', absint( $post_id ), $link );
+		}
+
+		return $link;
+	}
+
+	/**
 	 * Renders the available status filters.
 	 *
 	 * @see WP_Comments_List_Table::get_views() for consistency.
@@ -359,20 +385,7 @@ class ReviewsListTable extends WP_List_Table {
 			unset( $status_labels['trash'] );
 		}
 
-		$link = add_query_arg(
-			[
-				'post_type' => 'product',
-				'page'      => Reviews::MENU_SLUG,
-			],
-			admin_url( 'edit.php' )
-		);
-
-		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
-			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
-		}
-		if ( ! empty( $post_id ) ) {
-			$link = add_query_arg( 'p', absint( $post_id ), $link );
-		}
+		$link = $this->get_view_url( $comment_type, $post_id );
 
 		foreach ( $status_labels as $status => $label ) {
 			$current_link_attributes = '';
