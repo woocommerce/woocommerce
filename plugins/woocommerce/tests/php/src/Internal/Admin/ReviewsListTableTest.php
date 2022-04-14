@@ -629,6 +629,44 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can set the review type when preparing items.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_type()
+	 * @dataProvider data_provider_set_review_type
+	 *
+	 * @param string $review_type          Review type.
+	 * @param string $expected_review_type Expected review type to be set.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_set_review_type( $review_type, $expected_review_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
+		$method->setAccessible( true );
+
+		if ( null !== $review_type ) {
+			$_REQUEST['review_type'] = $review_type;
+		} else {
+			unset( $_REQUEST['review_type'] );
+		}
+
+		$method->invoke( $list_table );
+
+		global $comment_type;
+
+		$this->assertSame( $expected_review_type, $comment_type );
+	}
+
+	/** @see test_set_review_type */
+	public function data_provider_set_review_type() : Generator {
+		yield 'Type not set' => [ null, null ];
+		yield 'All types'    => [ 'all', null ];
+		yield 'Replies'      => [ 'comment', 'comment' ];
+		yield 'Reviews'      => [ 'review', 'review' ];
+		yield 'Other'        => [ 'other', 'other' ];
+	}
+
+	/**
 	 * Tests that can get the sortable columns for the reviews table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sortable_columns()
@@ -750,6 +788,42 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				'order'   => 'desc',
 			],
 		];
+	}
+
+	/**
+	 * Tests that can get the comment type argument for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_type_arguments()
+	 * @dataProvider data_provider_get_filter_type_arguments
+	 *
+	 * @param string $review_type  The requested review type.
+	 * @param string $comment_type The resulting comment type.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_filter_type_arguments( $review_type, $comment_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
+		$method->setAccessible( true );
+
+		if ( null !== ( $review_type ) ) {
+			$_REQUEST['review_type'] = $review_type;
+		} else {
+			unset( $_REQUEST['review_type'] );
+		}
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertSame( $comment_type, $args['type'] ?? null );
+	}
+
+	/** @see test_get_filter_type_arguments */
+	public function data_provider_get_filter_type_arguments() : Generator {
+		yield 'No requested type' => [ null, null ];
+		yield 'All types'         => [ 'all', null ];
+		yield 'Replies'           => [ 'comment', 'comment' ];
+		yield 'Reviews'           => [ 'review', 'review' ];
+		yield 'Other'             => [ 'other', 'other' ];
 	}
 
 	/**
@@ -1000,4 +1074,42 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 	}
 
+	/**
+	 * Tests that can output a filter by review type dropdown element.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_type_dropdown()
+	 * @dataProvider data_provider_test_review_type_dropdown
+	 *
+	 * @param string $chosen_type The chosen review type to filter for.
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_review_type_dropdown( $chosen_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_type_dropdown' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $chosen_type ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-review-type">Filter by review type</label>', $output );
+		$this->assertStringContainsString( '<select id="filter-by-review-type" name="review_type">', $output );
+
+		if ( ! in_array( $chosen_type, [ 'all', 'comment', 'review' ], true ) ) {
+			$this->assertStringNotContainsString( '<option value="' . $chosen_type . '"  selected', $output );
+		} else {
+			$this->assertStringContainsString( '<option value="' . $chosen_type . '"  selected', $output );
+		}
+	}
+
+	/** @see test_review_type_dropdown */
+	public function data_provider_test_review_type_dropdown() : Generator {
+		yield 'Unknown type' => [ 'invalid' ];
+		yield 'All'          => [ 'all' ];
+		yield 'Replies'      => [ 'comment' ];
+		yield 'Reviews'      => [ 'review' ];
+	}
 }
