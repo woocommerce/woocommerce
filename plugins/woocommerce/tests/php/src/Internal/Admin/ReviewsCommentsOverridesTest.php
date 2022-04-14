@@ -15,14 +15,13 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_notices()
+	 * @backupGlobals enabled
 	 * @dataProvider provider_test_display_notices()
 	 * @param string $current_screen_base    The current WP_Screen base value.
 	 * @param bool   $should_display_notices Whether notices should be displayed.
 	 */
 	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) {
 		global $current_screen;
-
-		$current_screen_backup = $current_screen;
 
 		$screen = new \stdClass();
 		$screen->base = $current_screen_base;
@@ -40,9 +39,6 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		} else {
 			$this->assertEmpty( $output );
 		}
-
-		// Restore the global variable.
-		$current_screen = $current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/** @see test_display_notices() */
