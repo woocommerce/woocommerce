@@ -4,7 +4,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
+use Generator;
 use ReflectionClass;
+use ReflectionException;
 use WC_Unit_Test_Case;
 
 /**
@@ -42,6 +44,78 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$reviews->load_reviews_screen();
 
 		$this->assertInstanceOf( ReviewsListTable::class, $list_table_property->getValue( $reviews ) );
+	}
+
+	/**
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::get_pending_count_bubble()
+	 * @dataProvider provider_get_pending_count_bubble
+	 *
+	 * @param int    $number_pending Number of pending product reviews.
+	 * @param string $expected_html  Expected return value.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_pending_count_bubble( int $number_pending, string $expected_html ) {
+		// Add a normal post with some pending comments -- these should not appear in our counts.
+		$post_id = $this->factory()->post->create(
+			[
+				'post_type' => 'post',
+			]
+		);
+		$this->factory()->comment->create_many(
+			3,
+			[
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => '0',
+			]
+		);
+
+		if ( $number_pending > 0 ) {
+			// Now add a product with a bunch of reviews.
+			$product_id = $this->factory()->post->create(
+				[
+					'post_type' => 'product',
+				]
+			);
+
+			// Create moderated comments -- these _should_ appear in our counts.
+			$this->factory()->comment->create_many(
+				$number_pending,
+				[
+					'comment_type' => 'review',
+					'comment_post_ID' => $product_id,
+					'comment_approved' => '0',
+				]
+			);
+
+			// Create some approved comments -- these _should not_ appear in our counts.
+			$this->factory()->comment->create_many(
+				2,
+				[
+					'comment_type' => 'review',
+					'comment_post_ID' => $product_id,
+					'comment_approved' => '1',
+				]
+			);
+		}
+
+		$reviews = new Reviews();
+		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'get_pending_count_bubble' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			$expected_html,
+			$method->invoke( $reviews )
+		);
+	}
+
+	/** @see test_get_pending_count_bubble */
+	public function provider_get_pending_count_bubble() : Generator {
+		yield 'no pending' => [ 0, '' ];
+		yield 'has pending' => [
+			2,
+			' <span class="awaiting-mod count-2"><span class="pending-count">2</span></span>',
+		];
 	}
 
 }
