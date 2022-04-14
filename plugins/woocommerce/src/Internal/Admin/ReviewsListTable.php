@@ -646,8 +646,7 @@ class ReviewsListTable extends WP_List_Table {
 			ob_start();
 
 			$this->review_type_dropdown( $comment_type );
-
-			$this->rating_dropdown( $this->current_rating );
+			$this->review_rating_dropdown( $this->current_rating );
 
 			$output = ob_get_clean();
 
@@ -705,7 +704,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param int $current_rating Rating to display reviews for.
 	 * @return void
 	 */
-	public function rating_dropdown( $current_rating ) {
+	public function review_rating_dropdown( $current_rating ) {
 
 		$rating_options = [
 			'0' => __( 'All ratings', 'woocommerce' ),
