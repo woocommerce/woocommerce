@@ -1300,9 +1300,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		);
 
 		if ( ! empty( $hook_callback ) ) {
-			add_action( 'woocommerce_manage_product_reviews_custom_column', $hook_callback, 10, 2 );
+			add_action( 'woocommerce_product_reviews_table_custom_column', $hook_callback, 10, 2 );
 		} else {
-			remove_all_actions( 'woocommerce_manage_product_reviews_custom_column' );
+			remove_all_actions( 'woocommerce_product_reviews_table_custom_column' );
 		}
 
 		ob_start();

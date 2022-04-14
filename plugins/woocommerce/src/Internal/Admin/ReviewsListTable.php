@@ -657,7 +657,7 @@ class ReviewsListTable extends WP_List_Table {
 		 * @param string $column_name The custom column's name.
 		 * @param string $comment_id  The review ID as a numeric string.
 		 */
-		do_action( 'woocommerce_manage_product_reviews_custom_column', $column_name, $item->comment_ID );
+		do_action( 'woocommerce_product_reviews_table_custom_column', $column_name, $item->comment_ID );
 	}
 
 	/**
