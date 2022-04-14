@@ -747,7 +747,7 @@ class ReviewsListTable extends WP_List_Table {
 			exit;
 		} elseif ( ! empty( $_GET['_wp_http_referer'] ) ) {
 
-			wp_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
+			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
 			exit;
 		}
 	}
