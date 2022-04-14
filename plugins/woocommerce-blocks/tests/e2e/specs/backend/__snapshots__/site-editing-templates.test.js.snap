@@ -10,6 +10,16 @@ exports[`Store Editing Templates Product Catalog block template should contain t
 <!-- wp:template-part {\\"slug\\":\\"footer\\",\\"theme\\":\\"emptytheme\\"} /-->"
 `;
 
+exports[`Store Editing Templates Product Search Results block template should contain the "WooCommerce Product Grid Block" classic template 1`] = `
+"<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
+
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"archive-product\\"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {\\"slug\\":\\"footer\\",\\"theme\\":\\"emptytheme\\"} /-->"
+`;
+
 exports[`Store Editing Templates Product by Category block template should contain the "WooCommerce Product Taxonomy Block" classic template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
 
