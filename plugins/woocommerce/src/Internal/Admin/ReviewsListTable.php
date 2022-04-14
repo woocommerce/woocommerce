@@ -95,10 +95,10 @@ class ReviewsListTable extends WP_List_Table {
 	protected function set_review_type() {
 		global $comment_type;
 
-		$item_type = sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ?? 'all' ) );
+		$review_type = sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ?? 'all' ) );
 
-		if ( 'all' !== $item_type ) {
-			$comment_type = $item_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( 'all' !== $review_type && ! empty( $review_type ) ) {
+			$comment_type = $review_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 

@@ -7,7 +7,6 @@ use Generator;
 use ReflectionClass;
 use ReflectionException;
 use WC_Unit_Test_Case;
-use WP_Comment;
 
 /**
  * Tests that product reviews page handler.
@@ -625,10 +624,12 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_set_review_type( $review_type, $expected_review_type ) {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
 		$method->setAccessible( true );
 
-		$_REQUEST['review_type'] = $review_type;
+		if ( null !== $review_type ) {
+			$_REQUEST['review_type'] = $review_type;
+		}
 
 		$method->invoke( $list_table );
 
@@ -639,7 +640,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/** @see test_set_review_type */
 	public function data_provider_set_review_type() : Generator {
-		yield 'Type not set' => [ null, 'all' ];
+		yield 'Type not set' => [ null, null ];
+		yield 'All types'    => [ 'all', null ];
 		yield 'Replies'      => [ 'comment', 'comment' ];
 		yield 'Reviews'      => [ 'review', 'review' ];
 		yield 'Other'        => [ 'other', 'other' ];
