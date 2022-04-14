@@ -850,7 +850,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$args = $method->invoke( $list_table );
 
-		$this->assertSame( $comment_type, $args['comment_type'] ?? null );
+		$this->assertSame( $comment_type, $args['type'] ?? null );
 	}
 
 	/** @see test_get_filter_type_arguments */
@@ -860,6 +860,47 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'Replies'           => [ 'comment', 'comment' ];
 		yield 'Reviews'           => [ 'review', 'review' ];
 		yield 'Other'             => [ 'other', 'other' ];
+	}
+
+	/**
+	 * Tests that can set the filter rating for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_rating_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If reflected method or property don't exist.
+	 */
+	public function test_get_filter_rating_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'get_filter_rating_arguments' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_reviews_rating' );
+		$property->setAccessible( true );
+
+		$property->setValue( $list_table, 0 );
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertSame( [], $args );
+
+		$property->setValue( $list_table, 5 );
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertEquals(
+			[
+				'meta_query' => [
+					[
+						'key'     => 'rating',
+						'value'   => 5,
+						'compare' => '=',
+						'type'    => 'NUMERIC',
+					],
+				],
+			],
+			$args
+		);
 	}
 
 	/**
@@ -1177,6 +1218,42 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output a filter dropdown for review ratings.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_rating_dropdown()
+	 * @dataProvider data_provider_test_review_rating_dropdown
+	 *
+	 * @param string $chosen_rating The rating to filter reviews for.
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_review_rating_dropdown( $chosen_rating ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_rating_dropdown' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $chosen_rating ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-review-rating">Filter by review rating</label>', $output );
+		$this->assertStringContainsString( '<select id="filter-by-review-rating" name="review_rating">', $output );
+		$this->assertStringContainsString( '<option value="' . $chosen_rating . '"  selected', $output );
+	}
+
+	/** @see test_review_type_dropdown */
+	public function data_provider_test_review_rating_dropdown() : Generator {
+		yield 'All ratings'    => [ 0 ];
+		yield '1 star'         => [ 1 ];
+		yield '2 stars'        => [ 2 ];
+		yield '3 stars'        => [ 3 ];
+		yield '4 stars'        => [ 4 ];
+		yield '5 stars'        => [ 5 ];
+	}
+
+	/**
 	 * Tests that can output a product search field for the product in context.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::product_search()
@@ -1200,5 +1277,4 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
 		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
-
 }

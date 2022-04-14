@@ -31,6 +31,13 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_user_can_moderate_reviews;
 
 	/**
+	 * Current rating of reviews to display.
+	 *
+	 * @var int
+	 */
+	private $current_reviews_rating = 0;
+
+	/**
 	 * Current product the reviews should be displayed for.
 	 *
 	 * @var WC_Product|null Product or null for all products.
@@ -55,9 +62,10 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		$this->set_review_product();
 		$this->set_review_status();
 		$this->set_review_type();
+		$this->current_reviews_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
+		$this->set_review_product();
 
 		$args = [
 			'post_type' => 'product',
@@ -65,10 +73,10 @@ class ReviewsListTable extends WP_List_Table {
 
 		// Include the order & orderby arguments.
 		$args = wp_parse_args( $this->get_sort_arguments(), $args );
-
 		// Handle the review item types filter.
 		$args = wp_parse_args( $this->get_filter_type_arguments(), $args );
-
+		// Handle the reviews rating filter.
+		$args = wp_parse_args( $this->get_filter_rating_arguments(), $args );
 		// Handle the review product filter.
 		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
 
@@ -163,7 +171,7 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Builds the `comment_type` and `parent__in` arguments based on the current request.
+	 * Builds the `type` argument based on the current request.
 	 *
 	 * @return array
 	 */
@@ -172,34 +180,36 @@ class ReviewsListTable extends WP_List_Table {
 		$args      = [];
 		$item_type = isset( $_REQUEST['review_type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ) ) : 'all';
 
-		switch ( $item_type ) {
-
-			case 'all':
-				break;
-
-			// Review replies.
-			case 'comment':
-				$parents = get_comments(
-					[
-						'type'   => 'review',
-						'fields' => 'ids',
-						'paged'  => -1,
-					]
-				);
-
-				$args['comment_type'] = 'comment';
-				$args['parent__in']   = ! empty( $parents ) ? (array) $parents : [ 0 ];
-
-				break;
-
-			// Reviews and other review types.
-			case 'review':
-			default:
-				$args['comment_type'] = $item_type;
-				$args['parent__in']   = [ 0 ];
-
-				break;
+		if ( 'all' === $item_type ) {
+			return $args;
 		}
+
+		$args['type'] = $item_type;
+
+		return $args;
+	}
+
+	/**
+	 * Builds the `meta_query` arguments based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_filter_rating_arguments() : array {
+
+		$args = [];
+
+		if ( empty( $this->current_reviews_rating ) ) {
+			return $args;
+		}
+
+		$args['meta_query'] = [
+			[
+				'key'     => 'rating',
+				'value'   => (int) $this->current_reviews_rating,
+				'compare' => '=',
+				'type'    => 'NUMERIC',
+			],
+		];
 
 		return $args;
 	}
@@ -654,6 +664,7 @@ class ReviewsListTable extends WP_List_Table {
 			ob_start();
 
 			$this->review_type_dropdown( $comment_type );
+			$this->review_rating_dropdown( $this->current_reviews_rating );
 			$this->product_search( $this->current_product_for_reviews );
 
 			$output = ob_get_clean();
@@ -685,10 +696,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::comment_type_dropdown() for consistency.
 	 *
-	 * @param string $item_type The current comment item type slug.
+	 * @param string $current_type The current comment item type slug.
 	 * @return void
 	 */
-	protected function review_type_dropdown( $item_type ) {
+	protected function review_type_dropdown( $current_type ) {
 
 		$item_types = [
 			'all'     => __( 'All types', 'woocommerce' ),
@@ -700,7 +711,45 @@ class ReviewsListTable extends WP_List_Table {
 		<label class="screen-reader-text" for="filter-by-review-type"><?php esc_html_e( 'Filter by review type', 'woocommerce' ); ?></label>
 		<select id="filter-by-review-type" name="review_type">
 			<?php foreach ( $item_types as $type => $label ) : ?>
-				<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $item_type ); ?>><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $current_type ); ?>><?php echo esc_html( $label ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Displays a review rating drop-down for filtering reviews in the Product Reviews list table.
+	 *
+	 * @param int $current_rating Rating to display reviews for.
+	 * @return void
+	 */
+	public function review_rating_dropdown( $current_rating ) {
+
+		$rating_options = [
+			'0' => __( 'All ratings', 'woocommerce' ),
+			'1' => '&#9733;',
+			'2' => '&#9733;&#9733;',
+			'3' => '&#9733;&#9733;&#9733;',
+			'4' => '&#9733;&#9733;&#9733;&#9733;',
+			'5' => '&#9733;&#9733;&#9733;&#9733;&#9733;',
+		];
+
+		?>
+		<label class="screen-reader-text" for="filter-by-review-rating"><?php esc_html_e( 'Filter by review rating', 'woocommerce' ); ?></label>
+		<select id="filter-by-review-rating" name="review_rating">
+			<?php foreach ( $rating_options as $rating => $label ) : ?>
+				<?php
+
+				$title = 0 === (int) $rating
+					? $label
+					: sprintf(
+						/* translators: %s: Star rating (1-5). */
+						__( '%s-star rating', 'woocommerce' ),
+						$rating
+					);
+
+				?>
+				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $rating, (string) $current_rating ); ?> title="<?php echo esc_attr( $title ); ?>"><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
 		</select>
 		<?php
