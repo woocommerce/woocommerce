@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "362a4c80079f72e193bb35b1e22c8598",
+    "content-hash": "71f2f725ab133e12dde802b2ecf180f4",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -681,16 +681,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v7.2.0",
+            "version": "v7.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "52fd37a82aa522b9e39fcad11a67b3560c0ea9f0"
+                "reference": "7f5430fa6c4a8a64eb28ac392c446099f1024c6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/52fd37a82aa522b9e39fcad11a67b3560c0ea9f0",
-                "reference": "52fd37a82aa522b9e39fcad11a67b3560c0ea9f0",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/7f5430fa6c4a8a64eb28ac392c446099f1024c6a",
+                "reference": "7f5430fa6c4a8a64eb28ac392c446099f1024c6a",
                 "shasum": ""
             },
             "require": {
@@ -734,9 +734,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v7.2.0"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v7.4.0"
             },
-            "time": "2022-03-15T11:18:07+00:00"
+            "time": "2022-04-14T12:11:29+00:00"
         }
     ],
     "packages-dev": [
@@ -1198,16 +1198,16 @@
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "1.6.0",
+            "version": "1.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "93ebd0014cab80c4ea9f5e297ea48672f1b87706"
+                "reference": "77a32518733312af16a44300404e945338981de3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/93ebd0014cab80c4ea9f5e297ea48672f1b87706",
-                "reference": "93ebd0014cab80c4ea9f5e297ea48672f1b87706",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/77a32518733312af16a44300404e945338981de3",
+                "reference": "77a32518733312af16a44300404e945338981de3",
                 "shasum": ""
             },
             "require": {
@@ -1242,9 +1242,9 @@
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
             "support": {
                 "issues": "https://github.com/phpDocumentor/TypeResolver/issues",
-                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.6.0"
+                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.6.1"
             },
-            "time": "2022-01-04T19:58:01+00:00"
+            "time": "2022-03-15T21:29:03+00:00"
         },
         {
             "name": "phpspec/prophecy",
