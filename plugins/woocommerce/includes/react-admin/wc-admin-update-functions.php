@@ -10,7 +10,6 @@
 use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
-use \Automattic\WooCommerce\Internal\Admin\Notes\DeactivatePlugin;
 use \Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
@@ -77,12 +76,18 @@ function wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note() {
 }
 
 /**
- * Change the deactivate plugin note type to 'info'.
- */
-function wc_admin_update_140_change_deactivate_plugin_note_type() {
-	global $wpdb;
 
-	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", DeactivatePlugin::NOTE_NAME ) );
+ * Update DB Version.
+ */
+function wc_admin_update_130_db_version() {
+	Installer::update_db_version( '1.3.0' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_140_db_version() {
+	Installer::update_db_version( '1.4.0' );
 }
 
 /**

@@ -168,7 +168,6 @@ class WC_Install {
 			'wc_update_440_insert_attribute_terms_for_variable_products',
 			'wc_admin_update_110_remove_facebook_note',
 			'wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note',
-			'wc_admin_update_140_change_deactivate_plugin_note_type',
 			'wc_update_440_db_version',
 		),
 		'4.5.0' => array(

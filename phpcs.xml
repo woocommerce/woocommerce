@@ -128,4 +128,16 @@
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
 	</rule>
+
+	<!-- Temporary -->
+	<rule ref="Squiz.Classes.ClassFileName.NoMatch">
+		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
+		<exclude-pattern>src/Admin/</exclude-pattern>
+	</rule>	
+
+	<!-- Temporary -->
+	<rule ref="Squiz.Classes.ValidClassName.NotCamelCaps">
+		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
+		<exclude-pattern>src/Admin/</exclude-pattern>
+	</rule>		
 </ruleset>
