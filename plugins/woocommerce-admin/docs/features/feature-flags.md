@@ -7,7 +7,7 @@ We currently support the following environments:
 | Environment | Description                                                                                                                                                            |
 |-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | development | Development - All features should be enabled in development. These flags are also used in both JS and PHP tests. Ran using `pnpm start`.                                |                              |
-| core        | Core - assets/files ready and stable enough. Ran using `WC_ADMIN_PHASE=core pnpm build` & `pnpm pack`.
+| core        | Core - assets/files ready and stable enough. Ran using `pnpm build` & `pnpm pack`.
 
 
 ## Adding a new flag
