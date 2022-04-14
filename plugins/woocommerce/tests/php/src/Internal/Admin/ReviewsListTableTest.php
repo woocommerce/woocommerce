@@ -21,7 +21,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @return ReviewsListTable
 	 */
-	protected function get_reviews_list_table() : ReviewsListTable {
+	private function get_reviews_list_table() : ReviewsListTable {
 		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 	}
 
