@@ -637,11 +637,12 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Displays a comment type drop-down for filtering on the Comments list table.
+	 * Displays a review type drop-down for filtering reviews in the Product Reviews list table.
 	 *
 	 * @see WP_Comments_List_Table::comment_type_dropdown() for consistency.
 	 *
 	 * @param string $item_type The current comment item type slug.
+	 * @return void
 	 */
 	protected function review_type_dropdown( $item_type ) {
 
