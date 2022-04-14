@@ -166,7 +166,8 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ),
+				'visible'      => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' )
+					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
 				'options'      => array(
 					'use_completed_title' => true,
 				),
