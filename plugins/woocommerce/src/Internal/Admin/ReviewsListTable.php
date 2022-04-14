@@ -33,7 +33,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Current product the reviews should be displayed for.
 	 *
-	 * @var int|null Product ID or null for all products.
+	 * @var WC_Product|null Product or null for all products.
 	 */
 	private $current_product_for_reviews;
 
@@ -55,8 +55,7 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		$this->current_product_for_reviews = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
-
+		$this->set_review_product();
 		$this->set_review_status();
 		$this->set_review_type();
 
@@ -70,11 +69,29 @@ class ReviewsListTable extends WP_List_Table {
 		// Handle the review item types filter.
 		$args = wp_parse_args( $this->get_filter_type_arguments(), $args );
 
+		// Handle the review product filter.
+		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
+
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
 
 		$this->items = $comments;
+	}
+
+	/**
+	 * Sets the product to filter reviews by.
+	 *
+	 * @return void
+	 */
+	public function set_review_product() {
+
+		$product_id = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
+		$product = $product_id ? wc_get_product( $product_id ) : null;
+
+		if ( $product instanceof WC_Product ) {
+			$this->current_product_for_reviews = $product;
+		}
 	}
 
 	/**
@@ -182,6 +199,22 @@ class ReviewsListTable extends WP_List_Table {
 				$args['parent__in']   = [ 0 ];
 
 				break;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Gets the `post_id` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	public function get_filter_product_arguments() : array {
+
+		$args = [];
+
+		if ( $this->current_product_for_reviews instanceof WC_Product ) {
+			$args['post_id'] = $this->current_product_for_reviews->get_id();
 		}
 
 		return $args;
@@ -676,13 +709,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Displays a product search input for filtering reviews by product in the Product Reviews list table.
 	 *
-	 * @param int|null $current_product_id The current product ID (or null when displaying all reviews).
+	 * @param WC_Product|null $current_product The current product (or null when displaying all reviews).
 	 * @return void
 	 */
-	protected function product_search( $current_product_id ) {
-
-		$current_product = $current_product_id ? wc_get_product( (int) $current_product_id ) : null;
-
+	protected function product_search( $current_product ) {
 		?>
 		<label class="screen-reader-text" for="filter-by-product"><?php esc_html_e( 'Filter by product', 'woocommerce' ); ?></label>
 		<select
