@@ -119,27 +119,6 @@ class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Deactivate_Plugin.
- *
- * @deprecated since 1.7.0, use DeactivatePlugin
- */
-class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Internal\Admin\Notes\DeactivatePlugin';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
  * WC_Admin_Notes_Edit_Products_On_The_Move.
  *
  * @deprecated since 1.7.0, use EditProductsOnTheMove

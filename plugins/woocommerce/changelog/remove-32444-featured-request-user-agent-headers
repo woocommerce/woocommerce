@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove custom user-agent from featured extensions requests.

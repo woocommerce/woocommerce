@@ -1097,7 +1097,7 @@ importers:
       chai-as-promised: 7.1.1
       config: 3.3.3
       cross-env: 6.0.3
-      deasync: 0.1.21
+      deasync: 0.1.26
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0
       eslint-plugin-jest: 23.20.0
@@ -1136,7 +1136,7 @@ importers:
       chai-as-promised: 7.1.1_chai@4.2.0
       config: 3.3.3
       cross-env: 6.0.3
-      deasync: 0.1.21
+      deasync: 0.1.26
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0_eslint@6.8.0
       eslint-plugin-jest: 23.20.0_eslint@6.8.0+typescript@3.9.7
@@ -19290,8 +19290,8 @@ packages:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
     dev: true
 
-  /deasync/0.1.21:
-    resolution: {integrity: sha512-kUmM8Y+PZpMpQ+B4AuOW9k2Pfx/mSupJtxOsLzmnHY2WqZUYRFccFn2RhzPAqt3Xb+sorK/badW2D4zNzqZz5w==}
+  /deasync/0.1.26:
+    resolution: {integrity: sha512-YKw0BmJSWxkjtQsbgn6Q9CHSWB7DKMen8vKrgyC006zy0UZ6nWyGidB0IzZgqkVRkOglAeUaFtiRTeLyel72bg==}
     engines: {node: '>=0.11.0'}
     requiresBuild: true
     dependencies:
@@ -29535,6 +29535,7 @@ packages:
 
   /nan/2.15.0:
     resolution: {integrity: sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==}
+    requiresBuild: true
     optional: true
 
   /nanoid/3.1.30:

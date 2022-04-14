@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\TaskList;
-use Automattic\WooCommerce\Internal\Admin\Install;
+use WC_Install;
 
 /**
  * DeprecatedOptions class.
@@ -30,9 +30,9 @@ class DeprecatedOptions {
 	 * @return string
 	 */
 	public static function get_deprecated_options( $pre_option, $option ) {
-		if ( Install::is_installing() ) {
+		if ( defined( 'WC_INSTALLING' ) && WC_INSTALLING === true ) {
 			return $pre_option;
-		};
+		}
 
 		$hidden = get_option( 'woocommerce_task_list_hidden_lists', array() );
 		switch ( $option ) {
