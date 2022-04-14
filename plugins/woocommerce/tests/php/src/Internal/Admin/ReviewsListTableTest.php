@@ -520,7 +520,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the product reviews bulk actions.
+	 * Tests that can get the bulk actions for the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_bulk_actions()
 	 * @dataProvider data_provider_get_bulk_actions
