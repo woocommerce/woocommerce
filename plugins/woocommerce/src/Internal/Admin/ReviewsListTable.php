@@ -57,7 +57,7 @@ class ReviewsListTable extends WP_List_Table {
 		// Include the order & orderby arguments.
 		$args = wp_parse_args( $this->get_sort_arguments(), $args );
 
-		// Handle the item types filter.
+		// Handle the review item types filter.
 		$args = wp_parse_args( $this->get_filter_type_arguments(), $args );
 
 		$comments = get_comments( $args );
@@ -82,107 +82,6 @@ class ReviewsListTable extends WP_List_Table {
 		if ( ! in_array( $comment_status, [ 'all', 'moderated', 'approved', 'spam', 'trash' ], true ) ) {
 			$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
-	}
-
-	/**
-	 * Returns a list of available bulk actions.
-	 *
-	 * @global string $comment_status
-	 *
-	 * @return array
-	 */
-	protected function get_bulk_actions() {
-		global $comment_status;
-
-		$actions = [];
-
-		if ( in_array( $comment_status, [ 'all', 'approved' ], true ) ) {
-			$actions['unapprove'] = __( 'Unapprove', 'woocommerce' );
-		}
-
-		if ( in_array( $comment_status, [ 'all', 'moderated' ], true ) ) {
-			$actions['approve'] = __( 'Approve', 'woocommerce' );
-		}
-
-		if ( in_array( $comment_status, [ 'all', 'moderated', 'approved', 'trash' ], true ) ) {
-			$actions['spam'] = _x( 'Mark as spam', 'review', 'woocommerce' );
-		}
-
-		if ( 'trash' === $comment_status ) {
-			$actions['untrash'] = __( 'Restore', 'woocommerce' );
-		} elseif ( 'spam' === $comment_status ) {
-			$actions['unspam'] = _x( 'Not spam', 'review', 'woocommerce' );
-		}
-
-		if ( in_array( $comment_status, [ 'trash', 'spam' ], true ) || ! EMPTY_TRASH_DAYS ) {
-			$actions['delete'] = __( 'Delete permanently', 'woocommerce' );
-		} else {
-			$actions['trash'] = __( 'Move to Trash', 'woocommerce' );
-		}
-
-		return $actions;
-	}
-
-	/**
-	 * Render a single row HTML.
-	 *
-	 * @global WP_Post $post
-	 * @global WP_Comment $comment
-	 *
-	 * @param WP_Comment $item Review or reply being rendered.
-	 * @return void
-	 */
-	public function single_row( $item ) {
-		global $post, $comment;
-
-		// Overrides the comment global for properly rendering rows.
-		$comment           = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$the_comment_class = (string) wp_get_comment_status( $comment->comment_ID );
-		$the_comment_class = implode( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
-		// Sets the post for the product in context.
-		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$this->current_user_can_edit_review = current_user_can( 'edit_comment', $comment->comment_ID );
-
-		?>
-		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="<?php echo esc_attr( $the_comment_class ); ?>">
-			<?php $this->single_row_columns( $comment ); ?>
-		</tr>
-		<?php
-	}
-
-	/**
-	 * Returns the columns for the table.
-	 *
-	 * @return array Table columns and their headings.
-	 */
-	public function get_columns() {
-		return [
-			'cb'       => '<input type="checkbox" />',
-			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
-			'author'   => __( 'Author', 'woocommerce' ),
-			'rating'   => __( 'Rating', 'woocommerce' ),
-			'comment'  => _x( 'Review', 'column name', 'woocommerce' ),
-			'response' => __( 'Product', 'woocommerce' ),
-			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
-		];
-	}
-
-	/**
-	 * Returns a list of sortable columns. Key is the column ID and value is which database column
-	 * we perform the sorting on. (`rating` uses a unique key instead, as that requires sorting
-	 * by meta value.)
-	 *
-	 * @return array
-	 */
-	protected function get_sortable_columns() {
-		return [
-			'author'   => 'comment_author',
-			'response' => 'comment_post_ID',
-			'date'     => 'comment_date_gmt',
-			'type'     => 'comment_type',
-			'rating'   => 'rating',
-		];
 	}
 
 	/**
@@ -232,9 +131,10 @@ class ReviewsListTable extends WP_List_Table {
 		switch ( $item_type ) {
 
 			case 'all':
-				return $args;
+				break;
 
-			case 'reply':
+			// Review replies.
+			case 'comment':
 				$parents = get_comments(
 					[
 						'type'   => 'review',
@@ -244,16 +144,64 @@ class ReviewsListTable extends WP_List_Table {
 				);
 
 				$args['comment_type'] = 'comment';
-				$args['parent__in'] = ! empty( $parents ) ? (array) $parents : [ 0 ];
+				$args['parent__in']   = ! empty( $parents ) ? (array) $parents : [ 0 ];
 
-				return $args;
+				break;
 
+			// Reviews and other review types.
 			case 'review':
 			default:
 				$args['comment_type'] = $item_type;
 
-				return $args;
+				break;
 		}
+
+		return $args;
+	}
+
+	/**
+	 * Render a single row HTML.
+	 *
+	 * @global WP_Post $post
+	 * @global WP_Comment $comment
+	 *
+	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
+	 */
+	public function single_row( $item ) {
+		global $post, $comment;
+
+		// Overrides the comment global for properly rendering rows.
+		$comment           = $item; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$the_comment_class = (string) wp_get_comment_status( $comment->comment_ID );
+		$the_comment_class = implode( ' ', get_comment_class( $the_comment_class, $comment->comment_ID, $comment->comment_post_ID ) );
+		// Sets the post for the product in context.
+		$post = get_post( $comment->comment_post_ID ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->current_user_can_edit_review = current_user_can( 'edit_comment', $comment->comment_ID );
+
+		?>
+		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="<?php echo esc_attr( $the_comment_class ); ?>">
+			<?php $this->single_row_columns( $comment ); ?>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Gets the columns for the table.
+	 *
+	 * @return array Table columns and their headings.
+	 */
+	public function get_columns() {
+		return [
+			'cb'       => '<input type="checkbox" />',
+			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
+			'author'   => __( 'Author', 'woocommerce' ),
+			'rating'   => __( 'Rating', 'woocommerce' ),
+			'comment'  => _x( 'Review', 'column name', 'woocommerce' ),
+			'response' => __( 'Product', 'woocommerce' ),
+			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
+		];
 	}
 
 	/**
@@ -266,7 +214,64 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * The text to display when there are no reviews to display.
+	 * Gets a list of sortable columns.
+	 *
+	 * Key is the column ID and value is which database column we perform the sorting on.
+	 * The `rating` column uses a unique key instead, as that requires sorting by meta value.
+	 *
+	 * @return array
+	 */
+	protected function get_sortable_columns() {
+		return [
+			'author'   => 'comment_author',
+			'response' => 'comment_post_ID',
+			'date'     => 'comment_date_gmt',
+			'type'     => 'comment_type',
+			'rating'   => 'rating',
+		];
+	}
+
+	/**
+	 * Returns a list of available bulk actions.
+	 *
+	 * @global string $comment_status
+	 *
+	 * @return array
+	 */
+	protected function get_bulk_actions() {
+		global $comment_status;
+
+		$actions = [];
+
+		if ( in_array( $comment_status, [ 'all', 'approved' ], true ) ) {
+			$actions['unapprove'] = __( 'Unapprove', 'woocommerce' );
+		}
+
+		if ( in_array( $comment_status, [ 'all', 'moderated' ], true ) ) {
+			$actions['approve'] = __( 'Approve', 'woocommerce' );
+		}
+
+		if ( in_array( $comment_status, [ 'all', 'moderated', 'approved', 'trash' ], true ) ) {
+			$actions['spam'] = _x( 'Mark as spam', 'review', 'woocommerce' );
+		}
+
+		if ( 'trash' === $comment_status ) {
+			$actions['untrash'] = __( 'Restore', 'woocommerce' );
+		} elseif ( 'spam' === $comment_status ) {
+			$actions['unspam'] = _x( 'Not spam', 'review', 'woocommerce' );
+		}
+
+		if ( in_array( $comment_status, [ 'trash', 'spam' ], true ) || ! EMPTY_TRASH_DAYS ) {
+			$actions['delete'] = __( 'Delete permanently', 'woocommerce' );
+		} else {
+			$actions['trash'] = __( 'Move to Trash', 'woocommerce' );
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Outputs the text to display when there are no reviews to display.
 	 *
 	 * @global string $comment_status
 	 *
@@ -623,9 +628,9 @@ class ReviewsListTable extends WP_List_Table {
 	protected function comment_type_dropdown( $item_type ) {
 
 		$item_types = [
-			'all'    => __( 'All', 'woocommerce' ),
-			'reply'  => __( 'Replies', 'woocommerce' ),
-			'review' => __( 'Reviews', 'woocommerce' ),
+			'all'     => __( 'All', 'woocommerce' ),
+			'comment' => __( 'Replies', 'woocommerce' ),
+			'review'  => __( 'Reviews', 'woocommerce' ),
 		];
 
 		?>

@@ -99,8 +99,10 @@ class Reviews {
 			<?php $this->reviews_list_table->views(); ?>
 
 			<form id="reviews-filter" method="get">
+				<?php $page = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : static::MENU_SLUG; ?>
 
-				<input type="hidden" name="page" value="<?php echo esc_html( static::MENU_SLUG ); ?>" />
+				<input type="hidden" name="page" value="<?php echo esc_attr( $page ); ?>" />
+				<input type="hidden" name="post_type" value="product" />
 
 				<?php $this->reviews_list_table->search_box( __( 'Search reviews', 'woocommerce' ), 'reviews' ); ?>
 
