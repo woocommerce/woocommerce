@@ -19,26 +19,23 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @param bool   $should_display_notices Whether notices should be displayed.
 	 */
 	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) {
-		$this->reset_legacy_proxy_mocks();
+		global $current_screen;
 
-		$this->register_legacy_proxy_function_mocks(
-			[
-				'get_current_screen' => function() use ( $current_screen_base ) {
-					$screen = new \stdClass();
-					$screen->base = $current_screen_base;
-					return $screen;
-				},
-			]
-		);
+		$screen = new \stdClass();
+		$screen->base = $current_screen_base;
+
+		$current_screen = $screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		ob_start();
 
 		ReviewsCommentsOverrides::get_instance()->display_notices();
 
+		$output = ob_get_clean();
+
 		if ( $should_display_notices ) {
-			$this->assertNotEmpty( ob_get_clean() );
+			$this->assertNotEmpty( $output );
 		} else {
-			$this->assertEmpty( ob_get_clean() );
+			$this->assertEmpty( $output );
 		}
 	}
 
