@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { COUNTRIES_STORE_NAME, Country, Locale } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp, has } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { SelectControl, TextControl } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -26,6 +26,20 @@ const storeAddressFields = [
 type Option = { key: string; label: string };
 
 /**
+ * Type guard to ensure that the specified locale object has a .required property
+ *
+ * @param fieldName field of Locale
+ * @param locale    unknown object to be checked
+ * @return          Boolean indicating if locale has a .required property
+ */
+const isLocaleRecord = (
+	fieldName: keyof Locale,
+	locale: unknown
+): locale is Record< keyof Locale, { required: boolean } > => {
+	return !! locale && has( locale, `${ fieldName }.required` );
+};
+
+/**
  * Check if a given address field is required for the locale.
  *
  * @param {string} fieldName Name of the field to check.
@@ -36,8 +50,8 @@ export function isAddressFieldRequired(
 	fieldName: keyof Locale,
 	locale: Locale = {}
 ): boolean {
-	if ( locale[ fieldName ]?.hasOwnProperty( 'required' ) ) {
-		return locale[ fieldName ]?.required as boolean;
+	if ( isLocaleRecord( fieldName, locale ) ) {
+		return locale[ fieldName ].required;
 	}
 
 	if ( fieldName === 'address_2' ) {
