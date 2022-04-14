@@ -629,6 +629,44 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can set the review type when preparing items.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_type()
+	 * @dataProvider data_provider_set_review_type
+	 *
+	 * @param string $review_type          Review type.
+	 * @param string $expected_review_type Expected review type to be set.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_set_review_type( $review_type, $expected_review_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
+		$method->setAccessible( true );
+
+		if ( null !== $review_type ) {
+			$_REQUEST['review_type'] = $review_type;
+		} else {
+			unset( $_REQUEST['review_type'] );
+		}
+
+		$method->invoke( $list_table );
+
+		global $comment_type;
+
+		$this->assertSame( $expected_review_type, $comment_type );
+	}
+
+	/** @see test_set_review_type */
+	public function data_provider_set_review_type() : Generator {
+		yield 'Type not set' => [ null, null ];
+		yield 'All types'    => [ 'all', null ];
+		yield 'Replies'      => [ 'comment', 'comment' ];
+		yield 'Reviews'      => [ 'review', 'review' ];
+		yield 'Other'        => [ 'other', 'other' ];
+	}
+
+	/**
 	 * Tests that can get the sortable columns for the reviews table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sortable_columns()
@@ -750,6 +788,83 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 				'order'   => 'desc',
 			],
 		];
+	}
+
+	/**
+	 * Tests that can get the comment type argument for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_type_arguments()
+	 * @dataProvider data_provider_get_filter_type_arguments
+	 *
+	 * @param string $review_type  The requested review type.
+	 * @param string $comment_type The resulting comment type.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_filter_type_arguments( $review_type, $comment_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
+		$method->setAccessible( true );
+
+		if ( null !== ( $review_type ) ) {
+			$_REQUEST['review_type'] = $review_type;
+		} else {
+			unset( $_REQUEST['review_type'] );
+		}
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertSame( $comment_type, $args['type'] ?? null );
+	}
+
+	/** @see test_get_filter_type_arguments */
+	public function data_provider_get_filter_type_arguments() : Generator {
+		yield 'No requested type' => [ null, null ];
+		yield 'All types'         => [ 'all', null ];
+		yield 'Replies'           => [ 'comment', 'comment' ];
+		yield 'Reviews'           => [ 'review', 'review' ];
+		yield 'Other'             => [ 'other', 'other' ];
+	}
+
+	/**
+	 * Tests that can set the filter rating for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_rating_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If reflected method or property don't exist.
+	 */
+	public function test_get_filter_rating_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'get_filter_rating_arguments' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_reviews_rating' );
+		$property->setAccessible( true );
+
+		$property->setValue( $list_table, 0 );
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertSame( [], $args );
+
+		$property->setValue( $list_table, 5 );
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertEquals(
+			[
+				'meta_query' => [
+					[
+						'key'     => 'rating',
+						'value'   => 5,
+						'compare' => '=',
+						'type'    => 'NUMERIC',
+					],
+				],
+			],
+			$args
+		);
 	}
 
 	/**
@@ -1001,6 +1116,80 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output a filter by review type dropdown element.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_type_dropdown()
+	 * @dataProvider data_provider_test_review_type_dropdown
+	 *
+	 * @param string $chosen_type The chosen review type to filter for.
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_review_type_dropdown( $chosen_type ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_type_dropdown' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $chosen_type ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-review-type">Filter by review type</label>', $output );
+		$this->assertStringContainsString( '<select id="filter-by-review-type" name="review_type">', $output );
+
+		if ( ! in_array( $chosen_type, [ 'all', 'comment', 'review' ], true ) ) {
+			$this->assertStringNotContainsString( '<option value="' . $chosen_type . '"  selected', $output );
+		} else {
+			$this->assertStringContainsString( '<option value="' . $chosen_type . '"  selected', $output );
+		}
+	}
+
+	/** @see test_review_type_dropdown */
+	public function data_provider_test_review_type_dropdown() : Generator {
+		yield 'Unknown type' => [ 'invalid' ];
+		yield 'All'          => [ 'all' ];
+		yield 'Replies'      => [ 'comment' ];
+		yield 'Reviews'      => [ 'review' ];
+	}
+
+	/**
+	 * Tests that can output a filter dropdown for review ratings.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_rating_dropdown()
+	 * @dataProvider data_provider_test_review_rating_dropdown
+	 *
+	 * @param string $chosen_rating The rating to filter reviews for.
+	 * @return void
+	 * @throws ReflectionException If the method is not defined.
+	 */
+	public function test_review_rating_dropdown( $chosen_rating ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_rating_dropdown' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $chosen_rating ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-review-rating">Filter by review rating</label>', $output );
+		$this->assertStringContainsString( '<select id="filter-by-review-rating" name="review_rating">', $output );
+		$this->assertStringContainsString( '<option value="' . $chosen_rating . '"  selected', $output );
+	}
+
+	/** @see test_review_type_dropdown */
+	public function data_provider_test_review_rating_dropdown() : Generator {
+		yield 'All ratings'    => [ 0 ];
+		yield '1 star'         => [ 1 ];
+		yield '2 stars'        => [ 2 ];
+		yield '3 stars'        => [ 3 ];
+		yield '4 stars'        => [ 4 ];
+		yield '5 stars'        => [ 5 ];
+	}
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_filters()
 	 *
 	 * @return void
@@ -1230,11 +1419,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			[
-				'all'       => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
-				'moderated' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
-				'approved'  => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
-				'spam'      => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
-				'trash'     => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
+				'all'       => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
+				'moderated' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
+				'approved'  => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
+				'spam'      => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
+				'trash'     => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
 			],
 			$method->invoke( $list_table )
 		);
