@@ -1201,4 +1201,5 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<select id="filter-by-product" name="product_id">', $output );
 		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"  selected', $output );
 	}
+
 }
