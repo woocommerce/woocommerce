@@ -35,6 +35,18 @@ const SEE_MORE_LINK =
 const comparePaymentGatewaysByPriority = ( a, b ) =>
 	a.recommendation_priority - b.recommendation_priority;
 
+const isGatewayWCPay = ( gateway ) =>
+	gateway.plugins?.length === 1 &&
+	gateway.plugins[ 0 ] === 'woocommerce-payments';
+
+const isGatewayOtherCategory = ( gateway, countryCode ) =>
+	gateway.category_other &&
+	gateway.category_other.indexOf( countryCode ) !== -1;
+
+const isGatewayAdditionalCategory = ( gateway, countryCode ) =>
+	gateway.category_additional &&
+	gateway.category_additional.indexOf( countryCode ) !== -1;
+
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
 	const {
@@ -197,17 +209,11 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				continue;
 			}
 
-			if (
-				gateway.plugins?.length === 1 &&
-				gateway.plugins[ 0 ] === 'woocommerce-payments'
-			) {
+			if ( isGatewayWCPay( gateway ) ) {
 				return true;
 			}
 
-			if (
-				gateway.category_other &&
-				gateway.category_other.indexOf( countryCode ) !== -1
-			) {
+			if ( isGatewayOtherCategory( gateway, countryCode ) ) {
 				return true;
 			}
 		}
@@ -215,12 +221,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	}, [ countryCode, paymentGateways ] );
 
 	const isWCPaySupported =
-		Array.from( paymentGateways.values() ).findIndex( ( gateway ) => {
-			return (
-				gateway.plugins?.length === 1 &&
-				gateway.plugins[ 0 ] === 'woocommerce-payments'
-			);
-		} ) !== -1;
+		Array.from( paymentGateways.values() ).findIndex( isGatewayWCPay ) !==
+		-1;
 
 	const [ wcPayGateway, offlineGateways, additionalGateways ] = useMemo(
 		() =>
@@ -243,8 +245,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 						// WCPay is handled separately when not installed and configured
 						if (
-							gateway.plugins?.length === 1 &&
-							gateway.plugins[ 0 ] === 'woocommerce-payments' &&
+							isGatewayWCPay( gateway ) &&
 							! ( gateway.installed && ! gateway.needsSetup )
 						) {
 							wcPay.push( gateway );
@@ -256,10 +257,10 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							// If WCPay or "other" gateway is enabled in an WCPay-eligible country, only
 							// allow to list "additional" gateways.
 							if (
-								gateway.category_additional &&
-								gateway.category_additional.indexOf(
+								isGatewayAdditionalCategory(
+									gateway,
 									countryCode
-								) !== -1
+								)
 							) {
 								additional.push( gateway );
 							}
@@ -267,8 +268,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							// When WCPay-ineligible, just show all gateways.
 							additional.push( gateway );
 						} else if (
-							gateway.category_other &&
-							gateway.category_other.indexOf( countryCode ) !== -1
+							isGatewayOtherCategory( gateway, countryCode )
 						) {
 							// When nothing is set up and eligible for WCPay, only show "other" gateways.
 							additional.push( gateway );
