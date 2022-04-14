@@ -13,25 +13,14 @@ import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { getSetting } from '@woocommerce/settings';
-import { getQueryArg, addQueryArgs, removeQueryArgs } from '@wordpress/url';
+import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import usePriceConstraints from './use-price-constraints.js';
+import { getUrlParameter } from '../../utils/filters';
 import './style.scss';
-
-/**
- * Returns specified parameter from URL
- *
- * @param {string} paramName Parameter you want the value of.
- */
-function findGetParameter( paramName ) {
-	if ( ! window ) {
-		return null;
-	}
-	return getQueryArg( window.location.href, paramName );
-}
 
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
@@ -71,6 +60,8 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 		''
 	);
 
+	const minPriceParam = getUrlParameter( 'min_price' );
+	const maxPriceParam = getUrlParameter( 'max_price' );
 	const [ queryState ] = useQueryStateByContext();
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
@@ -78,9 +69,6 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	} );
 
 	const currency = getCurrencyFromPriceResponse( results.price_range );
-
-	const minPriceParam = findGetParameter( 'min_price' );
-	const maxPriceParam = findGetParameter( 'max_price' );
 
 	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(
 		'min_price',
