@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use WP_Comment;
 use WP_Comments_List_Table;
 use WP_List_Table;
+use WP_Post;
 
 /**
  * Handles the Product Reviews page.
@@ -22,7 +23,27 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_user_can_edit_review = false;
 
 	/**
+	 * Memoization flag to determine if the current user can moderate reviews.
+	 *
+	 * @var bool
+	 */
+	private $current_user_can_moderate_reviews;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param array|string $args Array or string of arguments.
+	 */
+	public function __construct( $args = [] ) {
+		parent::__construct( $args );
+
+		$this->current_user_can_moderate_reviews = current_user_can( 'moderate_comments' );
+	}
+
+	/**
 	 * Sets the `$comment_status` global based on the current request.
+	 *
+	 * @global string $comment_status
 	 *
 	 * @return void
 	 */
@@ -100,6 +121,9 @@ class ReviewsListTable extends WP_List_Table {
 
 	/**
 	 * Render a single row HTML.
+	 *
+	 * @global WP_Post $post
+	 * @global WP_Comment $comment
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
 	 * @return void
@@ -202,6 +226,8 @@ class ReviewsListTable extends WP_List_Table {
 
 	/**
 	 * The text to display when there are no reviews to display.
+	 *
+	 * @global string $comment_status
 	 *
 	 * @see WP_List_Table::no_items()
 	 */
@@ -503,4 +529,48 @@ class ReviewsListTable extends WP_List_Table {
 		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
 	}
 
+	/**
+	 * Renders the extra controls to be displayed between bulk actions and pagination.
+	 *
+	 * @global string $comment_status
+	 * @global string $comment_type
+	 *
+	 * @param string $which Position (top or bottom).
+	 */
+	protected function extra_tablenav( $which ) {
+		global $comment_status, $comment_type;
+
+		echo '<div class="alignleft actions">';
+
+		if ( 'top' === $which ) {
+			ob_start();
+
+			$this->comment_type_dropdown( $comment_type );
+
+			$output = ob_get_clean();
+
+			if ( ! empty( $output ) && $this->has_items() ) {
+				echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, [ 'id' => 'post-query-submit' ] );
+			}
+		}
+
+		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $this->has_items() && $this->current_user_can_moderate_reviews ) {
+			wp_nonce_field( 'bulk-destroy', '_destroy_nonce' );
+			$title = ( 'spam' === $comment_status ) ? esc_attr__( 'Empty Spam', 'woocommerce' ) : esc_attr__( 'Empty Trash', 'woocommerce' );
+			submit_button( $title, 'apply', 'delete_all', false );
+		}
+
+		echo '</div>';
+	}
+
+	/**
+	 * Displays a comment type drop-down for filtering on the Comments list table.
+	 *
+	 * @param string $comment_type The current comment type slug.
+	 */
+	protected function comment_type_dropdown( $comment_type ) {
+		// @TODO Implement the Type filter - MWC-5343 {dmagalhaes 2022-04-13}
+		echo '&nbsp;';
+	}
 }

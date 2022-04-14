@@ -753,4 +753,220 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'spam filter' => [ 'spam', 'No reviews found.' ];
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::extra_tablenav()
+	 * @dataProvider provider_test_extra_tablenav()
+	 *
+	 * @param string   $position                  Position (top or bottom).
+	 * @param bool     $has_items                 Whether the table has items.
+	 * @param bool     $current_user_can_moderate Whether the current user has the capability to moderate comments.
+	 * @param string   $status                    Filtered status.
+	 * @param string   $expected_start            Output should start with this string.
+	 * @param string[] $expected_elements         Output should contain these elements.
+	 * @param string   $expected_end              Output should end with this string.
+	 * @param string[] $not_expected_elements     Output should not contain these elements.
+	 */
+	public function test_extra_tablenav( string $position, bool $has_items, bool $current_user_can_moderate, string $status, string $expected_start, array $expected_elements, string $expected_end, array $not_expected_elements ) {
+		global $comment_status;
+		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'extra_tablenav' );
+		$method->setAccessible( true );
+
+		$review = $this->factory()->comment->create_and_get();
+		$property = ( new ReflectionClass( $list_table ) )->getProperty( 'items' );
+		$property->setAccessible( true );
+		$property->setValue( $list_table, $has_items ? [ $review ] : [] );
+
+		$property = ( new ReflectionClass( $list_table ) )->getProperty( 'current_user_can_moderate_reviews' );
+		$property->setAccessible( true );
+		$property->setValue( $list_table, $current_user_can_moderate );
+
+		ob_start();
+
+		$method->invokeArgs( $list_table, [ $position ] );
+
+		$output = ob_get_clean();
+
+		$this->assertStringStartsWith( $expected_start, $output );
+
+		foreach ( $expected_elements as $element ) {
+			$this->assertStringContainsString( $element, $output );
+		}
+
+		foreach ( $not_expected_elements as $element ) {
+			$this->assertStringNotContainsString( $element, $output );
+		}
+
+		$this->assertStringEndsWith( $expected_end, $output );
+	}
+
+	/** @see test_extra_tablenav() */
+	public function provider_test_extra_tablenav() : Generator {
+		yield 'no items top' => [
+			'position' => 'top',
+			'has_items' => false,
+			'current_user_can_moderate' => true,
+			'status' => '',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
+			],
+		];
+
+		yield 'no items bottom' => [
+			'position' => 'bottom',
+			'has_items' => false,
+			'current_user_can_moderate' => true,
+			'status' => '',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
+			],
+		];
+
+		yield 'unfiltered with items top' => [
+			'position' => 'top',
+			'has_items' => true,
+			'current_user_can_moderate' => true,
+			'status' => '',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+			],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
+			],
+		];
+
+		yield 'unfiltered with items bottom' => [
+			'position' => 'bottom',
+			'has_items' => true,
+			'current_user_can_moderate' => true,
+			'status' => '',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
+			],
+		];
+
+		yield 'spam with items top' => [
+			'position' => 'top',
+			'has_items' => true,
+			'current_user_can_moderate' => true,
+			'status' => 'spam',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Spam"',
+			],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [],
+		];
+
+		yield 'spam with items bottom' => [
+			'position' => 'bottom',
+			'has_items' => true,
+			'current_user_can_moderate' => true,
+			'status' => 'spam',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Spam"',
+			],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+			],
+		];
+
+		yield 'trash with items top' => [
+			'position' => 'top',
+			'has_items' => true,
+			'current_user_can_moderate' => true,
+			'status' => 'trash',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Trash"',
+			],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [],
+		];
+
+		yield 'trash with items bottom' => [
+			'position' => 'bottom',
+			'has_items' => true,
+			'current_user_can_moderate' => true,
+			'status' => 'trash',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Trash"',
+			],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+			],
+		];
+
+		yield 'trash with items top and user cannot moderate' => [
+			'position' => 'top',
+			'has_items' => true,
+			'current_user_can_moderate' => false,
+			'status' => 'trash',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+			],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
+			],
+		];
+
+		yield 'trash with items bottom and user cannot moderate' => [
+			'position' => 'bottom',
+			'has_items' => true,
+			'current_user_can_moderate' => false,
+			'status' => 'trash',
+			'expected_start' => '<div class="alignleft actions">',
+			'expected_elements' => [],
+			'expected_end' => '</div>',
+			'not_expected_elements' => [
+				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
+				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
+				'<input type="hidden" name="_wp_http_referer"',
+				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
+			],
+		];
+	}
+
 }
