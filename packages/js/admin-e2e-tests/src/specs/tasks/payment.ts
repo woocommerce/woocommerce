@@ -52,7 +52,7 @@ const testAdminPaymentSetupTask = () => {
 			await paymentsSetup.isDisplayed();
 		} );
 
-		it( 'Saving valid bank account transfer details enables the payment method', async () => {
+		it.skip( 'Saving valid bank account transfer details enables the payment method', async () => {
 			await paymentsSetup.showOtherPaymentMethods();
 			await waitForTimeout( 500 );
 			await paymentsSetup.goToPaymentMethodSetup( 'bacs' );
@@ -71,7 +71,7 @@ const testAdminPaymentSetupTask = () => {
 			await homeScreen.navigate();
 		} );
 
-		it( 'Enabling cash on delivery enables the payment method', async () => {
+		it.skip( 'Enabling cash on delivery enables the payment method', async () => {
 			await settings.cleanPaymentMethods();
 			await homeScreen.navigate();
 			await homeScreen.isDisplayed();
