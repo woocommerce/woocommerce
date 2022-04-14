@@ -380,11 +380,51 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			[
-				'all'       => 'All',
-				'moderated' => 'Pending',
-				'approved'  => 'Approved',
-				'spam'      => 'Spam',
-				'trash'     => 'Trash',
+				'all'       => [
+					'All <span class="count">(%s)</span>',
+					'All <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'All <span class="count">(%s)</span>',
+					'plural'   => 'All <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'moderated' => [
+					'Pending <span class="count">(%s)</span>',
+					'Pending <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Pending <span class="count">(%s)</span>',
+					'plural'   => 'Pending <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'approved'  => [
+					'Approved <span class="count">(%s)</span>',
+					'Approved <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Approved <span class="count">(%s)</span>',
+					'plural'   => 'Approved <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'spam'      => [
+					'Spam <span class="count">(%s)</span>',
+					'Spam <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Spam <span class="count">(%s)</span>',
+					'plural'   => 'Spam <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'trash'     => [
+					'Trash <span class="count">(%s)</span>',
+					'Trash <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Trash <span class="count">(%s)</span>',
+					'plural'   => 'Trash <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
 			],
 			$method->invoke( $list_table )
 		);

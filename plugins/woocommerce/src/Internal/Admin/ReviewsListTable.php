@@ -305,11 +305,41 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	protected function get_status_filters() : array {
 		return [
-			'all'       => _x( 'All', 'product reviews', 'woocommerce' ),
-			'moderated' => _x( 'Pending', 'product reviews', 'woocommerce' ),
-			'approved'  => _x( 'Approved', 'product reviews', 'woocommerce' ),
-			'spam'      => _x( 'Spam', 'product reviews', 'woocommerce' ),
-			'trash'     => _x( 'Trash', 'product reviews', 'woocommerce' ),
+			/* translators: %s: Number of reviews. */
+			'all'       => _nx_noop(
+				'All <span class="count">(%s)</span>',
+				'All <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'moderated' => _nx_noop(
+				'Pending <span class="count">(%s)</span>',
+				'Pending <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'approved'  => _nx_noop(
+				'Approved <span class="count">(%s)</span>',
+				'Approved <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'spam'      => _nx_noop(
+				'Spam <span class="count">(%s)</span>',
+				'Spam <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'trash'     => _nx_noop(
+				'Trash <span class="count">(%s)</span>',
+				'Trash <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
 		];
 	}
 
@@ -323,10 +353,10 @@ class ReviewsListTable extends WP_List_Table {
 
 		$status_links = [];
 
-		$status_link_labels = $this->get_status_filters();
+		$status_labels = $this->get_status_filters();
 
 		if ( ! EMPTY_TRASH_DAYS ) {
-			unset( $status_link_labels['trash'] );
+			unset( $status_labels['trash'] );
 		}
 
 		$link = add_query_arg(
@@ -340,27 +370,28 @@ class ReviewsListTable extends WP_List_Table {
 		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
 			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
 		}
+		if ( ! empty( $post_id ) ) {
+			$link = add_query_arg( 'p', absint( $post_id ), $link );
+		}
 
-		foreach ( $status_link_labels as $status => $label ) {
+		foreach ( $status_labels as $status => $label ) {
 			$current_link_attributes = '';
 
 			if ( $status === $comment_status ) {
 				$current_link_attributes = ' class="current" aria-current="page"';
 			}
 
-			$link = add_query_arg( 'comment_status', $status, $link );
+			$link = add_query_arg( 'comment_status', urlencode( $status ), $link );
 
-			if ( $post_id ) {
-				$link = add_query_arg( 'p', absint( $post_id ), $link );
-			}
+			$number_reviews_for_status = $this->get_review_count( $status, (int) $post_id );
 
 			$count_html = sprintf(
-				'<span class="count">(<span class="%s-count">%s</span>)</span>',
+				'<span class="%s-count">%s</span>',
 				( 'moderated' === $status ) ? 'pending' : $status,
-				number_format_i18n( $this->get_review_count( $status, (int) $post_id ) )
+				number_format_i18n( $number_reviews_for_status )
 			);
 
-			$status_links[ $status ] = '<a href="' . esc_url( $link ) . '"' . $current_link_attributes . '>' . $label . ' ' . $count_html . '</a>';
+			$status_links[ $status ] = '<a href="' . esc_url( $link ) . '"' . $current_link_attributes . '>' . sprintf( translate_nooped_plural( $label, $number_reviews_for_status ), $count_html ) . '</a>';
 		}
 
 		/** This filter is documented in wp-admin/includes/class-wp-comments-list-table.php */
