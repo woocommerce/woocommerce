@@ -804,8 +804,8 @@ class ReviewsListTable extends WP_List_Table {
 			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
 			exit;
 		}
-  }
-    
+	}
+
 	/**
 	 * Displays a product search input for filtering reviews by product in the Product Reviews list table.
 	 *
