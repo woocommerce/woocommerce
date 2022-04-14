@@ -67,6 +67,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
+            ~/.pnpm
             plugins/woocommerce/node_modules
             plugins/woocommerce/vendor
           key: ${{ runner.os }}-install-deps-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
