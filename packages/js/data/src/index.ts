@@ -17,7 +17,9 @@ import type { NOTES_STORE_NAME } from './notes';
 import type { REPORTS_STORE_NAME } from './reports';
 import type { ITEMS_STORE_NAME } from './items';
 import type { COUNTRIES_STORE_NAME } from './countries';
+import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 import { OnboardingSelectors } from './onboarding/selectors';
+
 import { WPDataSelectors } from './types';
 import { PluginSelectors } from './plugins/selectors';
 
@@ -63,6 +65,7 @@ export { NAVIGATION_STORE_NAME } from './navigation';
 export { withNavigationHydration } from './navigation/with-navigation-hydration';
 
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+import { PaymentSelectors } from './payment-gateways/selectors';
 
 export {
 	getFilterQuery,
@@ -102,7 +105,8 @@ export type WCDataStoreName =
 	| typeof NOTES_STORE_NAME
 	| typeof REPORTS_STORE_NAME
 	| typeof ITEMS_STORE_NAME
-	| typeof COUNTRIES_STORE_NAME;
+	| typeof COUNTRIES_STORE_NAME
+	| typeof PAYMENT_GATEWAYS_STORE_NAME;
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -114,6 +118,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? PluginSelectors
 	: T extends typeof ONBOARDING_STORE_NAME
 	? OnboardingSelectors
+	: T extends typeof PAYMENT_GATEWAYS_STORE_NAME
+	? PaymentSelectors
 	: T extends typeof USER_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof OPTIONS_STORE_NAME
