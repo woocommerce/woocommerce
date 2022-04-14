@@ -601,9 +601,11 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Renders the available status filters.
+	 * Returns the available status filters.
 	 *
 	 * @see WP_Comments_List_Table::get_views() for consistency.
+	 * @return array An associative array of fully-formed comment status links. Includes 'All', 'Pending',
+	 *               'Approved', 'Spam', and 'Trash'.
 	 */
 	protected function get_views() {
 		global $post_id, $comment_status, $comment_type;
