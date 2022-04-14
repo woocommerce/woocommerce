@@ -17,6 +17,15 @@ use WP_Comment;
 class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Returns a new instance of the {@see ReviewsListTable} class.
+	 *
+	 * @return ReviewsListTable
+	 */
+	protected function get_reviews_list_table() : ReviewsListTable {
+		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+	}
+
+	/**
 	 * Tests that can process the row output for a review or reply.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::single_row()
@@ -413,15 +422,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$product_output = ob_get_clean();
 
 		$this->assertStringContainsString( 'Test product', $product_output );
-	}
-
-	/**
-	 * Returns a new instance of the {@see ReviewsListTable} class.
-	 *
-	 * @return ReviewsListTable
-	 */
-	protected function get_reviews_list_table() : ReviewsListTable {
-		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 	}
 
 	/**
