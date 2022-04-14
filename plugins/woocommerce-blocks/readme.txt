@@ -86,7 +86,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 7.4.0 - 2022-04-11 =
+= 7.4.0 - 2022-04-14 =
 
 #### Enhancements
 
@@ -96,10 +96,8 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 #### Bug Fixes
 
 - Increase Cart product quantity limit. ([6202](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6202))
-- Fix Featured Product: Prevent the block from breaking for out of stock products hidden from catalog. ([6166](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6166))
 - Mini Cart block: Fix translations loading. ([6158](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6158))
 - Fix Featured Product and Featured Category buttons misalignment in Twenty Twenty Two theme. ([6156](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6156))
-- Update `Product Title` link settings content and add an option to `Open in new tab`. ([6131](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6131))
 - Remove the ToggleButtonControl in favor of ToggleGroupControl. ([5967](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5967))
 - Decode HTML entities when formatting Store API error messages. ([5870](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5870))
 
