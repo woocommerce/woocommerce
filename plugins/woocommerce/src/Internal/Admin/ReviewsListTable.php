@@ -239,7 +239,17 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
-		// @TODO Implement in MWC-5335 {agibson 2022-04-12}
+		if ( $this->current_user_can_edit_review ) {
+			?>
+			<label class="screen-reader-text" for="cb-select-<?php echo esc_attr( $item->comment_ID ); ?>"><?php esc_html_e( 'Select review', 'woocommerce' ); ?></label>
+			<input
+				id="cb-select-<?php echo esc_attr( $item->comment_ID ); ?>"
+				type="checkbox"
+				name="delete_comments[]"
+				value="<?php echo esc_attr( $item->comment_ID ); ?>"
+			/>
+			<?php
+		}
 	}
 
 	/**

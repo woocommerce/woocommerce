@@ -3,11 +3,9 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
-use WC_Helper_Product;
 use WC_Unit_Test_Case;
 use WP_Comment;
 
@@ -85,6 +83,50 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$this->assertSame( 'comment', $method->invoke( $list_table ) );
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::cb()
+	 *
+	 * @dataProvider data_provider_test_column_cb()
+	 * @param bool   $current_user_can_edit Whether the current user has the capability to edit this review.
+	 * @param string $expected_output The expected output.
+	 */
+	public function test_column_cb( bool $current_user_can_edit, string $expected_output ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_cb' );
+		$method->setAccessible( true );
+
+		$property = ( new ReflectionClass( $list_table ) )->getProperty( 'current_user_can_edit_review' );
+		$property->setAccessible( true );
+		$property->setValue( $list_table, $current_user_can_edit );
+
+		$review = $this->factory()->comment->create_and_get();
+
+		$review->comment_ID = 123;
+
+		ob_start();
+		$method->invokeArgs( $list_table, [ $review ] );
+		$output = trim( ob_get_clean() );
+
+		$this->assertSame( $expected_output, $output );
+	}
+
+	/** @see test_column_cb() */
+	public function data_provider_test_column_cb() {
+		return [
+			'user has the capability' => [
+				true,
+				'<label class="screen-reader-text" for="cb-select-123">Select review</label>
+			<input
+				id="cb-select-123"
+				type="checkbox"
+				name="delete_comments[]"
+				value="123"
+			/>',
+			],
+			'user does not have the capability' => [ false, '' ],
+		];
 	}
 
 	/**
