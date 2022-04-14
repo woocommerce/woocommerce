@@ -136,7 +136,7 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Builds the `comment_type` and `parent__in` arguments based on the current request.
+	 * Builds the `type` argument based on the current request.
 	 *
 	 * @return array
 	 */
@@ -145,34 +145,11 @@ class ReviewsListTable extends WP_List_Table {
 		$args      = [];
 		$item_type = isset( $_REQUEST['review_type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ) ) : 'all';
 
-		switch ( $item_type ) {
-
-			case 'all':
-				break;
-
-			// Review replies.
-			case 'comment':
-				$parents = get_comments(
-					[
-						'type'   => 'review',
-						'fields' => 'ids',
-						'paged'  => -1,
-					]
-				);
-
-				$args['comment_type'] = 'comment';
-				$args['parent__in']   = ! empty( $parents ) ? (array) $parents : [ 0 ];
-
-				break;
-
-			// Reviews and other review types.
-			case 'review':
-			default:
-				$args['comment_type'] = $item_type;
-				$args['parent__in']   = [ 0 ];
-
-				break;
+		if ( 'all' === $item_type ) {
+			return $args;
 		}
+
+		$args['type'] = $item_type;
 
 		return $args;
 	}

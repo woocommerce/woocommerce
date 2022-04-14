@@ -814,7 +814,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$args = $method->invoke( $list_table );
 
-		$this->assertSame( $comment_type, $args['comment_type'] ?? null );
+		$this->assertSame( $comment_type, $args['type'] ?? null );
 	}
 
 	/** @see test_get_filter_type_arguments */
