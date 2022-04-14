@@ -15,7 +15,7 @@ import './List.scss';
 
 export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 	const {
-		image,
+		image_72x72: image72x72,
 		content,
 		id,
 		plugins = [],
@@ -58,7 +58,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 				className={ classes }
 			>
 				<CardMedia isBorderless>
-					<img src={ image } alt={ title } />
+					<img src={ image72x72 } alt={ title } />
 				</CardMedia>
 				<div className="woocommerce-task-payment__description">
 					{ showRecommendedRibbon && (
