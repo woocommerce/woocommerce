@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-install-deps-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
 
       - name: Install PNPM
-        run: npm install -g pnpm
+        run: npm install -g pnpm && which pnpm
 
       - name: Install node dependencies
         working-directory: ${{ inputs.working_directory }}

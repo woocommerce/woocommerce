@@ -72,6 +72,9 @@ jobs:
             plugins/woocommerce/vendor
           key: ${{ runner.os }}-install-deps-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
 
+      - name: current location
+        run: ls
+
       - name: Load docker images and start containers.
         working-directory: package/woocommerce/plugins/woocommerce
         run: pnpx wc-e2e docker:up
