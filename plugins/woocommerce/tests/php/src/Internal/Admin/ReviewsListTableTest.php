@@ -1138,4 +1138,80 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'empty string' => [ '', 'all' ];
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_review_count()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the metehod doesn't exist.
+	 */
+	public function test_get_review_count() {
+		// Add a normal post with some comments -- these should not appear in our counts.
+		$post_id = $this->factory()->post->create(
+			[
+				'post_type' => 'post',
+			]
+		);
+		$this->factory()->comment->create_many(
+			3,
+			[
+				'comment_post_ID'  => $post_id,
+			]
+		);
+
+		// Now add a product with a bunch of reviews -- these _should_ appear in our counts.
+		$product_id = $this->factory()->post->create(
+			[
+				'post_type' => 'product',
+			]
+		);
+
+		// 3 moderated comments.
+		$this->factory()->comment->create_many(
+			3,
+			[
+				'comment_type'     => 'comment',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => '0',
+			]
+		);
+
+		// 2 approved comments.
+		$this->factory()->comment->create_many(
+			2,
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => '1',
+			]
+		);
+
+		// 1 trashed comment.
+		$this->factory()->comment->create(
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => 'trash',
+			]
+		);
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_review_count' );
+		$method->setAccessible( true );
+
+		// Should have 3 moderated.
+		$this->assertSame( 3, $method->invoke( $list_table, 'moderated', 0 ) );
+
+		// Should have 2 approved.
+		$this->assertSame( 2, $method->invoke( $list_table, 'approved', 0 ) );
+
+		// Should have 1 trashed.
+		$this->assertSame( 1, $method->invoke( $list_table, 'trash', 0 ) );
+
+		// Should have 5 in total (trash is not included in "all").
+		$this->assertSame( 5, $method->invoke( $list_table, 'all', 0 ) );
+
+		// Should also have 5 in total when filtering by product ID (trash is not included in "all").
+		$this->assertSame( 5, $method->invoke( $list_table, 'all', $product_id ) );
+	}
+
 }
