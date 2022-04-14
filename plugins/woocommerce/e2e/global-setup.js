@@ -1,6 +1,25 @@
 const { chromium } = require('@playwright/test');
+const fs = require("fs");
 
 module.exports = async (config) => {
+	// Clear out the previous save states
+	const adminState = 'e2e/storage/adminState.json';
+	const customerState = 'e2e/storage/customerState.json';
+	fs.unlink(adminState, function (err) {
+		if (err) {
+			console.log('Admin auth state wasn\'t there. Will create it.');
+		} else {
+			console.log('Successfully deleted the admin auth state file.');
+		}
+	});
+	fs.unlink(customerState, function (err) {
+		if (err) {
+			console.log('Customer auth state wasn\'t there. Will create it.');
+		} else {
+			console.log('Successfully deleted the customer auth state file.');
+		}
+	});
+
 	const { baseURL } = config.projects[0].use;
 	// Sign in as admin user and save state
 	const browser = await chromium.launch();
