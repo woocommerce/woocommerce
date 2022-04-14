@@ -63,7 +63,7 @@ const testAdminPaymentSetupTask = () => {
 				iban: '12 3456 7890',
 				swiftCode: 'ABBA',
 			} );
-			await waitForTimeout( 1000 );
+			await waitForTimeout( 1500 );
 			expect( await settings.paymentMethodIsEnabled( 'bacs' ) ).toBe(
 				true
 			);
@@ -79,7 +79,7 @@ const testAdminPaymentSetupTask = () => {
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.showOtherPaymentMethods();
 			await paymentsSetup.enableCashOnDelivery();
-			await waitForTimeout( 1000 );
+			await waitForTimeout( 1500 );
 			expect( await settings.paymentMethodIsEnabled( 'cod' ) ).toBe(
 				true
 			);
