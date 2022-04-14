@@ -724,7 +724,7 @@ class ReviewsListTable extends WP_List_Table {
 				$title = 0 === (int) $rating
 					? $label
 					: sprintf(
-						/* translators: %s: Star rating. */
+						/* translators: %s: Star rating (1-5). */
 						__( '%s-star rating', 'woocommerce' ),
 						$rating
 					);
