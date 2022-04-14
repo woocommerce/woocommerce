@@ -8,7 +8,7 @@ const { resolveLocalE2ePath } = require( './test-config' );
 /**
  * Upload a plugin zip from a remote location, such as a GitHub URL or other hosted location.
  *
- * @param {string} fileUrl The URL where the zip file is located.
+ * @param {string} fileUrl            The URL where the zip file is located.
  * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
  * @return {string} The path where the zip file is located.
  */
@@ -20,16 +20,11 @@ const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
 	const fileName = fileUrl.split( '/' ).pop();
 	let filePath = path.join( savePath, fileName );
 
-	console.log( 'filePath in getRemotePluginZip before download is: ' + filePath );
-	console.log( 'fileUrl in getRemotePluginZip before download is: ' + fileUrl );
-
 	// First, download the zip file
 	await downloadZip( fileUrl, filePath, authorizationToken );
 
 	// Check for a nested zip and update the filepath
 	filePath = await checkNestedZip( filePath, savePath );
-
-	console.log( 'filePath in getRemotePluginZip after download is: ' + filePath );
 
 	return filePath;
 };
@@ -37,10 +32,10 @@ const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
 /**
  * Get the latest release zip for a plugin from a GiHub repository.
  *
- * @param {string} repository The repository owner and name. For example: `woocommerce/woocommerce`.
- * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
- * @param {boolean} getPrerelease Flag on whether to get a prelease or not.
- * @param {number} perPage Limit of entries returned from the latest releases list, defaults to 3.
+ * @param {string}  repository         The repository owner and name. For example: `woocommerce/woocommerce`.
+ * @param {string}  authorizationToken Authorization token used to authenticate with the GitHub API if required.
+ * @param {boolean} getPrerelease      Flag on whether to get a prelease or not.
+ * @param {number}  perPage            Limit of entries returned from the latest releases list, defaults to 3.
  * @return {Promise<string>}} Returns the URL for the release zip file.
  */
 const getLatestReleaseZipUrl = async (
@@ -107,7 +102,7 @@ const getLatestReleaseZipUrl = async (
  * Check the zip file for any nested zips. If one is found, extract it.
  *
  * @param {string} zipFilePath The location of the zip file.
- * @param {string} savePath The location where to save a nested zip if found.
+ * @param {string} savePath    The location where to save a nested zip if found.
  * @return {string} The path where the zip file is located.
  */
 const checkNestedZip = async ( zipFilePath, savePath ) => {
@@ -128,8 +123,8 @@ const checkNestedZip = async ( zipFilePath, savePath ) => {
 /**
  * Download the zip file from a remote location.
  *
- * @param {string} fileUrl The URL where the zip file is located.
- * @param {string} downloadPath The location where to download the zip to.
+ * @param {string} fileUrl            The URL where the zip file is located.
+ * @param {string} downloadPath       The location where to download the zip to.
  * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
  * @return {Promise<void>}
  */
