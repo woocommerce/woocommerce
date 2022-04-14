@@ -823,6 +823,47 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can set the filter rating for the current request.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_rating_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If reflected method or property don't exist.
+	 */
+	public function test_get_filter_rating_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'get_filter_rating_arguments' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_reviews_rating' );
+		$property->setAccessible( true );
+
+		$property->setValue( $list_table, 0 );
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertSame( [], $args );
+
+		$property->setValue( $list_table, 1 );
+
+		$args = $method->invoke( $list_table );
+
+		$this->assertEquals(
+			[
+				'meta_query' => [
+					[
+						'key'     => 'rating',
+						'value'   => 5,
+						'compare' => '=',
+						'type'    => 'NUMERIC',
+					],
+				],
+			],
+			$args
+		);
+	}
+
+	/**
 	 * Tests that can output the text for when no reviews are found.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::no_items()

@@ -34,7 +34,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @var int
 	 */
-	private $current_rating = 0;
+	private $current_reviews_rating = 0;
 
 	/**
 	 * Constructor.
@@ -54,7 +54,7 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		$this->current_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
+		$this->current_reviews_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
 
 		$this->set_review_status();
 		$this->set_review_type();
@@ -192,18 +192,18 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	public function get_filter_rating_arguments() : array {
+	protected function get_filter_rating_arguments() : array {
 
 		$args = [];
 
-		if ( empty( $this->current_rating ) ) {
+		if ( empty( $this->current_reviews_rating ) ) {
 			return $args;
 		}
 
 		$args['meta_query'] = [
 			[
 				'key'     => 'rating',
-				'value'   => (int) $this->current_rating,
+				'value'   => (int) $this->current_reviews_rating,
 				'compare' => '=',
 				'type'    => 'NUMERIC',
 			],
@@ -646,7 +646,7 @@ class ReviewsListTable extends WP_List_Table {
 			ob_start();
 
 			$this->review_type_dropdown( $comment_type );
-			$this->review_rating_dropdown( $this->current_rating );
+			$this->review_rating_dropdown( $this->current_reviews_rating );
 
 			$output = ob_get_clean();
 
