@@ -1,7 +1,7 @@
 Data
 ====
 
-WooCommerce Admin data stores implement the [`SqlQuery` class](https://github.com/woocommerce/woocommerce-admin/blob/main/src/API/Reports/SqlQuery.php). 
+WooCommerce Admin data stores implement the [`SqlQuery` class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/API/Reports/SqlQuery.php). 
 
 ### SqlQuery Class
 
