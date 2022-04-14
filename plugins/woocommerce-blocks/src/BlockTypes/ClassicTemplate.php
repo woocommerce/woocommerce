@@ -67,6 +67,13 @@ class ClassicTemplate extends AbstractDynamicBlock {
 				true,
 				null
 			);
+
+			$this->asset_data_registry->add(
+				'page_url',
+				html_entity_decode( get_pagenum_link() ),
+				''
+			);
+
 			return $this->render_archive_product();
 		} else {
 			ob_start();
