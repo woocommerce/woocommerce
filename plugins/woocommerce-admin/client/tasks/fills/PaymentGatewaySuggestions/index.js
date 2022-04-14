@@ -14,6 +14,7 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 import { Button } from '@wordpress/components';
 import ExternalIcon from 'gridicons/dist/external';
 
@@ -28,9 +29,6 @@ import { getPluginSlug } from '~/utils';
 import { getCountryCode } from '~/dashboard/utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
-
-const SEE_MORE_LINK =
-	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 
 const comparePaymentGatewaysByPriority = ( a, b ) =>
 	a.recommendation_priority - b.recommendation_priority;
@@ -323,7 +321,9 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			footerLink={
 				! isWCPayOrOtherCategoryDoneSetup && (
 					<Button
-						href={ SEE_MORE_LINK }
+						href={ getAdminLink(
+							'admin.php?page=wc-addons&section=payment-gateways'
+						) }
 						target="_blank"
 						onClick={ trackSeeMore }
 						isTertiary
