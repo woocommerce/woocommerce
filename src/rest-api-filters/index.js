@@ -63,16 +63,12 @@ function RestAPIFilters( {
 
 			return (
 				<tr key={ index }>
-					<td key={ 0 }>{ index + 1 }</td>
-					<td key={ 1 }>{ endpoint }</td>
+					<td>{ index + 1 }</td>
+					<td>{ endpoint }</td>
 					<td key={ 'optionValue' }>{ dotNotation }</td>
-					<td className="align-center" key={ 2 }>
-						{ replacement + '' }
-					</td>
-					<td className="align-center" key={ 3 }>
-						{ enabled + '' }
-					</td>
-					<td className="align-center" key={ 4 }>
+					<td className="align-center">{ replacement + '' }</td>
+					<td className="align-center">{ enabled + '' }</td>
+					<td className="align-center">
 						<button
 							className="button btn-primary"
 							onClick={ () => toggleFilter( index ) }
@@ -80,7 +76,7 @@ function RestAPIFilters( {
 							Toggle
 						</button>
 					</td>
-					<td className="align-center" key={ 5 }>
+					<td className="align-center">
 						<button
 							className="button btn-danger"
 							onClick={ () => deleteFilter( index ) }
@@ -134,46 +130,23 @@ function RestAPIFilters( {
 				<table className="wp-list-table striped table-view-list widefat">
 					<thead>
 						<tr>
-							<td
-								className="manage-column column-thumb"
-								key={ 0 }
-							>
-								I.D
-							</td>
-							<td
-								className="manage-column column-thumb"
-								key={ 1 }
-							>
+							<td className="manage-column column-thumb">I.D</td>
+							<td className="manage-column column-thumb">
 								Endpoint
 							</td>
-							<td
-								className="manage-column column-thumb"
-								key={ 'optionValue' }
-							>
+							<td className="manage-column column-thumb">
 								Dot Notation
 							</td>
-							<td
-								className="manage-column column-thumb align-center"
-								key={ 2 }
-							>
+							<td className="manage-column column-thumb align-center">
 								Replacement
 							</td>
-							<td
-								className="manage-column column-thumb align-center"
-								key={ 3 }
-							>
+							<td className="manage-column column-thumb align-center">
 								Enabled
 							</td>
-							<td
-								className="manage-column column-thumb align-center"
-								key={ 3 }
-							>
+							<td className="manage-column column-thumb align-center">
 								Toggle
 							</td>
-							<td
-								className="manage-column column-thumb align-center"
-								key={ 4 }
-							></td>
+							<td className="manage-column column-thumb align-center"></td>
 						</tr>
 					</thead>
 					<tbody>
