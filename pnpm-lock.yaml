@@ -1202,8 +1202,11 @@ importers:
       '@types/react-transition-group': ^4.4.4
       '@types/testing-library__jest-dom': ^5.14.3
       '@types/wordpress__components': ^19.3.0
+      '@types/wordpress__compose': ^4.0.1
+      '@types/wordpress__data': ^6.0.0
       '@types/wordpress__data-controls': ^2.2.0
       '@types/wordpress__notices': ^3.3.0
+      '@types/wordpress__plugins': ^3.0.0
       '@typescript-eslint/eslint-plugin': ^5.14.0
       '@typescript-eslint/parser': ^5.14.0
       '@woocommerce/admin-e2e-tests': workspace:*
@@ -1429,8 +1432,11 @@ importers:
       '@types/react-transition-group': 4.4.4
       '@types/testing-library__jest-dom': 5.14.3
       '@types/wordpress__components': 19.3.0_react-dom@17.0.2+react@17.0.2
+      '@types/wordpress__compose': 4.0.1
+      '@types/wordpress__data': 6.0.0
       '@types/wordpress__data-controls': 2.2.0
       '@types/wordpress__notices': 3.3.0
+      '@types/wordpress__plugins': 3.0.0_react-dom@17.0.2+react@17.0.2
       '@typescript-eslint/eslint-plugin': 5.15.0_f2c49ce7d0e93ebcfdb4b7d25b131b28
       '@typescript-eslint/parser': 5.15.0_eslint@8.11.0+typescript@4.6.2
       '@woocommerce/admin-e2e-tests': link:../../packages/js/admin-e2e-tests
@@ -8592,7 +8598,7 @@ packages:
       react-refresh: 0.11.0
       schema-utils: 3.1.1
       source-map: 0.7.3
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_92cb4b81c6b9f71cf92f0bdb85e4210c:
@@ -8975,7 +8981,7 @@ packages:
     peerDependencies:
       '@storybook/addon-actions': '*'
     dependencies:
-      '@storybook/addon-actions': 6.4.19
+      '@storybook/addon-actions': 6.4.19_react-dom@17.0.2+react@17.0.2
       global: 4.4.0
     dev: true
 
@@ -11288,7 +11294,7 @@ packages:
       react-docgen-typescript: 2.2.2_typescript@4.6.2
       tslib: 2.3.1
       typescript: 4.6.2
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -12490,15 +12496,23 @@ packages:
       - react-dom
     dev: true
 
+  /@types/wordpress__compose/4.0.1:
+    resolution: {integrity: sha512-2Czdu9Nyhxn0R7lSl+LwVyzHF+xgP6nuikRDt26VJPLAZhmgE9c/lmB8v8xiby8UGVWj6oKGQDmKda8kvoBWBQ==}
+    dependencies:
+      '@types/lodash': 4.14.180
+      '@types/react': 17.0.40
+      '@wordpress/element': 3.2.0
+    dev: true
+
   /@types/wordpress__data-controls/2.2.0:
     resolution: {integrity: sha512-arDQ6Sds47Lq3ZZwgCrG1QTQjBIJPhv0vpJhv8zWXSINkL/Ourus0k4y+WkgnNT1aSpTSdrISrDlAwwPuy6usw==}
     dependencies:
-      '@types/wordpress__data': 4.6.10
+      '@types/wordpress__data': 6.0.0
       '@wordpress/api-fetch': 5.2.6
     dev: true
 
-  /@types/wordpress__data/4.6.10:
-    resolution: {integrity: sha512-I5p1MnQpx4MM+/nYeThuCfuWXtHPt5zTrCaNPZWVsLQCwpUNMWxddCG4iXbh1uR1teSeEi8OAH6ozNxD1mm81Q==}
+  /@types/wordpress__data/6.0.0:
+    resolution: {integrity: sha512-+J6uLQjhT6zqDgOx4EtqJLMajYFP/thwW+WtZWX/SYZu8e3MqPnc1HaRdz6JGeKpjlpPr4UOpTB2nf/bWKrsGA==}
     dependencies:
       '@types/react': 17.0.40
       redux: 4.1.2
@@ -12510,11 +12524,22 @@ packages:
       '@types/react': 17.0.40
     dev: true
 
+  /@types/wordpress__plugins/3.0.0_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-P/Jkp0e1oLXLN34i5/U6JgBiZGjln6oDkHOLiNGF2yB9l+BkScV4aXQyLmOiib91kUvfGdK3+Pb+skecs474cA==}
+    dependencies:
+      '@types/react': 17.0.40
+      '@types/wordpress__components': 19.3.0_react-dom@17.0.2+react@17.0.2
+      '@wordpress/element': 3.2.0
+    transitivePeerDependencies:
+      - react
+      - react-dom
+    dev: true
+
   /@types/wordpress__rich-text/3.4.6:
     resolution: {integrity: sha512-MeLSATBHrcN3fp8cVylbpx+BKRJ1aootPNtbTblcUAHcuRo6avKu1kaDLxIZb/8YbsD+/3Wm8d1uldeNz9/lhw==}
     dependencies:
       '@types/react': 17.0.40
-      '@types/wordpress__data': 4.6.10
+      '@types/wordpress__data': 6.0.0
     dev: true
 
   /@types/yargs-parser/20.2.1:
@@ -18594,7 +18619,7 @@ packages:
       create-hash: 1.2.0
       inherits: 2.0.4
       ripemd160: 2.0.2
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.1
       sha.js: 2.4.11
 
   /create-require/1.1.1:
@@ -22186,7 +22211,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /file-loader/6.2.0_webpack@5.64.1:
@@ -24026,7 +24051,7 @@ packages:
       pretty-error: 2.1.2
       tapable: 1.1.3
       util.promisify: 1.0.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /html-webpack-plugin/5.5.0_webpack@5.70.0:
@@ -31004,7 +31029,7 @@ packages:
       postcss: 7.0.39
       schema-utils: 3.1.1
       semver: 7.3.5
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /postcss-loader/6.2.0_postcss@8.3.0+webpack@5.64.1:
@@ -32465,7 +32490,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /raw-loader/4.0.2_webpack@5.64.1:
@@ -35421,7 +35446,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /style-loader/2.0.0_webpack@5.70.0:
@@ -36162,7 +36187,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.10.0_acorn@7.4.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - acorn
@@ -36182,7 +36207,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.10.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - acorn
@@ -37387,7 +37412,7 @@ packages:
       loader-utils: 2.0.2
       mime-types: 2.1.34
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /url-parse-lax/1.0.0:
@@ -37928,7 +37953,7 @@ packages:
       mime: 2.5.2
       mkdirp: 0.5.5
       range-parser: 1.2.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
       webpack-log: 2.0.0
     dev: true
 
@@ -38011,7 +38036,7 @@ packages:
     peerDependencies:
       webpack: ^2.0.0 || ^3.0.0 || ^4.0.0
     dependencies:
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /webpack-fix-style-only-entries/0.6.1:
@@ -38195,7 +38220,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5_webpack@4.46.0
       watchpack: 1.7.5
-      webpack-cli: 3.3.12_webpack@5.70.0
+      webpack-cli: 3.3.12_webpack@4.46.0
       webpack-sources: 1.4.3
     dev: true
 
