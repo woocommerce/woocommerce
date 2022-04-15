@@ -75,6 +75,16 @@ class Reviews {
 	}
 
 	/**
+	 * Determines whether the current page is the reviews page.
+	 *
+	 * @return bool
+	 */
+	public function is_reviews_page() : bool {
+		global $pagenow;
+
+		return 'edit.php' === $pagenow && isset( $_GET['page'] ) && 'product-reviews' === $_GET['page'];
+	}
+	/**
 	 * Counts the number of pending product reviews/replies, and returns the notification bubble if there's more than zero.
 	 *
 	 * @return string Empty string if there are no pending reviews, or bubble HTML if there are.
