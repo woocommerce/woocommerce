@@ -9,6 +9,7 @@ on:
       path_to_woo_root:
         required: true
         default: plugins/woocommerce
+        type: string
 
 jobs:
   install-deps:
