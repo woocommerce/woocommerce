@@ -39,19 +39,20 @@ abstract class MetaToMetaTableMigrator {
 
 	public function process_migration_batch_for_ids( $entity_ids ) {
 		global $wpdb;
-		$data_to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
+		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
-		$data_already_migrated = $this->get_already_migrated_records( $entity_ids );
+		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate['data'] ) );
 
-		list( $to_insert, $to_update ) = $this->classify_update_insert_records( $data_to_migrate['data'], $data_already_migrated, $entity_ids );
+		list( $to_insert, $to_update ) = $this->classify_update_insert_records( $to_migrate['data'], $already_migrated );
 
-		$insert_queries = $this->generate_insert_sql_for_batch( $to_insert );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $insert_queries should already be escaped in the generating function.
-		$result = $wpdb->query( $insert_queries );
-		$wpdb->query( 'COMMIT;' );
-		if ( count( $to_insert ) !== $result ) {
-			// TODO: Find and log entity ids that were not inserted.
-			echo 'error';
+		if ( ! empty( $to_insert ) ) {
+			$insert_queries = $this->generate_insert_sql_for_batch( $to_insert );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $insert_queries should already be escaped in the generating function.
+			$result = $wpdb->query( $insert_queries );
+			$wpdb->query( 'COMMIT;' );
+			if ( count( $to_insert ) !== $result ) {
+				// TODO: Find and log entity ids that were not inserted.
+			}
 		}
 
 		if ( empty( $to_update ) ) {
@@ -89,7 +90,7 @@ abstract class MetaToMetaTableMigrator {
 
 		$on_duplicate_key_clause = MigrationHelper::generate_on_duplicate_statement_clause( $columns );
 
-		return "INSERT INTO $table ( `$columns_sql` ) VALUES ( $value_sql ) $on_duplicate_key_clause";
+		return "INSERT INTO $table ( `$columns_sql` ) VALUES $value_sql $on_duplicate_key_clause";
 	}
 
 	/**
@@ -168,8 +169,20 @@ abstract class MetaToMetaTableMigrator {
 			);
 		}
 
+		foreach ( $meta_data_rows as $migrate_row ) {
+			if ( ! isset( $to_migrate[ $migrate_row->entity_id ] ) ) {
+				$to_migrate[ $migrate_row->entity_id ] = array();
+			}
+
+			if ( ! isset( $to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ] ) ) {
+				$to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ] = array();
+			}
+
+			$to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ][] = $migrate_row->meta_value;
+		}
+
 		return array(
-			'data'   => $meta_data_rows,
+			'data'   => $to_migrate,
 			'errors' => array(),
 		);
 	}
@@ -186,7 +199,7 @@ abstract class MetaToMetaTableMigrator {
 		$entity_id_type_placeholder = MigrationHelper::get_wpdb_placeholder_for_type( $this->schema_config['destination']['meta']['entity_id_type'] );
 		$entity_ids_placeholder     = implode( ',', array_fill( 0, count( $entity_ids ), $entity_id_type_placeholder ) );
 
-		return $wpdb->get_results(
+		$data_already_migrated = $wpdb->get_results(
 			$wpdb->prepare(
 				"
 SELECT
@@ -200,23 +213,8 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 				$entity_ids
 			)
 		);
-	}
 
-	private function classify_update_insert_records( $data_to_migrate, $data_already_migrated ) {
-		// All data is ordered by entity_ids, which means we can optimize our processing a bit.
-		$to_migrate       = array();
 		$already_migrated = array();
-		foreach ( $data_to_migrate as $migrate_row ) {
-			if ( ! isset( $to_migrate[ $migrate_row->entity_id ] ) ) {
-				$to_migrate[ $migrate_row->entity_id ] = array();
-			}
-
-			if ( ! isset( $to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ] ) ) {
-				$to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ] = array();
-			}
-
-			$to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ][] = $migrate_row->meta_value;
-		}
 
 		foreach ( $data_already_migrated as $migrate_row ) {
 			if ( ! isset( $already_migrated[ $migrate_row->entity_id ] ) ) {
@@ -232,7 +230,10 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 				'meta_value' => $migrate_row->meta_value
 			);
 		}
+		return $already_migrated;
+	}
 
+	private function classify_update_insert_records( $to_migrate, $already_migrated ) {
 		$to_update = array();
 		$to_insert = array();
 
@@ -253,13 +254,13 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 						}
 						$to_update[ $entity_id ][ $meta_key ] = array(
 							'id'         => $already_migrated[ $entity_id ][ $meta_key ][0]['id'],
-							'meta_value' => $meta_values
+							'meta_value' => $meta_values[0]
 						);
 						continue;
 					}
 
 					// There are multiple meta entries, let's find the unique entries and insert.
-					$unique_meta_values = array_diff( $to_migrate[ $entity_id ][ $meta_key ], $already_migrated[ $entity_id ][ $meta_key ] );
+					$unique_meta_values = array_diff( $meta_values, array_column( $already_migrated[ $entity_id ][ $meta_key ], 'meta_value' ) );
 					if ( 0 === count( $unique_meta_values ) ) {
 						continue;
 					}
