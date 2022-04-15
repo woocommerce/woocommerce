@@ -74,6 +74,33 @@ class TaskLists {
 	}
 
 	/**
+	 * Check if an experiment is the treatment or control.
+	 *
+	 * @param string $name Name prefix of experiment.
+	 * @return bool
+	 */
+	public static function is_experiment_treatment( $name ) {
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking
+		);
+
+		$date = new \DateTime();
+		$date->setTimeZone( new \DateTimeZone( 'UTC' ) );
+
+		$experiment_name = sprintf(
+			'%s_%s_%s',
+			$name,
+			$date->format( 'Y' ),
+			$date->format( 'm' )
+		);
+		return $abtest->get_variation( $experiment_name ) === 'treatment';
+	}
+
+	/**
 	 * Initialize default lists.
 	 */
 	public static function init_default_lists() {
@@ -93,7 +120,8 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ) && ! Features::is_enabled( 'tasklist-setup-experiment-2' ),
+				'visible'      => ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' )
+					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ),
 			)
 		);
 
@@ -117,7 +145,7 @@ class TaskLists {
 				'options'                 => array(
 					'use_completed_title' => true,
 				),
-				'visible'                 => Features::is_enabled( 'tasklist-setup-experiment-1' ),
+				'visible'                 => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
 			)
 		);
 
@@ -138,7 +166,8 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => Features::is_enabled( 'tasklist-setup-experiment-2' ),
+				'visible'      => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' )
+					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
 				'options'      => array(
 					'use_completed_title' => true,
 				),

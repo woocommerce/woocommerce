@@ -11,7 +11,7 @@
 	"scripts": {
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"prebuild": "pnpm run install-if-deps-outdated",
-		"build": "pnpm run build:feature-config && cross-env NODE_ENV=production webpack",
+		"build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"build-storybook": "build-storybook  -c ./storybook/.storybook",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"build:packages": "cross-env NODE_ENV=production pnpm run:packages -- build",
