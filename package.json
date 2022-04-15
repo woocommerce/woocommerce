@@ -48,9 +48,6 @@
 		],
 		"*.scss": [
 			"npm run lint:css"
-		],
-		"*.md": [
-			"npm run lint:md:docs"
 		]
 	}
 }
