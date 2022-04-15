@@ -904,7 +904,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		// Test custom class attribute is honoured.
 		$attr = array( 'class' => 'custom-class' );
-		$this->assertContains( 'class="custom-class"', wc_placeholder_img( 'woocommerce_thumbnail', $attr ) );
+		$this->assertStringContainsString( 'class="custom-class"', wc_placeholder_img( 'woocommerce_thumbnail', $attr ) );
 	}
 
 	/**
@@ -926,10 +926,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $product_types, wc_get_product_types() );
 	}
 
-	/**
-	 * @expectedException WC_Data_Exception
-	 */
 	public function test_wc_product_has_unique_sku() {
+		$this->expectException( WC_Data_Exception::class );
+
 		$product_1 = WC_Helper_Product::create_simple_product();
 
 		$this->assertTrue( wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );

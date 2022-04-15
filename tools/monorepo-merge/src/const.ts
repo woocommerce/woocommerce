@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { dirname } from 'path';
 
 // Escape from ./tools/monorepo-merge/src

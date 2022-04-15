@@ -21,7 +21,7 @@ class CustomOrdersTableController {
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
 	 */
-	const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
+	private const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
 
 	/**
 	 * The data store object to use.
@@ -91,6 +91,38 @@ class CustomOrdersTableController {
 			},
 			999,
 			2
+		);
+
+		add_filter(
+			'updated_option',
+			function( $option, $old_value, $value ) {
+				$this->process_updated_option( $option, $old_value, $value );
+			},
+			999,
+			3
+		);
+
+		add_filter(
+			'pre_update_option',
+			function( $value, $option, $old_value ) {
+				return $this->process_pre_update_option( $option, $old_value, $value );
+			},
+			999,
+			3
+		);
+
+		add_filter(
+			DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION,
+			function() {
+				$this->process_sync_finished();
+			}
+		);
+
+		add_action(
+			'woocommerce_update_options_advanced_custom_data_stores',
+			function() {
+				$this->process_options_updated();
+			}
 		);
 	}
 
@@ -213,6 +245,7 @@ class CustomOrdersTableController {
 		}
 
 		$this->data_synchronizer->create_database_tables();
+		update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 	}
 
 	/**
@@ -258,40 +291,182 @@ class CustomOrdersTableController {
 			return $settings;
 		}
 
-		$title_item = array(
-			'title' => __( 'Custom orders tables', 'woocommerce' ),
-			'type'  => 'title',
-			'desc'  => sprintf(
-				/* translators: %1$s = <strong> tag, %2$s = </strong> tag. */
-				__( '%1$sWARNING:%2$s This feature is currently under development and may cause database instability. For contributors only.', 'woocommerce' ),
-				'<strong>',
-				'</strong>'
-			),
-		);
-
 		if ( $this->data_synchronizer->check_orders_table_exists() ) {
-			$settings[] = $title_item;
+			$settings[] = array(
+				'title' => __( 'Custom orders tables', 'woocommerce' ),
+				'type'  => 'title',
+				'id'    => 'cot-title',
+				'desc'  => sprintf(
+					/* translators: %1$s = <strong> tag, %2$s = </strong> tag. */
+					__( '%1$sWARNING:%2$s This feature is currently under development and may cause database instability. For contributors only.', 'woocommerce' ),
+					'<strong>',
+					'</strong>'
+				),
+			);
+
+			$sync_status     = $this->data_synchronizer->get_sync_status();
+			$sync_is_pending = 0 !== $sync_status['current_pending_count'];
 
 			$settings[] = array(
-				'title'         => __( 'Enable tables usage', 'woocommerce' ),
-				'desc'          => __( 'Use the custom orders tables as the main orders data store.', 'woocommerce' ),
+				'title'         => __( 'Data store for orders', 'woocommerce' ),
 				'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 				'default'       => 'no',
-				'type'          => 'checkbox',
+				'type'          => 'radio',
+				'options'       => array(
+					'yes' => __( 'Use the WooCommerce orders tables', 'woocommerce' ),
+					'no'  => __( 'Use the WordPress posts table', 'woocommerce' ),
+				),
 				'checkboxgroup' => 'start',
+				'disabled'      => $sync_is_pending ? array( 'yes', 'no' ) : array(),
 			);
+
+			if ( $sync_is_pending ) {
+				$initial_pending_count = $sync_status['initial_pending_count'];
+				$current_pending_count = $sync_status['current_pending_count'];
+				if ( $initial_pending_count ) {
+					$text =
+						sprintf(
+							/* translators: %1$s=current number of orders pending sync, %2$s=initial number of orders pending sync */
+							_n( 'There\'s %1$s order (out of a total of %2$s) pending sync!', 'There are %1$s orders (out of a total of %2$s) pending sync!', $current_pending_count, 'woocommerce' ),
+							$current_pending_count,
+							$initial_pending_count
+						);
+				} else {
+					$text =
+						/* translators: %s=initial number of orders pending sync */
+						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
+				}
+
+				if ( $this->data_synchronizer->pending_data_sync_is_in_progress() ) {
+					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
+				} else {
+					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
+				}
+
+				$settings[] = array(
+					'type' => 'info',
+					'id'   => 'cot-out-of-sync-warning',
+					'css'  => 'color: #C00000',
+					'text' => $text,
+				);
+			}
+
+			$settings[] = array(
+				'desc' => __( 'Keep the posts table and the orders tables synchronized', 'woocommerce' ),
+				'id'   => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+				'type' => 'checkbox',
+			);
+
+			if ( $sync_is_pending ) {
+				if ( $this->data_synchronizer->data_sync_is_enabled() ) {
+					$message    = $this->custom_orders_table_usage_is_enabled() ?
+						__( 'Switch to using the posts table as the authoritative data store for orders when sync finishes', 'woocommerce' ) :
+						__( 'Switch to using the orders table as the authoritative data store for orders when sync finishes', 'woocommerce' );
+					$settings[] = array(
+						'desc' => $message,
+						'id'   => DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
+						'type' => 'checkbox',
+					);
+				}
+			}
 		} else {
-			$title_item['desc'] = sprintf(
-				/* translators: %1$s = <em> tag, %2$s = </em> tag. */
-				__( 'Create the tables first by going to %1$sWooCommerce > Status > Tools%2$s and running %1$sCreate the custom orders tables%2$s.', 'woocommerce' ),
-				'<em>',
-				'</em>'
+			$settings[] = array(
+				'title' => __( 'Custom orders tables', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => sprintf(
+					/* translators: %1$s = <em> tag, %2$s = </em> tag. */
+					__( 'Create the tables first by going to %1$sWooCommerce > Status > Tools%2$s and running %1$sCreate the custom orders tables%2$s.', 'woocommerce' ),
+					'<em>',
+					'</em>'
+				),
 			);
-			$settings[] = $title_item;
 		}
 
 		$settings[] = array( 'type' => 'sectionend' );
 
 		return $settings;
+	}
+
+	/**
+	 * Handler for the individual setting updated hook.
+	 *
+	 * @param string $option Setting name.
+	 * @param mixed  $old_value Old value of the setting.
+	 * @param mixed  $value New value of the setting.
+	 */
+	private function process_updated_option( $option, $old_value, $value ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
+			$this->data_synchronizer->cleanup_synchronization_state();
+		}
+	}
+
+	/**
+	 * Handler for the setting pre-update hook.
+	 * We use it to verify that authoritative orders table switch doesn't happen while sync is pending.
+	 *
+	 * @param string $option Setting name.
+	 * @param mixed  $old_value Old value of the setting.
+	 * @param mixed  $value New value of the setting.
+	 *
+	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
+	 */
+	private function process_pre_update_option( $option, $old_value, $value ) {
+		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
+			return $value;
+		}
+
+		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
+		if ( $sync_is_pending ) {
+			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Handler for the synchronization finished hook.
+	 * Here we switch the authoritative table if needed.
+	 */
+	private function process_sync_finished() {
+		if ( $this->auto_flip_authoritative_table_enabled() ) {
+			return;
+		}
+
+		update_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
+
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
+			update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		} else {
+			update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		}
+	}
+
+	/**
+	 * Is the automatic authoritative table switch setting set?
+	 *
+	 * @return bool
+	 */
+	private function auto_flip_authoritative_table_enabled(): bool {
+		return 'yes' === get_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
+	}
+
+	/**
+	 * Handler for the all settings updated hook.
+	 */
+	private function process_options_updated() {
+		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
+
+		// Disabling the sync implies disabling the automatic authoritative table switch too.
+		if ( ! $data_sync_is_enabled && $this->auto_flip_authoritative_table_enabled() ) {
+			update_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
+		}
+
+		// Enabling the sync implies starting it too, if needed.
+		// We do this check here, and not in process_pre_update_option, so that if for some reason
+		// the setting is enabled but no sync is in process, sync will start by just saving the
+		// settings even without modifying them.
+		if ( $data_sync_is_enabled && ! $this->data_synchronizer->pending_data_sync_is_in_progress() ) {
+			$this->data_synchronizer->start_synchronizing_pending_orders();
+		}
 	}
 }

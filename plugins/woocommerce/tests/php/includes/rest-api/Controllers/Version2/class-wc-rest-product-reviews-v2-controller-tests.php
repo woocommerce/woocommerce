@@ -19,7 +19,7 @@ class WC_REST_Product_Reviews_V2_Controller_Test extends WC_REST_Unit_Test_case 
 	 */
 	private $editor_id;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->sut             = new WC_REST_Product_Reviews_V2_Controller();

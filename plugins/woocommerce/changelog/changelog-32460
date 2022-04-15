@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+WC_Product_CSV_Importer_Controller::is_file_valid_csv now just invokes wc_is_file_valid_csv. #32460

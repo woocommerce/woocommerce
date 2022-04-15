@@ -3,11 +3,6 @@
  */
 const { merchant, withRestApi } = require('@woocommerce/e2e-utils');
 
-/**
- * External dependencies
- */
-const { lorem, helpers } = require('faker');
-
 const runAddShippingClassesTest = () => {
 	describe('Merchant can add shipping classes', () => {
 		beforeAll(async () => {
@@ -23,14 +18,14 @@ const runAddShippingClassesTest = () => {
 
 		it('can add shipping classes', async () => {
 			const shippingClassSlug = {
-				name: lorem.words(),
-				slug: lorem.slug(),
-				description: lorem.sentence()
+				name: 'Small Items',
+				slug: 'small-items',
+				description: 'Small items that don\'t cost much to ship.'
 			};
 			const shippingClassNoSlug = {
-				name: lorem.words(3),
+				name: 'Poster Pack',
 				slug: '',
-				description: lorem.sentence()
+				description: ''
 			};
 			const shippingClasses = [shippingClassSlug, shippingClassNoSlug];
 
@@ -53,9 +48,7 @@ const runAddShippingClassesTest = () => {
 			await expect(page).toClick('.wc-shipping-class-save');
 
 			// Set the expected auto-generated slug
-			shippingClassNoSlug.slug = helpers.slugify(
-				shippingClassNoSlug.name
-			);
+			shippingClassNoSlug.slug = 'poster-pack';
 
 			// Verify that the specified shipping classes were saved
 			for (const { name, slug, description } of shippingClasses) {

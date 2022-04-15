@@ -15,7 +15,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.

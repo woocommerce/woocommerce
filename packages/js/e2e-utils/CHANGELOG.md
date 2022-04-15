@@ -15,6 +15,9 @@
 - `merchant.openDownloadLink()` to open the url of a download in a new tab.
 - `merchant.verifyCannotDownloadFromBecause()` to check that a download cannot happen for a specific reason.
 
+## Changed
+- Removed `faker` dependency
+
 # 0.1.7
 
 ## Fixed

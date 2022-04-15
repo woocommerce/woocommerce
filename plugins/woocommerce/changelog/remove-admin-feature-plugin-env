@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pass `WC_ADMIN_PHASE=core` to build commands & remove "plugin" env

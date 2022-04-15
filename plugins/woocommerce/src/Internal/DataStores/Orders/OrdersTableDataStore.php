@@ -17,7 +17,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return string The custom orders table name.
 	 */
-	public function get_orders_table_name() {
+	public static function get_orders_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'wc_orders';
 	}
@@ -27,7 +27,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return string The order addresses table name.
 	 */
-	public function get_addresses_table_name() {
+	public static function get_addresses_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'wc_order_addresses';
 	}
@@ -37,9 +37,19 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return string The orders operational data table name.
 	 */
-	public function get_operational_data_table_name() {
+	public static function get_operational_data_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'wc_order_operational_data';
+	}
+
+	/**
+	 * Get the orders meta data table name.
+	 *
+	 * @return string Name of order meta data table.
+	 */
+	public static function get_meta_table_name() {
+		global $wpdb;
+		return $wpdb->prefix . 'wc_orders_meta';
 	}
 
 	/**
@@ -52,6 +62,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			$this->get_orders_table_name(),
 			$this->get_addresses_table_name(),
 			$this->get_operational_data_table_name(),
+			$this->get_meta_table_name(),
 		);
 	}
 
@@ -185,6 +196,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$orders_table_name           = $this->get_orders_table_name();
 		$addresses_table_name        = $this->get_addresses_table_name();
 		$operational_data_table_name = $this->get_operational_data_table_name();
+		$meta_table                  = $this->get_meta_table_name();
 
 		$sql = "
 CREATE TABLE $orders_table_name (
@@ -234,7 +246,7 @@ CREATE TABLE $operational_data_table_name (
 	woocommerce_version varchar(20) NULL,
 	prices_include_tax tinyint(1) NULL,
 	coupon_usages_are_counted tinyint(1) NULL,
-	download_permissionis_granted tinyint(1) NULL,
+	download_permission_granted tinyint(1) NULL,
 	cart_hash varchar(100) NULL,
 	new_order_email_sent tinyint(1) NULL,
 	order_key varchar(100) NULL,
@@ -242,12 +254,21 @@ CREATE TABLE $operational_data_table_name (
 	date_paid_gmt datetime NULL,
 	date_completed_gmt datetime NULL,
 	shipping_tax_amount decimal(26, 8) NULL,
-	shopping_total_amount decimal(26, 8) NULL,
+	shipping_total_amount decimal(26, 8) NULL,
 	discount_tax_amount decimal(26, 8) NULL,
 	discount_total_amount decimal(26, 8) NULL,
 	KEY order_id (order_id),
 	KEY order_key (order_key)
-);";
+);
+CREATE TABLE $meta_table (
+	id bigint(20) unsigned auto_increment primary key,
+	order_id bigint(20) unsigned null,
+	meta_key varchar(255),
+	meta_value text null,
+	KEY meta_key_value (meta_key, meta_value(100))
+);
+";
+
 		return $sql;
 	}
 }

@@ -57,7 +57,9 @@ export class SettingGroup extends Model {
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof settingGroupRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof settingGroupRESTRepository > {
 		return settingGroupRESTRepository( httpClient );
 	}
 }

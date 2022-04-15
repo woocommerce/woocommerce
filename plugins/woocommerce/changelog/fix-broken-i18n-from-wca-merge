@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Added a temporary filter to patch the WCA JS packages i18n json files #32603

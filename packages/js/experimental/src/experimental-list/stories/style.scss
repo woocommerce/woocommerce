@@ -1,0 +1,23 @@
+.storybook-custom-list {
+	border: 1px solid $gray-400;
+	border-radius: 2px;
+	padding: 0;
+
+	.woocommerce-list__item {
+		&:not(:first-child) {
+			border-top: 1px solid $gray-200;
+		}
+	}
+}
+
+.woocommerce-experimental-list {
+	li {
+		padding-left: 25px;
+		.components-dropdown {
+			div {
+				position: absolute;
+				right: 0;
+			}
+		}
+	}
+}
