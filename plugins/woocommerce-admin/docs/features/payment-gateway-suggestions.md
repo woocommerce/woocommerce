@@ -8,9 +8,9 @@ After merchants click on a recommendation, plugins from this source will then wa
 
 Gateway suggestions are retreived from a REST API and can be added via a remote JSON data source or filtered with the `woocommerce_admin_payment_gateway_suggestion_specs` filter.
 
-To quickly get started with an example plugin, run the following from your `woocommerce-admin` directory:
+To quickly get started with an example plugin, run the following:
 
-`pnpm run example -- --ext=payment-gateway-suggestions`
+`WC_EXT=payment-gateway-suggestions pnpm nx example woocommerce-admin`
 
 This will create a new plugin that when activated will add two new gateway suggestions.  The first is a simple gateway demonstrating how configuration fields can be pulled from the gateway class to create a configuration form.  The second gateway shows a more customized approach via SlotFill.
 
