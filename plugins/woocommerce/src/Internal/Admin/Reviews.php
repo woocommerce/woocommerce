@@ -116,6 +116,14 @@ class Reviews {
 	 */
 	public function get_bulk_action_notice_messages() : array {
 
+		$approved   = isset( $_REQUEST['approved'] ) ? (int) $_REQUEST['approved'] : 0;
+		$unapproved = isset( $_REQUEST['unapproved'] ) ? (int) $_REQUEST['unapproved'] : 0;
+		$deleted    = isset( $_REQUEST['deleted'] ) ? (int) $_REQUEST['deleted'] : 0;
+		$trashed    = isset( $_REQUEST['trashed'] ) ? (int) $_REQUEST['trashed'] : 0;
+		$untrashed  = isset( $_REQUEST['untrashed'] ) ? (int) $_REQUEST['untrashed'] : 0;
+		$spammed    = isset( $_REQUEST['spammed'] ) ? (int) $_REQUEST['spammed'] : 0;
+		$unspammed  = isset( $_REQUEST['unspammed'] ) ? (int) $_REQUEST['unspammed'] : 0;
+
 		$messages = [];
 
 		return $messages;
