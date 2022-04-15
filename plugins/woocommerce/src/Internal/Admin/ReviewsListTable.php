@@ -273,26 +273,25 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @global string $comment_status Status for the current listed comments.
 	 *
-	 * @param WP_Comment $review         The product review or reply in context.
-	 * @param string     $column_name    Current column name.
-	 * @param string     $primary_column Primary column name.
+	 * @param WP_Comment $item        The product review or reply in context.
+	 * @param string     $column_name Current column name.
+	 * @param string     $primary     Primary column name.
 	 * @return string
 	 */
-	protected function handle_row_actions( $review, $column_name, $primary_column ) {
+	protected function handle_row_actions( $item, $column_name, $primary ) {
 		global $comment_status;
 
-		if ( $primary_column !== $column_name || ! $this->current_user_can_edit_review ) {
+		if ( $primary !== $column_name || ! $this->current_user_can_edit_review ) {
 			return '';
 		}
 
-		$review_status = wp_get_comment_status( $review );
-
-		$del_nonce     = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$review->comment_ID" ) );
-		$approve_nonce = esc_html( '_wpnonce=' . wp_create_nonce( "approve-comment_$review->comment_ID" ) );
+		$review_status = wp_get_comment_status( $item );
+		$del_nonce     = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$item->comment_ID" ) );
+		$approve_nonce = esc_html( '_wpnonce=' . wp_create_nonce( "approve-comment_$item->comment_ID" ) );
 
 		$url = add_query_arg(
 			[
-				'c' => urlencode( $review->comment_ID ),
+				'c' => urlencode( $item->comment_ID ),
 			],
 			admin_url( 'comment.php' )
 		);
@@ -323,7 +322,7 @@ class ReviewsListTable extends WP_List_Table {
 				$actions['unapprove'] = sprintf(
 					'<a href="%s" data-wp-lists="%s" class="vim-u vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 					esc_url( $unapprove_url ),
-					esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}:e7e7d3:action=dim-comment&amp;new=unapproved" ),
+					esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:e7e7d3:action=dim-comment&amp;new=unapproved" ),
 					esc_attr__( 'Unapprove this review', 'woocommerce' ),
 					esc_html__( 'Unapprove', 'woocommerce' )
 				);
@@ -331,7 +330,7 @@ class ReviewsListTable extends WP_List_Table {
 				$actions['approve'] = sprintf(
 					'<a href="%s" data-wp-lists="%s" class="vim-a vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 					esc_url( $approve_url ),
-					esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}:e7e7d3:action=dim-comment&amp;new=approved" ),
+					esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:e7e7d3:action=dim-comment&amp;new=approved" ),
 					esc_attr__( 'Approve this review', 'woocommerce' ),
 					esc_html__( 'Approve', 'woocommerce' )
 				);
@@ -340,7 +339,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['approve'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-a aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $approve_url ),
-				esc_attr( "dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=approved" ),
+				esc_attr( "dim:the-comment-list:comment-{$item->comment_ID}:unapproved:e7e7d3:e7e7d3:new=approved" ),
 				esc_attr__( 'Approve this review', 'woocommerce' ),
 				esc_html__( 'Approve', 'woocommerce' )
 			);
@@ -348,7 +347,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['unapprove'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-u aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $unapprove_url ),
-				esc_attr( "dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=unapproved" ),
+				esc_attr( "dim:the-comment-list:comment-{$item->comment_ID}:unapproved:e7e7d3:e7e7d3:new=unapproved" ),
 				esc_attr__( 'Unapprove this review', 'woocommerce' ),
 				esc_html__( 'Unapprove', 'woocommerce' )
 			);
@@ -358,7 +357,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['spam'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-s vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $spam_url ),
-				esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}::spam=1" ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}::spam=1" ),
 				esc_attr__( 'Mark this review as spam', 'woocommerce' ),
 				/* translators: "Mark as spam" link. */
 				esc_html_x( 'Spam', 'verb', 'woocommerce' )
@@ -367,7 +366,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['unspam'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $unspam_url ),
-				esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}:66cc66:unspam=1" ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:66cc66:unspam=1" ),
 				esc_attr__( 'Restore this review from the spam', 'woocommerce' ),
 				esc_html_x( 'Not Spam', 'review', 'woocommerce' )
 			);
@@ -377,7 +376,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['untrash'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $untrash_url ),
-				esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}:66cc66:untrash=1" ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:66cc66:untrash=1" ),
 				esc_attr__( 'Restore this review from the Trash', 'woocommerce' ),
 				esc_html__( 'Restore', 'woocommerce' )
 			);
@@ -387,7 +386,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['delete'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $delete_url ),
-				esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}::delete=1" ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}::delete=1" ),
 				esc_attr__( 'Delete this review permanently', 'woocommerce' ),
 				esc_html__( 'Delete Permanently', 'woocommerce' )
 			);
@@ -395,7 +394,7 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['trash'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $trash_url ),
-				esc_attr( "delete:the-comment-list:comment-{$review->comment_ID}::trash=1" ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}::trash=1" ),
 				esc_attr__( 'Move this review to the Trash', 'woocommerce' ),
 				esc_html_x( 'Trash', 'verb', 'woocommerce' )
 			);
@@ -408,7 +407,7 @@ class ReviewsListTable extends WP_List_Table {
 					add_query_arg(
 						[
 							'action' => 'editcomment',
-							'c'      => urlencode( $review->comment_ID ),
+							'c'      => urlencode( $item->comment_ID ),
 						],
 						admin_url( 'comment.php' )
 					)
@@ -421,8 +420,8 @@ class ReviewsListTable extends WP_List_Table {
 
 			$actions['quickedit'] = sprintf(
 				$format,
-				esc_attr( $review->comment_ID ),
-				esc_attr( $review->comment_post_ID ),
+				esc_attr( $item->comment_ID ),
+				esc_attr( $item->comment_post_ID ),
 				'edit',
 				'vim-q comment-inline',
 				esc_attr__( 'Quick edit this review inline', 'woocommerce' ),
@@ -431,8 +430,8 @@ class ReviewsListTable extends WP_List_Table {
 
 			$actions['reply'] = sprintf(
 				$format,
-				esc_attr( $review->comment_ID ),
-				esc_attr( $review->comment_post_ID ),
+				esc_attr( $item->comment_ID ),
+				esc_attr( $item->comment_post_ID ),
 				'replyto',
 				'vim-r comment-inline',
 				esc_attr__( 'Reply to this review', 'woocommerce' ),
@@ -441,7 +440,7 @@ class ReviewsListTable extends WP_List_Table {
 		}
 
 		/** This filter is documented in wp-admin/includes/dashboard.php */
-		$actions = apply_filters( 'comment_row_actions', array_filter( $actions ), $review );
+		$actions = apply_filters( 'comment_row_actions', array_filter( $actions ), $item );
 
 		$always_visible = 'excerpt' === get_user_setting( 'posts_list_mode', 'list' );
 
@@ -461,7 +460,7 @@ class ReviewsListTable extends WP_List_Table {
 			if ( ( 'reply' === $action || 'quickedit' === $action ) && ! wp_doing_ajax() ) {
 				$action .= ' hide-if-no-js';
 			} elseif ( ( 'untrash' === $action && 'trash' === $review_status ) || ( 'unspam' === $action && 'spam' === $review_status ) ) {
-				if ( '1' === get_comment_meta( $review->comment_ID, '_wp_trash_meta_status', true ) ) {
+				if ( '1' === get_comment_meta( $item->comment_ID, '_wp_trash_meta_status', true ) ) {
 					$action .= ' approve';
 				} else {
 					$action .= ' unapprove';
