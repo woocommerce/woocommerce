@@ -34,6 +34,11 @@ class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
 				),
+				'entity' => array(
+					'table_name'       => $this->table_names['orders'],
+					'source_id_column' => 'post_id',
+					'id_column'        => 'id',
+				),
 				'excluded_keys' => $this->excluded_columns,
 			),
 			'destination' => array(
@@ -43,11 +48,7 @@ class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
 					'entity_id_type'    => 'int',
-				),
-				'entity' => array(
-					'table_name'       => $this->table_names['orders'],
-					'source_id_column' => 'post_id',
-					'id_column'        => 'id',
+					'meta_id_column'    => 'id'
 				),
 			),
 		);
