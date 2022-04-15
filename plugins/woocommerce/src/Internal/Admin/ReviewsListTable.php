@@ -621,11 +621,18 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
-		echo esc_html(
-			'review' === $item->comment_type ?
-			'&#9734;&nbsp;' . __( 'Review', 'woocommerce' ) :
-			__( 'Reply', 'woocommerce' )
-		);
+
+		$type = 'review' === $item->comment_type
+			? '&#9734;&nbsp;' . __( 'Review', 'woocommerce' )
+			: __( 'Reply', 'woocommerce' );
+
+		/**
+		 * Filters the type column content.
+		 *
+		 * @param string     $type Type column content.
+		 * @param WP_Comment $item Review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_column_type', esc_html( $type ), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
