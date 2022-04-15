@@ -30,6 +30,7 @@ const FrontendBlock = ( {
 			createErrorNotice( decodeEntities( error.message ), {
 				isDismissible: true,
 				id: error.code,
+				context: 'wc/cart',
 			} );
 		} );
 	}, [ createErrorNotice, cartItemErrors ] );
