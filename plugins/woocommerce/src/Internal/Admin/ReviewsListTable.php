@@ -320,7 +320,7 @@ class ReviewsListTable extends WP_List_Table {
 					$unapprove_url,
 					"delete:the-comment-list:comment-{$review->comment_ID}:e7e7d3:action=dim-comment&amp;new=unapproved",
 					esc_attr__( 'Unapprove this review', 'woocommerce' ),
-					__( 'Unapprove', 'woocommerce' )
+					esc_html__( 'Unapprove', 'woocommerce' )
 				);
 			} elseif ( 'unapproved' === $review_status ) {
 				$actions['approve'] = sprintf(
@@ -328,7 +328,7 @@ class ReviewsListTable extends WP_List_Table {
 					$approve_url,
 					"delete:the-comment-list:comment-{$review->comment_ID}:e7e7d3:action=dim-comment&amp;new=approved",
 					esc_attr__( 'Approve this review', 'woocommerce' ),
-					__( 'Approve', 'woocommerce' )
+					esc_html__( 'Approve', 'woocommerce' )
 				);
 			}
 		} else {
@@ -337,7 +337,7 @@ class ReviewsListTable extends WP_List_Table {
 				$approve_url,
 				"dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=approved",
 				esc_attr__( 'Approve this review', 'woocommerce' ),
-				__( 'Approve', 'woocommerce' )
+				esc_html__( 'Approve', 'woocommerce' )
 			);
 
 			$actions['unapprove'] = sprintf(
@@ -345,7 +345,7 @@ class ReviewsListTable extends WP_List_Table {
 				$unapprove_url,
 				"dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=unapproved",
 				esc_attr__( 'Unapprove this review', 'woocommerce' ),
-				__( 'Unapprove', 'woocommerce' )
+				esc_html__( 'Unapprove', 'woocommerce' )
 			);
 		}
 
@@ -356,7 +356,7 @@ class ReviewsListTable extends WP_List_Table {
 				"delete:the-comment-list:comment-{$review->comment_ID}::spam=1",
 				esc_attr__( 'Mark this review as spam', 'woocommerce' ),
 				/* translators: "Mark as spam" link. */
-				_x( 'Spam', 'verb', 'woocommerce' )
+				esc_html_x( 'Spam', 'verb', 'woocommerce' )
 			);
 		} else {
 			$actions['unspam'] = sprintf(
@@ -364,7 +364,7 @@ class ReviewsListTable extends WP_List_Table {
 				$unspam_url,
 				"delete:the-comment-list:comment-{$review->comment_ID}:66cc66:unspam=1",
 				esc_attr__( 'Restore this review from the spam', 'woocommerce' ),
-				_x( 'Not Spam', 'review', 'woocommerce' )
+				esc_html_x( 'Not Spam', 'review', 'woocommerce' )
 			);
 		}
 
@@ -374,7 +374,7 @@ class ReviewsListTable extends WP_List_Table {
 				$untrash_url,
 				"delete:the-comment-list:comment-{$review->comment_ID}:66cc66:untrash=1",
 				esc_attr__( 'Restore this review from the Trash', 'woocommerce' ),
-				__( 'Restore', 'woocommerce' )
+				esc_html__( 'Restore', 'woocommerce' )
 			);
 		}
 
@@ -384,7 +384,7 @@ class ReviewsListTable extends WP_List_Table {
 				$delete_url,
 				"delete:the-comment-list:comment-{$review->comment_ID}::delete=1",
 				esc_attr__( 'Delete this review permanently', 'woocommerce' ),
-				__( 'Delete Permanently', 'woocommerce' )
+				esc_html__( 'Delete Permanently', 'woocommerce' )
 			);
 		} else {
 			$actions['trash'] = sprintf(
@@ -392,7 +392,7 @@ class ReviewsListTable extends WP_List_Table {
 				$trash_url,
 				"delete:the-comment-list:comment-{$review->comment_ID}::trash=1",
 				esc_attr__( 'Move this review to the Trash', 'woocommerce' ),
-				_x( 'Trash', 'verb', 'woocommerce' )
+				esc_html_x( 'Trash', 'verb', 'woocommerce' )
 			);
 		}
 
@@ -401,29 +401,29 @@ class ReviewsListTable extends WP_List_Table {
 				'<a href="%s" aria-label="%s">%s</a>',
 				"comment.php?action=editcomment&amp;c={$review->comment_ID}",
 				esc_attr__( 'Edit this review', 'woocommerce' ),
-				__( 'Edit', 'woocommerce' )
+				esc_html__( 'Edit', 'woocommerce' )
 			);
 
 			$format = '<button type="button" data-comment-id="%d" data-post-id="%d" data-action="%s" class="%s button-link" aria-expanded="false" aria-label="%s">%s</button>';
 
 			$actions['quickedit'] = sprintf(
 				$format,
-				$review->comment_ID,
-				$review->comment_post_ID,
+				esc_attr( $review->comment_ID ),
+				esc_attr( $review->comment_post_ID ),
 				'edit',
 				'vim-q comment-inline',
 				esc_attr__( 'Quick edit this review inline', 'woocommerce' ),
-				__( 'Quick&nbsp;Edit', 'woocommerce' )
+				esc_html__( 'Quick Edit', 'woocommerce' )
 			);
 
 			$actions['reply'] = sprintf(
 				$format,
-				$review->comment_ID,
-				$review->comment_post_ID,
+				esc_attr( $review->comment_ID ),
+				esc_attr( $review->comment_post_ID ),
 				'replyto',
 				'vim-r comment-inline',
 				esc_attr__( 'Reply to this review', 'woocommerce' ),
-				__( 'Reply', 'woocommerce' )
+				esc_html__( 'Reply', 'woocommerce' )
 			);
 		}
 
@@ -460,7 +460,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		$output .= '</div>';
 
-		$output .= '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details', 'woocommerce' ) . '</span></button>';
+		$output .= '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details', 'woocommerce' ) . '</span></button>';
 
 		return $output;
 	}
