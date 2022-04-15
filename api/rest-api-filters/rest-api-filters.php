@@ -61,12 +61,6 @@ class WCA_Test_Helper_Rest_Api_Filters {
         $dot_notation = $request->get_param('dot_notation');
         $replacement = $request->get_param('replacement');
 
-        if ($replacement === 'false' ) {
-            $replacement = false;
-        } else if ($replacement === 'true' ) {
-            $replacement = true;
-        }
-
         self::update(
             function ( $filters ) use (
                 $endpoint,
@@ -76,7 +70,7 @@ class WCA_Test_Helper_Rest_Api_Filters {
                 $filters[] = array(
                 'endpoint' => $endpoint,
                 'dot_notation' => $dot_notation,
-                'replacement' => $replacement,
+                'replacement' => filter_var( $replacement, FILTER_VALIDATE_BOOLEAN ),
                 'enabled' => true,
                 );
                 return $filters;
