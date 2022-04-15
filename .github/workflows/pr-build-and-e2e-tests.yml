@@ -75,6 +75,9 @@ jobs:
       - name: current location
         run: ls
 
+      - name: which pnpm
+        run: which pnpm
+
       - name: Load docker images and start containers.
         working-directory: package/woocommerce/plugins/woocommerce
         run: pnpm exec wc-e2e docker:up
