@@ -3,8 +3,6 @@ on: pull_request
 jobs:
   install-deps:
     uses: ./.github/workflows/reusable-install-deps.yml
-    with:
-      path_to_woo_root: code/woocommerce
 
   build:
     name: Build zip for PR
@@ -71,9 +69,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            code/woocommerce/node_modules
-            code/woocommerce/vendor
-          key: ${{ runner.os }}-install-deps-${{ hashFiles('code/woocommerce/package-lock.json', 'code/woocommerce/composer.lock') }}
+            ./woo-cache/node_modules
+            ./woo-cache/vendor
+          key: ${{ runner.os }}-install-deps-${{ hashFiles('./woo-cache/package-lock.json', './woo-cache/composer.lock') }}
+
+      - name: Copy cache into Woo
+        run: cp -R ./woo-cache/node_modules ./code/woocommerce && cp -R ./woo-cache/vendor ./code/woocommerce
 
       - name: check dir
         run: ls code/woocommerce
