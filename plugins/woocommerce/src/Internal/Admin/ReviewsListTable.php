@@ -459,6 +459,8 @@ class ReviewsListTable extends WP_List_Table {
 			$author_avatar = '';
 		}
 
+		ob_start();
+
 		echo '<strong>' . $author_avatar; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		comment_author();
 		echo '</strong><br>';
@@ -501,6 +503,14 @@ class ReviewsListTable extends WP_List_Table {
 			<?php
 
 		endif;
+
+		/**
+		 * Filters the product review author column content.
+		 *
+		 * @param string     $content The content of the column.
+		 * @param WP_Comment $item    The review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_column_author', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
