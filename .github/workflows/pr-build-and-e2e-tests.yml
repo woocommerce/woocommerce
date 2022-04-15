@@ -60,11 +60,23 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies
+            - name: Install PNPM
               working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
-                  pnpm install
+
+            - name: Cache dependencies
+              id: cache-deps
+              uses: actions/cache@v3
+              with:
+                path: |
+                  **/vendor
+                  **/node_modules
+                key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json', '**/composer.lock') }}
+
+            - name: Install npm deps
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm install
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
