@@ -6,6 +6,9 @@ on:
         required: false
         default: ./
         type: string
+      path_to_woo_root:
+        required: true
+        default: plugins/woocommerce
 
 jobs:
   install-deps:
@@ -25,10 +28,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            /usr/local/bin/pnpm
-            plugins/woocommerce/node_modules
-            plugins/woocommerce/vendor
-          key: ${{ runner.os }}-install-deps-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
+            ${{ inputs.path_to_woo_root }}/node_modules
+            ${{ inputs.path_to_woo_root }}/vendor
+          key: ${{ runner.os }}-install-deps-${{ hashFiles('${{ inputs.path_to_woo_root }}/package-lock.json', '${{ inputs.path_to_woo_root }}/composer.lock') }}
 
       - name: Install node dependencies
         working-directory: ${{ inputs.working_directory }}

@@ -3,6 +3,8 @@ on: pull_request
 jobs:
   install-deps:
     uses: ./.github/workflows/reusable-install-deps.yml
+    with:
+      path_to_woo_root: code/woocommerce
 
   build:
     name: Build zip for PR
@@ -69,13 +71,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            /usr/local/bin/pnpm
-            plugins/woocommerce/node_modules
-            plugins/woocommerce/vendor
-          key: ${{ runner.os }}-install-deps-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
+            code/woocommerce/node_modules
+            code/woocommerce/vendor
+          key: ${{ runner.os }}-install-deps-${{ hashFiles('code/woocommerce/package-lock.json', 'code/woocommerce/composer.lock') }}
 
       - name: check dir
-        run: ls plugins/woocommerce
+        run: ls code/woocommerce
 
       - name: Install PNPM
         run: npm install -g pnpm
