@@ -556,6 +556,8 @@ class ReviewsListTable extends WP_List_Table {
 			get_comment_date( __( 'g:i a', 'woocommerce' ), $item )
 		);
 
+		ob_start();
+
 		?>
 		<div class="submitted-on">
 			<?php
@@ -573,6 +575,14 @@ class ReviewsListTable extends WP_List_Table {
 			?>
 		</div>
 		<?php
+
+		/**
+		 * Filters the product review date column content.
+		 *
+		 * @param string     $content The review date column content.
+		 * @param WP_Comment $item    The review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_column_date', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -585,34 +595,44 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_response() {
 		$product_post = get_post();
 
-		if ( ! $product_post ) {
-			return;
-		}
+		ob_start();
 
-		?>
-		<div class="response-links">
-			<?php
-
-			if ( current_user_can( 'edit_product', $product_post->ID ) ) :
-				$post_link  = "<a href='" . esc_url( get_edit_post_link( $product_post->ID ) ) . "' class='comments-edit-item-link'>";
-				$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
-			else :
-				$post_link = esc_html( get_the_title( $product_post->ID ) );
-			endif;
-
-			echo $post_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
-			$post_type_object = get_post_type_object( $product_post->post_type );
+		if ( $product_post ) :
 
 			?>
-			<a href="<?php echo esc_url( get_permalink( $product_post->ID ) ); ?>" class="comments-view-item-link">
-				<?php echo esc_html( $post_type_object->labels->view_item ); ?>
-			</a>
-			<span class="post-com-count-wrapper post-com-count-<?php echo esc_attr( $product_post->ID ); ?>">
-				<?php $this->comments_bubble( $product_post->ID, get_pending_comments_num( $product_post->ID ) ); ?>
-			</span>
-		</div>
-		<?php
+			<div class="response-links">
+				<?php
+
+				if ( current_user_can( 'edit_product', $product_post->ID ) ) :
+					$post_link  = "<a href='" . esc_url( get_edit_post_link( $product_post->ID ) ) . "' class='comments-edit-item-link'>";
+					$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
+				else :
+					$post_link = esc_html( get_the_title( $product_post->ID ) );
+				endif;
+
+				echo $post_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+				$post_type_object = get_post_type_object( $product_post->post_type );
+
+				?>
+				<a href="<?php echo esc_url( get_permalink( $product_post->ID ) ); ?>" class="comments-view-item-link">
+					<?php echo esc_html( $post_type_object->labels->view_item ); ?>
+				</a>
+				<span class="post-com-count-wrapper post-com-count-<?php echo esc_attr( $product_post->ID ); ?>">
+					<?php $this->comments_bubble( $product_post->ID, get_pending_comments_num( $product_post->ID ) ); ?>
+				</span>
+			</div>
+			<?php
+
+		endif;
+
+		/**
+		 * Filters the product review response column content.
+		 *
+		 * @param string     $content The response column content.
+		 * @param WP_Comment $item    The review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_column_response', ob_get_clean(), get_comment() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -663,7 +683,7 @@ class ReviewsListTable extends WP_List_Table {
 		}
 
 		/**
-		 * Filters the review rating column content.
+		 * Filters the product review rating column content.
 		 *
 		 * @param string     $content Review rating column content.
 		 * @param WP_Comment $item    Review or reply being rendered.
