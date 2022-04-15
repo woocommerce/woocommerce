@@ -62,6 +62,8 @@ jobs:
         run: |
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+      - name: pre check
+        run: ls && ls plugins
 
       - name: Restore cache dependencies
         uses: actions/cache@v3
@@ -72,11 +74,11 @@ jobs:
             plugins/woocommerce/vendor
           key: ${{ runner.os }}-install-deps-${{ hashFiles('plugins/woocommerce/package-lock.json', 'plugins/woocommerce/composer.lock') }}
 
-      - name: current location
-        run: ls
+      - name: check dir
+        run: ls plugins/woocommerce
 
-      - name: which pnpm
-        run: which pnpm
+      - name: Install PNPM
+        run: npm install -g pnpm
 
       - name: Load docker images and start containers.
         working-directory: package/woocommerce/plugins/woocommerce
