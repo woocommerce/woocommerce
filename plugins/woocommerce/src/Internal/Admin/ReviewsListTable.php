@@ -401,7 +401,10 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	protected function column_comment( $item ) {
+
 		$in_reply_to = $this->get_in_reply_to_review_text( $item );
+
+		ob_start();
 
 		if ( $in_reply_to ) {
 			echo $in_reply_to . '<br><br>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -413,6 +416,14 @@ class ReviewsListTable extends WP_List_Table {
 			get_comment_text( $item->comment_ID ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			'</div>'
 		);
+
+		/**
+		 * Filters the review content column.
+		 *
+		 * @param string     $content Review or reply content.
+		 * @param WP_Comment $item    Review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_column_comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
