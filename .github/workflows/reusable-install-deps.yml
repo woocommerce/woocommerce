@@ -33,6 +33,9 @@ jobs:
             ${{ inputs.path_to_woo_root }}/vendor
           key: ${{ runner.os }}-install-deps-${{ hashFiles('${{ inputs.path_to_woo_root }}/package-lock.json', '${{ inputs.path_to_woo_root }}/composer.lock') }}
 
+      - name: Install PNPM
+        run: npm install pnpm -g
+
       - name: Install node dependencies
         working-directory: ${{ inputs.working_directory }}
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
