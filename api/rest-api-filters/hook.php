@@ -1,6 +1,6 @@
 <?php
 
-$filters = get_option(WCA_Test_Helper_Rest_Api_Filters::WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION);
+$filters = get_option(WCA_Test_Helper_Rest_Api_Filters::WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION, [] );
 
 function array_dot_set( &$array, $key, $value ) {
     if ( is_null( $key ) ) {
