@@ -14,7 +14,6 @@ module.exports = {
 			'jest-html-reporters',
 			{ publicPath: './reports/e2e', filename: 'index.html' },
 		],
-		'<rootDir>/tests/e2e/config/performance-reporter.js',
 	],
 
 	testEnvironment: '<rootDir>/tests/e2e/config/environment.js',
@@ -32,5 +31,6 @@ module.exports = {
 		'expect-puppeteer',
 	],
 
+	testPathIgnorePatterns: [ '<rootDir>/tests/e2e/specs/performance' ],
 	transformIgnorePatterns: [ 'node_modules/(?!(woocommerce)/)' ],
 };
