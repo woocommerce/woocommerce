@@ -41,6 +41,8 @@ class Reviews {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
+
+		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
 	/**
