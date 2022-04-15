@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
+use stdClass;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -1280,48 +1281,34 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
-	 * @dataProvider provider_column_default
+	 * Tests that it will trigger an action hook on custom columns.
 	 *
-	 * @param callable|null $hook_callback   Optional callback to add to the action.
-	 * @param string        $expected_output Expected output from the method.
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_column_default( ?callable $hook_callback, string $expected_output ) {
+	public function test_column_default() {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
 		$method->setAccessible( true );
 
-		$comment = new \WP_Comment(
-			(object) [
-				'comment_ID' => '123',
-			]
-		);
+		$review = $this->factory()->comment->create_and_get();
 
-		if ( ! empty( $hook_callback ) ) {
-			add_action( 'woocommerce_product_reviews_table_custom_column', $hook_callback, 10, 2 );
-		} else {
-			remove_all_actions( 'woocommerce_product_reviews_table_custom_column' );
-		}
+		add_action(
+			'woocommerce_product_reviews_table_custom_column',
+			static function( $review ) {
+				echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
+			},
+			10,
+			2
+		);
 
 		ob_start();
 
-		$method->invoke( $list_table, $comment, 'column-name' );
+		$method->invokeArgs( $list_table, [ $review, 'custom_column' ] );
 
-		$this->assertSame( $expected_output, ob_get_clean() );
-	}
-
-	/** @see test_column_default */
-	public function provider_column_default() : Generator {
-		yield 'no callback' => [ null, '' ];
-
-		yield 'custom callback' => [
-			'hook_callback' => static function ( $column_name, $review_id ) {
-				echo 'Column name: ' . $column_name . ' for ID ' . $review_id . '.'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			},
-			'expected_output' => 'Column name: column-name for ID 123.',
-		];
+		$this->assertSame( 'Custom content for "custom_column" for ID ' . $review->comment_ID, ob_get_clean() );
 	}
 
 	/**

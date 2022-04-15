@@ -636,19 +636,32 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_rating( $item ) {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
 
+		ob_start();
+
 		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
 			$rating = (int) $rating;
+
 			$accessibility_label = sprintf(
 				/* translators: 1: number representing a rating */
 				__( '%1$s out of 5', 'woocommerce' ),
 				$rating
 			);
+
 			$stars = str_repeat( '&#9733;', $rating );
 			$stars .= str_repeat( '&#9734;', 5 - $rating );
+
 			?>
 			<span aria-label="<?php echo esc_attr( $accessibility_label ); ?>"><?php echo esc_html( $stars ); ?></span>
 			<?php
 		}
+
+		/**
+		 * Filters the review rating column content.
+		 *
+		 * @param string     $content Review rating column content.
+		 * @param WP_Comment $item    Review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_column_rating', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -660,12 +673,12 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_default( $item, $column_name ) {
 		/**
 		 * Fires when the default column output is displayed for a single row.
+		 *
 		 * This action can be used to render custom columns that have been added.
 		 *
-		 * @param string $column_name The custom column's name.
-		 * @param string $comment_id  The review ID as a numeric string.
+		 * @param string $comment_id The review or reply ID as a numeric string.
 		 */
-		do_action( 'woocommerce_product_reviews_table_custom_column', $column_name, $item->comment_ID );
+		do_action( 'woocommerce_product_reviews_table_' . $column_name, $item );
 	}
 
 	/**
