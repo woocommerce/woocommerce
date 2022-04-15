@@ -116,7 +116,7 @@ class Reviews {
 	 *
 	 * @return array
 	 */
-	public function get_bulk_action_notice_messages() : array {
+	protected function get_bulk_action_notice_messages() : array {
 
 		$approved   = isset( $_REQUEST['approved'] ) ? (int) $_REQUEST['approved'] : 0;
 		$unapproved = isset( $_REQUEST['unapproved'] ) ? (int) $_REQUEST['unapproved'] : 0;
@@ -167,6 +167,7 @@ class Reviews {
 
 		return $messages;
 	}
+
 	/**
 	 * Counts the number of pending product reviews/replies, and returns the notification bubble if there's more than zero.
 	 *
