@@ -394,13 +394,7 @@ class ReviewsListTable extends WP_List_Table {
 			<?php
 		}
 
-		/**
-		 * Filters the content of the product review checkbox column.
-		 *
-		 * @param string     $content The content of the checkbox column.
-		 * @param WP_Comment $item    Review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_colum_cb', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'cb', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -428,13 +422,7 @@ class ReviewsListTable extends WP_List_Table {
 			'</div>'
 		);
 
-		/**
-		 * Filters the review content column.
-		 *
-		 * @param string     $content Review or reply content.
-		 * @param WP_Comment $item    Review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_column_comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -526,13 +514,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		endif;
 
-		/**
-		 * Filters the product review author column content.
-		 *
-		 * @param string     $content The content of the column.
-		 * @param WP_Comment $item    The review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_column_author', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'author', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -608,13 +590,7 @@ class ReviewsListTable extends WP_List_Table {
 		</div>
 		<?php
 
-		/**
-		 * Filters the product review date column content.
-		 *
-		 * @param string     $content The review date column content.
-		 * @param WP_Comment $item    The review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_column_date', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'date', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -622,9 +598,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::column_response() for consistency.
 	 *
+	 * @param WP_Comment $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_response() {
+	protected function column_response( $item ) {
 		$product_post = get_post();
 
 		ob_start();
@@ -658,13 +635,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		endif;
 
-		/**
-		 * Filters the product review response column content.
-		 *
-		 * @param string     $content The response column content.
-		 * @param WP_Comment $item    The review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_column_response', ob_get_clean(), get_comment() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'response', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -678,13 +649,7 @@ class ReviewsListTable extends WP_List_Table {
 			? '&#9734;&nbsp;' . __( 'Review', 'woocommerce' )
 			: __( 'Reply', 'woocommerce' );
 
-		/**
-		 * Filters the type column content.
-		 *
-		 * @param string     $type Type column content.
-		 * @param WP_Comment $item Review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_column_type', esc_html( $type ), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'type', esc_html( $type ), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -714,13 +679,7 @@ class ReviewsListTable extends WP_List_Table {
 			<?php
 		}
 
-		/**
-		 * Filters the product review rating column content.
-		 *
-		 * @param string     $content Review rating column content.
-		 * @param WP_Comment $item    Review or reply being rendered.
-		 */
-		echo apply_filters( 'woocommerce_product_reviews_table_column_rating', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->filter_column_output( 'rating', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -730,14 +689,38 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
+
+		ob_start();
+
 		/**
 		 * Fires when the default column output is displayed for a single row.
 		 *
 		 * This action can be used to render custom columns that have been added.
 		 *
-		 * @param string $comment_id The review or reply ID as a numeric string.
+		 * @param WP_Comment $item The review or reply being rendered.
 		 */
 		do_action( 'woocommerce_product_reviews_table_column_' . $column_name, $item );
+
+		echo $this->filter_column_output( $column_name, ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Runs a filter hook for a given column content.
+	 *
+	 * @param string     $column_name The column being output.
+	 * @param string     $output      The output content (may include HTML).
+	 * @param WP_Comment $item        The review or reply being rendered.
+	 * @return string
+	 */
+	protected function filter_column_output( $column_name, $output, $item ) {
+
+		/**
+		 * Filters the output of a column.
+		 *
+		 * @param string     $output The column output.
+		 * @param WP_Comment $item   The product review being rendered.
+		 */
+		return apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name, $output, $item );
 	}
 
 	/**
