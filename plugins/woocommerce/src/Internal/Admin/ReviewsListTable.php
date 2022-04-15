@@ -290,7 +290,12 @@ class ReviewsListTable extends WP_List_Table {
 		$del_nonce     = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$review->comment_ID" ) );
 		$approve_nonce = esc_html( '_wpnonce=' . wp_create_nonce( "approve-comment_$review->comment_ID" ) );
 
-		$url = "comment.php?c=$review->comment_ID";
+		$url = add_query_arg(
+			[
+				'c' => urlencode( $review->comment_ID ),
+			],
+			admin_url( 'comment.php' )
+		);
 
 		$approve_url   = $url . "&action=approvecomment&$approve_nonce";
 		$unapprove_url = $url . "&action=unapprovecomment&$approve_nonce";
