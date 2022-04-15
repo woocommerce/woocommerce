@@ -292,13 +292,13 @@ class ReviewsListTable extends WP_List_Table {
 
 		$url = "comment.php?c=$review->comment_ID";
 
-		$approve_url   = esc_url( $url . "&action=approvecomment&$approve_nonce" );
-		$unapprove_url = esc_url( $url . "&action=unapprovecomment&$approve_nonce" );
-		$spam_url      = esc_url( $url . "&action=spamcomment&$del_nonce" );
-		$unspam_url    = esc_url( $url . "&action=unspamcomment&$del_nonce" );
-		$trash_url     = esc_url( $url . "&action=trashcomment&$del_nonce" );
-		$untrash_url   = esc_url( $url . "&action=untrashcomment&$del_nonce" );
-		$delete_url    = esc_url( $url . "&action=deletecomment&$del_nonce" );
+		$approve_url   = $url . "&action=approvecomment&$approve_nonce";
+		$unapprove_url = $url . "&action=unapprovecomment&$approve_nonce";
+		$spam_url      = $url . "&action=spamcomment&$del_nonce";
+		$unspam_url    = $url . "&action=unspamcomment&$del_nonce";
+		$trash_url     = $url . "&action=trashcomment&$del_nonce";
+		$untrash_url   = $url . "&action=untrashcomment&$del_nonce";
+		$delete_url    = $url . "&action=deletecomment&$del_nonce";
 
 		$actions = [
 			'approve'   => '',
@@ -317,7 +317,7 @@ class ReviewsListTable extends WP_List_Table {
 			if ( 'approved' === $review_status ) {
 				$actions['unapprove'] = sprintf(
 					'<a href="%s" data-wp-lists="%s" class="vim-u vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-					$unapprove_url,
+					esc_url( $unapprove_url ),
 					"delete:the-comment-list:comment-{$review->comment_ID}:e7e7d3:action=dim-comment&amp;new=unapproved",
 					esc_attr__( 'Unapprove this review', 'woocommerce' ),
 					esc_html__( 'Unapprove', 'woocommerce' )
@@ -325,7 +325,7 @@ class ReviewsListTable extends WP_List_Table {
 			} elseif ( 'unapproved' === $review_status ) {
 				$actions['approve'] = sprintf(
 					'<a href="%s" data-wp-lists="%s" class="vim-a vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-					$approve_url,
+					esc_url( $approve_url ),
 					"delete:the-comment-list:comment-{$review->comment_ID}:e7e7d3:action=dim-comment&amp;new=approved",
 					esc_attr__( 'Approve this review', 'woocommerce' ),
 					esc_html__( 'Approve', 'woocommerce' )
@@ -334,7 +334,7 @@ class ReviewsListTable extends WP_List_Table {
 		} else {
 			$actions['approve'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-a aria-button-if-js" aria-label="%s">%s</a>',
-				$approve_url,
+				esc_url( $approve_url ),
 				"dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=approved",
 				esc_attr__( 'Approve this review', 'woocommerce' ),
 				esc_html__( 'Approve', 'woocommerce' )
@@ -342,7 +342,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$actions['unapprove'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-u aria-button-if-js" aria-label="%s">%s</a>',
-				$unapprove_url,
+				esc_url( $unapprove_url ),
 				"dim:the-comment-list:comment-{$review->comment_ID}:unapproved:e7e7d3:e7e7d3:new=unapproved",
 				esc_attr__( 'Unapprove this review', 'woocommerce' ),
 				esc_html__( 'Unapprove', 'woocommerce' )
@@ -352,7 +352,7 @@ class ReviewsListTable extends WP_List_Table {
 		if ( 'spam' !== $review_status ) {
 			$actions['spam'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-s vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-				$spam_url,
+				esc_url( $spam_url ),
 				"delete:the-comment-list:comment-{$review->comment_ID}::spam=1",
 				esc_attr__( 'Mark this review as spam', 'woocommerce' ),
 				/* translators: "Mark as spam" link. */
@@ -361,7 +361,7 @@ class ReviewsListTable extends WP_List_Table {
 		} else {
 			$actions['unspam'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-				$unspam_url,
+				esc_url( $unspam_url ),
 				"delete:the-comment-list:comment-{$review->comment_ID}:66cc66:unspam=1",
 				esc_attr__( 'Restore this review from the spam', 'woocommerce' ),
 				esc_html_x( 'Not Spam', 'review', 'woocommerce' )
@@ -371,7 +371,7 @@ class ReviewsListTable extends WP_List_Table {
 		if ( 'trash' === $review_status ) {
 			$actions['untrash'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-				$untrash_url,
+				esc_url( $untrash_url ),
 				"delete:the-comment-list:comment-{$review->comment_ID}:66cc66:untrash=1",
 				esc_attr__( 'Restore this review from the Trash', 'woocommerce' ),
 				esc_html__( 'Restore', 'woocommerce' )
@@ -381,7 +381,7 @@ class ReviewsListTable extends WP_List_Table {
 		if ( 'spam' === $review_status || 'trash' === $review_status || ! EMPTY_TRASH_DAYS ) {
 			$actions['delete'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-				$delete_url,
+				esc_url( $delete_url ),
 				"delete:the-comment-list:comment-{$review->comment_ID}::delete=1",
 				esc_attr__( 'Delete this review permanently', 'woocommerce' ),
 				esc_html__( 'Delete Permanently', 'woocommerce' )
@@ -389,7 +389,7 @@ class ReviewsListTable extends WP_List_Table {
 		} else {
 			$actions['trash'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
-				$trash_url,
+				esc_url( $trash_url ),
 				"delete:the-comment-list:comment-{$review->comment_ID}::trash=1",
 				esc_attr__( 'Move this review to the Trash', 'woocommerce' ),
 				esc_html_x( 'Trash', 'verb', 'woocommerce' )
@@ -399,7 +399,7 @@ class ReviewsListTable extends WP_List_Table {
 		if ( 'spam' !== $review_status && 'trash' !== $review_status ) {
 			$actions['edit'] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
-				"comment.php?action=editcomment&amp;c={$review->comment_ID}",
+				esc_url( "comment.php?action=editcomment&amp;c={$review->comment_ID}" ),
 				esc_attr__( 'Edit this review', 'woocommerce' ),
 				esc_html__( 'Edit', 'woocommerce' )
 			);
@@ -459,7 +459,6 @@ class ReviewsListTable extends WP_List_Table {
 		}
 
 		$output .= '</div>';
-
 		$output .= '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details', 'woocommerce' ) . '</span></button>';
 
 		return $output;
