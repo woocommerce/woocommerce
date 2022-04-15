@@ -153,6 +153,11 @@ class Reviews {
 			$messages[] = sprintf( _n( '%s comment moved to the Trash.', '%s comments moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=untrash&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
 		}
 
+		if ( $untrashed > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s comment restored from the Trash', '%s comments restored from the Trash', $untrashed, 'woocommerce' ), $untrashed );
+		}
+
 		return $messages;
 	}
 	/**
