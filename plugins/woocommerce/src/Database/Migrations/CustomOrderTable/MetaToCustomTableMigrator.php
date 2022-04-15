@@ -163,7 +163,7 @@ abstract class MetaToCustomTableMigrator {
 			$batch
 		);
 
-		$duplicate_update_key_statement = $this->generate_on_duplicate_statement_clause( $columns );
+		$duplicate_update_key_statement = MigrationHelper::generate_on_duplicate_statement_clause( $columns );
 
 		return "INSERT INTO $table (`$column_sql`) VALUES $value_sql $duplicate_update_key_statement;";
 	}
@@ -217,23 +217,6 @@ abstract class MetaToCustomTableMigrator {
 		$column_sql = implode( '`, `', $columns );
 
 		return array( $value_sql, $column_sql, $columns );
-	}
-
-	/**
-	 * Generates ON DUPLICATE KEY UPDATE clause to be used in migration.
-	 *
-	 * @param array $columns List of column names.
-	 *
-	 * @return string SQL clause for INSERT...ON DUPLICATE KEY UPDATE
-	 */
-	private function generate_on_duplicate_statement_clause( $columns ) {
-		$update_value_statements = array();
-		foreach ( $columns as $column ) {
-			$update_value_statements[] = "$column = VALUES( $column )";
-		}
-		$update_value_clause = implode( ', ', $update_value_statements );
-
-		return "ON DUPLICATE KEY UPDATE $update_value_clause";
 	}
 
 	/**
