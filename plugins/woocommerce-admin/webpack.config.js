@@ -58,6 +58,7 @@ wpAdminScripts.forEach( ( name ) => {
 	entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
 } );
 
+// WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const suffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
 const webpackConfig = {
@@ -181,10 +182,9 @@ const webpackConfig = {
 		// TODO: Partially replace with __webpack_get_script_filename__ in app with Webpack 5.x.
 		// The CSS chunk portion will need to remain, as it originates in MiniCssExtractPlugin.
 		new AsyncChunkSrcVersionParameterPlugin(),
-		// Generate unminified files to load the unminified version when `define( 'SCRIPT_DEBUG', true );` is set in wp-config.
-		// This is also required to publish human readeable code in the deployed "plugin".
-		// See https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#4-code-must-be-mostly-human-readable
-		WC_ADMIN_PHASE !== 'core' &&
+		// We only want to generate unminified files in the development phase.
+		WC_ADMIN_PHASE === 'development' &&
+			// Generate unminified files to load the unminified version when `define( 'SCRIPT_DEBUG', true );` is set in wp-config.
 			new UnminifyWebpackPlugin( {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
@@ -200,7 +200,11 @@ const webpackConfig = {
 	},
 };
 
-if ( webpackConfig.mode !== 'production' && WC_ADMIN_PHASE !== 'core' ) {
+// Use the source map if we're in development mode, .
+if (
+	webpackConfig.mode === 'development' ||
+	WC_ADMIN_PHASE === 'development'
+) {
 	webpackConfig.devtool = process.env.SOURCEMAP || 'source-map';
 }
 
