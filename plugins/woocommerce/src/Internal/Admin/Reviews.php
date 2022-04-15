@@ -96,6 +96,18 @@ class Reviews {
 			$this->maybe_display_reviews_bulk_action_notice();
 		}
 	}
+
+	/**
+	 * May display the bulk action admin notice.
+	 *
+	 * @return void
+	 */
+	public function maybe_display_reviews_bulk_action_notice() {
+
+		$messages = $this->get_bulk_action_notice_messages();
+
+		echo ! empty( $messages ) ? '<div id="moderated" class="updated"><p>' . implode( "<br/>\n", $messages ) . '</p></div>' : '';  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
 	/**
 	 * Counts the number of pending product reviews/replies, and returns the notification bubble if there's more than zero.
 	 *
