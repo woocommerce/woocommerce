@@ -14,3 +14,4 @@ declare module 'gridicons/dist/*' {
 }
 declare module '*.png';
 declare module '*.jpg';
+declare module '*.svg';
