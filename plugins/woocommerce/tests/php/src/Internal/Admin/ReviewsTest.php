@@ -17,6 +17,26 @@ use WC_Unit_Test_Case;
 class ReviewsTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Sets the global vars before each test.
+	 */
+	public function setUp() : void {
+		global $pagenow;
+
+		$this->old_pagenow = $pagenow;
+
+		parent::setUp();
+	}
+
+	/**
+	 * Restores the global vars after each test.
+	 */
+	public function tearDown() : void {
+		global $pagenow;
+
+		$pagenow = $this->old_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_instance()
 	 */
 	public function test_get_instance() {
@@ -153,6 +173,63 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertStringEndsWith( 'custom additional content', $output );
 
 		remove_all_filters( 'woocommerce_product_reviews_list_table' );
+	}
+
+	/**
+	 * Tests that the reviews page is properly identified.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
+	 * @dataProvider provider_is_reviews_page
+	 *
+	 * @param string|null $new_pagenow     the value of the global $pageview var.
+	 * @param string|null $page            the value of $_GET['page'].
+	 * @param bool        $expected_result the expected bool result.
+	 * @return void
+	 */
+	public function test_is_reviews_page( $new_pagenow, $page, $expected_result ) {
+		global $pagenow;
+
+		$pagenow = $new_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$_GET['page'] = $page;
+
+		$reviews = new Reviews();
+
+		$this->assertSame( $expected_result, $reviews->is_reviews_page() );
+	}
+
+	/** @see test_is_reviews_page */
+	public function provider_is_reviews_page() : Generator {
+
+		yield 'Global pagenow is null' => [
+			'new_pagenow'     => null,
+			'page'            => null,
+			'expected_result' => false,
+		];
+
+		yield 'Global pagenow is anything other than the edit page' => [
+			'new_pagenow'     => 'test.php',
+			'page'            => null,
+			'expected_result' => false,
+		];
+
+		yield 'Page is null' => [
+			'new_pagenow'     => 'edit.php',
+			'page'            => null,
+			'expected_result' => false,
+		];
+
+		yield 'Page is anything other than product-reviews' => [
+			'new_pagenow'     => 'edit.php',
+			'page'            => 'test',
+			'expected_result' => false,
+		];
+
+		yield 'Page is product-reviews' => [
+			'new_pagenow'     => 'edit.php',
+			'page'            => 'product-reviews',
+			'expected_result' => true,
+		];
 	}
 
 }
