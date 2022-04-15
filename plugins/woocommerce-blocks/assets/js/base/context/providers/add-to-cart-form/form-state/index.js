@@ -178,10 +178,9 @@ export const AddToCartFormStateContextProvider = ( {
 						response.forEach(
 							( { errorMessage, validationErrors } ) => {
 								if ( errorMessage ) {
-									createErrorNotice(
-										errorMessage,
-										'wc/add-to-cart'
-									);
+									createErrorNotice( errorMessage, {
+										context: 'wc/add-to-cart',
+									} );
 								}
 								if ( validationErrors ) {
 									setValidationErrors( validationErrors );

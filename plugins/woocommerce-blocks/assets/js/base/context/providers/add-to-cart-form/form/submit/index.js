@@ -106,7 +106,10 @@ const FormSubmit = () => {
 									'woo-gutenberg-products-block'
 								),
 								{
-									id: 'dadd-to-cart',
+									id: 'add-to-cart',
+									context: `woocommerce/single-product/${
+										product?.id || 0
+									}`,
 								}
 							);
 						}
