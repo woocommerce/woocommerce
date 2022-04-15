@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 class Reviews {
 
 	/**
-	 * Admin page identifier. (test with commit)
+	 * Admin page identifier.
 	 */
 	const MENU_SLUG = 'product-reviews';
 
