@@ -75,6 +75,7 @@ jobs:
                 key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json', '**/composer.lock') }}
 
             - name: Install npm deps
+              working-directory: package/woocommerce
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm install
 
