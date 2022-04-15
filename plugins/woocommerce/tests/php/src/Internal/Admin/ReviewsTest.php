@@ -182,7 +182,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @dataProvider provider_is_reviews_page
 	 *
 	 * @param string|null $new_pagenow     the value of the global $pageview var.
-	 * @param string|null $page            the value of $_GET['page'].
+	 * @param string|null $page            the value of $_GET[ 'page' ].
 	 * @param bool        $expected_result the expected bool result.
 	 * @return void
 	 */
@@ -229,6 +229,131 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			'new_pagenow'     => 'edit.php',
 			'page'            => 'product-reviews',
 			'expected_result' => true,
+		];
+	}
+
+	/**
+	 * Tests that the admin notice messages are properly returned.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::get_bulk_action_notice_messages()
+	 * @dataProvider provider_get_bulk_action_notice_messages
+	 *
+	 * @param string[] $statuses        the wp comment statuses after a bulk operation.
+	 * @param int      $count           the number of affected comments.
+	 * @param array    $expected_result the action notice messages.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_bulk_action_notice_messages( $statuses, $count, $expected_result ) {
+
+		$reviews = new Reviews();
+
+		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'get_bulk_action_notice_messages' );
+		$method->setAccessible( true );
+
+		foreach ( $statuses as $status ) {
+			$_REQUEST[ $status ] = $count;
+		}
+		$_REQUEST['ids'] = '1,2,3';
+
+		$result = $method->invoke( $reviews );
+
+		foreach ( $expected_result as $i => $expected_message ) {
+			$this->assertContains( $expected_message, $result[ $i ] );
+		}
+	}
+
+	/** @see test_get_bulk_action_notice_messages */
+	public function provider_get_bulk_action_notice_messages() : Generator {
+
+		yield 'An approved comment status' => [
+			'status'         => [ 'approved' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment approved' ],
+		];
+
+		yield 'Two approved comment statuses' => [
+			'status'         => [ 'approved' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments approved' ],
+		];
+
+		yield 'An unapproved comment status' => [
+			'status'         => [ 'unapproved' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment unapproved' ],
+		];
+
+		yield 'Two unapproved comment statuses' => [
+			'status'         => [ 'unapproved' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments unapproved' ],
+		];
+
+		yield 'A deleted comment status' => [
+			'status'         => [ 'deleted' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment permanently deleted' ],
+		];
+
+		yield 'Two deleted comment statuses' => [
+			'status'         => [ 'deleted' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments permanently deleted' ],
+		];
+
+		yield 'A trashed comment status' => [
+			'status'         => [ 'trashed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment moved to the Trash.' ],
+		];
+
+		yield 'Two trashed comment statuses' => [
+			'status'         => [ 'trashed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments moved to the Trash.' ],
+		];
+
+		yield 'An untrashed comment status' => [
+			'status'         => [ 'untrashed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment restored from the Trash' ],
+		];
+
+		yield 'Two untrashed comment statuses' => [
+			'status'         => [ 'untrashed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments restored from the Trash' ],
+		];
+
+		yield 'A spammed comment status' => [
+			'status'         => [ 'spammed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment marked as spam.' ],
+		];
+
+		yield 'Two spammed comment statuses' => [
+			'status'         => [ 'spammed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments marked as spam.' ],
+		];
+
+		yield 'An unspammed comment status' => [
+			'status'         => [ 'unspammed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment restored from the spam' ],
+		];
+
+		yield 'Two unspammed comment statuses' => [
+			'status'         => [ 'unspammed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 comments restored from the spam' ],
+		];
+
+		yield 'Two different statuses' => [
+			'status'         => [ 'approved', 'unapproved' ],
+			'count'          => 1,
+			'expected_array' => [ '1 comment approved', '1 comment unapproved' ],
 		];
 	}
 
