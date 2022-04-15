@@ -118,4 +118,41 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		];
 	}
 
+	/**
+	 * Tests that can output the reviews list table and filter it.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::render_reviews_list_table()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the property doesn't exist.
+	 */
+	public function test_render_reviews_list_table() {
+		$reviews = Reviews::get_instance();
+		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+
+		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
+		$property->setAccessible( true );
+		$property->setValue( $reviews, $list_table );
+
+		add_filter(
+			'woocommerce_product_reviews_list_table',
+			static function ( $content ) {
+				return $content . 'custom additional content';
+			}
+		);
+
+		ob_start();
+
+		$reviews->render_reviews_list_table();
+
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<form id="reviews-filter" method="get">', $output );
+		$this->assertStringContainsString( '<input type="hidden" name="page" value="' . Reviews::MENU_SLUG . '" />', $output );
+		$this->assertStringContainsString( '<input type="hidden" name="post_type" value="product" />', $output );
+		$this->assertStringEndsWith( 'custom additional content', $output );
+
+		remove_all_filters( 'woocommerce_product_reviews_list_table' );
+	}
+
 }
