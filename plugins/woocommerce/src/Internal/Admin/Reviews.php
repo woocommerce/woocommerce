@@ -158,6 +158,11 @@ class Reviews {
 			$messages[] = sprintf( _n( '%s comment restored from the Trash', '%s comments restored from the Trash', $untrashed, 'woocommerce' ), $untrashed );
 		}
 
+		if ( $deleted > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s comment permanently deleted', '%s comments permanently deleted', $deleted, 'woocommerce' ), $deleted );
+		}
+
 		return $messages;
 	}
 	/**
