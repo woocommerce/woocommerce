@@ -33,12 +33,6 @@
 		 "options": {
 		   "script": "clean"
 		 }
-	   },
-	   "prepare": {
-		 "executor": "@nrwl/workspace:run-script",
-		 "options": {
-		   "script": "prepare"
-		 }
 	   }
      }
  }

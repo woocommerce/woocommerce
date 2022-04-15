@@ -45,7 +45,7 @@
     "access": "public"
   },
   "scripts": {
-	"prepare": "pnpm run build",
+	"prepack": "pnpm run build",
 	"clean": "rm -rf ./build ./build-module",
   "compile": "e2e-builds",
 	"build": "./bin/build.sh && pnpm run clean && pnpm run compile"
