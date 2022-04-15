@@ -379,6 +379,9 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
+
+		ob_start();
+
 		if ( $this->current_user_can_edit_review ) {
 			?>
 			<label class="screen-reader-text" for="cb-select-<?php echo esc_attr( $item->comment_ID ); ?>"><?php esc_html_e( 'Select review', 'woocommerce' ); ?></label>
@@ -390,6 +393,14 @@ class ReviewsListTable extends WP_List_Table {
 			/>
 			<?php
 		}
+
+		/**
+		 * Filters the content of the product review checkbox column.
+		 *
+		 * @param string     $content The content of the checkbox column.
+		 * @param WP_Comment $item    Review or reply being rendered.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_table_colum_cb', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
