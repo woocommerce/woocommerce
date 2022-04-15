@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert back menu position to floats as string for WP compatibility.

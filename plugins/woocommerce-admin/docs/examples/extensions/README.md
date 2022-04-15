@@ -13,10 +13,10 @@ pnpm install
 Build the example extension by running the pnpm script and passing the example name.
 
 ```bash
-pnpm run example -- --ext=<example>
+WC_EXT=<example> pnpm nx example woocommerce-admin
 ```
 
-Go to your WordPress installation's plugins page and activate the plugin. WooCommerce Analytics reports will now reflect the changes made by the example extension.
+Include the output plugin in your `.wp-env.json` and `.wp-env.override.json` and restart the WordPress instance. WooCommerce Analytics reports will now reflect the changes made by the example extension.
 
 You can make changes to Javascript and PHP files in the example and see changes reflected upon refresh.
 

@@ -138,7 +138,7 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 		expect( queryByText( 'Recommended' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'should display Manage button if not enabled and does have setup', () => {
+	it( 'should display Manage button if enabled and does have setup', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
@@ -180,6 +180,7 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 					...mockGateway,
 					plugins: [ 'nope' ],
 					needsSetup: false,
+					enabled: true,
 				},
 			],
 		};

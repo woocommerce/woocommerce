@@ -35,7 +35,7 @@ const PanelBodyWithUpdatedType = PanelBody as React.ComponentType< PanelBodyProp
 export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	query,
 	id,
-	eventName,
+	eventPrefix,
 	tasks,
 	keepCompletedTaskList,
 	isComplete,
@@ -66,7 +66,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 			return;
 		}
 
-		recordEvent( `${ eventName }_view`, {
+		recordEvent( `${ eventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
@@ -122,7 +122,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	}
 
 	const trackClick = ( task: TaskType ) => {
-		recordEvent( `${ eventName }_click`, {
+		recordEvent( `${ eventPrefix }_click`, {
 			task_name: task.id,
 		} );
 	};
@@ -182,9 +182,33 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 							opened={ openPanel === section.id }
 							onToggle={ ( isOpen: boolean ) => {
 								if ( ! isOpen && openPanel === section.id ) {
+									recordEvent(
+										`${ eventPrefix }section_closed`,
+										{
+											id: section.id,
+											all: true,
+										}
+									);
 									setOpenPanel( null );
 								} else {
+									if ( openPanel ) {
+										recordEvent(
+											`${ eventPrefix }section_closed`,
+											{
+												id: openPanel,
+												all: false,
+											}
+										);
+									}
 									setOpenPanel( section.id );
+								}
+								if ( isOpen ) {
+									recordEvent(
+										`${ eventPrefix }section_opened`,
+										{
+											id: section.id,
+										}
+									);
 								}
 							} }
 							initialOpen={ false }

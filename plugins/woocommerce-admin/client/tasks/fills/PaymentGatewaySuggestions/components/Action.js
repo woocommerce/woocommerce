@@ -25,6 +25,7 @@ export const Action = ( {
 	onSetUp = () => {},
 	onSetupCallback,
 	setupButtonText = __( 'Get started', 'woocommerce' ),
+	externalLink = null,
 } ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
 
@@ -40,6 +41,11 @@ export const Action = ( {
 		recordEvent( 'tasklist_payment_setup', {
 			selected: getPluginTrackKey( id ),
 		} );
+
+		if ( ! hasPlugins && externalLink ) {
+			window.location.href = externalLink;
+			return;
+		}
 
 		if ( onSetupCallback ) {
 			setIsBusy( true );
@@ -84,17 +90,19 @@ export const Action = ( {
 		</Button>
 	);
 
+	const EnableButton = () => (
+		<Button
+			className={ classes }
+			isSecondary
+			onClick={ () => markConfigured( id ) }
+		>
+			{ __( 'Enable', 'woocommerce' ) }
+		</Button>
+	);
+
 	if ( ! hasSetup ) {
 		if ( ! isEnabled ) {
-			return (
-				<Button
-					className={ classes }
-					isSecondary
-					onClick={ () => markConfigured( id ) }
-				>
-					{ __( 'Enable', 'woocommerce' ) }
-				</Button>
-			);
+			return <EnableButton />;
 		}
 
 		return <ManageButton />;
@@ -110,6 +118,10 @@ export const Action = ( {
 	}
 
 	if ( ! needsSetup ) {
+		if ( ! isEnabled ) {
+			return <EnableButton />;
+		}
+
 		return <ManageButton />;
 	}
 

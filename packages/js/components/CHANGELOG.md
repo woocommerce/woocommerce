@@ -3,6 +3,7 @@
 -   Fix documentation for `TableCard` component
 -   Update dependency `@wordpress/hooks` to ^3.5.0
 -   Update dependency `@wordpress/icons` to ^8.1.0
+-   Add `className` prop for Pill component. #32605
 
 # 10.0.0
 -   Replace deprecated wp.compose.withState with wp.element.useState. #8338

@@ -76,7 +76,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 		return __( 'You are almost there', 'woocommerce' );
 	}, [ completedCount, hasVisitedTasks ] );
 
-	if ( loading || completedCount === tasksCount ) {
+	if ( loading ) {
 		return null;
 	}
 
@@ -90,22 +90,26 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 				<h1 className="woocommerce-task-progress-header__title">
 					{ progressTitle }
 				</h1>
-				<p>
-					{ sprintf(
-						/* translators: 1: completed tasks, 2: total tasks */
-						__(
-							'Follow these steps to start selling quickly. %1$d out of %2$d complete.',
-							'woocommerce'
-						),
-						completedCount,
-						tasksCount
-					) }
-				</p>
-				<progress
-					className="woocommerce-task-progress-header__progress-bar"
-					max={ tasksCount }
-					value={ completedCount || 0 }
-				/>
+				{ completedCount !== tasksCount ? (
+					<>
+						<p>
+							{ sprintf(
+								/* translators: 1: completed tasks, 2: total tasks */
+								__(
+									'Follow these steps to start selling quickly. %1$d out of %2$d complete.',
+									'woocommerce'
+								),
+								completedCount,
+								tasksCount
+							) }
+						</p>
+						<progress
+							className="woocommerce-task-progress-header__progress-bar"
+							max={ tasksCount }
+							value={ completedCount || 0 }
+						/>
+					</>
+				) : null }
 			</div>
 		</div>
 	);
