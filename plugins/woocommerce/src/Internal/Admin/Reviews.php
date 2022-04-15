@@ -84,6 +84,18 @@ class Reviews {
 
 		return 'edit.php' === $pagenow && isset( $_GET['page'] ) && 'product-reviews' === $_GET['page'];
 	}
+
+	/**
+	 * Displays notices on the Reviews page.
+	 *
+	 * @return void
+	 */
+	public function display_notices() {
+
+		if ( $this->is_reviews_page() ) {
+			$this->maybe_display_reviews_bulk_action_notice();
+		}
+	}
 	/**
 	 * Counts the number of pending product reviews/replies, and returns the notification bubble if there's more than zero.
 	 *
