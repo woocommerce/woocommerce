@@ -54,15 +54,13 @@ function RestAPIFilters( {
 
 		return filters.map( ( filter, index ) => {
 			// eslint-disable-next-line camelcase
-	                const {
+			const {
 				endpoint,
 				dot_notation: dotNotation,
 				replacement,
 				enabled,
 			} = filter;
 
-			// eslint-disable-next-line camelcase
-			const dotNotation = dot_notation;
 			return (
 				<tr key={ index }>
 					<td key={ 0 }>{ index + 1 }</td>
