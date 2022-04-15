@@ -86,6 +86,18 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 7.4.2 - 2022-04-15 =
+
+#### Bug Fixes
+
+- Ensure errors during cart/checkout API requests are shown on the front-end. ([6268](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6268))
+
+= 7.4.1 - 2022-04-14 =
+
+#### Bug Fixes
+
+- Fix page load problem due to incorrect URL to certain assets. ([6260](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6260))
+
 = 7.4.0 - 2022-04-14 =
 
 #### Enhancements
@@ -118,6 +130,18 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 #### Various
 
 - Rename Legacy Template block to Classic Template block. ([6021](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6021))
+
+= 7.2.2 - 2022-04-15 =
+
+#### Bug fixes
+
+- Fix page load problem due to incorrect URL to certain assets. [#6260](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6260)
+
+= 7.2.1 - 2022-03-23 =
+
+#### Bug fixes
+
+- Don't trigger class deprecations if headers are already sent [#6074](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6074)
 
 = 7.2.0 - 2022-03-14 =
 
