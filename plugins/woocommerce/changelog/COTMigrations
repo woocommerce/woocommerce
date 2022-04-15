@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Generic migration support for migration from posts + postsmeta table to any custom table. Additionaly, implement migrations to various COT tables using this generic support.
