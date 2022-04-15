@@ -126,6 +126,11 @@ class Reviews {
 
 		$messages = [];
 
+		if ( $approved > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s comment approved', '%s comments approved', $approved, 'woocommerce' ), $approved );
+		}
+
 		return $messages;
 	}
 	/**
