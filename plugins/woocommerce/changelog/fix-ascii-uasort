@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-String sorting when using different locales.

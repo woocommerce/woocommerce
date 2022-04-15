@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Avoid unsupported operand type errors from within `WC_Admin_Post_Types::set_new_price()`.
