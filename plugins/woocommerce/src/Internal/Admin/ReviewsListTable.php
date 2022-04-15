@@ -720,7 +720,7 @@ class ReviewsListTable extends WP_List_Table {
 		 * @param string     $output The column output.
 		 * @param WP_Comment $item   The product review being rendered.
 		 */
-		return apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name, $output, $item );
+		return apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name . '_content', $output, $item );
 	}
 
 	/**

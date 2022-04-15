@@ -1328,9 +1328,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$review = $this->factory()->comment->create_and_get();
 
 		add_filter(
-			'woocommerce_product_reviews_table_column_test',
+			'woocommerce_product_reviews_table_column_test_content',
 			static function( $content, $review ) {
-				return 'Additional content to ' . $content . ' for test column for review ID ' . esc_html( $review->comment_ID );
+				return 'Additional content to ' . $content . ' for test column for review ID ' . $review->comment_ID; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			10,
 			2
@@ -1342,7 +1342,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Additional content to "example content" for review ID ' . $review->comment_ID, ob_get_clean() );
 
-		remove_all_filters( 'woocommerce_product_reviews_table_column_test' );
+		remove_all_filters( 'woocommerce_product_reviews_table_column_test_content' );
 	}
 
 	/**
