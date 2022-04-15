@@ -108,6 +108,18 @@ class Reviews {
 
 		echo ! empty( $messages ) ? '<div id="moderated" class="updated"><p>' . implode( "<br/>\n", $messages ) . '</p></div>' : '';  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
+
+	/**
+	 * Gets the applicable bulk action admin notice messages.
+	 *
+	 * @return array
+	 */
+	public function get_bulk_action_notice_messages() : array {
+
+		$messages = [];
+
+		return $messages;
+	}
 	/**
 	 * Counts the number of pending product reviews/replies, and returns the notification bubble if there's more than zero.
 	 *
