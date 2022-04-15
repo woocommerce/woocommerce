@@ -15,6 +15,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List checkout code
+        run: ls ./plugins/woocommerce
+
       - name: Copy deps configuration to root.
         run: mkdir ./woo-cache && cp ./plugins/woocommerce/package-lock.json ./woo-cache && cp ./plugins/woocommerce/composer.lock ./woo-cache
 
