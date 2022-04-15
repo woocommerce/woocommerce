@@ -118,7 +118,7 @@ WHERE order_id = {$order_id}
 			$wpdb->get_var(
 				"
 SELECT COUNT(*) FROM {$this->data_store::get_meta_table_name()}
-WHERE order_id = {$order_id} AND meta_key = 'unique_key_1'
+WHERE order_id = {$order_id} AND meta_key = 'unique_key_1' AND meta_value = 'unique_value_1'
 "
 			)
 		);
@@ -127,7 +127,7 @@ WHERE order_id = {$order_id} AND meta_key = 'unique_key_1'
 			$wpdb->get_var(
 				"
 SELECT COUNT(*) FROM {$this->data_store::get_meta_table_name()}
-WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1'
+WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in ( 'non_unique_value_1', 'non_unique_value_2' )
 "
 			)
 		);
