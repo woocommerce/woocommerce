@@ -160,6 +160,81 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 6.5.0 2022-XX-XX =
+= 6.5.0 beta 1 2022-05-10 =
+
+**WooCommerce**
+
+- Added a temporary filter to patch the WCA JS packages i18n json files ([#32603](https://github.com/woocommerce/woocommerce/pull/32603))
+- Enable the "Save changes" button within the variations panel when a textfield receives input.
+- Ensure that an existing order with auto-draft status won't be interpreted as pending when determining if the status has changed.
+- Fixing bug in which tasks reminder bar was displayed on product screens
+- Fix issue where some tasks where not being tracked as completed, when tracking is enabled. ([#32493](https://github.com/woocommerce/woocommerce/pull/32493))
+- Fix WooCommerce Payments task not showing up in some supported countries. ([#32496](https://github.com/woocommerce/woocommerce/pull/32496))
+- Remove Pinterest extension from OBW ([#32626](https://github.com/woocommerce/woocommerce/pull/32626))
+- Revert back menu position to floats as string for WP compatibility.
+- String sorting when using different locales.
+- WCPayments task is not visible after installing the plugin ([#32506](https://github.com/woocommerce/woocommerce/pull/32506))
+- Add E2E tests to disabled welcome modal ([#32505](https://github.com/woocommerce/woocommerce/pull/32505))
+- Add Pinterest extension to onboarding wizard and marketing task ([#32527](https://github.com/woocommerce/woocommerce/pull/32527))
+- Add `order_item_display_meta` option to orders endpoint (REST API), to osupport filtering out variation meta.
+- Generic migration support for migration from posts + postsmeta table to any custom table. Additionaly, implement migrations to various COT tables using this generic support.
+- Make it possible for downloadable files to be in an enabled or disabled state.
+- Adds Other payment methods link to the payment setting page when the store is located in WC Payments eligible country.
+- Merge WCA install routines to the core
+- Remove `load_plugin_textdomain` method from admin plugin.
+- Simplify the WooCommerce Admin init routine. ([#32489](https://github.com/woocommerce/woocommerce/pull/32489))
+- UI changes for set up payments task
+- Update payment gateway logic in payment task
+- Update payment method link to the internal extension marketplace
+- Update WCA deactivation hooks to work with WC deactvation.
+- Updating deasync package to resolve install script issue with Linux
+- Add tracking for block themes.
+- Fix husky git hooks.
+- Move feature flag config files to Woocommerce plugin to support unit test execution in the wp-env environment.
+- Pass `WC_ADMIN_PHASE=core` to build commands & remove "plugin" env
+- Avoid unsupported operand type errors from within `WC_Admin_Post_Types::set_new_price()`.
+- Changelog entry not needed, because this is an adjustment to unreleased code.
+- Remove custom user-agent from featured extensions requests.
+- Update progress header bar styles in task list ([#32498](https://github.com/woocommerce/woocommerce/pull/32498))
+- `WC_Product_CSV_Importer_Controller::is_file_valid_csv` now just invokes `wc_is_file_valid_csv`. ([#32460](https://github.com/woocommerce/woocommerce/pull/32460))
+- Add a context param with a default value of global to `Admin\Notes\DataStore::get_notes()`, `get_notes_count()`, and `get_notes_where_clauses()`. ([#32574](https://github.com/woocommerce/woocommerce/pull/32574))
+- Add new sectioned task list component. ([#32302](https://github.com/woocommerce/woocommerce/pull/32302))
+- Add `woocommerce_download_parse_remote_file_path` and `woocommerce_download_parse_file_path` filters to modify the parse_file_path method file_path return. ([#32317](https://github.com/woocommerce/woocommerce/pull/32317))
+- Update country strings, rename Swaziland to Eswatini (per CLDR R41 update). ([#31185](https://github.com/woocommerce/woocommerce/pull/31185))
+- Updated Order save error messages to include the ID. ([#32081](https://github.com/woocommerce/woocommerce/pull/32081))
+- Bump minimum required PHP version of WooCommerce to 7.2. ([#32112](https://github.com/woocommerce/woocommerce/pull/32112))
+- Replace http://bot.whatismyipaddress.com, no longer available, with tnedi.me, a mirror of ident.me documented at https://api.tnedi.me. ([#31940](https://github.com/woocommerce/woocommerce/pull/31940))
+- Add event tracking so we can track block themes vs non-block themes. ([#32017](https://github.com/woocommerce/woocommerce/pull/32017))
+- OAuth flows that use the wc-auth endpoint on sites that use SSO with a redirect for authentication. ([#32335](https://github.com/woocommerce/woocommerce/pull/32335))
+- Dev - Add `build-watch` command for the new WooCommerce Admin project. ([#32347](https://github.com/woocommerce/woocommerce/pull/32347))
+- Remove - Admin notice warning about the upcoming minimum PHP version bump. ([#32376](https://github.com/woocommerce/woocommerce/pull/32376))
+- Stop the unsaved changes warning from appearing at inappropriate moments in the settings area. ([#32424](https://github.com/woocommerce/woocommerce/pull/32424))
+- Adds Other payment methods link to the payment setting page when the store is located in WC Payments eligible country. ([#32447](https://github.com/woocommerce/woocommerce/pull/32447))
+- Added a new `woocommerce_generate_{$type}_html` action hook to generate custom field types in `WC_Settings_API` class objects. ([#31238](https://github.com/woocommerce/woocommerce/pull/31238))
+- Make the `$webhook` object available to consumers of the `woocommerce_webhook_options` action. ([#31292](https://github.com/woocommerce/woocommerce/pull/31292))
+- Dev - ZeroClipboard library removed. ([#31354](https://github.com/woocommerce/woocommerce/pull/31354))
+- Add new hooks to `order-tracking.php` form. ([#30320](https://github.com/woocommerce/woocommerce/pull/30320))
+- Correct parameter type for the `ContainerException` class (Dependency Management). ([#30764](https://github.com/woocommerce/woocommerce/pull/30764))
+- Prevent 'Search' field from overflowing container on the 'Downloadable product permissions' widget when in the sidebar. ([#30856](https://github.com/woocommerce/woocommerce/pull/30856))
+- Ensure "doing it wrong" is triggered when internal meta keys are used directly. ([#31168](https://github.com/woocommerce/woocommerce/pull/31168))
+
+**WooCommerce Blocks 7.3.0 & 7.4.1**
+
+- Allow adding the Filter Products by Price block to Product Catalog templates to filter products. ([6146](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6146))
+- The order summary area for the Cart and Checkout Blocks is now powered by Inner Blocks allowing for more customizations and extensibility. ([6065](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6065))
+- Increase Cart product quantity limit. ([6202](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6202))
+- Mini Cart block: Fix translations loading. ([6158](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6158))
+- Fix Featured Product and Featured Category buttons misalignment in Twenty Twenty Two theme. ([6156](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6156))
+- Remove the ToggleButtonControl in favor of ToggleGroupControl. ([5967](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5967))
+- Decode HTML entities when formatting Store API error messages. ([5870](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5870))
+- Prevent deprecation messages causing PHP warnings. ([6074](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6074))
+- Product Ratings: Add Global Styles font size and spacing support. ([5927](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5927))
+- Fix page load problem due to incorrect URL to certain assets. ([6260](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6260))
+- Add resource hinting for cart and checkout blocks to improve first time performance. ([5553](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5553))
+- Add Mini Cart block to feature plugin ([6127](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6127))
+- Show warnings when form is incomplete on Checkout. ([6116](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6116))
+- Filter Products by Attribute: Make dropdown search case sensitive. ([6096](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6096))
+- Stop showing the price slider skeleton when moving the slider handles. ([6078](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6078))
+- Rename Legacy Template block to Classic Template block. ([6021](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6021))
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
