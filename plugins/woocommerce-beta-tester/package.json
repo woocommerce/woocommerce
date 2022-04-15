@@ -23,6 +23,7 @@
 		}
 	},
 	"scripts": {
+    "postinstall": "composer install",
 		"build": "pnpm run uglify",
 		"build:zip": "./bin/build-zip.sh",
 		"build:dev": "pnpm run lint:js && pnpm run uglify",
