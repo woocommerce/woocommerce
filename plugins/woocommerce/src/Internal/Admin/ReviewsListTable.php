@@ -705,7 +705,7 @@ class ReviewsListTable extends WP_List_Table {
 		 *
 		 * @param string $comment_id The review or reply ID as a numeric string.
 		 */
-		do_action( 'woocommerce_product_reviews_table_' . $column_name, $item );
+		do_action( 'woocommerce_product_reviews_table_column_' . $column_name, $item );
 	}
 
 	/**

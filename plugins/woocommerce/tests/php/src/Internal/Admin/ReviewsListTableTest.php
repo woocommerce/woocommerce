@@ -1296,7 +1296,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$review = $this->factory()->comment->create_and_get();
 
 		add_action(
-			'woocommerce_product_reviews_table_custom_column',
+			'woocommerce_product_reviews_table_column_custom_column',
 			static function( $review ) {
 				echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
 			},
