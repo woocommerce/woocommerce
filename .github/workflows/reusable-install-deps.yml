@@ -23,8 +23,10 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
-- name: check path
-  run: echo ${{ inputs.path_to_woo_root }}
+
+      - name: check path
+        run: echo ${{ inputs.path_to_woo_root }}
+
       - name: Cache dependencies
         id: cache-dependencies
         uses: actions/cache@v3
