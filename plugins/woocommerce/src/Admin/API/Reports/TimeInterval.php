@@ -79,28 +79,29 @@ class TimeInterval {
 	 *
 	 * @param string $time_interval Time interval.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
+	 * @param string $date_column_name Name of the date table column.
 	 * @return mixed
 	 */
-	public static function db_datetime_format( $time_interval, $table_name ) {
+	public static function db_datetime_format( $time_interval, $table_name, $date_column_name ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
 		if ( 1 === $first_day_of_week ) {
 			// Week begins on Monday, ISO 8601.
-			$week_format = "DATE_FORMAT({$table_name}.date_created, '%x-%v')";
+			$week_format = "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%x-%v')";
 		} else {
 			// Week begins on day other than specified by ISO 8601, needs to be in sync with function simple_week_number.
-			$week_format = "CONCAT(YEAR({$table_name}.date_created), '-', LPAD( FLOOR( ( DAYOFYEAR({$table_name}.date_created) + ( ( DATE_FORMAT(MAKEDATE(YEAR({$table_name}.date_created),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
+			$week_format = "CONCAT(YEAR({$table_name}.`{$date_column_name}`), '-', LPAD( FLOOR( ( DAYOFYEAR({$table_name}.`{$date_column_name}`) + ( ( DATE_FORMAT(MAKEDATE(YEAR({$table_name}.`{$date_column_name}`),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
 
 		}
 
 		// Whenever this is changed, double check method time_interval_id to make sure they are in sync.
 		$mysql_date_format_mapping = array(
-			'hour'    => "DATE_FORMAT({$table_name}.date_created, '%Y-%m-%d %H')",
-			'day'     => "DATE_FORMAT({$table_name}.date_created, '%Y-%m-%d')",
+			'hour'    => "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%Y-%m-%d %H')",
+			'day'     => "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%Y-%m-%d')",
 			'week'    => $week_format,
-			'month'   => "DATE_FORMAT({$table_name}.date_created, '%Y-%m')",
-			'quarter' => "CONCAT(YEAR({$table_name}.date_created), '-', QUARTER({$table_name}.date_created))",
-			'year'    => "YEAR({$table_name}.date_created)",
+			'month'   => "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%Y-%m')",
+			'quarter' => "CONCAT(YEAR({$table_name}.`{$date_column_name}`), '-', QUARTER({$table_name}.`{$date_column_name}`))",
+			'year'    => "YEAR({$table_name}.`{$date_column_name}`)",
 
 		);
 
