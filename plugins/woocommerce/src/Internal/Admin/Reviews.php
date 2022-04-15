@@ -142,6 +142,11 @@ class Reviews {
 			$messages[] = sprintf( _n( '%s comment marked as spam.', '%s comments marked as spam.', $spammed, 'woocommerce' ), $spammed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=unspam&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
 		}
 
+		if ( $unspammed > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s comment restored from the spam', '%s comments restored from the spam', $unspammed, 'woocommerce' ), $unspammed );
+		}
+
 		return $messages;
 	}
 	/**
