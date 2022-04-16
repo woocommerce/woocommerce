@@ -38,7 +38,8 @@ jobs:
           SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
           SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
           WC_E2E_SCREENSHOTS: 1
-          E2E_RETEST: 0
+          E2E_RETEST: 1
+          E2E_RETRY_TIMES: 0
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
           UPDATE_WC: 1
