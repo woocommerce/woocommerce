@@ -653,8 +653,8 @@ jQuery( function( $ ) {
 			});
 
 			var data = {
-				security:		wc_checkout_params.remove_coupon_nonce,
-				coupon_code:	coupon
+				security: wc_checkout_params.remove_coupon_nonce,
+				coupon:   coupon
 			};
 
 			$.ajax({
