@@ -28,6 +28,28 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can get the capability to view the reviews page.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_view_page_capability()
+	 *
+	 * @return void
+	 */
+	public function test_get_view_page_capability() {
+
+		$this->assertEquals( 'moderate_comments', Reviews::get_view_page_capability() );
+
+		$callback = function() {
+			return 'manage_woocommerce';
+		};
+
+		add_filter( 'woocommerce_view_product_reviews_page_capability', $callback );
+
+		$this->assertEquals( 'manage_woocommerce', Reviews::get_view_page_capability() );
+
+		remove_filter( 'woocommerce_view_product_reviews_page_capability', $callback );
+	}
+
+	/**
 	 * Tests that `load_reviews_screen()` creates an instance of {@see ReviewsListTable}.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::load_reviews_screen()

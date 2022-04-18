@@ -68,7 +68,7 @@ class Reviews {
 		 *
 		 * @param string $capability The capability (defaults to `moderate_comments`).
 		 */
-		return apply_filters( 'woocommerce_manage_product_reviews_page_view_capability', 'moderate_comments' );
+		return apply_filters( 'woocommerce_view_product_reviews_page_capability', 'moderate_comments' );
 	}
 
 	/**
