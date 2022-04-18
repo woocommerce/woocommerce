@@ -167,6 +167,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				$this->search_sku_in_product_lookup_table = $request['search_sku'];
 
 				if ( isset( $args['s'] ) && $args['s'] === $request['search_sku'] ) {
+					$args['sentence'] = true; // Ensure search string is treated as a phrase rather than multiple terms.
 					$this->combine_content_and_sku_search = true;
 				}
 
@@ -294,12 +295,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Add in conditional search filters for products.
+	 * Add a where clause for matching the SKU field.
 	 *
-	 * If the content search and the sku search have the same value, the clause operator here should be "OR" so that the
-	 * match can happen e.g. on the product title OR in the SKU. If they have different values, the clause operator
-	 * should be "AND" because we're assuming we're looking for e.g. a post title containing "foo" AND a SKU containing
-	 * "bar".
+	 * If the content search and the sku search have the same value, the extra clause we're adding here should be nested
+	 * with the other content fields that get covered (e.g. post_title, post_excerpt, post_content) and the operator
+	 * should be 'OR'. If the content and sku searches are different, then both should need to match, so the clause
+	 * should just get tacked on to the rest of the WHERE statement and the operator should be 'AND'.
 	 *
 	 * @param string $where Where clause used to search posts.
 	 * @return string
@@ -308,8 +309,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		global $wpdb;
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_in_product_lookup_table ) . '%';
-			$operator    = $this->combine_content_and_sku_search ? ' OR ' : ' AND ';
-			$where      .= $operator . $wpdb->prepare( 'wc_product_meta_lookup.sku LIKE %s', $like_search );
+
+			if ( $this->combine_content_and_sku_search ) {
+				// Ensure this clause gets nested with the other content fields being searched.
+				$clause = ' OR ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
+				$regex = sprintf(
+					// The '%' wildcards get hashed during $wpdb->prepare, so we have to match the hash.
+					"#(post_content LIKE '{[0-9a-f]+}%s{[0-9a-f]+}'\))#",
+					$wpdb->esc_like( $this->search_sku_in_product_lookup_table )
+				);
+				$where = preg_replace( $regex, '$1' . $clause, $where );
+			} else {
+				$where .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
+			}
 		}
 		return $where;
 	}
