@@ -61,7 +61,6 @@ jobs:
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Install PNPM
-              working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
 
@@ -135,7 +134,6 @@ jobs:
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Install PNPM
-              working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
 
@@ -205,7 +203,6 @@ jobs:
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Install PNPM
-              working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
 
