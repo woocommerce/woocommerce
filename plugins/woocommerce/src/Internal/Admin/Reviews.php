@@ -48,7 +48,7 @@ class Reviews {
 	 *
 	 * @return Reviews instance
 	 */
-	public static function get_instance(): ?Reviews {
+	public static function get_instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
@@ -115,6 +115,8 @@ class Reviews {
 
 		$this->reviews_list_table->prepare_items();
 
+		ob_start();
+
 		?>
 		<div class="wrap">
 			<h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
@@ -133,6 +135,14 @@ class Reviews {
 			</form>
 		</div>
 		<?php
+
+		/**
+		 * Filters the contents of the product reviews list table output.
+		 *
+		 * @param string           $output             The HTML output of the list table.
+		 * @param ReviewsListTable $reviews_list_table The reviews list table instance.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_list_table', ob_get_clean(), $this->reviews_list_table ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 }
