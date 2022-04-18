@@ -57,6 +57,23 @@ class Reviews {
 	}
 
 	/**
+	 * Gets the required capability to access the reviews page and manage product reviews.
+	 *
+	 * @param string $context The context for which the capability is needed.
+	 * @return string
+	 */
+	public static function get_capability( $context = 'view' ) {
+
+		/**
+		 * Filters whether the current user can manage product reviews.
+		 *
+		 * @param string $capability The capability (defaults to `moderate_comments`).
+		 * @param string $context    The context for which the capability is needed.
+		 */
+		return apply_filters( 'woocommerce_product_reviews_page_capability', 'moderate_comments', $context );
+	}
+
+	/**
 	 * Registers the Product Reviews submenu page.
 	 *
 	 * @return void
@@ -66,7 +83,7 @@ class Reviews {
 			'edit.php?post_type=product',
 			__( 'Reviews', 'woocommerce' ),
 			__( 'Reviews', 'woocommerce' ) . $this->get_pending_count_bubble(),
-			'moderate_comments',
+			static::get_capability(),
 			static::MENU_SLUG,
 			[ $this, 'render_reviews_list_table' ]
 		);
