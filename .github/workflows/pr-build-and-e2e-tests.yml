@@ -70,16 +70,12 @@ jobs:
               with:
                 path: |
                   package/woocommerce
-                key: ${{ runner.os }}-buildsss-${{ hashFiles('**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install npm deps
               working-directory: package/woocommerce
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm install
-
-            # List for debugging.
-            - name: list directories
-              run: ls -R
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -143,8 +139,8 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: |
-                  **/node_modules
-                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml', '**/composer.lock') }}
+                  package/woocommerce
+                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install npm deps
               working-directory: package/woocommerce
@@ -212,8 +208,8 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: |
-                  **/node_modules
-                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml', '**/composer.lock') }}
+                  package/woocommerce
+                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install npm deps
               working-directory: package/woocommerce
