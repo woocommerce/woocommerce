@@ -1280,6 +1280,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can output the default column content.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
 	 * @dataProvider provider_column_default
 	 *
@@ -1348,4 +1350,5 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
 		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
+
 }

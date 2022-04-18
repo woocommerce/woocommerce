@@ -17,16 +17,23 @@ use WC_Unit_Test_Case;
 class ReviewsTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Tests that can get the class instance.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_instance()
+	 *
+	 * @return void
 	 */
 	public function test_get_instance() {
 		$this->assertInstanceOf( Reviews::class, Reviews::get_instance() );
 	}
 
 	/**
-	 * Tests that `load_reviews_screen()` creates an instance of ReviewsListTable.
+	 * Tests that `load_reviews_screen()` creates an instance of {@see ReviewsListTable}.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::load_reviews_screen()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method or the property is not found.
 	 */
 	public function test_load_reviews_screen() {
 		$reviews = new Reviews();
@@ -47,7 +54,9 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::get_pending_count_bubble()
+	 * Tests that can get the pending comment count bubble.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_pending_count_bubble()
 	 * @dataProvider provider_get_pending_count_bubble
 	 *
 	 * @param int    $number_pending Number of pending product reviews.
