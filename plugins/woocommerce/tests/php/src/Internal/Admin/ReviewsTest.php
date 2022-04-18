@@ -42,11 +42,11 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			return 'manage_woocommerce';
 		};
 
-		add_filter( 'woocommerce_view_product_reviews_page_capability', $callback );
+		add_filter( 'woocommerce_product_reviews_page_capability', $callback );
 
 		$this->assertEquals( 'manage_woocommerce', Reviews::get_capability() );
 
-		remove_filter( 'woocommerce_view_product_reviews_page_capability', $callback );
+		remove_filter( 'woocommerce_product_reviews_page_capability', $callback );
 	}
 
 	/**
