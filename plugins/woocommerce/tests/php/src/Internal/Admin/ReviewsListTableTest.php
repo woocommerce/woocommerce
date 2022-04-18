@@ -62,6 +62,80 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can handle the row actions for a review in the Reviews page table.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::handle_row_actions()
+	 * @dataProvider data_provider_test_handle_row_actions
+	 *
+	 * @param string $review_status  The review status.
+	 * @param string $column_name    The current column name being output.
+	 * @param string $primary_column The primary colum name.
+	 * @param bool   $user_can_edit  Whether the current user can edit reviews.
+	 * @return void
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_handle_row_actions( $review_status, $column_name, $primary_column, $user_can_edit ) {
+		global $comment_status;
+
+		$comment_status = 'test'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$reflection = new ReflectionClass( $list_table );
+		$method = $reflection->getMethod( 'handle_row_actions' );
+		$method->setAccessible( true );
+		$property = $reflection->getProperty( 'current_user_can_edit_review' );
+		$property->setAccessible( true );
+
+		$property->setValue( $list_table, $user_can_edit );
+
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_approved' => $review_status,
+			]
+		);
+
+		$actions = $method->invokeArgs( $list_table, [ $review, $column_name, $primary_column ] );
+
+		if ( $column_name !== $primary_column || ! $user_can_edit ) {
+
+			$this->assertEmpty( $actions );
+
+		} else {
+
+			if ( '1' === $review_status ) {
+				$review_status = 'approved';
+			} elseif ( '0' === $review_status ) {
+				$review_status = 'unapproved';
+			}
+
+			if ( 'approved' === $review_status || 'unapproved' === $review_status ) {
+				$this->assertStringContainsString( 'approved' === $review_status ? 'Unapprove' : 'Approve', $actions );
+				$this->assertStringContainsString( 'Spam', $actions );
+			} elseif ( 'spam' === $review_status ) {
+				$this->assertStringContainsString( 'Not Spam', $actions );
+			} elseif ( 'trash' === $review_status ) {
+				$this->assertStringContainsString( 'Restore', $actions );
+			}
+
+			if ( 'trash' === $review_status || 'spam' === $review_status ) {
+				$this->assertStringContainsString( 'Delete Permanently', $actions );
+			} else {
+				$this->assertStringContainsString( 'Trash', $actions );
+			}
+		}
+	}
+
+	/** @see test_handle_row_actions */
+	public function data_provider_test_handle_row_actions() : Generator {
+		yield 'Not the primary column'   => [ 'foo', 'bar', 'baz', true ];
+		yield 'User cannot edit reviews' => [ 'test', 'foo', 'foo', false ];
+		yield 'Approved review'          => [ '1', 'foo', 'foo', true ];
+		yield 'Unapproved review'        => [ '0', 'foo', 'foo', true ];
+		yield 'Trashed review'           => [ 'trash', 'foo', 'foo', true ];
+		yield 'Spam review'              => [ 'spam', 'foo', 'foo', true ];
+	}
+
+	/**
 	 * Tests that can get the product reviews' page columns.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
