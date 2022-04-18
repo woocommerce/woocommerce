@@ -1325,10 +1325,12 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'filter_column_output' );
 		$method->setAccessible( true );
 
+		$review = $this->factory()->comment->create_and_get();
+
 		add_filter(
 			'woocommerce_product_reviews_table_column_test_content',
 			static function( $content, $review ) {
-				return 'Additional content to ' . $content . ' for test column for review with content: ' . $review->comment_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				return 'Additional content to "' . $content . '" for test column for review with ID: ' . $review->comment_ID; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			10,
 			2
@@ -1336,9 +1338,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		ob_start();
 
-		$method->invokeArgs( $list_table, [ 'test', '"example content"', $review ] );
+		$method->invokeArgs( $list_table, [ 'test', 'test content', $review ] );
 
-		$this->assertSame( 'Additional content to "example content" for review with content: ' . $review->comment_content, ob_get_clean() );
+		$this->assertSame( 'Additional content to "test content" for review with ID: ' . $review->comment_ID, ob_get_clean() );
 
 		remove_all_filters( 'woocommerce_product_reviews_table_column_test_content' );
 	}
