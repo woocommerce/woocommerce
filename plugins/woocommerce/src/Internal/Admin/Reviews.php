@@ -104,7 +104,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function maybe_display_reviews_bulk_action_notice() {
+	protected function maybe_display_reviews_bulk_action_notice() {
 
 		$messages = $this->get_bulk_action_notice_messages();
 

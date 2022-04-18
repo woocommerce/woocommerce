@@ -357,4 +357,55 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		];
 	}
 
+	/**
+	 * Tests that a notice message will result in a valid HTML return.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::maybe_display_reviews_bulk_action_notice()
+	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
+	 *
+	 * @param array  $messages        the action notice messages.
+	 * @param string $expected_result the expected result.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_maybe_display_reviews_bulk_action_notice( $messages, $expected_result ) {
+
+		$mock = $this->getMockBuilder( Reviews::class )
+			->setMethods( [ 'get_bulk_action_notice_messages' ] )
+			->getMock();
+
+		$mock->expects( $this->once() )
+			->method( 'get_bulk_action_notice_messages' )
+			->willReturn( $messages );
+
+		$method = ( new ReflectionClass( $mock ) )->getMethod( 'maybe_display_reviews_bulk_action_notice' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invoke( $mock );
+
+		$this->assertSame( $expected_result, ob_get_clean() );
+	}
+
+	/** @see test_maybe_display_reviews_bulk_action_notice */
+	public function provider_maybe_display_reviews_bulk_action_notice() : Generator {
+
+		yield 'No messages are returned' => [
+			'messages'        => [],
+			'expected_result' => '',
+		];
+
+		yield 'A message is returned' => [
+			'messages'        => [ 'test' ],
+			'expected_result' => '<div id="moderated" class="updated"><p>test</p></div>',
+		];
+
+		yield 'Two messages are returned' => [
+			'messages'        => [ 'test1', 'test2' ],
+			'expected_result' => '<div id="moderated" class="updated"><p>test1<br/>
+test2</p></div>',
+		];
+	}
+
 }
