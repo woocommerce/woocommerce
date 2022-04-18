@@ -1280,7 +1280,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it will trigger an action hook on custom columns.
+	 * Tests that can output the default column content and trigger an action hook for custom columns.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
 	 *
@@ -1325,12 +1325,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'filter_column_output' );
 		$method->setAccessible( true );
 
-		$review = $this->factory()->comment->create_and_get(
-			[
-				'comment_content' => 'Test content',
-			]
-		);
-
 		add_filter(
 			'woocommerce_product_reviews_table_column_test_content',
 			static function( $content, $review ) {
@@ -1373,4 +1367,5 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
 		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
+
 }
