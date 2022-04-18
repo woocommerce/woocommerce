@@ -1328,11 +1328,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_product_reviews_table_column_test_content', $callback, 10, 2 );
 
-		ob_start();
+		$output = $method->invokeArgs( $list_table, [ 'test', 'test content', $review ] );
 
-		$method->invokeArgs( $list_table, [ 'test', 'test content', $review ] );
-
-		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . (string) $review->comment_ID, ob_get_clean() );
+		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . (string) $review->comment_ID, $output );
 
 		remove_filter( 'woocommerce_product_reviews_table_column_test_content', $callback );
 	}
