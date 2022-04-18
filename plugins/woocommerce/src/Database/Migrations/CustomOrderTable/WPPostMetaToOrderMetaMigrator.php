@@ -1,11 +1,29 @@
 <?php
+/**
+ * Migration class for migrating from WPPostMeta to OrderMeta table.
+ */
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
+/**
+ * Class WPPostMetaToOrderMetaMigrator.
+ *
+ * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
+ */
 class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 
+	/**
+	 * List of meta keys to exclude from migration.
+	 *
+	 * @var array
+	 */
 	private $excluded_columns;
 
+	/**
+	 * WPPostMetaToOrderMetaMigrator constructor.
+	 *
+	 * @param array $excluded_columns List of meta keys to exclude from migration.
+	 */
 	public function __construct( $excluded_columns ) {
 		$this->excluded_columns = $excluded_columns;
 		parent::__construct();
@@ -34,7 +52,7 @@ class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
 				),
-				'entity' => array(
+				'entity'        => array(
 					'table_name'       => $this->table_names['orders'],
 					'source_id_column' => 'post_id',
 					'id_column'        => 'id',
@@ -42,13 +60,13 @@ class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 				'excluded_keys' => $this->excluded_columns,
 			),
 			'destination' => array(
-				'meta'   => array(
+				'meta' => array(
 					'table_name'        => $this->table_names['meta'],
 					'entity_id_column'  => 'order_id',
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
 					'entity_id_type'    => 'int',
-					'meta_id_column'    => 'id'
+					'meta_id_column'    => 'id',
 				),
 			),
 		);
