@@ -25,6 +25,9 @@ test.describe('Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&task=payments&id=bacs'
 		);
+		if (await page.locator('.components-button.is-small.has-icon').count() > 0) {
+			await page.click('.components-button.is-small.has-icon');
+		}
 		await page.fill('//input[@placeholder="Account name"]', 'Savings');
 		await page.fill('//input[@placeholder="Account number"]', '1234');
 		await page.fill('//input[@placeholder="Bank name"]', 'Test Bank');
