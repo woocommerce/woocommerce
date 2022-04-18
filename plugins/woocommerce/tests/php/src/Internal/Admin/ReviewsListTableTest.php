@@ -1293,15 +1293,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get();
+		$callback = function( $review ) {
+			echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
+		};
 
-		add_action(
-			'woocommerce_product_reviews_table_column_custom_column',
-			static function( $review ) {
-				echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
-			},
-			10,
-			2
-		);
+		add_action( 'woocommerce_product_reviews_table_column_custom_column', $callback, 10, 2 );
 
 		ob_start();
 
@@ -1309,7 +1305,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Custom content for "custom_column" for ID ' . $review->comment_ID, ob_get_clean() );
 
-		remove_all_actions( 'woocommerce_product_reviews_table_column_custom_column' );
+		remove_action( 'woocommerce_product_reviews_table_column_custom_column', $callback );
 	}
 
 	/**
@@ -1326,23 +1322,19 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get();
+		$callback = function( $content, $review ) {
+			return 'Additional content to "' . $content . '" for test column belonging to review with ID: ' . esc_html( $review->comment_ID );
+		};
 
-		add_filter(
-			'woocommerce_product_reviews_table_column_test_content',
-			static function( $content, $review ) {
-				return 'Additional content to "' . $content . '" for test column belonging to review with ID: ' . $review->comment_ID; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			},
-			10,
-			2
-		);
+		add_filter( 'woocommerce_product_reviews_table_column_test_content', $callback, 10, 2 );
 
 		ob_start();
 
 		$method->invokeArgs( $list_table, [ 'test', 'test content', $review ] );
 
-		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . $review->comment_ID, ob_get_clean() );
+		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . (string) $review->comment_ID, ob_get_clean() );
 
-		remove_all_filters( 'woocommerce_product_reviews_table_column_test_content' );
+		remove_filter( 'woocommerce_product_reviews_table_column_test_content', $callback );
 	}
 
 	/**
