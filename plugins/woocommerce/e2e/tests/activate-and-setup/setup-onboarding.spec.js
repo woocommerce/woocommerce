@@ -7,13 +7,13 @@ test.describe(
 
 		test('can make sure WooCommerce is activated.', async ({ page }) => {
 			await page.goto('/wp-admin/plugins.php');
-			// Expect the woo plugin to be displayed
-			expect(page.locator(`//tr[@data-slug='woocommerce']`))
+			// Expect the woo plugin to be displayed -- if there's an update available, it has the same data-slug attribute
+			await expect(page.locator("//tr[@data-slug='woocommerce'][1]"))
 				.toBeVisible;
 			// Expect it to have an active class
-			expect(
-				page.locator(`//tr[@data-slug='woocommerce']`)
-			).toHaveClass('active is-uninstallable');
+			await expect(
+				page.locator("//tr[@data-slug='woocommerce'][1]")
+			).toHaveClass(/active/);
 		});
 	}
 );
