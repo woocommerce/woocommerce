@@ -60,7 +60,7 @@ class ReviewsListTable extends WP_List_Table {
 			)
 		);
 
-		$this->current_user_can_moderate_reviews = current_user_can( Reviews::get_view_page_capability() );
+		$this->current_user_can_moderate_reviews = current_user_can( Reviews::get_view_page_capability( 'moderate' ) );
 	}
 
 	/**

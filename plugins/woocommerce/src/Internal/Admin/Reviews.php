@@ -59,16 +59,17 @@ class Reviews {
 	/**
 	 * Gets the required capability to access the reviews page and manage product reviews.
 	 *
+	 * @param string $context The context for which the capability is needed.
 	 * @return string
 	 */
-	public static function get_view_page_capability() {
+	public static function get_view_page_capability( $context = 'view' ) {
 
 		/**
 		 * Filters whether the current user can manage product reviews.
 		 *
 		 * @param string $capability The capability (defaults to `moderate_comments`).
 		 */
-		return apply_filters( 'woocommerce_view_product_reviews_page_capability', 'moderate_comments' );
+		return apply_filters( 'woocommerce_view_product_reviews_page_capability', 'moderate_comments', $context );
 	}
 
 	/**
