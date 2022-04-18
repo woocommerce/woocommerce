@@ -251,6 +251,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'get_bulk_action_notice_messages' );
 		$method->setAccessible( true );
 
+		$_REQUEST = [];
+
 		foreach ( $statuses as $status ) {
 			$_REQUEST[ $status ] = $count;
 		}
