@@ -408,4 +408,43 @@ test2</p></div>',
 		];
 	}
 
+	/**
+	 * Tests that the display method is called only for the reviews page.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::display_notices()
+	 * @dataProvider provider_display_notices
+	 *
+	 * @param bool $is_reviews_page                whether the current page is the reviews page or not.
+	 * @param bool $should_call_the_display_method indicates if the display method should be called.
+	 */
+	public function test_display_notices( $is_reviews_page, $should_call_the_display_method ) {
+
+		$mock = $this->getMockBuilder( Reviews::class )
+			->setMethods( [ 'is_reviews_page', 'maybe_display_reviews_bulk_action_notice' ] )
+			->getMock();
+
+		$mock->expects( $this->once() )
+			->method( 'is_reviews_page' )
+			->willReturn( $is_reviews_page );
+
+		$mock->expects( $this->exactly( (int) $should_call_the_display_method ) )
+			->method( 'maybe_display_reviews_bulk_action_notice' );
+
+		$mock->display_notices();
+	}
+
+	/** @see test_display_notices */
+	public function provider_display_notices() : Generator {
+
+		yield 'Is the reviews page' => [
+			'is_reviews_page'                          => true,
+			'maybe_display_reviews_bulk_action_notice' => true,
+		];
+
+		yield 'Is not the reviews page' => [
+			'is_reviews_page'                          => false,
+			'maybe_display_reviews_bulk_action_notice' => false,
+		];
+	}
+
 }
