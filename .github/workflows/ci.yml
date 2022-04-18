@@ -59,7 +59,7 @@ jobs:
           path: |
             ./packages
             ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+          key: ${{ runner.os }}-ci-${{ hashFiles('./composer.lock') }}
 
       - name: Install PNPM and install dependencies
         run: |
