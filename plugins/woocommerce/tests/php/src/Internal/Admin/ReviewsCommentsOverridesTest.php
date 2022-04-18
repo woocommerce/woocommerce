@@ -67,7 +67,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		$output = trim( ob_get_clean() );
 
 		$this->assertSame(
-			'<div class="notice notice-info is-dismissible">
+			'<div class="notice notice-info">
 			<p><strong>Product reviews have moved!</strong></p>
 			<p>Product reviews can now be managed from Products &gt; Reviews.</p>
 			<p class="submit"><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">Visit new location</a></p>
