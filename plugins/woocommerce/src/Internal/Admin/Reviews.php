@@ -61,14 +61,14 @@ class Reviews {
 	 *
 	 * @return string
 	 */
-	public static function get_capability() {
+	public static function get_view_page_capability() {
 
 		/**
 		 * Filters whether the current user can manage product reviews.
 		 *
 		 * @param string $capability The capability (defaults to `moderate_comments`).
 		 */
-		return apply_filters( 'woocommerce_manage_product_reviews_capability', 'moderate_comments' );
+		return apply_filters( 'woocommerce_manage_product_reviews_page_view_capability', 'moderate_comments' );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Reviews {
 			'edit.php?post_type=product',
 			__( 'Reviews', 'woocommerce' ),
 			__( 'Reviews', 'woocommerce' ) . $this->get_pending_count_bubble(),
-			static::get_capability(),
+			static::get_view_page_capability(),
 			static::MENU_SLUG,
 			[ $this, 'render_reviews_list_table' ]
 		);
