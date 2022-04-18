@@ -1,9 +1,10 @@
 name: Run CI
-on: 
-  push:
-    branches:
-      - trunk
-      - 'release/**'
+on: pull_request # remove after testing.
+# on: 
+#   push:
+#     branches:
+#       - trunk
+#       - 'release/**'
 defaults:
   run:
     shell: bash
@@ -52,7 +53,8 @@ jobs:
           composer --version
 
       - name: Get cached composer directories
-        uses: actions/cache@v2
+        id: cache-deps
+        uses: actions/cache@v3
         with:
           path: |
             ./packages
@@ -62,9 +64,13 @@ jobs:
       - name: Install PNPM and install dependencies
         run: |
             npm install -g pnpm
-            pnpm install
+
+      - name: Install npm deps
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: pnpm install
 
       - name: Setup and install composer
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: pnpm nx composer-install woocommerce
 
       - name: Build Admin feature config
