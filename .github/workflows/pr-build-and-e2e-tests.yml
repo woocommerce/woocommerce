@@ -77,6 +77,7 @@ jobs:
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm install
 
+            # List for debugging.
             - name: list directories
               run: ls -R
 
