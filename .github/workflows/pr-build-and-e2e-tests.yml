@@ -70,7 +70,7 @@ jobs:
               with:
                 path: |
                   package/woocommerce
-                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-buildsss-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install npm deps
               working-directory: package/woocommerce
