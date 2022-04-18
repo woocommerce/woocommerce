@@ -73,7 +73,7 @@ jobs:
               with:
                 path: |
                   **/node_modules
-                key: ${{ runner.os }}-builds-${{ hashFiles('**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install npm deps
               if: steps.cache-deps.outputs.cache-hit != 'true'
