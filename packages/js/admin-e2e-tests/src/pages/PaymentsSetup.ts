@@ -21,8 +21,20 @@ export class PaymentsSetup extends BasePage {
 		await waitForElementByText( 'h1', 'Set up payments' );
 	}
 
-	async closeHelpModal(): Promise< void > {
-		await this.clickButtonWithText( 'Got it' );
+	async possiblyCloseHelpModal(): Promise< void > {
+		try {
+			await this.clickButtonWithText( 'Got it' );
+		} catch ( e ) {}
+	}
+
+	async showOtherPaymentMethods(): Promise< void > {
+		const selector = '.woocommerce-task-payments button.toggle-button';
+		await this.page.waitForSelector( selector );
+		const toggleButton = await this.page.$(
+			`${ selector }[aria-expanded=false]`
+		);
+		await toggleButton?.click();
+		await waitForElementByText( 'h2', 'Offline payment methods' );
 	}
 
 	async goToPaymentMethodSetup(
@@ -39,14 +51,6 @@ export class PaymentsSetup extends BasePage {
 		} else {
 			await button.click();
 		}
-	}
-
-	async methodHasBeenSetup( method: PaymentMethod ): Promise< void > {
-		const selector = `.woocommerce-task-payment-${ method }`;
-		await this.page.waitForSelector( selector );
-		expect(
-			await getElementByText( '*', 'Manage', selector )
-		).toBeDefined();
 	}
 
 	async enableCashOnDelivery(): Promise< void > {

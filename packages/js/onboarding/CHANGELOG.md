@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Update TaskList types.
+
 # 3.0.1
 
 -   Add missing dependency.

@@ -36,6 +36,9 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
+			return __( 'Create or upload your first products', 'woocommerce' );
+		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added products', 'woocommerce' );
@@ -51,6 +54,9 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_content() {
+		if ( count( $this->task_list->get_sections() ) > 0 ) {
+			return __( 'Add products to sell and build your catalog.', 'woocommerce' );
+		}
 		return __(
 			'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
 			'woocommerce'
@@ -98,7 +104,7 @@ class Products extends Task {
 			return;
 		}
 
-		if ( ! $this->is_active() || $this->is_complete() ) {
+		if ( ! $this->is_active() || ! $this->is_complete() ) {
 			return;
 		}
 
@@ -112,6 +118,9 @@ class Products extends Task {
 			WC_VERSION,
 			true
 		);
+
+		// Clear the active task transient to only show notice once per active session.
+		delete_transient( self::ACTIVE_TASK_TRANSIENT );
 	}
 
 	/**

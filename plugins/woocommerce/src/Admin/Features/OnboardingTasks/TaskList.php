@@ -97,6 +97,20 @@ class TaskList {
 	public $options = array();
 
 	/**
+	 * Array of TaskListSection.
+	 *
+	 * @var array
+	 */
+	private $sections = array();
+
+	/**
+	 * Key value map of task class and id used for sections.
+	 *
+	 * @var array
+	 */
+	public $task_class_id_map = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @param array $data Task list data.
@@ -112,6 +126,7 @@ class TaskList {
 			'options'                 => array(),
 			'visible'                 => true,
 			'display_progress_header' => false,
+			'sections'                => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
@@ -132,6 +147,12 @@ class TaskList {
 		}
 
 		$this->possibly_remove_reminder_bar();
+		$this->sections = array_map(
+			function( $section ) {
+				return new TaskListSection( $section, $this );
+			},
+			$data['sections']
+		);
 	}
 
 	/**
@@ -243,7 +264,9 @@ class TaskList {
 			return;
 		}
 
-		$this->tasks[] = $task;
+		$task_class_name                             = substr( get_class( $task ), strrpos( get_class( $task ), '\\' ) + 1 );
+		$this->task_class_id_map[ $task_class_name ] = $task->get_id();
+		$this->tasks[]                               = $task;
 	}
 
 	/**
@@ -277,6 +300,15 @@ class TaskList {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Get task list sections.
+	 *
+	 * @return array
+	 */
+	public function get_sections() {
+		return $this->sections;
 	}
 
 	/**
@@ -330,6 +362,15 @@ class TaskList {
 	}
 
 	/**
+	 * Returns option to keep completed task list.
+	 *
+	 * @return string
+	 */
+	public function get_keep_completed_task_list() {
+		return get_option( 'woocommerce_task_list_keep_completed', 'no' );
+	}
+
+	/**
 	 * Remove reminder bar four weeks after store creation.
 	 */
 	public static function possibly_remove_reminder_bar() {
@@ -350,20 +391,30 @@ class TaskList {
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
+		$tasks_json = array();
+		foreach ( $this->tasks as $task ) {
+			$json = $task->get_json();
+			if ( $json['canView'] ) {
+				$tasks_json[] = $json;
+			}
+		}
+
 		return array(
 			'id'                    => $this->get_list_id(),
 			'title'                 => $this->title,
 			'isHidden'              => $this->is_hidden(),
 			'isVisible'             => $this->is_visible(),
 			'isComplete'            => $this->is_complete(),
-			'tasks'                 => array_map(
-				function( $task ) {
-					return $task->get_json();
-				},
-				$this->get_viewable_tasks()
-			),
+			'tasks'                 => $tasks_json,
 			'eventPrefix'           => $this->prefix_event( '' ),
 			'displayProgressHeader' => $this->display_progress_header,
+			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
+			'sections'              => array_map(
+				function( $section ) {
+					return $section->get_json();
+				},
+				$this->sections
+			),
 		);
 	}
 }

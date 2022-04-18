@@ -1,6 +1,6 @@
 # WooCommerce Admin
 
-The WooCommerce Admin plugin is where the next iteration of the administrative experience for WooCommerce is being developed. The project is being built on top of the modern JavaScript packages that are being released from the [core WordPress editor project](https://github.com/wordpress/gutenberg). By building with these `@wordpress/components` - WooCommerce Admin seeks to create a cohesive experience with the latest WordPress core design system, and to deliver a fast and modern set of tools to manage one's WooCommerce Store with.
+The WooCommerce Admin is where the next iteration of the administrative experience for WooCommerce is being developed. The project is being built on top of the modern JavaScript packages that are being released from the [core WordPress editor project](https://github.com/wordpress/gutenberg). By building with these `@wordpress/components` - WooCommerce Admin seeks to create a cohesive experience with the latest WordPress core design system, and to deliver a fast and modern set of tools to manage one's WooCommerce Store with.
 
 Currently, development efforts have been focused on two primary areas:
 
@@ -10,7 +10,7 @@ Currently, development efforts have been focused on two primary areas:
 
 ## Analytics
 
-With WooCommerce Admin installed, a new Analytics menu item is created in the wp-admin menu system. This menu item, and the reports contained insde of it are available to all wp-admin users that have the `view_woocommerce_reports` capability, so per a standard WooCommerce install this would give `shop_manager`s and `administrator`s access to the reports.
+With WooCommerce installed, a new Analytics menu item is created in the wp-admin menu system. This menu item, and the reports contained insde of it are available to all wp-admin users that have the `view_woocommerce_reports` capability, so per a standard WooCommerce install this would give `shop_manager`s and `administrator`s access to the reports.
 
 Each report is quite unique with its own set of filtering options and chart types. To learn more about each individual report, please view the pages below:
 

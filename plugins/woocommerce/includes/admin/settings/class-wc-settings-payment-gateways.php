@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Settings_Payment_Gateways', false ) ) {
@@ -199,6 +201,27 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 								echo '</td>';
 							}
 
+							echo '</tr>';
+						}
+						/**
+						 * Add "Other payment methods" link in WooCommerce -> Settings -> Payments
+						 * When the store is in WC Payments eligible country.
+						 * See https://github.com/woocommerce/woocommerce/issues/32130 for more details.
+						 */
+						if ( WooCommercePayments::is_supported() ) {
+							$columns_count      = count( $columns );
+							$link_text          = __( 'Other payment methods', 'woocommerce' );
+							$external_link_icon = '<svg style="margin-left: 4px" class="gridicon gridicons-external needs-offset" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M19 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6v2H5v12h12v-6h2zM13 3v2h4.586l-7.793 7.793 1.414 1.414L19 6.414V11h2V3h-8z"></path></g></svg>';
+							echo '<tr>';
+							// phpcs:ignore -- ignoring the error since the value is harded.
+							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
+							echo "<a id='settings-other-payment-methods' href='" . esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) ) . "' target='_blank' class='components-button is-tertiary'>";
+							// phpcs:ignore
+							echo $link_text;
+							// phpcs:ignore
+							echo $external_link_icon;
+							echo '</a>';
+							echo '</td>';
 							echo '</tr>';
 						}
 						?>

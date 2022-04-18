@@ -347,7 +347,7 @@ class WC_Form_Handler {
 
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+			wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
 			exit;
 		}
 	}

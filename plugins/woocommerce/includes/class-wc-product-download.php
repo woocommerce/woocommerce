@@ -25,9 +25,10 @@ class WC_Product_Download implements ArrayAccess {
 	 * @var array
 	 */
 	protected $data = array(
-		'id'   => '',
-		'name' => '',
-		'file' => '',
+		'id'      => '',
+		'name'    => '',
+		'file'    => '',
+		'enabled' => true,
 	);
 
 	/**
@@ -106,10 +107,20 @@ class WC_Product_Download implements ArrayAccess {
 	public function check_is_valid( bool $auto_add_to_approved_directory_list = true ) {
 		$download_file = $this->get_file();
 
+		if ( ! $this->data['enabled'] ) {
+			throw new Exception(
+				sprintf(
+					/* translators: %s: Downloadable file. */
+					__( 'The downloadable file %s cannot be used as it has been disabled.', 'woocommerce' ),
+					'<code>' . basename( $download_file ) . '</code>'
+				)
+			);
+		}
+
 		if ( ! $this->is_allowed_filetype() ) {
 			throw new Exception(
 				sprintf(
-				/* translators: %1$s: Downloadable file */
+					/* translators: 1: Downloadable file, 2: List of allowed filetypes. */
 					__( 'The downloadable file %1$s cannot be used as it does not have an allowed file type. Allowed types include: %2$s', 'woocommerce' ),
 					'<code>' . basename( $download_file ) . '</code>',
 					'<code>' . implode( ', ', array_keys( $this->get_allowed_mime_types() ) ) . '</code>'
@@ -121,7 +132,7 @@ class WC_Product_Download implements ArrayAccess {
 		if ( ! $this->file_exists() ) {
 			throw new Exception(
 				sprintf(
-				/* translators: %s: Downloadable file */
+					/* translators: %s: Downloadable file */
 					__( 'The downloadable file %s cannot be used as it does not exist on the server.', 'woocommerce' ),
 					'<code>' . $download_file . '</code>'
 				)
@@ -201,35 +212,42 @@ class WC_Product_Download implements ArrayAccess {
 			return;
 		}
 
-		$download_file           = $this->get_file();
+		$download_file = $this->get_file();
+
+		/**
+		 * Controls whether shortcodes should be resolved and validated using the Approved Download Directory feature.
+		 *
+		 * @param bool $should_validate
+		 */
+		if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $this->get_type_of_file_path() ) {
+			$download_file = do_shortcode( $download_file );
+		}
+
 		$is_site_administrator   = is_multisite() ? current_user_can( 'manage_sites' ) : current_user_can( 'manage_options' );
 		$valid_storage_directory = $download_directories->is_valid_path( $download_file );
 
-		if ( ! $valid_storage_directory && $auto_add_to_approved_directory_list ) {
+		if ( $valid_storage_directory ) {
+			return;
+		}
+
+		if ( $auto_add_to_approved_directory_list ) {
 			try {
 				// Add the parent URL to the approved directories list, but *do not enable it* unless the current user is a site admin.
 				$download_directories->add_approved_directory( ( new URL( $download_file ) )->get_parent_url(), $is_site_administrator );
-			} catch ( Exception $e ) {
-				/* translators: %s: Downloadable file */
-				throw new Exception(
-					sprintf(
-						/* translators: %1$s is the downloadable file path, %2$s is an opening link tag, %3%s is a closing link tag. */
-						__( 'The downloadable file %1$s cannot be used: it is not located in an approved directory. Please contact a site administrator and request their approval. %2$sLearn more.%3$s', 'woocommerce' ),
-						'<code>' . $download_file . '</code>',
-						'<a href="https://woocommerce.com/documentation/approved-download-directories">', // @todo update to working link (see https://github.com/Automattic/woocommerce/issues/181)
-						'</a>'
-					)
-				);
+				$valid_storage_directory = $download_directories->is_valid_path( $download_file );
+			} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// At this point, $valid_storage_directory will be false. Fall-through so the appropriate exception is
+				// triggered (same as if the storage directory was invalid and $auto_add_to_approved_directory_list was false.
 			}
 		}
 
-		if ( ! $valid_storage_directory && ! $is_site_administrator ) {
+		if ( ! $valid_storage_directory ) {
 			throw new Exception(
 				sprintf(
 					/* translators: %1$s is the downloadable file path, %2$s is an opening link tag, %3%s is a closing link tag. */
 					__( 'The downloadable file %1$s cannot be used: it is not located in an approved directory. Please contact a site administrator for help. %2$sLearn more.%3$s', 'woocommerce' ),
 					'<code>' . $download_file . '</code>',
-					'<a href="https://woocommerce.com/documentation/approved-download-directories">', // @todo update to working link (see https://github.com/Automattic/woocommerce/issues/181)
+					'<a href="https://woocommerce.com/document/approved-download-directories">',
 					'</a>'
 				)
 			);
@@ -292,6 +310,15 @@ class WC_Product_Download implements ArrayAccess {
 		}
 	}
 
+	/**
+	 * Sets the status of the download to enabled (true) or disabled (false).
+	 *
+	 * @param bool $enabled True indicates the downloadable file is enabled, false indicates it is disabled.
+	 */
+	public function set_enabled( bool $enabled = true ) {
+		$this->data['enabled'] = $enabled;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Getters
@@ -334,6 +361,15 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	public function get_file() {
 		return $this->data['file'];
+	}
+
+	/**
+	 * Get status of the download.
+	 *
+	 * @return bool
+	 */
+	public function get_enabled(): bool {
+		return $this->data['enabled'];
 	}
 
 	/*

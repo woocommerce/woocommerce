@@ -16,6 +16,7 @@ import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
+	getVisibleTasks,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
@@ -63,12 +64,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	const prevQueryRef = useRef( query );
 
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
+	const visibleTasks = getVisibleTasks( tasks );
 
 	const recordTaskListView = () => {
 		if ( query.task ) {
@@ -295,7 +291,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 							const className = classnames(
 								'woocommerce-task-list__item index-' + index,
 								{
-									complete: task.isComplete,
+									'is-complete': task.isComplete,
 									'is-active': task.id === activeTaskId,
 								}
 							);
