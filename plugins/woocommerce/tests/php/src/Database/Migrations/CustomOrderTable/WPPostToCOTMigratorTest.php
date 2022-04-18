@@ -174,7 +174,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	/**
 	 * Helper method to get address details from DB.
 	 *
-	 * @param int $order_id Order ID.
+	 * @param int    $order_id Order ID.
 	 * @param string $address_type Address Type.
 	 *
 	 * @return array|object|void|null DB object.
@@ -202,10 +202,18 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		return $wpdb->get_row( "SELECT * FROM $operational_data_table WHERE order_id = $order_id;" );
 	}
 
+	/**
+	 * Helper method to get meta data from custom order tables for given order id.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return array Meta data for an order ID.
+	 */
 	private function get_meta_data_from_cot( $order_id ) {
 		global $wpdb;
 		$metadata_table = $this->data_store::get_meta_table_name();
 
+		// phpcs:ignore
 		return $wpdb->get_results( "SELECT * FROM $metadata_table WHERE order_id = $order_id;" );
 	}
 
@@ -387,25 +395,39 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->assertEquals( (float) $order->get_discount_total(), (float) $db_order_op_data->discount_total_amount );
 	}
 
+	/**
+	 * Helper method to assert that metadata is migrated for an order.
+	 *
+	 * @param WP_Post $order WP_Post order object.
+	 */
 	private function assert_metadata_is_migrated( $order ) {
 		$db_order  = $this->get_order_from_cot( $order );
 		$meta_data = $this->get_meta_data_from_cot( $db_order->id );
 
-		$unique_row = array_filter( $meta_data, function ( $meta_row ) {
-			return 'unique_key_1' === $meta_row->meta_key;
-		} );
+		$unique_row = array_filter(
+			$meta_data,
+			function ( $meta_row ) {
+				return 'unique_key_1' === $meta_row->meta_key;
+			}
+		);
 
 		$this->assertEquals( 1, count( $unique_row ) );
-		$this->assertEquals( 'unique_value_1', array_values( $unique_row)[0]->meta_value );
+		$this->assertEquals( 'unique_value_1', array_values( $unique_row )[0]->meta_value );
 
-		$non_unique_rows = array_filter( $meta_data, function ( $meta_row ) {
-			return 'non_unique_key_1' === $meta_row->meta_key;
-		} );
+		$non_unique_rows = array_filter(
+			$meta_data,
+			function ( $meta_row ) {
+				return 'non_unique_key_1' === $meta_row->meta_key;
+			}
+		);
 		$this->assertEquals( 2, count( $non_unique_rows ) );
-		$this->assertEquals( array(
-			'non_unique_value_1',
-			'non_unique_value_2'
-		), array_column( $non_unique_rows, 'meta_value' ) );
+		$this->assertEquals(
+			array(
+				'non_unique_value_1',
+				'non_unique_value_2',
+			),
+			array_column( $non_unique_rows, 'meta_value' )
+		);
 	}
 
 	/**
