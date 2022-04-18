@@ -50,7 +50,7 @@ class Reviews {
 	 *
 	 * @return Reviews instance
 	 */
-	public static function get_instance(): ?Reviews {
+	public static function get_instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
