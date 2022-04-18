@@ -57,7 +57,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * Tests that can get the pending comment count bubble.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_pending_count_bubble()
-	 * @dataProvider provider_get_pending_count_bubble
+	 * @dataProvider data_provider_get_pending_count_bubble
 	 *
 	 * @param int    $number_pending Number of pending product reviews.
 	 * @param string $expected_html  Expected return value.
@@ -119,7 +119,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_pending_count_bubble */
-	public function provider_get_pending_count_bubble() : Generator {
+	public function data_provider_get_pending_count_bubble() : Generator {
 		yield 'no pending' => [ 0, '' ];
 		yield 'has pending' => [
 			2,
