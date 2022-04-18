@@ -71,16 +71,19 @@ jobs:
               with:
                 path: |
                   **/node_modules
-                key: ${{ runner.os }}-build-${{ hashFiles('**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-builds-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install npm deps
               working-directory: package/woocommerce
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm install
 
+            - name: list directories
+              run: ls -R
+
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpm dlx wc-e2e docker:up
+              run: pnpx wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -88,7 +91,7 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpm dlx wc-e2e test:e2e
+              run: pnpx wc-e2e test:e2e
 
             - name: Archive E2E test screenshots
               uses: actions/upload-artifact@v2
@@ -151,7 +154,7 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpm dlx wc-e2e docker:up
+              run: pnpx wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -159,7 +162,7 @@ jobs:
                   BASE_URL: http://localhost:8084
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpm dlx wc-api-tests test api
+              run: pnpx wc-api-tests test api
 
             - name: Upload API test report
               uses: actions/upload-artifact@v2
@@ -221,7 +224,7 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpm dlx wc-e2e docker:up
+              run: pnpx wc-e2e docker:up
             
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
@@ -230,7 +233,7 @@ jobs:
             
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpn dlx wc-e2e docker:up
+              run: pnpx wc-e2e docker:up
 
             - name: Install k6
               run: |
