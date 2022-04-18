@@ -458,7 +458,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		ob_start();
 
-		$method->invoke( $list_table );
+		$method->invokeArgs( $list_table, [ null ] );
 
 		$product_output = ob_get_clean();
 
@@ -1280,48 +1280,59 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
-	 * @dataProvider provider_column_default
+	 * Tests that can output the default column content and trigger an action hook for custom columns.
 	 *
-	 * @param callable|null $hook_callback   Optional callback to add to the action.
-	 * @param string        $expected_output Expected output from the method.
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_column_default( ?callable $hook_callback, string $expected_output ) {
+	public function test_column_default() {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
 		$method->setAccessible( true );
 
-		$comment = new \WP_Comment(
-			(object) [
-				'comment_ID' => '123',
-			]
-		);
+		$review = $this->factory()->comment->create_and_get();
+		$callback = function( $review ) {
+			echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
+		};
 
-		if ( ! empty( $hook_callback ) ) {
-			add_action( 'woocommerce_product_reviews_table_custom_column', $hook_callback, 10, 2 );
-		} else {
-			remove_all_actions( 'woocommerce_product_reviews_table_custom_column' );
-		}
+		add_action( 'woocommerce_product_reviews_table_column_custom_column', $callback, 10, 2 );
 
 		ob_start();
 
-		$method->invoke( $list_table, $comment, 'column-name' );
+		$method->invokeArgs( $list_table, [ $review, 'custom_column' ] );
 
-		$this->assertSame( $expected_output, ob_get_clean() );
+		$this->assertSame( 'Custom content for "custom_column" for ID ' . $review->comment_ID, ob_get_clean() );
+
+		remove_action( 'woocommerce_product_reviews_table_column_custom_column', $callback );
 	}
 
-	/** @see test_column_default */
-	public function provider_column_default() : Generator {
-		yield 'no callback' => [ null, '' ];
+	/**
+	 * Tests that it will trigger a filter hook for columns.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::filter_column_output()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_filter_column_output() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'filter_column_output' );
+		$method->setAccessible( true );
 
-		yield 'custom callback' => [
-			'hook_callback' => static function ( $column_name, $review_id ) {
-				echo 'Column name: ' . $column_name . ' for ID ' . $review_id . '.'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			},
-			'expected_output' => 'Column name: column-name for ID 123.',
-		];
+		$review = $this->factory()->comment->create_and_get();
+		$callback = function( $content, $review ) {
+			return 'Additional content to "' . $content . '" for test column belonging to review with ID: ' . esc_html( $review->comment_ID );
+		};
+
+		add_filter( 'woocommerce_product_reviews_table_column_test_content', $callback, 10, 2 );
+
+		$output = $method->invokeArgs( $list_table, [ 'test', 'test content', $review ] );
+
+		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . (string) $review->comment_ID, $output );
+
+		remove_filter( 'woocommerce_product_reviews_table_column_test_content', $callback );
 	}
 
 	/**
@@ -1348,4 +1359,5 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<label class="screen-reader-text" for="filter-by-product">Filter by product</label>', $output );
 		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
+
 }

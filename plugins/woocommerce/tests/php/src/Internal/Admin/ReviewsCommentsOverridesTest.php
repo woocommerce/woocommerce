@@ -77,7 +77,11 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that can exclude reviews from comments in the comments page.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::exclude_reviews_from_comments()
+	 *
+	 * @return void
 	 */
 	public function test_exclude_reviews_from_comments() {
 		$overrides = new ReviewsCommentsOverrides();
