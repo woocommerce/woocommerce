@@ -62,7 +62,7 @@ class Reviews {
 	 * @param string $context The context for which the capability is needed.
 	 * @return string
 	 */
-	public static function get_view_page_capability( $context = 'view' ) {
+	public static function get_capability( $context = 'view' ) {
 
 		/**
 		 * Filters whether the current user can manage product reviews.
@@ -83,7 +83,7 @@ class Reviews {
 			'edit.php?post_type=product',
 			__( 'Reviews', 'woocommerce' ),
 			__( 'Reviews', 'woocommerce' ) . $this->get_pending_count_bubble(),
-			static::get_view_page_capability(),
+			static::get_capability(),
 			static::MENU_SLUG,
 			[ $this, 'render_reviews_list_table' ]
 		);
