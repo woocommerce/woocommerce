@@ -247,7 +247,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function display() {
-		$singular = $this->_args['singular'];
+		$singular = $this->_args['singular'] ?? false;
 
 		$this->display_tablenav( 'top' );
 

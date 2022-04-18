@@ -26,6 +26,26 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that will output the reviews list table with the expected HTML elements.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::display()
+	 *
+	 * @return void
+	 */
+	public function test_display() {
+		$this->factory()->comment->create_many( 2 );
+
+		ob_start();
+
+		$this->get_reviews_list_table()->display();
+
+		$output = ob_get_clean();
+
+		$this->assertContains( '<table class="wp-list-table"', $output );
+		$this->assertContains( '<tbody id="the-comment-list"', $output );
+	}
+
+	/**
 	 * Tests that can process the row output for a review or reply.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::single_row()
