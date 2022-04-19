@@ -64,26 +64,26 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: |
-                  ./package/woocommerce/**/node_modules
-                key: ${{ runner.os }}-e2e-test2-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
+                  package/woocommerce/**/node_modules
+                key: ${{ runner.os }}-e2e-test3-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
 
             - name: Install dependencies
-              working-directory: ./package/woocommerce
+              working-directory: package/woocommerce
               if: steps.cache-modules.outputs.cache-hit != 'true'
               run: pnpm install
 
+            - name: list dir
+              run: ls -R package/woocommerce
+
             - name: Load docker images and start containers.
-              working-directory: ./package/woocommerce
+              working-directory: package/woocommerce
               run: pnpm exec wc-e2e docker:up
 
-            - name: list dir
-              run: ls -R ./package/woocommerce
-
             - name: Run tests command.
-              working-directory: ./package/woocommerce
+              working-directory: package/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
