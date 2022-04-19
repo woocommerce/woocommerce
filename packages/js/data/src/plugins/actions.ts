@@ -8,6 +8,7 @@ import {
 } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
 import { _n, sprintf } from '@wordpress/i18n';
+import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -416,8 +417,8 @@ export type Actions =
 	| ReturnType< typeof setRecommendedPlugins >;
 
 // Types
-export type ActionDispatchers = {
+export type ActionDispatchers = DispatchFromMap< {
 	installJetpackAndConnect: typeof installJetpackAndConnect;
 	installAndActivatePlugins: typeof installAndActivatePlugins;
 	dismissRecommendedPlugins: typeof dismissRecommendedPlugins;
-};
+} >;
