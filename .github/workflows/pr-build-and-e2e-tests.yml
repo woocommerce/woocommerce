@@ -81,7 +81,7 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: list dir
-              run: ls -R woocommerce/packages/js/e2e-environment
+              run: ls -R package/woocommerce/woocommerce/packages/js/e2e-environment
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
