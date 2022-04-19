@@ -59,7 +59,7 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - uses: pnpm/action-setup@2.2.1
+            - uses: pnpm/action-setup@2.1.0
               with:
                 version: 6.32.8
 
