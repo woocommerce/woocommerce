@@ -535,7 +535,18 @@ importers:
       webpack-cli: 3.3.12_webpack@5.70.0
 
   packages/js/e2e-builds:
-    specifiers: {}
+    specifiers:
+      '@babel/core': 7.12.9
+      chalk: ^4.1.2
+      glob: ^7.2.0
+      lodash: ^4.17.21
+      mkdirp: ^1.0.4
+    devDependencies:
+      '@babel/core': 7.12.9
+      chalk: 4.1.2
+      glob: 7.2.0
+      lodash: 4.17.21
+      mkdirp: 1.0.4
 
   packages/js/e2e-core-tests:
     specifiers:
@@ -1733,16 +1744,16 @@ packages:
     resolution: {integrity: sha512-gTXYh3M5wb7FRXQy+FErKFAv90BnlOuNn1QkCK2lREoPAjrQCO49+HVSrFoe5uakFAF5eenS75KbO2vQiLrTMQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@babel/code-frame': 7.16.0
-      '@babel/generator': 7.16.0
-      '@babel/helper-module-transforms': 7.16.0
-      '@babel/helpers': 7.16.3
-      '@babel/parser': 7.16.4
-      '@babel/template': 7.16.0
-      '@babel/traverse': 7.16.3
-      '@babel/types': 7.16.0
+      '@babel/code-frame': 7.16.7
+      '@babel/generator': 7.17.7
+      '@babel/helper-module-transforms': 7.17.7
+      '@babel/helpers': 7.17.8
+      '@babel/parser': 7.17.8
+      '@babel/template': 7.16.7
+      '@babel/traverse': 7.17.3
+      '@babel/types': 7.17.0
       convert-source-map: 1.8.0
-      debug: 4.3.2
+      debug: 4.3.3
       gensync: 1.0.0-beta.2
       json5: 2.2.0
       lodash: 4.17.21
@@ -23143,7 +23154,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
 
