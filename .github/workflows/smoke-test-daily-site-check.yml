@@ -1,6 +1,7 @@
 name: Check daily smoke test site status.
 on:
-  push:
+  schedule:
+    - cron: '25 7 * * *'
 
 jobs:
   ping_site:
