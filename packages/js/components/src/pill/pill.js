@@ -9,7 +9,7 @@ import classnames from 'classnames';
  */
 import { Text } from '../experimental';
 
-export function Pill( { children, className } ) {
+export function Pill( { children, className = '' } ) {
 	return (
 		<Text
 			className={ classnames( 'woocommerce-pill', className ) }
