@@ -2,7 +2,7 @@
 	"name": "woocommerce-admin-test-helper",
 	"title": "WooCommerce Admin Test Helper",
 	"license": "GPL-3.0-or-later",
-	"version": "0.7.1",
+	"version": "0.7.2",
 	"description": "woocommerce-admin-test-helper",
 	"scripts": {
 		"build": "wp-scripts build",
