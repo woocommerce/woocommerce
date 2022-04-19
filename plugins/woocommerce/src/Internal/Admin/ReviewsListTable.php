@@ -286,8 +286,6 @@ class ReviewsListTable extends WP_List_Table {
 		}
 
 		$review_status = wp_get_comment_status( $item );
-		$del_nonce     = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$item->comment_ID" ) );
-		$approve_nonce = esc_html( '_wpnonce=' . wp_create_nonce( "approve-comment_$item->comment_ID" ) );
 
 		$url = add_query_arg(
 			[
@@ -296,13 +294,13 @@ class ReviewsListTable extends WP_List_Table {
 			admin_url( 'comment.php' )
 		);
 
-		$approve_url   = $url . "&action=approvecomment&$approve_nonce";
-		$unapprove_url = $url . "&action=unapprovecomment&$approve_nonce";
-		$spam_url      = $url . "&action=spamcomment&$del_nonce";
-		$unspam_url    = $url . "&action=unspamcomment&$del_nonce";
-		$trash_url     = $url . "&action=trashcomment&$del_nonce";
-		$untrash_url   = $url . "&action=untrashcomment&$del_nonce";
-		$delete_url    = $url . "&action=deletecomment&$del_nonce";
+		$approve_url   = wp_nonce_url( add_query_arg( 'action', 'approvecomment', $url ), "approve-comment_$item->comment_ID" );
+		$unapprove_url = wp_nonce_url( add_query_arg( 'action', 'unapprovecomment', $url ), "approve-comment_$item->comment_ID" );
+		$spam_url      = wp_nonce_url( add_query_arg( 'action', 'spamcomment', $url ), "delete-comment_$item->comment_ID" );
+		$unspam_url    = wp_nonce_url( add_query_arg( 'action', 'unspamcomment', $url ), "delete-comment_$item->comment_ID" );
+		$trash_url     = wp_nonce_url( add_query_arg( 'action', 'trashcomment', $url ), "delete-comment_$item->comment_ID" );
+		$untrash_url   = wp_nonce_url( add_query_arg( 'action', 'untrashcomment', $url ), "delete-comment_$item->comment_ID" );
+		$delete_url    = wp_nonce_url( add_query_arg( 'action', 'deletecomment', $url ), "delete-comment_$item->comment_ID" );
 
 		$actions = [
 			'approve'   => '',
