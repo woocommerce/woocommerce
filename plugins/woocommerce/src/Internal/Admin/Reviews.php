@@ -130,39 +130,39 @@ class Reviews {
 
 		if ( $approved > 0 ) {
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment approved', '%s comments approved', $approved, 'woocommerce' ), $approved );
+			$messages[] = sprintf( _n( '%s review approved', '%s reviews approved', $approved, 'woocommerce' ), $approved );
 		}
 
 		if ( $unapproved > 0 ) {
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment unapproved', '%s comments unapproved', $unapproved, 'woocommerce' ), $unapproved );
+			$messages[] = sprintf( _n( '%s review unapproved', '%s reviews unapproved', $unapproved, 'woocommerce' ), $unapproved );
 		}
 
 		if ( $spammed > 0 ) {
 			$ids = isset( $_REQUEST['ids'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ids'] ) ) : 0;
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment marked as spam.', '%s comments marked as spam.', $spammed, 'woocommerce' ), $spammed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=unspam&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
+			$messages[] = sprintf( _n( '%s review marked as spam.', '%s reviews marked as spam.', $spammed, 'woocommerce' ), $spammed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=unspam&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
 		}
 
 		if ( $unspammed > 0 ) {
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment restored from the spam', '%s comments restored from the spam', $unspammed, 'woocommerce' ), $unspammed );
+			$messages[] = sprintf( _n( '%s review restored from the spam', '%s reviews restored from the spam', $unspammed, 'woocommerce' ), $unspammed );
 		}
 
 		if ( $trashed > 0 ) {
 			$ids = isset( $_REQUEST['ids'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ids'] ) ) : 0;
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment moved to the Trash.', '%s comments moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=untrash&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
+			$messages[] = sprintf( _n( '%s review moved to the Trash.', '%s reviews moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=untrash&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
 		}
 
 		if ( $untrashed > 0 ) {
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment restored from the Trash', '%s comments restored from the Trash', $untrashed, 'woocommerce' ), $untrashed );
+			$messages[] = sprintf( _n( '%s review restored from the Trash', '%s reviews restored from the Trash', $untrashed, 'woocommerce' ), $untrashed );
 		}
 
 		if ( $deleted > 0 ) {
 			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
-			$messages[] = sprintf( _n( '%s comment permanently deleted', '%s comments permanently deleted', $deleted, 'woocommerce' ), $deleted );
+			$messages[] = sprintf( _n( '%s review permanently deleted', '%s reviews permanently deleted', $deleted, 'woocommerce' ), $deleted );
 		}
 
 		return $messages;

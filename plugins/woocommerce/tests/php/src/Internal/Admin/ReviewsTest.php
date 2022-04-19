@@ -268,94 +268,94 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/** @see test_get_bulk_action_notice_messages */
 	public function provider_get_bulk_action_notice_messages() : Generator {
 
-		yield 'An approved comment status' => [
+		yield 'An approved review status' => [
 			'status'         => [ 'approved' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment approved' ],
+			'expected_array' => [ '1 review approved' ],
 		];
 
-		yield 'Two approved comment statuses' => [
+		yield 'Two approved review statuses' => [
 			'status'         => [ 'approved' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments approved' ],
+			'expected_array' => [ '2 reviews approved' ],
 		];
 
-		yield 'An unapproved comment status' => [
+		yield 'An unapproved review status' => [
 			'status'         => [ 'unapproved' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment unapproved' ],
+			'expected_array' => [ '1 review unapproved' ],
 		];
 
-		yield 'Two unapproved comment statuses' => [
+		yield 'Two unapproved review statuses' => [
 			'status'         => [ 'unapproved' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments unapproved' ],
+			'expected_array' => [ '2 reviews unapproved' ],
 		];
 
-		yield 'A deleted comment status' => [
+		yield 'A deleted review status' => [
 			'status'         => [ 'deleted' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment permanently deleted' ],
+			'expected_array' => [ '1 review permanently deleted' ],
 		];
 
-		yield 'Two deleted comment statuses' => [
+		yield 'Two deleted review statuses' => [
 			'status'         => [ 'deleted' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments permanently deleted' ],
+			'expected_array' => [ '2 reviews permanently deleted' ],
 		];
 
-		yield 'A trashed comment status' => [
+		yield 'A trashed review status' => [
 			'status'         => [ 'trashed' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment moved to the Trash.' ],
+			'expected_array' => [ '1 review moved to the Trash.' ],
 		];
 
-		yield 'Two trashed comment statuses' => [
+		yield 'Two trashed review statuses' => [
 			'status'         => [ 'trashed' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments moved to the Trash.' ],
+			'expected_array' => [ '2 reviews moved to the Trash.' ],
 		];
 
-		yield 'An untrashed comment status' => [
+		yield 'An untrashed review status' => [
 			'status'         => [ 'untrashed' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment restored from the Trash' ],
+			'expected_array' => [ '1 review restored from the Trash' ],
 		];
 
-		yield 'Two untrashed comment statuses' => [
+		yield 'Two untrashed review statuses' => [
 			'status'         => [ 'untrashed' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments restored from the Trash' ],
+			'expected_array' => [ '2 reviews restored from the Trash' ],
 		];
 
-		yield 'A spammed comment status' => [
+		yield 'A spammed review status' => [
 			'status'         => [ 'spammed' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment marked as spam.' ],
+			'expected_array' => [ '1 review marked as spam.' ],
 		];
 
-		yield 'Two spammed comment statuses' => [
+		yield 'Two spammed review statuses' => [
 			'status'         => [ 'spammed' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments marked as spam.' ],
+			'expected_array' => [ '2 reviews marked as spam.' ],
 		];
 
-		yield 'An unspammed comment status' => [
+		yield 'An unspammed review status' => [
 			'status'         => [ 'unspammed' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment restored from the spam' ],
+			'expected_array' => [ '1 review restored from the spam' ],
 		];
 
-		yield 'Two unspammed comment statuses' => [
+		yield 'Two unspammed review statuses' => [
 			'status'         => [ 'unspammed' ],
 			'count'          => 2,
-			'expected_array' => [ '2 comments restored from the spam' ],
+			'expected_array' => [ '2 reviews restored from the spam' ],
 		];
 
 		yield 'Two different statuses' => [
 			'status'         => [ 'approved', 'unapproved' ],
 			'count'          => 1,
-			'expected_array' => [ '1 comment approved', '1 comment unapproved' ],
+			'expected_array' => [ '1 review approved', '1 review unapproved' ],
 		];
 	}
 
