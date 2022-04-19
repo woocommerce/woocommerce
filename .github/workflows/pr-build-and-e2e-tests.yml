@@ -67,7 +67,7 @@ jobs:
                   package/woocommerce/**/node_modules
                 key: ${{ runner.os }}-build-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
 
-            - name: Install PNPM
+            - name: Install PNPM #comment.
               run: npm install -g pnpm
 
             - name: Install dependencies
