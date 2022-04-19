@@ -13,7 +13,6 @@ import {
 	PAYMENT_GATEWAYS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	Plugin,
-	PluginsStoreActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import ExternalIcon from 'gridicons/dist/external';
@@ -41,7 +40,7 @@ const PaymentRecommendations: React.FC = () => {
 	const {
 		installAndActivatePlugins,
 		dismissRecommendedPlugins,
-	}: PluginsStoreActions = useDispatch( PLUGINS_STORE_NAME );
+	} = useDispatch( PLUGINS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const {
