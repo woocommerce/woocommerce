@@ -38,8 +38,8 @@ const isJsFile = ( filepath ) => {
 /**
  * Get Build Path for a specified file
  *
- * @param  {string} file        File to build
- * @param  {string} buildFolder Output folder
+ * @param {string} file        File to build
+ * @param {string} buildFolder Output folder
  * @return {string}             Build path
  */
 function getBuildPath( file, buildFolder ) {
@@ -72,7 +72,7 @@ function buildFiles( files ) {
 /**
  * Build a javaScript file for the required environments (node and ES5)
  *
- * @param {string} file    File path to build
+ * @param {string}  file   File path to build
  * @param {boolean} silent Show logs
  */
 function buildJsFile( file, silent ) {
