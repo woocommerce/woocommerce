@@ -10,7 +10,11 @@ import {
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
-import { useDispatch, useSelect } from '@wordpress/data';
+import {
+	useDispatch,
+	useSelect,
+	select as wpDataSelect,
+} from '@wordpress/data';
 import { OPTIONS_STORE_NAME, PluginsStoreActions } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -111,7 +115,7 @@ const ConnectPageOnboarding = ( {
 	connectUrl,
 }: {
 	isJetpackConnected: string;
-	installAndActivatePlugins: PluginsStoreActions;
+	installAndActivatePlugins: PluginsStoreActions[ 'installAndActivatePlugins' ];
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setErrorMessage: Function;
 	connectUrl: string;
@@ -220,7 +224,7 @@ const ConnectAccountPage = () => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
 
 	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
-		( select ) => {
+		( select: typeof wpDataSelect ) => {
 			const { getOption } = select( OPTIONS_STORE_NAME );
 			let pageViewTimestamp = getOption(
 				'wc_pay_welcome_page_viewed_timestamp'
