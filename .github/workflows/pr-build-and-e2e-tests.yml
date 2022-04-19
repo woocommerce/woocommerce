@@ -75,9 +75,6 @@ jobs:
               if: steps.cache-modules.outputs.cache-hit != 'true'
               run: pnpm install
 
-            - name: list pnpm
-              run: ls -R ~/.pnpm-store
-
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
