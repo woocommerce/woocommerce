@@ -20,9 +20,9 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * Sets the global vars before each test.
 	 */
 	public function setUp() : void {
-		global $pagenow;
+		global $current_screen;
 
-		$this->old_pagenow = $pagenow;
+		$this->old_current_screen = $current_screen;
 
 		parent::setUp();
 	}
@@ -31,9 +31,11 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * Restores the global vars after each test.
 	 */
 	public function tearDown() : void {
-		global $pagenow;
+		global $current_screen;
 
-		$pagenow = $this->old_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		parent::tearDown();
 	}
 
 	/**
