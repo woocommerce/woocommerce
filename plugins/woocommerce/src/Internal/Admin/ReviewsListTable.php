@@ -87,6 +87,8 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_rating_arguments(), $args );
 		// Handle the review product filter.
 		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
+		// Include the review status arguments.
+		$args = wp_parse_args( $this->get_status_arguments(), $args );
 
 		$comments = get_comments( $args );
 
@@ -233,6 +235,23 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( $this->current_product_for_reviews instanceof WC_Product ) {
 			$args['post_id'] = $this->current_product_for_reviews->get_id();
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Gets the `status` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_status_arguments() : array {
+		$args = [];
+
+		global $comment_status;
+
+		if ( ! empty( $comment_status ) && 'all' !== $comment_status && array_key_exists( $comment_status, $this->get_status_filters() ) ) {
+			$args['status'] = $this->convert_status_to_query_value( $comment_status );
 		}
 
 		return $args;
@@ -721,6 +740,162 @@ class ReviewsListTable extends WP_List_Table {
 		 * @param WP_Comment $item   The product review being rendered.
 		 */
 		return apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name . '_content', $output, $item );
+	}
+
+	/**
+	 * Returns an array of supported statuses and their labels.
+	 *
+	 * @return array
+	 */
+	protected function get_status_filters() : array {
+		return [
+			/* translators: %s: Number of reviews. */
+			'all'       => _nx_noop(
+				'All <span class="count">(%s)</span>',
+				'All <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'moderated' => _nx_noop(
+				'Pending <span class="count">(%s)</span>',
+				'Pending <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'approved'  => _nx_noop(
+				'Approved <span class="count">(%s)</span>',
+				'Approved <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'spam'      => _nx_noop(
+				'Spam <span class="count">(%s)</span>',
+				'Spam <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'trash'     => _nx_noop(
+				'Trash <span class="count">(%s)</span>',
+				'Trash <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+		];
+	}
+
+	/**
+	 * Returns the base URL for a view, excluding the status (that should be appended).
+	 *
+	 * @param string $comment_type Comment type filter.
+	 * @param int    $post_id      Current post ID.
+	 * @return string
+	 */
+	protected function get_view_url( string $comment_type, int $post_id ) : string {
+		$link = add_query_arg(
+			[
+				'post_type' => 'product',
+				'page'      => Reviews::MENU_SLUG,
+			],
+			admin_url( 'edit.php' )
+		);
+
+		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
+			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
+		}
+		if ( ! empty( $post_id ) ) {
+			$link = add_query_arg( 'p', absint( $post_id ), $link );
+		}
+
+		return $link;
+	}
+
+	/**
+	 * Returns the available status filters.
+	 *
+	 * @see WP_Comments_List_Table::get_views() for consistency.
+	 * @return array An associative array of fully-formed comment status links. Includes 'All', 'Pending',
+	 *               'Approved', 'Spam', and 'Trash'.
+	 */
+	protected function get_views() {
+		global $post_id, $comment_status, $comment_type;
+
+		$status_links = [];
+
+		$status_labels = $this->get_status_filters();
+
+		if ( ! EMPTY_TRASH_DAYS ) {
+			unset( $status_labels['trash'] );
+		}
+
+		$link = $this->get_view_url( (string) $comment_type, (int) $post_id );
+
+		foreach ( $status_labels as $status => $label ) {
+			$current_link_attributes = '';
+
+			if ( $status === $comment_status ) {
+				$current_link_attributes = ' class="current" aria-current="page"';
+			}
+
+			$link = add_query_arg( 'comment_status', urlencode( $status ), $link );
+
+			$number_reviews_for_status = $this->get_review_count( $status, (int) $post_id );
+
+			$count_html = sprintf(
+				'<span class="%s-count">%s</span>',
+				( 'moderated' === $status ) ? 'pending' : $status,
+				number_format_i18n( $number_reviews_for_status )
+			);
+
+			$status_links[ $status ] = '<a href="' . esc_url( $link ) . '"' . $current_link_attributes . '>' . sprintf( translate_nooped_plural( $label, $number_reviews_for_status ), $count_html ) . '</a>';
+		}
+
+		return $status_links;
+	}
+
+	/**
+	 * Returns the number of reviews (including review replies) for a given status.
+	 *
+	 * @param string $status     Status key from {@see ReviewsListTable::get_status_filters()}.
+	 * @param int    $product_id ID of the product if we're filtering by product in this request. Otherwise `0` for
+	 *                           no product filter.
+	 * @return int
+	 */
+	protected function get_review_count( string $status, int $product_id ) : int {
+		return (int) get_comments(
+			[
+				'type__in'  => [ 'review', 'comment' ],
+				'status'    => $this->convert_status_to_query_value( $status ),
+				'post_type' => 'product',
+				'post_id'   => $product_id,
+				'count'     => true,
+			]
+		);
+	}
+
+	/**
+	 * Converts a status key into its equivalent `comment_approved` database column value.
+	 *
+	 * @param string $status Status key from {@see ReviewsListTable::get_status_filters()}.
+	 * @return string
+	 */
+	protected function convert_status_to_query_value( string $status ) : string {
+		// These keys exactly match the database column.
+		if ( in_array( $status, [ 'spam', 'trash' ], true ) ) {
+			return $status;
+		}
+
+		switch ( $status ) {
+			case 'moderated':
+				return '0';
+			case 'approved':
+				return '1';
+			default:
+				return 'all';
+		}
 	}
 
 	/**

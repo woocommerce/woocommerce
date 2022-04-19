@@ -1360,4 +1360,274 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<option value="' . $product->get_id() . '"', $output );
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_filters()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_status_filters() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_filters' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			[
+				'all'       => [
+					'All <span class="count">(%s)</span>',
+					'All <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'All <span class="count">(%s)</span>',
+					'plural'   => 'All <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'moderated' => [
+					'Pending <span class="count">(%s)</span>',
+					'Pending <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Pending <span class="count">(%s)</span>',
+					'plural'   => 'Pending <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'approved'  => [
+					'Approved <span class="count">(%s)</span>',
+					'Approved <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Approved <span class="count">(%s)</span>',
+					'plural'   => 'Approved <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'spam'      => [
+					'Spam <span class="count">(%s)</span>',
+					'Spam <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Spam <span class="count">(%s)</span>',
+					'plural'   => 'Spam <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+				'trash'     => [
+					'Trash <span class="count">(%s)</span>',
+					'Trash <span class="count">(%s)</span>',
+					'product reviews',
+					'singular' => 'Trash <span class="count">(%s)</span>',
+					'plural'   => 'Trash <span class="count">(%s)</span>',
+					'context'  => 'product reviews',
+					'domain'   => 'woocommerce',
+				],
+			],
+			$method->invoke( $list_table )
+		);
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_view_url()
+	 * @dataProvider provider_get_view_url
+	 *
+	 * @param string $comment_type Current type filter.
+	 * @param int    $post_id      Current post ID filter.
+	 * @param string $expected     Expected URL from the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_view_url( string $comment_type, int $post_id, string $expected ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_view_url' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $list_table, $comment_type, $post_id )
+		);
+	}
+
+	/** @see test_get_view_url */
+	public function provider_get_view_url() : Generator {
+		yield 'empty type, empty post ID' => [
+			'comment_type' => '',
+			'post_id'      => 0,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews',
+		];
+
+		yield 'review type, empty post ID' => [
+			'comment_type' => 'review',
+			'post_id'      => 0,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=review',
+		];
+
+		yield 'reply type, with post ID' => [
+			'comment_type' => 'reply',
+			'post_id'      => 123,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=reply&p=123',
+		];
+
+		yield 'all type, with post ID' => [
+			'comment_type' => 'all',
+			'post_id'      => 123,
+			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&p=123',
+		];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::convert_status_to_query_value()
+	 * @dataProvider provider_convert_status_string_to_comment_approved
+	 *
+	 * @param string $status              Status to pass in to the method.
+	 * @param string $expected_conversion Expected result.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_convert_status_string_to_comment_approved( string $status, string $expected_conversion ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'convert_status_to_query_value' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_conversion, $method->invoke( $list_table, $status ) );
+	}
+
+	/** @see test_convert_status_string_to_comment_approved */
+	public function provider_convert_status_string_to_comment_approved() : Generator {
+		yield 'spam' => [ 'spam', 'spam' ];
+		yield 'trash' => [ 'trash', 'trash' ];
+		yield 'moderated' => [ 'moderated', '0' ];
+		yield 'approved' => [ 'approved', '1' ];
+		yield 'all' => [ 'all', 'all' ];
+		yield 'empty string' => [ '', 'all' ];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_review_count()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the metehod doesn't exist.
+	 */
+	public function test_get_review_count() {
+		// Add a normal post with some comments -- these should not appear in our counts.
+		$post_id = $this->factory()->post->create(
+			[
+				'post_type' => 'post',
+			]
+		);
+		$this->factory()->comment->create_many(
+			3,
+			[
+				'comment_post_ID'  => $post_id,
+			]
+		);
+
+		// Now add a product with a bunch of reviews -- these _should_ appear in our counts.
+		$product_id = $this->factory()->post->create(
+			[
+				'post_type' => 'product',
+			]
+		);
+
+		// 3 moderated comments.
+		$this->factory()->comment->create_many(
+			3,
+			[
+				'comment_type'     => 'comment',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => '0',
+			]
+		);
+
+		// 2 approved comments.
+		$this->factory()->comment->create_many(
+			2,
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => '1',
+			]
+		);
+
+		// 1 trashed comment.
+		$this->factory()->comment->create(
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => 'trash',
+			]
+		);
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_review_count' );
+		$method->setAccessible( true );
+
+		// Should have 3 moderated.
+		$this->assertSame( 3, $method->invoke( $list_table, 'moderated', 0 ) );
+
+		// Should have 2 approved.
+		$this->assertSame( 2, $method->invoke( $list_table, 'approved', 0 ) );
+
+		// Should have 1 trashed.
+		$this->assertSame( 1, $method->invoke( $list_table, 'trash', 0 ) );
+
+		// Should have 5 in total (trash is not included in "all").
+		$this->assertSame( 5, $method->invoke( $list_table, 'all', 0 ) );
+
+		// Should also have 5 in total when filtering by product ID (trash is not included in "all").
+		$this->assertSame( 5, $method->invoke( $list_table, 'all', $product_id ) );
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_views()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_views() {
+		global $comment_status;
+		$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_views' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			[
+				'all'       => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
+				'moderated' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
+				'approved'  => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
+				'spam'      => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
+				'trash'     => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
+			],
+			$method->invoke( $list_table )
+		);
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_arguments()
+	 * @dataProvider provider_get_status_arguments
+	 *
+	 * @param string $status        Current status for the request.
+	 * @param array  $expected_args Expected result of the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_status_arguments( string $status, array $expected_args ) {
+		global $comment_status;
+		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_arguments' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
+	}
+
+	/** @see test_get_status_arguments */
+	public function provider_get_status_arguments() : Generator {
+		yield 'all statuses' => [ 'all', [] ];
+		yield 'moderated status' => [ 'moderated', [ 'status' => '0' ] ];
+		yield 'approved status' => [ 'approved', [ 'status' => '1' ] ];
+		yield 'spam status' => [ 'spam', [ 'status' => 'spam' ] ];
+		yield 'trash status' => [ 'trash', [ 'status' => 'trash' ] ];
+		yield 'invalid status' => [ 'not-valid', [] ];
+	}
+
 }
