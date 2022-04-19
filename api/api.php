@@ -37,3 +37,5 @@ require( 'tools/disable-wc-email.php' );
 require( 'tools/trigger-update-callbacks.php' );
 require( 'tracks/tracks-debug-log.php' );
 require( 'features/features.php' );
+require( 'rest-api-filters/rest-api-filters.php' );
+require( 'rest-api-filters/hook.php' );

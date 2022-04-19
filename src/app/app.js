@@ -12,8 +12,9 @@ import { default as Tools } from '../tools';
 import { default as Options } from '../options';
 import { default as Experiments } from '../experiments';
 import { default as Features } from '../features';
+import { default as RestAPIFilters } from '../rest-api-filters';
 
-const tabs = applyFilters('woocommerce_admin_test_helper_tabs', [
+const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 	{
 		name: 'options',
 		title: 'Options',
@@ -39,7 +40,12 @@ const tabs = applyFilters('woocommerce_admin_test_helper_tabs', [
 		title: 'Features',
 		content: <Features />,
 	},
-]);
+	{
+		name: 'rest-api-filters',
+		title: 'REST API FIlters',
+		content: <RestAPIFilters />,
+	},
+] );
 
 export function App() {
 	return (
@@ -48,18 +54,18 @@ export function App() {
 			<TabPanel
 				className="woocommerce-admin-test-helper__main-tab-panel"
 				activeClass="active-tab"
-				tabs={tabs}
-				initialTabName={tabs[0].name}
+				tabs={ tabs }
+				initialTabName={ tabs[ 0 ].name }
 			>
-				{(tab) => (
+				{ ( tab ) => (
 					<>
-						{tab.content}
-						{applyFilters(
-							`woocommerce_admin_test_helper_tab_${tab.name}`,
+						{ tab.content }
+						{ applyFilters(
+							`woocommerce_admin_test_helper_tab_${ tab.name }`,
 							[]
-						)}
+						) }
 					</>
-				)}
+				) }
 			</TabPanel>
 		</div>
 	);
