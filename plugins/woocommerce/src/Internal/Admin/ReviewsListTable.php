@@ -87,6 +87,8 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_rating_arguments(), $args );
 		// Handle the review product filter.
 		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
+		// Include the review status arguments.
+		$args = wp_parse_args( $this->get_status_arguments(), $args );
 
 		$comments = get_comments( $args );
 
@@ -233,6 +235,23 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( $this->current_product_for_reviews instanceof WC_Product ) {
 			$args['post_id'] = $this->current_product_for_reviews->get_id();
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Gets the `status` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_status_arguments() : array {
+		$args = [];
+
+		global $comment_status;
+
+		if ( ! empty( $comment_status ) && 'all' !== $comment_status && array_key_exists( $comment_status, $this->get_status_filters() ) ) {
+			$args['status'] = $this->convert_status_to_query_value( $comment_status );
 		}
 
 		return $args;
