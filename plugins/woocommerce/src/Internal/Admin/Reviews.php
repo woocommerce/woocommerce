@@ -48,12 +48,29 @@ class Reviews {
 	 *
 	 * @return Reviews instance
 	 */
-	public static function get_instance(): ?Reviews {
+	public static function get_instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Gets the required capability to access the reviews page and manage product reviews.
+	 *
+	 * @param string $context The context for which the capability is needed.
+	 * @return string
+	 */
+	public static function get_capability( $context = 'view' ) {
+
+		/**
+		 * Filters whether the current user can manage product reviews.
+		 *
+		 * @param string $capability The capability (defaults to `moderate_comments`).
+		 * @param string $context    The context for which the capability is needed.
+		 */
+		return apply_filters( 'woocommerce_product_reviews_page_capability', 'moderate_comments', $context );
 	}
 
 	/**
@@ -65,13 +82,35 @@ class Reviews {
 		$this->reviews_page_hook = add_submenu_page(
 			'edit.php?post_type=product',
 			__( 'Reviews', 'woocommerce' ),
-			__( 'Reviews', 'woocommerce' ),
-			'moderate_comments',
+			__( 'Reviews', 'woocommerce' ) . $this->get_pending_count_bubble(),
+			static::get_capability(),
 			static::MENU_SLUG,
 			[ $this, 'render_reviews_list_table' ]
 		);
 
 		add_action( "load-{$this->reviews_page_hook}", [ $this, 'load_reviews_screen' ] );
+	}
+
+	/**
+	 * Counts the number of pending product reviews/replies, and returns the notification bubble if there's more than zero.
+	 *
+	 * @return string Empty string if there are no pending reviews, or bubble HTML if there are.
+	 */
+	protected function get_pending_count_bubble() : string {
+		$count = (int) get_comments(
+			[
+				'type__in'  => [ 'review', 'comment' ],
+				'status'    => '0',
+				'post_type' => 'product',
+				'count'     => true,
+			]
+		);
+
+		if ( empty( $count ) ) {
+			return '';
+		}
+
+		return ' <span class="awaiting-mod count-' . esc_attr( $count ) . '"><span class="pending-count">' . esc_html( $count ) . '</span></span>';
 	}
 
 	/**
@@ -81,6 +120,7 @@ class Reviews {
 	 */
 	public function load_reviews_screen() {
 		$this->reviews_list_table = new ReviewsListTable( [ 'screen' => $this->reviews_page_hook ] );
+		$this->reviews_list_table->process_bulk_action();
 	}
 
 	/**
@@ -91,6 +131,8 @@ class Reviews {
 	public function render_reviews_list_table() {
 
 		$this->reviews_list_table->prepare_items();
+
+		ob_start();
 
 		?>
 		<div class="wrap">
@@ -110,6 +152,14 @@ class Reviews {
 			</form>
 		</div>
 		<?php
+
+		/**
+		 * Filters the contents of the product reviews list table output.
+		 *
+		 * @param string           $output             The HTML output of the list table.
+		 * @param ReviewsListTable $reviews_list_table The reviews list table instance.
+		 */
+		echo apply_filters( 'woocommerce_product_reviews_list_table', ob_get_clean(), $this->reviews_list_table ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 }

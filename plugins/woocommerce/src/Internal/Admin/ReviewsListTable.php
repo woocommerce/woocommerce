@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use WC_Product;
 use WP_Comment;
 use WP_Comments_List_Table;
 use WP_List_Table;
@@ -37,14 +38,29 @@ class ReviewsListTable extends WP_List_Table {
 	private $current_reviews_rating = 0;
 
 	/**
+	 * Current product the reviews should be displayed for.
+	 *
+	 * @var WC_Product|null Product or null for all products.
+	 */
+	private $current_product_for_reviews;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array|string $args Array or string of arguments.
 	 */
 	public function __construct( $args = [] ) {
-		parent::__construct( $args );
+		parent::__construct(
+			wp_parse_args(
+				$args,
+				[
+					'plural'   => 'product-reviews',
+					'singular' => 'product-review',
+				]
+			)
+		);
 
-		$this->current_user_can_moderate_reviews = current_user_can( 'moderate_comments' );
+		$this->current_user_can_moderate_reviews = current_user_can( Reviews::get_capability( 'moderate' ) );
 	}
 
 	/**
@@ -54,10 +70,10 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
-		$this->current_reviews_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
-
 		$this->set_review_status();
 		$this->set_review_type();
+		$this->current_reviews_rating = isset( $_REQUEST['review_rating'] ) ? absint( $_REQUEST['review_rating'] ) : 0;
+		$this->set_review_product();
 
 		$args = [
 			'post_type' => 'product',
@@ -69,12 +85,29 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_type_arguments(), $args );
 		// Handle the reviews rating filter.
 		$args = wp_parse_args( $this->get_filter_rating_arguments(), $args );
+		// Handle the review product filter.
+		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
 
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
 
 		$this->items = $comments;
+	}
+
+	/**
+	 * Sets the product to filter reviews by.
+	 *
+	 * @return void
+	 */
+	protected function set_review_product() {
+
+		$product_id = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
+		$product = $product_id ? wc_get_product( $product_id ) : null;
+
+		if ( $product instanceof WC_Product ) {
+			$this->current_product_for_reviews = $product;
+		}
 	}
 
 	/**
@@ -190,6 +223,22 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the `post_id` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	public function get_filter_product_arguments() : array {
+
+		$args = [];
+
+		if ( $this->current_product_for_reviews instanceof WC_Product ) {
+			$args['post_id'] = $this->current_product_for_reviews->get_id();
+		}
+
+		return $args;
+	}
+
+	/**
 	 * Render a single row HTML.
 	 *
 	 * @global WP_Post $post
@@ -223,7 +272,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return array Table columns and their headings.
 	 */
 	public function get_columns() {
-		return [
+		$columns = [
 			'cb'       => '<input type="checkbox" />',
 			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
 			'author'   => __( 'Author', 'woocommerce' ),
@@ -232,6 +281,13 @@ class ReviewsListTable extends WP_List_Table {
 			'response' => __( 'Product', 'woocommerce' ),
 			'date'     => _x( 'Submitted on', 'column name', 'woocommerce' ),
 		];
+
+		/**
+		 * Filters the table columns.
+		 *
+		 * @param array $columns
+		 */
+		return apply_filters( 'woocommerce_product_reviews_table_columns', $columns );
 	}
 
 	/**
@@ -323,6 +379,9 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_cb( $item ) {
+
+		ob_start();
+
 		if ( $this->current_user_can_edit_review ) {
 			?>
 			<label class="screen-reader-text" for="cb-select-<?php echo esc_attr( $item->comment_ID ); ?>"><?php esc_html_e( 'Select review', 'woocommerce' ); ?></label>
@@ -334,6 +393,8 @@ class ReviewsListTable extends WP_List_Table {
 			/>
 			<?php
 		}
+
+		echo $this->filter_column_output( 'cb', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -345,7 +406,10 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	protected function column_comment( $item ) {
+
 		$in_reply_to = $this->get_in_reply_to_review_text( $item );
+
+		ob_start();
 
 		if ( $in_reply_to ) {
 			echo $in_reply_to . '<br><br>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -357,6 +421,8 @@ class ReviewsListTable extends WP_List_Table {
 			get_comment_text( $item->comment_ID ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			'</div>'
 		);
+
+		echo $this->filter_column_output( 'comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -403,6 +469,8 @@ class ReviewsListTable extends WP_List_Table {
 			$author_avatar = '';
 		}
 
+		ob_start();
+
 		echo '<strong>' . $author_avatar; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		comment_author();
 		echo '</strong><br>';
@@ -445,6 +513,8 @@ class ReviewsListTable extends WP_List_Table {
 			<?php
 
 		endif;
+
+		echo $this->filter_column_output( 'author', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -500,6 +570,8 @@ class ReviewsListTable extends WP_List_Table {
 			get_comment_date( __( 'g:i a', 'woocommerce' ), $item )
 		);
 
+		ob_start();
+
 		?>
 		<div class="submitted-on">
 			<?php
@@ -517,6 +589,8 @@ class ReviewsListTable extends WP_List_Table {
 			?>
 		</div>
 		<?php
+
+		echo $this->filter_column_output( 'date', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -524,39 +598,44 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::column_response() for consistency.
 	 *
+	 * @param WP_Comment $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_response() {
+	protected function column_response( $item ) {
 		$product_post = get_post();
 
-		if ( ! $product_post ) {
-			return;
-		}
+		ob_start();
 
-		?>
-		<div class="response-links">
-			<?php
-
-			if ( current_user_can( 'edit_product', $product_post->ID ) ) :
-				$post_link  = "<a href='" . esc_url( get_edit_post_link( $product_post->ID ) ) . "' class='comments-edit-item-link'>";
-				$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
-			else :
-				$post_link = esc_html( get_the_title( $product_post->ID ) );
-			endif;
-
-			echo $post_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
-			$post_type_object = get_post_type_object( $product_post->post_type );
+		if ( $product_post ) :
 
 			?>
-			<a href="<?php echo esc_url( get_permalink( $product_post->ID ) ); ?>" class="comments-view-item-link">
-				<?php echo esc_html( $post_type_object->labels->view_item ); ?>
-			</a>
-			<span class="post-com-count-wrapper post-com-count-<?php echo esc_attr( $product_post->ID ); ?>">
-				<?php $this->comments_bubble( $product_post->ID, get_pending_comments_num( $product_post->ID ) ); ?>
-			</span>
-		</div>
-		<?php
+			<div class="response-links">
+				<?php
+
+				if ( current_user_can( 'edit_product', $product_post->ID ) ) :
+					$post_link  = "<a href='" . esc_url( get_edit_post_link( $product_post->ID ) ) . "' class='comments-edit-item-link'>";
+					$post_link .= esc_html( get_the_title( $product_post->ID ) ) . '</a>';
+				else :
+					$post_link = esc_html( get_the_title( $product_post->ID ) );
+				endif;
+
+				echo $post_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+				$post_type_object = get_post_type_object( $product_post->post_type );
+
+				?>
+				<a href="<?php echo esc_url( get_permalink( $product_post->ID ) ); ?>" class="comments-view-item-link">
+					<?php echo esc_html( $post_type_object->labels->view_item ); ?>
+				</a>
+				<span class="post-com-count-wrapper post-com-count-<?php echo esc_attr( $product_post->ID ); ?>">
+					<?php $this->comments_bubble( $product_post->ID, get_pending_comments_num( $product_post->ID ) ); ?>
+				</span>
+			</div>
+			<?php
+
+		endif;
+
+		echo $this->filter_column_output( 'response', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -565,11 +644,12 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param WP_Comment $item Review or reply being rendered.
 	 */
 	protected function column_type( $item ) {
-		echo esc_html(
-			'review' === $item->comment_type ?
-			'&#9734;&nbsp;' . __( 'Review', 'woocommerce' ) :
-			__( 'Reply', 'woocommerce' )
-		);
+
+		$type = 'review' === $item->comment_type
+			? '&#9734;&nbsp;' . __( 'Review', 'woocommerce' )
+			: __( 'Reply', 'woocommerce' );
+
+		echo $this->filter_column_output( 'type', esc_html( $type ), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -580,19 +660,26 @@ class ReviewsListTable extends WP_List_Table {
 	protected function column_rating( $item ) {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
 
+		ob_start();
+
 		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
 			$rating = (int) $rating;
+
 			$accessibility_label = sprintf(
 				/* translators: 1: number representing a rating */
 				__( '%1$s out of 5', 'woocommerce' ),
 				$rating
 			);
+
 			$stars = str_repeat( '&#9733;', $rating );
 			$stars .= str_repeat( '&#9734;', 5 - $rating );
+
 			?>
 			<span aria-label="<?php echo esc_attr( $accessibility_label ); ?>"><?php echo esc_html( $stars ); ?></span>
 			<?php
 		}
+
+		echo $this->filter_column_output( 'rating', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -602,7 +689,38 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param string     $column_name Name of the column being rendered.
 	 */
 	protected function column_default( $item, $column_name ) {
-		// @TODO Implement in MWC-5362 {agibson 2022-04-12}
+
+		ob_start();
+
+		/**
+		 * Fires when the default column output is displayed for a single row.
+		 *
+		 * This action can be used to render custom columns that have been added.
+		 *
+		 * @param WP_Comment $item The review or reply being rendered.
+		 */
+		do_action( 'woocommerce_product_reviews_table_column_' . $column_name, $item );
+
+		echo $this->filter_column_output( $column_name, ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Runs a filter hook for a given column content.
+	 *
+	 * @param string     $column_name The column being output.
+	 * @param string     $output      The output content (may include HTML).
+	 * @param WP_Comment $item        The review or reply being rendered.
+	 * @return string
+	 */
+	protected function filter_column_output( $column_name, $output, $item ) {
+
+		/**
+		 * Filters the output of a column.
+		 *
+		 * @param string     $output The column output.
+		 * @param WP_Comment $item   The product review being rendered.
+		 */
+		return apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name . '_content', $output, $item );
 	}
 
 	/**
@@ -781,6 +899,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$this->review_type_dropdown( $comment_type );
 			$this->review_rating_dropdown( $this->current_reviews_rating );
+			$this->product_search( $this->current_product_for_reviews );
 
 			$output = ob_get_clean();
 
@@ -866,6 +985,59 @@ class ReviewsListTable extends WP_List_Table {
 				?>
 				<option value="<?php echo esc_attr( $rating ); ?>" <?php selected( $rating, (string) $current_rating ); ?> title="<?php echo esc_attr( $title ); ?>"><?php echo esc_html( $label ); ?></option>
 			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Processes the bulk actions.
+	 *
+	 * @return void
+	 */
+	public function process_bulk_action() {
+		if ( ! $this->current_user_can_moderate_reviews ) {
+			return;
+		}
+
+		if ( $this->current_action() ) {
+			check_admin_referer( 'bulk-product-reviews' );
+
+			$query_string = remove_query_arg( [ 'page', '_wpnonce' ], wp_unslash( ( $_SERVER['QUERY_STRING'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			// Replace current nonce with bulk-comments nonce.
+			$comments_nonce = wp_create_nonce( 'bulk-comments' );
+			$query_string   = add_query_arg( '_wpnonce', $comments_nonce, $query_string );
+
+			// Redirect to edit-comments.php, which will handle processing the action for us.
+			wp_safe_redirect( esc_url_raw( admin_url( 'edit-comments.php?' . $query_string ) ) );
+			exit;
+		} elseif ( ! empty( $_GET['_wp_http_referer'] ) ) {
+
+			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Displays a product search input for filtering reviews by product in the Product Reviews list table.
+	 *
+	 * @param WC_Product|null $current_product The current product (or null when displaying all reviews).
+	 * @return void
+	 */
+	protected function product_search( $current_product ) {
+		?>
+		<label class="screen-reader-text" for="filter-by-product"><?php esc_html_e( 'Filter by product', 'woocommerce' ); ?></label>
+		<select
+			id="filter-by-product"
+			class="wc-product-search"
+			name="product_id"
+			style="width: 200px;"
+			data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>"
+			data-action="woocommerce_json_search_products"
+			data-allow_clear="true">
+			<?php if ( $current_product instanceof WC_Product ) : ?>
+				<option value="<?php echo esc_attr( $current_product->get_id() ); ?>" selected="selected"><?php echo esc_html( $current_product->get_formatted_name() ); ?></option>
+			<?php endif; ?>
 		</select>
 		<?php
 	}
