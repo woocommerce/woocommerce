@@ -41,8 +41,6 @@ class Reviews {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
-
-		add_action( 'init', [ $this, 'override_wp_count_comments' ] );
 	}
 
 	/**
@@ -91,16 +89,6 @@ class Reviews {
 		);
 
 		add_action( "load-{$this->reviews_page_hook}", [ $this, 'load_reviews_screen' ] );
-	}
-
-	/**
-	 * Overrides the WordPress comments count functions.
-	 *
-	 * This is necessary to prevent product reviews to be counted as regular post comments.
-	 */
-	public function override_wp_count_comments() {
-
-		add_filter( 'wp_count_comments', [ $this, 'count_comments' ], 10, 2 );
 	}
 
 	/**
@@ -172,134 +160,6 @@ class Reviews {
 		 * @param ReviewsListTable $reviews_list_table The reviews list table instance.
 		 */
 		echo apply_filters( 'woocommerce_product_reviews_list_table', ob_get_clean(), $this->reviews_list_table ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * Retrieves the total comment counts for the whole site or a single post.
-	 *
-	 * This method overrides the default count_comments from WordPress to not consider product reviews as comments.
-	 *
-	 * @param array $count   This param is not used, but added given that count_comments is a callback to a filter.
-	 * @param int   $post_id Optional. Restrict the comment counts to the given post. Default 0, which indicates that
-	 *                       comment counts for the whole site will be retrieved.
-	 * @return stdClass {
-	 *     The number of comments keyed by their status.
-	 *
-	 *     @type int $approved       The number of approved comments.
-	 *     @type int $moderated      The number of comments awaiting moderation (a.k.a. pending).
-	 *     @type int $spam           The number of spam comments.
-	 *     @type int $trash          The number of trashed comments.
-	 *     @type int $post-trashed   The number of comments for posts that are in the trash.
-	 *     @type int $total_comments The total number of non-trashed comments, including spam.
-	 *     @type int $all            The total number of pending or approved comments.
-	 * }
-	 */
-	public function count_comments( $count = [], $post_id = 0 ) {
-
-		$post_id = (int) $post_id;
-
-		/**
-		 * Filters the comments count for a given post or the whole site.
-		 *
-		 * @param array|stdClass $count   An empty array or an object containing comment counts.
-		 * @param int            $post_id The post ID. Can be 0 to represent the whole site.
-		 */
-		$filtered = apply_filters( 'woocommerce_product_reviews_count_comments', array(), $post_id );
-		if ( ! empty( $filtered ) ) {
-			return $filtered;
-		}
-
-		$count = wp_cache_get( "comments-{$post_id}", 'counts' );
-		if ( false !== $count ) {
-			return $count;
-		}
-
-		$stats              = $this->get_comment_count( $post_id );
-		$stats['moderated'] = $stats['awaiting_moderation'];
-		unset( $stats['awaiting_moderation'] );
-
-		$stats_object = (object) $stats;
-		wp_cache_set( "comments-{$post_id}", $stats_object, 'counts' );
-
-		return $stats_object;
-	}
-
-	/**
-	 * Retrieves the total comment counts for the whole site or a single post.
-	 *
-	 * This method overrides the default get_comment_count from WordPress to not consider product reviews as comments.
-	 *
-	 * @param int $post_id Optional. Restrict the comment counts to the given post. Default 0, which indicates that
-	 *                     comment counts for the whole site will be retrieved.
-	 * @return int[] {
-	 *     The number of comments keyed by their status.
-	 *
-	 *     @type int $approved            The number of approved comments.
-	 *     @type int $awaiting_moderation The number of comments awaiting moderation (a.k.a. pending).
-	 *     @type int $spam                The number of spam comments.
-	 *     @type int $trash               The number of trashed comments.
-	 *     @type int $post-trashed        The number of comments for posts that are in the trash.
-	 *     @type int $total_comments      The total number of non-trashed comments, including spam.
-	 *     @type int $all                 The total number of pending or approved comments.
-	 * }
-	 */
-	protected function get_comment_count( $post_id = 0 ) {
-		global $wpdb;
-
-		$post_id = (int) $post_id;
-
-		$where = '';
-		if ( $post_id > 0 ) {
-			$where = $wpdb->prepare( $where . ' AND comment_post_ID = %d', $post_id ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		}
-
-		$sql = "
-			SELECT comment_approved, COUNT( * ) AS total
-			FROM {$wpdb->comments}
-			WHERE comment_type <> 'review' {$where}
-			GROUP BY comment_approved
-		";
-
-		$totals = (array) $wpdb->get_results( $wpdb->prepare( $sql ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-
-		$comment_count = array(
-			'approved'            => 0,
-			'awaiting_moderation' => 0,
-			'spam'                => 0,
-			'trash'               => 0,
-			'post-trashed'        => 0,
-			'total_comments'      => 0,
-			'all'                 => 0,
-		);
-
-		foreach ( $totals as $row ) {
-			switch ( $row['comment_approved'] ) {
-				case 'trash':
-					$comment_count['trash'] = $row['total'];
-					break;
-				case 'post-trashed':
-					$comment_count['post-trashed'] = $row['total'];
-					break;
-				case 'spam':
-					$comment_count['spam']            = $row['total'];
-					$comment_count['total_comments'] += $row['total'];
-					break;
-				case '1':
-					$comment_count['approved']        = $row['total'];
-					$comment_count['total_comments'] += $row['total'];
-					$comment_count['all']            += $row['total'];
-					break;
-				case '0':
-					$comment_count['awaiting_moderation'] = $row['total'];
-					$comment_count['total_comments']     += $row['total'];
-					$comment_count['all']                += $row['total'];
-					break;
-				default:
-					break;
-			}
-		}
-
-		return array_map( 'intval', $comment_count );
 	}
 
 }
