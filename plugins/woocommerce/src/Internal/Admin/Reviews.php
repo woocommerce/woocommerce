@@ -194,7 +194,7 @@ class Reviews {
 	 *     @type int $all            The total number of pending or approved comments.
 	 * }
 	 */
-	public function count_comments( $count, $post_id = 0 ) {
+	public function count_comments( $count = [], $post_id = 0 ) {
 
 		$post_id = (int) $post_id;
 
