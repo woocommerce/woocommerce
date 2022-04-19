@@ -66,7 +66,7 @@ jobs:
                 path: |
                   ./package/woocommerce/**/node_modules
                   ./package/woocommerce/packages/js/e2e-environment/node_modules
-                key: ${{ runner.os }}-e2e-tests-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-e2e-test-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
