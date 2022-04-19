@@ -104,15 +104,19 @@ This only needs to be done if this release is the last release of the feature pl
 
 * [ ] Remind whoever is porter this week to audit our codebase to ensure this [experimental interface document](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/blocks/feature-flags-and-experimental-interfaces.md) is up to date. See Pca54o-rM-p2 for more details.
 * [ ] Create a pull request for updating the package in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/747cb6b7184ba9fdc875ab104da5839cfda8b4be/plugins/woocommerce/composer.json) for the Woo Blocks package to the version being pulled in.
-  * The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627). Update the `plugins/woocommerce/composer.json` file and then run `composer update`. In the PR description you will link to all the important things that have already been prepared since the version you replaced. Note, you need to make sure you link to all the related documents for the plugin releases since the last package version bump in Woo Core.
-      * Please add a changelog to the content which is aggregated from all the releases included in the package bump. The changelog should only list things surfaced to users of the package in WooCommerce core (i.e. excluding things only available in the feature plugin or development builds). This changelog will be used in the release notes for the WooCommerce release. 
-      * Since WooCommerce Blocks 7.4.0, the changelog entry for WooCommerce core must include the fields `Significance` and `Type`. In our case, we're using the following definition as seen on https://github.com/woocommerce/woocommerce/pull/32627/commits/99bf4afd262280ad4e45386ce4ad00ce3425af93:
-```
-Significance: minor
-Type: update
+  * The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627). 
+     * In the PR description you will link to all the important things that have already been prepared since the version you replaced. Note, you need to make sure you link to all the related documents for the plugin releases since the last package version bump in Woo Core.
+     * Please add a changelog to the content which is aggregated from all the releases included in the package bump. The changelog should only list things surfaced to users of the package in WooCommerce core (i.e. excluding things only available in the feature plugin or development builds). This changelog will be used in the release notes for the WooCommerce release.  
+      * Update the `plugins/woocommerce/composer.json` file and then run `composer update`. 
 
-Woo Blocks 7.3.0 & 7.4.0
-```
+      * Since WooCommerce Blocks 7.4.0, the changelog entry for WooCommerce core must include the fields `Significance` and `Type`. In our case, we're using the following definition as seen on [plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.0](https://github.com/woocommerce/woocommerce/pull/32627/commits/99bf4afd262280ad4e45386ce4ad00ce3425af93) file:
+      ```
+      // We’ll always use minor, or patch when including a patch release
+      Significance: minor
+      Type: update
+
+      Woo Blocks 7.3.0 & 7.4.0
+      ```
   * Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should include ensuring any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
   * Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
   * Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
