@@ -35,18 +35,13 @@ jobs:
         steps:
             - name: Create dirs.
               run: |
-                  mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
               uses: actions/checkout@v2
               with:
                   path: package/woocommerce
-
-            - name: Move current directory to code. We will install zip file in this dir later.
-              run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v2
