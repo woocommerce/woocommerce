@@ -219,7 +219,7 @@ describe( 'Shopper → Checkout', () => {
 				FREE_SHIPPING_PRICE
 			);
 			await shopper.block.placeOrder();
-			await page.waitForTimeout( 2000 );
+			await page.waitForSelector( '.woocommerce-order' );
 			await expect( page ).toMatch( 'Order received' );
 			await expect( page ).toMatch( FREE_SHIPPING_NAME );
 		} );
@@ -233,7 +233,7 @@ describe( 'Shopper → Checkout', () => {
 				NORMAL_SHIPPING_PRICE
 			);
 			await shopper.block.placeOrder();
-			await page.waitForTimeout( 2000 );
+			await page.waitForSelector( '.woocommerce-order' );
 			await expect( page ).toMatch( 'Order received' );
 			await expect( page ).toMatch( NORMAL_SHIPPING_NAME );
 		} );

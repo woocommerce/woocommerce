@@ -22,8 +22,9 @@ wp wc customer update 1 --user=1 --billing='{"first_name":"John","last_name":"Do
 
 ## Prepare translation for the test suite
 wp language core install nl_NL
+wp language plugin install woocommerce nl_NL
 wp language plugin install woo-gutenberg-products-block nl_NL
-# We need to run update after installing the langauge to update it to the latest version. Otherwise, new strings won't be available.
+# We need to run update after installing the language to update it to the latest version. Otherwise, new strings won't be available.
 wp language plugin update woo-gutenberg-products-block nl_NL
 
 exit $EXIT_CODE

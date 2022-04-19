@@ -244,33 +244,53 @@ export const shopper = {
 
 		// prettier-ignore
 		verifyBillingDetails: async ( customerBillingDetails ) => {
+			await page.waitForSelector( '.woocommerce-column--billing-address' );
 			await Promise.all( [
-				expect( page ).toMatch( customerBillingDetails.firstname ),
-				expect( page ).toMatch( customerBillingDetails.lastname ),
-				expect( page ).toMatch( customerBillingDetails.company ),
-				expect( page ).toMatch( customerBillingDetails.addressfirstline ),
-				expect( page ).toMatch( customerBillingDetails.addresssecondline ),
+				expect( page ).toMatch(
+					customerBillingDetails.firstname
+				),
+				expect( page ).toMatch( customerBillingDetails.lastname),
+				expect( page ).toMatch( customerBillingDetails.company),
+				expect( page ).toMatch(
+					customerBillingDetails.addressfirstline
+				),
+				expect( page ).toMatch(
+					customerBillingDetails.addresssecondline
+				),
 				// expect( page ).toMatch( customerBillingDetails.country ),
-				expect( page ).toMatch( customerBillingDetails.city ),
-				expect( page ).toMatch( customerBillingDetails.state ),
-				expect( page ).toMatch( customerBillingDetails.postcode ),
-				expect( page ).toMatch( customerBillingDetails.phone ),
+				expect( page ).toMatch( customerBillingDetails.city),
+				expect( page ).toMatch( customerBillingDetails.state),
+				expect( page ).toMatch( customerBillingDetails.postcode),
+				expect( page ).toMatch( customerBillingDetails.phone),
 			] );
 		},
 
 		// prettier-ignore
 		verifyShippingDetails: async ( customerShippingDetails ) => {
+			await page.waitForSelector(
+				'.woocommerce-column--shipping-address'
+			);
 			await Promise.all( [
-				expect( page ).toMatch( customerShippingDetails.firstname ),
-				expect( page ).toMatch( customerShippingDetails.lastname ),
-				expect( page ).toMatch( customerShippingDetails.company ),
-				expect( page ).toMatch( customerShippingDetails.addressfirstline ),
-				expect( page ).toMatch( customerShippingDetails.addresssecondline ),
+				expect( page ).toMatch(
+					customerShippingDetails.firstname
+				),
+				expect( page ).toMatch(
+					customerShippingDetails.lastname
+				),
+				expect( page ).toMatch( customerShippingDetails.company),
+				expect( page ).toMatch(
+					customerShippingDetails.addressfirstline
+				),
+				expect( page ).toMatch(
+					customerShippingDetails.addresssecondline
+				),
 				// expect( page ).toMatch( customerShippingDetails.country ),
-				expect( page ).toMatch( customerShippingDetails.city ),
-				expect( page ).toMatch( customerShippingDetails.state ),
-				expect( page ).toMatch( customerShippingDetails.postcode ),
-				expect( page ).toMatch( customerShippingDetails.phone ),
+				expect( page ).toMatch( customerShippingDetails.city),
+				expect( page ).toMatch( customerShippingDetails.state),
+				expect( page ).toMatch(
+					customerShippingDetails.postcode
+				),
+				expect( page ).toMatch( customerShippingDetails.phone),
 			] );
 		},
 
@@ -297,11 +317,12 @@ export const shopper = {
 					text: shippingName,
 				}
 			);
-			await page.waitForTimeout( 1000 );
+
 			await expect( page ).toMatchElement(
 				'.wc-block-components-totals-shipping .wc-block-formatted-money-amount',
 				{
 					text: shippingPrice,
+					timeout: 5000,
 				}
 			);
 		},
@@ -402,7 +423,7 @@ export const shopper = {
 			await expect( page ).toClick( couponExpandButtonSelector );
 			await expect( page ).toFill( couponInputSelector, couponCode );
 			await expect( page ).toClick( couponApplyButtonSelector );
-			await page.waitForNetworkIdle();
+			await page.waitForNetworkIdle( { idleTime: 2000 } );
 		},
 	},
 
