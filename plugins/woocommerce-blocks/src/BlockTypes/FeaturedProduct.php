@@ -25,9 +25,10 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		'dimRatio'     => 50,
 		'focalPoint'   => false,
 		'imageFit'     => 'none',
-		'minHeight'    => false,
+		'minHeight'    => 500,
 		'mediaId'      => 0,
 		'mediaSrc'     => '',
+		'overlayColor' => '#000000',
 		'showDesc'     => true,
 		'showPrice'    => true,
 	);
@@ -185,8 +186,10 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	public function get_styles( $attributes ) {
 		$style = '';
 
+		$min_height = isset( $attributes['minHeight'] ) ? $attributes['minHeight'] : wc_get_theme_support( 'featured_block::default_height', 500 );
+
 		if ( isset( $attributes['minHeight'] ) ) {
-			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['minHeight'] ) );
+			$style .= sprintf( 'min-height:%dpx;', intval( $min_height ) );
 		}
 
 		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
