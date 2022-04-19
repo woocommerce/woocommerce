@@ -157,7 +157,11 @@ const ConnectPageOnboarding = ( {
 				throw new Error( installAndActivateResponse.message );
 			}
 		} catch ( e ) {
-			renderErrorMessage( e.message );
+			if ( e instanceof Error ) {
+				renderErrorMessage( e.message );
+			} else {
+				throw new Error( `Unexpected error occurred. ${ e }` );
+			}
 		}
 	};
 
