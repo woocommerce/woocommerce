@@ -1,10 +1,9 @@
 name: Run CI
-on: pull_request # remove after testing.
-# on: 
-#   push:
-#     branches:
-#       - trunk
-#       - 'release/**'
+on: 
+  push:
+    branches:
+      - trunk
+      - 'release/**'
 defaults:
   run:
     shell: bash
@@ -53,23 +52,19 @@ jobs:
           composer --version
 
       - name: Get cached composer directories
-        id: cache-deps
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: |
-            plugins/woocommerce
-          key: ${{ runner.os }}-ci-${{ hashFiles('**/composer.lock') }}
+            ./packages
+            ./vendor
+          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
       - name: Install PNPM and install dependencies
         run: |
             npm install -g pnpm
-
-      - name: Install npm deps
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: pnpm install
+            pnpm install
 
       - name: Setup and install composer
-        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: pnpm nx composer-install woocommerce
 
       - name: Build Admin feature config
