@@ -57,9 +57,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-ci-${{ hashFiles('./composer.lock') }}
+            plugins/woocommerce
+          key: ${{ runner.os }}-ci-${{ hashFiles('**/composer.lock') }}
 
       - name: Install PNPM and install dependencies
         run: |
