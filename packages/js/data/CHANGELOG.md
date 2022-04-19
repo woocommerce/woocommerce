@@ -2,7 +2,7 @@
 
 -   Update dependency `@wordpress/hooks` to ^3.5.0
 -   Add `is_offline` attribute for `Plugin` type. #32467
-
+-   Added Typescript type declarations. #32615
 # 3.1.0
 
 -   Add "moment" to peerDependencies. #8349

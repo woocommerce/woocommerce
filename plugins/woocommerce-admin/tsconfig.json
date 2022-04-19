@@ -12,37 +12,20 @@
 		"strict": true,
 		// Import non-ES modules as default imports.
 		"esModuleInterop": true,
-		"skipLibCheck": false,
+		// Skip type checking of declaration files because some libraries define two copies of the same type in an inconsistent way
+		"skipLibCheck": true,
 		"module": "esnext",
-		"typeRoots": [
-			"./typings",
-			"./node_modules/@types",
-			"../../packages/js/**/node_modules/@types"
-		],
-		"baseUrl": "./",
+		"baseUrl": "client",
 		"paths": {
-			"@woocommerce/*": [ "../../packages/js/*/src" ],
-			"~/*": [ "client/*" ]
-		}
+			"~/*": [ "*" ]
+		},
+		"rootDir": "client",
+		"typeRoots": [
+			"./client/typings",
+			"./node_modules/@types"
+		]
 	},
-	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ],
-	"files": [],
-	"references": [
-		{ "path": "client/" },
-		{ "path": "../../packages/js/admin-e2e-tests" },
-		{ "path": "../../packages/js/components" },
-		{ "path": "../../packages/js/csv-export" },
-		{ "path": "../../packages/js/currency" },
-		{ "path": "../../packages/js/customer-effort-score" },
-		{ "path": "../../packages/js/data" },
-		{ "path": "../../packages/js/date" },
-		{ "path": "../../packages/js/experimental" },
-		{ "path": "../../packages/js/explat" },
-		{ "path": "../../packages/js/js-tests" },
-		{ "path": "../../packages/js/navigation" },
-		{ "path": "../../packages/js/notices" },
-		{ "path": "../../packages/js/number" },
-		{ "path": "../../packages/js/onboarding" },
-		{ "path": "../../packages/js/tracks" },
-    ]
+	"include": [
+		"./client/**/*"
+	]
 }

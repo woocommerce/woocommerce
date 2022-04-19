@@ -1,8 +1,7 @@
 declare module '@woocommerce/e2e-utils';
 declare module '@woocommerce/e2e-environment';
 declare module '@woocommerce/settings';
-declare module '@wordpress/data';
-declare module '@wordpress/compose';
+declare module '@woocommerce/tracks';
 declare module 'gridicons/dist/*' {
 	const value: React.ElementType< {
 		size?: 12 | 18 | 24 | 36 | 48 | 54 | 72;
@@ -10,3 +9,6 @@ declare module 'gridicons/dist/*' {
 	} >;
 	export default value;
 }
+declare module '*.png';
+declare module '*.jpg';
+declare module '*.svg';
