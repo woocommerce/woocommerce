@@ -1600,4 +1600,34 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_arguments()
+	 * @dataProvider provider_get_status_arguments
+	 *
+	 * @param string $status        Current status for the request.
+	 * @param array  $expected_args Expected result of the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_status_arguments( string $status, array $expected_args ) {
+		global $comment_status;
+		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_arguments' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
+	}
+
+	/** @see test_get_status_arguments */
+	public function provider_get_status_arguments() : Generator {
+		yield 'all statuses' => [ 'all', [] ];
+		yield 'moderated status' => [ 'moderated', [ 'status' => '0' ] ];
+		yield 'approved status' => [ 'approved', [ 'status' => '1' ] ];
+		yield 'spam status' => [ 'spam', [ 'status' => 'spam' ] ];
+		yield 'trash status' => [ 'trash', [ 'status' => 'trash' ] ];
+		yield 'invalid status' => [ 'not-valid', [] ];
+	}
+
 }
