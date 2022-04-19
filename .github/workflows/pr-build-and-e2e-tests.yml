@@ -75,8 +75,8 @@ jobs:
               if: steps.cache-modules.outputs.cache-hit != 'true'
               run: pnpm install
 
-            - name: list dir
-              run: ls -R package/woocommerce
+            - name: list pnpm
+              run: ls ~/.pnpm-store
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
