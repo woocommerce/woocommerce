@@ -64,8 +64,8 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: |
-                  package/woocommerce/plugins/woocommerce/**/node_modules
-                key: ${{ runner.os }}-e2e-test-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
+                  package/woocommerce/**/node_modules
+                key: ${{ runner.os }}-e2e-test6-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
