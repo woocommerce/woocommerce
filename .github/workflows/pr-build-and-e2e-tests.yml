@@ -59,7 +59,7 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Cache modules
+            - name: Cache modules # comment
               id: cache-modules
               uses: actions/cache@v3
               with:
