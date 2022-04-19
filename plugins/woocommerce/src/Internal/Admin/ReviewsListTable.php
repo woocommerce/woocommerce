@@ -834,8 +834,7 @@ class ReviewsListTable extends WP_List_Table {
 			$status_links[ $status ] = '<a href="' . esc_url( $link ) . '"' . $current_link_attributes . '>' . sprintf( translate_nooped_plural( $label, $number_reviews_for_status ), $count_html ) . '</a>';
 		}
 
-		/** This filter is documented in wp-admin/includes/class-wp-comments-list-table.php */
-		return apply_filters( 'comment_status_links', $status_links );
+		return $status_links;
 	}
 
 	/**
