@@ -82,9 +82,9 @@ class Reviews {
 	 * @return bool
 	 */
 	public function is_reviews_page() : bool {
-		global $pagenow;
+		global $current_screen;
 
-		return 'edit.php' === $pagenow && isset( $_GET['page'] ) && 'product-reviews' === $_GET['page'];
+		return isset( $current_screen->base ) && 'product_page_product-reviews' === $current_screen->base;
 	}
 
 	/**

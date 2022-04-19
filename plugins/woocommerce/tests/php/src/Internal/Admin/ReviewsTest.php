@@ -190,17 +190,14 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
 	 * @dataProvider provider_is_reviews_page
 	 *
-	 * @param string|null $new_pagenow     the value of the global $pageview var.
-	 * @param string|null $page            the value of $_GET[ 'page' ].
+	 * @param string|null $new_current_screen     the value of the global $pageview var.
 	 * @param bool        $expected_result the expected bool result.
 	 * @return void
 	 */
-	public function test_is_reviews_page( $new_pagenow, $page, $expected_result ) {
-		global $pagenow;
+	public function test_is_reviews_page( $new_current_screen, $expected_result ) {
+		global $current_screen;
 
-		$pagenow = $new_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$_GET['page'] = $page;
+		$current_screen = $new_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$reviews = new Reviews();
 
@@ -210,34 +207,28 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/** @see test_is_reviews_page */
 	public function provider_is_reviews_page() : Generator {
 
-		yield 'Global pagenow is null' => [
-			'new_pagenow'     => null,
-			'page'            => null,
-			'expected_result' => false,
+		yield 'Global current_screen is null' => [
+			'new_current_screen' => null,
+			'expected_result'    => false,
 		];
 
-		yield 'Global pagenow is anything other than the edit page' => [
-			'new_pagenow'     => 'test.php',
-			'page'            => null,
-			'expected_result' => false,
+		yield 'Global current_screen has no base' => [
+			'new_current_screen' => (object) [],
+			'expected_result'    => false,
 		];
 
-		yield 'Page is null' => [
-			'new_pagenow'     => 'edit.php',
-			'page'            => null,
-			'expected_result' => false,
+		$any_screen = (object) [ 'base' => 'any-page' ];
+
+		yield 'current_screen->base is anything other than the reviews page' => [
+			'new_current_screen' => $any_screen,
+			'expected_result'    => false,
 		];
 
-		yield 'Page is anything other than product-reviews' => [
-			'new_pagenow'     => 'edit.php',
-			'page'            => 'test',
-			'expected_result' => false,
-		];
+		$reviews_screen = (object) [ 'base' => 'product_page_product-reviews' ];
 
 		yield 'Page is product-reviews' => [
-			'new_pagenow'     => 'edit.php',
-			'page'            => 'product-reviews',
-			'expected_result' => true,
+			'new_current_screen' => $reviews_screen,
+			'expected_result'    => true,
 		];
 	}
 
