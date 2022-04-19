@@ -33,7 +33,7 @@ jobs:
         runs-on: ubuntu-18.04
         needs: [build]
         steps:
-            - name: Create dirs.
+            - name: Create dirs. #comment.
               run: |
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
