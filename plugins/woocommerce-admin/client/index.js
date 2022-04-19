@@ -56,9 +56,6 @@ const PaymentsGatewaysOptionsDescroption = () => {
 };
 
 registerPlugin( 'banner', { scope: 'my-scope', render: PaymentsBannerFill } );
-registerPlugin( 'banner2', { scope: 'my-scope', render: PaymentsGatewaysOptionsDescroption } );
-
-// TODO: move this to another module
 const Banner = () => {
 		return (
 			<>
@@ -111,16 +108,17 @@ if ( appRoot ) {
 	// Render notices just above the WP content div.
 	const wpBody = document.getElementById( 'wpbody-content' );
 
-	const mainform = document.getElementById(
+	const isWcAdminSettingsPaymentPage = document.getElementById(
 		'wc_payment_gateways_banner_slotfill'
 	);
+
+	isWcAdminSettingsPaymentPage ? render( Banner(), isWcAdminSettingsPaymentPage ) : null;
+	
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
-	// TODO: note this slotfill is not part of the form
-	render( Banner(), mainform );
 
 	render(
 		<div className="woocommerce-layout">
