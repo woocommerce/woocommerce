@@ -33,7 +33,7 @@ jobs:
         runs-on: ubuntu-18.04
         needs: [build]
         steps:
-            - name: Create dirs. #comment.
+            - name: Create dirs.
               run: |
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
@@ -64,8 +64,9 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: |
-                  package/woocommerce/**/node_modules
-                key: ${{ runner.os }}-build-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
+                  ./package/woocommerce/**/node_modules
+                  ./package/woocommerce/packages/js/e2e-environment/node_modules
+                key: ${{ runner.os }}-e2e-test-${{ hashFiles('package/woocommerce/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
