@@ -1,4 +1,4 @@
-export default () => (
+export const Maestro = () => (
 	/* eslint-disable */
 	<svg
 		width="51"
