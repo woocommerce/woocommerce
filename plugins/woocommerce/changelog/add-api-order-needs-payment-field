@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-REST API: Adds a `needs_payment` field to order requests.
+REST API: Adds a `needs_payment` field to order responses.
