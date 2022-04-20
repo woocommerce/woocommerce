@@ -258,6 +258,42 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Displays the product reviews HTML table.
+	 *
+	 * Reimplements {@see WP_Comment_::display()} but we change the ID to match the one output by {@see WP_Comments_List_Table::display()}.
+	 * This will automatically handle additional CSS for consistency with the comments page.
+	 *
+	 * @return void
+	 */
+	public function display() {
+		$singular = $this->_args['singular'] ?? false;
+
+		$this->display_tablenav( 'top' );
+
+		$this->screen->render_screen_reader_content( 'heading_list' );
+
+		?>
+		<table class="wp-list-table <?php echo esc_attr( implode( ' ', $this->get_table_classes() ) ); ?>">
+			<thead>
+			<tr>
+				<?php $this->print_column_headers(); ?>
+			</tr>
+			</thead>
+			<tbody id="the-comment-list" <?php echo esc_attr( $singular ? "data-wp-lists='list:$singular'" : '' ); ?>>
+			<?php $this->display_rows_or_placeholder(); ?>
+			</tbody>
+			<tfoot>
+			<tr>
+				<?php $this->print_column_headers( false ); ?>
+			</tr>
+			</tfoot>
+		</table>
+		<?php
+
+		$this->display_tablenav( 'bottom' );
+	}
+
+	/**
 	 * Render a single row HTML.
 	 *
 	 * @global WP_Post $post
@@ -279,7 +315,7 @@ class ReviewsListTable extends WP_List_Table {
 		$this->current_user_can_edit_review = current_user_can( 'edit_comment', $comment->comment_ID );
 
 		?>
-		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="<?php echo esc_attr( $the_comment_class ); ?>">
+		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="comment <?php echo esc_attr( $the_comment_class ); ?>">
 			<?php $this->single_row_columns( $comment ); ?>
 		</tr>
 		<?php
