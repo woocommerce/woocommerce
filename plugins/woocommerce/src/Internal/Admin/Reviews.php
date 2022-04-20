@@ -41,6 +41,8 @@ class Reviews {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
+
+		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
 	/**
@@ -57,6 +59,23 @@ class Reviews {
 	}
 
 	/**
+	 * Gets the required capability to access the reviews page and manage product reviews.
+	 *
+	 * @param string $context The context for which the capability is needed.
+	 * @return string
+	 */
+	public static function get_capability( $context = 'view' ) {
+
+		/**
+		 * Filters whether the current user can manage product reviews.
+		 *
+		 * @param string $capability The capability (defaults to `moderate_comments`).
+		 * @param string $context    The context for which the capability is needed.
+		 */
+		return apply_filters( 'woocommerce_product_reviews_page_capability', 'moderate_comments', $context );
+	}
+
+	/**
 	 * Registers the Product Reviews submenu page.
 	 *
 	 * @return void
@@ -66,12 +85,104 @@ class Reviews {
 			'edit.php?post_type=product',
 			__( 'Reviews', 'woocommerce' ),
 			__( 'Reviews', 'woocommerce' ) . $this->get_pending_count_bubble(),
-			'moderate_comments',
+			static::get_capability(),
 			static::MENU_SLUG,
 			[ $this, 'render_reviews_list_table' ]
 		);
 
 		add_action( "load-{$this->reviews_page_hook}", [ $this, 'load_reviews_screen' ] );
+	}
+
+	/**
+	 * Determines whether the current page is the reviews page.
+	 *
+	 * @return bool
+	 */
+	public function is_reviews_page() : bool {
+		global $current_screen;
+
+		return isset( $current_screen->base ) && 'product_page_product-reviews' === $current_screen->base;
+	}
+
+	/**
+	 * Displays notices on the Reviews page.
+	 *
+	 * @return void
+	 */
+	public function display_notices() {
+
+		if ( $this->is_reviews_page() ) {
+			$this->maybe_display_reviews_bulk_action_notice();
+		}
+	}
+
+	/**
+	 * May display the bulk action admin notice.
+	 *
+	 * @return void
+	 */
+	protected function maybe_display_reviews_bulk_action_notice() {
+
+		$messages = $this->get_bulk_action_notice_messages();
+
+		echo ! empty( $messages ) ? '<div id="moderated" class="updated"><p>' . implode( "<br/>\n", $messages ) . '</p></div>' : '';  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Gets the applicable bulk action admin notice messages.
+	 *
+	 * @return array
+	 */
+	protected function get_bulk_action_notice_messages() : array {
+
+		$approved   = isset( $_REQUEST['approved'] ) ? (int) $_REQUEST['approved'] : 0;
+		$unapproved = isset( $_REQUEST['unapproved'] ) ? (int) $_REQUEST['unapproved'] : 0;
+		$deleted    = isset( $_REQUEST['deleted'] ) ? (int) $_REQUEST['deleted'] : 0;
+		$trashed    = isset( $_REQUEST['trashed'] ) ? (int) $_REQUEST['trashed'] : 0;
+		$untrashed  = isset( $_REQUEST['untrashed'] ) ? (int) $_REQUEST['untrashed'] : 0;
+		$spammed    = isset( $_REQUEST['spammed'] ) ? (int) $_REQUEST['spammed'] : 0;
+		$unspammed  = isset( $_REQUEST['unspammed'] ) ? (int) $_REQUEST['unspammed'] : 0;
+
+		$messages = [];
+
+		if ( $approved > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review approved', '%s reviews approved', $approved, 'woocommerce' ), $approved );
+		}
+
+		if ( $unapproved > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review unapproved', '%s reviews unapproved', $unapproved, 'woocommerce' ), $unapproved );
+		}
+
+		if ( $spammed > 0 ) {
+			$ids = isset( $_REQUEST['ids'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ids'] ) ) : 0;
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review marked as spam.', '%s reviews marked as spam.', $spammed, 'woocommerce' ), $spammed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=unspam&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
+		}
+
+		if ( $unspammed > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review restored from the spam', '%s reviews restored from the spam', $unspammed, 'woocommerce' ), $unspammed );
+		}
+
+		if ( $trashed > 0 ) {
+			$ids = isset( $_REQUEST['ids'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ids'] ) ) : 0;
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review moved to the Trash.', '%s reviews moved to the Trash.', $trashed, 'woocommerce' ), $trashed ) . ' <a href="' . esc_url( wp_nonce_url( "edit-comments.php?doaction=undo&action=untrash&ids=$ids", 'bulk-comments' ) ) . '">' . __( 'Undo', 'woocommerce' ) . '</a><br />';
+		}
+
+		if ( $untrashed > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review restored from the Trash', '%s reviews restored from the Trash', $untrashed, 'woocommerce' ), $untrashed );
+		}
+
+		if ( $deleted > 0 ) {
+			/* translators: %s is an integer higher than 0 (1, 2, 3...) */
+			$messages[] = sprintf( _n( '%s review permanently deleted', '%s reviews permanently deleted', $deleted, 'woocommerce' ), $deleted );
+		}
+
+		return $messages;
 	}
 
 	/**
