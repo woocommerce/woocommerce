@@ -64,9 +64,7 @@ class ReviewsCommentsOverrides {
 			<p><?php esc_html_e( 'Product reviews can now be managed from Products > Reviews.', 'woocommerce' ); ?></p>
 			<p class="submit">
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary"><?php esc_html_e( 'Visit new location', 'woocommerce' ); ?></a>
-				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button">
-					<?php esc_html_e( 'Dismiss', 'woocommerce' ); ?>
-				</a>
+				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
 			</p>
 		</div>
 
