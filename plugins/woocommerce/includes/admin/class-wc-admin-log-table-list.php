@@ -338,30 +338,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Generates and displays row action links.
-	 *
-	 * @param WP_Post $item        Post being acted upon.
-	 * @param string  $column_name Current column name.
-	 * @param string  $primary     Primary column name.
-	 * @return string Row actions output for posts, or an empty string
-	 *                if the current column is not the primary column.
-	 */
-	protected function handle_row_actions( $item, $column_name, $primary ) {
-		if ( $primary !== $column_name ) {
-			return '';
-		}
-		$actions = array();
-		$actions['inline hide-if-no-js'] = sprintf(
-			'<button type="button" class="button-link editinline" aria-label="%1$s" aria-expanded="false" data-log-id="%2$s">%3$s</button>',
-			__( 'Expand to view details', 'woocommerce' ),
-			$item['log_id'],
-			__( 'View Details', 'woocommerce' )
-		);
-
-		return $this->row_actions( $actions );
-	}
-
-	/**
 	 * Outputs the hidden row displayed when inline editing
 	 */
 	public function inline_edit() {
