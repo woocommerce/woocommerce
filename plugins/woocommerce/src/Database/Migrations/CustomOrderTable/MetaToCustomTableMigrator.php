@@ -196,6 +196,9 @@ abstract class MetaToCustomTableMigrator {
 		$columns      = array();
 		$placeholders = array();
 		foreach ( $columns_schema as $prev_column => $schema ) {
+			if ( in_array( $schema['destination'], $columns ) ) {
+				continue;
+			}
 			$columns[]      = $schema['destination'];
 			$placeholders[] = MigrationHelper::get_wpdb_placeholder_for_type( $schema['type'] );
 		}

@@ -35,7 +35,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->create_order_custom_table_if_not_exist();
+		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->sut        = wc_get_container()->get( WPPostToCOTMigrator::class );
 	}
@@ -75,11 +75,11 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 			$wpdb->get_var(
 				"
 SELECT COUNT(*) FROM {$this->data_store::get_orders_table_name()}
-WHERE post_id = {$order->get_id()}"
+WHERE id = {$order->get_id()}"
 			),
 			'Order record is duplicated.'
 		);
-		$order_id = $wpdb->get_var( "SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE post_id = {$order->get_id()}" );
+		$order_id = $wpdb->get_var( "SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE id = {$order->get_id()}" );
 		$this->assertEquals(
 			1,
 			$wpdb->get_var(
@@ -160,7 +160,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	private function get_order_from_cot( $post_order ) {
 		global $wpdb;
 		$order_table = $this->data_store::get_orders_table_name();
-		$query       = "SELECT * FROM $order_table WHERE post_id = {$post_order->get_id()};";
+		$query       = "SELECT * FROM $order_table WHERE id = {$post_order->get_id()};";
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_row( $query );
@@ -221,7 +221,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$db_order = $this->get_order_from_cot( $order );
 
 		// Verify core data.
-		$this->assertEquals( $order->get_id(), $db_order->post_id );
+		$this->assertEquals( $order->get_id(), $db_order->id );
 		$this->assertEquals( 'wc-' . $order->get_status(), $db_order->status );
 		$this->assertEquals( 'INR', $db_order->currency );
 		$this->assertEquals( $order->get_customer_id(), $db_order->customer_id );
@@ -360,19 +360,5 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			$wpdb->query( "TRUNCATE table $table;" );
 		}
 		$this->sut->delete_checkpoint();
-	}
-
-	/**
-	 * Helper method to create custom tables if not present.
-	 */
-	private function create_order_custom_table_if_not_exist() {
-		$order_table_controller = wc_get_container()
-			->get( 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' );
-		$order_table_controller->show_feature();
-		$this->synchronizer = wc_get_container()
-			->get( DataSynchronizer::class );
-		if ( ! $this->synchronizer->check_orders_table_exists() ) {
-			$this->synchronizer->create_database_tables();
-		}
 	}
 }

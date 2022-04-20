@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WC_Mock_Payment_Gateway;
 use \WC_Tax;
 use \WC_Shipping_Rate;
@@ -126,6 +127,20 @@ class OrderHelper {
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * Helper method to create custom tables if not present.
+	 */
+	public static function create_order_custom_table_if_not_exist() {
+		$order_table_controller = wc_get_container()
+			->get( 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' );
+		$order_table_controller->show_feature();
+		$synchronizer = wc_get_container()
+			->get( DataSynchronizer::class );
+		if ( ! $synchronizer->check_orders_table_exists() ) {
+			$synchronizer->create_database_tables();
+		}
 	}
 
 	/**
