@@ -5,6 +5,10 @@ defaults:
   run:
     shell: bash
     working-directory: plugins/woocommerce
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
@@ -32,11 +36,6 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.7.0
-        with:
-            access_token: ${{ github.token }}
-
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -53,19 +52,23 @@ jobs:
           php --version
           composer --version
 
-      - name: Get cached composer directories
-        uses: actions/cache@v2
+      - name: Get cached composer and pnpm directories
+        uses: actions/cache@v3
         with:
           path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+            ~/.pnpm-store
+            ~/.composer
+          key: ${{ runner.os }}-test-${{ hashFiles('./composer.lock', '../../pnpm-lock.yaml') }}
 
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
-            pnpm nx composer-install woocommerce
+      - name: Install PNPM
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Composer dependencies
+        run: pnpm nx composer-install woocommerce
+
       - name: Build Admin feature config
         working-directory: ./
         run: |
