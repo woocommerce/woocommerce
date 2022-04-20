@@ -462,7 +462,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		$i = 0;
 
-		foreach ( $actions as $action => $link ) {
+		foreach ( array_filter( $actions ) as $action => $link ) {
 			++$i;
 
 			if ( ( ( 'approve' === $action || 'unapprove' === $action ) && 2 === $i ) || 1 === $i ) {

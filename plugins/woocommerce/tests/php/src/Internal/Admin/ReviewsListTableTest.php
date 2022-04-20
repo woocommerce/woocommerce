@@ -122,6 +122,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			} else {
 				$this->assertStringContainsString( 'Trash', $actions );
 			}
+
+			// Should not contain any tags with _only_ a pipe separator, but no label.
+			$this->assertStringNotContainsString( '> | </span>', $actions );
 		}
 	}
 
