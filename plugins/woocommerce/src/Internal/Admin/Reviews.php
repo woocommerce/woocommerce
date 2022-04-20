@@ -43,6 +43,7 @@ class Reviews {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
@@ -108,6 +109,18 @@ class Reviews {
 		global $current_screen;
 
 		return isset( $current_screen->base ) && 'product_page_product-reviews' === $current_screen->base;
+	}
+
+	/**
+	 * Loads the JavaScript required for inline replies and quick edit.
+	 *
+	 * @return void
+	 */
+	public function load_javascript() : void {
+		if ( $this->is_reviews_page() ) {
+			wp_enqueue_script( 'admin-comments' );
+			enqueue_comment_hotkeys_js();
+		}
 	}
 
 	/**
@@ -252,6 +265,8 @@ class Reviews {
 			</form>
 		</div>
 		<?php
+		wp_comment_reply( '-1', true, 'detail' );
+		wp_comment_trashnotice();
 
 		/**
 		 * Filters the contents of the product reviews list table output.
