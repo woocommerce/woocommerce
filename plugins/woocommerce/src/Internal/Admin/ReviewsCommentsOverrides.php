@@ -38,12 +38,30 @@ class ReviewsCommentsOverrides {
 			return;
 		}
 
+		$this->maybe_display_reviews_moved_notice();
+	}
+
+	/**
+	 * May render an admin notice informing the user that reviews were moved to a new page.
+	 */
+	protected function maybe_display_reviews_moved_notice() {
+		if ( $this->should_display_reviews_moved_notice() ) {
+			$this->display_reviews_moved_notice();
+		}
+	}
+
+	/**
+	 * Checks if the admin notice informing the user that reviews were moved to a new page should be displayed.
+	 *
+	 * @return bool
+	 */
+	protected function should_display_reviews_moved_notice() : bool {
 		// Do not display if the current user has dismissed this notice.
 		if ( get_user_meta( get_current_user_id(), 'dismissed_' . static::REVIEWS_MOVED_NOTICE_ID . '_notice', true ) ) {
-			return;
+			return false;
 		}
 
-		$this->display_reviews_moved_notice();
+		return true;
 	}
 
 	/**
