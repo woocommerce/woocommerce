@@ -15,8 +15,11 @@ const {
 	productPageSaveChanges,
 	orderPageSaveChanges,
 	verifyValueOfElementAttribute,
-	click
+	click,
+	uiUnblocked,
 } = require( '../page-utils' );
+
+const { waitAndClick } = require( '@woocommerce/e2e-environment' );
 
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
@@ -52,18 +55,17 @@ const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) =>
 const BTN_COPY_DOWNLOAD_LINK = '#copy-download-link';
 const INPUT_DOWNLOADS_REMAINING = 'input[name="downloads_remaining[0]"]';
 const INPUT_EXPIRATION_DATE = 'input[name="access_expires[0]"]';
-const MOST_RECENT_VARIATION = 'div.woocommerce_variations > div:nth-child(2)';
 const ORDER_DOWNLOADS = '#woocommerce-order-downloads';
 const INPUT_VARIATION = {
 	SKU: '#variable_sku0',
-	REGULAR_PRICE : '#variable_regular_price_0',
+	REGULAR_PRICE: '#variable_regular_price_0',
 	SALE_PRICE: '#variable_sale_price0',
 	WEIGHT: '#variable_weight0',
 	LENGTH: '[name="variable_length[0]"]',
 	WIDTH: '[name="variable_width[0]"]',
 	HEIGHT: '[name="variable_height[0]"]',
-	DESCRIPTION: '#variable_description0'
-}
+	DESCRIPTION: '#variable_description0',
+};
 
 const merchant = {
 	login: async () => {
@@ -374,22 +376,24 @@ const merchant = {
 
 	updateVariationDetails: async ( variationDetails ) => {
 		// View variations
-		await expect( page ).toClick( 'li.variations_options' );
+		await click( 'li.variations_options' );
 
-		// Display the details of the most recent variation
-		const variation = await expect( page ).toMatchElement( MOST_RECENT_VARIATION );
-		await expect( variation ).toClick( 'div.handlediv' );
+		// Wait until variations are displayed
+		await uiUnblocked();
+
+		// Expand variations info
+		await waitAndClick( page, '.variations-pagenav .expand_all' );
 
 		// Verify variation details
 		if ( variationDetails.sku ) {
-			await clearAndFillInput( 
-				INPUT_VARIATION.SKU, 
-				variationDetails.sku 
+			await clearAndFillInput(
+				INPUT_VARIATION.SKU,
+				variationDetails.sku
 			);
 		}
 
 		if ( variationDetails.regularPrice ) {
-			await clearAndFillInput( 
+			await clearAndFillInput(
 				INPUT_VARIATION.REGULAR_PRICE,
 				variationDetails.regularPrice
 			);
@@ -437,20 +441,22 @@ const merchant = {
 			);
 		}
 
+		// Save variation changes
 		await click( 'button.save-variation-changes' );
-		
+
 		// Save product changes
 		await productPageSaveChanges();
 	},
 
 	verifyVariationDetails: async ( expectedVariationDetails ) => {
-		// View variations
-		await expect( page ).toClick( 'li.variations_options' );
+		await click( 'li.variations_options' );
 
-		// Display latest variation details
-		const variation = await expect( page ).toMatchElement( MOST_RECENT_VARIATION );
-		await expect( variation ).toClick( 'div.handlediv' );
-		
+		// Wait until variations are displayed
+		await uiUnblocked();
+
+		// Expand variations info
+		await waitAndClick( page, '.variations-pagenav .expand_all' );
+
 		// Verify variation details
 		if ( expectedVariationDetails.sku ) {
 			await verifyValueOfInputField(
@@ -681,7 +687,7 @@ const merchant = {
 	/**
 	 * Deactivate a plugin by the plugin's name with the option to delete the plugin as well.
 	 *
-	 * @param {string} pluginName The name of the plugin to deactivate. For example, `WooCommerce`.
+	 * @param {string}  pluginName   The name of the plugin to deactivate. For example, `WooCommerce`.
 	 * @param {boolean} deletePlugin Pass in `true` to delete the plugin. Defaults to `false`.
 	 */
 	deactivatePlugin: async ( pluginName, deletePlugin = false ) => {
@@ -781,7 +787,7 @@ const merchant = {
 	 */
 	collapseAdminMenu: async ( collapse = true ) => {
 		const collapseButton = await page.$( '.folded #collapse-button' );
-		if ( ! collapseButton == collapse ) {
+		if ( ! collapseButton === collapse ) {
 			await collapseButton.click();
 		}
 	},

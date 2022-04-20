@@ -9,7 +9,7 @@ const {
 	verifyAndPublish,
 	createSimpleProduct,
 	createVariableProduct,
-	withRestApi
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -23,15 +23,15 @@ const runProductEditDetailsTest = () => {
 	describe( 'Products > Edit Product', () => {
 		beforeAll( async () => {
 			await merchant.login();
-		});
+		} );
 
 		beforeEach( async () => {
 			productId = await createSimpleProduct();
-		});
+		} );
 
-		afterEach(async () => {
-			await withRestApi.deleteProduct(productId);
-		});
+		afterEach( async () => {
+			await withRestApi.deleteProduct( productId );
+		} );
 
 		it( 'can edit a product and save the changes', async () => {
 			await merchant.goToProduct( productId );
@@ -44,7 +44,10 @@ const runProductEditDetailsTest = () => {
 
 			// Switch to text mode to work around the iframe
 			await expect( page ).toClick( '#content-html' );
-			await expect( page ).toFill( '.wp-editor-area', 'This product is pretty awesome.' );
+			await expect( page ).toFill(
+				'.wp-editor-area',
+				'This product is pretty awesome.'
+			);
 
 			await expect( page ).toFill( '#_regular_price', '100.05' );
 
@@ -54,36 +57,43 @@ const runProductEditDetailsTest = () => {
 
 			// Verify the changes saved
 			await expect( page ).toMatchElement( '#title', 'Awesome product' );
-			await expect( page ).toMatchElement( '.wp-editor-area', 'This product is pretty awesome.' );
+			await expect( page ).toMatchElement(
+				'.wp-editor-area',
+				'This product is pretty awesome.'
+			);
 			await expect( page ).toMatchElement( '#_regular_price', '100.05' );
-		});
-	});
+		} );
+	} );
 
 	describe( 'Products > Edit Product > Variations', () => {
 		beforeAll( async () => {
 			await merchant.login();
-		});
-		
+		} );
+
 		beforeEach( async () => {
 			productId = await createVariableProduct();
-		});
+		} );
 
-		afterEach(async () => {
-			await withRestApi.deleteProduct(productId);
-		});
+		afterEach( async () => {
+			await withRestApi.deleteProduct( productId );
+		} );
 
 		it( 'can edit just a single attribute of a product variation', async () => {
-			const expectedVariationDetails = { 
-				regularPrice: '10'
+			const expectedVariationDetails = {
+				regularPrice: '10',
 			};
 
 			await merchant.goToProduct( productId );
 			await merchant.updateVariationDetails( expectedVariationDetails );
-			await merchant.updateVariationDetails( expectedVariationDetails );
-		});
+
+			// Wait until page is stable again after saving changes
+			await uiUnblocked();
+
+			await merchant.verifyVariationDetails( expectedVariationDetails );
+		} );
 
 		it( 'can edit multiple attributes of a product variation', async () => {
-			const expectedVariationDetails = { 
+			const expectedVariationDetails = {
 				sku: 'ABCD0123',
 				regularPrice: '10',
 				salePrice: '8',
@@ -91,14 +101,18 @@ const runProductEditDetailsTest = () => {
 				length: '50',
 				width: '50',
 				height: '50',
-				description: 'This variation is awesome!'
+				description: 'This variation is awesome!',
 			};
 
 			await merchant.goToProduct( productId );
 			await merchant.updateVariationDetails( expectedVariationDetails );
+
+			// Wait until page is stable again after saving changes
+			await uiUnblocked();
+
 			await merchant.verifyVariationDetails( expectedVariationDetails );
-		});
-	});
-}
+		} );
+	} );
+};
 
 module.exports = runProductEditDetailsTest;
