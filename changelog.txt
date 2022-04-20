@@ -77,6 +77,16 @@
 - Stop showing the price slider skeleton when moving the slider handles. ([6078](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6078))
 - Rename Legacy Template block to Classic Template block. ([6021](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6021))
 
+= 6.4.1 2022-04-15 =
+
+**WooCommerce**
+
+- Revert - incorrect position value for registering menu pages. ([#32623](https://github.com/woocommerce/woocommerce/pull/32623))
+
+**WooCommerce Blocks - 7.2.2**
+
+- Fix - page load problem due to incorrect URL to certain assets. ([#6260](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6260))
+
 = 6.4.0 2022-04-12 =
 
 **WooCommerce**
