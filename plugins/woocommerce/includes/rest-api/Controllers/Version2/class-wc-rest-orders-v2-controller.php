@@ -218,7 +218,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']       = $item->get_product() ? $item->get_product()->get_sku() : null;
 			$data['price']     = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
-			$data['image_src'] = $item->get_product() ? wp_get_attachment_image_url( $item->get_product()->get_image_id() ) : null;
+			$data['image_src'] = $item->get_product() ? wp_get_attachment_image_url( $item->get_product()->get_image_id(), 'full' ) : null;
 		}
 
 		// Add parent_name if the product is a variation.
