@@ -17,6 +17,28 @@ use WC_Unit_Test_Case;
 class ReviewsTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Sets the global vars before each test.
+	 */
+	public function setUp() : void {
+		global $current_screen;
+
+		$this->old_current_screen = $current_screen;
+
+		parent::setUp();
+	}
+
+	/**
+	 * Restores the global vars after each test.
+	 */
+	public function tearDown() : void {
+		global $current_screen;
+
+		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Tests that can get the class instance.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_instance()
@@ -184,6 +206,271 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertStringEndsWith( 'custom additional content', $output );
 
 		remove_all_filters( 'woocommerce_product_reviews_list_table' );
+	}
+
+	/**
+	 * Tests that the reviews page is properly identified.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
+	 * @dataProvider provider_is_reviews_page
+	 *
+	 * @param string|null $new_current_screen The value of the global $pageview var.
+	 * @param bool        $expected_result    The expected bool result.
+	 * @return void
+	 */
+	public function test_is_reviews_page( $new_current_screen, $expected_result ) {
+		global $current_screen;
+
+		$current_screen = $new_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$reviews = new Reviews();
+
+		$this->assertSame( $expected_result, $reviews->is_reviews_page() );
+	}
+
+	/** @see test_is_reviews_page */
+	public function provider_is_reviews_page() : Generator {
+
+		yield 'Global current_screen is null' => [
+			'new_current_screen' => null,
+			'expected_result'    => false,
+		];
+
+		yield 'Global current_screen has no base' => [
+			'new_current_screen' => (object) [],
+			'expected_result'    => false,
+		];
+
+		$any_screen = (object) [ 'base' => 'any-page' ];
+
+		yield 'current_screen->base is anything other than the reviews page' => [
+			'new_current_screen' => $any_screen,
+			'expected_result'    => false,
+		];
+
+		$reviews_screen = (object) [ 'base' => 'product_page_product-reviews' ];
+
+		yield 'Page is product-reviews' => [
+			'new_current_screen' => $reviews_screen,
+			'expected_result'    => true,
+		];
+	}
+
+	/**
+	 * Tests that the admin notice messages are properly returned.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::get_bulk_action_notice_messages()
+	 * @dataProvider provider_get_bulk_action_notice_messages
+	 *
+	 * @param string[] $statuses        The wp comment statuses after a bulk operation.
+	 * @param int      $count           The number of affected comments.
+	 * @param array    $expected_result The action notice messages.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_bulk_action_notice_messages( $statuses, $count, $expected_result ) {
+
+		$reviews = new Reviews();
+
+		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'get_bulk_action_notice_messages' );
+		$method->setAccessible( true );
+
+		$_REQUEST = [];
+
+		foreach ( $statuses as $status ) {
+			$_REQUEST[ $status ] = $count;
+		}
+		$_REQUEST['ids'] = '1,2,3';
+
+		$result = $method->invoke( $reviews );
+
+		foreach ( $expected_result as $i => $expected_message ) {
+			$this->assertContains( $expected_message, $result[ $i ] );
+		}
+	}
+
+	/** @see test_get_bulk_action_notice_messages */
+	public function provider_get_bulk_action_notice_messages() : Generator {
+
+		yield 'An approved review status' => [
+			'status'         => [ 'approved' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review approved' ],
+		];
+
+		yield 'Two approved review statuses' => [
+			'status'         => [ 'approved' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews approved' ],
+		];
+
+		yield 'An unapproved review status' => [
+			'status'         => [ 'unapproved' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review unapproved' ],
+		];
+
+		yield 'Two unapproved review statuses' => [
+			'status'         => [ 'unapproved' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews unapproved' ],
+		];
+
+		yield 'A deleted review status' => [
+			'status'         => [ 'deleted' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review permanently deleted' ],
+		];
+
+		yield 'Two deleted review statuses' => [
+			'status'         => [ 'deleted' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews permanently deleted' ],
+		];
+
+		yield 'A trashed review status' => [
+			'status'         => [ 'trashed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review moved to the Trash.' ],
+		];
+
+		yield 'Two trashed review statuses' => [
+			'status'         => [ 'trashed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews moved to the Trash.' ],
+		];
+
+		yield 'An untrashed review status' => [
+			'status'         => [ 'untrashed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review restored from the Trash' ],
+		];
+
+		yield 'Two untrashed review statuses' => [
+			'status'         => [ 'untrashed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews restored from the Trash' ],
+		];
+
+		yield 'A spammed review status' => [
+			'status'         => [ 'spammed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review marked as spam.' ],
+		];
+
+		yield 'Two spammed review statuses' => [
+			'status'         => [ 'spammed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews marked as spam.' ],
+		];
+
+		yield 'An unspammed review status' => [
+			'status'         => [ 'unspammed' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review restored from the spam' ],
+		];
+
+		yield 'Two unspammed review statuses' => [
+			'status'         => [ 'unspammed' ],
+			'count'          => 2,
+			'expected_array' => [ '2 reviews restored from the spam' ],
+		];
+
+		yield 'Two different statuses' => [
+			'status'         => [ 'approved', 'unapproved' ],
+			'count'          => 1,
+			'expected_array' => [ '1 review approved', '1 review unapproved' ],
+		];
+	}
+
+	/**
+	 * Tests that a notice message will result in a valid HTML return.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::maybe_display_reviews_bulk_action_notice()
+	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
+	 *
+	 * @param array  $messages        The action notice messages.
+	 * @param string $expected_result The expected result.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_maybe_display_reviews_bulk_action_notice( $messages, $expected_result ) {
+
+		$mock = $this->getMockBuilder( Reviews::class )
+			->setMethods( [ 'get_bulk_action_notice_messages' ] )
+			->getMock();
+
+		$mock->expects( $this->once() )
+			->method( 'get_bulk_action_notice_messages' )
+			->willReturn( $messages );
+
+		$method = ( new ReflectionClass( $mock ) )->getMethod( 'maybe_display_reviews_bulk_action_notice' );
+		$method->setAccessible( true );
+
+		ob_start();
+
+		$method->invoke( $mock );
+
+		$this->assertSame( $expected_result, ob_get_clean() );
+	}
+
+	/** @see test_maybe_display_reviews_bulk_action_notice */
+	public function provider_maybe_display_reviews_bulk_action_notice() : Generator {
+
+		yield 'No messages are returned' => [
+			'messages'        => [],
+			'expected_result' => '',
+		];
+
+		yield 'A message is returned' => [
+			'messages'        => [ 'test' ],
+			'expected_result' => '<div id="moderated" class="updated"><p>test</p></div>',
+		];
+
+		yield 'Two messages are returned' => [
+			'messages'        => [ 'test1', 'test2' ],
+			'expected_result' => '<div id="moderated" class="updated"><p>test1<br/>
+test2</p></div>',
+		];
+	}
+
+	/**
+	 * Tests that the display method is called only for the reviews page.
+	 *
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::display_notices()
+	 * @dataProvider provider_display_notices
+	 *
+	 * @param bool $is_reviews_page                Whether the current page is the reviews page or not.
+	 * @param bool $should_call_the_display_method Indicates if the display method should be called.
+	 */
+	public function test_display_notices( $is_reviews_page, $should_call_the_display_method ) {
+
+		$mock = $this->getMockBuilder( Reviews::class )
+			->setMethods( [ 'is_reviews_page', 'maybe_display_reviews_bulk_action_notice' ] )
+			->getMock();
+
+		$mock->expects( $this->once() )
+			->method( 'is_reviews_page' )
+			->willReturn( $is_reviews_page );
+
+		$mock->expects( $this->exactly( (int) $should_call_the_display_method ) )
+			->method( 'maybe_display_reviews_bulk_action_notice' );
+
+		$mock->display_notices();
+	}
+
+	/** @see test_display_notices */
+	public function provider_display_notices() : Generator {
+
+		yield 'Is the reviews page' => [
+			'is_reviews_page'                          => true,
+			'maybe_display_reviews_bulk_action_notice' => true,
+		];
+
+		yield 'Is not the reviews page' => [
+			'is_reviews_page'                          => false,
+			'maybe_display_reviews_bulk_action_notice' => false,
+		];
 	}
 
 }
