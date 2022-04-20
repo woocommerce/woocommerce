@@ -23,6 +23,9 @@ export class PaymentsSetup extends BasePage {
 
 	async possiblyCloseHelpModal(): Promise< void > {
 		try {
+			await waitForElementByText( 'div', "We're here for help", {
+				timeout: 2000,
+			} );
 			await this.clickButtonWithText( 'Got it' );
 		} catch ( e ) {}
 	}
