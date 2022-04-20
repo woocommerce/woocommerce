@@ -44,7 +44,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 * Test that migration for a normal order happens as expected.
 	 */
 	public function test_process_next_migration_batch_normal_order() {
-		$order = wc_get_order( $this->create_complex_wp_post_order() );
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
 		$this->clear_all_orders_and_reset_checkpoint();
 		$this->sut->process_next_migration_batch( 100 );
 
@@ -59,7 +59,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_process_next_migration_batch_already_migrated_order() {
 		global $wpdb;
-		$order = wc_get_order( $this->create_complex_wp_post_order() );
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
 		$this->clear_all_orders_and_reset_checkpoint();
 
 		// Run the migration once.
@@ -210,82 +210,6 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		// phpcs:ignore
 		return $wpdb->get_results( "SELECT * FROM $metadata_table WHERE order_id = $order_id;" );
-	}
-
-	/**
-	 * Helper method to create complex wp_post based order.
-	 *
-	 * @return int Order ID
-	 */
-	private function create_complex_wp_post_order() {
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$uniq_cust_id = wp_generate_password( 10, false );
-		$customer     = CustomerHelper::create_customer( "user$uniq_cust_id", $uniq_cust_id, "user$uniq_cust_id@example.com" );
-		$tax_rate     = array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '15.0000',
-			'tax_rate_name'     => 'tax',
-			'tax_rate_priority' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_shipping' => '1',
-		);
-		WC_Tax::_insert_tax_rate( $tax_rate );
-
-		ShippingHelper::create_simple_flat_rate();
-
-		$order = OrderHelper::create_order();
-		// Make sure this is a wp_post order.
-		$post = get_post( $order->get_id() );
-		$this->assertNotNull( $post, 'Order is not created in wp_post table.' );
-		$this->assertEquals( 'shop_order', $post->post_type, 'Order is not created in wp_post table.' );
-
-		$order->save();
-
-		$order->set_status( 'completed' );
-		$order->set_currency( 'INR' );
-		$order->set_customer_id( $customer->get_id() );
-		$order->set_billing_email( $customer->get_billing_email() );
-
-		$payment_gateway = new WC_Mock_Payment_Gateway();
-		$order->set_payment_method( 'mock' );
-		$order->set_transaction_id( 'mock1' );
-
-		$order->set_customer_ip_address( '1.1.1.1' );
-		$order->set_customer_user_agent( 'wc_unit_tests' );
-
-		$order->save();
-
-		$order->set_shipping_first_name( 'Albert' );
-		$order->set_shipping_last_name( 'Einstein' );
-		$order->set_shipping_company( 'The Olympia Academy' );
-		$order->set_shipping_address_1( '112 Mercer Street' );
-		$order->set_shipping_address_2( 'Princeton' );
-		$order->set_shipping_city( 'New Jersey' );
-		$order->set_shipping_postcode( '08544' );
-		$order->set_shipping_phone( '299792458' );
-		$order->set_shipping_country( 'US' );
-
-		$order->set_created_via( 'unit_tests' );
-		$order->set_version( '0.0.2' );
-		$order->set_prices_include_tax( true );
-		wc_update_coupon_usage_counts( $order->get_id() );
-		$order->get_data_store()->set_download_permissions_granted( $order, true );
-		$order->set_cart_hash( '1234' );
-		$order->update_meta_data( '_new_order_email_sent', 'true' );
-		$order->update_meta_data( '_order_stock_reduced', 'true' );
-		$order->set_date_paid( time() );
-		$order->set_date_completed( time() );
-		$order->calculate_shipping();
-
-		$order->add_meta_data( 'unique_key_1', 'unique_value_1', true );
-		$order->add_meta_data( 'non_unique_key_1', 'non_unique_value_1', false );
-		$order->add_meta_data( 'non_unique_key_1', 'non_unique_value_2', false );
-		$order->save();
-		$order->save_meta_data();
-
-		return $order->get_id();
 	}
 
 	/**
