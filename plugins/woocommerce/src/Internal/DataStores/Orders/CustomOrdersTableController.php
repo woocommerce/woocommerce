@@ -124,6 +124,13 @@ class CustomOrdersTableController {
 				$this->process_options_updated();
 			}
 		);
+
+		add_action(
+			'woocommerce_after_register_post_type',
+			function() {
+				$this->register_post_type_for_order_placeholders();
+			}
+		);
 	}
 
 	/**
@@ -468,5 +475,36 @@ class CustomOrdersTableController {
 		if ( $data_sync_is_enabled && ! $this->data_synchronizer->pending_data_sync_is_in_progress() ) {
 			$this->data_synchronizer->start_synchronizing_pending_orders();
 		}
+	}
+
+	/**
+	 * Handler for the woocommerce_after_register_post_type post,
+	 * registers the post type for placeholder orders.
+	 *
+	 * @return void
+	 */
+	private function register_post_type_for_order_placeholders(): void {
+		wc_register_order_type(
+			DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE,
+			array(
+				'public'                           => false,
+				'exclude_from_search'              => true,
+				'publicly_queryable'               => false,
+				'show_ui'                          => false,
+				'show_in_menu'                     => false,
+				'show_in_nav_menus'                => false,
+				'show_in_admin_bar'                => false,
+				'show_in_rest'                     => false,
+				'rewrite'                          => false,
+				'query_var'                        => false,
+				'can_export'                       => false,
+				'supports'                         => array(),
+				'capabilities'                     => array(),
+				'exclude_from_order_count'         => true,
+				'exclude_from_order_views'         => true,
+				'exclude_from_order_reports'       => true,
+				'exclude_from_order_sales_reports' => true,
+			)
+		);
 	}
 }
