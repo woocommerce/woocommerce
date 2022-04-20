@@ -14,6 +14,28 @@ use WC_Unit_Test_Case;
 class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Sets the global vars before each test.
+	 */
+	public function setUp() : void {
+		global $current_screen;
+
+		$this->old_current_screen = $current_screen;
+
+		parent::setUp();
+	}
+
+	/**
+	 * Restores the global vars after each test.
+	 */
+	public function tearDown() : void {
+		global $current_screen;
+
+		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_notices()
 	 * @dataProvider provider_test_display_notices()
 	 * @param string $current_screen_base    The current WP_Screen base value.
@@ -22,27 +44,24 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) {
 		global $current_screen;
 
-		$current_screen_backup = $current_screen;
-
 		$screen = new \stdClass();
 		$screen->base = $current_screen_base;
 
 		$current_screen = $screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		ob_start();
+		// phpcs:disable Squiz.Commenting
+		$instance = new class() extends ReviewsCommentsOverrides {
+			public $maybe_display_reviews_moved_notice_called = 0;
 
-		ReviewsCommentsOverrides::get_instance()->display_notices();
+			protected function maybe_display_reviews_moved_notice() {
+				$this->maybe_display_reviews_moved_notice_called++;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
 
-		$output = ob_get_clean();
+		$instance->display_notices();
 
-		if ( $should_display_notices ) {
-			$this->assertNotEmpty( $output );
-		} else {
-			$this->assertEmpty( $output );
-		}
-
-		// Restore the global variable (using the @backupGlobals annotation will cause a serialization error).
-		$current_screen = $current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->assertSame( (int) $should_display_notices, $instance->maybe_display_reviews_moved_notice_called );
 	}
 
 	/** @see test_display_notices() */
@@ -50,6 +69,50 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		yield 'Comments page' => [ 'edit-comments', true ];
 		yield 'Posts page' => [ 'edit', false ];
 		yield 'Product Reviews page' => [ 'product_page_product-reviews', false ];
+	}
+
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::maybe_display_reviews_moved_notice()
+	 * @dataProvider provider_test_maybe_display_reviews_moved_notice()
+	 * @param bool $should_display_notice Whether the reviews moved notice should be displayed.
+	 */
+	public function test_maybe_display_reviews_moved_notice( bool $should_display_notice ) {
+
+		// phpcs:disable Squiz.Commenting
+		$instance = new class($should_display_notice) extends ReviewsCommentsOverrides {
+			public $should_display_reviews_moved_notice_called = 0;
+			public $display_reviews_moved_notice_called = 0;
+
+			public function __construct( $should_display_notice ) {
+				$this->should_display_notice = $should_display_notice;
+				parent::__construct();
+			}
+
+			protected function should_display_reviews_moved_notice() : bool {
+				$this->should_display_reviews_moved_notice_called++;
+				return $this->should_display_notice;
+			}
+
+			protected function display_reviews_moved_notice() {
+				$this->display_reviews_moved_notice_called++;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$reflection = new ReflectionClass( $instance );
+		$method = $reflection->getMethod( 'maybe_display_reviews_moved_notice' );
+		$method->setAccessible( true );
+
+		$method->invoke( $instance );
+
+		$this->assertSame( 1, $instance->should_display_reviews_moved_notice_called );
+		$this->assertSame( (int) $should_display_notice, $instance->display_reviews_moved_notice_called );
+	}
+
+	/** @see test_maybe_display_reviews_moved_notice() */
+	public function provider_test_maybe_display_reviews_moved_notice() : \Generator {
+		yield [ true ];
+		yield [ false ];
 	}
 
 	/**
