@@ -44,6 +44,17 @@ const getCcOrEcheckLabel = ( { method, expires } ) => {
  * @return {string} label
  */
 const getDefaultLabel = ( { method } ) => {
+	/* For saved payment methods with brand & last 4 */
+	if ( method.brand && method.last4 ) {
+		return sprintf(
+			/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card. */
+			__( '%1$s ending in %2$s', 'woo-gutenberg-products-block' ),
+			method.brand,
+			method.last4
+		);
+	}
+
+	/* For saved payment methods without brand & last 4 */
 	return sprintf(
 		/* translators: %s is the name of the payment method gateway. */
 		__( 'Saved token for %s', 'woo-gutenberg-products-block' ),
