@@ -27,4 +27,8 @@
 	display: block;
 	height: em(24px);
 	width: em(24px);
+
+	html[dir="rtl"] & {
+		transform: scaleX(-1);
+	}
 }
