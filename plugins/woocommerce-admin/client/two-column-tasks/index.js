@@ -28,7 +28,6 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 			),
 		};
 	} );
-
 	const getCurrentTask = () => {
 		if ( ! task ) {
 			return null;

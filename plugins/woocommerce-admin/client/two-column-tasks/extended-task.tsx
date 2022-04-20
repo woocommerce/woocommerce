@@ -6,7 +6,12 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
 import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	WCDataSelector,
+	TaskListType,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -26,18 +31,19 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { task } = query;
 
-	const { isResolving, taskLists } = useSelect( ( select ) => {
-		return {
-			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskListsByIds'
-			),
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
-				'extended_two_column',
-			] ),
-		};
-	} );
-
-	const toggleTaskList = ( taskList ) => {
+	const { isResolving, taskLists } = useSelect(
+		( select: WCDataSelector ) => {
+			return {
+				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
+					'getTaskListsByIds'
+				),
+				taskLists: select( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
+					'extended_two_column',
+				] ),
+			};
+		}
+	);
+	const toggleTaskList = ( taskList: TaskListType ) => {
 		const { id, isHidden } = taskList;
 		const newValue = ! isHidden;
 
@@ -71,8 +77,8 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	}
 
 	const completedTasks = extendedTaskList.tasks.filter(
-		( extendedTaskListTask ) => {
-			return extendedTaskListTask.completed;
+		( extendedTaskListTask: TaskListType ) => {
+			return extendedTaskListTask.isComplete;
 		}
 	);
 
@@ -88,6 +94,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 		isToggleable,
 		title,
 		tasks,
+		keepCompletedTaskList,
 	} = extendedTaskList;
 
 	if ( ! isVisible ) {
@@ -103,6 +110,10 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 				query={ query }
 				tasks={ tasks }
 				title={ title }
+				isHidden={ false }
+				isVisible={ true }
+				displayProgressHeader={ false }
+				keepCompletedTaskList={ keepCompletedTaskList }
 			/>
 			{ isToggleable && (
 				<DisplayOption>
@@ -112,7 +123,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 					>
 						<MenuItem
 							className="woocommerce-layout__homescreen-extension-tasklist-toggle"
-							icon={ ! isHidden && check }
+							icon={ isHidden ? undefined : check }
 							isSelected={ ! isHidden }
 							role="menuitemcheckbox"
 							onClick={ () => toggleTaskList( extendedTaskList ) }
