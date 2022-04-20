@@ -51,6 +51,8 @@ jobs:
         run: |
           php --version
           composer --version
+      - name: List
+        run: ls -R
 
       - name: Get cached composer and pnpm directories
         uses: actions/cache@v3
