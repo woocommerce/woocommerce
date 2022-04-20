@@ -63,14 +63,14 @@
 			pointer-events: none;
 		}
 
-		&:not(.is-complete)
+		&:not(.complete)
 		.woocommerce-task-list__item-before
 		.woocommerce-task__icon {
 			border-color: $gray-300;
 		}
 	}
 
-	.woocommerce-task-list__item.is-complete .woocommerce-task__icon {
+	.woocommerce-task-list__item.complete .woocommerce-task__icon {
 		background-color: $alert-green;
 	}
 
