@@ -1292,7 +1292,6 @@ importers:
       eslint-plugin-react: ^7.29.2
       expose-loader: ^3.1.0
       fork-ts-checker-webpack-plugin: ^6.5.0
-      fs-extra: ^8.1.0
       github-label-sync: ^2.0.2
       grapheme-splitter: ^1.0.4
       gridicons: ^3.4.0
@@ -1493,7 +1492,6 @@ importers:
       eslint-plugin-react: 7.29.4_eslint@8.11.0
       expose-loader: 3.1.0_webpack@5.70.0
       fork-ts-checker-webpack-plugin: 6.5.0_10568ae13669cc833891d65cd6879aa0
-      fs-extra: 8.1.0
       jest: 27.5.1
       jest-environment-jsdom: 27.5.1
       jest-environment-node: 27.5.1
@@ -8636,7 +8634,7 @@ packages:
       react-refresh: 0.11.0
       schema-utils: 3.1.1
       source-map: 0.7.3
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_92cb4b81c6b9f71cf92f0bdb85e4210c:
@@ -8830,30 +8828,6 @@ packages:
       lodash.merge: 4.6.2
       postcss: 5.2.18
 
-<<<<<<< HEAD
-=======
-  /@samverschueren/stream-to-observable/0.3.1_rxjs@6.6.7:
-    resolution: {integrity: sha512-c/qwwcHyafOQuVQJj0IlBjf5yYgBI7YPJ77k4fOJYesb41jio65eaJODRUmfYKhTOFBrIZ66kgvGPlNbjuoRdQ==}
-    engines: {node: '>=6'}
-    peerDependencies:
-      rxjs: '*'
-      zen-observable: '*'
-    peerDependenciesMeta:
-      rxjs:
-        optional: true
-      zen-observable:
-        optional: true
-    dependencies:
-      any-observable: 0.3.0
-      rxjs: 6.6.7
-    dev: true
-
-  /@sindresorhus/is/0.14.0:
-    resolution: {integrity: sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==}
-    engines: {node: '>=6'}
-    dev: true
-
->>>>>>> 1861038791 (Update create-wc-extension to work in monorepo context)
   /@sindresorhus/is/4.6.0:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
@@ -9043,7 +9017,7 @@ packages:
     peerDependencies:
       '@storybook/addon-actions': '*'
     dependencies:
-      '@storybook/addon-actions': 6.4.19
+      '@storybook/addon-actions': 6.4.19_react-dom@17.0.2+react@17.0.2
       global: 4.4.0
     dev: true
 
@@ -11356,7 +11330,7 @@ packages:
       react-docgen-typescript: 2.2.2_typescript@4.6.2
       tslib: 2.3.1
       typescript: 4.6.2
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -11879,35 +11853,6 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-  /@svgr/webpack/6.2.1:
-    resolution: {integrity: sha512-h09ngMNd13hnePwgXa+Y5CgOjzlCvfWLHg+MBnydEedAnuLRzUHUJmGS3o2OsrhxTOOqEsPOFt5v/f6C5Qulcw==}
-    engines: {node: '>=10'}
-    dependencies:
-      '@babel/core': 7.17.8
-      '@babel/plugin-transform-react-constant-elements': 7.17.6_@babel+core@7.17.8
-      '@babel/preset-env': 7.16.11_@babel+core@7.17.8
-      '@babel/preset-react': 7.16.7_@babel+core@7.17.8
-      '@babel/preset-typescript': 7.16.7_@babel+core@7.17.8
-      '@svgr/core': 6.2.1
-      '@svgr/plugin-jsx': 6.2.1_@svgr+core@6.2.1
-      '@svgr/plugin-svgo': 6.2.0_@svgr+core@6.2.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-=======
->>>>>>> 05800dcbaf (make starter sibling to repo)
-  /@szmarczak/http-timer/1.1.2:
-    resolution: {integrity: sha512-XIB2XbzHTN6ieIjfIMV9hlVcfPU26s2vafYWQcZHWXHOxiaRZYEDKEwdl129Zyg50+foYV2jCgtrqSA6qNuNSA==}
-    engines: {node: '>=6'}
-    dependencies:
-      defer-to-connect: 1.1.3
-    dev: true
-
->>>>>>> 1861038791 (Update create-wc-extension to work in monorepo context)
   /@szmarczak/http-timer/4.0.6:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
@@ -14032,17 +13977,10 @@ packages:
   /@wordpress/base-styles/3.6.0:
     resolution: {integrity: sha512-6/vXAmc9FSX7Y17UjKgUJoVU++Pv1U1G8uMx7iClRUaLetc7/jj2DD9PTyX/cdJjHr32e3yXuLVT9wfEbo6SEg==}
 
-<<<<<<< HEAD
   /@wordpress/base-styles/4.3.0:
     resolution: {integrity: sha512-e9Z+txhEQ3zyAHkzzsuYg1ADFhKArz1eGU3ayqCNtCdakrgNjI6Q/sPODI26LlwTmjJPBIJ5wSCBrsDjMhdWqA==}
-<<<<<<< HEAD
     dev: false
-=======
-    dev: true
->>>>>>> 1861038791 (Update create-wc-extension to work in monorepo context)
 
-=======
->>>>>>> 05800dcbaf (make starter sibling to repo)
   /@wordpress/blob/3.4.1:
     resolution: {integrity: sha512-rGm7nXaxnsXStIu9v9IjbUOKtE9UzkvgYiJMX5SyVyzAGLOo2Aq759+JNRDLRR0RDkS6igH/G7qBXS6xSgLFgA==}
     engines: {node: '>=12'}
@@ -14660,7 +14598,6 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
 
-<<<<<<< HEAD
   /@wordpress/element/4.3.0:
     resolution: {integrity: sha512-QN5qsNN6kzbHgrCL9CG2877iOu01KMEwls1K3iKk43EQ8hr/D/Ms/h5TqfOgF6oIGUR/QUlbeZQJs4zdvEnFOg==}
     engines: {node: '>=12'}
@@ -14672,14 +14609,8 @@ packages:
       lodash: 4.17.21
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-<<<<<<< HEAD
     dev: false
-=======
-    dev: true
->>>>>>> 1861038791 (Update create-wc-extension to work in monorepo context)
 
-=======
->>>>>>> 05800dcbaf (make starter sibling to repo)
   /@wordpress/escape-html/1.12.2:
     resolution: {integrity: sha512-FabgSwznhdaUwe6hr1CsGpgxQbzqEoGevv73WIL1B9GvlZ6csRWodgHfWh4P6fYqpzxFL4WYB8wPJ1PdO32XFA==}
     dependencies:
@@ -14699,20 +14630,13 @@ packages:
     dependencies:
       '@babel/runtime': 7.17.7
 
-<<<<<<< HEAD
   /@wordpress/escape-html/2.5.0:
     resolution: {integrity: sha512-WV4jI6uBPZNxxOQdftiOsx1WgimkjxnwCfx6T+K7Ltfnm78Q5q2P5R98twGOqSVI/rPqtZubv9e7oMDbpp4H2w==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.17.7
-<<<<<<< HEAD
     dev: false
-=======
-    dev: true
->>>>>>> 1861038791 (Update create-wc-extension to work in monorepo context)
 
-=======
->>>>>>> 05800dcbaf (make starter sibling to repo)
   /@wordpress/eslint-plugin/11.0.1_2205da2c9bef219d53091cb9dbc5524c:
     resolution: {integrity: sha512-HDKwKjOmCaWdyJEtWKRAd0xK/NAXL/ykUP/I8l+zCvzvCXbS1UuixWN09RRzl09tv17JUtPiEqehDilkWRCBZg==}
     engines: {node: '>=12', npm: '>=6.9'}
@@ -22463,7 +22387,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /file-loader/6.2.0_webpack@5.64.1:
@@ -24311,7 +24235,7 @@ packages:
       pretty-error: 2.1.2
       tapable: 1.1.3
       util.promisify: 1.0.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /html-webpack-plugin/5.5.0_webpack@5.70.0:
@@ -31347,7 +31271,7 @@ packages:
       postcss: 7.0.39
       schema-utils: 3.1.1
       semver: 7.3.5
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /postcss-loader/6.2.0_postcss@8.3.0+webpack@5.64.1:
@@ -32813,7 +32737,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /raw-loader/4.0.2_webpack@5.64.1:
@@ -35780,7 +35704,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /style-loader/2.0.0_webpack@5.70.0:
@@ -36521,7 +36445,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.10.0_acorn@7.4.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - acorn
@@ -36541,7 +36465,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.10.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - acorn
@@ -36924,21 +36848,6 @@ packages:
     engines: {node: '>=0.6'}
     dev: true
 
-<<<<<<< HEAD
-=======
-  /toposort/2.0.2:
-    resolution: {integrity: sha1-riF2gXXRVZ1IvvNUILL0li8JwzA=}
-    dev: true
-
-<<<<<<< HEAD
-  /totalist/1.1.0:
-    resolution: {integrity: sha512-gduQwd1rOdDMGxFG1gEvhV88Oirdo2p+KjoYFU7k2g+i7n6AFFbDQ5kMPUsW0pNbfQsB/cwXvT1i4Bue0s9g5g==}
-    engines: {node: '>=6'}
-    dev: true
-
->>>>>>> 1861038791 (Update create-wc-extension to work in monorepo context)
-=======
->>>>>>> 05800dcbaf (make starter sibling to repo)
   /tough-cookie/2.5.0:
     resolution: {integrity: sha512-nlLsUzgm1kfLXSXfRZMc1KLAugd4hqJHDTvc2hDIwS3mZAfMEuMbc03SujMF+GEcpaX/qboeycw6iO8JwVv2+g==}
     engines: {node: '>=0.8'}
@@ -37763,7 +37672,7 @@ packages:
       loader-utils: 2.0.2
       mime-types: 2.1.34
       schema-utils: 3.1.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /url-parse-lax/1.0.0:
@@ -38335,7 +38244,7 @@ packages:
       mime: 2.5.2
       mkdirp: 0.5.5
       range-parser: 1.2.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
       webpack-log: 2.0.0
     dev: true
 
@@ -38418,7 +38327,7 @@ packages:
     peerDependencies:
       webpack: ^2.0.0 || ^3.0.0 || ^4.0.0
     dependencies:
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0_webpack-cli@4.9.2
     dev: true
 
   /webpack-fix-style-only-entries/0.6.1:
@@ -38602,7 +38511,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5_webpack@4.46.0
       watchpack: 1.7.5
-      webpack-cli: 3.3.12_webpack@5.70.0
+      webpack-cli: 3.3.12_webpack@4.46.0
       webpack-sources: 1.4.3
     dev: true
 
