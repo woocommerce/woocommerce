@@ -12,6 +12,7 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+import { useExperiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -30,10 +31,10 @@ import {
 	JCB,
 	Sofort,
 } from '../payments-welcome/cards';
-import Banner from './banner';
+import WCPayBannerImage from './wcpay-banner-image';
 import './payment-recommendations.scss';
 
-export const PaymentMethods = () => (
+export const PaymentMethodsIcons = () => (
 	<div className="woocommerce-recommended-payments-banner__footer_icon_container">
 		<Visa />
 		<MasterCard />
@@ -57,7 +58,7 @@ const WcPayBanner = () => {
 		<Card size="medium" className="woocommerce-recommended-payments-banner">
 			<CardBody className="woocommerce-recommended-payments-banner__body">
 				<div className="woocommerce-recommended-payments-banner__image_container">
-					<Banner />
+					<WCPayBannerImage />
 				</div>
 				<div className="woocommerce-recommended-payments-banner__text_container">
 					<Text
@@ -101,7 +102,7 @@ const WcPayBanner = () => {
 					</Text>
 				</div>
 				<div>
-					<PaymentMethods />
+					<PaymentMethodsIcons />
 				</div>
 				<div>
 					<Text variant="caption" as="p" size="12" lineHeight="16px">
@@ -113,7 +114,7 @@ const WcPayBanner = () => {
 	);
 };
 
-export const PaymentsRecommendationsBanner = () => {
+export const PaymentsBannerWrapper = () => {
 	const {
 		installedPaymentGateways,
 		paymentGatewaySuggestions,
@@ -150,27 +151,27 @@ export const PaymentsRecommendationsBanner = () => {
 		}
 	);
 
-	const isWcPayEnabled = installedPaymentGateways.find(
+	const isWcPayDisabled = installedPaymentGateways.find(
 		( gateway: PaymentGateway ) => {
 			return (
 				gateway.id === 'woocommerce_payments' &&
-				gateway.enabled === true
+				gateway.enabled === false
 			);
 		}
 	);
 
-	const isWcPayBannerExplat = true;
-	if ( ! isResolving ) {
+	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
+		'woocommerce_payments_settings_banner_2022_04'
+	);
+	if ( ! isResolving && ! isLoadingExperiment ) {
 		if (
 			supportsWCPayments &&
 			isWcPayInstalled &&
-			! isWcPayEnabled &&
-			isWcPayBannerExplat
+			isWcPayDisabled &&
+			experimentAssignment?.variationName === 'treatment'
 		) {
-			// add tracks event here
 			return <WcPayBanner />;
 		}
-		// add tracks event here because we want to know when the control is shown
 	}
 	return null;
 };

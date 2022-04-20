@@ -1,5 +1,6 @@
 .woocommerce-recommended-payments-banner {
 	margin: 0 15px 10px 0;
+	min-width: 750px;
 	animation: isLoaded;
 	animation-duration: 250ms;
 
@@ -7,7 +8,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding-bottom: 0px;
+		padding-bottom: 0;
 	}
 
 	.woocommerce-recommended-payments-banner__text_container {
@@ -15,12 +16,8 @@
 		margin-inline: 24px;
 
 		* {
-			margin-block: 1rem
+			margin-block: 1rem;
 		}
-	}
-
-	.woocommerce-recommended-payments-banner__image_container {
-
 	}
 
 	.woocommerce-recommended-payments-banner__footer {
@@ -29,8 +26,13 @@
 		justify-content: center;
 	}
 
-	.wcpay-connect-account-page-payment-methods > svg {
-		height: 28px
+	.woocommerce-recommended-payments-banner__footer_icon_container {
+		display: flex;
+		align-items: center;
+	}
+
+	.woocommerce-recommended-payments-banner__footer_icon_container > svg {
+		height: 28px;
 	}
 }
 

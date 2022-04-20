@@ -16,10 +16,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { CustomerEffortScoreTracksContainer } from './customer-effort-score-tracks';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
-import { PaymentsRecommendationsBanner } from './payments/payment-recommendations-banner';
-
-import { createSlotFill, SlotFillProvider } from '@wordpress/components';
-import { registerPlugin, PluginArea } from '@wordpress/plugins';
+import { WcAdminPaymentsGatewaysBannerSlot } from './payments/payments-settings-banner-slotfill';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -29,45 +26,6 @@ const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
 const settingsGroup = 'wc_admin';
 const hydrateUser = getAdminSetting( 'currentUserData' );
-
-const { Fill, Slot } = createSlotFill( 'banner' );
-// Fill.slot = Slot;
-
-const PaymentsBannerFill = () => {
-	return (
-		<Fill>
-			<PaymentsRecommendationsBanner />
-		</Fill>
-	);
-};
-
-const PaymentsGatewaysOptionsDescroption = () => {
-	return (
-		<Fill>
-			<h2>Payment Methods</h2>
-			<div id="payment_gateways_options-description">
-				<p>
-					Installed payment methods are listed below and can be sorted
-					to control their display order on the frontend.
-				</p>
-			</div>
-		</Fill>
-	);
-};
-
-registerPlugin( 'banner', { scope: 'my-scope', render: PaymentsBannerFill } );
-const Banner = () => {
-		return (
-			<>
-				<SlotFillProvider>
-					<div className="banner">
-						<Slot />
-					</div>
-					<PluginArea scope='my-scope' />
-				</SlotFillProvider>
-			</>
-		);
-};
 
 if ( appRoot ) {
 	let HydratedPageLayout = withSettingsHydration(
@@ -112,13 +70,17 @@ if ( appRoot ) {
 		'wc_payment_gateways_banner_slotfill'
 	);
 
-	isWcAdminSettingsPaymentPage ? render( Banner(), isWcAdminSettingsPaymentPage ) : null;
-	
+	if ( isWcAdminSettingsPaymentPage ) {
+		render(
+			WcAdminPaymentsGatewaysBannerSlot(),
+			isWcAdminSettingsPaymentPage
+		);
+	}
+
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
-
 
 	render(
 		<div className="woocommerce-layout">
