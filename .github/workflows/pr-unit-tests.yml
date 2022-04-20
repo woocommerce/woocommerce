@@ -4,7 +4,6 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: plugins/woocommerce
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -72,7 +71,6 @@ jobs:
         run: pnpm nx composer-install woocommerce
 
       - name: Build Admin feature config
-        working-directory: ./
         run: |
           pnpm nx build:feature-config woocommerce
 
@@ -89,6 +87,7 @@ jobs:
            fi
 
       - name: Init DB and WP
+        working-directory: plugins/woocommerce
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
