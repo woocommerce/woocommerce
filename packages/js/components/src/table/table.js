@@ -14,6 +14,7 @@ import { find, get, noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
+import { applyFilters } from '@wordpress/hooks';
 
 const ASC = 'asc';
 const DESC = 'desc';
@@ -297,46 +298,52 @@ class Table extends Component {
 						</tr>
 						{ hasData ? (
 							rows.map( ( row, i ) => (
-								<tr key={ this.getRowKey( row, i ) }>
-									{ row.map( ( cell, j ) => {
-										const {
-											cellClassName,
-											isLeftAligned,
-											isNumeric,
-										} = headers[ j ];
-										const isHeader = rowHeader === j;
-										const Cell = isHeader ? 'th' : 'td';
-										const cellClasses = classnames(
-											'woocommerce-table__item',
-											cellClassName,
-											{
-												'is-left-aligned':
-													isLeftAligned ||
-													! isNumeric,
-												'is-numeric': isNumeric,
-												'is-sorted':
-													sortedBy ===
-													headers[ j ].key,
-											}
-										);
-										const cellKey =
-											this.getRowKey(
-												row,
-												i
-											).toString() + j;
-										return (
-											<Cell
-												scope={
-													isHeader ? 'row' : null
+								applyFilters(
+									'woocommerce_admin_table_row',
+									<tr key={ this.getRowKey( row, i ) }>
+										{ row.map( ( cell, j ) => {
+											const {
+												cellClassName,
+												isLeftAligned,
+												isNumeric,
+											} = headers[ j ];
+											const isHeader = rowHeader === j;
+											const Cell = isHeader ? 'th' : 'td';
+											const cellClasses = classnames(
+												'woocommerce-table__item',
+												cellClassName,
+												{
+													'is-left-aligned':
+														isLeftAligned ||
+														! isNumeric,
+													'is-numeric': isNumeric,
+													'is-sorted':
+														sortedBy ===
+														headers[ j ].key,
 												}
-												key={ cellKey }
-												className={ cellClasses }
-											>
-												{ getDisplay( cell ) }
-											</Cell>
-										);
-									} ) }
-								</tr>
+											);
+											const cellKey =
+												this.getRowKey(
+													row,
+													i
+												).toString() + j;
+											return (
+												<Cell
+													scope={
+														isHeader ? 'row' : null
+													}
+													key={ cellKey }
+													className={ cellClasses }
+												>
+													{ getDisplay( cell ) }
+												</Cell>
+											);
+										} ) }
+									</tr>,
+									i,
+									row,
+									query
+								)
 							) )
 						) : (
 							<tr>
@@ -344,9 +351,12 @@ class Table extends Component {
 									className="woocommerce-table__empty-item"
 									colSpan={ headers.length }
 								>
-									{ __(
-										'No data to display',
-										'woocommerce'
+									{ applyFilters(
+										'woocommerce_admin_nodata_text',
+										__(
+											'No data to display',
+											'woocommerce'
+										)
 									) }
 								</td>
 							</tr>
