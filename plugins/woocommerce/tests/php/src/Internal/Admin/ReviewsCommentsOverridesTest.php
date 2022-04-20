@@ -175,13 +175,13 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		$nonce = wp_create_nonce( 'woocommerce_hide_notices_nonce' );
 
 		$this->assertSame(
-			'<div class="notice notice-info">
+			'<div class="notice notice-info is-dismissible">
 			<p><strong>Product reviews have moved!</strong></p>
 			<p>Product reviews can now be managed from Products &gt; Reviews.</p>
 			<p class="submit">
 				<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">Visit new location</a>
-				<a href="?wc-hide-notice=product_reviews_moved&#038;_wc_notice_nonce=' . $nonce . '" class="button">Dismiss</a>
 			</p>
+			<button type="button" class="notice-dismiss" onclick="window.location = \'?wc-hide-notice=product_reviews_moved&#038;_wc_notice_nonce=' . $nonce . '\';"><span class="screen-reader-text">Dismiss this notice.</span></button>
 		</div>',
 			$output
 		);
