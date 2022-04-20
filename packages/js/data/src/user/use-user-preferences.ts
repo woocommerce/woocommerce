@@ -2,12 +2,50 @@
  * External dependencies
  */
 import { mapValues } from 'lodash';
-import { useDispatch, useSelect } from '@wordpress/data';
+import {
+	useDispatch,
+	useSelect,
+	select as wpDataSelect,
+} from '@wordpress/data';
+import schema, { Schema } from 'wordpress__core-data';
+import type { getEntityRecord } from 'wordpress__core-data/selectors';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
+
+type UserPreferences = {
+	activity_panel_inbox_last_read?: string;
+	activity_panel_reviews_last_read?: string;
+	android_app_banner_dismissed?: string;
+	categories_report_columns?: string;
+	coupons_report_columns?: string;
+	customers_report_columns?: string;
+	dashboard_chart_interval?: string;
+	dashboard_chart_type?: string;
+	dashboard_leaderboard_rows?: string;
+	dashboard_sections?: string;
+	help_panel_highlight_shown?: string;
+	homepage_layout?: string;
+	homepage_stats?: string;
+	orders_report_columns?: string;
+	products_report_columns?: string;
+	revenue_report_columns?: string;
+	task_list_tracked_started_tasks?: {
+		[ key: string ]: number;
+	};
+	taxes_report_columns?: string;
+	variations_report_columns?: string;
+};
+
+type WoocommerceMeta = UserPreferences & {
+	task_list_tracked_started_tasks?: string;
+};
+
+type WCUser = Schema.User & {
+	woocommerce_meta: WoocommerceMeta;
+};
 
 /**
  * Retrieve and decode the user's WooCommerce meta values.
@@ -15,7 +53,7 @@ import { STORE_NAME } from './constants';
  * @param {Object} user WP User object.
  * @return {Object} User's WooCommerce preferences.
  */
-const getWooCommerceMeta = ( user ) => {
+const getWooCommerceMeta = ( user: WCUser ) => {
 	const wooMeta = user.woocommerce_meta || {};
 
 	const userData = mapValues( wooMeta, ( data, key ) => {
@@ -25,12 +63,20 @@ const getWooCommerceMeta = ( user ) => {
 		try {
 			return JSON.parse( data );
 		} catch ( e ) {
-			/* eslint-disable no-console */
-			console.error(
-				`Error parsing value '${ data }' for ${ key }`,
-				e.message
-			);
-			/* eslint-enable no-console */
+			if ( e instanceof Error ) {
+				/* eslint-disable no-console */
+				console.error(
+					`Error parsing value '${ data }' for ${ key }`,
+					e.message
+				);
+				/* eslint-enable no-console */
+			} else {
+				/* eslint-disable no-console */
+				console.error(
+					`Unexpected Error parsing value '${ data }' for ${ key } ${ e }`
+				);
+				/* eslint-enable no-console */
+			}
 			return '';
 		}
 	} );
@@ -40,14 +86,20 @@ const getWooCommerceMeta = ( user ) => {
 
 // Create wrapper for updating user's `woocommerce_meta`.
 async function updateUserPrefs(
-	receiveCurrentUser,
-	user,
-	saveUser,
-	getLastEntitySaveError,
-	userPrefs
+	receiveCurrentUser: ( user: WCUser ) => void,
+	user: WCUser,
+	saveUser: ( userToSave: {
+		id: number;
+		woocommerce_meta: { [ key: string ]: boolean };
+	} ) => WCUser,
+	getLastEntitySaveError: (
+		kind: string,
+		name: string,
+		recordId: number
+	) => unknown,
+	userPrefs: UserPreferences
 ) {
 	// @todo Handle unresolved getCurrentUser() here.
-
 	// Prep fields for update.
 	const metaData = mapValues( userPrefs, JSON.stringify );
 
@@ -105,7 +157,7 @@ export const useUserPreferences = () => {
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
 	let { saveUser } = dispatch;
 
-	const userData = useSelect( ( select ) => {
+	const userData = useSelect( ( select: typeof wpDataSelect ) => {
 		const {
 			getCurrentUser,
 			getEntity,
@@ -127,11 +179,14 @@ export const useUserPreferences = () => {
 		};
 	} );
 
-	const updateUserPreferences = ( userPrefs ) => {
+	const updateUserPreferences = ( userPrefs: UserPreferences ) => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.
-			saveUser = async ( userToSave ) => {
+			saveUser = async ( userToSave: {
+				id: string;
+				woocommerce_meta: { [ key: string ]: boolean };
+			} ) => {
 				const entityDefined = Boolean(
 					userData.getEntity( 'root', 'user' )
 				);
@@ -169,7 +224,7 @@ export const useUserPreferences = () => {
 		);
 	};
 
-	const userPreferences = userData.user
+	const userPreferences: UserPreferences = userData.user
 		? getWooCommerceMeta( userData.user )
 		: {};
 
