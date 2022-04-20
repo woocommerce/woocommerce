@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	useSelect,
+	useDispatch,
+	select as wpDataSelect,
+} from '@wordpress/data';
 import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
@@ -99,7 +103,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 const ShippingRecommendations: React.FC = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
-	const activePlugins = useSelect< string[] >( ( select ) =>
+	const activePlugins = useSelect( ( select: typeof wpDataSelect ) =>
 		select( PLUGINS_STORE_NAME ).getActivePlugins()
 	);
 
