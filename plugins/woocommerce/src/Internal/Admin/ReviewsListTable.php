@@ -456,9 +456,6 @@ class ReviewsListTable extends WP_List_Table {
 			);
 		}
 
-		/** This filter is documented in wp-admin/includes/dashboard.php */
-		$actions = apply_filters( 'comment_row_actions', array_filter( $actions ), $item );
-
 		$always_visible = 'excerpt' === get_user_setting( 'posts_list_mode', 'list' );
 
 		$output = '<div class="' . ( $always_visible ? 'row-actions visible' : 'row-actions' ) . '">';
@@ -713,13 +710,12 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( $this->current_user_can_edit_review ) :
 
-			if ( ! empty( $item->comment_author_email ) ) :
-				/** This filter is documented in wp-includes/comment-template.php */
-				$email = apply_filters( 'comment_email', $item->comment_author_email, $item );
+			if ( ! empty( $item->comment_author_email ) && is_email( $item->comment_author_email ) ) :
 
-				if ( ! empty( $email ) && '@' !== $email ) {
-					printf( '<a href="%1$s">%2$s</a><br />', esc_url( 'mailto:' . $email ), esc_html( $email ) );
-				}
+				?>
+				<a href="mailto:<?php echo esc_attr( $item->comment_author_email ); ?>"><?php echo esc_html( $item->comment_author_email ); ?></a>
+				<?php
+
 			endif;
 
 			$link = add_query_arg(
