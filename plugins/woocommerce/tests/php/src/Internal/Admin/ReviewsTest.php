@@ -214,8 +214,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
 	 * @dataProvider provider_is_reviews_page
 	 *
-	 * @param string|null $new_current_screen     the value of the global $pageview var.
-	 * @param bool        $expected_result the expected bool result.
+	 * @param string|null $new_current_screen The value of the global $pageview var.
+	 * @param bool        $expected_result    The expected bool result.
 	 * @return void
 	 */
 	public function test_is_reviews_page( $new_current_screen, $expected_result ) {
@@ -262,9 +262,9 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::get_bulk_action_notice_messages()
 	 * @dataProvider provider_get_bulk_action_notice_messages
 	 *
-	 * @param string[] $statuses        the wp comment statuses after a bulk operation.
-	 * @param int      $count           the number of affected comments.
-	 * @param array    $expected_result the action notice messages.
+	 * @param string[] $statuses        The wp comment statuses after a bulk operation.
+	 * @param int      $count           The number of affected comments.
+	 * @param array    $expected_result The action notice messages.
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
@@ -389,8 +389,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::maybe_display_reviews_bulk_action_notice()
 	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
 	 *
-	 * @param array  $messages        the action notice messages.
-	 * @param string $expected_result the expected result.
+	 * @param array  $messages        The action notice messages.
+	 * @param string $expected_result The expected result.
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
@@ -440,8 +440,8 @@ test2</p></div>',
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::display_notices()
 	 * @dataProvider provider_display_notices
 	 *
-	 * @param bool $is_reviews_page                whether the current page is the reviews page or not.
-	 * @param bool $should_call_the_display_method indicates if the display method should be called.
+	 * @param bool $is_reviews_page                Whether the current page is the reviews page or not.
+	 * @param bool $should_call_the_display_method Indicates if the display method should be called.
 	 */
 	public function test_display_notices( $is_reviews_page, $should_call_the_display_method ) {
 

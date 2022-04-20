@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use WP_Screen;
+
 /**
  * Handles backend logic for the Reviews component.
  */
@@ -37,7 +39,7 @@ class Reviews {
 	protected $reviews_list_table;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
@@ -51,6 +53,7 @@ class Reviews {
 	 * @return Reviews instance
 	 */
 	public static function get_instance() {
+
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
@@ -81,6 +84,7 @@ class Reviews {
 	 * @return void
 	 */
 	public function add_reviews_page() {
+
 		$this->reviews_page_hook = add_submenu_page(
 			'edit.php?post_type=product',
 			__( 'Reviews', 'woocommerce' ),
@@ -95,6 +99,8 @@ class Reviews {
 
 	/**
 	 * Determines whether the current page is the reviews page.
+	 *
+	 * @global WP_Screen $current_screen
 	 *
 	 * @return bool
 	 */
