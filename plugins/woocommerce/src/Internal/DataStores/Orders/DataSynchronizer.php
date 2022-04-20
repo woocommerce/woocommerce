@@ -17,18 +17,18 @@ defined( 'ABSPATH' ) || exit;
  */
 class DataSynchronizer {
 
-	const ORDERS_DATA_SYNC_ENABLED_OPTION            = 'woocommerce_custom_orders_table_data_sync_enabled';
-	const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION   = 'woocommerce_initial_orders_pending_sync_count';
-	const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
-	const PENDING_SYNC_IS_IN_PROGRESS_OPTION         = 'woocommerce_custom_orders_table_pending_sync_in_progress';
-	const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK      = 'woocommerce_run_orders_sync_callback';
-	const PENDING_SYNCHRONIZATION_FINISHED_ACTION    = 'woocommerce_orders_sync_finished';
+	public const ORDERS_DATA_SYNC_ENABLED_OPTION            = 'woocommerce_custom_orders_table_data_sync_enabled';
+	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION  = 'woocommerce_initial_orders_pending_sync_count';
+	public const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
+	private const PENDING_SYNC_IS_IN_PROGRESS_OPTION        = 'woocommerce_custom_orders_table_pending_sync_in_progress';
+	private const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK     = 'woocommerce_run_orders_sync_callback';
+	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION    = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE                = 'shop_order_placehold';
 
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
-	const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
-	const ID_TYPE_MISSING_IN_POSTS_TABLE  = 1;
-	const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
+	public const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
+	public const ID_TYPE_MISSING_IN_POSTS_TABLE  = 1;
+	public const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
 
 	// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
 	const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
