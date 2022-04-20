@@ -49,14 +49,14 @@ test.describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 		}
 
 		await expect(
-			page.locator('.wc-shipping-zone-name >> nth=1')
-		).toHaveText(`${shippingZoneNameSF} Edit | Delete`);
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/SF with Local pickup.*/);
 		await expect(
-			page.locator('.wc-shipping-zone-region >> nth=1')
-		).toHaveText(`California, ${sanFranciscoZIP}`);
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/California, 94107.*/);
 		await expect(
-			page.locator('.wc-shipping-zone-methods >> nth=1')
-		).toHaveText('Local pickup');
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/Local pickup.*/);
 	});
 
 	test('add shipping zone for California with Free shipping', async ({
@@ -94,14 +94,14 @@ test.describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
 		await expect(
-			page.locator('.wc-shipping-zone-name >> nth=2')
-		).toHaveText(`${shippingZoneNameFL} Edit | Delete`);
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/CA with Free shipping.*/);
 		await expect(
-			page.locator('.wc-shipping-zone-region >> nth=2')
-		).toHaveText('California');
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/California.*/);
 		await expect(
-			page.locator('.wc-shipping-zone-methods >> nth=2')
-		).toHaveText('Free shipping');
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/Free shipping.*/);
 	});
 
 	test('add shipping zone for the US with Flat rate', async ({ page }) => {
@@ -138,94 +138,122 @@ test.describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
 		await expect(
-			page.locator('.wc-shipping-zone-name >> nth=3')
-		).toHaveText(`${shippingZoneNameUS} Edit | Delete`);
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/US with Flat rate*/);
 		await expect(
-			page.locator('.wc-shipping-zone-region >> nth=3')
-		).toHaveText('United States (US)');
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/United States \(US\).*/);
 		await expect(
-			page.locator('.wc-shipping-zone-methods >> nth=3')
-		).toHaveText('Flat rate');
+			page.locator('.wc-shipping-zones')
+		).toHaveText(/Flat rate.*/);
 	});
 });
 
-test.describe(
-	'Verifies shipping options from customer perspective',
-	() => {
-		// note: tests are being run in an unauthenticated state (not as admin)
-		test.beforeAll(async () => {
-			// need to add a product to the store so that we can order it and check shipping options
-			const api = new wcApi({
-				url: 'http://localhost:8084',
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			});
-			api.post('products', {
-				name: 'Shipping options are the best',
-				type: 'simple',
-				regular_price: '25.99',
-			}).then((response) => {
-				productId = response.data.id;
-			});
+test.describe('Verifies shipping options from customer perspective', () => {
+	// note: tests are being run in an unauthenticated state (not as admin)
+	test.beforeAll(async () => {
+		// need to add a product to the store so that we can order it and check shipping options
+		const api = new wcApi({
+			url: 'http://localhost:8084',
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
 		});
-
-		test.afterAll(async () => {
-			const api = new wcApi({
-				url: 'http://localhost:8084',
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			});
-			api.delete(`products/${productId}`, { force: true });
-		});
-
-		test('allows customer to benefit from a free Local pickup if in SF', async ({
-			page,
-		}) => {
-			await page.goto('/shop');
-			await page.click('text=Add to cart');
-			await page.click('text=View cart');
-
-			await page.click('text=Change address');
-			await page.fill('#calc_shipping_postcode', '94107');
-			await page.click('button[name=calc_shipping]');
-			await page.waitForSelector('button[name=calc_shipping]', { state: 'hidden' });
-
-			expect(await page.textContent('.shipping ul#shipping_method > li > label')).toBe('Local pickup');
-			expect(await page.textContent('td[data-title="Total"] > strong > .amount > bdi')).toBe('$25.99');
-		});
-
-		test('allows customer to benefit from a free Free shipping if in CA', async ({
-			page,
-		}) => {
-			await page.goto('/shop');
-			await page.click('text=Add to cart');
-			await page.click('text=View cart');
-
-			await page.click('text=Change address');
-			await page.fill('#calc_shipping_postcode', '94000');
-			await page.click('button[name=calc_shipping]');
-			await page.waitForSelector('button[name=calc_shipping]', { state: 'hidden' });
-
-			expect(await page.textContent('.shipping ul#shipping_method > li > label')).toBe('Free shipping');
-			expect(await page.textContent('td[data-title="Total"] > strong > .amount > bdi')).toBe('$25.99');
-		});
-
-		test('allows customer to pay for a Flat rate shipping method', async ({
-			page,
-		}) => {
-			await page.goto('/shop');
-			await page.click('text=Add to cart');
-			await page.click('text=View cart');
-
-			await page.click('text=Change address');
-			await page.selectOption('#calc_shipping_state', 'NY');
-			await page.fill('#calc_shipping_postcode', '10010');
-			await page.click('button[name=calc_shipping]');
-			await page.waitForSelector('button[name=calc_shipping]', { state: 'hidden' });
-
-			expect(await page.textContent('.shipping ul#shipping_method > li > label')).toBe('Flat rate: $10.00');
-			expect(await page.textContent('td[data-title="Total"] > strong > .amount > bdi')).toBe('$35.99');
+		api.post('products', {
+			name: 'Shipping options are the best',
+			type: 'simple',
+			regular_price: '25.99',
+		}).then((response) => {
+			productId = response.data.id;
 		});
 	});
+
+	test.afterAll(async () => {
+		const api = new wcApi({
+			url: 'http://localhost:8084',
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		});
+		api.delete(`products/${productId}`, { force: true });
+	});
+
+	test('allows customer to benefit from a free Local pickup if in SF', async ({
+		page,
+	}) => {
+		await page.goto('/shop');
+		await page.click('text=Add to cart');
+		await page.click('text=View cart');
+
+		await page.click('text=Change address');
+		await page.fill('#calc_shipping_postcode', '94107');
+		await page.click('button[name=calc_shipping]');
+		await page.waitForSelector('button[name=calc_shipping]', {
+			state: 'hidden',
+		});
+
+		expect(
+			await page.textContent(
+				'.shipping ul#shipping_method > li > label'
+			)
+		).toBe('Local pickup');
+		expect(
+			await page.textContent(
+				'td[data-title="Total"] > strong > .amount > bdi'
+			)
+		).toBe('$25.99');
+	});
+
+	test('allows customer to benefit from a free Free shipping if in CA', async ({
+		page,
+	}) => {
+		await page.goto('/shop');
+		await page.click('text=Add to cart');
+		await page.click('text=View cart');
+
+		await page.click('text=Change address');
+		await page.fill('#calc_shipping_postcode', '94000');
+		await page.click('button[name=calc_shipping]');
+		await page.waitForSelector('button[name=calc_shipping]', {
+			state: 'hidden',
+		});
+
+		expect(
+			await page.textContent(
+				'.shipping ul#shipping_method > li > label'
+			)
+		).toBe('Free shipping');
+		expect(
+			await page.textContent(
+				'td[data-title="Total"] > strong > .amount > bdi'
+			)
+		).toBe('$25.99');
+	});
+
+	test('allows customer to pay for a Flat rate shipping method', async ({
+		page,
+	}) => {
+		await page.goto('/shop');
+		await page.click('text=Add to cart');
+		await page.click('text=View cart');
+
+		await page.click('text=Change address');
+		await page.selectOption('#calc_shipping_state', 'NY');
+		await page.fill('#calc_shipping_postcode', '10010');
+		await page.click('button[name=calc_shipping]');
+		await page.waitForSelector('button[name=calc_shipping]', {
+			state: 'hidden',
+		});
+
+		expect(
+			await page.textContent(
+				'.shipping ul#shipping_method > li > label'
+			)
+		).toBe('Flat rate: $10.00');
+		expect(
+			await page.textContent(
+				'td[data-title="Total"] > strong > .amount > bdi'
+			)
+		).toBe('$35.99');
+	});
+});
