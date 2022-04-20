@@ -6,6 +6,29 @@ import { useDispatch } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { getHistory } from '@woocommerce/navigation';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
+import { TaskType } from '@woocommerce/data';
+
+const task: TaskType = {
+	id: 'optional',
+	title: 'Test',
+	isComplete: false,
+	time: '1 minute',
+	isDismissable: true,
+	isSnoozeable: true,
+	content: 'This is the optional task content',
+	additionalInfo: 'This is the task additional info',
+	parentId: '',
+	isDismissed: false,
+	isSnoozed: false,
+	isVisible: true,
+	isDisabled: false,
+	snoozedUntil: 0,
+	isVisited: false,
+	canView: true,
+	isActioned: false,
+	eventPrefix: '',
+	level: 0,
+};
 
 /**
  * Internal dependencies
@@ -66,7 +89,7 @@ describe( 'Task', () => {
 	it( 'should pass the task name as id to the OnboardingTask.Slot', () => {
 		const { queryByText } = render(
 			<div>
-				<Task query={ { task: 'test' } } task={ { title: 'Test' } } />
+				<Task query={ { task: 'test' } } task={ task } />
 			</div>
 		);
 		expect( queryByText( 'test' ) ).toBeInTheDocument();
@@ -81,7 +104,7 @@ describe( 'Task', () => {
 		} );
 		const { getByRole } = render(
 			<div>
-				<Task query={ { task: 'test' } } task={ { title: 'Test' } } />
+				<Task query={ { task: 'test' } } task={ task } />
 			</div>
 		);
 		act( () => {
