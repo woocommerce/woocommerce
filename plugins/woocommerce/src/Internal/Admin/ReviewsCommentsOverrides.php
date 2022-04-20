@@ -9,6 +9,8 @@ use WP_Comment_Query;
  */
 class ReviewsCommentsOverrides {
 
+	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
+
 	/**
 	 * Class instance.
 	 *
@@ -36,6 +38,11 @@ class ReviewsCommentsOverrides {
 			return;
 		}
 
+		// Do not display if the current user has dismissed this notice.
+		if ( get_user_meta( get_current_user_id(), 'dismissed_' . static::REVIEWS_MOVED_NOTICE_ID . '_notice', true ) ) {
+			return;
+		}
+
 		$this->display_reviews_moved_notice();
 	}
 
@@ -43,12 +50,24 @@ class ReviewsCommentsOverrides {
 	 * Renders an admin notice informing the user that reviews were moved to a new page.
 	 */
 	protected function display_reviews_moved_notice() {
+		$dismiss_url = wp_nonce_url(
+			add_query_arg(
+				[
+					'wc-hide-notice' => urlencode( static::REVIEWS_MOVED_NOTICE_ID ),
+				]
+			),
+			'woocommerce_hide_notices_nonce',
+			'_wc_notice_nonce'
+		);
 		?>
 
 		<div class="notice notice-info">
 			<p><strong><?php esc_html_e( 'Product reviews have moved!', 'woocommerce' ); ?></strong></p>
 			<p><?php esc_html_e( 'Product reviews can now be managed from Products > Reviews.', 'woocommerce' ); ?></p>
-			<p class="submit"><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary"><?php esc_html_e( 'Visit new location', 'woocommerce' ); ?></a></p>
+			<p class="submit">
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary"><?php esc_html_e( 'Visit new location', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
+			</p>
 		</div>
 
 		<?php
