@@ -545,6 +545,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 			'sku'          => null,
 			'price'        => 4,
 			'parent_name'  => null,
+			'image_src'    => null,
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -785,7 +786,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
-		$this->assertEquals( 15, count( $line_item_properties ) );
+		$this->assertEquals( 16, count( $line_item_properties ) );
 		$this->assertArrayHasKey( 'id', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
 		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
