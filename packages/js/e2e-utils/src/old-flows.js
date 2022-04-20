@@ -6,22 +6,18 @@ import deprecated from '@wordpress/deprecated';
 /**
  * Internal dependencies
  */
-const {
-	merchant,
-	shopper
-} = require( './flows' );
-
+const { merchant, shopper } = require( './flows' );
 
 const CustomerFlowDeprecated = () => {
 	deprecated( 'CustomerFlow', {
 		alternative: 'shopper',
-	});
+	} );
 };
 
 const StoreOwnerFlowDeprecated = () => {
 	deprecated( 'StoreOwnerFlow', {
 		alternative: 'merchant',
-	});
+	} );
 };
 
 const CustomerFlow = {
@@ -55,9 +51,19 @@ const CustomerFlow = {
 		await shopper.placeOrder();
 	},
 
-	productIsInCheckout: async ( productTitle, quantity, total, cartSubtotal ) => {
+	productIsInCheckout: async (
+		productTitle,
+		quantity,
+		total,
+		cartSubtotal
+	) => {
 		CustomerFlowDeprecated();
-		await shopper.productIsInCheckout( productTitle, quantity, total, cartSubtotal );
+		await shopper.productIsInCheckout(
+			productTitle,
+			quantity,
+			total,
+			cartSubtotal
+		);
 	},
 
 	goToCart: async () => {
@@ -70,7 +76,7 @@ const CustomerFlow = {
 		await shopper.productIsInCart( productTitle, quantity );
 	},
 
-	fillBillingDetails: async (	customerBillingDetails ) => {
+	fillBillingDetails: async ( customerBillingDetails ) => {
 		CustomerFlowDeprecated();
 		await shopper.fillBillingDetails( customerBillingDetails );
 	},
@@ -173,7 +179,4 @@ const StoreOwnerFlow = {
 	},
 };
 
-export {
-	CustomerFlow,
-	StoreOwnerFlow,
-};
+export { CustomerFlow, StoreOwnerFlow };

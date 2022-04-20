@@ -17,7 +17,7 @@ const reducer = (
 		errors: {},
 		lastImportStartTimestamp: 0,
 		period: {
-			date: moment().format( __( 'MM/DD/YYYY', 'woocommerce-admin' ) ),
+			date: moment().format( __( 'MM/DD/YYYY', 'woocommerce' ) ),
 			label: 'all',
 		},
 		skipPrevious: true,

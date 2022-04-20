@@ -122,7 +122,7 @@ export default {
 				{ interpolateComponents( {
 					mixedString: __(
 						'All attributes with names that include {{query /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					components: {
 						query: (

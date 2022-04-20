@@ -54,11 +54,11 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	const agreementText = pluginsToActivate.includes( 'woocommerce-services' )
 		? __(
 				'By installing Jetpack and WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce-admin'
+				'woocommerce'
 		  )
 		: __(
 				'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce-admin'
+				'woocommerce'
 		  );
 
 	if ( isResolving ) {
@@ -87,12 +87,9 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					} );
 					onManual();
 				} }
-				skipText={ __( 'Set up manually', 'woocommerce-admin' ) }
+				skipText={ __( 'Set up manually', 'woocommerce' ) }
 				onAbort={ () => onDisable() }
-				abortText={ __(
-					"I don't charge sales tax",
-					'woocommerce-admin'
-				) }
+				abortText={ __( "I don't charge sales tax", 'woocommerce' ) }
 			/>
 			{ ! tosAccepted && (
 				<Text

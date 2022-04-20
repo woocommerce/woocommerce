@@ -16,8 +16,8 @@ import moment from 'moment';
 import DatePicker from '../calendar/date-picker';
 import { textContent } from './utils';
 
-const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce-admin' );
-const dateFormat = __( 'MM/DD/YYYY', 'woocommerce-admin' );
+const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce' );
+const dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
 
 class DateFilter extends Component {
 	constructor( { filter } ) {
@@ -48,7 +48,7 @@ class DateFilter extends Component {
 		return _x(
 			'{{after /}}{{span}} and {{/span}}{{before /}}',
 			'Date range inputs arranged on a single line',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 

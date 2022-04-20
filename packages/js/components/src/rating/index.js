@@ -38,7 +38,7 @@ class Rating extends Component {
 		};
 
 		const label = sprintf(
-			__( '%1$s out of %2$s stars.', 'woocommerce-admin' ),
+			__( '%1$s out of %2$s stars.', 'woocommerce' ),
 			rating,
 			totalStars
 		);

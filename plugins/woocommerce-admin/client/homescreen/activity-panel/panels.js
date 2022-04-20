@@ -38,7 +38,7 @@ export function getAllPanels( {
 					orderStatuses={ orderStatuses }
 				/>
 			),
-			title: __( 'Orders', 'woocommerce-admin' ),
+			title: __( 'Orders', 'woocommerce' ),
 		},
 		totalOrderCount > 0 &&
 			publishedProductCount > 0 &&
@@ -53,7 +53,7 @@ export function getAllPanels( {
 						lowStockProductsCount={ lowStockProductsCount }
 					/>
 				),
-				title: __( 'Stock', 'woocommerce-admin' ),
+				title: __( 'Stock', 'woocommerce' ),
 			},
 		publishedProductCount > 0 &&
 			unapprovedReviewsCount > 0 &&
@@ -68,7 +68,7 @@ export function getAllPanels( {
 						hasUnapprovedReviews={ unapprovedReviewsCount > 0 }
 					/>
 				),
-				title: __( 'Reviews', 'woocommerce-admin' ),
+				title: __( 'Reviews', 'woocommerce' ),
 			},
 		// Add another panel row here
 	].filter( Boolean );

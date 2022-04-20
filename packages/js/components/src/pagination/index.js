@@ -108,7 +108,7 @@ class Pagination extends Component {
 						aria-live="polite"
 					>
 						{ sprintf(
-							__( 'Page %d of %d', 'woocommerce-admin' ),
+							__( 'Page %d of %d', 'woocommerce' ),
 							page,
 							this.pageCount
 						) }
@@ -119,7 +119,7 @@ class Pagination extends Component {
 						className={ previousLinkClass }
 						disabled={ ! ( page > 1 ) }
 						onClick={ this.previousPage }
-						label={ __( 'Previous Page', 'woocommerce-admin' ) }
+						label={ __( 'Previous Page', 'woocommerce' ) }
 					>
 						<Icon icon={ chevronLeft } />
 					</Button>
@@ -127,7 +127,7 @@ class Pagination extends Component {
 						className={ nextLinkClass }
 						disabled={ ! ( page < this.pageCount ) }
 						onClick={ this.nextPage }
-						label={ __( 'Next Page', 'woocommerce-admin' ) }
+						label={ __( 'Next Page', 'woocommerce' ) }
 					>
 						<Icon icon={ chevronRight } />
 					</Button>
@@ -154,7 +154,7 @@ class Pagination extends Component {
 					htmlFor={ instanceId }
 					className="woocommerce-pagination__page-picker-label"
 				>
-					{ __( 'Go to page', 'woocommerce-admin' ) }
+					{ __( 'Go to page', 'woocommerce' ) }
 					<input
 						id={ instanceId }
 						className={ inputClass }
@@ -181,7 +181,7 @@ class Pagination extends Component {
 		return (
 			<div className="woocommerce-pagination__per-page-picker">
 				<SelectControl
-					label={ __( 'Rows per page', 'woocommerce-admin' ) }
+					label={ __( 'Rows per page', 'woocommerce' ) }
 					labelPosition="side"
 					value={ this.props.perPage }
 					onChange={ this.perPageChange }

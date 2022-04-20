@@ -238,12 +238,12 @@ class Chart extends Component {
 		}
 
 		const intervalLabels = {
-			hour: __( 'By hour', 'woocommerce-admin' ),
-			day: __( 'By day', 'woocommerce-admin' ),
-			week: __( 'By week', 'woocommerce-admin' ),
-			month: __( 'By month', 'woocommerce-admin' ),
-			quarter: __( 'By quarter', 'woocommerce-admin' ),
-			year: __( 'By year', 'woocommerce-admin' ),
+			hour: __( 'By hour', 'woocommerce' ),
+			day: __( 'By day', 'woocommerce' ),
+			week: __( 'By week', 'woocommerce' ),
+			month: __( 'By month', 'woocommerce' ),
+			quarter: __( 'By quarter', 'woocommerce' ),
+			year: __( 'By year', 'woocommerce' ),
 		};
 
 		return (
@@ -390,10 +390,7 @@ class Chart extends Component {
 											chartType === 'line',
 									}
 								) }
-								title={ __(
-									'Line chart',
-									'woocommerce-admin'
-								) }
+								title={ __( 'Line chart', 'woocommerce' ) }
 								aria-checked={ chartType === 'line' }
 								role="menuitemradio"
 								tabIndex={ chartType === 'line' ? 0 : -1 }
@@ -412,7 +409,7 @@ class Chart extends Component {
 											chartType === 'bar',
 									}
 								) }
-								title={ __( 'Bar chart', 'woocommerce-admin' ) }
+								title={ __( 'Bar chart', 'woocommerce' ) }
 								aria-checked={ chartType === 'bar' }
 								role="menuitemradio"
 								tabIndex={ chartType === 'bar' ? 0 : -1 }
@@ -440,7 +437,7 @@ class Chart extends Component {
 								<span className="screen-reader-text">
 									{ __(
 										'Your requested data is loading',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</span>
 								<ChartPlaceholder height={ chartHeight } />

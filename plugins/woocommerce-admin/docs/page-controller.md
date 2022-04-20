@@ -25,8 +25,8 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-settings',
 		'screen_id' => 'woocommerce_page_wc-settings-general',
 		'title'     => array(
-			__( 'Settings', 'woocommerce-admin' ),
-			__( 'General', 'woocommerce-admin' ),
+			__( 'Settings', 'woocommerce' ),
+			__( 'General', 'woocommerce' ),
 		),
 		'path'      => add_query_arg( 'page', 'wc-settings', 'admin.php' ),
 	)
@@ -42,7 +42,7 @@ wc_admin_connect_page(
 		'id'        => 'woocommerce-settings-payments',
 		'parent'    => 'woocommerce-settings',
 		'screen_id' => 'woocommerce_page_wc-settings-checkout',
-		'title'     => __( 'Payments', 'woocommerce-admin' ),
+		'title'     => __( 'Payments', 'woocommerce' ),
 		'path'      => add_query_arg(
 			array(
 				'page' => 'wc-settings',
@@ -58,7 +58,7 @@ wc_admin_connect_page(
 	array(
 		'id'        => 'woocommerce-orders',
 		'screen_id' => 'edit-shop_order',
-		'title'     => __( 'Orders', 'woocommerce-admin' ),
+		'title'     => __( 'Orders', 'woocommerce' ),
 		'path'      => add_query_arg( 'post_type', 'shop_order', 'edit.php' ),
 	)
 );
@@ -181,6 +181,6 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
 
 ### Further Reading
 
--   Check out the [`PageController`](../src/PageController.php) class.
--   See how we're [connecting existing WooCommerce pages](../includes/page-controller-functions.php).
--   See how we're [registering Analytics Reports](../src/Features/Analytics.php).
+-   Check out the [`PageController`](../woocommerce/src/Admin/PageController.php) class.
+-   See how we're [connecting existing WooCommerce pages](../woocommerce/includes/react-admin/page-controller-functions.php).
+-   See how we're [registering Analytics Reports](../woocommerce/src/Internal/Admin/Analytics.php).

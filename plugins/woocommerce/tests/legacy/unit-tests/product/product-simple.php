@@ -12,7 +12,7 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	 */
 	protected $product;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->product = WC_Helper_Product::create_simple_product();

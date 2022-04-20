@@ -25,7 +25,7 @@ const total = storeCurrency.formatAmount( 20.923 ); // '$20.92'
 
 // Get the rounded decimal value of a number at the precision used for the current currency,
 // from the settings api. Defaults to 2.
-const total = storeCurrency.formatDecimal( '6.2892' ); // 6.29 https://google.com/?q=test
+const total = storeCurrency.formatDecimal( '6.2892' ); // 6.29
 
 // Get the string representation of a floating point number to the precision used by the current
 // currency. This is different from `formatAmount` by not returning the currency symbol.

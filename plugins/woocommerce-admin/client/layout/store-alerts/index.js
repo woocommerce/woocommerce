@@ -85,7 +85,7 @@ export class StoreAlerts extends Component {
 		const snoozeOptions = [
 			{
 				value: moment().add( 4, 'hours' ).unix().toString(),
-				label: __( 'Later Today', 'woocommerce-admin' ),
+				label: __( 'Later Today', 'woocommerce' ),
 			},
 			{
 				value: moment()
@@ -96,7 +96,7 @@ export class StoreAlerts extends Component {
 					.millisecond( 0 )
 					.unix()
 					.toString(),
-				label: __( 'Tomorrow', 'woocommerce-admin' ),
+				label: __( 'Tomorrow', 'woocommerce' ),
 			},
 			{
 				value: moment()
@@ -107,7 +107,7 @@ export class StoreAlerts extends Component {
 					.millisecond( 0 )
 					.unix()
 					.toString(),
-				label: __( 'Next Week', 'woocommerce-admin' ),
+				label: __( 'Next Week', 'woocommerce' ),
 			},
 			{
 				value: moment()
@@ -118,7 +118,7 @@ export class StoreAlerts extends Component {
 					.millisecond( 0 )
 					.unix()
 					.toString(),
-				label: __( 'Next Month', 'woocommerce-admin' ),
+				label: __( 'Next Month', 'woocommerce' ),
 			},
 		];
 
@@ -142,7 +142,7 @@ export class StoreAlerts extends Component {
 				className="woocommerce-store-alerts__snooze"
 				options={ [
 					{
-						label: __( 'Remind Me Later', 'woocommerce-admin' ),
+						label: __( 'Remind Me Later', 'woocommerce' ),
 						value: '0',
 					},
 					...snoozeOptions,
@@ -221,10 +221,7 @@ export class StoreAlerts extends Component {
 							<Button
 								onClick={ this.previousAlert }
 								disabled={ currentIndex === 0 }
-								label={ __(
-									'Previous Alert',
-									'woocommerce-admin'
-								) }
+								label={ __( 'Previous Alert', 'woocommerce' ) }
 							>
 								<Icon
 									icon={ chevronLeft }
@@ -239,7 +236,7 @@ export class StoreAlerts extends Component {
 								{ interpolateComponents( {
 									mixedString: __(
 										'{{current /}} of {{total /}}',
-										'woocommerce-admin'
+										'woocommerce'
 									),
 									components: {
 										current: (
@@ -258,10 +255,7 @@ export class StoreAlerts extends Component {
 							<Button
 								onClick={ this.nextAlert }
 								disabled={ numberOfAlerts - 1 === currentIndex }
-								label={ __(
-									'Next Alert',
-									'woocommerce-admin'
-								) }
+								label={ __( 'Next Alert', 'woocommerce' ) }
 							>
 								<Icon
 									icon={ chevronRight }

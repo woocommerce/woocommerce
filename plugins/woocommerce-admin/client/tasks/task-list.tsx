@@ -6,7 +6,11 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { Card, CardHeader } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
-import { ONBOARDING_STORE_NAME, TaskListType } from '@woocommerce/data';
+import {
+	getVisibleTasks,
+	ONBOARDING_STORE_NAME,
+	TaskListType,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text, List, CollapsibleList } from '@woocommerce/experimental';
 
@@ -16,6 +20,7 @@ import { Text, List, CollapsibleList } from '@woocommerce/experimental';
 import { TaskListItem } from './task-list-item';
 import { TaskListMenu } from './task-list-menu';
 import './task-list.scss';
+import { ProgressHeader } from '~/task-lists/progress-header';
 
 export type TaskListProps = TaskListType & {
 	query: {
@@ -33,6 +38,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	title: listTitle,
 	isCollapsible = false,
 	isExpandable = false,
+	displayProgressHeader = false,
 	query,
 } ) => {
 	const { profileItems } = useSelect( ( select ) => {
@@ -43,12 +49,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		};
 	} );
 	const prevQueryRef = useRef( query );
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
+	const visibleTasks = getVisibleTasks( tasks );
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed
@@ -89,11 +90,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			'Show %d more task.',
 			'Show %d more tasks.',
 			visibleTasks.length - 2,
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		visibleTasks.length - 2
 	);
-	const collapseLabel = __( 'Show less', 'woocommerce-admin' );
+	const collapseLabel = __( 'Show less', 'woocommerce' );
 	const ListComp = isCollapsible ? CollapsibleList : List;
 
 	const listProps = isCollapsible
@@ -114,6 +115,9 @@ export const TaskList: React.FC< TaskListProps > = ( {
 					id
 				}
 			>
+				{ displayProgressHeader ? (
+					<ProgressHeader taskListId={ id } />
+				) : null }
 				<Card
 					size="large"
 					className="woocommerce-task-card woocommerce-homescreen-card"

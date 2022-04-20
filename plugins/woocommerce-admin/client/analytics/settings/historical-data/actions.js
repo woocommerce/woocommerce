@@ -35,7 +35,7 @@ function HistoricalDataActions( {
 		);
 		const errorMessage = __(
 			'There was a problem rebuilding your report data.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 
 		const importStarted = true;
@@ -48,7 +48,7 @@ function HistoricalDataActions( {
 		const path = '/wc-analytics/reports/import/cancel';
 		const errorMessage = __(
 			'There was a problem stopping your current import.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 		makeQuery( path, errorMessage );
 	};
@@ -77,7 +77,7 @@ function HistoricalDataActions( {
 		const path = '/wc-analytics/reports/import/delete';
 		const errorMessage = __(
 			'There was a problem deleting your previous data.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 		makeQuery( path, errorMessage );
 
@@ -106,17 +106,17 @@ function HistoricalDataActions( {
 						isPrimary
 						onClick={ onStopImport }
 					>
-						{ __( 'Stop Import', 'woocommerce-admin' ) }
+						{ __( 'Stop Import', 'woocommerce' ) }
 					</Button>
 					<div className="woocommerce-setting__help woocommerce-settings-historical-data__action-help">
 						{ __(
 							'Imported data will not be lost if the import is stopped.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 						<br />
 						{ __(
 							'Navigating away from this page will not affect the import.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</div>
 				</Fragment>
@@ -132,12 +132,12 @@ function HistoricalDataActions( {
 							onClick={ onStartImport }
 							disabled={ importDisabled }
 						>
-							{ __( 'Start', 'woocommerce-admin' ) }
+							{ __( 'Start', 'woocommerce' ) }
 						</Button>
 						<Button isSecondary onClick={ deletePreviousData }>
 							{ __(
 								'Delete Previously Imported Data',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</Button>
 					</Fragment>
@@ -151,7 +151,7 @@ function HistoricalDataActions( {
 						onClick={ onStartImport }
 						disabled={ importDisabled }
 					>
-						{ __( 'Start', 'woocommerce-admin' ) }
+						{ __( 'Start', 'woocommerce' ) }
 					</Button>
 				</Fragment>
 			);
@@ -162,7 +162,7 @@ function HistoricalDataActions( {
 				'error',
 				__(
 					'Something went wrong with the importation process.',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -171,13 +171,10 @@ function HistoricalDataActions( {
 		return (
 			<Fragment>
 				<Button isSecondary onClick={ reimportData }>
-					{ __( 'Re-import Data', 'woocommerce-admin' ) }
+					{ __( 'Re-import Data', 'woocommerce' ) }
 				</Button>
 				<Button isSecondary onClick={ deletePreviousData }>
-					{ __(
-						'Delete Previously Imported Data',
-						'woocommerce-admin'
-					) }
+					{ __( 'Delete Previously Imported Data', 'woocommerce' ) }
 				</Button>
 			</Fragment>
 		);

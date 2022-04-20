@@ -28,14 +28,14 @@ class CouponsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Coupon code', 'woocommerce-admin' ),
+				label: __( 'Coupon code', 'woocommerce' ),
 				key: 'code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -43,21 +43,21 @@ class CouponsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Amount discounted', 'woocommerce-admin' ),
+				label: __( 'Amount discounted', 'woocommerce' ),
 				key: 'amount',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Created', 'woocommerce-admin' ),
+				label: __( 'Created', 'woocommerce' ),
 				key: 'created',
 			},
 			{
-				label: __( 'Expires', 'woocommerce-admin' ),
+				label: __( 'Expires', 'woocommerce' ),
 				key: 'expires',
 			},
 			{
-				label: __( 'Type', 'woocommerce-admin' ),
+				label: __( 'Type', 'woocommerce' ),
 				key: 'type',
 			},
 		];
@@ -147,7 +147,7 @@ class CouponsReportTable extends Component {
 							visibleFormat={ dateFormat }
 						/>
 					) : (
-						__( 'N/A', 'woocommerce-admin' )
+						__( 'N/A', 'woocommerce' )
 					),
 					value: dateCreated,
 				},
@@ -158,7 +158,7 @@ class CouponsReportTable extends Component {
 							visibleFormat={ dateFormat }
 						/>
 					) : (
-						__( 'N/A', 'woocommerce-admin' )
+						__( 'N/A', 'woocommerce' )
 					),
 					value: dateExpires,
 				},
@@ -180,25 +180,15 @@ class CouponsReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n(
-					'Coupon',
-					'Coupons',
-					couponsCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'Coupon', 'Coupons', couponsCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', couponsCount ),
 			},
 			{
-				label: _n(
-					'Order',
-					'Orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 			{
-				label: __( 'Amount discounted', 'woocommerce-admin' ),
+				label: __( 'Amount discounted', 'woocommerce' ),
 				value: formatAmount( amount ),
 			},
 		];
@@ -206,11 +196,11 @@ class CouponsReportTable extends Component {
 
 	getCouponType( discountType ) {
 		const couponTypes = {
-			percent: __( 'Percentage', 'woocommerce-admin' ),
-			fixed_cart: __( 'Fixed cart', 'woocommerce-admin' ),
-			fixed_product: __( 'Fixed product', 'woocommerce-admin' ),
+			percent: __( 'Percentage', 'woocommerce' ),
+			fixed_cart: __( 'Fixed cart', 'woocommerce' ),
+			fixed_product: __( 'Fixed product', 'woocommerce' ),
 		};
-		return couponTypes[ discountType ] || __( 'N/A', 'woocommerce-admin' );
+		return couponTypes[ discountType ] || __( 'N/A', 'woocommerce' );
 	}
 
 	render() {
@@ -233,7 +223,7 @@ class CouponsReportTable extends Component {
 					order: query.order || 'desc',
 					extended_info: true,
 				} }
-				title={ __( 'Coupons', 'woocommerce-admin' ) }
+				title={ __( 'Coupons', 'woocommerce' ) }
 				columnPrefsKey="coupons_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

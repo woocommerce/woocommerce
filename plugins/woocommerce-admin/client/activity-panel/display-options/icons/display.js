@@ -38,6 +38,6 @@ export const DisplayIcon = () => (
 				strokeLinejoin="round"
 			/>
 		</svg>
-		{ __( 'Display', 'woocommerce-admin' ) }
+		{ __( 'Display', 'woocommerce' ) }
 	</>
 );

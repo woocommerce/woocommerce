@@ -1,15 +1,21 @@
 const numberFormatter = require( 'locutus/php/strings/number_format' );
 
 /**
+ * Number formatting configuration object
+ *
+ * @typedef {Object} NumberConfig
+ * @property {number} [precision]         Decimal precision.
+ * @property {string} [decimalSeparator]  Decimal separator.
+ * @property {string} [thousandSeparator] Character used to separate thousands groups.
+ */
+
+/**
  * Formats a number using site's current locale
  *
  * @see http://locutus.io/php/strings/number_format/
- * @param {Object}        numberConfig                   number formatting configuration object.
- * @param {number}        numberConfig.precision
- * @param {string}        numberConfig.decimalSeparator
- * @param {string}        numberConfig.thousandSeparator
- * @param {number|string} number                         number to format
- * @return {?string} A formatted string.
+ * @param {NumberConfig}  numberConfig Number formatting configuration object.
+ * @param {number|string} number       number to format
+ * @return {string} A formatted string.
  */
 export function numberFormat(
 	{ precision = null, decimalSeparator = '.', thousandSeparator = ',' },
@@ -39,12 +45,14 @@ export function numberFormat(
 }
 
 /**
- * Formats a number string based on type of `average` or `number`.
+ * Formats a number as average or number string according to the given `type`.
+ *  - `type = 'average'` returns a rounded `Number`
+ *  - `type = 'number'` returns a formatted `String`
  *
- * @param {Object} numberConfig number formatting configuration object.
- * @param {string} type         of number to format, average or number
- * @param {number} value        to format.
- * @return {?string} A formatted string.
+ * @param {NumberConfig} numberConfig number formatting configuration object.
+ * @param {string}       type         of number to format, `'average'` or `'number'`
+ * @param {number}       value        to format.
+ * @return {string | number | null} A formatted string.
  */
 export function formatValue( numberConfig, type, value ) {
 	if ( ! Number.isFinite( value ) ) {

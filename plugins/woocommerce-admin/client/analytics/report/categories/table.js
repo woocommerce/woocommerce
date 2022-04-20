@@ -29,14 +29,14 @@ class CategoriesReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Category', 'woocommerce-admin' ),
+				label: __( 'Category', 'woocommerce' ),
 				key: 'category',
 				required: true,
 				isSortable: true,
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -44,19 +44,19 @@ class CategoriesReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
 				key: 'net_revenue',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Products', 'woocommerce-admin' ),
+				label: __( 'Products', 'woocommerce' ),
 				key: 'products_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
@@ -146,7 +146,7 @@ class CategoriesReportTable extends Component {
 					'Category',
 					'Categories',
 					totalResults,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', totalResults ),
 			},
@@ -155,21 +155,16 @@ class CategoriesReportTable extends Component {
 					'Item sold',
 					'Items sold',
 					itemsSold,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', itemsSold ),
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: _n(
-					'Order',
-					'Orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
@@ -181,9 +176,9 @@ class CategoriesReportTable extends Component {
 		const labels = {
 			helpText: __(
 				'Check at least two categories below to compare',
-				'woocommerce-admin'
+				'woocommerce'
 			),
-			placeholder: __( 'Search by category name', 'woocommerce-admin' ),
+			placeholder: __( 'Search by category name', 'woocommerce' ),
 		};
 
 		return (
@@ -208,7 +203,7 @@ class CategoriesReportTable extends Component {
 					order: query.order || 'desc',
 					extended_info: true,
 				} }
-				title={ __( 'Categories', 'woocommerce-admin' ) }
+				title={ __( 'Categories', 'woocommerce' ) }
 				columnPrefsKey="categories_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

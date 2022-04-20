@@ -72,7 +72,7 @@ export class Shipping extends Component {
 					zone.methods = await apiFetch( {
 						path: `/wc/v3/shipping/zones/${ zone.id }/methods`,
 					} );
-					zone.name = __( 'Rest of the world', 'woocommerce-admin' );
+					zone.name = __( 'Rest of the world', 'woocommerce' );
 					zone.toggleable = true;
 					shippingZones.push( zone );
 					return;
@@ -159,7 +159,7 @@ export class Shipping extends Component {
 				'success',
 				__(
 					"📦 Shipping is done! Don't worry, you can always change it later",
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			onComplete();
@@ -198,10 +198,10 @@ export class Shipping extends Component {
 		const steps = [
 			{
 				key: 'store_location',
-				label: __( 'Set store location', 'woocommerce-admin' ),
+				label: __( 'Set store location', 'woocommerce' ),
 				description: __(
 					'The address from which your business operates',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: (
 					<StoreLocation
@@ -225,18 +225,18 @@ export class Shipping extends Component {
 			},
 			{
 				key: 'rates',
-				label: __( 'Set shipping costs', 'woocommerce-admin' ),
+				label: __( 'Set shipping costs', 'woocommerce' ),
 				description: __(
 					'Define how much customers pay to ship to different destinations',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: (
 					<ShippingRates
 						buttonText={
 							pluginsToActivate.length ||
 							requiresJetpackConnection
-								? __( 'Proceed', 'woocommerce-admin' )
-								: __( 'Complete task', 'woocommerce-admin' )
+								? __( 'Proceed', 'woocommerce' )
+								: __( 'Complete task', 'woocommerce' )
 						}
 						shippingZones={ this.state.shippingZones }
 						onComplete={ () => {
@@ -255,10 +255,7 @@ export class Shipping extends Component {
 			},
 			{
 				key: 'label_printing',
-				label: __(
-					'Enable shipping label printing',
-					'woocommerce-admin'
-				),
+				label: __( 'Enable shipping label printing', 'woocommerce' ),
 				description: pluginsToActivate.includes(
 					'woocommerce-shipstation-integration'
 				)
@@ -266,7 +263,7 @@ export class Shipping extends Component {
 							mixedString: __(
 								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
 									'labels at home. Try ShipStation free for 30 days. {{link}}Learn more{{/link}}.',
-								'woocommerce-admin'
+								'woocommerce'
 							),
 							components: {
 								link: (
@@ -281,7 +278,7 @@ export class Shipping extends Component {
 					: __(
 							'With WooCommerce Shipping you can save time ' +
 								'by printing your USPS and DHL Express shipping labels at home',
-							'woocommerce-admin'
+							'woocommerce'
 					  ),
 				content: (
 					<Plugins
@@ -311,10 +308,10 @@ export class Shipping extends Component {
 			},
 			{
 				key: 'connect',
-				label: __( 'Connect your store', 'woocommerce-admin' ),
+				label: __( 'Connect your store', 'woocommerce' ),
 				description: __(
 					'Connect your store to WordPress.com to enable label printing',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: (
 					<Connect

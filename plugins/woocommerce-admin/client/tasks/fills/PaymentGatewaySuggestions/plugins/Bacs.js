@@ -31,7 +31,7 @@ const BacsPaymentGatewaySetup = () => {
 		if ( ! values.account_number && ! values.iban ) {
 			errors.account_number = errors.iban = __(
 				'Please enter an account number or IBAN',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -52,7 +52,7 @@ const BacsPaymentGatewaySetup = () => {
 				'success',
 				__(
 					'Direct bank transfer details added successfully',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			return;
@@ -62,7 +62,7 @@ const BacsPaymentGatewaySetup = () => {
 			'error',
 			__(
 				'There was a problem saving your payment settings',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 	};
@@ -85,20 +85,20 @@ const BacsPaymentGatewaySetup = () => {
 										<H>
 											{ __(
 												'Add your bank details',
-												'woocommerce-admin'
+												'woocommerce'
 											) }
 										</H>
 										<p>
 											{ __(
 												'These details are required to receive payments via bank transfer',
-												'woocommerce-admin'
+												'woocommerce'
 											) }
 										</p>
 										<div className="woocommerce-task-payment-method__fields">
 											<TextControl
 												label={ __(
 													'Account name',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												required
 												{ ...getInputProps(
@@ -108,7 +108,7 @@ const BacsPaymentGatewaySetup = () => {
 											<TextControl
 												label={ __(
 													'Account number',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												required
 												{ ...getInputProps(
@@ -118,7 +118,7 @@ const BacsPaymentGatewaySetup = () => {
 											<TextControl
 												label={ __(
 													'Bank name',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												required
 												{ ...getInputProps(
@@ -128,7 +128,7 @@ const BacsPaymentGatewaySetup = () => {
 											<TextControl
 												label={ __(
 													'Sort code',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												required
 												{ ...getInputProps(
@@ -138,7 +138,7 @@ const BacsPaymentGatewaySetup = () => {
 											<TextControl
 												label={ __(
 													'IBAN',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												required
 												{ ...getInputProps( 'iban' ) }
@@ -146,7 +146,7 @@ const BacsPaymentGatewaySetup = () => {
 											<TextControl
 												label={ __(
 													'BIC / Swift',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												required
 												{ ...getInputProps( 'bic' ) }
@@ -157,10 +157,7 @@ const BacsPaymentGatewaySetup = () => {
 											isBusy={ isUpdating }
 											onClick={ handleSubmit }
 										>
-											{ __(
-												'Save',
-												'woocommerce-admin'
-											) }
+											{ __( 'Save', 'woocommerce' ) }
 										</Button>
 									</>
 								);

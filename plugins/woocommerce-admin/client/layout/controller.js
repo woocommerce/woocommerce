@@ -67,10 +67,7 @@ export const getPages = () => {
 	pages.push( {
 		container: Homescreen,
 		path: '/',
-		breadcrumbs: [
-			...initialBreadcrumbs,
-			__( 'Home', 'woocommerce-admin' ),
-		],
+		breadcrumbs: [ ...initialBreadcrumbs, __( 'Home', 'woocommerce' ) ],
 		wpOpenMenu: 'toplevel_page_woocommerce',
 		navArgs: {
 			id: 'woocommerce-home',
@@ -84,11 +81,8 @@ export const getPages = () => {
 			path: '/analytics/overview',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[
-					'/analytics/overview',
-					__( 'Analytics', 'woocommerce-admin' ),
-				],
-				__( 'Overview', 'woocommerce-admin' ),
+				[ '/analytics/overview', __( 'Analytics', 'woocommerce' ) ],
+				__( 'Overview', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 			navArgs: {
@@ -101,11 +95,8 @@ export const getPages = () => {
 			path: '/analytics/settings',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[
-					'/analytics/revenue',
-					__( 'Analytics', 'woocommerce-admin' ),
-				],
-				__( 'Settings', 'woocommerce-admin' ),
+				[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
+				__( 'Settings', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 			navArgs: {
@@ -118,7 +109,7 @@ export const getPages = () => {
 			path: '/customers',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Customers', 'woocommerce-admin' ),
+				__( 'Customers', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce',
 			navArgs: {
@@ -138,10 +129,7 @@ export const getPages = () => {
 				}
 				return [
 					...initialBreadcrumbs,
-					[
-						'/analytics/revenue',
-						__( 'Analytics', 'woocommerce-admin' ),
-					],
+					[ '/analytics/revenue', __( 'Analytics', 'woocommerce' ) ],
 					report.title,
 				];
 			},
@@ -156,8 +144,8 @@ export const getPages = () => {
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[ '/marketing', __( 'Marketing', 'woocommerce-admin' ) ],
-				__( 'Overview', 'woocommerce-admin' ),
+				[ '/marketing', __( 'Marketing', 'woocommerce' ) ],
+				__( 'Overview', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce-marketing',
 			navArgs: {
@@ -173,7 +161,7 @@ export const getPages = () => {
 			path: '/setup-wizard',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Setup Wizard', 'woocommerce-admin' ),
+				__( 'Setup Wizard', 'woocommerce' ),
 			],
 			capability: 'manage_woocommerce',
 		} );
@@ -198,7 +186,7 @@ export const getPages = () => {
 							: `/settings/${
 									Object.keys( settingsPages )[ 0 ]
 							  }`,
-						__( 'Settings', 'woocommerce-admin' ),
+						__( 'Settings', 'woocommerce' ),
 					],
 					page,
 				];
@@ -215,9 +203,9 @@ export const getPages = () => {
 			breadcrumbs: [
 				[
 					'/wc-pay-welcome-page',
-					__( 'WooCommerce Payments', 'woocommerce-admin' ),
+					__( 'WooCommerce Payments', 'woocommerce' ),
 				],
-				__( 'WooCommerce Payments', 'woocommerce-admin' ),
+				__( 'WooCommerce Payments', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-wc-pay-welcome-page',
@@ -240,7 +228,7 @@ export const getPages = () => {
 		path: '*',
 		breadcrumbs: [
 			...initialBreadcrumbs,
-			__( 'Not allowed', 'woocommerce-admin' ),
+			__( 'Not allowed', 'woocommerce' ),
 		],
 		wpOpenMenu: 'toplevel_page_woocommerce',
 	} );

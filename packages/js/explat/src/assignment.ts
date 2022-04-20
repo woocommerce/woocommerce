@@ -26,7 +26,6 @@ const getRequestQueryString = ( {
 	 * 	args.experimentName = 'my-experiment';
 	 * 	return args;
 	 * });
-	 *
 	 */
 	return stringify(
 		applyFilters( 'woocommerce_explat_request_args', {

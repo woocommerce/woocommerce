@@ -201,6 +201,13 @@ export function optimisticallyCompleteTaskRequest( taskId ) {
 	};
 }
 
+export function visitedTask( taskId ) {
+	return {
+		type: TYPES.VISITED_TASK,
+		taskId,
+	};
+}
+
 export function setPaymentMethods( paymentMethods ) {
 	return {
 		type: TYPES.GET_PAYMENT_METHODS_SUCCESS,

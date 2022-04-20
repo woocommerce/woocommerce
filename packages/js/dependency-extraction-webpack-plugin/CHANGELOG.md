@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.0.0
+
 -   Update all js packages with minor/patch version changes. #8392
 
 ## Breaking changes

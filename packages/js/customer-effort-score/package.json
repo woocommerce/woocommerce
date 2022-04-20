@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/customer-effort-score",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "WooCommerce utility to measure user effort.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -8,13 +8,13 @@
 		"wordpress",
 		"woocommerce"
 	],
-	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/customer-effort-score/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/customer-effort-score/README.md",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/woocommerce/woocommerce-admin.git"
+		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
@@ -41,8 +41,10 @@
 		"@types/wordpress__components": "^9.8.6",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
+		"@wordpress/eslint-plugin": "^11.0.0",
 		"concurrently": "^7.0.0",
 		"css-loader": "^3.6.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"postcss-loader": "^3.0.0",
@@ -64,8 +66,15 @@
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
+		"lint": "eslint src",
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

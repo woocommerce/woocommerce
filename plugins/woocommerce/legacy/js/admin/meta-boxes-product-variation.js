@@ -350,7 +350,7 @@ jQuery( function( $ ) {
 				.on( 'click','.downloadable_files a.delete', this.input_changed );
 
 			$( document.body )
-				.on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed )
+				.on( 'change input', '#variable_product_options .woocommerce_variations :input', this.input_changed )
 				.on( 'change', '.variations-defaults select', this.defaults_changed );
 
 			var postForm = $( 'form#post' );
@@ -705,12 +705,17 @@ jQuery( function( $ ) {
 		/**
 		 * Add new class when have changes in some input
 		 */
-		input_changed: function() {
+		input_changed: function( event ) {
 			$( this )
 				.closest( '.woocommerce_variation' )
 				.addClass( 'variation-needs-update' );
 
 			$( 'button.cancel-variation-changes, button.save-variation-changes' ).prop( 'disabled', false );
+
+			// Do not trigger 'woocommerce_variations_input_changed' for 'input' events for backwards compat.
+			if ( 'input' === event.type && $( this ).is( ':text' ) ) {
+				return;
+			}
 
 			$( '#variable_product_options' ).trigger( 'woocommerce_variations_input_changed' );
 		},

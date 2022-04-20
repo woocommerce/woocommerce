@@ -55,10 +55,7 @@ export function addCesSurvey(
 export function addCesSurveyForAnalytics() {
 	return addCesSurvey(
 		'analytics_filtered',
-		__(
-			'How easy was it to filter your store analytics?',
-			'woocommerce-admin'
-		),
+		__( 'How easy was it to filter your store analytics?', 'woocommerce' ),
 		'woocommerce_page_wc-admin',
 		'woocommerce_page_wc-admin'
 	);
@@ -70,7 +67,7 @@ export function addCesSurveyForAnalytics() {
 export function addCesSurveyForCustomerSearch() {
 	return addCesSurvey(
 		'ces_search',
-		__( 'How easy was it to use search?', 'woocommerce-admin' ),
+		__( 'How easy was it to use search?', 'woocommerce' ),
 		'woocommerce_page_wc-admin',
 		'woocommerce_page_wc-admin',
 		undefined,

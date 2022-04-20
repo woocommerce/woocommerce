@@ -1,5 +1,9 @@
 # Unreleased
 
+-   Update TaskList types.
+-   Added Typescript type declarations. #32615
+# 3.0.1
+
 -   Add missing dependency.
 
 # 3.0.0

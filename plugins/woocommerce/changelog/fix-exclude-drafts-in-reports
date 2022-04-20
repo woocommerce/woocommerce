@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't include draft orders in reports

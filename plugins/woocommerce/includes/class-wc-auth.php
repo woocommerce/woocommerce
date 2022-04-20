@@ -324,6 +324,36 @@ class WC_Auth {
 
 			// Login endpoint.
 			if ( 'login' === $route && ! is_user_logged_in() ) {
+				/**
+				 * If a merchant is using the WordPress SSO (handled through Jetpack)
+				 * to manage their authorisation then it is likely they'll find that
+				 * their username and password do not work through this form. We
+				 * instead need to redirect them to the WordPress login so that they
+				 * can then be redirected back here with a valid token.
+				 */
+
+				// Check if Jetpack is installed and activated.
+				if ( class_exists( 'Jetpack' ) && Jetpack::connection()->is_active() ) {
+
+					// Check if the user is using the WordPress.com SSO.
+					if ( Jetpack::is_module_active( 'sso' ) ) {
+
+						$redirect_url = $this->build_url( $data, 'authorize' );
+
+						// Build the SSO URL.
+						$login_url = Jetpack_SSO::get_instance()->build_sso_button_url(
+							array(
+								'redirect_to' => rawurlencode( esc_url_raw( $redirect_url ) ),
+								'action'      => 'login',
+							)
+						);
+
+						// Perform the redirect.
+						wp_safe_redirect( $login_url );
+						exit;
+					}
+				}
+
 				wc_get_template(
 					'auth/form-login.php',
 					array(

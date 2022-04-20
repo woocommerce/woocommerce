@@ -15,7 +15,7 @@ import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import CartModal from '../../dashboard/components/cart-modal';
 import { getCategorizedOnboardingProducts } from '../../dashboard/utils';
 
-const PurchaseTaskItem = () => {
+const PurchaseTaskItem = ( { defaultTaskItem } ) => {
 	const [ cartModalOpen, setCartModalOpen ] = useState( false );
 
 	const { installedPlugins, productTypes, profileItems } = useSelect(
@@ -47,25 +47,32 @@ const PurchaseTaskItem = () => {
 		installedPlugins
 	);
 	const { remainingProducts } = groupedProducts;
+	const DefaultTaskItem = defaultTaskItem;
 
 	return (
+		<>
+			<DefaultTaskItem
+				onClick={ () => {
+					if ( remainingProducts.length ) {
+						toggleCartModal();
+					}
+				} }
+			/>
+			{ cartModalOpen && (
+				<CartModal
+					onClose={ () => toggleCartModal() }
+					onClickPurchaseLater={ () => toggleCartModal() }
+				/>
+			) }
+		</>
+	);
+};
+
+const PurchaseTaskItemFill = () => {
+	return (
 		<WooOnboardingTaskListItem id="purchase">
-			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
-				<>
-					<DefaultTaskItem
-						onClick={ () => {
-							if ( remainingProducts.length ) {
-								toggleCartModal();
-							}
-						} }
-					/>
-					{ cartModalOpen && (
-						<CartModal
-							onClose={ () => toggleCartModal() }
-							onClickPurchaseLater={ () => toggleCartModal() }
-						/>
-					) }
-				</>
+			{ ( { defaultTaskItem } ) => (
+				<PurchaseTaskItem defaultTaskItem={ defaultTaskItem } />
 			) }
 		</WooOnboardingTaskListItem>
 	);
@@ -73,5 +80,5 @@ const PurchaseTaskItem = () => {
 
 registerPlugin( 'woocommerce-admin-task-purchase', {
 	scope: 'woocommerce-tasks',
-	render: PurchaseTaskItem,
+	render: PurchaseTaskItemFill,
 } );

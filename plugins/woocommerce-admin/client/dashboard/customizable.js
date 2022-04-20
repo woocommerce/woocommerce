@@ -190,7 +190,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<Button
 						onClick={ onToggle }
-						title={ __( 'Add more sections', 'woocommerce-admin' ) }
+						title={ __( 'Add more sections', 'woocommerce' ) }
 						aria-expanded={ isOpen }
 					>
 						<Icon icon={ plusCircleFilled } />
@@ -198,9 +198,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<>
-						<H>
-							{ __( 'Dashboard Sections', 'woocommerce-admin' ) }
-						</H>
+						<H>{ __( 'Dashboard Sections', 'woocommerce' ) }</H>
 						<div className="woocommerce-dashboard-section__add-more-choices">
 							{ hiddenSections.map( ( section ) => {
 								return (
@@ -214,7 +212,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 										title={ sprintf(
 											__(
 												'Add %s section',
-												'woocommerce-admin'
+												'woocommerce'
 											),
 											section.title
 										) }

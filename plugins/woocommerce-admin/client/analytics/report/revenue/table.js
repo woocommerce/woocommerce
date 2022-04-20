@@ -54,7 +54,7 @@ class RevenueReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'woocommerce-admin' ),
+				label: __( 'Date', 'woocommerce' ),
 				key: 'date',
 				required: true,
 				defaultSort: true,
@@ -62,56 +62,56 @@ class RevenueReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Gross sales', 'woocommerce-admin' ),
+				label: __( 'Gross sales', 'woocommerce' ),
 				key: 'gross_sales',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Returns', 'woocommerce-admin' ),
+				label: __( 'Returns', 'woocommerce' ),
 				key: 'refunds',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Coupons', 'woocommerce-admin' ),
+				label: __( 'Coupons', 'woocommerce' ),
 				key: 'coupons',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
 				key: 'net_revenue',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Taxes', 'woocommerce-admin' ),
+				label: __( 'Taxes', 'woocommerce' ),
 				key: 'taxes',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Shipping', 'woocommerce-admin' ),
+				label: __( 'Shipping', 'woocommerce' ),
 				key: 'shipping',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total sales', 'woocommerce-admin' ),
+				label: __( 'Total sales', 'woocommerce' ),
 				key: 'total_sales',
 				required: false,
 				isSortable: true,
@@ -222,44 +222,39 @@ class RevenueReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n( 'day', 'days', totalResults, 'woocommerce-admin' ),
+				label: _n( 'day', 'days', totalResults, 'woocommerce' ),
 				value: formatValue( currency, 'number', totalResults ),
 			},
 			{
-				label: _n(
-					'order',
-					'orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 			{
-				label: __( 'Gross sales', 'woocommerce-admin' ),
+				label: __( 'Gross sales', 'woocommerce' ),
 				value: formatAmount( grossSales ),
 			},
 			{
-				label: __( 'Returns', 'woocommerce-admin' ),
+				label: __( 'Returns', 'woocommerce' ),
 				value: formatAmount( refunds ),
 			},
 			{
-				label: __( 'Coupons', 'woocommerce-admin' ),
+				label: __( 'Coupons', 'woocommerce' ),
 				value: formatAmount( coupons ),
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: __( 'Taxes', 'woocommerce-admin' ),
+				label: __( 'Taxes', 'woocommerce' ),
 				value: formatAmount( taxes ),
 			},
 			{
-				label: __( 'Shipping', 'woocommerce-admin' ),
+				label: __( 'Shipping', 'woocommerce' ),
 				value: formatAmount( shipping ),
 			},
 			{
-				label: __( 'Total sales', 'woocommerce-admin' ),
+				label: __( 'Total sales', 'woocommerce' ),
 				value: formatAmount( totalSales ),
 			},
 		];
@@ -277,7 +272,7 @@ class RevenueReportTable extends Component {
 				summaryFields={ summaryFields }
 				query={ query }
 				tableData={ tableData }
-				title={ __( 'Revenue', 'woocommerce-admin' ) }
+				title={ __( 'Revenue', 'woocommerce' ) }
 				columnPrefsKey="revenue_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

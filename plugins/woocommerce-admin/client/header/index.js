@@ -6,7 +6,9 @@ import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { Text, useSlot } from '@woocommerce/experimental';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,6 +20,7 @@ import {
 	WooHeaderItem,
 	WooHeaderPageTitle,
 } from './utils';
+import { TasksReminderBar } from '../tasks';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
@@ -79,7 +82,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 					/* translators: 1: document title. 2: page title */
 					__(
 						'%1$s &lsaquo; %2$s &#8212; WooCommerce',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					documentTitle,
 					siteTitle
@@ -92,8 +95,23 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
+	const { hasTasksReminderFeature } = useSelect( ( select ) => {
+		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
+		return {
+			hasTasksReminderFeature: taskLists.some(
+				( list ) => list.id === 'setup_experiment_1'
+			),
+		};
+	} );
+
 	return (
 		<div className={ className } ref={ headerElement }>
+			{ hasTasksReminderFeature && (
+				<TasksReminderBar
+					pageTitle={ pageTitle }
+					updateBodyMargin={ updateBodyMargin }
+				/>
+			) }
 			<div className="woocommerce-layout__header-wrapper">
 				<WooHeaderNavigationItem.Slot
 					fillProps={ { isEmbedded, query } }

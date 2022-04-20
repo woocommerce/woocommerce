@@ -8,6 +8,7 @@ import {
 } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
 import { _n, sprintf } from '@wordpress/i18n';
+import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -96,7 +97,7 @@ const formatErrorMessage = (
 			'Could not %(actionType)s %(pluginName)s plugin, %(error)s',
 			'Could not %(actionType)s the following plugins: %(pluginName)s with these Errors: %(error)s',
 			Object.keys( pluginErrors ).length || 1,
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		{
 			actionType,
@@ -416,8 +417,8 @@ export type Actions =
 	| ReturnType< typeof setRecommendedPlugins >;
 
 // Types
-export type ActionDispatchers = {
+export type ActionDispatchers = DispatchFromMap< {
 	installJetpackAndConnect: typeof installJetpackAndConnect;
 	installAndActivatePlugins: typeof installAndActivatePlugins;
 	dismissRecommendedPlugins: typeof dismissRecommendedPlugins;
-};
+} >;

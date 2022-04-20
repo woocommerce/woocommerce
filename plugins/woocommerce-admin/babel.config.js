@@ -22,16 +22,7 @@ module.exports = function ( api ) {
 		],
 		ignore: [ 'packages/**/node_modules' ],
 		env: {
-			production: {
-				plugins: [
-					[
-						'@wordpress/babel-plugin-makepot',
-						{
-							output: 'languages/woocommerce-admin.po',
-						},
-					],
-				],
-			},
+			production: {},
 
 			storybook: {
 				plugins: [

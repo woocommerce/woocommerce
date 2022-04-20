@@ -28,14 +28,14 @@ export const AutomatedTaxes: React.FC< SetupStepProps > = ( {
 				🎊
 			</span>
 			<H id="woocommerce-task-tax__success-message">
-				{ __( 'Good news!', 'woocommerce-admin' ) }
+				{ __( 'Good news!', 'woocommerce' ) }
 			</H>
 			<p>
 				{ interpolateComponents( {
 					mixedString: __(
 						'{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Tax{{/strong}} ' +
 							'can automate your sales tax calculations for you.',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					components: {
 						strong: <strong />,
@@ -52,7 +52,7 @@ export const AutomatedTaxes: React.FC< SetupStepProps > = ( {
 					onAutomate();
 				} }
 			>
-				{ __( 'Yes please', 'woocommerce-admin' ) }
+				{ __( 'Yes please', 'woocommerce' ) }
 			</Button>
 			<Button
 				disabled={ isPending }
@@ -64,10 +64,10 @@ export const AutomatedTaxes: React.FC< SetupStepProps > = ( {
 					onManual();
 				} }
 			>
-				{ __( "No thanks, I'll set up manually", 'woocommerce-admin' ) }
+				{ __( "No thanks, I'll set up manually", 'woocommerce' ) }
 			</Button>
 			<Button disabled={ isPending } isTertiary onClick={ onDisable }>
-				{ __( "I don't charge sales tax", 'woocommerce-admin' ) }
+				{ __( "I don't charge sales tax", 'woocommerce' ) }
 			</Button>
 		</div>
 	);

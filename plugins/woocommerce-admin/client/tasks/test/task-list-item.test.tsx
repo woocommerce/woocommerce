@@ -17,10 +17,6 @@ jest.mock( '@wordpress/data', () => {
 	return {
 		...originalModule,
 		useDispatch: jest.fn(),
-		// Mock dispatch to avoid errors for @wordpress/viewport listener.
-		dispatch: jest.fn().mockReturnValue( {
-			setIsMatching: jest.fn(),
-		} ),
 	};
 } );
 

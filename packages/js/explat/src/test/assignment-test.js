@@ -10,11 +10,12 @@ import {
 	fetchExperimentAssignment,
 	fetchExperimentAssignmentWithAuth,
 } from '../assignment';
-global.fetch = jest
-	.fn()
-	.mockImplementation( () =>
-		Promise.resolve( { json: () => Promise.resolve( [] ) } )
-	);
+global.fetch = jest.fn().mockImplementation( () =>
+	Promise.resolve( {
+		json: () => Promise.resolve( {} ),
+		status: 200,
+	} )
+);
 global.wcTracks.isEnabled = true;
 
 const fetchMock = jest.spyOn( global, 'fetch' );

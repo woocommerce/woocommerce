@@ -17,7 +17,7 @@ function HistoricalDataSkipCheckbox( { checked, disabled, setSkipPrevious } ) {
 			disabled={ disabled }
 			label={ __(
 				'Skip previously imported customers and orders',
-				'woocommerce-admin'
+				'woocommerce'
 			) }
 			onChange={ skipChange }
 		/>

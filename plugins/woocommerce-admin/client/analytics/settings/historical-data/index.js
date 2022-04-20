@@ -23,7 +23,7 @@ class HistoricalData extends Component {
 	constructor() {
 		super( ...arguments );
 
-		this.dateFormat = __( 'MM/DD/YYYY', 'woocommerce-admin' );
+		this.dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
 		this.intervalId = -1;
 		this.lastImportStopTimestamp = 0;
 		this.cacheNeedsClearing = true;

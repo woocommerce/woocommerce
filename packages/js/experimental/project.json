@@ -16,6 +16,12 @@
                  "script": "build"
              }
          },
+         "build-watch": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+                "script": "start"
+			}
+		},
          "test": {
              "executor": "@nrwl/workspace:run-script",
              "options": {

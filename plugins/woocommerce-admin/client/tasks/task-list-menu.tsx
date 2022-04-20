@@ -9,19 +9,24 @@ import { useDispatch } from '@wordpress/data';
 
 export type TaskListMenuProps = {
 	id: string;
+	hideTaskListText?: string;
 };
 
-export const TaskListMenu: React.FC< TaskListMenuProps > = ( { id } ) => {
+export const TaskListMenu: React.FC< TaskListMenuProps > = ( {
+	id,
+	hideTaskListText,
+} ) => {
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 
 	return (
 		<div className="woocommerce-card__menu woocommerce-card__header-item">
 			<EllipsisMenu
-				label={ __( 'Task List Options', 'woocommerce-admin' ) }
+				label={ __( 'Task List Options', 'woocommerce' ) }
 				renderContent={ () => (
 					<div className="woocommerce-task-card__section-controls">
 						<Button onClick={ () => hideTaskList( id ) }>
-							{ __( 'Hide this', 'woocommerce-admin' ) }
+							{ hideTaskListText ||
+								__( 'Hide this', 'woocommerce' ) }
 						</Button>
 					</div>
 				) }

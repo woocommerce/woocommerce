@@ -39,20 +39,20 @@ class ProductsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product title', 'woocommerce-admin' ),
+				label: __( 'Product title', 'woocommerce' ),
 				key: 'product_name',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'SKU', 'woocommerce-admin' ),
+				label: __( 'SKU', 'woocommerce' ),
 				key: 'sku',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -60,37 +60,37 @@ class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
+				screenReaderLabel: __( 'Net sales', 'woocommerce' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Category', 'woocommerce-admin' ),
+				label: __( 'Category', 'woocommerce' ),
 				key: 'product_cat',
 			},
 			{
-				label: __( 'Variations', 'woocommerce-admin' ),
+				label: __( 'Variations', 'woocommerce' ),
 				key: 'variations',
 				isSortable: true,
 			},
 			manageStock === 'yes'
 				? {
-						label: __( 'Status', 'woocommerce-admin' ),
+						label: __( 'Status', 'woocommerce' ),
 						key: 'stock_status',
 				  }
 				: null,
 			manageStock === 'yes'
 				? {
-						label: __( 'Stock', 'woocommerce-admin' ),
+						label: __( 'Stock', 'woocommerce' ),
 						key: 'stock',
 						isNumeric: true,
 				  }
@@ -167,7 +167,7 @@ class ProductsReportTable extends Component {
 					{ _x(
 						'Low',
 						'Indication of a low quantity',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</Link>
 			) : (
@@ -218,7 +218,7 @@ class ProductsReportTable extends Component {
 										_x(
 											'+%d more',
 											'categories',
-											'woocommerce-admin'
+											'woocommerce'
 										),
 										productCategories.length - 1
 									) }
@@ -252,7 +252,7 @@ class ProductsReportTable extends Component {
 					? {
 							display: extendedInfoManageStock
 								? stockStatus
-								: __( 'N/A', 'woocommerce-admin' ),
+								: __( 'N/A', 'woocommerce' ),
 							value: extendedInfoManageStock
 								? stockStatuses[ extendedInfoStockStatus ]
 								: null,
@@ -266,7 +266,7 @@ class ProductsReportTable extends Component {
 										'number',
 										stockQuantity
 								  )
-								: __( 'N/A', 'woocommerce-admin' ),
+								: __( 'N/A', 'woocommerce' ),
 							value: stockQuantity,
 					  }
 					: null,
@@ -289,7 +289,7 @@ class ProductsReportTable extends Component {
 					'Product',
 					'Products',
 					productsCount,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', productsCount ),
 			},
@@ -298,21 +298,16 @@ class ProductsReportTable extends Component {
 					'Item sold',
 					'Items sold',
 					itemsSold,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', itemsSold ),
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: _n(
-					'Orders',
-					'Orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'Orders', 'Orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
@@ -331,12 +326,9 @@ class ProductsReportTable extends Component {
 		const labels = {
 			helpText: __(
 				'Check at least two products below to compare',
-				'woocommerce-admin'
+				'woocommerce'
 			),
-			placeholder: __(
-				'Search by product name or SKU',
-				'woocommerce-admin'
-			),
+			placeholder: __( 'Search by product name or SKU', 'woocommerce' ),
 		};
 
 		return (
@@ -364,7 +356,7 @@ class ProductsReportTable extends Component {
 					extended_info: true,
 					segmentby: query.segmentby,
 				} }
-				title={ __( 'Products', 'woocommerce-admin' ) }
+				title={ __( 'Products', 'woocommerce' ) }
 				columnPrefsKey="products_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

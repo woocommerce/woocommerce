@@ -18,6 +18,7 @@
 - The e2e test `order-edit.test.js` now uses the API to create orders.
 - New coupon test deletes the coupon instead of trashing it.
 - A copy of sample_data.csv is included in the package.
+- Removed `faker` dependency
 
 # 0.1.6
 

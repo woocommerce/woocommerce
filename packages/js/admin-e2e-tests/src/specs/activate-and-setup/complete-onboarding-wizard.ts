@@ -449,10 +449,6 @@ const testSubscriptionsInclusion = () => {
 			await resetWooCommerceState();
 		} );
 
-		afterAll( async () => {
-			await login.logout();
-		} );
-
 		it( 'can complete the store details section', async () => {
 			await profileWizard.navigate();
 			await profileWizard.storeDetails.completeStoreDetailsSection( {
@@ -533,7 +529,6 @@ const testBusinessDetailsForm = () => {
 		const login = new Login( page );
 
 		beforeAll( async () => {
-			await login.login();
 			await resetWooCommerceState();
 		} );
 
@@ -602,10 +597,37 @@ const testBusinessDetailsForm = () => {
 	} );
 };
 
+const testAdminHomescreen = () => {
+	describe( 'Homescreen', () => {
+		const profileWizard = new OnboardingWizard( page );
+		const homeScreen = new WcHomescreen( page );
+		const login = new Login( page );
+
+		beforeAll( async () => {
+			await login.login();
+			await resetWooCommerceState();
+			await profileWizard.navigate();
+			await profileWizard.skipStoreSetup();
+		} );
+
+		afterAll( async () => {
+			await login.logout();
+		} );
+
+		it( 'should not show welcome modal', async () => {
+			await homeScreen.isDisplayed();
+			await expect( homeScreen.isWelcomeModalVisible() ).resolves.toBe(
+				false
+			);
+		} );
+	} );
+};
+
 module.exports = {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
 	testDifferentStoreCurrenciesWCPay,
 	testSubscriptionsInclusion,
 	testBusinessDetailsForm,
+	testAdminHomescreen,
 };

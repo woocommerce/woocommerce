@@ -43,6 +43,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		snoozeTask,
 		undoDismissTask,
 		undoSnoozeTask,
+		visitedTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 
@@ -68,7 +69,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		createNotice( 'success', __( 'Task dismissed' ), {
 			actions: [
 				{
-					label: __( 'Undo', 'woocommerce-admin' ),
+					label: __( 'Undo', 'woocommerce' ),
 					onClick: () => undoDismissTask( id ),
 				},
 			],
@@ -79,11 +80,11 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		snoozeTask( id );
 		createNotice(
 			'success',
-			__( 'Task postponed until tomorrow', 'woocommerce-admin' ),
+			__( 'Task postponed until tomorrow', 'woocommerce' ),
 			{
 				actions: [
 					{
-						label: __( 'Undo', 'woocommerce-admin' ),
+						label: __( 'Undo', 'woocommerce' ),
 						onClick: () => undoSnoozeTask( id ),
 					},
 				],
@@ -106,6 +107,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
+		visitedTask( id );
 		userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
