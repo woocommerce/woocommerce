@@ -67,7 +67,7 @@ jobs:
                   ~/.pnpm-store
                 key: ${{ runner.os }}-e2e-test8-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-            - name: Install PNPM
+            - name: Install PNPM # comment
               run: npm install -g pnpm
 
             - name: Install dependencies
