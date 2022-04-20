@@ -1,7 +1,21 @@
-import { Card, CardFooter, Button } from '@wordpress/components';
+/**
+ * External dependencies
+ */
+import { Card, CardFooter, CardBody, Button } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
-import Banner from './banner';
+import {
+	ONBOARDING_STORE_NAME,
+	PAYMENT_GATEWAYS_STORE_NAME,
+	Plugin,
+	PaymentGateway,
+	WCDataSelector,
+} from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
 import {
 	Visa,
 	MasterCard,
@@ -16,16 +30,7 @@ import {
 	JCB,
 	Sofort,
 } from '../payments-welcome/cards';
-import { CardBody } from '@wordpress/components';
-import {
-	ONBOARDING_STORE_NAME,
-	PAYMENT_GATEWAYS_STORE_NAME,
-} from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
+import Banner from './banner';
 import './payment-recommendations.scss';
 
 export const PaymentMethods = () => (
@@ -109,7 +114,11 @@ const WcPayBanner = () => {
 };
 
 export const PaymentsRecommendationsBanner = () => {
-	const boop = useSelect( ( select ) => {
+	const {
+		installedPaymentGateways,
+		paymentGatewaySuggestions,
+		isResolving,
+	} = useSelect( ( select: WCDataSelector ) => {
 		return {
 			installedPaymentGateways: select(
 				PAYMENT_GATEWAYS_STORE_NAME
@@ -123,31 +132,32 @@ export const PaymentsRecommendationsBanner = () => {
 		};
 	} );
 
-	const {
-		installedPaymentGateways,
-		paymentGatewaySuggestions,
-		isResolving,
-	} = boop;
-
 	const supportsWCPayments =
 		paymentGatewaySuggestions &&
-		paymentGatewaySuggestions.filter( ( paymentGatewaySuggestion ) => {
+		paymentGatewaySuggestions.filter(
+			( paymentGatewaySuggestion: Plugin ) => {
+				return (
+					paymentGatewaySuggestion.id.indexOf(
+						'woocommerce_payments'
+					) === 0
+				);
+			}
+		).length === 1;
+
+	const isWcPayInstalled = installedPaymentGateways.some(
+		( gateway: PaymentGateway ) => {
+			return gateway.id === 'woocommerce_payments';
+		}
+	);
+
+	const isWcPayEnabled = installedPaymentGateways.find(
+		( gateway: PaymentGateway ) => {
 			return (
-				paymentGatewaySuggestion.id.indexOf(
-					'woocommerce_payments'
-				) === 0
+				gateway.id === 'woocommerce_payments' &&
+				gateway.enabled === true
 			);
-		} ).length === 1;
-
-	console.log( boop );
-	console.log( 'supports', supportsWCPayments );
-	const isWcPayInstalled = installedPaymentGateways.some( ( gateway ) => {
-		return gateway.id === 'woocommerce_payments';
-	} );
-
-	const isWcPayEnabled = installedPaymentGateways.find( ( gateway ) => {
-		gateway.id === 'woocommerce_payments' && gateway.enabled === true;
-	} );
+		}
+	);
 
 	const isWcPayBannerExplat = true;
 	if ( ! isResolving ) {
@@ -157,22 +167,10 @@ export const PaymentsRecommendationsBanner = () => {
 			! isWcPayEnabled &&
 			isWcPayBannerExplat
 		) {
+			// add tracks event here
 			return <WcPayBanner />;
-		} else {
-			return (
-				<>
-					<h2>Payment Methods</h2>
-					<div id="payment_gateways_options-description">
-						<p>
-							Installed payment methods are listed below and can
-							be sorted to control their display order on the
-							frontend.
-						</p>
-					</div>
-				</>
-			);
 		}
-	} else {
-		return null;
+		// add tracks event here because we want to know when the control is shown
 	}
+	return null;
 };
