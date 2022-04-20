@@ -10,6 +10,7 @@
     - Add `getTaskListsByIds` selector type
     - Update `TaskType` & `TaskListType` types
 -   Convert `use-user-preferences.js` to TS. #32695
+-   Added PaymentGateway type to exports #32697
 
 ## Breaking change
 
