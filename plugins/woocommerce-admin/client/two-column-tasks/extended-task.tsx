@@ -11,6 +11,7 @@ import {
 	OPTIONS_STORE_NAME,
 	WCDataSelector,
 	TaskListType,
+	TaskType,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -31,18 +32,22 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { task } = query;
 
-	const { isResolving, taskLists } = useSelect(
-		( select: WCDataSelector ) => {
-			return {
-				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-					'getTaskListsByIds'
-				),
-				taskLists: select( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
-					'extended_two_column',
-				] ),
-			};
-		}
-	);
+	const {
+		isResolving,
+		taskLists,
+	}: {
+		isResolving: boolean;
+		taskLists: TaskListType[];
+	} = useSelect( ( select: WCDataSelector ) => {
+		return {
+			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
+				'getTaskListsByIds'
+			),
+			taskLists: select( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
+				'extended_two_column',
+			] ),
+		};
+	} );
 	const toggleTaskList = ( taskList: TaskListType ) => {
 		const { id, isHidden } = taskList;
 		const newValue = ! isHidden;
@@ -77,7 +82,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	}
 
 	const completedTasks = extendedTaskList.tasks.filter(
-		( extendedTaskListTask: TaskListType ) => {
+		( extendedTaskListTask: TaskType ) => {
 			return extendedTaskListTask.isComplete;
 		}
 	);
@@ -94,6 +99,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 		isToggleable,
 		title,
 		tasks,
+		displayProgressHeader,
 		keepCompletedTaskList,
 	} = extendedTaskList;
 
@@ -104,15 +110,15 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	return (
 		<Fragment key={ id }>
 			<TaskList
+				query={ query }
 				id={ id }
 				eventPrefix={ eventPrefix }
 				isComplete={ isComplete }
-				query={ query }
 				tasks={ tasks }
 				title={ title }
-				isHidden={ false }
-				isVisible={ true }
-				displayProgressHeader={ false }
+				isHidden={ isHidden }
+				isVisible={ isVisible }
+				displayProgressHeader={ displayProgressHeader }
 				keepCompletedTaskList={ keepCompletedTaskList }
 			/>
 			{ isToggleable && (
