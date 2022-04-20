@@ -25,23 +25,18 @@ test.describe('Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&task=payments&id=bacs'
 		);
-		if (await page.locator('.components-button.is-small.has-icon').count() > 0) {
-			await page.click('.components-button.is-small.has-icon');
-		}
+		page.locator('.components-button.is-small.has-icon').click().catch(() => { });
+		// purposely no await -- close the help dialog if/when it appears
 		await page.fill('//input[@placeholder="Account name"]', 'Savings');
 		await page.fill('//input[@placeholder="Account number"]', '1234');
 		await page.fill('//input[@placeholder="Bank name"]', 'Test Bank');
 		await page.fill('//input[@placeholder="Sort code"]', '12');
 		await page.fill('//input[@placeholder="IBAN"]', '12 3456 7890');
 		await page.fill('//input[@placeholder="BIC / Swift"]', 'ABBA');
-		await page.click('text=Save', { force: true });
+		await page.click('text=Save');
 		await expect(
-			page.locator(
-				'div.components-snackbar__content'
-			)
-		).toHaveText(
-			'Direct bank transfer details added successfully'
-		);
+			page.locator('div.components-snackbar__content')
+		).toHaveText('Direct bank transfer details added successfully');
 		await expect(page.locator('h1')).toHaveText('Set up payments');
 		await expect(
 			page.locator(
@@ -61,6 +56,8 @@ test.describe('Payment setup task', () => {
 		page,
 	}) => {
 		await page.goto('wp-admin/admin.php?page=wc-admin&task=payments');
+		page.locator('.components-button.is-small.has-icon').click().catch(() => { });
+		// purposely no await -- close the help dialog if/when it appears
 		await page.click('text=Enable', { force: true }); // enable COD payment option
 		await page.goto('wp-admin/admin.php?page=wc-admin&task=payments');
 		await expect(page.locator('h1')).toHaveText('Set up payments');
