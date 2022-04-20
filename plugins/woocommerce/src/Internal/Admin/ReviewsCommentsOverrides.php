@@ -57,12 +57,12 @@ class ReviewsCommentsOverrides {
 	 */
 	protected function should_display_reviews_moved_notice() : bool {
 		// Do not display if the user does not have the capability  to see the new page.
-		if ( ! current_user_can( Reviews::get_capability() ) ) {
+		if ( ! WC()->call_function( 'current_user_can', Reviews::get_capability() ) ) {
 			return false;
 		}
 
 		// Do not display if the current user has dismissed this notice.
-		if ( get_user_meta( get_current_user_id(), 'dismissed_' . static::REVIEWS_MOVED_NOTICE_ID . '_notice', true ) ) {
+		if ( WC()->call_function( 'get_user_meta', get_current_user_id(), 'dismissed_' . static::REVIEWS_MOVED_NOTICE_ID . '_notice', true ) ) {
 			return false;
 		}
 
