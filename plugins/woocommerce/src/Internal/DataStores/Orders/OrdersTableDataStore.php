@@ -201,7 +201,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$sql = "
 CREATE TABLE $orders_table_name (
 	id bigint(20) unsigned auto_increment,
-	post_id bigint(20) unsigned null,
 	status varchar(20) null,
 	currency varchar(10) null,
 	tax_amount decimal(26,8) null,
@@ -217,7 +216,6 @@ CREATE TABLE $orders_table_name (
 	ip_address varchar(100) null,
 	user_agent text null,
 	PRIMARY KEY (id),
-	KEY post_id (post_id),
 	KEY status (status),
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email)
