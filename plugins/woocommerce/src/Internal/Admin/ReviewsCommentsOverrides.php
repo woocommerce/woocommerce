@@ -9,6 +9,8 @@ use WP_Comment_Query;
  */
 class ReviewsCommentsOverrides {
 
+	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
+
 	/**
 	 * Class instance.
 	 *
@@ -36,6 +38,11 @@ class ReviewsCommentsOverrides {
 			return;
 		}
 
+		// Do not display if the current user has dismissed this notice.
+		if ( get_user_meta( get_current_user_id(), 'dismissed_' . static::REVIEWS_MOVED_NOTICE_ID . '_notice', true ) ) {
+			return;
+		}
+
 		$this->display_reviews_moved_notice();
 	}
 
@@ -43,15 +50,10 @@ class ReviewsCommentsOverrides {
 	 * Renders an admin notice informing the user that reviews were moved to a new page.
 	 */
 	protected function display_reviews_moved_notice() {
-		$notice_name = 'product_reviews_moved';
-		if ( get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true ) ) {
-			return;
-		}
-
 		$dismiss_url = wp_nonce_url(
 			add_query_arg(
 				[
-					'wc-hide-notice' => urlencode( $notice_name ),
+					'wc-hide-notice' => urlencode( static::REVIEWS_MOVED_NOTICE_ID ),
 				]
 			),
 			'woocommerce_hide_notices_nonce',
