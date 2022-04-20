@@ -3,6 +3,13 @@
 -   Update dependency `@wordpress/hooks` to ^3.5.0
 -   Add `is_offline` attribute for `Plugin` type. #32467
 -   Added Typescript type declarations. #32615
+-   Update type definitions. #32683
+    - Make `isResolving` param `args` optional.
+    - Update `Plugin` type to reflect the latest changes.
+    - Maps "raw"  payment `ActionDispatchers` to the registered actions.
+## Breaking change
+
+-   Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
 # 3.1.0
 
 -   Add "moment" to peerDependencies. #8349
