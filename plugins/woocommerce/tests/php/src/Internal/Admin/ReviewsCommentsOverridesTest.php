@@ -116,6 +116,49 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::should_display_reviews_moved_notice()
+	 * @dataProvider provider_test_should_display_reviews_moved_notice()
+	 * @param bool $user_has_capability       Whether the user has the capability to see the new page.
+	 * @param bool $user_has_dismissed_notice Whether the user has dismissed this notice before.
+	 * @param bool $expected                  Whether the reviews moved notice should be displayed.
+	 */
+	public function test_should_display_reviews_moved_notice( bool $user_has_capability, bool $user_has_dismissed_notice, bool $expected ) {
+		$this->register_legacy_proxy_function_mocks(
+			[
+				'current_user_can' => function( $capability, ...$args ) use ( $user_has_capability ) {
+					if ( 'moderate_comments' === $capability ) {
+						return $user_has_capability;
+					} else {
+						return current_user_can( $capability, $args );
+					}
+				},
+				'get_user_meta' => function ( int $user_id, string $key = '', bool $single = false ) use ( $user_has_dismissed_notice ) {
+					if ( 'dismissed_product_reviews_moved_notice' === $key ) {
+						return $user_has_dismissed_notice;
+					} else {
+						return get_user_meta( $user_id, $key, $single );
+					}
+				},
+			]
+		);
+
+		$reflection = new ReflectionClass( ReviewsCommentsOverrides::class );
+		$method = $reflection->getMethod( 'should_display_reviews_moved_notice' );
+		$method->setAccessible( true );
+
+		$should_display_notice = $method->invoke( ReviewsCommentsOverrides::get_instance() );
+
+		$this->assertSame( $expected, $should_display_notice );
+	}
+
+	/** @see test_should_display_reviews_moved_notice() */
+	public function provider_test_should_display_reviews_moved_notice() : \Generator {
+		yield 'user does not have the capability to see the new page' => [ false, false, false ];
+		yield 'user already dismissed this notice' => [ true, true, false ];
+		yield 'user has the capability and have not dismissed the notice' => [ true, false, true ];
+	}
+
+	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_reviews_moved_notice()
 	 */
 	public function test_display_reviews_moved_notice() {
