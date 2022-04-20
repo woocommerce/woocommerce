@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 		<div class="alignright">
 			<form action="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=logs' ) ); ?>" method="post">
-				<select name="log_file">
+				<select class="wc-enhanced-select" name="log_file">
 					<?php foreach ( $logs as $log_key => $log_file ) : ?>
 						<?php
 							$timestamp = filemtime( WC_LOG_DIR . $log_file );
