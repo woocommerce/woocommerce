@@ -214,11 +214,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
-		// Add SKU, PRICE, and IMAGE_URL to products.
+		// Add SKU, PRICE, and IMAGE_SRC to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']       = $item->get_product() ? $item->get_product()->get_sku() : null;
 			$data['price']     = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
-			$data['image_url'] = $item->get_product() ? wp_get_attachment_image_url( $item->get_product()->get_image_id() ) : null;
+			$data['image_src'] = $item->get_product() ? wp_get_attachment_image_url( $item->get_product()->get_image_id() ) : null;
 		}
 
 		// Add parent_name if the product is a variation.
@@ -1488,8 +1488,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'image_url'    => array(
-								'description' => __( 'Product image URL.', 'woocommerce' ),
+							'image_src'    => array(
+								'description' => __( 'URL for the main product image.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
