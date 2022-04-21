@@ -105,11 +105,11 @@ class ReviewsCommentsOverrides {
 	 * the notice displayed in the Comments page.
 	 *
 	 * @param string $default_capability The default required capability.
-	 * @param string $notice_id The notice ID.
+	 * @param string $notice_name The notice name.
 	 * @return string
 	 */
-	public function get_dismiss_capability( string $default_capability, string $notice_id ) {
-		return self::REVIEWS_MOVED_NOTICE_ID === $notice_id ? Reviews::get_capability() : $default_capability;
+	public function get_dismiss_capability( string $default_capability, string $notice_name ) {
+		return self::REVIEWS_MOVED_NOTICE_ID === $notice_name ? Reviews::get_capability() : $default_capability;
 	}
 
 	/**
