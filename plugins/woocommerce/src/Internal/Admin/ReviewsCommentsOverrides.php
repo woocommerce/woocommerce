@@ -25,6 +25,8 @@ class ReviewsCommentsOverrides {
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 
+		add_filter( 'woocommerce_dismiss_notice_capability', [ $this, 'get_dismiss_capability' ], 10, 2 );
+
 		add_filter( 'comments_list_table_query_args', [ $this, 'exclude_reviews_from_comments' ] );
 	}
 
@@ -94,6 +96,20 @@ class ReviewsCommentsOverrides {
 		</div>
 
 		<?php
+	}
+
+	/**
+	 * Gets the capability required to dismiss the notice.
+	 *
+	 * This is required so that users who do not have the manage_woocommerce capability (e.g. Editors) can still dismiss
+	 * the notice displayed in the Comments page.
+	 *
+	 * @param string $default_capability The default required capability.
+	 * @param string $notice_id The notice ID.
+	 * @return string
+	 */
+	public function get_dismiss_capability( string $default_capability, string $notice_id ) {
+		return self::REVIEWS_MOVED_NOTICE_ID === $notice_id ? Reviews::get_capability() : $default_capability;
 	}
 
 	/**
