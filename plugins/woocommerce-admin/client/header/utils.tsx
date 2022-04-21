@@ -37,10 +37,7 @@ const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
 	const sortedFills = [ ...fills ].sort( ( a, b ) => {
 		return a[ 0 ].props.order - b[ 0 ].props.order;
 	} );
-	if ( isValidElement( sortedFills ) ) {
-		return sortedFills;
-	}
-	return null;
+	return <>{ sortedFills }</>;
 };
 
 /**
@@ -142,11 +139,7 @@ export const WooHeaderPageTitle: React.FC & {
 WooHeaderPageTitle.Slot = ( { fillProps } ) => (
 	<Slot name={ 'woocommerce_header_page_title' } fillProps={ fillProps }>
 		{ ( fills ) => {
-			const last = [ [ ...fills ].pop() ];
-			if ( isValidElement( last ) ) {
-				return last;
-			}
-			return null;
+			return <>{ [ ...fills ].pop() }</>;
 		} }
 	</Slot>
 );
