@@ -871,6 +871,18 @@ class ReviewsListTable extends WP_List_Table {
 			'</div>'
 		);
 
+		if ( $this->current_user_can_edit_review ) {
+			?>
+			<div id="inline-<?php echo esc_attr( $item->comment_ID ); ?>" class="hidden">
+				<textarea class="comment" rows="1" cols="1"><?php echo esc_textarea( $item->comment_content ); ?></textarea>
+				<div class="author-email"><?php echo esc_attr( $item->comment_author_email ); ?></div>
+				<div class="author"><?php echo esc_attr( $item->comment_author ); ?></div>
+				<div class="author-url"><?php echo esc_attr( $item->comment_author_url ); ?></div>
+				<div class="comment_status"><?php echo esc_html( $item->comment_approved ); ?></div>
+			</div>
+			<?php
+		}
+
 		echo $this->filter_column_output( 'comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
