@@ -9,14 +9,14 @@
   },
   "license": "GPL-3.0+",
   "config": {
-    "wp_org_slug": "woocommerce"
+    "wp_org_slug": "woocommerce",
+    "build_step": "pnpm run build:zip"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "./bin/build-zip.sh",
+    "build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets && pnpm run makepot",
     "build:feature-config": "php bin/generate-feature-config.php",
-    "build:core": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets && pnpm run makepot",
-    "build:zip": "pnpm run build",
+    "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
     "docker:down": "pnpm exec wc-e2e docker:down",
     "docker:ssh": "pnpm exec wc-e2e docker:ssh",

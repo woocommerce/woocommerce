@@ -41,12 +41,6 @@
 				"script": "build"
 			}
 		},
-		"build-core": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "build:core"
-			}
-		},
 		"build-zip": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
