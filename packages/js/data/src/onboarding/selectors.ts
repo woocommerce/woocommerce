@@ -99,6 +99,9 @@ export type OnboardingSelectors = {
 	>;
 	getOnboardingError: () => ReturnType< typeof getOnboardingError >;
 	isOnboardingRequesting: () => ReturnType< typeof isOnboardingRequesting >;
+	getTaskListsByIds: (
+		ids: string[]
+	) => ReturnType< typeof getTaskListsByIds >;
 } & WPDataSelectors;
 
 export type OnboardingState = {

@@ -3,17 +3,23 @@ export type TaskType = {
 	actionUrl?: string;
 	content: string;
 	id: string;
+	parentId: string;
 	isComplete: boolean;
 	isDismissable: boolean;
 	isDismissed: boolean;
 	isSnoozed: boolean;
 	isVisible: boolean;
-	isSnoozable: boolean;
+	isSnoozeable: boolean;
 	isDisabled: boolean;
 	snoozedUntil: number;
 	time: string;
 	title: string;
 	isVisited: boolean;
+	additionalInfo: string;
+	canView: boolean;
+	isActioned: boolean;
+	eventPrefix: string;
+	level: number;
 };
 
 export type TaskListSection = {
@@ -27,13 +33,16 @@ export type TaskListSection = {
 
 export type TaskListType = {
 	id: string;
-	isCollapsible?: boolean;
-	isComplete: boolean;
-	isHidden: boolean;
-	isExpandable?: boolean;
-	tasks: TaskType[];
 	title: string;
+	isHidden: boolean;
+	isVisible: boolean;
+	isComplete: boolean;
+	tasks: TaskType[];
 	eventPrefix: string;
 	displayProgressHeader: boolean;
+	keepCompletedTaskList: 'yes' | 'no';
 	sections?: TaskListSection[];
+	isToggleable?: boolean;
+	isCollapsible?: boolean;
+	isExpandable?: boolean;
 };
