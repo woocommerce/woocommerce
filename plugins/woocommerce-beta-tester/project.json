@@ -3,6 +3,12 @@
 	"sourceRoot": "plugins/woocommerce-beta-tester",
 	"projectType": "application",
 	"targets": {
+		"build": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "build"
+			}
+		},
 		"changelog": {
 			"executor": "./tools/executors/changelogger:changelog",
 			"options": {
