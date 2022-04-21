@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add basic pre-requisite checking to the test suite installation script.
