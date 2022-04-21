@@ -172,6 +172,26 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that it will override the parent file and the submenu file globals when editing a review.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::edit_review_parent_file()
+	 *
+	 * @return void
+	 */
+	public function test_edit_review_parent_file() {
+		global $submenu_file, $current_screen;
+
+		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+		$review = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
+		$current_screen = (object) [ 'id' => 'comment' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$_GET['c'] = $review;
+		$reviews = new Reviews();
+
+		$this->assertSame( 'edit.php?post_type=product', $reviews->edit_review_parent_file( 'test' ) );
+		$this->assertSame( 'product-reviews', $submenu_file );
+	}
+
+	/**
 	 * Tests that can output the reviews list table and filter it.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::render_reviews_list_table()

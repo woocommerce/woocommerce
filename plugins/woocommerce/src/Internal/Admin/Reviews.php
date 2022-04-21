@@ -225,11 +225,9 @@ class Reviews {
 	 * @return string
 	 */
 	public function edit_review_parent_file( $parent_file ) {
-		global $submenu_file;
+		global $submenu_file, $current_screen;
 
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-
-		if ( $screen && 'comment' === $screen->id && isset( $_GET['c'] ) ) {
+		if ( isset( $current_screen->id, $_GET['c'] ) && 'comment' === $current_screen->id ) {
 
 			$comment_id = absint( $_GET['c'] );
 			$comment = get_comment( $comment_id );
