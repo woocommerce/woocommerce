@@ -15,7 +15,7 @@ jobs:
                   mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
                   ref: trunk
@@ -57,7 +57,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - name: Build
               id: build
@@ -66,7 +66,7 @@ jobs:
                   BUILD_ENV: e2e
 
             - name: Upload PR zip
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -122,7 +122,7 @@ jobs:
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                   name: woocommerce
                   path: tmp

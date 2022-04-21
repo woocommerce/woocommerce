@@ -5,36 +5,51 @@ on:
             - trunk
         types:
             - labeled
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
     prcheck:
         name: Smoke test a pull request.
         if: "${{ contains(github.event.label.name, 'run: smoke tests') }}"
         runs-on: ubuntu-18.04
         steps:
-            - name: Cancel Previous Runs
-              uses: styfle/cancel-workflow-action@0.7.0
-              with:
-                  access_token: ${{ github.token }}
-
             - name: Create dirs.
               run: |
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
+
+            - name: Get cached composer and pnpm directories
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  package/woocommerce/plugins/woocommerce/packages
+                  package/woocommerce/plugins/woocommerce/vendor
+                key: ${{ runner.os }}-smoke-test-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Install prerequisites.
               working-directory: package/woocommerce/plugins/woocommerce
               id: installation
               run: |
-                  npm install -g pnpm
-                  pnpm install
-                  pnpm nx composer-install-no-dev woocommerce
                   pnpm nx build-assets woocommerce
                   pnpm install jest
 
