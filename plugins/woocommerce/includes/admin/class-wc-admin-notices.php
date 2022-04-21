@@ -169,11 +169,19 @@ class WC_Admin_Notices {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			$hide_notice = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
+
+			/**
+			 * Filter the capability required to dismiss a given notice.
+			 *
+			 * @param string $default_capability The default required capability.
+			 * @param string $hide_notice The notice ID.
+			 */
+			$required_capability = apply_filters( 'woocommerce_dismiss_notice_capability', 'manage_woocommerce', $hide_notice );
+
+			if ( ! current_user_can( $required_capability ) ) {
 				wp_die( esc_html__( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );
 			}
-
-			$hide_notice = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
 
 			self::hide_notice( $hide_notice );
 		}
