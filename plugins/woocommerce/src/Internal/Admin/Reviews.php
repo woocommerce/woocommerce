@@ -145,8 +145,15 @@ class Reviews {
 	}
 
 	/**
-	 * Ajax callback for editing a review. This is based on {@see wp_ajax_edit_comment()}, and is designed to run
-	 * before that callback so we can override the rendering for a review.
+	 * Ajax callback for editing a review.
+	 *
+	 * This functionality is taken from {@see wp_ajax_edit_comment()} and is largely copy and pasted. The only thing
+	 * we want to change is the review row HTML in the response. WordPress core uses a comment list table and we need
+	 * to use our own {@see ReviewsListTable} class to support our custom columns.
+	 *
+	 * This ajax callback is registered with a lower priority than WordPress core's so that our code can run
+	 * first. If the supplied comment ID is not a review or a reply to a review, then we `return` early from this method
+	 * to allow the WordPress core callback to take over.
 	 *
 	 * @return void
 	 */
@@ -205,8 +212,15 @@ class Reviews {
 	}
 
 	/**
-	 * Ajax callback for replying to a review inline. This is based on {@see wp_ajax_replyto_comment()}, and is designed
-	 * to run before that callback so we can override the rendering for a review reply.
+	 * Ajax callback for replying to a review inline.
+	 *
+	 * This functionality is taken from {@see wp_ajax_replyto_comment()} and is largely copy and pasted. The only thing
+	 * we want to change is the review row HTML in the response. WordPress core uses a comment list table and we need
+	 * to use our own {@see ReviewsListTable} class to support our custom columns.
+	 *
+	 * This ajax callback is registered with a lower priority than WordPress core's so that our code can run
+	 * first. If the supplied comment ID is not a review or a reply to a review, then we `return` early from this method
+	 * to allow the WordPress core callback to take over.
 	 *
 	 * @return void
 	 */
