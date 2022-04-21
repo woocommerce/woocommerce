@@ -477,6 +477,8 @@ test2</p></div>',
 	}
 
 	/**
+	 * Tests scenarios that should return false.
+	 *
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
 	 * @dataProvider provider_is_review_or_reply
 	 *
@@ -485,7 +487,7 @@ test2</p></div>',
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_is_review_or_reply( $object, bool $expected ) : void {
+	public function test_is_not_review_or_reply( $object, bool $expected ) : void {
 		$reviews = new Reviews();
 		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
 		$method->setAccessible( true );
@@ -493,47 +495,55 @@ test2</p></div>',
 		$this->assertSame( $expected, $method->invoke( $reviews, $object ) );
 	}
 
-	/** @see test_is_review_or_reply */
+	/** @see test_is_not_review_or_reply */
 	public function provider_is_review_or_reply(): Generator {
 		yield 'null object' => [ null, false ];
 		yield 'invalid array' => [ [ 'data' ], false ];
+	}
 
-		yield 'regular comment' => [
-			'object' => $this->factory()->comment->create_and_get(
-				[
-					'comment_post_ID'  => $this->factory()->post->create(),
-				]
-			),
-			'expected' => false,
-		];
+	/**
+	 * Tests different cases that require factories.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_is_review_or_reply_with_comment_object() : void {
+		$reviews = new Reviews();
+		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
+		$method->setAccessible( true );
 
-		yield 'review' => [
-			'object' => $this->factory()->comment->create_and_get(
-				[
-					'comment_type'     => 'review',
-					'comment_post_ID'  => $this->factory()->post->create(
-						[
-							'post_type'  => 'product',
-						]
-					),
-				]
-			),
-			'expected' => true,
-		];
+		$regular_comment = $this->factory()->comment->create_and_get(
+			[
+				'comment_post_ID'  => $this->factory()->post->create(),
+			]
+		);
+		$this->assertFalse( $method->invoke( $reviews, $regular_comment ) );
 
-		yield 'comment attached to product' => [
-			'object' => $this->factory()->comment->create_and_get(
-				[
-					'comment_type'     => 'comment',
-					'comment_post_ID'  => $this->factory()->post->create(
-						[
-							'post_type'  => 'product',
-						]
-					),
-				]
-			),
-			'expected' => true,
-		];
+		$review = $this->factory()->comment->create_and_get(
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $this->factory()->post->create(
+					[
+						'post_type'  => 'product',
+					]
+				),
+			]
+		);
+		$this->assertTrue( $method->invoke( $reviews, $review ) );
+
+		$review_reply = $this->factory()->comment->create_and_get(
+			[
+				'comment_type'     => 'comment',
+				'comment_post_ID'  => $this->factory()->post->create(
+					[
+						'post_type'  => 'product',
+					]
+				),
+			]
+		);
+		$this->assertTrue( $method->invoke( $reviews, $review_reply ) );
 	}
 
 }
