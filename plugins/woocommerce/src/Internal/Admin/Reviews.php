@@ -213,8 +213,8 @@ class Reviews {
 	public function handle_reply_to_review(): void {
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
-		$reply_post_id = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0;
-		$post          = get_post( $reply_post_id );
+		$comment_post_ID = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+		$post            = get_post( $comment_post_ID ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 
 		if ( ! $post ) {
 			wp_die( -1 );
@@ -230,7 +230,7 @@ class Reviews {
 			return;
 		}
 
-		if ( ! current_user_can( 'edit_post', $reply_post_id ) ) {
+		if ( ! current_user_can( 'edit_post', $comment_post_ID ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 			wp_die( -1 );
 		}
 
@@ -277,13 +277,13 @@ class Reviews {
 		}
 
 		$comment_auto_approved = false;
-		$commentdata           = compact( 'reply_post_id', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID' );
+		$commentdata           = compact( 'comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID' );
 
 		// Automatically approve parent comment.
 		if ( ! empty( $_POST['approve_parent'] ) ) {
 			$parent = get_comment( $comment_parent );
 
-			if ( $parent && '0' === $parent->comment_approved && $parent->comment_post_ID == $reply_post_id ) {
+			if ( $parent && '0' === $parent->comment_approved && $parent->comment_post_ID == $comment_post_ID ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 				if ( ! current_user_can( 'edit_comment', $parent->comment_ID ) ) {
 					wp_die( -1 );
 				}
