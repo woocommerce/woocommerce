@@ -53,14 +53,17 @@
     "@woocommerce/eslint-plugin": "workspace:*",
     "@wordpress/eslint-plugin": "^11.0.0",
     "@wordpress/prettier-config": "^1.1.1",
+    "@woocommerce/data": "workspace:*",
     "babel-loader": "^8.2.3",
     "chalk": "^4.1.2",
     "core-js": "^3.21.1",
     "css-loader": "^6.7.0",
+    "expose-loader": "^3.1.0",
     "glob": "^7.2.0",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
     "lint-staged": "^12.3.7",
+    "moment": "^2.29.1",
     "mkdirp": "^1.0.4",
     "node-stream-zip": "^1.15.0",
     "prettier": "npm:wp-prettier@^2.2.1-beta-1",
@@ -69,7 +72,8 @@
     "request": "^2.88.2",
     "sass": "^1.49.9",
     "sass-loader": "^10.2.1",
-    "typescript": "4.2.4"
+    "typescript": "4.2.4",
+    "webpack": "^5.70.0"
   },
   "dependencies": {
     "@babel/core": "7.12.9",
