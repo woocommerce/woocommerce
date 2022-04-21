@@ -1,10 +1,10 @@
 name: Run smoke tests against pull request.
-on: pull_request
-    # pull_request:
-    #     branches:
-    #         - trunk
-    #     types:
-    #         - labeled
+on:
+    pull_request:
+        branches:
+            - trunk
+        types:
+            - labeled
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
