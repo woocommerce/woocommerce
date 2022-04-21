@@ -276,7 +276,7 @@ class Reviews {
 		}
 
 		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
-		if ( isset( $comment->comment_parent ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+		if ( isset( $comment->comment_post_ID ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
 			if ( 'Edit Comment' === $text ) {
 				$translation = $is_reply
 					? __( 'Edit Review Reply', 'woocommerce' )
