@@ -47,7 +47,7 @@ class Reviews {
 
 		add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
 
-		add_filter( 'gettext', array( $this, 'filter_edit_comments_screen_translations' ), 10, 2 );
+		add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
@@ -250,7 +250,7 @@ class Reviews {
 	 * @param  string $text        Text to translate.
 	 * @return string              Translated text.
 	 */
-	public function filter_edit_comments_screen_translations( $translation, $text ) {
+	public function edit_comments_screen_text( $translation, $text ) {
 		global $comment;
 
 		// Bail out if not a text we should replace.
@@ -266,17 +266,14 @@ class Reviews {
 
 		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
 		if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
-			switch ( $text ) {
-				case 'Edit Comment':
-					$translation = $comment->comment_parent > 0
-						? __( 'Edit Review Reply', 'woocommerce' )
-						: __( 'Edit Review', 'woocommerce' );
-					break;
-				case 'Moderate Comment':
-					$translation = $comment->comment_parent > 0
-						? __( 'Moderate Review Reply', 'woocommerce' )
-						: __( 'Moderate Review', 'woocommerce' );
-					break;
+			if ( 'Edit Comment' === $text ) {
+				$translation = $comment->comment_parent > 0
+					? __( 'Edit Review Reply', 'woocommerce' )
+					: __( 'Edit Review', 'woocommerce' );
+			} elseif ( 'Moderate Comment' === $text ) {
+				$translation = $comment->comment_parent > 0
+					? __( 'Moderate Review Reply', 'woocommerce' )
+					: __( 'Moderate Review', 'woocommerce' );
 			}
 		}
 

@@ -192,6 +192,51 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that it will override the headline text when editing or moderating a review or reply.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::edit_comments_screen_text()
+	 * @dataProvider data_provider_edit_comments_screen_text
+	 *
+	 * @param string $translated_text Translated text.
+	 * @param string $original_text   Original text (raw).
+	 * @param bool   $is_review       Whether we should test a review comment.
+	 * @param bool   $is_reply        Whether we should test a reply to a review comment.
+	 * @param string $expected_text   Expected text output.
+	 * @return void
+	 */
+	public function test_edit_comments_screen_text( string $translated_text, string $original_text, bool $is_review, bool $is_reply, string $expected_text ) {
+		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+		$comment = $this->factory()->comment->create( [ 'comment_post_ID' => $this->factory->post->create() ] );
+		$review = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
+		$reply = $this->factory()->comment->create(
+			[
+				'comment_post_ID' => $product,
+				'comment_parent'  => $review,
+			]
+		);
+
+		$_GET['action'] = 'editcomment';
+
+		if ( ! $is_review ) {
+			$_GET['c'] = $comment;
+		} else {
+			$_GET['c'] = $is_reply ? $reply : $review;
+		}
+
+		$this->assertSame( $expected_text, ( new Reviews() )->edit_comments_screen_text( $translated_text, $original_text ) );
+	}
+
+	/** @see test_edit_comments_screen_text */
+	public function data_provider_edit_comments_screen_text() : Generator {
+		yield 'Regular comment' => [ 'Foo', 'Bar', false, false, 'Foo' ];
+		yield 'Not the expected text'  => [ 'Foo', 'Bar', true, false, 'Foo' ];
+		yield 'Edit Review' => [ 'Edit Comment', 'Edit Comment', true, false, 'Edit Review' ];
+		yield 'Edit Review Reply' => [ 'Edit Comment', 'Edit Comment', true, true, 'Edit Review Reply' ];
+		yield 'Moderate Review' => [ 'Moderate Comment', 'Moderate Comment', true, false, 'Moderate Review' ];
+		yield 'Moderate Review Reply' => [ 'Moderate Comment', 'Moderate Comment', true, true, 'Moderate Review Reply' ];
+	}
+
+	/**
 	 * Tests that can output the reviews list table and filter it.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::render_reviews_list_table()
