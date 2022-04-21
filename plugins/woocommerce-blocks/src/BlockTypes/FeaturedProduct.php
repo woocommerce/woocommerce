@@ -25,10 +25,9 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		'dimRatio'     => 50,
 		'focalPoint'   => false,
 		'imageFit'     => 'none',
-		'minHeight'    => 500,
 		'mediaId'      => 0,
 		'mediaSrc'     => '',
-		'overlayColor' => '#000000',
+		'minHeight'    => 500,
 		'showDesc'     => true,
 		'showPrice'    => true,
 	);
@@ -171,6 +170,8 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			$overlay_styles = sprintf( 'background-color: %s', $attributes['overlayColor'] );
 		} elseif ( isset( $attributes['overlayGradient'] ) ) {
 			$overlay_styles = sprintf( 'background-image: %s', $attributes['overlayGradient'] );
+		} else {
+			$overlay_styles = 'background-color: #000000';
 		}
 
 		return sprintf( '<div class="wc-block-featured-product__overlay" style="%s"></div>', esc_attr( $overlay_styles ) );
