@@ -36,7 +36,7 @@ class WC_Comments {
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
 
-		// Secure product reviews.
+		// Exclude product reviews.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_product_reviews' ), 10, 1 );
 
 		// Count comments.
