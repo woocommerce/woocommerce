@@ -41,10 +41,11 @@ jobs:
 
       - name: Get cached composer and pnpm directories
         uses: actions/cache@v3
+        id: cache-deps
         with:
           path: |
             ~/.pnpm-store
-            ~/.composer
+            plugins/woocommerce/vendor
           key: ${{ runner.os }}-test-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
@@ -54,6 +55,7 @@ jobs:
         run: pnpm install
 
       - name: Install Composer dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: pnpm nx composer-install woocommerce
         
       - name: Build Admin feature config
