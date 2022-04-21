@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use WP_Ajax_Response;
+use WP_Comment;
 use WP_Screen;
 
 /**
@@ -29,7 +31,7 @@ class Reviews {
 	 *
 	 * @var string|null
 	 */
-	protected $reviews_page_hook;
+	protected $reviews_page_hook = null;
 
 	/**
 	 * Reviews list table instance.
@@ -45,6 +47,7 @@ class Reviews {
 
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
+		add_action( 'wp_ajax_edit-comment', [ $this, 'handle_edit_comment' ], -1 );
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
@@ -122,6 +125,80 @@ class Reviews {
 			wp_enqueue_script( 'admin-comments' );
 			enqueue_comment_hotkeys_js();
 		}
+	}
+
+	/**
+	 * Determines if the object is a review or a reply to a review.
+	 *
+	 * @param WP_Comment|array|null $object Object to check.
+	 * @return bool
+	 */
+	protected function is_review_or_reply( $object ) : bool {
+		if ( ! $object instanceof WP_Comment ) {
+			return false;
+		}
+
+		return 'review' === $object->comment_type || 'product' === get_post_type( $object->comment_post_ID );
+	}
+
+	/**
+	 * Ajax callback for editing a comment. This is based on {@see wp_ajax_edit_comment()}, and is designed to run
+	 * before that callback so we can override the rendering for a review.
+	 *
+	 * @return void
+	 */
+	public function handle_edit_comment(): void {
+		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
+
+		$comment_id = isset( $_POST['comment_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_ID'] ) ) : 0;
+
+		if ( empty( $comment_id ) || ! current_user_can( 'edit_comment', $comment_id ) ) {
+			wp_die( -1 );
+		}
+
+		$review = get_comment( $comment_id );
+
+		// Bail silently if this is not a review, or a reply to a review. That allows `wp_ajax_edit_comment()` to handle any further actions.
+		if ( ! $this->is_review_or_reply( $review ) ) {
+			return;
+		}
+
+		if ( empty( $review->comment_ID ) ) {
+			wp_die( -1 );
+		}
+
+		if ( empty( $_POST['content'] ) ) {
+			wp_die( esc_html__( 'Error: Please type your review text.', 'woocommerce' ) );
+		}
+
+		if ( isset( $_POST['status'] ) ) {
+			$_POST['comment_status'] = sanitize_text_field( wp_unslash( $_POST['status'] ) );
+		}
+
+		$updated = edit_comment();
+		if ( is_wp_error( $updated ) ) {
+			wp_die( esc_html( $updated->get_error_message() ) );
+		}
+
+		$position = isset( $_POST['position'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['position'] ) ) : -1;
+		$wp_list_table = $this->make_reviews_list_table();
+
+		ob_start();
+		$wp_list_table->single_row( $review );
+		$review_list_item = ob_get_clean();
+
+		$x = new WP_Ajax_Response();
+
+		$x->add(
+			array(
+				'what'     => 'edit_comment',
+				'id'       => $review->comment_ID,
+				'data'     => $review_list_item,
+				'position' => $position,
+			)
+		);
+
+		$x->send();
 	}
 
 	/**
@@ -228,12 +305,21 @@ class Reviews {
 	}
 
 	/**
+	 * Returns a new instance of `ReviewsListTable`, with the screen argument specified.
+	 *
+	 * @return ReviewsListTable
+	 */
+	protected function make_reviews_list_table() : ReviewsListTable {
+		return new ReviewsListTable( [ 'screen' => $this->reviews_page_hook ? $this->reviews_page_hook : 'product_page_product-reviews' ] );
+	}
+
+	/**
 	 * Initializes the list table.
 	 *
 	 * @return void
 	 */
 	public function load_reviews_screen() {
-		$this->reviews_list_table = new ReviewsListTable( [ 'screen' => $this->reviews_page_hook ] );
+		$this->reviews_list_table = $this->make_reviews_list_table();
 		$this->reviews_list_table->process_bulk_action();
 	}
 
