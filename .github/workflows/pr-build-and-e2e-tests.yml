@@ -60,7 +60,7 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
-                key: ${{ runner.os }}-e2e-test9-${{ hashFiles('**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-e2e-test10-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
