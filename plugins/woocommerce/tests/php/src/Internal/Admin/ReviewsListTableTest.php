@@ -42,7 +42,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( '<table class="wp-list-table', $output );
-		$this->assertStringContainsString( '<tbody id="the-comment-list', $output );
+		$this->assertStringContainsString( '<tbody id="the-comment-list" data-wp-lists="list:comment">', $output );
 	}
 
 	/**
