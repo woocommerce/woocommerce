@@ -193,111 +193,10 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	public function column_details( $log ) {
 		?>
-		<button class="button details-button" data-details-button="<?php echo esc_attr( $log['log_id'] ); ?>"><?php esc_html_e( 'View Details', 'woocommerce' ); ?></button>
+		<button class="button button-small details-button" aria-live="polite" data-details-button="<?php echo esc_attr( $log['log_id'] ); ?>">
+			<?php esc_html_e( 'View Details', 'woocommerce' ); ?>
+		</button>
 		<?php
-	}
-
-	/**
-	 * Render the Log Deails.
-	 *
-	 * @param array $log The Log item.
-	 */
-	public function render_log( $log ) {
-		// This is unserializing "safe" data from the database, not user input.
-		$context = unserialize( $log['context'] );
-		$context = $this->to_multidimensional_array( $context );
-
-		// Exclude unneeded log values.
-		$exclude = array( '*default_data', '*data_store', 'xdebug_message' );
-
-		/**
-		 * Error object properties to exclude from the WC Log.
-		 *
-		 * @param array $exclude Array of strings representing Class Properties.
-		 *
-		 * @return array
-		 */
-		$exclude = apply_filters( 'woocommerce_log_exclude_error_fields', $exclude );
-
-		$context = $this->printable_array( $context, $exclude );
-
-		?>
-		<p style="font-weight: bold"><?php echo esc_html_e( 'Error Details', 'woocommerce' ); ?></p>
-		<?php // All must be on one line to preserve tab spacing. ?>
-		<textarea class="widefat" rows="10" style="width:100%;white-space:pre;white-space:pre-wrap;"><?php echo print_r( $context, 1 ); ?></textarea> <?php // phpcs:ignore ?>
-		<?php
-	}
-
-	/**
-	 * Convert an array or object into a multidimensional array.
-	 *
-	 * @param array|object $input Array or object to be processed.
-	 *
-	 * @return array
-	 */
-	public function to_multidimensional_array( $input ) {
-		$out   = array();
-		$input = is_object( $input ) ? (array) $input : $input;
-
-		if ( is_array( $input ) ) {
-
-			// Run function on each item in the array.
-			$out = array_map(
-				function( $value ) {
-
-					if ( is_array( $value ) || is_object( $value ) ) {
-						return $this->to_multidimensional_array( $value );
-					}
-
-					return $value;
-				},
-				$input
-			);
-		}
-
-		return $out;
-	}
-
-	/**
-	 * Convert an array to a string with tabbed indentaion.
-	 *
-	 * @param array|object $input   An object or array.
-	 * @param array        $exclude An array of strings of params/keys to exclude.
-	 * @param int          $depth   The current depth of the walker.
-	 *
-	 * @return string
-	 */
-	public function printable_array( $input, $exclude = array(), $depth = 0 ) {
-		$out   = '';
-		$input = is_object( $input ) ? (array) $input : $input;
-		if ( is_array( $input ) ) {
-
-			foreach ( $input as $key => $val ) {
-
-				$key = strip_tags( (string) $key );
-
-				if ( in_array( (string) $key, $exclude ) ) {
-					continue;
-				}
-
-				$tabs = '';
-				for ( $i = 0; $i < $depth; $i++ ) {
-					$tabs .= '&#09;';
-				}
-
-				$out .= $tabs . '[' . $key . '] => ';
-
-				if ( is_array( $val ) || is_object( $val ) ) {
-					$new_depth = $depth + 1;
-					$out .= '[&#010;' . $this->printable_array( $val, $exclude, $new_depth ) . $tabs . ']';
-				} else {
-					$out .= "'" . $val . "'";
-				}
-				$out .= '&#013;&#010;';
-			}
-		}
-		$out .= '';
-		return $out;
 	}
 
 	/**
@@ -376,38 +275,6 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Outputs JS to control display of "Error Details".
-	 */
-	public function toggle_details_script() {
-		?>
-		<script>
-			( function( $ ) {
-				$( '#the-list' ).on( 'click', '.details-button', function( e ) {
-					e.preventDefault();
-
-					var logId = $( this ).attr( 'data-details-button' ),
-					box = $("[data-details-box='" + logId + "']");
-
-					// Close all boxes.
-					$( '.details-box' ).hide();
-
-					if ( $( this ).hasClass('open') ) {
-						$('.details-button').removeClass( 'open' );
-						// All boxes are closed.
-					} else {
-						// Clear out "open" class on buttons except this one.
-						$('.details-button').removeClass( 'open' );
-						$( this ).addClass( 'open' );
-						// Open this single box.
-						box.show();
-					}
-				} );
-			} )( jQuery );
-		</script>
-		<?php
-	}
-
-	/**
 	 * Generates the table rows.
 	 *
 	 * @since 3.1.0
@@ -428,10 +295,59 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	public function single_row_log( $item ) {
 		// Maintains alternating row background colors.
-		echo '<tr style="display: none"><td></td></tr>';
-		echo '<tr class="details-box" data-details-box="' . esc_attr( $item['log_id'] ) . '" style="display: none" ><td colspan="' . intval( $this->get_column_count() ) . '">';
-		$this->render_log( $item );
-		echo '</td></tr>';
+		?>
+		<tr style="display: none"><td></td></tr>
+		<tr class="details-box" data-details-box="<?php echo esc_attr( $item['log_id'] ); ?>" style="display: none">
+			<td colspan="<?php echo intval( $this->get_column_count() ); ?>">
+				<div style="display: flex; flex-flow: row wrap; column-gap: 20px;">
+					<div style="flex-grow:1">
+						<p style="font-weight: bold"><?php echo esc_html_e( 'Order Details', 'woocommerce' ); ?></p>
+						<?php $this->render_log( 'order', $item ); ?>
+					</div>
+					<div style="flex-grow:1">
+						<p style="font-weight: bold"><?php echo esc_html_e( 'Error Details', 'woocommerce' ); ?></p>
+						<?php $this->render_log( 'error', $item ); ?>
+					</div>
+				</div>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Render the Log Deails.
+	 *
+	 * @param string $key The key name.
+	 * @param array  $log The Log item.
+	 */
+	public function render_log( $key, $log ) {
+		// This is unserializing "safe" data from the database, not user input.
+		$context = unserialize( $log['context'] );
+		$context = $this->to_multidimensional_array( $context );
+
+		// Exclude unneeded log values. Note there may be hidden HTML chars around asterisks.
+		$exclude = array( '*default_data', '*data_store', 'xdebug_message' );
+
+		/**
+		 * Order/Error object properties to exclude from displaying in the WC Log.
+		 *
+		 * @param array $exclude Array of strings representing Class Properties.
+		 *
+		 * @return array
+		 */
+		$exclude = apply_filters( 'woocommerce_log_exclude_fields', $exclude );
+
+		$output = __( 'Data not found.', 'woocommerce' );
+
+		if ( isset( $context[ $key ] ) ) {
+			$output = $this->printable_array( $context[ $key ], $exclude );
+		}
+
+		?>
+
+		<?php // All must be on one line to preserve tab spacing. ?>
+		<textarea class="widefat" rows="10" style="width:100%;white-space:pre;white-space:pre-wrap;font-family:monospace;font-size: 13px;"><?php print_r( $output ); ?></textarea>
+		<?php
 	}
 
 	/**
@@ -570,5 +486,116 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			array(),
 			$this->get_sortable_columns(),
 		);
+	}
+
+	/**
+	 * Convert an array or object into a multidimensional array.
+	 *
+	 * @param array|object $input Array or object to be processed.
+	 *
+	 * @return array
+	 */
+	public function to_multidimensional_array( $input ) {
+		$out   = array();
+		$input = is_object( $input ) ? (array) $input : $input;
+
+		if ( is_array( $input ) ) {
+
+			// Run function on each item in the array.
+			$out = array_map(
+				function( $value ) {
+
+					if ( is_array( $value ) || is_object( $value ) ) {
+						return $this->to_multidimensional_array( $value );
+					}
+
+					return $value;
+				},
+				$input
+			);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Convert an array to a string with tabbed indentaion.
+	 *
+	 * @param array|object $input   An object or array.
+	 * @param array        $exclude An array of strings of params/keys to exclude.
+	 * @param int          $depth   The current depth of the walker.
+	 *
+	 * @return string
+	 */
+	public function printable_array( $input, $exclude = array(), $depth = 0 ) {
+		$out   = '';
+		$input = is_object( $input ) ? (array) $input : $input;
+		if ( is_array( $input ) ) {
+
+			foreach ( $input as $key => $val ) {
+
+				$key = strip_tags( (string) $key );
+
+				if ( in_array( (string) $key, $exclude ) ) {
+					continue;
+				}
+
+				$tabs = '';
+				for ( $i = 0; $i < $depth; $i++ ) {
+					$tabs .= '  ';
+				}
+
+				$out .= $tabs . '[' . $key . '] => ';
+
+				if ( is_array( $val ) || is_object( $val ) ) {
+					$new_depth = $depth + 1;
+					$out .= '[&#010;' . $this->printable_array( $val, $exclude, $new_depth ) . $tabs . ']';
+				} else {
+					$out .= "'" . $val . "'";
+				}
+				$out .= '&#013;&#010;';
+			}
+		}
+		$out .= '';
+		return $out;
+	}
+
+	/**
+	 * Outputs JS to control display of "Error Details".
+	 *
+	 * Not in a separate file as this is a single-use script.
+	 */
+	public function toggle_details_script() {
+		?>
+		<script type="text/javascript" id="wc-log-details">
+			( function( $ ) {
+				$( '#the-list' ).on( 'click', '.details-button', function( e ) {
+					e.preventDefault();
+
+					var button = $( this ),
+					logId = button.attr( 'data-details-button' ),
+					box = $( "[data-details-box='" + logId + "']" ),
+					defaultText = '<?php esc_html_e( 'View Details', 'woocommerce' ); ?>',
+					hideText = '<?php esc_html_e( 'Hide Details', 'woocommerce' ); ?>';
+
+					// Reset all boxes.
+					$( '.details-box' ).hide();
+
+					// If clicking a button to "close" it.
+					if ( button.hasClass('open') ) {
+						// Reset all buttons (boxes are already reset).
+						$( '.details-button' ).removeClass( 'open' ).html( defaultText );
+					} else {
+						// Reset all buttons.
+						$( '.details-button' ).removeClass( 'open' ).html( defaultText );
+						// Update this button.
+						$( this ).addClass( 'open' ).html( hideText );
+						// Open this box.
+						box.show();
+					}
+				} );
+			} )( jQuery );
+		</script>
+		<?php
 	}
 }
