@@ -53,7 +53,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-
+      - name: debug composer home location
+        run: composer config --global home
+      - name: debug composer vendor dir
+        run: ls -R plugins/woocommerce/vendor
       - name: Install Composer dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: pnpm nx composer-install woocommerce
