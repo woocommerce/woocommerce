@@ -49,7 +49,7 @@ jobs:
             plugins/woocommerce/vendor
           key: ${{ runner.os }}-test00100-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
-      - name: Install PNPM
+      - name: Install PNPM #comment
         run: npm install -g pnpm
 
       - name: Install dependencies
