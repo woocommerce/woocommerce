@@ -10,10 +10,11 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { PartnerCard } from '../components/partner-card';
+import { TaxProps } from '../';
 import logo from './logo.png';
 
-export const Card = ( { task } ) => {
-	const { avalaraActivated } = task.additionalData;
+export const Card: React.FC< TaxProps > = ( { task } ) => {
+	const { additionalData: { avalaraActivated } = {} } = task;
 
 	return (
 		<PartnerCard
@@ -66,7 +67,7 @@ export const Card = ( { task } ) => {
 				window.open(
 					new URL(
 						'https://woocommerce.com/products/woocommerce-avatax/'
-					),
+					).toString(),
 					'_blank'
 				);
 			} }

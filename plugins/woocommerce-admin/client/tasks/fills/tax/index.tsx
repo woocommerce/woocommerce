@@ -6,9 +6,10 @@ import { Card, CardBody, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import {
-	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	WCDataSelector,
+	TaskType,
 } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
@@ -37,7 +38,7 @@ import { ManualConfiguration } from './manual-configuration';
 import { Partners } from './components/partners';
 import { WooCommerceTax } from './woocommerce-tax';
 
-const TaskCard = ( { children } ) => {
+const TaskCard: React.FC = ( { children } ) => {
 	return (
 		<Card className="woocommerce-task-card">
 			<CardBody>{ children }</CardBody>
@@ -45,7 +46,13 @@ const TaskCard = ( { children } ) => {
 	);
 };
 
-const Tax = ( { onComplete, query, task } ) => {
+export type TaxProps = {
+	onComplete: () => void;
+	query: Record< string, string >;
+	task: TaskType;
+};
+
+const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -53,7 +60,7 @@ const Tax = ( { onComplete, query, task } ) => {
 		SETTINGS_STORE_NAME
 	);
 	const { generalSettings, isResolving, taxSettings } = useSelect(
-		( select ) => {
+		( select: WCDataSelector ) => {
 			const { getSettings, hasFinishedResolution } = select(
 				SETTINGS_STORE_NAME
 			) as SettingsSelector;
@@ -84,7 +91,7 @@ const Tax = ( { onComplete, query, task } ) => {
 				},
 			} )
 				.then( () => redirectToTaxSettings() )
-				.catch( ( error ) => {
+				.catch( ( error: unknown ) => {
 					setIsPending( false );
 					createNoticesFromResponse( error );
 				} );
@@ -138,9 +145,11 @@ const Tax = ( { onComplete, query, task } ) => {
 			generalSettings?.woocommerce_default_country
 		);
 		const {
-			woocommerceTaxCountries = [],
-			taxJarActivated,
-		} = task.additionalData;
+			additionalData: {
+				woocommerceTaxCountries = [],
+				taxJarActivated,
+			} = {},
+		} = task;
 
 		const partners = [
 			{
@@ -232,28 +241,33 @@ const Tax = ( { onComplete, query, task } ) => {
 	if ( currentPartner ) {
 		return (
 			<TaskCard>
-				{ createElement( currentPartner.component, childProps ) }
+				{ currentPartner.component &&
+					createElement( currentPartner.component, childProps ) }
 			</TaskCard>
 		);
 	}
 
 	return (
 		<Partners { ...childProps }>
-			{ partners.map( ( partner ) =>
-				createElement( partner.card, {
-					key: partner.id,
-					...childProps,
-				} )
+			{ partners.map(
+				( partner ) =>
+					partner.card &&
+					createElement( partner.card, {
+						key: partner.id,
+						...childProps,
+					} )
 			) }
 		</Partners>
 	);
 };
 
 registerPlugin( 'wc-admin-onboarding-task-tax', {
+	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => (
+		// @ts-expect-error WooOnboardingTask is still a pure JS file
 		<WooOnboardingTask id="tax">
-			{ ( { onComplete, query, task } ) => (
+			{ ( { onComplete, query, task }: TaxProps ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />
 			) }
 		</WooOnboardingTask>
