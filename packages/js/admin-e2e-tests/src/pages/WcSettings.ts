@@ -44,7 +44,7 @@ export class WcSettings extends BasePage {
 
 	async paymentMethodIsEnabled( method = '' ): Promise< boolean > {
 		await this.navigate( 'checkout' );
-		await waitForElementByText( 'th', 'Method' );
+		await waitForElementByText( 'h2', 'Payment methods' );
 		const className = await getAttribute(
 			`tr[data-gateway_id=${ method }] .woocommerce-input-toggle`,
 			'className'

@@ -114,6 +114,18 @@ const WcPayBanner = () => {
 	);
 };
 
+const DefaultPaymentMethodsHeaderText = () => (
+	<>
+		<h2>Payment Methods</h2>
+		<div id="payment_gateways_options-description">
+			<p>
+				Installed payment methods are listed below and can be sorted to
+				control their display order on the frontend.
+			</p>
+		</div>
+	</>
+);
+
 export const PaymentsBannerWrapper = () => {
 	const {
 		installedPaymentGateways,
@@ -172,6 +184,7 @@ export const PaymentsBannerWrapper = () => {
 		) {
 			return <WcPayBanner />;
 		}
+		return <DefaultPaymentMethodsHeaderText />;
 	}
-	return null;
+	return <DefaultPaymentMethodsHeaderText />;
 };
