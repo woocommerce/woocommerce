@@ -246,7 +246,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			</TaskCard>
 		);
 	}
-
 	return (
 		<Partners { ...childProps }>
 			{ partners.map(

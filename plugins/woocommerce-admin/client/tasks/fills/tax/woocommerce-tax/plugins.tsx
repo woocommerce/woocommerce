@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import {
@@ -73,7 +73,10 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	return (
 		<>
 			<PluginInstaller
-				onComplete={ ( activatedPlugins, response ) => {
+				onComplete={ (
+					activatedPlugins: string[],
+					response: InstallPluginsResponse
+				) => {
 					createNoticesFromResponse( response );
 					recordEvent( 'tasklist_tax_install_extensions', {
 						install_extensions: true,
@@ -83,7 +86,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					} );
 					nextStep();
 				} }
-				onError={ ( errors, response ) =>
+				onError={ ( errors: unknown, response: unknown ) =>
 					createNoticesFromResponse( response )
 				}
 				onSkip={ () => {

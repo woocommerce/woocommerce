@@ -5,7 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { difference } from 'lodash';
 import { useSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
-import { PLUGINS_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+	WCDataSelector,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -30,7 +34,7 @@ export const WooCommerceTax: React.FC< TaxChildProps > = ( {
 		isJetpackConnected,
 		isResolving,
 		pluginsToActivate,
-	} = useSelect( ( select ) => {
+	} = useSelect( ( select: WCDataSelector ) => {
 		const { getSettings } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;

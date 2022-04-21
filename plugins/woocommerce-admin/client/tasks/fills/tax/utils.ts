@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getAdminLink } from '@woocommerce/settings';
-import { WPDataSelectors } from '@woocommerce/data';
+import { WPDataSelectors, TaskType } from '@woocommerce/data';
 
 /**
  * Plugins required to automate taxes.
@@ -67,6 +67,7 @@ export type TaxChildProps = {
 	onAutomate: () => void;
 	onManual: () => void;
 	onDisable: () => void;
+	task: TaskType;
 };
 
 /**

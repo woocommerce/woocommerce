@@ -125,9 +125,10 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		};
 	} );
 
+	const query = getQuery() as { [ key: string ]: string };
 	const isHomescreen =
-		getQuery().page && getQuery().page === 'wc-admin' && ! getQuery().path;
-	const isActiveTaskPage = Boolean( getQuery().wc_onboarding_active_task );
+		query.page && query.page === 'wc-admin' && ! query.path;
+	const isActiveTaskPage = Boolean( query.wc_onboarding_active_task );
 
 	const hideReminderBar =
 		loading ||

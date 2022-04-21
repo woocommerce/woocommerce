@@ -10,10 +10,10 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { PartnerCard } from '../components/partner-card';
-import { TaxProps } from '../';
+import { TaxChildProps } from '../utils';
 import logo from './logo.png';
 
-export const Card: React.FC< TaxProps > = ( { task } ) => {
+export const Card: React.FC< TaxChildProps > = ( { task } ) => {
 	const { additionalData: { avalaraActivated } = {} } = task;
 
 	return (
