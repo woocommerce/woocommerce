@@ -60,6 +60,8 @@ jobs:
             ./packages
             ./vendor
           key: ${{ runner.os }}-test1-${{ hashFiles('./composer.lock') }}
+      - name: List dir
+        run: ls ./
 
       - name: Install PNPM and install dependencies
         run: |
