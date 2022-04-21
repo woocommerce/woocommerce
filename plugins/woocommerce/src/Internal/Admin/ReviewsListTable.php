@@ -266,8 +266,6 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function display() {
-		$singular = $this->_args['singular'] ?? false;
-
 		$this->display_tablenav( 'top' );
 
 		$this->screen->render_screen_reader_content( 'heading_list' );
@@ -279,7 +277,7 @@ class ReviewsListTable extends WP_List_Table {
 				<?php $this->print_column_headers(); ?>
 			</tr>
 			</thead>
-			<tbody id="the-comment-list" <?php echo esc_attr( $singular ? "data-wp-lists='list:$singular'" : '' ); ?>>
+			<tbody id="the-comment-list" data-wp-lists="list:comment">
 			<?php $this->display_rows_or_placeholder(); ?>
 			</tbody>
 			<tfoot>
@@ -872,6 +870,18 @@ class ReviewsListTable extends WP_List_Table {
 			get_comment_text( $item->comment_ID ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			'</div>'
 		);
+
+		if ( $this->current_user_can_edit_review ) {
+			?>
+			<div id="inline-<?php echo esc_attr( $item->comment_ID ); ?>" class="hidden">
+				<textarea class="comment" rows="1" cols="1"><?php echo esc_textarea( $item->comment_content ); ?></textarea>
+				<div class="author-email"><?php echo esc_attr( $item->comment_author_email ); ?></div>
+				<div class="author"><?php echo esc_attr( $item->comment_author ); ?></div>
+				<div class="author-url"><?php echo esc_attr( $item->comment_author_url ); ?></div>
+				<div class="comment_status"><?php echo esc_html( $item->comment_approved ); ?></div>
+			</div>
+			<?php
+		}
 
 		echo $this->filter_column_output( 'comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
