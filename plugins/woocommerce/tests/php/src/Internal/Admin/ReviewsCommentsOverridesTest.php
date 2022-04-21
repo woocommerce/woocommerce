@@ -188,6 +188,23 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::get_dismiss_capability()
+	 * @dataProvider provider_test_get_dismiss_capability()
+	 * @param string $default_capability The default required capability.
+	 * @param string $notice_id The notice ID.
+	 * @param string $expected_capability The expected capability.
+	 */
+	public function test_get_dismiss_capability( string $default_capability, string $notice_id, string $expected_capability ) {
+		$this->assertSame( $expected_capability, ReviewsCommentsOverrides::get_instance()->get_dismiss_capability( $default_capability, $notice_id ) );
+	}
+
+	/** @see test_get_dismiss_capability() */
+	public function provider_test_get_dismiss_capability() : \Generator {
+		yield 'another notice' => [ 'manage_woocommerce', 'other_notice', 'manage_woocommerce' ];
+		yield 'product reviews moved notice' => [ 'manage_woocommerce', ReviewsCommentsOverrides::REVIEWS_MOVED_NOTICE_ID, 'moderate_comments' ];
+	}
+
+	/**
 	 * Tests that can exclude reviews from comments in the comments page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::exclude_reviews_from_comments()
