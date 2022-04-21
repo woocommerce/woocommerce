@@ -90,7 +90,7 @@ class ReviewsCommentsOverrides {
 			<p class="submit">
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=product&page=product-reviews' ) ); ?>" class="button-primary"><?php esc_html_e( 'Visit new location', 'woocommerce' ); ?></a>
 			</p>
-			<button type="button" class="notice-dismiss" onclick="window.location = '<?php echo esc_url( $dismiss_url ); ?>';"><span class="screen-reader-text">Dismiss this notice.</span></button>
+			<button type="button" class="notice-dismiss" onclick="window.location = '<?php echo esc_url( $dismiss_url ); ?>';"><span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'woocommerce' ); ?></span></button>
 		</div>
 
 		<?php
