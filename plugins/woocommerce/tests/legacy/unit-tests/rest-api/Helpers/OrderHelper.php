@@ -1,12 +1,15 @@
-<?php
+<?php // phpcs:ignore
 /**
  * Orders helper.
+ *
+ * @package Automattic\WooCommerce\RestApi\UnitTests\Helpers
  */
 
 namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WC_Mock_Payment_Gateway;
 use \WC_Tax;
@@ -47,10 +50,10 @@ class OrderHelper {
 	 * @since   2.4
 	 * @version 3.0 New parameter $product.
 	 *
-	 * @param int        $customer_id
-	 * @param WC_Product $product
+	 * @param int        $customer_id Customer ID.
+	 * @param WC_Product $product     Product object.
 	 *
-	 * @return WC_Order
+	 * @return WC_Order WC_Order object.
 	 */
 	public static function create_order( $customer_id = 1, $product = null ) {
 
@@ -67,10 +70,10 @@ class OrderHelper {
 			'total'         => '',
 		);
 
-		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; // Required, else wc_create_order throws an exception
+		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; // Required, else wc_create_order throws an exception.
 		$order                  = wc_create_order( $order_data );
 
-		// Add order products
+		// Add order products.
 		$item = new WC_Order_Item_Product();
 		$item->set_props(
 			array(
@@ -83,7 +86,7 @@ class OrderHelper {
 		$item->save();
 		$order->add_item( $item );
 
-		// Set billing address
+		// Set billing address.
 		$order->set_billing_first_name( 'Jeroen' );
 		$order->set_billing_last_name( 'Sormani' );
 		$order->set_billing_company( 'WooCompany' );
@@ -96,7 +99,7 @@ class OrderHelper {
 		$order->set_billing_email( 'admin@example.org' );
 		$order->set_billing_phone( '555-32123' );
 
-		// Add shipping costs
+		// Add shipping costs.
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
 		$rate           = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
 		$item           = new WC_Order_Item_Shipping();
@@ -113,17 +116,17 @@ class OrderHelper {
 		}
 		$order->add_item( $item );
 
-		// Set payment gateway
+		// Set payment gateway.
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		$order->set_payment_method( $payment_gateways['bacs'] );
 
-		// Set totals
+		// Set totals.
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 0 );
 		$order->set_discount_tax( 0 );
 		$order->set_cart_tax( 0 );
 		$order->set_shipping_tax( 0 );
-		$order->set_total( 50 ); // 4 x $10 simple helper product
+		$order->set_total( 50 ); // 4 x $10 simple helper product.
 		$order->save();
 
 		return $order;
@@ -134,7 +137,7 @@ class OrderHelper {
 	 */
 	public static function create_order_custom_table_if_not_exist() {
 		$order_table_controller = wc_get_container()
-			->get( 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' );
+			->get( CustomOrdersTableController::class );
 		$order_table_controller->show_feature();
 		$synchronizer = wc_get_container()
 			->get( DataSynchronizer::class );
@@ -166,7 +169,7 @@ class OrderHelper {
 
 		ShippingHelper::create_simple_flat_rate();
 
-		$order = OrderHelper::create_order();
+		$order = self::create_order();
 		// Make sure this is a wp_post order.
 		$post = get_post( $order->get_id() );
 		assert( isset( $post ) );
