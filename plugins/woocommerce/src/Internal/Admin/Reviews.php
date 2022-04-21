@@ -270,13 +270,13 @@ class Reviews {
 
 		$is_reply = false;
 
-		if ( $comment && $comment->comment_parent > 0 ) {
+		if ( isset( $comment->comment_parent ) && $comment->comment_parent > 0 ) {
 			$is_reply = true;
 			$comment = get_comment( $comment->comment_parent ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
-		if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+		if ( isset( $comment->comment_parent ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
 			if ( 'Edit Comment' === $text ) {
 				$translation = $is_reply
 					? __( 'Edit Review Reply', 'woocommerce' )
