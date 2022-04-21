@@ -24,6 +24,7 @@ import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { SectionPanelTitle } from './section-panel-title';
 import { TaskListItem } from './task-list-item';
+import { TaskListCompletedHeaderWithCES } from './completed-header-with-ces';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
@@ -40,6 +41,8 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	sections,
 	displayProgressHeader,
+	cesHeader = true,
+	showCESFeedback = false,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { profileItems } = useSelect( ( select ) => {
@@ -115,14 +118,22 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
-	if ( isComplete && ! keepCompletedTaskList ) {
+	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
 			<>
-				<TaskListCompleted
-					hideTasks={ hideTasks }
-					keepTasks={ keepTasks }
-					twoColumns={ false }
-				/>
+				{ cesHeader ? (
+					<TaskListCompletedHeaderWithCES
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						showCES={ showCESFeedback }
+					/>
+				) : (
+					<TaskListCompleted
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						twoColumns={ false }
+					/>
+				) }
 			</>
 		);
 	}

@@ -7,7 +7,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import CustomerFeedbackModal from '../index';
+import { CustomerFeedbackModal } from '../index';
 
 const mockRecordScoreCallback = jest.fn();
 
@@ -59,7 +59,7 @@ describe( 'CustomerFeedbackModal', () => {
 		await screen.findByRole( 'dialog' );
 
 		expect(
-			screen.queryByLabelText( 'Comments (Optional)' )
+			screen.queryByLabelText( 'Comments (optional)' )
 		).not.toBeInTheDocument();
 	} );
 
@@ -80,7 +80,7 @@ describe( 'CustomerFeedbackModal', () => {
 			fireEvent.click( screen.getByLabelText( labelText ) );
 
 			// Wait for comments field to show.
-			await screen.findByLabelText( 'Comments (Optional)' );
+			await screen.findByLabelText( 'Comments (optional)' );
 
 			// Select neutral score.
 			fireEvent.click( screen.getByLabelText( 'Neutral' ) );
@@ -88,7 +88,7 @@ describe( 'CustomerFeedbackModal', () => {
 			// Wait for comments field to hide.
 			await waitFor( () => {
 				expect(
-					screen.queryByLabelText( 'Comments (Optional)' )
+					screen.queryByLabelText( 'Comments (optional)' )
 				).not.toBeInTheDocument();
 			} );
 		}

@@ -15,6 +15,7 @@ import { __ } from '@wordpress/i18n';
 type CustomerFeedbackSimpleProps = {
 	recordScoreCallback: ( score: number ) => void;
 	label: string;
+	feedbackScore?: number;
 	showFeedback?: boolean;
 };
 
@@ -32,12 +33,14 @@ type CustomerFeedbackSimpleProps = {
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
  * @param {string}   props.label               Question to ask the customer.
- * @param {string}   props.showFeedback        To show feedback message.
+ * @param {number}   props.feedbackScore       Feedback score.
+ * @param {boolean}  props.showFeedback        Show feedback.
  */
 const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 	recordScoreCallback,
 	label,
-	showFeedback = false,
+	feedbackScore = NaN,
+	showFeedback,
 } ) => {
 	const options = [
 		{
@@ -67,7 +70,13 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 		},
 	];
 
-	const [ score, setScore ] = useState( NaN );
+	const [ score, setScore ] = useState( feedbackScore || NaN );
+
+	useEffect( () => {
+		if ( feedbackScore !== score ) {
+			setScore( feedbackScore );
+		}
+	}, [ feedbackScore ] );
 
 	useEffect( () => {
 		if ( ! isNaN( score ) ) {
@@ -77,7 +86,7 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 
 	return (
 		<div className="customer-feedback-simple__container">
-			{ isNaN( score ) && ! showFeedback ? (
+			{ ! showFeedback ? (
 				<Fragment>
 					<Text
 						variant="subtitle.small"
@@ -124,7 +133,6 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 CustomerFeedbackSimple.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
-	showFeedback: PropTypes.bool,
 };
 
 export { CustomerFeedbackSimple };

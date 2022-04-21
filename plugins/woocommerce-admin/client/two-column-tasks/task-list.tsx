@@ -68,7 +68,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList, visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const {
+		hideTaskList,
+		visitedTask,
+		keepCompletedTaskList: keepCompletedTasks,
+	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;
@@ -115,13 +119,14 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const keepTasks = () => {
-		const updateOptionsParams = {
-			woocommerce_task_list_keep_completed: 'yes',
-		};
+		keepCompletedTasks( id );
+		// const updateOptionsParams = {
+		// 	woocommerce_task_list_keep_completed: 'yes',
+		// };
 
-		updateOptions( {
-			...updateOptionsParams,
-		} );
+		// updateOptions( {
+		// 	...updateOptionsParams,
+		// } );
 	};
 
 	const renderMenu = () => {

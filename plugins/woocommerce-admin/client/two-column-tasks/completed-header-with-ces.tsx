@@ -52,8 +52,8 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
+	const [ submittedScore, setSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
-	const [ showFeedback, setShowFeedback ] = useState( false );
 	const { storeAgeInWeeks, cesShownForActions } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 
@@ -69,19 +69,26 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 		return {};
 	} );
 
+	const submitScore = ( recordedScore: number, comments?: string ) => {
+		recordEvent( 'ces_feedback', {
+			action: CES_ACTION,
+			score: recordedScore,
+			comments: comments || '',
+			store_age: storeAgeInWeeks,
+		} );
+		updateOptions( {
+			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+				CES_ACTION,
+				...cesShownForActions,
+			],
+		} );
+		setSubmittedScore( true );
+	};
+
 	const recordScore = ( recordedScore: number ) => {
 		if ( recordedScore > 2 ) {
-			recordEvent( 'ces_feedback', {
-				action: CES_ACTION,
-				score: recordedScore,
-				store_age: storeAgeInWeeks,
-			} );
-			updateOptions( {
-				[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-					CES_ACTION,
-					...cesShownForActions,
-				],
-			} );
+			setScore( recordedScore );
+			submitScore( recordedScore );
 		} else {
 			setScore( recordedScore );
 			setShowCesModal( true );
@@ -94,19 +101,7 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 
 	const recordModalScore = ( recordedScore: number, comments: string ) => {
 		setShowCesModal( false );
-		recordEvent( 'ces_feedback', {
-			action: 'store_setup',
-			score: recordedScore,
-			comments: comments || '',
-			store_age: storeAgeInWeeks,
-		} );
-		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				CES_ACTION,
-				...cesShownForActions,
-			],
-		} );
-		setShowFeedback( true );
+		submitScore( recordedScore, comments );
 	};
 
 	return (
@@ -178,8 +173,9 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 								'How was your experience?',
 								'woocommerce'
 							) }
+							showFeedback={ submittedScore }
 							recordScoreCallback={ recordScore }
-							showFeedback={ showFeedback }
+							feedbackScore={ score }
 						/>
 					) }
 				</Card>
@@ -189,6 +185,10 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 					label={ __( 'How was your experience?', 'woocommerce' ) }
 					defaultScore={ score }
 					recordScoreCallback={ recordModalScore }
+					onCloseModal={ () => {
+						setScore( NaN );
+						setShowCesModal( false );
+					} }
 				/>
 			) : null }
 		</>
