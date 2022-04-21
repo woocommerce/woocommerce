@@ -42,6 +42,7 @@ class Reviews {
 	 * Constructor.
 	 */
 	public function __construct() {
+
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
 
@@ -108,7 +109,7 @@ class Reviews {
 	public function is_reviews_page() : bool {
 		global $current_screen;
 
-		return isset( $current_screen->base ) && 'product_page_product-reviews' === $current_screen->base;
+		return isset( $current_screen->base ) && 'product_page_' . static::MENU_SLUG === $current_screen->base;
 	}
 
 	/**
