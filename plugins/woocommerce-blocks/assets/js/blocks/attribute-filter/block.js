@@ -22,6 +22,10 @@ import classNames from 'classnames';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { getQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { isBoolean, isString } from '@woocommerce/types';
+import {
+	PREFIX_QUERY_ARG_FILTER_TYPE,
+	PREFIX_QUERY_ARG_QUERY_TYPE,
+} from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -36,6 +40,7 @@ import {
 	getActiveFilters,
 	areAllFiltersRemoved,
 	isQueryArgsEqual,
+	parseTaxonomyToGenerateURL,
 } from './utils';
 
 /**
@@ -392,9 +397,20 @@ const AttributeFilterBlock = ( {
 					getQueryArgs( window.location.href )
 				);
 
+				const parsedTaxonomy = parseTaxonomyToGenerateURL(
+					attributeObject?.taxonomy
+				);
+
 				const url = currentQueryArgKeys.reduce(
 					( currentUrl, queryArg ) =>
-						removeQueryArgs( currentUrl, queryArg ),
+						queryArg.includes(
+							PREFIX_QUERY_ARG_QUERY_TYPE + parsedTaxonomy
+						) ||
+						queryArg.includes(
+							PREFIX_QUERY_ARG_FILTER_TYPE + parsedTaxonomy
+						)
+							? removeQueryArgs( currentUrl, queryArg )
+							: currentUrl,
 					window.location.href
 				);
 
