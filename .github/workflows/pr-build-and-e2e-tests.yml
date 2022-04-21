@@ -15,7 +15,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@fix/build-core-reference
+              uses: woocommerce/action-build@trunk
               env:
                   BUILD_ENV: e2e
 
