@@ -1,11 +1,11 @@
 name: Lint and tests for JS packages and woocommerce-admin/client
 
-on: pull_request
-  # pull_request:
-  #   paths:
-  #     - 'packages/js/**/**'
-  #     - 'plugins/woocommerce-admin/client/**'
-  #     - '!**.md'
+on:
+  pull_request:
+    paths:
+      - 'packages/js/**/**'
+      - 'plugins/woocommerce-admin/client/**'
+      - '!**.md'
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
