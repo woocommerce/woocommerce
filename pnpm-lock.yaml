@@ -1097,7 +1097,7 @@ importers:
 
   plugins/woocommerce:
     specifiers:
-      '@babel/cli': 7.12.8
+      '@babel/cli': 7.17.6
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7
       '@babel/register': 7.12.1
@@ -1136,7 +1136,7 @@ importers:
       webpack-cli: 3.3.12
       wp-textdomain: 1.0.1
     devDependencies:
-      '@babel/cli': 7.12.8_@babel+core@7.12.9
+      '@babel/cli': 7.17.6_@babel+core@7.12.9
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@babel/register': 7.12.1_@babel+core@7.12.9
@@ -1735,6 +1735,27 @@ packages:
       source-map: 0.5.7
     optionalDependencies:
       '@nicolo-ribaudo/chokidar-2': 2.1.8-no-fsevents
+      chokidar: 3.5.3
+    dev: true
+
+  /@babel/cli/7.17.6_@babel+core@7.12.9:
+    resolution: {integrity: sha512-l4w608nsDNlxZhiJ5tE3DbNmr61fIKMZ6fTBo171VEFuFMIYuJ3mHRhTLEkKKyvx2Mizkkv/0a8OJOnZqkKYNA==}
+    engines: {node: '>=6.9.0'}
+    hasBin: true
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.12.9
+      '@jridgewell/trace-mapping': 0.3.4
+      commander: 4.1.1
+      convert-source-map: 1.8.0
+      fs-readdir-recursive: 1.1.0
+      glob: 7.2.0
+      make-dir: 2.1.0
+      slash: 2.0.0
+      source-map: 0.5.7
+    optionalDependencies:
+      '@nicolo-ribaudo/chokidar-2': 2.1.8-no-fsevents.3
       chokidar: 3.5.3
     dev: true
 
@@ -12553,6 +12574,7 @@ packages:
       re-resizable: 4.11.0
     transitivePeerDependencies:
       - react
+      - react-dom
     dev: true
 
   /@types/wordpress__compose/4.0.1:
