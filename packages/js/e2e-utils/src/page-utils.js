@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
+ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -62,6 +62,14 @@ export const orderPageSaveChanges = async () => {
 };
 
 /**
+ * Save changes on Product page.
+ */
+export const productPageSaveChanges = async () => {
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '#message' );
+};
+
+/**
  * Set checkbox.
  *
  * @param {string} selector
@@ -71,7 +79,7 @@ export const setCheckbox = async ( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = await (
 		await checkbox.getProperty( 'checked' )
-	 ).jsonValue();
+	).jsonValue();
 	if ( checkboxStatus !== true ) {
 		await checkbox.click();
 	}
@@ -87,7 +95,7 @@ export const unsetCheckbox = async ( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = await (
 		await checkbox.getProperty( 'checked' )
-	 ).jsonValue();
+	).jsonValue();
 	if ( checkboxStatus === true ) {
 		await checkbox.click();
 	}
@@ -114,8 +122,8 @@ export const backboneUnblocked = async () => {
 /**
  * Conditionally wait for a selector without throwing an error.
  *
- * @param selector
- * @param timeoutInSeconds
+ * @param  selector
+ * @param  timeoutInSeconds
  * @return {Promise<boolean>}
  */
 export const waitForSelectorWithoutThrow = async (
@@ -136,7 +144,7 @@ export const waitForSelectorWithoutThrow = async (
 /**
  * Publish, verify that item was published. Trash, verify that item was trashed.
  *
- * @param {string} button (Publish)
+ * @param {string} button              (Publish)
  * @param {string} publishNotice
  * @param {string} publishVerification
  * @param {string} trashVerification
@@ -171,7 +179,7 @@ export const verifyCheckboxIsSet = async ( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = await (
 		await checkbox.getProperty( 'checked' )
-	 ).jsonValue();
+	).jsonValue();
 	await expect( checkboxStatus ).toBe( true );
 };
 
@@ -185,7 +193,7 @@ export const verifyCheckboxIsUnset = async ( selector ) => {
 	const checkbox = await page.$( selector );
 	const checkboxStatus = await (
 		await checkbox.getProperty( 'checked' )
-	 ).jsonValue();
+	).jsonValue();
 	await expect( checkboxStatus ).not.toBe( true );
 };
 
@@ -193,7 +201,7 @@ export const verifyCheckboxIsUnset = async ( selector ) => {
  * Verify the value of input field once it was saved (can be used for radio buttons verification as well).
  *
  * @param {string} selector Selector of the input field that needs to be verified.
- * @param {string} value Value of the input field that needs to be verified.
+ * @param {string} value    Value of the input field that needs to be verified.
  */
 export const verifyValueOfInputField = async ( selector, value ) => {
 	await page.focus( selector );
@@ -249,7 +257,7 @@ export const evalAndClick = async ( selector ) => {
 /**
  * Select a value from select2 search input field.
  *
- * @param {string} value Value of what to be selected
+ * @param {string} value    Value of what to be selected
  * @param {string} selector Selector of the select2 search field
  */
 export const selectOptionInSelect2 = async (
@@ -266,8 +274,8 @@ export const selectOptionInSelect2 = async (
 /**
  * Search by any term for an order
  *
- * @param {string} value Value to be entered into the search field
- * @param {string} orderId Order ID
+ * @param {string} value        Value to be entered into the search field
+ * @param {string} orderId      Order ID
  * @param {string} customerName Customer's full name attached to order ID.
  */
 export const searchForOrder = async ( value, orderId, customerName ) => {
@@ -284,7 +292,7 @@ export const searchForOrder = async ( value, orderId, customerName ) => {
  * Apply a coupon code within cart or checkout.
  * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
  *
- * @param couponCode string
+ * @param  couponCode string
  * @return {Promise<void>}
  */
 export const applyCoupon = async ( couponCode ) => {
@@ -310,7 +318,7 @@ export const applyCoupon = async ( couponCode ) => {
 /**
  * Remove one coupon within cart or checkout.
  *
- * @param couponCode Coupon name.
+ * @param  couponCode Coupon name.
  * @return {Promise<void>}
  */
 export const removeCoupon = async ( couponCode ) => {
@@ -348,7 +356,7 @@ export const selectOrderAction = async ( action ) => {
  *
  * @param {string} buttonSelector Selector of button to click
  * @param {string} resultSelector Selector to wait for after click
- * @param {number} timeout Timeout length in milliseconds. Default 5000.
+ * @param {number} timeout        Timeout length in milliseconds. Default 5000.
  * @return {Promise<void>}
  */
 export const clickAndWaitForSelector = async (
@@ -367,9 +375,9 @@ export const clickAndWaitForSelector = async (
  * Behavior can be modified with @param options. Possible keys: `visible`, `hidden`, `timeout`.
  * More details at: https://pptr.dev/#?product=Puppeteer&show=api-pagewaitforselectorselector-options
  *
- * @param {Puppeteer.Page} page Puppeteer representation of the page.
- * @param {string} selector CSS selector of the element
- * @param {Object} options Custom options to modify function behavior.
+ * @param {Puppeteer.Page} page     Puppeteer representation of the page.
+ * @param {string}         selector CSS selector of the element
+ * @param {Object}         options  Custom options to modify function behavior.
  */
 export async function waitForSelector( page, selector, options = {} ) {
 	// set up default options
@@ -384,7 +392,7 @@ export async function waitForSelector( page, selector, options = {} ) {
  * Retrieves the desired HTML attribute from a selector.
  * For example, the 'value' attribute of an input element.
  *
- * @param {string} selector Selector of the element you want to get the attribute from.
+ * @param {string} selector  Selector of the element you want to get the attribute from.
  * @param {string} attribute The desired HTML attribute.
  * @return {Promise<string>}
  */
@@ -399,8 +407,8 @@ export async function getSelectorAttribute( selector, attribute ) {
 /**
  * Asserts the value of the desired HTML attribute of a selector.
  *
- * @param {string} selector Selector of the element you want to verify.
- * @param {string} attribute The desired HTML attribute.
+ * @param {string} selector      Selector of the element you want to verify.
+ * @param {string} attribute     The desired HTML attribute.
  * @param {string} expectedValue The expected value.
  */
 export async function verifyValueOfElementAttribute(
@@ -410,4 +418,18 @@ export async function verifyValueOfElementAttribute(
 ) {
 	const actualValue = await getSelectorAttribute( selector, attribute );
 	expect( actualValue ).toBe( expectedValue );
+}
+
+/**
+ * Clicks only if the element is enabled.
+ * Otherwise, it raises an error because element is disabled and therefore not clickable.
+ *
+ * @param {string} selector Selector of the element you want to click.
+ */
+export async function click( selector ) {
+	const isDisabled =
+		( await getSelectorAttribute( selector, 'disabled' ) ) !== null;
+	expect( isDisabled ).toBeFalsy();
+
+	await expect( page ).toClick( selector );
 }
