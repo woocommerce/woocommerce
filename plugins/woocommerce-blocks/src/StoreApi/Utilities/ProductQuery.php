@@ -95,11 +95,23 @@ class ProductQuery {
 			'and'    => 'AND',
 		];
 
+		// Gets all registered product taxonomies and prefixes them with `tax_`.
+		// This is neeeded to avoid situations where a users registers a new product taxonomy with the same name as default field.
+		// eg an `sku` taxonomy will be mapped to `tax_sku`.
+		$all_product_taxonomies = array_map(
+			function ( $value ) {
+				return '_unstable_tax_' . $value;
+			},
+			get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' )
+		);
+
 		// Map between taxonomy name and arg key.
-		$taxonomies = [
+		$default_taxonomies = [
 			'product_cat' => 'category',
 			'product_tag' => 'tag',
 		];
+
+		$taxonomies = array_merge( $all_product_taxonomies, $default_taxonomies );
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
