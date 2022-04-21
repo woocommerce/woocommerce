@@ -10,7 +10,7 @@
     "composer/installers": "~1.7"
   },
   "require-dev": {
-    "phpunit/phpunit": "6.5.14",
+    "phpunit/phpunit": "^6.5 || ^7.5",
     "woocommerce/woocommerce-sniffs": "^0.1.2",
     "automattic/jetpack-changelogger": "3.0.2"
   },
@@ -52,6 +52,9 @@
 		}
   },
   "config": {
+    "platform": {
+      "php": "7.2"
+		},
     "allow-plugins": {
       "composer/installers": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
