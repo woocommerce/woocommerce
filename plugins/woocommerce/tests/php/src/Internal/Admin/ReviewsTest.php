@@ -208,17 +208,17 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		global $comment;
 
 		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
-		$review  = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
-		$reply   = $this->factory()->comment->create(
+		$review  = $this->factory()->comment->create_and_get( [ 'comment_post_ID' => $product ] );
+		$reply   = $this->factory()->comment->create_and_get(
 			[
 				'comment_post_ID' => $product,
-				'comment_parent'  => $review,
+				'comment_parent'  => $review->comment_ID,
 			]
 		);
 
 		if ( ! $is_review ) {
 			$post    = $this->factory()->post->create();
-			$comment = $this->factory()->comment->create( [ 'comment_post_ID' => $post ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$comment = $this->factory()->comment->create_and_get( [ 'comment_post_ID' => $post ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		} else {
 			$comment = $is_reply ? $reply : $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
