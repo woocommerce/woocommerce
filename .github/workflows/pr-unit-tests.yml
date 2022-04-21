@@ -85,7 +85,7 @@ jobs:
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
              rm -rf ./vendor/phpunit/
-             composer dump-autoload
+             pnpm nx composer-dump-autoload woocommerce
            fi
 
       - name: Init DB and WP
