@@ -202,7 +202,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 		if ( task.actionUrl ) {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
+				window.location.href = task.actionUrl;
 			} else {
 				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
 			}
