@@ -266,8 +266,6 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function display() {
-		$singular = $this->_args['singular'] ?? false;
-
 		$this->display_tablenav( 'top' );
 
 		$this->screen->render_screen_reader_content( 'heading_list' );
@@ -279,7 +277,7 @@ class ReviewsListTable extends WP_List_Table {
 				<?php $this->print_column_headers(); ?>
 			</tr>
 			</thead>
-			<tbody id="the-comment-list" <?php echo esc_attr( $singular ? "data-wp-lists='list:$singular'" : '' ); ?>>
+			<tbody id="the-comment-list" data-wp-lists="list:comment">
 			<?php $this->display_rows_or_placeholder(); ?>
 			</tbody>
 			<tfoot>
