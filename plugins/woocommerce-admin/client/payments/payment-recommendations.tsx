@@ -13,7 +13,7 @@ import {
 	PAYMENT_GATEWAYS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	Plugin,
-	PluginsStoreActions,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import ExternalIcon from 'gridicons/dist/external';
@@ -41,7 +41,7 @@ const PaymentRecommendations: React.FC = () => {
 	const {
 		installAndActivatePlugins,
 		dismissRecommendedPlugins,
-	}: PluginsStoreActions = useDispatch( PLUGINS_STORE_NAME );
+	} = useDispatch( PLUGINS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const {
@@ -50,7 +50,7 @@ const PaymentRecommendations: React.FC = () => {
 		paymentGatewaySuggestions,
 		isResolving,
 	} = useSelect(
-		( select ) => {
+		( select: WCDataSelector ) => {
 			const installingGatewayId =
 				isInstalled && getPluginSlug( installingPlugin );
 			return {
@@ -61,13 +61,16 @@ const PaymentRecommendations: React.FC = () => {
 					),
 				installedPaymentGateways: select( PAYMENT_GATEWAYS_STORE_NAME )
 					.getPaymentGateways()
-					.reduce( ( gateways, gateway ) => {
-						if ( installingGatewayId === gateway.id ) {
+					.reduce(
+						( gateways: { [ id: string ]: boolean }, gateway ) => {
+							if ( installingGatewayId === gateway.id ) {
+								return gateways;
+							}
+							gateways[ gateway.id ] = true;
 							return gateways;
-						}
-						gateways[ gateway.id ] = true;
-						return gateways;
-					}, {} ),
+						},
+						{}
+					),
 				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
 					'getPaymentGatewaySuggestions'
 				),
@@ -78,16 +81,17 @@ const PaymentRecommendations: React.FC = () => {
 		},
 		[ isInstalled ]
 	);
-
 	const supportsWCPayments =
 		paymentGatewaySuggestions &&
-		paymentGatewaySuggestions.filter( ( paymentGatewaySuggestion ) => {
-			return (
-				paymentGatewaySuggestion.id.indexOf(
-					'woocommerce_payments'
-				) === 0
-			);
-		} ).length === 1;
+		paymentGatewaySuggestions.filter(
+			( paymentGatewaySuggestion: Plugin ) => {
+				return (
+					paymentGatewaySuggestion.id.indexOf(
+						'woocommerce_payments'
+					) === 0
+				);
+			}
+		).length === 1;
 
 	const triggeredPageViewRef = useRef( false );
 	const shouldShowRecommendations =
@@ -104,7 +108,7 @@ const PaymentRecommendations: React.FC = () => {
 		) {
 			triggeredPageViewRef.current = true;
 			const eventProps = ( paymentGatewaySuggestions || [] ).reduce(
-				( props, plugin ) => {
+				( props: { [ key: string ]: boolean }, plugin: Plugin ) => {
 					if ( plugin.plugins && plugin.plugins.length > 0 ) {
 						return {
 							...props,

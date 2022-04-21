@@ -19,6 +19,7 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
 		"@wordpress/api-fetch": "^6.0.1",

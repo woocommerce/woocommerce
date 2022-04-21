@@ -11,6 +11,7 @@ import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	getVisibleTasks,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
@@ -46,7 +47,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
 		OPTIONS_STORE_NAME
 	);
-	const { profileItems } = useSelect( ( select ) => {
+	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),

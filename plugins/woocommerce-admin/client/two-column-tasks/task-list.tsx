@@ -17,10 +17,13 @@ import {
 	TaskType,
 	useUserPreferences,
 	getVisibleTasks,
+	WCDataSelector,
+	TaskListType,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
 import classnames from 'classnames';
+import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -29,8 +32,15 @@ import '../tasks/task-list.scss';
 import taskHeaders from './task-headers';
 import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
-import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
+
+export type TaskListProps = TaskListType & {
+	eventName?: string;
+	twoColumns?: boolean;
+	query: {
+		task?: string;
+	};
+};
 
 export const TaskList: React.FC< TaskListProps > = ( {
 	query,
@@ -46,7 +56,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
 		OPTIONS_STORE_NAME
 	);
-	const { profileItems } = useSelect( ( select ) => {
+	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),
@@ -65,7 +75,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const prevQueryRef = useRef( query );
 
 	const visibleTasks = getVisibleTasks( tasks );
-
 	const recordTaskListView = () => {
 		if ( query.task ) {
 			return;
@@ -202,9 +211,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 		if ( task.actionUrl ) {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
+				window.location.href = task.actionUrl;
 			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+				( getHistory() as History ).push(
+					getNewPath( {}, task.actionUrl, {} )
+				);
 			}
 			return;
 		}

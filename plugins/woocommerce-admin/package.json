@@ -152,9 +152,13 @@
 		"@types/puppeteer": "^4.0.2",
 		"@types/react-router-dom": "^5.3.3",
 		"@types/react-transition-group": "^4.4.4",
+		"@types/testing-library__jest-dom": "^5.14.3",
 		"@types/wordpress__components": "^19.3.0",
+		"@types/wordpress__compose": "^4.0.1",
+		"@types/wordpress__data": "^6.0.0",
 		"@types/wordpress__data-controls": "^2.2.0",
 		"@types/wordpress__notices": "^3.3.0",
+		"@types/wordpress__plugins": "^3.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
 		"@typescript-eslint/parser": "^5.14.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
@@ -246,7 +250,9 @@
 		"@wordpress/data": "^6.3.0"
 	},
 	"lint-staged": {
-		"*.scss": [ "pnpm lint:css-fix" ],
+		"*.scss": [
+			"pnpm lint:css-fix"
+		],
 		"client/**/*.(t|j)s?(x)": [
 			"pnpm reformat-files",
 			"pnpm wp-scripts lint-js",

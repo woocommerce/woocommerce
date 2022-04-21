@@ -34,12 +34,17 @@ export type Plugin = {
 	content: string;
 	plugins: string[];
 	title: string;
+	category_additional: string[];
+	category_other: string[];
 	image: string;
+	image_72x72?: string;
 	square_image?: string;
 	recommendation_priority?: number;
 	is_visible?: boolean;
 	is_local_partner?: boolean;
 	is_offline?: boolean;
+	actionText?: string;
+	recommended?: boolean;
 };
 
 type PaypalOnboardingState = 'unknown' | 'start' | 'progressive' | 'onboarded';

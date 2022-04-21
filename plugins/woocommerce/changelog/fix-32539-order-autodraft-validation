@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure that an existing order with auto-draft status won't be interpreted as pending when determining if the status has changed.
