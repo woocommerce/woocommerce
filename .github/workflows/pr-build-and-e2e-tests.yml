@@ -1,17 +1,16 @@
 name: Build zip for PR
 on: pull_request
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
     build:
         name: Build zip for PR
         runs-on: ubuntu-latest
         steps:
-            - name: Cancel Previous Runs
-              uses: styfle/cancel-workflow-action@0.7.0
-              with:
-                  access_token: ${{ github.token }}
-
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - name: Build
               id: build
@@ -20,7 +19,7 @@ jobs:
                   BUILD_ENV: e2e
 
             - name: Upload PR zip
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -38,10 +37,9 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
 
@@ -49,7 +47,7 @@ jobs:
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                   name: woocommerce
                   path: tmp
@@ -60,15 +58,23 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+            - name: Cache modules
+              uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
             - name: Install dependencies
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+              run: pnpm install
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
+              run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -76,10 +82,10 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpx wc-e2e test:e2e
+              run: pnpm exec wc-e2e test:e2e
 
             - name: Archive E2E test screenshots
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               if: always()
               with:
                   name: E2E Screenshots
@@ -97,10 +103,9 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
 
@@ -108,7 +113,7 @@ jobs:
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                   name: woocommerce
                   path: tmp
@@ -119,15 +124,23 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+            - name: Cache modules
+              uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
             - name: Install dependencies
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+              run: pnpm install
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
+              run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -135,10 +148,10 @@ jobs:
                   BASE_URL: http://localhost:8084
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpx wc-api-tests test api
+              run: pnpm exec wc-api-tests test api
 
             - name: Upload API test report
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
@@ -156,9 +169,9 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
+
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
 
@@ -166,7 +179,7 @@ jobs:
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                   name: woocommerce
                   path: tmp
@@ -177,11 +190,19 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+            - name: Cache modules
+              uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
             - name: Install dependencies
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+              run: pnpm install
             
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
@@ -190,7 +211,7 @@ jobs:
             
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
+              run: pnpm exec wc-e2e docker:up
 
             - name: Install k6
               run: |
