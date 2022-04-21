@@ -103,6 +103,8 @@ export type OnboardingSelectors = {
 		ids: string[]
 	) => ReturnType< typeof getTaskListsByIds >;
 	getTaskLists: () => ReturnType< typeof getTaskLists >;
+	getTaskList: ( id: string ) => ReturnType< typeof getTaskList >;
+	getFreeExtensions: () => ReturnType< typeof getFreeExtensions >;
 } & WPDataSelectors;
 
 export type OnboardingState = {
