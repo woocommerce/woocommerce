@@ -24,6 +24,8 @@
   },
   "devDependencies": {
     "@automattic/nx-composer": "^0.1.0",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/runtime": "^7.17.2",
     "@nrwl/cli": "^13.3.4",
     "@nrwl/devkit": "^13.1.4",
     "@nrwl/linter": "^13.3.4",
@@ -51,7 +53,10 @@
     "@woocommerce/eslint-plugin": "workspace:*",
     "@wordpress/eslint-plugin": "^11.0.0",
     "@wordpress/prettier-config": "^1.1.1",
+    "babel-loader": "^8.2.3",
     "chalk": "^4.1.2",
+    "core-js": "^3.21.1",
+    "css-loader": "^6.7.0",
     "glob": "^7.2.0",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
@@ -59,7 +64,11 @@
     "mkdirp": "^1.0.4",
     "node-stream-zip": "^1.15.0",
     "prettier": "npm:wp-prettier@^2.2.1-beta-1",
+    "postcss-loader": "^3.0.0",
+    "regenerator-runtime": "^0.13.9",
     "request": "^2.88.2",
+    "sass": "^1.49.9",
+    "sass-loader": "^10.2.1",
     "typescript": "4.2.4"
   },
   "dependencies": {

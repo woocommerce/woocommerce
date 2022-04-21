@@ -7,7 +7,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 /**
  * External dependencies
  */
-const wcAdminWebpackConfig = require( '../webpack.config.js' );
+const wcAdminWebpackConfig = require( '../../plugins/woocommerce-admin/webpack.config.js' );
 
 const wcAdminPackages = [
 	'components',
@@ -47,7 +47,7 @@ module.exports = ( storybookConfig ) => {
 	wcAdminPackages.forEach( ( name ) => {
 		storybookConfig.resolve.alias[
 			`@woocommerce/${ name }`
-		] = path.resolve( __dirname, `../../../packages/js/${ name }/src` );
+		] = path.resolve( __dirname, `../../packages/js/${ name }/src` );
 	} );
 
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
@@ -71,14 +71,14 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve(
 						__dirname,
-						`../../../packages/js/components/build-style/*.css`
+						`../../packages/js/components/build-style/*.css`
 					),
 					to: `./component-css/[name][ext]`,
 				},
 				{
 					from: path.resolve(
 						__dirname,
-						`../../../packages/js/experimental/build-style/*.css`
+						`../../packages/js/experimental/build-style/*.css`
 					),
 					to: `./experimental-css/[name][ext]`,
 				},
