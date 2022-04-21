@@ -155,8 +155,8 @@ jobs:
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                        package/woocommerce/packages/js/api-core-tests/allure-results
-                        package/woocommerce/packages/js/api-core-tests/allure-report
+                      package/woocommerce/packages/js/api-core-tests/allure-results
+                      package/woocommerce/packages/js/api-core-tests/allure-report
                   retention-days: 7
 
     k6-tests-run:
@@ -203,12 +203,12 @@ jobs:
             - name: Install dependencies
               working-directory: package/woocommerce
               run: pnpm install
-            
+
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
               run: |
                   cp init-sample-products.sh initialize.sh
-            
+
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
