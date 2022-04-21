@@ -32,9 +32,9 @@ interface StepperProps {
 		onClick?: ( key: string ) => void;
 	} >;
 	/** If the stepper is vertical instead of horizontal. */
-	isVertical: boolean;
+	isVertical?: boolean;
 	/**  Optionally mark the current step as pending to show a spinner. */
-	isPending: boolean;
+	isPending?: boolean;
 }
 
 /**
