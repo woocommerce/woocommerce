@@ -247,6 +247,7 @@ class Reviews {
 			$comment_author       = wp_slash( $user->display_name );
 			$comment_author_email = wp_slash( $user->user_email );
 			$comment_author_url   = wp_slash( $user->user_url );
+			// WordPress core already sanitizes `content` during the `pre_comment_content` hook, which is why it's not needed here.
 			$comment_content      = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$comment_type         = isset( $_POST['comment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['comment_type'] ) ) : 'comment';
 
