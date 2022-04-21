@@ -262,7 +262,7 @@ class Reviews {
 			return $translation;
 		}
 
-		// Try to get comment from query params.
+		// Try to get comment from query params when not in context already.
 		if ( ! $comment && isset( $_GET['action'], $_GET['c'] ) && 'editcomment' === $_GET['action'] ) {
 			$comment_id = absint( $_GET['c'] );
 			$comment    = get_comment( $comment_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
