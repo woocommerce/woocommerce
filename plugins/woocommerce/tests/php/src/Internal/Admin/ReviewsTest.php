@@ -8,6 +8,7 @@ use Generator;
 use ReflectionClass;
 use ReflectionException;
 use WC_Unit_Test_Case;
+use WP_Comment;
 
 /**
  * Tests for the admin reviews handler.
@@ -180,6 +181,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the property doesn't exist.
 	 */
 	public function test_render_reviews_list_table() {
+		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
 		$reviews = Reviews::get_instance();
 		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
@@ -470,6 +473,66 @@ test2</p></div>',
 		yield 'Is not the reviews page' => [
 			'is_reviews_page'                          => false,
 			'maybe_display_reviews_bulk_action_notice' => false,
+		];
+	}
+
+	/**
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
+	 * @dataProvider provider_is_review_or_reply
+	 *
+	 * @param WP_Comment|array|null $object   Object to pass in to the method.
+	 * @param bool                  $expected Expected result.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_is_review_or_reply( $object, bool $expected ) : void {
+		$reviews = new Reviews();
+		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected, $method->invoke( $reviews, $object ) );
+	}
+
+	/** @see test_is_review_or_reply */
+	public function provider_is_review_or_reply(): Generator {
+		yield 'null object' => [ null, false ];
+		yield 'invalid array' => [ [ 'data' ], false ];
+
+		yield 'regular comment' => [
+			'object' => $this->factory()->comment->create_and_get(
+				[
+					'comment_post_ID'  => $this->factory()->post->create(),
+				]
+			),
+			'expected' => false,
+		];
+
+		yield 'review' => [
+			'object' => $this->factory()->comment->create_and_get(
+				[
+					'comment_type'     => 'review',
+					'comment_post_ID'  => $this->factory()->post->create(
+						[
+							'post_type'  => 'product',
+						]
+					),
+				]
+			),
+			'expected' => true,
+		];
+
+		yield 'comment attached to product' => [
+			'object' => $this->factory()->comment->create_and_get(
+				[
+					'comment_type'     => 'comment',
+					'comment_post_ID'  => $this->factory()->post->create(
+						[
+							'post_type'  => 'product',
+						]
+					),
+				]
+			),
+			'expected' => true,
 		];
 	}
 
