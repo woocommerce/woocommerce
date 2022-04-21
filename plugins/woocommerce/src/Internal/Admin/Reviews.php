@@ -234,11 +234,11 @@ class Reviews {
 			$comment_id = absint( $_GET['c'] );
 			$comment = get_comment( $comment_id );
 
-			if ( $comment->comment_parent > 0 ) {
+			if ( isset( $comment->comment_parent ) && $comment->comment_parent > 0 ) {
 				$comment = get_comment( $comment->comment_parent );
 			}
 
-			if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+			if ( isset( $comment->comment_post_ID ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
 				$parent_file  = 'edit.php?post_type=product';
 				$submenu_file = 'product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
