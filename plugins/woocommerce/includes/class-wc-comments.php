@@ -241,7 +241,7 @@ class WC_Comments {
 	}
 
 	/**
-	 * Remove order notes and webhook delivery logs from wp_count_comments().
+	 * Remove order notes, webhook delivery logs, and product reviews from wp_count_comments().
 	 *
 	 * @since  2.2
 	 * @param  object $stats   Comment stats.
