@@ -45,6 +45,8 @@ class Reviews {
 
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
 
+		add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
+
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
@@ -212,6 +214,33 @@ class Reviews {
 		}
 
 		return ' <span class="awaiting-mod count-' . esc_attr( $count ) . '"><span class="pending-count">' . esc_html( $count ) . '</span></span>';
+	}
+
+	/**
+	 * Highlights Product -> Reviews admin menu item when editing a review or a reply to a review.
+	 *
+	 * @global string $submenu_file
+	 *
+	 * @param string $parent_file Parent menu item.
+	 * @return string
+	 */
+	public function edit_review_parent_file( $parent_file ) {
+		global $submenu_file;
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		if ( $screen && 'comment' === $screen->id && isset( $_GET['c'] ) ) {
+
+			$comment_id = absint( $_GET['c'] );
+			$comment = get_comment( $comment_id );
+
+			if ( $comment && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+				$parent_file  = 'edit.php?post_type=product';
+				$submenu_file = 'product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		return $parent_file;
 	}
 
 	/**
