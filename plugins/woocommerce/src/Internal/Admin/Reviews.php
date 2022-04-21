@@ -47,7 +47,10 @@ class Reviews {
 
 		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
-		add_action( 'wp_ajax_edit-comment', [ $this, 'handle_edit_comment' ], -1 );
+
+		// These ajax callbacks need a low priority to ensure they run before their WordPress core counterparts.
+		add_action( 'wp_ajax_edit-comment', [ $this, 'handle_edit_review' ], -1 );
+		add_action( 'wp_ajax_replyto-comment', [ $this, 'handle_reply_to_review' ], -1 );
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
@@ -142,12 +145,12 @@ class Reviews {
 	}
 
 	/**
-	 * Ajax callback for editing a comment. This is based on {@see wp_ajax_edit_comment()}, and is designed to run
+	 * Ajax callback for editing a review. This is based on {@see wp_ajax_edit_comment()}, and is designed to run
 	 * before that callback so we can override the rendering for a review.
 	 *
 	 * @return void
 	 */
-	public function handle_edit_comment(): void {
+	public function handle_edit_review(): void {
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_id = isset( $_POST['comment_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_ID'] ) ) : 0;
@@ -198,6 +201,147 @@ class Reviews {
 			)
 		);
 
+		$x->send();
+	}
+
+	/**
+	 * Ajax callback for replying to a review inline. This is based on {@see wp_ajax_replyto_comment()}, and is designed
+	 * to run before that callback so we can override the rendering for a review reply.
+	 *
+	 * @return void
+	 */
+	public function handle_reply_to_review(): void {
+		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
+
+		$reply_post_id = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0;
+		$post          = get_post( $reply_post_id );
+
+		if ( ! $post ) {
+			wp_die( -1 );
+		}
+
+		// Inline Review replies will use the `detail` mode. If that's not what we have, then let WordPress core take over.
+		if ( isset( $_REQUEST['mode'] ) && 'dashboard' === $_REQUEST['mode'] ) {
+			return;
+		}
+
+		// If this is not a a reply to a review, bail silently to let WordPress core take over.
+		if ( 'product' !== get_post_type( $post ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_post', $reply_post_id ) ) {
+			wp_die( -1 );
+		}
+
+		if ( empty( $post->post_status ) ) {
+			wp_die( 1 );
+		} elseif ( in_array( $post->post_status, array( 'draft', 'pending', 'trash' ), true ) ) {
+			wp_die( esc_html__( 'Error: You can\'t reply to a review on a draft product.', 'woocommerce' ) );
+		}
+
+		$user = wp_get_current_user();
+
+		if ( $user->exists() ) {
+			$user_ID              = $user->ID;
+			$comment_author       = wp_slash( $user->display_name );
+			$comment_author_email = wp_slash( $user->user_email );
+			$comment_author_url   = wp_slash( $user->user_url );
+			$comment_content      = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$comment_type         = isset( $_POST['comment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['comment_type'] ) ) : 'comment';
+
+			if ( current_user_can( 'unfiltered_html' ) ) {
+				if ( ! isset( $_POST['_wp_unfiltered_html_comment'] ) ) {
+					$_POST['_wp_unfiltered_html_comment'] = '';
+				}
+
+				if ( wp_create_nonce( 'unfiltered-html-comment' ) != $_POST['_wp_unfiltered_html_comment'] ) {
+					kses_remove_filters(); // Start with a clean slate.
+					kses_init_filters();   // Set up the filters.
+					remove_filter( 'pre_comment_content', 'wp_filter_post_kses' );
+					add_filter( 'pre_comment_content', 'wp_filter_kses' );
+				}
+			}
+		} else {
+			wp_die( esc_html__( 'Sorry, you must be logged in to reply to a review.', 'woocommerce' ) );
+		}
+
+		if ( '' === $comment_content ) {
+			wp_die( esc_html__( 'Error: Please type your reply text.', 'woocommerce' ) );
+		}
+
+		$comment_parent = 0;
+
+		if ( isset( $_POST['comment_ID'] ) ) {
+			$comment_parent = absint( wp_unslash( $_POST['comment_ID'] ) );
+		}
+
+		$comment_auto_approved = false;
+		$commentdata           = compact( 'reply_post_id', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID' );
+
+		// Automatically approve parent comment.
+		if ( ! empty( $_POST['approve_parent'] ) ) {
+			$parent = get_comment( $comment_parent );
+
+			if ( $parent && '0' === $parent->comment_approved && $parent->comment_post_ID == $reply_post_id ) {
+				if ( ! current_user_can( 'edit_comment', $parent->comment_ID ) ) {
+					wp_die( -1 );
+				}
+
+				if ( wp_set_comment_status( $parent, 'approve' ) ) {
+					$comment_auto_approved = true;
+				}
+			}
+		}
+
+		$comment_id = wp_new_comment( $commentdata );
+
+		if ( is_wp_error( $comment_id ) ) {
+			wp_die( esc_html( $comment_id->get_error_message() ) );
+		}
+
+		$comment = get_comment( $comment_id );
+
+		if ( ! $comment ) {
+			wp_die( 1 );
+		}
+
+		$position = ( isset( $_POST['position'] ) && (int) $_POST['position'] ) ? (int) $_POST['position'] : '-1';
+
+		ob_start();
+		$wp_list_table = $this->make_reviews_list_table();
+		$wp_list_table->single_row( $comment );
+		$comment_list_item = ob_get_clean();
+
+		$response = array(
+			'what'     => 'comment',
+			'id'       => $comment->comment_ID,
+			'data'     => $comment_list_item,
+			'position' => $position,
+		);
+
+		$counts                   = wp_count_comments();
+		$response['supplemental'] = array(
+			'in_moderation'        => $counts->moderated,
+			'i18n_comments_text'   => sprintf(
+			/* translators: %s: Number of reviews. */
+				_n( '%s Review', '%s Reviews', $counts->approved, 'woocommerce' ),
+				number_format_i18n( $counts->approved )
+			),
+			'i18n_moderation_text' => sprintf(
+			/* translators: %s: Number of reviews. */
+				_n( '%s Review in moderation', '%s Reviews in moderation', $counts->moderated, 'woocommerce' ),
+				number_format_i18n( $counts->moderated )
+			),
+		);
+
+		if ( $comment_auto_approved && isset( $parent ) ) {
+			$response['supplemental']['parent_approved'] = $parent->comment_ID;
+			$response['supplemental']['parent_post_id']  = $parent->comment_post_ID;
+		}
+
+		$x = new WP_Ajax_Response();
+		$x->add( $response );
 		$x->send();
 	}
 
