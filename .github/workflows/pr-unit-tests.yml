@@ -58,7 +58,7 @@ jobs:
           path: |
             ~/.pnpm-store
             plugins/woocommerce/vendor
-          key: ${{ runner.os }}-test6-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-test006-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
         run: npm install -g pnpm
