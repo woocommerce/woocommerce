@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixing bug on sectioned task list for tasks with actionUrl property
