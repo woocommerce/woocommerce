@@ -87,6 +87,8 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_rating_arguments(), $args );
 		// Handle the review product filter.
 		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
+		// Include the review status arguments.
+		$args = wp_parse_args( $this->get_status_arguments(), $args );
 
 		$comments = get_comments( $args );
 
@@ -239,6 +241,57 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Gets the `status` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_status_arguments() : array {
+		$args = [];
+
+		global $comment_status;
+
+		if ( ! empty( $comment_status ) && 'all' !== $comment_status && array_key_exists( $comment_status, $this->get_status_filters() ) ) {
+			$args['status'] = $this->convert_status_to_query_value( $comment_status );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Displays the product reviews HTML table.
+	 *
+	 * Reimplements {@see WP_Comment_::display()} but we change the ID to match the one output by {@see WP_Comments_List_Table::display()}.
+	 * This will automatically handle additional CSS for consistency with the comments page.
+	 *
+	 * @return void
+	 */
+	public function display() {
+		$this->display_tablenav( 'top' );
+
+		$this->screen->render_screen_reader_content( 'heading_list' );
+
+		?>
+		<table class="wp-list-table <?php echo esc_attr( implode( ' ', $this->get_table_classes() ) ); ?>">
+			<thead>
+			<tr>
+				<?php $this->print_column_headers(); ?>
+			</tr>
+			</thead>
+			<tbody id="the-comment-list" data-wp-lists="list:comment">
+			<?php $this->display_rows_or_placeholder(); ?>
+			</tbody>
+			<tfoot>
+			<tr>
+				<?php $this->print_column_headers( false ); ?>
+			</tr>
+			</tfoot>
+		</table>
+		<?php
+
+		$this->display_tablenav( 'bottom' );
+	}
+
+	/**
 	 * Render a single row HTML.
 	 *
 	 * @global WP_Post $post
@@ -260,10 +313,215 @@ class ReviewsListTable extends WP_List_Table {
 		$this->current_user_can_edit_review = current_user_can( 'edit_comment', $comment->comment_ID );
 
 		?>
-		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="<?php echo esc_attr( $the_comment_class ); ?>">
+		<tr id="comment-<?php echo esc_attr( $comment->comment_ID ); ?>" class="comment <?php echo esc_attr( $the_comment_class ); ?>">
 			<?php $this->single_row_columns( $comment ); ?>
 		</tr>
 		<?php
+	}
+
+	/**
+	 * Generate and display row actions links.
+	 *
+	 * @see WP_Comments_List_Table::handle_row_actions() for consistency.
+	 *
+	 * @global string $comment_status Status for the current listed comments.
+	 *
+	 * @param WP_Comment $item        The product review or reply in context.
+	 * @param string     $column_name Current column name.
+	 * @param string     $primary     Primary column name.
+	 * @return string
+	 */
+	protected function handle_row_actions( $item, $column_name, $primary ) {
+		global $comment_status;
+
+		if ( $primary !== $column_name || ! $this->current_user_can_edit_review ) {
+			return '';
+		}
+
+		$review_status = wp_get_comment_status( $item );
+
+		$url = add_query_arg(
+			[
+				'c' => urlencode( $item->comment_ID ),
+			],
+			admin_url( 'comment.php' )
+		);
+
+		$approve_url   = wp_nonce_url( add_query_arg( 'action', 'approvecomment', $url ), "approve-comment_$item->comment_ID" );
+		$unapprove_url = wp_nonce_url( add_query_arg( 'action', 'unapprovecomment', $url ), "approve-comment_$item->comment_ID" );
+		$spam_url      = wp_nonce_url( add_query_arg( 'action', 'spamcomment', $url ), "delete-comment_$item->comment_ID" );
+		$unspam_url    = wp_nonce_url( add_query_arg( 'action', 'unspamcomment', $url ), "delete-comment_$item->comment_ID" );
+		$trash_url     = wp_nonce_url( add_query_arg( 'action', 'trashcomment', $url ), "delete-comment_$item->comment_ID" );
+		$untrash_url   = wp_nonce_url( add_query_arg( 'action', 'untrashcomment', $url ), "delete-comment_$item->comment_ID" );
+		$delete_url    = wp_nonce_url( add_query_arg( 'action', 'deletecomment', $url ), "delete-comment_$item->comment_ID" );
+
+		$actions = [
+			'approve'   => '',
+			'unapprove' => '',
+			'reply'     => '',
+			'quickedit' => '',
+			'edit'      => '',
+			'spam'      => '',
+			'unspam'    => '',
+			'trash'     => '',
+			'untrash'   => '',
+			'delete'    => '',
+		];
+
+		if ( $comment_status && 'all' !== $comment_status ) {
+			if ( 'approved' === $review_status ) {
+				$actions['unapprove'] = sprintf(
+					'<a href="%s" data-wp-lists="%s" class="vim-u vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+					esc_url( $unapprove_url ),
+					esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:e7e7d3:action=dim-comment&amp;new=unapproved" ),
+					esc_attr__( 'Unapprove this review', 'woocommerce' ),
+					esc_html__( 'Unapprove', 'woocommerce' )
+				);
+			} elseif ( 'unapproved' === $review_status ) {
+				$actions['approve'] = sprintf(
+					'<a href="%s" data-wp-lists="%s" class="vim-a vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+					esc_url( $approve_url ),
+					esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:e7e7d3:action=dim-comment&amp;new=approved" ),
+					esc_attr__( 'Approve this review', 'woocommerce' ),
+					esc_html__( 'Approve', 'woocommerce' )
+				);
+			}
+		} else {
+			$actions['approve'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="vim-a aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $approve_url ),
+				esc_attr( "dim:the-comment-list:comment-{$item->comment_ID}:unapproved:e7e7d3:e7e7d3:new=approved" ),
+				esc_attr__( 'Approve this review', 'woocommerce' ),
+				esc_html__( 'Approve', 'woocommerce' )
+			);
+
+			$actions['unapprove'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="vim-u aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $unapprove_url ),
+				esc_attr( "dim:the-comment-list:comment-{$item->comment_ID}:unapproved:e7e7d3:e7e7d3:new=unapproved" ),
+				esc_attr__( 'Unapprove this review', 'woocommerce' ),
+				esc_html__( 'Unapprove', 'woocommerce' )
+			);
+		}
+
+		if ( 'spam' !== $review_status ) {
+			$actions['spam'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="vim-s vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $spam_url ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}::spam=1" ),
+				esc_attr__( 'Mark this review as spam', 'woocommerce' ),
+				/* translators: "Mark as spam" link. */
+				esc_html_x( 'Spam', 'verb', 'woocommerce' )
+			);
+		} else {
+			$actions['unspam'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $unspam_url ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:66cc66:unspam=1" ),
+				esc_attr__( 'Restore this review from the spam', 'woocommerce' ),
+				esc_html_x( 'Not Spam', 'review', 'woocommerce' )
+			);
+		}
+
+		if ( 'trash' === $review_status ) {
+			$actions['untrash'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $untrash_url ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}:66cc66:untrash=1" ),
+				esc_attr__( 'Restore this review from the Trash', 'woocommerce' ),
+				esc_html__( 'Restore', 'woocommerce' )
+			);
+		}
+
+		if ( 'spam' === $review_status || 'trash' === $review_status || ! EMPTY_TRASH_DAYS ) {
+			$actions['delete'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $delete_url ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}::delete=1" ),
+				esc_attr__( 'Delete this review permanently', 'woocommerce' ),
+				esc_html__( 'Delete Permanently', 'woocommerce' )
+			);
+		} else {
+			$actions['trash'] = sprintf(
+				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
+				esc_url( $trash_url ),
+				esc_attr( "delete:the-comment-list:comment-{$item->comment_ID}::trash=1" ),
+				esc_attr__( 'Move this review to the Trash', 'woocommerce' ),
+				esc_html_x( 'Trash', 'verb', 'woocommerce' )
+			);
+		}
+
+		if ( 'spam' !== $review_status && 'trash' !== $review_status ) {
+			$actions['edit'] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				esc_url(
+					add_query_arg(
+						[
+							'action' => 'editcomment',
+							'c'      => urlencode( $item->comment_ID ),
+						],
+						admin_url( 'comment.php' )
+					)
+				),
+				esc_attr__( 'Edit this review', 'woocommerce' ),
+				esc_html__( 'Edit', 'woocommerce' )
+			);
+
+			$format = '<button type="button" data-comment-id="%d" data-post-id="%d" data-action="%s" class="%s button-link" aria-expanded="false" aria-label="%s">%s</button>';
+
+			$actions['quickedit'] = sprintf(
+				$format,
+				esc_attr( $item->comment_ID ),
+				esc_attr( $item->comment_post_ID ),
+				'edit',
+				'vim-q comment-inline',
+				esc_attr__( 'Quick edit this review inline', 'woocommerce' ),
+				esc_html__( 'Quick Edit', 'woocommerce' )
+			);
+
+			$actions['reply'] = sprintf(
+				$format,
+				esc_attr( $item->comment_ID ),
+				esc_attr( $item->comment_post_ID ),
+				'replyto',
+				'vim-r comment-inline',
+				esc_attr__( 'Reply to this review', 'woocommerce' ),
+				esc_html__( 'Reply', 'woocommerce' )
+			);
+		}
+
+		$always_visible = 'excerpt' === get_user_setting( 'posts_list_mode', 'list' );
+
+		$output = '<div class="' . ( $always_visible ? 'row-actions visible' : 'row-actions' ) . '">';
+
+		$i = 0;
+
+		foreach ( array_filter( $actions ) as $action => $link ) {
+			++$i;
+
+			if ( ( ( 'approve' === $action || 'unapprove' === $action ) && 2 === $i ) || 1 === $i ) {
+				$sep = '';
+			} else {
+				$sep = ' | ';
+			}
+
+			if ( ( 'reply' === $action || 'quickedit' === $action ) && ! wp_doing_ajax() ) {
+				$action .= ' hide-if-no-js';
+			} elseif ( ( 'untrash' === $action && 'trash' === $review_status ) || ( 'unspam' === $action && 'spam' === $review_status ) ) {
+				if ( '1' === get_comment_meta( $item->comment_ID, '_wp_trash_meta_status', true ) ) {
+					$action .= ' approve';
+				} else {
+					$action .= ' unapprove';
+				}
+			}
+
+			$output .= "<span class='$action'>$sep$link</span>";
+		}
+
+		$output .= '</div>';
+		$output .= '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details', 'woocommerce' ) . '</span></button>';
+
+		return $output;
 	}
 
 	/**
@@ -357,11 +615,201 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Processes the bulk actions.
+	 *
+	 * @return void
+	 */
+	public function process_bulk_action() {
+		if ( ! $this->current_user_can_moderate_reviews ) {
+			return;
+		}
+
+		if ( $this->current_action() ) {
+			check_admin_referer( 'bulk-product-reviews' );
+
+			$query_string = remove_query_arg( [ 'page', '_wpnonce' ], wp_unslash( ( $_SERVER['QUERY_STRING'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			// Replace current nonce with bulk-comments nonce.
+			$comments_nonce = wp_create_nonce( 'bulk-comments' );
+			$query_string   = add_query_arg( '_wpnonce', $comments_nonce, $query_string );
+
+			// Redirect to edit-comments.php, which will handle processing the action for us.
+			wp_safe_redirect( esc_url_raw( admin_url( 'edit-comments.php?' . $query_string ) ) );
+			exit;
+		} elseif ( ! empty( $_GET['_wp_http_referer'] ) ) {
+
+			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Returns an array of supported statuses and their labels.
+	 *
+	 * @return array
+	 */
+	protected function get_status_filters() : array {
+		return [
+			/* translators: %s: Number of reviews. */
+			'all'       => _nx_noop(
+				'All <span class="count">(%s)</span>',
+				'All <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'moderated' => _nx_noop(
+				'Pending <span class="count">(%s)</span>',
+				'Pending <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'approved'  => _nx_noop(
+				'Approved <span class="count">(%s)</span>',
+				'Approved <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'spam'      => _nx_noop(
+				'Spam <span class="count">(%s)</span>',
+				'Spam <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+			/* translators: %s: Number of reviews. */
+			'trash'     => _nx_noop(
+				'Trash <span class="count">(%s)</span>',
+				'Trash <span class="count">(%s)</span>',
+				'product reviews',
+				'woocommerce'
+			),
+		];
+	}
+
+	/**
+	 * Returns the available status filters.
+	 *
+	 * @see WP_Comments_List_Table::get_views() for consistency.
+	 *
+	 * @global int    $post_id
+	 * @global string $comment_status
+	 * @global string $comment_type
+	 *
+	 * @return array An associative array of fully-formed comment status links. Includes 'All', 'Pending', 'Approved', 'Spam', and 'Trash'.
+	 */
+	protected function get_views() {
+		global $post_id, $comment_status, $comment_type;
+
+		$status_links = [];
+
+		$status_labels = $this->get_status_filters();
+
+		if ( ! EMPTY_TRASH_DAYS ) {
+			unset( $status_labels['trash'] );
+		}
+
+		$link = $this->get_view_url( (string) $comment_type, (int) $post_id );
+
+		foreach ( $status_labels as $status => $label ) {
+			$current_link_attributes = '';
+
+			if ( $status === $comment_status ) {
+				$current_link_attributes = ' class="current" aria-current="page"';
+			}
+
+			$link = add_query_arg( 'comment_status', urlencode( $status ), $link );
+
+			$number_reviews_for_status = $this->get_review_count( $status, (int) $post_id );
+
+			$count_html = sprintf(
+				'<span class="%s-count">%s</span>',
+				( 'moderated' === $status ) ? 'pending' : $status,
+				number_format_i18n( $number_reviews_for_status )
+			);
+
+			$status_links[ $status ] = '<a href="' . esc_url( $link ) . '"' . $current_link_attributes . '>' . sprintf( translate_nooped_plural( $label, $number_reviews_for_status ), $count_html ) . '</a>';
+		}
+
+		return $status_links;
+	}
+
+	/**
+	 * Gets the base URL for a view, excluding the status (that should be appended).
+	 *
+	 * @param string $comment_type Comment type filter.
+	 * @param int    $post_id      Current post ID.
+	 * @return string
+	 */
+	protected function get_view_url( string $comment_type, int $post_id ) : string {
+		$link = add_query_arg(
+			[
+				'post_type' => 'product',
+				'page'      => Reviews::MENU_SLUG,
+			],
+			admin_url( 'edit.php' )
+		);
+
+		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
+			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
+		}
+		if ( ! empty( $post_id ) ) {
+			$link = add_query_arg( 'p', absint( $post_id ), $link );
+		}
+
+		return $link;
+	}
+
+	/**
+	 * Gets the number of reviews (including review replies) for a given status.
+	 *
+	 * @param string $status     Status key from {@see ReviewsListTable::get_status_filters()}.
+	 * @param int    $product_id ID of the product if we're filtering by product in this request. Otherwise, `0` for no product filters.
+	 * @return int
+	 */
+	protected function get_review_count( string $status, int $product_id ) : int {
+		return (int) get_comments(
+			[
+				'type__in'  => [ 'review', 'comment' ],
+				'status'    => $this->convert_status_to_query_value( $status ),
+				'post_type' => 'product',
+				'post_id'   => $product_id,
+				'count'     => true,
+			]
+		);
+	}
+
+	/**
+	 * Converts a status key into its equivalent `comment_approved` database column value.
+	 *
+	 * @param string $status Status key from {@see ReviewsListTable::get_status_filters()}.
+	 * @return string
+	 */
+	protected function convert_status_to_query_value( string $status ) : string {
+		// These keys exactly match the database column.
+		if ( in_array( $status, [ 'spam', 'trash' ], true ) ) {
+			return $status;
+		}
+
+		switch ( $status ) {
+			case 'moderated':
+				return '0';
+			case 'approved':
+				return '1';
+			default:
+				return 'all';
+		}
+	}
+
+	/**
 	 * Outputs the text to display when there are no reviews to display.
+	 *
+	 * @see WP_List_Table::no_items()
 	 *
 	 * @global string $comment_status
 	 *
-	 * @see WP_List_Table::no_items()
+	 * @return void
 	 */
 	public function no_items() {
 		global $comment_status;
@@ -377,6 +825,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * Renders the checkbox column.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_cb( $item ) {
 
@@ -421,6 +870,18 @@ class ReviewsListTable extends WP_List_Table {
 			get_comment_text( $item->comment_ID ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			'</div>'
 		);
+
+		if ( $this->current_user_can_edit_review ) {
+			?>
+			<div id="inline-<?php echo esc_attr( $item->comment_ID ); ?>" class="hidden">
+				<textarea class="comment" rows="1" cols="1"><?php echo esc_textarea( $item->comment_content ); ?></textarea>
+				<div class="author-email"><?php echo esc_attr( $item->comment_author_email ); ?></div>
+				<div class="author"><?php echo esc_attr( $item->comment_author ); ?></div>
+				<div class="author-url"><?php echo esc_attr( $item->comment_author_url ); ?></div>
+				<div class="comment_status"><?php echo esc_html( $item->comment_approved ); ?></div>
+			</div>
+			<?php
+		}
 
 		echo $this->filter_column_output( 'comment', ob_get_clean(), $item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
@@ -486,13 +947,12 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( $this->current_user_can_edit_review ) :
 
-			if ( ! empty( $item->comment_author_email ) ) :
-				/** This filter is documented in wp-includes/comment-template.php */
-				$email = apply_filters( 'comment_email', $item->comment_author_email, $item );
+			if ( ! empty( $item->comment_author_email ) && is_email( $item->comment_author_email ) ) :
 
-				if ( ! empty( $email ) && '@' !== $email ) {
-					printf( '<a href="%1$s">%2$s</a><br />', esc_url( 'mailto:' . $email ), esc_html( $email ) );
-				}
+				?>
+				<a href="mailto:<?php echo esc_attr( $item->comment_author_email ); ?>"><?php echo esc_html( $item->comment_author_email ); ?></a>
+				<?php
+
 			endif;
 
 			$link = add_query_arg(
@@ -642,6 +1102,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * Renders the type column.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_type( $item ) {
 
@@ -656,6 +1117,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * Renders the rating column.
 	 *
 	 * @param WP_Comment $item Review or reply being rendered.
+	 * @return void
 	 */
 	protected function column_rating( $item ) {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
@@ -687,6 +1149,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @param WP_Comment $item        Review or reply being rendered.
 	 * @param string     $column_name Name of the column being rendered.
+	 * @return void
 	 */
 	protected function column_default( $item, $column_name ) {
 
@@ -730,6 +1193,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @global string $comment_type
 	 *
 	 * @param string $which Position (top or bottom).
+	 * @return void
 	 */
 	protected function extra_tablenav( $which ) {
 		global $comment_status, $comment_type;
@@ -830,35 +1294,6 @@ class ReviewsListTable extends WP_List_Table {
 			<?php endforeach; ?>
 		</select>
 		<?php
-	}
-
-	/**
-	 * Processes the bulk actions.
-	 *
-	 * @return void
-	 */
-	public function process_bulk_action() {
-		if ( ! $this->current_user_can_moderate_reviews ) {
-			return;
-		}
-
-		if ( $this->current_action() ) {
-			check_admin_referer( 'bulk-product-reviews' );
-
-			$query_string = remove_query_arg( [ 'page', '_wpnonce' ], wp_unslash( ( $_SERVER['QUERY_STRING'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			// Replace current nonce with bulk-comments nonce.
-			$comments_nonce = wp_create_nonce( 'bulk-comments' );
-			$query_string   = add_query_arg( '_wpnonce', $comments_nonce, $query_string );
-
-			// Redirect to edit-comments.php, which will handle processing the action for us.
-			wp_safe_redirect( esc_url_raw( admin_url( 'edit-comments.php?' . $query_string ) ) );
-			exit;
-		} elseif ( ! empty( $_GET['_wp_http_referer'] ) ) {
-
-			wp_safe_redirect( remove_query_arg( [ '_wp_http_referer', '_wpnonce' ] ) );
-			exit;
-		}
 	}
 
 	/**
