@@ -20,7 +20,21 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	 *
 	 * @var array
 	 */
-	protected $global_style_wrapper = array( 'text_color', 'font_size', 'border_color', 'border_radius', 'border_width', 'background_color', 'text_color' );
+	protected $global_style_wrapper = array( 'text_color', 'font_size', 'border_color', 'border_radius', 'border_width', 'background_color', 'text_color', 'padding' );
+
+	/**
+	 * Get the supports array for this block type.
+	 *
+	 * @see $this->register_block_type()
+	 * @return string;
+	 */
+	protected function get_block_type_supports() {
+		return array(
+			'color' => array(
+				'__experimentalDuotone' => '.wc-block-featured-category__background-image',
+			),
+		);
+	}
 
 	/**
 	 * Default attribute values, should match what's set in JS `registerBlockType`.
@@ -32,9 +46,10 @@ class FeaturedCategory extends AbstractDynamicBlock {
 		'contentAlign' => 'center',
 		'dimRatio'     => 50,
 		'focalPoint'   => false,
-		'height'       => false,
+		'imageFit'     => 'none',
 		'mediaId'      => 0,
 		'mediaSrc'     => '',
+		'minHeight'    => 500,
 		'showDesc'     => true,
 	);
 
@@ -73,7 +88,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 
 		$attributes = wp_parse_args( $attributes, $this->defaults );
 
-		$attributes['height'] = $attributes['height'] ? $attributes['height'] : wc_get_theme_support( 'featured_block::default_height', 500 );
+		$attributes['height'] = isset( $attributes['height'] ) ? $attributes['height'] : wc_get_theme_support( 'featured_block::default_height', 500 );
 
 		$title = sprintf(
 			'<h2 class="wc-block-featured-category__title">%s</h2>',
@@ -85,11 +100,13 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			wc_format_content( wp_kses_post( $category->description ) )
 		);
 
-		$styles  = $this->get_styles( $attributes, $category );
+		$styles  = $this->get_styles( $attributes );
 		$classes = $this->get_classes( $attributes );
 
 		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-category" style="%2$s">', esc_attr( trim( $classes ) ), esc_attr( $styles ) );
 		$output .= '<div class="wc-block-featured-category__wrapper">';
+		$output .= $this->render_overlay( $attributes );
+		$output .= $this->render_image( $attributes, $category );
 		$output .= $title;
 		if ( $attributes['showDesc'] ) {
 			$output .= $desc_str;
@@ -101,18 +118,21 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Get the styles for the wrapper element (background image, color).
+	 * Renders the featured image
 	 *
-	 * @param array    $attributes Block attributes. Default empty array.
-	 * @param \WP_Term $category Term object.
+	 * @param array       $attributes Block attributes. Default empty array.
+	 * @param \WC_Product $category   Product object.
+	 *
 	 * @return string
 	 */
-	public function get_styles( $attributes, $category ) {
+	private function render_image( $attributes, $category ) {
 		$style      = '';
 		$image_size = 'large';
 		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
 			$image_size = 'full';
 		}
+
+		$style .= sprintf( 'object-fit: %s;', $attributes['imageFit'] );
 
 		if ( $attributes['mediaId'] ) {
 			$image = wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
@@ -120,25 +140,64 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			$image = $this->get_image( $category, $image_size );
 		}
 
-		if ( ! empty( $image ) ) {
-			$style .= sprintf( 'background-image:url(%s);', esc_url( $image ) );
-		}
-
-		if ( isset( $attributes['height'] ) ) {
-			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['height'] ) );
-		}
-
 		if ( is_array( $attributes['focalPoint'] ) && 2 === count( $attributes['focalPoint'] ) ) {
 			$style .= sprintf(
-				'background-position: %s%% %s%%;',
+				'object-position: %s%% %s%%;',
 				$attributes['focalPoint']['x'] * 100,
 				$attributes['focalPoint']['y'] * 100
 			);
 		}
 
-		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
+		if ( ! empty( $image ) ) {
+			return sprintf(
+				'<img alt="%1$s" class="wc-block-featured-category__background-image" src="%2$s" style="%3$s" />',
+				wp_kses_post( $category->description ),
+				esc_url( $image ),
+				$style
+			);
+		}
 
-		$style .= $global_style_style;
+		return '';
+	}
+
+	/**
+	 * Renders the block overlay
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 *
+	 * @return string
+	 */
+	private function render_overlay( $attributes ) {
+		$overlay_styles = '';
+
+		if ( isset( $attributes['overlayColor'] ) ) {
+			$overlay_styles = sprintf( 'background-color: %s', $attributes['overlayColor'] );
+		} elseif ( isset( $attributes['overlayGradient'] ) ) {
+			$overlay_styles = sprintf( 'background-image: %s', $attributes['overlayGradient'] );
+		} else {
+			$overlay_styles = 'background-color: #000000';
+		}
+
+		return sprintf( '<div class="wc-block-featured-category__overlay" style="%s"></div>', esc_attr( $overlay_styles ) );
+	}
+
+	/**
+	 * Get the styles for the wrapper element (background image, color).
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string
+	 */
+	public function get_styles( $attributes ) {
+		$style = '';
+
+		$min_height = isset( $attributes['minHeight'] ) ? $attributes['minHeight'] : wc_get_theme_support( 'featured_block::default_height', 500 );
+
+		if ( isset( $attributes['minHeight'] ) ) {
+			$style .= sprintf( 'min-height:%dpx;', intval( $min_height ) );
+		}
+
+		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
+		$style             .= $global_style_style;
 
 		return $style;
 	}

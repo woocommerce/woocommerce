@@ -52,7 +52,11 @@ import {
 } from '../../utils/products';
 import { useThrottle } from '../../utils/useThrottle';
 
-const ConstrainedResizable = ( { className = '', onResize, ...props } ) => {
+export const ConstrainedResizable = ( {
+	className = '',
+	onResize,
+	...props
+} ) => {
 	const [ isResizing, setIsResizing ] = useState( false );
 
 	const classNames = classnames( className, {
@@ -106,7 +110,10 @@ const FeaturedProduct = ( {
 	setAttributes,
 	triggerUrlUpdate = () => void null,
 } ) => {
-	const { gradientValue, setGradient } = useGradient();
+	const { setGradient } = useGradient( {
+		gradientAttribute: 'overlayGradient',
+		customGradientAttribute: 'overlayGradient',
+	} );
 	const onResize = useCallback(
 		( _event, _direction, elt ) => {
 			setAttributes( { minHeight: parseInt( elt.style.height, 10 ) } );
@@ -344,8 +351,9 @@ const FeaturedProduct = ( {
 								initialOpen={ true }
 								settings={ [
 									{
-										gradientValue,
 										colorValue: attributes.overlayColor,
+										gradientValue:
+											attributes.overlayGradient,
 										onColorChange: ( overlayColor ) =>
 											setAttributes( { overlayColor } ),
 										onGradientChange: (
@@ -398,6 +406,7 @@ const FeaturedProduct = ( {
 			overlayGradient,
 			showDesc,
 			showPrice,
+			style,
 		} = attributes;
 
 		const classes = classnames(
@@ -411,6 +420,10 @@ const FeaturedProduct = ( {
 			},
 			contentAlign !== 'center' && `has-${ contentAlign }-content`
 		);
+
+		const containerStyle = {
+			borderRadius: style?.border?.radius,
+		};
 
 		const wrapperStyle = {
 			...getSpacingClassesAndStyles( attributes ).style,
@@ -438,7 +451,7 @@ const FeaturedProduct = ( {
 					showHandle={ isSelected }
 					style={ { minHeight } }
 				/>
-				<div className={ classes }>
+				<div className={ classes } style={ containerStyle }>
 					<div
 						className="wc-block-featured-product__wrapper"
 						style={ wrapperStyle }

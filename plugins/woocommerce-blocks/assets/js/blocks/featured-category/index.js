@@ -40,13 +40,29 @@ registerBlockType( 'woocommerce/featured-category', {
 	supports: {
 		align: [ 'wide', 'full' ],
 		html: false,
-		color: true,
+		color: {
+			background: false,
+			text: true,
+			...( isFeaturePluginBuild() && {
+				__experimentalDuotone:
+					'.wc-block-featured-category__background-image',
+			} ),
+		},
+		spacing: {
+			padding: true,
+			...( isFeaturePluginBuild() && {
+				__experimentalDefaultControls: {
+					padding: true,
+				},
+				__experimentalSkipSerialization: true,
+			} ),
+		},
 		...( isFeaturePluginBuild() && {
 			__experimentalBorder: {
 				color: true,
 				radius: true,
 				width: true,
-				__experimentalSkipSerialization: false,
+				__experimentalSkipSerialization: true,
 			},
 		} ),
 	},
@@ -84,11 +100,14 @@ registerBlockType( 'woocommerce/featured-category', {
 		},
 
 		/**
-		 * A fixed height for the block.
+		 * Whether the image should fit the container or not be resized
+		 *
+		 * Note: when the image is resized to fit the container, the user loses
+		 * the ability to have full control over the focus.
 		 */
-		height: {
-			type: 'number',
-			default: getSetting( 'default_height', 500 ),
+		imageFit: {
+			type: 'string',
+			default: 'none',
 		},
 
 		/**
@@ -108,6 +127,20 @@ registerBlockType( 'woocommerce/featured-category', {
 		},
 
 		/**
+		 * A minimum height for the block.
+		 *
+		 * Note: if padding is increased, this way the inner content will never
+		 * overflow, but instead will resize the container.
+		 *
+		 * It was decided to change this to make this block more in line with
+		 * the “Cover” block.
+		 */
+		minHeight: {
+			type: 'number',
+			default: getSetting( 'default_height', 500 ),
+		},
+
+		/**
 		 * Text for the category link.
 		 */
 		linkText: {
@@ -123,11 +156,18 @@ registerBlockType( 'woocommerce/featured-category', {
 		},
 
 		/**
-		 * Show the category description.
+		 * Color for the overlay layer on top of the product image.
 		 */
-		showDesc: {
-			type: 'boolean',
-			default: true,
+		overlayColor: {
+			type: 'string',
+			default: '#000000',
+		},
+
+		/**
+		 * Gradient for the overlay layer on top of the product image.
+		 */
+		overlayGradient: {
+			type: 'string',
 		},
 
 		/**
@@ -136,6 +176,14 @@ registerBlockType( 'woocommerce/featured-category', {
 		previewCategory: {
 			type: 'object',
 			default: null,
+		},
+
+		/**
+		 * Show the category description.
+		 */
+		showDesc: {
+			type: 'boolean',
+			default: true,
 		},
 	},
 
