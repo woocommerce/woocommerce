@@ -55,7 +55,8 @@
 			"@woocommerce/shared-hocs": [ "assets/js/shared/hocs" ],
 			"@woocommerce/type-defs/*": [ "assets/js/types/type-defs/*" ],
 			"@woocommerce/types": [ "assets/js/types" ],
-			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ]
+			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ],
+			"@woocommerce/utils": [ "assets/js/utils" ]
 		}
 	}
 }
