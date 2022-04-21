@@ -275,11 +275,33 @@ class Products extends AbstractRoute {
 		$params['category_operator'] = array(
 			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
-			'enum'              => [ 'in', 'not in', 'and' ],
+			'enum'              => [ 'in', 'not_in', 'and' ],
 			'default'           => 'in',
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
+		// If the $_REQUEST contains a taxonomy query, add it to the params and sanitize it.
+		foreach ( $_REQUEST as $param => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( str_starts_with( $param, '_unstable_tax_' ) && ! str_ends_with( $param, '_operator' ) ) {
+				$params[ $param ] = array(
+					'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woo-gutenberg-products-block' ),
+					'type'              => 'string',
+					'sanitize_callback' => 'wp_parse_id_list',
+					'validate_callback' => 'rest_validate_request_arg',
+				);
+			}
+			if ( str_starts_with( $param, '_unstable_tax_' ) && str_ends_with( $param, '_operator' ) ) {
+				$params[ $param ] = array(
+					'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
+					'type'              => 'string',
+					'enum'              => [ 'in', 'not_in', 'and' ],
+					'default'           => 'in',
+					'sanitize_callback' => 'sanitize_key',
+					'validate_callback' => 'rest_validate_request_arg',
+				);
+			}
+		}
 
 		$params['tag'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woo-gutenberg-products-block' ),
@@ -291,7 +313,7 @@ class Products extends AbstractRoute {
 		$params['tag_operator'] = array(
 			'description'       => __( 'Operator to compare product tags.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
-			'enum'              => [ 'in', 'not in', 'and' ],
+			'enum'              => [ 'in', 'not_in', 'and' ],
 			'default'           => 'in',
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -360,7 +382,7 @@ class Products extends AbstractRoute {
 					'operator'  => array(
 						'description' => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
 						'type'        => 'string',
-						'enum'        => [ 'in', 'not in', 'and' ],
+						'enum'        => [ 'in', 'not_in', 'and' ],
 					),
 				),
 			),
