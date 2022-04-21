@@ -65,7 +65,7 @@
 		"watch-assets": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
-				"command": "pnpx grunt watch",
+				"command": "pnpm dlx grunt watch",
 				"cwd": "plugins/woocommerce/legacy"
 			}
 		},
