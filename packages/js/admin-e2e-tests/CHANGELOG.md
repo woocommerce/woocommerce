@@ -6,6 +6,8 @@
 
 -   Increase timeout threshold for payment task. #32605
 
+-   Changed page detection to use table header instead of h2 header for payment settings page #32697
+
 # 1.0.0
 
 -   Add returned type annotations and remove unused vars. #8020
