@@ -34,8 +34,8 @@ jobs:
         with:
           path: |
             ~/.pnpm-store
-            ~/.composer
-          key: ${{ runner.os }}-test8-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
+            **/composer
+          key: ${{ runner.os }}-test00-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
         run: npm install -g pnpm
