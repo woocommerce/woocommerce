@@ -52,6 +52,10 @@ class Reviews {
 		add_action( 'wp_ajax_edit-comment', [ $this, 'handle_edit_review' ], -1 );
 		add_action( 'wp_ajax_replyto-comment', [ $this, 'handle_reply_to_review' ], -1 );
 
+		add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
+
+		add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
+
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
@@ -461,6 +465,79 @@ class Reviews {
 		}
 
 		return ' <span class="awaiting-mod count-' . esc_attr( $count ) . '"><span class="pending-count">' . esc_html( $count ) . '</span></span>';
+	}
+
+	/**
+	 * Highlights Product -> Reviews admin menu item when editing a review or a reply to a review.
+	 *
+	 * @global string $submenu_file
+	 *
+	 * @param string $parent_file Parent menu item.
+	 * @return string
+	 */
+	public function edit_review_parent_file( $parent_file ) {
+		global $submenu_file, $current_screen;
+
+		if ( isset( $current_screen->id, $_GET['c'] ) && 'comment' === $current_screen->id ) {
+
+			$comment_id = absint( $_GET['c'] );
+			$comment = get_comment( $comment_id );
+
+			if ( isset( $comment->comment_parent ) && $comment->comment_parent > 0 ) {
+				$comment = get_comment( $comment->comment_parent );
+			}
+
+			if ( isset( $comment->comment_post_ID ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+				$parent_file  = 'edit.php?post_type=product';
+				$submenu_file = 'product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		return $parent_file;
+	}
+
+	/**
+	 * Replaces Edit/Moderate Comment title/headline with Edit Review, when editing/moderating a review.
+	 *
+	 * @param  string $translation Translated text.
+	 * @param  string $text        Text to translate.
+	 * @return string              Translated text.
+	 */
+	public function edit_comments_screen_text( $translation, $text ) {
+		global $comment;
+
+		// Bail out if not a text we should replace.
+		if ( ! in_array( $text, [ 'Edit Comment', 'Moderate Comment' ], true ) ) {
+			return $translation;
+		}
+
+		// Try to get comment from query params when not in context already.
+		if ( ! $comment && isset( $_GET['action'], $_GET['c'] ) && 'editcomment' === $_GET['action'] ) {
+			$comment_id = absint( $_GET['c'] );
+			$comment    = get_comment( $comment_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		$is_reply = false;
+
+		if ( isset( $comment->comment_parent ) && $comment->comment_parent > 0 ) {
+			$is_reply = true;
+			$comment = get_comment( $comment->comment_parent ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
+		if ( isset( $comment->comment_post_ID ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+			if ( 'Edit Comment' === $text ) {
+				$translation = $is_reply
+					? __( 'Edit Review Reply', 'woocommerce' )
+					: __( 'Edit Review', 'woocommerce' );
+			} elseif ( 'Moderate Comment' === $text ) {
+				$translation = $is_reply
+					? __( 'Moderate Review Reply', 'woocommerce' )
+					: __( 'Moderate Review', 'woocommerce' );
+			}
+		}
+
+		return $translation;
 	}
 
 	/**
