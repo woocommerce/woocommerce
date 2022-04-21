@@ -5,7 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { updateQueryString } from '@woocommerce/navigation';
+import {
+	updateQueryString,
+	getHistory,
+	getNewPath,
+} from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
@@ -128,13 +132,18 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		} );
 	};
 
-	const goToTask = ( task: TaskType ) => {
-		trackClick( task );
-		updateQueryString( { task: task.id } );
-	};
-
 	const onTaskSelected = ( task: TaskType ) => {
-		goToTask( task );
+		trackClick( task );
+		if ( task.actionUrl ) {
+			if ( task.actionUrl.startsWith( 'http' ) ) {
+				window.location.href = task.actionUrl;
+			} else {
+				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+			}
+			return;
+		}
+
+		updateQueryString( { task: task.id } );
 	};
 
 	const getSectionTasks = ( sectionTaskIds: string[] ) => {
