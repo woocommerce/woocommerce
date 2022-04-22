@@ -46,10 +46,10 @@ import {
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
  *
- * @param {string} url Current page URL.
- * @param {Array} params Parameters and their constraints.
+ * @param  {string} url    Current page URL.
+ * @param  {Array}  params Parameters and their constraints.
  *
- * @return {string} New URL with query parameters in it.
+ * @return {string}        New URL with query parameters in it.
  */
 
 /**
@@ -226,7 +226,7 @@ const AttributeFilterBlock = ( {
 	/**
 	 * Appends query params to the current pages URL and redirects them to the new URL for PHP rendered templates.
 	 *
-	 * @param {Object} query The object containing the active filter query.
+	 * @param {Object}  query             The object containing the active filter query.
 	 * @param {boolean} allFiltersRemoved If there are active filters or not.
 	 */
 	const redirectPageForPhpTemplate = useCallback(
@@ -471,7 +471,8 @@ const AttributeFilterBlock = ( {
 	useEffect( () => {
 		if ( filteringForPhpTemplate ) {
 			const activeFilters = getActiveFilters(
-				filteringForPhpTemplate, attributeObject
+				filteringForPhpTemplate,
+				attributeObject
 			);
 			if (
 				activeFilters.length > 0 &&
