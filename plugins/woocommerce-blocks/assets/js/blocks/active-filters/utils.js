@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { formatPrice } from '@woocommerce/price-format';
 import { RemovableChip } from '@woocommerce/base-components/chip';
 import Label from '@woocommerce/base-components/label';
+import { getQueryArgs, addQueryArgs, removeQueryArgs } from '@wordpress/url';
 
 /**
  * Format a min/max price range to display.
@@ -137,4 +138,51 @@ export const renderRemovableListItem = ( {
 			) }
 		</li>
 	);
+};
+
+/**
+ * Update the current URL to update or remove provided query arguments.
+ *
+ *
+ * @param {Array<string|Record<string, string>>} args Args to remove
+ */
+export const removeArgsFromFilterUrl = ( ...args ) => {
+	const url = window.location.href;
+	const currentQuery = getQueryArgs( url );
+	const cleanUrl = removeQueryArgs( url, ...Object.keys( currentQuery ) );
+
+	args.forEach( ( item ) => {
+		if ( typeof item === 'string' ) {
+			return delete currentQuery[ item ];
+		}
+		if ( typeof item === 'object' ) {
+			const key = Object.keys( item )[ 0 ];
+			const currentQueryValue = currentQuery[ key ].split( ',' );
+			currentQuery[ key ] = currentQueryValue
+				.filter( ( value ) => value !== item[ key ] )
+				.join( ',' );
+		}
+	} );
+
+	const filteredQuery = Object.fromEntries(
+		Object.entries( currentQuery ).filter( ( [ , value ] ) => value )
+	);
+
+	window.location.href = addQueryArgs( cleanUrl, filteredQuery );
+};
+
+/**
+ * Get the base URL for the current page.
+ *
+ * @return {string} The current URL without the query args.
+ */
+export const getBaseUrl = () => {
+	const url = window.location.href;
+
+	const queryStringIndex = url.indexOf( '?' );
+	if ( queryStringIndex === -1 ) {
+		return url;
+	}
+
+	return url.substring( 0, queryStringIndex );
 };
