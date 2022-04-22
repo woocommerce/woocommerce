@@ -20,6 +20,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
 import classnames from 'classnames';
+import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -138,7 +139,9 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
 				window.location.href = task.actionUrl;
 			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+				( getHistory() as History ).push(
+					getNewPath( {}, task.actionUrl, {} )
+				);
 			}
 			return;
 		}
