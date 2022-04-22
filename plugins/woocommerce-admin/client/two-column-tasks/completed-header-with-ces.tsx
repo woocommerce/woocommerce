@@ -2,11 +2,11 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { EllipsisMenu } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, WCDataSelector, WEEK } from '@woocommerce/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import {
@@ -54,20 +54,35 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ submittedScore, setSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
-	const { storeAgeInWeeks, cesShownForActions } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+	const [ hideCES, setHideCES ] = useState( false );
+	const { storeAgeInWeeks, cesShownForActions } = useSelect(
+		( select: WCDataSelector ) => {
+			const { getOption } = select( OPTIONS_STORE_NAME );
 
-		if ( showCES ) {
-			const adminInstallTimestamp: number =
-				getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-			return {
-				storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
-				cesShownForActions:
-					getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) || [],
-			};
+			if ( showCES ) {
+				const adminInstallTimestamp: number =
+					getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
+				return {
+					storeAgeInWeeks: getStoreAgeInWeeks(
+						adminInstallTimestamp
+					),
+					cesShownForActions:
+						getOption< string[] >(
+							SHOWN_FOR_ACTIONS_OPTION_NAME
+						) || [],
+				};
+			}
+			return {};
 		}
-		return {};
-	} );
+	);
+
+	useEffect( () => {
+		if ( submittedScore ) {
+			setTimeout( () => {
+				setHideCES( true );
+			}, 1200 );
+		}
+	}, [ submittedScore ] );
 
 	const submitScore = ( recordedScore: number, comments?: string ) => {
 		recordEvent( 'ces_feedback', {
@@ -167,7 +182,7 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 							</div>
 						</div>
 					</CardHeader>
-					{ showCES && (
+					{ showCES && ! hideCES && (
 						<CustomerFeedbackSimple
 							label={ __(
 								'How was your experience?',

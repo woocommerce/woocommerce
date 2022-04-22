@@ -105,6 +105,7 @@ import { WPDataSelectors } from './types';
 import { PaymentSelectors } from './payment-gateways/selectors';
 import { PluginSelectors } from './plugins/selectors';
 import { OnboardingSelectors } from './onboarding/selectors';
+import { OptionsSelectors } from './options/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -121,7 +122,7 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	: T extends typeof USER_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof OPTIONS_STORE_NAME
-	? WPDataSelectors
+	? OptionsSelectors
 	: T extends typeof NAVIGATION_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof NOTES_STORE_NAME
