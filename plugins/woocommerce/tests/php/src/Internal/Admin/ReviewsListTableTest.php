@@ -1773,4 +1773,36 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'page 2' => [ null, 2, [ 'offset' => 20 ] ];
 	}
 
+	/**
+	 * Tests that `offset` and `number` values are always set to `0`, and that `count` is added to the array.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_total_comments_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_total_comments_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_total_comments_arguments' );
+		$method->setAccessible( true );
+
+		$default_query_args = [
+			'offset'  => 20,
+			'number'  => 20,
+			'status'  => '1',
+			'post_id' => 5,
+		];
+
+		$this->assertSame(
+			[
+				'offset'  => 0,
+				'number'  => 0,
+				'status'  => '1',
+				'post_id' => 5,
+				'count'   => true,
+			],
+			$method->invoke( $list_table, $default_query_args )
+		);
+	}
+
 }
