@@ -14,7 +14,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@bump/node-2 #test 2.
+              uses: woocommerce/action-build@bump/node-2 #test 3.
               env:
                   BUILD_ENV: e2e
 
