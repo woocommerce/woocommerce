@@ -82,7 +82,9 @@ abstract class MetaToMetaTableMigrator {
 
 		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate['data'] ) );
 
-		list( $to_insert, $to_update ) = $this->classify_update_insert_records( $to_migrate['data'], $already_migrated );
+		$data = $this->classify_update_insert_records( $to_migrate['data'], $already_migrated );
+		$to_insert = $data[0];
+		$to_update = $data[1];
 
 		if ( ! empty( $to_insert ) ) {
 			$insert_queries = $this->generate_insert_sql_for_batch( $to_insert );
