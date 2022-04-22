@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Addressing issues with certain tasks in task list experiment leading to blank page. #32742
