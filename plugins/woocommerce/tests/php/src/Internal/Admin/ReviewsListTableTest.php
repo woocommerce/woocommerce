@@ -1764,4 +1764,86 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_offset_arguments()
+	 * @dataProvider provider_get_offset_arguments
+	 *
+	 * @param mixed    $request_start_value `$_REQUEST['start']` value.
+	 * @param int|null $current_page_number Current page number (used if `$_REQUEST['start']` isn't set).
+	 * @param array    $expected_args       Expected result of the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_offset_arguments( $request_start_value, ?int $current_page_number, array $expected_args ) {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_offset_arguments' );
+		$method->setAccessible( true );
+
+		if ( ! is_null( $request_start_value ) ) {
+			$_REQUEST['start'] = $request_start_value;
+		} else {
+			unset( $_REQUEST['start'] );
+		}
+
+		$_REQUEST['paged'] = $current_page_number;
+
+		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
+	}
+
+	/** @see test_get_offset_arguments */
+	public function provider_get_offset_arguments() : Generator {
+		yield 'start value has offset' => [ 5, null, [ 'offset' => 5 ] ];
+		yield 'start value set, but empty string' => [ '', null, [ 'offset' => 0 ] ];
+		yield 'page 1' => [ null, 1, [ 'offset' => 0 ] ];
+		yield 'page 2' => [ null, 2, [ 'offset' => 20 ] ];
+	}
+
+	/**
+	 * Tests that `offset` and `number` values are always set to `0`, and that `count` is added to the array.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_total_comments_arguments()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_total_comments_arguments() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_total_comments_arguments' );
+		$method->setAccessible( true );
+
+		$default_query_args = [
+			'offset'  => 20,
+			'number'  => 20,
+			'status'  => '1',
+			'post_id' => 5,
+		];
+
+		$this->assertSame(
+			[
+				'offset'  => 0,
+				'number'  => 0,
+				'status'  => '1',
+				'post_id' => 5,
+				'count'   => true,
+			],
+			$method->invoke( $list_table, $default_query_args )
+		);
+	}
+
+	/**
+	 * This is only testing the default value as we don't have a "current user".
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_per_page()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_per_page() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+		$method->setAccessible( true );
+
+		$this->assertSame( 20, $method->invoke( $list_table ) );
+	}
+
 }
