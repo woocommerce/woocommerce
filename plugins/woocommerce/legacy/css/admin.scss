@@ -7859,3 +7859,18 @@ table.bar_chart {
 		}
 	}
 }
+
+/**
+  * Product Reviews
+  */
+.wp-list-table.product-reviews {
+
+	@media screen and (max-width: 782px) {
+
+		.column-type,
+		.column-author,
+		.column-rating {
+			display: none !important;
+		}
+	}
+}
