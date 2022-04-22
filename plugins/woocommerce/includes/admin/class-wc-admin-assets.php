@@ -541,11 +541,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'manage_suggestions_url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ),
 						'in_app_purchase_params'   => WC_Admin_Addons::get_in_app_purchase_url_params(),
 						'i18n_marketplace_suggestions_default_cta'
-							=> esc_html__( 'Learn More', 'woocommerce' ),
+						=> esc_html__( 'Learn More', 'woocommerce' ),
 						'i18n_marketplace_suggestions_dismiss_tooltip'
-							=> esc_attr__( 'Dismiss this suggestion', 'woocommerce' ),
+						=> esc_attr__( 'Dismiss this suggestion', 'woocommerce' ),
 						'i18n_marketplace_suggestions_manage_suggestions'
-							=> esc_html__( 'Manage suggestions', 'woocommerce' ),
+						=> esc_html__( 'Manage suggestions', 'woocommerce' ),
 					)
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
