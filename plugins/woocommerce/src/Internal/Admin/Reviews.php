@@ -76,7 +76,7 @@ class Reviews {
 	/**
 	 * Gets the required capability to access the reviews page and manage product reviews.
 	 *
-	 * @param string $context The context for which the capability is needed.  (e.g. `view` or `moderate`)
+	 * @param string $context The context for which the capability is needed (e.g. `view` or `moderate`).
 	 * @return string
 	 */
 	public static function get_capability( $context = 'view' ) {
@@ -265,7 +265,7 @@ class Reviews {
 			$comment_author       = wp_slash( $user->display_name );
 			$comment_author_email = wp_slash( $user->user_email );
 			$comment_author_url   = wp_slash( $user->user_url );
-			// WordPress core already sanitizes `content` during the `pre_comment_content` hook, which is why it's not needed here.  {@see wp_filter_comment()} and {@see kses_init_filters()}
+			// WordPress core already sanitizes `content` during the `pre_comment_content` hook, which is why it's not needed here, {@see wp_filter_comment()} and {@see kses_init_filters()}.
 			$comment_content      = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$comment_type         = isset( $_POST['comment_type'] ) ? sanitize_text_field( wp_unslash( $_POST['comment_type'] ) ) : 'comment';
 
