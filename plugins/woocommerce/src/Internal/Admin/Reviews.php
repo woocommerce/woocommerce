@@ -76,7 +76,7 @@ class Reviews {
 	/**
 	 * Gets the required capability to access the reviews page and manage product reviews.
 	 *
-	 * @param string $context The context for which the capability is needed.
+	 * @param string $context The context for which the capability is needed.  (e.g. `view` or `moderate`)
 	 * @return string
 	 */
 	public static function get_capability( $context = 'view' ) {
