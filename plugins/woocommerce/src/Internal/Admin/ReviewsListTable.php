@@ -90,6 +90,8 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
 		// Include the review status arguments.
 		$args = wp_parse_args( $this->get_status_arguments(), $args );
+		// Include the search argument.
+		$args = wp_parse_args( $this->get_search_arguments(), $args );
 		// Include the offset argument.
 		$args = wp_parse_args( $this->get_offset_arguments(), $args );
 
@@ -271,6 +273,21 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( ! empty( $comment_status ) && 'all' !== $comment_status && array_key_exists( $comment_status, $this->get_status_filters() ) ) {
 			$args['status'] = $this->convert_status_to_query_value( $comment_status );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Gets the `search` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_search_arguments() : array {
+		$args = [];
+
+		if ( ! empty( $_REQUEST['s'] ) ) {
+			$args['search'] = sanitize_text_field( wp_unslash( $_REQUEST['s'] ) );
 		}
 
 		return $args;

@@ -1086,6 +1086,31 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_search_arguments()
+	 * @dataProvider provider_get_search_arguments
+	 *
+	 * @param mixed $search_value  Current search value in the request.
+	 * @param array $expected_args Expected result of the method.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_search_arguments( $search_value, array $expected_args ) {
+		$_REQUEST['s'] = $search_value;
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_search_arguments' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
+	}
+
+	/** @see test_get_search_arguments */
+	public function provider_get_search_arguments() : Generator {
+		yield 'no search' => [ null, [] ];
+		yield 'search value' => [ 'test', [ 'search' => 'test' ] ];
+	}
+
+	/**
 	 * Tests that can output the text for when no reviews are found.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::no_items()
