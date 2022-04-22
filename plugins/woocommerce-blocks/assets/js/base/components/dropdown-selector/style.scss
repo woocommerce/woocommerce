@@ -147,7 +147,7 @@ $dropdown-selector-line-height: math.div(18, 14);
 	top: 100%;
 	max-height: 300px;
 	overflow-y: auto;
-	z-index: 1;
+	z-index: 10;
 
 	&:not(:empty) {
 		border: 1px solid #9f9f9f;
