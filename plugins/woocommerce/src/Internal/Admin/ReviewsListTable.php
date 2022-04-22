@@ -76,6 +76,7 @@ class ReviewsListTable extends WP_List_Table {
 		$this->set_review_product();
 
 		$args = [
+			'number'    => $this->get_per_page(),
 			'post_type' => 'product',
 		];
 
@@ -89,12 +90,30 @@ class ReviewsListTable extends WP_List_Table {
 		$args = wp_parse_args( $this->get_filter_product_arguments(), $args );
 		// Include the review status arguments.
 		$args = wp_parse_args( $this->get_status_arguments(), $args );
+		// Include the offset argument.
+		$args = wp_parse_args( $this->get_offset_arguments(), $args );
 
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
 
 		$this->items = $comments;
+
+		$this->set_pagination_args(
+			[
+				'total_items' => get_comments( $this->get_total_comments_arguments( $args ) ),
+				'per_page'    => $this->get_per_page(),
+			]
+		);
+	}
+
+	/**
+	 * Returns the number of items to show per page.
+	 *
+	 * @return int
+	 */
+	protected function get_per_page() : int {
+		return $this->get_items_per_page( 'edit_comments_per_page' );
 	}
 
 	/**
@@ -255,6 +274,40 @@ class ReviewsListTable extends WP_List_Table {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Returns the `offset` argument based on the current request.
+	 *
+	 * @return array
+	 */
+	protected function get_offset_arguments() : array {
+		$args = [];
+
+		if ( isset( $_REQUEST['start'] ) ) {
+			$args['offset'] = absint( wp_unslash( $_REQUEST['start'] ) );
+		} else {
+			$args['offset'] = ( $this->get_pagenum() - 1 ) * $this->get_per_page();
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Returns the arguments used to count the total number of comments.
+	 *
+	 * @param array $default_query_args Query args for the main request.
+	 * @return array
+	 */
+	protected function get_total_comments_arguments( array $default_query_args ) : array {
+		return wp_parse_args(
+			[
+				'count'  => true,
+				'offset' => 0,
+				'number' => 0,
+			],
+			$default_query_args
+		);
 	}
 
 	/**
