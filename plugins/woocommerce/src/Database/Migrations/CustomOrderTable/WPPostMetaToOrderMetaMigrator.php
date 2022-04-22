@@ -54,7 +54,7 @@ class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 				),
 				'entity'        => array(
 					'table_name'       => $this->table_names['orders'],
-					'source_id_column' => 'post_id',
+					'source_id_column' => 'id',
 					'id_column'        => 'id',
 				),
 				'excluded_keys' => $this->excluded_columns,

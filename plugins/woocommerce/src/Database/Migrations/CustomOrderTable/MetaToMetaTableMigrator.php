@@ -82,7 +82,7 @@ abstract class MetaToMetaTableMigrator {
 
 		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate['data'] ) );
 
-		$data = $this->classify_update_insert_records( $to_migrate['data'], $already_migrated );
+		$data      = $this->classify_update_insert_records( $to_migrate['data'], $already_migrated );
 		$to_insert = $data[0];
 		$to_update = $data[1];
 
@@ -363,7 +363,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 
 		if ( $this->schema_config['source']['excluded_keys'] ) {
 			$key_placeholder = implode( ',', array_fill( 0, count( $this->schema_config['source']['excluded_keys'] ), '%s' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $source_meta_key_column is escated for backticks, $key_placeholder is hardcoded.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $source_meta_key_column is escaped for backticks, $key_placeholder is hardcoded.
 			$exclude_clause = $wpdb->prepare( "source.$source_meta_key_column NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
 			$where_clause   = "$where_clause AND $exclude_clause";
 		}
