@@ -2400,5 +2400,7 @@ function wc_update_640_db_version() {
  * (for existing installations, a site admin should review and make a conscious decision to enable).
  */
 function wc_update_650_approved_download_directories() {
-	wc_get_container()->get( Download_Directories_Sync::class )->init_feature( true, false );
+	$directory_sync = wc_get_container()->get( Download_Directories_Sync::class );
+	$directory_sync->init_hooks();
+	$directory_sync->init_feature( true, false );
 }
