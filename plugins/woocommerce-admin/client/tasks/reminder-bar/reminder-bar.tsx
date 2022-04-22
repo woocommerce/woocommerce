@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	useSelect,
+	useDispatch,
+	select as wpDataSelect,
+} from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -57,7 +61,9 @@ const ReminderText: React.FC< ReminderTextProps > = ( { remainingCount } ) => {
 						<Link
 							href={ getAdminLink( 'admin.php?page=wc-admin' ) }
 							type="wp-admin"
-						/>
+						>
+							<></>
+						</Link>
 					),
 				},
 			} ) }
@@ -77,7 +83,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		taskListComplete,
 		reminderBarHidden,
 		completedTasksCount,
-	} = useSelect( ( select ) => {
+	} = useSelect( ( select: typeof wpDataSelect ) => {
 		const {
 			getTaskList,
 			hasFinishedResolution: onboardingHasFinishedResolution,
@@ -119,9 +125,10 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		};
 	} );
 
+	const query = getQuery() as { [ key: string ]: string };
 	const isHomescreen =
-		getQuery().page && getQuery().page === 'wc-admin' && ! getQuery().path;
-	const isActiveTaskPage = Boolean( getQuery().wc_onboarding_active_task );
+		query.page && query.page === 'wc-admin' && ! query.path;
+	const isActiveTaskPage = Boolean( query.wc_onboarding_active_task );
 
 	const hideReminderBar =
 		loading ||

@@ -7,7 +7,7 @@ import { useSelect } from '@wordpress/data';
 import {
 	getVisibleTasks,
 	ONBOARDING_STORE_NAME,
-	TaskListType,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
@@ -30,14 +30,14 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 		completedCount,
 		hasVisitedTasks,
 		disabledCompletedCount,
-	} = useSelect( ( select ) => {
-		const taskList: TaskListType = select(
-			ONBOARDING_STORE_NAME
-		).getTaskList( taskListId );
+	} = useSelect( ( select: WCDataSelector ) => {
+		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
+			taskListId
+		);
 		const finishedResolution = select(
 			ONBOARDING_STORE_NAME
 		).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-		const visibleTasks = getVisibleTasks( taskList?.tasks );
+		const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 
 		return {
 			loading: ! finishedResolution,

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getAdminLink } from '@woocommerce/settings';
-import { WPDataSelectors } from '@woocommerce/data';
+import { WPDataSelectors, TaskType } from '@woocommerce/data';
 
 /**
  * Plugins required to automate taxes.
@@ -45,13 +45,17 @@ export const redirectToTaxSettings = (): void => {
 export type SettingsSelector = WPDataSelectors & {
 	getSettings: (
 		type: string
-	) => { general: { woocommerce_default_country?: string } };
+	) => {
+		general: { woocommerce_default_country?: string };
+		tax: { [ key: string ]: string };
+	};
 	getOption: (
 		type: string
 	) => {
 		wc_connect_options: {
 			tos_accepted: string;
 		};
+		tos_accepted?: boolean;
 	};
 };
 
@@ -63,6 +67,7 @@ export type TaxChildProps = {
 	onAutomate: () => void;
 	onManual: () => void;
 	onDisable: () => void;
+	task: TaskType;
 };
 
 /**

@@ -20,6 +20,11 @@ export type TaskType = {
 	isActioned: boolean;
 	eventPrefix: string;
 	level: number;
+	additionalData?: {
+		woocommerceTaxCountries?: string[];
+		taxJarActivated?: boolean;
+		avalaraActivated?: boolean;
+	};
 };
 
 export type TaskListSection = {

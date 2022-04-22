@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix remaining typescript type errors in react admin
