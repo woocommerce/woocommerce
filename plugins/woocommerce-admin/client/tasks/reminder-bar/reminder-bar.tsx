@@ -160,7 +160,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 
 	const tracksProps = {
 		completed: completedTasksCount,
-		is_homescreen: isHomescreen,
+		is_homescreen: !! isHomescreen,
 		is_active_task_page: isActiveTaskPage,
 	};
 
