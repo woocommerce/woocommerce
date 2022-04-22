@@ -7865,6 +7865,10 @@ table.bar_chart {
   */
 .wp-list-table.product-reviews {
 
+	th.column-type {
+		width: 10%;
+	}
+
 	@media screen and (max-width: 782px) {
 
 		.column-type,
