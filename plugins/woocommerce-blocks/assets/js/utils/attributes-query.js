@@ -57,6 +57,8 @@ export const removeAttributeFilterBySlug = (
  * @param {Object}   attribute      An attribute object.
  * @param {Array}    attributeTerms Array of term objects.
  * @param {string}   operator       Operator for the filter. Valid values: in, and.
+ *
+ * @return {Object} An attribute object.
  */
 export const updateAttributeFilter = (
 	query = [],
@@ -79,4 +81,6 @@ export const updateAttributeFilter = (
 		} );
 		setQuery( sortBy( returnQuery, 'attribute' ) );
 	}
+
+	return returnQuery;
 };
