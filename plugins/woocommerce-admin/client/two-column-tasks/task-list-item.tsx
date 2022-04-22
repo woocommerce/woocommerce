@@ -39,7 +39,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const hasFills = Boolean( slot?.fills?.length );
 
 	const trackClick = () => {
-		recordEvent( `${ eventPrefix }_click`, {
+		recordEvent( `${ eventPrefix }click`, {
 			task_name: task.id,
 		} );
 	};
