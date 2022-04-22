@@ -34,11 +34,6 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 * Setup data_store and sut.
 	 */
 	public function setUp(): void {
-
-		// TODO: Remove this once the migrations have been adapted to the removal of the post_id column.
-		$this->markTestSkipped( 'Temporarily skipping until the migrations have been adapted to the removal of the post_id column.' );
-		return;
-
 		parent::setUp();
 		$this->create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
