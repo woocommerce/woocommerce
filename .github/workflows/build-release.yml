@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Build
         id: build
-        uses: woocommerce/action-build@v2
+        uses: woocommerce/action-build@trunk
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
@@ -21,3 +21,30 @@ jobs:
           asset_path: ${{ steps.build.outputs.zip_path }}
           asset_name: woocommerce.zip
           asset_content_type: application/zip
+  update-code-reference:
+    if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
+    name: Update Code Reference
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Code Reference build and deploy workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: GitHub Pages deploy
+          repo: woocommerce/code-reference
+          token: ${{ secrets.CUSTOM_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "version": "${{ github.event.release.tag_name }}" }'
+  run-release-smoke-tests:
+    name: Execute Smoke test release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke release smoke testing workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: Smoke test release
+          repo: ${{ github.repository }}
+          token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "release_id": "${{ github.event.release.id }}" }'

@@ -1,0 +1,4 @@
+packages:
+    - 'packages/js/**'
+    - 'plugins/**'
+    - 'tools/monorepo-merge'

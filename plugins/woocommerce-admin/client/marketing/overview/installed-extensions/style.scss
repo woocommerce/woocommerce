@@ -1,0 +1,91 @@
+.woocommerce-marketing-installed-extensions-card {
+	&__item {
+		display: flex;
+		align-items: center;
+		padding: 18px 24px;
+
+		h4 {
+			font-weight: 400;
+			font-size: 16px;
+			margin: 0 0 5px;
+			color: $gray-900;
+		}
+
+		p {
+			color: $gray-700;
+			margin: 0;
+		}
+	}
+
+	&__item:not(:last-child) {
+		border-bottom: 1px solid $gray-200;
+	}
+
+	&__item-text-and-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		flex-grow: 2;
+		min-width: 0; // Flexbox truncated text fix
+
+		@include breakpoint( '>600px' ) {
+			flex-wrap: nowrap;
+		}
+	}
+
+	&__item-actions {
+		@include breakpoint( '>600px' ) {
+			text-align: right;
+			white-space: nowrap;
+			padding-left: 25px;
+		}
+	}
+
+	&__item-description {
+		@include breakpoint( '>960px' ) {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			max-width: 550px;
+		}
+	}
+
+	&__item-links {
+		margin: 0;
+		padding: 0;
+
+		li {
+			display: inline-block;
+			margin: 0 25px 0 0;
+
+			@include breakpoint( '>600px' ) {
+				margin: 0 0 0 30px;
+			}
+		}
+
+		a {
+			font-weight: 600;
+			color: var(--wp-admin-theme-color) !important;
+			text-decoration: none;
+			font-size: 14px;
+		}
+	}
+
+	.woocommerce-admin-marketing-product-icon {
+		align-self: flex-start;
+		margin-right: 14px;
+		margin-top: 2px; // Align top of image with text
+	}
+
+	&__item-text {
+		min-width: 0; // Flexbox truncated text fix
+		flex-grow: 2;
+		margin: 0 0 10px;
+		width: 100%;
+
+		@include breakpoint( '>600px' ) {
+			margin: 0;
+			width: auto;
+		}
+	}
+}

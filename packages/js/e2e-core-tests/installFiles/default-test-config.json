@@ -1,0 +1,195 @@
+{
+  "url": "http://localhost:8084/",
+  "users": {
+    "admin": {
+      "username": "admin",
+      "password": "password"
+    },
+    "customer": {
+      "username": "customer",
+      "password": "password"
+    }
+  },
+  "products": {
+    "simple": {
+      "name": "Simple product"
+    },
+    "variable": {
+      "name": "Variable Product with Three Attributes",
+      "defaultAttributes": [
+        {
+          "id": 0,
+          "name": "Size",
+          "option": "Medium"
+        },
+        {
+          "id": 0,
+          "name": "Colour",
+          "option": "Blue"
+        }
+      ],
+      "attributes": [
+        {
+          "id": 0,
+          "name": "Colour",
+          "isVisibleOnProductPage": true,
+          "isForVariations": true,
+          "options": [
+            "Red",
+            "Green",
+            "Blue"
+          ],
+          "sortOrder": 0
+        },
+        {
+          "id": 0,
+          "name": "Size",
+          "isVisibleOnProductPage": true,
+          "isForVariations": true,
+          "options": [
+            "Small",
+            "Medium",
+            "Large"
+          ],
+          "sortOrder": 0
+        },
+        {
+          "id": 0,
+          "name": "Logo",
+          "isVisibleOnProductPage": true,
+          "isForVariations": true,
+          "options": [
+            "Woo",
+            "WordPress"
+          ],
+          "sortOrder": 0
+        }
+      ]
+    },
+    "variations": [
+      {
+        "regularPrice": "19.99",
+        "attributes": [
+          {
+            "name": "Size",
+            "option": "Large"
+          },
+          {
+            "name": "Colour",
+            "option": "Red"
+          }
+        ]
+      },
+      {
+        "regularPrice": "18.99",
+        "attributes": [
+          {
+            "name": "Size",
+            "option": "Medium"
+          },
+          {
+            "name": "Colour",
+            "option": "Green"
+          }
+        ]
+      },
+      {
+        "regularPrice": "17.99",
+        "attributes": [
+          {
+            "name": "Size",
+            "option": "Small"
+          },
+          {
+            "name": "Colour",
+            "option": "Blue"
+          }
+        ]
+      }
+    ],
+    "grouped": {
+      "name": "Grouped Product with Three Children",
+      "groupedProducts": [
+        {
+          "name": "Base Unit",
+          "regularPrice": "29.99"
+        },
+        {
+          "name": "Add-on A",
+          "regularPrice": "11.95"
+        },
+        {
+          "name": "Add-on B",
+          "regularPrice": "18.97"
+        }
+      ]
+    },
+    "external": {
+      "name": "External product",
+      "regularPrice": "24.99",
+      "buttonText": "Buy now",
+      "externalUrl": "https://wordpress.org/plugins/woocommerce"
+    }
+  },
+  "coupons": {
+    "percentage": {
+      "code": "20percent",
+      "discountType": "percent",
+      "amount": "20.00"
+    }
+  },
+  "addresses": {
+    "admin": {
+      "store": {
+        "email": "admin@woocommercecoree2etestsuite.com",
+        "firstname": "John",
+        "lastname": "Doe",
+        "company": "Automattic",
+        "country": "United States (US)",
+        "addressfirstline": "addr 1",
+        "addresssecondline": "addr 2",
+        "countryandstate": "United States (US) — California",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94107"
+      }
+    },
+    "customer": {
+      "billing": {
+        "firstname": "John",
+        "lastname": "Doe",
+        "company": "Automattic",
+        "country": "United States (US)",
+        "addressfirstline": "addr 1",
+        "addresssecondline": "addr 2",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94107",
+        "phone": "123456789",
+        "email": "john.doe@example.com"
+      },
+      "shipping": {
+        "firstname": "John",
+        "lastname": "Doe",
+        "company": "Automattic",
+        "country": "United States (US)",
+        "addressfirstline": "addr 1",
+        "addresssecondline": "addr 2",
+        "city": "San Francisco",
+        "state": "CA",
+        "postcode": "94107"
+      }
+    }
+  },
+  "orders": {
+    "basicPaidOrder": {
+      "paymentMethod": "cod",
+      "status": "processing",
+      "billing": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com"
+      }
+    }
+  }
+}

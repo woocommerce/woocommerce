@@ -1,6 +1,6 @@
 ### All Submissions:
 
-* [ ] Have you followed the [WooCommerce Contributing guideline](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md)?
+* [ ] Have you followed the [WooCommerce Contributing guideline](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md)?
 * [ ] Does your code follow the [WordPress' coding standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/)?
 * [ ] Have you checked to ensure there aren't other open [Pull Requests](../../pulls) for the same update/change?
 
@@ -25,9 +25,10 @@ Closes # .
 * [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 * [ ] Have you written new tests for your changes, as applicable?
 * [ ] Have you successfully run tests with your changes locally?
+* [ ] Have you created a changelog file by running `pnpm nx affected --target=changelog`?
 
 <!-- Mark completed items with an [x] -->
 
-### Changelog entry
+### FOR PR REVIEWER ONLY:
 
-> Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted.
+* [ ] I have reviewed that everything is sanitized/escaped appropriately for any SQL or XSS injection possibilities. I made sure Linting is not ignored or disabled.

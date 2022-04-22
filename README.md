@@ -5,8 +5,8 @@
 <a href="https://packagist.org/packages/woocommerce/woocommerce"><img src="https://poser.pugx.org/woocommerce/woocommerce/v/stable" alt="Latest Stable Version"></a>
 <img src="https://img.shields.io/wordpress/plugin/dt/woocommerce.svg" alt="WordPress.org downloads">
 <img src="https://img.shields.io/wordpress/plugin/r/woocommerce.svg" alt="WordPress.org rating">
-<a href="https://travis-ci.com/woocommerce/woocommerce"><img src="https://travis-ci.com/woocommerce/woocommerce.svg?branch=master" alt="Build Status"></a>
-<a href="https://codecov.io/gh/woocommerce/woocommerce"><img src="https://codecov.io/gh/woocommerce/woocommerce/branch/master/graph/badge.svg" alt="codecov"></a>
+<a href="https://github.com/woocommerce/woocommerce/actions/workflows/ci.yml"><img src="https://github.com/woocommerce/woocommerce/actions/workflows/ci.yml/badge.svg?branch=trunk" alt="Build Status"></a>
+<a href="https://codecov.io/gh/woocommerce/woocommerce"><img src="https://codecov.io/gh/woocommerce/woocommerce/branch/trunk/graph/badge.svg" alt="codecov"></a>
 </p>
 
 Welcome to the WooCommerce repository on GitHub. Here you can browse the source, look at open issues and keep track of development. We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
@@ -18,6 +18,7 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+* [Setting up a development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment)
 
 ## Reporting Security Issues
 To disclose a security issue to our team, [please submit a report via HackerOne here](https://hackerone.com/automattic/).
@@ -34,4 +35,10 @@ This repository is not suitable for support. Please don't use our issue tracker 
 Support requests in issues on this repository will be closed on sight.
 
 ## Contributing to WooCommerce
-If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md) for more information how you can do this.
+If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information how you can do this.
+
+<p align="center">
+    <br/><br/>
+    Made with 💜 by <a href="https://woocommerce.com/">WooCommerce</a>.<br/>
+    <a href="https://woocommerce.com/careers/">We're hiring</a>! Come work with us!
+</p>

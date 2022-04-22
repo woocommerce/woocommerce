@@ -1,6 +1,0 @@
-{
-  "references": [
-    { "path": "tests/e2e/api" }
-  ],
-  "files": []
-}

@@ -4,20 +4,21 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
 jobs:
   build:
+    if: github.repository_owner == 'woocommerce'
     name: Nightly builds
     strategy:
       fail-fast: false
       matrix:
-        build: [master]
+        build: [trunk]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ matrix.build }}
       - name: Build
         id: build
-        uses: woocommerce/action-build@v2
+        uses: woocommerce/action-build@trunk
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.1.0
         env:

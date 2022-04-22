@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	bootstrap="tests/legacy/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	verbose="true"
+	>
+	<testsuites>
+		<testsuite name="WooCommerce Test Suite">
+			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+			<directory suffix=".php">./tests/php</directory>
+		</testsuite>
+	</testsuites>
+	<filter>
+		<whitelist addUncoveredFilesFromWhitelist="true">
+			<directory suffix=".php">./includes</directory>
+			<file>woocommerce.php</file>
+			<file>uninstall.php</file>
+			<exclude>
+				<directory suffix=".php">./includes/admin/helper/views</directory>
+				<directory suffix=".php">./includes/admin/importers/views</directory>
+				<directory suffix=".php">./includes/admin/meta-boxes/views</directory>
+				<directory suffix=".php">./includes/admin/plugin-updates/views</directory>
+				<directory suffix=".php">./includes/admin/views</directory>
+				<directory suffix=".php">./includes/api/legacy</directory>
+				<directory suffix=".php">./includes/api/v1</directory>
+				<directory suffix=".php">./includes/legacy</directory>
+				<directory suffix=".php">./includes/libraries</directory>
+				<directory suffix=".php">./includes/shipping/legacy-flat-rate</directory>
+				<directory suffix=".php">./includes/shipping/legacy-free-shipping</directory>
+				<directory suffix=".php">./includes/shipping/legacy-international-delivery</directory>
+				<directory suffix=".php">./includes/shipping/legacy-local-delivery</directory>
+				<directory suffix=".php">./includes/shipping/legacy-local-pickup</directory>
+				<directory suffix=".php">./includes/updates</directory>
+				<directory suffix=".php">./includes/vendor</directory>
+				<directory suffix=".php">./includes/widgets</directory>
+				<directory suffix=".php">./packages</directory>
+				<directory suffix=".php">./src</directory>
+				<directory suffix=".php">./vendor</directory>
+				<file>./includes/wc-deprecated-functions.php</file>
+				<file>./includes/wc-template-hooks.php</file>
+				<file>./includes/wc-widget-functions.php</file>
+			</exclude>
+		</whitelist>
+	</filter>
+</phpunit>
