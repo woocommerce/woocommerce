@@ -346,7 +346,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		?>
 
 		<?php // All must be on one line to preserve tab spacing. ?>
-		<textarea class="widefat" rows="10" style="width:100%;white-space:pre;white-space:pre-wrap;font-family:monospace;font-size: 13px;"><?php print_r( $output ); ?></textarea>
+		<textarea readonly class="widefat" rows="10" style="width:100%;white-space:pre;white-space:pre-wrap;font-family:monospace;font-size: 13px;"><?php print_r( $output ); ?></textarea>
 		<?php
 	}
 
@@ -474,7 +474,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			return '';
 		}
 
-		return $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values );  // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->prepare( 'WHERE 1 = 1 AND ' . implode( ' AND ', $where_conditions ), $where_values );  // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Imploding array of values.
 	}
 
 	/**
