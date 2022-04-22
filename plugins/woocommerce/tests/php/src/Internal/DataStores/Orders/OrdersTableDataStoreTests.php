@@ -31,10 +31,16 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->sut            = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator       = wc_get_container()->get( WPPostToCOTMigrator::class );
 		$this->cpt_data_store = new WC_Order_Data_Store_CPT();
+		// Add back removed filter.
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 	}
 
 	/**
