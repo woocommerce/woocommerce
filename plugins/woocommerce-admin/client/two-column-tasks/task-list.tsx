@@ -302,7 +302,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 							const className = classnames(
 								'woocommerce-task-list__item index-' + index,
 								{
-									'is-complete': task.isComplete,
+									complete: task.isComplete,
 									'is-active': task.id === activeTaskId,
 								}
 							);

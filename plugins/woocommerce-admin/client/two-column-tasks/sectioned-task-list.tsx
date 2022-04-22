@@ -233,8 +233,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 											const className = classnames(
 												'woocommerce-task-list__item',
 												{
-													'is-complete':
-														task.isComplete,
+													complete: task.isComplete,
 													'is-disabled':
 														task.isDisabled,
 												}
