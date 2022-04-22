@@ -1805,4 +1805,20 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * This is only testing the default value as we don't have a "current user".
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_per_page()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_per_page() {
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+		$method->setAccessible( true );
+
+		$this->assertSame( 20, $method->invoke( $list_table ) );
+	}
+
 }

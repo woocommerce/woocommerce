@@ -110,7 +110,7 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Returns the number of items to show per page.
 	 *
-	 * @return int
+	 * @return int Customized per-page value if available, or 20 as the default.
 	 */
 	protected function get_per_page() : int {
 		return $this->get_items_per_page( 'edit_comments_per_page' );
