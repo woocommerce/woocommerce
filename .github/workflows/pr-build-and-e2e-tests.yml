@@ -60,9 +60,11 @@ jobs:
 
             - name: Cache modules
               uses: actions/cache@v3
+              id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
+                  **/node_modules
                 key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
@@ -70,6 +72,7 @@ jobs:
 
             - name: Install dependencies
               working-directory: package/woocommerce
+              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm install
 
             - name: Load docker images and start containers.
