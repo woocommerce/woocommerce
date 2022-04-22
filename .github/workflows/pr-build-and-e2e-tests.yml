@@ -35,6 +35,9 @@ jobs:
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install-no-dev woocommerce
 
+            - name: Build zip
+              run: pnpm nx build woocommerce
+
             - name: Upload PR zip
               uses: actions/upload-artifact@v3
               env:
