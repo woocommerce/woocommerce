@@ -970,7 +970,7 @@ class ReviewsListTable extends WP_List_Table {
 			return '';
 		}
 
-		$parent_review_link = esc_url( get_comment_link( $review ) );
+		$parent_review_link = get_comment_link( $review );
 		$review_author_name = get_comment_author( $review );
 
 		return sprintf(
