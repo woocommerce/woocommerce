@@ -602,7 +602,7 @@ class ReviewsListTable extends WP_List_Table {
 	public function get_columns() {
 		$columns = [
 			'cb'       => '<input type="checkbox" />',
-			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
+			'type'     => _x( 'Type', 'review type', 'woocommerce' ) . '<style>.column-type { width: 10%; }</style>',
 			'author'   => __( 'Author', 'woocommerce' ),
 			'rating'   => __( 'Rating', 'woocommerce' ),
 			'comment'  => _x( 'Review', 'column name', 'woocommerce' ),
