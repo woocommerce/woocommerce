@@ -81,7 +81,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			try {
 				$insert['context'] = serialize( $context ); // @codingStandardsIgnoreLine.
 			} catch ( Exception $e ) {
-				$insert['context'] = 'There was an error while serializing the context: ' . $e->getMessage();
+				$insert['context'] = serialize( 'There was an error while serializing the context: ' . $e->getMessage() );
 			}
 		}
 
