@@ -243,12 +243,8 @@ const StockStatusFilterBlock = ( {
 	useEffect( () => {
 		if ( filteringForPhpTemplate ) {
 			setChecked( checked );
-			// Only automatically redirect if the filter button is not active.
-			if ( ! blockAttributes.showFilterButton ) {
-				redirectPageForPhpTemplate( checked );
-			}
 		}
-	}, [ filteringForPhpTemplate, checked, blockAttributes.showFilterButton ] );
+	}, [ filteringForPhpTemplate, checked ] );
 
 	/**
 	 * Important: For PHP rendered block templates only.

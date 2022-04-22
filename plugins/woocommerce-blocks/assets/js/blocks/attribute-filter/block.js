@@ -46,10 +46,10 @@ import {
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
  *
- * @param  {string} url    Current page URL.
- * @param  {Array}  params Parameters and their constraints.
+ * @param {string} url    Current page URL.
+ * @param {Array}  params Parameters and their constraints.
  *
- * @return {string}        New URL with query parameters in it.
+ * @return {string}       New URL with query parameters in it.
  */
 
 /**
