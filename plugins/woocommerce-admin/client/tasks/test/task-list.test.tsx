@@ -3,17 +3,21 @@
  */
 import { render } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
+import { TaskType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { TaskList } from '../task-list';
+import { TaskListItemProps } from '../task-list-item';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 jest.mock( '../task-list-item', () => ( {
-	TaskListItem: ( props ) => <div>{ props.task.title }</div>,
+	TaskListItem: ( props: TaskListItemProps ) => (
+		<div>{ props.task.title }</div>
+	),
 } ) );
 jest.mock( '../task-list-menu', () => ( {
 	TaskListMenu: jest
@@ -26,59 +30,94 @@ jest.mock( '@woocommerce/components', () => ( {
 		.mockImplementation( ( { count } ) => <div>Count:{ count }</div> ),
 } ) );
 
-const tasks = {
+const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [
 		{
 			id: 'optional',
 			title: 'This task is optional',
 			isComplete: false,
-			visible: true,
+			isVisible: true,
 			time: '1 minute',
 			isDismissable: true,
-			type: 'setup',
-			action: 'CTA (optional)',
 			content: 'This is the optional task content',
-			additionalInfo: 'This is the task additional info',
-			expandable: true,
-			expanded: true,
+			isDismissed: false,
+			isSnoozed: false,
+			isSnoozeable: false,
+			isDisabled: false,
+			snoozedUntil: 0,
+			isVisited: false,
+			parentId: '',
+			additionalInfo: '',
+			canView: true,
+			isActioned: false,
+			eventPrefix: '',
+			level: 0,
 		},
 		{
 			id: 'required',
 			title: 'This task is required',
-			container: null,
 			isComplete: false,
-			visible: true,
+			isVisible: true,
 			time: '1 minute',
 			isDismissable: false,
-			type: 'setup',
-			action: 'CTA (required)',
 			actionLabel: 'This is the action label',
 			content: 'This is the required task content',
-			expandable: false,
+			isDismissed: false,
+			isSnoozed: false,
+			isSnoozeable: false,
+			isDisabled: false,
+			snoozedUntil: 0,
+			isVisited: false,
+			parentId: '',
+			additionalInfo: '',
+			canView: true,
+			isActioned: false,
+			eventPrefix: '',
+			level: 0,
 		},
 		{
 			id: 'completed',
 			title: 'This task is completed',
-			container: null,
 			isComplete: true,
-			visible: true,
+			isVisible: true,
 			time: '1 minute',
 			isDismissable: true,
-			type: 'setup',
+			isDismissed: false,
+			isSnoozed: false,
+			isSnoozeable: false,
+			isDisabled: false,
+			snoozedUntil: 0,
+			isVisited: false,
+			content: '',
+			parentId: '',
+			additionalInfo: '',
+			canView: true,
+			isActioned: false,
+			eventPrefix: '',
+			level: 0,
 		},
 	],
 	extension: [
 		{
 			id: 'extension',
 			title: 'This task is an extension',
-			container: null,
 			isComplete: false,
-			visible: true,
+			isVisible: true,
 			time: '1 minute',
 			isDismissable: true,
-			type: 'extension',
-			action: 'CTA (extension)',
 			content: 'This is the extension task content',
+			isDismissed: false,
+			isSnoozed: false,
+			isSnoozeable: false,
+			isDisabled: false,
+			snoozedUntil: 0,
+			isVisited: false,
+			parentId: '',
+			additionalInfo: '',
+			canView: true,
+			isActioned: false,
+			eventPrefix: '',
+			level: 0,
 		},
 	],
 };
@@ -96,6 +135,11 @@ describe( 'TaskList', () => {
 				tasks={ [] }
 				title="List title"
 				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
 			/>
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
@@ -113,6 +157,11 @@ describe( 'TaskList', () => {
 				tasks={ [] }
 				title="List title"
 				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
 			/>
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
@@ -125,9 +174,16 @@ describe( 'TaskList', () => {
 	it( 'should render the task title and incomplete task number', () => {
 		const { queryByText } = render(
 			<TaskList
+				id="setup"
+				eventPrefix="tasklist_"
 				tasks={ [ ...tasks.setup ] }
 				title="List title"
 				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
 			/>
 		);
 		const incompleteCount = tasks.setup.filter(
@@ -140,9 +196,16 @@ describe( 'TaskList', () => {
 	it( 'should render all tasks', () => {
 		const { queryByText } = render(
 			<TaskList
+				id="setup"
+				eventPrefix="tasklist_"
 				tasks={ [ ...tasks.setup ] }
 				title="List title"
 				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
 			/>
 		);
 		for ( const task of tasks.setup ) {
@@ -153,7 +216,18 @@ describe( 'TaskList', () => {
 	it( 'should not display isDismissed tasks', () => {
 		const dismissedTask = [ { ...tasks.setup[ 0 ], isDismissed: true } ];
 		const { queryByText } = render(
-			<TaskList tasks={ dismissedTask } title="List title" query={ {} } />
+			<TaskList
+				id="setup"
+				eventPrefix="tasklist_"
+				tasks={ dismissedTask }
+				title="List title"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
 		);
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
@@ -169,7 +243,18 @@ describe( 'TaskList', () => {
 			},
 		];
 		const { queryByText } = render(
-			<TaskList tasks={ dismissedTask } title="List title" query={ {} } />
+			<TaskList
+				id="setup"
+				eventPrefix="tasklist_"
+				tasks={ dismissedTask }
+				title="List title"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
 		);
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
@@ -185,7 +270,18 @@ describe( 'TaskList', () => {
 			},
 		];
 		const { queryByText } = render(
-			<TaskList tasks={ dismissedTask } title="List title" query={ {} } />
+			<TaskList
+				id="setup"
+				eventPrefix="tasklist_"
+				tasks={ dismissedTask }
+				title="List title"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
 		);
 		expect( queryByText( dismissedTask[ 0 ].title ) ).toBeInTheDocument();
 	} );

@@ -3,11 +3,11 @@
 -   Update dependency `@wordpress/hooks` to ^3.5.0
 -   Add `is_offline` attribute for `Plugin` type. #32467
 -   Added Typescript type declarations. #32615
--   Update type definitions. #32683, #32695
+-   Update type definitions. #32683, #32695, #32698
     - Make `isResolving` param `args` optional.
     - Update `Plugin` type to reflect the latest changes.
     - Maps "raw"  payment `ActionDispatchers` to the registered actions.
-    - Add `getTaskListsByIds` selector type
+    - Add `getTaskListsByIds`, `getTaskLists` selector type
     - Update `TaskType` & `TaskListType` types
 -   Convert `use-user-preferences.js` to TS. #32695
 
