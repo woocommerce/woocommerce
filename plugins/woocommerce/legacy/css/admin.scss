@@ -7860,6 +7860,12 @@ table.bar_chart {
 	}
 }
 
-.product-reviews th.column-type {
-	width: 10%;
+/**
+  * Product Reviews
+  */
+.wp-list-table.product-reviews {
+
+	th.column-type {
+		width: 10%;
+	}
 }
