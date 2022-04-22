@@ -20,6 +20,7 @@
 		"store-alerts": true,
 		"transient-notices": true,
 		"wc-pay-promotion": true,
-		"wc-pay-welcome-page": true
+		"wc-pay-welcome-page": true,
+		"wc-pay-subscriptions-page": true
 	}
 }
