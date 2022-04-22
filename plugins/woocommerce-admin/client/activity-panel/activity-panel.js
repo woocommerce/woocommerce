@@ -298,9 +298,27 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			},
 		};
 
-		return [ activity, setup, previewSite, displayOptions, help ].filter(
-			( tab ) => tab.visible
-		);
+		const previewStore = {
+			name: 'previewStore',
+			title: __( 'Preview store', 'woocommerce' ),
+			icon: <Icon icon={ external } />,
+			visible: isHomescreen(),
+			onClick: () => {
+				window.open( getSetting( 'siteUrl' ) );
+				recordEvent( 'wcadmin_previewstore_click' );
+
+				return null;
+			},
+		};
+
+		return [
+			activity,
+			setup,
+			previewSite,
+			previewStore,
+			displayOptions,
+			help,
+		].filter( ( tab ) => tab.visible );
 	};
 
 	const getPanelContent = ( tab ) => {
