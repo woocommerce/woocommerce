@@ -7,16 +7,33 @@ concurrency:
 jobs:
     build:
         name: Build zip for PR
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                node-version: '16'
 
-            - name: Build
-              id: build
-              uses: woocommerce/action-build@bump/node-2 #test 5.
-              env:
-                  BUILD_ENV: e2e
+            - name: Get cached composer and pnpm directories
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/vendor
+                key: ${{ runner.os }}-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v3
@@ -24,7 +41,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   name: woocommerce
-                  path: ${{ steps.build.outputs.zip_path }}
+                  path: plugins/woocommerce/woocommerce.zip
                   retention-days: 7
 
     e2e-tests-run:
