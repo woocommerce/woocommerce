@@ -2376,15 +2376,6 @@ function wc_update_630_db_version() {
 }
 
 /**
- * Add the standard WooCommerce upload directories to the Approved Product Download Directories list
- * and start populating it based on existing product download URLs, but do not enable the feature
- * (for existing installations, a site admin should review and make a conscious decision to enable).
- */
-function wc_update_640_approved_download_directories() {
-	wc_get_container()->get( Download_Directories_Sync::class )->init_feature( true, false );
-}
-
-/**
  * Create the primary key for the product attributes lookup table if it doesn't exist already.
  *
  * @return bool Always false.
@@ -2401,4 +2392,13 @@ function wc_update_640_add_primary_key_to_product_attributes_lookup_table() {
  */
 function wc_update_640_db_version() {
 	WC_Install::update_db_version( '6.4.0' );
+}
+
+/**
+ * Add the standard WooCommerce upload directories to the Approved Product Download Directories list
+ * and start populating it based on existing product download URLs, but do not enable the feature
+ * (for existing installations, a site admin should review and make a conscious decision to enable).
+ */
+function wc_update_650_approved_download_directories() {
+	wc_get_container()->get( Download_Directories_Sync::class )->init_feature( true, false );
 }
