@@ -41,7 +41,7 @@ class WC_Cache_Helper {
 	 * @since 3.6.0
 	 */
 	public static function additional_nocache_headers( $headers ) {
-		global $wp_cache;
+		global $wp_query;
 		
 		$agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
