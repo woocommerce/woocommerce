@@ -25,21 +25,6 @@ module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [
 		...storybookConfig.module.rules,
 		...wcAdminWebpackConfig.module.rules,
-		// We need to expose packages in "peerDependencies" to the global scope for @woocommerce/* to resolve packages.
-		{
-			test: require.resolve( 'moment' ),
-			loader: 'expose-loader',
-			options: {
-				exposes: [ 'moment' ],
-			},
-		},
-		{
-			test: require.resolve( '@wordpress/data' ),
-			loader: 'expose-loader',
-			options: {
-				exposes: [ '_wp_data' ],
-			},
-		},
 	];
 
 	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
@@ -85,11 +70,6 @@ module.exports = ( storybookConfig ) => {
 			],
 		} )
 	);
-
-	storybookConfig.externals = {
-		'@wordpress/data': '_wp_data',
-		moment: 'moment',
-	};
 
 	return storybookConfig;
 };
