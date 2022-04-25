@@ -14,8 +14,7 @@ jobs:
 
             - name: Build
               id: build
-              run: "$GITHUB_API_URL/repos/woocommerce/${{ github.ref }}/contents/.github/workflows/scripts/entrypoint.sh"
-              shell: bash
+              uses: woocommerce/action-build@bump/node-2
               env:
                   BUILD_ENV: e2e
 
