@@ -37,20 +37,15 @@ class DraftOrders {
 	 * Set all hooks related to adding Checkout Draft order functionality to Woo Core.
 	 */
 	public function init() {
-		if ( $this->package->feature()->is_feature_plugin_build() ) {
-			add_filter( 'wc_order_statuses', [ $this, 'register_draft_order_status' ] );
-			add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
-			add_filter( 'woocommerce_analytics_excluded_order_statuses', [ $this, 'append_draft_order_post_status' ] );
-			add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ] );
-			add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ] );
-			// Hook into the query to retrieve My Account orders so draft status is excluded.
-			add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
-			add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
-			add_action( 'admin_init', [ $this, 'install' ] );
-		} else {
-			// Maybe remove existing cronjob if present because it shouldn't be needed in the environment.
-			add_action( 'admin_init', [ $this, 'uninstall' ] );
-		}
+		add_filter( 'wc_order_statuses', [ $this, 'register_draft_order_status' ] );
+		add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'register_draft_order_post_status' ] );
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', [ $this, 'append_draft_order_post_status' ] );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', [ $this, 'append_draft_order_post_status' ] );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ] );
+		// Hook into the query to retrieve My Account orders so draft status is excluded.
+		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
+		add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
+		add_action( 'admin_init', [ $this, 'install' ] );
 	}
 
 	/**
@@ -63,29 +58,11 @@ class DraftOrders {
 	}
 
 	/**
-	 * Remove cronjobs if they exist (but only from admin).
-	 *
-	 * @internal
-	 */
-	public function uninstall() {
-		$this->maybe_remove_cronjobs();
-	}
-
-	/**
 	 * Maybe create cron events.
 	 */
 	protected function maybe_create_cronjobs() {
 		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( 'woocommerce_cleanup_draft_orders' ) ) {
 			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
-		}
-	}
-
-	/**
-	 * Unschedule cron jobs that are present.
-	 */
-	protected function maybe_remove_cronjobs() {
-		if ( function_exists( 'as_next_scheduled_action' ) && as_next_scheduled_action( 'woocommerce_cleanup_draft_orders' ) ) {
-			as_unschedule_all_actions( 'woocommerce_cleanup_draft_orders' );
 		}
 	}
 
