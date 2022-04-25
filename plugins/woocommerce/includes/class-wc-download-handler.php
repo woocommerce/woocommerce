@@ -31,11 +31,21 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$product    = wc_get_product( $product_id );
+		$downloads  = $product ? $product->get_downloads() : array();
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
-		if ( ! $product || empty( $_GET['key'] ) || empty( $_GET['order'] ) ) { // WPCS: input var ok, CSRF ok.
+		$key = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+
+		if (
+			! $product
+			|| empty( $key )
+			|| empty( $_GET['order'] )
+			|| ! isset( $downloads[ $key ] )
+			|| ! $downloads[ $key ]->get_enabled()
+		) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
@@ -43,6 +53,7 @@ class WC_Download_Handler {
 		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
 		$order    = wc_get_order( $order_id );
