@@ -1,59 +1,58 @@
 name: Run code sniff on PR
-on:
-  pull_request
+on: pull_request
 defaults:
-  run:
-    shell: bash
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    run:
+        shell: bash
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 jobs:
-  test:
-    name: Code sniff (PHP 7.4, WP Latest)
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 100
+    test:
+        name: Code sniff (PHP 7.4, WP Latest)
+        timeout-minutes: 15
+        runs-on: 20.04.4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 100
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          tools: composer, cs2pr
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 7.4
+                  tools: composer, cs2pr
 
-      - name: Tool versions
-        run: |
-          php --version
-          composer --version
+            - name: Tool versions
+              run: |
+                  php --version
+                  composer --version
 
-      - name: Get cached composer and pnpm directories
-        uses: actions/cache@v3
-        id: cache-deps
-        with:
-          path: |
-            ~/.pnpm-store
-            plugins/woocommerce/packages
-            plugins/woocommerce/vendor
-          key: ${{ runner.os }}-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
+            - name: Get cached composer and pnpm directories
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                  path: |
+                      ~/.pnpm-store
+                      plugins/woocommerce/packages
+                      plugins/woocommerce/vendor
+                  key: ${{ runner.os }}-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
-      - name: Install PNPM
-        run: npm install -g pnpm
+            - name: Install PNPM
+              run: npm install -g pnpm
 
-      - name: Install dependencies
-        run: pnpm install
+            - name: Install dependencies
+              run: pnpm install
 
-      - name: Install Composer dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: pnpm nx composer-install woocommerce
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install woocommerce
 
-      - name: Run code sniff
-        continue-on-error: true
-        working-directory: plugins/woocommerce
-        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
-      
-      - name: Show PHPCS results in PR
-        working-directory: plugins/woocommerce
-        run: cs2pr ./phpcs-report.xml
+            - name: Run code sniff
+              continue-on-error: true
+              working-directory: plugins/woocommerce
+              run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
+
+            - name: Show PHPCS results in PR
+              working-directory: plugins/woocommerce
+              run: cs2pr ./phpcs-report.xml

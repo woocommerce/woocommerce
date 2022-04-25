@@ -54,7 +54,7 @@ jobs:
 
     build:
         name: Build zip for PR
-        runs-on: ubuntu-latest
+        runs-on: 20.04.4
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
