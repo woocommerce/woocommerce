@@ -13,7 +13,7 @@ import { controls } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { pluginNames, STORE_NAME } from './constants';
+import { STORE_NAME } from './constants';
 import { ACTION_TYPES as TYPES } from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { WPError } from '../types';
@@ -22,6 +22,8 @@ import {
 	PluginNames,
 	SelectorKeysWithActions,
 	RecommendedTypes,
+	InstallPluginsResponse,
+	ActivatePluginsResponse,
 } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
@@ -30,61 +32,10 @@ const dispatch =
 const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
-type PluginsResponse< PluginData > = {
-	data: PluginData;
-	errors: WPError< PluginNames >;
-	success: boolean;
-	message: string;
-} & Response;
-
-export type InstallPluginsResponse = PluginsResponse< {
-	installed: string[];
-	results: Record< string, boolean >;
-	install_time?: Record< string, number >;
-} >;
-
-type ActivatePluginsResponse = PluginsResponse< {
-	activated: string[];
-	active: string[];
-} >;
-
-function isWPError(
-	error: WPError< PluginNames > | Error | string
-): error is WPError< PluginNames > {
-	return ( error as WPError ).errors !== undefined;
-}
-
 class PluginError extends Error {
 	constructor( message: string, public data: unknown ) {
 		super( message );
 	}
-}
-
-function formatErrors(
-	response: WPError< PluginNames > | Error | string
-): string {
-	if ( isWPError( response ) ) {
-		// Replace the slug with a plugin name if a constant exists.
-		( Object.keys( response.errors ) as PluginNames[] ).forEach(
-			( plugin ) => {
-				response.errors[ plugin ] = response.errors[ plugin ].map(
-					( pluginError ) => {
-						return pluginNames[ plugin ]
-							? pluginError.replace(
-									`\`${ plugin }\``,
-									pluginNames[ plugin ]
-							  )
-							: pluginError;
-					}
-				);
-			}
-		);
-	} else if ( typeof response === 'string' ) {
-		return response;
-	} else {
-		return response.message;
-	}
-	return '';
 }
 
 const formatErrorMessage = (
