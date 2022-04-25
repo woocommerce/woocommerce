@@ -611,4 +611,11 @@ test2</p></div>',
 		$this->assertTrue( $method->invoke( $reviews, $review_reply ) );
 	}
 
+	/**
+	 * @covers Reviews::get_reviews_page_url()
+	 */
+	public function test_get_reviews_page_url() : void {
+		$this->assertSame( 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
+	}
+
 }
