@@ -12,11 +12,40 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3 # Comment.
 
-            - name: Build
-              id: build
-              run: bash .github/workflows/scripts/entrypoint.sh
-              env:
-                  BUILD_ENV: e2e
+            - name: Get cached composer and pnpm directories
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/vendor
+                key: ${{ runner.os }}-test000-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              #if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
+
+            - name: Prep dir
+              run: |
+                rm -rf plugins/woocommerce/build
+                mkdir -p plugins/woocommerce/build/woocommerce
+                mkdir -p plugins/woocommerce/build/woocommerce/node_modules/.bin
+                cp plugins/woocommerce/node_modules/.bin/wc-e2e plugins/woocommerce/build/woocommerce/node_modules/.bin
+                cp plugins/woocommerce/package.json plugins/woocommerce/build/woocommerce
+                cp plugins/woocommerce/project.json plugins/woocommerce/build/woocommerce
+                cp -r plugins/woocommerce/tests plugins/woocommerce/build/woocommerce
+                cp -r plugins/woocommerce/sample-data plugins/woocommerce/build/woocommerce
+                rsync -rc --exclude-from="plugins/woocommerce/.distignore" plugins/woocommerce/ plugins/woocommerce/build/woocommerce/
+                cd plugins/woocommerce/build/woocommerce
+                zip -r woocommerce.zip woocommerce/
+                echo ::set-output name=zip_path::plugins/woocommerce/build/woocommerce.zip
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v3
