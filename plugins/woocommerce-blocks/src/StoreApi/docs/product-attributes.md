@@ -1,7 +1,7 @@
 # Product Attributes API <!-- omit in toc -->
 
--   [List Product Attributes](#list-product-attributes)
--   [Single Product Attribute](#single-product-attribute)
+- [List Product Attributes](#list-product-attributes)
+- [Single Product Attribute](#single-product-attribute)
 
 ## List Product Attributes
 
@@ -22,7 +22,7 @@ Example response:
 	{
 		"id": 1,
 		"name": "Color",
-		"slug": "pa_color",
+		"taxonomy": "pa_color",
 		"type": "select",
 		"order": "menu_order",
 		"has_archives": false
@@ -30,7 +30,7 @@ Example response:
 	{
 		"id": 2,
 		"name": "Size",
-		"slug": "pa_size",
+		"taxonomy": "pa_size",
 		"type": "select",
 		"order": "menu_order",
 		"has_archives": false
@@ -60,7 +60,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/attributes/1"
 {
 	"id": 1,
 	"name": "Color",
-	"slug": "pa_color",
+	"taxonomy": "pa_color",
 	"type": "select",
 	"order": "menu_order",
 	"has_archives": false
