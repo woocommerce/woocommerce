@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { RestApiError } from '../types';
+
 export type SettingProperties = {
 	label?: string;
 	label_class?: string[];
@@ -35,7 +40,7 @@ export type Locales = {
 
 export type CountriesState = {
 	errors: {
-		[ key: string ]: string;
+		[ key: string ]: string | RestApiError | undefined;
 	};
 	locales: Locales;
 	countries: Country[];
