@@ -468,11 +468,14 @@ class TaskLists {
 	 * @return number
 	 */
 	public static function setup_tasks_remaining () {
-		if( ! Features::is_enabled( 'tasklist-setup-experiment-1' )) {
+
+		$active_list = self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ) ? 'setup_experiment_1' : self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ) ? 'setup_experiment_1' : null;
+
+		if( is_null( $active_list ) ) {
 			return;
 		}
 
-		$setup_list = self::get_list( 'setup_experiment_1' );
+		$setup_list = self::get_list( $active_list );
 
 		if( $setup_list->is_hidden() || $setup_list->is_complete() ) {
 			return;
