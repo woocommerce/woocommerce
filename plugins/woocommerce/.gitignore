@@ -34,3 +34,6 @@ i18n/languages/woocommerce.pot
 # Allure directories
 allure-report
 allure-results
+
+# Environment files
+.wp-env.override.json
