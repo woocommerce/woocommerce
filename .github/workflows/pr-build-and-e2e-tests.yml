@@ -25,8 +25,18 @@ jobs:
             - name: Install PNPM
               run: npm install -g pnpm
 
+            - name: Install Grunt
+              run: npm install -g grunt-cli
+
             - name: Install dependencies
               run: pnpm install
+
+            - name: Install Composer dependencies
+              #if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install woocommerce
+
+            - name: Build Woo
+              run: pnpm nx build woocommerce
 
             - name: Install Composer dependencies
               #if: steps.cache-deps.outputs.cache-hit != 'true'
