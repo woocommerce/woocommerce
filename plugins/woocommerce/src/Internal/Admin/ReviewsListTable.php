@@ -813,13 +813,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return string
 	 */
 	protected function get_view_url( string $comment_type, int $post_id ) : string {
-		$link = add_query_arg(
-			[
-				'post_type' => 'product',
-				'page'      => Reviews::MENU_SLUG,
-			],
-			admin_url( 'edit.php' )
-		);
+		$link = Reviews::get_reviews_page_url();
 
 		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
 			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
@@ -1388,6 +1382,100 @@ class ReviewsListTable extends WP_List_Table {
 			<?php endif; ?>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Displays a review count bubble.
+	 *
+	 * Based on {@see WP_List_Table::comments_bubble()}, but overridden, so we can customize the URL and text output.
+	 *
+	 * @param int $post_id          The product ID.
+	 * @param int $pending_comments Number of pending reviews.
+	 */
+	protected function comments_bubble( $post_id, $pending_comments ) {
+		$approved_review_count = get_comments_number();
+
+		$approved_reviews_number = number_format_i18n( $approved_review_count );
+		$pending_reviews_number  = number_format_i18n( $pending_comments );
+
+		$approved_only_phrase = sprintf(
+			/* translators: %s: Number of reviews. */
+			_n( '%s review', '%s reviews', $approved_review_count, 'woocommerce' ),
+			$approved_reviews_number
+		);
+
+		$approved_phrase = sprintf(
+			/* translators: %s: Number of reviews. */
+			_n( '%s approved review', '%s approved reviews', $approved_review_count, 'woocommerce' ),
+			$approved_reviews_number
+		);
+
+		$pending_phrase = sprintf(
+			/* translators: %s: Number of reviews. */
+			_n( '%s pending review', '%s pending reviews', $pending_comments, 'woocommerce' ),
+			$pending_reviews_number
+		);
+
+		if ( ! $approved_review_count && ! $pending_comments ) {
+			// No reviews at all.
+			printf(
+				'<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">%s</span>',
+				esc_html__( 'No reviews', 'woocommerce' )
+			);
+		} elseif ( $approved_review_count && 'trash' === get_post_status( $post_id ) ) {
+			// Don't link the comment bubble for a trashed product.
+			printf(
+				'<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
+				esc_html( $approved_reviews_number ),
+				$pending_comments ? esc_html( $approved_phrase ) : esc_html( $approved_only_phrase )
+			);
+		} elseif ( $approved_review_count ) {
+			// Link the comment bubble to approved reviews.
+			printf(
+				'<a href="%s" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></a>',
+				esc_url(
+					add_query_arg(
+						[
+							'product_id'     => urlencode( $post_id ),
+							'comment_status' => 'approved',
+						],
+						Reviews::get_reviews_page_url()
+					)
+				),
+				esc_html( $approved_reviews_number ),
+				$pending_comments ? esc_html( $approved_phrase ) : esc_html( $approved_only_phrase )
+			);
+		} else {
+			// Don't link the comment bubble when there are no approved reviews.
+			printf(
+				'<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
+				esc_html( $approved_reviews_number ),
+				$pending_comments ? esc_html__( 'No approved reviews', 'woocommerce' ) : esc_html__( 'No reviews', 'woocommerce' )
+			);
+		}
+
+		if ( $pending_comments ) {
+			printf(
+				'<a href="%s" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></a>',
+				esc_url(
+					add_query_arg(
+						[
+							'product_id'     => urlencode( $post_id ),
+							'comment_status' => 'moderated',
+						],
+						Reviews::get_reviews_page_url()
+					)
+				),
+				esc_html( $pending_reviews_number ),
+				esc_html( $pending_phrase )
+			);
+		} else {
+			printf(
+				'<span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
+				esc_html( $pending_reviews_number ),
+				$approved_review_count ? esc_html__( 'No pending reviews', 'woocommerce' ) : esc_html__( 'No reviews', 'woocommerce' )
+			);
+		}
 	}
 
 }
