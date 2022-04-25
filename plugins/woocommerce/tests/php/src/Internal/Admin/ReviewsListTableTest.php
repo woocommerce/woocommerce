@@ -1846,4 +1846,88 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertSame( 20, $method->invoke( $list_table ) );
 	}
 
+	/**
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::comments_bubble()
+	 * @dataProvider provider_comments_bubble
+	 *
+	 * @param int    $approved_review_count Number of approved reviews on the product.
+	 * @param int    $pending_review_count  Number of pending reviews on the product.
+	 * @param bool   $product_is_trashed    If the product has the "trash" status.
+	 * @param string $expected_html         Expected result of the method. If a product ID is expected then that will be
+	 *                                      in this string as `PRODUCT_ID` and we'll replace it after creating the
+	 *                                      product object.
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_comments_bubble( int $approved_review_count, int $pending_review_count, bool $product_is_trashed, string $expected_html ): void {
+		global $post;
+
+		$product_id = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+
+		if ( $product_is_trashed ) {
+			wp_trash_post( $product_id );
+		}
+
+		if ( $approved_review_count > 0 ) {
+			$this->factory()->comment->create_many(
+				$approved_review_count,
+				[
+					'comment_type'     => 'review',
+					'comment_post_ID'  => $product_id,
+					'comment_approved' => '1',
+				]
+			);
+		}
+
+		$post = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$list_table = $this->get_reviews_list_table();
+		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'comments_bubble' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $list_table, $product_id, $pending_review_count );
+		$actual_html = ob_get_clean();
+
+		$this->assertSame( str_replace( 'PRODUCT_ID', $product_id, $expected_html ), $actual_html );
+	}
+
+	/** @see test_comments_bubble */
+	public function provider_comments_bubble(): Generator {
+		yield 'no reviews' => [
+			'approved_review_count' => 0,
+			'pending_review_count' => 0,
+			'product_is_trashed' => false,
+			'expected_html' => '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">No reviews</span><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No reviews</span></span>',
+		];
+
+		yield 'approved reviews only' => [
+			'approved_review_count' => 2,
+			'pending_review_count' => 0,
+			'product_is_trashed' => false,
+			'expected_html' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 reviews</span></a><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No pending reviews</span></span>',
+		];
+
+		yield 'approved and pending reviews' => [
+			'approved_review_count' => 1,
+			'pending_review_count' => 1,
+			'product_is_trashed' => false,
+			'expected_html' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">1</span><span class="screen-reader-text">1 approved review</span></a><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
+		];
+
+		yield 'pending reviews only' => [
+			'approved_review_count' => 0,
+			'pending_review_count' => 2,
+			'product_is_trashed' => false,
+			'expected_html' => '<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">0</span><span class="screen-reader-text">No approved reviews</span></span><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">2</span><span class="screen-reader-text">2 pending reviews</span></a>',
+		];
+
+		yield 'approved and pending reviews, but product is trashed' => [
+			'approved_review_count' => 2,
+			'pending_review_count' => 1,
+			'product_is_trashed' => true,
+			'expected_html' => '<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 approved reviews</span></span><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
+		];
+	}
+
 }
