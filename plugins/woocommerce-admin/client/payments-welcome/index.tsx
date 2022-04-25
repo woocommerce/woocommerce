@@ -110,7 +110,7 @@ const ConnectPageOnboarding = ( {
 	setErrorMessage,
 	connectUrl,
 }: {
-	isJetpackConnected: string;
+	isJetpackConnected?: boolean;
 	installAndActivatePlugins: PluginsStoreActions[ 'installAndActivatePlugins' ];
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setErrorMessage: Function;
@@ -268,18 +268,15 @@ const ConnectAccountPage = () => {
 	}, [ hasViewedWelcomePage ] );
 
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
-	const onboardingProps = {
-		isJetpackConnected,
-		installAndActivatePlugins,
-		connectUrl,
-	};
 
 	return (
 		<div className="connect-account-page">
 			<div className="woocommerce-payments-page is-narrow connect-account">
 				<ConnectPageError errorMessage={ errorMessage } />
 				<ConnectPageOnboarding
-					{ ...onboardingProps }
+					isJetpackConnected={ isJetpackConnected }
+					installAndActivatePlugins={ installAndActivatePlugins }
+					connectUrl={ connectUrl }
 					setErrorMessage={ setErrorMessage }
 				/>
 				<Banner />

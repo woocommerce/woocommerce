@@ -3,7 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Card, CardHeader, Spinner } from '@wordpress/components';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	Extension,
+	ExtensionList,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { useMemo, useState } from '@wordpress/element';
@@ -21,21 +26,6 @@ import { PluginProps } from './Plugin';
 import { getPluginSlug } from '../../../utils';
 
 const ALLOWED_PLUGIN_LISTS = [ 'task-list/reach', 'task-list/grow' ];
-
-export type ExtensionList = {
-	key: string;
-	title: string;
-	plugins: Extension[];
-};
-
-export type Extension = {
-	description: string;
-	key: string;
-	image_url: string;
-	is_built_by_wc: boolean;
-	manage_url: string;
-	name: string;
-};
 
 export const transformExtensionToPlugin = (
 	extension: Extension,
@@ -148,7 +138,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 		setCurrentPlugin( slug );
 		actionTask( 'marketing' );
 		installAndActivatePlugins( [ slug ] )
-			.then( ( response: { errors: Record< string, string > } ) => {
+			.then( ( response ) => {
 				recordEvent( 'tasklist_marketing_install', {
 					selected_extension: slug,
 					installed_extensions: installedExtensions.map(

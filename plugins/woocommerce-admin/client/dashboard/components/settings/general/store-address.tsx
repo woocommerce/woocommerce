@@ -376,6 +376,10 @@ export function StoreAddress( {
 		setValue
 	);
 
+	const isLocaleKey = ( key: string ): key is keyof typeof locale => {
+		return locale.hasOwnProperty( key );
+	};
+
 	useEffect( () => {
 		if ( locale ) {
 			storeAddressFields.forEach( ( field ) => {
@@ -383,7 +387,12 @@ export function StoreAddress( {
 					.replace( /(address)Line([0-9])/, '$1$2' )
 					.toLowerCase();
 				const props = getInputProps( field );
-				if ( locale[ fieldKey ]?.hidden && props.value?.length > 0 ) {
+
+				if (
+					isLocaleKey( fieldKey ) &&
+					locale[ fieldKey ]?.hidden &&
+					props.value?.length > 0
+				) {
 					// Clear hidden field.
 					setValue( field, '' );
 				}

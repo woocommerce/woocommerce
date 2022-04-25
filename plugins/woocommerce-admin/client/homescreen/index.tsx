@@ -7,6 +7,7 @@ import { identity } from 'lodash';
 import {
 	ONBOARDING_STORE_NAME,
 	withOnboardingHydration,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import type { History } from 'history';
@@ -35,6 +36,7 @@ const Homescreen = ( {
 		);
 	}
 
+	// @ts-expect-error Layout is a pure JS component
 	return <Layout query={ query } />;
 };
 

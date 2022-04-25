@@ -1,11 +1,12 @@
 /**
+ * External dependencies
+ */
+import { Extension } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
-import {
-	Extension,
-	transformExtensionToPlugin,
-	getMarketingExtensionLists,
-} from '../';
+import { transformExtensionToPlugin, getMarketingExtensionLists } from '../';
 
 const basicPlugins: Extension[] = [
 	{

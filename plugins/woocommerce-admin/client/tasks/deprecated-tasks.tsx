@@ -8,7 +8,8 @@ import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useEffect, useState } from '@wordpress/element';
 
 type DeprecatedTask = TaskType & {
-	container: React.ReactNode;
+	container?: React.ReactNode;
+	isDeprecated?: boolean;
 };
 
 const DeprecatedWooOnboardingTaskFills = () => {
@@ -29,12 +30,17 @@ const DeprecatedWooOnboardingTaskFills = () => {
 			const deprecatedTasksWithContainer = [];
 			for ( const tasklist of taskLists ) {
 				for ( const task of tasklist.tasks ) {
-					if ( task.isDeprecated && task.container ) {
+					if (
+						( task as DeprecatedTask ).isDeprecated &&
+						( task as DeprecatedTask ).container
+					) {
 						deprecatedTasksWithContainer.push( task );
 					}
 				}
 			}
-			setDeprecatedTasks( deprecatedTasksWithContainer );
+			setDeprecatedTasks(
+				deprecatedTasksWithContainer as DeprecatedTask[]
+			);
 		}
 	}, [ taskLists ] );
 

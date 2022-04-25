@@ -15,6 +15,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 import { SetupStepProps } from './setup';
+import { SettingsSelector } from '../utils';
 
 export const Plugins: React.FC< SetupStepProps > = ( {
 	nextStep,
@@ -26,7 +27,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
-		);
+		) as SettingsSelector;
 
 		return {
 			isResolving:
@@ -67,6 +68,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	return (
 		<>
 			<PluginInstaller
+				// @ts-expect-error PluginInstaller has onComplete props but it is a pure js component and doesn't export the right types.
 				onComplete={ (
 					activatedPlugins: string[],
 					response: InstallPluginsResponse
