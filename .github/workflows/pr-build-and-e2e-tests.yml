@@ -46,7 +46,6 @@ jobs:
                 ls -R
                 cd plugins/woocommerce/build
                 zip -r woocommerce.zip woocommerce/
-                echo ::set-output name=zip_path::plugins/woocommerce/build/woocommerce.zip
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v3
@@ -54,7 +53,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   name: woocommerce
-                  path: ${{ steps.build.outputs.zip_path }}
+                  path: plugins/woocommerce/build/woocommerce.zip
                   retention-days: 7
 
     e2e-tests-run:
