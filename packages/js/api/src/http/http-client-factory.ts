@@ -8,23 +8,23 @@ import { AxiosURLToQueryInterceptor } from './axios/axios-url-to-query-intercept
  * These types describe the shape of the different auth methods our factory supports.
  */
 type OAuthMethod = {
-	type: 'oauth',
-	key: string,
-	secret: string,
+	type: 'oauth';
+	key: string;
+	secret: string;
 };
 type BasicAuthMethod = {
-	type: 'basic',
-	username: string,
-	password: string,
-}
+	type: 'basic';
+	username: string;
+	password: string;
+};
 
 /**
  * An interface for describing the shape of a client to create using the factory.
  */
 interface BuildParams {
-	wpURL: string,
-	useIndexPermalinks?: boolean,
-	auth?: OAuthMethod | BasicAuthMethod,
+	wpURL: string;
+	useIndexPermalinks?: boolean;
+	auth?: OAuthMethod | BasicAuthMethod;
 }
 
 /**
@@ -129,8 +129,8 @@ export class HTTPClientFactory {
 					interceptors.push(
 						new AxiosOAuthInterceptor(
 							this.clientConfig.auth.key,
-							this.clientConfig.auth.secret,
-						),
+							this.clientConfig.auth.secret
+						)
 					);
 					break;
 			}

@@ -5,6 +5,10 @@
  * @package WooCommerce\Emails
  */
 
+use Pelago\Emogrifier\CssInliner;
+use Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
+use Pelago\Emogrifier\HtmlProcessor\HtmlPruner;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -559,18 +563,20 @@ class WC_Email extends WC_Settings_API {
 			wc_get_template( 'emails/email-styles.php' );
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
-			$emogrifier_class = 'Pelago\\Emogrifier';
+			$css_inliner_class = CssInliner::class;
 
-			if ( $this->supports_emogrifier() && class_exists( $emogrifier_class ) ) {
+			if ( $this->supports_emogrifier() && class_exists( $css_inliner_class ) ) {
 				try {
-					$emogrifier = new $emogrifier_class( $content, $css );
+					$css_inliner = CssInliner::fromHtml( $content )->inlineCss( $css );
 
-					do_action( 'woocommerce_emogrifier', $emogrifier, $this );
+					do_action( 'woocommerce_emogrifier', $css_inliner, $this );
 
-					$content    = $emogrifier->emogrify();
-					$html_prune = \Pelago\Emogrifier\HtmlProcessor\HtmlPruner::fromHtml( $content );
-					$html_prune->removeElementsWithDisplayNone();
-					$content    = $html_prune->render();
+					$dom_document = $css_inliner->getDomDocument();
+
+					HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+					$content = CssToAttributeConverter::fromDomDocument( $dom_document )
+						->convertCssToVisualAttributes()
+						->render();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();
 					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
@@ -651,7 +657,7 @@ class WC_Email extends WC_Settings_API {
 
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
-		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, $subject, $message, $headers, $attachments ), $this );
+		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, wp_specialchars_decode( $subject ), $message, $headers, $attachments ), $this );
 		$return               = $mail_callback( ...$mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );

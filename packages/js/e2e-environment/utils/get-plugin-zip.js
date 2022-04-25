@@ -77,11 +77,20 @@ const getLatestReleaseZipUrl = async (
 					}
 				} );
 			} else if ( authorizationToken ) {
-				// If it's a private repo, we need to download the archive this way
-				const tagName = body.tag_name;
-				resolve(
-					`https://github.com/${ repository }/archive/${ tagName }.zip`
-				);
+				// If it's a private repo, we need to download the archive this way.
+				// Use uploaded assets over downloading the zip archive.
+				if (
+					body.assets &&
+					body.assets.length > 0 &&
+					body.assets[ 0 ].browser_download_url
+				) {
+					resolve( body.assets[ 0 ].browser_download_url );
+				} else {
+					const tagName = body.tag_name;
+					resolve(
+						`https://github.com/${ repository }/archive/${ tagName }.zip`
+					);
+				}
 			} else {
 				resolve( body.assets[ 0 ].browser_download_url );
 			}
@@ -152,13 +161,20 @@ const downloadZip = async ( fileUrl, downloadPath, authorizationToken ) => {
 const deleteDownloadedPluginFiles = async () => {
 	const pluginSavePath = resolveLocalE2ePath( 'plugins' );
 
-	fs.readdir( pluginSavePath, ( err, files ) => {
+	fs.readdir( pluginSavePath, ( err, contents ) => {
 		if ( err ) throw err;
 
-		for ( const file of files ) {
-			fs.unlink( path.join( pluginSavePath, file ), ( error ) => {
-				if ( error ) throw error;
-			} );
+		for ( const content of contents ) {
+			const contentPath = path.join( pluginSavePath, content );
+			const stats = fs.lstatSync( contentPath );
+
+			if ( stats.isDirectory() ) {
+				fs.rmSync( contentPath, { recursive: true, force: true } );
+			} else {
+				fs.unlink( contentPath, ( error ) => {
+					if ( error ) throw error;
+				} );
+			}
 		}
 	} );
 };

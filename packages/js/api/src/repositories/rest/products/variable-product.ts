@@ -41,11 +41,13 @@ import {
  * 	DeletesVariableProducts
  * } The created repository.
  */
-export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVariableProducts
-	& CreatesVariableProducts
-	& ReadsVariableProducts
-	& UpdatesVariableProducts
-	& DeletesVariableProducts {
+export function variableProductRESTRepository(
+	httpClient: HTTPClient
+): ListsVariableProducts &
+	CreatesVariableProducts &
+	ReadsVariableProducts &
+	UpdatesVariableProducts &
+	DeletesVariableProducts {
 	const crossSells = createProductCrossSellsTransformation();
 	const inventory = createProductInventoryTransformation();
 	const salesTax = createProductSalesTaxTransformation();
@@ -61,13 +63,39 @@ export function variableProductRESTRepository( httpClient: HTTPClient ): ListsVa
 		...variable,
 	];
 
-	const transformer = createProductTransformer<VariableProduct>( 'variable', transformations );
+	const transformer = createProductTransformer< VariableProduct >(
+		'variable',
+		transformations
+	);
 
 	return new ModelRepository(
-		restList< VariableProductRepositoryParams >( baseProductURL, VariableProduct, httpClient, transformer ),
-		restCreate< VariableProductRepositoryParams >( baseProductURL, VariableProduct, httpClient, transformer ),
-		restRead< VariableProductRepositoryParams >( buildProductURL, VariableProduct, httpClient, transformer ),
-		restUpdate< VariableProductRepositoryParams >( buildProductURL, VariableProduct, httpClient, transformer ),
-		restDelete< VariableProductRepositoryParams >( deleteProductURL, httpClient ),
+		restList< VariableProductRepositoryParams >(
+			baseProductURL,
+			VariableProduct,
+			httpClient,
+			transformer
+		),
+		restCreate< VariableProductRepositoryParams >(
+			baseProductURL,
+			VariableProduct,
+			httpClient,
+			transformer
+		),
+		restRead< VariableProductRepositoryParams >(
+			buildProductURL,
+			VariableProduct,
+			httpClient,
+			transformer
+		),
+		restUpdate< VariableProductRepositoryParams >(
+			buildProductURL,
+			VariableProduct,
+			httpClient,
+			transformer
+		),
+		restDelete< VariableProductRepositoryParams >(
+			deleteProductURL,
+			httpClient
+		)
 	);
 }

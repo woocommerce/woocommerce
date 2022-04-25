@@ -8,6 +8,9 @@
  * @version 2.3.0
  */
 
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\ReportsSync;
+
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 global $wpdb, $wp_version;
@@ -20,6 +23,9 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
+wp_clear_scheduled_hook( 'wc_admin_daily' );
+wp_clear_scheduled_hook( 'generate_category_lookup_table' );
+wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
@@ -28,9 +34,6 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Drop WC Admin tables.
-	include_once dirname( __FILE__ ) . '/packages/woocommerce-admin/src/Install.php';
-	\Automattic\WooCommerce\Admin\Install::drop_tables();
-
 	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
 
 	// Roles + caps.

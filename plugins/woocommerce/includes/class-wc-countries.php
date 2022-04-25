@@ -996,7 +996,7 @@ class WC_Countries {
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
-          'EC' => array(
+					'EC' => array(
 						'state'    => array(
 							'label' => __( 'Province', 'woocommerce' ),
 						),
@@ -1498,7 +1498,7 @@ class WC_Countries {
 						),
 						'address_2' => array(
 							'required' => false,
-							'hidden'   => true,
+							'hidden'   => false,
 						),
 					),
 					'WS' => array(

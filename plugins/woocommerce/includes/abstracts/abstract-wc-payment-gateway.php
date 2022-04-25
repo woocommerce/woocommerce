@@ -2,7 +2,7 @@
 /**
  * Abstract payment gateway
  *
- * Hanldes generic payment gateway functionality which is extended by idividual payment gateways.
+ * Handles generic payment gateway functionality which is extended by individual payment gateways.
  *
  * @class WC_Payment_Gateway
  * @version 2.1.0

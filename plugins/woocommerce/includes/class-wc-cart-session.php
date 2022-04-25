@@ -47,7 +47,7 @@ final class WC_Cart_Session {
 	public function init() {
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ), 1000 );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 

@@ -465,9 +465,10 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 	 * Filter check for CSV file path.
 	 *
 	 * @since 3.6.4
-	 * @param bool $check_import_file_path If requires file path check. Defaults to true.
+	 * @param bool   $check_import_file_path If requires file path check. Defaults to true.
+	 * @param string $file                   Path of the file to be checked.
 	 */
-	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true );
+	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true, $file );
 
 	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
 		return false;

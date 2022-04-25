@@ -1,10 +1,6 @@
 import { AbstractProductData } from './data';
 import { ModelID } from '../../model';
-import {
-	CatalogVisibility,
-	ProductTerm,
-	ProductAttribute,
-} from '../shared';
+import { CatalogVisibility, ProductTerm, ProductAttribute } from '../shared';
 import { ObjectLinks } from '../../shared-types';
 
 /**
@@ -33,7 +29,8 @@ export const buildProductURL = ( id: ModelID ) => baseProductURL() + id;
  * @param {ModelID} id the id of the product.
  * @return {string} RESTful Url.
  */
-export const deleteProductURL = ( id: ModelID ) => buildProductURL( id ) + '?force=true';
+export const deleteProductURL = ( id: ModelID ) =>
+	buildProductURL( id ) + '?force=true';
 
 /**
  * The base for all product types.
@@ -100,7 +97,8 @@ export abstract class AbstractProduct extends AbstractProductData {
 	 *
 	 * @type {CatalogVisibility}
 	 */
-	public readonly catalogVisibility: CatalogVisibility = CatalogVisibility.Everywhere;
+	public readonly catalogVisibility: CatalogVisibility =
+		CatalogVisibility.Everywhere;
 
 	/**
 	 * The count of sales of the product
@@ -135,7 +133,7 @@ export abstract class AbstractProduct extends AbstractProductData {
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly relatedIds: Array<number> = [];
+	public readonly relatedIds: Array< number > = [];
 
 	/**
 	 * The attributes for the product.

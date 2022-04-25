@@ -35,19 +35,23 @@ import {
 /**
  * The parameters that variable products can update.
  */
-type VariableProductUpdateParams = ProductVariableUpdateParams
-	& ProductCommonUpdateParams
-	& ProductCrossUpdateParams
-	& ProductInventoryUpdateParams
-	& ProductSalesTaxUpdateParams
-	& ProductShippingUpdateParams
-	& ProductUpSellUpdateParams;
+type VariableProductUpdateParams = ProductVariableUpdateParams &
+	ProductCommonUpdateParams &
+	ProductCrossUpdateParams &
+	ProductInventoryUpdateParams &
+	ProductSalesTaxUpdateParams &
+	ProductShippingUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type VariableProductRepositoryParams =
-	ModelRepositoryParams< VariableProduct, never, ProductSearchParams, VariableProductUpdateParams >;
+export type VariableProductRepositoryParams = ModelRepositoryParams<
+	VariableProduct,
+	never,
+	ProductSearchParams,
+	VariableProductUpdateParams
+>;
 
 /**
  * An interface for listing variable products using the repository.
@@ -92,22 +96,24 @@ export type DeletesVariableProducts = DeletesModels< VariableProductRepositoryPa
 /**
  * The base for the Variable product object.
  */
-export class VariableProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductCrossSells,
-	IProductInventory,
-	IProductSalesTax,
-	IProductShipping,
-	IProductUpSells {
+export class VariableProduct
+	extends AbstractProduct
+	implements
+		IProductCommon,
+		IProductCrossSells,
+		IProductInventory,
+		IProductSalesTax,
+		IProductShipping,
+		IProductUpSells {
 	/**
 	 * @see ./abstracts/cross-sells.ts
 	 */
-	public readonly crossSellIds: Array<number> = [];
+	public readonly crossSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/inventory.ts
@@ -151,7 +157,7 @@ export class VariableProduct extends AbstractProduct implements
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly variations: Array<number> = [];
+	public readonly variations: Array< number > = [];
 
 	/**
 	 * Creates a new Variable product instance with the given properties
@@ -168,7 +174,9 @@ export class VariableProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof variableProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof variableProductRESTRepository > {
 		return variableProductRESTRepository( httpClient );
 	}
 }

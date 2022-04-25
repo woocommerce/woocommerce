@@ -1,0 +1,26 @@
+.woocommerce-order-status {
+	display: grid;
+	grid-template-columns: min-content min-content;
+	grid-gap: $gap-smallest * 2;
+	align-items: center;
+}
+
+.woocommerce-order-status__indicator {
+	min-width: 16px;
+	width: 16px;
+	height: 16px;
+	display: block;
+	background: $gray-400;
+	border-radius: 50%;
+	border: 3px solid $gray-100;
+
+	&.is-processing {
+		background: $valid-green;
+		border-color: lighten($valid-green, 20%);
+	}
+
+	&.is-on-hold {
+		background: $notice-yellow;
+		border-color: lighten($notice-yellow, 20%);
+	}
+}
