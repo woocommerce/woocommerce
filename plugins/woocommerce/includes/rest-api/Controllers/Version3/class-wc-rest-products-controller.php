@@ -35,13 +35,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_sku_in_product_lookup_table = '';
 
 	/**
-	 * If the search and search_sku parameters are the same, the query SQL will be different.
-	 *
-	 * @var bool
-	 */
-	private $combine_content_and_sku_search = false;
-
-	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
@@ -166,11 +159,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				// Store this for use in the query clause filters.
 				$this->search_sku_in_product_lookup_table = $request['search_sku'];
 
-				if ( isset( $args['s'] ) && $args['s'] === $request['search_sku'] ) {
-					$args['sentence'] = true; // Ensure search string is treated as a phrase rather than multiple terms.
-					$this->combine_content_and_sku_search = true;
-				}
-
 				unset( $request['sku'] );
 			}
 
@@ -258,11 +246,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			add_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );
-			if ( $this->combine_content_and_sku_search ) {
-				add_filter( 'posts_search', array( $this, 'add_search_criteria_to_wp_query_where' ) );
-			} else {
-				add_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
-			}
+			add_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 		}
 
 		$result = parent::get_objects( $query_args );
@@ -270,11 +254,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Remove filters for search criteria in product postmeta via the lookup table.
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			remove_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );
-			remove_filter( 'posts_search', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 			remove_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 
 			$this->search_sku_in_product_lookup_table = '';
-			$this->combine_content_and_sku_search = false;
 		}
 		return $result;
 	}
@@ -309,19 +291,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		global $wpdb;
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_in_product_lookup_table ) . '%';
-
-			if ( $this->combine_content_and_sku_search ) {
-				// Ensure this clause gets nested with the other content fields being searched.
-				$clause = ' OR ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
-				$regex = sprintf(
-					// The '%' wildcards get hashed during $wpdb->prepare, so we have to match the hash.
-					"#(post_content LIKE '{[0-9a-f]+}%s{[0-9a-f]+}'\))#",
-					$wpdb->esc_like( $this->search_sku_in_product_lookup_table )
-				);
-				$where = preg_replace( $regex, '$1' . $clause, $where );
-			} else {
-				$where .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
-			}
+			$where .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
 		}
 		return $where;
 	}
