@@ -25,6 +25,19 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		optimisticallyCompleteTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 
+	const updateBadge = useCallback( () => {
+		const badgeElement: HTMLElement | null = document.querySelector(
+			'.toplevel_page_woocommerce .remaining-tasks-badge'
+		);
+
+		if ( ! badgeElement ) {
+			return;
+		}
+
+		const currentBadgeCount = Number( badgeElement.innerText );
+		badgeElement.innerHTML = String( currentBadgeCount - 1 );
+	}, [] );
+
 	const onComplete = useCallback(
 		( options ) => {
 			optimisticallyCompleteTask( id );
@@ -34,6 +47,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 					: getNewPath( {}, '/', {} )
 			);
 			invalidateResolutionForStoreSelector( 'getTaskLists' );
+			updateBadge();
 		},
 		[ id ]
 	);
