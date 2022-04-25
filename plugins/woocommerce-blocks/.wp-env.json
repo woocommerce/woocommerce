@@ -3,6 +3,7 @@
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
+		"./tests/mocks/woo-test-helper",
 		"."
 	],
 	"themes": [
