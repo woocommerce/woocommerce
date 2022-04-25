@@ -14,7 +14,7 @@ jobs:
 
             - name: Build
               id: build
-              run: "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/entrypoint.sh"
+              run: "$GITHUB_API_URL/repos/${{ github.ref }}/contents/.github/workflows/scripts/entrypoint.sh"
               shell: bash
               env:
                   BUILD_ENV: e2e
