@@ -9,6 +9,7 @@ test.describe('Payment setup task', () => {
 		);
 		await page.click('text=Skip setup store details');
 		await page.click('text=No thanks');
+		await page.waitForLoadState('networkidle');
 	});
 
 	test('Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ({
@@ -58,7 +59,7 @@ test.describe('Payment setup task', () => {
 		await page.goto('wp-admin/admin.php?page=wc-admin&task=payments');
 		page.locator('.components-button.is-small.has-icon').click().catch(() => { });
 		// purposely no await -- close the help dialog if/when it appears
-		await page.click('text=Enable', { force: true }); // enable COD payment option
+		await page.click('button:has-text("Enable")'); // enable COD payment option
 		await page.goto('wp-admin/admin.php?page=wc-admin&task=payments');
 		await expect(page.locator('h1')).toHaveText('Set up payments');
 		await expect(

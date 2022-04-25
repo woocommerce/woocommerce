@@ -1,9 +1,9 @@
 const { test, expect } = require('@playwright/test');
 const wcApi = require('@woocommerce/woocommerce-rest-api').default;
 
-const virtualProductName = "Virtual Product Name";
-const nonVirtualProductName = "Non Virtual Product Name";
-const productPrice = "9.99";
+const virtualProductName = 'Virtual Product Name';
+const nonVirtualProductName = 'Non Virtual Product Name';
+const productPrice = '9.99';
 
 test.describe('Add New Simple Product Page', () => {
 	test.use({ storageState: 'e2e/storage/adminState.json' });
@@ -25,7 +25,7 @@ test.describe('Add New Simple Product Page', () => {
 				zoneId = response.data.id;
 			});
 		await api.post(`shipping/zones/${zoneId}/methods`, {
-			method_id: "flat_rate"
+			method_id: 'flat_rate',
 		});
 	});
 
@@ -40,11 +40,16 @@ test.describe('Add New Simple Product Page', () => {
 		await api.get('products').then((response) => {
 			const products = response.data;
 			for (product of products) {
-				api.delete(`products/${product.id}`, { force: true }).then(
-					(response) => {
+				if (
+					product.name === virtualProductName ||
+					product.name === nonVirtualProductName
+				) {
+					api.delete(`products/${product.id}`, {
+						force: true,
+					}).then((response) => {
 						// nothing to do here.
-					}
-				);
+					});
+				}
 			}
 		});
 		// delete the shipping zone
@@ -66,7 +71,7 @@ test.describe('Add New Simple Product Page', () => {
 		page,
 	}) => {
 		await page.goto('shop/');
-		await page.click(`text=${virtualProductName}`);
+		await page.click(`h2:has-text("${virtualProductName}")`);
 		await page.click('text=Add to cart');
 		await page.click('text=View cart');
 		await expect(page.locator('td[data-title=Product]')).toHaveText(
@@ -92,7 +97,7 @@ test.describe('Add New Simple Product Page', () => {
 		page,
 	}) => {
 		await page.goto('shop/');
-		await page.click(`text=${nonVirtualProductName}`);
+		await page.click(`h2:has-text("${nonVirtualProductName}")`);
 		await page.click('text=Add to cart');
 		await page.click('text=View cart');
 		await expect(page.locator('td[data-title=Product]')).toHaveText(
