@@ -1385,8 +1385,9 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Displays a review count bubble. Based on {@see WP_List_Table::comments_bubble()}, but overridden so we can
-	 * customize the URL and some of the language.
+	 * Displays a review count bubble.
+	 *
+	 * Based on {@see WP_List_Table::comments_bubble()}, but overridden, so we can customize the URL and text output.
 	 *
 	 * @param int $post_id          The product ID.
 	 * @param int $pending_comments Number of pending reviews.
@@ -1398,19 +1399,19 @@ class ReviewsListTable extends WP_List_Table {
 		$pending_reviews_number  = number_format_i18n( $pending_comments );
 
 		$approved_only_phrase = sprintf(
-		/* translators: %s: Number of reviews. */
+			/* translators: %s: Number of reviews. */
 			_n( '%s review', '%s reviews', $approved_review_count, 'woocommerce' ),
 			$approved_reviews_number
 		);
 
 		$approved_phrase = sprintf(
-		/* translators: %s: Number of reviews. */
+			/* translators: %s: Number of reviews. */
 			_n( '%s approved review', '%s approved reviews', $approved_review_count, 'woocommerce' ),
 			$approved_reviews_number
 		);
 
 		$pending_phrase = sprintf(
-		/* translators: %s: Number of reviews. */
+			/* translators: %s: Number of reviews. */
 			_n( '%s pending review', '%s pending reviews', $pending_comments, 'woocommerce' ),
 			$pending_reviews_number
 		);
