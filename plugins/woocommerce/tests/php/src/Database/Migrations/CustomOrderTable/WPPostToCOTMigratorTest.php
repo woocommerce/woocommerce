@@ -34,13 +34,8 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 * Setup data_store and sut.
 	 */
 	public function setUp(): void {
-
-		// TODO: Remove this once the migrations have been adapted to the removal of the post_id column.
-		$this->markTestSkipped( 'Temporarily skipping until the migrations have been adapted to the removal of the post_id column.' );
-		return;
-
 		parent::setUp();
-		$this->create_order_custom_table_if_not_exist();
+		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->sut        = wc_get_container()->get( WPPostToCOTMigrator::class );
 	}
@@ -49,13 +44,14 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 * Test that migration for a normal order happens as expected.
 	 */
 	public function test_process_next_migration_batch_normal_order() {
-		$order = wc_get_order( $this->create_complex_wp_post_order() );
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
 		$this->clear_all_orders_and_reset_checkpoint();
 		$this->sut->process_next_migration_batch( 100 );
 
 		$this->assert_core_data_is_migrated( $order );
 		$this->assert_order_addresses_are_migrated( $order );
 		$this->assert_order_op_data_is_migrated( $order );
+		$this->assert_metadata_is_migrated( $order );
 	}
 
 	/**
@@ -63,7 +59,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_process_next_migration_batch_already_migrated_order() {
 		global $wpdb;
-		$order = wc_get_order( $this->create_complex_wp_post_order() );
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
 		$this->clear_all_orders_and_reset_checkpoint();
 
 		// Run the migration once.
@@ -79,11 +75,11 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 			$wpdb->get_var(
 				"
 SELECT COUNT(*) FROM {$this->data_store::get_orders_table_name()}
-WHERE post_id = {$order->get_id()}"
+WHERE id = {$order->get_id()}"
 			),
 			'Order record is duplicated.'
 		);
-		$order_id = $wpdb->get_var( "SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE post_id = {$order->get_id()}" );
+		$order_id = $wpdb->get_var( "SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE id = {$order->get_id()}" );
 		$this->assertEquals(
 			1,
 			$wpdb->get_var(
@@ -108,6 +104,25 @@ WHERE order_id = {$order_id} AND address_type = 'shipping'
 				"
 SELECT COUNT(*) FROM {$this->data_store::get_operational_data_table_name()}
 WHERE order_id = {$order_id}
+"
+			)
+		);
+
+		$this->assertEquals(
+			1,
+			$wpdb->get_var(
+				"
+SELECT COUNT(*) FROM {$this->data_store::get_meta_table_name()}
+WHERE order_id = {$order_id} AND meta_key = 'unique_key_1' AND meta_value = 'unique_value_1'
+"
+			)
+		);
+		$this->assertEquals(
+			2,
+			$wpdb->get_var(
+				"
+SELECT COUNT(*) FROM {$this->data_store::get_meta_table_name()}
+WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in ( 'non_unique_value_1', 'non_unique_value_2' )
 "
 			)
 		);
@@ -145,7 +160,7 @@ WHERE order_id = {$order_id}
 	private function get_order_from_cot( $post_order ) {
 		global $wpdb;
 		$order_table = $this->data_store::get_orders_table_name();
-		$query       = "SELECT * FROM $order_table WHERE post_id = {$post_order->get_id()};";
+		$query       = "SELECT * FROM $order_table WHERE id = {$post_order->get_id()};";
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_row( $query );
@@ -183,76 +198,18 @@ WHERE order_id = {$order_id}
 	}
 
 	/**
-	 * Helper method to create complex wp_post based order.
+	 * Helper method to get meta data from custom order tables for given order id.
 	 *
-	 * @return int Order ID
+	 * @param int $order_id Order ID.
+	 *
+	 * @return array Meta data for an order ID.
 	 */
-	private function create_complex_wp_post_order() {
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$uniq_cust_id = wp_generate_password( 10, false );
-		$customer     = CustomerHelper::create_customer( "user$uniq_cust_id", $uniq_cust_id, "user$uniq_cust_id@example.com" );
-		$tax_rate     = array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '15.0000',
-			'tax_rate_name'     => 'tax',
-			'tax_rate_priority' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_shipping' => '1',
-		);
-		WC_Tax::_insert_tax_rate( $tax_rate );
+	private function get_meta_data_from_cot( $order_id ) {
+		global $wpdb;
+		$metadata_table = $this->data_store::get_meta_table_name();
 
-		ShippingHelper::create_simple_flat_rate();
-
-		$order = OrderHelper::create_order();
-		// Make sure this is a wp_post order.
-		$post = get_post( $order->get_id() );
-		$this->assertNotNull( $post, 'Order is not created in wp_post table.' );
-		$this->assertEquals( 'shop_order', $post->post_type, 'Order is not created in wp_post table.' );
-
-		$order->save();
-
-		$order->set_status( 'completed' );
-		$order->set_currency( 'INR' );
-		$order->set_customer_id( $customer->get_id() );
-		$order->set_billing_email( $customer->get_billing_email() );
-
-		$payment_gateway = new WC_Mock_Payment_Gateway();
-		$order->set_payment_method( 'mock' );
-		$order->set_transaction_id( 'mock1' );
-
-		$order->set_customer_ip_address( '1.1.1.1' );
-		$order->set_customer_user_agent( 'wc_unit_tests' );
-
-		$order->save();
-
-		$order->set_shipping_first_name( 'Albert' );
-		$order->set_shipping_last_name( 'Einstein' );
-		$order->set_shipping_company( 'The Olympia Academy' );
-		$order->set_shipping_address_1( '112 Mercer Street' );
-		$order->set_shipping_address_2( 'Princeton' );
-		$order->set_shipping_city( 'New Jersey' );
-		$order->set_shipping_postcode( '08544' );
-		$order->set_shipping_phone( '299792458' );
-		$order->set_shipping_country( 'US' );
-
-		$order->set_created_via( 'unit_tests' );
-		$order->set_version( '0.0.2' );
-		$order->set_prices_include_tax( true );
-		wc_update_coupon_usage_counts( $order->get_id() );
-		$order->get_data_store()->set_download_permissions_granted( $order, true );
-		$order->set_cart_hash( '1234' );
-		$order->update_meta_data( '_new_order_email_sent', 'true' );
-		$order->update_meta_data( '_order_stock_reduced', 'true' );
-		$order->set_date_paid( time() );
-		$order->set_date_completed( time() );
-		$order->calculate_shipping();
-
-		$order->save();
-		$order->save_meta_data();
-
-		return $order->get_id();
+		// phpcs:ignore
+		return $wpdb->get_results( "SELECT * FROM $metadata_table WHERE order_id = $order_id;" );
 	}
 
 	/**
@@ -264,7 +221,7 @@ WHERE order_id = {$order_id}
 		$db_order = $this->get_order_from_cot( $order );
 
 		// Verify core data.
-		$this->assertEquals( $order->get_id(), $db_order->post_id );
+		$this->assertEquals( $order->get_id(), $db_order->id );
 		$this->assertEquals( 'wc-' . $order->get_status(), $db_order->status );
 		$this->assertEquals( 'INR', $db_order->currency );
 		$this->assertEquals( $order->get_customer_id(), $db_order->customer_id );
@@ -358,6 +315,41 @@ WHERE order_id = {$order_id}
 	}
 
 	/**
+	 * Helper method to assert that metadata is migrated for an order.
+	 *
+	 * @param WP_Post $order WP_Post order object.
+	 */
+	private function assert_metadata_is_migrated( $order ) {
+		$db_order  = $this->get_order_from_cot( $order );
+		$meta_data = $this->get_meta_data_from_cot( $db_order->id );
+
+		$unique_row = array_filter(
+			$meta_data,
+			function ( $meta_row ) {
+				return 'unique_key_1' === $meta_row->meta_key;
+			}
+		);
+
+		$this->assertEquals( 1, count( $unique_row ) );
+		$this->assertEquals( 'unique_value_1', array_values( $unique_row )[0]->meta_value );
+
+		$non_unique_rows = array_filter(
+			$meta_data,
+			function ( $meta_row ) {
+				return 'non_unique_key_1' === $meta_row->meta_key;
+			}
+		);
+		$this->assertEquals( 2, count( $non_unique_rows ) );
+		$this->assertEquals(
+			array(
+				'non_unique_value_1',
+				'non_unique_value_2',
+			),
+			array_column( $non_unique_rows, 'meta_value' )
+		);
+	}
+
+	/**
 	 * Helper method to clear checkout and truncate order tables.
 	 */
 	private function clear_all_orders_and_reset_checkpoint() {
@@ -368,19 +360,5 @@ WHERE order_id = {$order_id}
 			$wpdb->query( "TRUNCATE table $table;" );
 		}
 		$this->sut->delete_checkpoint();
-	}
-
-	/**
-	 * Helper method to create custom tables if not present.
-	 */
-	private function create_order_custom_table_if_not_exist() {
-		$order_table_controller = wc_get_container()
-			->get( 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' );
-		$order_table_controller->show_feature();
-		$this->synchronizer = wc_get_container()
-			->get( DataSynchronizer::class );
-		if ( ! $this->synchronizer->check_orders_table_exists() ) {
-			$this->synchronizer->create_database_tables();
-		}
 	}
 }
