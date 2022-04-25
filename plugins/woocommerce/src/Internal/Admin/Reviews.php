@@ -110,6 +110,21 @@ class Reviews {
 	}
 
 	/**
+	 * Retrieves the URL to the product reviews page.
+	 *
+	 * @return string
+	 */
+	public static function get_reviews_page_url(): string {
+		return add_query_arg(
+			[
+				'post_type' => 'product',
+				'page'      => static::MENU_SLUG,
+			],
+			admin_url( 'edit.php' )
+		);
+	}
+
+	/**
 	 * Determines whether the current page is the reviews page.
 	 *
 	 * @global WP_Screen $current_screen
