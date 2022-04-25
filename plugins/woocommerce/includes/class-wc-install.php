@@ -200,9 +200,11 @@ class WC_Install {
 		),
 		'6.4.0' => array(
 			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
-			'wc_update_640_approved_download_directories',
 			'wc_admin_update_340_remove_is_primary_from_note_action',
 			'wc_update_640_db_version',
+		),
+		'6.5.0' => array(
+			'wc_update_650_approved_download_directories',
 		),
 	);
 
