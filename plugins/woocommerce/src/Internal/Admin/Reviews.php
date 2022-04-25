@@ -582,7 +582,7 @@ class Reviews {
 				<input type="hidden" name="page" value="<?php echo esc_attr( $page ); ?>" />
 				<input type="hidden" name="post_type" value="product" />
 
-				<?php $this->reviews_list_table->search_box( __( 'Search reviews', 'woocommerce' ), 'reviews' ); ?>
+				<?php $this->reviews_list_table->search_box( __( 'Search Reviews', 'woocommerce' ), 'reviews' ); ?>
 
 				<?php $this->reviews_list_table->display(); ?>
 			</form>
