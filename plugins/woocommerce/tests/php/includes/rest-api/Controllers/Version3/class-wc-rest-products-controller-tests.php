@@ -5,6 +5,33 @@
  * Product Controller tests for V3 REST API.
  */
 class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
+	/**
+	 * @var WC_Product_Simple[]
+	 */
+	protected static $products = array();
+
+	/**
+	 * Create products for tests.
+	 *
+	 * @return void
+	 */
+	public static function wpSetUpBeforeClass() {
+		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pancake', 'sku' => 'pancake-1' ) );
+		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Waffle 1', 'sku' => 'pancake-2' ) );
+		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'French Toast', 'sku' => 'waffle-2' ) );
+		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Waffle 3', 'sku' => 'waffle-3' ) );
+	}
+
+	/**
+	 * Clean up products after tests.
+	 *
+	 * @return void
+	 */
+	public static function wpTearDownAfterClass() {
+		foreach ( self::$products as $product ) {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -149,58 +176,17 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that products with partial name or SKU case-insensitive match are returned given both `search` and `search_includes_sku` parameters.
+	 * Test that the `search` parameter does partial matching in the product name, but not the SKU.
+	 *
+	 * @return void
 	 */
-	public function test_products_with_search_param_including_sku_returns_products_with_sku_and_name_match() {
-		// Given.
+	public function test_products_search_with_search_param_only() {
 		wp_set_current_user( $this->user );
-		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WooCommerce Tests' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WordCamp' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WoO' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'Woo' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'wordpress' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => '*sunglasses-woo*' ) );
 
-		// When.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
 			array(
-				'search'              => 'woo',
-				'search_includes_sku' => true,
-				'order'               => 'asc',
-				'orderby'             => 'id',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$response_products = $response->get_data();
-
-		// Then.
-		$this->assertEquals( 4, count( $response_products ) );
-		$this->assertEquals( $response_products[0]['name'], 'WooCommerce Tests' );
-		$this->assertEquals( $response_products[1]['name'], 'WoO' );
-		$this->assertEquals( $response_products[2]['sku'], 'Woo' );
-		$this->assertEquals( $response_products[3]['sku'], '*sunglasses-woo*' );
-	}
-
-	/**
-	 * Test that only products with name match are returned given `search` without `search_includes_sku` parameter.
-	 */
-	public function test_products_with_search_param_only_returns_products_with_name_match() {
-		// Given.
-		wp_set_current_user( $this->user );
-		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WooCommerce Tests' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WordCamp' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WoO' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'Woo' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'wordpress' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => '*sunglasses-woo*' ) );
-
-		// When.
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params(
-			array(
-				'search'  => 'woo',
+				'search'  => 'waffle',
 				'order'   => 'asc',
 				'orderby' => 'id',
 			)
@@ -209,69 +195,95 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
 
-		// Then.
 		$this->assertEquals( 2, count( $response_products ) );
-		$this->assertEquals( $response_products[0]['name'], 'WooCommerce Tests' );
-		$this->assertEquals( $response_products[1]['name'], 'WoO' );
+		$this->assertEquals( $response_products[0]['name'], 'Waffle 1' );
+		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
+		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
+		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
 	}
 
 	/**
-	 * Test that no products with SKU are returned given `search` and `search_includes_sku` parameters when product SKU is disabled.
+	 * Test that the `search_sku` parameter does partial matching in the product SKU, but not the name.
+	 *
+	 * @return void
 	 */
-	public function test_products_with_search_param_including_sku_returns_no_products_when_sku_is_disabled() {
-		// Given.
+	public function test_products_search_with_search_sku_param_only() {
 		wp_set_current_user( $this->user );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'Woo' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'wordpress' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => '*sunglasses-woo*' ) );
 
-		// When.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_sku' => 'waffle',
+				'order'      => 'asc',
+				'orderby'    => 'id',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 2, count( $response_products ) );
+		$this->assertEquals( $response_products[0]['name'], 'French Toast' );
+		$this->assertEquals( $response_products[0]['sku'], 'waffle-2' );
+		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
+		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
+	}
+
+	/**
+	 * Test that using the `search` and `search_sku` parameters together only matches when both match.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_and_search_sku_param() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search'     => 'waffle',
+				'search_sku' => 'waffle',
+				'order'      => 'asc',
+				'orderby'    => 'id',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $response_products[0]['name'], 'Waffle 3' );
+		$this->assertEquals( $response_products[0]['sku'], 'waffle-3' );
+	}
+
+	/**
+	 * Test that the `search_sku` parameter does nothing when product SKUs are disabled.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_sku_when_skus_disabled() {
+		wp_set_current_user( $this->user );
+
 		add_filter( 'wc_product_sku_enabled', '__return_false' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
 			array(
-				'search'              => 'woo',
-				'search_includes_sku' => true,
-				'order'               => 'asc',
-				'orderby'             => 'id',
+				'search'     => 'waffle',
+				'search_sku' => 'waffle',
+				'order'      => 'asc',
+				'orderby'    => 'id',
 			)
 		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
 
-		// Then.
-		$this->assertEquals( 0, count( $response_products ) );
-	}
+		$this->assertEquals( 2, count( $response_products ) );
+		$this->assertEquals( $response_products[0]['name'], 'Waffle 1' );
+		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
+		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
+		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
 
-	/**
-	 * Test that the first product with full SKU case-insensitive match are returned given a `sku` parameter.
-	 */
-	public function test_products_with_sku_param_returns_the_first_product_with_full_sku_match() {
-		// Given.
-		wp_set_current_user( $this->user );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => '0oWoO' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'WoO' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'woo' ) );
-		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'woo-sunglasses' ) );
-
-		// When.
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params(
-			array(
-				'sku'     => 'woo',
-				'order'   => 'asc',
-				'orderby' => 'id',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$response_products = $response->get_data();
-
-		// Then.
-		$this->assertEquals( 1, count( $response_products ) );
-		$response_product = $response_products[0];
-		$this->assertEquals( 'WoO', $response_product['sku'] );
+		remove_filter( 'wc_product_sku_enabled', '__return_false' );
 	}
 }
