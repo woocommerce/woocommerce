@@ -41,7 +41,7 @@ module.exports = ( storybookConfig ) => {
 	);
 
 	storybookConfig.resolve.modules = [
-		path.join( __dirname, '../client' ),
+		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
 		'node_modules',
 	];
 
