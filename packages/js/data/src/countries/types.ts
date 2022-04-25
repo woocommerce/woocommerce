@@ -12,6 +12,7 @@ export type SettingProperties = {
 	priority?: number;
 	required?: boolean;
 	type?: string;
+	hidden?: boolean;
 };
 
 export type Locale = {

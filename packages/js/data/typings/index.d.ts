@@ -12,3 +12,5 @@ declare module '@wordpress/data' {
 
 
 }
+
+declare module 'rememo';

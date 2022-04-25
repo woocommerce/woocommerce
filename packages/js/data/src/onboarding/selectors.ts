@@ -204,5 +204,5 @@ export type Extension = {
 	image_url: string;
 	manage_url: string;
 	name: string;
-	slug: string;
+	is_built_by_wc: boolean;
 };
