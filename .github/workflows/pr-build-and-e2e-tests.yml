@@ -42,7 +42,8 @@ jobs:
                 cp plugins/woocommerce/project.json plugins/woocommerce/build/woocommerce
                 cp -r plugins/woocommerce/tests plugins/woocommerce/build/woocommerce
                 cp -r plugins/woocommerce/sample-data plugins/woocommerce/build/woocommerce
-                rsync -rc --exclude-from="plugins/woocommerce/.distignore" plugins/woocommerce/ plugins/woocommerce/build/woocommerce/
+                rsync -rc --exclude-from=plugins/woocommerce/.distignore plugins/woocommerce/ plugins/woocommerce/build/woocommerce/
+                ls -R
                 cd plugins/woocommerce/build/woocommerce
                 zip -r woocommerce.zip woocommerce/
                 echo ::set-output name=zip_path::plugins/woocommerce/build/woocommerce.zip
