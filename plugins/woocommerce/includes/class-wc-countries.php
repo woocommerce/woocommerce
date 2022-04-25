@@ -919,6 +919,7 @@ class WC_Countries {
 						),
 						'state' 	=> array(
 							'required' => false,
+						),
 					),
 					'CA' => array(
 						'postcode' => array(
