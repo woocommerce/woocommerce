@@ -132,7 +132,11 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 				>
 					<CardHeader size="medium">
 						<div className="wooocommerce-task-card__header">
-							<img src={ HeaderImage } alt="Completed" />
+							<img
+								src={ HeaderImage }
+								alt="Completed"
+								className="wooocommerce-task-card__finished-header-image"
+							/>
 
 							<h2>
 								{ __(
