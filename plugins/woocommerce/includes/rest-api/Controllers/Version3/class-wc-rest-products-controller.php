@@ -279,11 +279,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	/**
 	 * Add a where clause for matching the SKU field.
 	 *
-	 * If the content search and the sku search have the same value, the extra clause we're adding here should be nested
-	 * with the other content fields that get covered (e.g. post_title, post_excerpt, post_content) and the operator
-	 * should be 'OR'. If the content and sku searches are different, then both should need to match, so the clause
-	 * should just get tacked on to the rest of the WHERE statement and the operator should be 'AND'.
-	 *
 	 * @param string $where Where clause used to search posts.
 	 * @return string
 	 */
