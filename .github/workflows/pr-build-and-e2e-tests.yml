@@ -69,9 +69,9 @@ jobs:
             - name: Install dependencies
               run: pnpm install
 
-            - name: Load docker images and start containers.
-              working-directory: plugins/woocommerce
-              run: pnpm exec wc-e2e docker:up
+            # - name: Load docker images and start containers.
+            #   working-directory: plugins/woocommerce
+            #   run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: plugins/woocommerce
