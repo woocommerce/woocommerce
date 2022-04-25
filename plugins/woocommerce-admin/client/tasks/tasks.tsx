@@ -9,7 +9,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
-	WCDataSelector,
 	TaskListType,
 	TaskType,
 } from '@woocommerce/data';
@@ -67,16 +66,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		'woocommerce_tasklist_progression'
 	);
 
-	const { isResolving, taskLists } = useSelect(
-		( select: WCDataSelector ) => {
-			return {
-				isResolving: ! select(
-					ONBOARDING_STORE_NAME
-				).hasFinishedResolution( 'getTaskLists' ),
-				taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-			};
-		}
-	);
+	const { isResolving, taskLists } = useSelect( ( select ) => {
+		return {
+			isResolving: ! select(
+				ONBOARDING_STORE_NAME
+			).hasFinishedResolution( 'getTaskLists' ),
+			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+		};
+	} );
 
 	const getCurrentTask = () => {
 		if ( ! task ) {

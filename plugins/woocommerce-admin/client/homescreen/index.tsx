@@ -7,7 +7,6 @@ import { identity } from 'lodash';
 import {
 	ONBOARDING_STORE_NAME,
 	withOnboardingHydration,
-	WCDataSelector,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import type { History } from 'history';

@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	useSelect,
-	useDispatch,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -98,7 +94,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		taskListComplete,
 		reminderBarHidden,
 		completedTasksCount,
-	} = useSelect( ( select: typeof wpDataSelect ) => {
+	} = useSelect( ( select ) => {
 		const {
 			getTaskList,
 			hasFinishedResolution: onboardingHasFinishedResolution,

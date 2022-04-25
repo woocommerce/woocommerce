@@ -3,11 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Card, CardHeader, Spinner } from '@wordpress/components';
-import {
-	ONBOARDING_STORE_NAME,
-	PLUGINS_STORE_NAME,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { useMemo, useState } from '@wordpress/element';
@@ -122,7 +118,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 		freeExtensions,
 		installedPlugins,
 		isResolving,
-	} = useSelect( ( select: WCDataSelector ) => {
+	} = useSelect( ( select ) => {
 		const { getActivePlugins, getInstalledPlugins } = select(
 			PLUGINS_STORE_NAME
 		);

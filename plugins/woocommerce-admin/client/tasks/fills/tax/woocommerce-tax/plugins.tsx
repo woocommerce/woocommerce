@@ -7,11 +7,7 @@ import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import {
-	useDispatch,
-	useSelect,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
 /**
@@ -27,26 +23,24 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	pluginsToActivate,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { isResolving, tosAccepted } = useSelect(
-		( select: typeof wpDataSelect ) => {
-			const { getOption, hasFinishedResolution } = select(
-				OPTIONS_STORE_NAME
-			);
+	const { isResolving, tosAccepted } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		);
 
-			return {
-				isResolving:
-					! hasFinishedResolution( 'getOption', [
-						'woocommerce_setup_jetpack_opted_in',
-					] ) ||
-					! hasFinishedResolution( 'getOption', [
-						'wc_connect_options',
-					] ),
-				tosAccepted:
-					getOption( 'wc_connect_options' )?.tos_accepted ||
-					getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
-			};
-		}
-	);
+		return {
+			isResolving:
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_setup_jetpack_opted_in',
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					'wc_connect_options',
+				] ),
+			tosAccepted:
+				getOption( 'wc_connect_options' )?.tos_accepted ||
+				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
+		};
+	} );
 
 	useEffect( () => {
 		if ( ! tosAccepted || pluginsToActivate.length ) {

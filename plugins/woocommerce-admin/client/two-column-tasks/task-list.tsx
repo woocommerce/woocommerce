@@ -17,7 +17,6 @@ import {
 	TaskType,
 	useUserPreferences,
 	getVisibleTasks,
-	WCDataSelector,
 	TaskListType,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -56,7 +55,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
 		OPTIONS_STORE_NAME
 	);
-	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
+	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),

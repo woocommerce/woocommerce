@@ -8,7 +8,6 @@ import { getAdminLink } from '@woocommerce/settings';
 import {
 	OPTIONS_STORE_NAME,
 	SETTINGS_STORE_NAME,
-	WCDataSelector,
 	TaskType,
 } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
@@ -60,7 +59,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		SETTINGS_STORE_NAME
 	);
 	const { generalSettings, isResolving, taxSettings } = useSelect(
-		( select: WCDataSelector ) => {
+		( select ) => {
 			const { getSettings, hasFinishedResolution } = select(
 				SETTINGS_STORE_NAME
 			) as SettingsSelector;
