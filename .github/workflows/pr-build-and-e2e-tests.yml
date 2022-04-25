@@ -25,9 +25,6 @@ jobs:
             - name: Install PNPM
               run: npm install -g pnpm
 
-            - name: Install Grunt
-              run: npm install -g grunt-cli
-
             - name: Install dependencies
               run: pnpm install
 
