@@ -14,7 +14,7 @@ jobs:
 
             - name: Build
               id: build
-              run: bash workflows/scripts/entrypoint.sh
+              run: bash .github/workflows/scripts/entrypoint.sh
               env:
                   BUILD_ENV: e2e
 
