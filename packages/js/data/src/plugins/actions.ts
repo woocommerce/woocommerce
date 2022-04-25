@@ -121,6 +121,43 @@ export function updateJetpackConnectUrl(
 	};
 }
 
+export const createErrorNotice = (
+	errorMessage: string
+): {
+	type: 'CREATE_NOTICE';
+	[ key: string ]: unknown;
+} => {
+	return dispatch( 'core/notices', 'createNotice', 'error', errorMessage );
+};
+
+export function setPaypalOnboardingStatus(
+	status: Partial< PaypalOnboardingStatus >
+): {
+	type: TYPES.SET_PAYPAL_ONBOARDING_STATUS;
+	paypalOnboardingStatus: Partial< PaypalOnboardingStatus >;
+} {
+	return {
+		type: TYPES.SET_PAYPAL_ONBOARDING_STATUS as const,
+		paypalOnboardingStatus: status,
+	};
+}
+
+export function setRecommendedPlugins(
+	type: string,
+	plugins: Plugin[]
+): {
+	type: TYPES.SET_RECOMMENDED_PLUGINS;
+	recommendedType: string;
+	plugins: Plugin[];
+} {
+	return {
+		type: TYPES.SET_RECOMMENDED_PLUGINS as const,
+		recommendedType: type,
+		plugins,
+	};
+}
+
+// Action Creator Generators
 export function* installPlugins( plugins: string[] ) {
 	yield setIsRequesting( 'installPlugins', true );
 
@@ -209,15 +246,6 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 	}
 }
 
-export const createErrorNotice = (
-	errorMessage: string
-): {
-	type: 'CREATE_NOTICE';
-	[ key: string ]: unknown;
-} => {
-	return dispatch( 'core/notices', 'createNotice', 'error', errorMessage );
-};
-
 export function* connectToJetpack(
 	getAdminLink: ( endpoint: string ) => string
 ) {
@@ -284,33 +312,6 @@ export function* connectToJetpackWithFailureRedirect(
 		}
 		window.location.href = failureRedirect;
 	}
-}
-
-export function setPaypalOnboardingStatus(
-	status: Partial< PaypalOnboardingStatus >
-): {
-	type: TYPES.SET_PAYPAL_ONBOARDING_STATUS;
-	paypalOnboardingStatus: Partial< PaypalOnboardingStatus >;
-} {
-	return {
-		type: TYPES.SET_PAYPAL_ONBOARDING_STATUS as const,
-		paypalOnboardingStatus: status,
-	};
-}
-
-export function setRecommendedPlugins(
-	type: string,
-	plugins: Plugin[]
-): {
-	type: TYPES.SET_RECOMMENDED_PLUGINS;
-	recommendedType: string;
-	plugins: Plugin[];
-} {
-	return {
-		type: TYPES.SET_RECOMMENDED_PLUGINS as const,
-		recommendedType: type,
-		plugins,
-	};
 }
 
 const SUPPORTED_TYPES = [ 'payments' ];
