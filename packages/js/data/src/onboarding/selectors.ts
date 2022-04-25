@@ -14,6 +14,7 @@ import {
 	ProfileItemsState,
 	Product,
 } from './types';
+import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
 
 export const getFreeExtensions = (
@@ -94,3 +95,18 @@ export const getEmailPrefill = ( state: OnboardingState ): string => {
 export const getProductTypes = ( state: OnboardingState ): Product[] => {
 	return state.productTypes || [];
 };
+
+export type OnboardingSelectors = {
+	getProfileItems: () => ReturnType< typeof getProfileItems >;
+	getPaymentGatewaySuggestions: () => ReturnType<
+		typeof getPaymentGatewaySuggestions
+	>;
+	getOnboardingError: () => ReturnType< typeof getOnboardingError >;
+	isOnboardingRequesting: () => ReturnType< typeof isOnboardingRequesting >;
+	getTaskListsByIds: (
+		ids: string[]
+	) => ReturnType< typeof getTaskListsByIds >;
+	getTaskLists: () => ReturnType< typeof getTaskLists >;
+	getTaskList: ( id: string ) => ReturnType< typeof getTaskList >;
+	getFreeExtensions: () => ReturnType< typeof getFreeExtensions >;
+} & WPDataSelectors;
