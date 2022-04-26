@@ -46,7 +46,8 @@ jobs:
       - name: Run Tests With Code Coverage
         run: |
           cd plugins/woocommerce
-          echo "{ \"phpVersion\": \"7.4\", \"core\": null }" > .wp-env.override.json
+          composer require "wp-phpunit/wp-phpunit" "^5.9" --dev --no-scripts
+          echo "{ \"phpVersion\": \"7.4\", \"core\": \"WordPress/WordPress#5.9\" }" > .wp-env.override.json
           npm -g install @wordpress/env
           wp-env start
           pnpm nx test-code-coverage woocommerce
