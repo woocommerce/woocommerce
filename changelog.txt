@@ -1,6 +1,6 @@
 == Changelog ==
 
-= 6.5.0 beta 1 2022-05-10 =
+= 6.5.0 RC 1 2022-05-10 =
 
 **WooCommerce**
 
@@ -57,6 +57,11 @@
 - Correct parameter type for the `ContainerException` class (Dependency Management). ([#30764](https://github.com/woocommerce/woocommerce/pull/30764))
 - Prevent 'Search' field from overflowing container on the 'Downloadable product permissions' widget when in the sidebar. ([#30856](https://github.com/woocommerce/woocommerce/pull/30856))
 - Ensure "doing it wrong" is triggered when internal meta keys are used directly. ([#31168](https://github.com/woocommerce/woocommerce/pull/31168))
+- Changes to reduce the risk of admin error messages being discarded prematurely. ([#32540](https://github.com/woocommerce/woocommerce/pull/32540))
+- Fixing bug on sectioned task list for tasks with actionUrl property. ([#32723](https://github.com/woocommerce/woocommerce/pull/32723))
+- Addressing issues with certain tasks in task list experiment leading to blank page. ([#32742](https://github.com/woocommerce/woocommerce/pull/32742))
+- Remove `woocommerce_payments_menu_promo_nz_ie` experiment request. ([#32752](https://github.com/woocommerce/woocommerce/pull/32752))
+- Fix event names for tracks in new Task List. ([#32759](https://github.com/woocommerce/woocommerce/pull/32759))
 
 **WooCommerce Blocks 7.3.0 & 7.4.1**
 
