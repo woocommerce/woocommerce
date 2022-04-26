@@ -26,14 +26,14 @@ jobs:
             - name: Install dependencies
               run: pnpm install
 
-            - name: Composer version
-              run: composer --version
-
             - name: Install Composer dependencies
               run: pnpm nx composer-install woocommerce
 
             - name: Run build
               run: pnpm nx build woocommerce
+
+            - name: Install Grunt
+              run: npm install -g grunt-cli
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
