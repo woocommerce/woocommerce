@@ -172,17 +172,28 @@ export const removeArgsFromFilterUrl = ( ...args ) => {
 };
 
 /**
- * Get the base URL for the current page.
- *
- * @return {string} The current URL without the query args.
+ * Clean the filter URL.
  */
-export const getBaseUrl = () => {
+export const cleanFilterUrl = () => {
 	const url = window.location.href;
+	const args = getQueryArgs( url );
+	const cleanUrl = removeQueryArgs( url, ...Object.keys( args ) );
+	const remainingArgs = Object.fromEntries(
+		Object.keys( args )
+			.filter( ( arg ) => {
+				if (
+					arg.includes( 'min_price' ) ||
+					arg.includes( 'max_price' ) ||
+					arg.includes( 'filter_' ) ||
+					arg.includes( 'query_type_' )
+				) {
+					return false;
+				}
 
-	const queryStringIndex = url.indexOf( '?' );
-	if ( queryStringIndex === -1 ) {
-		return url;
-	}
+				return true;
+			} )
+			.map( ( key ) => [ key, args[ key ] ] )
+	);
 
-	return url.substring( 0, queryStringIndex );
+	window.location.href = addQueryArgs( cleanUrl, remainingArgs );
 };
