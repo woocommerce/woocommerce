@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 import {
 	ONBOARDING_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
-	Plugin,
 	PaymentGateway,
 	WCDataSelector,
 } from '@woocommerce/data';
@@ -35,6 +34,7 @@ import {
 } from '../payments-welcome/cards';
 import WCPayBannerImage from './wcpay-banner-image';
 import './payment-recommendations.scss';
+import { isWcPaySupported } from './utils';
 
 export const PaymentMethodsIcons = () => (
 	<div className="woocommerce-recommended-payments-banner__footer_icon_container">
@@ -148,18 +148,6 @@ export const PaymentsBannerWrapper = () => {
 		};
 	} );
 
-	const supportsWCPayments =
-		paymentGatewaySuggestions &&
-		paymentGatewaySuggestions.filter(
-			( paymentGatewaySuggestion: Plugin ) => {
-				return (
-					paymentGatewaySuggestion.id.indexOf(
-						'woocommerce_payments'
-					) === 0
-				);
-			}
-		).length === 1;
-
 	const isWcPayInstalled = installedPaymentGateways.some(
 		( gateway: PaymentGateway ) => {
 			return gateway.id === 'woocommerce_payments';
@@ -183,7 +171,7 @@ export const PaymentsBannerWrapper = () => {
 	);
 	if ( ! isResolving && ! isLoadingExperiment ) {
 		if (
-			supportsWCPayments &&
+			isWcPaySupported( paymentGatewaySuggestions ) &&
 			isWcPayInstalled &&
 			isWcPayDisabled &&
 			experimentAssignment?.variationName === 'treatment'

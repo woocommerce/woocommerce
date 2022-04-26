@@ -24,6 +24,7 @@ import ExternalIcon from 'gridicons/dist/external';
 import './payment-recommendations.scss';
 import { createNoticesFromResponse } from '../lib/notices';
 import { getPluginSlug } from '~/utils';
+import { isWcPaySupported } from './utils';
 
 const SEE_MORE_LINK =
 	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
@@ -81,23 +82,12 @@ const PaymentRecommendations: React.FC = () => {
 		},
 		[ isInstalled ]
 	);
-	const supportsWCPayments =
-		paymentGatewaySuggestions &&
-		paymentGatewaySuggestions.filter(
-			( paymentGatewaySuggestion: Plugin ) => {
-				return (
-					paymentGatewaySuggestion.id.indexOf(
-						'woocommerce_payments'
-					) === 0
-				);
-			}
-		).length === 1;
 
 	const triggeredPageViewRef = useRef( false );
 	const shouldShowRecommendations =
 		paymentGatewaySuggestions &&
 		paymentGatewaySuggestions.length > 0 &&
-		! supportsWCPayments &&
+		! isWcPaySupported( paymentGatewaySuggestions ) &&
 		! isDismissed;
 
 	useEffect( () => {
