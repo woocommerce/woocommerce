@@ -1,14 +1,15 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useQueryStateByKey } from '@woocommerce/base-context/hooks';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useEffect } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import Label from '@woocommerce/base-components/label';
 import { isBoolean } from '@woocommerce/types';
+import { getUrlParameter } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -124,10 +125,74 @@ const ActiveFiltersBlock = ( {
 		} );
 	}, [ productAttributes, blockAttributes.displayStyle ] );
 
+	const [ productRatings, setProductRatings ] = useQueryStateByKey(
+		'ratings'
+	);
+
+	/**
+	 * Parse the filter URL to set the active rating fitlers.
+	 * This code should be moved to Rating Filter block once it's implemented.
+	 */
+	useEffect( () => {
+		if ( ! filteringForPhpTemplate ) {
+			return;
+		}
+
+		if ( productRatings.length && productRatings.length > 0 ) {
+			return;
+		}
+
+		const currentRatings = getUrlParameter( 'rating_filter' )?.toString();
+
+		if ( ! currentRatings ) {
+			return;
+		}
+
+		setProductRatings( currentRatings.split( ',' ) );
+	}, [ filteringForPhpTemplate, productRatings, setProductRatings ] );
+
+	const activeRatingFilters = useMemo( () => {
+		if ( productRatings.length > 0 ) {
+			return productRatings.map( ( slug ) => {
+				return renderRemovableListItem( {
+					type: __( 'Rating', 'woo-gutenberg-products-block' ),
+					name: sprintf(
+						/* translators: %s is referring to the average rating value */
+						__(
+							'Rated %s out of 5',
+							'woo-gutenberg-products-block'
+						),
+						slug
+					),
+					removeCallback: () => {
+						if ( filteringForPhpTemplate ) {
+							return removeArgsFromFilterUrl( {
+								rating_filter: slug,
+							} );
+						}
+						const newRatings = productRatings.filter(
+							( rating ) => {
+								return rating !== slug;
+							}
+						);
+						setProductRatings( newRatings );
+					},
+					displayStyle: blockAttributes.displayStyle,
+				} );
+			} );
+		}
+	}, [
+		productRatings,
+		setProductRatings,
+		blockAttributes.displayStyle,
+		filteringForPhpTemplate,
+	] );
+
 	const hasFilters = () => {
 		return (
 			productAttributes.length > 0 ||
 			productStockStatus.length > 0 ||
+			productRatings.length > 0 ||
 			Number.isFinite( minPrice ) ||
 			Number.isFinite( maxPrice )
 		);
@@ -182,6 +247,7 @@ const ActiveFiltersBlock = ( {
 							{ activePriceFilters }
 							{ activeStockStatusFilters }
 							{ activeAttributeFilters }
+							{ activeRatingFilters }
 						</>
 					) }
 				</ul>

@@ -44,7 +44,7 @@ export const formatPriceRange = ( minPrice, maxPrice ) => {
  * @param {Object}   listItem                  The removable item to render.
  * @param {string}   listItem.type             Type string.
  * @param {string}   listItem.name             Name string.
- * @param {string}   listItem.prefix           Prefix shown before item name.
+ * @param {string}   [listItem.prefix='']      Prefix shown before item name.
  * @param {Function} listItem.removeCallback   Callback to remove item.
  * @param {string}   listItem.displayStyle     Whether it's a list or chips.
  * @param {boolean}  [listItem.showLabel=true] Should the label be shown for
@@ -53,7 +53,7 @@ export const formatPriceRange = ( minPrice, maxPrice ) => {
 export const renderRemovableListItem = ( {
 	type,
 	name,
-	prefix,
+	prefix = '',
 	removeCallback = () => {},
 	showLabel = true,
 	displayStyle,
