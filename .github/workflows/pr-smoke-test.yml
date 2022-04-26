@@ -33,7 +33,7 @@ jobs:
                 path: |
                   ~/.pnpm-store
                   package/woocommerce/plugins/woocommerce/packages
-                  package/woocommerce/plugins/woocommerce/vendor
+                  package/woocommerce/plugins/woocommerce/**/vendor
                 key: ${{ runner.os }}-smoke-test-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM

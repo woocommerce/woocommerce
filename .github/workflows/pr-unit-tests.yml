@@ -58,7 +58,7 @@ jobs:
           path: |
             ~/.pnpm-store
             plugins/woocommerce/packages
-            plugins/woocommerce/vendor
+            plugins/woocommerce/**/vendor
           key: ${{ runner.os }}-npm-composer-${{ hashFiles('plugins/woocommerce/composer.lock', '**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
@@ -75,12 +75,12 @@ jobs:
         run: |
           pnpm nx build:feature-config woocommerce
 
-      - name: Add PHP8 Compatibility.
+      - name: Add PHP8 Compatibility. # Comment.
         run: |
           if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+             cd plugins/woocommerce
              curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
              unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
-             cd plugins/woocommerce
              composer bin phpunit config --unset platform
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
