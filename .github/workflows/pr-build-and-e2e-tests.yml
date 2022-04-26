@@ -30,6 +30,7 @@ jobs:
               run: pnpm nx composer-install woocommerce
 
             - name: Run build
+              working-directory: plugins/woocommerce
               run: pnpm nx build woocommerce
 
             - name: Load docker images and start containers.
