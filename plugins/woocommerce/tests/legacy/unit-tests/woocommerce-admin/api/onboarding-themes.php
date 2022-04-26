@@ -57,6 +57,7 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 		$themes   = wp_get_themes();
 
+		print_r( $response->get_data() );
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'storefront', $data['slug'] );
 		$this->assertEquals( 'success', $data['status'] );
