@@ -64,9 +64,14 @@ class ClassicTemplatesCompatibility {
 	 * This method passes the value `is_rendering_php_template` to the front-end of Classic themes,
 	 * so that widget product filter blocks are aware of how to filter the products.
 	 *
+	 * This data only matters on WooCommerce product archive pages.
+	 * On non-archive pages the merchant could be using the All Products block which is not a PHP template.
+	 *
 	 * @return void
 	 */
 	public function set_php_template_data() {
-		$this->asset_data_registry->add( 'is_rendering_php_template', true, null );
+		if ( is_shop() || is_product_taxonomy() ) {
+			$this->asset_data_registry->add( 'is_rendering_php_template', true, null );
+		}
 	}
 }
