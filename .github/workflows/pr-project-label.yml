@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
     label_project:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-18.04
         steps:
             - uses: actions/labeler@v3
               with:
