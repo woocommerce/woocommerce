@@ -13,6 +13,7 @@ import {
 } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useExperiment } from '@woocommerce/explat';
+import moment from 'moment';
 
 /**
  * Internal dependencies
@@ -172,8 +173,11 @@ export const PaymentsBannerWrapper = () => {
 		}
 	);
 
+	const momentDate = moment().utc();
+	const year = momentDate.format( 'YYYY' );
+	const month = momentDate.format( 'MM' );
 	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
-		'woocommerce_payments_settings_banner_2022_04'
+		`woocommerce_payments_settings_banner_${ year }_${ month }`
 	);
 	if ( ! isResolving && ! isLoadingExperiment ) {
 		if (
