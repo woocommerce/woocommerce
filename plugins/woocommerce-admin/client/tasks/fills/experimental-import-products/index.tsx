@@ -4,8 +4,19 @@
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { registerPlugin } from '@wordpress/plugins';
 
+/**
+ * Internal dependencies
+ */
+import CardList from './CardList';
+import { importTypes } from './importTypes';
+
 const Products = () => {
-	return <h1>Experimental import products</h1>;
+	return (
+		<div>
+			<h1>Import products</h1>
+			<CardList items={ importTypes } />
+		</div>
+	);
 };
 
 registerPlugin( 'wc-admin-onboarding-task-products', {
