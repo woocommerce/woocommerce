@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Approved_Directories;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 /**
  * Class WC_Download_Handler_Tests.
@@ -57,8 +58,8 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_inactive_downloads_will_not_be_served() {
 		self::remove_download_handlers();
-
 		$downloads_served = 0;
+
 		$download_counter = function () use ( &$downloads_served ) {
 			$downloads_served++;
 		};
@@ -106,21 +107,33 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			'key'           => $download_keys[0],
 		);
 
+		// With both the corresponding approved directory rules enabled...
 		WC_Download_Handler::download_product();
-		$this->assertEquals( 1, $downloads_served, 'Valid download request (download key 1 - corresponding approved directory rule enabled) was successfully served.' );
+		$this->assertEquals( 1, $downloads_served, 'Can successfully download "Book 1".' );
 
 		$_GET['key'] = $download_keys[1];
 		WC_Download_Handler::download_product();
-		$this->assertEquals( 2, $downloads_served, 'Valid download request (download key 2 - corresponding approved directory rule enabled) was successfully served.' );
+		$this->assertEquals( 2, $downloads_served, 'Can successfully download "Book 2".' );
 
+		// And now with one of the approved directory rules disabled...
 		$approved_directories->disable_by_id( $approved_directory_rule_id );
-		$this->expectException( WPDieException::class );
-		WC_Download_Handler::download_product();
-		$this->assertEquals( 2, $downloads_served, 'Invalid download request (download key 2 - corresponding approved directory rule disabled) was not served.' );
+		$_GET['key']     = $download_keys[1];
+		$wp_die_happened = false;
+
+		// We do not use expectException() here because we wish to continue testing after wp_die() has
+		// been triggered inside WC_Download_Handler::download_error().
+		try {
+			WC_Download_Handler::download_product();
+		} catch ( WPDieException $e ) {
+			$wp_die_happened = true;
+		}
+
+		$this->assertTrue( $wp_die_happened );
+		$this->assertEquals( 2, $downloads_served, 'Downloading "Book 2" failed after the corresponding approved directory rule was disabled.' );
 
 		$_GET['key'] = $download_keys[0];
 		WC_Download_Handler::download_product();
-		$this->assertEquals( 1, $downloads_served, 'Valid download request (download key 1 - corresponding approved directory rule remained enabled) was still successfully served.' );
+		$this->assertEquals( 3, $downloads_served, 'Continued to be able to download "Book 1" (the corresponding rule never having been disabled.' );
 
 		// Cleanup.
 		add_action( 'woocommerce_download_file_force', $download_counter );

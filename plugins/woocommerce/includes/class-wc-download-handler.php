@@ -665,10 +665,12 @@ class WC_Download_Handler {
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.
 		 */
-		header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
-		header_remove( 'Content-Description;' );
-		header_remove( 'Content-Disposition' );
-		header_remove( 'Content-Transfer-Encoding' );
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
+			header_remove( 'Content-Description;' );
+			header_remove( 'Content-Disposition' );
+			header_remove( 'Content-Transfer-Encoding' );
+		}
 
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
