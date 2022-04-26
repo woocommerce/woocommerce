@@ -35,6 +35,10 @@
 		"webpack": "^5.70.0",
 		"webpack-cli": "^3.3.12"
 	},
+	"scripts": {
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
+	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
 			"eslint --fix"

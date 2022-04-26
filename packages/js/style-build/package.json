@@ -29,7 +29,8 @@
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"scripts": {
-		"lint": "eslint index.js"
+		"lint": "eslint index.js",
+		"lint:fix": "eslint index.js --fix"
 	},
 	"private": true,
 	"devDependencies": {
@@ -45,7 +46,7 @@
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }

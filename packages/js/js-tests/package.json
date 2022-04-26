@@ -21,7 +21,8 @@
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "eslint src"
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
 		"@testing-library/jest-dom": "^5.16.2",
@@ -43,7 +44,7 @@
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }
