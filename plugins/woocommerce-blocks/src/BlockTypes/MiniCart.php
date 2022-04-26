@@ -150,8 +150,14 @@ class MiniCart extends AbstractBlock {
 		 *
 		 * $wp_scripts->print_translations() calls load_script_textdomain()
 		 * which calls load_script_translations() containing the below filter.
+		 *
+		 * In Customzier, woocommerce_blocks_get_i18n_data_json doesn't exist
+		 * at the time of this filter call. So we need checking for its
+		 * existence to prevent fatal error.
 		 */
-		remove_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
+		if ( function_exists( 'woocommerce_blocks_get_i18n_data_json' ) ) {
+			remove_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
+		}
 
 		$script_data = $this->asset_api->get_script_data( 'build/mini-cart-component-frontend.js' );
 
@@ -187,7 +193,9 @@ class MiniCart extends AbstractBlock {
 		);
 
 		// Re-add the filter.
-		add_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
+		if ( function_exists( 'woocommerce_blocks_get_i18n_data_json' ) ) {
+			add_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
+		}
 
 		$this->asset_data_registry->add(
 			'mini_cart_block_frontend_dependencies',
