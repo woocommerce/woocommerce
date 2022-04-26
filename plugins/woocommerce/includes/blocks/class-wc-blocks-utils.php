@@ -60,6 +60,27 @@ class WC_Blocks_Utils {
 	}
 
 	/**
+	 * Get all instances of the specified block on a specific template part.
+	 *
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/mini-cart`.
+	 * @param string $template_part_slug The woo page to search, e.g. `header`.
+	 * @return array Array of blocks as returned by parse_blocks().
+	 */
+	public static function get_block_from_template_part( $block_name, $template_part_slug ) {
+		$template = get_block_template( get_stylesheet() . '//' . $template_part_slug, 'wp_template_part' );
+		$blocks   = parse_blocks( $template->content );
+
+		return array_values(
+			array_filter(
+				$blocks,
+				function ( $block ) use ( $block_name ) {
+					return ( $block_name === $block['blockName'] );
+				}
+			)
+		);
+	}
+
+	/**
 	 * Check if a given page contains a particular block.
 	 *
 	 * @param int|WP_Post $page Page post ID or post object.

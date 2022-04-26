@@ -166,6 +166,9 @@ class WC_Tracker {
 		// Cart & checkout tech (blocks or shortcodes).
 		$data['cart_checkout'] = self::get_cart_checkout_info();
 
+		// Mini Cart block.
+		$data['mini_cart_block'] = self::get_mini_cart_info();
+
 		// WooCommerce Admin info.
 		$data['wc_admin_disabled'] = apply_filters( 'woocommerce_admin_disabled', false ) ? 'yes' : 'no';
 
@@ -773,6 +776,33 @@ class WC_Tracker {
 			'cart_block_attributes'                     => $cart_block_data['block_attributes'],
 			'checkout_page_contains_checkout_block'     => $checkout_block_data['page_contains_block'],
 			'checkout_block_attributes'                 => $checkout_block_data['block_attributes'],
+		);
+	}
+
+	/**
+	 * Get info about the Mini Cart Block.
+	 *
+	 * @return array
+	 */
+	public static function get_mini_cart_info() {
+		$mini_cart_block_name = 'woocommerce/mini-cart';
+		$mini_cart_block_data = wc_current_theme_is_fse_theme() ? WC_Blocks_Utils::get_block_from_template_part( $mini_cart_block_name, 'header' ) :
+			array_reduce(
+				get_option( 'widget_block' ),
+				function ( $acc, $block ) use ( $mini_cart_block_name ) {
+					$parsed_blocks = ! empty( $block ) && is_array( $block ) ? parse_blocks( $block['content'] ) : array();
+					if ( ! empty( $parsed_blocks ) && $mini_cart_block_name === $parsed_blocks[0]['blockName'] ) {
+						array_push( $acc, $parsed_blocks[0] );
+						return $acc;
+					}
+					return $acc;
+				},
+				array()
+			);
+
+		return array(
+			'mini_cart_used'             => empty( $mini_cart_block_data[0] ) ? 'No' : 'Yes',
+			'mini_cart_block_attributes' => empty( $mini_cart_block_data[0] ) ? array() : $mini_cart_block_data[0]['attrs'],
 		);
 	}
 
