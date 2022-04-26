@@ -9,8 +9,6 @@ declare module '@wordpress/data' {
 		resolveSelect: resolveSelect;
 		dispatch: dispatch;
 	};
-
-
 }
 
 declare module 'rememo';
