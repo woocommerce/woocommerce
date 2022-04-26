@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -35,15 +36,24 @@ const TOS = () => (
 
 const GetStartedButton = () => {
 	const [ isGettingStarted, setIsGettingStarted ] = useState( false );
+	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 
 	return (
 		<div className="wcpay-empty-subscriptions__button_container">
 			<Button
 				disabled={ isGettingStarted }
-				href="https://example.com"
 				isBusy={ isGettingStarted }
 				isPrimary
 				onClick={ () => {
+					installAndActivatePlugins( [ 'woocommerce-payments' ] )
+						.then( () => {
+							// TODO: Handle success.
+							console.log( 'It was a success!' );
+						} )
+						.catch( ( error ) => {
+							// TODO: Handle erorr.
+							console.log( 'Oh no, there was an error!' );
+						} );
 					setIsGettingStarted( true );
 				} }
 			>
