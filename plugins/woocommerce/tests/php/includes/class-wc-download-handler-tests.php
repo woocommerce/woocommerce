@@ -1,7 +1,6 @@
 <?php
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Approved_Directories;
-use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 /**
  * Class WC_Download_Handler_Tests.
