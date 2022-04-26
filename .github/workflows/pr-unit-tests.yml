@@ -75,7 +75,7 @@ jobs:
         run: |
           pnpm nx build:feature-config woocommerce
 
-      - name: Add PHP8 Compatibility.
+      - name: Add PHP8 Compatibility. # Comment.
         run: |
           if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
              cd plugins/woocommerce
