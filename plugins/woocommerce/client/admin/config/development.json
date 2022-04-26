@@ -4,7 +4,7 @@
 		"analytics": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
-		"experimental-products-task": true,
+		"experimental-products-task": false,
 		"homescreen": true,
 		"marketing": true,
 		"minified-js": true,
