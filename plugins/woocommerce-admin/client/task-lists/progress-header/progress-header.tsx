@@ -54,7 +54,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 						__( 'Welcome to %s', 'woocommerce' ),
 						siteTitle
 				  )
-				: __( 'Welcome', 'woocommerce' );
+				: __( 'Welcome to your store', 'woocommerce' );
 		}
 		if ( completedCount > 0 && completedCount < 4 ) {
 			return __( "Let's get you started", 'woocommerce' ) + '   🚀';
