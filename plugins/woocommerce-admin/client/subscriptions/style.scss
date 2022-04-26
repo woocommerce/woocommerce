@@ -1,0 +1,31 @@
+.wcpay-empty-subscriptions__container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: 48px 0;
+	position: static;
+	height: 344px;
+	left: calc( 50% - 1240px / 2 );
+	top: 271px;
+	flex: none;
+	order: 1;
+	flex-grow: 0;
+	margin: 0;
+	text-align: center;
+
+	.wcpay-empty-subscriptions__description {
+		max-width: 535px;
+		margin: 15px 0;
+	}
+
+	.wcpay-empty-subscriptions__tos {
+		font-size: 11px;
+		color: #757575;
+		margin-bottom: 6px;
+	}
+
+	.wcpay-empty-subscriptions__button_container {
+		margin: 8px 0;
+	}
+}
