@@ -69,6 +69,7 @@ jobs:
 
       - name: Prepare Test Environment
         run: |
+          cd plugins/woocommerce
           WP_VERSION="${{ matrix.wp }}"
           if [[ $WP_VERSION == 'latest' ]]; then
             WP_VERSION="null"
@@ -81,6 +82,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          cd plugins/woocommerce
           npm -g install @wordpress/env
           wp-env start
           pnpm nx test-unit woocommerce

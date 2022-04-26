@@ -45,6 +45,7 @@ jobs:
 
       - name: Run Tests With Code Coverage
         run: |
+          cd plugins/woocommerce
           echo "{ \"phpVersion\": \"7.4\", \"core\": null }" > .wp-env.override.json
           npm -g install @wordpress/env
           wp-env start
