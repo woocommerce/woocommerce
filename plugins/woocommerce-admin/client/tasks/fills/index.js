@@ -12,7 +12,9 @@ import './purchase';
 
 if (
 	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-products-task' ]
+	window.wcAdminFeatures[ 'experimental-products-task' ] &&
+	window.wcSettings?.admin?.onboarding?.profile?.selling_venues &&
+	window.wcSettings.admin.onboarding.profile.selling_venues !== 'no'
 ) {
 	import( './experimental-products' );
 } else {
