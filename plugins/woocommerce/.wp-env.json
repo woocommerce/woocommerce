@@ -1,7 +1,10 @@
 {
 	"phpVersion": "7.4",
 	"core": "WordPress/WordPress#5.9",
-	"plugins": [ "." ],
+	"plugins": [ 
+		".",
+		"https://downloads.wordpress.org/plugin/akismet.zip"
+	 ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
