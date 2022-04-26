@@ -184,6 +184,7 @@ export const cleanFilterUrl = () => {
 				if (
 					arg.includes( 'min_price' ) ||
 					arg.includes( 'max_price' ) ||
+					arg.includes( 'rating_filter' ) ||
 					arg.includes( 'filter_' ) ||
 					arg.includes( 'query_type_' )
 				) {
