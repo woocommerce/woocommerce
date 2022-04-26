@@ -70,6 +70,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->description  = trim( $this->description );
 		}
 
+		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
@@ -83,7 +84,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			if ( $this->identity_token ) {
 				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
-				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+				$pdt_handler->set_receiver_email( $this->receiver_email );
 			}
 		}
 

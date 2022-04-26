@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AF' => array(),
-	'AL' => array( // Albania states.
+	'AL' => array( // Albanian states.
 		'AL-01' => __( 'Berat', 'woocommerce' ),
 		'AL-09' => __( 'Dibër', 'woocommerce' ),
 		'AL-02' => __( 'Durrës', 'woocommerce' ),
@@ -29,7 +29,7 @@ return array(
 		'AL-11' => __( 'Tirana', 'woocommerce' ),
 		'AL-12' => __( 'Vlorë', 'woocommerce' ),
 	),
-	'AO' => array( // Angola states.
+	'AO' => array( // Angolan states.
 		'BGO' => __( 'Bengo', 'woocommerce' ),
 		'BLU' => __( 'Benguela', 'woocommerce' ),
 		'BIE' => __( 'Bié', 'woocommerce' ),
@@ -87,7 +87,7 @@ return array(
 		'WA'  => __( 'Western Australia', 'woocommerce' ),
 	),
 	'AX' => array(),
-	'BD' => array( // Bangladeshi states (districts).
+	'BD' => array( // Bangladeshi districts.
 		'BD-05' => __( 'Bagerhat', 'woocommerce' ),
 		'BD-01' => __( 'Bandarban', 'woocommerce' ),
 		'BD-02' => __( 'Barguna', 'woocommerce' ),
@@ -186,7 +186,7 @@ return array(
 	),
 	'BH' => array(),
 	'BI' => array(),
-	'BJ' => array( // Benin states.
+	'BJ' => array( // Beninese states.
 		'AL' => __( 'Alibori', 'woocommerce' ),
 		'AK' => __( 'Atakora', 'woocommerce' ),
 		'AQ' => __( 'Atlantique', 'woocommerce' ),
@@ -211,7 +211,7 @@ return array(
 		'BO-S' => __( 'Santa Cruz', 'woocommerce' ),
 		'BO-T' => __( 'Tarija', 'woocommerce' ),
 	),
-	'BR' => array( // Brazillian states.
+	'BR' => array( // Brazilian states.
 		'AC' => __( 'Acre', 'woocommerce' ),
 		'AL' => __( 'Alagoas', 'woocommerce' ),
 		'AP' => __( 'Amapá', 'woocommerce' ),
@@ -255,7 +255,7 @@ return array(
 		'SK' => __( 'Saskatchewan', 'woocommerce' ),
 		'YT' => __( 'Yukon Territory', 'woocommerce' ),
 	),
-	'CH' => array( // Cantons of Switzerland.
+	'CH' => array( // Swiss cantons.
 		'AG' => __( 'Aargau', 'woocommerce' ),
 		'AR' => __( 'Appenzell Ausserrhoden', 'woocommerce' ),
 		'AI' => __( 'Appenzell Innerrhoden', 'woocommerce' ),
@@ -283,7 +283,7 @@ return array(
 		'ZG' => __( 'Zug', 'woocommerce' ),
 		'ZH' => __( 'Zürich', 'woocommerce' ),
 	),
-	'CL' => array( // Chile states.
+	'CL' => array( // Chilean states.
 		'CL-AI' => __( 'Aisén del General Carlos Ibañez del Campo', 'woocommerce' ),
 		'CL-AN' => __( 'Antofagasta', 'woocommerce' ),
 		'CL-AP' => __( 'Arica y Parinacota', 'woocommerce' ),
@@ -335,7 +335,7 @@ return array(
 		'CN31' => __( 'Tibet / 西藏', 'woocommerce' ),
 		'CN32' => __( 'Xinjiang / 新疆', 'woocommerce' ),
 	),
-	'CO' => array( // Colombia States.
+	'CO' => array( // Colombian states.
 		'CO-AMA' => __( 'Amazonas', 'woocommerce' ),
 		'CO-ANT' => __( 'Antioquia', 'woocommerce' ),
 		'CO-ARA' => __( 'Arauca', 'woocommerce' ),
@@ -370,7 +370,7 @@ return array(
 		'CO-VAU' => __( 'Vaupés', 'woocommerce' ),
 		'CO-VID' => __( 'Vichada', 'woocommerce' ),
 	),
-	'CR' => array( // Costa Rica states.
+	'CR' => array( // Costa Rican states.
 		'CR-A' => __( 'Alajuela', 'woocommerce' ),
 		'CR-C' => __( 'Cartago', 'woocommerce' ),
 		'CR-G' => __( 'Guanacaste', 'woocommerce' ),
@@ -380,9 +380,26 @@ return array(
 		'CR-SJ' => __( 'San José', 'woocommerce' ),
 	),
 	'CZ' => array(),
-	'DE' => array(),
+	'DE' => array( // German states.
+		'DE-BW' => __( 'Baden-Württemberg', 'woocommerce' ),
+		'DE-BY' => __( 'Bavaria', 'woocommerce' ),
+		'DE-BE' => __( 'Berlin', 'woocommerce' ),
+		'DE-BB' => __( 'Brandenburg', 'woocommerce' ),
+		'DE-HB' => __( 'Bremen', 'woocommerce' ),
+		'DE-HH' => __( 'Hamburg', 'woocommerce' ),
+		'DE-HE' => __( 'Hesse', 'woocommerce' ),
+		'DE-MV' => __( 'Mecklenburg-Vorpommern', 'woocommerce' ),
+		'DE-NI' => __( 'Lower Saxony', 'woocommerce' ),
+		'DE-NW' => __( 'North Rhine-Westphalia', 'woocommerce' ),
+		'DE-RP' => __( 'Rhineland-Palatinate', 'woocommerce' ),
+		'DE-SL' => __( 'Saarland', 'woocommerce' ),
+		'DE-SN' => __( 'Saxony', 'woocommerce' ),
+		'DE-ST' => __( 'Saxony-Anhalt', 'woocommerce' ),
+		'DE-SH' => __( 'Schleswig-Holstein', 'woocommerce' ),
+		'DE-TH' => __( 'Thuringia', 'woocommerce' ),
+	),
 	'DK' => array(),
-	'DO' => array( // Dominican Republic.
+	'DO' => array( // Dominican states.
 		'DO-01' => __( 'Distrito Nacional', 'woocommerce' ),
 		'DO-02' => __( 'Azua', 'woocommerce' ),
 		'DO-03' => __( 'Baoruco', 'woocommerce' ),
@@ -426,7 +443,7 @@ return array(
 		'DO-27' => __( 'Valverde', 'woocommerce' ),
 		'DO-42' => __( 'Yuma', 'woocommerce' ),
 	),
-	'DZ' => array(
+	'DZ' => array( // Algerian states.
 		'DZ-01' => __( 'Adrar', 'woocommerce' ),
 		'DZ-02' => __( 'Chlef', 'woocommerce' ),
 		'DZ-03' => __( 'Laghouat', 'woocommerce' ),
@@ -477,7 +494,7 @@ return array(
 		'DZ-48' => __( 'Relizane', 'woocommerce' ),
 	),
 	'EE' => array(),
-	'EC' => array( // Ecuador states.
+	'EC' => array( // Ecuadorian states.
 		'EC-A' => __( 'Azuay', 'woocommerce' ),
 		'EC-B' => __( 'Bolívar', 'woocommerce' ),
 		'EC-F' => __( 'Cañar', 'woocommerce' ),
@@ -503,7 +520,7 @@ return array(
 		'EC-T' => __( 'Tungurahua', 'woocommerce' ),
 		'EC-Z' => __( 'Zamora-Chinchipe', 'woocommerce' ),
 	),
-	'EG' => array( // Egypt states.
+	'EG' => array( // Egyptian states.
 		'EGALX' => __( 'Alexandria', 'woocommerce' ),
 		'EGASN' => __( 'Aswan', 'woocommerce' ),
 		'EGAST' => __( 'Asyut', 'woocommerce' ),
@@ -589,7 +606,7 @@ return array(
 	'FI' => array(),
 	'FR' => array(),
 	'GF' => array(),
-	'GH' => array( // Ghanaian Regions.
+	'GH' => array( // Ghanaian regions.
 		'AF' => __( 'Ahafo', 'woocommerce' ),
 		'AH' => __( 'Ashanti', 'woocommerce' ),
 		'BA' => __( 'Brong-Ahafo', 'woocommerce' ),
@@ -609,7 +626,7 @@ return array(
 		'WN' => __( 'Western North', 'woocommerce' ),
 	),
 	'GP' => array(),
-	'GR' => array( // Greek Regions.
+	'GR' => array( // Greek regions.
 		'I' => __( 'Attica', 'woocommerce' ),
 		'A' => __( 'East Macedonia and Thrace', 'woocommerce' ),
 		'B' => __( 'Central Macedonia', 'woocommerce' ),
@@ -653,7 +670,7 @@ return array(
 		'KOWLOON'         => __( 'Kowloon', 'woocommerce' ),
 		'NEW TERRITORIES' => __( 'New Territories', 'woocommerce' ),
 	),
-	'HN' => array( // Honduras states.
+	'HN' => array( // Honduran states.
 		'HN-AT' => __( 'Atlántida', 'woocommerce' ),
 		'HN-IB' => __( 'Bay Islands', 'woocommerce' ),
 		'HN-CH' => __( 'Choluteca', 'woocommerce' ),
@@ -673,7 +690,7 @@ return array(
 		'HN-VA' => __( 'Valle', 'woocommerce' ),
 		'HN-YO' => __( 'Yoro', 'woocommerce' ),
 	),
-	'HU' => array( // Hungary states.
+	'HU' => array( // Hungarian states.
 		'BK' => __( 'Bács-Kiskun', 'woocommerce' ),
 		'BE' => __( 'Békés', 'woocommerce' ),
 		'BA' => __( 'Baranya', 'woocommerce' ),
@@ -695,7 +712,7 @@ return array(
 		'VE' => __( 'Veszprém', 'woocommerce' ),
 		'ZA' => __( 'Zala', 'woocommerce' ),
 	),
-	'ID' => array( // Indonesia Provinces.
+	'ID' => array( // Indonesian provinces.
 		'AC' => __( 'Daerah Istimewa Aceh', 'woocommerce' ),
 		'SU' => __( 'Sumatera Utara', 'woocommerce' ),
 		'SB' => __( 'Sumatera Barat', 'woocommerce' ),
@@ -731,7 +748,7 @@ return array(
 		'PA' => __( 'Papua', 'woocommerce' ),
 		'PB' => __( 'Papua Barat', 'woocommerce' ),
 	),
-	'IE' => array( // Republic of Ireland.
+	'IE' => array( // Irish states.
 		'CW' => __( 'Carlow', 'woocommerce' ),
 		'CN' => __( 'Cavan', 'woocommerce' ),
 		'CE' => __( 'Clare', 'woocommerce' ),
@@ -798,7 +815,7 @@ return array(
 		'LD' => __( 'Lakshadeep', 'woocommerce' ),
 		'PY' => __( 'Pondicherry (Puducherry)', 'woocommerce' ),
 	),
-	'IR' => array( // Iran States.
+	'IR' => array( // Irania states.
 		'KHZ' => __( 'Khuzestan (خوزستان)', 'woocommerce' ),
 		'THR' => __( 'Tehran (تهران)', 'woocommerce' ),
 		'ILM' => __( 'Ilaam (ایلام)', 'woocommerce' ),
@@ -832,7 +849,7 @@ return array(
 		'SBN' => __( 'Sistan and Baluchestan (سیستان و بلوچستان)', 'woocommerce' ),
 	),
 	'IS' => array(),
-	'IT' => array( // Italy Provinces.
+	'IT' => array( // Italian provinces.
 		'AG' => __( 'Agrigento', 'woocommerce' ),
 		'AL' => __( 'Alessandria', 'woocommerce' ),
 		'AN' => __( 'Ancona', 'woocommerce' ),
@@ -943,7 +960,7 @@ return array(
 	),
 	'IL' => array(),
 	'IM' => array(),
-	'JM' => array( // Jamaica's Parishes. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:JM.
+	'JM' => array( // Jamaican parishes.
 		'JM-01' => __( 'Kingston', 'woocommerce' ),
 		'JM-02' => __( 'Saint Andrew', 'woocommerce' ),
 		'JM-03' => __( 'Saint Thomas', 'woocommerce' ),
@@ -961,7 +978,7 @@ return array(
 	),
 
 	/**
-	 * Japan States.
+	 * Japanese states.
 	 *
 	 * English notation of prefectures conform to the notation of Japan Post.
 	 * The suffix corresponds with the Japanese translation file.
@@ -1015,7 +1032,7 @@ return array(
 		'JP46' => __( 'Kagoshima', 'woocommerce' ),
 		'JP47' => __( 'Okinawa', 'woocommerce' ),
 	),
-	'KE' => array( // Kenya counties.
+	'KE' => array( // Kenyan counties.
 		'KE01' => __( 'Baringo', 'woocommerce' ),
 		'KE02' => __( 'Bomet', 'woocommerce' ),
 		'KE03' => __( 'Bungoma', 'woocommerce' ),
@@ -1066,7 +1083,7 @@ return array(
 	),
 	'KR' => array(),
 	'KW' => array(),
-	'LA' => array(
+	'LA' => array( // Laotian provinces.
 		'AT' => __( 'Attapeu', 'woocommerce' ),
 		'BK' => __( 'Bokeo', 'woocommerce' ),
 		'BL' => __( 'Bolikhamsai', 'woocommerce' ),
@@ -1087,7 +1104,7 @@ return array(
 		'XS' => __( 'Xaisomboun', 'woocommerce' ),
 	),
 	'LB' => array(),
-	'LR' => array( // Liberia provinces.
+	'LR' => array( // Liberian provinces.
 		'BM' => __( 'Bomi', 'woocommerce' ),
 		'BN' => __( 'Bong', 'woocommerce' ),
 		'GA' => __( 'Gbarpolu', 'woocommerce' ),
@@ -1105,7 +1122,7 @@ return array(
 		'SN' => __( 'Sinoe', 'woocommerce' ),
 	),
 	'LU' => array(),
-	'MD' => array( // Moldova states.
+	'MD' => array( // Moldovan states.
 		'C'  => __( 'Chișinău', 'woocommerce' ),
 		'BL' => __( 'Bălți', 'woocommerce' ),
 		'AN' => __( 'Anenii Noi', 'woocommerce' ),
@@ -1144,7 +1161,7 @@ return array(
 	),
 	'MQ' => array(),
 	'MT' => array(),
-	'MX' => array( // Mexico States.
+	'MX' => array( // Mexican states.
 		'DF' => __( 'Ciudad de México', 'woocommerce' ),
 		'JA' => __( 'Jalisco', 'woocommerce' ),
 		'NL' => __( 'Nuevo León', 'woocommerce' ),
@@ -1196,7 +1213,7 @@ return array(
 		'PJY' => __( 'Putrajaya', 'woocommerce' ),
 		'KUL' => __( 'Kuala Lumpur', 'woocommerce' ),
 	),
-	'MZ' => array( // Mozambique provinces.
+	'MZ' => array( // Mozambican provinces.
 		'MZP'   => __( 'Cabo Delgado', 'woocommerce' ),
 		'MZG'   => __( 'Gaza', 'woocommerce' ),
 		'MZI'   => __( 'Inhambane', 'woocommerce' ),
@@ -1209,7 +1226,7 @@ return array(
 		'MZT'   => __( 'Tete', 'woocommerce' ),
 		'MZQ'   => __( 'Zambézia', 'woocommerce' ),
 	),
-	'NA' => array( // Namibia regions.
+	'NA' => array( // Namibian regions.
 		'ER' => __( 'Erongo', 'woocommerce' ),
 		'HA' => __( 'Hardap', 'woocommerce' ),
 		'KA' => __( 'Karas', 'woocommerce' ),
@@ -1266,7 +1283,7 @@ return array(
 	),
 	'NL' => array(),
 	'NO' => array(),
-	'NP' => array( // Nepal states (Zones).
+	'NP' => array( // Nepalese zones.
 		'BAG' => __( 'Bagmati', 'woocommerce' ),
 		'BHE' => __( 'Bheri', 'woocommerce' ),
 		'DHA' => __( 'Dhaulagiri', 'woocommerce' ),
@@ -1282,7 +1299,7 @@ return array(
 		'SAG' => __( 'Sagarmatha', 'woocommerce' ),
 		'SET' => __( 'Seti', 'woocommerce' ),
 	),
-	'NI' => array( // Nicaragua states
+	'NI' => array( // Nicaraguan states.
 		'NI-AN' => __( 'Atlántico Norte', 'woocommerce' ),
 		'NI-AS' => __( 'Atlántico Sur', 'woocommerce' ),
 		'NI-BO' => __( 'Boaco', 'woocommerce' ),
@@ -1301,7 +1318,7 @@ return array(
 		'NI-RI' => __( 'Rivas', 'woocommerce' ),
 		'NI-SJ' => __( 'Río San Juan', 'woocommerce' ),
 	),
-	'NZ' => array( // New Zealand States.
+	'NZ' => array( // New Zealand states.
 		'NL' => __( 'Northland', 'woocommerce' ),
 		'AK' => __( 'Auckland', 'woocommerce' ),
 		'WA' => __( 'Waikato', 'woocommerce' ),
@@ -1319,7 +1336,7 @@ return array(
 		'OT' => __( 'Otago', 'woocommerce' ),
 		'SL' => __( 'Southland', 'woocommerce' ),
 	),
-	'PA' => array( // Panama states.
+	'PA' => array( // Panamanian states.
 		'PA-1' => __( 'Bocas del Toro', 'woocommerce' ),
 		'PA-2' => __( 'Coclé', 'woocommerce' ),
 		'PA-3' => __( 'Colón', 'woocommerce' ),
@@ -1334,7 +1351,7 @@ return array(
 		'PA-KY' => __( 'Guna Yala', 'woocommerce' ),
 		'PA-NB' => __( 'Ngöbe-Buglé', 'woocommerce' ),
 	),
-	'PE' => array( // Peru states.
+	'PE' => array( // Peruvian states.
 		'CAL' => __( 'El Callao', 'woocommerce' ),
 		'LMA' => __( 'Municipalidad Metropolitana de Lima', 'woocommerce' ),
 		'AMA' => __( 'Amazonas', 'woocommerce' ),
@@ -1362,11 +1379,7 @@ return array(
 		'TUM' => __( 'Tumbes', 'woocommerce' ),
 		'UCA' => __( 'Ucayali', 'woocommerce' ),
 	),
-
-	/**
-	 * Philippine Provinces.
-	 */
-	'PH' => array(
+	'PH' => array( // Philippine provinces.
 		'ABR' => __( 'Abra', 'woocommerce' ),
 		'AGN' => __( 'Agusan del Norte', 'woocommerce' ),
 		'AGS' => __( 'Agusan del Sur', 'woocommerce' ),
@@ -1450,7 +1463,7 @@ return array(
 		'ZSI' => __( 'Zamboanga Sibugay', 'woocommerce' ),
 		'00'  => __( 'Metro Manila', 'woocommerce' ),
 	),
-	'PK' => array( // Pakistan's states.
+	'PK' => array( // Pakistani states.
 		'JK' => __( 'Azad Kashmir', 'woocommerce' ),
 		'BA' => __( 'Balochistan', 'woocommerce' ),
 		'TA' => __( 'FATA', 'woocommerce' ),
@@ -1463,7 +1476,7 @@ return array(
 	'PL' => array(),
 	'PR' => array(),
 	'PT' => array(),
-	'PY' => array( // Paraguay states.
+	'PY' => array( // Paraguayan states.
 		'PY-ASU' => __( 'Asunción', 'woocommerce' ),
 		'PY-1'   => __( 'Concepción', 'woocommerce' ),
 		'PY-2'   => __( 'San Pedro', 'woocommerce' ),
@@ -1484,7 +1497,7 @@ return array(
 		'PY-17'  => __( 'Boquerón', 'woocommerce' ),
 	),
 	'RE' => array(),
-	'RO' => array( // Romania states.
+	'RO' => array( // Romanian states.
 		'AB' => __( 'Alba', 'woocommerce' ),
 		'AR' => __( 'Arad', 'woocommerce' ),
 		'AG' => __( 'Argeș', 'woocommerce' ),
@@ -1531,7 +1544,7 @@ return array(
 	'SG' => array(),
 	'SK' => array(),
 	'SI' => array(),
-	'SV' => array( // El Salvador states.
+	'SV' => array( // Salvadoran states.
 		'SV-AH' => __( 'Ahuachapán', 'woocommerce' ),
 		'SV-CA' => __( 'Cabañas', 'woocommerce' ),
 		'SV-CH' => __( 'Chalatenango', 'woocommerce' ),
@@ -1547,7 +1560,7 @@ return array(
 		'SV-UN' => __( 'La Unión', 'woocommerce' ),
 		'SV-US' => __( 'Usulután', 'woocommerce' ),
 	),
-	'TH' => array( // Thailand states.
+	'TH' => array( // Thai states.
 		'TH-37' => __( 'Amnat Charoen', 'woocommerce' ),
 		'TH-15' => __( 'Ang Thong', 'woocommerce' ),
 		'TH-14' => __( 'Ayutthaya', 'woocommerce' ),
@@ -1626,7 +1639,7 @@ return array(
 		'TH-95' => __( 'Yala', 'woocommerce' ),
 		'TH-35' => __( 'Yasothon', 'woocommerce' ),
 	),
-	'TR' => array( // Turkey States.
+	'TR' => array( // Turkish states.
 		'TR01' => __( 'Adana', 'woocommerce' ),
 		'TR02' => __( 'Adıyaman', 'woocommerce' ),
 		'TR03' => __( 'Afyon', 'woocommerce' ),
@@ -1709,7 +1722,7 @@ return array(
 		'TR80' => __( 'Osmaniye', 'woocommerce' ),
 		'TR81' => __( 'Düzce', 'woocommerce' ),
 	),
-	'TZ' => array( // Tanzania States.
+	'TZ' => array( // Tanzanian states.
 		'TZ01' => __( 'Arusha', 'woocommerce' ),
 		'TZ02' => __( 'Dar es Salaam', 'woocommerce' ),
 		'TZ03' => __( 'Dodoma', 'woocommerce' ),
@@ -1742,7 +1755,7 @@ return array(
 		'TZ30' => __( 'Simiyu', 'woocommerce' ),
 	),
 	'LK' => array(),
-	'RS' => array( // Serbia districts. Ref: https://github.com/unicode-org/cldr/blob/release-37/common/subdivisions/en.xml#L4251-L4283.
+	'RS' => array( // Serbian districts.
 		'RS00' => _x( 'Belgrade', 'district', 'woocommerce' ),
 		'RS14' => _x( 'Bor', 'district', 'woocommerce' ),
 		'RS11' => _x( 'Braničevo', 'district', 'woocommerce' ),
@@ -1777,7 +1790,7 @@ return array(
 		'RSVO' => _x( 'Vojvodina', 'district', 'woocommerce' ),
 	),
 	'SE' => array(),
-	'UA' => array( // Ukraine. Ref: https://en.wikipedia.org/wiki/Oblasts_of_Ukraine.
+	'UA' => array( // Ukrainian oblasts.
 		'VN' => __( 'Vinnytsia Oblast', 'woocommerce' ),
 		'VL' => __( 'Volyn Oblast', 'woocommerce' ),
 		'DP' => __( 'Dnipropetrovsk Oblast', 'woocommerce' ),
@@ -1803,7 +1816,7 @@ return array(
 		'CH' => __( 'Chernihiv Oblast', 'woocommerce' ),
 		'CV' => __( 'Chernivtsi Oblast', 'woocommerce' ),
 	),
-	'UG' => array( // Uganda districts. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:UG.
+	'UG' => array( // Ugandan districts.
 		'UG314' => __( 'Abim', 'woocommerce' ),
 		'UG301' => __( 'Adjumani', 'woocommerce' ),
 		'UG322' => __( 'Agago', 'woocommerce' ),
@@ -1944,7 +1957,7 @@ return array(
 		'95' => __( 'Palmyra Atoll', 'woocommerce' ),
 		'79' => __( 'Wake Island', 'woocommerce' ),
 	),
-	'US' => array( // United States.
+	'US' => array( // U.S. states.
 		'AL' => __( 'Alabama', 'woocommerce' ),
 		'AK' => __( 'Alaska', 'woocommerce' ),
 		'AZ' => __( 'Arizona', 'woocommerce' ),
@@ -2000,7 +2013,7 @@ return array(
 		'AE' => __( 'Armed Forces (AE)', 'woocommerce' ),
 		'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
 	),
-	'UY' => array( // Uruguay States.
+	'UY' => array( // Uruguayan states.
 		'UY-AR' => __( 'Artigas', 'woocommerce' ),
 		'UY-CA' => __( 'Canelones', 'woocommerce' ),
 		'UY-CL' => __( 'Cerro Largo', 'woocommerce' ),
@@ -2021,7 +2034,7 @@ return array(
 		'UY-TA' => __( 'Tacuarembó', 'woocommerce' ),
 		'UY-TT' => __( 'Treinta y Tres', 'woocommerce' ),
 	),
-	'VE' => array( // Venezuela States.
+	'VE' => array( // Venezuelan states.
 		'VE-A' => __( 'Capital', 'woocommerce' ),
 		'VE-B' => __( 'Anzoátegui', 'woocommerce' ),
 		'VE-C' => __( 'Apure', 'woocommerce' ),
@@ -2061,7 +2074,7 @@ return array(
 		'NW'  => __( 'North West', 'woocommerce' ),
 		'WC'  => __( 'Western Cape', 'woocommerce' ),
 	),
-	'ZM' => array( // Zambia's Provinces. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:ZM.
+	'ZM' => array( // Zambian provinces.
 		'ZM-01' => __( 'Western', 'woocommerce' ),
 		'ZM-02' => __( 'Central', 'woocommerce' ),
 		'ZM-03' => __( 'Eastern', 'woocommerce' ),

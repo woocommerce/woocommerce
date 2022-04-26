@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure observers of the `removed_coupon_in_checkout` event can access the coupon code successfully.

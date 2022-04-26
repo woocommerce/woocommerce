@@ -3,8 +3,16 @@
  *
  * @typedef OrderStatus
  */
-export type OrderStatus = 'pending' | 'processing' | 'complete' | 'on-hold' | 'refunded'
-	| 'cancelled' | 'failed' | 'trash' | string;
+export type OrderStatus =
+	| 'pending'
+	| 'processing'
+	| 'complete'
+	| 'on-hold'
+	| 'refunded'
+	| 'cancelled'
+	| 'failed'
+	| 'trash'
+	| string;
 
 /**
  * An fee's tax status.
@@ -16,11 +24,32 @@ export type TaxStatus = 'taxable' | 'none';
 /**
  * Base order properties
  */
-export type OrderDataUpdateParams = 'id' | 'parentId' | 'status' | 'currency' | 'version'
-	| 'pricesIncludeTax' | 'discountTotal' | 'discountTax' | 'shippingTotal' | 'shippingTax'
-	| 'cartTax' | 'customerId' | 'orderKey' | 'paymentMethod' | 'paymentMethodTitle'
-	| 'transactionId' | 'customerIpAddress' | 'customerUserAgent' | 'createdVia' | 'datePaid'
-	| 'customerNote' | 'dateCompleted' | 'cartHash' | 'orderNumber' | 'currencySymbol';
+export type OrderDataUpdateParams =
+	| 'id'
+	| 'parentId'
+	| 'status'
+	| 'currency'
+	| 'version'
+	| 'pricesIncludeTax'
+	| 'discountTotal'
+	| 'discountTax'
+	| 'shippingTotal'
+	| 'shippingTax'
+	| 'cartTax'
+	| 'customerId'
+	| 'orderKey'
+	| 'paymentMethod'
+	| 'paymentMethodTitle'
+	| 'transactionId'
+	| 'customerIpAddress'
+	| 'customerUserAgent'
+	| 'createdVia'
+	| 'datePaid'
+	| 'customerNote'
+	| 'dateCompleted'
+	| 'cartHash'
+	| 'orderNumber'
+	| 'currencySymbol';
 
 /**
  * Common total properties
@@ -28,27 +57,61 @@ export type OrderDataUpdateParams = 'id' | 'parentId' | 'status' | 'currency' | 
 export type OrderTotalUpdateParams = 'total' | 'totalTax';
 
 /**
- * Order address properties
+ * Billing address properties
  */
-export type OrderAddressUpdateParams = 'firstName' | 'lastName' | 'companyName' | 'address1'
-	| 'address2' | 'city' | 'state' | 'postCode' | 'countryCode' | 'email' | 'phone';
+export type BillingOrderAddressUpdateParams =
+	| ShippingOrderAddressUpdateParams
+	| 'email'
+	| 'phone';
+
+/**
+ * Shipping address properties
+ */
+export type ShippingOrderAddressUpdateParams =
+	| 'firstName'
+	| 'lastName'
+	| 'company'
+	| 'address1'
+	| 'address2'
+	| 'city'
+	| 'state'
+	| 'postCode'
+	| 'country';
 
 /**
  * Line item properties
  */
-export type OrderLineItemUpdateParams = 'name' | 'ProductId' | 'variationId' | 'quantity'
-	| 'taxClass' | 'subtotal' | 'subtotalTax' | 'sku' | 'price' | 'parentName';
+export type OrderLineItemUpdateParams =
+	| 'name'
+	| 'ProductId'
+	| 'variationId'
+	| 'quantity'
+	| 'taxClass'
+	| 'subtotal'
+	| 'subtotalTax'
+	| 'sku'
+	| 'price'
+	| 'parentName';
 
 /**
  * Tax rate properties
  */
-export type OrderTaxUpdateParams = 'rateCode' | 'rateId' | 'label' | 'compoundRate'
-	| 'taxTotal' | 'shippingTaxTotal' | 'ratePercent';
+export type OrderTaxUpdateParams =
+	| 'rateCode'
+	| 'rateId'
+	| 'label'
+	| 'compoundRate'
+	| 'taxTotal'
+	| 'shippingTaxTotal'
+	| 'ratePercent';
 
 /**
  * Order shipping properties
  */
-export type OrderShippingUpdateParams = 'methodTitle' | 'methodId' | 'instanceId';
+export type OrderShippingUpdateParams =
+	| 'methodTitle'
+	| 'methodId'
+	| 'instanceId';
 
 /**
  * Order fee properties

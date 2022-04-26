@@ -2226,7 +2226,7 @@ class WC_AJAX {
 			echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">' . esc_html__( 'Dismiss this notice.', 'woocommerce' ) . '</span></button>';
 			echo '</div>';
 
-			delete_option( 'woocommerce_meta_box_errors' );
+			delete_option( WC_Admin_Meta_Boxes::ERROR_STORE );
 		}
 
 		wp_die();
@@ -3075,6 +3075,14 @@ class WC_AJAX {
 	 */
 	public static function toggle_gateway_enabled() {
 		if ( current_user_can( 'manage_woocommerce' ) && check_ajax_referer( 'woocommerce-toggle-payment-gateway-enabled', 'security' ) && isset( $_POST['gateway_id'] ) ) {
+			// Set current tab.
+			$referer = wp_get_referer();
+			if ( $referer ) {
+				global $current_tab;
+				parse_str( wp_parse_url( $referer, PHP_URL_QUERY ), $queries );
+				$current_tab = $queries['tab'] ?? '';
+			}
+
 			// Load gateways.
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
 
@@ -3086,19 +3094,25 @@ class WC_AJAX {
 					continue;
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );
+				$option  = array(
+					'id' => $gateway->get_option_key(),
+				);
 
 				if ( ! wc_string_to_bool( $enabled ) ) {
 					if ( $gateway->needs_setup() ) {
 						wp_send_json_error( 'needs_setup' );
 						wp_die();
 					} else {
+						do_action( 'woocommerce_update_option', $option );
 						$gateway->update_option( 'enabled', 'yes' );
 					}
 				} else {
+					do_action( 'woocommerce_update_option', $option );
 					// Disable the gateway.
 					$gateway->update_option( 'enabled', 'no' );
 				}
 
+				do_action( 'woocommerce_update_options' );
 				wp_send_json_success( ! wc_string_to_bool( $enabled ) );
 				wp_die();
 			}

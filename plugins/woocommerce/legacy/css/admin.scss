@@ -1086,17 +1086,7 @@ table.wc_status_table {
 			margin-bottom: 0.5em;
 		}
 
-		mark {
-			background: transparent none;
-		}
-
-		mark.yes {
-			color: $green;
-		}
-
-		mark.no {
-			color: #999;
-		}
+		@include table-marks();
 
 		mark.error,
 		.red {
@@ -1110,6 +1100,13 @@ table.wc_status_table {
 
 	.help_tip {
 		cursor: help;
+	}
+}
+
+table.wp-list-table.urls {
+	td,
+	th {
+		@include table-marks();
 	}
 }
 
@@ -2423,6 +2420,14 @@ ul.wc_coupon_list_block {
 
 	h3 small {
 		color: #999;
+	}
+}
+
+#side-sortables #woocommerce-order-downloads {
+
+	.buttons,
+	.select2-container {
+		max-width: 100%;
 	}
 }
 
@@ -4285,7 +4290,7 @@ img.help_tip {
 		margin: 1.5em 0 1em;
 	}
 
-	.subsubsub {
+	.subsubsub:not(.list-table-filters) {
 		margin: -8px 0 0;
 	}
 
@@ -5105,6 +5110,14 @@ img.help_tip {
 				margin: 1px 0;
 			}
 
+			&.file_url {
+				/* Reduce the size of this field to make space for a warning asterisk. */
+				input {
+					display: inline-block;
+					width: 96%;
+				}
+			}
+
 			.upload_file_button {
 				width: auto;
 				float: right;
@@ -5154,6 +5167,11 @@ img.help_tip {
 			&:hover::before {
 				color: #333;
 			}
+		}
+
+		/* Warning asterisk (indicates if there is a problem with a downloadable file). */
+		span.disabled {
+			color: var( --wc-red );
 		}
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Mark marketing task as complete when an extension is installed #32630

@@ -1,6 +1,6 @@
 import factories from '../factories';
 import { getSlug } from './utils';
-import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
+import { Coupon, Setting, SimpleProduct, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
@@ -19,25 +19,29 @@ const userEndpoint = '/wp/v2/users';
  * @param repository
  * @param defaultObjectId
  * @param statuses Status of the object to check
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
-const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, statuses = [ 'draft', 'publish', 'trash' ] ) => {
+const deleteAllRepositoryObjects = async (
+	repository,
+	defaultObjectId = null,
+	statuses = [ 'draft', 'publish', 'trash' ]
+) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
 
 	for ( let s = 0; s < statuses.length; s++ ) {
 		const status = statuses[ s ];
 		objects = await repository.list( { status } );
-		while (objects.length > minimum) {
-			for (let o = 0; o < objects.length; o++) {
+		while ( objects.length > minimum ) {
+			for ( let o = 0; o < objects.length; o++ ) {
 				// Skip default data store object
-				if (objects[o].id == defaultObjectId) {
+				if ( objects[ o ].id == defaultObjectId ) {
 					continue;
 				}
 				// We may be getting a cached copy of the dataset and the object has already been deleted.
 				try {
-					await repository.delete(objects[o].id);
-				} catch (e) {}
+					await repository.delete( objects[ o ].id );
+				} catch ( e ) {}
 			}
 			objects = await repository.list( { status } );
 		}
@@ -47,7 +51,7 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, s
 /**
  * Utility to flatten a tax rate.
  *
- * @param {object} taxRate Tax rate to be flattened.
+ * @param {Object} taxRate Tax rate to be flattened.
  * @return {string}
  */
 const flattenTaxRate = ( taxRate ) => {
@@ -60,7 +64,8 @@ const flattenTaxRate = ( taxRate ) => {
 export const withRestApi = {
 	/**
 	 * Reset onboarding to equivalent of new site.
-	 * @returns {Promise<void>}
+	 *
+	 * @return {Promise<void>}
 	 */
 	resetOnboarding: async () => {
 		const onboardingReset = {
@@ -77,7 +82,10 @@ export const withRestApi = {
 			wccom_connected: false,
 		};
 
-		const response = await client.put( onboardingProfileEndpoint, onboardingReset );
+		const response = await client.put(
+			onboardingProfileEndpoint,
+			onboardingReset
+		);
 		expect( response.statusCode ).toEqual( 200 );
 	},
 	/**
@@ -109,6 +117,16 @@ export const withRestApi = {
 		await deleteAllRepositoryObjects( repository );
 	},
 	/**
+	 * Use api package to delete a product.
+	 *
+	 * @param {number} productId Product ID.
+	 * @return {Promise} Promise resolving once the product has been deleted.
+	 */
+	deleteProduct: async ( productId ) => {
+		const repository = SimpleProduct.restRepository( client );
+		await repository.delete( productId );
+	},
+	/**
 	 * Use the API to delete all product attributes.
 	 *
 	 * @param {boolean} testResponse Test the response status code.
@@ -119,7 +137,10 @@ export const withRestApi = {
 		const productAttributes = await client.get( productAttributesPath );
 		if ( productAttributes.data && productAttributes.data.length ) {
 			for ( let a = 0; a < productAttributes.data.length; a++ ) {
-				const response = await client.delete( productAttributesPath + `/${productAttributes.data[a].id}?force=true` );
+				const response = await client.delete(
+					productAttributesPath +
+						`/${ productAttributes.data[ a ].id }?force=true`
+				);
 				if ( testResponse ) {
 					expect( response.status ).toBe( 200 );
 				}
@@ -138,10 +159,13 @@ export const withRestApi = {
 		if ( productCategories.data && productCategories.data.length ) {
 			for ( let c = 0; c < productCategories.data.length; c++ ) {
 				// The default `uncategorized` category can't be deleted
-				if ( productCategories.data[c].slug == 'uncategorized' ) {
+				if ( productCategories.data[ c ].slug == 'uncategorized' ) {
 					continue;
 				}
-				const response = await client.delete( productCategoriesPath + `/${productCategories.data[c].id}?force=true` );
+				const response = await client.delete(
+					productCategoriesPath +
+						`/${ productCategories.data[ c ].id }?force=true`
+				);
 				if ( testResponse ) {
 					expect( response.status ).toBe( 200 );
 				}
@@ -159,7 +183,10 @@ export const withRestApi = {
 		const productTags = await client.get( productTagsPath );
 		if ( productTags.data && productTags.data.length ) {
 			for ( let t = 0; t < productTags.data.length; t++ ) {
-				const response = await client.delete( productTagsPath + `/${productTags.data[t].id}?force=true` );
+				const response = await client.delete(
+					productTagsPath +
+						`/${ productTags.data[ t ].id }?force=true`
+				);
 				if ( testResponse ) {
 					expect( response.status ).toBe( 200 );
 				}
@@ -173,9 +200,28 @@ export const withRestApi = {
 	 */
 	deleteAllOrders: async () => {
 		// We need to specfically filter on order status here to make sure we catch all orders to delete.
-		const orderStatuses = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
+		const orderStatuses = [
+			'pending',
+			'processing',
+			'on-hold',
+			'completed',
+			'cancelled',
+			'refunded',
+			'failed',
+			'trash',
+		];
 		const repository = Order.restRepository( client );
 		await deleteAllRepositoryObjects( repository, null, orderStatuses );
+	},
+	/**
+	 * Use api package to delete an order.
+	 *
+	 * @param {number} orderId Order ID.
+	 * @return {Promise} Promise resolving once the order has been deleted.
+	 */
+	deleteOrder: async ( orderId ) => {
+		const repository = Order.restRepository( client );
+		await repository.delete( orderId );
 	},
 	/**
 	 * Adds a shipping zone along with a shipping method using the API.
@@ -195,73 +241,85 @@ export const withRestApi = {
 		zoneMethod = 'flat_rate',
 		cost = '',
 		additionalZoneMethods = [],
-		testResponse = true ) => {
-
+		testResponse = true
+	) => {
 		const path = 'wc/v3/shipping/zones';
 
 		const response = await client.post( path, { name: zoneName } );
 		if ( testResponse ) {
 			expect( response.status ).toEqual( 201 );
 		}
-		let zoneId = response.data.id;
+		const zoneId = response.data.id;
 
 		// Select shipping zone location
-		let [ zoneType, zoneCode ] = zoneLocation.split(/:(.+)/);
-		let zoneLocationPayload = [
-		   {
-			   code: zoneCode,
-			   type: zoneType,
-		   }
+		const [ zoneType, zoneCode ] = zoneLocation.split( /:(.+)/ );
+		const zoneLocationPayload = [
+			{
+				code: zoneCode,
+				type: zoneType,
+			},
 		];
 
 		// Fill shipping zone postcode if provided
 		if ( zipCode ) {
-		   zoneLocationPayload.push( {
-			   code: zipCode,
-			   type: "postcode",
-		   } );
+			zoneLocationPayload.push( {
+				code: zipCode,
+				type: 'postcode',
+			} );
 		}
 
-		const locationResponse = await client.put( path + `/${zoneId}/locations`, zoneLocationPayload );
+		const locationResponse = await client.put(
+			path + `/${ zoneId }/locations`,
+			zoneLocationPayload
+		);
 		if ( testResponse ) {
 			expect( locationResponse.status ).toEqual( 200 );
 		}
 
-	   // Add shipping zone method
-	   let methodPayload = {
-		   method_id: zoneMethod
-	   }
+		// Add shipping zone method
+		const methodPayload = {
+			method_id: zoneMethod,
+		};
 
-	   const methodsResponse = await client.post( path + `/${zoneId}/methods`, methodPayload );
+		const methodsResponse = await client.post(
+			path + `/${ zoneId }/methods`,
+			methodPayload
+		);
 		if ( testResponse ) {
 			expect( methodsResponse.status ).toEqual( 200 );
 		}
-	   let methodId = methodsResponse.data.id;
+		const methodId = methodsResponse.data.id;
 
-	   // Add in cost, if provided
-	   if ( cost ) {
-		   let costPayload = {
-			   settings: {
-				   cost: cost
-			   }
-		   }
+		// Add in cost, if provided
+		if ( cost ) {
+			const costPayload = {
+				settings: {
+					cost,
+				},
+			};
 
-		   const costResponse = await client.put( path + `/${zoneId}/methods/${methodId}`, costPayload );
-		   if ( testResponse ) {
-			   expect( costResponse.status ).toEqual( 200 );
-		   }
-	   }
+			const costResponse = await client.put(
+				path + `/${ zoneId }/methods/${ methodId }`,
+				costPayload
+			);
+			if ( testResponse ) {
+				expect( costResponse.status ).toEqual( 200 );
+			}
+		}
 
-	   // Add any additional zones, if provided
-	   if (additionalZoneMethods.length > 0) {
-		   for ( let z = 0; z < additionalZoneMethods.length; z++ ) {
-			   let response = await client.post( path + `/${zoneId}/methods`, { method_id: additionalZoneMethods[z] } );
-			   if ( testResponse ) {
-				   expect( response.status ).toBe( 200 );
-			   }
-		   }
-	   }
-    },
+		// Add any additional zones, if provided
+		if ( additionalZoneMethods.length > 0 ) {
+			for ( let z = 0; z < additionalZoneMethods.length; z++ ) {
+				const response = await client.post(
+					path + `/${ zoneId }/methods`,
+					{ method_id: additionalZoneMethods[ z ] }
+				);
+				if ( testResponse ) {
+					expect( response.status ).toBe( 200 );
+				}
+			}
+		}
+	},
 	/**
 	 * Use api package to delete shipping zones.
 	 *
@@ -273,10 +331,13 @@ export const withRestApi = {
 		if ( shippingZones.data && shippingZones.data.length ) {
 			for ( let z = 0; z < shippingZones.data.length; z++ ) {
 				// The data store doesn't support deleting the default zone.
-				if ( shippingZones.data[z].id == 0 ) {
+				if ( shippingZones.data[ z ].id == 0 ) {
 					continue;
 				}
-				const response = await client.delete( shippingZoneEndpoint + `/${shippingZones.data[z].id}?force=true` );
+				const response = await client.delete(
+					shippingZoneEndpoint +
+						`/${ shippingZones.data[ z ].id }?force=true`
+				);
 				if ( testResponse ) {
 					expect( response.status ).toBe( 200 );
 				}
@@ -293,7 +354,10 @@ export const withRestApi = {
 		const shippingClasses = await client.get( shippingClassesEndpoint );
 		if ( shippingClasses.data && shippingClasses.data.length ) {
 			for ( let c = 0; c < shippingClasses.data.length; c++ ) {
-				const response = await client.delete( shippingClassesEndpoint + `/${shippingClasses.data[c].id}?force=true` );
+				const response = await client.delete(
+					shippingClassesEndpoint +
+						`/${ shippingClasses.data[ c ].id }?force=true`
+				);
 				if ( testResponse ) {
 					expect( response.status ).toBe( 200 );
 				}
@@ -304,7 +368,7 @@ export const withRestApi = {
 	 * Delete a customer account by their email address if the user exists.
 	 *
 	 * @param emailAddress Customer user account email address.
-	 * @returns {Promise<void>}
+	 * @return {Promise<void>}
 	 */
 	deleteCustomerByEmail: async ( emailAddress ) => {
 		const query = {
@@ -316,41 +380,55 @@ export const withRestApi = {
 		if ( customers.data && customers.data.length ) {
 			for ( let c = 0; c < customers.data.length; c++ ) {
 				const deleteUser = {
-					id: customers.data[c].id,
+					id: customers.data[ c ].id,
 					force: true,
 					reassign: 1,
-				}
-				await client.delete( userEndpoint + `/${ deleteUser.id }`, deleteUser );
+				};
+				await client.delete(
+					userEndpoint + `/${ deleteUser.id }`,
+					deleteUser
+				);
 			}
 		}
 	},
 	/**
 	 * Reset a settings group to default values except selects.
+	 *
 	 * @param settingsGroup
 	 * @param {boolean} testResponse Test the response status code.
-	 * @returns {Promise<void>}
+	 * @return {Promise<void>}
 	 */
-	resetSettingsGroupToDefault: async ( settingsGroup, testResponse = true ) => {
+	resetSettingsGroupToDefault: async (
+		settingsGroup,
+		testResponse = true
+	) => {
 		const settingsClient = Setting.restRepository( client );
 		const settings = await settingsClient.list( settingsGroup );
-		if ( ! settings.length  ) {
+		if ( ! settings.length ) {
 			return;
 		}
 
 		for ( let s = 0; s < settings.length; s++ ) {
 			// The rest api doesn't allow selects to be set to ''.
-			if ( settings[s].type == 'select' && settings[s].default == '' ) {
+			if (
+				settings[ s ].type == 'select' &&
+				settings[ s ].default == ''
+			) {
 				continue;
 			}
 			const defaultSetting = {
 				group_id: settingsGroup,
-				id: settings[s].id,
-				value: settings[s].default,
+				id: settings[ s ].id,
+				value: settings[ s ].default,
 			};
 
-			const response = await settingsClient.update( settingsGroup, defaultSetting.id, defaultSetting );
+			const response = await settingsClient.update(
+				settingsGroup,
+				defaultSetting.id,
+				defaultSetting
+			);
 			// Multi-selects have a default '' but return an empty [].
-			if ( testResponse && settings[s].type != 'multiselect' ) {
+			if ( testResponse && settings[ s ].type != 'multiselect' ) {
 				expect( response.value ).toBe( defaultSetting.value );
 			}
 		}
@@ -360,7 +438,7 @@ export const withRestApi = {
 	 *
 	 * @param {string} settingsGroup The settings group to update.
 	 * @param {string} settingId The setting ID to update
-	 * @param {object} payload An object with a key/value pair to update.
+	 * @param {Object} payload An object with a key/value pair to update.
 	 */
 	updateSettingOption: async ( settingsGroup, settingId, payload = {} ) => {
 		const settingsClient = Setting.restRepository( client );
@@ -370,11 +448,18 @@ export const withRestApi = {
 	 * Update a payment gateway.
 	 *
 	 * @param {string} paymentGatewayId The ID of the payment gateway to update.
-	 * @param {object} payload An object with the key/value pair to update.
+	 * @param {Object} payload An object with the key/value pair to update.
 	 * @param {boolean} testResponse Test the response status code.
 	 */
-	updatePaymentGateway: async ( paymentGatewayId, payload = {}, testResponse = true ) => {
-		const response = await client.put( `/wc/v3/payment_gateways/${paymentGatewayId}`, payload );
+	updatePaymentGateway: async (
+		paymentGatewayId,
+		payload = {},
+		testResponse = true
+	) => {
+		const response = await client.put(
+			`/wc/v3/payment_gateways/${ paymentGatewayId }`,
+			payload
+		);
 		if ( testResponse ) {
 			expect( response.status ).toEqual( 200 );
 		}
@@ -389,7 +474,7 @@ export const withRestApi = {
 		const path = '/wc/v3/orders/batch';
 		const payload = { create: orders };
 
-		const response = await client.post(path, payload);
+		const response = await client.post( path, payload );
 		if ( testResponse ) {
 			expect( response.status ).toBe( 200 );
 		}
@@ -398,13 +483,17 @@ export const withRestApi = {
 	 * Add tax classes.
 	 *
 	 * @param {<Array<Object>>} taxClasses Array of tax class objects.
-	 * @returns {Promise<void>}
+	 * @return {Promise<void>}
 	 */
 	addTaxClasses: async ( taxClasses ) => {
 		// Only add tax classes which don't already exist.
 		const existingTaxClasses = await client.get( taxClassesEndpoint );
-		const existingTaxNames = existingTaxClasses.data.map( taxClass => taxClass.name );
-		const newTaxClasses = taxClasses.filter( taxClass => ! existingTaxNames.includes( taxClass.name ) );
+		const existingTaxNames = existingTaxClasses.data.map(
+			( taxClass ) => taxClass.name
+		);
+		const newTaxClasses = taxClasses.filter(
+			( taxClass ) => ! existingTaxNames.includes( taxClass.name )
+		);
 
 		for ( const taxClass of newTaxClasses ) {
 			await client.post( taxClassesEndpoint, taxClass );
@@ -414,12 +503,14 @@ export const withRestApi = {
 	 * Add tax rates.
 	 *
 	 * @param {<Array<Object>>} taxRates Array of tax rate objects.
-	 * @returns {Promise<void>}
+	 * @return {Promise<void>}
 	 */
 	addTaxRates: async ( taxRates ) => {
 		// Only add rates which don't already exist
 		const existingTaxRates = await client.get( taxRatesEndpoint );
-		const existingRates = existingTaxRates.data.map( taxRate => flattenTaxRate( taxRate ) );
+		const existingRates = existingTaxRates.data.map( ( taxRate ) =>
+			flattenTaxRate( taxRate )
+		);
 
 		for ( const taxRate of taxRates ) {
 			if ( ! existingRates.includes( flattenTaxRate( taxRate ) ) ) {
@@ -432,14 +523,12 @@ export const withRestApi = {
 	 *
 	 * For more details, see: https://woocommerce.github.io/woocommerce-rest-api-docs/#system-status-environment-properties
 	 *
-	 * @returns {Promise<object>} The environment object from the API response.
+	 * @return {Promise<object>} The environment object from the API response.
 	 */
 	getSystemEnvironment: async () => {
 		const response = await client.get( systemStatusEndpoint );
 		if ( response.data.environment ) {
 			return response.data.environment;
-		} else {
-			return;
 		}
 	},
 	/**

@@ -25,7 +25,7 @@ const factories = {
 		simple: simpleProductFactory( withDefaultPermalinks ),
 		variable: variableProductFactory( withDefaultPermalinks ),
 		variation: variationFactory( withDefaultPermalinks ),
-		grouped: groupedProductFactory( withDefaultPermalinks )
+		grouped: groupedProductFactory( withDefaultPermalinks ),
 	},
 };
 

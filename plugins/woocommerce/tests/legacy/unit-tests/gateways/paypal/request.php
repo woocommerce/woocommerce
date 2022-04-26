@@ -81,7 +81,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	/**
 	 * Initialize the Paypal gateway and Request objects.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();

@@ -36,18 +36,22 @@ import { productVariationRESTRepository } from '../../repositories';
 /**
  * The parameters that product variations can update.
  */
-type ProductVariationUpdateParams = ProductDataUpdateParams
-	& ProductDeliveryUpdateParams
-	& ProductInventoryUpdateParams
-	& ProductPriceUpdateParams
-	& ProductSalesTaxUpdateParams
-	& ProductShippingUpdateParams;
+type ProductVariationUpdateParams = ProductDataUpdateParams &
+	ProductDeliveryUpdateParams &
+	ProductInventoryUpdateParams &
+	ProductPriceUpdateParams &
+	ProductSalesTaxUpdateParams &
+	ProductShippingUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type ProductVariationRepositoryParams =
-	ModelRepositoryParams< ProductVariation, ModelID, ProductSearchParams, ProductVariationUpdateParams >;
+export type ProductVariationRepositoryParams = ModelRepositoryParams<
+	ProductVariation,
+	ModelID,
+	ProductSearchParams,
+	ProductVariationUpdateParams
+>;
 
 /**
  * An interface for listing variable products using the repository.
@@ -92,12 +96,14 @@ export type DeletesProductVariations = DeletesChildModels< ProductVariationRepos
 /**
  * The base for the product variation object.
  */
-export class ProductVariation extends AbstractProductData implements
-	IProductDelivery,
-	IProductInventory,
-	IProductPrice,
-	IProductSalesTax,
-	IProductShipping {
+export class ProductVariation
+	extends AbstractProductData
+	implements
+		IProductDelivery,
+		IProductInventory,
+		IProductPrice,
+		IProductSalesTax,
+		IProductShipping {
 	/**
 	 * @see ./abstracts/delivery.ts
 	 */
@@ -114,7 +120,7 @@ export class ProductVariation extends AbstractProductData implements
 	public readonly onePerOrder: boolean = false;
 	public readonly trackInventory: boolean = false;
 	public readonly remainingStock: number = -1;
-	public readonly stockStatus: StockStatus = ''
+	public readonly stockStatus: StockStatus = '';
 	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
 	public readonly canBackorder: boolean = false;
 	public readonly isOnBackorder: boolean = false;
@@ -182,7 +188,9 @@ export class ProductVariation extends AbstractProductData implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof productVariationRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof productVariationRESTRepository > {
 		return productVariationRESTRepository( httpClient );
 	}
 }

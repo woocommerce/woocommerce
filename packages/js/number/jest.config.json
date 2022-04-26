@@ -1,0 +1,4 @@
+{
+	"rootDir": "./src",
+	"preset": "../../js-tests/jest.config.js"
+}

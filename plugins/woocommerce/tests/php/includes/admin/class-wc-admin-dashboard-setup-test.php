@@ -15,7 +15,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	/**
 	 * Set up
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
 		update_option( 'woocommerce_default_country', 'JP' );
@@ -36,7 +36,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	/**
 	 * Tear down
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_available_payment_gateways' );
 
 		parent::tearDown();
@@ -98,7 +98,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $widget->should_display_widget() );
 	}
-	
+
 	/**
 	 * Tests widget does not display when task list is hidden.
 	 */
@@ -125,6 +125,16 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( $author );
 
 		$widget = $this->get_widget();
+
+		$this->assertFalse( $widget->should_display_widget() );
+	}
+
+	/**
+	 * Tests widget does not display when task list is unavailable.
+	 */
+	public function test_widget_does_not_display_when_no_task_list() {
+		$widget = $this->get_widget();
+		$widget->set_task_list( null );
 
 		$this->assertFalse( $widget->should_display_widget() );
 	}

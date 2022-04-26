@@ -18,15 +18,35 @@ describe( 'SettingService', () => {
 			'line2',
 			'New York',
 			'US:NY',
-			'12345',
+			'12345'
 		);
 
 		expect( result ).toBeTruthy();
 		expect( repository.update ).toHaveBeenCalledTimes( 5 );
-		expect( repository.update ).toHaveBeenCalledWith( 'general', 'woocommerce_store_address', { value: 'line1' } );
-		expect( repository.update ).toHaveBeenCalledWith( 'general', 'woocommerce_store_address_2', { value: 'line2' } );
-		expect( repository.update ).toHaveBeenCalledWith( 'general', 'woocommerce_store_city', { value: 'New York' } );
-		expect( repository.update ).toHaveBeenCalledWith( 'general', 'woocommerce_default_country', { value: 'US:NY' } );
-		expect( repository.update ).toHaveBeenCalledWith( 'general', 'woocommerce_store_postcode', { value: '12345' } );
+		expect( repository.update ).toHaveBeenCalledWith(
+			'general',
+			'woocommerce_store_address',
+			{ value: 'line1' }
+		);
+		expect( repository.update ).toHaveBeenCalledWith(
+			'general',
+			'woocommerce_store_address_2',
+			{ value: 'line2' }
+		);
+		expect( repository.update ).toHaveBeenCalledWith(
+			'general',
+			'woocommerce_store_city',
+			{ value: 'New York' }
+		);
+		expect( repository.update ).toHaveBeenCalledWith(
+			'general',
+			'woocommerce_default_country',
+			{ value: 'US:NY' }
+		);
+		expect( repository.update ).toHaveBeenCalledWith(
+			'general',
+			'woocommerce_store_postcode',
+			{ value: '12345' }
+		);
 	} );
 } );
