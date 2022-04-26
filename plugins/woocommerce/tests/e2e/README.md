@@ -1,5 +1,7 @@
 # WooCommerce End to End Tests
 
+THIS IS A TEST. IT IS ONLY A TEST.
+
 Automated end-to-end tests for WooCommerce.
 
 ## Table of contents
