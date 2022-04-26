@@ -13,6 +13,7 @@ import {
 } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useExperiment } from '@woocommerce/explat';
+import { getAdminLink } from '@woocommerce/settings';
 import moment from 'moment';
 
 /**
@@ -53,8 +54,9 @@ export const PaymentMethodsIcons = () => (
 );
 
 const WcPayBanner = () => {
-	const WC_PAY_SETUP_URL =
-		'./admin.php?page=wc-settings&tab=checkout&section=woocommerce_payments';
+	const WC_PAY_SETUP_URL = getAdminLink(
+		'admin.php?page=wc-settings&tab=checkout&section=woocommerce_payments'
+	);
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-banner">
 			<CardBody className="woocommerce-recommended-payments-banner__body">
