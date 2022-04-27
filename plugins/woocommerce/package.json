@@ -14,7 +14,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets && pnpm nx makepot woocommerce",
+    "build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets",
     "build:feature-config": "php bin/generate-feature-config.php",
     "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
