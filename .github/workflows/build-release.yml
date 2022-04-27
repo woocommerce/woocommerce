@@ -10,22 +10,9 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v3
 
-      - name: Cache modules
-        uses: actions/cache@v3
-        id: cache-deps
-        with:
-          path: |
-            ~/.pnpm-store
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
       - name: Build zip
-        run: pnpm nx build-zip woocommerce
+        shell: bash
+        run: plugins/woocommerce/bin/build-zip.sh
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
