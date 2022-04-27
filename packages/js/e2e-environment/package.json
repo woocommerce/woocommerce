@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-environment",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "WooCommerce End to End Testing Environment Configuration.",
   "author": "Automattic",
   "license": "GPL-3.0-or-later",
@@ -49,6 +49,7 @@
     "@babel/plugin-transform-runtime": "^7.16.4",
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.12.7",
+    "@woocommerce/e2e-builds": "workspace:*",
     "@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
     "@wordpress/babel-preset-default": "3.0.2",
     "@wordpress/browserslist-config": "^4.1.0",
@@ -62,10 +63,11 @@
   },
   "scripts": {
     "clean": "rm -rf ./build ./build-module",
-    "compile": "node ./../bin/build.js",
+    "compile": "e2e-builds",
     "build": "pnpm run clean && pnpm run compile",
     "prepare": "pnpm run build",
     "docker:up": "./bin/docker-compose.sh up",
+	"docker:wait": "bash ./bin/wait-for-build.sh",
     "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
     "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
@@ -76,5 +78,10 @@
   },
   "bin": {
     "wc-e2e": "bin/wc-e2e.sh"
+  },
+  "lint-staged": {
+	"*.(t|j)s?(x)": [
+		"eslint --fix"
+	]
   }
 }

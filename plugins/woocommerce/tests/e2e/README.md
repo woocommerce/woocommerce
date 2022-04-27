@@ -26,6 +26,7 @@ Automated end-to-end tests for WooCommerce.
   - [Creating test structure](#creating-test-structure)
   - [Writing the test](#writing-the-test)
   - [Best practices](#best-practices)
+  - [Writing tests for WooCommerce extensions](#Writing-tests-for-WooCommerce-extensions)
 - [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
@@ -63,7 +64,7 @@ This section explains how e2e tests are working behind the scenes. These are not
 
 ### Test Environment
 
-We recommend using Docker for running tests locally in order for the test environment to match the setup on Github CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
+We recommend using Docker for running tests locally in order for the test environment to match the setup on GitHub CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
 
 ### Test Variables
 
@@ -194,7 +195,7 @@ Sometimes tests may fail for different reasons such as network issues, or lost c
 
 ```
 cd plugins/woocommerce
-E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
+E2E_RETRY_TIMES=2 pnpm exec wc-e2e test:e2e
 ```
 
 ### How to run tests in debug mode
@@ -213,7 +214,7 @@ To run an individual test, use the direct path to the spec. For example:
 
 ```bash
 cd plugins/woocommerce
-pnpx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
+pnpm exec wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
 ``` 
 
 ### How to skip tests
@@ -291,7 +292,7 @@ In the WooCommerce Core repository the tests are in `tests/e2e/core-tests/specs/
 The following packages are used in write tests:
 
 - `@automattic/puppeteer-utils` - utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
-- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/utils).
+- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-utils).
 
 ### Creating test structure
 
@@ -372,6 +373,12 @@ FAIL ../specs/front-end/front-end-my-account.test.js (9.219s)
 ```
 
 In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it. 
+
+### Writing tests for WooCommerce extensions
+
+If you want to set up E2E tests for your WooCommerce extension you can make use of the default WooCommerce E2E package.
+
+The [WooCommerce E2E Tests Boilerplate repo](https://github.com/woocommerce/woocommerce-e2e-boilerplate) aims to provide a stripped down version of the default WooCommerce E2E test suite along with basic set up instructions to get started.
 
 ## Debugging tests
 

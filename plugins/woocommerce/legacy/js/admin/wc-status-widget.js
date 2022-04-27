@@ -1,5 +1,9 @@
 /*global jQuery */
 (function( $ ) {
+	$( document ).on( 'ready', function() {
+		window.wcTracks.recordEvent( 'wcadmin_status_widget_view' );
+	});
+
 	var recordEvent = function( link ) {
 		window.wcTracks.recordEvent( 'status_widget_click', {
 			link: link

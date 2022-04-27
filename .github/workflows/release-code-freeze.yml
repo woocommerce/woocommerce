@@ -1,0 +1,35 @@
+name: "Enforce release code freeze"
+on:
+  schedule:
+    - cron: '0 16 * * 4' # Run at 1600 UTC on Thursdays.
+
+jobs:
+  maybe-create-next-milestone-and-release-branch:
+    name: "Maybe create next milestone and release branch"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: "Get the action script"
+        run: |
+          scripts="post-request-shared.php release-code-freeze.php"
+          for script in $scripts
+          do
+            curl \
+            --silent \
+            --fail \
+            --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
+            --header 'User-Agent: GitHub action to enforce release code freeze' \
+            --header 'Accept: application/vnd.github.v3.raw' \
+            --output $script \
+            --location "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/$script?ref=$GITHUB_REF"
+          done
+        env:
+          GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
+          GITHUB_REF: ${{ env.GITHUB_REF }}
+      - name: "Install PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: "Run the script to enforce the code freeze"
+        run: php release-code-freeze.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

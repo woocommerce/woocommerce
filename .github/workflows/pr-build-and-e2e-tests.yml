@@ -1,12 +1,16 @@
 name: Build zip for PR
 on: pull_request
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
     build:
         name: Build zip for PR
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - name: Build
               id: build
@@ -15,7 +19,7 @@ jobs:
                   BUILD_ENV: e2e
 
             - name: Upload PR zip
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -25,7 +29,7 @@ jobs:
 
     e2e-tests-run:
         name: Runs E2E tests.
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         needs: [build]
         steps:
             - name: Create dirs.
@@ -33,28 +37,17 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
-
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
 
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                   name: woocommerce
                   path: tmp
@@ -65,11 +58,23 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies again
+            - name: Cache modules
+              uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install dependencies
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+              run: pnpm install
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -77,11 +82,20 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpx wc-e2e test:e2e
-                  
+              run: pnpm exec wc-e2e test:e2e
+
+            - name: Archive E2E test screenshots
+              uses: actions/upload-artifact@v3
+              if: always()
+              with:
+                  name: E2E Screenshots
+                  path: package/woocommerce/plugins/woocommerce/tests/e2e/screenshots
+                  if-no-files-found: ignore
+                  retention-days: 5
+
     api-tests-run:
         name: Runs API tests.
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         needs: [build]
         steps:
             - name: Create dirs.
@@ -89,28 +103,17 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
-
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
 
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                   name: woocommerce
                   path: tmp
@@ -121,11 +124,23 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies again
+            - name: Cache modules
+              uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install dependencies
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+              run: pnpm install
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -133,4 +148,75 @@ jobs:
                   BASE_URL: http://localhost:8084
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpx wc-api-tests test api
+              run: pnpm exec wc-api-tests test api
+
+            - name: Upload API test report
+              uses: actions/upload-artifact@v3
+              with:
+                  name: api-test-report---pr-${{ github.event.number }}
+                  path: |
+                      package/woocommerce/packages/js/api-core-tests/allure-results
+                      package/woocommerce/packages/js/api-core-tests/allure-report
+                  retention-days: 7
+
+    k6-tests-run:
+        name: Runs k6 Performance tests
+        runs-on: ubuntu-20.04
+        needs: [build]
+        steps:
+            - name: Create dirs.
+              run: |
+                  mkdir -p code/woocommerce
+                  mkdir -p package/woocommerce
+                  mkdir -p tmp/woocommerce
+
+            - name: Checkout code.
+              uses: actions/checkout@v3
+              with:
+                  path: package/woocommerce
+
+            - name: Move current directory to code. We will install zip file in this dir later.
+              run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
+
+            - name: Download WooCommerce ZIP.
+              uses: actions/download-artifact@v3
+              with:
+                  name: woocommerce
+                  path: tmp
+
+            - name: Extract and replace WooCommerce zip.
+              working-directory: tmp
+              run: |
+                  unzip woocommerce.zip -d woocommerce
+                  mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: Cache modules
+              uses: actions/cache@v3
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install dependencies
+              working-directory: package/woocommerce
+              run: pnpm install
+
+            - name: Workaround to use initialization file with prepopulated data.
+              working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
+              run: |
+                  cp init-sample-products.sh initialize.sh
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpm exec wc-e2e docker:up
+
+            - name: Install k6
+              run: |
+                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+            - name: Run k6 tests
+              run: |
+                  ./k6 run package/woocommerce/plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js

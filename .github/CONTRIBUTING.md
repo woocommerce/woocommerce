@@ -13,7 +13,7 @@ There are many ways to contribute to the project!
 
 If you wish to contribute code, please read the information in the sections below. Then [fork](https://help.github.com/articles/fork-a-repo/) WooCommerce, commit your changes, and [submit a pull request](https://help.github.com/articles/using-pull-requests/) 🎉
 
-We use the `good first issue` label to mark issues that are suitable for new contributors. You can find all the issues with this label [here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+We use the `good first issue` label to mark issues that are suitable for new contributors. You can find all the issues with this label [here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+good+first+issue%22).
 
 WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
@@ -26,8 +26,8 @@ If you have questions about the process to contribute code or want to discuss de
 - [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)
 - [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
 - [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
-- [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/tests/README.md)
-- [Running e2e tests](https://github.com/woocommerce/woocommerce/wiki/End-to-end-Testing)
+- [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
+- [Running e2e tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md)
 
 ## Coding Guidelines and Development 🛠
 
@@ -41,15 +41,14 @@ If you have questions about the process to contribute code or want to discuss de
 - Make sure to write good and detailed commit messages (see [this post](https://chris.beams.io/posts/git-commit/) for more on this) and follow all the applicable sections of the pull request template.
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team.
 
-If you are contributing code to the (Javascript-driven) WooCommerce Admin project or to Gutenberg blocks, note that these are developed in external packages.
+If you are contributing code to the (Javascript-driven) Gutenberg blocks, note that it's developed in an external package.
 
-- [WooCommerce Admin](https://github.com/woocommerce/woocommerce-admin)
 - [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
 
 ## Feature Requests 🚀
 
-Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?template=6-Feature-request.md). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
+Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
 
 Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
 
-You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aclosed+label%3A%22type%3A+enhancement%22+label%3A%22votes+needed%22+sort%3Areactions-%2B1-desc).
+You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+sort%3Areactions-%2B1-desc+label%3A%22needs%3A+votes%22+).

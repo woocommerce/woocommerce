@@ -2,7 +2,10 @@
 	"root": "plugins/woocommerce/",
 	"sourceRoot": "plugins/woocommerce",
 	"projectType": "application",
-	"implicitDependencies": [ "woocommerce-legacy-assets" ],
+	"implicitDependencies": [
+		"woocommerce-legacy-assets",
+		"woocommerce-admin"
+	],
 	"targets": {
 		"changelog": {
 			"executor": "./tools/executors/changelogger:changelog",
@@ -38,12 +41,6 @@
 				"script": "build"
 			}
 		},
-		"build-core": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "build:core"
-			}
-		},
 		"build-zip": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
@@ -53,7 +50,16 @@
 		"build-watch": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
-				"command": "pnpx grunt watch",
+				"commands": [
+					"pnpm nx build:feature-config woocommerce",
+					"pnpm nx watch-assets woocommerce"
+				]
+			}
+		},
+		"watch-assets": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"command": "pnpm dlx grunt watch",
 				"cwd": "plugins/woocommerce/legacy"
 			}
 		},
@@ -128,12 +134,6 @@
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
 				"script": "packages:fix:textdomain"
-			}
-		},
-		"git-update-hooks": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "git:update-hooks"
 			}
 		},
 		"make-collection": {

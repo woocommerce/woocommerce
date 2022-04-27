@@ -1,4 +1,8 @@
-import { ModelTransformation, ModelTransformer, TransformationOrder } from '../model-transformer';
+import {
+	ModelTransformation,
+	ModelTransformer,
+	TransformationOrder,
+} from '../model-transformer';
 import { Model, ModelConstructor } from '../../models';
 
 /**
@@ -6,7 +10,8 @@ import { Model, ModelConstructor } from '../../models';
  *
  * @template T
  */
-export class ModelTransformerTransformation< T extends Model > implements ModelTransformation {
+export class ModelTransformerTransformation< T extends Model >
+implements ModelTransformation {
 	public readonly fromModelOrder = TransformationOrder.Normal;
 
 	/**
@@ -42,7 +47,15 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 	 * @param {ModelTransformer} transformer The transformer we want to apply.
 	 * @template T
 	 */
-	public constructor( property: string, modelClass: ModelConstructor< T >, transformer: ModelTransformer< T > ) {
+	public constructor(
+		property: string,
+		modelClass: ModelConstructor< T >,
+		transformer: ModelTransformer< T >
+	) {
+		// Developer-friendly error to make sure this doesn't go unnoticed.
+		if ( property.includes( '_' ) ) {
+			throw new Error( 'The property must be camelCase' );
+		}
 		this.property = property;
 		this.modelClass = modelClass;
 		this.transformer = transformer;
@@ -58,7 +71,9 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 		const val = properties[ this.property ];
 		if ( val ) {
 			if ( Array.isArray( val ) ) {
-				properties[ this.property ] = val.map( ( v ) => this.transformer.fromModel( v ) );
+				properties[ this.property ] = val.map( ( v ) =>
+					this.transformer.fromModel( v )
+				);
 			} else {
 				properties[ this.property ] = this.transformer.fromModel( val );
 			}
@@ -77,9 +92,14 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 		const val = properties[ this.property ];
 		if ( val ) {
 			if ( Array.isArray( val ) ) {
-				properties[ this.property ] = val.map( ( v ) => this.transformer.toModel( this.modelClass, v ) );
+				properties[ this.property ] = val.map( ( v ) =>
+					this.transformer.toModel( this.modelClass, v )
+				);
 			} else {
-				properties[ this.property ] = this.transformer.toModel( this.modelClass, val );
+				properties[ this.property ] = this.transformer.toModel(
+					this.modelClass,
+					val
+				);
 			}
 		}
 

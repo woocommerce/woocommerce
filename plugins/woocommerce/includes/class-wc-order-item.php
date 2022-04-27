@@ -248,6 +248,17 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	*/
 
 	/**
+	 * Wrapper for get_formatted_meta_data that includes all metadata by default. See https://github.com/woocommerce/woocommerce/pull/30948
+	 *
+	 * @param string $hideprefix  Meta data prefix, (default: _).
+	 * @param bool   $include_all Include all meta data, this stop skip items with values already in the product name.
+	 * @return array
+	 */
+	public function get_all_formatted_meta_data( $hideprefix = '_', $include_all = true ) {
+		return $this->get_formatted_meta_data( $hideprefix, $include_all );
+	}
+
+	/**
 	 * Expands things like term slugs before return.
 	 *
 	 * @param string $hideprefix  Meta data prefix, (default: _).

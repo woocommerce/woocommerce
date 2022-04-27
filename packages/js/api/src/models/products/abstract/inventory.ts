@@ -1,8 +1,5 @@
 import { Model } from '../../model';
-import {
-	BackorderStatus,
-	StockStatus,
-} from '../shared';
+import { BackorderStatus, StockStatus } from '../shared';
 
 /**
  * The base for inventory products.

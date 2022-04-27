@@ -5,10 +5,10 @@ on:
 jobs:
   build:
     name: Build release asset
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Build
         id: build
         uses: woocommerce/action-build@trunk
@@ -25,7 +25,7 @@ jobs:
     if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
     name: Update Code Reference
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Invoke Code Reference build and deploy workflow
         uses: aurelien-baudet/workflow-dispatch@v2
@@ -35,3 +35,16 @@ jobs:
           token: ${{ secrets.CUSTOM_GH_TOKEN }}
           ref: refs/heads/trunk
           inputs: '{ "version": "${{ github.event.release.tag_name }}" }'
+  run-release-smoke-tests:
+    name: Execute Smoke test release
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Invoke release smoke testing workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: Smoke test release
+          repo: ${{ github.repository }}
+          token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "release_id": "${{ github.event.release.id }}" }'

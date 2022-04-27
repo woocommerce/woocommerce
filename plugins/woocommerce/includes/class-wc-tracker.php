@@ -181,15 +181,17 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_theme_info() {
-		$theme_data        = wp_get_theme();
-		$theme_child_theme = wc_bool_to_string( is_child_theme() );
-		$theme_wc_support  = wc_bool_to_string( current_theme_supports( 'woocommerce' ) );
+		$theme_data           = wp_get_theme();
+		$theme_child_theme    = wc_bool_to_string( is_child_theme() );
+		$theme_wc_support     = wc_bool_to_string( current_theme_supports( 'woocommerce' ) );
+		$theme_is_block_theme = wc_bool_to_string( wc_current_theme_is_fse_theme() );
 
 		return array(
 			'name'        => $theme_data->Name, // @phpcs:ignore
 			'version'     => $theme_data->Version, // @phpcs:ignore
 			'child_theme' => $theme_child_theme,
 			'wc_support'  => $theme_wc_support,
+			'block_theme' => $theme_is_block_theme,
 		);
 	}
 
@@ -221,6 +223,7 @@ class WC_Tracker {
 		$wp_data['version']      = get_bloginfo( 'version' );
 		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
 		$wp_data['env_type']     = $environment_type;
+		$wp_data['dropins']      = array_keys( get_dropins() );
 
 		return $wp_data;
 	}

@@ -72,7 +72,7 @@ function wc_get_attribute_taxonomies() {
 	 */
 	$raw_attribute_taxonomies = (array) array_filter( apply_filters( 'woocommerce_attribute_taxonomies', $raw_attribute_taxonomies ) );
 
-	// Index by ID for easer lookups.
+	// Index by ID for easier lookups.
 	$attribute_taxonomies = array();
 
 	foreach ( $raw_attribute_taxonomies as $result ) {
