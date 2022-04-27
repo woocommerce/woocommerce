@@ -16,10 +16,34 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pancake', 'sku' => 'pancake-1' ) );
-		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Waffle 1', 'sku' => 'pancake-2' ) );
-		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'French Toast', 'sku' => 'waffle-2' ) );
-		self::$products[] = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Waffle 3', 'sku' => 'waffle-3' ) );
+		self::$products[] = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Pancake',
+				'sku'  => 'pancake-1',
+			)
+		);
+		self::$products[] = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Waffle 1',
+				'sku'  => 'pancake-2',
+			)
+		);
+		self::$products[] = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'French Toast',
+				'sku'  => 'waffle-2',
+			)
+		);
+		self::$products[] = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Waffle 3',
+				'sku'  => 'waffle-3',
+			)
+		);
 	}
 
 	/**
