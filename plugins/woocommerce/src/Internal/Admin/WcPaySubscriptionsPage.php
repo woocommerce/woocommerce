@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 
 /**
@@ -10,10 +11,25 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayme
 class WcPaySubscriptionsPage {
 
 	/**
+	 * The WCPay Subscriptions admin page ID.
+	 *
+	 * @var string
+	 */
+	private $page_id = 'woocommerce-wcpay-subscriptions';
+
+	/**
+	 * The option key used to record when a user has viewed the WCPay Subscriptions admin page.
+	 *
+	 * @var string
+	 */
+	private $user_viewed_option = 'woocommerce-wcpay-subscriptions_page_viewed';
+
+	/**
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_subscriptions_page' ) );
+		add_action( 'current_screen', array( $this, 'record_user_page_view' ) );
 	}
 
 	/**
@@ -22,7 +38,7 @@ class WcPaySubscriptionsPage {
 	public function register_subscriptions_page() {
 		global $submenu;
 
-		// WC Payment must not be active.
+		// WC Payments must not be active.
 		if ( is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
 			return;
 		}
@@ -32,7 +48,7 @@ class WcPaySubscriptionsPage {
 		}
 
 		$menu_data = array(
-			'id'         => 'woocommerce-wcpay-subscriptions',
+			'id'         => $this->page_id,
 			'title'      => _x( 'Subscriptions', 'Admin menu name', 'woocommerce' ),
 			'parent'     => 'woocommerce',
 			'path'       => '/subscriptions',
@@ -45,17 +61,29 @@ class WcPaySubscriptionsPage {
 
 		wc_admin_register_page( $menu_data );
 
-		if ( ! isset( $submenu['woocommerce'] ) ) {
+		if ( ! isset( $submenu['woocommerce'] ) || 'yes' === get_option( $this->user_viewed_option, 'no' ) ) {
 			return;
 		}
 
 		// Add the "1" badge.
-		// TODO: remove this badge after the user has visited the "Subscriptions" page the first time.
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 'wc-admin&path=/subscriptions' === $menu_item[2] ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
+		}
+	}
+
+	/**
+	 * Registers when a user views the WCPay Subscriptions screen.
+	 *
+	 * Sets an option to prevent the notification badge from being displayed.
+	 */
+	public function record_user_page_view() {
+		$current_page = PageController::get_instance()->get_current_page();
+
+		if ( isset( $current_page['id'] ) && $current_page['id'] === $this->page_id ) {
+			update_option( $this->user_viewed_option, 'yes' );
 		}
 	}
 }
