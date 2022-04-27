@@ -91,4 +91,4 @@ jobs:
           WP_ENV_HOME="$HOME/.wp-env"
           wp-env start
           pnpm nx test-unit woocommerce || true
-          wp-env logs tests --no-watch
+          wp-env logs all --no-watch
