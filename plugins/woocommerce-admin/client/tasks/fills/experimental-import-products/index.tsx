@@ -7,7 +7,7 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import CardList from './CardList';
+import CardList from './cardList';
 import { importTypes } from './importTypes';
 
 const Products = () => {
