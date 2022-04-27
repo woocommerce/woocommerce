@@ -13,7 +13,9 @@ import { ProductType } from './constants';
 import './stack.scss';
 
 type StackProps = {
-	items: ProductType[];
+	items: ( ProductType & {
+		onClick: () => void;
+	} )[];
 };
 
 const Stack: React.FC< StackProps > = ( { items } ) => {
