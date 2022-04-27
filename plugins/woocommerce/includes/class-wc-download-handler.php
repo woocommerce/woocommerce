@@ -665,7 +665,9 @@ class WC_Download_Handler {
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.
 		 */
-		if ( ! headers_sent() ) {
+		if ( headers_sent() ) {
+			wc_get_logger()->log( 'warning', __( 'Headers already sent when generating download error message.', 'woocommerce' ) );
+		} else {
 			header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
 			header_remove( 'Content-Description;' );
 			header_remove( 'Content-Disposition' );
