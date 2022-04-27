@@ -7,6 +7,11 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
  */
 class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	/**
+	 * @var int
+	 */
+	private $admin_user;
+
+	/**
 	 * @var Download_Directories $download_directories
 	 */
 	private $download_directories;
@@ -17,10 +22,18 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	private $product;
 
 	/**
+	 * @var int
+	 */
+	private $shop_manager_user;
+
+	/**
 	 * Setup items we need repeatedly across tests in this class.
 	 */
 	public function set_up() {
+		$this->admin_user           = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->shop_manager_user    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->download_directories = wc_get_container()->get( Download_Directories::class );
+
 		$this->download_directories->set_mode( Download_Directories::MODE_ENABLED );
 		$this->download_directories->add_approved_directory( 'https://always.trusted/' );
 		$this->download_directories->add_approved_directory( 'https://new.supplier/' );
@@ -75,13 +88,10 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Confirm that when product downloads are set, the operation is successful (or else errors are raised) as appropriate.
+	 * @testdox Confirm behavior that when product downloads are set by an admin-level user.
 	 */
-	public function test_setting_of_product_downloads() {
-		$administrator = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$shop_manager  = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
-		wp_set_current_user( $administrator );
-
+	public function test_updating_of_product_downloads_by_admin_user() {
+		wp_set_current_user( $this->admin_user );
 		$downloads   = $this->product->get_downloads();
 		$downloads[] = array(
 			'id'   => '',
@@ -89,7 +99,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 			'name' => 'A file',
 		);
 
-		wp_set_current_user( $administrator );
 		$this->product->set_downloads( $downloads );
 		$this->product->save();
 		$this->assertCount(
@@ -97,29 +106,29 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 			$this->product->get_downloads(),
 			'Administrators can add new downloadable files and a matching download directory rule will automatically be generated if necessary.'
 		);
+	}
 
-		wp_set_current_user( $shop_manager );
-		$exception_thrown    = false;
-		$downloads   = $this->product->get_downloads();
-		$downloads[] = array(
+	/**
+	 * @testdox Confirm that attempts to add an invalid downloadable file to a product is rejected.
+	 */
+	public function test_addition_of_invalid_product_downloads_by_shop_manager() {
+		wp_set_current_user( $this->shop_manager_user );
+		$downloads        = $this->product->get_downloads();
+		$downloads[]      = array(
 			'id'   => '',
 			'file' => 'https://also.not.yet.added/file.pdf',
 			'name' => 'Another file',
 		);
 
-		try {
-			$this->product->set_downloads( $downloads );
-			$this->product->save();
-		} catch ( WC_Data_Exception $e ) {
-			$exception_thrown = true;
-		}
+		$this->expectException( WC_Data_Exception::class );
+		$this->product->set_downloads( $downloads );
+		$this->product->save();
+	}
 
-		$this->assertTrue(
-			$exception_thrown,
-			'If a shop manager attempts to add a new downloadable file (not covered by an approved directory rule) an error is generated.'
-		);
-
-		$exception_thrown                = false;
+	/**
+	 * @testdox Confirm that attempts to update a downloadable file to an invalid path is rejected.
+	 */
+	public function test_invalid_update_of_product_downloads_by_shop_manager() {
 		$downloads                       = $this->product->get_downloads();
 		$existing_file_key               = key( $downloads );
 		$downloads[ $existing_file_key ] = array(
@@ -128,19 +137,17 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 			'name' => 'Yet another file',
 		);
 
-		try {
-			$this->product->set_downloads( $downloads );
-			$this->product->save();
-		} catch ( WC_Data_Exception $e ) {
-			$exception_thrown = true;
-		}
+		$this->expectException( WC_Data_Exception::class );
+		$this->product->set_downloads( $downloads );
+		$this->product->save();
+	}
 
-		$this->assertTrue(
-			$exception_thrown,
-			'If a shop manager attempts to change an existing downloadable file to a new path (not covered by an approved directory rule) an error is generated.'
-		);
-
+	/**
+	 * @testdox Confirm that attempts to update a downloadable file to a different but valid path works as expected.
+	 */
+	public function test_valid_update_of_product_downloads_by_shop_manager() {
 		$downloads                       = $this->product->get_downloads();
+		$existing_file_key               = key( $downloads );
 		$downloads[ $existing_file_key ] = array(
 			'id'   => $existing_file_key,
 			'file' => 'https://always.trusted/why-we-test-code.pdf',
@@ -151,7 +158,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->product->save();
 
 		$this->assertCount(
-			4,
+			3,
 			$this->product->get_downloads(),
 			'If a shop manager attempts to change an existing downloadable file to a valid path (that is covered by an approved directory rule) that is okay.'
 		);
