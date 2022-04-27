@@ -5,7 +5,7 @@ on:
 jobs:
     login-run:
         name: Daily smoke test on trunk.
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         steps:
             - name: Create dirs.
               run: |
@@ -54,7 +54,7 @@ jobs:
 
     build:
         name: Build zip for PR
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -76,7 +76,7 @@ jobs:
 
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         needs: [build]
         strategy:
             fail-fast: false

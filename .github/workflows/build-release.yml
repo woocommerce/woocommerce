@@ -5,7 +5,7 @@ on:
 jobs:
   build:
     name: Build release asset
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
     if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
     name: Update Code Reference
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Invoke Code Reference build and deploy workflow
         uses: aurelien-baudet/workflow-dispatch@v2
@@ -38,7 +38,7 @@ jobs:
   run-release-smoke-tests:
     name: Execute Smoke test release
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Invoke release smoke testing workflow
         uses: aurelien-baudet/workflow-dispatch@v2
