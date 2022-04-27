@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.9
 Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 7.5.0-dev
+Stable tag: 7.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -85,6 +85,48 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 7.5.0 - 2022-04-25 =
+
+#### Enhancements
+
+- Add PHP templates support to the Active Product Filters block. ([6295](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6295))
+- Enable Draft orders in WooCommerce Core. ([6288](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6288))
+- Enhanced the *Featured Category block*:
+	- Implemented support for duotone.
+	- Implemented support for gradients on the overlay.
+	- Implemented support for custom inner padding.
+	- Implemented image fit options: users can now decide how should the image behave on the resizing of the component; it can either scale to always cover the entire container, or remain its original size.
+	- Fixed an inconsistency where the overlay color was controlled by the background color control. It is now moved to the correct section.
+	- Fixed the focal point picker, it now works on both axis as long as the image fit (above) is set to `none`.
+	- Fixed an issue with the visibility of the resizing handle.
+	- Fixed an issue which would keep the resizing handle always active regardless of block selection status.
+	- Changed the behavior of the resizing: The block can't be resized below a minimum height determined by its content plus the padding. ([6276](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6276))
+- Allow adding the Filter Products by Stock block to Product Catalog templates to filter products. ([6261](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6261))
+- Enhanced the *Featured Product block*:
+	- Implemented support for duotone.
+	- Implemented support for gradients on the overlay.
+	- Implemented support for custom inner padding.
+	- Implemented image fit options: users can now decide how should the image behave on the resizing of the component; it can either scale to always cover the entire container, or remain its original size.
+	- Fixed an inconsistency where the overlay color was controlled by the background color control. It is now moved to the correct section.
+	- Fixed the focal point picker, it now works on both axis as long as the image fit (above) is set to `none`.
+	- Fixed an issue with the visibility of the resizing handle.
+	- Fixed an issue which would keep the resizing handle always active regardless of block selection status.
+	- Changed the behavior of the resizing: The block can't be resized below a minimum height determined by its content plus the padding. ([6181](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6181))
+- Allow saved payment methods labels other than card/eCheck to display brand & last 4 digits if present. ([6177](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6177))
+
+#### Bug Fixes
+
+- Filter Products by Attribute: Fix the page reload which happens when clicking the filter button on Woo templates using the Classic Template block. ([6287](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6287))
+- Store API: Show visible attributes in simple products, and hidden attributes in variable products. ([6274](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6274))
+- Add RTL support for the Mini Cart icon. ([6264](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6264))
+- Fix page load problem due to incorrect URL to certain assets. ([6260](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6260))
+- Fix: Make Filters Products by Price work with Active Filters block for the PHP rendered Classic Template. ([6245](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6245))
+
+#### Various
+
+- Product Query: Pass any product taxonomies existing in the URL parameters. ([6152](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6152))
+
 
 = 7.4.2 - 2022-04-15 =
 
