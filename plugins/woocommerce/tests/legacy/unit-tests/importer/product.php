@@ -174,10 +174,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_server_file() {
-		self::file_copy( $this->csv_file, ABSPATH . 'sample.csv' );
-		$_POST['file_url'] = 'sample.csv';
+		$uploads = wp_upload_dir();
+
+		self::file_copy( $this->csv_file, $uploads['basedir'] . '/sample.csv' );
+		$_POST['file_url'] = str_replace( ABSPATH, '', $uploads['basedir'] ) . '/sample.csv';
 		$import_controller = new WC_Product_CSV_Importer_Controller();
-		$this->assertEquals( ABSPATH . 'sample.csv', $import_controller->handle_upload() );
+
+		$this->assertEquals( $uploads['basedir'] . '/sample.csv', $import_controller->handle_upload() );
 	}
 
 	/**
