@@ -59,7 +59,6 @@ jobs:
     api-tests-run:
         name: Runs API tests.
         runs-on: ubuntu-20.04
-        needs: [build]
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
@@ -162,7 +161,7 @@ jobs:
         name: Publish test reports
         if: ${{ always() }}
         runs-on: ubuntu-18.04
-        needs: [build, api-tests-run, e2e-tests-run, k6-tests-run]
+        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             PR_NUMBER: ${{ github.event.number }}
