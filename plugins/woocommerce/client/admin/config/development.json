@@ -5,6 +5,7 @@
 		"coupons": true,
 		"customer-effort-score-tracks": true,
 		"experimental-products-task": false,
+		"experimental-import-products-task": false,
 		"homescreen": true,
 		"marketing": true,
 		"minified-js": true,
