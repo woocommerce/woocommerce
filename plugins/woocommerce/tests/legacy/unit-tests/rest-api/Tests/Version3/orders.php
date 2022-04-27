@@ -657,7 +657,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'sku'          => null,
 			'price'        => 4,
 			'parent_name'  => null,
-			'image_src'    => null,
+			'image'        => array(
+				'id'  => '',
+				'src' => '',
+			),
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
