@@ -10,6 +10,7 @@
 		grid-row-gap: 24px;
 		justify-content: start;
 	}
+	display: inline-block;
 
 	.woocommerce-list__item {
 		float: left;
@@ -31,7 +32,7 @@
 			justify-content: center;
 		}
 
-		&:not(.transitions-disabled) {
+		&:not( .transitions-disabled ) {
 			&.woocommerce-list__item-enter {
 				transform: none;
 				transition: none;
