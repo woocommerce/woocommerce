@@ -27,6 +27,10 @@ describe( 'getSurfacedProductKeys', () => {
 			expected: onboardingProductTypesToSurfaced[ 'downloads,physical' ],
 		},
 		{
+			selectedTypes: [ 'physical', 'downloads', 'membership', 'booking' ],
+			expected: onboardingProductTypesToSurfaced[ 'downloads,physical' ],
+		},
+		{
 			selectedTypes: [],
 			expected: productTypes.map( ( p ) => p.key ),
 		},

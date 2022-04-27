@@ -104,3 +104,9 @@ export const onboardingProductTypesToSurfaced: Readonly<
 		'subscription',
 	],
 } );
+
+export const supportedOnboardingProductTypes = [
+	'physical',
+	'subscriptions',
+	'downloads',
+];

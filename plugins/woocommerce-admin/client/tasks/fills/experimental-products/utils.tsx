@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { intersection } from 'lodash';
+
+/**
  * Internal dependencies
  */
 import {
@@ -6,6 +11,7 @@ import {
 	ProductType,
 	ProductTypeKey,
 	onboardingProductTypesToSurfaced,
+	supportedOnboardingProductTypes,
 } from './constants';
 
 export const getProductTypes = (
@@ -20,7 +26,11 @@ export const getProductTypes = (
  * Return all product types if onboarding product types is empty.
  */
 export const getSurfacedProductKeys = ( onboardingProductTypes: string[] ) => {
-	const sortedKeyStr = onboardingProductTypes.sort().join( ',' );
+	const validOnboardingProductTypes = intersection(
+		onboardingProductTypes,
+		supportedOnboardingProductTypes
+	);
+	const sortedKeyStr = validOnboardingProductTypes.sort().join( ',' );
 	if ( ! onboardingProductTypesToSurfaced.hasOwnProperty( sortedKeyStr ) ) {
 		return productTypes.map( ( p ) => p.key );
 	}

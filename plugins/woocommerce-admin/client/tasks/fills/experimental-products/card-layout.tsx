@@ -11,7 +11,7 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { ProductType } from './constants';
-import CardList from '../experimental-import-products/cardList';
+import CardList from '../experimental-import-products/CardList';
 import './card-layout.scss';
 
 type CardProps = {
