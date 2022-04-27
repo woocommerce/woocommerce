@@ -12,7 +12,6 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
               uses: actions/checkout@v3
@@ -59,11 +58,11 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
-            - name: Build
-              id: build
-              uses: woocommerce/action-build@trunk
-              env:
-                  BUILD_ENV: e2e
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Build zip
+              run: pnpm nx build-zip woocommerce
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v3
@@ -71,7 +70,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   name: woocommerce
-                  path: ${{ steps.build.outputs.zip_path }}
+                  path: plugins/woocommerce/woocommerce.zip
                   retention-days: 7
 
     test-plugins:
@@ -101,10 +100,9 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
 
