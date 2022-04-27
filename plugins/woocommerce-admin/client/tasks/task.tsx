@@ -35,6 +35,11 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		}
 
 		const currentBadgeCount = Number( badgeElement.innerText );
+
+		if ( currentBadgeCount === 1 ) {
+			badgeElement.remove();
+		}
+
 		badgeElement.innerHTML = String( currentBadgeCount - 1 );
 	}, [] );
 

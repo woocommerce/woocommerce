@@ -497,7 +497,7 @@ class TaskLists {
 
 		$tasks_count = self::setup_tasks_remaining();
 
-		if( !$tasks_count ) {
+		if( ! $tasks_count ) {
 			return;
 		}
 

@@ -190,6 +190,7 @@ class CoreMenu {
 		}
 
 		$home_item = array();
+		$setup_tasks_remaining = TaskLists::setup_tasks_remaining();
 		if ( defined( '\Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG' ) ) {
 			$home_item = array(
 				'id'              => 'woocommerce-home',
@@ -197,7 +198,7 @@ class CoreMenu {
 				'url'             => \Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG,
 				'order'           => 0,
 				'matchExpression' => 'page=wc-admin((?!path=).)*$',
-				'badge'           => TaskLists::setup_tasks_remaining(),
+				'badge'           => $setup_tasks_remaining ? $setup_tasks_remaining : null,
 			);
 		}
 
