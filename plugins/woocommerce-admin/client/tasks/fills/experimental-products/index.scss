@@ -1,8 +1,7 @@
 .woocommerce-task-products {
 	display: flex;
 	flex-direction: column;
-	max-width: 550px;
-	margin: auto;
+	align-items: center;
 
 	a {
 		text-decoration: none;
@@ -45,6 +44,25 @@
 		font-size: 11px;
 		line-height: 16px;
 		margin-bottom: 8px;
+	}
+
+	.woocommerce-products-stack {
+		max-width: 550px;
+	}
+
+	.woocommerce-products-card-list {
+		.woocommerce-list {
+			grid-template-columns: 215px 215px 215px;
+		}
+
+		.woocommerce-list__item {
+			width: 215px;
+			height: 200px;
+		}
+
+		.woocommerce-list__item-after {
+			opacity: 0;
+		}
 	}
 }
 
