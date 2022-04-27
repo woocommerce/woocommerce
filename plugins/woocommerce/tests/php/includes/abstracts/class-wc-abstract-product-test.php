@@ -88,7 +88,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Confirm behavior that when product downloads are set by an admin-level user.
+	 * @testdox Confirm admin-level users can update product downloads, even if the new path is initially unapproved.
 	 */
 	public function test_updating_of_product_downloads_by_admin_user() {
 		wp_set_current_user( $this->admin_user );
@@ -109,7 +109,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Confirm that attempts to add an invalid downloadable file to a product is rejected.
+	 * @testdox Confirm that attempts (by a shop manager) to add an invalid downloadable file to a product are rejected.
 	 */
 	public function test_addition_of_invalid_product_downloads_by_shop_manager() {
 		wp_set_current_user( $this->shop_manager_user );
@@ -126,7 +126,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Confirm that attempts to update a downloadable file to an invalid path is rejected.
+	 * @testdox Confirm that attempts (by a shop manager) to update a downloadable file to an invalid path are rejected.
 	 */
 	public function test_invalid_update_of_product_downloads_by_shop_manager() {
 		$downloads                       = $this->product->get_downloads();
@@ -143,7 +143,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Confirm that attempts to update a downloadable file to a different but valid path works as expected.
+	 * @testdox Confirm that attempts (by a shop manager) to update a downloadable file to a different but valid path work as expected.
 	 */
 	public function test_valid_update_of_product_downloads_by_shop_manager() {
 		$downloads                       = $this->product->get_downloads();
