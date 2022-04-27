@@ -93,7 +93,7 @@
 			"phpcbf -p"
 		],
 		"makepot-audit": [
-			"wp i18n make-pot . i18n/languages/woocommerce.pot --allow-root --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests,assets,vendor\" --slug=woocommerce"
+			"wp i18n make-pot . i18n/languages/woocommerce.pot --allow-root --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests,assets,packages,vendor\" --slug=woocommerce"
 		],
 		"makepot": [
 			"@makepot-audit --skip-audit"
