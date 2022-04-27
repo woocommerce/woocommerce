@@ -89,7 +89,7 @@ jobs:
             - name: Run tests command.
               working-directory: plugins/woocommerce
               env:
-                  BASE_URL: http://localhost:8084
+                  BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
               run: pnpm exec wc-api-tests test api
