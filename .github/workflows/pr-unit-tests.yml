@@ -89,5 +89,6 @@ jobs:
           cd plugins/woocommerce
           npm -g install @wordpress/env
           wp-env start
+          wp-env run tests-wordpress "chmod 755 wp-content wp-content/plugins wp-content/uploads"
           pnpm nx test-unit woocommerce
           wp-env logs tests --no-watch
