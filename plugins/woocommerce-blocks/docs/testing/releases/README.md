@@ -69,6 +69,7 @@ Every release includes specific testing instructions for new features and bug fi
 -   [7.4.0](./740.md)
     -   [7.4.1](./741.md)
     -   [7.4.2](./742.md)
+-   [7.5.0](./750.md)
 
 <!-- FEEDBACK -->
 ---
