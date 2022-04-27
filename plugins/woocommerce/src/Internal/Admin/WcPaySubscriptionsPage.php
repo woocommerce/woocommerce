@@ -30,6 +30,9 @@ class WcPaySubscriptionsPage {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_subscriptions_page' ) );
 		add_action( 'current_screen', array( $this, 'record_user_page_view' ) );
+
+		// Priority 50 to run after Automattic\WooCommerce\Internal\Admin\Homescreen::update_link_structure() which runs on 20.
+		add_action( 'admin_menu', array( $this, 'restructure_menu_order' ), 50 );
 	}
 
 	/**
@@ -53,10 +56,6 @@ class WcPaySubscriptionsPage {
 			'parent'     => 'woocommerce',
 			'path'       => '/subscriptions',
 			'capability' => 'manage_options',
-			'nav_args' => [
-				'order'  => 10, // TODO: this menu item should appear below the "Orders" menu item.
-				'parent' => 'woocommerce',
-			],
 		);
 
 		wc_admin_register_page( $menu_data );
@@ -84,6 +83,38 @@ class WcPaySubscriptionsPage {
 
 		if ( isset( $current_page['id'] ) && $current_page['id'] === $this->page_id ) {
 			update_option( $this->user_viewed_option, 'yes' );
+		}
+	}
+
+	/**
+	 * Reorders the default WC admin menu items to ensure the Subscriptions item comes after orders.
+	 *
+	 * @see Automattic\WooCommerce\Internal\Admin\Homescreen::update_link_structure() which this approach is based on.
+	 */
+	public function restructure_menu_order() {
+		global $submenu;
+		$wc_admin_menu           = array();
+		$subscriptions_menu_item = null;
+
+		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+			$wc_admin_menu[ $key ] = $menu_item;
+
+			// Add a placeholder element for the Subscriptions item after the Orders element. We'll replace it later.
+			if ( 'edit.php?post_type=shop_order' === $menu_item[2] ) {
+				$wc_admin_menu['wcpay-subscriptions'] = 'wcpay-subscriptions';
+			}
+
+			// Keep a record of the subscriptions item and remove it from its current place in the menu.
+			if ( 'wc-admin&path=/subscriptions' === $menu_item[2] ) {
+				$subscriptions_menu_item = $menu_item;
+				unset( $wc_admin_menu[ $key ] );
+			}
+		}
+
+		// Replace the placeholder element with the subscription menu item.
+		if ( isset( $wc_admin_menu['wcpay-subscriptions'] ) && $subscriptions_menu_item ) {
+			$wc_admin_menu['wcpay-subscriptions'] = $subscriptions_menu_item;
+			$submenu['woocommerce']               = array_values( $wc_admin_menu ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 }
