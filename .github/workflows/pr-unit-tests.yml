@@ -88,7 +88,6 @@ jobs:
         run: |
           cd plugins/woocommerce
           npm -g install @wordpress/env
-          WP_ENV_HOME="$HOME/.wp-env"
           wp-env start
-          pnpm nx test-unit woocommerce || true
-          wp-env logs all --no-watch
+          pnpm nx test-unit woocommerce
+          wp-env logs tests --no-watch
