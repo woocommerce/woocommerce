@@ -17,8 +17,19 @@ jobs:
         with:
           ref: ${{ matrix.build }}
 
+      - name: Cache modules
+        uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.pnpm-store
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Install PNPM
         run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Build zip
         run: pnpm nx build-zip woocommerce
