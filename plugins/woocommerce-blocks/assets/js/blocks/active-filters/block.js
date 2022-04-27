@@ -203,6 +203,16 @@ const ActiveFiltersBlock = ( {
 	}
 
 	const TagName = `h${ blockAttributes.headingLevel }`;
+	const hasFilterableProducts = getSettingWithCoercion(
+		'has_filterable_products',
+		false,
+		isBoolean
+	);
+
+	if ( ! hasFilterableProducts ) {
+		return null;
+	}
+
 	const listClasses = classnames( 'wc-block-active-filters__list', {
 		'wc-block-active-filters__list--chips':
 			blockAttributes.displayStyle === 'chips',
