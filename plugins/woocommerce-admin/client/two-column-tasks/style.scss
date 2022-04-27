@@ -96,6 +96,12 @@
 	}
 }
 
+.two-columns .woocommerce-task-dashboard__container.two-column-experiment {
+	.svg-background {
+		top: 15%;
+	}
+}
+
 .woocommerce-task-dashboard__container.two-column-experiment {
 	max-width: 1032px;
 	display: flex;
@@ -130,12 +136,19 @@
 		}
 
 		.woocommerce-task-header__contents {
-			max-width: calc(60% - 2%);
+			@include breakpoint( '<782px') {
+				max-width: 380px;
+			}
+			@include breakpoint('<600px') {
+				max-width: 100%;
+			}
+
+			max-width: 65%;
 		}
 
 		.svg-background {
-			right: 2%;
-			width: 40%;
+			right: 6%;
+			width: 25%;
 		}
 	}
 
@@ -264,6 +277,10 @@
 			color: $gray-600;
 		}
 
+		p:first-of-type {
+			margin-top: $gap-smallest;
+		}
+
 		// This is required in order to have svg image as background.
 		position: relative;
 		z-index: 1;
@@ -273,6 +290,7 @@
 		display: flex;
 		align-items: center;
 		line-height: 22px;
+		margin-bottom: 0;
 		img {
 			margin-right: 6px;
 		}

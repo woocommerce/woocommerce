@@ -33,6 +33,10 @@
 			.components-panel__arrow {
 				right: $gap-large;
 			}
+
+			.woocommerce-task-header__contents p:first-of-type {
+				margin-top: $gap-small;
+			}
 		}
 		.wooocommerce-task-card__header-container {
 			width: 100%;
