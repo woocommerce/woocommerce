@@ -14,7 +14,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets",
+    "build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets && pnpm nx makepot woocommerce",
     "build:feature-config": "php bin/generate-feature-config.php",
     "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
@@ -27,7 +27,7 @@
     "test:e2e-debug": "pnpm exec wc-e2e test:e2e-debug",
     "test:e2e-dev": "pnpm exec wc-e2e test:e2e-dev",
     "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
-    "makepot": "composer run-script makepot",
+    "makepot": "composer run makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
   },
   "devDependencies": {
