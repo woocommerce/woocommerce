@@ -5,7 +5,7 @@ on:
 
 jobs:
   ping_site:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Check site and notify if not found
     steps:
     - name: Check site status

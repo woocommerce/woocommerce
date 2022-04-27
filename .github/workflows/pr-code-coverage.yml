@@ -11,7 +11,7 @@ jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
     timeout-minutes: 20
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     services:
       database:
         image: mysql:5.6

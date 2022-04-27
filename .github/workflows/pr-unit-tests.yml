@@ -12,7 +12,7 @@ jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     timeout-minutes: 20
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false

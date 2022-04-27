@@ -7,7 +7,7 @@ concurrency:
 jobs:
     build:
         name: Build zip for PR
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -29,7 +29,7 @@ jobs:
 
     e2e-tests-run:
         name: Runs E2E tests.
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         needs: [build]
         steps:
             - name: Create dirs.
@@ -95,7 +95,7 @@ jobs:
 
     api-tests-run:
         name: Runs API tests.
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         needs: [build]
         steps:
             - name: Create dirs.
@@ -161,7 +161,7 @@ jobs:
 
     k6-tests-run:
         name: Runs k6 Performance tests
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
         needs: [build]
         steps:
             - name: Create dirs.
