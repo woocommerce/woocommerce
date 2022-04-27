@@ -6,7 +6,13 @@ import ProductIcon from 'gridicons/dist/product';
 import CloudOutlineIcon from 'gridicons/dist/cloud-outline';
 import TypesIcon from 'gridicons/dist/types';
 import CalendarIcon from 'gridicons/dist/calendar';
-import { Icon, chevronRight, widget, link } from '@wordpress/icons';
+import { Icon, chevronRight } from '@wordpress/icons';
+
+/**
+ * Internal dependencies
+ */
+import Link from './icon/link_24px.svg';
+import Widget from './icon/widgets_24px.svg';
 
 export const productTypes = Object.freeze( [
 	{
@@ -53,14 +59,14 @@ export const productTypes = Object.freeze( [
 		key: 'grouped' as const,
 		title: __( 'Grouped product', 'woocommerce' ),
 		content: __( 'A collection of related products.', 'woocommerce' ),
-		before: <Icon icon={ widget } />,
+		before: <img src={ Widget } alt="Widget" />,
 		after: <Icon icon={ chevronRight } />,
 	},
 	{
 		key: 'external' as const,
 		title: __( 'External product', 'woocommerce' ),
 		content: __( 'Link a product to an external website.', 'woocommerce' ),
-		before: <Icon icon={ link } />,
+		before: <img src={ Link } alt="Link" />,
 		after: <Icon icon={ chevronRight } />,
 	},
 ] );
