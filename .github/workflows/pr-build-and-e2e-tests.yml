@@ -1,4 +1,4 @@
-name: Build zip for PR
+name: Run tests against PR
 on: pull_request
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,10 +14,13 @@ jobs:
 
             - name: Cache modules
               uses: actions/cache@v3
+              id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  package/woocommerce/plugins/woocommerce/packages
+                  package/woocommerce/plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-test-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
@@ -26,7 +29,8 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
-              run: pnpm nx composer-install woocommerce
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Run build
               run: pnpm nx build woocommerce
@@ -83,7 +87,7 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               env:
                   BASE_URL: http://localhost:8084
                   USER_KEY: admin
@@ -95,8 +99,8 @@ jobs:
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                      package/woocommerce/packages/js/api-core-tests/allure-results
-                      package/woocommerce/packages/js/api-core-tests/allure-report
+                      packages/js/api-core-tests/allure-results
+                      packages/js/api-core-tests/allure-report
                   retention-days: 7
 
     k6-tests-run:
