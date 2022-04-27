@@ -27,7 +27,7 @@
     "test:e2e-debug": "pnpm exec wc-e2e test:e2e-debug",
     "test:e2e-dev": "pnpm exec wc-e2e test:e2e-dev",
     "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
-    "makepot": "composer run makepot",
+    "makepot": "composer run-script makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
   },
   "devDependencies": {
