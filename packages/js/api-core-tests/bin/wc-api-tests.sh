@@ -38,7 +38,7 @@ report() {
 	if [[ $REPORT_EXIT_CODE -eq 0 && $GITHUB_ACTIONS != "true" ]]; then
 		echo "To view the report on your browser, run:"
 		echo ""
-		echo "pnpx allure open \"$ALLURE_REPORT_DIR\""
+		echo "pnpm dlx allure open \"$ALLURE_REPORT_DIR\""
 		echo ""
 	fi
 }

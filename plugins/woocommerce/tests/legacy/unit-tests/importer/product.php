@@ -35,11 +35,14 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
-		$this->sut = new WC_Product_CSV_Importer( $this->csv_file, array(
-			'mapping'          => $this->get_csv_mapped_items(),
-			'parse'            => true,
-			'prevent_timeouts' => false,
-		) );
+		$this->sut = new WC_Product_CSV_Importer(
+			$this->csv_file,
+			array(
+				'mapping'          => $this->get_csv_mapped_items(),
+				'parse'            => true,
+				'prevent_timeouts' => false,
+			)
+		);
 	}
 
 	/**
@@ -112,7 +115,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['skipped'] ) );
 		$this->assertEquals(
 			7,
-			count( $results['imported'] ) ,
+			count( $results['imported'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by an admin user, that location will be automatically approved.'
 		);
 	}

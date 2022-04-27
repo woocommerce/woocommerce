@@ -47,7 +47,7 @@ class UnminifyWebpackPlugin {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'UnminifyWebpackPlugin',
-						stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+						stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
 					},
 					( assets ) => {
 						Object.entries( assets ).forEach(

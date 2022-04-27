@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
+import { TaskType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -64,20 +65,26 @@ jest.mock( '@woocommerce/experimental', () => {
 	};
 } );
 
-const task = {
+const task: TaskType = {
 	id: 'optional',
 	title: 'This task is optional',
 	isComplete: false,
-	visible: true,
 	time: '1 minute',
 	isDismissable: true,
 	isSnoozeable: true,
-	type: 'setup',
-	action: 'CTA (optional)',
 	content: 'This is the optional task content',
 	additionalInfo: 'This is the task additional info',
-	expandable: true,
-	expanded: true,
+	parentId: '',
+	isDismissed: false,
+	isSnoozed: false,
+	isVisible: true,
+	isDisabled: false,
+	snoozedUntil: 0,
+	isVisited: false,
+	canView: true,
+	isActioned: false,
+	eventPrefix: '',
+	level: 0,
 };
 
 describe( 'TaskListItem', () => {

@@ -25,12 +25,9 @@ Closes # .
 * [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 * [ ] Have you written new tests for your changes, as applicable?
 * [ ] Have you successfully run tests with your changes locally?
+* [ ] Have you created a changelog file by running `pnpm nx affected --target=changelog`?
 
 <!-- Mark completed items with an [x] -->
-
-### Changelog entry
-
-> Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted.
 
 ### FOR PR REVIEWER ONLY:
 

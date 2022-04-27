@@ -6,7 +6,13 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
 import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	WCDataSelector,
+	TaskListType,
+	TaskType,
+} from '@woocommerce/data';
 import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -17,20 +23,24 @@ import { DisplayOption } from '~/activity-panel/display-options';
 import { Task } from './task';
 import { TasksPlaceholder, TasksPlaceholderProps } from './placeholder';
 import './tasks.scss';
-import { TaskListProps, TaskList } from './task-list';
+import { TaskList } from './task-list';
 import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
+import { SectionedTaskList } from '../two-column-tasks/sectioned-task-list';
 import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-list-placeholder';
 
 export type TasksProps = {
 	query: { task?: string };
 };
 
-function getTaskListComponent( taskListId: string ): React.FC< TaskListProps > {
+function getTaskListComponent( taskListId: string ) {
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
 			return TwoColumnTaskList;
+		case 'setup_experiment_2':
+			return SectionedTaskList;
 		default:
 			return TaskList;
 	}
@@ -42,6 +52,8 @@ function getTaskListPlaceholderComponent(
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
 			return TwoColumnTaskListPlaceholder;
+		case 'setup_experiment_2':
+			return SectionedTaskListPlaceholder;
 		default:
 			return TasksPlaceholder;
 	}
@@ -55,14 +67,16 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		'woocommerce_tasklist_progression'
 	);
 
-	const { isResolving, taskLists } = useSelect( ( select ) => {
-		return {
-			isResolving: ! select(
-				ONBOARDING_STORE_NAME
-			).hasFinishedResolution( 'getTaskLists' ),
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-		};
-	} );
+	const { isResolving, taskLists } = useSelect(
+		( select: WCDataSelector ) => {
+			return {
+				isResolving: ! select(
+					ONBOARDING_STORE_NAME
+				).hasFinishedResolution( 'getTaskLists' ),
+				taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+			};
+		}
+	);
 
 	const getCurrentTask = () => {
 		if ( ! task ) {
@@ -70,11 +84,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		}
 
 		const tasks = taskLists.reduce(
-			( acc, taskList ) => [ ...acc, ...taskList.tasks ],
+			( acc: TaskType[], taskList: TaskListType ) => [
+				...acc,
+				...taskList.tasks,
+			],
 			[]
 		);
 
-		const currentTask = tasks.find( ( t ) => t.id === task );
+		const currentTask = tasks.find( ( t: TaskType ) => t.id === task );
 
 		if ( ! currentTask ) {
 			return null;
@@ -83,7 +100,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return currentTask;
 	};
 
-	const toggleTaskList = ( taskList ) => {
+	const toggleTaskList = ( taskList: TaskListType ) => {
 		const { id, eventPrefix, isHidden } = taskList;
 		const newValue = ! isHidden;
 
@@ -131,12 +148,12 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	}
 
 	return taskLists
-		.filter( ( { id } ) =>
+		.filter( ( { id }: TaskListType ) =>
 			experimentAssignment?.variationName === 'treatment'
 				? id.endsWith( 'two_column' )
 				: ! id.endsWith( 'two_column' )
 		)
-		.map( ( taskList ) => {
+		.map( ( taskList: TaskListType ) => {
 			const { id, isHidden, isVisible, isToggleable } = taskList;
 
 			if ( ! isVisible ) {
@@ -144,7 +161,6 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 			}
 
 			const TaskListComponent = getTaskListComponent( id );
-
 			return (
 				<Fragment key={ id }>
 					<TaskListComponent
@@ -163,7 +179,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 							>
 								<MenuItem
 									className="woocommerce-layout__homescreen-extension-tasklist-toggle"
-									icon={ ! isHidden && check }
+									icon={ isHidden ? undefined : check }
 									isSelected={ ! isHidden }
 									role="menuitemcheckbox"
 									onClick={ () => toggleTaskList( taskList ) }

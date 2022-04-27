@@ -16,10 +16,14 @@ import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
+	getVisibleTasks,
+	WCDataSelector,
+	TaskListType,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
 import classnames from 'classnames';
+import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -28,24 +32,33 @@ import '../tasks/task-list.scss';
 import taskHeaders from './task-headers';
 import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
-import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
+
+export type TaskListProps = TaskListType & {
+	eventName?: string;
+	twoColumns?: boolean;
+	query: {
+		task?: string;
+	};
+};
 
 export const TaskList: React.FC< TaskListProps > = ( {
 	query,
 	id,
 	eventName,
+	eventPrefix,
 	tasks,
 	twoColumns,
 	keepCompletedTaskList,
 	isComplete,
 	displayProgressHeader,
 } ) => {
+	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
 		OPTIONS_STORE_NAME
 	);
-	const { profileItems } = useSelect( ( select ) => {
+	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),
@@ -63,19 +76,13 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	const prevQueryRef = useRef( query );
 
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
-
+	const visibleTasks = getVisibleTasks( tasks );
 	const recordTaskListView = () => {
 		if ( query.task ) {
 			return;
 		}
 
-		recordEvent( `${ eventName }_view`, {
+		recordEvent( `${ listEventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
@@ -194,7 +201,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const trackClick = ( task: TaskType ) => {
-		recordEvent( `${ eventName }_click`, {
+		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
 		} );
 	};
@@ -206,9 +213,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 		if ( task.actionUrl ) {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
+				window.location.href = task.actionUrl;
 			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+				( getHistory() as History ).push(
+					getNewPath( {}, task.actionUrl, {} )
+				);
 			}
 			return;
 		}

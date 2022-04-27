@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	useSelect,
+	useDispatch,
+	select as wpDataSelect,
+} from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -14,6 +18,8 @@ import { getAdminLink } from '@woocommerce/settings';
 import { close as closeIcon } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { useEffect } from '@wordpress/element';
+import { getQuery } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -27,12 +33,20 @@ type ReminderBarProps = {
 };
 
 type ReminderTextProps = {
-	remainingCount: number;
+	remainingCount: number | null;
+	tracksProps: {
+		completed: number;
+		is_homescreen: boolean;
+		is_active_task_page: boolean;
+	};
 };
 
 const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
 
-const ReminderText: React.FC< ReminderTextProps > = ( { remainingCount } ) => {
+const ReminderText: React.FC< ReminderTextProps > = ( {
+	remainingCount,
+	tracksProps,
+} ) => {
 	const translationText =
 		remainingCount === 1
 			? /* translators: 1: remaining tasks count */
@@ -55,8 +69,16 @@ const ReminderText: React.FC< ReminderTextProps > = ( { remainingCount } ) => {
 					setupLink: (
 						<Link
 							href={ getAdminLink( 'admin.php?page=wc-admin' ) }
+							onClick={ () =>
+								recordEvent(
+									'tasklist_reminder_bar_continue',
+									tracksProps
+								)
+							}
 							type="wp-admin"
-						/>
+						>
+							<></>
+						</Link>
 					),
 				},
 			} ) }
@@ -66,7 +88,6 @@ const ReminderText: React.FC< ReminderTextProps > = ( { remainingCount } ) => {
 
 export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 	taskListId = 'setup_experiment_1',
-	pageTitle,
 	updateBodyMargin,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -77,7 +98,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		taskListComplete,
 		reminderBarHidden,
 		completedTasksCount,
-	} = useSelect( ( select ) => {
+	} = useSelect( ( select: typeof wpDataSelect ) => {
 		const {
 			getTaskList,
 			hasFinishedResolution: onboardingHasFinishedResolution,
@@ -119,34 +140,56 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		};
 	} );
 
-	const hideReminderBar =
+	const query = getQuery() as { [ key: string ]: string };
+	const isHomescreen =
+		query.page && query.page === 'wc-admin' && ! query.path;
+	const isActiveTaskPage = Boolean( query.wc_onboarding_active_task );
+
+	const isHidden =
 		loading ||
 		taskListHidden ||
 		taskListComplete ||
 		reminderBarHidden ||
 		completedTasksCount === 0 ||
-		[ 'Home', 'Shipping', 'Tax', 'Payments' ].includes( pageTitle );
+		isHomescreen ||
+		isActiveTaskPage;
 
 	useEffect( () => {
 		updateBodyMargin();
-	}, [ hideReminderBar, updateBodyMargin ] );
+	}, [ isHidden, updateBodyMargin ] );
 
-	if ( hideReminderBar ) {
+	const tracksProps = {
+		completed: completedTasksCount,
+		is_homescreen: !! isHomescreen,
+		is_active_task_page: isActiveTaskPage,
+	};
+
+	useEffect( () => {
+		if ( loading || isHidden ) {
+			return;
+		}
+
+		recordEvent( 'tasklist_reminder_bar_view', tracksProps );
+	}, [ isHidden, loading ] );
+
+	const onClose = () => {
+		updateOptions( {
+			[ REMINDER_BAR_HIDDEN_OPTION ]: 'yes',
+		} );
+		recordEvent( 'tasklist_reminder_bar_close', tracksProps );
+	};
+
+	if ( isHidden ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-layout__header-tasks-reminder-bar">
-			<ReminderText remainingCount={ remainingCount } />
-			<Button
-				isSmall
-				onClick={ () =>
-					updateOptions( {
-						[ REMINDER_BAR_HIDDEN_OPTION ]: 'yes',
-					} )
-				}
-				icon={ closeIcon }
+			<ReminderText
+				remainingCount={ remainingCount }
+				tracksProps={ tracksProps }
 			/>
+			<Button isSmall onClick={ onClose } icon={ closeIcon } />
 		</div>
 	);
 };

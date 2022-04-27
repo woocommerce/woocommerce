@@ -6,14 +6,15 @@
 	overflow: hidden;
 
 	.components-card__media {
-		width: 170px;
+		width: 85px;
 		flex-shrink: 0;
+		align-self: flex-start;
 
 		img,
 		svg,
 		.is-placeholder {
 			margin: auto;
-			max-width: 100px;
+			max-width: 36px;
 			display: block;
 		}
 
@@ -41,6 +42,15 @@
 		color: $studio-gray-80;
 		margin-top: 0;
 		margin-bottom: $gap-smaller;
+
+		.woocommerce-pill {
+			margin-left: 8px;
+
+			&.pill-green {
+				color: #008a20;
+				border-color: #008a20;
+			}
+		}
 	}
 
 	.woocommerce-task-payment__content {
