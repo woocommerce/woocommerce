@@ -14,6 +14,9 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v3
 
+      - name: Install PNPM
+        run: npm install -g pnpm
+
       - name: Build zip
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh

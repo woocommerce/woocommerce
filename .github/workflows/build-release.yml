@@ -10,9 +10,12 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v3
 
+      - name: Install PNPM
+        run: npm install -g pnpm
+
       - name: Build zip
-        shell: bash
-        run: plugins/woocommerce/bin/build-zip.sh
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
