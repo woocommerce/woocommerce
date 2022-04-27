@@ -6,10 +6,10 @@ module.exports = {
 	},
 	stories: [
 		// WooCommerce Admin / @woocommerce/components components
-		'../../../../packages/js/components/src/**/stories/*.@(js|tsx)',
+		'../../../packages/js/components/src/**/stories/*.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/experimental components
-		'../../../../packages/js/experimental/src/**/stories/*.@(js|tsx)',
-		'../../client/**/stories/*.js',
+		'../../../packages/js/experimental/src/**/stories/*.@(js|tsx)',
+		'../../../plugins/woocommerce-admin/client/**/stories/*.js',
 	],
 	addons: [
 		'@storybook/addon-docs',

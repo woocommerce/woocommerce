@@ -7,7 +7,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 /**
  * External dependencies
  */
-const wcAdminWebpackConfig = require( '../webpack.config.js' );
+const wcAdminWebpackConfig = require( '../../plugins/woocommerce-admin/webpack.config.js' );
 
 const wcAdminPackages = [
 	'components',
@@ -25,21 +25,6 @@ module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [
 		...storybookConfig.module.rules,
 		...wcAdminWebpackConfig.module.rules,
-		// We need to expose packages in "peerDependencies" to the global scope for @woocommerce/* to resolve packages.
-		{
-			test: require.resolve( 'moment' ),
-			loader: 'expose-loader',
-			options: {
-				exposes: [ 'moment' ],
-			},
-		},
-		{
-			test: require.resolve( '@wordpress/data' ),
-			loader: 'expose-loader',
-			options: {
-				exposes: [ '_wp_data' ],
-			},
-		},
 	];
 
 	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
@@ -47,7 +32,7 @@ module.exports = ( storybookConfig ) => {
 	wcAdminPackages.forEach( ( name ) => {
 		storybookConfig.resolve.alias[
 			`@woocommerce/${ name }`
-		] = path.resolve( __dirname, `../../../packages/js/${ name }/src` );
+		] = path.resolve( __dirname, `../../packages/js/${ name }/src` );
 	} );
 
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
@@ -56,7 +41,7 @@ module.exports = ( storybookConfig ) => {
 	);
 
 	storybookConfig.resolve.modules = [
-		path.join( __dirname, '../client' ),
+		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
 		'node_modules',
 	];
 
@@ -71,25 +56,20 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve(
 						__dirname,
-						`../../../packages/js/components/build-style/*.css`
+						`../../packages/js/components/build-style/*.css`
 					),
 					to: `./component-css/[name][ext]`,
 				},
 				{
 					from: path.resolve(
 						__dirname,
-						`../../../packages/js/experimental/build-style/*.css`
+						`../../packages/js/experimental/build-style/*.css`
 					),
 					to: `./experimental-css/[name][ext]`,
 				},
 			],
 		} )
 	);
-
-	storybookConfig.externals = {
-		'@wordpress/data': '_wp_data',
-		moment: 'moment',
-	};
 
 	return storybookConfig;
 };
