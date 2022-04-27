@@ -72,13 +72,14 @@ jobs:
           cd plugins/woocommerce
           WP_VERSION="${{ matrix.wp }}"
           if [[ $WP_VERSION == 'latest' ]]; then
-            composer require "wp-phpunit/wp-phpunit" "dev-master" --dev --no-scripts
-            WP_VERSION="null"
+            WP_VERSION="\"https://wordpress.org/latest.zip\""
           elif [[ $WP_VERSION == 'nightly' ]]; then
-            composer require "wp-phpunit/wp-phpunit" "dev-master" --dev --no-scripts
-            WP_VERSION="\"WordPress/WordPress#master\""
+            WP_VERSION="\"https://wordpress.org/nightly-builds/wordpress-latest.zip\""
+          elif [[ $WP_VERSION == '5.8' ]]; then
+            WP_VERSION="\"https://wordpress.org/wordpress-5.8.4.zip\""
+          elif [[ $WP_VERSION == '5.7' ]]; then
+            WP_VERSION="\"https://wordpress.org/wordpress-5.7.6.zip\""
           else
-            composer require "wp-phpunit/wp-phpunit" "dev-tree-$WP_VERSION" --dev --no-scripts
             WP_VERSION="\"WordPress/WordPress#$WP_VERSION\""
           fi
           echo "{ \"phpVersion\": \"${{ matrix.php }}\", \"core\": $WP_VERSION }" > .wp-env.override.json
