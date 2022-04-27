@@ -7,18 +7,22 @@ jobs:
     name: Build release asset
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
+      - name: Checkout code.
         uses: actions/checkout@v3
-      - name: Build
-        id: build
-        uses: woocommerce/action-build@trunk
+
+      - name: Install PNPM
+        run: npm install -g pnpm
+
+      - name: Build zip
+        run: pnpm nx build-zip woocommerce
+
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ steps.build.outputs.zip_path }}
+          asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce.zip
           asset_content_type: application/zip
   update-code-reference:
