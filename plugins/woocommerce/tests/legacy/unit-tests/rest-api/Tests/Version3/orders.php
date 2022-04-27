@@ -658,7 +658,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			'price'        => 4,
 			'parent_name'  => null,
 			'image'        => array(
-				'id'  => '',
+				'id'  => 0,
 				'src' => '',
 			),
 		);
