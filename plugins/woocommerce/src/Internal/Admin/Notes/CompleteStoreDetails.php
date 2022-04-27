@@ -48,15 +48,15 @@ class CompleteStoreDetails {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Add your store details to complete store setup', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Complete your store details with important information for setup such as your store’s base address', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Add your store details to complete store setup', 'woocommerce' ) );
+		$note->set_content( __( 'Complete your store details with important information for setup such as your store’s base address', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'add-store-details',
-			__( 'Add store details', 'woocommerce-admin' ),
+			__( 'Add store details', 'woocommerce' ),
 			wc_admin_url( '&path=/setup-wizard' )
 		);
 

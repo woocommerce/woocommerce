@@ -219,7 +219,18 @@ class Synchronize {
 			$parent_url = _x( 'invalid URL', 'Approved product download URLs migration', 'woocommerce' );
 
 			try {
-				$parent_url = ( new URL( $downloadable->get_file() ) )->get_parent_url();
+				$download_file = $downloadable->get_file();
+
+				/**
+				 * Controls whether shortcodes should be resolved and validated using the Approved Download Directory feature.
+				 *
+				 * @param bool $should_validate
+				 */
+				if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $downloadable->get_type_of_file_path() ) {
+					$download_file = do_shortcode( $download_file );
+				}
+
+				$parent_url = ( new URL( $download_file ) )->get_parent_url();
 				$this->register->add_approved_directory( $parent_url, false );
 			} catch ( Exception $e ) {
 				wc_get_logger()->log(

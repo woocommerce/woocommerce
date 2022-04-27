@@ -28,28 +28,28 @@ class InstalledExtensionRow extends Component {
 			links.push( {
 				key: 'docs',
 				href: docsUrl,
-				text: __( 'Docs', 'woocommerce-admin' ),
+				text: __( 'Docs', 'woocommerce' ),
 			} );
 		}
 		if ( supportUrl ) {
 			links.push( {
 				key: 'support',
 				href: supportUrl,
-				text: __( 'Get support', 'woocommerce-admin' ),
+				text: __( 'Get support', 'woocommerce' ),
 			} );
 		}
 		if ( settingsUrl ) {
 			links.push( {
 				key: 'settings',
 				href: settingsUrl,
-				text: __( 'Settings', 'woocommerce-admin' ),
+				text: __( 'Settings', 'woocommerce' ),
 			} );
 		}
 		if ( dashboardUrl ) {
 			links.push( {
 				key: 'dashboard',
 				href: dashboardUrl,
-				text: __( 'Dashboard', 'woocommerce-admin' ),
+				text: __( 'Dashboard', 'woocommerce' ),
 			} );
 		}
 
@@ -97,7 +97,7 @@ class InstalledExtensionRow extends Component {
 				onClick={ this.onActivateClick }
 				disabled={ isLoading }
 			>
-				{ __( 'Activate', 'woocommerce-admin' ) }
+				{ __( 'Activate', 'woocommerce' ) }
 			</Button>
 		);
 	}
@@ -109,7 +109,7 @@ class InstalledExtensionRow extends Component {
 				href={ this.props.settingsUrl }
 				onClick={ this.onFinishSetupClick }
 			>
-				{ __( 'Finish setup', 'woocommerce-admin' ) }
+				{ __( 'Finish setup', 'woocommerce' ) }
 			</Button>
 		);
 	}

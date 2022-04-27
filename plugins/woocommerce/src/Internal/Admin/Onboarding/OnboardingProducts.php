@@ -31,29 +31,29 @@ class OnboardingProducts {
 	public static function get_allowed_product_types() {
 		$products         = array(
 			'physical'        => array(
-				'label'   => __( 'Physical products', 'woocommerce-admin' ),
+				'label'   => __( 'Physical products', 'woocommerce' ),
 				'default' => true,
 			),
 			'downloads'       => array(
-				'label' => __( 'Downloads', 'woocommerce-admin' ),
+				'label' => __( 'Downloads', 'woocommerce' ),
 			),
 			'subscriptions'   => array(
-				'label' => __( 'Subscriptions', 'woocommerce-admin' ),
+				'label' => __( 'Subscriptions', 'woocommerce' ),
 			),
 			'memberships'     => array(
-				'label'   => __( 'Memberships', 'woocommerce-admin' ),
+				'label'   => __( 'Memberships', 'woocommerce' ),
 				'product' => 958589,
 			),
 			'bookings'        => array(
-				'label'   => __( 'Bookings', 'woocommerce-admin' ),
+				'label'   => __( 'Bookings', 'woocommerce' ),
 				'product' => 390890,
 			),
 			'product-bundles' => array(
-				'label'   => __( 'Bundles', 'woocommerce-admin' ),
+				'label'   => __( 'Bundles', 'woocommerce' ),
 				'product' => 18716,
 			),
 			'product-add-ons' => array(
-				'label'   => __( 'Customizable products', 'woocommerce-admin' ),
+				'label'   => __( 'Customizable products', 'woocommerce' ),
 				'product' => 18618,
 			),
 		);
@@ -116,7 +116,7 @@ class OnboardingProducts {
 				$product_data[ $key ]['slug']         = strtolower( preg_replace( '~[^\pL\d]+~u', '-', $products[ $product_type['product'] ]->slug ) );
 			} elseif ( isset( $product_type['product'] ) ) {
 				/* translators: site currency symbol (used to show that the product costs money) */
-				$product_data[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce-admin' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
+				$product_data[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
 			}
 		}
 

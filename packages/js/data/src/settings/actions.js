@@ -98,7 +98,7 @@ export function* persistSettingsForGroup( group ) {
 			throw new Error(
 				__(
 					'There was a problem updating your settings.',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}

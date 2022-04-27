@@ -58,11 +58,11 @@ class AddingAndManangingProducts {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Adding and Managing Products', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Adding and Managing Products', 'woocommerce' ) );
 		$note->set_content(
 			__(
 				'Learn more about how to set up products in WooCommerce through our useful documentation about adding and managing products.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 		$note->set_content_data( (object) array() );
@@ -71,7 +71,7 @@ class AddingAndManangingProducts {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/document/managing-products/?utm_source=inbox&utm_medium=product'
 		);
 

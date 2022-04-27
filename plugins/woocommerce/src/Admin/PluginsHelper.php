@@ -154,7 +154,7 @@ class PluginsHelper {
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
 
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ) );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -193,7 +193,7 @@ class PluginsHelper {
 			if ( is_wp_error( $api ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
+					'error_message' => __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
 					'api'           => $api,
 					'slug'          => $slug,
 				);
@@ -205,7 +205,7 @@ class PluginsHelper {
 					$plugin,
 					sprintf(
 						/* translators: %s: plugin slug (example: woocommerce-services) */
-						__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
+						__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
 						$slug
 					)
 				);
@@ -221,7 +221,7 @@ class PluginsHelper {
 			if ( is_wp_error( $result ) || is_null( $result ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => __( 'The requested plugin `%s` could not be installed.', 'woocommerce-admin' ),
+					'error_message' => __( 'The requested plugin `%s` could not be installed.', 'woocommerce' ),
 					'slug'          => $slug,
 					'api'           => $api,
 					'upgrader'      => $upgrader,
@@ -235,7 +235,7 @@ class PluginsHelper {
 					$plugin,
 					sprintf(
 						/* translators: %s: plugin slug (example: woocommerce-services) */
-						__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce-admin' ),
+						__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce' ),
 						$slug
 					)
 				);
@@ -263,7 +263,7 @@ class PluginsHelper {
 	 */
 	public static function schedule_install_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		$job_id = uniqid();
@@ -280,7 +280,7 @@ class PluginsHelper {
 	 */
 	public static function activate_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -307,7 +307,7 @@ class PluginsHelper {
 				$errors->add(
 					$plugin,
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s`. is not yet installed.', 'woocommerce-admin' ), $slug )
+					sprintf( __( 'The requested plugin `%s`. is not yet installed.', 'woocommerce' ), $slug )
 				);
 				continue;
 			}
@@ -319,7 +319,7 @@ class PluginsHelper {
 				$errors->add(
 					$plugin,
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s` could not be activated.', 'woocommerce-admin' ), $slug )
+					sprintf( __( 'The requested plugin `%s` could not be activated.', 'woocommerce' ), $slug )
 				);
 				continue;
 			}
@@ -344,7 +344,7 @@ class PluginsHelper {
 	 */
 	public static function schedule_activate_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		$job_id = uniqid();

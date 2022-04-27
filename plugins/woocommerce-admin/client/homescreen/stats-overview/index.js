@@ -67,7 +67,7 @@ export const StatsOverview = () => {
 
 	const HeaderText = (
 		<Text variant="title.small" size="20" lineHeight="28px">
-			{ __( 'Stats overview', 'woocommerce-admin' ) }
+			{ __( 'Stats overview', 'woocommerce' ) }
 		</Text>
 	);
 
@@ -86,12 +86,12 @@ export const StatsOverview = () => {
 				<EllipsisMenu
 					label={ __(
 						'Choose which values to display',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 					renderContent={ () => (
 						<Fragment>
 							<MenuTitle>
-								{ __( 'Display stats:', 'woocommerce-admin' ) }
+								{ __( 'Display stats:', 'woocommerce' ) }
 							</MenuTitle>
 							{ stats.map( ( item ) => {
 								const checked = ! hiddenStats.includes(
@@ -125,15 +125,15 @@ export const StatsOverview = () => {
 				} }
 				tabs={ [
 					{
-						title: __( 'Today', 'woocommerce-admin' ),
+						title: __( 'Today', 'woocommerce' ),
 						name: 'today',
 					},
 					{
-						title: __( 'Week to date', 'woocommerce-admin' ),
+						title: __( 'Week to date', 'woocommerce' ),
 						name: 'week',
 					},
 					{
-						title: __( 'Month to date', 'woocommerce-admin' ),
+						title: __( 'Month to date', 'woocommerce' ),
 						name: 'month',
 					},
 				] }
@@ -165,7 +165,7 @@ export const StatsOverview = () => {
 						} );
 					} }
 				>
-					{ __( 'View detailed stats', 'woocommerce-admin' ) }
+					{ __( 'View detailed stats', 'woocommerce' ) }
 				</Link>
 			</CardFooter>
 		</Card>

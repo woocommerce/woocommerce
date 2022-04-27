@@ -224,7 +224,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const getTabs = () => {
 		const activity = {
 			name: 'activity',
-			title: __( 'Activity', 'woocommerce-admin' ),
+			title: __( 'Activity', 'woocommerce' ),
 			icon: <IconFlag />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
@@ -233,7 +233,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const setup = {
 			name: 'setup',
-			title: __( 'Finish setup', 'woocommerce-admin' ),
+			title: __( 'Finish setup', 'woocommerce' ),
 			icon: <SetupProgress />,
 			onClick: () => {
 				const currentLocation = window.location.href;
@@ -265,7 +265,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const help = {
 			name: 'help',
-			title: __( 'Help', 'woocommerce-admin' ),
+			title: __( 'Help', 'woocommerce' ),
 			icon: <Icon icon={ helpIcon } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
@@ -284,7 +284,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const previewSite = {
 			name: 'previewSite',
-			title: __( 'Preview site', 'woocommerce-admin' ),
+			title: __( 'Preview site', 'woocommerce' ),
 			icon: <Icon icon={ external } />,
 			visible: query.page === 'wc-admin' && query.task === 'appearance',
 			onClick: () => {
@@ -355,7 +355,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	return (
 		<div>
 			<H id={ headerId } className="screen-reader-text">
-				{ __( 'Store Activity', 'woocommerce-admin' ) }
+				{ __( 'Store Activity', 'woocommerce' ) }
 			</H>
 			<Section
 				component="aside"
@@ -390,12 +390,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				<HighlightTooltip
 					delay={ 1000 }
 					useAnchor={ true }
-					title={ __( "We're here for help", 'woocommerce-admin' ) }
+					title={ __( "We're here for help", 'woocommerce' ) }
 					content={ __(
 						'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
-					closeButtonText={ __( 'Got it', 'woocommerce-admin' ) }
+					closeButtonText={ __( 'Got it', 'woocommerce' ) }
 					id="activity-panel-tab-help"
 					onClose={ () => closedHelpPanelHighlight() }
 					onShow={ () => recordEvent( 'help_tooltip_view' ) }

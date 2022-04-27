@@ -7,6 +7,7 @@ import { Icon, chevronLeft } from '@wordpress/icons';
 import { getHistory, updateQueryString } from '@woocommerce/navigation';
 import { ENTER, SPACE } from '@wordpress/keycodes';
 import { recordEvent } from '@woocommerce/tracks';
+import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -18,13 +19,17 @@ export type BackButtonProps = {
 };
 
 export const BackButton: React.FC< BackButtonProps > = ( { title } ) => {
-	const homeText = __( 'WooCommerce Home', 'woocommerce-admin' );
+	const homeText = __( 'WooCommerce Home', 'woocommerce' );
 
 	const navigateHome = () => {
 		recordEvent( 'topbar_back_button', {
 			page_name: title,
 		} );
-		updateQueryString( {}, getHistory().location.pathname, {} );
+		updateQueryString(
+			{},
+			( getHistory() as History ).location.pathname,
+			{}
+		);
 	};
 
 	// if it's a task list page, render a back button to the homescreen

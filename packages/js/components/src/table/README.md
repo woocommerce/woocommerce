@@ -67,8 +67,8 @@ Name | Type | Default | Description
 `downloadable` | Boolean | `false` | Whether the table must be downloadable. If true, the download button will appear
 `onClickDownload` | Function | `null` | A callback function called when the "download" button is pressed. Optional, if used, the download button will appear
 `query` | Object | `{}` | An object of the query parameters passed to the page, ex `{ page: 2, per_page: 5 }`
-`rowHeader` | One of type: number, bool | `0` | An array of arrays of display/value object pairs (see `Table` props)
-`rows` | Array | `[]` | Which column should be the row header, defaults to the first item (`0`) (see `Table` props)
+`rowHeader` | One of type: number, bool | `0` | Which column should be the row header, defaults to the first item (`0`) (see `Table` props)
+`rows` | Array | `[]` | (required) An array of arrays of display/value object pairs (see `Table` props)
 `rowsPerPage` | Number | `null` | (required) The total number of rows to display per page
 `searchBy` | String | `null` | The string to use as a query parameter when searching row items
 `showMenu` | Boolean | `true` | Boolean to determine whether or not ellipsis menu is shown

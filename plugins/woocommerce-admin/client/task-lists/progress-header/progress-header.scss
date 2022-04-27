@@ -19,9 +19,9 @@ $progress-complete-color: #007cba;
 		appearance: none;
 		border: 1px solid #ddd;
 		border-radius: 16px;
-		height: 10px;
+		height: 12px;
 		width: 100%;
-		margin-bottom: 20px;
+		margin-bottom: 0;
 
 		// Firefox
 		& {
@@ -49,5 +49,6 @@ $progress-complete-color: #007cba;
 	.woocommerce-card__menu {
 		position: absolute;
 		right: 0;
+		top: 7px;
 	}
 }

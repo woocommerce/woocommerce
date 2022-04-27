@@ -43,14 +43,14 @@ class WelcomeToWooCommerceForStoreUsers {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Welcome to your new store management experience', 'woocommerce-admin' ) );
-		$note->set_content( __( "We've designed your navigation and home screen to help you focus on the things that matter most in managing your online store.", 'woocommerce-admin' ) );
+		$note->set_title( __( 'Welcome to your new store management experience', 'woocommerce' ) );
+		$note->set_content( __( "We've designed your navigation and home screen to help you focus on the things that matter most in managing your online store.", 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://wordpress.com/support/new-woocommerce-experience-on-wordpress-dot-com/"',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true

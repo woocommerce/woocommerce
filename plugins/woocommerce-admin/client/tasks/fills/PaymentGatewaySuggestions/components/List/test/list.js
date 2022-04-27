@@ -49,7 +49,7 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Enable' );
 	} );
 
-	it( 'should display the "Set up" button when setup is required', () => {
+	it( 'should display the "Get started" button when setup is required', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
@@ -63,7 +63,7 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 
 		const { queryByRole } = render( <List { ...props } /> );
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Set up' );
+		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Get started' );
 	} );
 
 	it( 'should display the SetupRequired component when appropriate', () => {
@@ -138,7 +138,7 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 		expect( queryByText( 'Recommended' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'should display Manage button if not enabled and does have setup', () => {
+	it( 'should display Manage button if enabled and does have setup', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
@@ -180,6 +180,7 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 					...mockGateway,
 					plugins: [ 'nope' ],
 					needsSetup: false,
+					enabled: true,
 				},
 			],
 		};

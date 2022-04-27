@@ -46,7 +46,7 @@ export const WCPayCardBody = ( {
 				href="https://woocommerce.com/payments/?utm_medium=product"
 				onClick={ onLinkClick }
 			>
-				{ __( 'Learn more', 'woocommerce-admin' ) }
+				{ __( 'Learn more', 'woocommerce' ) }
 			</Link>
 		</Text>
 

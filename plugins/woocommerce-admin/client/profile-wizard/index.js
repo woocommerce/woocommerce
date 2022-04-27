@@ -65,7 +65,7 @@ class ProfileWizard extends Component {
 				'error',
 				__(
 					'There was a problem finishing the setup wizard',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -135,7 +135,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'store-details',
 			container: StoreDetails,
-			label: __( 'Store Details', 'woocommerce-admin' ),
+			label: __( 'Store Details', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'setup_client' ) &&
 				profileItems.setup_client !== null,
@@ -143,7 +143,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'industry',
 			container: Industry,
-			label: __( 'Industry', 'woocommerce-admin' ),
+			label: __( 'Industry', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'industry' ) &&
 				profileItems.industry !== null,
@@ -151,7 +151,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'product-types',
 			container: ProductTypes,
-			label: __( 'Product Types', 'woocommerce-admin' ),
+			label: __( 'Product Types', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'product_types' ) &&
 				profileItems.product_types !== null,
@@ -159,7 +159,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'business-details',
 			container: BusinessDetailsStep,
-			label: __( 'Business Details', 'woocommerce-admin' ),
+			label: __( 'Business Details', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'product_count' ) &&
 				profileItems.product_count !== null,
@@ -167,7 +167,7 @@ class ProfileWizard extends Component {
 		steps.push( {
 			key: 'theme',
 			container: Theme,
-			label: __( 'Theme', 'woocommerce-admin' ),
+			label: __( 'Theme', 'woocommerce' ),
 			isComplete:
 				profileItems.hasOwnProperty( 'theme' ) &&
 				profileItems.theme !== null,
@@ -274,7 +274,7 @@ class ProfileWizard extends Component {
 					'error',
 					__(
 						'There was a problem skipping the setup wizard',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				);
 			} );

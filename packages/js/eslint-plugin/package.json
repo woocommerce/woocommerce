@@ -10,14 +10,14 @@
 		"eslint",
 		"plugin"
 	],
-	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/eslint-plugin/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/eslint-plugin/README.md",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/woocommerce/woocommerce-admin.git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
 		"directory": "packages/eslint-plugin"
 	},
 	"bugs": {
-		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"files": [
 		"configs",

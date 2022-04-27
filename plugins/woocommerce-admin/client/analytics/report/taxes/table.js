@@ -27,35 +27,35 @@ class TaxesReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Tax code', 'woocommerce-admin' ),
+				label: __( 'Tax code', 'woocommerce' ),
 				key: 'tax_code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Rate', 'woocommerce-admin' ),
+				label: __( 'Rate', 'woocommerce' ),
 				key: 'rate',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total tax', 'woocommerce-admin' ),
+				label: __( 'Total tax', 'woocommerce' ),
 				key: 'total_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Order tax', 'woocommerce-admin' ),
+				label: __( 'Order tax', 'woocommerce' ),
 				key: 'order_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Shipping tax', 'woocommerce-admin' ),
+				label: __( 'Shipping tax', 'woocommerce' ),
 				key: 'shipping_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -144,33 +144,23 @@ class TaxesReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n(
-					'tax code',
-					'tax codes',
-					taxesCodes,
-					'woocommerce-admin'
-				),
+				label: _n( 'tax code', 'tax codes', taxesCodes, 'woocommerce' ),
 				value: formatValue( currency, 'number', taxesCodes ),
 			},
 			{
-				label: __( 'total tax', 'woocommerce-admin' ),
+				label: __( 'total tax', 'woocommerce' ),
 				value: formatAmount( totalTax ),
 			},
 			{
-				label: __( 'order tax', 'woocommerce-admin' ),
+				label: __( 'order tax', 'woocommerce' ),
 				value: formatAmount( orderTax ),
 			},
 			{
-				label: __( 'shipping tax', 'woocommerce-admin' ),
+				label: __( 'shipping tax', 'woocommerce' ),
 				value: formatAmount( shippingTax ),
 			},
 			{
-				label: _n(
-					'order',
-					'orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
@@ -200,7 +190,7 @@ class TaxesReportTable extends Component {
 				tableQuery={ {
 					orderby: query.orderby || 'tax_rate_id',
 				} }
-				title={ __( 'Taxes', 'woocommerce-admin' ) }
+				title={ __( 'Taxes', 'woocommerce' ) }
 				columnPrefsKey="taxes_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

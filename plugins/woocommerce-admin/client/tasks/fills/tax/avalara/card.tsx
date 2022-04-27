@@ -10,25 +10,23 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { PartnerCard } from '../components/partner-card';
+import { TaxChildProps } from '../utils';
 import logo from './logo.png';
 
-export const Card = ( { task } ) => {
-	const { avalaraActivated } = task.additionalData;
+export const Card: React.FC< TaxChildProps > = ( { task } ) => {
+	const { additionalData: { avalaraActivated } = {} } = task;
 
 	return (
 		<PartnerCard
-			name={ __( 'Avalara', 'woocommerce-admin' ) }
+			name={ __( 'Avalara', 'woocommerce' ) }
 			logo={ logo }
-			description={ __(
-				'Powerful all-in-one tax tool',
-				'woocommerce-admin'
-			) }
+			description={ __( 'Powerful all-in-one tax tool', 'woocommerce' ) }
 			benefits={ [
-				__( 'Real-time sales tax calculation', 'woocommerce-admin' ),
+				__( 'Real-time sales tax calculation', 'woocommerce' ),
 				interpolateComponents( {
 					mixedString: __(
 						'{{strong}}Multi{{/strong}}-economic nexus compliance',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					components: {
 						strong: <strong />,
@@ -36,22 +34,22 @@ export const Card = ( { task } ) => {
 				} ),
 				__(
 					'Cross-border and multi-channel compliance',
-					'woocommerce-admin'
+					'woocommerce'
 				),
-				__( 'Automate filing & remittance', 'woocommerce-admin' ),
+				__( 'Automate filing & remittance', 'woocommerce' ),
 				__(
 					'Return-ready, jurisdiction-level reporting.',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 			] }
 			terms={ __(
 				'30-day free trial. No credit card needed.',
-				'woocommerce-admin'
+				'woocommerce'
 			) }
 			actionText={
 				avalaraActivated
-					? __( 'Continue setup', 'woocommerce-admin' )
-					: __( 'Enable & set up', 'woocommerce-admin' )
+					? __( 'Continue setup', 'woocommerce' )
+					: __( 'Enable & set up', 'woocommerce' )
 			}
 			onClick={ () => {
 				recordEvent( 'tasklist_tax_select_option', {
@@ -69,7 +67,7 @@ export const Card = ( { task } ) => {
 				window.open(
 					new URL(
 						'https://woocommerce.com/products/woocommerce-avatax/'
-					),
+					).toString(),
 					'_blank'
 				);
 			} }

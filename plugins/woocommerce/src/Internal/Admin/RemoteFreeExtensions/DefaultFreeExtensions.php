@@ -22,7 +22,7 @@ class DefaultFreeExtensions {
 		$bundles = [
 			[
 				'key'     => 'obw/basics',
-				'title'   => __( 'Get the basics', 'woocommerce-admin' ),
+				'title'   => __( 'Get the basics', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'woocommerce-payments' ),
 					self::get_plugin( 'woocommerce-services:shipping' ),
@@ -32,7 +32,7 @@ class DefaultFreeExtensions {
 			],
 			[
 				'key'     => 'obw/grow',
-				'title'   => __( 'Grow your store', 'woocommerce-admin' ),
+				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
@@ -40,7 +40,7 @@ class DefaultFreeExtensions {
 			],
 			[
 				'key'     => 'task-list/reach',
-				'title'   => __( 'Reach out to customers', 'woocommerce-admin' ),
+				'title'   => __( 'Reach out to customers', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'mailpoet:alt' ),
 					self::get_plugin( 'mailchimp-for-woocommerce' ),
@@ -49,9 +49,10 @@ class DefaultFreeExtensions {
 			],
 			[
 				'key'     => 'task-list/grow',
-				'title'   => __( 'Grow your store', 'woocommerce-admin' ),
+				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
+					self::get_plugin( 'pinterest-for-woocommerce' ),
 				],
 			],
 		];
@@ -69,14 +70,14 @@ class DefaultFreeExtensions {
 	public static function get_plugin( $slug ) {
 		$plugins = array(
 			'google-listings-and-ads'           => [
-				'name'           => __( 'Google Listings & Ads', 'woocommerce-admin' ),
+				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Drive sales with %1$sGoogle Listings and Ads%2$s', 'woocommerce-admin' ),
+					__( 'Drive sales with %1$sGoogle Listings and Ads%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 				'is_visible'     => [
@@ -92,37 +93,44 @@ class DefaultFreeExtensions {
 				],
 			],
 			'google-listings-and-ads:alt'       => [
-				'name'           => __( 'Google Listings & Ads', 'woocommerce-admin' ),
-				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce-admin' ),
-				'image_url'      => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
+				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
+				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			],
+			'pinterest-for-woocommerce'     => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => false,
+			],
 			'mailpoet'                          => [
-				'name'           => __( 'MailPoet', 'woocommerce-admin' ),
-				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce-admin' ),
-				'image_url'      => plugins_url( 'images/onboarding/mailpoet.png', WC_ADMIN_PLUGIN_FILE ),
+				'name'           => __( 'MailPoet', 'woocommerce' ),
+				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			],
 			'mailchimp-for-woocommerce'         => [
-				'name'           => __( 'Mailchimp', 'woocommerce-admin' ),
-				'description'    => __( 'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.', 'woocommerce-admin' ),
-				'image_url'      => plugins_url( 'images/onboarding/mailchimp-for-woocommerce.png', WC_ADMIN_PLUGIN_FILE ),
+				'name'           => __( 'Mailchimp', 'woocommerce' ),
+				'description'    => __( 'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailchimp-for-woocommerce.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailchimp-woocommerce',
 				'is_built_by_wc' => false,
 			],
 			'creative-mail-by-constant-contact' => [
-				'name'           => __( 'Creative Mail for WooCommerce', 'woocommerce-admin' ),
-				'description'    => __( 'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.', 'woocommerce-admin' ),
-				'image_url'      => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+				'name'           => __( 'Creative Mail for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=creativemail',
 				'is_built_by_wc' => false,
 			],
 			'woocommerce-payments'              => [
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Accept credit cards and other popular payment methods with %1$sWooCommerce Payments%2$s', 'woocommerce-admin' ),
+					__( 'Accept credit cards and other popular payment methods with %1$sWooCommerce Payments%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/woocommerce-payments" target="_blank">',
 					'</a>'
 				),
@@ -260,7 +268,7 @@ class DefaultFreeExtensions {
 			'woocommerce-services:shipping'     => [
 				'description'    => sprintf(
 				/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Print shipping labels with %1$sWooCommerce Shipping%2$s', 'woocommerce-admin' ),
+					__( 'Print shipping labels with %1$sWooCommerce Shipping%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/shipping" target="_blank">',
 					'</a>'
 				),
@@ -327,7 +335,7 @@ class DefaultFreeExtensions {
 			'woocommerce-services:tax'          => [
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Get automated sales tax with %1$sWooCommerce Tax%2$s', 'woocommerce-admin' ),
+					__( 'Get automated sales tax with %1$sWooCommerce Tax%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/tax" target="_blank">',
 					'</a>'
 				),
@@ -407,7 +415,7 @@ class DefaultFreeExtensions {
 			'jetpack'                           => [
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Enhance speed and security with %1$sJetpack%2$s', 'woocommerce-admin' ),
+					__( 'Enhance speed and security with %1$sJetpack%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/jetpack" target="_blank">',
 					'</a>'
 				),
@@ -425,10 +433,10 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => false,
 			],
 			'mailpoet'                          => [
-				'name'           => __( 'MailPoet', 'woocommerce-admin' ),
+				'name'           => __( 'MailPoet', 'woocommerce' ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Level up your email marketing with %1$sMailPoet%2$s', 'woocommerce-admin' ),
+					__( 'Level up your email marketing with %1$sMailPoet%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/mailpoet" target="_blank">',
 					'</a>'
 				),
@@ -447,9 +455,9 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 			],
 			'mailpoet:alt'                      => [
-				'name'           => __( 'MailPoet', 'woocommerce-admin' ),
-				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce-admin' ),
-				'image_url'      => plugins_url( 'images/onboarding/mailpoet.png', WC_ADMIN_PLUGIN_FILE ),
+				'name'           => __( 'MailPoet', 'woocommerce' ),
+				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			],

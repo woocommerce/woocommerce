@@ -25,13 +25,16 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
+			return __( 'Grow your business with marketing tools', 'woocommerce' );
+		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added sales channels', 'woocommerce-admin' );
+				return __( 'You added sales channels', 'woocommerce' );
 			}
-			return __( 'Get more sales', 'woocommerce-admin' );
+			return __( 'Get more sales', 'woocommerce' );
 		}
-		return __( 'Set up marketing tools', 'woocommerce-admin' );
+		return __( 'Set up marketing tools', 'woocommerce' );
 	}
 
 	/**
@@ -40,9 +43,12 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_content() {
+		if ( count( $this->task_list->get_sections() ) > 0 ) {
+			return __( 'Promote your store in other sales channels, like email, Google, and Facebook.', 'woocommerce' );
+		}
 		return __(
 			'Add recommended marketing tools to reach new customers and grow your business',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -52,7 +58,7 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce-admin' );
+		return __( '1 minute', 'woocommerce' );
 	}
 
 	/**
@@ -119,13 +125,8 @@ class Marketing extends Task {
 			}
 		}
 
-		// All extensions installed.
-		if ( count( $remaining ) === 0 ) {
-			return true;
-		}
-
-		// Make sure the task has been actioned and at least one extension is installed.
-		if ( count( $installed ) > 0 && Task::is_task_actioned( 'marketing' ) ) {
+		// Make sure the task has been actioned or a marketing extension has been installed.
+		if ( count( $installed ) > 0 || Task::is_task_actioned( 'marketing' ) ) {
 			return true;
 		}
 

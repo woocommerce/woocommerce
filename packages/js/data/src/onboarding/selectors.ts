@@ -7,7 +7,8 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { TaskType, TaskListType } from './types';
-import { WPDataSelectors, RuleProcessor } from '../types';
+import { WPDataSelectors } from '../types';
+import { Plugin } from '../plugins/types';
 
 export const getFreeExtensions = (
 	state: OnboardingState
@@ -64,7 +65,7 @@ export const getTask = (
 
 export const getPaymentGatewaySuggestions = (
 	state: OnboardingState
-): PaymentMethodsState[] => {
+): Plugin[] => {
 	return state.paymentMethods || [];
 };
 
@@ -98,13 +99,19 @@ export type OnboardingSelectors = {
 	>;
 	getOnboardingError: () => ReturnType< typeof getOnboardingError >;
 	isOnboardingRequesting: () => ReturnType< typeof isOnboardingRequesting >;
+	getTaskListsByIds: (
+		ids: string[]
+	) => ReturnType< typeof getTaskListsByIds >;
+	getTaskLists: () => ReturnType< typeof getTaskLists >;
+	getTaskList: ( id: string ) => ReturnType< typeof getTaskList >;
+	getFreeExtensions: () => ReturnType< typeof getFreeExtensions >;
 } & WPDataSelectors;
 
 export type OnboardingState = {
 	freeExtensions: ExtensionList[];
 	profileItems: ProfileItemsState;
 	taskLists: Record< string, TaskListType >;
-	paymentMethods: PaymentMethodsState[];
+	paymentMethods: Plugin[];
 	productTypes: Product[];
 	emailPrefill: string;
 	// TODO clarify what the error record's type is
@@ -183,20 +190,6 @@ export type Product = {
 	default?: boolean;
 	label: string;
 	product?: number;
-};
-
-export type PaymentMethodsState = {
-	locale: string;
-	title: string;
-	content: string;
-	key: string;
-	image: string;
-	is_visible: boolean | RuleProcessor[];
-	plugins: string[];
-	is_configured: boolean | RuleProcessor[];
-	fields: MethodFields[];
-	api_details_url: string;
-	manage_url: string;
 };
 
 export type ExtensionList = {

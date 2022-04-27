@@ -65,25 +65,22 @@ class DatePickerContent extends Component {
 		return (
 			<div>
 				<H className="screen-reader-text" tabIndex="0">
-					{ __(
-						'Select date range and comparison',
-						'woocommerce-admin'
-					) }
+					{ __( 'Select date range and comparison', 'woocommerce' ) }
 				</H>
 				<Section component={ false }>
 					<H className="woocommerce-filters-date__text">
-						{ __( 'select a date range', 'woocommerce-admin' ) }
+						{ __( 'select a date range', 'woocommerce' ) }
 					</H>
 					<TabPanel
 						tabs={ [
 							{
 								name: 'period',
-								title: __( 'Presets', 'woocommerce-admin' ),
+								title: __( 'Presets', 'woocommerce' ),
 								className: 'woocommerce-filters-date__tab',
 							},
 							{
 								name: 'custom',
-								title: __( 'Custom', 'woocommerce-admin' ),
+								title: __( 'Custom', 'woocommerce' ),
 								className: 'woocommerce-filters-date__tab',
 							},
 						] }
@@ -130,10 +127,7 @@ class DatePickerContent extends Component {
 									ref={ this.controlsRef }
 								>
 									<H className="woocommerce-filters-date__text">
-										{ __(
-											'compare to',
-											'woocommerce-admin'
-										) }
+										{ __( 'compare to', 'woocommerce' ) }
 									</H>
 									<ComparePeriods
 										onSelect={ onUpdate }
@@ -149,10 +143,7 @@ class DatePickerContent extends Component {
 													! ( after || before )
 												}
 											>
-												{ __(
-													'Reset',
-													'woocommerce-admin'
-												) }
+												{ __( 'Reset', 'woocommerce' ) }
 											</Button>
 										) }
 										{ isValidSelection( selected.name ) ? (
@@ -166,7 +157,7 @@ class DatePickerContent extends Component {
 											>
 												{ __(
 													'Update',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 											</Button>
 										) : (
@@ -177,7 +168,7 @@ class DatePickerContent extends Component {
 											>
 												{ __(
 													'Update',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 											</Button>
 										) }

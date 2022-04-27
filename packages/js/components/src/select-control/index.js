@@ -173,17 +173,14 @@ export class SelectControl extends Component {
 						'%d result found, use up and down arrow keys to navigate.',
 						'%d results found, use up and down arrow keys to navigate.',
 						searchOptions.length,
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					searchOptions.length
 				),
 				'assertive'
 			);
 		} else {
-			debouncedSpeak(
-				__( 'No results.', 'woocommerce-admin' ),
-				'assertive'
-			);
+			debouncedSpeak( __( 'No results.', 'woocommerce' ), 'assertive' );
 		}
 	}
 

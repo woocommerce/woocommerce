@@ -26,7 +26,7 @@ $args = array(
   'id'              => 'my-task', // A unique task ID.
   'title'           => 'My Task', // Task title.
   'content'         => 'Task explanation and instructions', // Content shown in the task list item.
-  'action_label'    => __( "Do the task!", 'woocommerce-admin' ), // Text used for the action button.
+  'action_label'    => __( "Do the task!", 'woocommerce' ), // Text used for the action button.
   'action_url'      => 'http://wordpress.com/my/task', // URL used when clicking the task item in lieu of SlotFill.
   'is_complete'     => get_option( 'my-task-option', false ), // Determine if the task is complete.
   'can_view'        => 'US:CA' === wc_get_base_location(),

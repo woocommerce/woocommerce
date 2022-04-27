@@ -36,13 +36,13 @@ To create a new package, add a new folder to `/packages`, containing…
     	"author": "Automattic",
     	"license": "GPL-2.0-or-later",
     	"keywords": [ "wordpress", "woocommerce" ],
-    	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/[_YOUR_PACKAGE_]/README.md",
+    	"homepage": "https://github.com/woocommerce/woocommerce/tree/main/packages/[_YOUR_PACKAGE_]/README.md",
     	"repository": {
     		"type": "git",
-    		"url": "https://github.com/woocommerce/woocommerce-admin.git"
+    		"url": "https://github.com/woocommerce/woocommerce.git"
     	},
     	"bugs": {
-    		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+    		"url": "https://github.com/woocommerce/woocommerce/issues"
     	},
     	"main": "build/index.js",
     	"module": "build-module/index.js",

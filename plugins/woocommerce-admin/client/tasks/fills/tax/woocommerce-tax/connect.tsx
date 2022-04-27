@@ -29,11 +29,11 @@ export const Connect: React.FC< SetupStepProps > = ( {
 				} );
 				onManual();
 			} }
-			skipText={ __( 'Set up tax rates manually', 'woocommerce-admin' ) }
+			skipText={ __( 'Set up tax rates manually', 'woocommerce' ) }
 			onAbort={ () => onDisable() }
 			abortText={ __(
 				"My business doesn't charge sales tax",
-				'woocommerce-admin'
+				'woocommerce'
 			) }
 		/>
 	);

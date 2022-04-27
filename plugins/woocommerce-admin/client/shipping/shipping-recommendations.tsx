@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	useSelect,
+	useDispatch,
+	select as wpDataSelect,
+} from '@wordpress/data';
 import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
@@ -59,7 +63,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 	>
 		<DismissableListHeading>
 			<Text variant="title.small" as="p" size="20" lineHeight="28px">
-				{ __( 'Recommended shipping solutions', 'woocommerce-admin' ) }
+				{ __( 'Recommended shipping solutions', 'woocommerce' ) }
 			</Text>
 			<Text
 				className="woocommerce-recommended-shipping__header-heading"
@@ -70,7 +74,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 			>
 				{ __(
 					'We recommend adding one of the following shipping extensions to your store. The extension will be installed and activated for you when you click "Get started".',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			</Text>
 		</DismissableListHeading>
@@ -86,9 +90,9 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 				target="_blank"
 				isTertiary
 			>
-				{ __( 'See more options', 'woocommerce-admin' ) }
+				{ __( 'See more options', 'woocommerce' ) }
 				<VisuallyHidden>
-					{ __( '(opens in a new tab)', 'woocommerce-admin' ) }
+					{ __( '(opens in a new tab)', 'woocommerce' ) }
 				</VisuallyHidden>
 				<ExternalIcon size={ 18 } />
 			</Button>
@@ -99,7 +103,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 const ShippingRecommendations: React.FC = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
-	const activePlugins = useSelect< string[] >( ( select ) =>
+	const activePlugins = useSelect( ( select: typeof wpDataSelect ) =>
 		select( PLUGINS_STORE_NAME ).getActivePlugins()
 	);
 

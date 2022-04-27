@@ -16,15 +16,12 @@ const ShippingHeader = ( { task, goToTask } ) => {
 			<Shipping className="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>
-					{ __(
-						'Set up shipping for your store',
-						'woocommerce-admin'
-					) }
+					{ __( 'Set up shipping for your store', 'woocommerce' ) }
 				</h1>
 				<p>
 					{ __(
 						'Configure shipping zones and rates',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<Button
@@ -32,7 +29,7 @@ const ShippingHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Add shipping zones', 'woocommerce-admin' ) }
+					{ __( 'Add shipping zones', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }

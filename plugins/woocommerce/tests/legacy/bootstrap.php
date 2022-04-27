@@ -194,10 +194,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		// Initialize the WC API extensions.
-		\Automattic\WooCommerce\Internal\Admin\Install::create_tables();
-		\Automattic\WooCommerce\Internal\Admin\Install::create_events();
-
 		WC_Install::install();
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
@@ -259,7 +255,7 @@ class WC_Unit_Tests_Bootstrap {
 	 * @return array Filtered feature flags.
 	 */
 	public function add_development_features( $flags ) {
-		$config = json_decode( file_get_contents( $this->plugin_dir . '/../woocommerce-admin/config/development.json' ) ); // @codingStandardsIgnoreLine.
+		$config = json_decode( file_get_contents( $this->plugin_dir . '/client/admin/config/development.json' ) ); // @codingStandardsIgnoreLine.
 		foreach ( $config->features as $feature => $bool ) {
 			$flags[ $feature ] = $bool;
 		}

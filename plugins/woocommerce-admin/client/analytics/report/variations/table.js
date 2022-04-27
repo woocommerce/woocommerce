@@ -42,19 +42,19 @@ class VariationsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product / Variation title', 'woocommerce-admin' ),
+				label: __( 'Product / Variation title', 'woocommerce' ),
 				key: 'name',
 				required: true,
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'SKU', 'woocommerce-admin' ),
+				label: __( 'SKU', 'woocommerce' ),
 				key: 'sku',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -62,28 +62,28 @@ class VariationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce' ),
+				screenReaderLabel: __( 'Net sales', 'woocommerce' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce-admin' ),
+				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			manageStock === 'yes'
 				? {
-						label: __( 'Status', 'woocommerce-admin' ),
+						label: __( 'Status', 'woocommerce' ),
 						key: 'stock_status',
 				  }
 				: null,
 			manageStock === 'yes'
 				? {
-						label: __( 'Stock', 'woocommerce-admin' ),
+						label: __( 'Stock', 'woocommerce' ),
 						key: 'stock',
 						isNumeric: true,
 				  }
@@ -175,7 +175,7 @@ class VariationsReportTable extends Component {
 									{ _x(
 										'Low',
 										'Indication of a low quantity',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</Link>
 							) : (
@@ -221,7 +221,7 @@ class VariationsReportTable extends Component {
 						'variation sold',
 						'variations sold',
 						variationsCount,
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					variationsCount,
 					query
@@ -233,21 +233,16 @@ class VariationsReportTable extends Component {
 					'item sold',
 					'items sold',
 					itemsSold,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', itemsSold ),
 			},
 			{
-				label: __( 'net sales', 'woocommerce-admin' ),
+				label: __( 'net sales', 'woocommerce' ),
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: _n(
-					'orders',
-					'orders',
-					ordersCount,
-					'woocommerce-admin'
-				),
+				label: _n( 'orders', 'orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
@@ -265,12 +260,9 @@ class VariationsReportTable extends Component {
 		const labels = {
 			helpText: __(
 				'Check at least two variations below to compare',
-				'woocommerce-admin'
+				'woocommerce'
 			),
-			placeholder: __(
-				'Search by variation name or SKU',
-				'woocommerce-admin'
-			),
+			placeholder: __( 'Search by variation name or SKU', 'woocommerce' ),
 		};
 
 		return (
@@ -309,7 +301,7 @@ class VariationsReportTable extends Component {
 				 */
 				title={ applyFilters(
 					EXPERIMENTAL_VARIATIONS_REPORT_TABLE_TITLE_FILTER,
-					__( 'Variations', 'woocommerce-admin' ),
+					__( 'Variations', 'woocommerce' ),
 					query
 				) }
 				columnPrefsKey="variations_report_columns"

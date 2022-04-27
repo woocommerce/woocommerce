@@ -74,12 +74,12 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	protected function get_export_collection_params() {
 		$params                = array();
 		$params['report_args'] = array(
-			'description'       => __( 'Parameters to pass on to the exported report.', 'woocommerce-admin' ),
+			'description'       => __( 'Parameters to pass on to the exported report.', 'woocommerce' ),
 			'type'              => 'object',
 			'validate_callback' => 'rest_validate_request_arg', // @todo: use each controller's schema?
 		);
 		$params['email']       = array(
-			'description'       => __( 'When true, email a link to download the export to the requesting user.', 'woocommerce-admin' ),
+			'description'       => __( 'When true, email a link to download the export to the requesting user.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -98,19 +98,19 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'status'    => array(
-					'description' => __( 'Export status.', 'woocommerce-admin' ),
+					'description' => __( 'Export status.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'message'   => array(
-					'description' => __( 'Export status message.', 'woocommerce-admin' ),
+					'description' => __( 'Export status message.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'export_id' => array(
-					'description' => __( 'Export ID.', 'woocommerce-admin' ),
+					'description' => __( 'Export ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -133,13 +133,13 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'percent_complete' => array(
-					'description' => __( 'Percentage complete.', 'woocommerce-admin' ),
+					'description' => __( 'Percentage complete.', 'woocommerce' ),
 					'type'        => 'int',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'download_url'     => array(
-					'description' => __( 'Export download URL.', 'woocommerce-admin' ),
+					'description' => __( 'Export download URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -170,7 +170,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		if ( 0 === $total_rows ) {
 			return rest_ensure_response(
 				array(
-					'message' => __( 'There is no data to export for the given request.', 'woocommerce-admin' ),
+					'message' => __( 'There is no data to export for the given request.', 'woocommerce' ),
 				)
 			);
 		}
@@ -179,7 +179,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 		$response = rest_ensure_response(
 			array(
-				'message'   => __( 'Your report file is being generated.', 'woocommerce-admin' ),
+				'message'   => __( 'Your report file is being generated.', 'woocommerce' ),
 				'export_id' => $export_id,
 			)
 		);
@@ -212,7 +212,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		if ( false === $percentage ) {
 			return new \WP_Error(
 				'woocommerce_admin_reports_export_invalid_id',
-				__( 'Sorry, there is no export with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no export with that ID.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}

@@ -40,7 +40,7 @@ class RemoteInboxNotificationsEngine {
 		// Hook into WCA updated. This is hooked up here rather than in
 		// on_admin_init because that runs too late to hook into the action.
 		add_action(
-			'woocommerce_admin_updated',
+			'woocommerce_updated',
 			function() {
 				$next_hook = WC()->queue()->get_next(
 					'woocommerce_run_on_woocommerce_admin_updated',

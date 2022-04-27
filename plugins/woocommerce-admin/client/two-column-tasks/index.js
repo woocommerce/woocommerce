@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -14,25 +14,7 @@ import TaskList from './task-list';
 import TaskListPlaceholder from './placeholder';
 import { Task } from '../tasks/task';
 
-const taskDashboardSelect = ( select ) => {
-	const { getOption, hasFinishedResolution } = select( OPTIONS_STORE_NAME );
-
-	return {
-		keepCompletedTaskList: getOption(
-			'woocommerce_task_list_keep_completed'
-		),
-		isResolving: ! hasFinishedResolution( 'getOption', [
-			'woocommerce_task_list_keep_completed',
-		] ),
-	};
-};
-
 const TaskDashboard = ( { query, twoColumns } ) => {
-	const {
-		keepCompletedTaskList,
-		isResolving: isResolvingOptions,
-	} = useSelect( taskDashboardSelect );
-
 	const { task } = query;
 
 	const { isResolving, taskLists } = useSelect( ( select ) => {
@@ -46,7 +28,6 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 			),
 		};
 	} );
-
 	const getCurrentTask = () => {
 		if ( ! task ) {
 			return null;
@@ -72,7 +53,7 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 		return null;
 	}
 
-	if ( isResolving || isResolvingOptions || ! taskLists[ 0 ] ) {
+	if ( isResolving || ! taskLists[ 0 ] ) {
 		return <TaskListPlaceholder twoColumns={ twoColumns } />;
 	}
 
@@ -104,15 +85,12 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 					id={ taskList.id }
 					eventName="tasklist"
 					twoColumns={ twoColumns }
-					keepCompletedTaskList={ keepCompletedTaskList }
+					keepCompletedTaskList={ taskList.keepCompletedTaskList }
 					dismissedTasks={ dismissedTasks || [] }
 					isComplete={ isTaskListComplete }
 					query={ query }
 					tasks={ setupTasks }
-					title={ __(
-						'Get ready to start selling',
-						'woocommerce-admin'
-					) }
+					title={ __( 'Get ready to start selling', 'woocommerce' ) }
 				/>
 			) }
 		</>

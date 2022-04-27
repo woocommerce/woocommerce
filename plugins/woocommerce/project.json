@@ -41,12 +41,6 @@
 				"script": "build"
 			}
 		},
-		"build-core": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "build:core"
-			}
-		},
 		"build-zip": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
@@ -57,7 +51,7 @@
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"commands": [
-					"pnpm nx build:feature-config woocommerce-admin",
+					"pnpm nx build:feature-config woocommerce",
 					"pnpm nx watch-assets woocommerce"
 				]
 			}
@@ -65,7 +59,7 @@
 		"watch-assets": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
-				"command": "pnpx grunt watch",
+				"command": "pnpm dlx grunt watch",
 				"cwd": "plugins/woocommerce/legacy"
 			}
 		},
@@ -140,12 +134,6 @@
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
 				"script": "packages:fix:textdomain"
-			}
-		},
-		"git-update-hooks": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "git:update-hooks"
 			}
 		},
 		"make-collection": {

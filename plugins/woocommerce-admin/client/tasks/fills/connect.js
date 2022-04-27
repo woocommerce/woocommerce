@@ -21,7 +21,7 @@ class Connect extends Component {
 			this.errorMessage(
 				__(
 					'You must click approve to install your extensions and connect to WooCommerce.com',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			return;
@@ -48,7 +48,7 @@ class Connect extends Component {
 	errorMessage(
 		message = __(
 			'There was an error connecting to WooCommerce.com. Please try again',
-			'woocommerce-admin'
+			'woocommerce'
 		)
 	) {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
@@ -91,7 +91,7 @@ class Connect extends Component {
 						'success',
 						__(
 							'Store connected to WooCommerce.com and extensions are being installed',
-							'woocommerce-admin'
+							'woocommerce'
 						)
 					);
 

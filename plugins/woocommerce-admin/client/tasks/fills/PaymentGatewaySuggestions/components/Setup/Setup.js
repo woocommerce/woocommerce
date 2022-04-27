@@ -88,7 +88,7 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 					key: 'install',
 					label: sprintf(
 						/* translators: %s = title of the payment gateway to install */
-						__( 'Install %s', 'woocommerce-admin' ),
+						__( 'Install %s', 'woocommerce' ),
 						title
 					),
 					content: (
@@ -120,7 +120,7 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 		() => ( {
 			key: 'configure',
 			label: sprintf(
-				__( 'Configure your %(title)s account', 'woocommerce-admin' ),
+				__( 'Configure your %(title)s account', 'woocommerce' ),
 				{
 					title,
 				}

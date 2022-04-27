@@ -24,13 +24,16 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
+			return __( 'Select how to ship your products', 'woocommerce' );
+		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added shipping costs', 'woocommerce-admin' );
+				return __( 'You added shipping costs', 'woocommerce' );
 			}
-			return __( 'Add shipping costs', 'woocommerce-admin' );
+			return __( 'Add shipping costs', 'woocommerce' );
 		}
-		return __( 'Set up shipping', 'woocommerce-admin' );
+		return __( 'Set up shipping', 'woocommerce' );
 	}
 
 	/**
@@ -39,9 +42,12 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_content() {
+		if ( count( $this->task_list->get_sections() ) > 0 ) {
+			return __( 'Set delivery costs and enable extra features, like shipping label printing.', 'woocommerce' );
+		}
 		return __(
 			"Set your store location and where you'll ship to.",
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -51,7 +57,7 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce-admin' );
+		return __( '1 minute', 'woocommerce' );
 	}
 
 	/**

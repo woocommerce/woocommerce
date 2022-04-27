@@ -36,7 +36,7 @@ class Data extends \WC_REST_Data_Controller {
 			$this->prepare_item_for_response(
 				(object) array(
 					'slug'        => 'download-ips',
-					'description' => __( 'An endpoint used for searching download logs for a specific IP address.', 'woocommerce-admin' ),
+					'description' => __( 'An endpoint used for searching download logs for a specific IP address.', 'woocommerce' ),
 				),
 				$request
 			)

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Standardize build scripts and create a build:zip script

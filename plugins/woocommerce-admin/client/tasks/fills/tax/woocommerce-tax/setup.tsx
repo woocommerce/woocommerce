@@ -10,7 +10,7 @@ import {
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, select as wpDataSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -44,28 +44,32 @@ export const Setup: React.FC< SetupProps > = ( {
 	onAutomate,
 	onManual,
 } ) => {
-	const [ pluginsToActivate, setPluginsToActivate ] = useState( [] );
-	const { activePlugins, isResolving } = useSelect( ( select ) => {
-		const { getSettings } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
-		const { hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		) as SettingsSelector;
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+	const [ pluginsToActivate, setPluginsToActivate ] = useState< string[] >(
+		[]
+	);
+	const { activePlugins, isResolving } = useSelect(
+		( select: typeof wpDataSelect ) => {
+			const { getSettings } = select(
+				SETTINGS_STORE_NAME
+			) as SettingsSelector;
+			const { hasFinishedResolution } = select(
+				OPTIONS_STORE_NAME
+			) as SettingsSelector;
+			const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
-		return {
-			activePlugins: getActivePlugins(),
-			generalSettings: getSettings( 'general' )?.general,
-			isResolving:
-				! hasFinishedResolution( 'getOption', [
-					'woocommerce_setup_jetpack_opted_in',
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					'wc_connect_options',
-				] ),
-		};
-	} );
+			return {
+				activePlugins: getActivePlugins(),
+				generalSettings: getSettings( 'general' )?.general,
+				isResolving:
+					! hasFinishedResolution( 'getOption', [
+						'woocommerce_setup_jetpack_opted_in',
+					] ) ||
+					! hasFinishedResolution( 'getOption', [
+						'wc_connect_options',
+					] ),
+			};
+		}
+	);
 	const [ stepIndex, setStepIndex ] = useState( 0 );
 
 	useEffect( () => {
@@ -96,33 +100,30 @@ export const Setup: React.FC< SetupProps > = ( {
 	const steps = [
 		{
 			key: 'store_location',
-			label: __( 'Set store location', 'woocommerce-admin' ),
+			label: __( 'Set store location', 'woocommerce' ),
 			description: __(
 				'The address from which your business operates',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <StoreLocation { ...stepProps } />,
 		},
 		{
 			key: 'plugins',
 			label: pluginsToActivate.includes( 'woocommerce-services' )
-				? __(
-						'Install Jetpack and WooCommerce Tax',
-						'woocommerce-admin'
-				  )
-				: __( 'Install Jetpack', 'woocommerce-admin' ),
+				? __( 'Install Jetpack and WooCommerce Tax', 'woocommerce' )
+				: __( 'Install Jetpack', 'woocommerce' ),
 			description: __(
 				'Jetpack and WooCommerce Tax allow you to automate sales tax calculations',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <Plugins { ...stepProps } />,
 		},
 		{
 			key: 'connect',
-			label: __( 'Connect your store', 'woocommerce-admin' ),
+			label: __( 'Connect your store', 'woocommerce' ),
 			description: __(
 				'Connect your store to WordPress.com to enable automated sales tax calculations',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <Connect { ...stepProps } />,
 		},

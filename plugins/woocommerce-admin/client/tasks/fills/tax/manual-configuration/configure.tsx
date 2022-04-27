@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -14,11 +14,10 @@ import { useSelect } from '@wordpress/data';
  */
 import { SettingsSelector, TaxChildProps } from '../utils';
 
-export const Configure: React.FC< TaxChildProps > = ( {
-	isPending,
-	onManual,
-} ) => {
-	const { generalSettings } = useSelect( ( select ) => {
+export const Configure: React.FC<
+	Pick< TaxChildProps, 'isPending' | 'onManual' >
+> = ( { isPending, onManual } ) => {
+	const { generalSettings } = useSelect( ( select: WCDataSelector ) => {
 		const { getSettings } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;
@@ -39,7 +38,7 @@ export const Configure: React.FC< TaxChildProps > = ( {
 					onManual();
 				} }
 			>
-				{ __( 'Configure', 'woocommerce-admin' ) }
+				{ __( 'Configure', 'woocommerce' ) }
 			</Button>
 			<p>
 				{ generalSettings.woocommerce_calc_taxes !== 'yes' &&
@@ -47,8 +46,7 @@ export const Configure: React.FC< TaxChildProps > = ( {
 						mixedString: __(
 							/*eslint-disable max-len*/
 							'By clicking "Configure" you\'re enabling tax rates and calculations. More info {{link}}here{{/link}}.',
-							/*eslint-enable max-len*/
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						components: {
 							link: (
@@ -56,7 +54,9 @@ export const Configure: React.FC< TaxChildProps > = ( {
 									href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_medium=product#section-1"
 									target="_blank"
 									type="external"
-								/>
+								>
+									<></>
+								</Link>
 							),
 						},
 					} ) }

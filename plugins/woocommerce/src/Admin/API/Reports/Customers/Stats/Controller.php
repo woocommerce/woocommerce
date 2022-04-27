@@ -129,26 +129,26 @@ class Controller extends \WC_REST_Reports_Controller {
 		// @todo Should any of these be 'indicator's?
 		$totals = array(
 			'customers_count'     => array(
-				'description' => __( 'Number of customers.', 'woocommerce-admin' ),
+				'description' => __( 'Number of customers.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'avg_orders_count'    => array(
-				'description' => __( 'Average number of orders.', 'woocommerce-admin' ),
+				'description' => __( 'Average number of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'avg_total_spend'     => array(
-				'description' => __( 'Average total spend per customer.', 'woocommerce-admin' ),
+				'description' => __( 'Average total spend per customer.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'format'      => 'currency',
 			),
 			'avg_avg_order_value' => array(
-				'description' => __( 'Average AOV per customer.', 'woocommerce-admin' ),
+				'description' => __( 'Average AOV per customer.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -162,7 +162,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'totals' => array(
-					'description' => __( 'Totals data.', 'woocommerce-admin' ),
+					'description' => __( 'Totals data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -183,19 +183,19 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params                            = array();
 		$params['context']                 = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['registered_before']       = array(
-			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['registered_after']        = array(
-			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['match']                   = array(
-			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce-admin' ),
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
 			'enum'              => array(
@@ -205,7 +205,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['search']                  = array(
-			'description'       => __( 'Limit response to objects with a customer field containing the search term. Searches the field provided by `searchby`.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with a customer field containing the search term. Searches the field provided by `searchby`.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -220,59 +220,59 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['name_includes']           = array(
-			'description'       => __( 'Limit response to objects with specfic names.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with specfic names.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['name_excludes']           = array(
-			'description'       => __( 'Limit response to objects excluding specfic names.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects excluding specfic names.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['username_includes']       = array(
-			'description'       => __( 'Limit response to objects with specfic usernames.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with specfic usernames.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['username_excludes']       = array(
-			'description'       => __( 'Limit response to objects excluding specfic usernames.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects excluding specfic usernames.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['email_includes']          = array(
-			'description'       => __( 'Limit response to objects including emails.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects including emails.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['email_excludes']          = array(
-			'description'       => __( 'Limit response to objects excluding emails.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects excluding emails.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['country_includes']        = array(
-			'description'       => __( 'Limit response to objects with specfic countries.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with specfic countries.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['country_excludes']        = array(
-			'description'       => __( 'Limit response to objects excluding specfic countries.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects excluding specfic countries.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['last_active_before']      = array(
-			'description'       => __( 'Limit response to objects last active before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects last active before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['last_active_after']       = array(
-			'description'       => __( 'Limit response to objects last active after (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects last active after (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['last_active_between']     = array(
-			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_date_arg' ),
 			'items'             => array(
@@ -280,19 +280,19 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['registered_before']       = array(
-			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['registered_after']        = array(
-			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['registered_between']      = array(
-			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_date_arg' ),
 			'items'             => array(
@@ -300,19 +300,19 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['orders_count_min']        = array(
-			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orders_count_max']        = array(
-			'description'       => __( 'Limit response to objects with an order count less than or equal to given integer.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with an order count less than or equal to given integer.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orders_count_between']    = array(
-			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
 			'items'             => array(
@@ -320,17 +320,17 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['total_spend_min']         = array(
-			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'woocommerce' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['total_spend_max']         = array(
-			'description'       => __( 'Limit response to objects with a total order spend less than or equal to given number.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with a total order spend less than or equal to given number.', 'woocommerce' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['total_spend_between']     = array(
-			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
 			'items'             => array(
@@ -338,17 +338,17 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['avg_order_value_min']     = array(
-			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'woocommerce' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['avg_order_value_max']     = array(
-			'description'       => __( 'Limit response to objects with an average order spend less than or equal to given number.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with an average order spend less than or equal to given number.', 'woocommerce' ),
 			'type'              => 'number',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['avg_order_value_between'] = array(
-			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
 			'items'             => array(
@@ -356,19 +356,19 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['last_order_before']       = array(
-			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['last_order_after']        = array(
-			'description'       => __( 'Limit response to objects with last order after (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to objects with last order after (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['customers']               = array(
-			'description'       => __( 'Limit result to items with specified customer ids.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result to items with specified customer ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -377,7 +377,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['fields']                  = array(
-			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',

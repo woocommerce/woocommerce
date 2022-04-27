@@ -69,15 +69,15 @@ class FirstProduct {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Do you need help with adding your first product?', 'woocommerce-admin' ) );
-		$note->set_content( __( 'This video tutorial will help you go through the process of adding your first product in WooCommerce.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Do you need help with adding your first product?', 'woocommerce' ) );
+		$note->set_content( __( 'This video tutorial will help you go through the process of adding your first product in WooCommerce.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'first-product-watch-tutorial',
-			__( 'Watch tutorial', 'woocommerce-admin' ),
+			__( 'Watch tutorial', 'woocommerce' ),
 			'https://www.youtube.com/watch?v=sFtXa00Jf_o&list=PLHdG8zvZd0E575Ia8Mu3w1h750YLXNfsC&index=24'
 		);
 
