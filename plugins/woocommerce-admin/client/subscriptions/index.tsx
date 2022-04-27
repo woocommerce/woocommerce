@@ -6,6 +6,7 @@ import { createInterpolateElement, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -45,6 +46,11 @@ const GetStartedButton = () => {
 				isBusy={ isGettingStarted }
 				isPrimary
 				onClick={ () => {
+					setIsGettingStarted( true );
+					recordEvent(
+						'wccore_subscriptions_empty_state_get_started_click',
+						{}
+					);
 					installAndActivatePlugins( [ 'woocommerce-payments' ] )
 						.then( () => {
 							// TODO: Handle success.
@@ -54,7 +60,6 @@ const GetStartedButton = () => {
 							// TODO: Handle erorr.
 							console.log( 'Oh no, there was an error!' );
 						} );
-					setIsGettingStarted( true );
 				} }
 			>
 				{ __( 'Get started', 'woocommerce-payments' ) }
