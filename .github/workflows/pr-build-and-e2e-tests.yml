@@ -18,9 +18,9 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
-                  package/woocommerce/plugins/woocommerce/packages
-                  package/woocommerce/plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-test-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
@@ -65,10 +65,13 @@ jobs:
 
             - name: Cache modules
               uses: actions/cache@v3
+              id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
@@ -77,6 +80,7 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install woocommerce
 
             - name: Run build
@@ -112,10 +116,13 @@ jobs:
 
             - name: Cache modules
               uses: actions/cache@v3
+              id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm
@@ -124,6 +131,7 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install woocommerce
 
             - name: Run build
