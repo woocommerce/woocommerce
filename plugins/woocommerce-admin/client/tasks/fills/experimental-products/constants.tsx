@@ -73,3 +73,20 @@ export const productTypes = Object.freeze( [
 
 export type ProductType = typeof productTypes[ number ];
 export type ProductTypeKey = ProductType[ 'key' ];
+
+export const onboardingProductTypesToSurfaced: Readonly<
+	Record< string, ProductTypeKey[] >
+> = Object.freeze( {
+	physical: [ 'physical', 'variable', 'grouped' ],
+	subscriptions: [ 'subscription' ],
+	downloads: [ 'digital' ],
+	// key in alphabetical and ascending order for mapping
+	'physical,subscriptions': [ 'physical', 'subscription' ],
+	'downloads,physical': [ 'physical', 'digital' ],
+	'downloads,subscriptions': [ 'digital', 'subscription' ],
+	'downloads,physical,subscriptions': [
+		'physical',
+		'digital',
+		'subscription',
+	],
+} );

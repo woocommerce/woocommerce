@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { List, Link } from '@woocommerce/components';
+import { Text } from '@woocommerce/experimental';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 
@@ -13,14 +14,16 @@ import { ProductType } from './constants';
 import './stack.scss';
 
 type StackProps = {
-	items: ProductType[];
+	items: ( ProductType & {
+		onClick: () => void;
+	} )[];
 };
 
 const Stack: React.FC< StackProps > = ( { items } ) => {
 	return (
 		<div className="woocommerce-products-stack">
 			<List items={ items } />
-			<div className="woocommerce-stack-other-options">
+			<Text className="woocommerce-stack__other-options">
 				{ interpolateComponents( {
 					mixedString: __(
 						'Can’t find your product type? {{sbLink}}Start Blank{{/sbLink}} or {{LspLink}}Load Sample Products{{/LspLink}} to see what they look like in your store.',
@@ -49,7 +52,7 @@ const Stack: React.FC< StackProps > = ( { items } ) => {
 						),
 					},
 				} ) }
-			</div>
+			</Text>
 		</div>
 	);
 };

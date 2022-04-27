@@ -53,7 +53,8 @@
 		}
 	}
 
-	.woocommerce-stack-other-options {
+	.woocommerce-stack__other-options {
+		display: block;
 		margin-top: 20px;
 		color: $gray-700;
 		line-height: 16px;
