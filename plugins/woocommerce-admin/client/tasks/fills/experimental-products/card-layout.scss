@@ -1,0 +1,27 @@
+.woocommerce-products-card-layout {
+	margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	.woocommerce-products-card-layout__description {
+		text-align: center;
+	}
+
+	.woocommerce-products-card-list {
+		margin-top: 32px;
+
+		.woocommerce-list {
+			grid-template-columns: 215px 215px 215px;
+		}
+
+		.woocommerce-list__item {
+			width: 215px;
+			height: 200px;
+		}
+
+		.woocommerce-list__item-after {
+			opacity: 0;
+		}
+	}
+}

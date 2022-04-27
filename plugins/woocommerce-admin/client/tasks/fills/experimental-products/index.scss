@@ -1,8 +1,7 @@
 .woocommerce-task-products {
 	display: flex;
 	flex-direction: column;
-	max-width: 550px;
-	margin: auto;
+	align-items: center;
 
 	a {
 		text-decoration: none;
@@ -11,7 +10,6 @@
 
 	.woocommerce-task-products__title {
 		font-size: 24px;
-		margin-bottom: 24px;
 		text-align: center;
 	}
 
@@ -45,6 +43,11 @@
 		font-size: 11px;
 		line-height: 16px;
 		margin-bottom: 8px;
+	}
+
+	.woocommerce-products-stack {
+		max-width: 550px;
+		margin-top: 32px;
 	}
 }
 
