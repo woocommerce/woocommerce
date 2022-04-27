@@ -1,10 +1,12 @@
-export const base_url = __ENV.URL || 'http://localhost:8084';
-export const base_host = __ENV.HOST || 'localhost:8084';
+/* eslint-disable */
+export const base_url = __ENV.URL || 'http://localhost:8086';
+export const base_host = __ENV.HOST || 'localhost:8086';
 
 export const admin_username = __ENV.A_USER || 'admin';
 export const admin_password = __ENV.A_PW || 'password';
 
-export const customer_username = __ENV.C_USER || 'customer@woocommercecoree2etestsuite.com';
+export const customer_username =
+	__ENV.C_USER || 'customer@woocommercecoree2etestsuite.com';
 export const customer_password = __ENV.C_PW || 'password';
 
 export const addresses_customer_billing_first_name = 'John';
