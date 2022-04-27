@@ -17,28 +17,23 @@ import { getAdminLink } from '@woocommerce/settings';
 import './index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import Stack from './stack';
-import { getSurfacedProductKeys, getProductTypes } from './utils';
-import useCreateProductByType from './use-create-product-by-type';
+import { getSurfacedProductKeys } from './utils';
+import useProductTypeListItems from './use-product-types-list-items';
 
-const onboardingData = getAdminSetting( 'onboarding' );
-const onboardingProductTypes =
-	( onboardingData?.profile && onboardingData?.profile.product_types ) || [];
-
-const Products = () => {
-	const [ isCollapsed, setIsCollapsed ] = useState< boolean >( true );
-	const { createProductByType } = useCreateProductByType();
-
-	const productTypes = useMemo(
-		() =>
-			getProductTypes().map( ( p ) => ( {
-				...p,
-				onClick: () => createProductByType( p.key ),
-			} ) ),
-		[ createProductByType ]
+const getOnboardingProductType = (): string[] => {
+	const onboardingData = getAdminSetting( 'onboarding' );
+	return (
+		( onboardingData?.profile && onboardingData?.profile.product_types ) ||
+		[]
 	);
+};
+
+export const Products = () => {
+	const [ isCollapsed, setIsCollapsed ] = useState< boolean >( true );
+	const productTypes = useProductTypeListItems();
 
 	const surfacedProductKeys = getSurfacedProductKeys(
-		onboardingProductTypes
+		getOnboardingProductType()
 	);
 
 	const isAllProductSurfaced =
@@ -49,15 +44,15 @@ const Products = () => {
 			return productTypes;
 		}
 
-		const surfacedProductTypes = productTypes.filter( ( p ) =>
-			surfacedProductKeys.includes( p.key )
+		const surfacedProductTypes = productTypes.filter( ( productType ) =>
+			surfacedProductKeys.includes( productType.key )
 		);
 		if ( ! isCollapsed ) {
 			// To show product types in same order, we need to push the other product types to the end.
 			productTypes.forEach(
-				( p ) =>
-					! surfacedProductTypes.includes( p ) &&
-					surfacedProductTypes.push( p )
+				( productType ) =>
+					! surfacedProductTypes.includes( productType ) &&
+					surfacedProductTypes.push( productType )
 			);
 		}
 		return surfacedProductTypes;
@@ -85,7 +80,9 @@ const Products = () => {
 					className="woocommerce-task-products__button-view-less-product-types"
 					onClick={ () => setIsCollapsed( ! isCollapsed ) }
 				>
-					{ __( 'View less product types', 'woocommerce' ) }
+					{ isCollapsed
+						? __( `View more product types`, 'woocommerce' )
+						: __( `View less product types`, 'woocommerce' ) }
 					<Icon icon={ isCollapsed ? chevronDown : chevronUp } />
 				</Button>
 			) }
