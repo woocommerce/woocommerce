@@ -67,6 +67,23 @@ jobs:
              pnpm nx composer-dump-autoload woocommerce
            fi
 
+      - name: Prepare Test Environment
+        run: |
+          cd plugins/woocommerce
+          WP_VERSION="${{ matrix.wp }}"
+          if [[ $WP_VERSION == 'latest' ]]; then
+            WP_VERSION="\"https://wordpress.org/latest.zip\""
+          elif [[ $WP_VERSION == 'nightly' ]]; then
+            WP_VERSION="\"https://wordpress.org/nightly-builds/wordpress-latest.zip\""
+          elif [[ $WP_VERSION == '5.8' ]]; then
+            WP_VERSION="\"https://wordpress.org/wordpress-5.8.4.zip\""
+          elif [[ $WP_VERSION == '5.7' ]]; then
+            WP_VERSION="\"https://wordpress.org/wordpress-5.7.6.zip\""
+          else
+            WP_VERSION="\"WordPress/WordPress#$WP_VERSION\""
+          fi
+          echo "{ \"phpVersion\": \"${{ matrix.php }}\", \"core\": $WP_VERSION }" > .wp-env.override.json
+
       - name: Run Tests
         run: |
           cd plugins/woocommerce
