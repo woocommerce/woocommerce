@@ -249,6 +249,78 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test order and orderby sanitization in get_notes()
+	 */
+	public function test_get_notes_order_args_sanitized() {
+		global $wpdb;
+
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		// Attempt to pass a nonstandard direction.
+		// It should be replaced with the default: DESC.
+		$data_store->get_notes( array( 'order' => 'increasing' ) );
+		$this->assertFalse( stripos( 'increasing', $wpdb->last_query ) );
+		$this->assertTrue( stripos( 'DESC', $wpdb->last_query ) >= 0 );
+
+		// Attempt to pass a standard direction in lowercase.
+		// It should be replaced with the all-caps equivalent.
+		$data_store->get_notes( array( 'order' => 'asc' ) );
+		$this->assertFalse( strpos( 'asc', $wpdb->last_query ) );
+		$this->assertTrue( strpos( 'ASC', $wpdb->last_query ) >= 0 );
+
+		// Attempt to pass a suspicious string for orderby.
+		// It should have backticks stripped from it and get wrapped in backticks, thus causing an error.
+		$log_file = ini_set( 'error_log', '/dev/null' );
+		$wpdb->hide_errors();
+		$this->assertTrue( '' === $wpdb->last_error );
+
+		$data_store->get_notes( array( 'orderby' => '`name`;select 1;' ) );
+
+		$this->assertFalse( stripos( '`name`;select', $wpdb->last_query ) );
+		$this->assertTrue( stripos( '`name;select 1;`', $wpdb->last_query ) >= 0 );
+		$this->assertFalse( '' === $wpdb->last_error );
+
+		ini_set( 'error_log', $log_file );
+		$wpdb->show_errors();
+	}
+
+	/**
+	 * Test order and orderby sanitization in lookup_notes()
+	 */
+	public function test_lookup_notes_order_args_sanitized() {
+		global $wpdb;
+
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		// Attempt to pass a nonstandard direction.
+		// It should be replaced with the default: DESC.
+		$data_store->lookup_notes( array( 'order' => 'increasing' ) );
+		$this->assertFalse( stripos( 'increasing', $wpdb->last_query ) );
+		$this->assertTrue( stripos( 'DESC', $wpdb->last_query ) >= 0 );
+
+		// Attempt to pass a standard direction in lowercase.
+		// It should be replaced with the all-caps equivalent.
+		$data_store->lookup_notes( array( 'order' => 'asc' ) );
+		$this->assertFalse( strpos( 'asc', $wpdb->last_query ) );
+		$this->assertTrue( strpos( 'ASC', $wpdb->last_query ) >= 0 );
+
+		// Attempt to pass a suspicious string for orderby.
+		// It should have backticks stripped from it and get wrapped in backticks, thus causing an error.
+		$log_file = ini_set( 'error_log', '/dev/null' );
+		$wpdb->hide_errors();
+		$this->assertTrue( '' === $wpdb->last_error );
+
+		$data_store->lookup_notes( array( 'orderby' => '`name`;select 1;' ) );
+
+		$this->assertFalse( stripos( '`name`;select', $wpdb->last_query ) );
+		$this->assertTrue( stripos( '`name;select 1;`', $wpdb->last_query ) >= 0 );
+		$this->assertFalse( '' === $wpdb->last_error );
+
+		ini_set( 'error_log', $log_file );
+		$wpdb->show_errors();
+	}
+
+	/**
 	 * Test that sources are correctly added to where clause.
 	 */
 	public function test_get_notes_where_clauses_with_sources() {

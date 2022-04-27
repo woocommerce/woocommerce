@@ -46,12 +46,14 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	query,
 	id,
 	eventName,
+	eventPrefix,
 	tasks,
 	twoColumns,
 	keepCompletedTaskList,
 	isComplete,
 	displayProgressHeader,
 } ) => {
+	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
 		OPTIONS_STORE_NAME
@@ -80,7 +82,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			return;
 		}
 
-		recordEvent( `${ eventName }_view`, {
+		recordEvent( `${ listEventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
@@ -199,7 +201,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const trackClick = ( task: TaskType ) => {
-		recordEvent( `${ eventName }_click`, {
+		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
 		} );
 	};
@@ -302,7 +304,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 							const className = classnames(
 								'woocommerce-task-list__item index-' + index,
 								{
-									'is-complete': task.isComplete,
+									complete: task.isComplete,
 									'is-active': task.id === activeTaskId,
 								}
 							);

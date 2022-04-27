@@ -10,10 +10,10 @@ jobs:
       fail-fast: false
       matrix:
         build: [trunk]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ matrix.build }}
       - name: Build
@@ -32,7 +32,7 @@ jobs:
           max_releases: 1
   update:
     name: Update nightly tag commit ref
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Update nightly tag
         uses: richardsimko/github-tag-action@v1.0.5

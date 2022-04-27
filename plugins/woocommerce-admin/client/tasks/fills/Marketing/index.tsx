@@ -108,7 +108,7 @@ export const getMarketingExtensionLists = (
 };
 
 export type MarketingProps = {
-	onComplete: ( bool: boolean ) => void;
+	onComplete: ( bool?: boolean ) => void;
 };
 
 const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
@@ -236,10 +236,12 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 };
 
 registerPlugin( 'wc-admin-onboarding-task-marketing', {
+	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => (
+		// @ts-expect-error WooOnboardingTask is still a pure JS file
 		<WooOnboardingTask id="marketing">
-			{ ( { onComplete } ) => {
+			{ ( { onComplete }: MarketingProps ) => {
 				return <Marketing onComplete={ onComplete } />;
 			} }
 		</WooOnboardingTask>

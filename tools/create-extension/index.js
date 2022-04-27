@@ -11,6 +11,7 @@ const files = [
 	'_package.json',
 	'._eslintrc.js',
 	'._prettierrc.json',
+	'._wp-env.json',
 ];
 const maybeThrowError = ( error ) => {
 	if ( error ) throw error;
@@ -37,7 +38,7 @@ const maybeThrowError = ( error ) => {
 		const from = path.join( __dirname, file );
 		const to = path.join(
 			folder,
-			'_main.php' === file
+			file === '_main.php'
 				? `${ extensionSlug }.php`
 				: file.replace( '_', '' )
 		);
@@ -79,10 +80,11 @@ const maybeThrowError = ( error ) => {
 	process.stdout.write( '\n' );
 	console.log(
 		chalk.green(
-			'Run the following commands from the root of the extension and activate the plugin.'
+			'Run the following commands from the root of the extension to scaffold a dev environment.'
 		)
 	);
 	process.stdout.write( '\n' );
+	console.log( 'wp-env start' );
 	console.log( 'pnpm install' );
 	console.log( 'pnpm start' );
 	process.stdout.write( '\n' );

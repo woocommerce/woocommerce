@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Enable meta table to meta table migrations towards custom table project.

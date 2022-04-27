@@ -6,7 +6,7 @@ on:
 jobs:
   maybe-create-next-milestone-and-release-branch:
     name: "Maybe create next milestone and release branch"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: "Get the action script"
         run: |

@@ -10,7 +10,7 @@ import {
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, select as wpDataSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -44,28 +44,32 @@ export const Setup: React.FC< SetupProps > = ( {
 	onAutomate,
 	onManual,
 } ) => {
-	const [ pluginsToActivate, setPluginsToActivate ] = useState( [] );
-	const { activePlugins, isResolving } = useSelect( ( select ) => {
-		const { getSettings } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
-		const { hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		) as SettingsSelector;
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+	const [ pluginsToActivate, setPluginsToActivate ] = useState< string[] >(
+		[]
+	);
+	const { activePlugins, isResolving } = useSelect(
+		( select: typeof wpDataSelect ) => {
+			const { getSettings } = select(
+				SETTINGS_STORE_NAME
+			) as SettingsSelector;
+			const { hasFinishedResolution } = select(
+				OPTIONS_STORE_NAME
+			) as SettingsSelector;
+			const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
-		return {
-			activePlugins: getActivePlugins(),
-			generalSettings: getSettings( 'general' )?.general,
-			isResolving:
-				! hasFinishedResolution( 'getOption', [
-					'woocommerce_setup_jetpack_opted_in',
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					'wc_connect_options',
-				] ),
-		};
-	} );
+			return {
+				activePlugins: getActivePlugins(),
+				generalSettings: getSettings( 'general' )?.general,
+				isResolving:
+					! hasFinishedResolution( 'getOption', [
+						'woocommerce_setup_jetpack_opted_in',
+					] ) ||
+					! hasFinishedResolution( 'getOption', [
+						'wc_connect_options',
+					] ),
+			};
+		}
+	);
 	const [ stepIndex, setStepIndex ] = useState( 0 );
 
 	useEffect( () => {

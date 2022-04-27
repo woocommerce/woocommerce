@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { filter } from 'lodash';
 import { useState } from '@wordpress/element';
 import { Stepper } from '@woocommerce/components';
 

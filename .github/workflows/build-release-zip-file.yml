@@ -9,10 +9,10 @@ on:
 jobs:
   build:
     name: Build release zip file
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
       - name: Build the zip file

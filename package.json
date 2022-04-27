@@ -16,7 +16,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm git:update-hooks",
-    "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install"
+    "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
+    "create-extension": "node ./tools/create-extension/index.js"
   },
   "devDependencies": {
     "@automattic/nx-composer": "^0.1.0",
@@ -45,7 +46,9 @@
     "@babel/core": "7.12.9",
     "@wordpress/babel-plugin-import-jsx-pragma": "^3.1.0",
     "@wordpress/babel-preset-default": "^6.4.1",
+    "fs-extra": "^10.0.1",
     "lodash": "^4.17.21",
+    "promptly": "^3.2.0",
     "wp-textdomain": "1.0.1"
   }
 }
