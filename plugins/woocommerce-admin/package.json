@@ -25,6 +25,7 @@
 		"install-if-deps-outdated": "node bin/install-if-deps-outdated.js",
 		"install-if-no-packages": "node bin/install-if-no-packages.js",
 		"lint": "pnpm run lint:js && pnpm run lint:css",
+		"lint:fix": "pnpm lint:js-fix && pnpm lint:css-fix",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:js": "wp-scripts lint-js ./client --ext=js,ts,tsx",
