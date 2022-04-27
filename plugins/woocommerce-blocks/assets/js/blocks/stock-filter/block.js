@@ -336,6 +336,16 @@ const StockStatusFilterBlock = ( {
 	const isLoading = ! blockAttributes.isPreview && ! STOCK_STATUS_OPTIONS;
 	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
 
+	const hasFilterableProducts = getSettingWithCoercion(
+		'has_filterable_products',
+		false,
+		isBoolean
+	);
+
+	if ( ! hasFilterableProducts ) {
+		return null;
+	}
+
 	return (
 		<>
 			{ ! isEditor && blockAttributes.heading && (

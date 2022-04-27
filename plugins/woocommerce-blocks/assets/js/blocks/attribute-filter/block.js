@@ -63,6 +63,12 @@ const AttributeFilterBlock = ( {
 	attributes: blockAttributes,
 	isEditor = false,
 } ) => {
+	const hasFilterableProducts = getSettingWithCoercion(
+		'has_filterable_products',
+		false,
+		isBoolean
+	);
+
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'is_rendering_php_template',
 		false,
@@ -499,6 +505,10 @@ const AttributeFilterBlock = ( {
 		hasSetPhpFilterDefaults,
 		attributeTermsLoading,
 	] );
+
+	if ( ! hasFilterableProducts ) {
+		return null;
+	}
 
 	// Short-circuit if no attribute is selected.
 	if ( ! attributeObject ) {
