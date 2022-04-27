@@ -50,8 +50,8 @@ jobs:
           echo "{ \"phpVersion\": \"7.4\", \"core\": \"WordPress/WordPress#5.9\" }" > .wp-env.override.json
           npm -g install @wordpress/env
           wp-env start
-          pnpm nx test-code-coverage woocommerce
-          exit 0
+          wp-env run tests-wordpress "chmod 755 wp-content wp-content/plugins wp-content/uploads"
+          pnpm nx test-code-coverage woocommerce || true
       
       - name: Send code coverage to Codecov.
         run: |
