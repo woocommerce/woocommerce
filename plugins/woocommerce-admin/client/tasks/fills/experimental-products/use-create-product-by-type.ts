@@ -17,7 +17,6 @@ const useCreateProductByType = () => {
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
-		setIsRequesting( true );
 		if ( type === 'subscription' ) {
 			window.location = getAdminLink(
 				'post-new.php?post_type=product&subscription_pointers=true'
@@ -25,8 +24,11 @@ const useCreateProductByType = () => {
 			return;
 		}
 
+		setIsRequesting( true );
 		try {
-			const data = await createProductFromTemplate(
+			const data: {
+				id?: string;
+			} = await createProductFromTemplate(
 				{
 					template_name: type,
 					status: 'draft',
