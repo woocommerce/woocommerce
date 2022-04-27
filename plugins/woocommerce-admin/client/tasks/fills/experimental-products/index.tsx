@@ -19,9 +19,10 @@ import useProductTypeListItems from './use-product-types-list-items';
 import Stack from './stack';
 import Footer from './footer';
 import CardLayout from './card-layout';
+import { LoadSampleProductType } from './constants';
 
 // TODO: Use experiment data from the API, not hardcoded.
-const SHOW_STACK_LAYOUT = false;
+const SHOW_STACK_LAYOUT = true;
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -72,6 +73,14 @@ export const Products = () => {
 					! surfacedProductTypes.includes( productType ) &&
 					surfacedProductTypes.push( productType )
 			);
+
+			if ( ! SHOW_STACK_LAYOUT ) {
+				surfacedProductTypes.push( {
+					...LoadSampleProductType,
+					// TODO: Change to load sample product
+					onClick: () => new Promise( () => {} ),
+				} );
+			}
 		}
 		return surfacedProductTypes;
 	}, [

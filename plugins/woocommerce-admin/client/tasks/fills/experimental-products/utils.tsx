@@ -3,11 +3,14 @@
  */
 import {
 	productTypes,
+	ProductType,
 	ProductTypeKey,
 	onboardingProductTypesToSurfaced,
 } from './constants';
 
-export const getProductTypes = ( exclude: ProductTypeKey[] = [] ) =>
+export const getProductTypes = (
+	exclude: ProductTypeKey[] = []
+): ProductType[] =>
 	productTypes.filter(
 		( productType ) => ! exclude.includes( productType.key )
 	);

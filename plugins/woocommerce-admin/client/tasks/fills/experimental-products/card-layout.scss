@@ -12,16 +12,29 @@
 		margin-top: 32px;
 
 		.woocommerce-list {
-			grid-template-columns: 215px 215px 215px;
+			grid-template-columns: 217px 217px 217px;
 		}
 
 		.woocommerce-list__item {
-			width: 215px;
+			width: 217px;
 			height: 200px;
+			padding: 40px 24px;
 		}
 
 		.woocommerce-list__item-after {
 			opacity: 0;
+		}
+
+		.woocommerce-list__item-inner {
+			padding: 0;
+		}
+	}
+
+	.woocommerce-products-list__item-load-sample-product {
+		border: 1px dashed #dcdcde;
+
+		.woocommerce-list__item-before {
+			background-color: $gray-100;
 		}
 	}
 }
