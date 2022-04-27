@@ -1,6 +1,6 @@
 {
-	"phpVersion": "7.4",
-	"core": "WordPress/WordPress#5.9",
+	"phpVersion": "7.2",
+	"core": null,
 	"plugins": [ 
 		".",
 		"https://downloads.wordpress.org/plugin/akismet.zip"
