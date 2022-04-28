@@ -16,7 +16,7 @@ const basicPlugins: Extension[] = [
 		manage_url: '#',
 		image_url: 'basic.jpeg',
 		is_built_by_wc: true,
-		is_visible: true,
+		is_visible: true,,,
 	},
 ];
 
