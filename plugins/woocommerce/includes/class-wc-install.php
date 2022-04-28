@@ -764,6 +764,7 @@ class WC_Install {
 			'wc-admin-getting-started-ecommerce-webinar',
 			'wc-admin-navigation-feedback',
 			'wc-admin-navigation-feedback-follow-up',
+			'wc-admin-set-up-additional-payment-types',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(
