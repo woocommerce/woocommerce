@@ -21,7 +21,8 @@ jobs:
         run: npm install -g pnpm
 
       - name: Build zip
-        run: pnpm nx build-zip woocommerce
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
 
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.1.0
