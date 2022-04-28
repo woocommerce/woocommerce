@@ -152,6 +152,28 @@ describe( 'TaskList', () => {
 		} );
 	} );
 
+	it( 'should trigger tasklist_view event on initial render for setup task list with eventPrefix if eventName is undefined', () => {
+		render(
+			<TaskList
+				id="setup"
+				tasks={ [] }
+				title="List title"
+				query={ {} }
+				isComplete={ false }
+				isHidden={ false }
+				eventPrefix={ 'tasklist_' }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+				isVisible={ true }
+			/>
+		);
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
+			number_tasks: 0,
+			store_connected: null,
+		} );
+	} );
+
 	it( 'should trigger {id}_tasklist_view event on initial render for setup task list if id is not setup', () => {
 		render(
 			<TaskList

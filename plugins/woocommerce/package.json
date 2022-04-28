@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "6.5.0",
+  "version": "6.6.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -9,23 +9,23 @@
   },
   "license": "GPL-3.0+",
   "config": {
-    "wp_org_slug": "woocommerce"
+    "wp_org_slug": "woocommerce",
+    "build_step": "pnpm run build:zip"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "./bin/build-zip.sh",
+    "build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets",
     "build:feature-config": "php bin/generate-feature-config.php",
-    "build:core": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets && pnpm run makepot",
-    "build:zip": "pnpm run build",
+    "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
-    "docker:down": "pnpx wc-e2e docker:down",
-    "docker:ssh": "pnpx wc-e2e docker:ssh",
-    "docker:up": "pnpx wc-e2e docker:up",
-    "test:api": "ALLURE_OUTPUT_DIR=\"$PWD/tests/api\" pnpx wc-api-tests test api",
-    "make:collection": "pnpx wc-api-tests make:collection",
-    "test:e2e": "pnpx wc-e2e test:e2e",
-    "test:e2e-debug": "pnpx wc-e2e test:e2e-debug",
-    "test:e2e-dev": "pnpx wc-e2e test:e2e-dev",
+    "docker:down": "pnpm exec wc-e2e docker:down",
+    "docker:ssh": "pnpm exec wc-e2e docker:ssh",
+    "docker:up": "pnpm exec wc-e2e docker:up",
+    "test:api": "ALLURE_OUTPUT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
+    "make:collection": "pnpm exec wc-api-tests make:collection",
+    "test:e2e": "pnpm exec wc-e2e test:e2e",
+    "test:e2e-debug": "pnpm exec wc-e2e test:e2e-debug",
+    "test:e2e-dev": "pnpm exec wc-e2e test:e2e-dev",
     "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
     "makepot": "composer run-script makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js"

@@ -89,4 +89,21 @@ class MigrationHelper {
 		return self::$wpdb_placeholder_for_type[ $type ];
 	}
 
+	/**
+	 * Generates ON DUPLICATE KEY UPDATE clause to be used in migration.
+	 *
+	 * @param array $columns List of column names.
+	 *
+	 * @return string SQL clause for INSERT...ON DUPLICATE KEY UPDATE
+	 */
+	public static function generate_on_duplicate_statement_clause( $columns ) {
+		$update_value_statements = array();
+		foreach ( $columns as $column ) {
+			$update_value_statements[] = "$column = VALUES( $column )";
+		}
+		$update_value_clause = implode( ', ', $update_value_statements );
+
+		return "ON DUPLICATE KEY UPDATE $update_value_clause";
+	}
+
 }

@@ -9,6 +9,9 @@
   "title": "WooCommerce Beta Tester",
   "version": "2.0.5",
   "homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
+  "config": {
+    "build_step": "pnpm run build:zip"
+  },
   "devDependencies": {
     "eslint": "5.16.0",
     "uglify-js": "^3.5.3"
@@ -20,8 +23,9 @@
     }
   },
   "scripts": {
-    "build": "./bin/build-zip.sh",
-    "build:dev": "npm run lint:js && npm run uglify",
+    "build": "pnpm run uglify",
+    "build:zip": "./bin/build-zip.sh",
+    "build:dev": "pnpm run lint:js && pnpm run uglify",
     "preuglify": "rm -f $npm_package_assets_js_min",
     "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
     "lint:js": "eslint assets/js --ext=js"

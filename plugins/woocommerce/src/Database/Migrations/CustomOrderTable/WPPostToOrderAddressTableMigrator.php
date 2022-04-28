@@ -47,9 +47,9 @@ class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 			'source'      => array(
 				'entity' => array(
 					'table_name'             => $this->table_names['orders'],
-					'meta_rel_column'        => 'post_id',
+					'meta_rel_column'        => 'id',
 					'destination_rel_column' => 'id',
-					'primary_key'            => 'post_id',
+					'primary_key'            => 'id',
 				),
 				'meta'   => array(
 					'table_name'        => $wpdb->postmeta,

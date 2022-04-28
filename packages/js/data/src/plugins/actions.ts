@@ -37,7 +37,7 @@ type PluginsResponse< PluginData > = {
 	message: string;
 } & Response;
 
-type InstallPluginsResponse = PluginsResponse< {
+export type InstallPluginsResponse = PluginsResponse< {
 	installed: string[];
 	results: Record< string, boolean >;
 	install_time?: Record< string, number >;

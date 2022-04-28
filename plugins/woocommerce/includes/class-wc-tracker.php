@@ -223,6 +223,7 @@ class WC_Tracker {
 		$wp_data['version']      = get_bloginfo( 'version' );
 		$wp_data['multisite']    = is_multisite() ? 'Yes' : 'No';
 		$wp_data['env_type']     = $environment_type;
+		$wp_data['dropins']      = array_keys( get_dropins() );
 
 		return $wp_data;
 	}

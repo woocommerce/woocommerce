@@ -14,12 +14,6 @@ class WcPayWelcomePage {
 	const EXPERIMENT_NAME_BASE = 'woocommerce_payments_menu_promo_nz_ie_:yyyy_:mm';
 
 	/**
-	 * WCPayWelcomePage constructor.
-	 */
-	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
-	}
-	/**
 	 * Registers the WooCommerce Payments welcome page.
 	 */
 	public function register_payments_welcome_page() {

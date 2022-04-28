@@ -12,12 +12,12 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { SetupStepProps } from './setup';
 
-export const AutomatedTaxes: React.FC< SetupStepProps > = ( {
-	isPending,
-	onAutomate,
-	onManual,
-	onDisable,
-} ) => {
+export const AutomatedTaxes: React.FC<
+	Pick<
+		SetupStepProps,
+		'isPending' | 'onAutomate' | 'onManual' | 'onDisable'
+	>
+> = ( { isPending, onAutomate, onManual, onDisable } ) => {
 	return (
 		<div className="woocommerce-task-tax__success">
 			<span
