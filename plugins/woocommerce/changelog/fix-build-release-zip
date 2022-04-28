@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add exclusions for makepot on assets, packages and vendor directories.
