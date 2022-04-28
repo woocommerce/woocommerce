@@ -46,15 +46,15 @@ export type SettingsSelector = WPDataSelectors & {
 	getSettings: (
 		type: string
 	) => {
-		general: { woocommerce_default_country?: string };
+		general: {
+			woocommerce_default_country?: string;
+			woocommerce_calc_taxes?: string;
+		};
 		tax: { [ key: string ]: string };
 	};
 	getOption: (
 		type: string
 	) => {
-		wc_connect_options: {
-			tos_accepted: string;
-		};
 		tos_accepted?: boolean;
 	};
 };

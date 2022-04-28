@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useSelect,
-	useDispatch,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
@@ -26,9 +22,8 @@ const WooCommerceServicesItem: React.FC< {
 	const wcAdminAssetUrl = getAdminSetting( 'wcAdminAssetUrl', '' );
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
-	const isSiteConnectedToJetpack = useSelect(
-		( select: typeof wpDataSelect ) =>
-			select( PLUGINS_STORE_NAME ).isJetpackConnected()
+	const isSiteConnectedToJetpack = useSelect( ( select ) =>
+		select( PLUGINS_STORE_NAME ).isJetpackConnected()
 	);
 
 	const handleSetupClick = () => {
