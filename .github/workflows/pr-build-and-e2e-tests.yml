@@ -33,7 +33,7 @@ jobs:
               run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Run build
-              run: pnpm nx build woocommerce --skip-nx-cache
+              run: pnpm nx build woocommerce
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -84,7 +84,7 @@ jobs:
               run: pnpm nx composer-install woocommerce
 
             - name: Run build
-              run: pnpm nx build woocommerce --skip-nx-cache
+              run: pnpm nx build woocommerce
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -135,7 +135,7 @@ jobs:
               run: pnpm nx composer-install woocommerce
 
             - name: Run build
-              run: pnpm nx build woocommerce --skip-nx-cache
+              run: pnpm nx build woocommerce
 
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: plugins/woocommerce/tests/e2e/docker
