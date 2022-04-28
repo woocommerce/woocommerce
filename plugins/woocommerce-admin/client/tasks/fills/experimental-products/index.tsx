@@ -27,8 +27,8 @@ const SHOW_STACK_LAYOUT = true;
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
 	return (
-		( onboardingData?.profile && onboardingData?.profile.product_types ) ||
-		[]
+		( onboardingData?.profile &&
+			onboardingData?.profile.product_types ) || [ 'physical' ]
 	);
 };
 
@@ -48,17 +48,12 @@ const ViewControlButton: React.FC< {
 );
 
 export const Products = () => {
+	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
+
+	const productTypes = useProductTypeListItems();
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
-	const productTypes = useProductTypeListItems();
-	const isAllProductSurfaced =
-		surfacedProductTypeKeys.length === productTypes.length;
-
-	const [ isExpanded, setIsExpanded ] = useState< boolean >(
-		isAllProductSurfaced
-	);
-
 	const visibleProductTypes = useMemo( () => {
 		const surfacedProductTypes = productTypes.filter( ( productType ) =>
 			surfacedProductTypeKeys.includes( productType.key )
@@ -98,12 +93,10 @@ export const Products = () => {
 				) : (
 					<CardLayout items={ visibleProductTypes } />
 				) }
-				{ ! isAllProductSurfaced && (
-					<ViewControlButton
-						isExpanded={ isExpanded }
-						onClick={ () => setIsExpanded( ! isExpanded ) }
-					/>
-				) }
+				<ViewControlButton
+					isExpanded={ isExpanded }
+					onClick={ () => setIsExpanded( ! isExpanded ) }
+				/>
 				<Footer />
 			</div>
 		</div>

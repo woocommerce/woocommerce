@@ -32,7 +32,7 @@ describe( 'getSurfacedProductTypeKeys', () => {
 		},
 		{
 			selectedTypes: [],
-			expected: productTypes.map( ( p ) => p.key ),
+			expected: onboardingProductTypesToSurfaced.physical,
 		},
 	] )(
 		'should return expected surfaced product keys when onboarding product type contains $selected',

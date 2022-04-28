@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { Products } from '../';
-import { productTypes } from '../constants';
+import { defaultSurfacedProductTypes, productTypes } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 jest.mock( '@wordpress/data', () => ( {
@@ -25,7 +25,7 @@ describe( 'Products', () => {
 		jest.clearAllMocks();
 	} );
 
-	it( 'should render all products types without view less button when onboardingData.profile.productType is null', () => {
+	it( 'should render default products types when onboardingData.profile.productType is null', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
 			profile: {
 				product_types: null,
@@ -33,13 +33,11 @@ describe( 'Products', () => {
 		} ) );
 		const { queryByText } = render( <Products /> );
 
-		productTypes.forEach( ( { title } ) => {
-			expect( queryByText( title ) ).toBeInTheDocument();
+		productTypes.forEach( ( { key, title } ) => {
+			if ( defaultSurfacedProductTypes.includes( key ) ) {
+				expect( queryByText( title ) ).toBeInTheDocument();
+			}
 		} );
-
-		expect(
-			queryByText( 'View more product types' )
-		).not.toBeInTheDocument();
 	} );
 
 	it( 'should render digital products type with view more button', () => {

@@ -12,6 +12,7 @@ import {
 	ProductTypeKey,
 	onboardingProductTypesToSurfaced,
 	supportedOnboardingProductTypes,
+	defaultSurfacedProductTypes,
 } from './constants';
 
 export const getProductTypes = (
@@ -34,7 +35,7 @@ export const getSurfacedProductTypeKeys = (
 	);
 	const sortedKeyStr = validOnboardingProductTypes.sort().join( ',' );
 	if ( ! onboardingProductTypesToSurfaced.hasOwnProperty( sortedKeyStr ) ) {
-		return productTypes.map( ( p ) => p.key );
+		return defaultSurfacedProductTypes;
 	}
 	return onboardingProductTypesToSurfaced[ sortedKeyStr ];
 };

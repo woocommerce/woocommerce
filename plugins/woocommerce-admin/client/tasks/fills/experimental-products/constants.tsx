@@ -104,6 +104,8 @@ export const onboardingProductTypesToSurfaced: Readonly<
 		'subscription',
 	],
 } );
+export const defaultSurfacedProductTypes =
+	onboardingProductTypesToSurfaced.physical;
 
 export const supportedOnboardingProductTypes = [
 	'physical',
