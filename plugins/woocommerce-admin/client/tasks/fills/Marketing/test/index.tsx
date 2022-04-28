@@ -14,7 +14,7 @@ const basicPlugins: Extension[] = [
 		description: 'Basic plugin description',
 		manage_url: '#',
 		image_url: 'basic.jpeg',
-		is_built_by_wc: true,
+		is_built_by_wc: true, // Comment.
 	},
 ];
 
