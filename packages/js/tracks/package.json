@@ -31,7 +31,8 @@
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "eslint src"
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
@@ -45,7 +46,7 @@
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }

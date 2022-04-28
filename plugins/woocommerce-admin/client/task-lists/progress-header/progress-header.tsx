@@ -4,11 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import {
-	getVisibleTasks,
-	ONBOARDING_STORE_NAME,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -30,7 +26,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 		completedCount,
 		hasVisitedTasks,
 		disabledCompletedCount,
-	} = useSelect( ( select: WCDataSelector ) => {
+	} = useSelect( ( select ) => {
 		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
 			taskListId
 		);

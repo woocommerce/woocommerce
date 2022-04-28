@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect, select as wpDataSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useUser, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 const SHOW_MARKETPLACE_SUGGESTION_OPTION =
@@ -10,21 +10,19 @@ const SHOW_MARKETPLACE_SUGGESTION_OPTION =
 const RecommendationsEligibilityWrapper: React.FC = ( { children } ) => {
 	const { currentUserCan } = useUser();
 
-	const isMarketplaceSuggestionsEnabled = useSelect(
-		( select: typeof wpDataSelect ) => {
-			const { getOption, hasFinishedResolution } = select(
-				OPTIONS_STORE_NAME
-			);
+	const isMarketplaceSuggestionsEnabled = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		);
 
-			const hasFinishedResolving = hasFinishedResolution( 'getOption', [
-				SHOW_MARKETPLACE_SUGGESTION_OPTION,
-			] );
-			const canShowMarketplaceSuggestions =
-				getOption( SHOW_MARKETPLACE_SUGGESTION_OPTION ) !== 'no';
+		const hasFinishedResolving = hasFinishedResolution( 'getOption', [
+			SHOW_MARKETPLACE_SUGGESTION_OPTION,
+		] );
+		const canShowMarketplaceSuggestions =
+			getOption( SHOW_MARKETPLACE_SUGGESTION_OPTION ) !== 'no';
 
-			return hasFinishedResolving && canShowMarketplaceSuggestions;
-		}
-	);
+		return hasFinishedResolving && canShowMarketplaceSuggestions;
+	} );
 
 	if ( ! currentUserCan( 'install_plugins' ) ) {
 		return null;

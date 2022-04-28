@@ -10,7 +10,6 @@ import {
 	getVisibleTasks,
 	ONBOARDING_STORE_NAME,
 	TaskListType,
-	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text, List, CollapsibleList } from '@woocommerce/experimental';
@@ -39,7 +38,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	displayProgressHeader = false,
 	query,
 } ) => {
-	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
+	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 
 		return {

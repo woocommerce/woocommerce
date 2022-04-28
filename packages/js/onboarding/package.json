@@ -37,9 +37,9 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
-		"@wordpress/eslint-plugin": "^11.0.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
@@ -59,11 +59,12 @@
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "eslint src"
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }
