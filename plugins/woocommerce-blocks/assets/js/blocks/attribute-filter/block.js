@@ -274,42 +274,47 @@ const AttributeFilterBlock = ( {
 		[ pageUrl, attributeObject?.taxonomy ]
 	);
 
-	const onClickSubmit = ( isChecked ) => {
+	const onSubmit = ( checkedFilters ) => {
 		const query = updateAttributeFilter(
 			productAttributesQuery,
 			setProductAttributesQuery,
 			attributeObject,
-			getSelectedTerms( isChecked ),
+			getSelectedTerms( checkedFilters ),
 			blockAttributes.queryType === 'or' ? 'in' : 'and'
 		);
 
 		// This is for PHP rendered template filtering only.
 		if ( filteringForPhpTemplate ) {
-			redirectPageForPhpTemplate( query, isChecked.length === 0 );
+			redirectPageForPhpTemplate( query, checkedFilters.length === 0 );
 		}
 	};
 
-	const onSubmit = useCallback(
-		( isChecked ) => {
+	const updateCheckedFilters = useCallback(
+		( checkedFilters ) => {
 			if ( isEditor ) {
 				return;
 			}
 
-			updateAttributeFilter(
-				productAttributesQuery,
-				setProductAttributesQuery,
-				attributeObject,
-				getSelectedTerms( isChecked ),
-				blockAttributes.queryType === 'or' ? 'in' : 'and'
-			);
+			setChecked( checkedFilters );
+			if ( ! blockAttributes.showFilterButton ) {
+				updateAttributeFilter(
+					productAttributesQuery,
+					setProductAttributesQuery,
+					attributeObject,
+					getSelectedTerms( checkedFilters ),
+					blockAttributes.queryType === 'or' ? 'in' : 'and'
+				);
+			}
 		},
 		[
 			isEditor,
+			setChecked,
 			productAttributesQuery,
 			setProductAttributesQuery,
 			attributeObject,
 			getSelectedTerms,
 			blockAttributes.queryType,
+			blockAttributes.showFilterButton,
 		]
 	);
 
@@ -329,17 +334,13 @@ const AttributeFilterBlock = ( {
 			! isShallowEqual( previousCheckedQuery, currentCheckedQuery ) && // checked query changed
 			! isShallowEqual( checked, currentCheckedQuery ) // checked query doesn't match the UI
 		) {
-			setChecked( currentCheckedQuery );
-			if ( ! blockAttributes.showFilterButton ) {
-				onSubmit( currentCheckedQuery );
-			}
+			updateCheckedFilters( currentCheckedQuery );
 		}
 	}, [
 		checked,
 		currentCheckedQuery,
 		previousCheckedQuery,
-		onSubmit,
-		blockAttributes.showFilterButton,
+		updateCheckedFilters,
 	] );
 
 	const multiple =
@@ -426,18 +427,9 @@ const AttributeFilterBlock = ( {
 				}
 			}
 
-			setChecked( newChecked );
-			if ( ! blockAttributes.showFilterButton ) {
-				onSubmit( newChecked );
-			}
+			updateCheckedFilters( newChecked );
 		},
-		[
-			checked,
-			displayedOptions,
-			multiple,
-			onSubmit,
-			blockAttributes.showFilterButton,
-		]
+		[ checked, displayedOptions, multiple, updateCheckedFilters ]
 	);
 
 	/**
@@ -479,7 +471,7 @@ const AttributeFilterBlock = ( {
 	 * Important: For PHP rendered block templates only.
 	 *
 	 * When we set the default parameter values which we get from the URL in the above useEffect(),
-	 * we need to run onSubmit which will set these values in state for the Active Filters block.
+	 * we need to run updateCheckedFilters which will set these values in state for the Active Filters block.
 	 */
 	useEffect( () => {
 		if ( filteringForPhpTemplate ) {
@@ -493,24 +485,15 @@ const AttributeFilterBlock = ( {
 				! attributeTermsLoading
 			) {
 				setHasSetPhpFilterDefaults( true );
-				updateAttributeFilter(
-					productAttributesQuery,
-					setProductAttributesQuery,
-					attributeObject,
-					getSelectedTerms( activeFilters ),
-					blockAttributes.queryType === 'or' ? 'in' : 'and'
-				);
+				updateCheckedFilters( activeFilters );
 			}
 		}
 	}, [
-		productAttributesQuery,
-		setProductAttributesQuery,
 		attributeObject,
-		blockAttributes.queryType,
-		getSelectedTerms,
 		filteringForPhpTemplate,
 		hasSetPhpFilterDefaults,
 		attributeTermsLoading,
+		updateCheckedFilters,
 	] );
 
 	if ( ! hasFilterableProducts ) {
@@ -595,7 +578,7 @@ const AttributeFilterBlock = ( {
 					<FilterSubmitButton
 						className="wc-block-attribute-filter__button"
 						disabled={ isLoading || isDisabled }
-						onClick={ () => onClickSubmit( checked ) }
+						onClick={ () => onSubmit( checked ) }
 					/>
 				) }
 			</div>
