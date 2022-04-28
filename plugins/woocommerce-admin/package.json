@@ -11,11 +11,11 @@
 	"scripts": {
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"prebuild": "pnpm run install-if-deps-outdated",
-		"build": "WC_ADMIN_PHASE=core pnpm run clean && pnpm run build:packages && pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
+		"build": "pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:packages && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"build:packages": "cross-env NODE_ENV=production pnpm run:packages -- build",
 		"clean": "rimraf ../woocommerce/assets/client/admin/* && pnpm run:packages -- clean --parallel",
-		"client:watch": "cross-env WC_ADMIN_PHASE=development && pnpm run clean && pnpm run build:packages && pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
+		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
 		"create-hook-reference": "node ./bin/hook-reference/index.js",
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
 		"predev": "pnpm run -s install-if-deps-outdated",
