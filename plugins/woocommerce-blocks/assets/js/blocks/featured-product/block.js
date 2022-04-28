@@ -19,12 +19,14 @@ import {
 import { withSelect } from '@wordpress/data';
 import {
 	Button,
+	ExternalLink,
 	FocalPointPicker,
 	PanelBody,
 	Placeholder,
 	RangeControl,
 	ResizableBox,
 	Spinner,
+	TextareaControl,
 	ToggleControl,
 	ToolbarGroup,
 	withSpokenMessages,
@@ -337,6 +339,30 @@ const FeaturedProduct = ( {
 											setAttributes( {
 												focalPoint: value,
 											} )
+										}
+									/>
+									<TextareaControl
+										label={ __(
+											'Alt text (alternative text)',
+											'woo-gutenberg-products-block'
+										) }
+										value={ attributes.alt }
+										onChange={ ( alt ) => {
+											setAttributes( { alt } );
+										} }
+										help={
+											<>
+												<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
+													{ __(
+														'Describe the purpose of the image',
+														'woo-gutenberg-products-block'
+													) }
+												</ExternalLink>
+												{ __(
+													'Leaving it empty will use the product name.',
+													'woo-gutenberg-products-block'
+												) }
+											</>
 										}
 									/>
 								</PanelBody>
