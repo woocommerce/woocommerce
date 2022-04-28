@@ -50,6 +50,10 @@
 		"access": "public"
 	},
 	"scripts": {
+<<<<<<< HEAD
+=======
+		"postinstall": "composer install",
+>>>>>>> 74a1984900 (admin e2e tests)
 		"build": "tsc --build",
 		"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
