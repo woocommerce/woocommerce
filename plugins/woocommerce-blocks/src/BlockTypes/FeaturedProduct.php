@@ -15,21 +15,12 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	protected $block_name = 'featured-product';
 
 	/**
-	 * Default attribute values, should match what's set in JS `registerBlockType`.
+	 * Default attribute values.
 	 *
 	 * @var array
 	 */
 	protected $defaults = array(
-		'align'        => 'none',
-		'contentAlign' => 'center',
-		'dimRatio'     => 50,
-		'focalPoint'   => false,
-		'imageFit'     => 'none',
-		'mediaId'      => 0,
-		'mediaSrc'     => '',
-		'minHeight'    => 500,
-		'showDesc'     => true,
-		'showPrice'    => true,
+		'align' => 'none',
 	);
 
 	/**
@@ -37,7 +28,16 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	 *
 	 * @var array
 	 */
-	protected $global_style_wrapper = array( 'text_color', 'font_size', 'border_color', 'border_radius', 'border_width', 'background_color', 'text_color', 'padding' );
+	protected $global_style_wrapper = array(
+		'text_color',
+		'font_size',
+		'border_color',
+		'border_radius',
+		'border_width',
+		'background_color',
+		'text_color',
+		'padding',
+	);
 
 	/**
 	 * Get the supports array for this block type.
@@ -147,7 +147,7 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		if ( ! empty( $image ) ) {
 			return sprintf(
 				'<img alt="%1$s" class="wc-block-featured-product__background-image" src="%2$s" style="%3$s" />',
-				wp_kses_post( $attributes['alt'] ?? $product->get_name() ),
+				wp_kses_post( $attributes['alt'] ?: $product->get_name() ),
 				esc_url( $image ),
 				$style
 			);

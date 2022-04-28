@@ -263,6 +263,10 @@ const getMainConfig = ( options = {} ) => {
 						from: './assets/js/blocks/checkout/block.json',
 						to: './checkout/block.json',
 					},
+					{
+						from: './assets/js/blocks/featured-product/block.json',
+						to: './featured-product/block.json',
+					},
 				],
 			} ),
 		],
