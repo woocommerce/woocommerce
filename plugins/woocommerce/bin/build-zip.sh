@@ -8,7 +8,8 @@ DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
-
+echo "check wp cli version"
+wp --version
 echo "Installing PHP and JS dependencies..."
 pnpm install
 composer install || exit "$?"
