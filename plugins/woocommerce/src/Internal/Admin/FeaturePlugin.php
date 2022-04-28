@@ -120,7 +120,7 @@ class FeaturePlugin {
 		 * @deprecated 3.3.0
 		 * @var string
 		 */
-		define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		$this->define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
 	}
 
 	/**
