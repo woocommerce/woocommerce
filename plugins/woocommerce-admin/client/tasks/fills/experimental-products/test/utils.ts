@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getProductTypes, getSurfacedProductKeys } from '../utils';
+import { getProductTypes, getSurfacedProductTypeKeys } from '../utils';
 import { productTypes, onboardingProductTypesToSurfaced } from '../constants';
 
 describe( 'getProductTypes', () => {
@@ -16,7 +16,7 @@ describe( 'getProductTypes', () => {
 	} );
 } );
 
-describe( 'getSurfacedProductKeys', () => {
+describe( 'getSurfacedProductTypeKeys', () => {
 	test.each( [
 		{
 			selectedTypes: [ 'physical' ],
@@ -37,7 +37,7 @@ describe( 'getSurfacedProductKeys', () => {
 	] )(
 		'should return expected surfaced product keys when onboarding product type contains $selected',
 		( { selectedTypes, expected } ) => {
-			expect( getSurfacedProductKeys( selectedTypes ) ).toEqual(
+			expect( getSurfacedProductTypeKeys( selectedTypes ) ).toEqual(
 				expected
 			);
 		}

@@ -25,7 +25,9 @@ export const getProductTypes = (
  * Get key of surfaced product types by onboarding product types.
  * Return all product types if onboarding product types is empty.
  */
-export const getSurfacedProductKeys = ( onboardingProductTypes: string[] ) => {
+export const getSurfacedProductTypeKeys = (
+	onboardingProductTypes: string[]
+) => {
 	const validOnboardingProductTypes = intersection(
 		onboardingProductTypes,
 		supportedOnboardingProductTypes

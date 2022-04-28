@@ -14,7 +14,7 @@ import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
  */
 import './index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { getSurfacedProductKeys } from './utils';
+import { getSurfacedProductTypeKeys } from './utils';
 import useProductTypeListItems from './use-product-types-list-items';
 import Stack from './stack';
 import Footer from './footer';
@@ -48,23 +48,20 @@ const ViewControlButton: React.FC< {
 );
 
 export const Products = () => {
-	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
-	const productTypes = useProductTypeListItems();
-
-	const surfacedProductKeys = getSurfacedProductKeys(
+	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
-
+	const productTypes = useProductTypeListItems();
 	const isAllProductSurfaced =
-		surfacedProductKeys.length === productTypes.length;
+		surfacedProductTypeKeys.length === productTypes.length;
+
+	const [ isExpanded, setIsExpanded ] = useState< boolean >(
+		isAllProductSurfaced
+	);
 
 	const visibleProductTypes = useMemo( () => {
-		if ( isAllProductSurfaced ) {
-			return productTypes;
-		}
-
 		const surfacedProductTypes = productTypes.filter( ( productType ) =>
-			surfacedProductKeys.includes( productType.key )
+			surfacedProductTypeKeys.includes( productType.key )
 		);
 		if ( isExpanded ) {
 			// To show product types in same order, we need to push the other product types to the end.
@@ -83,12 +80,7 @@ export const Products = () => {
 			}
 		}
 		return surfacedProductTypes;
-	}, [
-		surfacedProductKeys,
-		isExpanded,
-		isAllProductSurfaced,
-		productTypes,
-	] );
+	}, [ surfacedProductTypeKeys, isExpanded, productTypes ] );
 
 	return (
 		<div className="woocommerce-task-products">
