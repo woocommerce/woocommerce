@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\WPPostToCOTMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -79,12 +79,12 @@ class DataSynchronizer {
 	/**
 	 * Class initialization, invoked by the DI container.
 	 *
-	 * @internal
-	 * @param OrdersTableDataStore $data_store The data store to use.
-	 * @param DatabaseUtil         $database_util The database util class to use.
-	 * @param WPPostToCOTMigrator  $posts_to_cot_migrator The posts to COT migration class to use.
+	 * @param OrdersTableDataStore             $data_store The data store to use.
+	 * @param DatabaseUtil                     $database_util The database util class to use.
+	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
+	 *@internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, WPPostToCOTMigrator $posts_to_cot_migrator ) {
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator ) {
 		$this->data_store            = $data_store;
 		$this->database_util         = $database_util;
 		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
@@ -355,7 +355,7 @@ WHERE
 			// TODO: Load $order_ids orders from the orders table and create them (by updating the corresponding placeholder record) in the posts table.
 		} else {
 			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
-			$this->posts_to_cot_migrator->process_migration_for_ids( $order_ids );
+			$this->posts_to_cot_migrator->migrate_orders( $order_ids );
 		}
 
 		$batch_size -= count( $order_ids );
@@ -372,7 +372,7 @@ WHERE
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			// TODO: Load $order_ids orders from the orders table and update them in the posts table.
 		} else {
-			$this->posts_to_cot_migrator->process_migration_for_ids( $order_ids );
+			$this->posts_to_cot_migrator->migrate_orders( $order_ids );
 		}
 	}
 

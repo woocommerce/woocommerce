@@ -1,9 +1,9 @@
 <?php
 /**
- * Tests for WPPostToCOTMigrator class.
+ * Tests for PostsToOrdersMigrationController class.
  */
 
-use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\WPPostToCOTMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
@@ -11,9 +11,9 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ShippingHelper;
 
 /**
- * Class WPPostToCOTMigratorTest.
+ * Class PostsToOrdersMigrationControllerTest.
  */
-class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
+class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @var DataSynchronizer
@@ -21,7 +21,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	private $synchronizer;
 
 	/**
-	 * @var WPPostToCOTMigrator
+	 * @var PostsToOrdersMigrationController
 	 */
 	private $sut;
 
@@ -37,16 +37,16 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
-		$this->sut        = wc_get_container()->get( WPPostToCOTMigrator::class );
+		$this->sut        = wc_get_container()->get( PostsToOrdersMigrationController::class );
 	}
 
 	/**
 	 * Test that migration for a normal order happens as expected.
 	 */
-	public function test_process_next_migration_batch_normal_order() {
+	public function test_migration_for_normal_order() {
 		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
-		$this->clear_all_orders_and_reset_checkpoint();
-		$this->sut->process_next_migration_batch( 100 );
+		$this->clear_all_orders();
+		$this->sut->migrate_order( $order->get_id() );
 
 		$this->assert_core_data_is_migrated( $order );
 		$this->assert_order_addresses_are_migrated( $order );
@@ -57,17 +57,16 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	/**
 	 * Test that already migrated order isn't migrated twice.
 	 */
-	public function test_process_next_migration_batch_already_migrated_order() {
+	public function test_migration_for_already_migrated_order() {
 		global $wpdb;
 		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
-		$this->clear_all_orders_and_reset_checkpoint();
+		$this->clear_all_orders();
 
 		// Run the migration once.
-		$this->sut->process_next_migration_batch( 100 );
+		$this->sut->migrate_order( $order->get_id() );
 
-		// Delete checkpoint and run migration again, assert there are still no duplicates.
-		$this->sut->update_checkpoint( 0 );
-		$this->sut->process_next_migration_batch( 100 );
+		// Run the migration again, assert there are still no duplicates.
+		$this->sut->migrate_order( $order->get_id() );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertEquals(
@@ -132,21 +131,21 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	/**
 	 * Test that when an order is partially migrated, it can still be resumed as expected.
 	 */
-	public function test_process_next_migration_batch_interrupted_migrating_order() {
+	public function test_interrupted_migration() {
 		$this->markTestSkipped();
 	}
 
 	/**
 	 * Test that invalid order data is not migrated but logged.
 	 */
-	public function test_process_next_migration_batch_invalid_order_data() {
+	public function test_migrating_invalid_order_data() {
 		$this->markTestSkipped();
 	}
 
 	/**
 	 * Test when one order is invalid but other one is valid in a migration batch.
 	 */
-	public function test_process_next_migration_batch_invalid_valid_order_combo() {
+	public function test_migrating_invalid_valid_order_combo() {
 		$this->markTestSkipped();
 	}
 
@@ -352,13 +351,12 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	/**
 	 * Helper method to clear checkout and truncate order tables.
 	 */
-	private function clear_all_orders_and_reset_checkpoint() {
+	private function clear_all_orders() {
 		global $wpdb;
 		$order_tables = $this->data_store->get_all_table_names();
 		foreach ( $order_tables as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( "TRUNCATE table $table;" );
 		}
-		$this->sut->delete_checkpoint();
 	}
 }
