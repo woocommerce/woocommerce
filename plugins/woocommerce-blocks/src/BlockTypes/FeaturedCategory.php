@@ -20,7 +20,16 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	 *
 	 * @var array
 	 */
-	protected $global_style_wrapper = array( 'text_color', 'font_size', 'border_color', 'border_radius', 'border_width', 'background_color', 'text_color', 'padding' );
+	protected $global_style_wrapper = array(
+		'text_color',
+		'font_size',
+		'border_color',
+		'border_radius',
+		'border_width',
+		'background_color',
+		'text_color',
+		'padding',
+	);
 
 	/**
 	 * Get the supports array for this block type.
@@ -42,15 +51,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	 * @var array
 	 */
 	protected $defaults = array(
-		'align'        => 'none',
-		'contentAlign' => 'center',
-		'dimRatio'     => 50,
-		'focalPoint'   => false,
-		'imageFit'     => 'none',
-		'mediaId'      => 0,
-		'mediaSrc'     => '',
-		'minHeight'    => 500,
-		'showDesc'     => true,
+		'align' => 'none',
 	);
 
 	/**
@@ -151,7 +152,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 		if ( ! empty( $image ) ) {
 			return sprintf(
 				'<img alt="%1$s" class="wc-block-featured-category__background-image" src="%2$s" style="%3$s" />',
-				wp_kses_post( $attributes['alt'] ?? $category->name ),
+				wp_kses_post( $attributes['alt'] ?: $category->name ),
 				esc_url( $image ),
 				$style
 			);
@@ -255,6 +256,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 
 		return $image;
 	}
+
 	/**
 	 * Extra data passed through from server to client for block.
 	 *
