@@ -84,7 +84,7 @@ class Loader {
 		*/
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 
-		add_action( 'admin_init', array( __CLASS__, 'is_using_installed_wc_admin_plugin' ) );
+		add_action( 'admin_init', array( __CLASS__, 'deactivate_wc_admin_plugin' ) );
 	}
 
 	/**
@@ -108,6 +108,30 @@ class Loader {
 					}
 				);
 			}
+		}
+	}
+
+	/**
+	 * Verifies which plugin version is being used. If WooCommerce Admin is installed and activated but not in use
+	 * it will show a warning.
+	 */
+	public static function deactivate_wc_admin_plugin() {
+		if ( PluginsHelper::is_plugin_active( 'woocommerce-admin' ) ) {
+			$path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
+			deactivate_plugins( $path );
+			add_action(
+				'admin_notices',
+				function() {
+					echo '<div class="error"><p>';
+					printf(
+						/* translators: %s: is referring to the plugin's name. */
+						esc_html__( '%1$s plugin has been deactivated to avoid conflicts with %2$s plugin.', 'woocommerce' ),
+						'<code>WooCommerce Admin</code>',
+						'<code>WooCommerce</code>'
+					);
+					echo '</p></div>';
+				}
+			);
 		}
 	}
 
