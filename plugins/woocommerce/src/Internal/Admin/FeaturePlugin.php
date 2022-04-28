@@ -120,7 +120,15 @@ class FeaturePlugin {
 		 * @deprecated 3.3.0
 		 * @var string
 		 */
-		$this->define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+			/**
+			  * Define the current WC Admin version.
+			  *
+ 			  * @deprecated 3.3.0
+ 			  * @var string
+ 			  */
+			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		}
 	}
 
 	/**
