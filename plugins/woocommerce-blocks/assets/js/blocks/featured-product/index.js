@@ -66,6 +66,10 @@ registerBlockType( 'woocommerce/featured-product', {
 	},
 	example,
 	attributes: {
+		alt: {
+			type: 'string',
+			default: '',
+		},
 		/**
 		 * Alignment of content inside block.
 		 */
