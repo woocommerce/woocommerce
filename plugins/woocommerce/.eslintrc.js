@@ -15,7 +15,6 @@ module.exports = {
 	rules: {
 		camelcase: 0,
 		indent: 0,
-		'max-len': [ 2, { code: 140 } ],
 		'no-console': 1,
 	},
 	parser: 'babel-eslint',
@@ -27,4 +26,12 @@ module.exports = {
 			jsx: true,
 		},
 	},
+	overrides: [
+		{
+			files: ["e2e/tests/**/*.spec.js"],
+			rules: {
+				"jest/no-test-callback": "off"
+			}
+		}
+	]
 };
