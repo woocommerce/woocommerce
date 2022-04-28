@@ -151,7 +151,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 		if ( ! empty( $image ) ) {
 			return sprintf(
 				'<img alt="%1$s" class="wc-block-featured-category__background-image" src="%2$s" style="%3$s" />',
-				wp_kses_post( $category->description ),
+				wp_kses_post( $attributes['alt'] ?? $category->name ),
 				esc_url( $image ),
 				$style
 			);
