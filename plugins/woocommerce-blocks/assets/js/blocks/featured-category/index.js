@@ -68,6 +68,11 @@ registerBlockType( 'woocommerce/featured-category', {
 	},
 	example,
 	attributes: {
+		alt: {
+			type: 'string',
+			default: '',
+		},
+
 		/**
 		 * Alignment of content inside block.
 		 */

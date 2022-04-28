@@ -28,6 +28,8 @@ import {
 	withSpokenMessages,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	TextareaControl,
+	ExternalLink,
 } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
@@ -238,6 +240,30 @@ const FeaturedCategory = ( {
 										setAttributes( {
 											focalPoint: value,
 										} )
+									}
+								/>
+								<TextareaControl
+									label={ __(
+										'Alt text (alternative text)',
+										'woo-gutenberg-products-block'
+									) }
+									value={ attributes.alt }
+									onChange={ ( alt ) => {
+										setAttributes( { alt } );
+									} }
+									help={
+										<>
+											<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
+												{ __(
+													'Describe the purpose of the image',
+													'woo-gutenberg-products-block'
+												) }
+											</ExternalLink>
+											{ __(
+												'Leaving it empty will use the category name.',
+												'woo-gutenberg-products-block'
+											) }
+										</>
 									}
 								/>
 							</PanelBody>
