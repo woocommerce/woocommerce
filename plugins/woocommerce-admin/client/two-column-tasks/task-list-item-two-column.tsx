@@ -83,8 +83,8 @@ export const TaskListItemTwoColumn: React.FC< TaskListItemProps > = ( {
 					completed={ isComplete }
 					additionalInfo={ additionalInfo }
 					content={ content }
-					onClick={ ( e: React.ChangeEvent ) => {
-						if ( e.target?.tagName === 'A' ) {
+					onClick={ ( e: React.MouseEvent< HTMLButtonElement > ) => {
+						if ( ( e.target as HTMLElement ).tagName === 'A' ) {
 							return;
 						}
 						onClickActions();
