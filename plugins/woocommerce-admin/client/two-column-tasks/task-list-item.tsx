@@ -123,8 +123,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					action={ () => {} }
 					actionLabel={ task.actionLabel }
 					{ ...props }
-					onClick={ () => {
-						if ( task.isDisabled ) {
+					onClick={ ( e: React.ChangeEvent ) => {
+						if ( task.isDisabled || e.target.tagName === 'A' ) {
 							return;
 						}
 						onClickActions();
