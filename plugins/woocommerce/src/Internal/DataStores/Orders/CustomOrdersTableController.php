@@ -24,6 +24,11 @@ class CustomOrdersTableController {
 	public const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
 
 	/**
+	 * The name of the option that tells that the authoritative table must be flipped once sync finishes.
+	 */
+	private const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
+
+	/**
 	 * The data store object to use.
 	 *
 	 * @var OrdersTableDataStore
@@ -371,7 +376,7 @@ class CustomOrdersTableController {
 						__( 'Switch to using the orders table as the authoritative data store for orders when sync finishes', 'woocommerce' );
 					$settings[] = array(
 						'desc' => $message,
-						'id'   => DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
+						'id'   => self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
 						'type' => 'checkbox',
 					);
 				}
@@ -435,11 +440,11 @@ class CustomOrdersTableController {
 	 * Here we switch the authoritative table if needed.
 	 */
 	private function process_sync_finished() {
-		if ( $this->auto_flip_authoritative_table_enabled() ) {
+		if ( ! $this->auto_flip_authoritative_table_enabled() ) {
 			return;
 		}
 
-		update_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
+		update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
 
 		if ( $this->custom_orders_table_usage_is_enabled() ) {
 			update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
@@ -454,7 +459,7 @@ class CustomOrdersTableController {
 	 * @return bool
 	 */
 	private function auto_flip_authoritative_table_enabled(): bool {
-		return 'yes' === get_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
+		return 'yes' === get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
 	}
 
 	/**
@@ -465,7 +470,7 @@ class CustomOrdersTableController {
 
 		// Disabling the sync implies disabling the automatic authoritative table switch too.
 		if ( ! $data_sync_is_enabled && $this->auto_flip_authoritative_table_enabled() ) {
-			update_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
+			update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
 		}
 
 		// Enabling the sync implies starting it too, if needed.

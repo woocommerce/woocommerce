@@ -17,13 +17,12 @@ defined( 'ABSPATH' ) || exit;
  */
 class DataSynchronizer {
 
-	public const ORDERS_DATA_SYNC_ENABLED_OPTION            = 'woocommerce_custom_orders_table_data_sync_enabled';
-	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION  = 'woocommerce_initial_orders_pending_sync_count';
-	public const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
-	private const PENDING_SYNC_IS_IN_PROGRESS_OPTION        = 'woocommerce_custom_orders_table_pending_sync_in_progress';
-	private const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK     = 'woocommerce_run_orders_sync_callback';
-	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION    = 'woocommerce_orders_sync_finished';
-	public const PLACEHOLDER_ORDER_POST_TYPE                = 'shop_order_placehold';
+	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
+	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
+	private const PENDING_SYNC_IS_IN_PROGRESS_OPTION       = 'woocommerce_custom_orders_table_pending_sync_in_progress';
+	private const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK    = 'woocommerce_run_orders_sync_callback';
+	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
+	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
 	public const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
@@ -128,7 +127,6 @@ class DataSynchronizer {
 		return array(
 			'initial_pending_count' => (int) get_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION, 0 ),
 			'current_pending_count' => $this->get_current_orders_pending_sync_count(),
-			'auto_flip'             => 'yes' === get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION ),
 			'sync_in_progress'      => $this->pending_data_sync_is_in_progress(),
 		);
 	}
@@ -312,6 +310,5 @@ WHERE
 	public function cleanup_synchronization_state() {
 		delete_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION );
 		delete_option( self::PENDING_SYNC_IS_IN_PROGRESS_OPTION );
-		delete_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
 	}
 }
