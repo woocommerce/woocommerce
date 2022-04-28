@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\WPPostToCOTMigrator;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -23,6 +24,9 @@ class DataSynchronizer {
 	private const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK    = 'woocommerce_run_orders_sync_callback';
 	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
+
+	private const ORDERS_SYNC_BATCH_SIZE      = 50;
+	private const SECONDS_BETWEEN_BATCH_SYNCS = 5;
 
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
 	public const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
@@ -47,6 +51,13 @@ class DataSynchronizer {
 	private $database_util;
 
 	/**
+	 * The posts to COT migrator to use.
+	 *
+	 * @var DatabaseUtil
+	 */
+	private $posts_to_cot_migrator;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -54,6 +65,13 @@ class DataSynchronizer {
 			self::ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK,
 			function() {
 				$this->do_pending_orders_synchronization();
+			}
+		);
+
+		add_action(
+			'woocommerce_after_order_object_save',
+			function() {
+				$this->maybe_start_synchronizing_pending_orders();
 			}
 		);
 	}
@@ -64,10 +82,12 @@ class DataSynchronizer {
 	 * @internal
 	 * @param OrdersTableDataStore $data_store The data store to use.
 	 * @param DatabaseUtil         $database_util The database util class to use.
+	 * @param WPPostToCOTMigrator  $posts_to_cot_migrator The posts to COT migration class to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util ) {
-		$this->data_store    = $data_store;
-		$this->database_util = $database_util;
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, WPPostToCOTMigrator $posts_to_cot_migrator ) {
+		$this->data_store            = $data_store;
+		$this->database_util         = $database_util;
+		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
 	}
 
 	/**
@@ -154,7 +174,7 @@ class DataSynchronizer {
 
 		$orders_table = $wpdb->prefix . 'wc_orders';
 
-		if ( 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ) {
+		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = "
 SELECT COUNT(1) FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
@@ -184,6 +204,15 @@ SELECT(
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $sql );
+	}
+
+	/**
+	 * Is the custom orders table the authoritative data source for orders currently?
+	 *
+	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
+	 */
+	private function custom_orders_table_is_authoritative(): bool {
+		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
 	}
 
 	/**
@@ -275,7 +304,7 @@ WHERE
 	private function schedule_pending_orders_synchronization() {
 		$queue = WC()->get_instance_of( \WC_Queue::class );
 		$queue->schedule_single(
-			WC()->call_function( 'time' ) + 1,
+			WC()->call_function( 'time' ) + self::SECONDS_BETWEEN_BATCH_SYNCS,
 			self::ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK,
 			array(),
 			'woocommerce-db-updates'
@@ -294,9 +323,8 @@ WHERE
 		$fake_count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
 		if ( false !== $fake_count ) {
 			update_option( 'woocommerce_fake_orders_pending_sync_count', (int) $fake_count - 1 );
-		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElse
 		} else {
-			// TODO: Use get_ids_of_orders_pending_sync to get a batch of order ids and syncrhonize them.
+			$this->sync_next_batch();
 		}
 
 		if ( 0 === $this->get_current_orders_pending_sync_count() ) {
@@ -308,6 +336,43 @@ WHERE
 			do_action( self::PENDING_SYNCHRONIZATION_FINISHED_ACTION );
 		} else {
 			$this->schedule_pending_orders_synchronization();
+		}
+	}
+
+	/**
+	 * Processes a batch of out of sync orders.
+	 * First it synchronizes orders that don't exist in the backup table, and after that,
+	 * it synchronizes orders that exist in both tables but have a different last update date.
+	 *
+	 * @return void
+	 */
+	private function sync_next_batch(): void {
+		// TODO: Provide a way to customize this.
+		$batch_size = self::ORDERS_SYNC_BATCH_SIZE;
+
+		if ( $this->custom_orders_table_is_authoritative() ) {
+			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $batch_size );
+			// TODO: Load $order_ids orders from the orders table and create them (by updating the corresponding placeholder record) in the posts table.
+		} else {
+			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
+			$this->posts_to_cot_migrator->process_migration_for_ids( $order_ids );
+		}
+
+		$batch_size -= count( $order_ids );
+		if ( 0 === $batch_size ) {
+			return;
+		}
+
+		$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_DIFFERENT_UPDATE_DATE, $batch_size );
+		if ( 0 === count( $order_ids ) ) {
+			return;
+		}
+
+		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
+		if ( $this->custom_orders_table_is_authoritative() ) {
+			// TODO: Load $order_ids orders from the orders table and update them in the posts table.
+		} else {
+			$this->posts_to_cot_migrator->process_migration_for_ids( $order_ids );
 		}
 	}
 
