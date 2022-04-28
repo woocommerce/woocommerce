@@ -30,7 +30,8 @@
 	},
 	"scripts": {
 		"lint": "eslint index.js",
-		"lint:fix": "eslint index.js --fix"
+		"lint:fix": "eslint index.js --fix",
+		"postinstall": "composer install"
 	},
 	"private": true,
 	"devDependencies": {
