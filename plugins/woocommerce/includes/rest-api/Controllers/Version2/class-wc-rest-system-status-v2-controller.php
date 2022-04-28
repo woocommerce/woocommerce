@@ -585,18 +585,44 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_item_mappings_per_fields( $fields ) {
-		return array(
-			'environment'        => $this->get_environment_info_per_fields( $fields ),
-			'database'           => $this->get_database_info(),
-			'active_plugins'     => $this->get_active_plugins(),
-			'inactive_plugins'   => $this->get_inactive_plugins(),
-			'dropins_mu_plugins' => $this->get_dropins_mu_plugins(),
-			'theme'              => $this->get_theme_info(),
-			'settings'           => $this->get_settings(),
-			'security'           => $this->get_security_info(),
-			'pages'              => $this->get_pages(),
-			'post_type_counts'   => $this->get_post_type_counts(),
-		);
+		$items = array();
+
+		foreach( $fields as $field ) {
+			switch( $field ) {
+			case 'environment':
+				$items['environment'] = $this->get_environment_info_per_fields( $fields );
+				break;
+			case 'database':
+				$items['database'] = $this->get_database_info();
+				break;
+			case 'active_plugins':
+				$items['active_plugins'] = $this->get_active_plugins();
+				break;
+			case 'inactive_plugins':
+				$items['inactive_plugins'] = $this->get_inactive_plugins();
+				break;
+			case 'dropins_mu_plugins':
+				$items['dropins_mu_plugins'] = $this->get_dropins_mu_plugins();
+				break;
+			case 'theme':
+				$items['theme'] = $this->get_theme_info();
+				break;
+			case 'settings':
+				$items['settings'] = $this->get_settings();
+				break;
+			case 'security':
+				$items['security'] = $this->get_security_info();
+				break;
+			case 'pages':
+				$items['pages'] = $this->get_pages();
+				break;
+			case 'post_type_counts':
+				$items['post_type_counts'] = $this->get_post_type_counts();
+				break;
+			}
+		}
+
+		return $items;
 	}
 
 	/**
