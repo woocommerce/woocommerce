@@ -30,6 +30,9 @@
 		}
 	}
 	.woocommerce-task-import-products-stacks {
-		text-align: center;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		padding: 12px;
 	}
 }

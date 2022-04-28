@@ -14,13 +14,12 @@ import { useState } from '@wordpress/element';
 import CardList from './CardList';
 import { importTypes } from './importTypes';
 import './style.scss';
-
-const Stacks = () => {
-	return <div>Hello</div>;
-};
+import { getProductTypes } from '../experimental-products/utils';
+import Stacks from '../experimental-products/stack';
 
 const Products = () => {
 	const [ showStacks, setStackVisibility ] = useState< boolean >( false );
+	const StacksComponent = <Stacks items={ getProductTypes() } />;
 	return (
 		<div className="woocommerce-task-import-products">
 			<h1>{ __( 'Import your products', 'woocommerce' ) }</h1>
@@ -30,7 +29,7 @@ const Products = () => {
 					{ __( 'Or add your products from scratch', 'woocommerce' ) }
 					<Icon icon={ showStacks ? chevronUp : chevronDown } />
 				</Button>
-				{ showStacks && <Stacks /> }
+				{ showStacks && StacksComponent }
 			</div>
 		</div>
 	);
