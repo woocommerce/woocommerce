@@ -84,7 +84,6 @@ class Loader extends DeprecatedClassFacade {
 		if ( ! defined( 'WC_ABSPATH' ) ) {
 			return;
 		}
-		wc_deprecated_function( 'should_use_minified_js_file', '6.3', '\Automattic\WooCommerce\Internal\Admin\WCAdminAssets::should_use_minified_js_file()' );
 		return WCAdminAssets::should_use_minified_js_file( $script_debug );
 	}
 }
