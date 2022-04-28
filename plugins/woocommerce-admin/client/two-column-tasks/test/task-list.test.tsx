@@ -13,7 +13,8 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 jest.mock( '@woocommerce/experimental', () => ( {
-	TaskItem: ( props ) => <div>{ props.title }</div>,
+	TaskItem: ( props: { title: string } ) => <div>{ props.title }</div>,
+	useSlot: jest.fn(),
 	List: jest.fn().mockImplementation( ( { children } ) => children ),
 } ) );
 jest.mock( '@woocommerce/components', () => ( {
