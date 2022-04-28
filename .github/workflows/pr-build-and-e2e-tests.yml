@@ -11,8 +11,6 @@ jobs:
         steps:
             - name: Checkout code.
               uses: actions/checkout@v3
-              with:
-                ref: ${{ github.ref }}
 
             - name: Cache modules
               uses: actions/cache@v3
@@ -33,6 +31,9 @@ jobs:
             - name: Install Composer dependencies
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install-no-dev woocommerce
+
+            - name: Check file
+              run: cat plugins/woocommerce-admin/client/tasks/fills/Marketing/test/index.tsx
 
             - name: Run build
               run: pnpm nx build woocommerce
@@ -64,8 +65,6 @@ jobs:
         steps:
             - name: Checkout code.
               uses: actions/checkout@v3
-              with:
-                ref: ${{ github.ref }}
 
             - name: Cache modules
               uses: actions/cache@v3
@@ -117,8 +116,6 @@ jobs:
         steps:
             - name: Checkout code.
               uses: actions/checkout@v3
-              with:
-                ref: ${{ github.ref }}
 
             - name: Cache modules
               uses: actions/cache@v3
