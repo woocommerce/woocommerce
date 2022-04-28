@@ -477,9 +477,7 @@ class CustomOrdersTableController {
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
 		// settings even without modifying them.
-		if ( $data_sync_is_enabled && ! $this->data_synchronizer->pending_data_sync_is_in_progress() ) {
-			$this->data_synchronizer->start_synchronizing_pending_orders();
-		}
+		$this->data_synchronizer->maybe_start_synchronizing_pending_orders();
 	}
 
 	/**

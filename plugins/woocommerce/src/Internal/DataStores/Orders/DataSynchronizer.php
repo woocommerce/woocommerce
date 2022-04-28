@@ -242,10 +242,19 @@ WHERE
 	}
 
 	/**
-	 * Start an orders synchronization process.
-	 * This will setup the appropriate status information and schedule the first synchronization batch.
+	 * Start an orders synchronization process if all the following is true:
+	 *
+	 * 1. Data synchronization is enabled.
+	 * 2. Data synchronization isn't already in progress.
+	 * 3. There's at least one out of sync order.
+	 *
+	 * This will set up the appropriate status information and schedule the first synchronization batch.
 	 */
-	public function start_synchronizing_pending_orders() {
+	public function maybe_start_synchronizing_pending_orders() {
+		if ( ! $this->data_sync_is_enabled() || $this->pending_data_sync_is_in_progress() ) {
+			return;
+		}
+
 		$initial_pending_count = $this->get_current_orders_pending_sync_count();
 		if ( 0 === $initial_pending_count ) {
 			return;
