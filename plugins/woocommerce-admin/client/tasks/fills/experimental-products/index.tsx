@@ -7,6 +7,7 @@ import { Text } from '@woocommerce/experimental';
 import { registerPlugin } from '@wordpress/plugins';
 import { useMemo, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 
 /**
@@ -20,6 +21,8 @@ import Stack from './stack';
 import Footer from './footer';
 import CardLayout from './card-layout';
 import { LoadSampleProductType } from './constants';
+import LoadSampleProductModal from '../components/load-sample-product-modal';
+import useLoadSampleProducts from '../components/use-load-sample-products';
 
 // TODO: Use experiment data from the API, not hardcoded.
 const SHOW_STACK_LAYOUT = true;
@@ -54,6 +57,14 @@ export const Products = () => {
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
+
+	const {
+		loadSampleProduct,
+		isLoadingSampleProducts,
+	} = useLoadSampleProducts( {
+		redirectUrlAfterSuccess: getAdminLink( 'edit.php?post_type=product' ),
+	} );
+
 	const visibleProductTypes = useMemo( () => {
 		const surfacedProductTypes = productTypes.filter( ( productType ) =>
 			surfacedProductTypeKeys.includes( productType.key )
@@ -69,13 +80,17 @@ export const Products = () => {
 			if ( ! SHOW_STACK_LAYOUT ) {
 				surfacedProductTypes.push( {
 					...LoadSampleProductType,
-					// TODO: Change to load sample product
-					onClick: () => new Promise( () => {} ),
+					onClick: loadSampleProduct,
 				} );
 			}
 		}
 		return surfacedProductTypes;
-	}, [ surfacedProductTypeKeys, isExpanded, productTypes ] );
+	}, [
+		surfacedProductTypeKeys,
+		isExpanded,
+		productTypes,
+		loadSampleProduct,
+	] );
 
 	return (
 		<div className="woocommerce-task-products">
@@ -89,7 +104,10 @@ export const Products = () => {
 
 			<div className="woocommerce-product-content">
 				{ SHOW_STACK_LAYOUT ? (
-					<Stack items={ visibleProductTypes } />
+					<Stack
+						items={ visibleProductTypes }
+						onClickLoadSampleProduct={ loadSampleProduct }
+					/>
 				) : (
 					<CardLayout items={ visibleProductTypes } />
 				) }
@@ -99,6 +117,7 @@ export const Products = () => {
 				/>
 				<Footer />
 			</div>
+			{ isLoadingSampleProducts && <LoadSampleProductModal /> }
 		</div>
 	);
 };
