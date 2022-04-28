@@ -7,7 +7,7 @@ jobs:
   stale:
     if: |
       ! contains(github.event.issue.labels.*.name, 'type: enhancement')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/stale@v3
         with:

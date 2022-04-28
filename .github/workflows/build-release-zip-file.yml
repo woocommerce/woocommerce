@@ -9,22 +9,22 @@ on:
 jobs:
   build:
     name: Build release zip file
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
+      - name: Checkout code.
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.ref || github.ref }}
-      - name: Build the zip file
-        id: build
-        uses: woocommerce/action-build@trunk
-      - name: Unzip the file (prevents double zip problem)
-        run: unzip ${{ steps.build.outputs.zip_path }} -d zipfile
+
+      - name: Install PNPM
+        run: npm install -g pnpm
+
+      - name: Build zip
+        run: pnpm nx build-zip woocommerce
+
       - name: Upload the zip file as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: woocommerce
-          path: zipfile
+          path: plugins/woocommerce/woocommerce.zip
           retention-days: 7
