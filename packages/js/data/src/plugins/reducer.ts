@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { concat } from 'lodash';
+import { Reducer } from 'redux';
 
 /**
  * Internal dependencies
@@ -10,8 +11,8 @@ import { ACTION_TYPES as TYPES } from './action-types';
 import { Actions } from './actions';
 import { PluginsState } from './types';
 
-const plugins = (
-	state: PluginsState = {
+const reducer: Reducer< PluginsState, Actions > = (
+	state = {
 		active: [],
 		installed: [],
 		requesting: {},
@@ -19,8 +20,8 @@ const plugins = (
 		jetpackConnectUrls: {},
 		recommended: {},
 	},
-	payload?: Actions
-): PluginsState => {
+	payload
+) => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case TYPES.UPDATE_ACTIVE_PLUGINS:
@@ -122,4 +123,5 @@ const plugins = (
 	return state;
 };
 
-export default plugins;
+export type State = ReturnType< typeof reducer >;
+export default reducer;

@@ -17,7 +17,7 @@ import { SettingsSelector, TaxChildProps } from '../utils';
 export const Configure: React.FC<
 	Pick< TaxChildProps, 'isPending' | 'onManual' >
 > = ( { isPending, onManual } ) => {
-	const { generalSettings } = useSelect( ( select: WCDataSelector ) => {
+	const { generalSettings } = useSelect( ( select ) => {
 		const { getSettings } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;

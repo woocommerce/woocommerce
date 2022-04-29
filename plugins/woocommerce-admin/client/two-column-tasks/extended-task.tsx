@@ -9,7 +9,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
-	WCDataSelector,
 	TaskListType,
 	TaskType,
 } from '@woocommerce/data';
@@ -38,7 +37,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	}: {
 		isResolving: boolean;
 		taskLists: TaskListType[];
-	} = useSelect( ( select: WCDataSelector ) => {
+	} = useSelect( ( select ) => {
 		return {
 			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
 				'getTaskListsByIds'

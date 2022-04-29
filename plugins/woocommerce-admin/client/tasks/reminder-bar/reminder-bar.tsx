@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	useSelect,
-	useDispatch,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -98,7 +94,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		taskListComplete,
 		reminderBarHidden,
 		completedTasksCount,
-	} = useSelect( ( select: typeof wpDataSelect ) => {
+	} = useSelect( ( select ) => {
 		const {
 			getTaskList,
 			hasFinishedResolution: onboardingHasFinishedResolution,
@@ -108,7 +104,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 			hasFinishedResolution: optionHasFinishedResolution,
 		} = select( OPTIONS_STORE_NAME );
 		const reminderBarHiddenOption = getOption( REMINDER_BAR_HIDDEN_OPTION );
-		const taskList: TaskListType = getTaskList( taskListId );
+		const taskList = getTaskList( taskListId );
 		const taskListIsResolved = onboardingHasFinishedResolution(
 			'getTaskList',
 			[ taskListId ]
@@ -117,11 +113,12 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 			REMINDER_BAR_HIDDEN_OPTION,
 		] );
 
-		const visibleTasks = taskList?.tasks.filter(
-			( task ) =>
-				! task.isDismissed &&
-				( ! task.isSnoozed || task.snoozedUntil < Date.now() )
-		);
+		const visibleTasks =
+			taskList?.tasks.filter(
+				( task ) =>
+					! task.isDismissed &&
+					( ! task.isSnoozed || task.snoozedUntil < Date.now() )
+			) || [];
 
 		const completedTasks =
 			visibleTasks?.filter( ( task ) => task.isComplete ) || [];
@@ -130,8 +127,8 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 
 		return {
 			reminderBarHidden: reminderBarHiddenOption === 'yes',
-			taskListHidden: isResolved ? taskList.isHidden : false,
-			taskListComplete: isResolved ? taskList.isComplete : false,
+			taskListHidden: isResolved ? taskList?.isHidden : false,
+			taskListComplete: isResolved ? taskList?.isComplete : false,
 			loading: ! isResolved,
 			completedTasksCount: completedTasks.length,
 			remainingCount: isResolved

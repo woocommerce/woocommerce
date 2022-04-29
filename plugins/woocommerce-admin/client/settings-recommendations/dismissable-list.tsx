@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useDispatch,
-	useSelect,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { EllipsisMenu } from '@woocommerce/components';
@@ -59,7 +55,7 @@ export const DismissableList: React.FC< {
 	dismissOptionName: string;
 	className?: string;
 } > = ( { children, className, dismissOptionName } ) => {
-	const isVisible = useSelect( ( select: typeof wpDataSelect ) => {
+	const isVisible = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);

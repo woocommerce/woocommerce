@@ -12,6 +12,7 @@
     - Export `InstallPluginsResponse` type
 -   Convert `use-user-preferences.js` to TS. #32695
 -   Added PaymentGateway type to exports #32697
+-   Add `@types/wordpress__compose`, `@types/wordpress__data`, `redux` types and fix related type errors. #32735
 
 ## Breaking change
 
