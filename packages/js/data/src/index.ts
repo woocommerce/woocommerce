@@ -16,6 +16,7 @@ export { NAVIGATION_STORE_NAME } from './navigation';
 export { OPTIONS_STORE_NAME } from './options';
 export { ITEMS_STORE_NAME } from './items';
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
