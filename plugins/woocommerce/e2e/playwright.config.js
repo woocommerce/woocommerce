@@ -1,27 +1,27 @@
 // playwright.config.js
 // @ts-check
-const { devices } = require('@playwright/test');
+const { devices } = require( '@playwright/test' );
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
 	timeout: 20000,
 	outputDir: './report',
-	globalSetup: require.resolve('./global-setup'),
-	globalTeardown: require.resolve('./global-teardown'),
+	globalSetup: require.resolve( './global-setup' ),
+	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
 	retries: 1,
-	reporter: [['list'], ['html', { outputFolder: 'e2e/output' }]],
+	reporter: [ [ 'list' ], [ 'html', { outputFolder: 'e2e/output' } ] ],
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'retain-on-failure',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL: 'http://localhost:8084'
+		baseURL: 'http://localhost:8084',
 	},
 	projects: [
 		{
 			name: 'Chrome',
-			use: { ...devices['Desktop Chrome'] },
+			use: { ...devices[ 'Desktop Chrome' ] },
 		},
 		// {
 		//  name: 'Firefox',
