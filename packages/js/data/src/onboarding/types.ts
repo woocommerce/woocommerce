@@ -155,4 +155,5 @@ export type Extension = {
 	manage_url: string;
 	name: string;
 	is_built_by_wc: boolean;
+	is_visible: boolean;
 };
