@@ -7,7 +7,12 @@ import {
 	getNewPath,
 	updateQueryString,
 } from '@woocommerce/navigation';
-import { OPTIONS_STORE_NAME, TaskType } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	TaskType,
+	useUserPreferences,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
@@ -32,16 +37,46 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		snoozeTask,
 		undoSnoozeTask,
 	} = useDispatch( OPTIONS_STORE_NAME );
+	const { visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
 
 	const slot = useSlot(
 		`woocommerce_onboarding_task_list_item_${ task.id }`
 	);
 	const hasFills = Boolean( slot?.fills?.length );
 
+	const userPreferences = useUserPreferences();
+
+	const getTaskStartedCount = () => {
+		const trackedStartedTasks =
+			userPreferences.task_list_tracked_started_tasks;
+		if ( ! trackedStartedTasks || ! trackedStartedTasks[ task.id ] ) {
+			return 0;
+		}
+		return trackedStartedTasks[ task.id ];
+	};
+
+	const updateTrackStartedCount = () => {
+		const newCount = getTaskStartedCount() + 1;
+		const trackedStartedTasks =
+			userPreferences.task_list_tracked_started_tasks || {};
+
+		visitedTask( task.id );
+		userPreferences.updateUserPreferences( {
+			task_list_tracked_started_tasks: {
+				...( trackedStartedTasks || {} ),
+				[ task.id ]: newCount,
+			},
+		} );
+	};
+
 	const trackClick = () => {
 		recordEvent( `${ eventPrefix }click`, {
 			task_name: task.id,
 		} );
+
+		if ( ! task.isComplete ) {
+			updateTrackStartedCount();
+		}
 	};
 
 	const onTaskSelected = () => {
