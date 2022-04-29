@@ -1,0 +1,6 @@
+Significance: minor
+Type: feature
+
+Added slotfill for payment gateway banner in settings page 
+Refactored payment methods icons in payments-welcome
+Added experiment for showing payment banner in payment settings page #32697

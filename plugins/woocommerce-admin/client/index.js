@@ -16,6 +16,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { CustomerEffortScoreTracksContainer } from './customer-effort-score-tracks';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
+import { WcAdminPaymentsGatewaysBannerSlot } from './payments/payments-settings-banner-slotfill';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -64,6 +65,17 @@ if ( appRoot ) {
 
 	// Render notices just above the WP content div.
 	const wpBody = document.getElementById( 'wpbody-content' );
+
+	const isWcAdminSettingsPaymentPage = document.getElementById(
+		'wc_payment_gateways_banner_slotfill'
+	);
+
+	if ( isWcAdminSettingsPaymentPage ) {
+		render(
+			WcAdminPaymentsGatewaysBannerSlot(),
+			isWcAdminSettingsPaymentPage
+		);
+	}
 
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||

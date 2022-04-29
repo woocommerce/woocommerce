@@ -1,4 +1,4 @@
-export default () => (
+export const ApplePay = () => (
 	/* eslint-disable */
 	<svg
 		width="52"

@@ -1,4 +1,4 @@
-export default () => (
+export const GooglePay = () => (
 	/* eslint-disable */
 	<svg
 		width="84"
