@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-
+import { find } from 'lodash';
 /**
  * Internal dependencies
  */
@@ -16,10 +16,17 @@ import { importTypes } from './importTypes';
 import './style.scss';
 import useProductTypeListItems from '../experimental-products/use-product-types-list-items';
 import Stacks from '../experimental-products/stack';
+import { getProductTypes } from '../experimental-products/utils';
 
 const Products = () => {
 	const [ showStacks, setStackVisibility ] = useState< boolean >( false );
-	const StacksComponent = <Stacks items={ useProductTypeListItems() } />;
+	const StacksComponent = (
+		<Stacks
+			items={ useProductTypeListItems(
+				getProductTypes( [ 'subscription' ] )
+			) }
+		/>
+	);
 	return (
 		<div className="woocommerce-task-import-products">
 			<h1>{ __( 'Import your products', 'woocommerce' ) }</h1>
