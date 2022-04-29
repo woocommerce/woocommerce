@@ -14,7 +14,7 @@ import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
  */
 import './index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { getSurfacedProductTypeKeys } from './utils';
+import { getSurfacedProductTypeKeys, getProductTypes } from './utils';
 import useProductTypeListItems from './use-product-types-list-items';
 import Stack from './stack';
 import Footer from './footer';
@@ -50,7 +50,7 @@ const ViewControlButton: React.FC< {
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
 
-	const productTypes = useProductTypeListItems();
+	const productTypes = useProductTypeListItems( getProductTypes() );
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
