@@ -62,7 +62,9 @@ export const Products = () => {
 		loadSampleProduct,
 		isLoadingSampleProducts,
 	} = useLoadSampleProducts( {
-		redirectUrlAfterSuccess: getAdminLink( 'edit.php?post_type=product' ),
+		redirectUrlAfterSuccess: getAdminLink(
+			'edit.php?post_type=product&wc_onboarding_active_task=products'
+		),
 	} );
 
 	const visibleProductTypes = useMemo( () => {
