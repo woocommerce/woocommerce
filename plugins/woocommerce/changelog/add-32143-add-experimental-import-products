@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add experimental import product task, which replaces the default add products task when selling elsewhere is selected during the OBW.
