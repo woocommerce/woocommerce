@@ -1,5 +1,3 @@
-import { waitForTimeout } from '../flows/utils';
-
 export class AdminEdit {
 	/**
 	 * Publish the object being edited and verify published status
@@ -11,7 +9,7 @@ export class AdminEdit {
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {
 		// Wait for auto save
-		await waitForTimeout( 2000 );
+		await page.waitForTimeout( 2000 );
 
 		// Publish and verify
 		await expect( page ).toClick( button );

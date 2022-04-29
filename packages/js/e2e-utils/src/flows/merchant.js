@@ -40,7 +40,7 @@ const {
 	IS_RETEST_MODE,
 } = require( './constants' );
 
-const { getSlug, waitForTimeout } = require( './utils' );
+const { getSlug } = require( './utils' );
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) =>
@@ -184,7 +184,7 @@ const merchant = {
 			waitUntil: 'networkidle0',
 		} );
 		await expect( page ).toSelect( '#order_status', status );
-		await waitForTimeout( 2000 );
+		await page.waitForTimeout( 2000 );
 		await expect( page ).toClick( 'button.save_order' );
 		await page.waitForSelector( '#message' );
 		await expect( page ).toMatchElement( '#message', {
@@ -281,7 +281,7 @@ const merchant = {
 		await expect( permission ).toClick( 'button.revoke_access' );
 
 		// Wait for auto save
-		await waitForTimeout( 2000 );
+		await page.waitForTimeout( 2000 );
 
 		// Save the order changes
 		await orderPageSaveChanges();

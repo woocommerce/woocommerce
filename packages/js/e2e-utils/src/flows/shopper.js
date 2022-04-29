@@ -53,8 +53,7 @@ const shopper = {
 			const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
 			await addToCartButton.click();
 
-			// @todo: Update to waitForXPath when available in Puppeteer api.
-			await page.waitFor(
+			await page.waitForXPath(
 				addToCartXPath + ' and contains(@class, "added")]'
 			);
 		}
@@ -267,11 +266,11 @@ const shopper = {
 		// Single search results may go directly to product page
 		if ( await page.waitForSelector( 'h2.entry-title' ) ) {
 			await expect( page ).toMatchElement( 'h2.entry-title', {
-        text: prouductName
-      } );
-			await expect( page ).toClick( 'h2.entry-title > a' , {
-        text: prouductName
-      } );
+				text: prouductName,
+			} );
+			await expect( page ).toClick( 'h2.entry-title > a', {
+				text: prouductName,
+			} );
 		}
 		await page.waitForSelector( 'h1.entry-title' );
 		await expect( page.title() ).resolves.toMatch( prouductName );

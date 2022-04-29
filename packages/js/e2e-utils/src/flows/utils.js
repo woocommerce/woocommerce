@@ -35,13 +35,3 @@ export const describeIf = ( condition ) =>
 
 // Conditionally determine whether or not to skip a test case
 export const itIf = ( condition ) => ( condition ? it : it.skip );
-
-/**
- * Wait for a timeout in milliseconds
- *
- * @param timeout delay time in milliseconds
- * @return {Promise<void>}
- */
-export const waitForTimeout = async ( timeout ) => {
-	await new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
-};

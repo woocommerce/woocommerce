@@ -16,7 +16,6 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { waitForTimeout } from './flows/utils';
 import { withRestApi } from './flows/with-rest-api';
 import { Coupon, Order } from '@woocommerce/api';
 
@@ -38,7 +37,7 @@ const uuid = require( 'uuid' );
  */
 const verifyAndPublish = async ( noticeText ) => {
 	// Wait for auto save
-	await waitForTimeout( 2000 );
+	await page.waitForTimeout( 2000 );
 
 	// Publish product
 	await expect( page ).toClick( '#publish' );
@@ -173,7 +172,7 @@ const completeOnboardingWizard = async () => {
 	// Business Details section
 
 	// Temporarily add delay to reduce test flakiness
-	await page.waitFor( 2000 );
+	await page.waitForTimeout( 2000 );
 
 	// Query for the <SelectControl>s
 	const selectControls = await page.$$( '.woocommerce-select-control' );
@@ -459,7 +458,7 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	await expect( page ).toSelect( '#order_status', orderStatus );
 
 	// Wait for auto save
-	await page.waitFor( 2000 );
+	await page.waitForTimeout( 2000 );
 
 	// Create the order
 	await expect( page ).toClick( 'button.save_order' );
@@ -611,7 +610,7 @@ const addShippingZoneAndMethod = async (
 	await uiUnblocked();
 
 	// Add shipping zone method
-	await page.waitFor( 1000 );
+	await page.waitForTimeout( 1000 );
 	await expect( page ).toClick( 'button.wc-shipping-zone-add-method', {
 		text: 'Add shipping method',
 	} );
@@ -631,7 +630,7 @@ const addShippingZoneAndMethod = async (
  */
 const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
 	if ( waitForSave ) {
-		await page.waitFor( 2000 );
+		await page.waitForTimeout( 2000 );
 	}
 
 	// Update order
