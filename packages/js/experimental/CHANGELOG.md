@@ -1,5 +1,6 @@
 # Unreleased
 
+-   Update TaskItem props type definition.
 -   Fix setup task list style conflict #32704
 -   Update dependency `@wordpress/icons` to ^8.1.0
 -   Added Typescript type declarations. #32615
