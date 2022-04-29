@@ -67,7 +67,7 @@
     "build": "pnpm run clean && pnpm run compile",
     "prepack": "pnpm run build",
     "docker:up": "./bin/docker-compose.sh up",
-	  "docker:wait": "bash ./bin/wait-for-build.sh",
+	"docker:wait": "bash ./bin/wait-for-build.sh",
     "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
     "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
