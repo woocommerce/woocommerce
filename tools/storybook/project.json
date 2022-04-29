@@ -1,5 +1,5 @@
 {
-	"root": "woocommerce-storybook",
+	"root": "tools/storybook/",
 	"sourceRoot": "tools/storybook",
 	"projectType": "library",
 	"targets": {
@@ -10,7 +10,7 @@
 				"cwd": "packages/js/admin-e2e-tests"
 			}
 		},
-		"storybook": {
+		"watch": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"command": "pnpm run storybook",

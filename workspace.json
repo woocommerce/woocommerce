@@ -28,6 +28,7 @@
 		"@woocommerce/number": "packages/js/number",
 		"@woocommerce/onboarding": "packages/js/onboarding",
 		"@woocommerce/style-build": "packages/js/style-build",
-		"@woocommerce/tracks": "packages/js/tracks"
+		"@woocommerce/tracks": "packages/js/tracks",
+		"storybook": "tools/storybook"
 	}
 }
