@@ -37,6 +37,7 @@ jobs:
 
       - name: Lint
         run: |
+          pnpm nx build woocommerce-admin
           pnpm nx lint woocommerce-admin
           pnpm nx lint:js-packages woocommerce-admin
 
