@@ -14,6 +14,20 @@ import { recordEvent } from '@woocommerce/tracks';
 import unconnectedImage from './subscriptions-empty-state-unconnected.svg';
 import './style.scss';
 
+declare global {
+	interface Window {
+		wcWcpaySubscriptions: {
+			newSubscriptionProductUrl: string;
+			onboardingUrl: string;
+		};
+	}
+}
+
+const {
+	newSubscriptionProductUrl,
+	onboardingUrl,
+} = window.wcWcpaySubscriptions;
+
 const TOS = () => (
 	<p className="wcpay-empty-subscriptions__tos">
 		{ createInterpolateElement(
@@ -53,7 +67,11 @@ const GetStartedButton = () => {
 					);
 					installAndActivatePlugins( [ 'woocommerce-payments' ] )
 						.then( () => {
-							// TODO: Handle success.
+							/*
+							 * TODO:
+							 * Navigate to either newSubscriptionProductUrl or onboardingUrl
+							 * depending on the which treatment the user is assigned to.
+							 */
 							console.log( 'It was a success!' );
 						} )
 						.catch( ( error ) => {

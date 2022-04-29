@@ -30,6 +30,7 @@ class WcPaySubscriptionsPage {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_subscriptions_page' ) );
 		add_action( 'current_screen', array( $this, 'record_user_page_view' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		// Priority 50 to run after Automattic\WooCommerce\Internal\Admin\Homescreen::update_link_structure() which runs on 20.
 		add_action( 'admin_menu', array( $this, 'restructure_menu_order' ), 50 );
@@ -84,6 +85,37 @@ class WcPaySubscriptionsPage {
 		if ( isset( $current_page['id'] ) && $current_page['id'] === $this->page_id ) {
 			update_option( $this->user_viewed_option, 'yes' );
 		}
+	}
+
+	/**
+	 * Enqueues an inline script on the WooCommerce → Subscriptions admin page.
+	 */
+	public function enqueue_scripts() {
+		$current_page = PageController::get_instance()->get_current_page();
+
+		if ( ! isset( $current_page['id'] ) || $current_page['id'] !== $this->page_id ) {
+			return;
+		}
+
+		$data = array(
+			'newSubscriptionProductUrl' => add_query_arg(
+				array(
+					'post_type'             => 'product',
+					'select_subscription'   => 'true',
+					'subscription_pointers' => 'true',
+				),
+				admin_url( 'post-new.php' )
+			),
+			'onboardingUrl'             => add_query_arg(
+				array(
+					'wcpay-connect' => 'WC_SUBSCRIPTIONS_TABLE',
+					'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+				),
+				admin_url( 'admin.php' )
+			),
+		);
+
+		wp_add_inline_script( WC_ADMIN_APP, 'window.wcWcpaySubscriptions = ' . wp_json_encode( $data ), 'before' );
 	}
 
 	/**
