@@ -37,7 +37,9 @@
 		"core-js": "^3.21.1",
 		"dompurify": "^2.3.6",
 		"md5": "^2.3.0",
+		"moment": "^2.29.1",
 		"qs": "^6.10.3",
+		"regenerator-runtime": "^0.13.9",
 		"rememo": "^4.0.0"
 	},
 	"publishConfig": {

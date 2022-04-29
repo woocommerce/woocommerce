@@ -20,7 +20,6 @@
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.16.11",
-		"@babel/runtime": "^7.17.2",
 		"@storybook/addon-a11y": "^6.4.19",
 		"@storybook/addon-actions": "^6.4.19",
 		"@storybook/addon-console": "^1.2.3",
@@ -42,9 +41,7 @@
 		"@wordpress/data": "^6.3.0",
 		"babel-loader": "^8.2.3",
 		"css-loader": "^6.7.0",
-		"moment": "^2.29.1",
 		"postcss-loader": "^3.0.0",
-		"regenerator-runtime": "^0.13.9",
 		"sass": "^1.49.9",
 		"sass-loader": "^10.2.1",
 		"webpack": "^5.70.0"
