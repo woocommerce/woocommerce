@@ -27,12 +27,22 @@ import { noop } from 'lodash';
 import './style.scss';
 
 const SHOW_CLASS = 'highlight-tooltip__show';
+
+function findElement( id, selector ) {
+	if ( id ) {
+		return document.getElementById( id );
+	}
+	const items = document.querySelectorAll( selector );
+	return items[ 0 ];
+}
+
 function HighlightTooltip( {
 	title,
 	closeButtonText,
 	content,
 	show = true,
 	id,
+	selector,
 	onClose,
 	delay,
 	onShow = noop,
@@ -45,20 +55,10 @@ function HighlightTooltip( {
 	const [ anchorRect, setAnchorRect ] = useState( null );
 
 	useEffect( () => {
-		const element = document.getElementById( id );
-		let container, parent;
+		const element = findElement( id, selector );
+		let container;
 		if ( element && ! node ) {
-			// Add tooltip container
-			if ( ! useAnchor ) {
-				parent = element.parentElement;
-			} else {
-				parent = document.createElement( 'div' );
-				document.body.appendChild( parent );
-			}
-			container = document.createElement( 'div' );
-			container.classList.add( 'highlight-tooltip__container' );
-			parent.appendChild( container );
-			setNode( container );
+			container = setContainerNode( element );
 		}
 		const timeoutId = triggerShowTooltip( container );
 
@@ -98,9 +98,25 @@ function HighlightTooltip( {
 		return () => window.removeEventListener( 'resize', updateSize );
 	}, [] );
 
+	function setContainerNode( element ) {
+		// Add tooltip container
+		let parent;
+		if ( ! useAnchor ) {
+			parent = element.parentElement;
+		} else {
+			parent = document.createElement( 'div' );
+			document.body.appendChild( parent );
+		}
+		const container = document.createElement( 'div' );
+		container.classList.add( 'highlight-tooltip__container' );
+		parent.appendChild( container );
+		setNode( container );
+		return container;
+	}
+
 	function updateSize() {
 		if ( useAnchor ) {
-			const element = document.getElementById( id );
+			const element = findElement( id, selector );
 			setAnchorRect( element.getBoundingClientRect() );
 		}
 	}
@@ -119,12 +135,16 @@ function HighlightTooltip( {
 	};
 
 	const showTooltip = ( container ) => {
-		const element = document.getElementById( id );
+		const element = findElement( id, selector );
+		let containerEle = container;
+		if ( element && ! node && ! container ) {
+			containerEle = setContainerNode( element );
+		}
 		if ( element && useAnchor ) {
 			setAnchorRect( element.getBoundingClientRect() );
 		}
-		if ( container ) {
-			container.classList.add( SHOW_CLASS );
+		if ( containerEle ) {
+			containerEle.classList.add( SHOW_CLASS );
 		}
 		setShowHighlight( true );
 		onShow();
@@ -185,7 +205,11 @@ HighlightTooltip.propTypes = {
 	/**
 	 * The id of the element it should highlight, should be unique per HighlightTooltip.
 	 */
-	id: PropTypes.string.isRequired,
+	id: PropTypes.string,
+	/**
+	 * The selector of the element it should highlight, should be unique per HighlightTooltip.
+	 */
+	selector: PropTypes.string,
 	/**
 	 * Title of the popup
 	 */

@@ -43,7 +43,7 @@ import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-h
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { OneClickComplete } from '../one-click-complete';
+import { TipOfTheDay } from '../tip-of-the-day';
 import { QuoteOfTheDay } from '../quote-of-the-day';
 
 const Tasks = lazy( () =>
@@ -224,7 +224,7 @@ export const Layout = ( {
 				} ) }
 			>
 				<QuoteOfTheDay />
-				<OneClickComplete />
+				<TipOfTheDay />
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowWelcomeModal && (
 					<WelcomeModal

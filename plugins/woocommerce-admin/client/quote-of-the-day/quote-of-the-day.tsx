@@ -28,7 +28,9 @@ export const QuoteOfTheDay: React.FC< Record< string, never > > = () => {
 
 	useEffect( () => {
 		getQuoteOfTheDay().then( ( q: Quote ) => {
-			setQuote( q );
+			if ( q && q.q ) {
+				setQuote( q );
+			}
 		} );
 	}, [] );
 
