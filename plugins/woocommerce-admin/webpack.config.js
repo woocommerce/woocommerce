@@ -48,6 +48,7 @@ const wpAdminScripts = [
 	'print-shipping-label-banner',
 	'beta-features-tracking-modal',
 	'payment-method-promotions',
+	'onboarding-load-sample-products-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
