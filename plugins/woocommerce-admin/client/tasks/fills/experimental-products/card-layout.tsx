@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { List, Link } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
+import { Link } from '@woocommerce/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 
@@ -11,23 +11,22 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { ProductType } from './constants';
-import './stack.scss';
+import CardList from '../experimental-import-products/CardList';
+import './card-layout.scss';
 
-type StackProps = {
+type CardProps = {
 	items: ( ProductType & {
 		onClick: () => void;
 	} )[];
 };
 
-const Stack: React.FC< StackProps > = ( { items } ) => {
+const CardLayout: React.FC< CardProps > = ( { items } ) => {
 	return (
-		<div className="woocommerce-products-stack">
-			<List items={ items } />
-			<Text className="woocommerce-stack__other-options">
+		<div className="woocommerce-products-card-layout">
+			<Text className="woocommerce-products-card-layout__description">
 				{ interpolateComponents( {
 					mixedString: __(
-						'Can’t find your product type? {{sbLink}}Start Blank{{/sbLink}} or {{LspLink}}Load Sample Products{{/LspLink}} to see what they look like in your store.',
-						'woocommerce'
+						'{{sbLink}}Start blank{{/sbLink}} or select a product type:'
 					),
 					components: {
 						sbLink: (
@@ -44,17 +43,12 @@ const Stack: React.FC< StackProps > = ( { items } ) => {
 								<></>
 							</Link>
 						),
-						LspLink: (
-							// TODO: Update this to the load sample product.
-							<Link href="" type="wc-admin">
-								<></>
-							</Link>
-						),
 					},
 				} ) }
 			</Text>
+			<CardList items={ items } />
 		</div>
 	);
 };
 
-export default Stack;
+export default CardLayout;

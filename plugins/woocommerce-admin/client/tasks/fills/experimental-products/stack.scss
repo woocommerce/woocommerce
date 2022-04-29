@@ -12,6 +12,10 @@
 		&:hover {
 			background-color: #fff;
 			border: 1.5px solid #007cba;
+
+			.woocommerce-list__item-title {
+				color: $gray-900;
+			}
 		}
 
 		&:not(.transitions-disabled) {
@@ -29,6 +33,12 @@
 		}
 	}
 
+	.woocommerce-list__item-inner {
+		&:focus {
+			box-shadow: none;
+		}
+	}
+
 	.woocommerce-list__item-before {
 		background: #f0f6fc;
 		padding: 8px;
@@ -39,6 +49,7 @@
 		color: $gray-900;
 		line-height: 16px;
 		font-weight: 600;
+
 	}
 
 	.woocommerce-list__item-content {
@@ -53,7 +64,8 @@
 		}
 	}
 
-	.woocommerce-stack-other-options {
+	.woocommerce-stack__other-options {
+		display: block;
 		margin-top: 20px;
 		color: $gray-700;
 		line-height: 16px;
