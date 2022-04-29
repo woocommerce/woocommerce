@@ -17,9 +17,9 @@ const lowStockAmount = '10';
 test.describe( 'Add New Variable Product Page', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
-			url: 'http://localhost:8084',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',

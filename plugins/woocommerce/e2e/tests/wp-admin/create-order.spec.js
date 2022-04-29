@@ -41,9 +41,9 @@ let simpleProductId,
 test.describe( 'WooCommerce Orders > Add new order', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
-	test.beforeAll( async () => {
+	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
-			url: 'http://localhost:8084/',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
@@ -166,10 +166,10 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			} );
 	} );
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { baseURL } ) => {
 		// cleans up all products after run
 		const api = new wcApi( {
-			url: 'http://localhost:8084/',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
