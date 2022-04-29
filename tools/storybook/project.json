@@ -9,6 +9,13 @@
 				"action": "add",
 				"cwd": "packages/js/admin-e2e-tests"
 			}
+		},
+		"storybook": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"command": "pnpm run storybook",
+				"cwd": "tools/storybook"
+			}
 		}
 	}
 }
