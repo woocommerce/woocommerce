@@ -14,12 +14,12 @@ import { useState } from '@wordpress/element';
 import CardList from './CardList';
 import { importTypes } from './importTypes';
 import './style.scss';
-import { getProductTypes } from '../experimental-products/utils';
+import useProductTypeListItems from '../experimental-products/use-product-types-list-items';
 import Stacks from '../experimental-products/stack';
 
 const Products = () => {
 	const [ showStacks, setStackVisibility ] = useState< boolean >( false );
-	const StacksComponent = <Stacks items={ getProductTypes() } />;
+	const StacksComponent = <Stacks items={ useProductTypeListItems() } />;
 	return (
 		<div className="woocommerce-task-import-products">
 			<h1>{ __( 'Import your products', 'woocommerce' ) }</h1>
