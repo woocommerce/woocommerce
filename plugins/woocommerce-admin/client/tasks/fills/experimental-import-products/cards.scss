@@ -32,7 +32,7 @@
 			justify-content: center;
 		}
 
-		&:not( .transitions-disabled ) {
+		&:not(.transitions-disabled) {
 			&.woocommerce-list__item-enter {
 				transform: none;
 				transition: none;
