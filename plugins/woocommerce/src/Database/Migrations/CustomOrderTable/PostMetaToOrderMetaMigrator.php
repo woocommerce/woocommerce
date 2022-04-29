@@ -6,11 +6,11 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
- * Class WPPostMetaToOrderMetaMigrator.
+ * Class PostMetaToOrderMetaMigrator.
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
-class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
+class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 
 	/**
 	 * List of meta keys to exclude from migration.
@@ -20,7 +20,7 @@ class WPPostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 	private $excluded_columns;
 
 	/**
-	 * WPPostMetaToOrderMetaMigrator constructor.
+	 * PostMetaToOrderMetaMigrator constructor.
 	 *
 	 * @param array $excluded_columns List of meta keys to exclude from migration.
 	 */

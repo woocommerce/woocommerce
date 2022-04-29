@@ -6,9 +6,9 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
- * Class WPPostToOrderTableMigrator.
+ * Class PostToOrderTableMigrator.
  */
-class WPPostToOrderTableMigrator extends MetaToCustomTableMigrator {
+class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 
 	/**
 	 * Get schema config for wp_posts and wc_order table.

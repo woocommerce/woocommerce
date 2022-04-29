@@ -25,28 +25,28 @@ class PostsToOrdersMigrationController {
 	/**
 	 * Migrator instance to migrate data into wc_order table.
 	 *
-	 * @var WPPostToOrderTableMigrator
+	 * @var PostToOrderTableMigrator
 	 */
 	private $order_table_migrator;
 
 	/**
 	 * Migrator instance to migrate billing data into address table.
 	 *
-	 * @var WPPostToOrderAddressTableMigrator
+	 * @var PostToOrderAddressTableMigrator
 	 */
 	private $billing_address_table_migrator;
 
 	/**
 	 * Migrator instance to migrate shipping data into address table.
 	 *
-	 * @var WPPostToOrderAddressTableMigrator
+	 * @var PostToOrderAddressTableMigrator
 	 */
 	private $shipping_address_table_migrator;
 
 	/**
 	 * Migrator instance to migrate operational data.
 	 *
-	 * @var WPPostToOrderOpTableMigrator
+	 * @var PostToOrderOpTableMigrator
 	 */
 	private $operation_data_table_migrator;
 
@@ -62,17 +62,17 @@ class PostsToOrdersMigrationController {
 	 */
 	public function __construct() {
 
-		$this->order_table_migrator            = new WPPostToOrderTableMigrator();
-		$this->billing_address_table_migrator  = new WPPostToOrderAddressTableMigrator( 'billing' );
-		$this->shipping_address_table_migrator = new WPPostToOrderAddressTableMigrator( 'shipping' );
-		$this->operation_data_table_migrator   = new WPPostToOrderOpTableMigrator();
+		$this->order_table_migrator            = new PostToOrderTableMigrator();
+		$this->billing_address_table_migrator  = new PostToOrderAddressTableMigrator( 'billing' );
+		$this->shipping_address_table_migrator = new PostToOrderAddressTableMigrator( 'shipping' );
+		$this->operation_data_table_migrator   = new PostToOrderOpTableMigrator();
 
 		$excluded_columns = array_keys( $this->order_table_migrator->get_meta_column_config() );
 		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->billing_address_table_migrator->get_meta_column_config() ) );
 		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->shipping_address_table_migrator->get_meta_column_config() ) );
 		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->operation_data_table_migrator->get_meta_column_config() ) );
 
-		$this->meta_table_migrator             = new WPPostMetaToOrderMetaMigrator( $excluded_columns );
+		$this->meta_table_migrator             = new PostMetaToOrderMetaMigrator( $excluded_columns );
 		$this->error_logger                    = new MigrationErrorLogger();
 	}
 

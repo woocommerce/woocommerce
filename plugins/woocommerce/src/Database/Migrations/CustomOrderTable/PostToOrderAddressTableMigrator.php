@@ -6,11 +6,11 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
- * Class WPPostToOrderAddressTableMigrator
+ * Class PostToOrderAddressTableMigrator
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
-class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
+class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	/**
 	 * Type of addresses being migrated, could be billing|shipping.
 	 *
@@ -19,7 +19,7 @@ class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	protected $type;
 
 	/**
-	 * WPPostToOrderAddressTableMigrator constructor.
+	 * PostToOrderAddressTableMigrator constructor.
 	 *
 	 * @param string $type Type of addresses being migrated, could be billing|shipping.
 	 */
