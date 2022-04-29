@@ -43,6 +43,7 @@ import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-h
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { OneClickComplete } from '../one-click-complete';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -221,6 +222,7 @@ export const Layout = ( {
 					'two-columns': twoColumns,
 				} ) }
 			>
+				<OneClickComplete />
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowWelcomeModal && (
 					<WelcomeModal
