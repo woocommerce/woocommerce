@@ -24,11 +24,14 @@ jobs:
       - name: Install PNPM
         run: npm install -g pnpm
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
 
       - name: Build zip
-        run: pnpm nx build-zip woocommerce
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
 
       - name: Upload the zip file as an artifact
         uses: actions/upload-artifact@v3
