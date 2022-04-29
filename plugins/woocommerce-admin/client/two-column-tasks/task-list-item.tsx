@@ -118,13 +118,12 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					completed={ task.isComplete }
 					expanded={ ! task.isComplete }
 					additionalInfo={ task.additionalInfo }
-					content={ task.content }
 					onDismiss={ task.isDismissable && onDismiss }
 					action={ () => {} }
 					actionLabel={ task.actionLabel }
 					{ ...props }
-					onClick={ () => {
-						if ( task.isDisabled ) {
+					onClick={ ( e: React.ChangeEvent ) => {
+						if ( task.isDisabled || e.target.tagName === 'A' ) {
 							return;
 						}
 						onClickActions();
