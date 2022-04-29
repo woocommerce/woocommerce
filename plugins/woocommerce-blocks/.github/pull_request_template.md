@@ -1,10 +1,11 @@
 <!-- Start by describing the changes made in this Pull Request, and the reason for such changes. -->
 
 <!-- Reference any related issues or PRs here -->
+
 Fixes #
 
 <!-- Don't forget to update the title with something descriptive. -->
-<!-- If your pull request implements a feature flag, make sure you update [this doc](../docs/blocks/features-and-blocks-behind-a-flag.md) -->
+<!-- If you can, add the appropriate labels -->
 
 #### Accessibility
 
@@ -17,12 +18,17 @@ Fixes #
 
 #### Other Checks
 
-- [ ] I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md) for any feature flags or experimental interfaces implemented in this pull request.
+- [ ] This PR adds/removes a feature flag & I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md) .
+- [ ] This PR adds/removes an experimental interfaces and I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md)
 - [ ] I tagged two reviewers because this PR makes queries to the database or I think it might have some security impact.
 
 ### Screenshots
 
 <!-- If your change has a visual component, add a screenshot here. A "before" screenshot would also be helpful. -->
+
+| Before | After |
+| ------ | ----- |
+|        |       |
 
 ### Testing
 
@@ -30,23 +36,24 @@ Fixes #
 * [ ] Changes in this PR are covered by Automated Tests.
   * [ ] Unit tests
   * [ ] E2E tests
-### Manual Testing
 
-How to test the changes in this Pull Request:
+#### User Facing Testing
 
-1.
-2.
-3.
-### User Facing Testing
-These are steps for user testing (where "user" is someone interacting with this change that is not editing any code).
-* [ ] Same as above, or
-* [ ] See steps below.
+<!-- Write these steps from the perspective of a "user" (merchant) familiar with WooCommerce. No need to spell out the steps for common setup scenarios (eg. "Create a product"), but do be specific about the thing being tested. Include screenshots demonstrating expectations where that will be helpful. -->
 
 1.
 2.
 3.
 
-<!-- If you can, add the appropriate labels -->
+* [ ] Do not include in the Testing Notes
+
+### WooCommerce Visibility
+
+<!-- Check this [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md) to see if the change is visible in WC core or not (part of the feature plugin or experimental)-->
+
+* [ ] WooCommerce Core
+* [ ] Feature plugin
+* [ ] Experimental
 
 ### Performance Impact
 
