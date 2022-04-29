@@ -31,7 +31,9 @@
 		"@wordpress/url": "^3.4.1",
 		"core-js": "^3.21.1",
 		"history": "^4.10.1",
-		"qs": "^6.10.3"
+		"qs": "^6.10.3",
+		"react": "^17.0.0",
+		"react-dom": "^17.0.0"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"

@@ -25,12 +25,12 @@
 		"@wordpress/a11y": "^3.5.0",
 		"@wordpress/data": "^6.3.0",
 		"@wordpress/notices": "^3.3.2",
-		"core-js": "^3.21.1"
-	},
-	"peerDependencies": {
-		"lodash": "^4.17.0",
+		"core-js": "^3.21.1",
 		"react": "^17.0.0",
 		"react-dom": "^17.0.0"
+	},
+	"peerDependencies": {
+		"lodash": "^4.17.0"
 	},
 	"publishConfig": {
 		"access": "public"
