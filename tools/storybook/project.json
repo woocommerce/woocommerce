@@ -3,13 +3,6 @@
 	"sourceRoot": "tools/storybook",
 	"projectType": "library",
 	"targets": {
-		"changelog": {
-			"executor": "./tools/executors/changelogger:changelog",
-			"options": {
-				"action": "add",
-				"cwd": "packages/js/admin-e2e-tests"
-			}
-		},
 		"watch": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
