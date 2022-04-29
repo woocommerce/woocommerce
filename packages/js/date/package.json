@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@wordpress/date": "^4.3.1",
 		"@wordpress/i18n": "^4.3.1",
+		"core-js": "^3.21.1",
 		"moment": "^2.29.1",
 		"qs": "^6.10.3"
 	},

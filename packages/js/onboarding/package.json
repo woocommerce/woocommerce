@@ -32,6 +32,7 @@
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/element": "^4.1.1",
 		"@wordpress/i18n": "^4.3.1",
+		"core-js": "^3.21.1",
 		"concurrently": "^7.0.0",
 		"gridicons": "^3.4.0"
 	},
@@ -40,6 +41,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
+		"core-js": "^3.21.1",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",

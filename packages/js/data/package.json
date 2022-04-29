@@ -34,6 +34,7 @@
 		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/i18n": "^4.3.1",
 		"@wordpress/url": "^3.4.1",
+		"core-js": "^3.21.1",
 		"dompurify": "^2.3.6",
 		"md5": "^2.3.0",
 		"qs": "^6.10.3",

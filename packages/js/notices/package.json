@@ -24,7 +24,8 @@
 	"dependencies": {
 		"@wordpress/a11y": "^3.5.0",
 		"@wordpress/data": "^6.3.0",
-		"@wordpress/notices": "^3.3.2"
+		"@wordpress/notices": "^3.3.2",
+		"core-js": "^3.21.1"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0",
