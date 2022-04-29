@@ -6,7 +6,8 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
- * Class PostMetaToOrderMetaMigrator.
+ * Helper class to migrate records from the WordPress post meta table
+ * to the custom orders meta table.
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
@@ -34,7 +35,7 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 	 *
 	 * @return array Meta data migration config.
 	 */
-	public function get_meta_config() {
+	public function get_meta_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
 		$this->table_names = array(

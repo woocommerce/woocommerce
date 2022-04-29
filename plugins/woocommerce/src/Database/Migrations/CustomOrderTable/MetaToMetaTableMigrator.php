@@ -8,9 +8,8 @@ namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 
 /**
- * Class MetaToMetaTableMigrator.
- *
- * Generic class for powering migrations from one meta table to another table.
+ * Base class for implementing migrations from the standard WordPress meta table
+ * to custom meta (key-value pairs) tables.
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
@@ -61,7 +60,7 @@ abstract class MetaToMetaTableMigrator {
 	 *  ),
 	 * )
 	 */
-	abstract public function get_meta_config();
+	abstract public function get_meta_config(): array;
 
 	/**
 	 * MetaToMetaTableMigrator constructor.
@@ -76,7 +75,7 @@ abstract class MetaToMetaTableMigrator {
 	 *
 	 * @param array $entity_ids Entity IDs to process migration for.
 	 */
-	public function process_migration_batch_for_ids( $entity_ids ) {
+	public function process_migration_batch_for_ids( array $entity_ids ): void {
 		global $wpdb;
 		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
@@ -111,7 +110,7 @@ abstract class MetaToMetaTableMigrator {
 	 *
 	 * @return string Query to update batch records.
 	 */
-	public function generate_update_sql_for_batch( $batch ) {
+	public function generate_update_sql_for_batch( array $batch ): string {
 		global $wpdb;
 
 		$table             = $this->schema_config['destination']['meta']['table_name'];
@@ -149,7 +148,7 @@ abstract class MetaToMetaTableMigrator {
 	 *
 	 * @return string Insert SQL query.
 	 */
-	public function generate_insert_sql_for_batch( $batch ) {
+	public function generate_insert_sql_for_batch( array $batch ): string {
 		global $wpdb;
 
 		$table             = $this->schema_config['destination']['meta']['table_name'];
@@ -196,7 +195,7 @@ abstract class MetaToMetaTableMigrator {
 	 *      ...,
 	 * )
 	 */
-	public function fetch_data_for_migration_for_ids( $entity_ids ) {
+	public function fetch_data_for_migration_for_ids( array $entity_ids ): array {
 		global $wpdb;
 		if ( empty( $entity_ids ) ) {
 			return array(
@@ -241,7 +240,7 @@ abstract class MetaToMetaTableMigrator {
 	 *
 	 * @return array Already migrated records.
 	 */
-	private function get_already_migrated_records( $entity_ids ) {
+	private function get_already_migrated_records( array $entity_ids ): array {
 		global $wpdb;
 
 		$destination_table_name        = $this->schema_config['destination']['meta']['table_name'];
@@ -298,7 +297,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 	 *
 	 * @return array[] Returns two arrays, first for records to migrate, and second for records to upgrade.
 	 */
-	private function classify_update_insert_records( $to_migrate, $already_migrated ) {
+	private function classify_update_insert_records( array $to_migrate, array $already_migrated ): array {
 		$to_update = array();
 		$to_insert = array();
 
@@ -347,7 +346,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
-	private function build_meta_table_query( $entity_ids ) {
+	private function build_meta_table_query( array $entity_ids ): string {
 		global $wpdb;
 		$source_meta_table        = $this->schema_config['source']['meta']['table_name'];
 		$source_meta_key_column   = $this->schema_config['source']['meta']['meta_key_column'];

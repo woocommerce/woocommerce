@@ -6,7 +6,8 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
- * Class PostToOrderAddressTableMigrator
+ * Helper class to migrate records from the WordPress post table
+ * to the custom order addresses table.
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
@@ -33,7 +34,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return array Config.
 	 */
-	public function get_schema_config() {
+	public function get_schema_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
 		$this->table_names = array(
@@ -72,7 +73,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return \string[][] Config.
 	 */
-	public function get_core_column_mapping() {
+	public function get_core_column_mapping(): array {
 		$type = $this->type;
 
 		return array(
@@ -93,7 +94,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return \string[][] Config.
 	 */
-	public function get_meta_column_config() {
+	public function get_meta_column_config(): array {
 		$type = $this->type;
 
 		return array(
@@ -158,7 +159,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *      ...
 	 * )
 	 */
-	public function get_already_migrated_records( $entity_ids ) {
+	public function get_already_migrated_records( array $entity_ids ): array {
 		global $wpdb;
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
 		$source_destination_join_column = $this->schema_config['source']['entity']['destination_rel_column'];
