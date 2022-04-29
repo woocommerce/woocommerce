@@ -44,6 +44,7 @@ import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { OneClickComplete } from '../one-click-complete';
+import { QuoteOfTheDay } from '../quote-of-the-day';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -222,6 +223,7 @@ export const Layout = ( {
 					'two-columns': twoColumns,
 				} ) }
 			>
+				<QuoteOfTheDay />
 				<OneClickComplete />
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowWelcomeModal && (

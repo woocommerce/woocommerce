@@ -9,6 +9,10 @@ import { useUserPreferences } from '@woocommerce/data';
  */
 import { Layout } from '../layout';
 
+jest.mock( '../../quote-of-the-day', () => ( {
+	QuoteOfTheDay: jest.fn().mockReturnValue( <div>[QuoteOfTheDay]</div> ),
+} ) );
+
 jest.mock( '../stats-overview', () =>
 	jest.fn().mockReturnValue( <div>[StatsOverview]</div> )
 );
