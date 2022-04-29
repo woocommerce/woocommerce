@@ -62,6 +62,7 @@
 	ul li.woocommerce-task-list__item {
 		padding-top: $gap;
 		padding-bottom: $gap;
+		min-height: 72px;
 
 		&.is-disabled {
 			pointer-events: none;
@@ -71,6 +72,9 @@
 		.woocommerce-task-list__item-before
 		.woocommerce-task__icon {
 			border-color: $gray-300;
+		}
+		.woocommerce-task-list__item-expandable-content {
+			line-height: $gap;
 		}
 	}
 
