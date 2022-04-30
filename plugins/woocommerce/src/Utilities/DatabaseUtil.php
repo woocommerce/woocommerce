@@ -3,7 +3,7 @@
  * DatabaseUtil class file.
  */
 
-namespace Automattic\WooCommerce\Internal\Utilities;
+namespace Automattic\WooCommerce\Utilities;
 
 /**
  * A class of utilities for dealing with the database.
