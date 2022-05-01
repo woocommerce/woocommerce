@@ -7,16 +7,15 @@ import {
 	saveOrPublish,
 } from '@woocommerce/blocks-test-utils';
 import {
-	merchant,
 	setCheckbox,
 	openDocumentSettingsSidebar,
 } from '@woocommerce/e2e-utils';
-import { switchUserToAdmin, visitAdminPage } from '@wordpress/e2e-test-utils';
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { shopper } from '../../../../utils';
+import { shopper, merchant } from '../../../../utils';
 import { SIMPLE_PHYSICAL_PRODUCT_NAME } from '.../../../../utils/constants';
 
 const block = {
@@ -32,6 +31,7 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 
 describe( 'Shopper → Checkout → Account', () => {
 	beforeAll( async () => {
+		await merchant.login();
 		await merchant.openSettings( 'account' );
 		//Enable create an account at checkout option.
 		await setCheckbox( '#woocommerce_enable_checkout_login_reminder' );
@@ -55,13 +55,17 @@ describe( 'Shopper → Checkout → Account', () => {
 				'Allow shoppers to sign up for a user account during checkout',
 		} );
 		await saveOrPublish();
-		await shopper.logout();
+		await merchant.logout();
+	} );
+
+	beforeEach( async () => {
+		await shopper.block.emptyCart();
 		await shopper.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 	} );
 
-	it( 'user can login to existing account', async () => {
+	it.only( 'user can login to existing account', async () => {
 		//Get the login link from checkout page.
 		const loginLink = await page.$eval(
 			'span.wc-block-components-checkout-step__heading-content a',
@@ -80,11 +84,11 @@ describe( 'Shopper → Checkout → Account', () => {
 		} );
 		//Create random email to place an order.
 		let testEmail = `test${ Math.random() * 10 }@example.com`;
-		await expect( page ).toFill( `#email`, testEmail );
 		await shopper.block.fillInCheckoutWithTestData();
+		await expect( page ).toFill( `#email`, testEmail );
 		await shopper.block.placeOrder();
 		await expect( page ).toMatch( 'Order received' );
-		await switchUserToAdmin();
+		await merchant.login();
 		await visitAdminPage( 'users.php' );
 		//Confirm account is being created with the email.
 		await expect( page ).toMatch( testEmail );
