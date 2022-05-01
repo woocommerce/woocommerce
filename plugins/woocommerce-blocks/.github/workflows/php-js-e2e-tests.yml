@@ -20,7 +20,6 @@ jobs:
               run: |
                   npm ci --no-optional
                   FORCE_REDUCED_MOTION=true npm run build:e2e-test
-
             - name: blocks.ini setup
               run: |
                   echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
@@ -34,7 +33,6 @@ jobs:
                   key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-composer-
-
             - name: Set up PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -45,26 +43,22 @@ jobs:
             - name: Composer install
               run: |
                   composer install
-
             - name: E2E Tests (WP latest with Gutenberg plugin)
               env:
                   WOOCOMMERCE_BLOCKS_PHASE: 3
                   GUTENBERG_EDITOR_CONTEXT: 'gutenberg'
               run: |
                   chmod -R 767 ./ #needed for permissions issues
-                  JSON='{"plugins": ["https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip","https://github.com/WP-API/Basic-Auth/archive/master.zip","https://downloads.wordpress.org/plugin/gutenberg.latest-stable.zip", "."] }'
-                  echo $JSON > .wp-env.override.json
+                  node ./bin/wp-env-with-gutenberg.js
                   npm run wp-env start
                   npm run wp-env clean all
                   npm run test:e2e
-
             - name: Upload artifacts on failure
               if: ${{ failure() }}
               uses: actions/upload-artifact@v3
               with:
                   name: e2e-with-gutenberg-test-report
                   path: reports/e2e
-
     JSE2ETests:
         name: JavaScript E2E Tests (latest)
         runs-on: ubuntu-latest
