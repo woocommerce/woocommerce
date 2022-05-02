@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install PNPM
-        run: npm install -g pnpm
+        run: npm install -g pnpm@^6.24.2
 
       - name: Build zip
         run: pnpm nx build-zip woocommerce
