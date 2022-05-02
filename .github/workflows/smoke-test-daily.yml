@@ -22,7 +22,7 @@ jobs:
             - name: Install prerequisites.
               working-directory: package/woocommerce/plugins/woocommerce
               run: |
-                  npm install -g pnpm
+                  npm install -g pnpm@^6.24.2
                   pnpm install
                   pnpm nx composer-install-no-dev woocommerce
                   pnpm nx build-assets woocommerce
@@ -69,7 +69,7 @@ jobs:
                 key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
-              run: npm install -g pnpm
+              run: npm install -g pnpm@^6.24.2
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -125,7 +125,7 @@ jobs:
             - name: Install PNPM and install dependencies
               working-directory: package/woocommerce
               run: |
-                  npm install -g pnpm
+                  npm install -g pnpm@^6.24.2
                   pnpm install
 
             - name: Load docker images and start containers.
@@ -150,7 +150,7 @@ jobs:
             - name: Install dependencies again
               working-directory: package/woocommerce
               run: |
-                  npm install -g pnpm
+                  npm install -g pnpm@^6.24.2
                   pnpm install
 
             - name: Run tests command.

@@ -15,6 +15,7 @@ jest.mock( '@woocommerce/tracks', () => ( {
 } ) );
 jest.mock( '@woocommerce/experimental', () => ( {
 	TaskItem: ( props: { title: string } ) => <div>{ props.title }</div>,
+	useSlot: jest.fn(),
 	List: jest.fn().mockImplementation( ( { children } ) => children ),
 } ) );
 jest.mock( '@woocommerce/components', () => ( {
