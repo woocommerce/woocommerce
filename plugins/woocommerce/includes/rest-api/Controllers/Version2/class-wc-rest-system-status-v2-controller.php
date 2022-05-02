@@ -32,16 +32,28 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	protected $rest_base = 'system_status';
 
+	/**
+	 * Register cache cleaner
+	 *
+	 * Handles all the cache cleaning for this endpoint. We need to register
+	 * these functions before the routes are registered, so this function gets
+	 * called from Server.php
+	 */
 	public static function register_cache_clean() {
-		// Clear the theme cache if we switch themes or our theme is upgraded
+		// Clear the theme cache if we switch themes or our theme is upgraded.
 		add_action( 'switch_theme', array( __CLASS__, 'clean_theme_cache' ) );
-		add_action( 'upgrader_process_complete', function( $upgrader, $extra ) {
-			if ( $extra['type'] !== 'theme' ) {
-				return;
-			}
+		add_action(
+			'upgrader_process_complete',
+			function( $upgrader, $extra ) {
+				if ( 'theme' !== $extra['type'] ) {
+					return;
+				}
 
-			\WC_REST_System_Status_V2_Controller::clean_theme_cache();
-		}, 10, 2 );
+				\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -599,38 +611,38 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	public function get_item_mappings_per_fields( $fields ) {
 		$items = array();
 
-		foreach( $fields as $field ) {
-			switch( $field ) {
-			case 'environment':
-				$items['environment'] = $this->get_environment_info_per_fields( $fields );
-				break;
-			case 'database':
-				$items['database'] = $this->get_database_info();
-				break;
-			case 'active_plugins':
-				$items['active_plugins'] = $this->get_active_plugins();
-				break;
-			case 'inactive_plugins':
-				$items['inactive_plugins'] = $this->get_inactive_plugins();
-				break;
-			case 'dropins_mu_plugins':
-				$items['dropins_mu_plugins'] = $this->get_dropins_mu_plugins();
-				break;
-			case 'theme':
-				$items['theme'] = $this->get_theme_info();
-				break;
-			case 'settings':
-				$items['settings'] = $this->get_settings();
-				break;
-			case 'security':
-				$items['security'] = $this->get_security_info();
-				break;
-			case 'pages':
-				$items['pages'] = $this->get_pages();
-				break;
-			case 'post_type_counts':
-				$items['post_type_counts'] = $this->get_post_type_counts();
-				break;
+		foreach ( $fields as $field ) {
+			switch ( $field ) {
+				case 'environment':
+					$items['environment'] = $this->get_environment_info_per_fields( $fields );
+					break;
+				case 'database':
+					$items['database'] = $this->get_database_info();
+					break;
+				case 'active_plugins':
+					$items['active_plugins'] = $this->get_active_plugins();
+					break;
+				case 'inactive_plugins':
+					$items['inactive_plugins'] = $this->get_inactive_plugins();
+					break;
+				case 'dropins_mu_plugins':
+					$items['dropins_mu_plugins'] = $this->get_dropins_mu_plugins();
+					break;
+				case 'theme':
+					$items['theme'] = $this->get_theme_info();
+					break;
+				case 'settings':
+					$items['settings'] = $this->get_settings();
+					break;
+				case 'security':
+					$items['security'] = $this->get_security_info();
+					break;
+				case 'pages':
+					$items['pages'] = $this->get_pages();
+					break;
+				case 'post_type_counts':
+					$items['post_type_counts'] = $this->get_post_type_counts();
+					break;
 			}
 		}
 
@@ -1147,7 +1159,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		return $theme_info;
 	}
 
-	static function clean_theme_cache() {
+	/**
+	 * Clear the system status theme cache
+	 */
+	public static function clean_theme_cache() {
 		delete_transient( 'wc_system_status_theme_info' );
 	}
 
