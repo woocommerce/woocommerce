@@ -11,6 +11,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -784,9 +785,9 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	public static function get_mini_cart_info() {
+	private static function get_mini_cart_info() {
 		$mini_cart_block_name = 'woocommerce/mini-cart';
-		$mini_cart_block_data = wc_current_theme_is_fse_theme() ? WC_Blocks_Utils::get_block_from_template_part( $mini_cart_block_name, 'header' ) : WC_Blocks_Utils::get_blocks_from_widget_area( $mini_cart_block_name );
+		$mini_cart_block_data = wc_current_theme_is_fse_theme() ? BlocksUtil::get_block_from_template_part( $mini_cart_block_name, 'header' ) : BlocksUtil::get_blocks_from_widget_area( $mini_cart_block_name );
 		return array(
 			'mini_cart_used'             => empty( $mini_cart_block_data[0] ) ? 'No' : 'Yes',
 			'mini_cart_block_attributes' => empty( $mini_cart_block_data[0] ) ? array() : $mini_cart_block_data[0]['attrs'],
