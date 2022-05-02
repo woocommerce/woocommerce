@@ -7,7 +7,7 @@ const productPrice = '9.99';
 const couponAmount = '5';
 const discountedPrice = ( productPrice - couponAmount ).toString();
 
-test.describe.only( 'WooCommerce Orders > Apply Coupon', () => {
+test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.beforeAll( async ( { baseURL } ) => {
