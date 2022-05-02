@@ -14,7 +14,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SetUpAdditionalPaymentTypes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
@@ -68,6 +67,11 @@ class FeaturePlugin {
 	 * Init the feature plugin, only if we can detect both Gutenberg and WooCommerce.
 	 */
 	public function init() {
+		// Bail if WC isn't initialized (This can be called from WCAdmin's entrypoint).
+		if ( ! defined( 'WC_ABSPATH' ) ) {
+			return;
+		}
+
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/page-controller-functions.php';
@@ -115,7 +119,15 @@ class FeaturePlugin {
 		 * @deprecated 3.3.0
 		 * @var string
 		 */
-		define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+			/**
+			  * Define the current WC Admin version.
+			  *
+			  * @deprecated 3.3.0
+			  * @var string
+			  */
+			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		}
 	}
 
 	/**
@@ -153,7 +165,6 @@ class FeaturePlugin {
 		new TrackingOptIn();
 		new WooCommercePayments();
 		new InstallJPAndWCSPlugins();
-		new SetUpAdditionalPaymentTypes();
 		new TestCheckout();
 		new SellingOnlineCourses();
 		new WelcomeToWooCommerceForStoreUsers();

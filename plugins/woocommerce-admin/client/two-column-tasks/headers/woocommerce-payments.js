@@ -14,7 +14,7 @@ import interpolateComponents from '@automattic/interpolate-components';
  * Internal dependencies
  */
 import TimerImage from './timer.svg';
-import GetPaid from './illustrations/get-paid';
+import { WC_ASSET_URL } from '../../utils/admin-settings';
 
 const connect = ( createNotice, setIsBusy ) => {
 	const errorMessage = __(
@@ -45,7 +45,13 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<GetPaid className="svg-background" />
+			<img
+				alt={ __( 'Payment illustration', 'woocommerce' ) }
+				src={
+					WC_ASSET_URL + 'images/task_list/payment-illustration.png'
+				}
+				className="svg-background"
+			/>
 			<div className="woocommerce-task-header__contents">
 				<h1>{ __( "It's time to get paid", 'woocommerce' ) }</h1>
 				<p>

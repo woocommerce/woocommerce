@@ -9,7 +9,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
-	WCDataSelector,
 	TaskListType,
 	TaskType,
 } from '@woocommerce/data';
@@ -67,16 +66,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		'woocommerce_tasklist_progression'
 	);
 
-	const { isResolving, taskLists } = useSelect(
-		( select: WCDataSelector ) => {
-			return {
-				isResolving: ! select(
-					ONBOARDING_STORE_NAME
-				).hasFinishedResolution( 'getTaskLists' ),
-				taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-			};
-		}
-	);
+	const { isResolving, taskLists } = useSelect( ( select ) => {
+		return {
+			isResolving: ! select(
+				ONBOARDING_STORE_NAME
+			).hasFinishedResolution( 'getTaskLists' ),
+			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+		};
+	} );
 
 	const getCurrentTask = () => {
 		if ( ! task ) {
@@ -147,52 +144,61 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
-	return taskLists
-		.filter( ( { id }: TaskListType ) =>
-			experimentAssignment?.variationName === 'treatment'
-				? id.endsWith( 'two_column' )
-				: ! id.endsWith( 'two_column' )
-		)
-		.map( ( taskList: TaskListType ) => {
-			const { id, isHidden, isVisible, isToggleable } = taskList;
+	return (
+		<>
+			{ taskLists
+				.filter( ( { id }: TaskListType ) =>
+					experimentAssignment?.variationName === 'treatment'
+						? id.endsWith( 'two_column' )
+						: ! id.endsWith( 'two_column' )
+				)
+				.map( ( taskList: TaskListType ) => {
+					const { id, isHidden, isVisible, isToggleable } = taskList;
 
-			if ( ! isVisible ) {
-				return null;
-			}
+					if ( ! isVisible ) {
+						return null;
+					}
 
-			const TaskListComponent = getTaskListComponent( id );
-			return (
-				<Fragment key={ id }>
-					<TaskListComponent
-						isExpandable={
-							experimentAssignment?.variationName === 'treatment'
-						}
-						query={ query }
-						twoColumns={ false }
-						{ ...taskList }
-					/>
-					{ isToggleable && (
-						<DisplayOption>
-							<MenuGroup
-								className="woocommerce-layout__homescreen-display-options"
-								label={ __( 'Display', 'woocommerce' ) }
-							>
-								<MenuItem
-									className="woocommerce-layout__homescreen-extension-tasklist-toggle"
-									icon={ isHidden ? undefined : check }
-									isSelected={ ! isHidden }
-									role="menuitemcheckbox"
-									onClick={ () => toggleTaskList( taskList ) }
-								>
-									{ __(
-										'Show things to do next',
-										'woocommerce'
-									) }
-								</MenuItem>
-							</MenuGroup>
-						</DisplayOption>
-					) }
-				</Fragment>
-			);
-		} );
+					const TaskListComponent = getTaskListComponent( id );
+					return (
+						<Fragment key={ id }>
+							<TaskListComponent
+								isExpandable={
+									experimentAssignment?.variationName ===
+									'treatment'
+								}
+								query={ query }
+								twoColumns={ false }
+								{ ...taskList }
+							/>
+							{ isToggleable && (
+								<DisplayOption>
+									<MenuGroup
+										className="woocommerce-layout__homescreen-display-options"
+										label={ __( 'Display', 'woocommerce' ) }
+									>
+										<MenuItem
+											className="woocommerce-layout__homescreen-extension-tasklist-toggle"
+											icon={
+												isHidden ? undefined : check
+											}
+											isSelected={ ! isHidden }
+											role="menuitemcheckbox"
+											onClick={ () =>
+												toggleTaskList( taskList )
+											}
+										>
+											{ __(
+												'Show things to do next',
+												'woocommerce'
+											) }
+										</MenuItem>
+									</MenuGroup>
+								</DisplayOption>
+							) }
+						</Fragment>
+					);
+				} ) }
+		</>
+	);
 };

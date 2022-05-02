@@ -6,7 +6,7 @@ concurrency:
 jobs:
   changelogger_used:
     name: Changelogger use
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3

@@ -8,7 +8,7 @@ import { escapeRegExp, has } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { SelectControl, TextControl } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
-import { useSelect, select as wpDataSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -28,8 +28,8 @@ type Option = { key: string; label: string };
 /**
  * Type guard to ensure that the specified locale object has a .required property
  *
- * @param fieldName field of Locale
- * @param locale    unknown object to be checked
+ * @param  fieldName field of Locale
+ * @param  locale    unknown object to be checked
  * @return          Boolean indicating if locale has a .required property
  */
 const isLocaleRecord = (
@@ -353,7 +353,7 @@ export function StoreAddress( {
 		hasFinishedResolution,
 		countries,
 		loadingCountries,
-	} = useSelect( ( select: typeof wpDataSelect ) => {
+	} = useSelect( ( select ) => {
 		const {
 			getLocale,
 			getCountries,
@@ -376,6 +376,10 @@ export function StoreAddress( {
 		setValue
 	);
 
+	const isLocaleKey = ( key: string ): key is keyof typeof locale => {
+		return locale.hasOwnProperty( key );
+	};
+
 	useEffect( () => {
 		if ( locale ) {
 			storeAddressFields.forEach( ( field ) => {
@@ -383,7 +387,12 @@ export function StoreAddress( {
 					.replace( /(address)Line([0-9])/, '$1$2' )
 					.toLowerCase();
 				const props = getInputProps( field );
-				if ( locale[ fieldKey ]?.hidden && props.value?.length > 0 ) {
+
+				if (
+					isLocaleKey( fieldKey ) &&
+					locale[ fieldKey ]?.hidden &&
+					props.value?.length > 0
+				) {
 					// Clear hidden field.
 					setValue( field, '' );
 				}

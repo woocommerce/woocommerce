@@ -33,6 +33,10 @@
 			.components-panel__arrow {
 				right: $gap-large;
 			}
+
+			.woocommerce-task-header__contents p:first-of-type {
+				margin-top: $gap-small;
+			}
 		}
 		.wooocommerce-task-card__header-container {
 			width: 100%;
@@ -58,6 +62,7 @@
 	ul li.woocommerce-task-list__item {
 		padding-top: $gap;
 		padding-bottom: $gap;
+		min-height: 72px;
 
 		&.is-disabled {
 			pointer-events: none;
@@ -67,6 +72,9 @@
 		.woocommerce-task-list__item-before
 		.woocommerce-task__icon {
 			border-color: $gray-300;
+		}
+		.woocommerce-task-list__item-expandable-content {
+			line-height: $gap;
 		}
 	}
 

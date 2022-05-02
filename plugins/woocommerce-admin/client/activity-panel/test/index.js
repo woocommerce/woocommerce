@@ -90,6 +90,12 @@ describe( 'Activity Panel', () => {
 		expect( screen.queryByText( 'Inbox' ) ).toBeNull();
 	} );
 
+	it( 'should render preview store tab on home screen', () => {
+		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
+
+		expect( screen.getByText( 'Preview store' ) ).toBeDefined();
+	} );
+
 	it( 'should not render help tab if not on home screen', () => {
 		render(
 			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />

@@ -1,11 +1,12 @@
 /**
+ * External dependencies
+ */
+import { Extension } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
-import {
-	Extension,
-	transformExtensionToPlugin,
-	getMarketingExtensionLists,
-} from '../';
+import { transformExtensionToPlugin, getMarketingExtensionLists } from '../';
 
 const basicPlugins: Extension[] = [
 	{
@@ -15,6 +16,7 @@ const basicPlugins: Extension[] = [
 		manage_url: '#',
 		image_url: 'basic.jpeg',
 		is_built_by_wc: true,
+		is_visible: true,
 	},
 ];
 
@@ -26,6 +28,7 @@ const reachPlugins: Extension[] = [
 		manage_url: '#',
 		image_url: 'reach.jpeg',
 		is_built_by_wc: false,
+		is_visible: true,
 	},
 ];
 
@@ -37,6 +40,7 @@ const growPlugins: Extension[] = [
 		manage_url: '#',
 		image_url: 'grow.jpeg',
 		is_built_by_wc: false,
+		is_visible: true,
 	},
 	{
 		key: 'grow-plugin-two:extra',
@@ -45,6 +49,7 @@ const growPlugins: Extension[] = [
 		manage_url: '#',
 		image_url: 'grow2.jpeg',
 		is_built_by_wc: false,
+		is_visible: true,
 	},
 ];
 

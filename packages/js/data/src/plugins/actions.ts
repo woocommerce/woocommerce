@@ -6,14 +6,14 @@ import {
 	select,
 	dispatch as depreciatedDispatch,
 } from '@wordpress/data-controls';
-import { controls } from '@wordpress/data';
 import { _n, sprintf } from '@wordpress/i18n';
 import { DispatchFromMap } from '@automattic/data-stores';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { pluginNames, STORE_NAME } from './constants';
+import { STORE_NAME } from './constants';
 import { ACTION_TYPES as TYPES } from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { WPError } from '../types';
@@ -22,6 +22,8 @@ import {
 	PluginNames,
 	SelectorKeysWithActions,
 	RecommendedTypes,
+	InstallPluginsResponse,
+	ActivatePluginsResponse,
 } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
@@ -30,61 +32,10 @@ const dispatch =
 const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
-type PluginsResponse< PluginData > = {
-	data: PluginData;
-	errors: WPError< PluginNames >;
-	success: boolean;
-	message: string;
-} & Response;
-
-export type InstallPluginsResponse = PluginsResponse< {
-	installed: string[];
-	results: Record< string, boolean >;
-	install_time?: Record< string, number >;
-} >;
-
-type ActivatePluginsResponse = PluginsResponse< {
-	activated: string[];
-	active: string[];
-} >;
-
-function isWPError(
-	error: WPError< PluginNames > | Error | string
-): error is WPError< PluginNames > {
-	return ( error as WPError ).errors !== undefined;
-}
-
 class PluginError extends Error {
 	constructor( message: string, public data: unknown ) {
 		super( message );
 	}
-}
-
-export function formatErrors(
-	response: WPError< PluginNames > | Error | string
-): string {
-	if ( isWPError( response ) ) {
-		// Replace the slug with a plugin name if a constant exists.
-		( Object.keys( response.errors ) as PluginNames[] ).forEach(
-			( plugin ) => {
-				response.errors[ plugin ] = response.errors[ plugin ].map(
-					( pluginError ) => {
-						return pluginNames[ plugin ]
-							? pluginError.replace(
-									`\`${ plugin }\``,
-									pluginNames[ plugin ]
-							  )
-							: pluginError;
-					}
-				);
-			}
-		);
-	} else if ( typeof response === 'string' ) {
-		return response;
-	} else {
-		return response.message;
-	}
-	return '';
 }
 
 const formatErrorMessage = (
@@ -107,12 +58,9 @@ const formatErrorMessage = (
 	);
 };
 
-export function updateActivePlugins(
-	active: string[],
-	replace = false
-): { type: TYPES.UPDATE_ACTIVE_PLUGINS; active: string[]; replace?: boolean } {
+export function updateActivePlugins( active: string[], replace = false ) {
 	return {
-		type: TYPES.UPDATE_ACTIVE_PLUGINS,
+		type: TYPES.UPDATE_ACTIVE_PLUGINS as const,
 		active,
 		replace,
 	};
@@ -127,7 +75,7 @@ export function updateInstalledPlugins(
 	replace?: boolean;
 } {
 	return {
-		type: TYPES.UPDATE_INSTALLED_PLUGINS,
+		type: TYPES.UPDATE_INSTALLED_PLUGINS as const,
 		installed,
 		replace,
 	};
@@ -136,13 +84,9 @@ export function updateInstalledPlugins(
 export function setIsRequesting(
 	selector: SelectorKeysWithActions,
 	isRequesting: boolean
-): {
-	type: TYPES.SET_IS_REQUESTING;
-	selector: SelectorKeysWithActions;
-	isRequesting: boolean;
-} {
+) {
 	return {
-		type: TYPES.SET_IS_REQUESTING,
+		type: TYPES.SET_IS_REQUESTING as const,
 		selector,
 		isRequesting,
 	};
@@ -151,26 +95,17 @@ export function setIsRequesting(
 export function setError(
 	selector: SelectorKeysWithActions,
 	error: Partial< Record< PluginNames, string[] > >
-): {
-	type: TYPES.SET_ERROR;
-	selector: SelectorKeysWithActions;
-	error: Partial< Record< PluginNames, string[] > >;
-} {
+) {
 	return {
-		type: TYPES.SET_ERROR,
+		type: TYPES.SET_ERROR as const,
 		selector,
 		error,
 	};
 }
 
-export function updateIsJetpackConnected(
-	jetpackConnection: boolean
-): {
-	type: TYPES.UPDATE_JETPACK_CONNECTION;
-	jetpackConnection: boolean;
-} {
+export function updateIsJetpackConnected( jetpackConnection: boolean ) {
 	return {
-		type: TYPES.UPDATE_JETPACK_CONNECTION,
+		type: TYPES.UPDATE_JETPACK_CONNECTION as const,
 		jetpackConnection,
 	};
 }
@@ -178,18 +113,51 @@ export function updateIsJetpackConnected(
 export function updateJetpackConnectUrl(
 	redirectUrl: string,
 	jetpackConnectUrl: string
-): {
-	type: TYPES.UPDATE_JETPACK_CONNECT_URL;
-	redirectUrl: string;
-	jetpackConnectUrl: string;
-} {
+) {
 	return {
-		type: TYPES.UPDATE_JETPACK_CONNECT_URL,
+		type: TYPES.UPDATE_JETPACK_CONNECT_URL as const,
 		jetpackConnectUrl,
 		redirectUrl,
 	};
 }
 
+export const createErrorNotice = (
+	errorMessage: string
+): {
+	type: 'CREATE_NOTICE';
+	[ key: string ]: unknown;
+} => {
+	return dispatch( 'core/notices', 'createNotice', 'error', errorMessage );
+};
+
+export function setPaypalOnboardingStatus(
+	status: Partial< PaypalOnboardingStatus >
+): {
+	type: TYPES.SET_PAYPAL_ONBOARDING_STATUS;
+	paypalOnboardingStatus: Partial< PaypalOnboardingStatus >;
+} {
+	return {
+		type: TYPES.SET_PAYPAL_ONBOARDING_STATUS as const,
+		paypalOnboardingStatus: status,
+	};
+}
+
+export function setRecommendedPlugins(
+	type: string,
+	plugins: Plugin[]
+): {
+	type: TYPES.SET_RECOMMENDED_PLUGINS;
+	recommendedType: string;
+	plugins: Plugin[];
+} {
+	return {
+		type: TYPES.SET_RECOMMENDED_PLUGINS as const,
+		recommendedType: type,
+		plugins,
+	};
+}
+
+// Action Creator Generators
 export function* installPlugins( plugins: string[] ) {
 	yield setIsRequesting( 'installPlugins', true );
 
@@ -278,10 +246,6 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 	}
 }
 
-export const createErrorNotice = ( errorMessage: string ) => {
-	return dispatch( 'core/notices', 'createNotice', 'error', errorMessage );
-};
-
 export function* connectToJetpack(
 	getAdminLink: ( endpoint: string ) => string
 ) {
@@ -350,33 +314,6 @@ export function* connectToJetpackWithFailureRedirect(
 	}
 }
 
-export function setPaypalOnboardingStatus(
-	status: Partial< PaypalOnboardingStatus >
-): {
-	type: TYPES.SET_PAYPAL_ONBOARDING_STATUS;
-	paypalOnboardingStatus: Partial< PaypalOnboardingStatus >;
-} {
-	return {
-		type: TYPES.SET_PAYPAL_ONBOARDING_STATUS,
-		paypalOnboardingStatus: status,
-	};
-}
-
-export function setRecommendedPlugins(
-	type: string,
-	plugins: Plugin[]
-): {
-	type: TYPES.SET_RECOMMENDED_PLUGINS;
-	recommendedType: string;
-	plugins: Plugin[];
-} {
-	return {
-		type: TYPES.SET_RECOMMENDED_PLUGINS,
-		recommendedType: type,
-		plugins,
-	};
-}
-
 const SUPPORTED_TYPES = [ 'payments' ];
 export function* dismissRecommendedPlugins( type: RecommendedTypes ) {
 	if ( ! SUPPORTED_TYPES.includes( type ) ) {
@@ -406,19 +343,24 @@ export function* dismissRecommendedPlugins( type: RecommendedTypes ) {
 	return success;
 }
 
-export type Actions =
-	| ReturnType< typeof updateActivePlugins >
-	| ReturnType< typeof updateInstalledPlugins >
-	| ReturnType< typeof setIsRequesting >
-	| ReturnType< typeof setError >
-	| ReturnType< typeof updateIsJetpackConnected >
-	| ReturnType< typeof updateJetpackConnectUrl >
-	| ReturnType< typeof setPaypalOnboardingStatus >
-	| ReturnType< typeof setRecommendedPlugins >;
+export type Actions = ReturnType<
+	| typeof updateActivePlugins
+	| typeof updateInstalledPlugins
+	| typeof setIsRequesting
+	| typeof setError
+	| typeof updateIsJetpackConnected
+	| typeof updateJetpackConnectUrl
+	| typeof setPaypalOnboardingStatus
+	| typeof setRecommendedPlugins
+	| typeof createErrorNotice
+>;
 
 // Types
 export type ActionDispatchers = DispatchFromMap< {
+	installPlugins: typeof installPlugins;
+	activatePlugins: typeof activatePlugins;
 	installJetpackAndConnect: typeof installJetpackAndConnect;
 	installAndActivatePlugins: typeof installAndActivatePlugins;
+	connectToJetpackWithFailureRedirect: typeof connectToJetpackWithFailureRedirect;
 	dismissRecommendedPlugins: typeof dismissRecommendedPlugins;
 } >;

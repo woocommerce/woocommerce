@@ -42,7 +42,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\NavigationNudge;
 use \Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Internal\Admin\Notes\UpdateStoreDetails;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SetUpAdditionalPaymentTypes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 
@@ -149,7 +148,6 @@ class Events {
 	 */
 	protected function possibly_delete_notes() {
 		NavigationNudge::delete_if_not_applicable();
-		SetUpAdditionalPaymentTypes::delete_if_not_applicable();
 		PaymentsRemindMeLater::delete_if_not_applicable();
 	}
 

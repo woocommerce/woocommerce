@@ -21,20 +21,18 @@ export const StoreLocation: React.FC< {
 	const { updateAndPersistSettingsForGroup } = useDispatch(
 		SETTINGS_STORE_NAME
 	);
-	const { generalSettings, isResolving } = useSelect(
-		( select: WCDataSelector ) => {
-			const { getSettings, hasFinishedResolution } = select(
-				SETTINGS_STORE_NAME
-			) as SettingsSelector;
+	const { generalSettings, isResolving } = useSelect( ( select ) => {
+		const { getSettings, hasFinishedResolution } = select(
+			SETTINGS_STORE_NAME
+		) as SettingsSelector;
 
-			return {
-				generalSettings: getSettings( 'general' )?.general,
-				isResolving: ! hasFinishedResolution( 'getSettings', [
-					'general',
-				] ),
-			};
-		}
-	);
+		return {
+			generalSettings: getSettings( 'general' )?.general,
+			isResolving: ! hasFinishedResolution( 'getSettings', [
+				'general',
+			] ),
+		};
+	} );
 
 	useEffect( () => {
 		if ( isResolving || ! hasCompleteAddress( generalSettings ) ) {

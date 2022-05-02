@@ -8,7 +8,6 @@ import { getAdminLink } from '@woocommerce/settings';
 import {
 	OPTIONS_STORE_NAME,
 	SETTINGS_STORE_NAME,
-	WCDataSelector,
 	TaskType,
 } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
@@ -60,7 +59,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		SETTINGS_STORE_NAME
 	);
 	const { generalSettings, isResolving, taxSettings } = useSelect(
-		( select: WCDataSelector ) => {
+		( select ) => {
 			const { getSettings, hasFinishedResolution } = select(
 				SETTINGS_STORE_NAME
 			) as SettingsSelector;
@@ -90,6 +89,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 					woocommerce_calc_taxes: 'yes',
 				},
 			} )
+				// @ts-expect-error updateAndPersistSettingsForGroup returns a Promise, but it is not typed in source.
 				.then( () => redirectToTaxSettings() )
 				.catch( ( error: unknown ) => {
 					setIsPending( false );
@@ -135,6 +135,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		updateOptions( {
 			woocommerce_no_sales_tax: true,
 			woocommerce_calc_taxes: 'no',
+			// @ts-expect-error updateOptions returns a Promise, but it is not typed in source.
 		} ).then( () => {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		} );

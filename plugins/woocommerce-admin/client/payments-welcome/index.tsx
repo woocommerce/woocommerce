@@ -10,11 +10,7 @@ import {
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	useDispatch,
-	useSelect,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME, PluginsStoreActions } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -23,16 +19,18 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import strings from './strings';
 import Banner from './banner';
-import Visa from './cards/visa';
-import MasterCard from './cards/mastercard';
-import Maestro from './cards/maestro';
-import Amex from './cards/amex';
-import ApplePay from './cards/applepay';
-import CB from './cards/cb';
-import DinersClub from './cards/diners';
-import Discover from './cards/discover';
-import JCB from './cards/jcb';
-import UnionPay from './cards/unionpay';
+import {
+	Visa,
+	MasterCard,
+	Maestro,
+	Amex,
+	ApplePay,
+	CB,
+	DinersClub,
+	Discover,
+	JCB,
+	UnionPay,
+} from './cards';
 import './style.scss';
 import FrequentlyAskedQuestions from './faq';
 import ExitSurveyModal from './exit-survey-modal';
@@ -72,7 +70,7 @@ const LearnMore = () => {
 	);
 };
 
-const PaymentMethods = () => (
+export const PaymentMethods = () => (
 	<div className="wcpay-connect-account-page-payment-methods">
 		<Visa />
 		<MasterCard />
@@ -114,7 +112,7 @@ const ConnectPageOnboarding = ( {
 	setErrorMessage,
 	connectUrl,
 }: {
-	isJetpackConnected: string;
+	isJetpackConnected?: boolean;
 	installAndActivatePlugins: PluginsStoreActions[ 'installAndActivatePlugins' ];
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setErrorMessage: Function;
@@ -228,7 +226,7 @@ const ConnectAccountPage = () => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
 
 	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
-		( select: typeof wpDataSelect ) => {
+		( select ) => {
 			const { getOption } = select( OPTIONS_STORE_NAME );
 			let pageViewTimestamp = getOption(
 				'wc_pay_welcome_page_viewed_timestamp'
@@ -272,18 +270,15 @@ const ConnectAccountPage = () => {
 	}, [ hasViewedWelcomePage ] );
 
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
-	const onboardingProps = {
-		isJetpackConnected,
-		installAndActivatePlugins,
-		connectUrl,
-	};
 
 	return (
 		<div className="connect-account-page">
 			<div className="woocommerce-payments-page is-narrow connect-account">
 				<ConnectPageError errorMessage={ errorMessage } />
 				<ConnectPageOnboarding
-					{ ...onboardingProps }
+					isJetpackConnected={ isJetpackConnected }
+					installAndActivatePlugins={ installAndActivatePlugins }
+					connectUrl={ connectUrl }
 					setErrorMessage={ setErrorMessage }
 				/>
 				<Banner />

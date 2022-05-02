@@ -7,11 +7,7 @@ import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import {
-	useDispatch,
-	useSelect,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
 /**
@@ -19,6 +15,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 import { SetupStepProps } from './setup';
+import { SettingsSelector } from '../utils';
 
 export const Plugins: React.FC< SetupStepProps > = ( {
 	nextStep,
@@ -27,26 +24,24 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	pluginsToActivate,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { isResolving, tosAccepted } = useSelect(
-		( select: typeof wpDataSelect ) => {
-			const { getOption, hasFinishedResolution } = select(
-				OPTIONS_STORE_NAME
-			);
+	const { isResolving, tosAccepted } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		) as SettingsSelector;
 
-			return {
-				isResolving:
-					! hasFinishedResolution( 'getOption', [
-						'woocommerce_setup_jetpack_opted_in',
-					] ) ||
-					! hasFinishedResolution( 'getOption', [
-						'wc_connect_options',
-					] ),
-				tosAccepted:
-					getOption( 'wc_connect_options' )?.tos_accepted ||
-					getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
-			};
-		}
-	);
+		return {
+			isResolving:
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_setup_jetpack_opted_in',
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					'wc_connect_options',
+				] ),
+			tosAccepted:
+				getOption( 'wc_connect_options' )?.tos_accepted ||
+				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
+		};
+	} );
 
 	useEffect( () => {
 		if ( ! tosAccepted || pluginsToActivate.length ) {
@@ -73,6 +68,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	return (
 		<>
 			<PluginInstaller
+				// @ts-expect-error PluginInstaller has onComplete props but it is a pure js component and doesn't export the right types.
 				onComplete={ (
 					activatedPlugins: string[],
 					response: InstallPluginsResponse
