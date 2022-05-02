@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
-        run: npm install -g pnpm@6.24.2
+        run: npm install -g pnpm@^6.24.2
 
       - name: Install dependencies
         run: pnpm install
