@@ -58,11 +58,27 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
+            - name: Get cached composer and pnpm directories
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
 
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
             - name: Build zip
-              run: pnpm nx build-zip woocommerce
+              working-directory: plugins/woocommerce
+              run: bash bin/build-zip.sh
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v3

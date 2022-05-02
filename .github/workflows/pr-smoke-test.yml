@@ -40,9 +40,11 @@ jobs:
               run: npm install -g pnpm@^6.24.2
 
             - name: Install dependencies
+              working-directory: package/woocommerce/plugins/woocommerce
               run: pnpm install
 
             - name: Install Composer dependencies
+              working-directory: package/woocommerce/plugins/woocommerce
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install-no-dev woocommerce
 
