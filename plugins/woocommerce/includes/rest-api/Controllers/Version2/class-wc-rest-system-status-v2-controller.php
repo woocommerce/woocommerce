@@ -612,7 +612,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$items = array();
 
 		foreach ( $fields as $field ) {
-			switch ( $field ) {
+			// If we're looking for a sub-property, like environment.version we need
+			// to extract the first-level property here so we know which function to run.
+			list( $prop ) = explode( '.', $field, 2 );
+			switch ( $prop ) {
 				case 'environment':
 					$items['environment'] = $this->get_environment_info_per_fields( $fields );
 					break;
