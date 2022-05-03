@@ -36,11 +36,14 @@ jobs:
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
 
+      - name: Unzip the file (prevents double zip problem)
+        run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
+
       - name: Upload the zip file as an artifact
         uses: actions/upload-artifact@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: woocommerce
-          path: plugins/woocommerce/woocommerce.zip
+          path: zipfile
           retention-days: 7
