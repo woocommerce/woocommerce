@@ -32,6 +32,11 @@ jobs:
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install-no-dev woocommerce
 
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
             - name: Run build
               run: pnpm nx build woocommerce
 
@@ -83,6 +88,11 @@ jobs:
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install woocommerce
 
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
             - name: Run build
               run: pnpm nx build woocommerce
 
@@ -133,6 +143,11 @@ jobs:
             - name: Install Composer dependencies
               if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install woocommerce
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
 
             - name: Run build
               run: pnpm nx build woocommerce
