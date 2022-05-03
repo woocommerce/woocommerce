@@ -32,19 +32,35 @@ describe( 'fetchExperimentAssignment', () => {
 		);
 
 		const fetchPromise = fetchExperimentAssignment( {
-			experimentId: '123',
+			experimentName: '123',
 			anonId: 'abc',
 		} );
 		Promise.resolve( fetchPromise );
 
 		expect( fetchMock ).toHaveBeenCalledWith(
-			'https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/woocommerce?anon_id=abc&test=test'
+			'https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/woocommerce?experiment_name=123&anon_id=abc&test=test'
 		);
 	} );
 
 	it( 'should throw error when anonId is empty', async () => {
 		const fetchPromise = fetchExperimentAssignment( {
-			experimentId: '123',
+			experimentName: '123',
+			anonId: null,
+		} );
+		await expect( fetchPromise ).rejects.toThrowError();
+	} );
+
+	it( 'should throw error when experiment_name is empty', async () => {
+		const fetchPromise = fetchExperimentAssignment( {
+			experimentName: '',
+			anonId: null,
+		} );
+		await expect( fetchPromise ).rejects.toThrowError();
+	} );
+
+	it( 'should throw error when experiment_name is invalid', async () => {
+		const fetchPromise = fetchExperimentAssignment( {
+			experimentName: '',
 			anonId: null,
 		} );
 		await expect( fetchPromise ).rejects.toThrowError();
@@ -64,13 +80,13 @@ describe( 'fetchExperimentAssignmentWithAuth', () => {
 		);
 
 		const fetchPromise = fetchExperimentAssignmentWithAuth( {
-			experimentId: '123',
+			experimentName: '123',
 			anonId: 'abc',
 		} );
 		Promise.resolve( fetchPromise );
 
 		expect( fetchMock ).toHaveBeenCalledWith(
-			'/wc-admin/experiments/assignment?anon_id=abc&test=test&_locale=user',
+			'/wc-admin/experiments/assignment?experiment_name=123&anon_id=abc&test=test&_locale=user',
 			{
 				body: undefined,
 				credentials: 'include',
