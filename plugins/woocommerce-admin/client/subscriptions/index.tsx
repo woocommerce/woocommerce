@@ -41,7 +41,7 @@ const ErrorNotice = ( { isError }: { isError: boolean } ) => {
 		>
 			{ createInterpolateElement(
 				__(
-					'WooCommerce Payments failed to install. To continue with WooCommerce Payments built-in subscriptions functionality, please install <a>WooCommerce Payments</a> manually.',
+					'Installing WooCommerce Payments failed. To continue with WooCommerce Payments built-in subscriptions functionality, please install <a>WooCommerce Payments</a> manually.',
 					'woocommerce-payments'
 				),
 				{
