@@ -48,7 +48,7 @@ const ErrorNotice = ( { isError }: { isError: boolean } ) => {
 					a: (
 						// eslint-disable-next-line jsx-a11y/anchor-has-content
 						<a
-							href="https://woocommerce.com/payments"
+							href="https://wordpress.org/plugins/woocommerce-payments/"
 							target="_blank"
 							rel="noreferrer"
 						/>
