@@ -43,6 +43,13 @@ $tt2-gray: #f7f7f7;
 	h2 {
 		font-size: var(--wp--preset--font-size--large);
 	}
+
+	main {
+		.woocommerce {
+			@include clearfix();
+			max-width: 1000px;
+		}
+	}
 }
 
 .woocommerce {
@@ -1125,14 +1132,6 @@ $tt2-gray: #f7f7f7;
  * Account section
  */
 .woocommerce-account {
-
-	main {
-
-		.woocommerce {
-			@include clearfix();
-			max-width: 1000px;
-		}
-	}
 
 	.woocommerce-MyAccount-navigation {
 
