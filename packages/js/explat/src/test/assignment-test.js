@@ -41,6 +41,14 @@ describe( 'fetchExperimentAssignment', () => {
 			'https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/woocommerce?anon_id=abc&test=test'
 		);
 	} );
+
+	it( 'should throw error when anonId is empty', async () => {
+		const fetchPromise = fetchExperimentAssignment( {
+			experimentId: '123',
+			anonId: null,
+		} );
+		await expect( fetchPromise ).rejects.toThrowError();
+	} );
 } );
 
 describe( 'fetchExperimentAssignmentWithAuth', () => {

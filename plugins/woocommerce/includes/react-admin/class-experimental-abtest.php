@@ -122,6 +122,10 @@ final class Experimental_Abtest {
 
 		// Request as anonymous user.
 		if ( ! isset( $response ) ) {
+			if ( ! isset( $args['anon_id'] ) || empty( $args['anon_id'] ) ) {
+				return new \WP_Error( 'invalid_anon_id', 'anon_id must be an none empty string.' );
+			}
+
 			$url      = add_query_arg(
 				$args,
 				sprintf(

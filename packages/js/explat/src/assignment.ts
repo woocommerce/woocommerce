@@ -52,6 +52,12 @@ export const fetchExperimentAssignment = async ( {
 			`Tracking is disabled, can't fetch experimentAssignment`
 		);
 	}
+	if ( ! anonId ) {
+		throw new Error(
+			`Can't fetch experiment assignment without an anonId or auth, please initialize anonId first or use fetchExperimentAssignmentWithAuth instead.`
+		);
+	}
+
 	return await window.fetch(
 		`https://public-api.wordpress.com/wpcom/v2/experiments/${ EXPLAT_VERSION }/assignments/woocommerce?${ getRequestQueryString(
 			{
