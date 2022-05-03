@@ -6,6 +6,8 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Admin_Menus', false ) ) {
@@ -16,6 +18,10 @@ if ( class_exists( 'WC_Admin_Menus', false ) ) {
  * WC_Admin_Menus Class.
  */
 class WC_Admin_Menus {
+	/**
+	 * @var Custom_Orders_List_Table
+	 */
+	private $orders_list_table;
 
 	/**
 	 * Hook in tabs.
@@ -25,6 +31,7 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
+		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
@@ -299,6 +306,36 @@ class WC_Admin_Menus {
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::output();
+	}
+
+	/**
+	 * Link to the oder admin list table from the main WooCommerce menu.
+	 *
+	 * @return void
+	 */
+	public function orders_menu(): void {
+		add_submenu_page( 'woocommerce', __( 'Orders', 'woocommerce' ), __( 'Orders', 'woocommerce' ), 'edit_others_shop_orders', 'wc-orders', array( $this, 'orders_page' ) );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'orders_table' ) );
+	}
+
+	/**
+	 * Set-up the orders admin list table.
+	 *
+	 * @return void
+	 */
+	public function orders_table(): void {
+		$this->orders_list_table = new Custom_Orders_List_Table();
+		$this->orders_list_table->setup();
+	}
+
+	/**
+	 * Render the orders admin list table.
+	 *
+	 * @return void
+	 */
+	public function orders_page(): void {
+		$this->orders_list_table->prepare_items();
+		$this->orders_list_table->display();
 	}
 
 	/**
