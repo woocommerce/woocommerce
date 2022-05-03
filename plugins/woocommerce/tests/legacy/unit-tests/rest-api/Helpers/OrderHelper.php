@@ -208,8 +208,8 @@ class OrderHelper {
 		$order->get_data_store()->set_download_permissions_granted( $order, true );
 		$order->get_data_store()->set_recorded_sales( $order, true );
 		$order->set_cart_hash( '1234' );
-		$order->update_meta_data( '_new_order_email_sent', 'true' );
-		$order->update_meta_data( '_order_stock_reduced', 'true' );
+		$order->get_data_store()->set_email_sent( $order, true );
+		$order->get_data_store()->stock_reduced( $order, true );
 		$order->set_date_paid( time() );
 		$order->set_date_completed( time() );
 		$order->calculate_shipping();
