@@ -1171,7 +1171,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			);
 
 			$theme_info = array_merge( $active_theme_info, $parent_theme_info );
-			set_transient( 'wc_system_status_theme_info', $theme_info );
+			set_transient( 'wc_system_status_theme_info', $theme_info, HOUR_IN_SECONDS );
 		}
 
 		return $theme_info;
