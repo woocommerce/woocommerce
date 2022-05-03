@@ -24,6 +24,7 @@ export const importTypes = [
 	{
 		key: 'from-cart2cart' as const,
 		title: __( 'FROM CART2CART', 'woocommerce' ),
+		href: 'https://woocommerce.com/products/cart2cart/?utm_medium=product',
 		content: interpolateComponents( {
 			mixedString: __(
 				'Migrate all store data like products, customers, and orders in no time with this 3rd party plugin. {{link}}Learn more{{/link}}',
