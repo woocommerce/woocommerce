@@ -49,7 +49,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					return;
 				}
 
-				// Clear the cache if woocommerce is updated
+				// Clear the cache if woocommerce is updated.
 				if ( 'plugin' === $extra['type'] ) {
 					\WC_REST_System_Status_V2_Controller::clean_theme_cache();
 					return;
