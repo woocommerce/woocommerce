@@ -45,11 +45,26 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		add_action(
 			'upgrader_process_complete',
 			function( $upgrader, $extra ) {
-				if ( 'theme' !== $extra['type'] ) {
+				if ( ! $extra || ! $extra['type'] ) {
 					return;
 				}
 
-				\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+				// Clear the cache if woocommerce is updated
+				if ( 'plugin' === $extra['type'] && isset( $extra['plugins'] ) ) {
+					$plugins = array_filter( $extra['plugins'], function( $plugin ) {
+						return strpos( $plugin, 'woocommerce.php' ) !== false;
+					} );
+
+					if ( count( $plugins ) > 0 ) {
+						\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+						return;
+					}
+				}
+
+				if ( 'theme' === $extra['type'] ) {
+					\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+					return;
+				}
 			},
 			10,
 			2
