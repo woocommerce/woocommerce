@@ -186,7 +186,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 			setMinPriceQuery,
 			setMaxPriceQuery,
 			filteringForPhpTemplate,
-			currency,
+			currency.minorUnit,
 		]
 	);
 
@@ -202,13 +202,30 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 			if ( prices[ 1 ] !== maxPrice ) {
 				setMaxPrice( prices[ 1 ] );
 			}
+
+			if (
+				filteringForPhpTemplate &&
+				hasSetPhpFilterDefaults &&
+				! attributes.showFilterButton
+			) {
+				debouncedUpdateQuery( prices[ 0 ], prices[ 1 ] );
+			}
 		},
-		[ minPrice, maxPrice, setMinPrice, setMaxPrice ]
+		[
+			minPrice,
+			maxPrice,
+			setMinPrice,
+			setMaxPrice,
+			filteringForPhpTemplate,
+			hasSetPhpFilterDefaults,
+			debouncedUpdateQuery,
+			attributes.showFilterButton,
+		]
 	);
 
 	// Track price STATE changes - if state changes, update the query.
 	useEffect( () => {
-		if ( ! attributes.showFilterButton ) {
+		if ( ! attributes.showFilterButton && ! filteringForPhpTemplate ) {
 			debouncedUpdateQuery( minPrice, maxPrice );
 		}
 	}, [
@@ -216,6 +233,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 		maxPrice,
 		attributes.showFilterButton,
 		debouncedUpdateQuery,
+		filteringForPhpTemplate,
 	] );
 
 	// Track price query/price constraint changes so the slider reflects current filters.
