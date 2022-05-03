@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:8084/",
+  "url": "http://localhost:8086/",
   "appName": "woocommerce_e2e",
   "users": {
 	"admin": {
