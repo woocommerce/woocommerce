@@ -155,7 +155,7 @@ jobs:
 
             - name: Run k6 tests
               run: |
-                  ./k6 run package/woocommerce/plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
     publish-test-reports:
         name: Publish test reports
