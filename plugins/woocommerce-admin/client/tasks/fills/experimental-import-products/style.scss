@@ -36,6 +36,14 @@
 		flex-wrap: wrap;
 		justify-content: center;
 		padding: 25px 0 12px 0;
+		.woocommerce-list__item {
+			.woocommerce-list__item-title {
+				color: #1e1e1e;
+			}
+			.woocommerce-list__item-content {
+				color: #757575;
+			}
+		}
 
 		.woocommerce-list__item-before {
 			border: 0;
