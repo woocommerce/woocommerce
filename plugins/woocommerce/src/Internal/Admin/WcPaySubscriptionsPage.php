@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 
 /**
@@ -42,12 +43,7 @@ class WcPaySubscriptionsPage {
 	public function register_subscriptions_page() {
 		global $submenu;
 
-		// WC Payments must not be active.
-		if ( is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
-			return;
-		}
-
-		if ( ! WooCommercePayments::is_supported() ) {
+		if ( ! $this->is_store_experiment_eligible() ) {
 			return;
 		}
 
@@ -72,6 +68,51 @@ class WcPaySubscriptionsPage {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Returns true if the store is eligible for the WooCommerce subsciptions empty state experiment.
+	 *
+	 * @return bool
+	 */
+	private function is_store_experiment_eligible() {
+		// Ineligible if WooCommerce Payments OR an existing subscriptions plugin is active.
+		$active_plugins         = PluginsHelper::get_active_plugin_slugs();
+		$plugin_ineligible_list = array(
+			'woocommerce-payments',
+			'woocommerce-subscriptions',
+			'subscriptions-for-woocommerce',
+			'subscriptions-for-woocommerce-pro',
+			'yith-woocommerce-subscription',
+		);
+		foreach ( $plugin_ineligible_list as $plugin_slug ) {
+			if ( in_array( $plugin_slug, $active_plugins, true ) ) {
+				return false;
+			}
+		}
+
+		// Ineligible if store address is not compatible with WCPay Subscriptions (US).
+		if ( ! WooCommercePayments::is_supported() ) {
+			return false;
+		}
+
+		// Ineligible if store has not had any sales in the last 30 days.
+		$store_recent_sales_count = $this->get_store_recent_sales_count();
+		if ( ! $store_recent_sales_count || $store_recent_sales_count < 1 ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns the number of store recent sales as per the experiment eligibility criteria.
+	 */
+	private function get_store_recent_sales_count() {
+		// Get orders that were paid in the last 30 days.
+		$orders = wc_get_orders( array( 'date_paid' => '>' . strtotime( '-30 days' ) ) );
+
+		return count( $orders );
 	}
 
 	/**
