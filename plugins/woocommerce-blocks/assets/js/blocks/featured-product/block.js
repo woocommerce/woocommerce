@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	AlignmentToolbar,
@@ -13,6 +13,8 @@ import {
 	MediaReplaceFlow,
 	RichText,
 	__experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles,
+	__experimentalImageEditingProvider as ImageEditingProvider,
+	__experimentalImageEditor as ImageEditor,
 	__experimentalPanelColorGradientSettings as PanelColorGradientSettings,
 	__experimentalUseGradient as useGradient,
 } from '@wordpress/block-editor';
@@ -28,6 +30,7 @@ import {
 	Spinner,
 	TextareaControl,
 	ToggleControl,
+	ToolbarButton,
 	ToolbarGroup,
 	withSpokenMessages,
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -42,7 +45,7 @@ import ProductControl from '@woocommerce/editor-components/product-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
 import { withProduct } from '@woocommerce/block-hocs';
-import { Icon, starEmpty } from '@wordpress/icons';
+import { crop, Icon, starEmpty } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -53,6 +56,11 @@ import {
 	getImageIdFromProduct,
 } from '../../utils/products';
 import { useThrottle } from '../../utils/useThrottle';
+
+const DEFAULT_EDITOR_SIZE = {
+	height: 500,
+	width: 500,
+};
 
 export const ConstrainedResizable = ( {
 	className = '',
@@ -112,10 +120,18 @@ const FeaturedProduct = ( {
 	setAttributes,
 	triggerUrlUpdate = () => void null,
 } ) => {
+	const { mediaId, mediaSrc } = attributes;
+
+	const [ isEditingImage, setIsEditingImage ] = useState( false );
+	const [ backgroundImageSize, setBackgroundImageSize ] = useState( {} );
 	const { setGradient } = useGradient( {
 		gradientAttribute: 'overlayGradient',
 		customGradientAttribute: 'overlayGradient',
 	} );
+
+	const backgroundImageSrc = mediaSrc || getImageSrcFromProduct( product );
+	const backgroundImageId = mediaId || getImageIdFromProduct( product );
+
 	const onResize = useCallback(
 		( _event, _direction, elt ) => {
 			setAttributes( { minHeight: parseInt( elt.style.height, 10 ) } );
@@ -131,6 +147,10 @@ const FeaturedProduct = ( {
 			onRetry={ getProduct }
 		/>
 	);
+
+	useEffect( () => {
+		setIsEditingImage( false );
+	}, [ isSelected ] );
 
 	const renderEditMode = () => {
 		const onDone = () => {
@@ -182,8 +202,7 @@ const FeaturedProduct = ( {
 	};
 
 	const getBlockControls = () => {
-		const { contentAlign, editMode, mediaSrc } = attributes;
-		const mediaId = attributes.mediaId || getImageIdFromProduct( product );
+		const { contentAlign, editMode } = attributes;
 
 		return (
 			<BlockControls>
@@ -194,8 +213,18 @@ const FeaturedProduct = ( {
 					} }
 				/>
 				<ToolbarGroup>
+					{ ! isEditingImage && (
+						<ToolbarButton
+							onClick={ () => setIsEditingImage( true ) }
+							icon={ crop }
+							label={ __(
+								'Edit product image',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					) }
 					<MediaReplaceFlow
-						mediaId={ mediaId }
+						mediaId={ backgroundImageId }
 						mediaURL={ mediaSrc }
 						accept="image/*"
 						onSelect={ ( media ) => {
@@ -206,7 +235,7 @@ const FeaturedProduct = ( {
 						} }
 						allowedTypes={ [ 'image' ] }
 					/>
-					{ mediaId && mediaSrc ? (
+					{ backgroundImageId && mediaSrc ? (
 						<TextToolbarButton
 							onClick={ () =>
 								setAttributes( { mediaId: 0, mediaSrc: '' } )
@@ -426,7 +455,6 @@ const FeaturedProduct = ( {
 			dimRatio,
 			focalPoint,
 			imageFit,
-			mediaSrc,
 			minHeight,
 			overlayColor,
 			overlayGradient,
@@ -455,9 +483,6 @@ const FeaturedProduct = ( {
 			...getSpacingClassesAndStyles( attributes ).style,
 			minHeight,
 		};
-
-		const backgroundImageSrc =
-			mediaSrc || getImageSrcFromProduct( product );
 
 		const backgroundImageStyle = {
 			...calculateBackgroundImagePosition( focalPoint ),
@@ -491,6 +516,12 @@ const FeaturedProduct = ( {
 							className="wc-block-featured-product__background-image"
 							src={ backgroundImageSrc }
 							style={ backgroundImageStyle }
+							onLoad={ ( e ) => {
+								setBackgroundImageSize( {
+									height: e.target?.naturalHeight,
+									width: e.target?.naturalWidth,
+								} );
+							} }
 						/>
 						<h2
 							className="wc-block-featured-product__title"
@@ -604,6 +635,40 @@ const FeaturedProduct = ( {
 
 	if ( editMode ) {
 		return renderEditMode();
+	}
+
+	if ( isEditingImage ) {
+		return (
+			<>
+				<ImageEditingProvider
+					id={ backgroundImageId }
+					url={ backgroundImageSrc }
+					naturalHeight={
+						backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
+					}
+					naturalWidth={
+						backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
+					}
+					onSaveImage={ ( { id, url } ) => {
+						setAttributes( { mediaId: id, mediaSrc: url } );
+					} }
+					isEditing={ isEditingImage }
+					onFinishEditing={ () => setIsEditingImage( false ) }
+				>
+					<ImageEditor
+						url={ backgroundImageSrc }
+						height={
+							backgroundImageSize.height ||
+							DEFAULT_EDITOR_SIZE.height
+						}
+						width={
+							backgroundImageSize.width ||
+							DEFAULT_EDITOR_SIZE.width
+						}
+					/>
+				</ImageEditingProvider>
+			</>
+		);
 	}
 
 	return (
