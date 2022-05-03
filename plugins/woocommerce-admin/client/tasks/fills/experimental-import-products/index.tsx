@@ -11,11 +11,11 @@ import { find } from 'lodash';
 /**
  * Internal dependencies
  */
+import Stacks from '../experimental-products/stack';
 import CardList from './CardList';
 import { importTypes } from './importTypes';
 import './style.scss';
 import useProductTypeListItems from '../experimental-products/use-product-types-list-items';
-import Stacks from '../experimental-products/stack';
 import { getProductTypes } from '../experimental-products/utils';
 
 const Products = () => {
