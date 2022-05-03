@@ -26,10 +26,11 @@
 	],
 	"sideEffects": false,
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
 		"build": "pnpm run clean && npm run compile",
-		"prepare": "pnpm run build",
+		"prepack": "pnpm run build",
 		"lint": "eslint src",
 		"lint:fix": "eslint src --fix",
 		"test": "jest"
