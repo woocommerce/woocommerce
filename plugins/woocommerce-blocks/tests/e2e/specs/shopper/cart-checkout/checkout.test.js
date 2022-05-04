@@ -53,6 +53,26 @@ describe( 'Shopper → Checkout', () => {
 			}
 		);
 	} );
+	describe( 'Payment Methods', () => {
+		it( 'User can change payment methods', async () => {
+			await shopper.block.emptyCart();
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+			await expect( page ).toClick(
+				'.wc-block-components-payment-method-label',
+				{
+					text: 'Direct bank transfer',
+				}
+			);
+			await expect( page ).toClick(
+				'.wc-block-components-payment-method-label',
+				{
+					text: 'Cash on delivery',
+				}
+			);
+		} );
+	} );
 
 	describe( 'Shipping and Billing Addresses', () => {
 		beforeAll( async () => {
