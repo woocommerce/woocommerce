@@ -90,6 +90,27 @@ class ListTable extends WP_List_Table {
 
 		echo '</form> </div>';
 	}
+
+	/**
+	 * Retrieves the list of bulk actions available for this table.
+	 *
+	 * @return array
+	 */
+	protected function get_bulk_actions() {
+		$actions = array(
+			'mark_processing' => __( 'Change status to processing', 'woocommerce' ),
+			'mark_on-hold'    => __( 'Change status to on-hold', 'woocommerce' ),
+			'mark_completed'  => __( 'Change status to completed', 'woocommerce' ),
+			'mark_cancelled'  => __( 'Change status to cancelled', 'woocommerce' ),
+		);
+
+		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
+			$actions['remove_personal_data'] = __( 'Remove personal data', 'woocommerce' );
+		}
+
+		return $actions;
+	}
+
 	/**
 	 * Prepares the list of items for displaying.
 	 */
