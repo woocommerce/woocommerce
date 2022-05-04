@@ -109,6 +109,10 @@
 	margin: 0 auto;
 	justify-content: space-between;
 
+	&.woocommerce-task-list__setup_experiment_2 {
+		margin-bottom: 16px;
+	}
+
 	ul li.complete .woocommerce-task-list__item-title {
 		font-weight: 600;
 		color: $gray-600;
