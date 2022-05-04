@@ -78,29 +78,102 @@ class ListTable extends WP_List_Table {
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
 				<a href='/to-implement' class='page-title-action'>{$add_new}</a>
+				<hr class='wp-header-end'>
 		";
 
 		$this->views();
+
+		echo '<form id="wc-orders-filter" method="get">';
+		$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
+
 		parent::display();
 
-		echo '</div>';
+		echo '</form> </div>';
 	}
 	/**
 	 * Prepares the list of items for displaying.
 	 */
 	public function prepare_items() {
-		$status = sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) );
-		$search = sanitize_text_field( wp_unslash( $_REQUEST['s'] ?? '' ) );
-
 		$args = array(
-			'limit' => $this->get_items_per_page( 'edit_orders_per_page' ),
-			'page'  => $this->get_pagenum(),
+			'limit'  => $this->get_items_per_page( 'edit_orders_per_page' ),
+			'page'   => $this->get_pagenum(),
+			'status' => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ),
 		);
 
 		// @todo Confirm this is the best way to query.
 		//       An alternative is using `$this->data_store->get_orders()` however in the case of the order CPT store
 		//       that method is considered deprecated (not sure if that carries over to the new COT store).
 		$this->items = wc_get_orders( $args );
+	}
+
+	/**
+	 * Get the list of views for this table (all orders, completed orders, etc, each with a count of the number of
+	 * corresponding orders).
+	 *
+	 * @return array
+	 */
+	public function get_views() {
+		$view_counts = array();
+		$view_links  = array();
+		$statuses    = wc_get_order_statuses();
+		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
+
+		foreach ( $statuses as $slug => $name ) {
+			$total_in_status = $this->count_orders_by_status( $slug );
+
+			if ( $total_in_status > 0 ) {
+				$view_counts[ $slug ] = $total_in_status;
+			}
+		}
+
+		$all_count         = array_sum( $view_counts );
+		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, 'all' === $current );
+
+		foreach ( $view_counts as $slug => $count ) {
+			$view_links[ $slug ] = $this->get_view_link( $slug, $statuses[ $slug ], $count, $slug === $current );
+		}
+
+		return $view_links;
+	}
+
+	/**
+	 * Count orders by status.
+	 *
+	 * @todo review and replace (probably not ideal to do this work here).
+	 *
+	 * @param string $status The order status we are interested in.
+	 *
+	 * @return int
+	 */
+	private function count_orders_by_status( string $status ): int {
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'return' => 'ids',
+				'status' => $status,
+			)
+		);
+
+		return count( $orders );
+	}
+
+	/**
+	 * Form a link to use in the list of table views.
+	 *
+	 * @param string $slug    Slug used to identify the view (usually the order status slug).
+	 * @param string $name    Human-readable name of the view (usually the order status label).
+	 * @param int    $count   Number of items in this view.
+	 * @param bool   $current If this is the current view.
+	 *
+	 * @return string
+	 */
+	private function get_view_link( string $slug, string $name, int $count, bool $current ): string {
+		$url   = esc_url( add_query_arg( 'status', $slug, get_admin_url( null, 'admin.php?page=wc-orders' ) ) );
+		$name  = esc_html( $name );
+		$count = absint( $count );
+		$class = $current ? 'class="current"' : '';
+
+		return "<a href='$url' $class>$name <span class='count'>($count)</span></a>";
 	}
 
 	/**
