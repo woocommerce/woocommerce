@@ -104,7 +104,7 @@ class WcPaySubscriptionsPage {
 
 		// Ineligible if store has not had any sales in the last 30 days.
 		$store_recent_sales_count = $this->get_store_recent_sales_count();
-		if ( ! $store_recent_sales_count || $store_recent_sales_count < 1 ) {
+		if ( $store_recent_sales_count < 1 ) {
 			return false;
 		}
 
@@ -116,7 +116,12 @@ class WcPaySubscriptionsPage {
 	 */
 	private function get_store_recent_sales_count() {
 		// Get orders that were paid in the last 30 days.
-		$orders = wc_get_orders( array( 'date_paid' => '>' . strtotime( '-30 days' ) ) );
+		$orders = wc_get_orders(
+			array(
+				'date_paid' => '>' . strtotime( '-30 days' ),
+				'status'    => array( 'wc-completed' ),
+			)
+		);
 
 		return count( $orders );
 	}
