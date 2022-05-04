@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 
 /**
@@ -93,6 +94,11 @@ class WcPaySubscriptionsPage {
 
 		// Ineligible if store address is not compatible with WCPay Subscriptions (US).
 		if ( ! WooCommercePayments::is_supported() ) {
+			return false;
+		}
+
+		// Ineligible if store has not been active for at least 6 months.
+		if ( ! WCAdminHelper::is_wc_admin_active_in_date_range( 'month-6+' ) ) {
 			return false;
 		}
 
