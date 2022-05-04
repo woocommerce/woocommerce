@@ -167,8 +167,10 @@ class WC_Tracker {
 		// Cart & checkout tech (blocks or shortcodes).
 		$data['cart_checkout'] = self::get_cart_checkout_info();
 
-		// Mini Cart block.
-		$data['mini_cart_block'] = self::get_mini_cart_info();
+		// Mini Cart block, which only exists since wp 5.9.
+		if ( version_compare( get_bloginfo( 'version' ), '5.9', '>=' ) ) {
+			$data['mini_cart_block'] = self::get_mini_cart_info();
+		}
 
 		// WooCommerce Admin info.
 		$data['wc_admin_disabled'] = apply_filters( 'woocommerce_admin_disabled', false ) ? 'yes' : 'no';

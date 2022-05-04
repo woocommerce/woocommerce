@@ -23,6 +23,9 @@
 		&:hover {
 			background-color: #fff;
 			border: 1.5px solid #007cba;
+			.woocommerce-list__item-title {
+				color: #1e1e1e;
+			}
 		}
 
 		.woocommerce-list__item-inner {
