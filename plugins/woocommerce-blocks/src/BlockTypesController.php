@@ -143,6 +143,7 @@ final class BlockTypesController {
 			'woocommerce_product_search',
 			'woocommerce_product_categories',
 			'woocommerce_recent_reviews',
+			'woocommerce_product_tag_cloud',
 			'woocommerce_price_filter',
 			'woocommerce_layered_nav',
 			'woocommerce_layered_nav_filters'
