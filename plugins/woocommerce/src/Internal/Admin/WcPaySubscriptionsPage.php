@@ -93,7 +93,8 @@ class WcPaySubscriptionsPage {
 		}
 
 		// Ineligible if store address is not compatible with WCPay Subscriptions (US).
-		if ( ! WooCommercePayments::is_supported() ) {
+		$store_base_location = wc_get_base_location();
+		if ( empty( $store_base_location['country'] ) || 'US' !== $store_base_location['country'] ) {
 			return false;
 		}
 
