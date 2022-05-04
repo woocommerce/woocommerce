@@ -2,7 +2,21 @@
 
 -   Update dependency `@wordpress/hooks` to ^3.5.0
 -   Add `is_offline` attribute for `Plugin` type. #32467
+-   Added Typescript type declarations. #32615
+-   Update type definitions. #32683, #32695, #32698, #32712
+    - Make `isResolving` param `args` optional.
+    - Update `Plugin` type to reflect the latest changes.
+    - Maps "raw"  payment `ActionDispatchers` to the registered actions.
+    - Export `getTaskListsByIds`, `getTaskLists`, `getTaskList`, `getFreeExtensions` onboarding selector types
+    - Update `TaskType` & `TaskListType` types
+    - Export `InstallPluginsResponse` type
+-   Convert `use-user-preferences.js` to TS. #32695
+-   Added PaymentGateway type to exports #32697
+-   Add `@types/wordpress__compose`, `@types/wordpress__data`, `redux` types and fix related type errors. #32735
 
+## Breaking change
+
+-   Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
 # 3.1.0
 
 -   Add "moment" to peerDependencies. #8349

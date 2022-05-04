@@ -7,12 +7,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: plugins/woocommerce
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     timeout-minutes: 20
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
@@ -36,7 +38,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -51,29 +53,33 @@ jobs:
           php --version
           composer --version
 
-      - name: Get cached composer directories
-        uses: actions/cache@v2
+      - name: Get cached composer and pnpm directories
+        uses: actions/cache@v3
+        id: cache-deps
         with:
           path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+            ~/.pnpm-store
+            plugins/woocommerce/packages
+            plugins/woocommerce/**/vendor
+          key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
 
-      - name: Setup and install composer
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Composer dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: pnpm nx composer-install woocommerce
 
       - name: Build Admin feature config
-        working-directory: ./
         run: pnpm nx build:feature-config woocommerce
 
       - name: Add PHP8 Compatibility.
         run: |
           if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+             cd plugins/woocommerce
              curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
              unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
              composer bin phpunit config --unset platform
@@ -84,6 +90,7 @@ jobs:
            fi
 
       - name: Init DB and WP
+        working-directory: plugins/woocommerce
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests

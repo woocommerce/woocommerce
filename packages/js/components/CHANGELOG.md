@@ -4,6 +4,7 @@
 -   Update dependency `@wordpress/hooks` to ^3.5.0
 -   Update dependency `@wordpress/icons` to ^8.1.0
 -   Add `className` prop for Pill component. #32605
+-   Update `StepperProps` prop types. #32712
 
 # 10.0.0
 -   Replace deprecated wp.compose.withState with wp.element.useState. #8338

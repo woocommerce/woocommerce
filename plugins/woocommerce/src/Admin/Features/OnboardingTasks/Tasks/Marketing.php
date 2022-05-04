@@ -58,7 +58,7 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**
@@ -125,13 +125,8 @@ class Marketing extends Task {
 			}
 		}
 
-		// All extensions installed.
-		if ( count( $remaining ) === 0 ) {
-			return true;
-		}
-
-		// Make sure the task has been actioned and at least one extension is installed.
-		if ( count( $installed ) > 0 && Task::is_task_actioned( 'marketing' ) ) {
+		// Make sure the task has been actioned or a marketing extension has been installed.
+		if ( count( $installed ) > 0 || Task::is_task_actioned( 'marketing' ) ) {
 			return true;
 		}
 

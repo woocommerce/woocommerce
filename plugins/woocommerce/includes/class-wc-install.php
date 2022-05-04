@@ -200,9 +200,11 @@ class WC_Install {
 		),
 		'6.4.0' => array(
 			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
-			'wc_update_640_approved_download_directories',
 			'wc_admin_update_340_remove_is_primary_from_note_action',
 			'wc_update_640_db_version',
+		),
+		'6.5.0' => array(
+			'wc_update_650_approved_download_directories',
 		),
 	);
 
@@ -700,7 +702,7 @@ class WC_Install {
 		$settings = WC_Admin_Settings::get_settings_pages();
 
 		foreach ( $settings as $section ) {
-			if ( ! method_exists( $section, 'get_settings' ) ) {
+			if ( ! is_a( $section, 'WC_Settings_Page' ) || ! method_exists( $section, 'get_settings' ) ) {
 				continue;
 			}
 			$subsections = array_unique( array_merge( array( '' ), array_keys( $section->get_sections() ) ) );
@@ -762,6 +764,7 @@ class WC_Install {
 			'wc-admin-getting-started-ecommerce-webinar',
 			'wc-admin-navigation-feedback',
 			'wc-admin-navigation-feedback-follow-up',
+			'wc-admin-set-up-additional-payment-types',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(

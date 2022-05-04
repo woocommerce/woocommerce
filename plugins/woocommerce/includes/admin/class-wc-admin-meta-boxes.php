@@ -15,6 +15,12 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Meta_Boxes.
  */
 class WC_Admin_Meta_Boxes {
+	/**
+	 * Name of the option used to store errors to be displayed at the next suitable opportunity.
+	 *
+	 * @since 6.5.0
+	 */
+	public const ERROR_STORE = 'woocommerce_meta_box_errors';
 
 	/**
 	 * Is meta boxes saved once?
@@ -66,7 +72,7 @@ class WC_Admin_Meta_Boxes {
 
 		// Error handling (for showing errors from meta boxes on next page load).
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
-		add_action( 'shutdown', array( $this, 'save_errors' ) );
+		add_action( 'shutdown', array( $this, 'append_to_error_store' ) );
 
 		add_filter( 'theme_product_templates', array( $this, 'remove_block_templates' ), 10, 1 );
 	}
@@ -82,16 +88,34 @@ class WC_Admin_Meta_Boxes {
 
 	/**
 	 * Save errors to an option.
+	 *
+	 * Note that calling this will overwrite any errors that have already been stored via the Options API.
+	 * Unless you are sure you want this, consider using the append_to_error_store() method instead.
 	 */
 	public function save_errors() {
-		update_option( 'woocommerce_meta_box_errors', self::$meta_box_errors );
+		update_option( self::ERROR_STORE, self::$meta_box_errors );
+	}
+
+	/**
+	 * If additional errors have been added in the current request (ie, via the add_error() method) then they
+	 * will be added to the persistent error store via the Options API.
+	 *
+	 * @since 6.5.0
+	 */
+	public function append_to_error_store() {
+		if ( empty( self::$meta_box_errors ) ) {
+			return;
+		}
+
+		$existing_errors = get_option( self::ERROR_STORE, array() );
+		update_option( self::ERROR_STORE, array_unique( array_merge( $existing_errors, self::$meta_box_errors ) ) );
 	}
 
 	/**
 	 * Show any stored error messages.
 	 */
 	public function output_errors() {
-		$errors = array_filter( (array) get_option( 'woocommerce_meta_box_errors' ) );
+		$errors = array_filter( (array) get_option( self::ERROR_STORE ) );
 
 		if ( ! empty( $errors ) ) {
 
@@ -104,7 +128,7 @@ class WC_Admin_Meta_Boxes {
 			echo '</div>';
 
 			// Clear.
-			delete_option( 'woocommerce_meta_box_errors' );
+			delete_option( self::ERROR_STORE );
 		}
 	}
 

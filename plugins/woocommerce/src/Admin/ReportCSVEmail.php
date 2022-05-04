@@ -25,7 +25,7 @@ class ReportCSVEmail extends \WC_Email {
 	 */
 	public function __construct() {
 		$this->id             = 'admin_report_export_download';
-		$this->template_base  = dirname( __DIR__ ) . '/includes/emails/';
+		$this->template_base  = WC()->plugin_path() . '/includes/react-admin/emails/';
 		$this->template_html  = 'html-admin-report-export-download.php';
 		$this->template_plain = 'plain-admin-report-export-download.php';
 		$this->report_labels  = array(

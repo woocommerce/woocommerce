@@ -6,29 +6,38 @@ on:
       - 'packages/js/**/**'
       - 'plugins/woocommerce-admin/client/**'
       - '!**.md'
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-test-js:
     name: Lint and Test JS
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.7.0
-        with:
-            access_token: ${{ github.token }}
-      
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
       
-      - name: Install PNPM and install dependencies
-        run: npm install -g pnpm && pnpm install
+      - name: Cache modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pnpm-store
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Lint
         run: |
+          pnpm nx build woocommerce-admin
           pnpm nx lint woocommerce-admin
           pnpm nx lint:js-packages woocommerce-admin
 

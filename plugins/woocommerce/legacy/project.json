@@ -9,7 +9,7 @@
 			"options": {
 				"commands": [
 					{
-						"command": "pnpx grunt assets",
+						"command": "pnpm exec grunt assets",
 						"forwardAllArgs": false
 					}
 				],
@@ -25,11 +25,11 @@
 			"options": {
 				"commands": [
 					{
-						"command": "pnpx grunt eslint",
+						"command": "pnpm exec grunt eslint",
 						"forwardAllArgs": false
 					},
 					{
-						"command": "pnpx grunt stylelint",
+						"command": "pnpm exec grunt stylelint",
 						"forwardAllArgs": false
 					}
 				],

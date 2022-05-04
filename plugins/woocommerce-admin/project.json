@@ -20,6 +20,7 @@
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"commands": [
+					"WC_ADMIN_PHASE=development pnpm nx clean woocommerce-admin",
 					"WC_ADMIN_PHASE=development pnpm nx dev woocommerce-admin",
 					"pnpm nx watch woocommerce-admin"
 				],

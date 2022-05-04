@@ -3,67 +3,38 @@
  */
 import '@wordpress/core-data';
 
-/**
- * Internal dependencies
- */
-import type { REVIEWS_STORE_NAME } from './reviews';
-import type { SETTINGS_STORE_NAME } from './settings';
-import type { PLUGINS_STORE_NAME } from './plugins';
-import type { ONBOARDING_STORE_NAME } from './onboarding';
-import type { USER_STORE_NAME } from './user';
-import type { OPTIONS_STORE_NAME } from './options';
-import type { NAVIGATION_STORE_NAME } from './navigation';
-import type { NOTES_STORE_NAME } from './notes';
-import type { REPORTS_STORE_NAME } from './reports';
-import type { ITEMS_STORE_NAME } from './items';
-import type { COUNTRIES_STORE_NAME } from './countries';
-import { OnboardingSelectors } from './onboarding/selectors';
-import { WPDataSelectors } from './types';
-import { PluginSelectors } from './plugins/selectors';
-
-export * from './types';
+// Export store names
 export { SETTINGS_STORE_NAME } from './settings';
-export { withSettingsHydration } from './settings/with-settings-hydration';
-export { useSettings } from './settings/use-settings';
-
 export { PLUGINS_STORE_NAME } from './plugins';
-export type { Plugin } from './plugins/types';
-export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
-export { pluginNames } from './plugins/constants';
-export { withPluginsHydration } from './plugins/with-plugins-hydration';
-
 export { ONBOARDING_STORE_NAME } from './onboarding';
-export { withOnboardingHydration } from './onboarding/with-onboarding-hydration';
-export { getVisibleTasks } from './onboarding/utils';
-export type { TaskType, TaskListType } from './onboarding/types';
-
 export { USER_STORE_NAME } from './user';
-export { withCurrentUserHydration } from './user/with-current-user-hydration';
-export { useUser } from './user/use-user';
-export { useUserPreferences } from './user/use-user-preferences';
-
+export { REVIEWS_STORE_NAME } from './reviews';
+export { NOTES_STORE_NAME } from './notes';
+export { REPORTS_STORE_NAME } from './reports';
+export { COUNTRIES_STORE_NAME } from './countries';
+export { NAVIGATION_STORE_NAME } from './navigation';
 export { OPTIONS_STORE_NAME } from './options';
+export { ITEMS_STORE_NAME } from './items';
+export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+export { PaymentGateway } from './payment-gateways/types';
+
+// Export hooks
+export { withSettingsHydration } from './settings/with-settings-hydration';
+export { withOnboardingHydration } from './onboarding/with-onboarding-hydration';
+export { withCurrentUserHydration } from './user/with-current-user-hydration';
+export { withNavigationHydration } from './navigation/with-navigation-hydration';
+export { withPluginsHydration } from './plugins/with-plugins-hydration';
 export {
 	withOptionsHydration,
 	useOptionsHydration,
 } from './options/with-options-hydration';
+export { useSettings } from './settings/use-settings';
+export { useUserPreferences } from './user/use-user-preferences';
+export { useUser } from './user/use-user';
 
-export { REVIEWS_STORE_NAME } from './reviews';
-
-export { NOTES_STORE_NAME } from './notes';
-
-export { REPORTS_STORE_NAME } from './reports';
-
-export { ITEMS_STORE_NAME } from './items';
+// Export utils
+export { getVisibleTasks } from './onboarding/utils';
 export { getLeaderboard, searchItemsByString } from './items/utils';
-
-export { COUNTRIES_STORE_NAME } from './countries';
-
-export { NAVIGATION_STORE_NAME } from './navigation';
-export { withNavigationHydration } from './navigation/with-navigation-hydration';
-
-export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
-
 export {
 	getFilterQuery,
 	getSummaryNumbers,
@@ -73,6 +44,10 @@ export {
 	getTooltipValueFormat,
 } from './reports/utils';
 
+// Export constants
+export { pluginNames } from './plugins/constants';
+export { EXPORT_STORE_NAME } from './export';
+export { IMPORT_STORE_NAME } from './import';
 export {
 	MAX_PER_PAGE,
 	QUERY_DEFAULTS,
@@ -87,9 +62,27 @@ export {
 	MONTH,
 } from './constants';
 
-export { EXPORT_STORE_NAME } from './export';
+// Export types
+export * from './types';
+export * from './countries/types';
+export * from './onboarding/types';
+export * from './plugins/types';
 
-export { IMPORT_STORE_NAME } from './import';
+/**
+ * Internal dependencies
+ */
+import type { REVIEWS_STORE_NAME } from './reviews';
+import type { SETTINGS_STORE_NAME } from './settings';
+import type { PLUGINS_STORE_NAME } from './plugins';
+import type { ONBOARDING_STORE_NAME } from './onboarding';
+import type { USER_STORE_NAME } from './user';
+import type { OPTIONS_STORE_NAME } from './options';
+import type { NAVIGATION_STORE_NAME } from './navigation';
+import type { NOTES_STORE_NAME } from './notes';
+import type { REPORTS_STORE_NAME } from './reports';
+import type { ITEMS_STORE_NAME } from './items';
+import type { COUNTRIES_STORE_NAME } from './countries';
+import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -102,7 +95,16 @@ export type WCDataStoreName =
 	| typeof NOTES_STORE_NAME
 	| typeof REPORTS_STORE_NAME
 	| typeof ITEMS_STORE_NAME
-	| typeof COUNTRIES_STORE_NAME;
+	| typeof COUNTRIES_STORE_NAME
+	| typeof PAYMENT_GATEWAYS_STORE_NAME;
+
+/**
+ * Internal dependencies
+ */
+import { WPDataSelectors } from './types';
+import { PaymentSelectors } from './payment-gateways/selectors';
+import { PluginSelectors } from './plugins/selectors';
+import { OnboardingSelectors } from './onboarding/selectors';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -114,6 +116,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? PluginSelectors
 	: T extends typeof ONBOARDING_STORE_NAME
 	? OnboardingSelectors
+	: T extends typeof PAYMENT_GATEWAYS_STORE_NAME
+	? PaymentSelectors
 	: T extends typeof USER_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof OPTIONS_STORE_NAME
@@ -133,6 +137,6 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 export interface WCDataSelector {
 	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T >;
 }
-export * from './onboarding/selectors';
-export * from './onboarding/types';
-export * from './countries/types';
+
+// Other exports
+export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';

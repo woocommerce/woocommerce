@@ -19,6 +19,7 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
 		"@wordpress/api-fetch": "^6.0.1",
@@ -43,13 +44,14 @@
 		"start": "tsc --build --watch",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint": "eslint src",
+		"lint:fix": "eslint src --fix",
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
-		"@wordpress/eslint-plugin": "^11.0.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0",
 		"@babel/runtime": "^7.17.2",
 		"jest": "^27.5.1",
@@ -60,7 +62,7 @@
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix",
+			"pnpm lint:fix",
 			"pnpm test-staged"
 		]
 	}

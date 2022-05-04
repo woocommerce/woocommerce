@@ -1,4 +1,4 @@
-export default () => (
+export const DinersClub = () => (
 	/* eslint-disable */
 	<svg
 		width="51"

@@ -17,6 +17,7 @@ import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
+import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -27,7 +28,9 @@ export type TaskListItemProps = {
 	isExpandable: boolean;
 	isExpanded: boolean;
 	setExpandedTask: ( id: string ) => void;
-	task: TaskType;
+	task: TaskType & {
+		onClick?: () => void;
+	};
 };
 
 export const TaskListItem: React.FC< TaskListItemProps > = ( {
@@ -131,7 +134,9 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			if ( actionUrl.startsWith( 'http' ) ) {
 				window.location.href = actionUrl;
 			} else {
-				getHistory().push( getNewPath( {}, actionUrl, {} ) );
+				( getHistory() as History ).push(
+					getNewPath( {}, actionUrl, {} )
+				);
 			}
 			return;
 		}
