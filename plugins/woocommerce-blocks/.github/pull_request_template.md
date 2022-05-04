@@ -45,7 +45,7 @@ Fixes #
 2.
 3.
 
-* [ ] Do not include in the Testing Notes
+* [ ] Do not include in the Testing Notes <!-- Check this box if this PR can't be tested by users (ie: it doesn't include user-facing changes or it can't be tested without manually modifying the code). -->
 
 ### WooCommerce Visibility
 
