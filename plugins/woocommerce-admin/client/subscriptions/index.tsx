@@ -42,7 +42,7 @@ const ErrorNotice = ( { isError }: { isError: boolean } ) => {
 			{ createInterpolateElement(
 				__(
 					'Installing WooCommerce Payments failed. To continue with WooCommerce Payments built-in subscriptions functionality, please install <a>WooCommerce Payments</a> manually.',
-					'woocommerce-payments'
+					'woocommerce'
 				),
 				{
 					a: (
@@ -64,7 +64,7 @@ const TOS = () => (
 		{ createInterpolateElement(
 			__(
 				'By clicking "Get started", you agree to the <a>Terms of Service</a>',
-				'woocommerce-payments'
+				'woocommerce'
 			),
 			{
 				a: (
@@ -113,7 +113,7 @@ const GetStartedButton = ( { setIsError }: { setIsError: Function } ) => {
 						} );
 				} }
 			>
-				{ __( 'Get started', 'woocommerce-payments' ) }
+				{ __( 'Get started', 'woocommerce' ) }
 			</Button>
 		</div>
 	);
@@ -129,7 +129,7 @@ const SubscriptionsPage = () => {
 			<p className="wcpay-empty-subscriptions__description">
 				{ __(
 					'Track recurring revenue and manage active subscriptions directly from your store’s dashboard — powered by WooCommerce Payments.',
-					'woocommerce-payments'
+					'woocommerce'
 				) }
 			</p>
 			<TOS />
