@@ -1,0 +1,21 @@
+name: 'WooCommerce Changelogger Pull Request'
+author: WooCommerce
+description: 'Validate and append PR number to changelogger descriptions'
+inputs:
+    diff:
+        description: 'Name only PR diff'
+        required: true
+    prNumber:
+        description: 'Pull request number'
+        required: true
+    repository:
+        description: 'Pull request repository'
+        required: true
+outputs:
+    changelogFilePath:
+        description: 'Amended changelog to commit'
+    changesMade:
+        description: 'Whether or not a change needs to be committed'
+runs:
+    using: 'node16'
+    main: 'index.js'
