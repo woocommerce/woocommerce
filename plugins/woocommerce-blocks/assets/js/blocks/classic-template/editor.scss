@@ -1,3 +1,9 @@
+:where(.wp-block-woocommerce-legacy-template) {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 1000px;
+}
+
 .wp-block-woocommerce-classic-template__placeholder-copy {
 	max-width: 900px;
 	margin-bottom: 30px;

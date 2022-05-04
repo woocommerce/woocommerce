@@ -235,7 +235,13 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			return $content;
 		}
 
-		$attributes            = (array) $block['attrs'];
+		$attributes = (array) $block['attrs'];
+
+		// Set the default alignment to wide.
+		if ( ! isset( $attributes['align'] ) ) {
+			$attributes['align'] = 'wide';
+		}
+
 		$align_class_and_style = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
 		if ( ! isset( $align_class_and_style['class'] ) ) {
@@ -304,6 +310,5 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		$vars[] = self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM;
 		return $vars;
 	}
-
 
 }
