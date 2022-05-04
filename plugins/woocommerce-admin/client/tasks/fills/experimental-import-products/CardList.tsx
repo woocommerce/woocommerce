@@ -11,7 +11,7 @@ import './cards.scss';
 type Card = {
 	key: string;
 	title: string;
-	content: string;
+	content: string | JSX.Element;
 	before: JSX.Element;
 };
 
