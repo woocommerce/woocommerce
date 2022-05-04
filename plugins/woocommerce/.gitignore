@@ -27,6 +27,7 @@ tests/cli/vendor
 # Packages
 /packages/*
 !/packages/README.md
+!/packages/woocommerce-admin/woocommerce-admin.php
 
 # Language files
 i18n/languages/woocommerce.pot
