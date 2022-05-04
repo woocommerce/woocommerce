@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add check for $wp_query before calling is_cart to prevent doing_it_wrong notice.
