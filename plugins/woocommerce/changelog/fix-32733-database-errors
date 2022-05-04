@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix database errors after deleting WC Admin standalone plugin while WC 6.5 is active
