@@ -6,7 +6,7 @@
 	padding: 48px 0;
 	position: static;
 	height: 344px;
-	left: calc( 50% - 1240px / 2 );
+	left: calc(50% - 1240px / 2);
 	top: 271px;
 	flex: none;
 	order: 1;
@@ -27,5 +27,9 @@
 
 	.wcpay-empty-subscriptions__button_container {
 		margin: 8px 0;
+	}
+
+	.wcpay-empty-subscriptions__error {
+		margin: 15px 0;
 	}
 }
