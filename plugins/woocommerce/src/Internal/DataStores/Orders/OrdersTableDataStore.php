@@ -311,7 +311,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		),
 		'discount_total_amount'       => array(
 			'type' => 'decimal',
-			'name' => 'discount_total_amount',
+			'name' => 'discount_total',
 		),
 		'recorded_sales'              => array( 'type' => 'bool' ),
 	);
@@ -450,7 +450,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $set True or false.
 	 */
 	public function set_email_sent( $order, $set ) {
-		return $order->update_meta_data( '_new_order_email_sent', wc_string_to_bool( $set ) );
+		return $order->update_meta_data( '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
 
 	/**
@@ -559,10 +559,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		if ( ! $order->get_id() ) {
 			throw new \Exception( __( 'ID must be set for an order to be read', 'woocommerce' ) );
 		}
-		$meta_data = $this->read_meta( $order );
-		foreach ( $meta_data as $row ) {
-			$order->add_meta_data( $row->meta_key, $row->meta_value, false );
-		}
+		$order->read_meta_data();
 		$order_data = $this->get_order_data_for_id( $order->get_id() );
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
@@ -595,10 +592,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$raw_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
 				"
-SELECT id, meta_key, meta_value
+SELECT id as meta_id, meta_key, meta_value
 FROM $meta_table
 WHERE order_id = %d
-ORDER BY id;
+ORDER BY meta_id;
 ",
 				$order->get_id()
 			)

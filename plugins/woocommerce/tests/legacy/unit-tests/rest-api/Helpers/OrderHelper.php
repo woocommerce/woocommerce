@@ -1,4 +1,5 @@
 <?php // phpcs:ignore
+
 /**
  * Orders helper.
  *
@@ -47,13 +48,13 @@ class OrderHelper {
 	/**
 	 * Create a order.
 	 *
-	 * @since   2.4
-	 * @version 3.0 New parameter $product.
-	 *
-	 * @param int        $customer_id Customer ID.
-	 * @param WC_Product $product     Product object.
+	 * @param int $customer_id Customer ID.
+	 * @param WC_Product $product Product object.
 	 *
 	 * @return WC_Order WC_Order object.
+	 * @version 3.0 New parameter $product.
+	 *
+	 * @since   2.4
 	 */
 	public static function create_order( $customer_id = 1, $product = null ) {
 
@@ -130,6 +131,20 @@ class OrderHelper {
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * Helper method to drop custom tables if present.
+	 */
+	public static function delete_order_custom_tables() {
+		$order_table_controller = wc_get_container()
+			->get( CustomOrdersTableController::class );
+		$order_table_controller->show_feature();
+		$synchronizer = wc_get_container()
+			->get( DataSynchronizer::class );
+		if ( $synchronizer->check_orders_table_exists() ) {
+			$synchronizer->delete_database_tables();
+		}
 	}
 
 	/**

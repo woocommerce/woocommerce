@@ -35,13 +35,18 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->sut            = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator       = wc_get_container()->get( PostsToOrdersMigrationController::class );
 		$this->cpt_data_store = new WC_Order_Data_Store_CPT();
+	}
+
+	public function tearDown(): void {
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		parent::tearDown();
 	}
 
 	/**
@@ -51,24 +56,21 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
+		$switch_to_data_store = function ( $data_store ) {
+			$this->data_store = $data_store;
+		};
+
 		$cot_order = new WC_Order();
 		$cot_order->set_id( $post_order_id );
+		$switch_to_data_store->call( $cot_order, $this->sut );
 		$this->sut->read( $cot_order );
 
 		$post_order = new WC_Order();
 		$post_order->set_id( $post_order_id );
+		$switch_to_data_store->call( $post_order, $this->cpt_data_store );
 		$this->cpt_data_store->read( $post_order );
 
 		$post_order_data    = $post_order->get_data();
-		$string_to_num_keys = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'cart_tax' );
-		array_walk(
-			$post_order_data,
-			function ( &$data, $key ) use ( $string_to_num_keys ) {
-				if ( in_array( $key, $string_to_num_keys, true ) ) {
-					$data = (float) $data;
-				}
-			}
-		);
 
 		$this->assertEquals( $post_order_data, $cot_order->get_data() );
 	}
@@ -84,7 +86,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$post_meta_data = get_post_meta( $post_order_id );
 		// TODO: Remove `_recorded_sales` from exempted keys after https://github.com/woocommerce/woocommerce/issues/32843.
 		$exempted_keys         = array( 'post_modified', 'post_modified_gmt', '_recorded_sales' );
-		$convert_to_float_keys = array( '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax' );
+		$convert_to_float_keys = array( '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_cart_discount', 'cart_tax' );
 		$exempted_keys         = array_flip( array_merge( $exempted_keys, $convert_to_float_keys ) );
 
 		$post_data_float      = array_intersect_key( $post_data, array_flip( $convert_to_float_keys ) );
