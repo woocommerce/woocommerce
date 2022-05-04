@@ -14,6 +14,7 @@ This block does not have any customizable options available, so any style or cus
 
 * `attributes`
   * `template`: `single-product` | `archive-product` | `taxonomy-product_cat` | `taxonomy-product_tag`
+  * `align`: `wide` | `full`
 
 ```html
 <!-- wp:woocommerce/legacy-template {"template":"single-product"} /-->
