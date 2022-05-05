@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
- const {
+const {
 	shopper,
 	merchant,
 	createSimpleProduct,
@@ -21,21 +21,28 @@ const config = require( 'config' );
 const customerBilling = config.get( 'addresses.customer.billing' );
 
 const runCheckoutCreateAccountTest = () => {
-	describe('Shopper Checkout Create Account', () => {
+	describe( 'Shopper Checkout Create Account', () => {
 		let productId;
 
-		beforeAll(async () => {
+		beforeAll( async () => {
 			productId = await createSimpleProduct();
 			await withRestApi.deleteCustomerByEmail( customerBilling.email );
 
 			// Set checkbox for creating an account during checkout
 			await merchant.login();
-			await merchant.openSettings('account');
-			await setCheckbox('#woocommerce_enable_signup_and_login_from_checkout');
+			await merchant.openSettings( 'account' );
+			await setCheckbox(
+				'#woocommerce_enable_signup_and_login_from_checkout'
+			);
 			await settingsPageSaveChanges();
 
 			// Set free shipping within California
-			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping' );
+			await addShippingZoneAndMethod(
+				'Free Shipping CA',
+				'state:US:CA',
+				' ',
+				'free_shipping'
+			);
 
 			await merchant.logout();
 
@@ -46,25 +53,29 @@ const runCheckoutCreateAccountTest = () => {
 			await shopper.goToCheckout();
 		}, 45000 );
 
-		it('can create an account during checkout', async () => {
+		it( 'can create an account during checkout', async () => {
 			// Fill all the details for a new customer
 			await shopper.fillBillingDetails( customerBilling );
 			await uiUnblocked();
 
 			// Set checkbox for creating account during checkout
-			await setCheckbox('#createaccount');
+			await setCheckbox( '#createaccount' );
 
 			// Place an order
 			await shopper.placeOrder();
-			await expect(page).toMatchElement('h1.entry-title', {text: 'Order received'});
-		});
+			await expect( page ).toMatchElement( 'h1.entry-title', {
+				text: 'Order received',
+			} );
+		} );
 
-		it('can verify that the customer has been created', async () => {
+		it( 'can verify that the customer has been created', async () => {
 			await merchant.login();
 			await merchant.openAllUsersView();
-			await expect(page).toMatchElement('td.email.column-email > a', { text: customerBilling.email });
-		});
-	});
+			await expect( page ).toMatchElement( 'td.email.column-email > a', {
+				text: customerBilling.email,
+			} );
+		} );
+	} );
 };
 
 module.exports = runCheckoutCreateAccountTest;
