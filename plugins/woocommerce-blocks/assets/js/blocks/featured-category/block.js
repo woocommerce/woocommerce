@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	AlignmentToolbar,
@@ -13,6 +13,8 @@ import {
 	MediaReplaceFlow,
 	RichText,
 	__experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles,
+	__experimentalImageEditingProvider as ImageEditingProvider,
+	__experimentalImageEditor as ImageEditor,
 	__experimentalPanelColorGradientSettings as PanelColorGradientSettings,
 	__experimentalUseGradient as useGradient,
 } from '@wordpress/block-editor';
@@ -24,6 +26,7 @@ import {
 	RangeControl,
 	Spinner,
 	ToggleControl,
+	ToolbarButton,
 	ToolbarGroup,
 	withSpokenMessages,
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -37,7 +40,7 @@ import { withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { folderStarred } from '@woocommerce/icons';
-import { Icon } from '@wordpress/icons';
+import { crop, Icon } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
@@ -53,6 +56,11 @@ import {
 import { withCategory } from '../../hocs';
 import { calculateBackgroundImagePosition } from '../featured-product/utils';
 import { ConstrainedResizable } from '../featured-product/block';
+
+const DEFAULT_EDITOR_SIZE = {
+	height: 500,
+	width: 500,
+};
 
 /**
  * Component to handle edit mode of "Featured Category".
@@ -79,10 +87,17 @@ const FeaturedCategory = ( {
 	debouncedSpeak,
 	triggerUrlUpdate = () => void null,
 } ) => {
+	const { mediaId, mediaSrc } = attributes;
+
+	const [ isEditingImage, setIsEditingImage ] = useState( false );
+	const [ backgroundImageSize, setBackgroundImageSize ] = useState( {} );
 	const { setGradient } = useGradient( {
 		gradientAttribute: 'overlayGradient',
 		customGradientAttribute: 'overlayGradient',
 	} );
+
+	const backgroundImageSrc = mediaSrc || getCategoryImageSrc( category );
+	const backgroundImageId = mediaId || getCategoryImageId( category );
 
 	const onResize = useCallback(
 		( _event, _direction, elt ) => {
@@ -90,6 +105,10 @@ const FeaturedCategory = ( {
 		},
 		[ setAttributes ]
 	);
+
+	useEffect( () => {
+		setIsEditingImage( false );
+	}, [ isSelected ] );
 
 	const renderApiError = () => (
 		<ErrorPlaceholder
@@ -101,8 +120,7 @@ const FeaturedCategory = ( {
 	);
 
 	const getBlockControls = () => {
-		const { contentAlign, mediaSrc } = attributes;
-		const mediaId = attributes.mediaId || getCategoryImageId( category );
+		const { contentAlign, editMode } = attributes;
 
 		return (
 			<BlockControls>
@@ -113,8 +131,18 @@ const FeaturedCategory = ( {
 					} }
 				/>
 				<ToolbarGroup>
+					{ backgroundImageSrc && ! isEditingImage && (
+						<ToolbarButton
+							onClick={ () => setIsEditingImage( true ) }
+							icon={ crop }
+							label={ __(
+								'Edit category image',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					) }
 					<MediaReplaceFlow
-						mediaId={ mediaId }
+						mediaId={ backgroundImageId }
 						mediaURL={ mediaSrc }
 						accept="image/*"
 						onSelect={ ( media ) => {
@@ -125,7 +153,7 @@ const FeaturedCategory = ( {
 						} }
 						allowedTypes={ [ 'image' ] }
 					/>
-					{ mediaId && mediaSrc ? (
+					{ backgroundImageId && mediaSrc ? (
 						<TextToolbarButton
 							onClick={ () =>
 								setAttributes( { mediaId: 0, mediaSrc: '' } )
@@ -154,7 +182,6 @@ const FeaturedCategory = ( {
 	};
 
 	const getInspectorControls = () => {
-		const url = attributes.mediaSrc || getCategoryImageSrc( category );
 		const { focalPoint = { x: 0.5, y: 0.5 } } = attributes;
 		// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
 		// so we need to check if it exists before using it.
@@ -176,7 +203,7 @@ const FeaturedCategory = ( {
 						}
 					/>
 				</PanelBody>
-				{ !! url && (
+				{ !! backgroundImageSrc && (
 					<>
 						{ focalPointPickerExists && (
 							<PanelBody
@@ -234,7 +261,7 @@ const FeaturedCategory = ( {
 										'Focal Point Picker',
 										'woo-gutenberg-products-block'
 									) }
-									url={ url }
+									url={ backgroundImageSrc }
 									value={ focalPoint }
 									onChange={ ( value ) =>
 										setAttributes( {
@@ -419,7 +446,6 @@ const FeaturedCategory = ( {
 			dimRatio,
 			focalPoint,
 			imageFit,
-			mediaSrc,
 			minHeight,
 			overlayColor,
 			overlayGradient,
@@ -442,8 +468,6 @@ const FeaturedCategory = ( {
 		const containerStyle = {
 			borderRadius: style?.border?.radius,
 		};
-
-		const backgroundImageSrc = mediaSrc || getCategoryImageSrc( category );
 
 		const wrapperStyle = {
 			...getSpacingClassesAndStyles( attributes ).style,
@@ -483,6 +507,12 @@ const FeaturedCategory = ( {
 								className="wc-block-featured-category__background-image"
 								src={ backgroundImageSrc }
 								style={ backgroundImageStyle }
+								onLoad={ ( e ) => {
+									setBackgroundImageSize( {
+										height: e.target?.naturalHeight,
+										width: e.target?.naturalWidth,
+									} );
+								} }
 							/>
 						) }
 						<h2
@@ -533,6 +563,40 @@ const FeaturedCategory = ( {
 
 	if ( editMode ) {
 		return renderEditMode();
+	}
+
+	if ( isEditingImage ) {
+		return (
+			<>
+				<ImageEditingProvider
+					id={ backgroundImageId }
+					url={ backgroundImageSrc }
+					naturalHeight={
+						backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
+					}
+					naturalWidth={
+						backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
+					}
+					onSaveImage={ ( { id, url } ) => {
+						setAttributes( { mediaId: id, mediaSrc: url } );
+					} }
+					isEditing={ isEditingImage }
+					onFinishEditing={ () => setIsEditingImage( false ) }
+				>
+					<ImageEditor
+						url={ backgroundImageSrc }
+						height={
+							backgroundImageSize.height ||
+							DEFAULT_EDITOR_SIZE.height
+						}
+						width={
+							backgroundImageSize.width ||
+							DEFAULT_EDITOR_SIZE.width
+						}
+					/>
+				</ImageEditingProvider>
+			</>
+		);
 	}
 
 	return (
