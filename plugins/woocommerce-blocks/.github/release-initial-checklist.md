@@ -85,7 +85,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
     * [ ] `readme.txt`
     * [ ] `src/Package.php`
     * [ ] `woocommerce-gutenberg-products-block.php`.
-* [ ] Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
+* [ ] Update the schedules p2 with the shipped date for the release (PdToLP-K-p2).
 * [ ] Edit the GitHub milestone of the release you just shipped and add the current date as the due date (this is used to track ship date as well).
 
 ## Pull request in WooCommerce Core for Package update
