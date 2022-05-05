@@ -17,6 +17,7 @@
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
 	"scripts": {
+		"postinstall": "composer install",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",

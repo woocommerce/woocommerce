@@ -4,9 +4,9 @@ export class AdminEdit {
 	/**
 	 * Publish the object being edited and verify published status
 	 *
-	 * @param button Publish button selector
-	 * @param publishNotice Publish notice selector
-	 * @param publishVerification Expected notice on successful publish
+	 * @param  button              Publish button selector
+	 * @param  publishNotice       Publish notice selector
+	 * @param  publishVerification Expected notice on successful publish
 	 * @return {Promise<void>}
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {

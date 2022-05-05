@@ -53,6 +53,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm run build:js && pnpm run build:css",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",

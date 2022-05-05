@@ -3,12 +3,12 @@
  *
  * Note that by default the update endpoint is limited to 100 objects to be created, updated, or deleted.
  *
- * @param {string} action Batch action. Must be one of: create, update, or delete.
- * @param {Array} resources A list of resource objects. For the delete action, this will be a list of IDs.
- * @param {Object} payload The batch payload object. Defaults to an empty object.
- * @returns {Object} The payload to send to the batch endpoint.
+ * @param {string} action    Batch action. Must be one of: create, update, or delete.
+ * @param {Array}  resources A list of resource objects. For the delete action, this will be a list of IDs.
+ * @param {Object} payload   The batch payload object. Defaults to an empty object.
+ * @return {Object} The payload to send to the batch endpoint.
  */
- const batch = ( action, resources = [], payload = {} ) => {
+const batch = ( action, resources = [], payload = {} ) => {
 	if ( ! [ 'create', 'update', 'delete' ].includes( action ) ) {
 		return;
 	}
