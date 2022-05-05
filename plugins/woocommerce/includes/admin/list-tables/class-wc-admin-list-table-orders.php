@@ -629,26 +629,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
-		$user_string = '';
-		$user_id     = '';
-
-		if ( ! empty( $_GET['_customer_user'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Recommended
-			$user_id = absint( $_GET['_customer_user'] ); // WPCS: input var ok, sanitization ok.
-			$user    = get_user_by( 'id', $user_id );
-
-			$user_string = sprintf(
-				/* translators: 1: user display name 2: user ID 3: user email */
-				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-				$user->display_name,
-				absint( $user->ID ),
-				$user->user_email
-			);
-		}
-		?>
-		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Filter by registered customer', 'woocommerce' ); ?>" data-allow_clear="true">
-			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( wp_kses_post( $user_string ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?></option>
-		</select>
-		<?php
+		$this->orders_list_table->customers_filter();
 	}
 
 	/**

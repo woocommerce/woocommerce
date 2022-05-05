@@ -198,6 +198,112 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Extra controls to be displayed between bulk actions and pagination.
+	 *
+	 * @param string $which Either 'top' or 'bottom'.
+	 */
+	protected function extra_tablenav( $which ) {
+		echo '<div class="alignleft actions">';
+
+		if ( 'top' === $which ) {
+			$this->months_filter();
+			$this->customers_filter();
+
+			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'order-query-submit' ) );
+		}
+
+		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_orders' ) ) {
+			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
+		}
+
+		echo '</div>';
+	}
+
+	/**
+	 * Render the months filter dropdown.
+	 *
+	 * @todo [review] we may prefer to move this logic outside of the ListTable class
+	 *
+	 * @return void
+	 */
+	private function months_filter() {
+		global $wp_locale;
+		global $wpdb;
+
+		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$order_dates = $wpdb->get_results(
+			"
+				SELECT DISTINCT YEAR( date_created_gmt ) AS year,
+								MONTH( date_created_gmt ) AS month
+
+				FROM $orders_table
+
+				WHERE status NOT IN (
+					'trash'
+				)
+
+				ORDER BY year DESC, month DESC;
+			"
+		);
+
+		$m = isset( $_GET['m'] ) ? (int) $_GET['m'] : 0;
+		echo '<select name="m" id="filter-by-date">';
+		echo '<option ' . selected( $m, 0, false ) . ' value="0">' . esc_html__( 'All dates', 'woocommerce' ) . '</option>';
+
+		foreach ( $order_dates as $date ) {
+			$month           = zeroise( $date->month, 2 );
+			$month_year_text = sprintf(
+				/* translators: 1: Month name, 2: 4-digit year. */
+				esc_html_x( '%1$s %2$d', 'order dates dropdown', 'woocommerce' ),
+				$wp_locale->get_month( $month ),
+				$date->year
+			);
+
+			printf(
+				'<option %1$s value="%2$s">%3$s</option>\n',
+				selected( $m, $date->year . $month, false ),
+				esc_attr( $date->year . $month ),
+				esc_html( $month_year_text )
+			);
+		}
+
+		echo '</select>';
+	}
+
+	/**
+	 * Render the customer filter dropdown.
+	 *
+	 * @return void
+	 */
+	public function customers_filter() {
+		$user_string = '';
+		$user_id     = '';
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['_customer_user'] ) ) {
+			$user_id = absint( $_GET['_customer_user'] );
+			$user    = get_user_by( 'id', $user_id );
+
+			$user_string = sprintf(
+				/* translators: 1: user display name 2: user ID 3: user email */
+				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+				$user->display_name,
+				absint( $user->ID ),
+				$user->user_email
+			);
+		}
+
+		// Note: use of htmlspecialchars (below) is to prevent XSS when rendered by selectWoo.
+		?>
+		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Filter by registered customer', 'woocommerce' ); ?>" data-allow_clear="true">
+			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( wp_kses_post( $user_string ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></option>
+		</select>
+		<?php
+	}
+
+	/**
 	 * Get list columns.
 	 *
 	 * @return array
