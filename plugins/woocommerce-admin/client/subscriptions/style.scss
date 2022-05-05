@@ -1,35 +1,109 @@
-.wcpay-empty-subscriptions__container {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	padding: 48px 0;
-	position: static;
-	height: 344px;
-	left: calc(50% - 1240px / 2);
-	top: 271px;
-	flex: none;
-	order: 1;
-	flex-grow: 0;
-	margin: 0;
-	text-align: center;
+$max-width: 680px;
 
-	.wcpay-empty-subscriptions__description {
-		max-width: 535px;
-		margin: 15px 0;
+.wcpay-empty-subscriptions__error {
+	margin: 0 auto 24px;
+	max-width: $max-width;
+}
+
+.subscriptions-page {
+	margin: 0 auto;
+	max-width: $max-width;
+
+	.components-card {
+		margin-bottom: 24px;
 	}
 
-	.wcpay-empty-subscriptions__tos {
-		font-size: 11px;
-		color: #757575;
-		margin-bottom: 6px;
+	.wcpay-empty-subscriptions-page-payment-methods {
+		svg {
+			display: inline-block;
+			height: 35px;
+			width: 52px;
+			margin-right: 0.5em;
+			margin-bottom: 0.5em;
+		}
 	}
 
-	.wcpay-empty-subscriptions__button_container {
-		margin: 8px 0;
+	.wcpay-empty-subscriptions-page-terms-of-service {
+		display: block;
+		margin: 0.5em 0;
 	}
 
-	.wcpay-empty-subscriptions__error {
-		margin: 15px 0;
+	.subscriptions-page-onboarding-steps {
+		@include breakpoint( '>600px' ) {
+			display: flex;
+			flex-direction: row;
+		}
+
+		.subscriptions-page-onboarding-steps-item {
+			margin-top: 30px;
+
+			@include breakpoint( '>600px' ) {
+				margin-top: 0;
+				margin-right: 80px;
+			}
+		}
+	}
+
+	.wcpay-empty-subscriptions-page-step-number {
+		background-color: $studio-woocommerce-purple-50;
+		color: $white;
+		font-size: 20px;
+		border-radius: 50%;
+		min-height: 32px;
+		min-width: 32px;
+		display: inline-block;
+		text-align: center;
+		line-height: 32px;
+	}
+
+	.subscriptions {
+		h2 {
+			font-size: 20px;
+			font-weight: 300;
+			margin-top: 0;
+		}
+
+		h3 {
+			font-size: 1em;
+		}
+
+		p {
+			color: #3c434a;
+		}
+
+		.subscriptions__card {
+			.components-card__body {
+				padding: 0;
+
+				.content {
+					padding: 24px;
+
+					a {
+						text-decoration: none;
+					}
+
+					hr {
+						position: relative;
+						left: -24px;
+						width: calc( 100% + 48px );
+					}
+				}
+			}
+		}
+
+		.subscriptions__action {
+			margin-top: 16px;
+			margin-bottom: 0;
+		}
+
+		.subscriptions__steps {
+			.components-card__body {
+				padding: 24px;
+			}
+
+			h2 {
+				margin-top: 0;
+			}
+		}
 	}
 }
