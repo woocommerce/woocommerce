@@ -6,6 +6,7 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
 
 defined( 'ABSPATH' ) || exit;
@@ -316,6 +317,7 @@ class WC_Admin_Menus {
 	public function orders_menu(): void {
 		add_submenu_page( 'woocommerce', __( 'Orders', 'woocommerce' ), __( 'Orders', 'woocommerce' ), 'edit_others_shop_orders', 'wc-orders', array( $this, 'orders_page' ) );
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'orders_table' ) );
+		Screen::add_screen( 'wc-orders', 'woocommerce' );
 	}
 
 	/**
