@@ -2,13 +2,8 @@
  * External dependencies
  */
 import { mapValues } from 'lodash';
-import {
-	useDispatch,
-	useSelect,
-	select as wpDataSelect,
-} from '@wordpress/data';
-import schema, { Schema } from 'wordpress__core-data';
-import type { getEntityRecord } from 'wordpress__core-data/selectors';
+import { useDispatch, useSelect } from '@wordpress/data';
+import schema from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -43,7 +38,10 @@ type WoocommerceMeta = UserPreferences & {
 	task_list_tracked_started_tasks?: string;
 };
 
-type WCUser = Schema.User & {
+type WCUser = Pick<
+	schema.Schema.BaseUser< 'view' >,
+	schema.Schema.ViewKeys.User
+> & {
 	woocommerce_meta: WoocommerceMeta;
 };
 
@@ -155,15 +153,19 @@ export const useUserPreferences = () => {
 	// Get our dispatch methods now - this can't happen inside the callback below.
 	const dispatch = useDispatch( STORE_NAME );
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
+	// @ts-expect-error WP 5.3.x doesn't have the User entity defined.
 	let { saveUser } = dispatch;
 
-	const userData = useSelect( ( select: typeof wpDataSelect ) => {
+	const userData = useSelect( ( select ) => {
 		const {
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
+			// @ts-expect-error type definition is missing.
 			getLastEntitySaveError,
+			// @ts-expect-error type definition is missing.
 			hasStartedResolution,
+			// @ts-expect-error type definition is missing.
 			hasFinishedResolution,
 		} = select( STORE_NAME );
 
@@ -171,7 +173,7 @@ export const useUserPreferences = () => {
 			isRequesting:
 				hasStartedResolution( 'getCurrentUser' ) &&
 				! hasFinishedResolution( 'getCurrentUser' ),
-			user: getCurrentUser(),
+			user: getCurrentUser() as WCUser,
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
@@ -184,7 +186,7 @@ export const useUserPreferences = () => {
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.
 			saveUser = async ( userToSave: {
-				id: string;
+				id: number;
 				woocommerce_meta: { [ key: string ]: boolean };
 			} ) => {
 				const entityDefined = Boolean(
@@ -214,7 +216,7 @@ export const useUserPreferences = () => {
 			};
 		}
 		// Get most recent user before update.
-		const currentUser = userData.getCurrentUser();
+		const currentUser = userData.getCurrentUser() as WCUser;
 		return updateUserPrefs(
 			receiveCurrentUser,
 			currentUser,

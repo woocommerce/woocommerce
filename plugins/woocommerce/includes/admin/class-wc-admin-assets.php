@@ -181,7 +181,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 
 				$locale  = localeconv();
-				$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+				$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+				$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 
 				$params = array(
 					/* translators: %s: decimal */

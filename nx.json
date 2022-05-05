@@ -9,8 +9,7 @@
           "build",
           "test",
           "lint",
-          "package",
-          "prepare"
+          "package"
         ]
       }
     }
@@ -19,12 +18,6 @@
     "build": [
       {
         "target": "build",
-        "projects": "dependencies"
-      }
-    ],
-    "prepare": [
-      {
-        "target": "prepare",
         "projects": "dependencies"
       }
     ],

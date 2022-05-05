@@ -48,12 +48,15 @@
 		"@babel/runtime": "^7.17.2",
 		"@testing-library/react": "^12.1.3",
 		"@testing-library/react-hooks": "^7.0.2",
+		"@types/wordpress__compose": "^4.0.1",
 		"@types/wordpress__core-data": "^2.4.5",
+		"@types/wordpress__data": "^6.0.0",
 		"@types/wordpress__data-controls": "^2.2.0",
-		"@wordpress/eslint-plugin": "^11.0.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
+		"redux": "^4.1.0",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
 		"typescript": "^4.6.2"
@@ -65,18 +68,20 @@
 		"react-dom": "^17.0.0"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint": "eslint src",
+		"lint:fix": "eslint src --fix",
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix",
+			"pnpm lint:fix",
 			"pnpm test-staged"
 		]
 	}

@@ -9,6 +9,7 @@ declare global {
 			analytics: boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
+			'experimental-products-task': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;

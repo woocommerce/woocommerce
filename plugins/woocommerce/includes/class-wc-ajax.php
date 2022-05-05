@@ -2226,7 +2226,7 @@ class WC_AJAX {
 			echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">' . esc_html__( 'Dismiss this notice.', 'woocommerce' ) . '</span></button>';
 			echo '</div>';
 
-			delete_option( 'woocommerce_meta_box_errors' );
+			delete_option( WC_Admin_Meta_Boxes::ERROR_STORE );
 		}
 
 		wp_die();
@@ -3095,7 +3095,7 @@ class WC_AJAX {
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );
 				$option  = array(
-					'id' => $gateway->get_option_key()
+					'id' => $gateway->get_option_key(),
 				);
 
 				if ( ! wc_string_to_bool( $enabled ) ) {

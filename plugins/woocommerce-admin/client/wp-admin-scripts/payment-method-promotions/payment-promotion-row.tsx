@@ -10,11 +10,7 @@ import {
 	PluginsStoreActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	useDispatch,
-	useSelect,
-	select as wpDataSelect,
-} from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { sanitize } from 'dompurify';
 import { __ } from '@wordpress/i18n';
 
@@ -59,27 +55,24 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
-	const { gatewayIsActive, paymentGateway } = useSelect(
-		( select: typeof wpDataSelect ) => {
-			const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
-			const activePlugins: string[] = select(
-				PLUGINS_STORE_NAME
-			).getActivePlugins();
-			const isActive =
-				activePlugins && activePlugins.includes( pluginSlug );
-			let paymentGatewayData;
-			if ( isActive ) {
-				paymentGatewayData = getPaymentGateway(
-					pluginSlug.replace( /\-/g, '_' )
-				);
-			}
-
-			return {
-				gatewayIsActive: isActive,
-				paymentGateway: paymentGatewayData,
-			};
+	const { gatewayIsActive, paymentGateway } = useSelect( ( select ) => {
+		const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
+		const activePlugins: string[] = select(
+			PLUGINS_STORE_NAME
+		).getActivePlugins();
+		const isActive = activePlugins && activePlugins.includes( pluginSlug );
+		let paymentGatewayData;
+		if ( isActive ) {
+			paymentGatewayData = getPaymentGateway(
+				pluginSlug.replace( /\-/g, '_' )
+			);
 		}
-	);
+
+		return {
+			gatewayIsActive: isActive,
+			paymentGateway: paymentGatewayData,
+		};
+	} );
 
 	useEffect( () => {
 		if (

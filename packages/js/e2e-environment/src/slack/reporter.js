@@ -67,7 +67,7 @@ const initializeSlack = () => {
 /**
  * Post a message to a Slack channel for a failed test.
  *
- * @param testName
+ * @param  testName
  * @return {Promise<void>}
  */
 async function sendFailedTestMessageToSlack( testName ) {
@@ -131,7 +131,7 @@ async function sendFailedTestMessageToSlack( testName ) {
 /**
  * Post a screenshot to a Slack channel for a failed test.
  *
- * @param screenshotOfFailedTest
+ * @param  screenshotOfFailedTest
  * @return {Promise<void>}
  */
 async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) {

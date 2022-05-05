@@ -14,6 +14,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { Action } from '../Action';
 import './List.scss';
+import fallbackImage from './fallback.png';
 
 export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 	const {
@@ -60,7 +61,13 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 				className={ classes }
 			>
 				<CardMedia isBorderless>
-					<img src={ image72x72 } alt={ title } />
+					<img
+						src={ image72x72 }
+						alt={ title }
+						onError={ ( e ) =>
+							( e.currentTarget.src = fallbackImage )
+						}
+					/>
 				</CardMedia>
 				<div className="woocommerce-task-payment__description">
 					<Text as="h3" className="woocommerce-task-payment__title">

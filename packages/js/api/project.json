@@ -28,12 +28,6 @@
 				"script": "compile"
 			}
 		},
-		"prepare": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "prepare"
-			}
-		},
 		"lint": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {

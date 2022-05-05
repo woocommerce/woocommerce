@@ -11,6 +11,9 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { Tasks } from '../tasks';
+import { TaskProps } from '../task';
+import { TaskListProps } from '../task-list';
+import { TaskListProps as TwoColumnTaskListProps } from '../../two-column-tasks/task-list';
 
 jest.mock( '@wordpress/data', () => {
 	// Require the original module to not be mocked...
@@ -28,15 +31,17 @@ jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks' );
 
 jest.mock( '../task-list', () => ( {
-	TaskList: ( { id } ) => <div>task-list:{ id }</div>,
+	TaskList: ( { id }: TaskListProps ) => <div>task-list:{ id }</div>,
 } ) );
 
 jest.mock( '../../two-column-tasks/task-list', () => ( {
-	TaskList: ( { id } ) => <div>two-column-list:{ id }</div>,
+	TaskList: ( { id }: TwoColumnTaskListProps ) => (
+		<div>two-column-list:{ id }</div>
+	),
 } ) );
 
 jest.mock( '../task', () => ( {
-	Task: ( { query } ) => <div>task:{ query.task }</div>,
+	Task: ( { query }: TaskProps ) => <div>task:{ query.task }</div>,
 } ) );
 
 jest.mock( '../placeholder', () => ( {
@@ -44,7 +49,9 @@ jest.mock( '../placeholder', () => ( {
 } ) );
 
 jest.mock( '~/activity-panel/display-options', () => ( {
-	DisplayOption: ( { children } ) => <div>{ children } </div>,
+	DisplayOption: ( { children }: { children: React.ReactNode } ) => (
+		<div>{ children } </div>
+	),
 } ) );
 
 describe( 'Task', () => {

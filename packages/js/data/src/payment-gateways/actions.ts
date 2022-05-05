@@ -106,9 +106,12 @@ export function updatePaymentGatewayError(
 	};
 }
 
+type DeepPartial< T > = {
+	[ P in keyof T ]?: DeepPartial< T[ P ] >;
+};
 export function* updatePaymentGateway(
 	id: string,
-	data: Partial< PaymentGateway >
+	data: DeepPartial< PaymentGateway >
 ) {
 	try {
 		yield updatePaymentGatewayRequest();

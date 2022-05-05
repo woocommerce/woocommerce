@@ -6,42 +6,67 @@ jobs:
   build:
     if: github.repository == 'woocommerce/woocommerce'
     name: Build WooCommerce zip
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build
-        id: build
-        uses: woocommerce/action-build@trunk
-        env:
-          BUILD_ENV: mirrors
-      - name: Upload PR zip
-        uses: actions/upload-artifact@v2
+      - name: Checkout code.
+        uses: actions/checkout@v3
+
+      - name: Cache modules
+        uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.pnpm-store
+            plugins/woocommerce/packages
+            plugins/woocommerce/**/vendor
+          key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
+      - name: Upload the zip file as an artifact
+        uses: actions/upload-artifact@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: woocommerce
-          path: ${{ steps.build.outputs.zip_path }}
+          path: plugins/woocommerce/woocommerce.zip
           retention-days: 7
+
   mirror:
     if: github.repository == 'woocommerce/woocommerce'
     name: Push to Mirror
-    runs-on: ubuntu-latest
     needs: [build]
+    runs-on: ubuntu-20.04
     steps:
       - name: Create directories
         run: |
           mkdir -p tmp/woocommerce-build
           mkdir -p monorepo
+
       - name: Checkout monorepo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: monorepo
+
+      - name: Copy Composer over to production
+        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build
+
       - name: Download WooCommerce ZIP
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: woocommerce
           path: tmp/woocommerce-build
+
       - name: Extract and replace WooCommerce zip.
         working-directory: tmp/woocommerce-build
         run: |
@@ -49,11 +74,13 @@ jobs:
           unzip woocommerce.zip -d woocommerce/woocommerce-production
           mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
           rm -rf woocommerce/woocommerce-production/woocommerce
+
       - name: Set up mirror
         working-directory: tmp/woocommerce-build
         run: |
           touch mirrors.txt
           echo "woocommerce/woocommerce-production" >> mirrors.txt
+
       - name: Push to mirror
         uses: Automattic/action-push-to-mirrors@v1
         with:

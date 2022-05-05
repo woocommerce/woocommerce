@@ -1220,6 +1220,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		foreach ( $downloads_array as $download ) {
 			$download_id = $download->get_id();
 			$is_new      = ! isset( $existing_downloads[ $download_id ] );
+			$has_changed = ! $is_new && $existing_downloads[ $download_id ]->get_file() !== $downloads_array[ $download_id ]->get_file();
 
 			try {
 				$download->check_is_valid( $this->get_object_read() );
@@ -1227,7 +1228,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			} catch ( Exception $e ) {
 				// We only add error messages for newly added downloads (let's not overwhelm the user if there are
 				// multiple existing files which are problematic).
-				if ( $is_new ) {
+				if ( $is_new || $has_changed ) {
 					$errors[] = $e->getMessage();
 				}
 

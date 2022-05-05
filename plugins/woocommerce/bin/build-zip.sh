@@ -13,10 +13,11 @@ echo "Installing PHP and JS dependencies..."
 pnpm install
 composer install || exit "$?"
 echo "Running JS Build..."
-pnpm run build:core || exit "$?"
+pnpm run build || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
-
+echo "Run makepot..."
+composer run-script makepot || exit "$?"
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
 
