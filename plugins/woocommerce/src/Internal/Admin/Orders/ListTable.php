@@ -320,14 +320,14 @@ class ListTable extends WP_List_Table {
 	 */
 	public function get_columns() {
 		return array(
-			'cb'           => '<input type="checkbox" />',
-			'order_number' => esc_html__( 'Order', 'woocommerce' ),
-			'date'         => esc_html__( 'Date', 'woocommerce' ),
-			'status'       => esc_html__( 'Status', 'woocommerce' ),
-			'billing'      => esc_html__( 'Billing', 'woocommerce' ),
-			'ship_to'      => esc_html__( 'Ship to', 'woocommerce' ),
-			'total'        => esc_html__( 'Total', 'woocommerce' ),
-			'actions'      => esc_html__( 'Actions', 'woocommerce' ),
+			'cb'               => '<input type="checkbox" />',
+			'order_number'     => esc_html__( 'Order', 'woocommerce' ),
+			'order_date'       => esc_html__( 'Date', 'woocommerce' ),
+			'order_status'     => esc_html__( 'Status', 'woocommerce' ),
+			'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
+			'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
+			'order_total'      => esc_html__( 'Total', 'woocommerce' ),
+			'wc_actions'       => esc_html__( 'Actions', 'woocommerce' ),
 		);
 	}
 
@@ -344,9 +344,9 @@ class ListTable extends WP_List_Table {
 			$hidden = array_merge(
 				$hidden,
 				array(
-					'billing',
-					'ship_to',
-					'actions',
+					'billing_address',
+					'shipping_address',
+					'wc_actions',
 				)
 			);
 		}
@@ -410,7 +410,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_date( WC_Order $order ): void {
+	public function column_order_date(WC_Order $order ): void {
 		$order_timestamp = $order->get_date_created() ? $order->get_date_created()->getTimestamp() : '';
 
 		if ( ! $order_timestamp ) {
@@ -443,7 +443,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_status( WC_Order $order ): void {
+	public function column_order_status(WC_Order $order ): void {
 		$tooltip                 = '';
 		$comment_count           = get_comment_count( $order->get_id() );
 		$approved_comments_count = absint( $comment_count['approved'] );
@@ -484,7 +484,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_billing( WC_Order $order ): void {
+	public function column_billing_address(WC_Order $order ): void {
 		$address = $order->get_formatted_billing_address();
 
 		if ( $address ) {
@@ -506,7 +506,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_ship_to( WC_Order $order ): void {
+	public function column_shipping_address(WC_Order $order ): void {
 		$address = $order->get_formatted_shipping_address();
 
 		if ( $address ) {
@@ -527,7 +527,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_total( WC_Order $order ): void {
+	public function column_order_total(WC_Order $order ): void {
 		if ( $order->get_payment_method_title() ) {
 			/* translators: %s: method */
 			echo '<span class="tips" data-tip="' . esc_attr( sprintf( __( 'via %s', 'woocommerce' ), $order->get_payment_method_title() ) ) . '">' . wp_kses_post( $order->get_formatted_order_total() ) . '</span>';
@@ -543,7 +543,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_actions( WC_Order $order ): void {
+	public function column_wc_actions(WC_Order $order ): void {
 		echo '<p>';
 
 		do_action( 'woocommerce_admin_order_actions_start', $order );

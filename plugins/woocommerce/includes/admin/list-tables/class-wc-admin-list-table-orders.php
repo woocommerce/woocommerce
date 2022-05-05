@@ -190,42 +190,42 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render column: order_status.
 	 */
 	protected function render_order_status_column() {
-		$this->orders_list_table->column_status( $this->object );
+		$this->orders_list_table->column_order_status( $this->object );
 	}
 
 	/**
 	 * Render column: order_date.
 	 */
 	protected function render_order_date_column() {
-		$this->orders_list_table->column_date( $this->object );
+		$this->orders_list_table->column_order_date( $this->object );
 	}
 
 	/**
 	 * Render column: order_total.
 	 */
 	protected function render_order_total_column() {
-		$this->orders_list_table->column_total( $this->object );
+		$this->orders_list_table->column_order_total( $this->object );
 	}
 
 	/**
 	 * Render column: wc_actions.
 	 */
 	protected function render_wc_actions_column() {
-		$this->orders_list_table->column_actions( $this->object );
+		$this->orders_list_table->column_wc_actions( $this->object );
 	}
 
 	/**
 	 * Render column: billing_address.
 	 */
 	protected function render_billing_address_column() {
-		$this->orders_list_table->column_billing( $this->object );
+		$this->orders_list_table->column_billing_address( $this->object );
 	}
 
 	/**
 	 * Render column: shipping_address.
 	 */
 	protected function render_shipping_address_column() {
-		$this->orders_list_table->column_ship_to( $this->object );
+		$this->orders_list_table->column_shipping_address( $this->object );
 	}
 
 	/**
