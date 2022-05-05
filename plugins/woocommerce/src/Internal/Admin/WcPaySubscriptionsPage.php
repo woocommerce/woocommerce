@@ -77,8 +77,8 @@ class WcPaySubscriptionsPage {
 	 * @return bool
 	 */
 	private function is_store_experiment_eligible() {
-		// Ineligible if WooCommerce Payments OR an existing subscriptions plugin is active.
-		$active_plugins         = PluginsHelper::get_active_plugin_slugs();
+		// Ineligible if WooCommerce Payments OR an existing subscriptions plugin is installed.
+		$installed_plugins      = PluginsHelper::get_installed_plugin_slugs();
 		$plugin_ineligible_list = array(
 			'woocommerce-payments',
 			'woocommerce-subscriptions',
@@ -87,7 +87,7 @@ class WcPaySubscriptionsPage {
 			'yith-woocommerce-subscription',
 		);
 		foreach ( $plugin_ineligible_list as $plugin_slug ) {
-			if ( in_array( $plugin_slug, $active_plugins, true ) ) {
+			if ( in_array( $plugin_slug, $installed_plugins, true ) ) {
 				return false;
 			}
 		}
