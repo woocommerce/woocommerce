@@ -323,7 +323,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected function set_meta_data( &$product, $data ) {
 		if ( isset( $data['meta_data'] ) ) {
 			foreach ( $data['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'] );
+				$product->update_meta_data( $meta['key'], maybe_unserialize( $meta['value'] ) );
 			}
 		}
 	}

@@ -714,12 +714,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						continue;
 					}
 
-					// Allow 3rd parties to process the meta, e.g. to transform non-scalar values to scalar.
-					$meta_value = apply_filters( 'woocommerce_product_export_meta_value', $meta->value, $meta, $product, $row );
-
-					if ( ! is_scalar( $meta_value ) ) {
-						continue;
-					}
+					$meta_value = apply_filters( 'woocommerce_product_export_meta_value', maybe_serialize( $meta->value ), $meta, $product, $row );
 
 					$column_key = 'meta:' . esc_attr( $meta->key );
 					/* translators: %s: meta data name */
