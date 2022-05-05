@@ -16,6 +16,21 @@
 			height: auto !important;
 		}
 	}
+
+	// Applying image edits
+	.is-applying {
+		.components-spinner {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin-top: -9px;
+			margin-left: -9px;
+		}
+
+		img {
+			opacity: 0.3;
+		}
+	}
 }
 
 .wc-block-featured-category {
