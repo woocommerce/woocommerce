@@ -15,6 +15,7 @@ jest.mock( '@woocommerce/tracks', () => ( {
 } ) );
 jest.mock( '@woocommerce/experimental', () => ( {
 	TaskItem: ( props: { title: string } ) => <div>{ props.title }</div>,
+	useSlot: jest.fn(),
 	List: jest.fn().mockImplementation( ( { children } ) => children ),
 } ) );
 jest.mock( '@woocommerce/components', () => ( {
@@ -140,6 +141,28 @@ describe( 'TaskList', () => {
 				isComplete={ false }
 				isHidden={ false }
 				eventPrefix={ '' }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+				isVisible={ true }
+			/>
+		);
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
+			number_tasks: 0,
+			store_connected: null,
+		} );
+	} );
+
+	it( 'should trigger tasklist_view event on initial render for setup task list with eventPrefix if eventName is undefined', () => {
+		render(
+			<TaskList
+				id="setup"
+				tasks={ [] }
+				title="List title"
+				query={ {} }
+				isComplete={ false }
+				isHidden={ false }
+				eventPrefix={ 'tasklist_' }
 				displayProgressHeader={ false }
 				keepCompletedTaskList="no"
 				isVisible={ true }

@@ -42,7 +42,9 @@ export const Card: React.FC< TaxChildProps > = () => {
 								type="external"
 								href="https://woocommerce.com/products/jetpack/?utm_medium=product"
 								target="_blank"
-							/>
+							>
+								<></>
+							</Link>
 						),
 					},
 				} ),
@@ -60,7 +62,9 @@ export const Card: React.FC< TaxChildProps > = () => {
 							href={ 'https://wordpress.com/tos/' }
 							target="_blank"
 							type="external"
-						/>
+						>
+							<></>
+						</Link>
 					),
 				},
 			} ) }

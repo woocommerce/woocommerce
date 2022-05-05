@@ -39,7 +39,7 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
-	onClick: () => void;
+	onClick: React.MouseEventHandler< HTMLElement >;
 	onCollapse?: () => void;
 	onDelete?: () => void;
 	onDismiss?: () => void;
@@ -130,7 +130,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	}, [ expanded ] );
 
 	const className = classnames( 'woocommerce-task-list__item', {
-		'is-complete': completed,
+		complete: completed,
 		expanded: isTaskExpanded,
 		'level-2': level === 2 && ! completed,
 		'level-1': level === 1 && ! completed,

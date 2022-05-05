@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Check WP version 5.9 before adding mini_cart_block to WC Tracker

@@ -1,4 +1,4 @@
-export default () => (
+export const JCB = () => (
 	/* eslint-disable */
 	<svg
 		width="51"
