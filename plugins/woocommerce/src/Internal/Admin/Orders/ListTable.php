@@ -85,7 +85,8 @@ class ListTable extends WP_List_Table {
 
 		$this->views();
 
-		echo '<form id="wc-orders-filter" method="get">';
+		echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
+		$this->print_hidden_form_fields();
 		$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
 
 		parent::display();
@@ -122,7 +123,7 @@ class ListTable extends WP_List_Table {
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ),
+			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'all' ) ),
 		);
 
 		$orders      = wc_get_orders( $args );
@@ -573,5 +574,29 @@ class ListTable extends WP_List_Table {
 		do_action( 'woocommerce_admin_order_actions_end', $order );
 
 		echo '</p>';
+	}
+
+	/**
+	 * Outputs hidden fields used to retain state when filtering.
+	 *
+	 * @return void
+	 */
+	private function print_hidden_form_fields(): void {
+		echo '<input type="hidden" name="page" value="wc-orders" >';
+
+		$state_params = array(
+			'_customer_user',
+			'm',
+			'paged',
+			'status',
+		);
+
+		foreach ( $state_params as $param ) {
+			if ( ! isset( $_GET[ $param ] ) ) {
+				continue;
+			}
+
+			echo '<input type="hidden" name="status" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) ) . '" >';
+		}
 	}
 }
