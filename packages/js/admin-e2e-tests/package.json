@@ -50,6 +50,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"build": "tsc --build",
 		"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
