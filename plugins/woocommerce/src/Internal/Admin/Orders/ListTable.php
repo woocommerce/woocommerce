@@ -115,16 +115,23 @@ class ListTable extends WP_List_Table {
 	 * Prepares the list of items for displaying.
 	 */
 	public function prepare_items() {
-		$args = array(
-			'limit'  => $this->get_items_per_page( 'edit_orders_per_page' ),
-			'page'   => $this->get_pagenum(),
-			'status' => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ),
+		$limit = $this->get_items_per_page( 'edit_orders_per_page' );
+		$args  = array(
+			'limit'    => $limit,
+			'page'     => $this->get_pagenum(),
+			'paginate' => true,
+			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ),
 		);
 
-		// @todo Confirm this is the best way to query.
-		//       An alternative is using `$this->data_store->get_orders()` however in the case of the order CPT store
-		//       that method is considered deprecated (not sure if that carries over to the new COT store).
-		$this->items = wc_get_orders( $args );
+		$orders      = wc_get_orders( $args );
+		$this->items = $orders->orders;
+
+		$this->set_pagination_args(
+			array(
+				'total_items' => $orders->total,
+				'per_page'    => $limit,
+			)
+		);
 	}
 
 	/**
