@@ -1122,6 +1122,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$query .= ' ORDER BY posts.menu_order ASC, postmeta.post_id ASC;';
 
+		/**
+		 * Filter the query used to find a matching variation within a variable product.
+		 *
+		 * @param string     $query   The SQL query.
+		 * @param WC_Product $product The variable product.
+		 * @return string
+		 */
+		$query = apply_filters( 'woocommerce_find_matching_product_variation_query', $query, $product );
+
 		$attributes = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! $attributes ) {
@@ -1135,6 +1144,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		/**
+		 * Filter the sorted attributes by variation ID.
+		 *
+		 * @param  array      $sorted_meta The sorted attributes by variation ID.
+		 * @param  array      $attributes  The attributes used to build the $sorted_meta.
+		 * @param  WC_Product $product     The variable product.
+		 * @return array
+		 */
+		$sorted_meta = apply_filters( 'woocommerce_sorted_attributes_by_variation_id', $sorted_meta, $attributes, $product );
+
+		/**
 		 * Check each variation to find the one that matches the $match_attributes.
 		 *
 		 * Note: Not all meta fields will be set which is why we check existence.
@@ -1144,7 +1163,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
 			foreach ( $variation as $attribute_key => $attribute_value ) {
-				$match_any_value = '' === $attribute_value;
+				/**
+				 * Filter whether it should match any value or not.
+				 *
+				 * @param  bool   $match_any_value The result of '' === $attribute_value.
+				 * @param  string $attribute_value The attribute value.
+				 * @param  string $attribute_key   The attribute key.
+				 * @param  int    $variation_id    The variation ID.
+				 * @return bool
+				 */
+				$match_any_value = apply_filters( 'woocommerce_match_any_value', '' === $attribute_value, $attribute_value, $attribute_key, $variation_id );
 
 				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
 					$match = false; // Requires a selection but no value was provide.
