@@ -410,7 +410,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_date(WC_Order $order ): void {
+	public function column_order_date( WC_Order $order ): void {
 		$order_timestamp = $order->get_date_created() ? $order->get_date_created()->getTimestamp() : '';
 
 		if ( ! $order_timestamp ) {
@@ -443,7 +443,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_status(WC_Order $order ): void {
+	public function column_order_status( WC_Order $order ): void {
 		$tooltip                 = '';
 		$comment_count           = get_comment_count( $order->get_id() );
 		$approved_comments_count = absint( $comment_count['approved'] );
@@ -484,7 +484,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_billing_address(WC_Order $order ): void {
+	public function column_billing_address( WC_Order $order ): void {
 		$address = $order->get_formatted_billing_address();
 
 		if ( $address ) {
@@ -506,7 +506,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_shipping_address(WC_Order $order ): void {
+	public function column_shipping_address( WC_Order $order ): void {
 		$address = $order->get_formatted_shipping_address();
 
 		if ( $address ) {
@@ -527,7 +527,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order_total(WC_Order $order ): void {
+	public function column_order_total( WC_Order $order ): void {
 		if ( $order->get_payment_method_title() ) {
 			/* translators: %s: method */
 			echo '<span class="tips" data-tip="' . esc_attr( sprintf( __( 'via %s', 'woocommerce' ), $order->get_payment_method_title() ) ) . '">' . wp_kses_post( $order->get_formatted_order_total() ) . '</span>';
@@ -543,9 +543,15 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_wc_actions(WC_Order $order ): void {
+	public function column_wc_actions( WC_Order $order ): void {
 		echo '<p>';
 
+		/**
+		 * Fires before the order action buttons (within the actions column for the order list table)
+		 * are registered.
+		 *
+		 * @param WC_Order $order Current order object.
+		 */
 		do_action( 'woocommerce_admin_order_actions_start', $order );
 
 		$actions = array();
@@ -566,11 +572,23 @@ class ListTable extends WP_List_Table {
 			);
 		}
 
+		/**
+		 * Provides an opportunity to modify the action buttons within the order list table.
+		 *
+		 * @param array    $action Order actions.
+		 * @param WC_Order $order  Current order object.
+		 */
 		$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wc_render_action_buttons( $actions );
 
+		/**
+		 * Fires after the order action buttons (within the actions column for the order list table)
+		 * are rendered.
+		 *
+		 * @param WC_Order $order Current order object.
+		 */
 		do_action( 'woocommerce_admin_order_actions_end', $order );
 
 		echo '</p>';
