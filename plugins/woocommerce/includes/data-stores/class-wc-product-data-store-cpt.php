@@ -1125,8 +1125,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		/**
 		 * Filter the query used to find a matching variation within a variable product.
 		 *
-		 * @param string     $query   The SQL query.
-		 * @param WC_Product $product The variable product.
+		 * @param  string     $query   The SQL query.
+		 * @param  WC_Product $product The variable product.
 		 * @return string
 		 */
 		$query = apply_filters( 'woocommerce_find_matching_product_variation_query', $query, $product );
