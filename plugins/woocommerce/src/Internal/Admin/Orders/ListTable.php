@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use WC_Order;
 use WC_Order_Data_Store_Interface;
 use WP_List_Table;
+use WP_Screen;
 
 /**
  * Admin list table for orders as managed by the OrdersTableDataStore.
@@ -34,6 +35,7 @@ class ListTable extends WP_List_Table {
 	public function setup(): void {
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
+		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		$this->items_per_page();
 		set_screen_options();
 	}
@@ -326,6 +328,29 @@ class ListTable extends WP_List_Table {
 			'total'        => esc_html__( 'Total', 'woocommerce' ),
 			'actions'      => esc_html__( 'Actions', 'woocommerce' ),
 		);
+	}
+
+	/**
+	 * Specify the columns we wish to hide by default.
+	 *
+	 * @param array     $hidden Columns set to be hidden.
+	 * @param WP_Screen $screen Screen object.
+	 *
+	 * @return array
+	 */
+	public function default_hidden_columns( array $hidden, WP_Screen $screen ) {
+		if ( isset( $screen->id ) && 'woocommerce_page_wc-orders' === $screen->id ) {
+			$hidden = array_merge(
+				$hidden,
+				array(
+					'billing',
+					'ship_to',
+					'actions',
+				)
+			);
+		}
+
+		return $hidden;
 	}
 
 	/**
