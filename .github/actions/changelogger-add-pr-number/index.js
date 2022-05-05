@@ -26,8 +26,6 @@ const prNumberRegEx = new RegExp(
 // Create a pull request link.
 const prLink = `[#${ prNumber }](https://github.com/${ repository }/pull/${ prNumber })`;
 
-let hasChanges = false;
-
 /**
  * Test Changelog entry for PR number and append a PR number if it's not already present.
  *
@@ -74,13 +72,14 @@ const readFiles = async ( paths ) => {
 	}
 };
 
+if ( changelogFilePaths.length === 0 ) {
+	console.log( 'No changelog files found.' );
+	process.exit( 0 );
+}
+
 readFiles( changelogFilePaths )
 	.then( () => {
 		console.log( 'All changelog entries successfully checked.' );
-		if ( ! hasChanges ) {
-			process.env.OUTPUT_PAUL = 'sealock';
-			process.env.INPUT_PAUL = 'dan';
-		}
 		process.exit( 0 );
 	} )
 	.catch( ( err ) => {
