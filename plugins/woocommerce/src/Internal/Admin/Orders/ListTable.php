@@ -317,14 +317,14 @@ class ListTable extends WP_List_Table {
 	 */
 	public function get_columns() {
 		return array(
-			'cb'      => '<input type="checkbox" />',
-			'order'   => esc_html__( 'Order', 'woocommerce' ),
-			'date'    => esc_html__( 'Date', 'woocommerce' ),
-			'status'  => esc_html__( 'Status', 'woocommerce' ),
-			'billing' => esc_html__( 'Billing', 'woocommerce' ),
-			'ship_to' => esc_html__( 'Ship to', 'woocommerce' ),
-			'total'   => esc_html__( 'Total', 'woocommerce' ),
-			'actions' => esc_html__( 'Actions', 'woocommerce' ),
+			'cb'           => '<input type="checkbox" />',
+			'order_number' => esc_html__( 'Order', 'woocommerce' ),
+			'date'         => esc_html__( 'Date', 'woocommerce' ),
+			'status'       => esc_html__( 'Status', 'woocommerce' ),
+			'billing'      => esc_html__( 'Billing', 'woocommerce' ),
+			'ship_to'      => esc_html__( 'Ship to', 'woocommerce' ),
+			'total'        => esc_html__( 'Total', 'woocommerce' ),
+			'actions'      => esc_html__( 'Actions', 'woocommerce' ),
 		);
 	}
 
@@ -346,7 +346,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function column_order( WC_Order $order ): void {
+	public function column_order_number( WC_Order $order ): void {
 		$buyer = '';
 
 		if ( $order->get_billing_first_name() || $order->get_billing_last_name() ) {

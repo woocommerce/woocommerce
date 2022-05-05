@@ -183,7 +183,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render column: order_number.
 	 */
 	protected function render_order_number_column() {
-		$this->orders_list_table->column_order( $this->object );
+		$this->orders_list_table->column_order_number( $this->object );
 	}
 
 	/**
