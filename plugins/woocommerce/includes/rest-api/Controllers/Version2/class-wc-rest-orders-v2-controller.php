@@ -468,6 +468,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'coupon_lines',
 			'refunds',
 			'payment_url',
+			'is_editable',
+			'needs_payment',
+			'needs_processing',
 		);
 
 		$data = array_intersect_key( $data, array_flip( $allowed_fields ) );
