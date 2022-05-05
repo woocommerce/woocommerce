@@ -15857,47 +15857,6 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /@wordpress/eslint-plugin/7.3.0_eslint@8.2.0+typescript@4.2.4:
-=======
-  /@wordpress/eslint-plugin/7.3.0_eslint@6.8.0+typescript@3.9.7:
->>>>>>> 3555635657 (Standardize lint e2e packages)
-    resolution: {integrity: sha512-7wIFzzc14E1XuuT9haBuhoA9FRUGWlbD4Oek+XkiZlzNVqZI3slgbtIFJ6/Mfij1V18rv6Ns9a1cPJLtCU8JHQ==}
-    peerDependencies:
-      eslint: ^6 || ^7
-    dependencies:
-      '@wordpress/prettier-config': 0.4.0
-<<<<<<< HEAD
-      babel-eslint: 10.1.0_eslint@8.2.0
-      cosmiconfig: 7.0.1
-      eslint: 8.2.0
-      eslint-config-prettier: 6.15.0_eslint@8.2.0
-      eslint-plugin-jest: 23.20.0_eslint@8.2.0+typescript@4.2.4
-      eslint-plugin-jsdoc: 30.7.13_eslint@8.2.0
-      eslint-plugin-jsx-a11y: 6.5.1_eslint@8.2.0
-      eslint-plugin-prettier: 3.4.1_1786dfa66f4aafe2692523a4f07ad974
-      eslint-plugin-react: 7.29.4_eslint@8.2.0
-      eslint-plugin-react-hooks: 4.3.0_eslint@8.2.0
-=======
-      babel-eslint: 10.1.0_eslint@6.8.0
-      cosmiconfig: 7.0.1
-      eslint: 6.8.0
-      eslint-config-prettier: 6.15.0_eslint@6.8.0
-      eslint-plugin-jest: 23.20.0_eslint@6.8.0+typescript@3.9.7
-      eslint-plugin-jsdoc: 30.7.13_eslint@6.8.0
-      eslint-plugin-jsx-a11y: 6.5.1_eslint@6.8.0
-      eslint-plugin-prettier: 3.4.1_a3d1a124e53dbc217d8b5198036499fa
-      eslint-plugin-react: 7.27.0_eslint@6.8.0
-      eslint-plugin-react-hooks: 4.3.0_eslint@6.8.0
->>>>>>> 3555635657 (Standardize lint e2e packages)
-      globals: 12.4.0
-      prettier: /wp-prettier/2.0.5
-      requireindex: 1.2.0
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-    dev: true
-
   /@wordpress/eslint-plugin/7.4.0_eslint@7.32.0+typescript@4.6.2:
     resolution: {integrity: sha512-HJpDYz2drtC9rY8MiYtYJ3cimioEIweGyb3P2DQTjUZ3sC4AGg+97PhXLHUdKfsFQ31JRxyLS9kKuGdDVBwWww==}
     engines: {node: '>=10', npm: '>=6.9'}
@@ -21848,27 +21807,6 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /eslint-plugin-jsdoc/30.7.13_eslint@8.2.0:
-    resolution: {integrity: sha512-YM4WIsmurrp0rHX6XiXQppqKB8Ne5ATiZLJe2+/fkp9l9ExXFr43BbAbjZaVrpCT+tuPYOZ8k1MICARHnURUNQ==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0
-    dependencies:
-      comment-parser: 0.7.6
-      debug: 4.3.4
-      eslint: 8.2.0
-      jsdoctypeparser: 9.0.0
-      lodash: 4.17.21
-      regextras: 0.7.1
-      semver: 7.3.5
-      spdx-expression-parse: 3.0.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-=======
->>>>>>> 3555635657 (Standardize lint e2e packages)
   /eslint-plugin-jsdoc/37.9.7:
     resolution: {integrity: sha512-8alON8yYcStY94o0HycU2zkLKQdcS+qhhOUNQpfONHHwvI99afbmfpYuPqf6PbLz5pLZldG3Te5I0RbAiTN42g==}
     engines: {node: ^12 || ^14 || ^16 || ^17}
@@ -22123,22 +22061,8 @@ packages:
     dependencies:
       eslint: 8.12.0
 
-<<<<<<< HEAD
-  /eslint-plugin-react-hooks/4.3.0_eslint@8.2.0:
-    resolution: {integrity: sha512-XslZy0LnMn+84NEG9jSGR6eGqaZB3133L8xewQo3fQagbQuGt7a63gf+P1NGKZavEYEC3UXaWEAA/AqDkuN6xA==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
-    dependencies:
-      eslint: 8.2.0
-    dev: true
-
   /eslint-plugin-react/7.29.4:
     resolution: {integrity: sha512-CVCXajliVh509PcZYRFyu/BoUEz452+jtQJq2b3Bae4v3xBUWPLCmtmBM+ZinG4MzwmxJgJ2M5rMqhqLVn7MtQ==}
-=======
-  /eslint-plugin-react/7.27.0_eslint@6.8.0:
-    resolution: {integrity: sha512-0Ut+CkzpppgFtoIhdzi2LpdpxxBvgFf99eFqWxJnUrO7mMe0eOiNpou6rvNYeVVV6lWZvTah0BFne7k5xHjARg==}
->>>>>>> 3555635657 (Standardize lint e2e packages)
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
@@ -22146,35 +22070,20 @@ packages:
       array-includes: 3.1.4
       array.prototype.flatmap: 1.2.5
       doctrine: 2.1.0
-<<<<<<< HEAD
       estraverse: 5.3.0
       jsx-ast-utils: 3.2.1
       minimatch: 3.1.2
-=======
-      eslint: 6.8.0
-      estraverse: 5.3.0
-      jsx-ast-utils: 3.2.1
-      minimatch: 3.0.4
->>>>>>> 3555635657 (Standardize lint e2e packages)
       object.entries: 1.1.5
       object.fromentries: 2.0.5
       object.hasown: 1.1.0
       object.values: 1.1.5
-<<<<<<< HEAD
       prop-types: 15.8.1
-=======
-      prop-types: 15.7.2
->>>>>>> 3555635657 (Standardize lint e2e packages)
       resolve: 2.0.0-next.3
       semver: 6.3.0
       string.prototype.matchall: 4.0.6
     dev: true
 
-<<<<<<< HEAD
   /eslint-plugin-react/7.29.4_eslint@7.32.0:
-=======
-  /eslint-plugin-react/7.29.4:
->>>>>>> 3555635657 (Standardize lint e2e packages)
     resolution: {integrity: sha512-CVCXajliVh509PcZYRFyu/BoUEz452+jtQJq2b3Bae4v3xBUWPLCmtmBM+ZinG4MzwmxJgJ2M5rMqhqLVn7MtQ==}
     engines: {node: '>=4'}
     peerDependencies:
@@ -22241,29 +22150,6 @@ packages:
       resolve: 2.0.0-next.3
       semver: 6.3.0
       string.prototype.matchall: 4.0.6
-
-  /eslint-plugin-react/7.29.4_eslint@8.2.0:
-    resolution: {integrity: sha512-CVCXajliVh509PcZYRFyu/BoUEz452+jtQJq2b3Bae4v3xBUWPLCmtmBM+ZinG4MzwmxJgJ2M5rMqhqLVn7MtQ==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
-    dependencies:
-      array-includes: 3.1.4
-      array.prototype.flatmap: 1.2.5
-      doctrine: 2.1.0
-      eslint: 8.2.0
-      estraverse: 5.3.0
-      jsx-ast-utils: 3.2.1
-      minimatch: 3.1.2
-      object.entries: 1.1.5
-      object.fromentries: 2.0.5
-      object.hasown: 1.1.0
-      object.values: 1.1.5
-      prop-types: 15.8.1
-      resolve: 2.0.0-next.3
-      semver: 6.3.0
-      string.prototype.matchall: 4.0.6
-    dev: true
 
   /eslint-plugin-testing-library/5.1.0_eslint@8.12.0+typescript@4.6.2:
     resolution: {integrity: sha512-YSNzasJUbyhOTe14ZPygeOBvcPvcaNkwHwrj4vdf+uirr2D32JTDaKi6CP5Os2aWtOcvt4uBSPXp9h5xGoqvWQ==}
@@ -37247,7 +37133,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - acorn
     dev: true
