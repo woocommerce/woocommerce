@@ -104,8 +104,7 @@ class WcPaySubscriptionsPage {
 		}
 
 		// Ineligible if store has not had any sales in the last 30 days.
-		$store_recent_sales_count = $this->get_store_recent_sales_count();
-		if ( $store_recent_sales_count < 1 ) {
+		if ( ! $this->get_store_recent_sales_eligibility() ) {
 			return false;
 		}
 
@@ -113,18 +112,22 @@ class WcPaySubscriptionsPage {
 	}
 
 	/**
-	 * Returns the number of store recent sales as per the experiment eligibility criteria.
+	 * Returns true if the store has an order completed within the last 30 days.
+	 *
+	 * @return bool
 	 */
-	private function get_store_recent_sales_count() {
-		// Get orders that were paid in the last 30 days.
+	private function get_store_recent_sales_eligibility() {
+		// Get a single order that was marked as completed within the last 30 days.
 		$orders = wc_get_orders(
 			array(
 				'date_paid' => '>' . strtotime( '-30 days' ),
 				'status'    => array( 'wc-completed' ),
+				'limit'     => 1,
+				'return'    => 'ids',
 			)
 		);
 
-		return count( $orders );
+		return count( $orders ) >= 1;
 	}
 
 	/**
