@@ -1873,7 +1873,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						),
 					),
 				),
-				'payment_url' => array(
+				'payment_url'          => array(
 					'description' => __( 'Order payment URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -1884,6 +1884,24 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'edit' ),
+				),
+				'is_editable'          => array(
+					'description' => __( 'Whether an order can be edited.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'needs_payment'        => array(
+					'description' => __( 'Whether an order needs payment, based on status and order total.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'needs_processing'     => array(
+					'description' => __( 'Whether an order needs processing before it can be completed.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 			),
 		);
