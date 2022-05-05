@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { findSidebarPanelToggleButtonWithTitle } from '@wordpress/e2e-test-utils';
+import {
+	findSidebarPanelToggleButtonWithTitle,
+	ensureSidebarOpened,
+} from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { visitBlockPage } from './visit-block-page';
-import { ensureSidebarOpened } from './ensure-sidebar-opened';
 
 const blockPagePermalinks = {};
 
