@@ -14,7 +14,7 @@
         ],
         "html": false,
         "color": {
-            "background": false,
+            "background": true,
             "text": true,
             "__experimentalDuotone": ".wc-block-featured-category__background-image"
         },
