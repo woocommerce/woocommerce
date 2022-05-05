@@ -213,7 +213,7 @@ const FeaturedProduct = ( {
 					} }
 				/>
 				<ToolbarGroup>
-					{ ! isEditingImage && (
+					{ backgroundImageSrc && ! isEditingImage && (
 						<ToolbarButton
 							onClick={ () => setIsEditingImage( true ) }
 							icon={ crop }
