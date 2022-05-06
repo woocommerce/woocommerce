@@ -110,7 +110,7 @@
 	justify-content: space-between;
 
 	&.woocommerce-task-list__setup_experiment_2 {
-		margin-bottom: 16px;
+		margin-bottom: $gap;
 	}
 
 	ul li.complete .woocommerce-task-list__item-title {
