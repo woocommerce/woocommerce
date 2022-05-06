@@ -73,7 +73,7 @@ class ListTable extends WP_List_Table {
 	 */
 	public function display() {
 		$title   = esc_html__( 'Orders', 'woocommerce' );
-		$add_new = esc_html__( 'Add New', 'woocommerce' );
+		$add_new = esc_html__( 'Add Order', 'woocommerce' );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo "
@@ -83,15 +83,46 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>
 		";
 
-		$this->views();
+		if ( $this->has_items() ) {
+			$this->views();
 
-		echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
-		$this->print_hidden_form_fields();
-		$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
+			echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
+			$this->print_hidden_form_fields();
+			$this->search_box( esc_html__( 'Search orders', 'woocommerce' ), 'orders-search-input' );
 
-		parent::display();
+			parent::display();
+			echo '</form> </div>';
+		} else {
+			$this->render_blank_state();
+		}
+	}
 
-		echo '</form> </div>';
+	/**
+	 * Renders advice in the event that no orders exist yet.
+	 *
+	 * @return void
+	 */
+	public function render_blank_state(): void {
+		?>
+			<div class="woocommerce-BlankState">
+
+				<h2 class="woocommerce-BlankState-message">
+					<?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?>
+				</h2>
+
+				<div class="woocommerce-BlankState-buttons">
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+				</div>
+
+			<?php
+			/**
+			 * Renders after the 'blank state' message for the order list table has rendered.
+			 */
+			do_action( 'wc_marketplace_suggestions_orders_empty_state' );
+			?>
+
+			</div>
+		<?php
 	}
 
 	/**

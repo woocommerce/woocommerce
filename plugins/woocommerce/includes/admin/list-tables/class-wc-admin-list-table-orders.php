@@ -57,17 +57,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * Render blank state.
 	 */
 	protected function render_blank_state() {
-		echo '<div class="woocommerce-BlankState">';
-
-		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'When you receive a new order, it will appear here.', 'woocommerce' ) . '</h2>';
-
-		echo '<div class="woocommerce-BlankState-buttons">';
-		echo '<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about orders', 'woocommerce' ) . '</a>';
-		echo '</div>';
-
-		do_action( 'wc_marketplace_suggestions_orders_empty_state' );
-
-		echo '</div>';
+		$this->orders_list_table->render_blank_state();
 	}
 
 	/**
