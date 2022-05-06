@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\Helpers;
 
-require_once 'ValidateSchema.php';
+require_once __DIR__ . '/ValidateSchema.php';
 
 /**
  * Test Validate schema.
