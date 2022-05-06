@@ -1,5 +1,5 @@
-export const base_url = __ENV.URL || 'http://localhost:8084';
-export const base_host = __ENV.HOST || 'localhost:8084';
+export const base_url = __ENV.URL || 'http://localhost:8086';
+export const base_host = __ENV.HOST || 'localhost:8086';
 
 export const admin_username = __ENV.A_USER || 'admin';
 export const admin_password = __ENV.A_PW || 'password';

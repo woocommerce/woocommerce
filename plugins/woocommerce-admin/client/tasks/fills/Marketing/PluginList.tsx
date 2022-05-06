@@ -12,7 +12,7 @@ import './PluginList.scss';
 export type PluginListProps = {
 	currentPlugin?: string | null;
 	key?: string;
-	installAndActivate: ( slug: string ) => void;
+	installAndActivate?: ( slug: string ) => void;
 	plugins?: PluginProps[];
 	title?: string;
 };

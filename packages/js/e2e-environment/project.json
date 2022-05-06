@@ -34,12 +34,6 @@
 				"script": "compile"
 			}
 		},
-		"prepare": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "prepare"
-			}
-		},
 		"docker-up": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {

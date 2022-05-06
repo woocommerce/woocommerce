@@ -88,6 +88,8 @@ The jest test sequencer uses the following test variables:
 
 If you need to modify the port for your local test environment (eg. port is already in use), edit `tests/e2e/config/default.json`. Only edit this file while your test container is `down`.
 
+This is also what you'll need to edit if you want to run tests against an external (or non-Docker) environment.  There are a few additional steps you'll have to take to ensure your environment is ready for testing. Complete [instructions are available here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/e2e-environment/external.md).
+
 ### Jest test sequencer
 
 [Jest](https://jestjs.io/) is being used to run e2e tests. Jest sequencer introduces tools that can be used to specify the order in which the tests are being run. In our case, they are being run in alphabetical order of the directories where tests are located. This way, tests in the directory `activate-and-setup` will run first. By default, jest runs tests ordered by the time it takes to run the test (the test that takes longer to run will be run first, the test that takes less time to run will run last).
@@ -193,7 +195,7 @@ Sometimes tests may fail for different reasons such as network issues, or lost c
 
 ```
 cd plugins/woocommerce
-E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
+E2E_RETRY_TIMES=2 pnpm exec wc-e2e test:e2e
 ```
 
 ### How to run tests in debug mode
@@ -212,7 +214,7 @@ To run an individual test, use the direct path to the spec. For example:
 
 ```bash
 cd plugins/woocommerce
-pnpx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
+pnpm exec wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
 ``` 
 
 ### How to skip tests

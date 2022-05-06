@@ -34,7 +34,7 @@ const uuid = require( 'uuid' );
 /**
  * Verify and publish
  *
- * @param noticeText The text that appears in the notice after publishing.
+ * @param  noticeText The text that appears in the notice after publishing.
  */
 const verifyAndPublish = async ( noticeText ) => {
 	// Wait for auto save
@@ -53,7 +53,7 @@ const verifyAndPublish = async ( noticeText ) => {
 /**
  * Wait for primary button to be enabled and click.
  *
- * @param waitForNetworkIdle - Wait for network idle after click
+ * @param  waitForNetworkIdle - Wait for network idle after click
  * @return {Promise<void>}
  */
 const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
@@ -231,8 +231,8 @@ const completeOnboardingWizard = async () => {
 /**
  * Create simple product.
  *
- * @param {string} productTitle Defaults to Simple Product. Customizable title.
- * @param {string} productPrice Defaults to $9.99. Customizable pricing.
+ * @param {string} productTitle    Defaults to Simple Product. Customizable title.
+ * @param {string} productPrice    Defaults to $9.99. Customizable pricing.
  * @param {Object} additionalProps Defaults to nothing. Additional product properties.
  */
 const createSimpleProduct = async (
@@ -252,9 +252,9 @@ const createSimpleProduct = async (
 /**
  * Create simple product with categories
  *
- * @param productName Product's name which can be changed when writing a test
- * @param productPrice Product's price which can be changed when writing a test
- * @param categoryName Product's category which can be changed when writing a test
+ * @param  productName  Product's name which can be changed when writing a test
+ * @param  productPrice Product's price which can be changed when writing a test
+ * @param  categoryName Product's category which can be changed when writing a test
  */
 const createSimpleProductWithCategory = async (
 	productName,
@@ -281,10 +281,10 @@ const createSimpleProductWithCategory = async (
 /**
  * Create simple downloadable product
  *
- * @param name Product's name. Defaults to 'Simple Product' (see createSimpleProduct definition).
- * @param downloadLimit Product's download limit. Defaults to '-1' (unlimited).
- * @param downloadName Product's download name. Defaults to 'Single'.
- * @param price Product's price. Defaults to '$9.99' (see createSimpleProduct definition).
+ * @param  name          Product's name. Defaults to 'Simple Product' (see createSimpleProduct definition).
+ * @param  downloadLimit Product's download limit. Defaults to '-1' (unlimited).
+ * @param  downloadName  Product's download name. Defaults to 'Single'.
+ * @param  price         Product's price. Defaults to '$9.99' (see createSimpleProduct definition).
  */
 const createSimpleDownloadableProduct = async (
 	name,
@@ -312,7 +312,7 @@ const createSimpleDownloadableProduct = async (
  * Create variable product.
  * Also, create variations for all attributes.
  *
- * @param varProduct Defaults to the variable product object in `default.json`
+ * @param  varProduct Defaults to the variable product object in `default.json`
  * @return the ID of the created variable product
  */
 const createVariableProduct = async ( varProduct = defaultVariableProduct ) => {
@@ -383,7 +383,7 @@ const createVariableProduct = async ( varProduct = defaultVariableProduct ) => {
 /**
  * Create grouped product.
  *
- * @param groupedProduct Defaults to the grouped product object in `default.json`
+ * @param  groupedProduct Defaults to the grouped product object in `default.json`
  * @return ID of the grouped product
  */
 const createGroupedProduct = async (
@@ -446,7 +446,7 @@ const createOrder = async ( orderOptions = {} ) => {
 /**
  * Create a basic order with the provided order status.
  *
- * @param orderStatus Status of the new order. Defaults to `Pending payment`.
+ * @param  orderStatus Status of the new order. Defaults to `Pending payment`.
  */
 const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	// Go to 'Add new order' page
@@ -481,7 +481,7 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
  * Creates a batch of orders from the given `statuses`
  * using the "Batch Create Order" API.
  *
- * @param statuses Array of order statuses
+ * @param  statuses Array of order statuses
  */
 const batchCreateOrders = async ( statuses ) => {
 	const defaultOrder = config.get( 'orders.basicPaidOrder' );
@@ -505,8 +505,8 @@ const batchCreateOrders = async ( statuses ) => {
 /**
  * Adds a product to an order in the merchant.
  *
- * @param orderId ID of the order to add the product to.
- * @param productName Name of the product being added to the order.
+ * @param  orderId     ID of the order to add the product to.
+ * @param  productName Name of the product being added to the order.
  */
 const addProductToOrder = async ( orderId, productName ) => {
 	await merchant.goToOrder( orderId );
@@ -539,8 +539,8 @@ const addProductToOrder = async ( orderId, productName ) => {
 /**
  * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
  *
- * @param couponAmount Amount to be applied. Defaults to 5.
- * @param discountType Type of a coupon. Defaults to Fixed cart discount.
+ * @param  couponAmount Amount to be applied. Defaults to 5.
+ * @param  discountType Type of a coupon. Defaults to Fixed cart discount.
  */
 const createCoupon = async (
 	couponAmount = '5',
@@ -576,10 +576,10 @@ const createCoupon = async (
 /**
  * Adds a shipping zone along with a shipping method.
  *
- * @param zoneName Shipping zone name.
- * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
- * @param zipCode Shipping zone zip code. Defaults to empty one space.
- * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
+ * @param  zoneName     Shipping zone name.
+ * @param  zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param  zipCode      Shipping zone zip code. Defaults to empty one space.
+ * @param  zoneMethod   Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
 const addShippingZoneAndMethod = async (
 	zoneName,
@@ -626,8 +626,8 @@ const addShippingZoneAndMethod = async (
 /**
  * Click the Update button on the order details page.
  *
- * @param noticeText The text that appears in the notice after updating the order.
- * @param waitForSave Optionally wait for auto save.
+ * @param  noticeText  The text that appears in the notice after updating the order.
+ * @param  waitForSave Optionally wait for auto save.
  */
 const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
 	if ( waitForSave ) {

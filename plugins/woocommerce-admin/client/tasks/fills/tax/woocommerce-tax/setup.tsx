@@ -44,7 +44,9 @@ export const Setup: React.FC< SetupProps > = ( {
 	onAutomate,
 	onManual,
 } ) => {
-	const [ pluginsToActivate, setPluginsToActivate ] = useState( [] );
+	const [ pluginsToActivate, setPluginsToActivate ] = useState< string[] >(
+		[]
+	);
 	const { activePlugins, isResolving } = useSelect( ( select ) => {
 		const { getSettings } = select(
 			SETTINGS_STORE_NAME

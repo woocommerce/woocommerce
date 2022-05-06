@@ -1,4 +1,4 @@
-export default () => (
+export const Visa = () => (
 	/* eslint-disable */
 	<svg
 		width="51"
