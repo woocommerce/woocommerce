@@ -39,6 +39,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",

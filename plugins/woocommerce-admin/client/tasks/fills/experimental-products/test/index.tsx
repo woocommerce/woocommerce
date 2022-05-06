@@ -20,6 +20,13 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
 } ) );
 
+global.fetch = jest.fn().mockImplementation( () =>
+	Promise.resolve( {
+		json: () => Promise.resolve( {} ),
+		status: 200,
+	} )
+);
+
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -74,5 +81,28 @@ describe( 'Products', () => {
 		);
 
 		expect( queryByText( 'View less product types' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should send a request to load sample products when the link is clicked', async () => {
+		const fetchMock = jest.spyOn( global, 'fetch' );
+		const { queryByText, getByRole } = render( <Products /> );
+
+		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
+
+		userEvent.click(
+			getByRole( 'link', { name: 'Load Sample Products' } )
+		);
+
+		await waitFor( () =>
+			expect( fetchMock ).toHaveBeenCalledWith(
+				'/wc-admin/onboarding/tasks/import_sample_products?_locale=user',
+				{
+					body: undefined,
+					credentials: 'include',
+					headers: { Accept: 'application/json, */*;q=0.1' },
+					method: 'POST',
+				}
+			)
+		);
 	} );
 } );

@@ -9,7 +9,9 @@
 		"test:api": "jest --group=api",
 		"test:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
-		"report": "allure generate --clean && allure serve"
+		"report": "allure generate --clean && allure serve",
+		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
+		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
 	},
 	"repository": {
 		"type": "git",
@@ -28,6 +30,10 @@
 		"jest-runner-groups": "^2.1.0",
 		"postman-collection": "^4.1.0",
 		"supertest": "^6.1.4"
+	},
+	"devDependencies": {
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.12.0"
 	},
 	"publishConfig": {
 		"access": "public"

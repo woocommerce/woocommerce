@@ -37,7 +37,8 @@
 	},
 	"scripts": {
 		"lint": "eslint ./rules ./configs",
-		"lint:fix": "eslint ./rules ./configs --fix"
+		"lint:fix": "eslint ./rules ./configs --fix",
+		"postinstall": "composer install"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",

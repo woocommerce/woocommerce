@@ -7,7 +7,7 @@ const errorResponse = {
 	code: '',
 	message: '',
 	data: {
-	  status: 400
+		status: 400,
 	},
 };
 
