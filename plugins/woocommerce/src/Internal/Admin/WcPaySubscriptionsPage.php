@@ -82,6 +82,7 @@ class WcPaySubscriptionsPage {
 		$plugin_ineligible_list = array(
 			'woocommerce-payments',
 			'woocommerce-subscriptions',
+			'subscriptio',
 			'subscriptions-for-woocommerce',
 			'subscriptions-for-woocommerce-pro',
 			'sumosubscriptions',
