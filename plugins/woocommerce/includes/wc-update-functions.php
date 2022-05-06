@@ -2358,9 +2358,9 @@ function wc_update_630_create_product_attributes_lookup_table() {
 
 	/**
 	 * If the table exists and contains data, it was manually created by user before the migration ran.
-	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed.
+	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed (unless one is in progress already).
 	 */
-	if ( ! $data_store->check_lookup_table_exists() || ! $data_store->lookup_table_has_data() ) {
+	if ( ! $data_store->check_lookup_table_exists() || ( ! $data_store->lookup_table_has_data() && ! $data_store->regeneration_is_in_progress() ) ) {
 		$data_regenerator->initiate_regeneration();
 	}
 
