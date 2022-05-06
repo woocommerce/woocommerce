@@ -33,7 +33,9 @@ const EmptyMiniCartContentsBlock = ( {
 
 	return (
 		<div tabIndex={ -1 } ref={ elementRef } className={ className }>
-			{ children }
+			<div className="wc-block-mini-cart__empty-cart-wrapper">
+				{ children }
+			</div>
 		</div>
 	);
 };
