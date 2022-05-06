@@ -1,13 +1,13 @@
 {
-  "require-dev": {
-    "woocommerce/woocommerce-sniffs": "^0.1.3"
-  },
-  "config": {
-    "platform": {
-      "php": "7.0"
-    },
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    }
-  }
+	"require-dev": {
+		"woocommerce/woocommerce-sniffs": "^0.1.3"
+	},
+	"config": {
+		"platform": {
+			"php": "7.0"
+		},
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
 }
