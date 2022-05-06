@@ -10,30 +10,41 @@ jobs:
         name: Daily smoke test on release.
         runs-on: ubuntu-20.04
         steps:
-            - name: Create dirs.
-              run: |
-                  mkdir -p code/woocommerce
-                  mkdir -p package/woocommerce
-                  mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
-
             - name: Checkout code.
               uses: actions/checkout@v3
               with:
-                  path: package/woocommerce
                   ref: trunk
 
-            - name: Install prerequisites.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
-                  pnpm nx composer-install-no-dev woocommerce
-                  pnpm nx build-assets woocommerce
-                  pnpm install jest
+            - name: Cache modules
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  plugins/woocommerce/packages
+                  plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
+            - name: Run build
+              run: pnpm nx build woocommerce
 
             - name: Run smoke test.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               env:
                   SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
                   SMOKE_TEST_ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -52,6 +63,7 @@ jobs:
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
               run: |
+                  pnpm exec wc-e2e docker:up
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
                   pnpm exec wc-e2e test:e2e
                   pnpm exec wc-api-tests test api
@@ -66,8 +78,7 @@ jobs:
               run: |
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
-                  mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
+                  mkdir -p tmp/woocommerce 
 
             - name: Checkout code.
               uses: actions/checkout@v3
@@ -85,11 +96,33 @@ jobs:
                       const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
 
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
+            - name: Cache modules
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  package/woocommerce/plugins/woocommerce/packages
+                  package/woocommerce/plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-smoke-test-release-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
+            - name: Run build
+              run: pnpm nx build woocommerce
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -142,10 +175,9 @@ jobs:
                   mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
 
             - name: Checkout code.
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: package/woocommerce
             - name: Fetch Asset ID
@@ -160,11 +192,33 @@ jobs:
                       const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
                       await script({github, context, core})
 
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
+            - name: Cache modules
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  package/woocommerce/plugins/woocommerce/packages
+                  package/woocommerce/plugins/woocommerce/**/vendor
+                key: ${{ runner.os }}-npm-composer-smoke-test-release-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
+            - name: Run build
+              run: pnpm nx build woocommerce
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
