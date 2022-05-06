@@ -7,7 +7,8 @@ import { __ } from '@wordpress/i18n';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { find } from 'lodash';
+import { getAdminLink } from '@woocommerce/settings';
+
 /**
  * Internal dependencies
  */
@@ -17,14 +18,26 @@ import { importTypes } from './importTypes';
 import './style.scss';
 import useProductTypeListItems from '../experimental-products/use-product-types-list-items';
 import { getProductTypes } from '../experimental-products/utils';
+import LoadSampleProductModal from '../components/load-sample-product-modal';
+import useLoadSampleProducts from '../components/use-load-sample-products';
 
 const Products = () => {
 	const [ showStacks, setStackVisibility ] = useState< boolean >( false );
+
+	const {
+		loadSampleProduct,
+		isLoadingSampleProducts,
+	} = useLoadSampleProducts( {
+		redirectUrlAfterSuccess: getAdminLink(
+			'edit.php?post_type=product&wc_onboarding_active_task=products'
+		),
+	} );
 	const StacksComponent = (
 		<Stacks
 			items={ useProductTypeListItems(
 				getProductTypes( [ 'subscription' ] )
 			) }
+			onClickLoadSampleProduct={ loadSampleProduct }
 		/>
 	);
 	return (
@@ -38,6 +51,7 @@ const Products = () => {
 				</Button>
 				{ showStacks && StacksComponent }
 			</div>
+			{ isLoadingSampleProducts && <LoadSampleProductModal /> }
 		</div>
 	);
 };
