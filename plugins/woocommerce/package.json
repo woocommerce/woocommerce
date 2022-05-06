@@ -15,7 +15,7 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
-		"build": "WC_ADMIN_PHASE=core pnpm run build:feature-config && pnpm nx build woocommerce-admin && pnpm nx build woocommerce-legacy-assets",
+		"build": "WC_ADMIN_PHASE=core pnpm run build:feature-config",
 		"build:feature-config": "php bin/generate-feature-config.php",
 		"build:zip": "./bin/build-zip.sh",
 		"lint": "pnpm lint:js && pnpm lint:php",
