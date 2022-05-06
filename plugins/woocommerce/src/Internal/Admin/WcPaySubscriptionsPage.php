@@ -84,6 +84,7 @@ class WcPaySubscriptionsPage {
 			'woocommerce-subscriptions',
 			'subscriptions-for-woocommerce',
 			'subscriptions-for-woocommerce-pro',
+			'sumosubscriptions',
 			'yith-woocommerce-subscription',
 		);
 		foreach ( $plugin_ineligible_list as $plugin_slug ) {
