@@ -46,7 +46,7 @@ registerBlockType( metadata, {
 	supports: {
 		...metadata.supports,
 		color: {
-			background: false,
+			background: true,
 			text: true,
 			...( isFeaturePluginBuild() && {
 				__experimentalDuotone:

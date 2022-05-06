@@ -12,7 +12,7 @@
         ],
         "html": false,
         "color": {
-            "background": false,
+            "background": true,
             "text": true,
             "__experimentalDuotone": ".wc-block-featured-product__background-image"
         },
