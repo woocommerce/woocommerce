@@ -1,9 +1,0 @@
-{
-	"name": "woocommerce/e2e-utiles",
-	"description": "WooCommerce end to end testing utilities",
-	"type": "library",
-	"license": "GPL-3.0-or-later",
-	"minimum-stability": "dev",
-	"require-dev": {},
-	"extra": {}
-}
