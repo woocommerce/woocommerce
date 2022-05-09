@@ -120,6 +120,16 @@ class WcPaySubscriptionsPage {
 	 * @return bool
 	 */
 	private function get_store_recent_sales_eligibility() {
+		$transient_key = 'woocommerce-wcpay-subscriptions_recent_sales_eligibility';
+
+		// Load from cache.
+		$is_eligible = get_transient( $transient_key );
+
+		// Valid cache found.
+		if ( false !== $is_eligible ) {
+			return $is_eligible;
+		}
+
 		// Get a single order that was marked as completed within the last 30 days.
 		$orders = wc_get_orders(
 			array(
@@ -129,7 +139,10 @@ class WcPaySubscriptionsPage {
 			)
 		);
 
-		return count( $orders ) >= 1;
+		$is_eligible = count( $orders ) >= 1;
+		set_transient( $transient_key, $is_eligible, DAY_IN_SECONDS );
+
+		return $is_eligible;
 	}
 
 	/**
