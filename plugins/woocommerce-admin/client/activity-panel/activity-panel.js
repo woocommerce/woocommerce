@@ -246,7 +246,10 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				if ( currentLocation !== homescreenLocation ) {
 					// Ensure that if the user is trying to get to the task list they can see it even if
 					// it was dismissed.
-					if ( setupTaskListHidden === 'no' ) {
+					if (
+						setupTaskListHidden === 'no' ||
+						setupTaskListHidden === false
+					) {
 						redirectToHomeScreen();
 					} else {
 						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
