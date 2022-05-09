@@ -25,7 +25,7 @@ class DataSynchronizer {
 	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
-	private const ORDERS_SYNC_BATCH_SIZE      = 50;
+	private const ORDERS_SYNC_BATCH_SIZE      = 250;
 	private const SECONDS_BETWEEN_BATCH_SYNCS = 5;
 
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
