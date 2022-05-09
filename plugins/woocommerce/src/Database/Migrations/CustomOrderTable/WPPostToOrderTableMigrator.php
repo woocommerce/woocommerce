@@ -43,7 +43,7 @@ class WPPostToOrderTableMigrator extends MetaToCustomTableMigrator {
 			),
 			'destination' => array(
 				'table_name'        => $this->table_names['orders'],
-				'source_rel_column' => 'post_id',
+				'source_rel_column' => 'id',
 				'primary_key'       => 'id',
 				'primary_key_type'  => 'int',
 			),
@@ -59,7 +59,7 @@ class WPPostToOrderTableMigrator extends MetaToCustomTableMigrator {
 		return array(
 			'ID'                => array(
 				'type'        => 'int',
-				'destination' => 'post_id',
+				'destination' => 'id',
 			),
 			'post_status'       => array(
 				'type'        => 'string',

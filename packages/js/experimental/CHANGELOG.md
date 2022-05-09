@@ -1,7 +1,10 @@
 # Unreleased
 
+-   Update TaskItem props type definition.
+-   Fix setup task list style conflict #32704
 -   Update dependency `@wordpress/icons` to ^8.1.0
 -   Added Typescript type declarations. #32615
+
 # 3.0.1
 
 -   Update all js packages with minor/patch version changes. #8392
@@ -14,6 +17,7 @@
 -   Drop support for IE11. #8305
 
 # 2.2.0
+
 -   Make the Inbox note title clickable. #7975
 -   Fix incorrectly displayed note created date. #8179
 -   Fix inbox note css #7983

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -11,12 +11,13 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { getCountryCode } from '~/dashboard/utils';
-import { hasCompleteAddress, SettingsSelector, TaxChildProps } from '../utils';
+import { hasCompleteAddress, SettingsSelector } from '../utils';
 import { default as StoreLocationForm } from '~/tasks/fills/steps/location';
 
 export const StoreLocation: React.FC< {
 	nextStep: () => void;
 } > = ( { nextStep } ) => {
+	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateAndPersistSettingsForGroup } = useDispatch(
 		SETTINGS_STORE_NAME
 	);
@@ -46,7 +47,7 @@ export const StoreLocation: React.FC< {
 
 	return (
 		<StoreLocationForm
-			onComplete={ ( values ) => {
+			onComplete={ ( values: { [ key: string ]: string } ) => {
 				const country = getCountryCode( values.countryState );
 				recordEvent( 'tasklist_tax_set_location', {
 					country,
@@ -58,6 +59,8 @@ export const StoreLocation: React.FC< {
 			updateAndPersistSettingsForGroup={
 				updateAndPersistSettingsForGroup
 			}
+			createNotice={ createNotice }
+			isSettingsError={ false }
 		/>
 	);
 };

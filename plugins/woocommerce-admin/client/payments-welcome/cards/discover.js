@@ -1,4 +1,4 @@
-export default () => (
+export const Discover = () => (
 	/* eslint-disable */
 	<svg
 		width="52"

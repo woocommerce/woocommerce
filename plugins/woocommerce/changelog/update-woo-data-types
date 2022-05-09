@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix react admin ./client type errors after updating @woocommerce/data types

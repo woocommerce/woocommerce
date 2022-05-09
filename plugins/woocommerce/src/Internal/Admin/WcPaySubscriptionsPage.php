@@ -27,6 +27,13 @@ class WcPaySubscriptionsPage {
 	private $user_viewed_option = 'woocommerce-wcpay-subscriptions_page_viewed';
 
 	/**
+	 * The option key used to record when the user dismisses the WCPay Subscriptions page.
+	 *
+	 * @var string
+	 */
+	private $user_dismissed_option = 'woocommerce-wcpay-subscriptions_dismissed';
+
+	/**
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
@@ -43,6 +50,10 @@ class WcPaySubscriptionsPage {
 	 */
 	public function register_subscriptions_page() {
 		global $submenu;
+
+		if ( 'yes' === get_option( $this->user_dismissed_option, 'no' ) ) {
+			return;
+		}
 
 		if ( ! $this->is_store_experiment_eligible() ) {
 			return;
@@ -62,10 +73,13 @@ class WcPaySubscriptionsPage {
 			return;
 		}
 
-		// Add the "1" badge.
+		// translators: Admin menu item badge. It is used alongside the "Subscriptions" menu item to grab attention and let merchants know that this is a new offering.
+		$new_badge_text = __( 'new', 'woocommerce' );
+
+		// Add the "new" badge.
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 'wc-admin&path=/subscriptions' === $menu_item[2] ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$submenu['woocommerce'][ $key ][0] .= sprintf( ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">%s</span></span>', esc_html( $new_badge_text ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
 		}
@@ -159,12 +173,11 @@ class WcPaySubscriptionsPage {
 	}
 
 	/**
-	 * Enqueues an inline script on the WooCommerce → Subscriptions admin page.
+	 * Enqueues an inline script WooCommerce registered pages for use
+	 * on the WooCommerce → Subscriptions admin page.
 	 */
 	public function enqueue_scripts() {
-		$current_page = PageController::get_instance()->get_current_page();
-
-		if ( ! isset( $current_page['id'] ) || $current_page['id'] !== $this->page_id ) {
+		if ( ! PageController::get_instance()->is_registered_page() ) {
 			return;
 		}
 
@@ -184,6 +197,8 @@ class WcPaySubscriptionsPage {
 				),
 				admin_url( 'admin.php' )
 			),
+			'dismissOptionKey'          => $this->user_dismissed_option,
+			'noThanksUrl'               => wc_admin_url(),
 		);
 
 		wp_add_inline_script( WC_ADMIN_APP, 'window.wcWcpaySubscriptions = ' . wp_json_encode( $data ), 'before' );
