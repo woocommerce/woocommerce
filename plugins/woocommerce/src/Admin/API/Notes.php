@@ -267,12 +267,6 @@ class Notes extends \WC_REST_CRUD_Controller {
 			$args['orderby'] = 'date_created';
 		}
 
-		// Hide selected notes for users not in experiment.
-		$is_tasklist_experiment_assigned_treatment = $this->is_tasklist_experiment_assigned_treatment();
-		if ( false === $is_tasklist_experiment_assigned_treatment ) {
-			$args['excluded_name'] = array( 'wc-admin-complete-store-details', 'wc-admin-update-store-details' );
-		}
-
 		/**
 		 * Filter the query arguments for a request.
 		 *
