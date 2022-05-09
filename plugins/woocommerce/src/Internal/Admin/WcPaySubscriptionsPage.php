@@ -25,6 +25,13 @@ class WcPaySubscriptionsPage {
 	private $user_viewed_option = 'woocommerce-wcpay-subscriptions_page_viewed';
 
 	/**
+	 * The option key used to record when the user dismisses the WCPay Subscriptions page.
+	 *
+	 * @var string
+	 */
+	private $user_dismissed_option = 'woocommerce-wcpay-subscriptions_dismissed';
+
+	/**
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
@@ -41,6 +48,10 @@ class WcPaySubscriptionsPage {
 	 */
 	public function register_subscriptions_page() {
 		global $submenu;
+
+		if ( 'yes' === get_option( $this->user_dismissed_option, 'no' ) ) {
+			return;
+		}
 
 		// WC Payments must not be active.
 		if ( is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
@@ -113,6 +124,8 @@ class WcPaySubscriptionsPage {
 				),
 				admin_url( 'admin.php' )
 			),
+			'dismissOptionKey'          => $this->user_dismissed_option,
+			'noThanksUrl'               => wc_admin_url(),
 		);
 
 		wp_add_inline_script( WC_ADMIN_APP, 'window.wcWcpaySubscriptions = ' . wp_json_encode( $data ), 'before' );
