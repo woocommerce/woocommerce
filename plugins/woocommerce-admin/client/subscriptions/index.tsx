@@ -4,10 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Button, Card, CardBody, Notice } from '@wordpress/components';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -69,6 +68,7 @@ const ErrorNotice = () => {
 
 const NoThanksButton = () => {
 	const [ isNoThanksClicked, setIsNoThanksClicked ] = useState( false );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	return (
 		<Button
@@ -80,12 +80,8 @@ const NoThanksButton = () => {
 					'wccore_subscriptions_empty_state_no_thanks_click',
 					{}
 				);
-				apiFetch( {
-					path: 'wc-admin/options',
-					method: 'POST',
-					data: {
-						[ dismissOptionKey ]: 'yes',
-					},
+				updateOptions( {
+					[ dismissOptionKey ]: 'yes',
 				} ).then( () => {
 					window.location.href = noThanksUrl;
 				} );
