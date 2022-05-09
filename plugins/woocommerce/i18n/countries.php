@@ -3,7 +3,7 @@
  * Countries
  *
  * Returns an array of countries and codes.
- * Country codes and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/displaynames/country-names).
+ * Country codes and names should follow the Unicode CLDR recommendation (https://cldr.unicode.org/translation/displaynames/countryregion-territory-names).
  *
  * See https://github.com/unicode-org/cldr/blob/master/common/subdivisions/en.xml
  *
