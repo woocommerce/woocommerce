@@ -102,12 +102,11 @@ class WcPaySubscriptionsPage {
 	}
 
 	/**
-	 * Enqueues an inline script on the WooCommerce → Subscriptions admin page.
+	 * Enqueues an inline script WooCommerce registered pages for use
+	 * on the WooCommerce → Subscriptions admin page.
 	 */
 	public function enqueue_scripts() {
-		$current_page = PageController::get_instance()->get_current_page();
-
-		if ( ! isset( $current_page['id'] ) || $current_page['id'] !== $this->page_id ) {
+		if ( ! PageController::get_instance()->is_registered_page() ) {
 			return;
 		}
 
