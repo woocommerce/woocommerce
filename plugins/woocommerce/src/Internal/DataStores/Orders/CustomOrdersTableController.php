@@ -427,10 +427,14 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
+		// TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently disabled to ease testing).
+
+		/*
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
+		*/
 
 		return $value;
 	}
@@ -477,7 +481,7 @@ class CustomOrdersTableController {
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
 		// settings even without modifying them.
-		$this->data_synchronizer->maybe_start_synchronizing_pending_orders();
+		$this->data_synchronizer->maybe_start_synchronizing_pending_orders( true );
 	}
 
 	/**

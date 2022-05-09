@@ -274,13 +274,15 @@ WHERE
 	 * Start an orders synchronization process if all the following is true:
 	 *
 	 * 1. Data synchronization is enabled.
-	 * 2. Data synchronization isn't already in progress.
+	 * 2. Data synchronization isn't already in progress ($force can be used to bypass this).
 	 * 3. There's at least one out of sync order.
 	 *
 	 * This will set up the appropriate status information and schedule the first synchronization batch.
+	 *
+	 * @param bool $force If true, (re)start the sync process even if it's already in progress.
 	 */
-	public function maybe_start_synchronizing_pending_orders() {
-		if ( ! $this->data_sync_is_enabled() || $this->pending_data_sync_is_in_progress() ) {
+	public function maybe_start_synchronizing_pending_orders( bool $force = false ) {
+		if ( ! $this->data_sync_is_enabled() || ( $this->pending_data_sync_is_in_progress() && ! $force ) ) {
 			return;
 		}
 
@@ -347,8 +349,14 @@ WHERE
 	 * @return void
 	 */
 	private function sync_next_batch(): void {
-		// TODO: Provide a way to customize this.
-		$batch_size = self::ORDERS_SYNC_BATCH_SIZE;
+		/**
+		 * Filter to customize the count of orders that will be synchronized in each step of the custom orders table to/from posts table synchronization process.
+		 *
+		 * @since 6.6.0
+		 *
+		 * @param int Default value for the count.
+		 */
+		$batch_size = apply_filters( 'woocommerce_orders_cot_and_posts_sync_step_size', self::ORDERS_SYNC_BATCH_SIZE );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $batch_size );
