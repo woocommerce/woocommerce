@@ -127,7 +127,7 @@ class WcPaySubscriptionsPage {
 
 		// Valid cache found.
 		if ( false !== $is_eligible ) {
-			return $is_eligible;
+			return 'eligible' === $is_eligible;
 		}
 
 		// Get a single order that was marked as completed within the last 30 days.
@@ -139,10 +139,10 @@ class WcPaySubscriptionsPage {
 			)
 		);
 
-		$is_eligible = count( $orders ) >= 1;
+		$is_eligible = count( $orders ) >= 1 ? 'eligible' : 'not_eligible';
 		set_transient( $transient_key, $is_eligible, DAY_IN_SECONDS );
 
-		return $is_eligible;
+		return 'eligible' === $is_eligible;
 	}
 
 	/**
