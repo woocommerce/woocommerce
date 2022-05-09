@@ -124,7 +124,6 @@ class WcPaySubscriptionsPage {
 		$orders = wc_get_orders(
 			array(
 				'date_paid' => '>' . strtotime( '-30 days' ),
-				'status'    => array( 'wc-completed' ),
 				'limit'     => 1,
 				'return'    => 'ids',
 			)
