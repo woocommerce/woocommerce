@@ -155,6 +155,7 @@ class ListTable extends WP_List_Table {
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
 			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'all' ) ),
+			'type'     => 'shop_order',
 		);
 
 		$orders      = wc_get_orders( $args );
