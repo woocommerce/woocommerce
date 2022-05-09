@@ -209,8 +209,8 @@ const MainContent: React.FC< MainContentProps > = ( { setHasError } ) => {
 			</p>
 
 			<div className="wcpay-empty-subscriptions__button_container">
-				<NoThanksButton></NoThanksButton>
 				<GetStartedButton setHasError={ setHasError } />
+				<NoThanksButton />
 			</div>
 		</>
 	);
