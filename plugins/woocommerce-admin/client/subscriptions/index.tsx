@@ -145,7 +145,7 @@ const MainContent: React.FC< MainContentProps > = ( { setHasError } ) => {
 			</h2>
 			<p>
 				{ __(
-					'With WooCommerce Payments, you can sell subscriptions with no setup costs or monthly fees. Create subscription products, track recurring revenue, and manages subscriptions directly from your store’s dashboard.',
+					'With WooCommerce Payments, you can sell subscriptions with no setup costs or monthly fees. Create subscription products, track recurring revenue, and manage subscribers directly from your store’s dashboard.',
 					'woocommerce'
 				) }
 				<br />
