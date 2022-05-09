@@ -7,6 +7,7 @@ import { Button, Card, CardBody, Notice } from '@wordpress/components';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -24,6 +25,8 @@ declare global {
 		wcWcpaySubscriptions: {
 			newSubscriptionProductUrl: string;
 			onboardingUrl: string;
+			noThanksUrl: string;
+			dismissOptionKey: string;
 		};
 	}
 }
@@ -31,6 +34,8 @@ declare global {
 const {
 	newSubscriptionProductUrl,
 	onboardingUrl,
+	noThanksUrl,
+	dismissOptionKey,
 } = window.wcWcpaySubscriptions;
 
 type setHasErrorFunction = React.Dispatch< React.SetStateAction< boolean > >;
@@ -62,6 +67,35 @@ const ErrorNotice = () => {
 	);
 };
 
+const NoThanksButton = () => {
+	const [ isNoThanksClicked, setIsNoThanksClicked ] = useState( false );
+
+	return (
+		<Button
+			isBusy={ isNoThanksClicked }
+			isSecondary
+			onClick={ () => {
+				setIsNoThanksClicked( true );
+				recordEvent(
+					'wccore_subscriptions_empty_state_no_thanks_click',
+					{}
+				);
+				apiFetch( {
+					path: 'wc-admin/options',
+					method: 'POST',
+					data: {
+						[ dismissOptionKey ]: 'yes',
+					},
+				} ).then( () => {
+					window.location.href = noThanksUrl;
+				} );
+			} }
+		>
+			{ __( 'No thanks', 'woocommerce' ) }
+		</Button>
+	);
+};
+
 type GetStartedButtonProps = {
 	setHasError: setHasErrorFunction;
 };
@@ -73,36 +107,34 @@ const GetStartedButton: React.FC< GetStartedButtonProps > = ( {
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 
 	return (
-		<div className="wcpay-empty-subscriptions__button_container">
-			<Button
-				disabled={ isGettingStarted }
-				isBusy={ isGettingStarted }
-				isPrimary
-				onClick={ () => {
-					setIsGettingStarted( true );
-					recordEvent(
-						'wccore_subscriptions_empty_state_get_started_click',
-						{}
-					);
-					installAndActivatePlugins( [ 'woocommerce-payments' ] )
-						.then( () => {
-							/*
-							 * TODO:
-							 * Navigate to either newSubscriptionProductUrl or onboardingUrl
-							 * depending on the which treatment the user is assigned to.
-							 */
-							// eslint-disable-next-line no-console
-							console.log( 'It was a success!' );
-						} )
-						.catch( () => {
-							setIsGettingStarted( false );
-							setHasError( true );
-						} );
-				} }
-			>
-				{ __( 'Get started', 'woocommerce' ) }
-			</Button>
-		</div>
+		<Button
+			disabled={ isGettingStarted }
+			isBusy={ isGettingStarted }
+			isPrimary
+			onClick={ () => {
+				setIsGettingStarted( true );
+				recordEvent(
+					'wccore_subscriptions_empty_state_get_started_click',
+					{}
+				);
+				installAndActivatePlugins( [ 'woocommerce-payments' ] )
+					.then( () => {
+						/*
+						 * TODO:
+						 * Navigate to either newSubscriptionProductUrl or onboardingUrl
+						 * depending on the which treatment the user is assigned to.
+						 */
+						// eslint-disable-next-line no-console
+						console.log( 'It was a success!' );
+					} )
+					.catch( () => {
+						setIsGettingStarted( false );
+						setHasError( true );
+					} );
+			} }
+		>
+			{ __( 'Get started', 'woocommerce' ) }
+		</Button>
 	);
 };
 
@@ -176,7 +208,10 @@ const MainContent: React.FC< MainContentProps > = ( { setHasError } ) => {
 				<TermsOfService />
 			</p>
 
-			<GetStartedButton setHasError={ setHasError } />
+			<div className="wcpay-empty-subscriptions__button_container">
+				<NoThanksButton></NoThanksButton>
+				<GetStartedButton setHasError={ setHasError } />
+			</div>
 		</>
 	);
 };
