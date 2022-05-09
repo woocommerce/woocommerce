@@ -76,10 +76,13 @@ class WcPaySubscriptionsPage {
 			return;
 		}
 
-		// Add the "1" badge.
+		// translators: Admin menu item badge. It is used alongside the "Subscriptions" menu item to grab attention and let merchants know that this is a new offering.
+		$new_badge_text = __( 'new', 'woocommerce' );
+
+		// Add the "new" badge.
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 'wc-admin&path=/subscriptions' === $menu_item[2] ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$submenu['woocommerce'][ $key ][0] .= sprintf( ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">%s</span></span>', esc_html( $new_badge_text ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
 		}
