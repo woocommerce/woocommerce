@@ -129,7 +129,7 @@ class WcPaySubscriptionsPage {
 	}
 
 	/**
-	 * Returns true if the store has an order completed within the last 30 days.
+	 * Returns true if the store has an order that has been paid within the last 30 days.
 	 *
 	 * @return bool
 	 */
@@ -144,7 +144,7 @@ class WcPaySubscriptionsPage {
 			return 'yes' === $is_eligible;
 		}
 
-		// Get a single order that was marked as completed within the last 30 days.
+		// Get a single order that has been paid within the last 30 days.
 		$orders = wc_get_orders(
 			array(
 				'date_paid' => '>' . strtotime( '-30 days' ),
