@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.9
 Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 7.6.0-dev
+Stable tag: 7.7.0-dev
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -85,6 +85,29 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 7.6.0 - 2022-05-09 =
+
+#### Enhancements
+
+- Featured Category: Add background color option. ([6368](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6368))
+- Featured Product: Add background color option. ([6367](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6367))
+- Added media controls allowing the user to edit images within the editor on a Featured Category block. ([6360](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6360))
+- Added media controls allowing the user to edit images within the editor on a Featured Product block. ([6348](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6348))
+- Add the alt text control to the Featured Category block media settings. ([6341](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6341))
+- Hide the Product Tag Cloud from the Widgets screen in classic themes. ([6327](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6327))
+- Add the alt text control to the Featured Product block media settings. ([6308](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6308))
+- GridContentControl: Add product image control. ([6302](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6302))
+
+#### Bug Fixes
+
+- Fix: Align Empty Mini Cart Contents block center in the Site Editor. ([6379](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6379))
+- Remove the Template panel from the Setting Sidebar for Shop page. ([6366](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6366))
+- Parse categories coming from the back-end as a json array. ([6358](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6358))
+- Update the default width of Classic Template to Wide width. ([6356](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6356))
+- Fix: Mini Cart block is not available from the Edit template screen. ([6351](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6351))
+- Fix Filter Products by Attribute block not working on PHP templates when Filter button was enabled. ([6332](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6332))
+
 
 = 7.5.0 - 2022-04-25 =
 
