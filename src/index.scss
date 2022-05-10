@@ -83,6 +83,13 @@
 	.components-notice {
 		margin: 0px 0px 10px 0px;
 	}
+	.tracking-disabled {
+		border: 1px solid #cc99c2;
+		border-left: 4px solid #cc99c2;
+		line-height: 1.5em;
+		background: #fff;
+		padding: 10px;
+	}
 }
 
 #wc-admin-test-helper-rest-api-filters {
