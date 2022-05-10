@@ -13,11 +13,17 @@
 		text-align: center;
 	}
 
+	.woocommerce-product-content {
+		display: flex;
+		flex-direction: column;
+	}
+
 	.woocommerce-task-products__button-view-less-product-types {
 		color: #007cba;
 		padding: 0;
 		height: fit-content;
 		margin-top: 25px;
+		justify-content: center;
 
 		svg {
 			margin-left: 8px;
