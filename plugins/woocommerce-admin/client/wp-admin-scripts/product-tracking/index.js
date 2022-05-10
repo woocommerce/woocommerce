@@ -35,24 +35,6 @@ bulkActionsButton.addEventListener( 'click', function () {
 	} );
 } );
 
-bulkActionsButton.addEventListener( 'click', function () {
-	const productNumber = document.querySelectorAll( '[name="post[]"]:checked' )
-		.length;
-	recordEvent( 'products_list_bulk_actions_click', {
-		selected_action: bulkActions.value,
-		product_number: productNumber,
-	} );
-} );
-
-bulkActionsButton.addEventListener( 'click', function () {
-	const productNumber = document.querySelectorAll( '[name="post[]"]:checked' )
-		.length;
-	recordEvent( 'products_list_bulk_actions_click', {
-		selected_action: bulkActions.value,
-		product_number: productNumber,
-	} );
-} );
-
 document.querySelector( '#bulk_edit' ).addEventListener( 'click', function () {
 	recordEvent( 'products_list_bulk_edit_update', {
 		product_number: document.querySelector( '#bulk-titles' ).children
@@ -126,15 +108,6 @@ featuredButtons.forEach( ( button ) => {
 		recordEvent( 'products_list_featured_click', {
 			featured: willFeature ? 'yes' : 'no',
 		} );
-	} );
-} );
-
-searchButton.addEventListener( 'click', function () {
-	recordEvent( 'products_search', {
-		search_string_length: searchInput.value.length,
-		filter_category: productCategory.value !== '',
-		filter_product_type: productType.value,
-		filter_stock_status: stockStatus.value,
 	} );
 } );
 
