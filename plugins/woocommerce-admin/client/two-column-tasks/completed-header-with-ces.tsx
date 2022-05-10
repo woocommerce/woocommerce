@@ -94,7 +94,7 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				CES_ACTION,
-				...cesShownForActions,
+				...( cesShownForActions || [] ),
 			],
 		} );
 		setSubmittedScore( true );
