@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { Button, Card, CardBody, Notice } from '@wordpress/components';
 import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -262,6 +266,10 @@ const OnboardingSteps = () => (
 
 const SubscriptionsPage = () => {
 	const [ hasError, setHasError ] = useState( false );
+
+	useEffect( () => {
+		recordEvent( 'wccore_subscriptions_empty_state_view' );
+	}, [] );
 
 	return (
 		<>
