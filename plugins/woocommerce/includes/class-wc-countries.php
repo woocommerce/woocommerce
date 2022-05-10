@@ -1028,6 +1028,12 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'GG' => array(
+ 						'state' => array(
+ 							'required' => false,
+ 							'hidden'   => true,
+ 						),
+ 					),
 					'GH' => array(
 						'postcode' => array(
 							'required' => false,
