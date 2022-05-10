@@ -4,7 +4,6 @@
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"scripts": {
-		"postinstall": "composer install",
 		"test": "jest",
 		"test:api": "jest --group=api",
 		"test:hello": "jest --group=hello",

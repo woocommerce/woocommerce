@@ -47,7 +47,6 @@
 		"access": "public"
 	},
 	"scripts": {
-		"postinstall": "composer install",
 		"prepare": "pnpm run build",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
