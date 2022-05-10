@@ -89,7 +89,7 @@ describe( 'Products', () => {
 				'task_completion_time',
 				{
 					task_name: 'products',
-					time: 1000,
+					time: '0-2s',
 				}
 			)
 		);
