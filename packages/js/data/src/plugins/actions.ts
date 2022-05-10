@@ -16,14 +16,15 @@ import { controls } from '@wordpress/data';
 import { STORE_NAME } from './constants';
 import { ACTION_TYPES as TYPES } from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { WPError } from '../types';
+import { isRestApiError } from '../types';
 import {
 	PaypalOnboardingStatus,
-	PluginNames,
 	SelectorKeysWithActions,
 	RecommendedTypes,
 	InstallPluginsResponse,
 	ActivatePluginsResponse,
+	PluginsResponse,
+	PluginNames,
 } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
@@ -38,8 +39,16 @@ class PluginError extends Error {
 	}
 }
 
+type PluginResponseErrors = PluginsResponse< unknown >[ 'errors' ][ 'errors' ];
+
+const isPluginResponseError = (
+	plugins: Partial< PluginNames >[],
+	error: unknown
+): error is PluginResponseErrors =>
+	typeof error === 'object' && error !== null && plugins[ 0 ] in error;
+
 const formatErrorMessage = (
-	pluginErrors: Record< PluginNames, string[] >,
+	pluginErrors: PluginResponseErrors,
 	actionType = 'install'
 ) => {
 	return sprintf(
@@ -92,10 +101,7 @@ export function setIsRequesting(
 	};
 }
 
-export function setError(
-	selector: SelectorKeysWithActions,
-	error: Partial< Record< PluginNames, string[] > >
-) {
+export function setError( selector: SelectorKeysWithActions, error: unknown ) {
 	return {
 		type: TYPES.SET_ERROR as const,
 		selector,
@@ -157,8 +163,40 @@ export function setRecommendedPlugins(
 	};
 }
 
+function* handlePluginAPIError(
+	actionType: string,
+	plugins: Partial< PluginNames >[],
+	error: unknown
+) {
+	yield setError( 'installPlugins', error );
+
+	let pluginResponseError = error;
+	if (
+		( error instanceof Error || isRestApiError( error ) ) &&
+		plugins[ 0 ]
+	) {
+		pluginResponseError = {
+			[ plugins[ 0 ] ]: [ error.message ],
+		};
+	}
+
+	if ( isPluginResponseError( plugins, pluginResponseError ) ) {
+		throw new PluginError(
+			formatErrorMessage( pluginResponseError, actionType ),
+			pluginResponseError
+		);
+	} else {
+		throw new PluginError(
+			`Unexpected Plugin Error: ${ JSON.stringify(
+				pluginResponseError
+			) }`,
+			pluginResponseError
+		);
+	}
+}
+
 // Action Creator Generators
-export function* installPlugins( plugins: string[] ) {
+export function* installPlugins( plugins: Partial< PluginNames >[] ) {
 	yield setIsRequesting( 'installPlugins', true );
 
 	try {
@@ -171,26 +209,18 @@ export function* installPlugins( plugins: string[] ) {
 		if ( results.data.installed.length ) {
 			yield updateInstalledPlugins( results.data.installed );
 		}
-
 		if ( Object.keys( results.errors.errors ).length ) {
 			throw results.errors.errors;
 		}
 
 		yield setIsRequesting( 'installPlugins', false );
-
 		return results;
 	} catch ( error ) {
-		if ( error instanceof Error && plugins.length === 1 ) {
-			// Incase of a network error
-			error = { [ plugins[ 0 ] ]: error.message };
-		}
-		const errors = error as WPError[ 'errors' ];
-		yield setError( 'installPlugins', errors );
-		throw new PluginError( formatErrorMessage( errors ), errors );
+		yield handlePluginAPIError( 'install', plugins, error );
 	}
 }
 
-export function* activatePlugins( plugins: string[] ) {
+export function* activatePlugins( plugins: Partial< PluginNames >[] ) {
 	yield setIsRequesting( 'activatePlugins', true );
 
 	try {
@@ -212,13 +242,7 @@ export function* activatePlugins( plugins: string[] ) {
 
 		return results;
 	} catch ( error ) {
-		if ( error instanceof Error && plugins.length === 1 ) {
-			// Incase of a network error
-			error = { [ plugins[ 0 ] ]: error.message };
-		}
-		const errors = error as WPError[ 'errors' ];
-		yield setError( 'installPlugins', errors );
-		throw new PluginError( formatErrorMessage( errors ), errors );
+		yield handlePluginAPIError( 'activate', plugins, error );
 	}
 }
 
