@@ -144,6 +144,9 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+            - name: List dir
+              run: ls -R
+
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
               env:
@@ -242,6 +245,9 @@ jobs:
 
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: List dir
+              run: ls -R
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
