@@ -384,10 +384,6 @@ class WC_Post_Types {
 			)
 		);
 
-		// When custom order tables are in effect, we should not display the regular WP Posts-based admin list table.
-		$hide_orders_from_menu = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
-		$orders_menu_location  = current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true;
-
 		wc_register_order_type(
 			'shop_order',
 			apply_filters(
@@ -418,7 +414,7 @@ class WC_Post_Types {
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => false,
 					'exclude_from_search' => true,
-					'show_in_menu'        => $hide_orders_from_menu ? false : $orders_menu_location,
+					'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
 					'hierarchical'        => false,
 					'show_in_nav_menus'   => false,
 					'rewrite'             => false,
