@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isExperimentProductTask } from './use-product-layout-experiment';
 
 import './PaymentGatewaySuggestions';
 import './shipping';
@@ -14,6 +15,15 @@ import './purchase';
 
 const onboardingData = getAdminSetting( 'onboarding' );
 
+const importProductTask = async () => {
+	const isExperiment = await isExperimentProductTask();
+	if ( isExperiment ) {
+		import( './experimental-products' );
+	} else {
+		import( './products' );
+	}
+};
+
 if (
 	window.wcAdminFeatures &&
 	window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
@@ -25,7 +35,7 @@ if (
 	window.wcAdminFeatures &&
 	window.wcAdminFeatures[ 'experimental-products-task' ]
 ) {
-	import( './experimental-products' );
+	importProductTask();
 } else {
 	import( './products' );
 }

@@ -20,6 +20,11 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
 } ) );
 
+jest.mock( '../../use-product-layout-experiment', () => ( {
+	default: () => [ false, 'stacked' ],
+	__esModule: true,
+} ) );
+
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {
 		json: () => Promise.resolve( {} ),
