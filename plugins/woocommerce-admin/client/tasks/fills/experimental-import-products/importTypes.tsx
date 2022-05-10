@@ -7,6 +7,7 @@ import ReblogIcon from 'gridicons/dist/reblog';
 import { getAdminLink } from '@woocommerce/settings';
 import interpolateComponents from '@automattic/interpolate-components';
 import { ExternalLink } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 export const importTypes = [
 	{
@@ -20,6 +21,8 @@ export const importTypes = [
 		href: getAdminLink(
 			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
 		),
+		onClick: () =>
+			recordEvent( 'tasklist_add_product', { method: 'import' } ),
 	},
 	{
 		key: 'from-cart2cart' as const,
@@ -37,5 +40,7 @@ export const importTypes = [
 			},
 		} ),
 		before: <ReblogIcon />,
+		onClick: () =>
+			recordEvent( 'tasklist_add_product', { method: 'migrate' } ),
 	},
 ];
