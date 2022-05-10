@@ -15,7 +15,7 @@ import './purchase';
 
 const onboardingData = getAdminSetting( 'onboarding' );
 
-const importProductTask = async () => {
+const possiblyImportProductTaskExperiment = async () => {
 	const isExperiment = await isExperimentProductTask();
 	if ( isExperiment ) {
 		import( './experimental-products' );
@@ -35,7 +35,7 @@ if (
 	window.wcAdminFeatures &&
 	window.wcAdminFeatures[ 'experimental-products-task' ]
 ) {
-	importProductTask();
+	possiblyImportProductTaskExperiment();
 } else {
 	import( './products' );
 }
