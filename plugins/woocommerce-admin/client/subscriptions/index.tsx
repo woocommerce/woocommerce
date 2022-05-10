@@ -128,6 +128,9 @@ const GetStartedButton: React.FC< GetStartedButtonProps > = ( {
 						window.location.href = newSubscriptionProductUrl;
 					} )
 					.catch( () => {
+						recordEvent(
+							'wccore_subscriptions_empty_state_get_started_error'
+						);
 						setIsGettingStarted( false );
 						setHasError( true );
 					} );
