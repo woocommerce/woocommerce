@@ -5,7 +5,7 @@
  * Description: A helper plugin to assist with testing WooCommerce Admin
  * Author: WooCommerce
  * Author URI: https://woocommerce.com/
- * Version: 0.7.2
+ * Version: 0.7.3
  *
  * @package WooCommerce\Admin\TestHelper
  */
