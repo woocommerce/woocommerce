@@ -227,7 +227,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 		if ( ! empty( $items['create'] ) ) {
 			foreach ( $items['create'] as $item ) {
-				$_item = new WP_REST_Request( 'POST' );
+				$_item = new WP_REST_Request( 'POST', $request->get_route() );
 
 				// Default parameters.
 				$defaults = array();
@@ -264,7 +264,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 		if ( ! empty( $items['update'] ) ) {
 			foreach ( $items['update'] as $item ) {
-				$_item = new WP_REST_Request( 'PUT' );
+				$_item = new WP_REST_Request( 'PUT', $request->get_route() );
 				$_item->set_body_params( $item );
 				$_response = $this->update_item( $_item );
 
@@ -291,7 +291,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					continue;
 				}
 
-				$_item = new WP_REST_Request( 'DELETE' );
+				$_item = new WP_REST_Request( 'DELETE', $request->get_route() );
 				$_item->set_query_params(
 					array(
 						'id'    => $id,

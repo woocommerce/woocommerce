@@ -9,14 +9,26 @@ import { useMemo } from '@wordpress/element';
 import useCreateProductByType from './use-create-product-by-type';
 import { ProductType } from './constants';
 
-const useProductTypeListItems = ( _productTypes: ProductType[] ) => {
+const useProductTypeListItems = (
+	_productTypes: ProductType[],
+	{
+		onClick,
+	}: {
+		onClick?: () => void;
+	} = {}
+) => {
 	const { createProductByType } = useCreateProductByType();
 
 	const productTypes = useMemo(
 		() =>
 			_productTypes.map( ( productType ) => ( {
 				...productType,
-				onClick: () => createProductByType( productType.key ),
+				onClick: () => {
+					createProductByType( productType.key );
+					if ( typeof onClick === 'function' ) {
+						onClick();
+					}
+				},
 			} ) ),
 		[ createProductByType ]
 	);

@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\WPPostToCOTMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 /**
@@ -21,7 +21,7 @@ class COTMigrationServiceProvider extends AbstractServiceProvider {
 	 * @var string[]
 	 */
 	protected $provides = array(
-		WPPostToCOTMigrator::class,
+		PostsToOrdersMigrationController::class,
 	);
 
 	/**
@@ -32,6 +32,6 @@ class COTMigrationServiceProvider extends AbstractServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		$this->share( WPPostToCOTMigrator::class );
+		$this->share( PostsToOrdersMigrationController::class );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Fix system status API requests that only query some fields
