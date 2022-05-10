@@ -162,7 +162,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 6.5.0 2022-05-10 =
 
-* Add -Added a temporary filter to patch the WCA JS packages i18n json files ([#32603](https://github.com/woocommerce/woocommerce/pull/32603))
+**WooCommerce**
+
+* Add - Added a temporary filter to patch the WCA JS packages i18n json files ([#32603](https://github.com/woocommerce/woocommerce/pull/32603))
 * Add - Other payment methods link to the payment setting page when the store is located in WC Payments eligible country.
 * Add - tracking for block themes.
 * Add - a context param with a default value of global to `Admin\Notes\DataStore::get_notes()`, `get_notes_count()`, and `get_notes_where_clauses()`. ([#32574](https://github.com/woocommerce/woocommerce/pull/32574))
