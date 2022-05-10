@@ -20,6 +20,8 @@ export const trackView = ( taskId ) => {
 
 	recordEvent( 'task_view', {
 		task_name: taskId,
+		experimental_products:
+			window.wcAdminFeatures[ 'experimental-products-task' ],
 		wcs_installed: installedPlugins.includes( 'woocommerce-services' ),
 		wcs_active: activePlugins.includes( 'woocommerce-services' ),
 		jetpack_installed: installedPlugins.includes( 'jetpack' ),
