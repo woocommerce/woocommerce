@@ -125,8 +125,7 @@ const GetStartedButton: React.FC< GetStartedButtonProps > = ( {
 						 * Navigate to either newSubscriptionProductUrl or onboardingUrl
 						 * depending on the which treatment the user is assigned to.
 						 */
-						// eslint-disable-next-line no-console
-						console.log( 'It was a success!' );
+						window.location.href = newSubscriptionProductUrl;
 					} )
 					.catch( () => {
 						setIsGettingStarted( false );
