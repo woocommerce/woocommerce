@@ -137,11 +137,11 @@ class WcPaySubscriptionsPage {
 		$transient_key = 'woocommerce-wcpay-subscriptions_recent_sales_eligibility';
 
 		// Load from cache.
-		$is_eligible = get_transient( $transient_key );
+		$is_eligible_cached = get_transient( $transient_key );
 
 		// Valid cache found.
-		if ( false !== $is_eligible ) {
-			return 'yes' === $is_eligible;
+		if ( false !== $is_eligible_cached ) {
+			return wc_string_to_bool( $is_eligible_cached );
 		}
 
 		// Get a single order that has been paid within the last 30 days.
@@ -153,10 +153,10 @@ class WcPaySubscriptionsPage {
 			)
 		);
 
-		$is_eligible = count( $orders ) >= 1 ? 'yes' : 'no';
-		set_transient( $transient_key, $is_eligible, DAY_IN_SECONDS );
+		$is_eligible = count( $orders ) >= 1;
+		set_transient( $transient_key, wc_bool_to_string( $is_eligible ), DAY_IN_SECONDS );
 
-		return 'yes' === $is_eligible;
+		return $is_eligible;
 	}
 
 	/**
