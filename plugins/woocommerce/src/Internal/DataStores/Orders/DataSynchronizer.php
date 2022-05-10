@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
@@ -53,7 +55,7 @@ class DataSynchronizer {
 	/**
 	 * The posts to COT migrator to use.
 	 *
-	 * @var DatabaseUtil
+	 * @var PostsToOrdersMigrationController
 	 */
 	private $posts_to_cot_migrator;
 
@@ -211,7 +213,7 @@ SELECT(
 	 *
 	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
 	 */
-	private function custom_orders_table_is_authoritative(): bool {
+	public function custom_orders_table_is_authoritative(): bool {
 		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
 	}
 
@@ -229,7 +231,7 @@ SELECT(
 	 * @return array An array of order ids.
 	 * @throws \Exception Invalid parameter.
 	 */
-	private function get_ids_of_orders_pending_sync( int $type, int $limit ) {
+	public function get_ids_of_orders_pending_sync( int $type, int $limit ) {
 		global $wpdb;
 
 		if ( $limit < 1 ) {
@@ -334,6 +336,8 @@ WHERE
 
 			/**
 			 * Hook to signal that the orders tables synchronization process has finished (nothing left to synchronize).
+			 *
+			 * @since 6.5.0
 			 */
 			do_action( self::PENDING_SYNCHRONIZATION_FINISHED_ACTION );
 		} else {

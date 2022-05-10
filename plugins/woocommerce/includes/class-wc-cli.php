@@ -29,6 +29,8 @@ class WC_CLI {
 		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-tool-command.php';
 		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-update-command.php';
 		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-tracker-command.php';
+		$cli_runner = wc_get_container()->get( \Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner::class );
+		WP_CLI::add_command( 'wc cot', $cli_runner );
 	}
 
 	/**
