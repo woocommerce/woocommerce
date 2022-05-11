@@ -2404,3 +2404,29 @@ function wc_update_650_approved_download_directories() {
 	$directory_sync->init_hooks();
 	$directory_sync->init_feature( true, false );
 }
+
+/**
+ * In some cases, the approved download directories table may not have been successfully created during the update to
+ * 6.5.0. If this was the case we will need to re-initialize the feature.
+ */
+function wc_update_651_approved_download_directories() {
+	global $wpdb;
+
+	$download_directories = wc_get_container()->get( Download_Directories::class );
+	$directory_sync       = wc_get_container()->get( Download_Directories_Sync::class );
+
+	// Check if at least 1 row exists, without scanning the entire table.
+	$is_populated = (bool) $wpdb->get_col(
+		'SELECT 1 FROM ' . $download_directories->get_table() . ' LIMIT 1'
+	);
+
+	// If the table contains rules (or does not yet, but a sync is in-progress) we should do nothing else at this point.
+	if ( $is_populated || $directory_sync->in_progress() ) {
+		return;
+	}
+
+	// Otherwise, it seems reasonable to assume that the feature was not initialized as expected during the update to
+	// 6.5.0. Let's give that another try.
+	$directory_sync->init_hooks();
+	$directory_sync->init_feature( true, false );
+}
