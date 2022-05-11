@@ -139,7 +139,7 @@ class WC_Site_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
-		add_filter( 'woocommerce_tracks_event_properties', array( __CLASS__, 'add_global_properties' ) );
+		add_filter( 'woocommerce_tracks_event_properties', array( __CLASS__, 'add_global_properties' ), 10, 2 );
 
 		// Define window.wcTracks.recordEvent in case it is enabled client-side.
 		self::register_scripts();
@@ -242,18 +242,22 @@ class WC_Site_Tracking {
 	 * Add global properties to tracks.
 	 *
 	 * @param array $properties Array of event properties.
+	 * @param array $event_name Name of the event, if passed.
 	 * @return array
 	 */
-	public static function add_global_properties( $properties ) {
-		$data = array(
-			'_en' => $prefixed_event_name,
-			'_ts' => WC_Tracks_Client::build_timestamp(),
-		);
+	public static function add_global_properties( $properties, $event_name = null ) {
+		$user = wp_get_current_user();
+		$data = $event_name
+			? array(
+				'_en' => $event_name,
+				'_ts' => WC_Tracks_Client::build_timestamp(),
+			)
+			: array();
 
 		$server_details = self::get_server_details();
 		$identity       = WC_Tracks_Client::get_identity( $user->ID );
 		$blog_details   = self::get_blog_details( $user->ID );
 
-		return array_merge( $properties, $server_details, $identity, $blog_details );
+		return array_merge( $data, $properties, $server_details, $identity, $blog_details );
 	}
 }
