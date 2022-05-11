@@ -29,6 +29,12 @@ class WC_Admin_Attributes {
 	 * The added attributes are stored in the database and can be used for layered navigation.
 	 */
 	public static function output() {
+			/**
+			 * Test hook
+			 *
+			 * @since 6.6.0
+			 */
+			do_action( 'woocommerce_test_hook_three' );
 		$result = '';
 		$action = '';
 

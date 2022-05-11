@@ -31,6 +31,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Enqueue styles.
 		 */
 		public function admin_styles() {
+			/**
+			 * Test hook
+			 *
+			 * @since 6.6.0
+			 */
+			do_action( 'woocommerce_test_hook_one' );
+
 			global $wp_scripts;
 
 			$version   = Constants::get_constant( 'WC_VERSION' );
@@ -98,6 +105,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Enqueue scripts.
 		 */
 		public function admin_scripts() {
+			/**
+			 * Test hook
+			 *
+			 * @since 6.6.0
+			 */
+			do_action( 'woocommerce_test_hook_two' );
+
 			global $wp_query, $post;
 
 			$screen       = get_current_screen();
