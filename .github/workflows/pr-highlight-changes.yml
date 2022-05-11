@@ -48,7 +48,7 @@ jobs:
               with:
                   comment-id: ${{ steps.fc.outputs.comment-id }}
                   token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
-                  body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                  body: '## New hook or template changes in this PR\n${{ needs.analyze.outputs.results }}'
                   edit-mode: replace
             - name: Delete comment
               if: ${{ !needs.analyze.outputs.results && steps.fc.outputs.comment-id }}
