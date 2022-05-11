@@ -2416,7 +2416,7 @@ function wc_update_651_approved_download_directories() {
 	$directory_sync       = wc_get_container()->get( Download_Directories_Sync::class );
 
 	// Check if at least 1 row exists, without scanning the entire table.
-	$is_populated = (bool) $wpdb->get_col(
+	$is_populated = (bool) $wpdb->get_var(
 		'SELECT 1 FROM ' . $download_directories->get_table() . ' LIMIT 1'
 	);
 
