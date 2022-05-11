@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { isExperimentProductTask } from '@woocommerce/onboarding';
+
+/**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import { isExperimentProductTask } from './use-product-layout-experiment';
 
 import './PaymentGatewaySuggestions';
 import './shipping';
