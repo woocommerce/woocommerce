@@ -88,12 +88,13 @@ jobs:
             - name: Install dependencies
               working-directory: package/woocommerce
               run: pnpm install
-
+            - name: List dir
+              run: ls -R package/woocommerce/plugins/woocommerce
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
               env:
                   LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
-              run: pnpm nx docker-up woocommerce
+              run: pnpm exec wc-e2e docker:up
 
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
@@ -112,7 +113,7 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-              run: pnpm nx test-e2e woocommerce
+              run: pnpm exec wc-e2e test:e2e
 
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
