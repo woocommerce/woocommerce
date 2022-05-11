@@ -105,7 +105,10 @@ jobs:
 
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-
+            - name: List dirs
+              run: |
+                ls code/woocommerce
+                ls package/woocommerce
             - name: Copy over tools and testing packages
               run: |
                 mkdir -p package/woocommerce/plugins/woocommerce/node_modules/.bin
