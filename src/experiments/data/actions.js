@@ -7,7 +7,11 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { EXPERIMENT_NAME_PREFIX, TRANSIENT_NAME_PREFIX } from './constants';
+import {
+	EXPERIMENT_NAME_PREFIX,
+	TRANSIENT_NAME_PREFIX,
+	TRANSIENT_TIMEOUT_NAME_PREFIX,
+} from './constants';
 
 function toggleFrontendExperiment( experimentName, newVariation ) {
 	const storageItem = JSON.parse(
@@ -15,6 +19,7 @@ function toggleFrontendExperiment( experimentName, newVariation ) {
 	);
 
 	storageItem.variationName = newVariation;
+	storageItem.ttl = 3600;
 
 	window.localStorage.setItem(
 		EXPERIMENT_NAME_PREFIX + experimentName,
@@ -26,6 +31,9 @@ function* toggleBackendExperiment( experimentName, newVariation ) {
 	try {
 		const payload = {};
 		payload[ TRANSIENT_NAME_PREFIX + experimentName ] = newVariation;
+		payload[ TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName ] =
+			Math.round( Date.now() / 1000 ) + 3600;
+
 		yield apiFetch( {
 			method: 'POST',
 			path: '/wc-admin/options',
