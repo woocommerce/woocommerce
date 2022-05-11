@@ -7,9 +7,9 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WP_CLI;
 
 /**
- * Credits https://github.com/liquidweb/woocommerce-custom-orders-table/blob/develop/includes/class-woocommerce-custom-orders-table-cli.php.
- *
  * CLI tool for migrating order data to/from custom table.
+ *
+ * Credits https://github.com/liquidweb/woocommerce-custom-orders-table/blob/develop/includes/class-woocommerce-custom-orders-table-cli.php.
  *
  * Class CLIRunner
  */
@@ -52,6 +52,15 @@ class CLIRunner {
 	}
 
 	/**
+	 * Registers commands for CLI.
+	 */
+	public function register_commands() {
+		WP_CLI::add_command( 'wc cot count', array( $this, 'count' ) );
+		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) );
+		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
+	}
+
+	/**
 	 * Check if the COT feature is enabled.
 	 *
 	 * @param bool $log Optionally log a error message.
@@ -71,7 +80,7 @@ class CLIRunner {
 	/**
 	 * Helper method to log warning that feature is not yet production ready.
 	 */
-	private function log_product_warning() {
+	private function log_production_warning() {
 		WP_CLI::log( __( 'This feature is not production ready yet. Make sure you are not running these commands in your production environment.', 'woocommerce' ) );
 	}
 
@@ -82,11 +91,13 @@ class CLIRunner {
 	 *
 	 *     wp wc cot count
 	 *
-	 * @param bool $log Whether to also log the order remaining count.
+	 * @param array $args Positional arguments passed to the command.
+	 *
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 *
 	 * @return int The number of orders to be migrated.*
 	 */
-	public function count( $log = true ) {
+	public function count( $args = array(), $assoc_args = array() ) {
 		if ( ! $this->is_enabled() ) {
 			return 0;
 		}
@@ -94,7 +105,13 @@ class CLIRunner {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$order_count = $this->synchronizer->get_current_orders_pending_sync_count();
 
-		if ( $log ) {
+		$assoc_args = wp_parse_args(
+			$assoc_args,
+			array(
+				'log' => true,
+			)
+		);
+		if ( isset( $assoc_args['log'] ) && $assoc_args['log'] ) {
 			WP_CLI::log(
 				sprintf(
 				/* Translators: %1$d is the number of orders to be migrated. */
@@ -126,7 +143,7 @@ class CLIRunner {
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
 	public function migrate( $args = array(), $assoc_args = array() ) {
-		$this->log_product_warning();
+		$this->log_production_warning();
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
@@ -142,18 +159,17 @@ class CLIRunner {
 			return WP_CLI::warning( __( 'There are no orders to migrate, aborting.', 'woocommerce' ) );
 		}
 
-		$assoc_args         = wp_parse_args(
+		$assoc_args  = wp_parse_args(
 			$assoc_args,
 			array(
 				'batch-size' => 500,
 			)
 		);
-		$batch_size         = ( (int) $assoc_args['batch-size'] ) === 0 ? 100 : (int) $assoc_args['batch-size'];
-		$progress           = WP_CLI\Utils\make_progress_bar( 'Order Data Migration', $order_count / $batch_size );
-		$processed          = 0;
-		$batch_count        = 1;
-		$avg_time_per_batch = 0.0;
-		$total_time         = 0;
+		$batch_size  = ( (int) $assoc_args['batch-size'] ) === 0 ? 100 : (int) $assoc_args['batch-size'];
+		$progress    = WP_CLI\Utils\make_progress_bar( 'Order Data Migration', $order_count / $batch_size );
+		$processed   = 0;
+		$batch_count = 1;
+		$total_time  = 0;
 
 		while ( $order_count > 0 ) {
 
@@ -168,7 +184,7 @@ class CLIRunner {
 			$batch_start_time = microtime( true );
 			$order_ids        = $this->synchronizer->get_ids_of_orders_pending_sync( $this->synchronizer::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
 			$this->post_to_cot_migrator->migrate_orders( $order_ids );
-			$processed       += count( $order_ids );
+			$processed        += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 
 			WP_CLI::debug(
@@ -181,13 +197,12 @@ class CLIRunner {
 				)
 			);
 
-			$avg_time_per_batch = ( ( $avg_time_per_batch * $batch_count ) + $batch_total_time ) / ( $batch_count + 1 );
 			$batch_count ++;
 			$total_time += $batch_total_time;
 
 			$progress->tick();
 
-			$remaining_count = $this->count( false );
+			$remaining_count = $this->count( array(), array( 'log' => false ) );
 			if ( $remaining_count === $order_count ) {
 				return WP_CLI::error( __( 'Infinite loop detected, aborting.', 'woocommerce' ) );
 			}
@@ -260,7 +275,7 @@ class CLIRunner {
 	 */
 	public function verify_cot_data( $args = array(), $assoc_args = array() ) {
 		global $wpdb;
-		$this->log_product_warning();
+		$this->log_production_warning();
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
@@ -306,7 +321,7 @@ class CLIRunner {
 			);
 			$batch_start_time = microtime( true );
 			$failed_ids       = $failed_ids + $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
-			$processed       += count( $order_ids );
+			$processed        += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 			$batch_count ++;
 			$total_time += $batch_total_time;
@@ -362,7 +377,7 @@ class CLIRunner {
 	 * Helper method to get remaining order count
 	 *
 	 * @param int  $order_id_start Order ID to start from.
-	 * @param bool $log            Whether to also log an error message.
+	 * @param bool $log Whether to also log an error message.
 	 *
 	 * @return int Order count.
 	 */
@@ -385,6 +400,7 @@ class CLIRunner {
 				)
 			);
 		}
+
 		return $order_count;
 	}
 }
