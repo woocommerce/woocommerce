@@ -73,7 +73,7 @@ jobs:
           rm -rf woocommerce/woocommerce-production/woocommerce
 
       - name: Copy Composer over to production
-        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build
+        run: cp monorepo/plugins/woocommerce/composer.json woocommerce/woocommerce-production
 
       - name: Set up mirror
         working-directory: tmp/woocommerce-build
