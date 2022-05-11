@@ -3,6 +3,8 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 
 /**
@@ -53,12 +55,7 @@ class WcPaySubscriptionsPage {
 			return;
 		}
 
-		// WC Payments must not be active.
-		if ( is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
-			return;
-		}
-
-		if ( ! WooCommercePayments::is_supported() ) {
+		if ( ! $this->is_store_experiment_eligible() ) {
 			return;
 		}
 
@@ -86,6 +83,80 @@ class WcPaySubscriptionsPage {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Returns true if the store is eligible for the WooCommerce subsciptions empty state experiment.
+	 *
+	 * @return bool
+	 */
+	private function is_store_experiment_eligible() {
+		// Ineligible if WooCommerce Payments OR an existing subscriptions plugin is installed.
+		$installed_plugins      = PluginsHelper::get_installed_plugin_slugs();
+		$plugin_ineligible_list = array(
+			'woocommerce-payments',
+			'woocommerce-subscriptions',
+			'subscriptio',
+			'subscriptions-for-woocommerce',
+			'subscriptions-for-woocommerce-pro',
+			'sumosubscriptions',
+			'yith-woocommerce-subscription',
+			'xa-woocommerce-subscriptions',
+		);
+		foreach ( $plugin_ineligible_list as $plugin_slug ) {
+			if ( in_array( $plugin_slug, $installed_plugins, true ) ) {
+				return false;
+			}
+		}
+
+		// Ineligible if store address is not compatible with WCPay Subscriptions (US).
+		$store_base_location = wc_get_base_location();
+		if ( empty( $store_base_location['country'] ) || 'US' !== $store_base_location['country'] ) {
+			return false;
+		}
+
+		// Ineligible if store has not been active for at least 6 months.
+		if ( ! WCAdminHelper::is_wc_admin_active_in_date_range( 'month-6+' ) ) {
+			return false;
+		}
+
+		// Ineligible if store has not had any sales in the last 30 days.
+		if ( ! $this->get_store_recent_sales_eligibility() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns true if the store has an order that has been paid within the last 30 days.
+	 *
+	 * @return bool
+	 */
+	private function get_store_recent_sales_eligibility() {
+		$transient_key = 'woocommerce-wcpay-subscriptions_recent_sales_eligibility';
+
+		// Load from cache.
+		$is_eligible_cached = get_transient( $transient_key );
+
+		// Valid cache found.
+		if ( false !== $is_eligible_cached ) {
+			return wc_string_to_bool( $is_eligible_cached );
+		}
+
+		// Get a single order that has been paid within the last 30 days.
+		$orders = wc_get_orders(
+			array(
+				'date_paid' => '>' . strtotime( '-30 days' ),
+				'limit'     => 1,
+				'return'    => 'ids',
+			)
+		);
+
+		$is_eligible = count( $orders ) >= 1;
+		set_transient( $transient_key, wc_bool_to_string( $is_eligible ), DAY_IN_SECONDS );
+
+		return $is_eligible;
 	}
 
 	/**
