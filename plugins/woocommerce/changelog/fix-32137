@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Supressing warnings originating from metadata functions from product templates.
+Suppressing warnings for malformed metadata in product template downloads.
