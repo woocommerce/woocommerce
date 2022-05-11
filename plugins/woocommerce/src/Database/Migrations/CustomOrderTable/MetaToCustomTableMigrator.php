@@ -751,7 +751,14 @@ WHERE $where_clause
 			$row[ $destination_alias ] = wc_string_to_bool( $row[ $destination_alias ] );
 		}
 		if ( 'date_epoch' === $schema['type'] ) {
-			$row[ $alias ] = ( new \DateTime( "@{$row[ $alias ]}" ) )->format( 'Y-m-d H:i:s' );
+			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
+				$row[ $alias ] = null;
+			} else {
+				$row[ $alias ] = ( new \DateTime( "@{$row[ $alias ]}" ) )->format( 'Y-m-d H:i:s' );
+			}
+			if ( '0000-00-00 00:00:00' === $row[ $destination_alias ] ) {
+				$row[ $destination_alias ] = null;
+			}
 		}
 		if ( is_null( $row[ $alias ] ) ) {
 			$row[ $alias ] = $this->get_type_defaults( $schema['type'] );
