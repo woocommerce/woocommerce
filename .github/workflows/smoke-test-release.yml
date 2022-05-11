@@ -105,21 +105,6 @@ jobs:
 
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-            - name: List dirs
-              run: |
-                ls code/woocommerce
-                echo "-----------"
-                ls package/woocommerce
-                echo "------------"
-                ls tmp
-            - name: Copy over tools and testing packages
-              run: |
-                mkdir -p package/woocommerce/plugins/woocommerce/node_modules/.bin
-                cp ./code/woocommerce/node_modules/.bin/wc-e2e package/woocommerce/plugins/woocommerce/node_modules/.bin
-                cp ./code/woocommerce/project.json package/woocommerce/plugins/woocommerce
-                cp ./code/woocommerce/package.json package/woocommerce/plugins/woocommerce
-                cp -r ./code/woocommerce/tests package/woocommerce/plugins/woocommerce
-                cp -r ./code/woocommerce/sample-data package/woocommerce/plugins/woocommerce
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -195,7 +180,8 @@ jobs:
 
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-
+            - name: list dir
+              run: ls package/woocommerce/plugins/woocommerce
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
               env:
