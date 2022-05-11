@@ -1152,6 +1152,7 @@ importers:
   packages/js/tracks:
     specifiers:
       '@babel/core': ^7.17.5
+      '@types/debug': ^4.1.7
       '@wordpress/eslint-plugin': ^11.0.0
       debug: ^4.3.3
       eslint: ^8.12.0
@@ -1164,6 +1165,7 @@ importers:
       debug: 4.3.3
     devDependencies:
       '@babel/core': 7.17.8
+      '@types/debug': 4.1.7
       '@wordpress/eslint-plugin': 11.0.1_7c040a9b494a33cf8bf9079642892fb1
       eslint: 8.12.0
       jest: 27.5.1
@@ -13231,6 +13233,12 @@ packages:
       '@types/node': 16.10.3
     dev: true
 
+  /@types/debug/4.1.7:
+    resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
+    dependencies:
+      '@types/ms': 0.7.31
+    dev: true
+
   /@types/dompurify/2.3.3:
     resolution: {integrity: sha512-nnVQSgRVuZ/843oAfhA25eRSNzUFcBPk/LOiw5gm8mD9/X7CNcbRkQu/OsjCewO8+VIYfPxUnXvPEVGenw14+w==}
     dependencies:
@@ -13404,6 +13412,10 @@ packages:
 
   /@types/mousetrap/1.6.9:
     resolution: {integrity: sha512-HUAiN65VsRXyFCTicolwb5+I7FM6f72zjMWr+ajGk+YTvzBgXqa2A5U7d+rtsouAkunJ5U4Sb5lNJjo9w+nmXg==}
+
+  /@types/ms/0.7.31:
+    resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
+    dev: true
 
   /@types/node-fetch/2.6.1:
     resolution: {integrity: sha512-oMqjURCaxoSIsHSr1E47QHzbmzNR5rK8McHuNb11BOM9cHcIK3Avy0s/b2JlXHoQGTYS3NsvWzV1M0iK7l0wbA==}

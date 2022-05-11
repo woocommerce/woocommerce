@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove woo tracks type declaration from woo admin ./cleint.
