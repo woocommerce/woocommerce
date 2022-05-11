@@ -572,13 +572,29 @@ WHERE
 	}
 
 	/**
+	 * Verify whether data was migrated properly for given IDs.
+	 *
+	 * @param array $source_ids List of source IDs.
+	 *
+	 * @return array List of IDs along with columns that failed to migrate.
+	 */
+	public function verify_migrated_data( array $source_ids ) : array {
+		global $wpdb;
+		$query   = $this->build_verification_query( $source_ids );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query should already be prepared.
+		$results = $wpdb->get_results( $query, ARRAY_A );
+
+		return $this->verify_data( $results );
+	}
+
+	/**
 	 * Generate query to fetch data from both source and destination tables. Use the results in `verify_data` to verify if data was migrated properly.
 	 *
 	 * @param array $source_ids Array of IDs in source table.
 	 *
 	 * @return string SELECT statement.
 	 */
-	public function build_verification_query( $source_ids ) {
+	protected function build_verification_query( $source_ids ) {
 		$source_table                  = $this->schema_config['source']['entity']['table_name'];
 		$meta_table                    = $this->schema_config['source']['meta']['table_name'];
 		$destination_table             = $this->schema_config['destination']['table_name'];
@@ -655,7 +671,7 @@ WHERE $where_clause
 	 *
 	 * @return array Array of failed IDs if any, along with columns/meta_key names.
 	 */
-	public function verify_data( $collected_data ) {
+	protected function verify_data( $collected_data ) {
 		$failed_ids = array();
 		foreach ( $collected_data as $row ) {
 			$failed_ids = $this->verify_core_columns( $row, $failed_ids );
