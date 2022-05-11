@@ -48,6 +48,7 @@ const wpAdminScripts = [
 	'print-shipping-label-banner',
 	'beta-features-tracking-modal',
 	'payment-method-promotions',
+	'onboarding-load-sample-products-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -165,7 +166,14 @@ const webpackConfig = {
 
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
-			new WooCommerceDependencyExtractionWebpackPlugin(),
+			new WooCommerceDependencyExtractionWebpackPlugin( {
+				requestToExternal( request ) {
+					if ( request === '@wordpress/components/build/ui' ) {
+						// The external wp.components does not include ui components, so we need to skip requesting to external here.
+						return null;
+					}
+				},
+			} ),
 		// Reduces data for moment-timezone.
 		new MomentTimezoneDataPlugin( {
 			// This strips out timezone data before the year 2000 to make a smaller file.

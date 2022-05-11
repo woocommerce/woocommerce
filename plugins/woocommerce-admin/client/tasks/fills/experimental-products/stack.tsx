@@ -17,9 +17,13 @@ type StackProps = {
 	items: ( ProductType & {
 		onClick: () => void;
 	} )[];
+	onClickLoadSampleProduct: () => void;
 };
 
-const Stack: React.FC< StackProps > = ( { items } ) => {
+const Stack: React.FC< StackProps > = ( {
+	items,
+	onClickLoadSampleProduct,
+} ) => {
 	return (
 		<div className="woocommerce-products-stack">
 			<List items={ items } />
@@ -46,7 +50,14 @@ const Stack: React.FC< StackProps > = ( { items } ) => {
 						),
 						LspLink: (
 							// TODO: Update this to the load sample product.
-							<Link href="" type="wc-admin">
+							<Link
+								href=""
+								type="wc-admin"
+								onClick={ () => {
+									onClickLoadSampleProduct();
+									return false;
+								} }
+							>
 								<></>
 							</Link>
 						),

@@ -19,7 +19,7 @@ jobs:
             ~/.pnpm-store
             plugins/woocommerce/packages
             plugins/woocommerce/**/vendor
-          key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
         run: npm install -g pnpm@^6.24.2
@@ -58,9 +58,6 @@ jobs:
         with:
           path: monorepo
 
-      - name: Copy Composer over to production
-        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build
-
       - name: Download WooCommerce ZIP
         uses: actions/download-artifact@v3
         with:
@@ -74,6 +71,9 @@ jobs:
           unzip woocommerce.zip -d woocommerce/woocommerce-production
           mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
           rm -rf woocommerce/woocommerce-production/woocommerce
+
+      - name: Copy Composer over to production
+        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build
 
       - name: Set up mirror
         working-directory: tmp/woocommerce-build

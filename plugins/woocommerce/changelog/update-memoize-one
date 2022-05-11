@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove `memoize-one` from woo admin dependency

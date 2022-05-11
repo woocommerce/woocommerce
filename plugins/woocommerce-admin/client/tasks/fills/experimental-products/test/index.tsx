@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { Products } from '../';
 import { defaultSurfacedProductTypes, productTypes } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
+import useLayoutExperiment from '../../use-product-layout-experiment';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -19,6 +20,18 @@ jest.mock( '@wordpress/data', () => ( {
 jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
 } ) );
+
+jest.mock( '../../use-product-layout-experiment', () => ( {
+	default: jest.fn().mockReturnValue( [ false, 'stacked' ] ),
+	__esModule: true,
+} ) );
+
+global.fetch = jest.fn().mockImplementation( () =>
+	Promise.resolve( {
+		json: () => Promise.resolve( {} ),
+		status: 200,
+	} )
+);
 
 describe( 'Products', () => {
 	beforeEach( () => {
@@ -74,5 +87,63 @@ describe( 'Products', () => {
 		);
 
 		expect( queryByText( 'View less product types' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should send a request to load sample products when the link is clicked', async () => {
+		const fetchMock = jest.spyOn( global, 'fetch' );
+		const { queryByText, getByRole } = render( <Products /> );
+
+		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
+
+		userEvent.click(
+			getByRole( 'link', { name: 'Load Sample Products' } )
+		);
+
+		await waitFor( () =>
+			expect( fetchMock ).toHaveBeenCalledWith(
+				'/wc-admin/onboarding/tasks/import_sample_products?_locale=user',
+				{
+					body: undefined,
+					credentials: 'include',
+					headers: { Accept: 'application/json, */*;q=0.1' },
+					method: 'POST',
+				}
+			)
+		);
+	} );
+
+	it( 'should show spinner when layout experiment is loading', async () => {
+		( useLayoutExperiment as jest.Mock ).mockImplementation( () => [
+			true,
+			'card',
+		] );
+		const { container } = render( <Products /> );
+		expect(
+			container.getElementsByClassName( 'components-spinner' )
+		).toHaveLength( 1 );
+	} );
+
+	it( 'should render card layout when experiment is assigned', async () => {
+		( useLayoutExperiment as jest.Mock ).mockImplementation( () => [
+			false,
+			'card',
+		] );
+		const { container } = render( <Products /> );
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-products-card-layout'
+			)
+		).toHaveLength( 1 );
+	} );
+
+	it( 'should render stacked layout when experiment is assigned', async () => {
+		( useLayoutExperiment as jest.Mock ).mockImplementation( () => [
+			false,
+			'stacked',
+		] );
+		const { container } = render( <Products /> );
+		expect(
+			container.getElementsByClassName( 'woocommerce-products-stack' )
+		).toHaveLength( 1 );
 	} );
 } );
