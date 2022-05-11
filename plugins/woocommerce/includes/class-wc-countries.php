@@ -1040,7 +1040,7 @@ class WC_Countries {
 					'GG' => array(
  						'state' => array(
  							'required' => false,
- 							'hidden'   => true,
+ 							'label' => __( 'Parish', 'woocommerce' ),
  						),
  					),
 					'GH' => array(
