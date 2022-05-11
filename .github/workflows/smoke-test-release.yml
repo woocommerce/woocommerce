@@ -108,7 +108,10 @@ jobs:
             - name: List dirs
               run: |
                 ls code/woocommerce
+                echo "-----------"
                 ls package/woocommerce
+                echo "------------"
+                ls tmp
             - name: Copy over tools and testing packages
               run: |
                 mkdir -p package/woocommerce/plugins/woocommerce/node_modules/.bin
