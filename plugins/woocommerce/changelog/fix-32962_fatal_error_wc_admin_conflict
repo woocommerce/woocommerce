@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issue where FeaturePlugin class caused a conflict with older WooCommerce Admin versions. #32966
