@@ -145,7 +145,7 @@ class CLIRunner {
 		$assoc_args         = wp_parse_args(
 			$assoc_args,
 			array(
-				'batch-size' => 100,
+				'batch-size' => 500,
 			)
 		);
 		$batch_size         = ( (int) $assoc_args['batch-size'] ) === 0 ? 100 : (int) $assoc_args['batch-size'];
@@ -168,7 +168,7 @@ class CLIRunner {
 			$batch_start_time = microtime( true );
 			$order_ids        = $this->synchronizer->get_ids_of_orders_pending_sync( $this->synchronizer::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
 			$this->post_to_cot_migrator->migrate_orders( $order_ids );
-			$processed        += count( $order_ids );
+			$processed       += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 
 			WP_CLI::debug(
@@ -237,5 +237,154 @@ class CLIRunner {
 	 */
 	public function backfill( $args = array(), $assoc_args = array() ) {
 		return WP_CLI::error( __( 'Error: Backfill is not implemented yet.', 'woocommerce' ) );
+	}
+
+	/**
+	 * Verify migrated order data with original posts data.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--batch-size=<batch-size>]
+	 * : The number of orders to verify in each batch.
+	 * ---
+	 * default: 500
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Verify migrated order data, 100 orders at a time.
+	 *     wp wc cot verify_cot_data --batch-size=100
+	 *
+	 * @param array $args Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function verify_cot_data( $args = array(), $assoc_args = array() ) {
+		global $wpdb;
+		$this->log_product_warning();
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
+		$assoc_args = wp_parse_args(
+			$assoc_args,
+			array(
+				'batch-size' => 500,
+				'start-from' => 0,
+			)
+		);
+
+		$batch_count    = 1;
+		$total_time     = 0;
+		$failed_ids     = array();
+		$processed      = 0;
+		$order_id_start = (int) $assoc_args['start-from'];
+		$order_count    = $this->get_verify_order_count( $order_id_start );
+		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
+
+		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
+
+		if ( ! $order_count ) {
+			return WP_CLI::warning( __( 'There are no orders to verify, aborting.', 'woocommerce' ) );
+		}
+
+		while ( $order_count > 0 ) {
+			WP_CLI::debug(
+				sprintf(
+				/* Translators: %1$d is the batch number, %2$d is the batch size. */
+					__( 'Beginning verification for batch #%1$d (%2$d orders/batch).', 'woocommerce' ),
+					$batch_count,
+					$batch_size
+				)
+			);
+
+			$order_ids        = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d ORDER BY ID ASC LIMIT %d",
+					$order_id_start,
+					$batch_size
+				)
+			);
+			$batch_start_time = microtime( true );
+			$failed_ids       = $failed_ids + $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
+			$processed       += count( $order_ids );
+			$batch_total_time = microtime( true ) - $batch_start_time;
+			$batch_count ++;
+			$total_time += $batch_total_time;
+
+			$progress->tick();
+
+			WP_CLI::debug(
+				sprintf(
+				// Translators: %1$d is the batch number, %2$f is time taken to process batch.
+					__( 'Batch %1$d (%2$d orders) completed in %3$f seconds', 'woocommerce' ),
+					$batch_count,
+					count( $order_ids ),
+					$batch_total_time
+				)
+			);
+
+			$order_id_start  = max( $order_ids );
+			$remaining_count = $this->get_verify_order_count( $order_id_start, false );
+			if ( $remaining_count === $order_count ) {
+				return WP_CLI::error( __( 'Infinite loop detected, aborting. No errors found.', 'woocommerce' ) );
+			}
+			$order_count = $remaining_count;
+		}
+
+		$progress->finish();
+		WP_CLI::log( __( 'Verification completed.', 'woocommerce' ) );
+
+		if ( 0 === count( $failed_ids ) ) {
+			return WP_CLI::success(
+				sprintf(
+				/* Translators: %1$d is the number of migrated orders and %2$f is time taken */
+					_n( '%1$d order was verified, in %2$f seconds', '%1$d orders were verified in %2$f seconds', $processed, 'woocommerce' ),
+					$processed,
+					$total_time
+				)
+			);
+		} else {
+			$errors = print_r( $failed_ids, true );
+
+			return WP_CLI::error(
+				sprintf(
+				/* Translators: %1$d is the number of migrated orders, %2$f is time taken, $3%s is formatted array of order ids. */
+					_n( '%1$d order was verified, in %2$f seconds. Errors were found: %3$s', '%1$d orders were verified in %2$f seconds. Errors were found %3$s', $processed, 'woocommerce' ),
+					$processed,
+					$total_time,
+					$errors
+				)
+			);
+		}
+	}
+
+	/**
+	 * Helper method to get remaining order count
+	 *
+	 * @param int  $order_id_start Order ID to start from.
+	 * @param bool $log            Whether to also log an error message.
+	 *
+	 * @return int Order count.
+	 */
+	private function get_verify_order_count( int $order_id_start, $log = true ) {
+		global $wpdb;
+
+		$order_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d",
+				$order_id_start
+			)
+		);
+
+		if ( $log ) {
+			WP_CLI::log(
+				sprintf(
+				/* Translators: %1$d is the number of orders to be verified. */
+					_n( 'There is %1$d order to be verified.', 'There are %1$d orders to be verified.', $order_count, 'woocommerce' ),
+					$order_count
+				)
+			);
+		}
+		return $order_count;
 	}
 }
