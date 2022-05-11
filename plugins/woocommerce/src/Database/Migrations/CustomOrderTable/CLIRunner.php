@@ -70,7 +70,13 @@ class CLIRunner {
 	private function is_enabled( $log = true ) {
 		if ( ! $this->controller->is_feature_visible() ) {
 			if ( $log ) {
-				WP_CLI::log( __( 'Custom order table usage is not enabled.', 'woocommerce' ) );
+				WP_CLI::log(
+					sprintf(
+						// translators: %s - link to testing instructions webpage.
+						__( 'Custom order table usage is not enabled. If you are testing, you can enable it by following the testing instructions in %s', 'woocommerce' ),
+						'https://developer.woocommerce.com/' // TODO: Change the link when testing instructin page is live.
+					)
+				);
 			}
 		}
 
@@ -184,7 +190,7 @@ class CLIRunner {
 			$batch_start_time = microtime( true );
 			$order_ids        = $this->synchronizer->get_ids_of_orders_pending_sync( $this->synchronizer::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
 			$this->post_to_cot_migrator->migrate_orders( $order_ids );
-			$processed        += count( $order_ids );
+			$processed       += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 
 			WP_CLI::debug(
@@ -321,7 +327,7 @@ class CLIRunner {
 			);
 			$batch_start_time = microtime( true );
 			$failed_ids       = $failed_ids + $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
-			$processed        += count( $order_ids );
+			$processed       += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 			$batch_count ++;
 			$total_time += $batch_total_time;
