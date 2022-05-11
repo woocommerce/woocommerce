@@ -58,7 +58,7 @@
 		"dompurify": "^2.3.6",
 		"emoji-flags": "^1.3.0",
 		"gridicons": "^3.4.0",
-		"memoize-one": "^5.2.1",
+		"memoize-one": "^6.0.0",
 		"moment": "^2.29.1",
 		"moment-timezone": "^0.5.34",
 		"prop-types": "^15.8.1",
