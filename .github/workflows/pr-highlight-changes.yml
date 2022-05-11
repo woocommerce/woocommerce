@@ -42,17 +42,29 @@ jobs:
                         repo: context.repo.repo,
                         body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
                       })
+            # - name: Update comment
+            #   if: ${{ needs.analyze.outputs.results && steps.fc.outputs.comment-id }}
+            #   uses: peter-evans/create-or-update-comment@v2
+            #   with:
+            #       comment-id: ${{ steps.fc.outputs.comment-id }}
+            #       token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+            #       body: |
+            #           ## New hook or template changes in this PR
+
+            #           ${{ needs.analyze.outputs.results }}
+            #       edit-mode: replace
             - name: Update comment
               if: ${{ needs.analyze.outputs.results && steps.fc.outputs.comment-id }}
-              uses: peter-evans/create-or-update-comment@v2
+              uses: actions/github-script@v5
               with:
-                  comment-id: ${{ steps.fc.outputs.comment-id }}
-                  token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
-                  body: |
-                      ## New hook or template changes in this PR 
-
-                      ${{ needs.analyze.outputs.results }}
-                  edit-mode: replace
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+                  script: |
+                      github.rest.issues.updateComment({
+                        comment_id: ${{ steps.fc.outputs.comment-id }},
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                      })
             - name: Delete comment
               if: ${{ !needs.analyze.outputs.results && steps.fc.outputs.comment-id }}
               uses: izhangzhihao/delete-comment@master
