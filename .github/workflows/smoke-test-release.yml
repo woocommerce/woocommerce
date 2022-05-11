@@ -21,7 +21,7 @@ jobs:
             - name: Install dependencies
               run: |
                 pnpm install
-                pnpm install jest
+                pnpm install -g jest
 
             - name: Install Composer dependencies
               run: pnpm nx composer-install-no-dev woocommerce
@@ -105,6 +105,15 @@ jobs:
 
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: Copy over tools and testing packages
+              run: |
+                mkdir -p package/woocommerce/plugins/woocommerce/node_modules/.bin
+                cp ./code/woocommerce/node_modules/.bin/wc-e2e package/woocommerce/plugins/woocommerce/node_modules/.bin
+                cp ./code/woocommerce/project.json package/woocommerce/plugins/woocommerce
+                cp ./code/woocommerce/package.json package/woocommerce/plugins/woocommerce
+                cp -r ./code/woocommerce/tests package/woocommerce/plugins/woocommerce
+                cp -r ./code/woocommerce/sample-data package/woocommerce/plugins/woocommerce
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
