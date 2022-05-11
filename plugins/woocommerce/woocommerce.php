@@ -60,3 +60,6 @@ function wc_get_container() : \Psr\Container\ContainerInterface {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+
+do_action( 'new_test' );
+$testing = apply_filters( 'woo_test_filter', true );
