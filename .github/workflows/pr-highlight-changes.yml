@@ -53,7 +53,7 @@ jobs:
                         issue_number: context.issue.number,
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        labels: release: highlight
+                        labels: ['release: highlight']
                       })
             - name: Update comment
               if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
