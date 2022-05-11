@@ -30,6 +30,7 @@ declare global {
 			onboardingUrl: string;
 			noThanksUrl: string;
 			dismissOptionKey: string;
+			experimentAssignment: 'A' | 'B';
 		};
 	}
 }
@@ -39,6 +40,7 @@ const {
 	onboardingUrl,
 	noThanksUrl,
 	dismissOptionKey,
+	experimentAssignment,
 } = window.wcWcpaySubscriptions;
 
 type setHasErrorFunction = React.Dispatch< React.SetStateAction< boolean > >;
@@ -120,12 +122,10 @@ const GetStartedButton: React.FC< GetStartedButtonProps > = ( {
 				);
 				installAndActivatePlugins( [ 'woocommerce-payments' ] )
 					.then( () => {
-						/*
-						 * TODO:
-						 * Navigate to either newSubscriptionProductUrl or onboardingUrl
-						 * depending on the which treatment the user is assigned to.
-						 */
-						window.location.href = newSubscriptionProductUrl;
+						window.location.href =
+							experimentAssignment === 'A'
+								? newSubscriptionProductUrl
+								: onboardingUrl;
 					} )
 					.catch( () => {
 						recordEvent(
@@ -270,6 +270,13 @@ const SubscriptionsPage = () => {
 	const [ hasError, setHasError ] = useState( false );
 
 	useEffect( () => {
+		// TODO: Remove this.
+		console.log(
+			experimentAssignment === 'A'
+				? 'Treatment A: Create a subscription product then WCPay onboarding.'
+				: 'Treatment B: WCPay onboarding then create a subscription product.'
+		);
+
 		recordEvent( 'wccore_subscriptions_empty_state_view' );
 	}, [] );
 

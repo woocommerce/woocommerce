@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use WooCommerce\Admin\Experimental_Abtest;
 
 /**
  * Contains logic related to the WooCommerce → Subscriptions admin page.
@@ -181,6 +181,12 @@ class WcPaySubscriptionsPage {
 			return;
 		}
 
+		$experiment_assignment = 'A';
+
+		if ( $this->is_store_experiment_eligible() ) {
+			$experiment_assignment = $this->get_user_experiment_assignment();
+		}
+
 		$data = array(
 			'newSubscriptionProductUrl' => add_query_arg(
 				array(
@@ -199,6 +205,7 @@ class WcPaySubscriptionsPage {
 			),
 			'dismissOptionKey'          => $this->user_dismissed_option,
 			'noThanksUrl'               => wc_admin_url(),
+			'experimentAssignment'      => $experiment_assignment,
 		);
 
 		wp_add_inline_script( WC_ADMIN_APP, 'window.wcWcpaySubscriptions = ' . wp_json_encode( $data ), 'before' );
@@ -234,5 +241,32 @@ class WcPaySubscriptionsPage {
 			$wc_admin_menu['wcpay-subscriptions'] = $subscriptions_menu_item;
 			$submenu['woocommerce']               = array_values( $wc_admin_menu ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
+	}
+
+	/**
+	 * Returns the user's assignment for this experiment.
+	 *
+	 * @return string Either 'A' or 'B' to represent which treatment the user is assigned to.
+	 */
+	private function get_user_experiment_assignment() {
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new Experimental_Abtest(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking
+		);
+
+		$date = new \DateTime();
+		$date->setTimeZone( new \DateTimeZone( 'UTC' ) );
+
+		$experiment_name = sprintf(
+			'%s_%s_%s',
+			'woocommerce_wcpay_subscriptions_page',
+			$date->format( 'Y' ),
+			$date->format( 'm' )
+		);
+
+		return $abtest->get_variation( $experiment_name ) === 'control' ? 'A' : 'B';
 	}
 }
