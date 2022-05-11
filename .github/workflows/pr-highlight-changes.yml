@@ -42,6 +42,12 @@ jobs:
                         repo: context.repo.repo,
                         body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
                       })
+                      github.rest.issues.addLabels({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        labels: release: highlight
+                      })
             - name: Update comment
               if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
               uses: actions/github-script@v5
@@ -53,6 +59,12 @@ jobs:
                         owner: context.repo.owner,
                         repo: context.repo.repo,
                         body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                      })
+                       github.rest.issues.addLabels({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        labels: release: highlight
                       })
             - name: Delete comment
               if: ${{ !needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
