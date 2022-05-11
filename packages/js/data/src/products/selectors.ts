@@ -15,7 +15,7 @@ import { ProductState } from './reducer';
 import { ProductQuery } from './types';
 
 export const getProducts = createSelector(
-	( state: ProductState, query: ProductQuery, defaultValue = new Map() ) => {
+	( state: ProductState, query: ProductQuery, defaultValue = undefined ) => {
 		const resourceName = getProductResourceName( query );
 		const ids = state.products[ resourceName ]
 			? state.products[ resourceName ].data
@@ -23,10 +23,9 @@ export const getProducts = createSelector(
 		if ( ! ids ) {
 			return defaultValue;
 		}
-		return ids.reduce( ( map, id ) => {
-			map.set( id, state.data[ id ] );
-			return map;
-		}, new Map() );
+		return ids.map( ( id ) => {
+			return state.data[ id ];
+		} );
 	},
 	( state, query ) => {
 		const resourceName = getProductResourceName( query );
