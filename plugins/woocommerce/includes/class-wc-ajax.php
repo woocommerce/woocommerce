@@ -23,12 +23,6 @@ class WC_AJAX {
 		add_action( 'init', array( __CLASS__, 'define_ajax' ), 0 );
 		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax' ), 0 );
 		self::add_ajax_events();
-		/**
-		* Testing
-		*
-		* @since 6.6.0
-		*/
-		do_action( 'more_hook' );
 	}
 
 	/**
