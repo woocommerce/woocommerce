@@ -98,12 +98,10 @@ class PostsToOrdersMigrationController {
 	 * @return array Array of failed IDs along with columns.
 	 */
 	public function verify_migrated_orders( array $order_post_ids ): array {
-		return array_merge_recursive(
-			$this->order_table_migrator->verify_migrated_data( $order_post_ids ),
-			$this->billing_address_table_migrator->verify_migrated_data( $order_post_ids ),
-			$this->shipping_address_table_migrator->verify_migrated_data( $order_post_ids ),
-			$this->operation_data_table_migrator->verify_migrated_data( $order_post_ids )
-		);
+		return $this->order_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->billing_address_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->shipping_address_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->operation_data_table_migrator->verify_migrated_data( $order_post_ids );
 	}
 
 	/**
