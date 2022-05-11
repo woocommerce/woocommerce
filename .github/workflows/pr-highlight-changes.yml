@@ -46,8 +46,6 @@ jobs:
               if: ${{ needs.analyze.outputs.results && steps.fc.outputs.comment-id }}
               uses: peter-evans/create-or-update-comment@v2
               with:
-                  repository: context.repo.repo
-                  issue-number: context.issue.number
                   comment-id: ${{ steps.fc.outputs.comment-id }}
                   token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
