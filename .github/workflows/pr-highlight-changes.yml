@@ -8,7 +8,7 @@ jobs:
             results: ${{ steps.results.outputs.results }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
             - name: Install prerequisites
               run: |
                   npm install -g pnpm@^6.24.2
