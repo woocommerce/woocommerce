@@ -42,6 +42,18 @@ jobs:
                         repo: context.repo.repo,
                         body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
                       })
+            - name: Add label
+              if: ${{ needs.analyze.outputs.results }}
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+                  script: |
+                      github.rest.issues.addLabels({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        labels: ['release: highlight']
+                      })
             - name: Update comment
               if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
               uses: actions/github-script@v5
@@ -61,21 +73,8 @@ jobs:
                   github_token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   delete_user_name: woocommercebot
                   issue_number: ${{ github.event.number }}
-            - name: Add label
-              if: ${{ needs.analyze.outputs.results }}
-              uses: actions/github-script@v5
-              with:
-                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
-                  script: |
-                      github.rest.issues.addLabels({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        labels: ['release: highlight']
-                      })
             - name: Remove label
               if: ${{ !needs.analyze.outputs.results }}
-              continue-on-error: true
               uses: actions/github-script@v5
               with:
                   github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
