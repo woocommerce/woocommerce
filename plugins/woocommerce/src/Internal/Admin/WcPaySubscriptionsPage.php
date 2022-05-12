@@ -257,16 +257,6 @@ class WcPaySubscriptionsPage {
 			$allow_tracking
 		);
 
-		$date = new \DateTime();
-		$date->setTimeZone( new \DateTimeZone( 'UTC' ) );
-
-		$experiment_name = sprintf(
-			'%s_%s_%s',
-			'woocommerce_wcpay_subscriptions_page',
-			$date->format( 'Y' ),
-			$date->format( 'm' )
-		);
-
-		return $abtest->get_variation( $experiment_name ) === 'control' ? 'A' : 'B';
+		return $abtest->get_variation( 'woocommerce_wcpay_subscriptions_page_202207_v1' ) === 'control' ? 'A' : 'B';
 	}
 }
