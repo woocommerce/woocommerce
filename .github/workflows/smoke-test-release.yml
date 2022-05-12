@@ -173,7 +173,7 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
             - name: list dir
-              run: ls -R package/woocommerce/packages/js/e2e-environment/node_modules/@woocommerce/api/dist
+              run: ls -R package/woocommerce/packages/js/e2e-environment/node_modules/@woocommerce/api
             - name: Load docker images and start containers.
               working-directory: package/woocommerce
               env:
