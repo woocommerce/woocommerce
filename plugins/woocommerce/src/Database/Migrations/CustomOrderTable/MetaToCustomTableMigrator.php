@@ -674,7 +674,7 @@ WHERE $where_clause
 	protected function verify_data( $collected_data ) {
 		$failed_ids = array();
 		foreach ( $collected_data as $row ) {
-			$failed_ids = $this->verify_core_columns( $row, $failed_ids );
+			$failed_ids = $this->verify_entity_columns( $row, $failed_ids );
 			$failed_ids = $this->verify_meta_columns( $row, $failed_ids );
 		}
 
@@ -689,7 +689,7 @@ WHERE $where_clause
 	 *
 	 * @return array Array of failed IDs if any, along with columns/meta_key names.
 	 */
-	private function verify_core_columns( $row, $failed_ids ) {
+	private function verify_entity_columns( $row, $failed_ids ) {
 		$primary_key_column = "{$this->schema_config['source']['entity']['table_name']}_{$this->schema_config['source']['entity']['primary_key']}";
 		foreach ( $this->core_column_mapping as $column_name => $schema ) {
 			$source_alias      = "{$this->schema_config['source']['entity']['table_name']}_$column_name";
@@ -699,7 +699,11 @@ WHERE $where_clause
 				if ( ! isset( $failed_ids[ $row[ $primary_key_column ] ] ) ) {
 					$failed_ids[ $row[ $primary_key_column ] ] = array();
 				}
-				$failed_ids[ $row[ $primary_key_column ] ][] = $column_name;
+				$failed_ids[ $row[ $primary_key_column ] ][] = array(
+					'column' => $column_name,
+					'original_value' => $row[ $source_alias ],
+					'new_value' => $row[ $destination_alias ],
+				);
 			}
 		}
 
@@ -724,7 +728,11 @@ WHERE $where_clause
 				if ( ! isset( $failed_ids[ $row[ $primary_key_column ] ] ) ) {
 					$failed_ids[ $row[ $primary_key_column ] ] = array();
 				}
-				$failed_ids[ $row[ $primary_key_column ] ][] = $meta_key;
+				$failed_ids[ $row[ $primary_key_column ] ][] = array(
+					'column' => $meta_key,
+					'original_value' => $row[ $meta_alias ],
+					'new_value' => $row[ $destination_alias ],
+				);
 			}
 		}
 
@@ -743,8 +751,8 @@ WHERE $where_clause
 	 */
 	private function pre_process_row( $row, $schema, $alias, $destination_alias ) {
 		if ( in_array( $schema['type'], array( 'int', 'decimal' ) ) ) {
-			$row[ $alias ]             = (float) $row[ $alias ];
-			$row[ $destination_alias ] = (float) $row[ $destination_alias ];
+			$row[ $alias ]             = wc_format_decimal( $row[ $alias ], false, true );
+			$row[ $destination_alias ] = wc_format_decimal( $row[ $destination_alias ], false, true );
 		}
 		if ( 'bool' === $schema['type'] ) {
 			$row[ $alias ]             = wc_string_to_bool( $row[ $alias ] );

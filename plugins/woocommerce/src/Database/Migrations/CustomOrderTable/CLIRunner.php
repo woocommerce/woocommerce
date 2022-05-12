@@ -67,7 +67,7 @@ class CLIRunner {
 	 *
 	 * @return bool Whether the COT feature is enabled.
 	 */
-	private function is_enabled( $log = true ) {
+	private function is_enabled( $log = true ) : bool {
 		if ( ! $this->controller->is_feature_visible() ) {
 			if ( $log ) {
 				WP_CLI::log(
@@ -103,7 +103,7 @@ class CLIRunner {
 	 *
 	 * @return int The number of orders to be migrated.*
 	 */
-	public function count( $args = array(), $assoc_args = array() ) {
+	public function count( $args = array(), $assoc_args = array() ) : int {
 		if ( ! $this->is_enabled() ) {
 			return 0;
 		}
@@ -271,10 +271,16 @@ class CLIRunner {
 	 * default: 500
 	 * ---
 	 *
+	 * [--start-from=<order_id>]
+	 * : Order ID to start from.
+	 * ---
+	 * default: 0
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
-	 *     wp wc cot verify_cot_data --batch-size=500
+	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -369,8 +375,8 @@ class CLIRunner {
 
 			return WP_CLI::error(
 				sprintf(
-				/* Translators: %1$d is the number of migrated orders, %2$f is time taken, $3%s is formatted array of order ids. */
-					_n( '%1$d order was verified, in %2$f seconds. Errors were found: %3$s', '%1$d orders were verified in %2$f seconds. Errors were found %3$s', $processed, 'woocommerce' ),
+				/* Translators: %1$d is the number of migrated orders, %2$f is time taken, %3$f is number of errors and$4%s is formatted array of order ids. */
+					_n( '%1$d order was verified, in %2$f seconds. %3$f error was found: %4$s', '%1$d orders were verified in %2$f seconds. %3$f errors were found %4$s', $processed, 'woocommerce' ),
 					$processed,
 					$total_time,
 					$errors
@@ -380,14 +386,14 @@ class CLIRunner {
 	}
 
 	/**
-	 * Helper method to get remaining order count
+	 * Helper method to get count for orders needing verification.
 	 *
 	 * @param int  $order_id_start Order ID to start from.
 	 * @param bool $log Whether to also log an error message.
 	 *
 	 * @return int Order count.
 	 */
-	private function get_verify_order_count( int $order_id_start, $log = true ) {
+	private function get_verify_order_count( int $order_id_start, $log = true ) : int {
 		global $wpdb;
 
 		$order_count = (int) $wpdb->get_var(
