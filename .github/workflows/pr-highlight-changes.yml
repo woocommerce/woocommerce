@@ -74,7 +74,8 @@ jobs:
                         labels: ['release: highlight']
                       })
             - name: Remove label
-              if: ${{ !needs.analyze.outputs.results && contains( github.event.pull_request.labels.*.name, ['release: highlight']) }}
+              if: ${{ !needs.analyze.outputs.results }}
+              continue-on-error: true
               uses: actions/github-script@v5
               with:
                   github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
