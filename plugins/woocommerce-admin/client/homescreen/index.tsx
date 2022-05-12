@@ -36,6 +36,7 @@ const Homescreen = ( {
 		);
 	}
 
+	// @ts-expect-error Layout is a pure JS component
 	return <Layout query={ query } />;
 };
 

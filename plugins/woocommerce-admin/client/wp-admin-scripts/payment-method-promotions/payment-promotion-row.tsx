@@ -7,7 +7,6 @@ import { useState, useEffect } from '@wordpress/element';
 import {
 	PLUGINS_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
-	WCDataSelector,
 	PluginsStoreActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -35,11 +34,11 @@ type PaymentPromotionRowProps = {
 		pluginSlug: string;
 		url: string;
 	};
-	title: string;
+	title?: string;
 	columns: {
 		className: string;
 		html: string;
-		width: string;
+		width: string | number | undefined;
 	}[];
 	subTitleContent?: string;
 };
@@ -53,32 +52,27 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	const { gatewayId, pluginSlug, url } = paymentMethod;
 	const [ installing, setInstalling ] = useState( false );
 	const [ isVisible, setIsVisible ] = useState( true );
-	const { installAndActivatePlugins }: PluginsStoreActions = useDispatch(
-		PLUGINS_STORE_NAME
-	);
+	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
-	const { gatewayIsActive, paymentGateway } = useSelect(
-		( select: WCDataSelector ) => {
-			const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
-			const activePlugins: string[] = select(
-				PLUGINS_STORE_NAME
-			).getActivePlugins();
-			const isActive =
-				activePlugins && activePlugins.includes( pluginSlug );
-			let paymentGatewayData;
-			if ( isActive ) {
-				paymentGatewayData = getPaymentGateway(
-					pluginSlug.replace( /\-/g, '_' )
-				);
-			}
-
-			return {
-				gatewayIsActive: isActive,
-				paymentGateway: paymentGatewayData,
-			};
+	const { gatewayIsActive, paymentGateway } = useSelect( ( select ) => {
+		const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
+		const activePlugins: string[] = select(
+			PLUGINS_STORE_NAME
+		).getActivePlugins();
+		const isActive = activePlugins && activePlugins.includes( pluginSlug );
+		let paymentGatewayData;
+		if ( isActive ) {
+			paymentGatewayData = getPaymentGateway(
+				pluginSlug.replace( /\-/g, '_' )
+			);
 		}
-	);
+
+		return {
+			gatewayIsActive: isActive,
+			paymentGateway: paymentGatewayData,
+		};
+	} );
 
 	useEffect( () => {
 		if (

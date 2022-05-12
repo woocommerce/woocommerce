@@ -8,14 +8,13 @@
 /**
  * Get phase for feature flags
  * - development: All features should be enabled in development.
- * - plugin: For the standalone feature plugin, for GitHub and WordPress.org.
  * - core: Stable features for WooCommerce core merge.
  */
 
 $phase = getenv( 'WC_ADMIN_PHASE' );
 
-if ( ! in_array( $phase, array( 'development', 'plugin', 'core' ), true ) ) {
-	$phase = 'plugin'; // Default to plugin when running `pnpm run build`.
+if ( ! in_array( $phase, array( 'development', 'core' ), true ) ) {
+	$phase = 'core'; // Default to core when running `pnpm run build`.
 }
 $config_json = file_get_contents( __DIR__ . '/../client/admin/config/' . $phase . '.json' );
 $config      = json_decode( $config_json );

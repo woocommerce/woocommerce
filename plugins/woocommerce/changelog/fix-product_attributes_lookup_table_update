@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product attributes lookup table is now properly updated on WooCommerce upgrade and when using REST API batch endpoints

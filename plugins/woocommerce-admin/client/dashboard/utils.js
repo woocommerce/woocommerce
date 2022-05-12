@@ -16,7 +16,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
  * @return {string} Country string.
  */
 
-export function getCountryCode( countryState ) {
+export function getCountryCode( countryState = '' ) {
 	if ( ! countryState ) {
 		return null;
 	}

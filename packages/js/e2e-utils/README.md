@@ -237,7 +237,6 @@ There is a general utilities object `utils` with the following functions:
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
-| `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
 | `searchForOrder` | `value, orderId, customerName` | helper method that searchs for an order via many different terms |
 | `addShippingZoneAndMethod` | `zoneName, zoneLocation, zipCode, zoneMethod` | util helper method for adding shipping zones with shipping methods |

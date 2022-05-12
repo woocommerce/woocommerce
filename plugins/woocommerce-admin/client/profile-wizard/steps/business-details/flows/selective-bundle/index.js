@@ -36,7 +36,7 @@ import { sellingVenueOptions } from '../../data/selling-venue-options';
 import { getRevenueOptions } from '../../data/revenue-options';
 import { getProductCountOptions } from '../../data/product-options';
 import { SelectiveExtensionsBundle } from './selective-extensions-bundle';
-import { getPluginSlug, getPluginTrackKey } from '~/utils';
+import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
 
 const BUSINESS_DETAILS_TAB_NAME = 'business-details';
@@ -59,27 +59,6 @@ export const filterBusinessExtensions = (
 			.filter( ( item, index, arr ) => arr.indexOf( item ) === index )
 	);
 };
-
-const timeFrames = [
-	{ name: '0-2s', max: 2 },
-	{ name: '2-5s', max: 5 },
-	{ name: '5-10s', max: 10 },
-	{ name: '10-15s', max: 15 },
-	{ name: '15-20s', max: 20 },
-	{ name: '20-30s', max: 30 },
-	{ name: '30-60s', max: 60 },
-	{ name: '>60s' },
-];
-function getTimeFrame( timeInMs ) {
-	for ( const timeFrame of timeFrames ) {
-		if ( ! timeFrame.max ) {
-			return timeFrame.name;
-		}
-		if ( timeInMs < timeFrame.max * 1000 ) {
-			return timeFrame.name;
-		}
-	}
-}
 
 export const prepareExtensionTrackingData = (
 	extensionInstallationOptions

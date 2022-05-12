@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: This fixes a bug that was introduced in a PR targetting the same Woo version.
+
+

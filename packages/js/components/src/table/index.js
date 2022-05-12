@@ -308,11 +308,12 @@ TableCard.propTypes = {
 	 */
 	query: PropTypes.object,
 	/**
-	 * An array of arrays of display/value object pairs (see `Table` props).
+	 * Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col
+	 * is checkboxes, for example). Set to false to disable row headers.
 	 */
 	rowHeader: PropTypes.oneOfType( [ PropTypes.number, PropTypes.bool ] ),
 	/**
-	 * Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
+	 * An array of arrays of display/value object pairs (see `Table` props).
 	 */
 	rows: PropTypes.arrayOf(
 		PropTypes.arrayOf(

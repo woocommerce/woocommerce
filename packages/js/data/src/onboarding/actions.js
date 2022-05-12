@@ -169,6 +169,7 @@ export function hideTaskListSuccess( taskList ) {
 	return {
 		type: TYPES.HIDE_TASK_LIST_SUCCESS,
 		taskList,
+		taskListId: taskList.id,
 	};
 }
 
@@ -191,6 +192,7 @@ export function unhideTaskListSuccess( taskList ) {
 	return {
 		type: TYPES.UNHIDE_TASK_LIST_SUCCESS,
 		taskList,
+		taskListId: taskList.id,
 	};
 }
 

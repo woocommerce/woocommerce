@@ -6,7 +6,7 @@ on:
 jobs:
   add-dev-comment:
     if: "github.event.label.name == 'needs: developer feedback'"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       issues: write
     steps:
@@ -26,7 +26,7 @@ jobs:
             })              
   add-reproduction-comment:
     if: "github.event.label.name == 'status: reproduction'"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       issues: write
     steps:
@@ -45,7 +45,7 @@ jobs:
             })
   add-support-comment:
     if: "github.event.label.name == 'type: support request'"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       issues: write
     steps:
@@ -85,7 +85,7 @@ jobs:
                 })
   add-votes-comment:
     if: "github.event.label.name == 'needs: votes'"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       issues: write
     steps:
@@ -120,7 +120,7 @@ jobs:
                 })
   fill-template-comment:
     if: "github.event.label.name == 'needs: template'"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       issues: write
     steps:
