@@ -116,6 +116,7 @@ export const Products = () => {
 							<Stack
 								items={ visibleProductTypes }
 								onClickLoadSampleProduct={ loadSampleProduct }
+								showOtherOptions={ isExpanded }
 							/>
 						) : (
 							<CardLayout items={ visibleProductTypes } />

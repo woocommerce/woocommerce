@@ -18,52 +18,55 @@ type StackProps = {
 		onClick: () => void;
 	} )[];
 	onClickLoadSampleProduct: () => void;
+	showOtherOptions?: boolean;
 };
 
 const Stack: React.FC< StackProps > = ( {
 	items,
 	onClickLoadSampleProduct,
+	showOtherOptions = true,
 } ) => {
 	return (
 		<div className="woocommerce-products-stack">
 			<List items={ items } />
-			<Text className="woocommerce-stack__other-options">
-				{ interpolateComponents( {
-					mixedString: __(
-						'Can’t find your product type? {{sbLink}}Start Blank{{/sbLink}} or {{LspLink}}Load Sample Products{{/LspLink}} to see what they look like in your store.',
-						'woocommerce'
-					),
-					components: {
-						sbLink: (
-							<Link
-								onClick={ () => {
-									window.location = getAdminLink(
-										'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
-									);
-									return false;
-								} }
-								href=""
-								type="wc-admin"
-							>
-								<></>
-							</Link>
+			{ showOtherOptions && (
+				<Text className="woocommerce-stack__other-options">
+					{ interpolateComponents( {
+						mixedString: __(
+							'Can’t find your product type? {{sbLink}}Start Blank{{/sbLink}} or {{LspLink}}Load Sample Products{{/LspLink}} to see what they look like in your store.',
+							'woocommerce'
 						),
-						LspLink: (
-							// TODO: Update this to the load sample product.
-							<Link
-								href=""
-								type="wc-admin"
-								onClick={ () => {
-									onClickLoadSampleProduct();
-									return false;
-								} }
-							>
-								<></>
-							</Link>
-						),
-					},
-				} ) }
-			</Text>
+						components: {
+							sbLink: (
+								<Link
+									onClick={ () => {
+										window.location = getAdminLink(
+											'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
+										);
+										return false;
+									} }
+									href=""
+									type="wc-admin"
+								>
+									<></>
+								</Link>
+							),
+							LspLink: (
+								<Link
+									href=""
+									type="wc-admin"
+									onClick={ () => {
+										onClickLoadSampleProduct();
+										return false;
+									} }
+								>
+									<></>
+								</Link>
+							),
+						},
+					} ) }
+				</Text>
+			) }
 		</div>
 	);
 };
