@@ -178,7 +178,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException Thrown when the method does not exist.
 	 */
 	public function test_display_reviews_moved_notice() : void {
-		$overrides = new ReviewsCommentsOverrides();
+		$overrides = wc_get_container()->get( ReviewsCommentsOverrides::class );
 		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'display_reviews_moved_notice' );
 		$method->setAccessible( true );
 
@@ -231,7 +231,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_exclude_reviews_from_comments() : void {
-		$overrides = new ReviewsCommentsOverrides();
+		$overrides = wc_get_container()->get( ReviewsCommentsOverrides::class );
 
 		$original_args = [
 			'post_type' => [ 'product' ],
