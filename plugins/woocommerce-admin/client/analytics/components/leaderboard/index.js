@@ -121,7 +121,7 @@ Leaderboard.propTypes = {
 	 */
 	query: PropTypes.object,
 	/**
-	 * Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
+	 * An array of arrays of display/value object pairs (see `Table` props).
 	 */
 	rows: PropTypes.arrayOf(
 		PropTypes.arrayOf(

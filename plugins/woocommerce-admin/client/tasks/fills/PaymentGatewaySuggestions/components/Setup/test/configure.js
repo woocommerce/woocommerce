@@ -81,7 +81,7 @@ describe( 'Configure', () => {
 		const { container } = render( <Configure { ...props } /> );
 
 		const button = container.querySelector( 'a' );
-		expect( button.textContent ).toBe( 'Set up' );
+		expect( button.textContent ).toBe( 'Get started' );
 		expect( button.href ).toBe( mockGateway.settingsUrl );
 	} );
 } );

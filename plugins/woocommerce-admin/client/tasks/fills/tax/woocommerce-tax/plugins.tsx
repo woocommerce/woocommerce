@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -68,7 +68,11 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 	return (
 		<>
 			<PluginInstaller
-				onComplete={ ( activatedPlugins, response ) => {
+				// @ts-expect-error PluginInstaller has onComplete props but it is a pure js component and doesn't export the right types.
+				onComplete={ (
+					activatedPlugins: string[],
+					response: InstallPluginsResponse
+				) => {
 					createNoticesFromResponse( response );
 					recordEvent( 'tasklist_tax_install_extensions', {
 						install_extensions: true,
@@ -78,7 +82,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					} );
 					nextStep();
 				} }
-				onError={ ( errors, response ) =>
+				onError={ ( errors: unknown, response: unknown ) =>
 					createNoticesFromResponse( response )
 				}
 				onSkip={ () => {
@@ -106,7 +110,9 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 									href={ 'https://wordpress.com/tos/' }
 									target="_blank"
 									type="external"
-								/>
+								>
+									<></>
+								</Link>
 							),
 						},
 					} ) }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove the post_id column from the orders table, and adjust the SQL queries that count/get out of sync orders accordingly.

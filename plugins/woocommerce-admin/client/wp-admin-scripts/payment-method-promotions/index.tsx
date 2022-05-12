@@ -26,7 +26,7 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 			return {
 				className: child.className,
 				html: child.innerHTML,
-				width: child.getAttribute( 'width' ),
+				width: child.getAttribute( 'width' ) || undefined,
 			};
 		} );
 		const title = container.getElementsByClassName(

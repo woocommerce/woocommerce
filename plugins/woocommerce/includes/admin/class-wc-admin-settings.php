@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -273,6 +274,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						break;
 
+					case 'info':
+						echo '<tr><th scope="row" class="titledesc"/><td style="' . esc_attr( $value['css'] ) . '">';
+						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
+						echo '</td></tr>';
+						break;
+
 					// Section Ends.
 					case 'sectionend':
 						if ( ! empty( $value['id'] ) ) {
@@ -417,6 +424,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					// Radio inputs.
 					case 'radio':
 						$option_value = $value['value'];
+						$disabled_values = ArrayUtil::get_value_or_default($value, 'disabled', array());
 
 						?>
 						<tr valign="top">
@@ -435,6 +443,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												name="<?php echo esc_attr( $value['id'] ); ?>"
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
+												<?php if( in_array( $key, $disabled_values ) ) { echo 'disabled'; } ?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
 												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>

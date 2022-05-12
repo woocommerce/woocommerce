@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove `woocommerce_payments_menu_promo_nz_ie` experiment request

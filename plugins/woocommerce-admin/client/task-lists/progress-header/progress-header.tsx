@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, TaskListType } from '@woocommerce/data';
+import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -22,18 +22,13 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 } ) => {
 	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
 		( select ) => {
-			const taskList: TaskListType = select(
-				ONBOARDING_STORE_NAME
-			).getTaskList( taskListId );
+			const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
+				taskListId
+			);
 			const finishedResolution = select(
 				ONBOARDING_STORE_NAME
 			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-			const nowTimestamp = Date.now();
-			const visibleTasks = taskList?.tasks.filter(
-				( task ) =>
-					! task.isDismissed &&
-					( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-			);
+			const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 
 			return {
 				loading: ! finishedResolution,
@@ -42,17 +37,16 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 					( task ) => task.isComplete
 				).length,
 				hasVisitedTasks:
-					visibleTasks?.filter( ( task ) => task.isVisited ).length >
-					0,
+					visibleTasks?.filter(
+						( task ) =>
+							task.isVisited && task.id !== 'store_details'
+					).length > 0,
 			};
 		}
 	);
 
 	const progressTitle = useMemo( () => {
-		if (
-			( ! hasVisitedTasks && completedCount < 2 ) ||
-			completedCount === tasksCount
-		) {
+		if ( ! hasVisitedTasks || completedCount === tasksCount ) {
 			const siteTitle = getSetting( 'siteTitle' );
 			return siteTitle
 				? sprintf(
@@ -60,7 +54,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 						__( 'Welcome to %s', 'woocommerce' ),
 						siteTitle
 				  )
-				: __( 'Welcome', 'woocommerce' );
+				: __( 'Welcome to your store', 'woocommerce' );
 		}
 		if ( completedCount > 0 && completedCount < 4 ) {
 			return __( "Let's get you started", 'woocommerce' ) + '   🚀';
@@ -69,9 +63,9 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 			return __( 'You are on the right track', 'woocommerce' );
 		}
 		return __( 'You are almost there', 'woocommerce' );
-	}, [ completedCount, hasVisitedTasks ] );
+	}, [ completedCount, hasVisitedTasks, tasksCount ] );
 
-	if ( loading || completedCount === tasksCount ) {
+	if ( loading ) {
 		return null;
 	}
 
@@ -85,22 +79,26 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 				<h1 className="woocommerce-task-progress-header__title">
 					{ progressTitle }
 				</h1>
-				<p>
-					{ sprintf(
-						/* translators: 1: completed tasks, 2: total tasks */
-						__(
-							'Follow these steps to start selling quickly. %1$d out of %2$d complete.',
-							'woocommerce'
-						),
-						completedCount,
-						tasksCount
-					) }
-				</p>
-				<progress
-					className="woocommerce-task-progress-header__progress-bar"
-					max={ tasksCount }
-					value={ completedCount || 0 }
-				/>
+				{ completedCount !== tasksCount ? (
+					<>
+						<p>
+							{ sprintf(
+								/* translators: 1: completed tasks, 2: total tasks */
+								__(
+									'Follow these steps to start selling quickly. %1$d out of %2$d complete.',
+									'woocommerce'
+								),
+								completedCount,
+								tasksCount
+							) }
+						</p>
+						<progress
+							className="woocommerce-task-progress-header__progress-bar"
+							max={ tasksCount }
+							value={ completedCount || 0 }
+						/>
+					</>
+				) : null }
 			</div>
 		</div>
 	);

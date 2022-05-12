@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Modify migration to make cot.id === posts.id.

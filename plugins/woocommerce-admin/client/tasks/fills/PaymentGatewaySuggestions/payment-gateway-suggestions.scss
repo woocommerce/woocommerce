@@ -22,6 +22,14 @@
 		margin: 0;
 	}
 
+	.components-card__footer {
+		a.components-button {
+			.gridicon {
+				margin-left: 4px;
+			}
+		}
+	}
+
 	.woocommerce-task-payment__recommended-pill {
 		border: 1px solid $studio-gray-5;
 		border-radius: 28px;
@@ -37,6 +45,10 @@
 
 	.components-card__divider:last-child {
 		display: none;
+	}
+
+	.woocommerce-task-payment-wcpay {
+		margin-bottom: 0;
 	}
 }
 

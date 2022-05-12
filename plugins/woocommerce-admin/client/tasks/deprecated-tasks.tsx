@@ -4,11 +4,18 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useEffect, useState } from '@wordpress/element';
 
+type DeprecatedTask = TaskType & {
+	container?: React.ReactNode;
+	isDeprecated?: boolean;
+};
+
 const DeprecatedWooOnboardingTaskFills = () => {
-	const [ deprecatedTasks, setDeprecatedTasks ] = useState( [] );
+	const [ deprecatedTasks, setDeprecatedTasks ] = useState<
+		DeprecatedTask[]
+	>( [] );
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
 			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
@@ -23,12 +30,17 @@ const DeprecatedWooOnboardingTaskFills = () => {
 			const deprecatedTasksWithContainer = [];
 			for ( const tasklist of taskLists ) {
 				for ( const task of tasklist.tasks ) {
-					if ( task.isDeprecated && task.container ) {
+					if (
+						( task as DeprecatedTask ).isDeprecated &&
+						( task as DeprecatedTask ).container
+					) {
 						deprecatedTasksWithContainer.push( task );
 					}
 				}
 			}
-			setDeprecatedTasks( deprecatedTasksWithContainer );
+			setDeprecatedTasks(
+				deprecatedTasksWithContainer as DeprecatedTask[]
+			);
 		}
 	}, [ taskLists ] );
 
@@ -38,8 +50,9 @@ const DeprecatedWooOnboardingTaskFills = () => {
 	return (
 		<>
 			{ deprecatedTasks.map( ( task ) => (
+				// @ts-expect-error WooOnboardingTask is still a pure JS file
 				<WooOnboardingTask id={ task.id } key={ task.id }>
-					{ ( { onComplete } ) => task.container }
+					{ () => task.container }
 				</WooOnboardingTask>
 			) ) }
 		</>
@@ -47,6 +60,7 @@ const DeprecatedWooOnboardingTaskFills = () => {
 };
 
 registerPlugin( 'wc-admin-deprecated-task-container', {
+	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => <DeprecatedWooOnboardingTaskFills />,
 } );

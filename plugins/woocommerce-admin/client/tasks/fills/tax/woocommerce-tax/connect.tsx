@@ -16,6 +16,7 @@ export const Connect: React.FC< SetupStepProps > = ( {
 } ) => {
 	return (
 		<ConnectForm
+			// @ts-expect-error ConnectForm is pure JS component
 			onConnect={ () => {
 				recordEvent( 'tasklist_tax_connect_store', {
 					connect: true,

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Move feature flag config files to Woocommerce plugin to support unit test execution in the wp-env environment.

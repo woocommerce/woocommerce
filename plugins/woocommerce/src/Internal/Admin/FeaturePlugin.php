@@ -8,14 +8,12 @@ namespace Automattic\WooCommerce\Internal\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API;
-use Automattic\WooCommerce\Internal\Admin\Install;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SetUpAdditionalPaymentTypes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
@@ -69,6 +67,11 @@ class FeaturePlugin {
 	 * Init the feature plugin, only if we can detect both Gutenberg and WooCommerce.
 	 */
 	public function init() {
+		// Bail if WC isn't initialized (This can be called from WCAdmin's entrypoint).
+		if ( ! defined( 'WC_ABSPATH' ) ) {
+			return;
+		}
+
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/page-controller-functions.php';
@@ -78,8 +81,6 @@ class FeaturePlugin {
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/wc-admin-update-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/class-experimental-abtest.php';
 
-		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
-		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
 		if ( did_action( 'plugins_loaded' ) ) {
 			self::on_plugins_loaded();
 		} else {
@@ -89,35 +90,6 @@ class FeaturePlugin {
 			// See: https://github.com/woocommerce/woocommerce-admin/issues/3869.
 			add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), 9 );
 		}
-	}
-
-	/**
-	 * Install DB and create cron events when activated.
-	 *
-	 * @return void
-	 */
-	public function on_activation() {
-		Install::create_tables();
-		Install::create_events();
-	}
-
-	/**
-	 * Remove WooCommerce Admin scheduled actions on deactivate.
-	 *
-	 * @return void
-	 */
-	public function on_deactivation() {
-		// Don't clean up if the WooCommerce Admin package is in core.
-		// NOTE: Any future divergence from the core package will need to be accounted for here.
-		if ( defined( 'WC_ADMIN_PACKAGE_EXISTS' ) && WC_ADMIN_PACKAGE_EXISTS ) {
-			return;
-		}
-
-		$this->includes();
-		ReportsSync::clear_queued_actions();
-		Notes::clear_queued_actions();
-		wp_clear_scheduled_hook( 'wc_admin_daily' );
-		wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 	}
 
 	/**
@@ -147,7 +119,15 @@ class FeaturePlugin {
 		 * @deprecated 3.3.0
 		 * @var string
 		 */
-		define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+			/**
+			  * Define the current WC Admin version.
+			  *
+			  * @deprecated 3.3.0
+			  * @var string
+			  */
+			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
+		}
 	}
 
 	/**
@@ -155,7 +135,6 @@ class FeaturePlugin {
 	 */
 	public function includes() {
 		// Initialize Database updates, option migrations, and Notes.
-		Install::init();
 		Events::instance()->init();
 		Notes::init();
 
@@ -186,7 +165,6 @@ class FeaturePlugin {
 		new TrackingOptIn();
 		new WooCommercePayments();
 		new InstallJPAndWCSPlugins();
-		new SetUpAdditionalPaymentTypes();
 		new TestCheckout();
 		new SellingOnlineCourses();
 		new WelcomeToWooCommerceForStoreUsers();

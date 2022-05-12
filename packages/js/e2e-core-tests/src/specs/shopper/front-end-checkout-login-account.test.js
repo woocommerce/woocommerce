@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
- const {
+const {
 	shopper,
 	merchant,
 	createSimpleProduct,
@@ -15,19 +15,19 @@
  */
 const { it, describe, beforeAll } = require( '@jest/globals' );
 
-const config = require('config');
+const config = require( 'config' );
 
 const runCheckoutLoginAccountTest = () => {
-	describe('Shopper Checkout Login Account', () => {
+	describe( 'Shopper Checkout Login Account', () => {
 		let productId;
 
-		beforeAll(async () => {
+		beforeAll( async () => {
 			productId = await createSimpleProduct();
 
 			// Set checkbox for logging to account during checkout
 			await merchant.login();
-			await merchant.openSettings('account');
-			await setCheckbox('#woocommerce_enable_checkout_login_reminder');
+			await merchant.openSettings( 'account' );
+			await setCheckbox( '#woocommerce_enable_checkout_login_reminder' );
 			await settingsPageSaveChanges();
 			await merchant.logout();
 
@@ -36,42 +36,54 @@ const runCheckoutLoginAccountTest = () => {
 			await shopper.addToCartFromShopPage( productId );
 			await uiUnblocked();
 			await shopper.goToCheckout();
-		});
+		} );
 
 		afterAll( async () => {
 			await shopper.logout();
 		} );
 
-		it('can login to an existing account during checkout', async () => {
+		it( 'can login to an existing account during checkout', async () => {
 			// Click to login during checkout
-			await page.waitForSelector('.woocommerce-form-login-toggle');
-			await expect(page).toClick('.woocommerce-info > a.showlogin');
+			await page.waitForSelector( '.woocommerce-form-login-toggle' );
+			await expect( page ).toClick( '.woocommerce-info > a.showlogin' );
 
 			// Fill shopper's login credentials and proceed further
-			await page.type( '#username', config.get('users.customer.username') );
-			await page.type( '#password', config.get('users.customer.password') );
+			await page.type(
+				'#username',
+				config.get( 'users.customer.username' )
+			);
+			await page.type(
+				'#password',
+				config.get( 'users.customer.password' )
+			);
 
-			await Promise.all([
-				page.waitForNavigation({waitUntil: 'networkidle0'}),
-				page.click('button[name="login"]'),
-			]);
+			await Promise.all( [
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+				page.click( 'button[name="login"]' ),
+			] );
 
 			// Place an order
 			await shopper.placeOrder();
-			await expect(page).toMatchElement('h1.entry-title', {text: 'Order received'});
+			await expect( page ).toMatchElement( 'h1.entry-title', {
+				text: 'Order received',
+			} );
 
 			// Verify the email of a logged in user
-			await expect(page).toMatchElement('ul > li.email', {text: 'Email: john.doe@example.com'});
+			await expect( page ).toMatchElement( 'ul > li.email', {
+				text: 'Email: john.doe@example.com',
+			} );
 
 			// Verify the user is logged in on my account page
 			await shopper.gotoMyAccount();
 
 			await Promise.all( [
-				await expect(page.url()).toMatch('my-account/'),
-				await expect(page).toMatchElement('h1', {text: 'My account'}),
+				await expect( page.url() ).toMatch( 'my-account/' ),
+				await expect( page ).toMatchElement( 'h1', {
+					text: 'My account',
+				} ),
 			] );
-		});
-	});
+		} );
+	} );
 };
 
 module.exports = runCheckoutLoginAccountTest;

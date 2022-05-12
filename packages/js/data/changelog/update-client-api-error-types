@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update @woocomerce/data client api error types. #32939

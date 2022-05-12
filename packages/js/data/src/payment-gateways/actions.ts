@@ -9,7 +9,6 @@ import { apiFetch } from '@wordpress/data-controls';
 import { ACTION_TYPES } from './action-types';
 import { API_NAMESPACE } from './constants';
 import { PaymentGateway } from './types';
-import { RestApiError } from '../types';
 
 export function getPaymentGatewaysRequest(): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_REQUEST;
@@ -32,10 +31,10 @@ export function getPaymentGatewaysSuccess(
 }
 
 export function getPaymentGatewaysError(
-	error: RestApiError
+	error: unknown
 ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_ERROR;
-	error: RestApiError;
+	error: unknown;
 } {
 	return {
 		type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_ERROR,
@@ -52,10 +51,10 @@ export function getPaymentGatewayRequest(): {
 }
 
 export function getPaymentGatewayError(
-	error: RestApiError
+	error: unknown
 ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAY_ERROR;
-	error: RestApiError;
+	error: unknown;
 } {
 	return {
 		type: ACTION_TYPES.GET_PAYMENT_GATEWAY_ERROR,
@@ -95,10 +94,10 @@ export function updatePaymentGatewayRequest(): {
 }
 
 export function updatePaymentGatewayError(
-	error: RestApiError
+	error: unknown
 ): {
 	type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_ERROR;
-	error: RestApiError;
+	error: unknown;
 } {
 	return {
 		type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_ERROR,
@@ -106,9 +105,12 @@ export function updatePaymentGatewayError(
 	};
 }
 
+type DeepPartial< T > = {
+	[ P in keyof T ]?: DeepPartial< T[ P ] >;
+};
 export function* updatePaymentGateway(
 	id: string,
-	data: Partial< PaymentGateway >
+	data: DeepPartial< PaymentGateway >
 ) {
 	try {
 		yield updatePaymentGatewayRequest();
@@ -124,7 +126,7 @@ export function* updatePaymentGateway(
 			return response;
 		}
 	} catch ( e ) {
-		yield updatePaymentGatewayError( e as RestApiError );
+		yield updatePaymentGatewayError( e );
 		throw e;
 	}
 }

@@ -14,8 +14,8 @@ export const PartnerCard: React.FC< {
 	name: string;
 	logo: string;
 	description: string;
-	benefits: string[];
-	terms: string;
+	benefits: ( string | JSX.Element )[];
+	terms: string | JSX.Element;
 	actionText: string;
 	onClick: () => void;
 	isBusy?: boolean;
