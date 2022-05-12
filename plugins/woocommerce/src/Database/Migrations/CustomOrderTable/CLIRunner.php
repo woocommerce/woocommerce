@@ -138,12 +138,12 @@ class CLIRunner {
 	 * [--batch-size=<batch-size>]
 	 * : The number of orders to process in each batch.
 	 * ---
-	 * default: 100
+	 * default: 500
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc cot migrate --batch-size=100
+	 *     wp wc cot migrate --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -171,7 +171,7 @@ class CLIRunner {
 				'batch-size' => 500,
 			)
 		);
-		$batch_size  = ( (int) $assoc_args['batch-size'] ) === 0 ? 100 : (int) $assoc_args['batch-size'];
+		$batch_size  = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
 		$progress    = WP_CLI\Utils\make_progress_bar( 'Order Data Migration', $order_count / $batch_size );
 		$processed   = 0;
 		$batch_count = 1;
@@ -245,13 +245,13 @@ class CLIRunner {
 	 * [--batch-size=<batch-size>]
 	 * : The number of orders to process in each batch. Passing a value of 0 will disable batching.
 	 * ---
-	 * default: 100
+	 * default: 500
 	 * ---
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Copy all order data into the post meta table, 100 posts at a time.
-	 *     wp wc cot backfill --batch-size=100
+	 *     # Copy all order data into the post meta table, 500 posts at a time.
+	 *     wp wc cot backfill --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -273,8 +273,8 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Verify migrated order data, 100 orders at a time.
-	 *     wp wc cot verify_cot_data --batch-size=100
+	 *     # Verify migrated order data, 500 orders at a time.
+	 *     wp wc cot verify_cot_data --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
