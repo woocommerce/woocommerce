@@ -121,7 +121,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'name' => 'customer_id',
 		),
 		'billing_email'        => array(
-			'type' => 'int',
+			'type' => 'string',
 			'name' => 'billing_email',
 		),
 		'date_created_gmt'     => array(
@@ -282,7 +282,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'name' => 'version',
 		),
 		'prices_include_tax'          => array(
-			'type' => 'string',
+			'type' => 'bool',
 			'name' => 'prices_include_tax',
 		),
 		'coupon_usages_are_counted'   => array(
@@ -298,7 +298,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'name' => 'cart_hash',
 		),
 		'new_order_email_sent'        => array(
-			'type' => 'string',
+			'type' => 'bool',
 			'name' => 'new_order_email_sent',
 		),
 		'order_key'                   => array(
