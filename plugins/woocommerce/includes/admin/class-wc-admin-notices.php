@@ -174,6 +174,8 @@ class WC_Admin_Notices {
 			/**
 			 * Filter the capability required to dismiss a given notice.
 			 *
+			 * @since 6.6.0
+			 *
 			 * @param string $default_capability The default required capability.
 			 * @param string $notice_name The notice name.
 			 */
