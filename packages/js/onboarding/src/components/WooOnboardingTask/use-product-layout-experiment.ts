@@ -21,11 +21,11 @@ export const getProductLayoutExperiment = async (): Promise< Layout > => {
 	return 'control';
 };
 
-export const isExperimentProductTask = async (): Promise< boolean > => {
+export const isProductTaskExperimentTreatment = async (): Promise< boolean > => {
 	return ( await getProductLayoutExperiment() ) !== 'control';
 };
 
-export const useLayoutExperiment = () => {
+export const useProductTaskExperiment = () => {
 	const [ isLoading, setIsLoading ] = useState< boolean >( true );
 	const [ experimentLayout, setExperimentLayout ] = useState< Layout >(
 		'control'
@@ -41,4 +41,4 @@ export const useLayoutExperiment = () => {
 	return [ isLoading, experimentLayout ];
 };
 
-export default useLayoutExperiment;
+export default useProductTaskExperiment;

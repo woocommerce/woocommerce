@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import {
 	WooOnboardingTask,
-	useLayoutExperiment,
+	useProductTaskExperiment,
 } from '@woocommerce/onboarding';
 import { Text } from '@woocommerce/experimental';
 import { registerPlugin } from '@wordpress/plugins';
@@ -52,7 +52,10 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
-	const [ isLoadingExperiment, experimentLayout ] = useLayoutExperiment();
+	const [
+		isLoadingExperiment,
+		experimentLayout,
+	] = useProductTaskExperiment();
 
 	const productTypes = useProductTypeListItems( getProductTypes() );
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(

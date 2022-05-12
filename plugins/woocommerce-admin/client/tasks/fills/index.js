@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isExperimentProductTask } from '@woocommerce/onboarding';
+import { isProductTaskExperimentTreatment } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ import './purchase';
 const onboardingData = getAdminSetting( 'onboarding' );
 
 const possiblyImportProductTaskExperiment = async () => {
-	const isExperiment = await isExperimentProductTask();
+	const isExperiment = await isProductTaskExperimentTreatment();
 	if ( isExperiment ) {
 		import( './experimental-products' );
 	} else {

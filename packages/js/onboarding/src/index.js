@@ -13,6 +13,6 @@ export { WooPaymentGatewayConfigure } from './components/WooPaymentGatewayConfig
 export { WooOnboardingTaskListItem } from './components/WooOnboardingTaskListItem';
 export {
 	WooOnboardingTask,
-	useLayoutExperiment,
-	isExperimentProductTask,
+	useProductTaskExperiment,
+	isProductTaskExperimentTreatment,
 } from './components/WooOnboardingTask';
