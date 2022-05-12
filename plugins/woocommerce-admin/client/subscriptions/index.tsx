@@ -248,7 +248,7 @@ const OnboardingSteps = () => (
 				<StepNumber>1</StepNumber>
 				<h3>
 					{ experimentAssignment === Treatment.A
-						? __( 'Create and connect your account', 'woocommerce' )
+						? __( 'Create a subscription', 'woocommerce' )
 						: __(
 								'Create and connect your account',
 								'woocommerce'
@@ -257,7 +257,7 @@ const OnboardingSteps = () => (
 				<p>
 					{ experimentAssignment === Treatment.A
 						? __(
-								'To ensure safe and secure transactions, a WordPress.com account is required.',
+								'Add a name, price and image to your subscription product and then publish it.',
 								'woocommerce'
 						  )
 						: __(
@@ -270,7 +270,7 @@ const OnboardingSteps = () => (
 				<StepNumber>2</StepNumber>
 				<h3>
 					{ experimentAssignment === Treatment.A
-						? __( 'Provide a few business details', 'woocommerce' )
+						? __( 'Create and connect your account', 'woocommerce' )
 						: __(
 								'Provide a few business details',
 								'woocommerce'
@@ -279,7 +279,7 @@ const OnboardingSteps = () => (
 				<p>
 					{ experimentAssignment === Treatment.A
 						? __(
-								'Next we’ll ask you to verify your business and payment details to enable deposits.',
+								'To ensure safe and secure transactions, a WordPress.com account is required.',
 								'woocommerce'
 						  )
 						: __(
@@ -292,13 +292,13 @@ const OnboardingSteps = () => (
 				<StepNumber>3</StepNumber>
 				<h3>
 					{ experimentAssignment === Treatment.A
-						? __( 'Create subscriptions', 'woocommerce' )
+						? __( 'Provide a few business details', 'woocommerce' )
 						: __( 'Create subscriptions', 'woocommerce' ) }
 				</h3>
 				<p>
 					{ experimentAssignment === Treatment.A
 						? __(
-								'Finally, publish subscription products to offer on your store.',
+								'Finally, we’ll ask you to verify your business and payment details to enable deposits.',
 								'woocommerce'
 						  )
 						: __(
@@ -315,13 +315,6 @@ const SubscriptionsPage = () => {
 	const [ hasError, setHasError ] = useState( false );
 
 	useEffect( () => {
-		// TODO: Remove this.
-		console.log(
-			experimentAssignment === Treatment.A
-				? 'Treatment A: Create a subscription product then WCPay onboarding.'
-				: 'Treatment B: WCPay onboarding then create a subscription product.'
-		);
-
 		recordEvent( 'wccore_subscriptions_empty_state_view' );
 	}, [] );
 
