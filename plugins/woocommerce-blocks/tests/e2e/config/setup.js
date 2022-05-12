@@ -20,6 +20,7 @@ import {
 	createBlockPages,
 	enablePaymentGateways,
 	createProductAttributes,
+	disableAttributeLookup,
 } from '../fixtures/fixture-loaders';
 import { PERFORMANCE_REPORT_FILENAME } from '../../utils/constants';
 
@@ -65,6 +66,9 @@ module.exports = async ( globalConfig ) => {
 		products.forEach( async ( productId ) => {
 			await createReviews( productId );
 		} );
+
+		// This is necessary for avoid this bug https://github.com/woocommerce/woocommerce/issues/32065
+		await disableAttributeLookup();
 
 		// Wipe the performance e2e file at the start of every run
 		if ( existsSync( PERFORMANCE_REPORT_FILENAME ) ) {
