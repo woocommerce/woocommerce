@@ -344,7 +344,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			( Features::is_enabled( 'experimental-import-products-task' ) || Features::is_enabled( 'experimental-products-task' ) )
 			&& static::is_experiment_product_task()
 		) {
-			$sample_csv_file = WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
+
+			$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
+			WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
 		} else {
 			$sample_csv_file = WC_ABSPATH . 'sample-data/sample_products.csv';
 		}
