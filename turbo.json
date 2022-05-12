@@ -1,0 +1,37 @@
+{
+    "$schema": "https://turborepo.org/schema.json",
+    "baseBranch": "origin/trunk",
+    "pipeline": {
+        "build": {
+            "dependsOn":  [ "^build" ],
+            "inputs": [
+                "src/**.js",
+                "src/**.ts",
+                "src/**.tsx",
+                "src/**.php",
+                "includes/**.php"
+            ],
+            "outputs": [
+                "dist/**",
+                "build/**",
+                "build-module/**",
+                "build-style/**",
+                "build-types/**"
+            ]
+        },
+        "woocommerce#build": {
+            "dependsOn":  [ 
+                "^build",
+                "@woocommerce/admin-library#build",
+                "woocommerce-legacy-assets#build" 
+            ],
+            "outputs": [],
+            "inputs": [
+                "src/**.php",
+                "includes/**.php",
+                "!legacy/**"
+            ]
+        }
+    }
+}
+  
