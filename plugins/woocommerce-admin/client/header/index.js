@@ -95,21 +95,32 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const { hasTasksReminderFeature } = useSelect( ( select ) => {
+	const { activeSetuplist } = useSelect( ( select ) => {
 		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
+
+		const visibleSetupList = taskLists
+			.filter( ( list ) => list.isVisible )
+			.filter( ( list ) =>
+				[
+					'setup_experiment_1',
+					'setup_experiment_2',
+					'setup',
+				].includes( list.id )
+			);
+
 		return {
-			hasTasksReminderFeature: taskLists.some(
-				( list ) => list.id === 'setup_experiment_1'
-			),
+			activeSetuplist: visibleSetupList.length
+				? visibleSetupList[ 0 ].id
+				: null,
 		};
 	} );
 
 	return (
 		<div className={ className } ref={ headerElement }>
-			{ hasTasksReminderFeature && (
+			{ activeSetuplist && (
 				<TasksReminderBar
-					pageTitle={ pageTitle }
 					updateBodyMargin={ updateBodyMargin }
+					taskListId={ activeSetuplist }
 				/>
 			) }
 			<div className="woocommerce-layout__header-wrapper">
