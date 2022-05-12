@@ -12,7 +12,7 @@ pnpm install @woocommerce/explat --save
 
 This package assumes that your code will run in an ES2015+ environment. If you're using an environment that has limited or no support for ES2015+ such as lower versions of IE then using core-js or @babel/polyfill will add support for these methods. Learn more about it in Babel docs.
 
-## Usage
+## Usage with Experiment Component
 
 ```js
 import { Experiment } from '@woocommerce/explat';
@@ -40,3 +40,25 @@ import { ExperimentWithAuth } from '@woocommerce/explat';
 	loadingExperience={ LoadingExperience }
 />;
 ```
+
+## Usage with useExperiment
+
+```js
+import { useExperiment } from '@woocommerce/explat';
+
+const DefaultExperience = <div>Hello World</div>;
+
+const TreatmentExperience = <div>Hello WooCommerce!</div>;
+
+const LoadingExperience = <div>⏰</div>;
+
+const [ isLoadingExperiment, experimentAssignment ] = useExperiment('experiment-name');
+
+if ( ! isLoadingExperiment && experimentAssignment?.variationName === 'treatment' ) {
+	return <TreatmentExperience />
+}
+
+return <DefaultExperience />
+
+````
+
