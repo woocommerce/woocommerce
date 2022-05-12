@@ -8,7 +8,7 @@ jobs:
             results: ${{ steps.results.outputs.results }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
             - name: Install prerequisites
               run: |
                   npm install -g pnpm@^6.24.2
@@ -61,3 +61,28 @@ jobs:
                   github_token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   delete_user_name: woocommercebot
                   issue_number: ${{ github.event.number }}
+            - name: Add label
+              if: ${{ needs.analyze.outputs.results }}
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+                  script: |
+                      github.rest.issues.addLabels({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        labels: ['release: highlight']
+                      })
+            - name: Remove label
+              if: ${{ !needs.analyze.outputs.results }}
+              continue-on-error: true
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+                  script: |
+                      github.rest.issues.removeLabel({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: ['release: highlight']
+                      })
