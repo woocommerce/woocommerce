@@ -92,6 +92,10 @@ describe( 'Products', () => {
 		const fetchMock = jest.spyOn( global, 'fetch' );
 		const { queryByText, getByRole } = render( <Products /> );
 
+		userEvent.click(
+			getByRole( 'button', { name: 'View more product types' } )
+		);
+
 		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
 
 		userEvent.click(

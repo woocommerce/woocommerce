@@ -27,6 +27,24 @@ describe( 'Stack', () => {
 		expect( queryAllByRole( 'link' ) ).toHaveLength( 2 );
 	} );
 
+	it( 'should not render other product options', () => {
+		const { queryByText } = render(
+			<Stack
+				showOtherOptions={ false }
+				onClickLoadSampleProduct={ () => {} }
+				items={ [
+					{
+						...productTypes[ 0 ],
+						onClick: () => {},
+					},
+				] }
+			/>
+		);
+
+		expect( queryByText( 'Start Blank' ) ).not.toBeInTheDocument();
+		expect( queryByText( 'Load Sample Products' ) ).not.toBeInTheDocument();
+	} );
+
 	it( 'should call onClickLoadSampleProduct when the "Load Sample Products" link is clicked', async () => {
 		const onClickLoadSampleProduct = jest.fn();
 		const { getByRole } = render(
