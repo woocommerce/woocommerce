@@ -75,6 +75,7 @@ jobs:
                       })
             - name: Remove label
               if: ${{ !needs.analyze.outputs.results }}
+              continue-on-error: true
               uses: actions/github-script@v5
               with:
                   github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
