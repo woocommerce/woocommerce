@@ -155,11 +155,11 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 			]
 		);
 
-		$reflection = new ReflectionClass( \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::class );
+		$reflection = new ReflectionClass( ReviewsCommentsOverrides::class );
 		$method = $reflection->getMethod( 'should_display_reviews_moved_notice' );
 		$method->setAccessible( true );
 
-		$should_display_notice = $method->invoke( \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::get_instance() );
+		$should_display_notice = $method->invoke( ReviewsCommentsOverrides::get_instance() );
 
 		$this->assertSame( $expected, $should_display_notice );
 	}
@@ -178,7 +178,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException Thrown when the method does not exist.
 	 */
 	public function test_display_reviews_moved_notice() : void {
-		$overrides = new \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides();
+		$overrides = new ReviewsCommentsOverrides();
 		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'display_reviews_moved_notice' );
 		$method->setAccessible( true );
 
@@ -214,7 +214,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_get_dismiss_capability( string $default_capability, string $notice_name, string $expected_capability ) : void {
-		$this->assertSame( $expected_capability, \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::get_instance()->get_dismiss_capability( $default_capability, $notice_name ) );
+		$this->assertSame( $expected_capability, ReviewsCommentsOverrides::get_instance()->get_dismiss_capability( $default_capability, $notice_name ) );
 	}
 
 	/** @see test_get_dismiss_capability() */

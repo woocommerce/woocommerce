@@ -95,7 +95,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$reviews->load_reviews_screen();
 
-		$this->assertInstanceOf( \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::class, $list_table_property->getValue( $reviews ) );
+		$this->assertInstanceOf( ReviewsListTable::class, $list_table_property->getValue( $reviews ) );
 	}
 
 	/**
@@ -251,7 +251,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$reviews = Reviews::get_instance();
-		$list_table = new \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
+		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
 		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
 		$property->setAccessible( true );
