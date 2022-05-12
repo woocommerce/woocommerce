@@ -288,7 +288,7 @@ export default class Analyzer extends Command {
 		output: string
 	): Promise< void > {
 		const templates = await this.scanTemplates( content, version );
-		const hooks = await this.scanHooks( content, version );
+		const hooks = await this.scanHooks( content, version, output );
 		// @todo: Scan for changes to database schema.
 
 		if ( templates.size ) {
@@ -479,11 +479,13 @@ export default class Analyzer extends Command {
 	 *
 	 * @param {string} content Patch content.
 	 * @param {string} version Current product version.
+	 * @param {string} output  Output style.
 	 * @return {Promise<Map<string, Map<string, string[]>>>} Promise.
 	 */
 	private async scanHooks(
 		content: string,
-		version: string
+		version: string,
+		output: string
 	): Promise< Map< string, Map< string, string[] > > > {
 		CliUx.ux.action.start( 'Scanning for new hooks' );
 
@@ -531,7 +533,10 @@ export default class Analyzer extends Command {
 				const name = await this.getHookName( hookName[ 3 ] );
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
-				const message = `\\'${ name }\\' introduced in ${ version }`;
+				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
+				const GithubMessage = `\\'${ name }\\' introduced in ${ version }`;
+				const message =
+					output === 'github' ? GithubMessage : CLIMessage;
 				const title = `New ${ kind } found`;
 
 				if ( ! hookName[ 2 ].startsWith( '-' ) ) {
