@@ -67,13 +67,23 @@ class PostsToOrdersMigrationController {
 		$this->shipping_address_table_migrator = new PostToOrderAddressTableMigrator( 'shipping' );
 		$this->operation_data_table_migrator   = new PostToOrderOpTableMigrator();
 
-		$excluded_columns = array_keys( $this->order_table_migrator->get_meta_column_config() );
-		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->billing_address_table_migrator->get_meta_column_config() ) );
-		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->shipping_address_table_migrator->get_meta_column_config() ) );
-		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->operation_data_table_migrator->get_meta_column_config() ) );
+		$excluded_columns = $this->get_migrated_meta_keys();
 
 		$this->meta_table_migrator = new PostMetaToOrderMetaMigrator( $excluded_columns );
 		$this->error_logger        = new MigrationErrorLogger();
+	}
+
+	/**
+	 * Helper method to get keys to migrate for migrations.
+	 *
+	 * @return int[]|string[]
+	 */
+	public function get_migrated_meta_keys() : array {
+		$migrated_keys = array_keys( $this->order_table_migrator->get_meta_column_config() );
+		$migrated_keys = array_merge( $migrated_keys, array_keys( $this->billing_address_table_migrator->get_meta_column_config() ) );
+		$migrated_keys = array_merge( $migrated_keys, array_keys( $this->shipping_address_table_migrator->get_meta_column_config() ) );
+		$migrated_keys = array_merge( $migrated_keys, array_keys( $this->operation_data_table_migrator->get_meta_column_config() ) );
+		return $migrated_keys;
 	}
 
 	/**

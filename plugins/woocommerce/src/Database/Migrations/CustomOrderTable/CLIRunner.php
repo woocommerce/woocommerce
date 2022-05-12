@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use WP_CLI;
 
 /**
@@ -198,7 +199,6 @@ class CLIRunner {
 				// Translators: %1$d is the batch number, %2$f is time taken to process batch.
 					__( 'Batch %1$d (%2$d orders) completed in %3$f seconds', 'woocommerce' ),
 					$batch_count,
-					count( $order_ids ),
 					$batch_total_time
 				)
 			);
@@ -333,6 +333,7 @@ class CLIRunner {
 			);
 			$batch_start_time = microtime( true );
 			$failed_ids       = $failed_ids + $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
+			$failed_ids       = $this->verify_meta_data( $order_ids, $failed_ids );
 			$processed       += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 			$batch_count ++;
@@ -375,10 +376,11 @@ class CLIRunner {
 
 			return WP_CLI::error(
 				sprintf(
-				/* Translators: %1$d is the number of migrated orders, %2$f is time taken, %3$f is number of errors and$4%s is formatted array of order ids. */
-					_n( '%1$d order was verified, in %2$f seconds. %3$f error was found: %4$s', '%1$d orders were verified in %2$f seconds. %3$f errors were found %4$s', $processed, 'woocommerce' ),
+				/* Translators: %1$d is the number of migrated orders, %2$f is time taken, %3$d is number of errors and$4%s is formatted array of order ids. */
+					_n( '%1$d order was verified, in %2$f seconds. %3$f error was found: %4$s', '%1$d orders were verified in %2$f seconds. %3$d errors were found %4$s', $processed, 'woocommerce' ),
 					$processed,
 					$total_time,
+					count( $failed_ids ),
 					$errors
 				)
 			);
@@ -415,4 +417,104 @@ class CLIRunner {
 
 		return $order_count;
 	}
+
+	/**
+	 * Verify meta data as part of verifying the order object.
+	 *
+	 * @param array $order_ids Order IDs.
+	 * @param array $failed_ids Array for storing failed IDs.
+	 *
+	 * @return array Failed IDs with meta details.
+	 */
+	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
+		global $wpdb;
+		if ( ! count( $order_ids ) ) {
+			return array();
+		}
+		$excluded_columns             = $this->post_to_cot_migrator->get_migrated_meta_keys();
+		$excluded_columns_placeholder = implode( ', ', array_fill( 0, count( $excluded_columns ), '%s' ) );
+		$order_ids_placeholder        = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
+		$meta_table                   = OrdersTableDataStore::get_meta_table_name();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
+		$query           = $wpdb->prepare(
+			"
+SELECT {$wpdb->postmeta}.post_id as entity_id, {$wpdb->postmeta}.meta_key, {$wpdb->postmeta}.meta_value
+FROM $wpdb->postmeta
+WHERE
+      {$wpdb->postmeta}.post_id in ( $order_ids_placeholder ) AND
+      {$wpdb->postmeta}.meta_key not in ( $excluded_columns_placeholder )
+ORDER BY {$wpdb->postmeta}.post_id ASC, {$wpdb->postmeta}.meta_key ASC;
+",
+			array_merge(
+				$order_ids,
+				$excluded_columns
+			)
+		);
+		$data_to_migrate = $wpdb->get_results( $query, ARRAY_A );
+		// phpcs:enable
+
+		$clubbed_data_to_migrate = $this->club_data( $data_to_migrate );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
+		$migrated_query = $wpdb->prepare(
+			"
+SELECT $meta_table.order_id as entity_id, $meta_table.meta_key, $meta_table.meta_value
+FROM $meta_table
+WHERE
+	$meta_table.order_id in ( $order_ids_placeholder )
+ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
+",
+			$order_ids
+		);
+		$migrated_data  = $wpdb->get_results( $migrated_query, ARRAY_A );
+		// phpcs:enable
+
+		$clubbed_migrated_data = $this->club_data( $migrated_data );
+
+		foreach ( $clubbed_data_to_migrate as $order_id => $meta ) {
+			foreach ( $meta as $meta_key => $values ) {
+				if ( ! isset( $clubbed_migrated_data[ $order_id ] ) || ! isset( $clubbed_migrated_data[ $order_id ][ $meta_key ] ) ) {
+					$diff = $values;
+				} else {
+					$diff = array_diff( $values, $clubbed_migrated_data[ $order_id ][ $meta_key ] );
+				}
+
+				if ( count( $diff ) ) {
+					if ( ! isset( $failed_ids[ $order_id ] ) ) {
+						$failed_ids[ $order_id ] = array();
+					}
+					$failed_ids[ $order_id ][] = array(
+						'order_id'   => $order_id,
+						'meta_key'   => $meta_key,
+						'meta_value' => $diff,
+					);
+				}
+			}
+		}
+
+		return $failed_ids;
+	}
+
+	/**
+	 * Helper method to club response from meta queries into order_id > meta_key.
+	 *
+	 * @param array $data Data fetched from meta queries.
+	 *
+	 * @return array Clubbed data.
+	 */
+	private function club_data( array $data ) : array {
+		$clubbed_data = array();
+		foreach ( $data as $row ) {
+			if ( ! isset( $clubbed_data[ $row['entity_id'] ] ) ) {
+				$clubbed_data[ $row['entity_id'] ] = array();
+			}
+			if ( ! isset( $clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] ) ) {
+				$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] = array();
+			}
+			$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ][] = $row['meta_value'];
+		}
+		return $clubbed_data;
+	}
+
 }
