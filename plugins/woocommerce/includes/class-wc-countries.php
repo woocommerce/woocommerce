@@ -1143,7 +1143,7 @@ class WC_Countries {
 					),
 					'IN' => array(
 						'postcode' => array(
-							'label' => __( 'PIN', 'woocommerce' ),
+							'label' => __( 'PIN Code', 'woocommerce' ),
 						),
 						'state'    => array(
 							'label' => __( 'State', 'woocommerce' ),
