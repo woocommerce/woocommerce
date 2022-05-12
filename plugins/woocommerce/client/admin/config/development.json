@@ -6,6 +6,7 @@
 		"customer-effort-score-tracks": true,
 		"experimental-products-task": false,
 		"experimental-import-products-task": false,
+		"experimental-fashion-sample-products": false,
 		"homescreen": true,
 		"marketing": true,
 		"minified-js": true,
