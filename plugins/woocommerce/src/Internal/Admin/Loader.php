@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
 use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**

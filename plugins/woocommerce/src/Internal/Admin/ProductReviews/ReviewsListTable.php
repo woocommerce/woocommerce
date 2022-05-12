@@ -3,7 +3,7 @@
  * Product > Reviews
  */
 
-namespace Automattic\WooCommerce\Internal\Admin;
+namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
 use WC_Product;
 use WP_Comment;

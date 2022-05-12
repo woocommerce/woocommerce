@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
-use Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
@@ -11,7 +11,7 @@ use WC_Unit_Test_Case;
 /**
  * Tests the product reviews overrides for the comments page.
  *
- * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides
+ * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides
  */
 class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
@@ -38,7 +38,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_notices()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::display_notices()
 	 * @dataProvider provider_test_display_notices()
 	 *
 	 * @param string $current_screen_base    The current WP_Screen base value.
@@ -77,7 +77,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::maybe_display_reviews_moved_notice()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::maybe_display_reviews_moved_notice()
 	 * @dataProvider provider_test_maybe_display_reviews_moved_notice()
 	 *
 	 * @param bool $should_display_notice Whether the reviews moved notice should be displayed.
@@ -125,7 +125,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::should_display_reviews_moved_notice()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::should_display_reviews_moved_notice()
 	 * @dataProvider provider_test_should_display_reviews_moved_notice()
 	 *
 	 * @param bool $user_has_capability       Whether the user has the capability to see the new page.
@@ -172,7 +172,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_reviews_moved_notice()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::display_reviews_moved_notice()
 	 *
 	 * @return void
 	 * @throws ReflectionException Thrown when the method does not exist.
@@ -204,7 +204,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::get_dismiss_capability()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::get_dismiss_capability()
 	 * @dataProvider provider_test_get_dismiss_capability()
 	 *
 	 * @param string $default_capability The default required capability.
@@ -226,7 +226,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can exclude reviews from comments in the comments page.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::exclude_reviews_from_comments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::exclude_reviews_from_comments()
 	 *
 	 * @return void
 	 */

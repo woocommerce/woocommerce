@@ -3,7 +3,7 @@
  * Products > Reviews
  */
 
-namespace Automattic\WooCommerce\Internal\Admin;
+namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
 use WP_Ajax_Response;
 use WP_Comment;

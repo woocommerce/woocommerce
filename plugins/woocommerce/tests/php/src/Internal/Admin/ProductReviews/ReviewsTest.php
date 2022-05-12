@@ -1,9 +1,9 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
-use Automattic\WooCommerce\Internal\Admin\Reviews;
-use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
@@ -13,7 +13,7 @@ use WP_Comment;
 /**
  * Tests for the admin reviews handler.
  *
- * @covers \Automattic\WooCommerce\Internal\Admin\Reviews
+ * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews
  */
 class ReviewsTest extends WC_Unit_Test_Case {
 
@@ -42,7 +42,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the class instance.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_instance()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_instance()
 	 *
 	 * @return void
 	 */
@@ -53,7 +53,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the capability to view the reviews page.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_capability()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_capability()
 	 *
 	 * @return void
 	 */
@@ -73,9 +73,9 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that `load_reviews_screen()` creates an instance of {@see ReviewsListTable}.
+	 * Tests that `load_reviews_screen()` creates an instance of {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable}.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::load_reviews_screen()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_reviews_screen()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method or the property is not found.
@@ -101,7 +101,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the pending comment count bubble.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::get_pending_count_bubble()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_pending_count_bubble()
 	 * @dataProvider data_provider_get_pending_count_bubble
 	 *
 	 * @param int    $number_pending Number of pending product reviews.
@@ -176,7 +176,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that it will override the parent file and the submenu file globals when editing a review.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::edit_review_parent_file()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_review_parent_file()
 	 *
 	 * @return void
 	 */
@@ -196,7 +196,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that it will override the headline text when editing or moderating a review or reply.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::edit_comments_screen_text()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_comments_screen_text()
 	 * @dataProvider data_provider_edit_comments_screen_text
 	 *
 	 * @param string $translated_text Translated text.
@@ -242,7 +242,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the reviews list table and filter it.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::render_reviews_list_table()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::render_reviews_list_table()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the property doesn't exist.
@@ -281,7 +281,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the reviews page is properly identified.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_reviews_page()
 	 * @dataProvider provider_is_reviews_page
 	 *
 	 * @param mixed $new_current_screen The value of the global $pageview var.
@@ -330,7 +330,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the admin notice messages are properly returned.
 	 *
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::get_bulk_action_notice_messages()
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_bulk_action_notice_messages()
 	 * @dataProvider provider_get_bulk_action_notice_messages
 	 *
 	 * @param string[] $statuses        The wp comment statuses after a bulk operation.
@@ -458,7 +458,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that a notice message will result in a valid HTML return.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::maybe_display_reviews_bulk_action_notice()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::maybe_display_reviews_bulk_action_notice()
 	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
 	 *
 	 * @param array  $messages        The action notice messages.
@@ -510,7 +510,7 @@ test2</p></div>',
 	/**
 	 * Tests that the display method is called only for the reviews page.
 	 *
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::display_notices()
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::display_notices()
 	 * @dataProvider provider_display_notices
 	 *
 	 * @param bool $is_reviews_page                Whether the current page is the reviews page or not.
@@ -551,7 +551,7 @@ test2</p></div>',
 	/**
 	 * Tests scenarios that should return false.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_review_or_reply()
 	 * @dataProvider provider_is_review_or_reply
 	 *
 	 * @param WP_Comment|array|null $object   Object to pass in to the method.
@@ -577,7 +577,7 @@ test2</p></div>',
 	/**
 	 * Tests different cases that require factories.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_review_or_reply()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
