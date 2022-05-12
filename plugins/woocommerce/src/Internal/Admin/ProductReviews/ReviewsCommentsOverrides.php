@@ -12,13 +12,6 @@ class ReviewsCommentsOverrides {
 	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
 
 	/**
-	 * Class instance.
-	 *
-	 * @var ReviewsCommentsOverrides|null instance
-	 */
-	protected static $instance;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
