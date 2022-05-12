@@ -27,7 +27,7 @@ jobs:
               run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Run build
-              run: pnpm nx woocommerce
+              run: pnpm nx build woocommerce
 
             - name: Run smoke test.
               working-directory: plugins/woocommerce
@@ -88,7 +88,7 @@ jobs:
               working-directory: package/woocommerce
               run: pnpm install
 
-            - name: Build WooCommerce
+            - name: Run build
               working-directory: package/woocommerce
               run: pnpm nx build woocommerce
 
@@ -163,7 +163,7 @@ jobs:
               working-directory: package/woocommerce
               run: pnpm install
 
-            - name: Build WooCommerce
+            - name: Run build
               working-directory: package/woocommerce
               run: pnpm nx build woocommerce
 
