@@ -29,6 +29,7 @@
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
+		"@woocommerce/explat": "workspace:*",
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/element": "^4.1.1",
 		"@wordpress/i18n": "^4.3.1",
