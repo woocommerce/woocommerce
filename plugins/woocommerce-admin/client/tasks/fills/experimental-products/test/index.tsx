@@ -3,6 +3,7 @@
  */
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useProductTaskExperiment } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { Products } from '../';
 import { defaultSurfacedProductTypes, productTypes } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
-import useLayoutExperiment from '../../use-product-layout-experiment';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -21,9 +21,8 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
 } ) );
 
-jest.mock( '../../use-product-layout-experiment', () => ( {
-	default: jest.fn().mockReturnValue( [ false, 'stacked' ] ),
-	__esModule: true,
+jest.mock( '@woocommerce/onboarding', () => ( {
+	useProductTaskExperiment: jest.fn().mockReturnValue( [ false, 'stacked' ] ),
 } ) );
 
 global.fetch = jest.fn().mockImplementation( () =>
@@ -113,7 +112,7 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should show spinner when layout experiment is loading', async () => {
-		( useLayoutExperiment as jest.Mock ).mockImplementation( () => [
+		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => [
 			true,
 			'card',
 		] );
@@ -124,7 +123,7 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should render card layout when experiment is assigned', async () => {
-		( useLayoutExperiment as jest.Mock ).mockImplementation( () => [
+		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => [
 			false,
 			'card',
 		] );
@@ -137,7 +136,7 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should render stacked layout when experiment is assigned', async () => {
-		( useLayoutExperiment as jest.Mock ).mockImplementation( () => [
+		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => [
 			false,
 			'stacked',
 		] );

@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { WooOnboardingTask } from '@woocommerce/onboarding';
+import {
+	WooOnboardingTask,
+	useProductTaskExperiment,
+} from '@woocommerce/onboarding';
 import { Text } from '@woocommerce/experimental';
 import { registerPlugin } from '@wordpress/plugins';
 import { useMemo, useState } from '@wordpress/element';
@@ -17,7 +20,6 @@ import './index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getSurfacedProductTypeKeys, getProductTypes } from './utils';
 import useProductTypeListItems from './use-product-types-list-items';
-import useLayoutExperiment from '../use-product-layout-experiment';
 import Stack from './stack';
 import Footer from './footer';
 import CardLayout from './card-layout';
@@ -50,7 +52,10 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
-	const [ isLoadingExperiment, experimentLayout ] = useLayoutExperiment();
+	const [
+		isLoadingExperiment,
+		experimentLayout,
+	] = useProductTaskExperiment();
 
 	const productTypes = useProductTypeListItems( getProductTypes() );
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(

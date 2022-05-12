@@ -1062,6 +1062,7 @@ importers:
       '@woocommerce/components': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/experimental': workspace:*
+      '@woocommerce/explat': workspace:*
       '@woocommerce/style-build': workspace:*
       '@woocommerce/tracks': workspace:*
       '@wordpress/browserslist-config': ^4.1.1
@@ -1085,6 +1086,7 @@ importers:
       '@automattic/interpolate-components': 1.2.1
       '@woocommerce/components': link:../components
       '@woocommerce/experimental': link:../experimental
+      '@woocommerce/explat': link:../explat
       '@woocommerce/tracks': link:../tracks
       '@wordpress/components': 19.6.1_@babel+core@7.17.8
       '@wordpress/element': 4.2.1
