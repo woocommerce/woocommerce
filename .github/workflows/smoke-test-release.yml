@@ -164,7 +164,8 @@ jobs:
             - name: Install dependencies
               working-directory: package/woocommerce
               run: pnpm install
-
+            - name: list dir 1
+              run: ls -R package/woocommerce/packages/js/e2e-environment/node_modules/@woocommerce/api
             - name: Download WooCommerce release zip
               working-directory: tmp
               run: |
@@ -172,7 +173,7 @@ jobs:
 
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-            - name: list dir
+            - name: list dir 2
               run: ls -R package/woocommerce/packages/js/e2e-environment/node_modules/@woocommerce/api
             - name: Load docker images and start containers.
               working-directory: package/woocommerce
