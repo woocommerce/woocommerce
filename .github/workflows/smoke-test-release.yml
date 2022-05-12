@@ -165,12 +165,6 @@ jobs:
               working-directory: package/woocommerce
               run: pnpm install
 
-            - name: Install WP CLI
-              run: |
-                  curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-                  chmod +x wp-cli.phar
-                  sudo mv wp-cli.phar /usr/local/bin/wp
-                  wp --info
             - name: Download WooCommerce release zip
               working-directory: tmp
               run: |
@@ -179,9 +173,9 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
             - name: list dir
-              run: ls package/woocommerce/plugins/woocommerce
+              run: ls -R package/woocommerce
             - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: package/woocommerce
               env:
                   LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
               run: pnpm nx docker-up woocommerce
