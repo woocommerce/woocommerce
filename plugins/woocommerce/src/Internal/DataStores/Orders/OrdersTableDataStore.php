@@ -13,6 +13,26 @@ defined( 'ABSPATH' ) || exit;
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
 
 	/**
+	 * Handles custom metadata in the wc_orders_meta table.
+	 *
+	 * @var OrdersTableDataStoreMeta
+	 */
+	protected OrdersTableDataStoreMeta $data_store_meta;
+
+	/**
+	 * Handles various db column <> order prop conversions.
+	 *
+	 * @var OrdersTableDataStoreHelper
+	 */
+	protected OrdersTableDataStoreHelper $helper;
+
+
+	public function init( OrdersTableDataStoreMeta $data_store_meta, OrdersTableDataStoreHelper $data_store_helper ) {
+		$this->data_store_meta = $data_store_meta;
+		$this->helper          = $data_store_helper;
+	}
+
+	/**
 	 * Get the custom orders table name.
 	 *
 	 * @return string The custom orders table name.

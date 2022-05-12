@@ -48,5 +48,6 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		if ( Constants::is_defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->share( CLIRunner::class )->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class, PostsToOrdersMigrationController::class ) );
 		}
+		$this->share( OrdersTableDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, OrdersTableDataStoreHelper::class ) );
 	}
 }
