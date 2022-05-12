@@ -55,7 +55,7 @@ class CLIRunner {
 	 * Registers commands for CLI.
 	 */
 	public function register_commands() {
-		WP_CLI::add_command( 'wc cot count', array( $this, 'count' ) );
+		WP_CLI::add_command( 'wc cot count_unmigrated', array( $this, 'count_unmigrated' ) );
 		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) );
 		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
 	}
@@ -95,7 +95,7 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc cot count
+	 *     wp wc cot count_unmigrated
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 *
@@ -103,7 +103,7 @@ class CLIRunner {
 	 *
 	 * @return int The number of orders to be migrated.*
 	 */
-	public function count( $args = array(), $assoc_args = array() ) : int {
+	public function count_unmigrated( $args = array(), $assoc_args = array() ) : int {
 		if ( ! $this->is_enabled() ) {
 			return 0;
 		}
@@ -158,7 +158,7 @@ class CLIRunner {
 			return WP_CLI::error( __( 'Migration is not yet supported when custom tables are authoritative. Switch to post tables as authoritative source if you are testing.', 'woocommerce' ) );
 		}
 
-		$order_count = $this->count();
+		$order_count = $this->count_unmigrated();
 
 		// Abort if there are no orders to migrate.
 		if ( ! $order_count ) {
@@ -208,7 +208,7 @@ class CLIRunner {
 
 			$progress->tick();
 
-			$remaining_count = $this->count( array(), array( 'log' => false ) );
+			$remaining_count = $this->count_unmigrated( array(), array( 'log' => false ) );
 			if ( $remaining_count === $order_count ) {
 				return WP_CLI::error( __( 'Infinite loop detected, aborting.', 'woocommerce' ) );
 			}
