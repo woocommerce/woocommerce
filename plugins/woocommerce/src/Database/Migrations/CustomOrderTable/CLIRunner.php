@@ -120,7 +120,7 @@ class CLIRunner {
 		if ( isset( $assoc_args['log'] ) && $assoc_args['log'] ) {
 			WP_CLI::log(
 				sprintf(
-				/* Translators: %1$d is the number of orders to be migrated. */
+					/* Translators: %1$d is the number of orders to be migrated. */
 					_n( 'There is %1$d order to be migrated.', 'There are %1$d orders to be migrated.', $order_count, 'woocommerce' ),
 					$order_count
 				)
