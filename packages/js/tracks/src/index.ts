@@ -8,13 +8,26 @@ import debug from 'debug';
  */
 const tracksDebug = debug( 'wc-admin:tracks' );
 
+export type ExtraProperties = {
+	[ key: string ]: unknown;
+};
+
+const isRecordEventArgs = (
+	args: unknown[]
+): args is [ string, ExtraProperties | undefined ] => {
+	return args.length === 2 && typeof args[ 0 ] === 'string';
+};
+
 /**
  * Record an event to Tracks
  *
  * @param {string} eventName       The name of the event to record, don't include the wcadmin_ prefix
  * @param {Object} eventProperties event properties to include in the event
  */
-export function recordEvent( eventName, eventProperties ) {
+export function recordEvent(
+	eventName: string,
+	eventProperties?: ExtraProperties
+) {
 	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties, {
 		_tqk: window._tkq,
 		shouldRecord:
@@ -53,21 +66,26 @@ const tracksQueue = {
 			return [];
 		}
 
-		let items = window.localStorage.getItem(
+		const items = window.localStorage.getItem(
 			tracksQueue.localStorageKey()
 		);
+		const parsedJSONItems = items ? JSON.parse( items ) : [];
+		const arrayItems = Array.isArray( parsedJSONItems )
+			? parsedJSONItems
+			: [];
 
-		items = items ? JSON.parse( items ) : [];
-		items = Array.isArray( items ) ? items : [];
-
-		return items;
+		return arrayItems;
 	},
 
-	add( ...args ) {
+	add( ...args: unknown[] ) {
 		if ( ! window.localStorage ) {
 			// If unable to queue, run it now.
 			tracksDebug( 'Unable to queue, running now', { args } );
-			recordEvent.apply( null, args || undefined );
+			if ( isRecordEventArgs( args ) ) {
+				recordEvent( ...args );
+			} else {
+				tracksDebug( 'Invalid args', args );
+			}
 			return;
 		}
 
@@ -97,7 +115,12 @@ const tracksQueue = {
 		items.forEach( ( item ) => {
 			if ( typeof item === 'object' ) {
 				tracksDebug( 'Processing item in queue.', item );
-				recordEvent.apply( null, item.args || undefined );
+				const args = item.args;
+				if ( isRecordEventArgs( args ) ) {
+					recordEvent( ...args );
+				} else {
+					tracksDebug( 'Invalid item args', item.args );
+				}
 			}
 		} );
 	},
@@ -115,7 +138,10 @@ const tracksQueue = {
  * @param {Object} eventProperties event properties to include in the event
  */
 
-export function queueRecordEvent( eventName, eventProperties ) {
+export function queueRecordEvent(
+	eventName: string,
+	eventProperties?: ExtraProperties
+) {
 	tracksQueue.add( eventName, eventProperties );
 }
 
@@ -126,7 +152,10 @@ export function queueRecordEvent( eventName, eventProperties ) {
  * @param {Object} extraProperties extra event properties to include in the event
  */
 
-export function recordPageView( path, extraProperties ) {
+export function recordPageView(
+	path: string,
+	extraProperties?: ExtraProperties
+) {
 	if ( ! path ) {
 		return;
 	}

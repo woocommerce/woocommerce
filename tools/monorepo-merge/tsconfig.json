@@ -1,17 +1,17 @@
 {
-  "compilerOptions": {
-    "declaration": true,
-    "importHelpers": true,
-    "module": "commonjs",
-    "outDir": "dist",
-    "rootDir": "src",
-    "strict": true,
-    "target": "es2019",
-    "typeRoots": [
+	"compilerOptions": {
+		"declaration": true,
+		"importHelpers": true,
+		"module": "commonjs",
+		"outDir": "dist",
+		"rootDir": "src",
+		"strict": true,
+		"target": "es2019",
+		"typeRoots": [
 			"./node_modules/@types"
 		],
-  },
-  "include": [
-    "src/**/*"
-  ]
+	},
+	"include": [
+		"src/**/*"
+	]
 }

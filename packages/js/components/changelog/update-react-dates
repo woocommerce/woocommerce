@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update dependency `react-dates` to ^21.8.0. #32883
