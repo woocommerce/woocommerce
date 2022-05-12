@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -803,8 +805,108 @@ LEFT JOIN {$operational_data_clauses['join']}
 		throw new \Exception( 'Unimplemented' );
 	}
 
+	/**
+	 * Method to update an order in the database.
+	 *
+	 * @param \WC_Order $order
+	 */
 	public function update( &$order ) {
-		throw new \Exception( 'Unimplemented' );
+		global $wpdb;
+
+		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
+
+		// Before updating, ensure date paid is set if missing.
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) {
+			$order->set_date_paid( $order->get_date_created( 'edit' ) );
+		}
+
+		if ( null === $order->get_date_created( 'edit' ) ) {
+			$order->set_date_created( time() );
+		}
+
+		// Fetch changes.
+		$changes = $order->get_changes();
+
+		// If address changed, store concatenated version to make searches faster.
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			if ( isset( $changes[ $address_type ] ) ) {
+				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
+			}
+		}
+
+		if ( ! isset( $changes['date_modified'] ) ) {
+			$order->set_date_modified( gmdate( 'Y-m-d H:i:s' ) );
+		}
+
+		// Update with latest changes.
+		$changes = $order->get_changes();
+
+		// Figure out what needs to be updated in the database.
+		$db_updates = array();
+
+		if ( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->order_column_mapping ) ) {
+			// wc_orders.
+			$db_updates[] = array(
+				'table'        => self::get_orders_table_name(),
+				'where'        => array( 'id' => $order->get_id() ),
+				'where_format' => '%d',
+				'row'          => $row['row'],
+				'row_format'   => array_values( $row['format'] ),
+			);
+		}
+
+		if ( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping ) ) {
+			// wc_order_operational_data.
+			$db_updates[] = array(
+				'table'        => self::get_operational_data_table_name(),
+				'where'        => array( 'order_id' => $order->get_id() ),
+				'where_format' => '%d',
+				'row'          => $row['row'],
+				'row_format'   => array_values( $row['format'] ),
+			);
+		}
+
+		if ( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->billing_address_column_mapping ) ) {
+			// wc_order_addresses: billing.
+			$db_updates[] = array(
+				'table'        => self::get_addresses_table_name(),
+				'where'        => array( 'order_id' => $order->get_id(), 'address_type' => 'billing' ),
+				'where_format' => array( '%d', '%s' ),
+				'row'          => $row['row'],
+				'row_format'   => array_values( $row['format'] ),
+			);
+		}
+
+		if( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->shipping_address_column_mapping ) ) {
+			// wc_order_addresses: shipping.
+			$db_updates[] = array(
+				'table'      => self::get_addresses_table_name(),
+				'where'      => array( 'order_id' => $order->get_id(), 'address_type' => 'shipping' ),
+				'where_format' => array( '%d', '%s' ),
+				'row'        => $row['row'],
+				'row_format' => array_values( $row['format'] ),
+			);
+		}
+
+		// Persist changes.
+		foreach ( $db_updates as $update ) {
+			$wpdb->update(
+				$update['table'],
+				$update['row'],
+				$update['where'],
+				$update['row_format'],
+				$update['where_format']
+			);
+		}
+
+		$order->save_meta_data();
+
+		// TODO: legacy meta (_paid_date, completed_date)
+		// TODO: update download permissions.
+		// TODO: mark user account as active.
+
+		$order->apply_changes();
+		$this->clear_caches( $order );
 	}
 
 	public function get_coupon_held_keys( $order, $coupon_id = null ) {
