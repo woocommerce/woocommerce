@@ -917,4 +917,107 @@ CREATE TABLE $meta_table (
 
 		return $sql;
 	}
+
+	/**
+	 * Returns an array of meta for an object.
+	 *
+	 * @param  WC_Data $object WC_Data object.
+	 * @return array
+	 */
+	public function read_meta( &$object ) {
+		return $this->data_store_meta->read_meta( $object );
+	}
+
+	/**
+	 * Deletes meta based on meta ID.
+	 *
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing at least ->id).
+	 */
+	public function delete_meta( &$object, $meta ) {
+		return $this->data_store_meta->delete_meta( $object, $meta );
+	}
+
+	/**
+	 * Add new piece of meta.
+	 *
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @return int meta ID
+	 */
+	public function add_meta( &$object, $meta ) {
+		return $this->data_store_meta->add_meta( $object, $meta );
+	}
+
+	/**
+	 * Update meta.
+	 *
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 */
+	public function update_meta( &$object, $meta ) {
+		return $this->data_store_meta->update_meta( $object, $meta );
+	}
+
+	/**
+	 * Returns list of metadata that is considered "internal".
+	 * @todo This is mostly just to trick `WC_Data_Store_WP` for the time being.
+	 *
+	 * @return array
+	 */
+	public function get_internal_meta_keys() {
+		return array(
+			'_customer_user',
+			'_order_key',
+			'_order_currency',
+			'_billing_first_name',
+			'_billing_last_name',
+			'_billing_company',
+			'_billing_address_1',
+			'_billing_address_2',
+			'_billing_city',
+			'_billing_state',
+			'_billing_postcode',
+			'_billing_country',
+			'_billing_email',
+			'_billing_phone',
+			'_shipping_first_name',
+			'_shipping_last_name',
+			'_shipping_company',
+			'_shipping_address_1',
+			'_shipping_address_2',
+			'_shipping_city',
+			'_shipping_state',
+			'_shipping_postcode',
+			'_shipping_country',
+			'_shipping_phone',
+			'_completed_date',
+			'_paid_date',
+			'_edit_lock',
+			'_edit_last',
+			'_cart_discount',
+			'_cart_discount_tax',
+			'_order_shipping',
+			'_order_shipping_tax',
+			'_order_tax',
+			'_order_total',
+			'_payment_method',
+			'_payment_method_title',
+			'_transaction_id',
+			'_customer_ip_address',
+			'_customer_user_agent',
+			'_created_via',
+			'_order_version',
+			'_prices_include_tax',
+			'_date_completed',
+			'_date_paid',
+			'_payment_tokens',
+			'_billing_address_index',
+			'_shipping_address_index',
+			'_recorded_sales',
+			'_recorded_coupon_usage_counts',
+			'_download_permissions_granted',
+			'_order_stock_reduced',
+		);
+	}
 }
