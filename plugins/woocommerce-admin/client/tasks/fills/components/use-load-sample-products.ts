@@ -7,6 +7,12 @@ import apiFetch from '@wordpress/api-fetch';
 import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import useRecordCompletionTime from '../use-record-completion-time';
 
 type UseLoadSampleProductsProps = {
 	redirectUrlAfterSuccess: string;
@@ -17,8 +23,13 @@ const useLoadSampleProducts = ( {
 }: UseLoadSampleProductsProps ) => {
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 	const { createNotice } = useDispatch( 'core/notices' );
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
 	const loadSampleProduct = async () => {
+		recordEvent( 'tasklist_add_product', {
+			method: 'sample_product',
+		} );
+		recordCompletionTime();
 		setIsRequesting( true );
 		try {
 			await apiFetch( {
