@@ -3,7 +3,9 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides;
+use Generator;
 use ReflectionClass;
+use ReflectionException;
 use WC_Unit_Test_Case;
 
 /**
@@ -38,10 +40,13 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_notices()
 	 * @dataProvider provider_test_display_notices()
+	 *
 	 * @param string $current_screen_base    The current WP_Screen base value.
 	 * @param bool   $should_display_notices Whether notices should be displayed.
+	 *
+	 * @return void
 	 */
-	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) {
+	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) : void {
 		global $current_screen;
 
 		$screen = new \stdClass();
@@ -53,7 +58,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		$instance = new class() extends ReviewsCommentsOverrides {
 			public $maybe_display_reviews_moved_notice_called = 0;
 
-			protected function maybe_display_reviews_moved_notice() {
+			protected function maybe_display_reviews_moved_notice() : void {
 				$this->maybe_display_reviews_moved_notice_called++;
 			}
 		};
@@ -65,7 +70,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_display_notices() */
-	public function provider_test_display_notices() : \Generator {
+	public function provider_test_display_notices() : Generator {
 		yield 'Comments page' => [ 'edit-comments', true ];
 		yield 'Posts page' => [ 'edit', false ];
 		yield 'Product Reviews page' => [ 'product_page_product-reviews', false ];
@@ -74,9 +79,13 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::maybe_display_reviews_moved_notice()
 	 * @dataProvider provider_test_maybe_display_reviews_moved_notice()
+	 *
 	 * @param bool $should_display_notice Whether the reviews moved notice should be displayed.
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method is not found.
 	 */
-	public function test_maybe_display_reviews_moved_notice( bool $should_display_notice ) {
+	public function test_maybe_display_reviews_moved_notice( bool $should_display_notice ) : void {
 
 		// phpcs:disable Squiz.Commenting
 		$instance = new class($should_display_notice) extends ReviewsCommentsOverrides {
@@ -93,7 +102,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 				return $this->should_display_notice;
 			}
 
-			protected function display_reviews_moved_notice() {
+			protected function display_reviews_moved_notice() : void {
 				$this->display_reviews_moved_notice_called++;
 			}
 		};
@@ -110,7 +119,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_maybe_display_reviews_moved_notice() */
-	public function provider_test_maybe_display_reviews_moved_notice() : \Generator {
+	public function provider_test_maybe_display_reviews_moved_notice() : Generator {
 		yield [ true ];
 		yield [ false ];
 	}
@@ -118,11 +127,15 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::should_display_reviews_moved_notice()
 	 * @dataProvider provider_test_should_display_reviews_moved_notice()
+	 *
 	 * @param bool $user_has_capability       Whether the user has the capability to see the new page.
 	 * @param bool $user_has_dismissed_notice Whether the user has dismissed this notice before.
 	 * @param bool $expected                  Whether the reviews moved notice should be displayed.
+	 *
+	 * @return void
+	 * @throws ReflectionException Throws if the method is not accessible.
 	 */
-	public function test_should_display_reviews_moved_notice( bool $user_has_capability, bool $user_has_dismissed_notice, bool $expected ) {
+	public function test_should_display_reviews_moved_notice( bool $user_has_capability, bool $user_has_dismissed_notice, bool $expected ) : void {
 		$this->register_legacy_proxy_function_mocks(
 			[
 				'current_user_can' => function( $capability, ...$args ) use ( $user_has_capability ) {
@@ -152,7 +165,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_should_display_reviews_moved_notice() */
-	public function provider_test_should_display_reviews_moved_notice() : \Generator {
+	public function provider_test_should_display_reviews_moved_notice() : Generator {
 		yield 'user does not have the capability to see the new page' => [ false, false, false ];
 		yield 'user already dismissed this notice' => [ true, true, false ];
 		yield 'user has the capability and have not dismissed the notice' => [ true, false, true ];
@@ -160,8 +173,11 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::display_reviews_moved_notice()
+	 *
+	 * @return void
+	 * @throws ReflectionException Thrown when the method does not exist.
 	 */
-	public function test_display_reviews_moved_notice() {
+	public function test_display_reviews_moved_notice() : void {
 		$overrides = new ReviewsCommentsOverrides();
 		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'display_reviews_moved_notice' );
 		$method->setAccessible( true );
@@ -190,16 +206,19 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsCommentsOverrides::get_dismiss_capability()
 	 * @dataProvider provider_test_get_dismiss_capability()
+	 *
 	 * @param string $default_capability The default required capability.
 	 * @param string $notice_name The notice name.
 	 * @param string $expected_capability The expected capability.
+	 *
+	 * @return void
 	 */
-	public function test_get_dismiss_capability( string $default_capability, string $notice_name, string $expected_capability ) {
+	public function test_get_dismiss_capability( string $default_capability, string $notice_name, string $expected_capability ) : void {
 		$this->assertSame( $expected_capability, ReviewsCommentsOverrides::get_instance()->get_dismiss_capability( $default_capability, $notice_name ) );
 	}
 
 	/** @see test_get_dismiss_capability() */
-	public function provider_test_get_dismiss_capability() : \Generator {
+	public function provider_test_get_dismiss_capability() : Generator {
 		yield 'another notice' => [ 'manage_woocommerce', 'other_notice', 'manage_woocommerce' ];
 		yield 'product reviews moved notice' => [ 'manage_woocommerce', ReviewsCommentsOverrides::REVIEWS_MOVED_NOTICE_ID, 'moderate_comments' ];
 	}
@@ -211,7 +230,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_exclude_reviews_from_comments() {
+	public function test_exclude_reviews_from_comments() : void {
 		$overrides = new ReviewsCommentsOverrides();
 
 		$original_args = [

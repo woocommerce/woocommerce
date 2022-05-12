@@ -68,7 +68,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function prepare_items() {
+	public function prepare_items() : void {
 
 		$this->set_review_status();
 		$this->set_review_type();
@@ -123,7 +123,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	protected function set_review_product() {
+	protected function set_review_product() : void {
 
 		$product_id = isset( $_REQUEST['product_id'] ) ? absint( $_REQUEST['product_id'] ) : null;
 		$product = $product_id ? wc_get_product( $product_id ) : null;
@@ -140,7 +140,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	protected function set_review_status() {
+	protected function set_review_status() : void {
 		global $comment_status;
 
 		$comment_status = sanitize_text_field( wp_unslash( $_REQUEST['comment_status'] ?? 'all' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -157,7 +157,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	protected function set_review_type() {
+	protected function set_review_type() : void {
 		global $comment_type;
 
 		$review_type = sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ?? 'all' ) );
@@ -335,7 +335,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function display() {
+	public function display() : void {
 		$this->display_tablenav( 'top' );
 
 		$this->screen->render_screen_reader_content( 'heading_list' );
@@ -367,10 +367,10 @@ class ReviewsListTable extends WP_List_Table {
 	 * @global WP_Post $post
 	 * @global WP_Comment $comment
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	public function single_row( $item ) {
+	public function single_row( $item ) : void {
 		global $post, $comment;
 
 		// Overrides the comment global for properly rendering rows.
@@ -396,12 +396,12 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @global string $comment_status Status for the current listed comments.
 	 *
-	 * @param WP_Comment $item        The product review or reply in context.
-	 * @param string     $column_name Current column name.
-	 * @param string     $primary     Primary column name.
+	 * @param WP_Comment|mixed $item        The product review or reply in context.
+	 * @param string|mixed     $column_name Current column name.
+	 * @param string|mixed     $primary     Primary column name.
 	 * @return string
 	 */
-	protected function handle_row_actions( $item, $column_name, $primary ) {
+	protected function handle_row_actions( $item, $column_name, $primary ) : string {
 		global $comment_status;
 
 		if ( $primary !== $column_name || ! $this->current_user_can_edit_review ) {
@@ -599,7 +599,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return array Table columns and their headings.
 	 */
-	public function get_columns() {
+	public function get_columns() : array {
 		$columns = [
 			'cb'       => '<input type="checkbox" />',
 			'type'     => _x( 'Type', 'review type', 'woocommerce' ),
@@ -617,7 +617,7 @@ class ReviewsListTable extends WP_List_Table {
 		 *
 		 * @param array $columns
 		 */
-		return apply_filters( 'woocommerce_product_reviews_table_columns', $columns );
+		return (array) apply_filters( 'woocommerce_product_reviews_table_columns', $columns );
 	}
 
 	/**
@@ -625,7 +625,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return string Name of the primary colum.
 	 */
-	protected function get_primary_column_name() {
+	protected function get_primary_column_name() : string {
 		return 'comment';
 	}
 
@@ -637,7 +637,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	protected function get_sortable_columns() {
+	protected function get_sortable_columns() : array {
 		return [
 			'author'   => 'comment_author',
 			'response' => 'comment_post_ID',
@@ -654,7 +654,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	protected function get_bulk_actions() {
+	protected function get_bulk_actions() : array {
 		global $comment_status;
 
 		$actions = [];
@@ -691,7 +691,8 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function process_bulk_action() {
+	public function process_bulk_action() : void {
+
 		if ( ! $this->current_user_can_moderate_reviews ) {
 			return;
 		}
@@ -771,7 +772,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return array An associative array of fully-formed comment status links. Includes 'All', 'Pending', 'Approved', 'Spam', and 'Trash'.
 	 */
-	protected function get_views() {
+	protected function get_views() : array {
 		global $post_id, $comment_status, $comment_type;
 
 		$status_links = [];
@@ -877,7 +878,7 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @return void
 	 */
-	public function no_items() {
+	public function no_items() : void {
 		global $comment_status;
 
 		if ( 'moderated' === $comment_status ) {
@@ -890,10 +891,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the checkbox column.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_cb( $item ) {
+	protected function column_cb( $item ) : void {
 
 		ob_start();
 
@@ -917,10 +918,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::column_comment() for consistency.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_comment( $item ) {
+	protected function column_comment( $item ) : void {
 
 		$in_reply_to = $this->get_in_reply_to_review_text( $item );
 
@@ -955,10 +956,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Gets the in-reply-to-review text.
 	 *
-	 * @param WP_Comment $reply Reply to review.
+	 * @param WP_Comment|mixed $reply Reply to review.
 	 * @return string
 	 */
-	private function get_in_reply_to_review_text( $reply ) {
+	private function get_in_reply_to_review_text( $reply ) : string {
 
 		$review = $reply->comment_parent ? get_comment( $reply->comment_parent ) : null;
 
@@ -981,10 +982,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::column_author() for consistency.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_author( $item ) {
+	protected function column_author( $item ) : void {
 		global $comment_status;
 
 		$author_url = $this->get_item_author_url();
@@ -1082,10 +1083,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * Note that the output is consistent with {@see WP_Comments_List_Table::column_date()}.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_date( $item ) {
+	protected function column_date( $item ) : void {
 
 		$submitted = sprintf(
 			/* translators: 1 - Product review date, 2: Product review time. */
@@ -1124,10 +1125,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::column_response() for consistency.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_response( $item ) {
+	protected function column_response( $item ) : void {
 		$product_post = get_post();
 
 		ob_start();
@@ -1167,10 +1168,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the type column.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_type( $item ) {
+	protected function column_type( $item ) : void {
 
 		$type = 'review' === $item->comment_type
 			? '&#9734;&nbsp;' . __( 'Review', 'woocommerce' )
@@ -1182,10 +1183,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders the rating column.
 	 *
-	 * @param WP_Comment $item Review or reply being rendered.
+	 * @param WP_Comment|mixed $item Review or reply being rendered.
 	 * @return void
 	 */
-	protected function column_rating( $item ) {
+	protected function column_rating( $item ) : void {
 		$rating = get_comment_meta( $item->comment_ID, 'rating', true );
 
 		ob_start();
@@ -1213,11 +1214,11 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Renders any custom columns.
 	 *
-	 * @param WP_Comment $item        Review or reply being rendered.
-	 * @param string     $column_name Name of the column being rendered.
+	 * @param WP_Comment|mixed $item        Review or reply being rendered.
+	 * @param string|mixed     $column_name Name of the column being rendered.
 	 * @return void
 	 */
-	protected function column_default( $item, $column_name ) {
+	protected function column_default( $item, $column_name ) : void {
 
 		ob_start();
 
@@ -1238,12 +1239,12 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Runs a filter hook for a given column content.
 	 *
-	 * @param string     $column_name The column being output.
-	 * @param string     $output      The output content (may include HTML).
-	 * @param WP_Comment $item        The review or reply being rendered.
+	 * @param string|mixed     $column_name The column being output.
+	 * @param string|mixed     $output      The output content (may include HTML).
+	 * @param WP_Comment|mixed $item        The review or reply being rendered.
 	 * @return string
 	 */
-	protected function filter_column_output( $column_name, $output, $item ) {
+	protected function filter_column_output( $column_name, $output, $item ) : string {
 
 		/**
 		 * Filters the output of a column.
@@ -1253,7 +1254,7 @@ class ReviewsListTable extends WP_List_Table {
 		 * @param string     $output The column output.
 		 * @param WP_Comment $item   The product review being rendered.
 		 */
-		return apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name . '_content', $output, $item );
+		return (string) apply_filters( 'woocommerce_product_reviews_table_column_' . $column_name . '_content', $output, $item );
 	}
 
 	/**
@@ -1262,10 +1263,10 @@ class ReviewsListTable extends WP_List_Table {
 	 * @global string $comment_status
 	 * @global string $comment_type
 	 *
-	 * @param string $which Position (top or bottom).
+	 * @param string|mixed $which Position (top or bottom).
 	 * @return void
 	 */
-	protected function extra_tablenav( $which ) {
+	protected function extra_tablenav( $which ) : void {
 		global $comment_status, $comment_type;
 
 		echo '<div class="alignleft actions">';
@@ -1307,10 +1308,10 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * @see WP_Comments_List_Table::comment_type_dropdown() for consistency.
 	 *
-	 * @param string $current_type The current comment item type slug.
+	 * @param string|mixed $current_type The current comment item type slug.
 	 * @return void
 	 */
-	protected function review_type_dropdown( $current_type ) {
+	protected function review_type_dropdown( $current_type ) : void {
 
 		$item_types = [
 			'all'     => __( 'All types', 'woocommerce' ),
@@ -1331,10 +1332,10 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Displays a review rating drop-down for filtering reviews in the Product Reviews list table.
 	 *
-	 * @param int $current_rating Rating to display reviews for.
+	 * @param int|string|mixed $current_rating Rating to display reviews for.
 	 * @return void
 	 */
-	public function review_rating_dropdown( $current_rating ) {
+	public function review_rating_dropdown( $current_rating ) : void {
 
 		$rating_options = [
 			'0' => __( 'All ratings', 'woocommerce' ),
@@ -1372,7 +1373,7 @@ class ReviewsListTable extends WP_List_Table {
 	 * @param WC_Product|null $current_product The current product (or null when displaying all reviews).
 	 * @return void
 	 */
-	protected function product_search( $current_product ) {
+	protected function product_search( ?WC_Product $current_product ) : void {
 		?>
 		<label class="screen-reader-text" for="filter-by-product"><?php esc_html_e( 'Filter by product', 'woocommerce' ); ?></label>
 		<select
@@ -1395,10 +1396,12 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * Based on {@see WP_List_Table::comments_bubble()}, but overridden, so we can customize the URL and text output.
 	 *
-	 * @param int $post_id          The product ID.
-	 * @param int $pending_comments Number of pending reviews.
+	 * @param int|mixed $post_id          The product ID.
+	 * @param int|mixed $pending_comments Number of pending reviews.
+	 *
+	 * @return void
 	 */
-	protected function comments_bubble( $post_id, $pending_comments ) {
+	protected function comments_bubble( $post_id, $pending_comments ) : void {
 		$approved_review_count = get_comments_number();
 
 		$approved_reviews_number = number_format_i18n( $approved_review_count );

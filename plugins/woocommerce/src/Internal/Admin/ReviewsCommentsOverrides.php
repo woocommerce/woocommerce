@@ -33,7 +33,7 @@ class ReviewsCommentsOverrides {
 	/**
 	 * Renders admin notices.
 	 */
-	public function display_notices() {
+	public function display_notices() : void {
 		$screen = get_current_screen();
 
 		if ( empty( $screen ) || 'edit-comments' !== $screen->base ) {
@@ -45,8 +45,10 @@ class ReviewsCommentsOverrides {
 
 	/**
 	 * May render an admin notice informing the user that reviews were moved to a new page.
+	 *
+	 * @return void
 	 */
-	protected function maybe_display_reviews_moved_notice() {
+	protected function maybe_display_reviews_moved_notice() : void {
 		if ( $this->should_display_reviews_moved_notice() ) {
 			$this->display_reviews_moved_notice();
 		}
@@ -73,8 +75,10 @@ class ReviewsCommentsOverrides {
 
 	/**
 	 * Renders an admin notice informing the user that reviews were moved to a new page.
+	 *
+	 * @return void
 	 */
-	protected function display_reviews_moved_notice() {
+	protected function display_reviews_moved_notice() : void {
 		$dismiss_url = wp_nonce_url(
 			add_query_arg(
 				[
@@ -104,20 +108,20 @@ class ReviewsCommentsOverrides {
 	 * This is required so that users who do not have the manage_woocommerce capability (e.g. Editors) can still dismiss
 	 * the notice displayed in the Comments page.
 	 *
-	 * @param string $default_capability The default required capability.
-	 * @param string $notice_name The notice name.
+	 * @param string|mixed $default_capability The default required capability.
+	 * @param string|mixed $notice_name The notice name.
 	 * @return string
 	 */
-	public function get_dismiss_capability( string $default_capability, string $notice_name ) {
+	public function get_dismiss_capability( $default_capability, $notice_name ) {
 		return self::REVIEWS_MOVED_NOTICE_ID === $notice_name ? Reviews::get_capability() : $default_capability;
 	}
 
 	/**
 	 * Gets the class instance.
 	 *
-	 * @return object instance
+	 * @return ReviewsCommentsOverrides instance
 	 */
-	public static function get_instance() {
+	public static function get_instance() : ReviewsCommentsOverrides {
 
 		if ( null === self::$instance ) {
 			self::$instance = new self();

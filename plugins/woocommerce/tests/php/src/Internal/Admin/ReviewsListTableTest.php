@@ -32,7 +32,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_display() {
+	public function test_display() : void {
 		$this->factory()->comment->create_many( 2 );
 
 		ob_start();
@@ -52,7 +52,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_single_row() {
+	public function test_single_row() : void {
 		$post_id = $this->factory()->post->create();
 		$review = $this->factory()->comment->create_and_get(
 			[
@@ -91,10 +91,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @param string $column_name    The current column name being output.
 	 * @param string $primary_column The primary colum name.
 	 * @param bool   $user_can_edit  Whether the current user can edit reviews.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_handle_row_actions( $review_status, $column_name, $primary_column, $user_can_edit ) {
+	public function test_handle_row_actions( string $review_status, string $column_name, string $primary_column, bool $user_can_edit ) : void {
 		global $comment_status;
 
 		$comment_status = 'test'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -165,7 +166,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_columns() {
+	public function test_get_columns() : void {
 		$this->assertSame(
 			[
 				'cb'       => '<input type="checkbox" />',
@@ -187,7 +188,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_columns_filtered() {
+	public function test_get_columns_filtered() : void {
 		$filter_callback = function( $columns ) {
 			return [
 				'custom_column' => 'Custom column',
@@ -214,7 +215,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_get_primary_column_name() {
+	public function test_get_primary_column_name() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_primary_column_name' );
 		$method->setAccessible( true );
@@ -228,10 +229,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @dataProvider data_provider_test_column_cb()
 	 * @param bool   $current_user_can_edit Whether the current user has the capability to edit this review.
 	 * @param string $expected_output The expected output.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_cb( bool $current_user_can_edit, string $expected_output ) {
+	public function test_column_cb( bool $current_user_can_edit, string $expected_output ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_cb' );
 		$method->setAccessible( true );
@@ -252,7 +254,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_column_cb() */
-	public function data_provider_test_column_cb() {
+	public function data_provider_test_column_cb() : array {
 		return [
 			'user has the capability' => [
 				true,
@@ -276,10 +278,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $comment_type The comment type (usually review or comment).
 	 * @param string $expected_output The expected output.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_type( $comment_type, $expected_output ) {
+	public function test_column_type( string $comment_type, string $expected_output ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_type' );
 		$method->setAccessible( true );
@@ -298,7 +301,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_column_type() */
-	public function data_provider_test_column_type() {
+	public function data_provider_test_column_type() : array {
 		return [
 			'review' => [ 'review', '&#9734;&nbsp;Review' ],
 			'reply' => [ 'comment', 'Reply' ],
@@ -314,10 +317,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $meta_value The comment meta value for rating.
 	 * @param string $expected_output The expected output.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_rating( $meta_value, $expected_output ) {
+	public function test_column_rating( string $meta_value, string $expected_output ) : void {
 
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
@@ -357,10 +361,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $show_avatars          Value for the `show_avatars` option.
 	 * @param bool $should_contain_avatar If the HTML should contain an avatar.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_author( bool $show_avatars, bool $should_contain_avatar ) {
+	public function test_column_author( bool $show_avatars, bool $should_contain_avatar ) : void {
 		global $comment;
 
 		$review = $this->factory()->comment->create_and_get(
@@ -412,10 +417,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $comment_author_url The comment author URL.
 	 * @param string $expected_author_url The expected author URL.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_get_item_author_url( $comment_author_url, $expected_author_url ) {
+	public function test_get_item_author_url( string $comment_author_url, string $expected_author_url ) : void {
 		global $comment;
 
 		$list_table = $this->get_reviews_list_table();
@@ -434,7 +440,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_item_author_url() */
-	public function data_provider_test_get_item_author_url() {
+	public function data_provider_test_get_item_author_url() : array {
 		return [
 			'No URL' => [ '', '' ],
 			'Empty URL (http)' => [ 'http://', '' ],
@@ -451,10 +457,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $author_url The author URL.
 	 * @param string $author_url_for_display The author URL for display.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_get_item_author_url_for_display( $author_url, $author_url_for_display ) {
+	public function test_get_item_author_url_for_display( string $author_url, string $author_url_for_display ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url_for_display' );
 		$method->setAccessible( true );
@@ -463,7 +470,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_item_author_url_for_display() */
-	public function data_provider_test_get_item_author_url_for_display() {
+	public function data_provider_test_get_item_author_url_for_display() : array {
 		$very_long_url = 'https://www.example.com/this-is-a-very-long-url-that-is-longer-than-the-maximum-allowed-length-of-the-url-for-display-purposes/';
 
 		return [
@@ -483,10 +490,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $has_product   Whether the review is for a valid product object.
 	 * @param int  $approved_flag The review (comment) approved flag.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_date( $has_product, $approved_flag ) {
+	public function test_column_date( bool $has_product, int $approved_flag ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_date' );
 		$method->setAccessible( true );
@@ -521,7 +529,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_column_date() */
-	public function data_provider_test_column_date() {
+	public function data_provider_test_column_date() : array {
 		return [
 			'No product'   => [ false, 1 ],
 			'Not approved' => [ true, 0 ],
@@ -537,7 +545,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_response() {
+	public function test_column_response() : void {
 		global $post;
 
 		$product = $this->factory()->post->create_and_get(
@@ -570,7 +578,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_column_comment() {
+	public function test_column_comment() : void {
 
 		$review = $this->factory()->comment->create_and_get(
 			[
@@ -617,7 +625,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
 	 */
-	public function test_get_in_reply_to_review_text() {
+	public function test_get_in_reply_to_review_text() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_in_reply_to_review_text' );
 		$method->setAccessible( true );
@@ -651,10 +659,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $current_comment_status Currently set status.
 	 * @param array  $expected_actions       Keys of the expected actions.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_bulk_actions( string $current_comment_status, array $expected_actions ) {
+	public function test_get_bulk_actions( string $current_comment_status, array $expected_actions ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
 		$method->setAccessible( true );
@@ -724,7 +733,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method or the property do not exist.
 	 */
-	public function test_set_review_product() {
+	public function test_set_review_product() : void {
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
 		$method = $reflection->getMethod( 'set_review_product' );
@@ -762,7 +771,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_set_review_status( ?string $request_status, string $expected_comment_status ) {
+	public function test_set_review_status( ?string $request_status, string $expected_comment_status ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
 		$method->setAccessible( true );
@@ -793,12 +802,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_type()
 	 * @dataProvider data_provider_set_review_type
 	 *
-	 * @param string $review_type          Review type.
-	 * @param string $expected_review_type Expected review type to be set.
+	 * @param string|null $review_type          Review type.
+	 * @param string|null $expected_review_type Expected review type to be set.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_set_review_type( $review_type, $expected_review_type ) {
+	public function test_set_review_type( ?string $review_type, ?string $expected_review_type ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
 		$method->setAccessible( true );
@@ -833,7 +843,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_sortable_columns() {
+	public function test_get_sortable_columns() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sortable_columns' );
 		$method->setAccessible( true );
@@ -859,10 +869,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @param string|null $orderby       The orderby value that's set in the request.
 	 * @param string|null $order         The order value that's set in the request.
 	 * @param array       $expected_args Expected arguments.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_sort_arguments( ?string $orderby, ?string $order, array $expected_args ) {
+	public function test_get_sort_arguments( ?string $orderby, ?string $order, array $expected_args ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
 		$method->setAccessible( true );
@@ -955,12 +966,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_type_arguments()
 	 * @dataProvider data_provider_get_filter_type_arguments
 	 *
-	 * @param string $review_type  The requested review type.
-	 * @param string $comment_type The resulting comment type.
+	 * @param string|null $review_type  The requested review type.
+	 * @param string|null $comment_type The resulting comment type.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_filter_type_arguments( $review_type, $comment_type ) {
+	public function test_get_filter_type_arguments( ?string $review_type, ?string $comment_type ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
 		$method->setAccessible( true );
@@ -993,7 +1005,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If reflected method or property don't exist.
 	 */
-	public function test_get_filter_rating_arguments() {
+	public function test_get_filter_rating_arguments() : void {
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
 		$method = $reflection->getMethod( 'get_filter_rating_arguments' );
@@ -1034,7 +1046,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method or the property don't exist.
 	 */
-	public function test_get_filter_product_arguments() {
+	public function test_get_filter_product_arguments() : void {
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
 		$method = $reflection->getMethod( 'get_filter_product_arguments' );
@@ -1061,10 +1073,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $status        Current status for the request.
 	 * @param array  $expected_args Expected result of the method.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_status_arguments( string $status, array $expected_args ) {
+	public function test_get_status_arguments( string $status, array $expected_args ) : void {
 		global $comment_status;
 		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
@@ -1091,10 +1104,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param mixed $search_value  Current search value in the request.
 	 * @param array $expected_args Expected result of the method.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_search_arguments( $search_value, array $expected_args ) {
+	public function test_get_search_arguments( $search_value, array $expected_args ) : void {
 		$_REQUEST['s'] = $search_value;
 
 		$list_table = $this->get_reviews_list_table();
@@ -1118,9 +1132,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $status   Filtered status.
 	 * @param string $expected Expected text.
+	 *
 	 * @return void
 	 */
-	public function test_no_items( string $status, string $expected ) {
+	public function test_no_items( string $status, string $expected ) : void {
 		global $comment_status;
 		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
@@ -1132,7 +1147,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_no_items */
-	public function data_provider_no_items() : \Generator {
+	public function data_provider_no_items() : Generator {
 		yield 'moderated filter' => [ 'moderated', 'No reviews awaiting moderation.' ];
 		yield 'no filter'        => [ '', 'No reviews found.' ];
 		yield 'spam filter'      => [ 'spam', 'No reviews found.' ];
@@ -1152,10 +1167,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @param string[] $expected_elements         Output should contain these elements.
 	 * @param string   $expected_end              Output should end with this string.
 	 * @param string[] $not_expected_elements     Output should not contain these elements.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_extra_tablenav( string $position, bool $has_items, bool $current_user_can_moderate, string $status, string $expected_start, array $expected_elements, string $expected_end, array $not_expected_elements ) {
+	public function test_extra_tablenav( string $position, bool $has_items, bool $current_user_can_moderate, string $status, string $expected_start, array $expected_elements, string $expected_end, array $not_expected_elements ) : void {
 		global $comment_status;
 		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
@@ -1368,7 +1384,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method is not defined.
 	 */
-	public function test_review_type_dropdown( $chosen_type ) {
+	public function test_review_type_dropdown( string $chosen_type ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_type_dropdown' );
 		$method->setAccessible( true );
@@ -1403,11 +1419,12 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_rating_dropdown()
 	 * @dataProvider data_provider_test_review_rating_dropdown
 	 *
-	 * @param string $chosen_rating The rating to filter reviews for.
+	 * @param int $chosen_rating The rating to filter reviews for.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method is not defined.
 	 */
-	public function test_review_rating_dropdown( $chosen_rating ) {
+	public function test_review_rating_dropdown( int $chosen_rating ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_rating_dropdown' );
 		$method->setAccessible( true );
@@ -1441,7 +1458,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_column_default() {
+	public function test_column_default() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
 		$method->setAccessible( true );
@@ -1470,7 +1487,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_filter_column_output() {
+	public function test_filter_column_output() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'filter_column_output' );
 		$method->setAccessible( true );
@@ -1497,7 +1514,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method is not defined.
 	 */
-	public function test_product_search() {
+	public function test_product_search() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'product_search' );
 		$method->setAccessible( true );
@@ -1522,7 +1539,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_status_filters() {
+	public function test_get_status_filters() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_filters' );
 		$method->setAccessible( true );
@@ -1588,10 +1605,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @param string $comment_type Current type filter.
 	 * @param int    $post_id      Current post ID filter.
 	 * @param string $expected     Expected URL from the method.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_view_url( string $comment_type, int $post_id, string $expected ) {
+	public function test_get_view_url( string $comment_type, int $post_id, string $expected ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_view_url' );
 		$method->setAccessible( true );
@@ -1637,10 +1655,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $status              Status to pass in to the method.
 	 * @param string $expected_conversion Expected result.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_convert_status_string_to_comment_approved( string $status, string $expected_conversion ) {
+	public function test_convert_status_string_to_comment_approved( string $status, string $expected_conversion ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'convert_status_to_query_value' );
 		$method->setAccessible( true );
@@ -1666,7 +1685,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_review_count() {
+	public function test_get_review_count() : void {
 		// Add a normal post with some comments -- these should not appear in our counts.
 		$post_id = $this->factory()->post->create(
 			[
@@ -1744,7 +1763,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_views() {
+	public function test_get_views() : void {
 		global $comment_status;
 		$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
@@ -1765,7 +1784,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_offset_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_offset_arguments()
 	 * @dataProvider provider_get_offset_arguments
 	 *
 	 * @param mixed    $request_start_value `$_REQUEST['start']` value.
@@ -1774,7 +1793,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_offset_arguments( $request_start_value, ?int $current_page_number, array $expected_args ) {
+	public function test_get_offset_arguments( $request_start_value, ?int $current_page_number, array $expected_args ) : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_offset_arguments' );
 		$method->setAccessible( true );
@@ -1806,7 +1825,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_total_comments_arguments() {
+	public function test_get_total_comments_arguments() : void {
 		$list_table = $this->get_reviews_list_table();
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_total_comments_arguments' );
 		$method->setAccessible( true );
@@ -1859,7 +1878,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_comments_bubble( int $approved_review_count, int $pending_review_count, bool $product_is_trashed, string $expected_html ): void {
+	public function test_comments_bubble( int $approved_review_count, int $pending_review_count, bool $product_is_trashed, string $expected_html ) : void {
 		global $post;
 
 		$product_id = $this->factory()->post->create( [ 'post_type' => 'product' ] );
