@@ -239,7 +239,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_render_reviews_list_table() : void {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$reviews = Reviews::get_instance();
+		$reviews = wc_get_container()->get( Reviews::class );
 		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
 		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );

@@ -110,20 +110,6 @@ class ReviewsCommentsOverrides {
 	}
 
 	/**
-	 * Gets the class instance.
-	 *
-	 * @return ReviewsCommentsOverrides instance
-	 */
-	public static function get_instance() : ReviewsCommentsOverrides {
-
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
-	}
-
-	/**
 	 * Excludes product reviews from showing in the comments page.
 	 *
 	 * @param array $args {@see WP_Comment_Query} query args.
