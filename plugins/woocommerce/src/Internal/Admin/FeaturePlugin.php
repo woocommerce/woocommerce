@@ -193,6 +193,11 @@ class FeaturePlugin {
 	 * @param array $features Array of feature slugs.
 	 */
 	public function replace_supported_features( $features ) {
+		/**
+		 * Get additional feature config
+		 *
+		 * @since 6.5.0
+		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;
