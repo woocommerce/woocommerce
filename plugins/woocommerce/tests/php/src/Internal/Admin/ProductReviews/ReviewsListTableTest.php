@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
-use Automattic\WooCommerce\Internal\Admin\ReviewsListTable;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable;
 use Generator;
 use ReflectionClass;
 use ReflectionException;
@@ -12,23 +12,23 @@ use WC_Unit_Test_Case;
 /**
  * Tests that product reviews page handler.
  *
- * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable
+ * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable
  */
 class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Returns a new instance of the {@see ReviewsListTable} class.
+	 * Returns a new instance of the {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable} class.
 	 *
 	 * @return ReviewsListTable
 	 */
-	private function get_reviews_list_table() : ReviewsListTable {
+	private function get_reviews_list_table() : \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable {
 		return new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 	}
 
 	/**
 	 * Tests that will output the reviews list table with the expected HTML elements.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::display()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::display()
 	 *
 	 * @return void
 	 */
@@ -48,7 +48,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can process the row output for a review or reply.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::single_row()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::single_row()
 	 *
 	 * @return void
 	 */
@@ -84,7 +84,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can handle the row actions for a review in the Reviews page table.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::handle_row_actions()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::handle_row_actions()
 	 * @dataProvider data_provider_test_handle_row_actions
 	 *
 	 * @param string $review_status  The review status.
@@ -162,7 +162,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the product reviews' page columns.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_columns()
 	 *
 	 * @return void
 	 */
@@ -184,7 +184,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the product reviews' page columns when a filter is applied.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_columns()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_columns()
 	 *
 	 * @return void
 	 */
@@ -210,7 +210,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the primary column name.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_primary_column_name()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_primary_column_name()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
@@ -224,7 +224,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::cb()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::cb()
 	 *
 	 * @dataProvider data_provider_test_column_cb()
 	 * @param bool   $current_user_can_edit Whether the current user has the capability to edit this review.
@@ -273,7 +273,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests the output of the review type column.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_type()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_type()
 	 * @dataProvider data_provider_test_column_type()
 	 *
 	 * @param string $comment_type The comment type (usually review or comment).
@@ -312,7 +312,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can generate the column rating HTML output.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_rating()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_rating()
 	 * @dataProvider data_provider_test_column_rating()
 	 *
 	 * @param string $meta_value The comment meta value for rating.
@@ -356,7 +356,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the author information.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_author()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_author()
 	 * @dataProvider data_provider_column_author
 	 *
 	 * @param bool $show_avatars          Value for the `show_avatars` option.
@@ -412,7 +412,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the item author URL.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_item_author_url()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_item_author_url()
 	 * @dataProvider data_provider_test_get_item_author_url
 	 *
 	 * @param string $comment_author_url The comment author URL.
@@ -452,7 +452,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get a review author url for display.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_item_author_url_for_display()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_item_author_url_for_display()
 	 * @dataProvider data_provider_test_get_item_author_url_for_display()
 	 *
 	 * @param string $author_url The author URL.
@@ -485,7 +485,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the review or reply date column.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_date()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_date()
 	 * @dataProvider data_provider_test_column_date
 	 *
 	 * @param bool $has_product   Whether the review is for a valid product object.
@@ -540,7 +540,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that it will output the product information for the corresponding review column.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_response()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_response()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
@@ -573,7 +573,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the review or reply content.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_comment()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_comment()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
@@ -620,7 +620,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the in reply to review text message for the review content column.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_in_reply_to_review_text()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_in_reply_to_review_text()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method does not exist.
@@ -654,7 +654,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the bulk actions for the product reviews page.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_bulk_actions()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_bulk_actions()
 	 * @dataProvider data_provider_get_bulk_actions
 	 *
 	 * @param string $current_comment_status Currently set status.
@@ -728,7 +728,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can set the product to filter reviews by.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_product()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::set_review_product()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method or the property do not exist.
@@ -763,7 +763,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can set the review status for the current request.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_status()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::set_review_status()
 	 * @dataProvider data_provider_set_review_status
 	 *
 	 * @param string|null $request_status          Status that's in the request.
@@ -799,7 +799,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can set the review type when preparing items.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::set_review_type()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::set_review_type()
 	 * @dataProvider data_provider_set_review_type
 	 *
 	 * @param string|null $review_type          Review type.
@@ -838,7 +838,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the sortable columns for the reviews table.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sortable_columns()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_sortable_columns()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -863,7 +863,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the sort arguments for the current request.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_sort_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_sort_arguments()
 	 * @dataProvider data_provider_get_sort_arguments
 	 *
 	 * @param string|null $orderby       The orderby value that's set in the request.
@@ -963,7 +963,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the comment type argument for the current request.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_type_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_filter_type_arguments()
 	 * @dataProvider data_provider_get_filter_type_arguments
 	 *
 	 * @param string|null $review_type  The requested review type.
@@ -1000,7 +1000,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can set the filter rating for the current request.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_rating_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_filter_rating_arguments()
 	 *
 	 * @return void
 	 * @throws ReflectionException If reflected method or property don't exist.
@@ -1041,7 +1041,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the post ID argument for the current request.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_filter_product_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_filter_product_arguments()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method or the property don't exist.
@@ -1068,7 +1068,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the status arguments based on the current request.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_status_arguments()
 	 * @dataProvider provider_get_status_arguments
 	 *
 	 * @param string $status        Current status for the request.
@@ -1099,7 +1099,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_search_arguments()
+	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_search_arguments()
 	 * @dataProvider provider_get_search_arguments
 	 *
 	 * @param mixed $search_value  Current search value in the request.
@@ -1127,7 +1127,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the text for when no reviews are found.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::no_items()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::no_items()
 	 * @dataProvider data_provider_no_items
 	 *
 	 * @param string $status   Filtered status.
@@ -1156,7 +1156,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can render the extra controls for the product reviews page.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::extra_tablenav()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::extra_tablenav()
 	 * @dataProvider data_provider_test_extra_tablenav()
 	 *
 	 * @param string   $position                  Position (top or bottom).
@@ -1377,7 +1377,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output a filter by review type dropdown element.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_type_dropdown()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::review_type_dropdown()
 	 * @dataProvider data_provider_test_review_type_dropdown
 	 *
 	 * @param string $chosen_type The chosen review type to filter for.
@@ -1416,7 +1416,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output a filter dropdown for review ratings.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::review_rating_dropdown()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::review_rating_dropdown()
 	 * @dataProvider data_provider_test_review_rating_dropdown
 	 *
 	 * @param int $chosen_rating The rating to filter reviews for.
@@ -1453,7 +1453,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output the default column content and trigger an action hook for custom columns.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::column_default()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_default()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1482,7 +1482,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that it will trigger a filter hook for columns.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::filter_column_output()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::filter_column_output()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1509,7 +1509,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can output a product search field for the product in context.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::product_search()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::product_search()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method is not defined.
@@ -1534,7 +1534,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the reviews' status filter.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_status_filters()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_status_filters()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1599,7 +1599,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get a view URL for the product reviews page.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_view_url()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_view_url()
 	 * @dataProvider provider_get_view_url
 	 *
 	 * @param string $comment_type Current type filter.
@@ -1650,7 +1650,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can convert the status to a query value.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::convert_status_to_query_value()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::convert_status_to_query_value()
 	 * @dataProvider provider_convert_status_string_to_comment_approved
 	 *
 	 * @param string $status              Status to pass in to the method.
@@ -1680,7 +1680,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the product reviews count.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_review_count()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_review_count()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1758,7 +1758,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that can get the product reviews page views.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_views()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_views()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1784,7 +1784,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_offset_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_offset_arguments()
 	 * @dataProvider provider_get_offset_arguments
 	 *
 	 * @param mixed    $request_start_value `$_REQUEST['start']` value.
@@ -1820,7 +1820,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that `offset` and `number` values are always set to `0`, and that `count` is added to the array.
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_total_comments_arguments()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_total_comments_arguments()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1852,7 +1852,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/**
 	 * This is only testing the default value as we don't have a "current user".
 	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::get_per_page()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
@@ -1866,7 +1866,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ReviewsListTable::comments_bubble()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::comments_bubble()
 	 * @dataProvider provider_comments_bubble
 	 *
 	 * @param int    $approved_review_count Number of approved reviews on the product.

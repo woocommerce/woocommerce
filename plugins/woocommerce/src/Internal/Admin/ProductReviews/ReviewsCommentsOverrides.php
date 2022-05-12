@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\Admin;
+namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
 use WP_Comment_Query;
 
