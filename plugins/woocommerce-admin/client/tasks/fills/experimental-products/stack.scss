@@ -1,4 +1,12 @@
 .woocommerce-products-stack {
+	width: 550px;
+
+	@media (max-width: 550px ) {
+		& {
+			width: 100%;
+		}
+	}
+
 	a {
 		text-decoration: none;
 		color: #007cba;
@@ -67,6 +75,7 @@
 	.woocommerce-stack__other-options {
 		display: block;
 		margin-top: 20px;
+		margin-bottom: 4px;
 		color: $gray-700;
 		line-height: 16px;
 	}
