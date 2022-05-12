@@ -64,7 +64,7 @@ class Reviews {
 	 *
 	 * @return Reviews instance
 	 */
-	public static function get_instance() {
+	public static function get_instance() : Reviews {
 
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -79,7 +79,7 @@ class Reviews {
 	 * @param string $context The context for which the capability is needed (e.g. `view` or `moderate`).
 	 * @return string
 	 */
-	public static function get_capability( $context = 'view' ) {
+	public static function get_capability( string $context = 'view' ) : string {
 
 		/**
 		 * Filters whether the current user can manage product reviews.
@@ -87,7 +87,7 @@ class Reviews {
 		 * @param string $capability The capability (defaults to `moderate_comments`).
 		 * @param string $context    The context for which the capability is needed.
 		 */
-		return apply_filters( 'woocommerce_product_reviews_page_capability', 'moderate_comments', $context );
+		return (string) apply_filters( 'woocommerce_product_reviews_page_capability', 'moderate_comments', $context );
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function add_reviews_page() {
+	public function add_reviews_page() : void {
 
 		$this->reviews_page_hook = add_submenu_page(
 			'edit.php?post_type=product',
@@ -114,7 +114,7 @@ class Reviews {
 	 *
 	 * @return string
 	 */
-	public static function get_reviews_page_url(): string {
+	public static function get_reviews_page_url() : string {
 		return add_query_arg(
 			[
 				'post_type' => 'product',
@@ -243,7 +243,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function handle_reply_to_review(): void {
+	public function handle_reply_to_review() : void {
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_post_ID = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
@@ -384,7 +384,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function display_notices() {
+	public function display_notices() : void {
 
 		if ( $this->is_reviews_page() ) {
 			$this->maybe_display_reviews_bulk_action_notice();
@@ -396,7 +396,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	protected function maybe_display_reviews_bulk_action_notice() {
+	protected function maybe_display_reviews_bulk_action_notice() : void {
 
 		$messages = $this->get_bulk_action_notice_messages();
 
@@ -487,7 +487,7 @@ class Reviews {
 	 *
 	 * @global string $submenu_file
 	 *
-	 * @param string $parent_file Parent menu item.
+	 * @param string|mixed $parent_file Parent menu item.
 	 * @return string
 	 */
 	public function edit_review_parent_file( $parent_file ) {
@@ -514,9 +514,9 @@ class Reviews {
 	/**
 	 * Replaces Edit/Moderate Comment title/headline with Edit Review, when editing/moderating a review.
 	 *
-	 * @param  string $translation Translated text.
-	 * @param  string $text        Text to translate.
-	 * @return string              Translated text.
+	 * @param  string|mixed $translation Translated text.
+	 * @param  string|mixed $text        Text to translate.
+	 * @return string|mixed              Translated text.
 	 */
 	public function edit_comments_screen_text( $translation, $text ) {
 		global $comment;
@@ -569,7 +569,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function load_reviews_screen() {
+	public function load_reviews_screen() : void {
 		$this->reviews_list_table = $this->make_reviews_list_table();
 		$this->reviews_list_table->process_bulk_action();
 	}
@@ -579,7 +579,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function render_reviews_list_table() {
+	public function render_reviews_list_table() : void {
 
 		$this->reviews_list_table->prepare_items();
 

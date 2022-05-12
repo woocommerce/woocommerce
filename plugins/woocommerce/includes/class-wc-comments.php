@@ -80,8 +80,8 @@ class WC_Comments {
 	/**
 	 * Removes product reviews from the edit-comments page to fix the "Mine" tab counter.
 	 *
-	 * @param  array $clauses A compacted array of comment query clauses.
-	 * @return array
+	 * @param  array|mixed $clauses A compacted array of comment query clauses.
+	 * @return array|mixed
 	 */
 	public static function exclude_product_reviews( $clauses ) {
 		global $wpdb, $current_screen;

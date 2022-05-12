@@ -46,7 +46,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_instance() {
+	public function test_get_instance() : void {
 		$this->assertInstanceOf( Reviews::class, Reviews::get_instance() );
 	}
 
@@ -57,7 +57,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_view_page_capability() {
+	public function test_get_view_page_capability() : void {
 
 		$this->assertEquals( 'moderate_comments', Reviews::get_capability() );
 
@@ -80,7 +80,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method or the property is not found.
 	 */
-	public function test_load_reviews_screen() {
+	public function test_load_reviews_screen() : void {
 		$reviews = new Reviews();
 
 		// This has to be manually set, otherwise instantiating ReviewsListTable will throw an undefined index error.
@@ -106,10 +106,11 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @param int    $number_pending Number of pending product reviews.
 	 * @param string $expected_html  Expected return value.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_pending_count_bubble( int $number_pending, string $expected_html ) {
+	public function test_get_pending_count_bubble( int $number_pending, string $expected_html ) : void {
 		// Add a normal post with some pending comments -- these should not appear in our counts.
 		$post_id = $this->factory()->post->create(
 			[
@@ -179,7 +180,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_edit_review_parent_file() {
+	public function test_edit_review_parent_file() : void {
 		global $submenu_file, $current_screen;
 
 		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
@@ -203,9 +204,10 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @param bool   $is_review       Whether we should test a review comment.
 	 * @param bool   $is_reply        Whether we should test a reply to a review comment.
 	 * @param string $expected_text   Expected text output.
+	 *
 	 * @return void
 	 */
-	public function test_edit_comments_screen_text( string $translated_text, string $original_text, bool $is_review, bool $is_reply, string $expected_text ) {
+	public function test_edit_comments_screen_text( string $translated_text, string $original_text, bool $is_review, bool $is_reply, string $expected_text ) : void {
 		global $comment;
 
 		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
@@ -245,7 +247,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the property doesn't exist.
 	 */
-	public function test_render_reviews_list_table() {
+	public function test_render_reviews_list_table() : void {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$reviews = Reviews::get_instance();
@@ -279,14 +281,15 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the reviews page is properly identified.
 	 *
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::is_reviews_page()
 	 * @dataProvider provider_is_reviews_page
 	 *
-	 * @param string|null $new_current_screen The value of the global $pageview var.
-	 * @param bool        $expected_result    The expected bool result.
+	 * @param mixed $new_current_screen The value of the global $pageview var.
+	 * @param bool  $expected_result    The expected bool result.
+	 *
 	 * @return void
 	 */
-	public function test_is_reviews_page( $new_current_screen, $expected_result ) {
+	public function test_is_reviews_page( $new_current_screen, bool $expected_result ) : void {
 		global $current_screen;
 
 		$current_screen = $new_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -333,10 +336,11 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @param string[] $statuses        The wp comment statuses after a bulk operation.
 	 * @param int      $count           The number of affected comments.
 	 * @param array    $expected_result The action notice messages.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_bulk_action_notice_messages( $statuses, $count, $expected_result ) {
+	public function test_get_bulk_action_notice_messages( array $statuses, int $count, array $expected_result ) : void {
 
 		$reviews = new Reviews();
 
@@ -454,15 +458,16 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests that a notice message will result in a valid HTML return.
 	 *
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::maybe_display_reviews_bulk_action_notice()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::maybe_display_reviews_bulk_action_notice()
 	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
 	 *
 	 * @param array  $messages        The action notice messages.
 	 * @param string $expected_result The expected result.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_maybe_display_reviews_bulk_action_notice( $messages, $expected_result ) {
+	public function test_maybe_display_reviews_bulk_action_notice( array $messages, string $expected_result ) : void {
 
 		$mock = $this->getMockBuilder( Reviews::class )
 			->setMethods( [ 'get_bulk_action_notice_messages' ] )
@@ -510,8 +515,10 @@ test2</p></div>',
 	 *
 	 * @param bool $is_reviews_page                Whether the current page is the reviews page or not.
 	 * @param bool $should_call_the_display_method Indicates if the display method should be called.
+	 *
+	 * @return void
 	 */
-	public function test_display_notices( $is_reviews_page, $should_call_the_display_method ) {
+	public function test_display_notices( bool $is_reviews_page, bool $should_call_the_display_method ) : void {
 
 		$mock = $this->getMockBuilder( Reviews::class )
 			->setMethods( [ 'is_reviews_page', 'maybe_display_reviews_bulk_action_notice' ] )
@@ -544,11 +551,12 @@ test2</p></div>',
 	/**
 	 * Tests scenarios that should return false.
 	 *
-	 * @covers       \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\Reviews::is_review_or_reply()
 	 * @dataProvider provider_is_review_or_reply
 	 *
 	 * @param WP_Comment|array|null $object   Object to pass in to the method.
 	 * @param bool                  $expected Expected result.
+	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
@@ -613,6 +621,8 @@ test2</p></div>',
 
 	/**
 	 * @covers Reviews::get_reviews_page_url()
+	 *
+	 * @return void
 	 */
 	public function test_get_reviews_page_url() : void {
 		$this->assertSame( 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
