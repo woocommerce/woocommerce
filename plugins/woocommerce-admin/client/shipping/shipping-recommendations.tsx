@@ -99,7 +99,7 @@ const ShippingRecommendationsList: React.FC = ( { children } ) => (
 const ShippingRecommendations: React.FC = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
 
-	const activePlugins = useSelect< string[] >( ( select ) =>
+	const activePlugins = useSelect( ( select ) =>
 		select( PLUGINS_STORE_NAME ).getActivePlugins()
 	);
 

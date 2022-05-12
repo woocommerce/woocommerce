@@ -42,9 +42,23 @@ export class WcSettings extends BasePage {
 		);
 	}
 
+	async paymentMethodIsEnabled( method = '' ): Promise< boolean > {
+		await this.navigate( 'checkout' );
+		await waitForElementByText( 'th', 'Method' );
+		const className = await getAttribute(
+			`tr[data-gateway_id=${ method }] .woocommerce-input-toggle`,
+			'className'
+		);
+		return (
+			( className as string ).indexOf(
+				'woocommerce-input-toggle--disabled'
+			) === -1
+		);
+	}
+
 	async cleanPaymentMethods(): Promise< void > {
-		this.navigate( 'checkout' );
-		await waitForElementByText( 'h2', 'Payment methods' );
+		await this.navigate( 'checkout' );
+		await waitForElementByText( 'th', 'Method' );
 		const paymentMethods = await page.$$( 'span.woocommerce-input-toggle' );
 		for ( const method of paymentMethods ) {
 			if (

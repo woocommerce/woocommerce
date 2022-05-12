@@ -83,7 +83,7 @@ class OrderMilestones {
 		$this->allowed_statuses = apply_filters( 'woocommerce_admin_order_milestone_statuses', $this->allowed_statuses );
 
 		add_action( 'woocommerce_after_register_post_type', array( $this, 'init' ) );
-		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'clear_scheduled_event' ) );
+		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_scheduled_event' ) );
 	}
 
 	/**

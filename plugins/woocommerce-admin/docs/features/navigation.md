@@ -8,9 +8,9 @@ This API will allow you to add in your own items to the navigation and register 
 
 This feature is hidden behind a feature flag and can be turned on or off by visiting WooCommerce -> Settngs -> Advanced -> Features and checking the box next to the `Navigation` option.  It can also by controlled programmatically by setting the option `woocommerce_navigation_enable` to `yes` or `no`. 
 
-The fastest way to get started is by creating an example plugin from WooCommerce Admin.  Inside your `woocommerce-admin` directory, enter the following command:
+The fastest way to get started is by creating an example plugin from WooCommerce Admin. Enter the following command:
 
-`pnpm run example -- --ext=add-navigation-items`
+`WC_EXT=add-navigation-items pnpm nx example woocommerce-admin`
 
 This will create a new plugin that covers various features of the navigation and helps to register some intial items and categories within the new navigation menu.  After running the command above, you can make edits directly to the files at `docs/examples/extensions/add-navigation-items` and they will be built and copied to your `wp-content/add-navigation-items` folder on save.
 

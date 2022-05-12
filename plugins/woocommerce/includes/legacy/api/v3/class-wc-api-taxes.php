@@ -411,7 +411,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		// Filter by tax class
 		if ( ! empty( $args['tax_rate_class'] ) ) {
-			$tax_rate_class = 'standard' !== $args['tax_rate_class'] ? sanitize_title( $args['tax_rate_class'] ) : '';
+			$tax_rate_class = esc_sql( 'standard' !== $args['tax_rate_class'] ? sanitize_title( $args['tax_rate_class'] ) : '' );
 			$query .= " AND tax_rate_class = '$tax_rate_class'";
 		}
 

@@ -1,6 +1,7 @@
 import { wpLogin } from '../requests/merchant/wp-login.js';
 import { products } from '../requests/merchant/products.js';
 import { addProduct } from '../requests/merchant/add-product.js';
+import { coupons } from '../requests/merchant/coupons.js';
 import { orders } from '../requests/merchant/orders.js';
 import { ordersSearch } from '../requests/merchant/orders-search.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
@@ -26,4 +27,5 @@ export function allMerchantFlow() {
     ordersSearch();
     products();
     addProduct();
+    coupons();
 }

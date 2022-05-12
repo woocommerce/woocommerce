@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an 'image_src' field to product line items returned by the orders endpoint (v2 and v3). This contains the URL of the main product image.

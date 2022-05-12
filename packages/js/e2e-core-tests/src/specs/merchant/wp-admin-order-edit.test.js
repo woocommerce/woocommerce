@@ -15,63 +15,71 @@ let orderId;
 
 const orderStatus = {
 	processing: 'processing',
-	completed: 'completed'
+	completed: 'completed',
 };
 
 const runEditOrderTest = () => {
-	describe('WooCommerce Orders > Edit order', () => {
-		beforeAll(async () => {
+	describe( 'WooCommerce Orders > Edit order', () => {
+		beforeAll( async () => {
 			orderId = await createOrder( { status: orderStatus.processing } );
 			await merchant.login();
-		});
+		} );
 
 		afterAll( async () => {
 			await withRestApi.deleteOrder( orderId );
-		});
+		} );
 
-		it('can view single order', async () => {
+		it( 'can view single order', async () => {
 			// Go to "orders" page
 			await merchant.openAllOrdersView();
 
 			// Make sure we're on the orders page
-			await expect(page.title()).resolves.toMatch('Orders');
+			await expect( page.title() ).resolves.toMatch( 'Orders' );
 
 			//Open order we created
-			await merchant.goToOrder(orderId);
+			await merchant.goToOrder( orderId );
 
 			// Make sure we're on the order details page
-			await expect(page.title()).resolves.toMatch('Edit order');
-        });
+			await expect( page.title() ).resolves.toMatch( 'Edit order' );
+		} );
 
-        it('can update order status', async () => {
+		it( 'can update order status', async () => {
 			//Open order we created
-			await merchant.goToOrder(orderId);
+			await merchant.goToOrder( orderId );
 
 			// Make sure we're still on the order details page
-			await expect(page.title()).resolves.toMatch('Edit order');
+			await expect( page.title() ).resolves.toMatch( 'Edit order' );
 
 			// Update order status to `Completed`
-			await merchant.updateOrderStatus(orderId, 'Completed');
+			await merchant.updateOrderStatus( orderId, 'Completed' );
 
 			// Verify order status changed note added
-			await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Completed' } );
+			await expect( page ).toMatchElement(
+				'#select2-order_status-container',
+				{
+					text: 'Completed',
+				}
+			);
 			await expect( page ).toMatchElement(
 				'#woocommerce-order-notes .note_content',
 				{
 					text: 'Order status changed from Processing to Completed.',
 				}
 			);
-        });
+		} );
 
-        it('can update order details', async () => {
+		it( 'can update order details', async () => {
 			//Open order we created
-			await merchant.goToOrder(orderId);
+			await merchant.goToOrder( orderId );
 
 			// Make sure we're still on the order details page
-			await expect(page.title()).resolves.toMatch('Edit order');
+			await expect( page.title() ).resolves.toMatch( 'Edit order' );
 
 			// Update order details
-			await expect(page).toFill('input[name=order_date]', '2018-12-14');
+			await expect( page ).toFill(
+				'input[name=order_date]',
+				'2018-12-14'
+			);
 
 			// Wait for auto save
 			await utils.waitForTimeout( 2000 );
@@ -80,10 +88,15 @@ const runEditOrderTest = () => {
 			await orderPageSaveChanges();
 
 			// Verify
-			await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
-		 	await verifyValueOfInputField( 'input[name=order_date]' , '2018-12-14' );
-		});
-	});
+			await expect( page ).toMatchElement( '#message', {
+				text: 'Order updated.',
+			} );
+			await verifyValueOfInputField(
+				'input[name=order_date]',
+				'2018-12-14'
+			);
+		} );
+	} );
 
 	describe( 'WooCommerce Orders > Edit order > Downloadable product permissions', () => {
 		const productName = 'TDP 001';
@@ -97,12 +110,12 @@ const runEditOrderTest = () => {
 			await merchant.login();
 		} );
 
-		beforeEach(async () => {
+		beforeEach( async () => {
 			productId = await createSimpleDownloadableProduct( productName );
 			orderId = await createOrder( {
 				productId,
-				customerBilling ,
-				status: orderStatus.processing
+				customerBilling,
+				status: orderStatus.processing,
 			} );
 		} );
 
@@ -115,7 +128,7 @@ const runEditOrderTest = () => {
 			// Create order without product
 			const newOrderId = await createOrder( {
 				customerBilling,
-				status: orderStatus.processing
+				status: orderStatus.processing,
 			} );
 
 			// Open order we created
@@ -125,7 +138,7 @@ const runEditOrderTest = () => {
 			await merchant.addDownloadableProductPermission( productName );
 
 			// Verify new downloadable product permission details
-			await merchant.verifyDownloadableProductPermission( productName )
+			await merchant.verifyDownloadableProductPermission( productName );
 
 			// Remove order
 			await withRestApi.deleteOrder( newOrderId );
@@ -134,7 +147,9 @@ const runEditOrderTest = () => {
 		it( 'can add downloadable product permissions to order with product', async () => {
 			// Create new downloadable product
 			const newProductName = 'TDP 002';
-			const newProductId = await createSimpleDownloadableProduct( newProductName );
+			const newProductId = await createSimpleDownloadableProduct(
+				newProductName
+			);
 
 			// Open order we created
 			await merchant.goToOrder( orderId );
@@ -143,7 +158,9 @@ const runEditOrderTest = () => {
 			await merchant.addDownloadableProductPermission( newProductName );
 
 			// Verify new downloadable product permission details
-			await merchant.verifyDownloadableProductPermission( newProductName )
+			await merchant.verifyDownloadableProductPermission(
+				newProductName
+			);
 
 			// Remove product
 			await withRestApi.deleteProduct( newProductId );
@@ -180,21 +197,28 @@ const runEditOrderTest = () => {
 			await merchant.revokeDownloadableProductPermission( productName );
 
 			// Verify
-			await expect( page ).not.toMatchElement( 'div.order_download_permissions', {
-				text: productName
-			} );
+			await expect( page ).not.toMatchElement(
+				'div.order_download_permissions',
+				{
+					text: productName,
+				}
+			);
 		} );
 
 		it( 'should not allow downloading a product if download attempts are exceeded', async () => {
 			// Define expected download error reason
-			const expectedReason = 'Sorry, you have reached your download limit for this file';
+			const expectedReason =
+				'Sorry, you have reached your download limit for this file';
 
 			// Create order with product without any available download attempt
-			const newProductId = await createSimpleDownloadableProduct( productName, 0 );
+			const newProductId = await createSimpleDownloadableProduct(
+				productName,
+				0
+			);
 			const newOrderId = await createOrder( {
 				productId: newProductId,
 				customerBilling,
-				status: orderStatus.processing
+				status: orderStatus.processing,
 			} );
 
 			// Open order we created
@@ -204,7 +228,10 @@ const runEditOrderTest = () => {
 			const downloadPage = await merchant.openDownloadLink();
 
 			// Verify file download cannot start
-	  		await merchant.verifyCannotDownloadFromBecause( downloadPage, expectedReason );
+			await merchant.verifyCannotDownloadFromBecause(
+				downloadPage,
+				expectedReason
+			);
 
 			// Remove data
 			await withRestApi.deleteOrder( newOrderId );
@@ -220,15 +247,21 @@ const runEditOrderTest = () => {
 
 			// Update permission so that the expiration date has already passed
 			// Note: Seems this operation can't be performed through the API
-			await merchant.updateDownloadableProductPermission( productName, '2018-12-14' );
+			await merchant.updateDownloadableProductPermission(
+				productName,
+				'2018-12-14'
+			);
 
 			// Open download page
 			const downloadPage = await merchant.openDownloadLink();
 
 			// Verify file download cannot start
-	  		await merchant.verifyCannotDownloadFromBecause( downloadPage, expectedReason );
+			await merchant.verifyCannotDownloadFromBecause(
+				downloadPage,
+				expectedReason
+			);
 		} );
 	} );
-}
+};
 
 module.exports = runEditOrderTest;

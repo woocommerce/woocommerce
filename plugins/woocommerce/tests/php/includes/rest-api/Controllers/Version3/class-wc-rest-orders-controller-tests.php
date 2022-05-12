@@ -67,6 +67,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'currency_symbol',
 			'refunds',
 			'payment_url',
+			'is_editable',
+			'needs_payment',
+			'needs_processing',
 		);
 	}
 

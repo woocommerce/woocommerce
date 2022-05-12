@@ -7,7 +7,11 @@ import { render, fireEvent } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useGetCountryStateAutofill, getStateFilter } from '../store-address';
+import {
+	isAddressFieldRequired,
+	useGetCountryStateAutofill,
+	getStateFilter,
+} from '../store-address';
 
 const AutofillWrapper = ( { options, value, onChange } ) => {
 	const [ values, setValues ] = useState( { countryState: value || '' } );
@@ -210,4 +214,29 @@ describe( 'getStateFilter', () => {
 			).toEqual( [ expected ] );
 		}
 	);
+} );
+
+describe( 'isAddressFieldRequired', () => {
+	it( 'should return true if fieldName is not a key in locale', () => {
+		expect( isAddressFieldRequired( 'address_1', { foo: 'bar' } ) ).toBe(
+			true
+		);
+	} );
+	it( 'should return true if locale object marks it as required', () => {
+		expect(
+			isAddressFieldRequired( 'address_1', {
+				address_1: { required: true },
+			} )
+		).toBe( true );
+	} );
+	it( 'should return false if locale object marks it as not required', () => {
+		expect(
+			isAddressFieldRequired( 'address_1', {
+				address_1: { required: false },
+			} )
+		).toBe( false );
+	} );
+	it( 'should return false if fieldName is address_2', () => {
+		expect( isAddressFieldRequired( 'address_2', {} ) ).toBe( false );
+	} );
 } );

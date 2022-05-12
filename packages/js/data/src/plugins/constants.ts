@@ -55,4 +55,8 @@ export const pluginNames = {
 	'google-listings-and-ads': __( 'Google Listings and Ads', 'woocommerce' ),
 	'woo-razorpay': __( 'Razorpay', 'woocommerce' ),
 	mailpoet: __( 'MailPoet', 'woocommerce' ),
+	'pinterest-for-woocommerce': __(
+		'Pinterest for WooCommerce',
+		'woocommerce'
+	),
 };

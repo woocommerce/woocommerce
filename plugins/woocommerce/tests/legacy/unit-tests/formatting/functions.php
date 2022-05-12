@@ -803,6 +803,12 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// Test empty NL postcode.
 		$this->assertEquals( '', wc_format_postcode( '', 'NL' ) );
+
+		// Test LV postcode without mandatory country code.
+		$this->assertEquals( 'LV-1337', wc_format_postcode( '1337', 'LV' ) );
+
+		// Test LV postcode with incorrect format (no dash).
+		$this->assertEquals( 'LV-1337', wc_format_postcode( 'lv1337', 'LV' ) );
 	}
 
 	/**

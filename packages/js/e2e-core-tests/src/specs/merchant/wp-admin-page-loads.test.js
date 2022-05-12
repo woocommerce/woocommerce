@@ -11,7 +11,7 @@ const { it, describe, beforeAll } = require( '@jest/globals' );
 
 const runPageLoadTest = () => {
 	describe.each( MENUS )(
-		' %s > Opening Top Level Pages',
+		'%s > Opening Top Level Pages',
 		( menuTitle, menuElement, subMenus ) => {
 			beforeAll( async () => {
 				await merchant.login();
@@ -34,9 +34,11 @@ const runPageLoadTest = () => {
 
 					// Click sub-menu item and wait for the page to finish loading
 					if ( subMenuElement.length ) {
-						await Promise.all([
+						await Promise.all( [
 							page.click( subMenuElement ),
-							page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+							page.waitForNavigation( {
+								waitUntil: 'networkidle0',
+							} ),
 						] );
 					}
 

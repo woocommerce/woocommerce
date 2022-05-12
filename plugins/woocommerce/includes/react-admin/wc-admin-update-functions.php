@@ -7,11 +7,9 @@
  * @package WooCommerce\Admin
  */
 
-use Automattic\WooCommerce\Internal\Admin\Install as Installer;
 use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
-use \Automattic\WooCommerce\Internal\Admin\Notes\DeactivatePlugin;
 use \Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
@@ -41,13 +39,6 @@ function wc_admin_update_0201_order_status_index() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_0201_db_version() {
-	Installer::update_db_version( '0.20.1' );
-}
-
-/**
  * Rename "gross_total" to "total_sales".
  * See: https://github.com/woocommerce/woocommerce-admin/issues/3175
  */
@@ -61,13 +52,6 @@ function wc_admin_update_0230_rename_gross_total() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_0230_db_version() {
-	Installer::update_db_version( '0.23.0' );
-}
-
-/**
  * Remove the note unsnoozing scheduled action.
  */
 function wc_admin_update_0251_remove_unsnooze_action() {
@@ -76,24 +60,10 @@ function wc_admin_update_0251_remove_unsnooze_action() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_0251_db_version() {
-	Installer::update_db_version( '0.25.1' );
-}
-
-/**
  * Remove Facebook Extension note.
  */
 function wc_admin_update_110_remove_facebook_note() {
 	Notes::delete_notes_with_name( 'wc-admin-facebook-extension' );
-}
-
-/**
- * Update DB Version.
- */
-function wc_admin_update_110_db_version() {
-	Installer::update_db_version( '1.1.0' );
 }
 
 /**
@@ -106,19 +76,11 @@ function wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note() {
 }
 
 /**
+
  * Update DB Version.
  */
 function wc_admin_update_130_db_version() {
 	Installer::update_db_version( '1.3.0' );
-}
-
-/**
- * Change the deactivate plugin note type to 'info'.
- */
-function wc_admin_update_140_change_deactivate_plugin_note_type() {
-	global $wpdb;
-
-	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}wc_admin_notes SET type = 'info' WHERE name = %s", DeactivatePlugin::NOTE_NAME ) );
 }
 
 /**
@@ -136,24 +98,10 @@ function wc_admin_update_160_remove_facebook_note() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_160_db_version() {
-	Installer::update_db_version( '1.6.0' );
-}
-
-/**
  * Set "two column" homescreen layout as default for existing stores.
  */
 function wc_admin_update_170_homescreen_layout() {
 	add_option( 'woocommerce_default_homepage_layout', 'two_columns', '', 'no' );
-}
-
-/**
- * Update DB Version.
- */
-function wc_admin_update_170_db_version() {
-	Installer::update_db_version( '1.7.0' );
 }
 
 /**
@@ -242,13 +190,6 @@ function wc_admin_update_270_delete_report_downloads() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_270_db_version() {
-	Installer::update_db_version( '2.7.0' );
-}
-
-/**
  * Update the old task list options.
  */
 function wc_admin_update_271_update_task_list_options() {
@@ -268,13 +209,6 @@ function wc_admin_update_271_update_task_list_options() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_271_db_version() {
-	Installer::update_db_version( '2.7.1' );
-}
-
-/**
  * Update order stats `status`.
  */
 function wc_admin_update_280_order_status() {
@@ -287,13 +221,6 @@ function wc_admin_update_280_order_status() {
 		SET refunds.status = orders.status
 		WHERE refunds.parent_id != 0"
 	);
-}
-
-/**
- * Update DB Version.
- */
-function wc_admin_update_280_db_version() {
-	Installer::update_db_version( '2.8.0' );
 }
 
 /**
@@ -315,13 +242,6 @@ function wc_admin_update_290_update_apperance_task_option() {
  */
 function wc_admin_update_290_delete_default_homepage_layout_option() {
 	delete_option( 'woocommerce_default_homepage_layout' );
-}
-
-/**
- * Update DB Version.
- */
-function wc_admin_update_290_db_version() {
-	Installer::update_db_version( '2.9.0' );
 }
 
 /**
@@ -350,25 +270,9 @@ function wc_admin_update_300_update_is_read_from_last_read() {
 }
 
 /**
- * Update DB Version.
- */
-function wc_admin_update_300_db_version() {
-	Installer::update_db_version( '3.0.0' );
-}
-
-
-
-/**
  * Delete "is_primary" column from the wc_admin_notes table.
  */
 function wc_admin_update_340_remove_is_primary_from_note_action() {
 	global $wpdb;
 	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_admin_note_actions DROP COLUMN `is_primary`" );
-}
-
-/**
- * Update DB Version.
- */
-function wc_admin_update_340_db_version() {
-	Installer::update_db_version( '3.4.0' );
 }

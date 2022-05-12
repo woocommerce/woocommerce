@@ -5110,6 +5110,14 @@ img.help_tip {
 				margin: 1px 0;
 			}
 
+			&.file_url {
+				/* Reduce the size of this field to make space for a warning asterisk. */
+				input {
+					display: inline-block;
+					width: 96%;
+				}
+			}
+
 			.upload_file_button {
 				width: auto;
 				float: right;
@@ -5159,6 +5167,11 @@ img.help_tip {
 			&:hover::before {
 				color: #333;
 			}
+		}
+
+		/* Warning asterisk (indicates if there is a problem with a downloadable file). */
+		span.disabled {
+			color: var( --wc-red );
 		}
 	}
 }

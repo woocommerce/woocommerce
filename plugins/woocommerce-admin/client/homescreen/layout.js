@@ -35,11 +35,9 @@ import { TasksPlaceholder } from '../tasks';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
-	WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 } from './constants';
 import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import { WelcomeModal } from './welcome-modal';
-import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-hook';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -64,12 +62,12 @@ export const Layout = ( {
 	query,
 	taskListComplete,
 	hasTaskList,
+	showingProgressHeader,
+	isLoadingTaskLists,
 	shouldShowWelcomeModal,
 	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
 	updateOptions,
-	installTimestamp,
-	installTimestampHasResolved,
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
@@ -77,15 +75,18 @@ export const Layout = ( {
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task;
+
 	const {
 		isLoadingExperimentAssignment,
 		isLoadingTwoColExperimentAssignment,
 		experimentAssignment,
 		twoColExperimentAssignment,
-	} = useHeadercardExperimentHook(
-		installTimestampHasResolved,
-		installTimestamp
-	);
+	} = {
+		isLoadingExperimentAssignment: false,
+		isLoadingTwoColExperimentAssignment: false,
+		experimentAssignment: null,
+		twoColExperimentAssignment: null,
+	};
 
 	const isRunningTwoColumnExperiment =
 		twoColExperimentAssignment?.variationName === 'treatment';
@@ -141,7 +142,9 @@ export const Layout = ( {
 				<Column shouldStick={ shouldStickColumns }>
 					{ ! isLoadingExperimentAssignment &&
 						! isLoadingTwoColExperimentAssignment &&
-						! isRunningTaskListExperiment && (
+						! isRunningTaskListExperiment &&
+						! isLoadingTaskLists &&
+						! showingProgressHeader && (
 							<ActivityHeader
 								className="your-store-today"
 								title={ __(
@@ -286,7 +289,13 @@ export default compose(
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);
-		const { getTaskList } = select( ONBOARDING_STORE_NAME );
+		const {
+			getTaskList,
+			getTaskLists,
+			hasFinishedResolution: taskListFinishResolution,
+		} = select( ONBOARDING_STORE_NAME );
+		const taskLists = getTaskLists();
+		const isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
 
 		const welcomeFromCalypsoModalDismissed =
 			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
@@ -307,18 +316,9 @@ export default compose(
 		const welcomeModalDismissed =
 			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'no';
 
-		const installTimestamp = getOption(
-			WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
-		);
-
 		const welcomeModalDismissedHasResolved = hasFinishedResolution(
 			'getOption',
 			[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]
-		);
-
-		const installTimestampHasResolved = hasFinishedResolution(
-			'getOption',
-			[ WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ]
 		);
 
 		const shouldShowWelcomeModal =
@@ -336,11 +336,13 @@ export default compose(
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
+			isLoadingTaskLists,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
 			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
+			showingProgressHeader: !! taskLists.find(
+				( list ) => list.isVisible && list.displayProgressHeader
+			),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
-			installTimestamp,
-			installTimestampHasResolved,
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

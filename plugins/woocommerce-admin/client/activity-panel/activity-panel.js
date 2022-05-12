@@ -6,7 +6,7 @@ import { lazy, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
-import { getAdminLink, getSetting } from '@woocommerce/settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -37,6 +37,7 @@ import {
 } from '../homescreen/activity-panel/orders/utils';
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -245,7 +246,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				if ( currentLocation !== homescreenLocation ) {
 					// Ensure that if the user is trying to get to the task list they can see it even if
 					// it was dismissed.
-					if ( setupTaskListHidden === 'no' ) {
+					if ( setupTaskListHidden === false ) {
 						redirectToHomeScreen();
 					} else {
 						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
@@ -286,9 +287,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'previewSite',
 			title: __( 'Preview site', 'woocommerce' ),
 			icon: <Icon icon={ external } />,
-			visible: query.page === 'wc-admin' && query.task === 'appearance',
+			visible: isHomescreen() && query.task === 'appearance',
 			onClick: () => {
-				window.open( getSetting( 'siteUrl' ) );
+				window.open( getAdminSetting( 'siteUrl' ) );
 				recordEvent(
 					'wcadmin_tasklist_previewsite',
 					previewSiteBtnTrackData
@@ -298,9 +299,27 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			},
 		};
 
-		return [ activity, setup, previewSite, displayOptions, help ].filter(
-			( tab ) => tab.visible
-		);
+		const previewStore = {
+			name: 'previewStore',
+			title: __( 'Preview store', 'woocommerce' ),
+			icon: <Icon icon={ external } />,
+			visible: isHomescreen() && query.task !== 'appearance',
+			onClick: () => {
+				window.open( getAdminSetting( 'shopUrl' ) );
+				recordEvent( 'wcadmin_previewstore_click' );
+
+				return null;
+			},
+		};
+
+		return [
+			activity,
+			setup,
+			previewSite,
+			previewStore,
+			displayOptions,
+			help,
+		].filter( ( tab ) => tab.visible );
 	};
 
 	const getPanelContent = ( tab ) => {
