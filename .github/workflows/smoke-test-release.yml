@@ -58,7 +58,7 @@ jobs:
         runs-on: ubuntu-20.04
         strategy:
             matrix:
-                wp: [1, 2]
+                wp: ['1', '2']
         steps:
             - name: Create dirs.
               run: |
