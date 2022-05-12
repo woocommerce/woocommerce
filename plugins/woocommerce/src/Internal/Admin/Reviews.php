@@ -84,6 +84,8 @@ class Reviews {
 		/**
 		 * Filters whether the current user can manage product reviews.
 		 *
+		 * @since 6.6.0
+		 *
 		 * @param string $capability The capability (defaults to `moderate_comments`).
 		 * @param string $context    The context for which the capability is needed.
 		 */
@@ -608,6 +610,8 @@ class Reviews {
 
 		/**
 		 * Filters the contents of the product reviews list table output.
+		 *
+		 * @since 6.6.0
 		 *
 		 * @param string           $output             The HTML output of the list table.
 		 * @param ReviewsListTable $reviews_list_table The reviews list table instance.
