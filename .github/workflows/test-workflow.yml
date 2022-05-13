@@ -12,12 +12,6 @@ jobs:
             - name: Checkout code.
               uses: actions/checkout@v3
 
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
             - name: Cache modules
               uses: actions/cache@v3
               id: cache-deps
@@ -26,6 +20,12 @@ jobs:
                   ~/.pnpm-store
                   ~/.cache/composer/files
                 key: ${{ runner.os }}-testtesttest7-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Install dependencies
+              run: pnpm install
 
             - name: Install composer
               run: pnpm nx composer-install woocommerce
