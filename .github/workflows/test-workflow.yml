@@ -23,4 +23,4 @@ jobs:
                 key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: List dirs
-              run: ls ~/.pnpm-store
+              run: ls ~/.composer
