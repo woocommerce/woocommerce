@@ -768,6 +768,7 @@ class WC_Install {
 			'wc-admin-navigation-feedback',
 			'wc-admin-navigation-feedback-follow-up',
 			'wc-admin-set-up-additional-payment-types',
+			'wc-admin-deactivate-plugin',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(
