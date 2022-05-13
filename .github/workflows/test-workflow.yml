@@ -18,14 +18,14 @@ jobs:
             - name: Install dependencies
               run: pnpm install
 
-            # - name: Cache modules
-            #   uses: actions/cache@v3
-            #   id: cache-deps
-            #   with:
-            #     path: |
-            #       ~/.pnpm-store
-            #       ~/.cache/composer/files
-            #     key: ${{ runner.os }}-testtesttest6-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+            - name: Cache modules
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-testtesttest7-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install composer
               run: pnpm nx composer-install woocommerce
