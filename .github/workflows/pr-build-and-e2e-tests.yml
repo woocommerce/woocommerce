@@ -12,15 +12,14 @@ jobs:
             - name: Checkout code.
               uses: actions/checkout@v3
 
-            - name: Cache modules
+            - name: Dependency caching
               uses: actions/cache@v3
               id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -29,7 +28,6 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Setup PHP
@@ -68,15 +66,14 @@ jobs:
             - name: Checkout code.
               uses: actions/checkout@v3
 
-            - name: Cache modules
+            - name: Dependency caching
               uses: actions/cache@v3
               id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -85,7 +82,6 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install woocommerce
 
             - name: Setup PHP
@@ -124,15 +120,14 @@ jobs:
             - name: Checkout code.
               uses: actions/checkout@v3
 
-            - name: Cache modules
+            - name: Dependency caching
               uses: actions/cache@v3
               id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -141,7 +136,6 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install woocommerce
 
             - name: Setup PHP
