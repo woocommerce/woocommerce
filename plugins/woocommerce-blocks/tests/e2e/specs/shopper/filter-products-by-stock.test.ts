@@ -1,46 +1,40 @@
 import {
-	canvas,
 	createNewPost,
 	deleteAllTemplates,
 	insertBlock,
 	switchUserToAdmin,
 	publishPost,
 } from '@wordpress/e2e-test-utils';
-import { Frame } from 'puppeteer';
 import { selectBlockByName } from '@woocommerce/blocks-test-utils';
-
 import {
 	BASE_URL,
 	goToTemplateEditor,
 	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
+	waitForCanvas,
 } from '../../utils';
 
 const block = {
-	name: 'Filter Products by Attribute',
-	slug: 'woocommerce/attribute-filter',
-	class: '.wc-block-attribute-filter',
+	name: 'Filter Products by Stock',
+	slug: 'woocommerce/stock-filter',
+	class: '.wc-block-stock-filter',
 	selectors: {
 		editor: {
-			firstAttributeInTheList:
-				'.woocommerce-search-list__list > li > label > input.woocommerce-search-list__item-input',
 			filterButtonToggle: "//label[text()='Filter button']",
-			doneButton: '.wc-block-attribute-filter__selection > button',
 		},
 		frontend: {
-			firstAttributeInTheList:
-				'.wc-block-attribute-filter-list > li:not([class^="is-loading"])',
 			productsList: '.wc-block-grid__products > li',
 			classicProductsList: '.products.columns-3 > li',
-			filter: "input[id='128gb']",
+			filter: 'label[for=outofstock]',
 			submitButton: '.wc-block-components-filter-submit-button',
 		},
 	},
-	urlSearchParamWhenFilterIsApplied:
-		'?filter_capacity=128gb&query_type_capacity=or',
-	foundProduct: '128GB USB Stick',
+	urlSearchParamWhenFilterIsApplied: '?filter_stock_status=outofstock',
+	foundProduct: 'Woo Single #3',
 };
+
+const { selectors } = block;
 
 const waitForAllProductsBlockLoaded = () =>
 	page.waitForSelector( selectors.frontend.productsList + '.is-loading', {
@@ -52,10 +46,9 @@ const goToShopPage = () =>
 		waitUntil: 'networkidle0',
 	} );
 
-const { selectors } = block;
-
 describe( `${ block.name } Block`, () => {
 	describe( 'with All Products Block', () => {
+		let link = '';
 		beforeAll( async () => {
 			await switchUserToAdmin();
 			await createNewPost( {
@@ -64,19 +57,16 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await insertBlock( block.name );
-			await page.click( selectors.editor.firstAttributeInTheList );
-			await page.click( selectors.editor.doneButton );
 			await insertBlock( 'All Products' );
 			await publishPost();
 
-			const link = await page.evaluate( () =>
+			link = await page.evaluate( () =>
 				wp.data.select( 'core/editor' ).getPermalink()
 			);
-
-			await page.goto( link );
 		} );
 
 		it( 'should render', async () => {
+			await page.goto( link );
 			await waitForAllProductsBlockLoaded();
 			const products = await page.$$( selectors.frontend.productsList );
 
@@ -89,7 +79,6 @@ describe( `${ block.name } Block`, () => {
 			await page.click( selectors.frontend.filter );
 			await waitForAllProductsBlockLoaded();
 			const products = await page.$$( selectors.frontend.productsList );
-
 			expect( isRefreshed ).not.toBeCalled();
 			expect( products ).toHaveLength( 1 );
 			await expect( page ).toMatch( block.foundProduct );
@@ -104,19 +93,10 @@ describe( `${ block.name } Block`, () => {
 		beforeAll( async () => {
 			await deleteAllTemplates( 'wp_template' );
 			await deleteAllTemplates( 'wp_template_part' );
-
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
 			await insertBlock( block.name );
-			const canvasEl: Frame = canvas();
-
-			// It seems that .click doesn't work well with radio input element.
-			await canvasEl.$eval(
-				block.selectors.editor.firstAttributeInTheList,
-				( el ) => ( el as HTMLInputElement ).click()
-			);
-			await canvasEl.click( selectors.editor.doneButton );
 			await saveTemplate();
 			await goToShopPage();
 		} );
@@ -154,7 +134,6 @@ describe( `${ block.name } Block`, () => {
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
-
 			const pageURL = page.url();
 			const parsedURL = new URL( pageURL );
 
@@ -171,10 +150,14 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 
+			await waitForCanvas();
 			await selectBlockByName( block.slug );
 			await openBlockEditorSettings();
-			const [ filterButtonToggle ] = await page.$x(
+			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
+			);
+			const [ filterButtonToggle ] = await page.$x(
+				selectors.editor.filterButtonToggle
 			);
 			await filterButtonToggle.click();
 			await saveTemplate();
@@ -182,14 +165,15 @@ describe( `${ block.name } Block`, () => {
 
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
+
 			await page.waitForSelector( block.class + '.is-loading', {
 				hidden: true,
 			} );
-			await page.waitForSelector( selectors.frontend.filter );
-			await page.click( selectors.frontend.filter );
 
 			expect( isRefreshed ).not.toBeCalled();
 
+			await page.waitForSelector( selectors.frontend.filter );
+			await page.click( selectors.frontend.filter );
 			await Promise.all( [
 				page.waitForNavigation( {
 					waitUntil: 'networkidle0',
@@ -197,11 +181,15 @@ describe( `${ block.name } Block`, () => {
 				page.click( selectors.frontend.submitButton ),
 			] );
 
+			const pageURL = page.url();
+			const parsedURL = new URL( pageURL );
+
+			await page.waitForSelector(
+				selectors.frontend.classicProductsList
+			);
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
-			const pageURL = page.url();
-			const parsedURL = new URL( pageURL );
 
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );

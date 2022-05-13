@@ -229,6 +229,29 @@ const Products = () => [
 		categories: [ 'Music' ],
 		tags: [ 'Newest' ],
 	},
+	{
+		name: 'Woo Single #3 - Limited Edition',
+		type: 'simple',
+		regular_price: '100.00',
+		virtual: true,
+		downloadable: true,
+		downloads: [
+			{
+				name: 'Woo Single 2',
+				file:
+					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+			},
+		],
+		images: [
+			{
+				src:
+					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+			},
+		],
+		categories: [ 'Music' ],
+		stock_status: 'outofstock',
+		tags: [ 'Newest' ],
+	},
 ];
 
 /**
