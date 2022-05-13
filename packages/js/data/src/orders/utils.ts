@@ -29,7 +29,7 @@ export function getTotalOrderCountResourceName( query: Partial< OrderQuery > ) {
 	// Disable eslint rule because we're using this spread to omit properties
 	// that don't affect item totals count results.
 	// eslint-disable-next-line no-unused-vars, camelcase
-	const { page, per_page, ...totalsQuery } = query;
+	const { _fields, page, per_page, ...totalsQuery } = query;
 
 	return getOrderResourceName( totalsQuery );
 }

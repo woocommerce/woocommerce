@@ -93,19 +93,21 @@ export type OrderLineItem = {
 	meta_data: OrderMetaData[];
 };
 
-export type Order = Schema.Post & {
+export type OrderStatuses =
+	| 'processing'
+	| 'pending'
+	| 'on-hold'
+	| 'completed'
+	| 'cancelled'
+	| 'refunded'
+	| 'failed';
+
+export type Order = Omit< Schema.Post, 'status' > & {
 	id: number;
 	number: string;
 	order_key: string;
 	created_via: string;
-	status:
-		| 'pending'
-		| 'processing'
-		| 'on-hold'
-		| 'completed'
-		| 'cancelled'
-		| 'refunded'
-		| 'failed';
+	status: OrderStatuses;
 	currency: string;
 	version: number;
 	prices_include_tax: boolean;
