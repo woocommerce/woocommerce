@@ -50,8 +50,6 @@ const DefaultExperience = <div>Hello World</div>;
 
 const TreatmentExperience = <div>Hello WooCommerce!</div>;
 
-const LoadingExperience = <div>⏰</div>;
-
 const [ isLoadingExperiment, experimentAssignment ] = useExperiment('experiment-name');
 
 if ( ! isLoadingExperiment && experimentAssignment?.variationName === 'treatment' ) {
