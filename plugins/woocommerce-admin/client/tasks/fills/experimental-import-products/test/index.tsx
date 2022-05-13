@@ -73,6 +73,8 @@ describe( 'Products', () => {
 				now: jest
 					.fn()
 					.mockReturnValueOnce( 0 )
+					.mockReturnValueOnce( 1000 )
+					.mockReturnValueOnce( 0 )
 					.mockReturnValueOnce( 1000 ),
 			},
 		} );
@@ -84,14 +86,21 @@ describe( 'Products', () => {
 					'FROM A CSV FILE Import all products at once by uploading a CSV file.',
 			} )
 		);
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
+		await waitFor( () => {
+			expect( recordEvent ).toHaveBeenNthCalledWith(
+				1,
+				'tasklist_add_product',
+				{ method: 'import' }
+			);
+
+			expect( recordEvent ).toHaveBeenNthCalledWith(
+				2,
 				'task_completion_time',
 				{
 					task_name: 'products',
 					time: '0-2s',
 				}
-			)
-		);
+			);
+		} );
 	} );
 } );

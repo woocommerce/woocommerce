@@ -6,12 +6,14 @@ import { List, Link } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { ProductType } from './constants';
 import './stack.scss';
+import useRecordCompletionTime from '../use-record-completion-time';
 
 type StackProps = {
 	items: ( ProductType & {
@@ -26,6 +28,8 @@ const Stack: React.FC< StackProps > = ( {
 	onClickLoadSampleProduct,
 	showOtherOptions = true,
 } ) => {
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+
 	return (
 		<div className="woocommerce-products-stack">
 			<List items={ items } />
@@ -40,6 +44,10 @@ const Stack: React.FC< StackProps > = ( {
 							sbLink: (
 								<Link
 									onClick={ () => {
+										recordEvent( 'tasklist_add_product', {
+											method: 'manually',
+										} );
+										recordCompletionTime();
 										window.location = getAdminLink(
 											'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
 										);
@@ -56,6 +64,7 @@ const Stack: React.FC< StackProps > = ( {
 									href=""
 									type="wc-admin"
 									onClick={ () => {
+										recordCompletionTime();
 										onClickLoadSampleProduct();
 										return false;
 									} }

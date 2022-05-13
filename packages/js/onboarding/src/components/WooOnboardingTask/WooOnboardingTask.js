@@ -8,7 +8,7 @@ import { Slot, Fill } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { isProductTaskExperimentTreatment } from './use-product-layout-experiment';
+import { getProductLayoutExperiment } from './use-product-layout-experiment';
 
 export const trackView = async ( taskId ) => {
 	const activePlugins = wp.data
@@ -25,9 +25,7 @@ export const trackView = async ( taskId ) => {
 
 	recordEvent( 'task_view', {
 		task_name: taskId,
-		experimental_products:
-			window.wcAdminFeatures[ 'experimental-products-task' ] &&
-			( await isProductTaskExperimentTreatment() ),
+		variant: await getProductLayoutExperiment(),
 		wcs_installed: installedPlugins.includes( 'woocommerce-services' ),
 		wcs_active: activePlugins.includes( 'woocommerce-services' ),
 		jetpack_installed: installedPlugins.includes( 'jetpack' ),
