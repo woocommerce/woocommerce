@@ -1,4 +1,3 @@
 Significance: patch
 Type: fix
-
-Changelog added in #32046, which has not yet been released, and this simply fixes a bug from that.
+Comment: Changelog added in #32046, which has not yet been released, and this simply fixes a bug from that.
