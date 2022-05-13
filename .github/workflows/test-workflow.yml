@@ -25,7 +25,7 @@ jobs:
                 path: |
                   ~/.pnpm-store
                   ~/.cache/composer/files
-                key: ${{ runner.os }}-testtesttest5-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-testtesttest6-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install composer
               run: pnpm nx composer-install woocommerce
