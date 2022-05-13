@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php printf( esc_attr__( 'Enter price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
+				<input type="text" name="_regular_price" class="text regular_price" placeholder="<?php printf( esc_attr__( 'Enter Price (%s) or % value (e.g. 20%)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
@@ -61,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php printf( esc_attr__( 'Enter sale price (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
+				<input type="text" name="_sale_price" class="text sale_price" placeholder="<?php printf( esc_attr__( 'Enter Sale Price (%s) or % value (e.g. 20%)', 'woocommerce' ), get_woocommerce_currency_symbol() ); ?>" value="" />
 			</label>
 		</div>
 
