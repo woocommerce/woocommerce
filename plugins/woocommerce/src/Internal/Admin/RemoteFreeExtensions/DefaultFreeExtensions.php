@@ -78,7 +78,7 @@ class DefaultFreeExtensions {
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok-for-business', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 				'is_visible'     => [
