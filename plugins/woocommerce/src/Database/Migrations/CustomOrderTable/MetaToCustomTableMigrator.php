@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
  *
  * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
-abstract class MetaToCustomTableMigrator {
+abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 	/**
 	 * Config for tables being migrated and migrated from. See __construct() for detailed config.
@@ -37,20 +37,12 @@ abstract class MetaToCustomTableMigrator {
 	protected $core_column_mapping;
 
 	/**
-	 * Store errors along with entity IDs from migrations.
-	 *
-	 * @var array
-	 */
-	protected $errors;
-
-	/**
 	 * MetaToCustomTableMigrator constructor.
 	 */
 	public function __construct() {
 		$this->schema_config       = MigrationHelper::escape_schema_for_backtick( $this->get_schema_config() );
 		$this->meta_column_mapping = $this->get_meta_column_config();
 		$this->core_column_mapping = $this->get_core_column_mapping();
-		$this->errors              = array();
 	}
 
 	/**
@@ -224,13 +216,13 @@ abstract class MetaToCustomTableMigrator {
 	}
 
 	/**
-	 * Process next migration batch, uses option `wc_cot_migration` to checkpoints of what have been processed so far.
+	 * Migrate a batch of orders from the posts table to the corresponding table.
 	 *
-	 * @param array $entity_ids List of entity IDs to perform migrations for.
+	 * @param array $entity_ids Ids of orders ro migrate.
 	 *
-	 * @return array List of errors happened during migration.
+	 * @return void
 	 */
-	public function process_migration_batch_for_ids( array $entity_ids ): array {
+	protected function process_migration_batch_for_ids_core( array $entity_ids ): void {
 		$data = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
 		foreach ( $data['errors'] as $entity_id => $errors ) {
@@ -240,7 +232,7 @@ abstract class MetaToCustomTableMigrator {
 		}
 
 		if ( count( $data['data'] ) === 0 ) {
-			return array();
+			return;
 		}
 
 		$entity_ids       = array_keys( $data['data'] );
@@ -251,10 +243,6 @@ abstract class MetaToCustomTableMigrator {
 
 		$to_update = array_intersect_key( $data['data'], $already_migrated );
 		$this->process_update_batch( $to_update, $already_migrated );
-
-		return array(
-			'errors' => $this->errors,
-		);
 	}
 
 	/**
@@ -263,18 +251,15 @@ abstract class MetaToCustomTableMigrator {
 	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
 	 */
 	private function process_insert_batch( array $batch ): void {
-		global $wpdb;
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
 
 		$queries = $this->generate_insert_sql_for_batch( $batch );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
-		$result = $wpdb->query( $queries );
-		$wpdb->query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
-		if ( count( $batch ) !== $result ) {
-			$this->errors[] = 'Error with batch: ' . $wpdb->last_error;
-		}
+		$actual_processed_count = $this->db_query( $queries );
+		$this->db_query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
+		$this->maybe_add_insert_or_update_mismatch_error( 'insert', $batch, $actual_processed_count );
 	}
 
 	/**
@@ -284,18 +269,15 @@ abstract class MetaToCustomTableMigrator {
 	 * @param array $already_migrated Maps rows to update data with their original IDs.
 	 */
 	private function process_update_batch( array $batch, array $already_migrated ): void {
-		global $wpdb;
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
 
 		$queries = $this->generate_update_sql_for_batch( $batch, $already_migrated );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
-		$result = $wpdb->query( $queries );
-		$wpdb->query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
-		if ( count( $batch ) !== $result ) {
-			$this->errors[] = 'Error with batch: ' . $wpdb->last_error;
-		}
+		$actual_processed_count = $this->db_query( $queries );
+		$this->db_query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
+		$this->maybe_add_insert_or_update_mismatch_error( 'update', $batch, $actual_processed_count );
 	}
 
 
@@ -316,8 +298,6 @@ abstract class MetaToCustomTableMigrator {
 	 * )
 	 */
 	private function fetch_data_for_migration_for_ids( array $entity_ids ): array {
-		global $wpdb;
-
 		if ( empty( $entity_ids ) ) {
 			return array(
 				'data'   => array(),
@@ -327,7 +307,7 @@ abstract class MetaToCustomTableMigrator {
 
 		$entity_table_query = $this->build_entity_table_query( $entity_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Output of $this->build_entity_table_query is already prepared.
-		$entity_data = $wpdb->get_results( $entity_table_query );
+		$entity_data = $this->db_get_results( $entity_table_query );
 		if ( empty( $entity_data ) ) {
 			return array(
 				'data'   => array(),
@@ -338,7 +318,7 @@ abstract class MetaToCustomTableMigrator {
 
 		$meta_table_query = $this->build_meta_data_query( $entity_meta_rel_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Output of $this->build_meta_data_query is already prepared.
-		$meta_data = $wpdb->get_results( $meta_table_query );
+		$meta_data = $this->db_get_results( $meta_table_query );
 
 		return $this->process_and_sanitize_data( $entity_data, $meta_data );
 	}
@@ -370,7 +350,7 @@ abstract class MetaToCustomTableMigrator {
 
 		$entity_id_placeholder = implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) );
 
-		$already_migrated_entity_ids = $wpdb->get_results(
+		$already_migrated_entity_ids = $this->db_get_results(
 			$wpdb->prepare(
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
 				"
