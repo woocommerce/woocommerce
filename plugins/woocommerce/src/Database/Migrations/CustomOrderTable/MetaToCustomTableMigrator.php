@@ -233,8 +233,10 @@ abstract class MetaToCustomTableMigrator {
 	public function process_migration_batch_for_ids( array $entity_ids ): array {
 		$data = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
-		foreach ( $data['errors'] as $entity_id => $error ) {
-			$this->errors[ $entity_id ] = "Error in importing post id $entity_id: " . $error->get_message();
+		foreach ( $data['errors'] as $entity_id => $errors ) {
+			foreach ( $errors as $column_name => $error_message ) {
+				$this->add_error( "Error importing data for post with id $entity_id: column $column_name: $error_message" );
+			}
 		}
 
 		if ( count( $data['data'] ) === 0 ) {
@@ -416,6 +418,7 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
 			"
 SELECT
 	$source_meta_rel_id_column as entity_meta_rel_id,
+    $source_primary_key_column as primary_key_id,
 	$entity_column_string
 FROM `$source_entity_table`
 WHERE $where_clause;
@@ -502,7 +505,7 @@ WHERE
 				$value                    = $entity->$column_name;
 				$value                    = $this->validate_data( $value, $schema['type'] );
 				if ( is_wp_error( $value ) ) {
-					$error_records[ $entity->primary_key_id ][ $custom_table_column_name ] = $value->get_error_message();
+					$error_records[ $entity->primary_key_id ][ $custom_table_column_name ] = $value->get_error_code();
 				} else {
 					$row_data[ $custom_table_column_name ] = $value;
 				}
