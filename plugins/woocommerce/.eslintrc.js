@@ -28,7 +28,7 @@ module.exports = {
 	},
 	overrides: [
 		{
-			files: ["e2e/tests/**/*.spec.js", "e2e/tests/*.js"],
+			files: ["e2e/tests/**/*.spec.js", "e2e/*.js"],
 			rules: {
 				"jest/no-test-callback": "off",
 				"@wordpress/no-unsafe-wp-apis": "off",
