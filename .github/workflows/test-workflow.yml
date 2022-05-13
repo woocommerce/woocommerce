@@ -23,6 +23,9 @@ jobs:
               with:
                 php-version: '7.4'
 
+            - name: Install composer
+              run: pnpm nx composer-install woocommerce
+
             - name: Run build
               run: pnpm nx build woocommerce
 
@@ -34,7 +37,7 @@ jobs:
                   ~/.pnpm-store
                   plugins/woocommerce/packages
                   plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-testtest-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-testtesttest-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: List dirs
               run: ls -R ~/.composer
