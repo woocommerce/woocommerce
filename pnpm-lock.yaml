@@ -1282,7 +1282,6 @@ importers:
       '@types/cookie': ^0.4.1
       '@types/dompurify': ^2.3.3
       '@types/expect-puppeteer': ^4.4.7
-      '@types/history': ^4.7.11
       '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.179
       '@types/puppeteer': ^4.0.2
@@ -1490,7 +1489,6 @@ importers:
       '@types/cookie': 0.4.1
       '@types/dompurify': 2.3.3
       '@types/expect-puppeteer': 4.4.7
-      '@types/history': 4.7.11
       '@types/jest': 27.4.1
       '@types/lodash': 4.14.180
       '@types/puppeteer': 4.0.2
