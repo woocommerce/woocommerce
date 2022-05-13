@@ -34,7 +34,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return array Config.
 	 */
-	public function get_schema_config(): array {
+	protected function get_schema_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
 		$this->table_names = array(
@@ -73,7 +73,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return \string[][] Config.
 	 */
-	public function get_core_column_mapping(): array {
+	protected function get_core_column_mapping(): array {
 		$type = $this->type;
 
 		return array(
@@ -159,7 +159,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *      ...
 	 * )
 	 */
-	public function get_already_migrated_records( array $entity_ids ): array {
+	protected function get_already_migrated_records( array $entity_ids ): array {
 		global $wpdb;
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
 		$source_destination_join_column = $this->schema_config['source']['entity']['destination_rel_column'];

@@ -35,7 +35,7 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 	 *
 	 * @return array Meta data migration config.
 	 */
-	public function get_meta_config(): array {
+	protected function get_meta_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
 		$this->table_names = array(

@@ -53,7 +53,7 @@ class DataSynchronizer {
 	/**
 	 * The posts to COT migrator to use.
 	 *
-	 * @var DatabaseUtil
+	 * @var PostsToOrdersMigrationController
 	 */
 	private $posts_to_cot_migrator;
 
@@ -334,6 +334,8 @@ WHERE
 
 			/**
 			 * Hook to signal that the orders tables synchronization process has finished (nothing left to synchronize).
+			 *
+			 * @since 6.5.0
 			 */
 			do_action( self::PENDING_SYNCHRONIZATION_FINISHED_ACTION );
 		} else {

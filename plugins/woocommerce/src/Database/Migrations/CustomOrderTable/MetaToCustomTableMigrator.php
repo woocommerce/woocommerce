@@ -79,7 +79,7 @@ abstract class MetaToCustomTableMigrator {
 			'primary_key_type' => $type bool|int|string|decimal
 		)
 	 */
-	abstract public function get_schema_config(): array;
+	abstract protected function get_schema_config(): array;
 
 	/**
 	 * Specify column config from the source table.
@@ -96,7 +96,7 @@ abstract class MetaToCustomTableMigrator {
 	 *  ....
 	 * ).
 	 */
-	abstract public function get_core_column_mapping(): array;
+	abstract protected function get_core_column_mapping(): array;
 
 	/**
 	 * Specify meta keys config from source meta table.
@@ -113,7 +113,7 @@ abstract class MetaToCustomTableMigrator {
 	 *  ....
 	 * ).
 	 */
-	abstract public function get_meta_column_config(): array;
+	abstract protected function get_meta_column_config(): array;
 
 	/**
 	 * Generate SQL for data insertion.
@@ -126,7 +126,7 @@ abstract class MetaToCustomTableMigrator {
 	 *  ($value for row 2)
 	 * ...
 	 */
-	public function generate_insert_sql_for_batch( array $batch ): string {
+	private function generate_insert_sql_for_batch( array $batch ): string {
 		$table = $this->schema_config['destination']['table_name'];
 
 		list( $value_sql, $column_sql ) = $this->generate_column_clauses( array_merge( $this->core_column_mapping, $this->meta_column_mapping ), $batch );
@@ -151,7 +151,7 @@ abstract class MetaToCustomTableMigrator {
 	 * $column2 = VALUES($column2)
 	 * ...
 	 */
-	public function generate_update_sql_for_batch( array $batch, array $entity_row_mapping ): string {
+	private function generate_update_sql_for_batch( array $batch, array $entity_row_mapping ): string {
 		$table = $this->schema_config['destination']['table_name'];
 
 		$destination_primary_id_schema = $this->get_destination_table_primary_id_schema();
@@ -174,7 +174,7 @@ abstract class MetaToCustomTableMigrator {
 	 *
 	 * @return array[] Schema for primary ID column.
 	 */
-	protected function get_destination_table_primary_id_schema(): array {
+	private function get_destination_table_primary_id_schema(): array {
 		return array(
 			'destination_primary_key' => array(
 				'destination' => $this->schema_config['destination']['primary_key'],
@@ -191,13 +191,13 @@ abstract class MetaToCustomTableMigrator {
 	 *
 	 * @return array SQL clause for values, columns placeholders, and columns.
 	 */
-	protected function generate_column_clauses( array $columns_schema, array $batch ): array {
+	private function generate_column_clauses( array $columns_schema, array $batch ): array {
 		global $wpdb;
 
 		$columns      = array();
 		$placeholders = array();
 		foreach ( $columns_schema as $prev_column => $schema ) {
-			if ( in_array( $schema['destination'], $columns ) ) {
+			if ( in_array( $schema['destination'], $columns, true ) ) {
 				continue;
 			}
 			$columns[]      = $schema['destination'];
@@ -260,11 +260,12 @@ abstract class MetaToCustomTableMigrator {
 	 *
 	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
 	 */
-	protected function process_insert_batch( array $batch ): void {
+	private function process_insert_batch( array $batch ): void {
 		global $wpdb;
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
+
 		$queries = $this->generate_insert_sql_for_batch( $batch );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
 		$result = $wpdb->query( $queries );
@@ -280,11 +281,12 @@ abstract class MetaToCustomTableMigrator {
 	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
 	 * @param array $already_migrated Maps rows to update data with their original IDs.
 	 */
-	protected function process_update_batch( array $batch, array $already_migrated ): void {
+	private function process_update_batch( array $batch, array $already_migrated ): void {
 		global $wpdb;
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
+
 		$queries = $this->generate_update_sql_for_batch( $batch, $already_migrated );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
 		$result = $wpdb->query( $queries );
@@ -311,7 +313,7 @@ abstract class MetaToCustomTableMigrator {
 	 *      ...,
 	 * )
 	 */
-	public function fetch_data_for_migration_for_ids( array $entity_ids ): array {
+	private function fetch_data_for_migration_for_ids( array $entity_ids ): array {
 		global $wpdb;
 
 		if ( empty( $entity_ids ) ) {
@@ -353,8 +355,9 @@ abstract class MetaToCustomTableMigrator {
 	 *      ...
 	 * )
 	 */
-	public function get_already_migrated_records( array $entity_ids ): array {
+	protected function get_already_migrated_records( array $entity_ids ): array {
 		global $wpdb;
+
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
 		$source_destination_join_column = $this->schema_config['source']['entity']['destination_rel_column'];
 		$source_primary_key_column      = $this->schema_config['source']['entity']['primary_key'];
@@ -390,8 +393,9 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
-	protected function build_entity_table_query( array $entity_ids ): string {
+	private function build_entity_table_query( array $entity_ids ): string {
 		global $wpdb;
+
 		$source_entity_table       = $this->schema_config['source']['entity']['table_name'];
 		$source_meta_rel_id_column = "`$source_entity_table`.`{$this->schema_config['source']['entity']['meta_rel_column']}`";
 		$source_primary_key_column = "`$source_entity_table`.`{$this->schema_config['source']['entity']['primary_key']}`";
@@ -431,8 +435,9 @@ WHERE $where_clause;
 	 *
 	 * @return string Query for fetching meta data.
 	 */
-	protected function build_meta_data_query( array $entity_ids ): string {
+	private function build_meta_data_query( array $entity_ids ): string {
 		global $wpdb;
+
 		$meta_table                = $this->schema_config['source']['meta']['table_name'];
 		$meta_keys                 = array_keys( $this->meta_column_mapping );
 		$meta_key_column           = $this->schema_config['source']['meta']['meta_key_column'];

@@ -60,7 +60,7 @@ abstract class MetaToMetaTableMigrator {
 	 *  ),
 	 * )
 	 */
-	abstract public function get_meta_config(): array;
+	abstract protected function get_meta_config(): array;
 
 	/**
 	 * MetaToMetaTableMigrator constructor.
@@ -110,7 +110,7 @@ abstract class MetaToMetaTableMigrator {
 	 *
 	 * @return string Query to update batch records.
 	 */
-	public function generate_update_sql_for_batch( array $batch ): string {
+	private function generate_update_sql_for_batch( array $batch ): string {
 		global $wpdb;
 
 		$table             = $this->schema_config['destination']['meta']['table_name'];
@@ -127,11 +127,12 @@ abstract class MetaToMetaTableMigrator {
 		foreach ( $batch as $entity_id => $rows ) {
 			foreach ( $rows as $meta_key => $meta_details ) {
 
+				// phpcs:disable WordPress.DB.PreparedSQL, WordPress.DB.PreparedSQLPlaceholders
 				$values[] = $wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholder string is already being prepared.
 					"( $placeholder_string )",
 					array( $meta_details['id'], $entity_id, $meta_key, $meta_details['meta_value'] )
 				);
+				// phpcs:enable
 			}
 		}
 		$value_sql = implode( ',', $values );
@@ -148,7 +149,7 @@ abstract class MetaToMetaTableMigrator {
 	 *
 	 * @return string Insert SQL query.
 	 */
-	public function generate_insert_sql_for_batch( array $batch ): string {
+	private function generate_insert_sql_for_batch( array $batch ): string {
 		global $wpdb;
 
 		$table             = $this->schema_config['destination']['meta']['table_name'];
@@ -168,7 +169,7 @@ abstract class MetaToMetaTableMigrator {
 						$meta_key,
 						$meta_value,
 					);
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholder_string is hardcoded.
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
 					$value_sql = $wpdb->prepare( "$placeholder_string", $query_params );
 					$values[]  = $value_sql;
 				}
@@ -221,6 +222,7 @@ abstract class MetaToMetaTableMigrator {
 			}
 
 			if ( ! isset( $to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ] ) ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$to_migrate[ $migrate_row->entity_id ][ $migrate_row->meta_key ] = array();
 			}
 
@@ -276,6 +278,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 				$already_migrated[ $migrate_row->entity_id ] = array();
 			}
 
+			// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			if ( ! isset( $already_migrated[ $migrate_row->entity_id ][ $migrate_row->meta_key ] ) ) {
 				$already_migrated[ $migrate_row->entity_id ][ $migrate_row->meta_key ] = array();
 			}
@@ -284,6 +287,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 				'id'         => $migrate_row->meta_id,
 				'meta_value' => $migrate_row->meta_value,
 			);
+			// phpcs:enable
 		}
 
 		return $already_migrated;
@@ -318,6 +322,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 						}
 						$to_update[ $entity_id ][ $meta_key ] = array(
 							'id'         => $already_migrated[ $entity_id ][ $meta_key ][0]['id'],
+							// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'meta_value' => $meta_values[0],
 						);
 						continue;
@@ -367,7 +372,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 			$where_clause   = "$where_clause AND $exclude_clause";
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		return $wpdb->prepare(
 			"
 SELECT
