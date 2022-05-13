@@ -9,8 +9,16 @@ jobs:
         name: Test workflow.
         runs-on: ubuntu-20.04
         steps:
-            # - name: Checkout code.
-            #   uses: actions/checkout@v3
+            - name: Checkout code.
+              uses: actions/checkout@v3
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
+            - name: Run build
+              run: pnpm nx build woocommerce
 
             - name: Cache modules
               uses: actions/cache@v3
@@ -20,7 +28,7 @@ jobs:
                   ~/.pnpm-store
                   plugins/woocommerce/packages
                   plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-testtest-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: List dirs
               run: ls -R ~/.composer
