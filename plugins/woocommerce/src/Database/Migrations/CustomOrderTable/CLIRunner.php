@@ -182,7 +182,7 @@ class CLIRunner {
 
 			WP_CLI::debug(
 				sprintf(
-				/* Translators: %1$d is the batch number, %2$d is the batch size. */
+					/* Translators: %1$d is the batch number, %2$d is the batch size. */
 					__( 'Beginning batch #%1$d (%2$d orders/batch).', 'woocommerce' ),
 					$batch_count,
 					$batch_size
@@ -190,15 +190,18 @@ class CLIRunner {
 			);
 			$batch_start_time = microtime( true );
 			$order_ids        = $this->synchronizer->get_ids_of_orders_pending_sync( $this->synchronizer::ID_TYPE_MISSING_IN_ORDERS_TABLE, $batch_size );
-			$this->post_to_cot_migrator->migrate_orders( $order_ids );
+			if ( count( $order_ids ) ) {
+				$this->post_to_cot_migrator->migrate_orders( $order_ids );
+			}
 			$processed       += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 
 			WP_CLI::debug(
 				sprintf(
-				// Translators: %1$d is the batch number, %2$f is time taken to process batch.
+					// Translators: %1$d is the batch number, %2$f is time taken to process batch.
 					__( 'Batch %1$d (%2$d orders) completed in %3$f seconds', 'woocommerce' ),
 					$batch_count,
+					count( $order_ids ),
 					$batch_total_time
 				)
 			);
@@ -226,7 +229,7 @@ class CLIRunner {
 
 		return WP_CLI::success(
 			sprintf(
-			/* Translators: %1$d is the number of migrated orders. */
+				/* Translators: %1$d is the number of migrated orders. */
 				_n( '%1$d order was migrated, in %2$f seconds', '%1$d orders were migrated in %2$f seconds', $processed, 'woocommerce' ),
 				$processed,
 				$total_time
@@ -317,7 +320,7 @@ class CLIRunner {
 		while ( $order_count > 0 ) {
 			WP_CLI::debug(
 				sprintf(
-				/* Translators: %1$d is the batch number, %2$d is the batch size. */
+					/* Translators: %1$d is the batch number, %2$d is the batch size. */
 					__( 'Beginning verification for batch #%1$d (%2$d orders/batch).', 'woocommerce' ),
 					$batch_count,
 					$batch_size
@@ -365,7 +368,7 @@ class CLIRunner {
 		if ( 0 === count( $failed_ids ) ) {
 			return WP_CLI::success(
 				sprintf(
-				/* Translators: %1$d is the number of migrated orders and %2$f is time taken */
+					/* Translators: %1$d is the number of migrated orders and %2$f is time taken */
 					_n( '%1$d order was verified, in %2$f seconds', '%1$d orders were verified in %2$f seconds', $processed, 'woocommerce' ),
 					$processed,
 					$total_time
@@ -376,8 +379,8 @@ class CLIRunner {
 
 			return WP_CLI::error(
 				sprintf(
-				/* Translators: %1$d is the number of migrated orders, %2$f is time taken, %3$d is number of errors and$4%s is formatted array of order ids. */
-					_n( '%1$d order was verified, in %2$f seconds. %3$f error was found: %4$s', '%1$d orders were verified in %2$f seconds. %3$d errors were found %4$s', $processed, 'woocommerce' ),
+					/* Translators: %1$d is the number of migrated orders, %2$f is time taken, %3$d is number of errors and$4%s is formatted array of order ids. */
+					_n( '%1$d order was verified, in %2$f seconds. %3$f error(s) found: %4$s', '%1$d orders were verified in %2$f seconds Please review above errros. %3$d error(s) found %4$s. Please review above errors.', $processed, 'woocommerce' ),
 					$processed,
 					$total_time,
 					count( $failed_ids ),
@@ -408,7 +411,7 @@ class CLIRunner {
 		if ( $log ) {
 			WP_CLI::log(
 				sprintf(
-				/* Translators: %1$d is the number of orders to be verified. */
+					/* Translators: %1$d is the number of orders to be verified. */
 					_n( 'There is %1$d order to be verified.', 'There are %1$d orders to be verified.', $order_count, 'woocommerce' ),
 					$order_count
 				)
@@ -451,10 +454,10 @@ ORDER BY {$wpdb->postmeta}.post_id ASC, {$wpdb->postmeta}.meta_key ASC;
 				$excluded_columns
 			)
 		);
-		$data_to_migrate = $wpdb->get_results( $query, ARRAY_A );
+		$source_data = $wpdb->get_results( $query, ARRAY_A );
 		// phpcs:enable
 
-		$clubbed_data_to_migrate = $this->club_data( $data_to_migrate );
+		$normalized_source_data = $this->normalize_raw_meta_data( $source_data );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
 		$migrated_query = $wpdb->prepare(
@@ -470,15 +473,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$migrated_data  = $wpdb->get_results( $migrated_query, ARRAY_A );
 		// phpcs:enable
 
-		$clubbed_migrated_data = $this->club_data( $migrated_data );
+		$normalized_migrated_meta_data = $this->normalize_raw_meta_data( $migrated_data );
 
-		foreach ( $clubbed_data_to_migrate as $order_id => $meta ) {
+		foreach ( $normalized_source_data as $order_id => $meta ) {
 			foreach ( $meta as $meta_key => $values ) {
-				if ( ! isset( $clubbed_migrated_data[ $order_id ] ) || ! isset( $clubbed_migrated_data[ $order_id ][ $meta_key ] ) ) {
-					$diff = $values;
-				} else {
-					$diff = array_diff( $values, $clubbed_migrated_data[ $order_id ][ $meta_key ] );
-				}
+				$migrated_meta_values = isset( $normalized_migrated_meta_data[ $order_id ][ $meta_key ] ) ? $normalized_migrated_meta_data[ $order_id ][ $meta_key ] : array();
+				$diff = array_diff( $values, $migrated_meta_values );
 
 				if ( count( $diff ) ) {
 					if ( ! isset( $failed_ids[ $order_id ] ) ) {
@@ -487,7 +487,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 					$failed_ids[ $order_id ][] = array(
 						'order_id'   => $order_id,
 						'meta_key'   => $meta_key,
-						'meta_value' => $diff,
+						'orig_meta_values' => $values,
+						'new_meta_values' => $migrated_meta_values,
 					);
 				}
 			}
@@ -497,13 +498,13 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	}
 
 	/**
-	 * Helper method to club response from meta queries into order_id > meta_key.
+	 * Helper method to normalize response from meta queries into order_id > meta_key > meta_values.
 	 *
 	 * @param array $data Data fetched from meta queries.
 	 *
-	 * @return array Clubbed data.
+	 * @return array Normalized data.
 	 */
-	private function club_data( array $data ) : array {
+	private function normalize_raw_meta_data( array $data ) : array {
 		$clubbed_data = array();
 		foreach ( $data as $row ) {
 			if ( ! isset( $clubbed_data[ $row['entity_id'] ] ) ) {
