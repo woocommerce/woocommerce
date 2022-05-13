@@ -8,6 +8,7 @@ import {
 import { selectBlockByName } from '@woocommerce/blocks-test-utils';
 import {
 	BASE_URL,
+	clickLink,
 	goToTemplateEditor,
 	openBlockEditorSettings,
 	saveTemplate,
@@ -186,12 +187,7 @@ describe( `${ block.name } Block`, () => {
 
 			await setMaxPrice();
 
-			await Promise.all( [
-				page.click( selectors.frontend.submitButton ),
-				page.waitForNavigation( {
-					waitUntil: 'networkidle0',
-				} ),
-			] );
+			await clickLink( selectors.frontend.submitButton );
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList

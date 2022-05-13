@@ -455,9 +455,13 @@ const createProductAttributes = ( fixture = fixtures.Attributes() ) => {
 				)
 				.catch( () => {
 					// At this point, the attributes probably already exist. Get them and return them instead.
-					return WooCommerce.get( 'products/attributes' ).then(
-						( response ) => response.data
-					);
+					return WooCommerce.get( 'products/attributes' )
+						.then( ( response ) => response.data )
+						.then( ( data ) => {
+							return data.find(
+								( item ) => item.name === attribute.name
+							);
+						} );
 				} );
 		} )
 	);
