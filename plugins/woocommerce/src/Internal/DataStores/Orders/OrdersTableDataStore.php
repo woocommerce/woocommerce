@@ -19,17 +19,25 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @var OrdersTableDataStoreMeta
 	 */
-	protected OrdersTableDataStoreMeta $data_store_meta;
+	protected $data_store_meta;
 
 	/**
 	 * Handles various db column <> order prop conversions.
 	 *
 	 * @var OrdersTableDataStoreHelper
 	 */
-	protected OrdersTableDataStoreHelper $helper;
+	protected $helper;
 
 
-	public function init( OrdersTableDataStoreMeta $data_store_meta, OrdersTableDataStoreHelper $data_store_helper ) {
+	/**
+	 * Initialize the object.
+	 *
+	 * @internal
+	 * @param OrdersTableDataStoreMeta   $data_store_meta   Metadata helper.
+	 * @param OrdersTableDataStoreHelper $data_store_helper General datastore helper.
+	 * @return void
+	 */
+	final public function init( OrdersTableDataStoreMeta $data_store_meta, OrdersTableDataStoreHelper $data_store_helper ) {
 		$this->data_store_meta = $data_store_meta;
 		$this->helper          = $data_store_helper;
 	}
@@ -816,7 +824,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 
 		// Before updating, ensure date paid is set if missing.
-		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) {
+		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
 
@@ -844,7 +852,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 		// Figure out what needs to be updated in the database.
 		$db_updates = array();
 
-		if ( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->order_column_mapping ) ) {
+		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
+		if ( $row ) {
 			// wc_orders.
 			$db_updates[] = array(
 				'table'        => self::get_orders_table_name(),
@@ -855,7 +864,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 			);
 		}
 
-		if ( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping ) ) {
+		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping );
+		if ( $row ) {
 			// wc_order_operational_data.
 			$db_updates[] = array(
 				'table'        => self::get_operational_data_table_name(),
@@ -866,25 +876,33 @@ LEFT JOIN {$operational_data_clauses['join']}
 			);
 		}
 
-		if ( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->billing_address_column_mapping ) ) {
+		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->billing_address_column_mapping );
+		if ( $row ) {
 			// wc_order_addresses: billing.
 			$db_updates[] = array(
 				'table'        => self::get_addresses_table_name(),
-				'where'        => array( 'order_id' => $order->get_id(), 'address_type' => 'billing' ),
+				'where'        => array(
+					'order_id'     => $order->get_id(),
+					'address_type' => 'billing',
+				),
 				'where_format' => array( '%d', '%s' ),
 				'row'          => $row['row'],
 				'row_format'   => array_values( $row['format'] ),
 			);
 		}
 
-		if( $row = $this->helper->get_db_row_from_order_changes( $changes, $this->shipping_address_column_mapping ) ) {
+		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->shipping_address_column_mapping );
+		if ( $row ) {
 			// wc_order_addresses: shipping.
 			$db_updates[] = array(
-				'table'      => self::get_addresses_table_name(),
-				'where'      => array( 'order_id' => $order->get_id(), 'address_type' => 'shipping' ),
+				'table'        => self::get_addresses_table_name(),
+				'where'        => array(
+					'order_id'     => $order->get_id(),
+					'address_type' => 'shipping',
+				),
 				'where_format' => array( '%d', '%s' ),
-				'row'        => $row['row'],
-				'row_format' => array_values( $row['format'] ),
+				'row'          => $row['row'],
+				'row_format'   => array_values( $row['format'] ),
 			);
 		}
 
@@ -1063,11 +1081,11 @@ CREATE TABLE $meta_table (
 
 	/**
 	 * Returns list of metadata that is considered "internal".
-	 * @todo This is mostly just to trick `WC_Data_Store_WP` for the time being.
 	 *
 	 * @return array
 	 */
 	public function get_internal_meta_keys() {
+		// XXX: This is mostly just to trick `WC_Data_Store_WP` for the time being.
 		return array(
 			'_customer_user',
 			'_order_key',

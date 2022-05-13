@@ -30,8 +30,8 @@ class OrdersTableDataStoreHelper {
 	 * `$format` parameters. Values are taken from the order changes array and properly formatted for inclusion in the
 	 * database.
 	 *
-	 * @param array $changes
-	 * @param array $column_mapping
+	 * @param array $changes        Order changes array.
+	 * @param array $column_mapping Table column mapping.
 	 * @return array
 	 */
 	public function get_db_row_from_order_changes( $changes, $column_mapping ) {
@@ -45,19 +45,27 @@ class OrdersTableDataStoreHelper {
 				continue;
 			}
 
-			$row[ $column ] = $this->format_value_for_db( $changes[ $details['name'] ], $details['type'] );
+			$row[ $column ]        = $this->format_value_for_db( $changes[ $details['name'] ], $details['type'] );
 			$row_format[ $column ] = $this->get_wpdb_format_for_type( $details['type'] );
 		}
 
-		return ( ! empty( $row ) ) ? array( 'row' => $row, 'format' => $row_format ) : false;
+		if ( ! $row ) {
+			return false;
+		}
+
+		return array(
+			'row'    => $row,
+			'format' => $row_format,
+		);
 	}
 
 	/**
 	 * Formats a value of type `$type` for inclusion in the database.
 	 *
-	 * @param mixed $value
-	 * @param string $type
+	 * @param mixed  $value Raw value.
+	 * @param string $type  Data type.
 	 * @return mixed
+	 * @throws \Exception When an invalid type is passed.
 	 */
 	public function format_value_for_db( $value, string $type ) {
 		switch ( $type ) {
@@ -74,14 +82,13 @@ class OrdersTableDataStoreHelper {
 				$value = strval( $value );
 				break;
 			case 'date':
-				$value = $value ? (new \DateTime( $value ) )->format( 'Y-m-d H:i:s' ) : null;
+				$value = $value ? ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' ) : null;
 				break;
 			case 'date_epoch':
-				$value = $value ? (new \DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
+				$value = $value ? ( new \DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
 				break;
 			default:
 				throw new \Exception( 'Invalid type received: ' . $type );
-				break;
 		}
 
 		return $value;
@@ -90,12 +97,13 @@ class OrdersTableDataStoreHelper {
 	/**
 	 * Returns the `$wpdb` placeholder to use for data type `$type`.
 	 *
-	 * @param string $type
+	 * @param string $type Data type.
 	 * @return string
+	 * @throws \Exception When an invalid type is passed.
 	 */
 	private function get_wpdb_format_for_type( string $type ) {
 		if ( ! isset( self::$wpdb_placeholder_for_type[ $type ] ) ) {
-			throw new \Exception('Invalid column type: ' . $type);
+			throw new \Exception( 'Invalid column type: ' . $type );
 		}
 
 		return self::$wpdb_placeholder_for_type[ $type ];

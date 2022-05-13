@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-
 /**
  * Mimics a WP metadata (i.e. add_metadata(), get_metadata() and friends) implementation using a custom table.
  */
@@ -37,13 +36,15 @@ class OrdersTableDataStoreMeta {
 
 		$db_info = $this->get_db_info();
 
-		// TODO: do we want to augment this with pre-COT metadata?
+		// XXX: do we want to augment this with pre-COT metadata?
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$raw_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT {$db_info['meta_id_field']} AS meta_id, meta_key, meta_value FROM {$db_info['table']} WHERE {$db_info['object_id_field']} = %d ORDER BY meta_id",
 				$object->get_id()
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $raw_meta_data;
 	}
@@ -63,8 +64,9 @@ class OrdersTableDataStoreMeta {
 
 		$db_info = $this->get_db_info();
 
-		$meta_id = absint( $meta->id );
-		if ( $current_meta = $this->get_metadata_by_id( $meta_id ) ) {
+		$meta_id      = absint( $meta->id );
+		$current_meta = $this->get_metadata_by_id( $meta_id );
+		if ( $current_meta ) {
 			return (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
 		}
 
@@ -91,6 +93,7 @@ class OrdersTableDataStoreMeta {
 		$meta_key   = wp_unslash( wp_slash( $meta->key ) );
 		$meta_value = maybe_serialize( is_string( $meta->value ) ? wp_unslash( wp_slash( $meta->value ) ) : $meta->value );
 
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		$result = $wpdb->insert(
 			$db_info['table'],
 			array(
@@ -99,6 +102,7 @@ class OrdersTableDataStoreMeta {
 				'meta_value'                => $meta_value,
 			)
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
 		return $result ? (int) $wpdb->insert_id : false;
 	}
@@ -112,11 +116,14 @@ class OrdersTableDataStoreMeta {
 	public function update_meta( &$object, $meta ) {
 		global $wpdb;
 
-		if ( $current_meta = $this->get_metadata_by_id( $meta->id ) ) {
+		$current_meta = $this->get_metadata_by_id( $meta->id );
+		if ( $current_meta ) {
+			// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			$data = array(
 				'meta_key'   => $meta->key,
 				'meta_value' => maybe_serialize( $meta->value ),
 			);
+			// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
 			$db_info = $this->get_db_info();
 
@@ -137,25 +144,27 @@ class OrdersTableDataStoreMeta {
 	/**
 	 * Retrieves metadata by meta ID.
 	 *
-	 * @param int $meta_id
+	 * @param int $meta_id Meta ID.
 	 * @return object|bool Metadata object or FALSE if not found.
 	 */
 	public function get_metadata_by_id( $meta_id ) {
 		global $wpdb;
 
-		if ( ! is_numeric( $meta_id ) || floor( $meta_id ) != $meta_id ) {
+		if ( ! is_numeric( $meta_id ) || floor( $meta_id ) != $meta_id ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			return false;
 		}
 
 		$db_info = $this->get_db_info();
 
 		$meta_id = absint( $meta_id );
-		$meta    = $wpdb->get_row(
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$meta = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$db_info['table']} WHERE {$db_info['meta_id_field']} = %d",
 				$meta_id
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( empty( $meta ) ) {
 			return false;
