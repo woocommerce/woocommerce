@@ -1,8 +1,5 @@
-// playwright.config.js
-// @ts-check
 const { devices } = require( '@playwright/test' );
 
-/** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
 	timeout: 20000,
 	outputDir: './report',
@@ -13,7 +10,7 @@ const config = {
 	reporter: [ [ 'list' ], [ 'html', { outputFolder: 'e2e/output' } ] ],
 	use: {
 		screenshot: 'only-on-failure',
-		video: 'retain-on-failure',
+		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		baseURL: 'http://localhost:8084',
