@@ -66,3 +66,10 @@ $GLOBALS['woocommerce'] = WC();
  * @since 6.6.0
  */
 do_action( 'woo_test_hook' );
+
+/**
+ * Testing hook
+ *
+ * @since 6.6.0
+ */
+$test = apply_filters( 'woo_test_hook2', true );
