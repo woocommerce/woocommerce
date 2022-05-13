@@ -466,7 +466,7 @@ class DefaultFreeExtensions {
 				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok-for-business.svg', WC_PLUGIN_FILE ),
 				'description'    =>
-					__( 'Grow your online sales by promoting your products on TikTok to over one billion monthly active users around the world', 'woocommerce' ),
+					__( 'Grow your online sales by promoting your products on TikTok to over one billion monthly active users around the world.', 'woocommerce' ),
 				'is_visible'     => [
 					[
 						'type'     => 'or',
