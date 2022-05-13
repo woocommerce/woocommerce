@@ -12,6 +12,12 @@ jobs:
             - name: Checkout code.
               uses: actions/checkout@v3
 
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Install dependencies
+              run: pnpm install
+
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
