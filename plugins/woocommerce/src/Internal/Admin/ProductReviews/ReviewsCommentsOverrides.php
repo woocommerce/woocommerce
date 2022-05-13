@@ -12,13 +12,6 @@ class ReviewsCommentsOverrides {
 	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
 
 	/**
-	 * Class instance.
-	 *
-	 * @var ReviewsCommentsOverrides|null instance
-	 */
-	protected static $instance;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -114,20 +107,6 @@ class ReviewsCommentsOverrides {
 	 */
 	public function get_dismiss_capability( $default_capability, $notice_name ) {
 		return self::REVIEWS_MOVED_NOTICE_ID === $notice_name ? Reviews::get_capability() : $default_capability;
-	}
-
-	/**
-	 * Gets the class instance.
-	 *
-	 * @return ReviewsCommentsOverrides instance
-	 */
-	public static function get_instance() : ReviewsCommentsOverrides {
-
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**

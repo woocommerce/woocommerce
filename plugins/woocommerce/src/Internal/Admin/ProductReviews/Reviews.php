@@ -20,13 +20,6 @@ class Reviews {
 	const MENU_SLUG = 'product-reviews';
 
 	/**
-	 * Class instance.
-	 *
-	 * @var Reviews|null instance
-	 */
-	protected static $instance;
-
-	/**
 	 * Reviews page hook name.
 	 *
 	 * @var string|null
@@ -57,20 +50,6 @@ class Reviews {
 		add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
-	}
-
-	/**
-	 * Gets the class instance.
-	 *
-	 * @return Reviews instance
-	 */
-	public static function get_instance() : Reviews {
-
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**

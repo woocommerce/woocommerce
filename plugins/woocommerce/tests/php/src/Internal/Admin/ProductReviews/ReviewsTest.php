@@ -40,17 +40,6 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the class instance.
-	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_instance()
-	 *
-	 * @return void
-	 */
-	public function test_get_instance() : void {
-		$this->assertInstanceOf( Reviews::class, Reviews::get_instance() );
-	}
-
-	/**
 	 * Tests that can get the capability to view the reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_capability()
@@ -81,7 +70,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method or the property is not found.
 	 */
 	public function test_load_reviews_screen() : void {
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 
 		// This has to be manually set, otherwise instantiating ReviewsListTable will throw an undefined index error.
 		$hook_property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_page_hook' );
@@ -154,7 +143,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			);
 		}
 
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'get_pending_count_bubble' );
 		$method->setAccessible( true );
 
@@ -187,7 +176,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$review = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
 		$current_screen = (object) [ 'id' => 'comment' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$_GET['c'] = $review;
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 
 		$this->assertSame( 'edit.php?post_type=product', $reviews->edit_review_parent_file( 'test' ) );
 		$this->assertSame( 'product-reviews', $submenu_file );
@@ -226,7 +215,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			$comment = $is_reply ? $reply : $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
-		$this->assertSame( $expected_text, ( new Reviews() )->edit_comments_screen_text( $translated_text, $original_text ) );
+		$this->assertSame( $expected_text, ( wc_get_container()->get( Reviews::class ) )->edit_comments_screen_text( $translated_text, $original_text ) );
 	}
 
 	/** @see test_edit_comments_screen_text */
@@ -250,7 +239,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_render_reviews_list_table() : void {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$reviews = Reviews::get_instance();
+		$reviews = wc_get_container()->get( Reviews::class );
 		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
 		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
@@ -294,7 +283,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$current_screen = $new_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 
 		$this->assertSame( $expected_result, $reviews->is_reviews_page() );
 	}
@@ -342,7 +331,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_bulk_action_notice_messages( array $statuses, int $count, array $expected_result ) : void {
 
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 
 		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'get_bulk_action_notice_messages' );
 		$method->setAccessible( true );
@@ -561,7 +550,7 @@ test2</p></div>',
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_is_not_review_or_reply( $object, bool $expected ) : void {
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
 		$method->setAccessible( true );
 
@@ -583,7 +572,7 @@ test2</p></div>',
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_is_review_or_reply_with_comment_object() : void {
-		$reviews = new Reviews();
+		$reviews = wc_get_container()->get( Reviews::class );
 		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
 		$method->setAccessible( true );
 
