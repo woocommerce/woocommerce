@@ -987,15 +987,11 @@
 		  slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
 		  slider.setProps(sliderOffset * slider.h, "init");
         } else {
-		  if (type === "init") slider.container.css({"height": slider.h, "overflow":"hidden"});
-          if(slider.vars.rtl){
-            slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
-          } else {
-            slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "left", "display": "block"});
-          }
+		  if (type === "init") slider.viewport.css({"height": slider.h, "overflow-X":"hidden"});
+		  slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": slider.vars.rtl ? "right" : "left", "display": "block"});
+		  slider.container.css({"height": "","width": (slider.count + slider.cloneCount) * 200 + "%"});
+		  slider.setProps(sliderOffset * slider.computedW, "init");
 		  setTimeout(function(){
-			slider.container.css({"height": "","width": (slider.count + slider.cloneCount) * 200 + "%"});
-			slider.setProps(sliderOffset * slider.computedW, "init");
 			// SMOOTH HEIGHT:
 			if (slider.vars.smoothHeight) { methods.smoothHeight(); }
 		  }, (type === "init") ? 100 : 0);
@@ -1003,20 +999,19 @@
       } else { // FADE:
         if(slider.vars.rtl){
           slider.slides.css({"width": "100%", "float": 'right', "marginLeft": "-100%", "position": "relative"});
-        }
-        else{
+        } else{
           slider.slides.css({"width": "100%", "float": 'left', "marginRight": "-100%", "position": "relative"});
         }
         if (type === "init") {
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
-            if (slider.vars.fadeFirstSlide == false) {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
+            if (!slider.vars.fadeFirstSlide) {
+              slider.slides.css({ "opacity": 1, "display": "block", "zIndex": 1 });
             } else {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
+              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
             }
           } else {
-            slider.slides.css({ "opacity": 0, "display": "block", "webkitTransition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
+            slider.slides.css({ "opacity": 0, "display": "block", "webkitTransition": "opacity " + slider.vars.fadeFirstSlide ? 1 : slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1 });
           }
         }
         // SMOOTH HEIGHT:
