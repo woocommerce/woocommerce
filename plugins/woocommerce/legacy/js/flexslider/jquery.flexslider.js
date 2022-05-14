@@ -947,6 +947,16 @@
     };
 
     slider.setup = function(type) {
+	  slider.slides.slice(1).each( function () {
+	    var $img = $(this).find('img').first();
+		$img
+		.data({
+			srcset: $img.srcset,
+			src: $img.src
+		})
+		.removeAttr('src srcset')
+		.addClass('flexslider-deferred');
+      })
       // SLIDE:
       if (!fade) {
         var sliderOffset, arr;
@@ -1153,6 +1163,16 @@
     focused = false;
   }).on( 'focus', function ( e ) {
     focused = true;
+  }).on( 'load', function () {
+	  $('.woocommerce-product-gallery__wrapper .flexslider-deferred').each(function () {
+		  $(this)
+			  .prop({
+				  src: $(this).attr('data-src'),
+				  srcset: $(this).attr('data-srcset')
+			  })
+			  .removeAttr('data-src data-srcset loading')
+			  .removeClass('flex-deferred');
+	  })
   });
 
   //FlexSlider: Default Settings
