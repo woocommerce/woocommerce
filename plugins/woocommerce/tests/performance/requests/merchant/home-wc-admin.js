@@ -46,7 +46,7 @@ export function homeWCAdmin() {
 		check(response, {
 			"is status 200": (r) => r.status === 200,
 			"body contains: current page is 'Home'": (response) =>
-				response.body.includes('aria-current="page">Home</a>'),
+				response.body.includes('>Home</h1>'),
 		});
 
 		// Correlate nonce values for use in subsequent requests.
