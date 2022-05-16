@@ -36,9 +36,10 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"lint": "eslint src",
-		"lint:fix": "eslint src --fix",
-		"postinstall": "composer install"
+		"lint:fix": "eslint src --fix"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
