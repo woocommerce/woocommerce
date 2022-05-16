@@ -63,12 +63,14 @@ class Reviews {
 		/**
 		 * Filters whether the current user can manage product reviews.
 		 *
+		 * This is aligned to {@see \wc_rest_check_product_reviews_permissions()}
+		 *
 		 * @since 6.6.0
 		 *
-		 * @param string $capability The capability (defaults to `moderate_comments`).
+		 * @param string $capability The capability (defaults to `moderate_comments` for viewing and `edit_products` for editing).
 		 * @param string $context    The context for which the capability is needed.
 		 */
-		return (string) apply_filters( 'woocommerce_product_reviews_page_capability', 'moderate_comments', $context );
+		return (string) apply_filters( 'woocommerce_product_reviews_page_capability', 'view' === $context ? 'moderate_comments' : 'edit_products', $context );
 	}
 
 	/**
