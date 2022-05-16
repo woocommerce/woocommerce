@@ -14,6 +14,14 @@ import { fetchWithHeaders } from '../controls';
 
 type OrderGetResponse = Order[] | ( { data: Order[] } & Response );
 
+type RequestError = {
+	code: string;
+	data: {
+		status: number;
+	};
+	message: string;
+};
+
 function* request( query: Partial< OrderQuery > ) {
 	const url: string = addQueryArgs( `${ WC_ORDER_NAMESPACE }`, query );
 	const isUnboundedRequest = query.per_page === -1;
@@ -63,5 +71,6 @@ export function* getOrdersTotalCount( query: Partial< OrderQuery > ) {
 		return totalCount;
 	} catch ( error ) {
 		yield setError( query, error );
+		return error;
 	}
 }
