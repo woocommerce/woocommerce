@@ -22,7 +22,15 @@ const onboardingData = getAdminSetting( 'onboarding' );
 const possiblyImportProductTaskExperiment = async () => {
 	const isExperiment = await isProductTaskExperimentTreatment();
 	if ( isExperiment ) {
-		import( './experimental-products' );
+		if (
+			window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
+			onboardingData?.profile?.selling_venues &&
+			onboardingData?.profile?.selling_venues !== 'no'
+		) {
+			import( './experimental-import-products' );
+		} else {
+			import( './experimental-products' );
+		}
 	} else {
 		import( './products' );
 	}
@@ -30,14 +38,8 @@ const possiblyImportProductTaskExperiment = async () => {
 
 if (
 	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
-	onboardingData?.profile?.selling_venues &&
-	onboardingData?.profile?.selling_venues !== 'no'
-) {
-	import( './experimental-import-products' );
-} else if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-products-task' ]
+	( window.wcAdminFeatures[ 'experimental-import-products-task' ] ||
+		window.wcAdminFeatures[ 'experimental-products-task' ] )
 ) {
 	possiblyImportProductTaskExperiment();
 } else {
