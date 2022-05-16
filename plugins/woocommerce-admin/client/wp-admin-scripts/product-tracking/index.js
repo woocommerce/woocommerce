@@ -17,6 +17,11 @@ const sortableColumnHeaders = document.querySelectorAll(
 );
 const stockStatus = document.querySelector( '[name="stock_status"]' );
 
+const hasValue = ( selector ) => {
+	const element = document.querySelector( selector );
+	return !! element && element.value !== '' && element.value !== '-1';
+};
+
 filterButton.addEventListener( 'click', function () {
 	recordEvent( 'products_list_filter_click', {
 		search_string_length: searchInput.value.length,
@@ -37,45 +42,29 @@ bulkActionsButton.addEventListener( 'click', function () {
 
 document.querySelector( '#bulk_edit' ).addEventListener( 'click', function () {
 	recordEvent( 'products_list_bulk_edit_update', {
-		product_number: document.querySelector( '#bulk-titles' ).children
+		product_number: document.querySelector( '#bulk-titles' )?.children
 			.length,
 		product_categories:
 			document.querySelectorAll(
 				'[name="tax_input[product_cat][]"]:checked'
-			).length > 0,
-		comments:
-			document.querySelector( '[name="comment_status"]' ).value !== '',
-		status: document.querySelector( '[name="_status"]' ).value !== '',
-		product_tags:
-			document.querySelector( '[name="tax_input[product_tag]"]' )
-				.value !== '',
-		price:
-			document.querySelector( '[name="change_regular_price"]' ).value !==
-			'',
-		sale:
-			document.querySelector( '[name="change_sale_price"]' ).value !== '',
-		tax_status:
-			document.querySelector( '[name="_tax_status"]' ).value !== '',
-		tax_class: document.querySelector( '[name="_tax_class"]' ).value !== '',
-		weight: document.querySelector( '[name="change_weight"]' ).value !== '',
-		dimensions:
-			document.querySelector( '[name="change_dimensions"]' ).value !== '',
-		shipping_class:
-			document.querySelector( '[name="_shipping_class"]' ).value !== '',
-		visibility:
-			document.querySelector( '[name="_visibility"]' ).value !== '',
-		featured: document.querySelector( '[name="_featured"]' ).value !== '',
-		stock_status:
-			document.querySelector( '[name="_stock_status"]' ).value !== '',
-		manage_stock:
-			document.querySelector( '[name="_manage_stock"]' ).value !== '',
-		stock_quantity:
-			document.querySelector( '[name="change_stock"]' ).value !== '',
-		backorders:
-			document.querySelector( '[name="_backorders"]' ).value !== '',
-		sold_individually:
-			document.querySelector( '[name="_sold_individually"]' ).value !==
-			'',
+			)?.length > 0,
+		comments: hasValue( '[name="comment_status"]' ),
+		status: hasValue( '[name="_status"]' ),
+		product_tags: hasValue( '[name="tax_input[product_tag]"]' ),
+		price: hasValue( '[name="change_regular_price"]' ),
+		sale: hasValue( '[name="change_sale_price"]' ),
+		tax_status: hasValue( '[name="_tax_status"]' ),
+		tax_class: hasValue( '[name="_tax_class"]' ),
+		weight: hasValue( '[name="change_weight"]' ),
+		dimensions: hasValue( '[name="change_dimensions"]' ),
+		shipping_class: hasValue( '[name="_shipping_class"]' ),
+		visibility: hasValue( '[name="_visibility"]' ),
+		featured: hasValue( '[name="_featured"]' ),
+		stock_status: hasValue( '[name="_stock_status"]' ),
+		manage_stock: hasValue( '[name="_manage_stock"]' ),
+		stock_quantity: hasValue( '[name="change_stock"]' ),
+		backorders: hasValue( '[name="_backorders"]' ),
+		sold_individually: hasValue( '[name="_sold_individually"]' ),
 	} );
 } );
 
