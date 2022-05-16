@@ -6,6 +6,7 @@ import { recordEvent } from '@woocommerce/tracks';
 const actionButtons = document.querySelectorAll( '.row-actions span' );
 const bulkActions = document.querySelector( '#bulk-action-selector-top' );
 const bulkActionsButton = document.querySelector( '#doaction' );
+const bulkActionsCancelButton = document.querySelector( '#bulk-edit .cancel' );
 const featuredButtons = document.querySelectorAll( '#the-list .featured a' );
 const filterButton = document.querySelector( '#post-query-submit' );
 const productCategory = document.querySelector( '#product_cat' );
@@ -66,6 +67,10 @@ document.querySelector( '#bulk_edit' ).addEventListener( 'click', function () {
 		backorders: hasValue( '[name="_backorders"]' ),
 		sold_individually: hasValue( '[name="_sold_individually"]' ),
 	} );
+} );
+
+bulkActionsCancelButton.addEventListener( 'click', function () {
+	recordEvent( 'products_list_bulk_edit_cancel' );
 } );
 
 actionButtons.forEach( ( button ) => {
