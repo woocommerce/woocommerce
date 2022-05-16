@@ -311,6 +311,10 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->assertEquals( (float) $order->get_shipping_total(), (float) $db_order_op_data->shipping_total_amount );
 		$this->assertEquals( (float) $order->get_discount_tax(), (float) $db_order_op_data->discount_tax_amount );
 		$this->assertEquals( (float) $order->get_discount_total(), (float) $db_order_op_data->discount_total_amount );
+		$this->assertEquals(
+			$order->get_data_store()->get_recorded_sales( $order ),
+			(bool) $db_order_op_data->recorded_sales
+		);
 	}
 
 	/**

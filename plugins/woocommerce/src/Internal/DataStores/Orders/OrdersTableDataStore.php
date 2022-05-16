@@ -301,6 +301,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'type' => 'decimal',
 			'name' => 'discount_total_amount',
 		),
+		'recorded_sales'              => array( 'type' => 'bool' ),
 	);
 
 	/**
@@ -716,6 +717,7 @@ CREATE TABLE $operational_data_table_name (
 	shipping_total_amount decimal(26, 8) NULL,
 	discount_tax_amount decimal(26, 8) NULL,
 	discount_total_amount decimal(26, 8) NULL,
+	recorded_sales tinyint(1) NULL,
 	KEY order_id (order_id),
 	KEY order_key (order_key)
 );
