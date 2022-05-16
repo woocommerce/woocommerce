@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add wc-admin-deactivate-plugin to list of obselete notes so it gets deleted on upgrade

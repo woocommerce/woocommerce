@@ -3,6 +3,7 @@
  */
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -10,7 +11,13 @@ import userEvent from '@testing-library/user-event';
 import Stack from '../stack';
 import { productTypes } from '../constants';
 
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+
 describe( 'Stack', () => {
+	beforeEach( () => {
+		( recordEvent as jest.Mock ).mockClear();
+	} );
+
 	it( 'should render stack with given product type and two links', () => {
 		const { queryByText, queryAllByRole } = render(
 			<Stack
@@ -63,5 +70,38 @@ describe( 'Stack', () => {
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
 		await waitFor( () => expect( onClickLoadSampleProduct ).toBeCalled() );
+
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			1,
+			'task_completion_time',
+			{ task_name: 'products', time: '0-2s' }
+		);
+	} );
+
+	it( 'should fire the tasklist_add_product and task_completion_time events when the "Start Blank" link is clicked', async () => {
+		const onClickLoadSampleProduct = jest.fn();
+		const { getByRole } = render(
+			<Stack
+				onClickLoadSampleProduct={ onClickLoadSampleProduct }
+				items={ [
+					{
+						...productTypes[ 0 ],
+						onClick: () => {},
+					},
+				] }
+			/>
+		);
+
+		userEvent.click( getByRole( 'link', { name: 'Start Blank' } ) );
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			1,
+			'tasklist_add_product',
+			{ method: 'manually' }
+		);
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			2,
+			'task_completion_time',
+			{ task_name: 'products', time: '0-2s' }
+		);
 	} );
 } );

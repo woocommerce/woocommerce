@@ -12,7 +12,7 @@ import { useState } from '@wordpress/element';
 import { ProductTypeKey } from './constants';
 import { createNoticesFromResponse } from '../../../lib/notices';
 
-const useCreateProductByType = () => {
+export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 
@@ -54,5 +54,3 @@ const useCreateProductByType = () => {
 		isRequesting,
 	};
 };
-
-export default useCreateProductByType;
