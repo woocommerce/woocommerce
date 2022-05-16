@@ -118,6 +118,20 @@ class PostsToOrdersMigrationController {
 	}
 
 	/**
+	 * Verify whether the given order IDs were migrated properly or not.
+	 *
+	 * @param array $order_post_ids Order IDs.
+	 *
+	 * @return array Array of failed IDs along with columns.
+	 */
+	public function verify_migrated_orders( array $order_post_ids ): array {
+		return $this->order_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->billing_address_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->shipping_address_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->operation_data_table_migrator->verify_migrated_data( $order_post_ids );
+	}
+
+	/**
 	 * Migrates an order from the posts table to the custom orders tables.
 	 *
 	 * @param int $order_post_id Post ID of the order to migrate.

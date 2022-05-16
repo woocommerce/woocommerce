@@ -26,6 +26,7 @@ import CardLayout from './card-layout';
 import { LoadSampleProductType } from './constants';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
+import useRecordCompletionTime from '../use-record-completion-time';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -57,9 +58,26 @@ export const Products = () => {
 		experimentLayout,
 	] = useProductTaskExperiment();
 
-	const productTypes = useProductTypeListItems( getProductTypes() );
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
+	);
+
+	const productTypes = useProductTypeListItems(
+		getProductTypes(),
+		surfacedProductTypeKeys
+	);
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+
+	const productTypesWithTimeRecord = useMemo(
+		() =>
+			productTypes.map( ( productType ) => ( {
+				...productType,
+				onClick: () => {
+					productType.onClick();
+					recordCompletionTime();
+				},
+			} ) ),
+		[ recordCompletionTime ]
 	);
 
 	const {
@@ -72,12 +90,13 @@ export const Products = () => {
 	} );
 
 	const visibleProductTypes = useMemo( () => {
-		const surfacedProductTypes = productTypes.filter( ( productType ) =>
-			surfacedProductTypeKeys.includes( productType.key )
+		const surfacedProductTypes = productTypesWithTimeRecord.filter(
+			( productType ) =>
+				surfacedProductTypeKeys.includes( productType.key )
 		);
 		if ( isExpanded ) {
 			// To show product types in same order, we need to push the other product types to the end.
-			productTypes.forEach(
+			productTypesWithTimeRecord.forEach(
 				( productType ) =>
 					! surfacedProductTypes.includes( productType ) &&
 					surfacedProductTypes.push( productType )
@@ -121,6 +140,7 @@ export const Products = () => {
 							<Stack
 								items={ visibleProductTypes }
 								onClickLoadSampleProduct={ loadSampleProduct }
+								showOtherOptions={ isExpanded }
 							/>
 						) : (
 							<CardLayout items={ visibleProductTypes } />

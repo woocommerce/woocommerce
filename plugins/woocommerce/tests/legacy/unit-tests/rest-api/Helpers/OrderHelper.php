@@ -206,6 +206,7 @@ class OrderHelper {
 		$order->set_prices_include_tax( true );
 		wc_update_coupon_usage_counts( $order->get_id() );
 		$order->get_data_store()->set_download_permissions_granted( $order, true );
+		$order->get_data_store()->set_recorded_sales( $order, true );
 		$order->set_cart_hash( '1234' );
 		$order->update_meta_data( '_new_order_email_sent', 'true' );
 		$order->update_meta_data( '_order_stock_reduced', 'true' );

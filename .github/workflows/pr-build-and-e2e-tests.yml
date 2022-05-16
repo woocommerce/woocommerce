@@ -64,6 +64,8 @@ jobs:
     api-tests-run:
         name: Runs API tests.
         runs-on: ubuntu-20.04
+        env:
+            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
             - name: Checkout code.
               uses: actions/checkout@v3
@@ -108,13 +110,14 @@ jobs:
                   USER_SECRET: password
               run: pnpm exec wc-api-tests test api
 
-            - name: Upload API test report
+            - name: Archive API test report
+              if: always()
               uses: actions/upload-artifact@v3
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                      packages/js/api-core-tests/allure-results
-                      packages/js/api-core-tests/allure-report
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
                   retention-days: 7
 
     k6-tests-run:
@@ -168,3 +171,28 @@ jobs:
             - name: Run k6 tests
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+
+    publish-test-reports:
+        name: Publish test reports
+        if: ${{ always() }}
+        runs-on: ubuntu-18.04
+        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            PR_NUMBER: ${{ github.event.number }}
+            RUN_ID: ${{ github.run_id }}
+            COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        steps:
+            - name: Publish API test report
+              env:
+                  ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
+              run: |
+                  gh workflow run publish-report.yml \
+                    -f test_workflow=pr \
+                    -f test_type=api \
+                    -f run_id=$RUN_ID \
+                    -f artifact_name=$ARTIFACT_NAME \
+                    -f pr_number=$PR_NUMBER \
+                    -f commit_sha=$COMMIT_SHA \
+                    --repo woocommerce/woocommerce-test-reports
+

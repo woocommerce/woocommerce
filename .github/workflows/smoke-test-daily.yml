@@ -2,63 +2,22 @@ name: Smoke test daily
 on:
     schedule:
         - cron: '25 3 * * *'
+env:
+  API_TEST_REPORT_ARTIFACT_NAME: api-test-report---daily
+
 jobs:
     login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
+        env:
+            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
-            - name: Create dirs.
-              run: |
-                  mkdir -p code/woocommerce
-                  mkdir -p package/woocommerce
-                  mkdir -p tmp/woocommerce
-
             - name: Checkout code.
               uses: actions/checkout@v3
               with:
-                  path: package/woocommerce
                   ref: trunk
 
-            - name: Install prerequisites.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
-                  pnpm nx composer-install-no-dev woocommerce
-                  pnpm nx build-assets woocommerce
-                  pnpm install jest
-
-            - name: Run smoke test.
-              working-directory: package/woocommerce/plugins/woocommerce
-              env:
-                  SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
-                  SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-                  SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-                  SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-                  SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-                  SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-                  WC_E2E_SCREENSHOTS: 1
-                  E2E_RETEST: 1
-                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: 'C01U0H617MY'
-                  UPDATE_WC: 1
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-                  USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-              run: |
-                  pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
-                  pnpm exec wc-e2e test:e2e
-                  pnpm exec wc-api-tests test api
-
-    build:
-        name: Build zip for PR
-        runs-on: ubuntu-20.04
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-
-            - name: Get cached composer and pnpm directories
+            - name: Cache modules
               uses: actions/cache@v3
               id: cache-deps
               with:
@@ -66,28 +25,102 @@ jobs:
                   ~/.pnpm-store
                   plugins/woocommerce/packages
                   plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                key: ${{ runner.os }}-npm-composer-smoke-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
+
+            - name: Install Jest
+              run: pnpm install -g jest
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Install Composer dependencies
+              if: steps.cache-deps.outputs.cache-hit != 'true'
+              run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Build zip
-              working-directory: plugins/woocommerce
-              run: bash bin/build-zip.sh
+            - name: Run build
+              run: pnpm nx build woocommerce
 
-            - name: Upload PR zip
-              uses: actions/upload-artifact@v3
+            - name: Run smoke test.
+              working-directory: plugins/woocommerce
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
+                  SMOKE_TEST_ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+                  SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
+                  SMOKE_TEST_CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
+                  SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
+                  WC_E2E_SCREENSHOTS: 1
+                  E2E_RETEST: 1
+                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+                  E2E_SLACK_CHANNEL: 'C02DS4NE72S'
+                  TEST_RELEASE: 1
+                  UPDATE_WC: 1
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+              run: |
+                  pnpm exec wc-e2e docker:up
+                  pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
+                  pnpm exec wc-e2e test:e2e
+                  pnpm exec wc-api-tests test api
+                  
+            - name: Archive API test report
+              if: always()
+              uses: actions/upload-artifact@v2
               with:
-                  name: woocommerce
-                  path: plugins/woocommerce/woocommerce.zip
-                  retention-days: 7
+                  name: ${{ env.API_TEST_REPORT_ARTIFACT_NAME }}
+                  path: |
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
+                  retention-days: 7                    
+
+    build:
+        name: Build zip for PR
+        runs-on: ubuntu-20.04
+        steps:
+          - name: Checkout code.
+            uses: actions/checkout@v3
+
+          - name: Cache modules
+            uses: actions/cache@v3
+            id: cache-deps
+            with:
+              path: |
+                ~/.pnpm-store
+              key: ${{ runner.os }}-npm-smoke-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+          - name: Install PNPM
+            run: npm install -g pnpm@^6.24.2
+
+          - name: Setup PHP
+            uses: shivammathur/setup-php@v2
+            with:
+              php-version: '7.4'
+
+          - name: Build zip
+            working-directory: plugins/woocommerce
+            run: bash bin/build-zip.sh
+
+          - name: Unzip the file (prevents double zip problem)
+            run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
+
+          - name: Upload the zip file as an artifact
+            uses: actions/upload-artifact@v3
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+              name: woocommerce
+              path: zipfile
+              retention-days: 7
 
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
@@ -113,7 +146,6 @@ jobs:
         steps:
             - name: Create dirs.
               run: |
-                  mkdir -p code/woocommerce
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
 
@@ -122,18 +154,29 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Install PNPM and install dependencies
+            - name: Cache modules
+              uses: actions/cache@v3
+              id: cache-deps
+              with:
+                path: |
+                  ~/.pnpm-store
+                key: ${{ runner.os }}-npm-smoke-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Install dependencies
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
+              run: pnpm install
 
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpm exec wc-e2e docker:up
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
 
-            - name: Move current directory to code. We will install zip file in this dir later.
-              run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
+            - name: Run build
+              working-directory: package/woocommerce
+              run: pnpm nx build woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
@@ -145,13 +188,11 @@ jobs:
               working-directory: tmp
               run: |
                   unzip woocommerce.zip -d woocommerce
-                  mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+                  rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies again
+            - name: Load docker images and start containers.
               working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
+              run: pnpm nx docker-up woocommerce
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -165,3 +206,21 @@ jobs:
               run: |
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
                   pnpm exec wc-e2e test:e2e
+
+    publish-test-reports:
+        name: Publish test reports
+        if: ${{ always() }}
+        runs-on: ubuntu-18.04
+        needs: [login-run, build, test-plugins]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+        steps:
+            - name: Publish API test report
+              run: |
+                  gh workflow run publish-report.yml \
+                    -f test_workflow=daily \
+                    -f test_type=api \
+                    -f run_id=$RUN_ID \
+                    -f artifact_name=$API_TEST_REPORT_ARTIFACT_NAME \
+                    --repo woocommerce/woocommerce-test-reports

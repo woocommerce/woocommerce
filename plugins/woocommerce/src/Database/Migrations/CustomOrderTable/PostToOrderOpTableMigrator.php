@@ -135,6 +135,10 @@ class PostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 				'type'        => 'decimal',
 				'destination' => 'discount_total_amount',
 			),
+			'_recorded_sales'               => array(
+				'type'        => 'bool',
+				'destination' => 'recorded_sales',
+			),
 		);
 	}
 }

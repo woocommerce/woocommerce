@@ -211,7 +211,7 @@ SELECT(
 	 *
 	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
 	 */
-	private function custom_orders_table_is_authoritative(): bool {
+	public function custom_orders_table_is_authoritative(): bool {
 		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
 	}
 
@@ -229,7 +229,7 @@ SELECT(
 	 * @return array An array of order ids.
 	 * @throws \Exception Invalid parameter.
 	 */
-	private function get_ids_of_orders_pending_sync( int $type, int $limit ) {
+	public function get_ids_of_orders_pending_sync( int $type, int $limit ) {
 		global $wpdb;
 
 		if ( $limit < 1 ) {

@@ -50,6 +50,7 @@ export const Products = () => {
 
 	const productTypeListItems = useProductTypeListItems(
 		getProductTypes( [ 'subscription' ] ),
+		[],
 		{
 			onClick: recordCompletionTime,
 		}

@@ -189,4 +189,18 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) AND dest
 
 		return array_column( $already_migrated_entity_ids, null, 'source_id' );
 	}
+
+	/**
+	 * Helper function to generate where clause for fetching data for verification.
+	 *
+	 * @param array $source_ids Array of IDs from source table.
+	 *
+	 * @return string WHERE clause.
+	 */
+	protected function get_where_clause_for_verification( $source_ids ) {
+		global $wpdb;
+		$query = parent::get_where_clause_for_verification( $source_ids );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $query should already be prepared, $schema_config is hardcoded.
+		return $wpdb->prepare( "$query AND {$this->schema_config['destination']['table_name']}.address_type = %s", $this->type );
+	}
 }
