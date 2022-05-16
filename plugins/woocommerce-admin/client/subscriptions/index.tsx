@@ -23,6 +23,22 @@ import Discover from './cards/discover.js';
 import JCB from './cards/jcb.js';
 import UnionPay from './cards/unionpay.js';
 import './style.scss';
+
+/**
+ * The available experiment treatments.
+ */
+enum Treatment {
+	/**
+	 * Treatment A: Create a subscription product then WCPay onboarding.
+	 */
+	A = 'A',
+
+	/**
+	 * Treatment B: WCPay onboarding then create a subscription product.
+	 */
+	B = 'B',
+}
+
 declare global {
 	interface Window {
 		wcWcpaySubscriptions: {
@@ -30,6 +46,7 @@ declare global {
 			onboardingUrl: string;
 			noThanksUrl: string;
 			dismissOptionKey: string;
+			experimentAssignment: Treatment;
 		};
 	}
 }
@@ -39,6 +56,7 @@ const {
 	onboardingUrl,
 	noThanksUrl,
 	dismissOptionKey,
+	experimentAssignment,
 } = window.wcWcpaySubscriptions;
 
 type setHasErrorFunction = React.Dispatch< React.SetStateAction< boolean > >;
@@ -120,12 +138,10 @@ const GetStartedButton: React.FC< GetStartedButtonProps > = ( {
 				);
 				installAndActivatePlugins( [ 'woocommerce-payments' ] )
 					.then( () => {
-						/*
-						 * TODO:
-						 * Navigate to either newSubscriptionProductUrl or onboardingUrl
-						 * depending on the which treatment the user is assigned to.
-						 */
-						window.location.href = newSubscriptionProductUrl;
+						window.location.href =
+							experimentAssignment === Treatment.A
+								? newSubscriptionProductUrl
+								: onboardingUrl;
 					} )
 					.catch( () => {
 						recordEvent(
@@ -231,35 +247,64 @@ const OnboardingSteps = () => (
 			<div className="subscriptions-page-onboarding-steps-item">
 				<StepNumber>1</StepNumber>
 				<h3>
-					{ __( 'Create and connect your account', 'woocommerce' ) }
+					{ experimentAssignment === Treatment.A
+						? __( 'Create a subscription', 'woocommerce' )
+						: __(
+								'Create and connect your account',
+								'woocommerce'
+						  ) }
 				</h3>
 				<p>
-					{ __(
-						'To ensure safe and secure transactions, a WordPress.com account is required.',
-						'woocommerce'
-					) }
+					{ experimentAssignment === Treatment.A
+						? __(
+								'Add a name, price and image to your subscription product and then publish it.',
+								'woocommerce'
+						  )
+						: __(
+								'To ensure safe and secure transactions, a WordPress.com account is required.',
+								'woocommerce'
+						  ) }
 				</p>
 			</div>
 			<div className="subscriptions-page-onboarding-steps-item">
 				<StepNumber>2</StepNumber>
 				<h3>
-					{ __( 'Provide a few business details', 'woocommerce' ) }
+					{ experimentAssignment === Treatment.A
+						? __( 'Create and connect your account', 'woocommerce' )
+						: __(
+								'Provide a few business details',
+								'woocommerce'
+						  ) }
 				</h3>
 				<p>
-					{ __(
-						'Next we’ll ask you to verify your business and payment details to enable deposits.',
-						'woocommerce'
-					) }
+					{ experimentAssignment === Treatment.A
+						? __(
+								'To ensure safe and secure transactions, a WordPress.com account is required.',
+								'woocommerce'
+						  )
+						: __(
+								'Next we’ll ask you to verify your business and payment details to enable deposits.',
+								'woocommerce'
+						  ) }
 				</p>
 			</div>
 			<div className="subscriptions-page-onboarding-steps-item">
 				<StepNumber>3</StepNumber>
-				<h3>{ __( 'Create subscriptions', 'woocommerce' ) }</h3>
+				<h3>
+					{ experimentAssignment === Treatment.A
+						? __( 'Provide a few business details', 'woocommerce' )
+						: __( 'Create subscriptions', 'woocommerce' ) }
+				</h3>
 				<p>
-					{ __(
-						'Finally, publish subscription products to offer on your store.',
-						'woocommerce'
-					) }
+					{ experimentAssignment === Treatment.A
+						? __(
+								'Finally, we’ll ask you to verify your business and payment details to enable deposits.',
+								'woocommerce'
+						  )
+						: __(
+								'Finally, publish subscription products to offer on your store.',
+								'woocommerce'
+						  ) }
 				</p>
 			</div>
 		</div>
