@@ -614,7 +614,7 @@ test2</p></div>',
 
 		add_filter( 'woocommerce_product_reviews_is_product_review_or_reply', $callback );
 
-		$this->assertEquals( $method->invoke( $reviews, new stdClass() ) );
+		$this->assertTrue( $method->invoke( $reviews, new stdClass() ) );
 
 		remove_filter( 'woocommerce_product_reviews_is_product_review_or_reply', $callback );
 	}
