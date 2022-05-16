@@ -20,18 +20,6 @@
                 "build-types/**"
             ]
         },
-        "test": {
-            "dependsOn":  [ "build" ],
-            "inputs": [
-                "src/**.js",
-                "src/**.jsx",
-                "src/**.ts",
-                "src/**.tsx",
-                "src/**.php",
-                "includes/**.php"
-            ],
-            "outputs": []
-        },
         "woocommerce#build": {
             "dependsOn":  [ 
                 "^build",
@@ -44,6 +32,27 @@
                 "includes/**.php",
                 "!legacy/**"
             ]
+        },
+
+        "test": {
+            "dependsOn":  [ "build" ],
+            "inputs": [
+                "src/**.js",
+                "src/**.jsx",
+                "src/**.ts",
+                "src/**.tsx",
+                "src/**.php",
+                "includes/**.php"
+            ],
+            "outputs": []
+        },
+
+        "lint": {
+            "cache": false
+        },
+
+        "lint:fix": {
+            "cache": false
         }
     }
 }
