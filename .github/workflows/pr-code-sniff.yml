@@ -35,6 +35,7 @@ jobs:
         with:
           path: |
             ~/.pnpm-store
+            ~/.local/share/pnpm/store
             ~/.cache/composer/files
           key: ${{ runner.os }}-pr-code-sniff-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 

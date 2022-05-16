@@ -18,6 +18,7 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
+                  ~/.local/share/pnpm/store
                   ~/.cache/composer/files
                 key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
@@ -72,6 +73,7 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
+                  ~/.local/share/pnpm/store
                   ~/.cache/composer/files
                 key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
@@ -126,6 +128,7 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
+                  ~/.local/share/pnpm/store
                   ~/.cache/composer/files
                 key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 

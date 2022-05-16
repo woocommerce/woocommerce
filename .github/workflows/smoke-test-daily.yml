@@ -18,6 +18,7 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
+                  ~/.local/share/pnpm/store
                   ~/.cache/composer/files
                 key: ${{ runner.os }}-smoke-test-daily-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
@@ -79,6 +80,7 @@ jobs:
             with:
               path: |
                 ~/.pnpm-store
+                ~/.local/share/pnpm/store
                 ~/.cache/composer/files
               key: ${{ runner.os }}-smoke-test-daily-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
@@ -144,6 +146,7 @@ jobs:
               with:
                 path: |
                   ~/.pnpm-store
+                  ~/.local/share/pnpm/store
                   ~/.cache/composer/files
                 key: ${{ runner.os }}-smoke-test-daily-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
