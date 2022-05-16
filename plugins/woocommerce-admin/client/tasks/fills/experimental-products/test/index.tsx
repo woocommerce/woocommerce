@@ -128,11 +128,15 @@ describe( 'Products', () => {
 
 		expect( recordEvent ).toHaveBeenNthCalledWith(
 			1,
+			'tasklist_view_more_product_types_click'
+		);
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			2,
 			'tasklist_product_template_selection',
 			{ is_suggested: false, product_type: 'grouped' }
 		);
 		expect( recordEvent ).toHaveBeenNthCalledWith(
-			2,
+			3,
 			'task_completion_time',
 			{ task_name: 'products', time: '0-2s' }
 		);

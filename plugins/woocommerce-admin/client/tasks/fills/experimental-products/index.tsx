@@ -12,6 +12,7 @@ import { useMemo, useState } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -147,7 +148,14 @@ export const Products = () => {
 						) }
 						<ViewControlButton
 							isExpanded={ isExpanded }
-							onClick={ () => setIsExpanded( ! isExpanded ) }
+							onClick={ () => {
+								if ( ! isExpanded ) {
+									recordEvent(
+										'tasklist_view_more_product_types_click'
+									);
+								}
+								setIsExpanded( ! isExpanded );
+							} }
 						/>
 						<Footer />
 					</div>
