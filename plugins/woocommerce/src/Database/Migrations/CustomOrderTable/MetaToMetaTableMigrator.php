@@ -69,6 +69,9 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	 */
 	protected function process_migration_batch_for_ids_core( array $entity_ids ): void {
 		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
+		if ( empty( $to_migrate ) ) {
+			return;
+		}
 
 		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate ) );
 
