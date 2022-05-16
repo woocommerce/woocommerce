@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add wcadmin_tasklist_view_more_product_types_click track event for add product task
