@@ -56,16 +56,22 @@ const WooOnboardingTask = ( { id, variant, ...props } ) => {
 	return <Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />;
 };
 
+// We need this here just in case the experiment assignment takes awhile to load, so that we don't fire trackView with a blank experimentalVariant
+// Remove all of the code in this file related to experiments and variants when the product task experiment concludes and never speak of the existence of this code to anyone
+const pollForExperimentalVariant = ( id ) => {
+	if ( experimentalVariant ) {
+		trackView( id, experimentalVariant );
+	} else {
+		setTimeout( () => pollForExperimentalVariant( id ), 200 );
+	}
+};
+
 WooOnboardingTask.Slot = ( { id, fillProps } ) => {
 	// The Slot is a React component and this hook works as expected.
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	useEffect( () => {
 		if ( id === 'products' ) {
-			setTimeout(
-				// call trackView with a small delay to ensure the experimentalVariant variable is loaded
-				() => trackView( id, experimentalVariant ),
-				200
-			);
+			pollForExperimentalVariant( id );
 		} else {
 			trackView( id );
 		}
