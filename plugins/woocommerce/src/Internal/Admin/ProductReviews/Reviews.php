@@ -138,7 +138,7 @@ class Reviews {
 	 */
 	protected function is_review_or_reply( $object ) : bool {
 
-		$is_review_or_reply = $object instanceof WP_Comment && ( ( 'review' === $object->comment_type || 'comment' === $object->comment_type ) && 'product' === get_post_type( $object->comment_post_ID ) );
+		$is_review_or_reply = $object instanceof WP_Comment && in_array( $object->comment_type, [ 'review', 'comment' ], true ) && 'product' === get_post_type( $object->comment_post_ID );
 
 		/**
 		 * Filters whether the object is a review or a reply to a review.
