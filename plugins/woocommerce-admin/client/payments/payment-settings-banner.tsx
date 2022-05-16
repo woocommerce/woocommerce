@@ -14,6 +14,8 @@ import { useSelect } from '@wordpress/data';
 import { useExperiment } from '@woocommerce/explat';
 import { getAdminLink } from '@woocommerce/settings';
 import moment from 'moment';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -35,6 +37,7 @@ import {
 import WCPayBannerImage from './wcpay-banner-image';
 import './payment-recommendations.scss';
 import { isWcPaySupported } from './utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const PaymentMethodsIcons = () => (
 	<div className="woocommerce-recommended-payments-banner__footer_icon_container">
@@ -55,8 +58,10 @@ export const PaymentMethodsIcons = () => (
 
 const WcPayBanner = () => {
 	const WC_PAY_SETUP_URL = getAdminLink(
-		'admin.php?page=wc-settings&tab=checkout&section=woocommerce_payments'
+		'admin.php?wcpay-connect=1&_wpnonce=' +
+			getAdminSetting( 'wcpay_welcome_page_connect_nonce' )
 	);
+
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-banner">
 			<CardBody className="woocommerce-recommended-payments-banner__body">
@@ -85,10 +90,32 @@ const WcPayBanner = () => {
 						size="12"
 						lineHeight="16px"
 					>
-						{ __(
-							'By using WooCommerce Payments you agree to be bound by our Terms of Service and acknowledge that you have read our Privacy Policy',
-							'woocommerce'
-						) }
+						{ interpolateComponents( {
+							mixedString: __(
+								'By using WooCommerce Payments you agree to be bound by our {{tosLink}}Terms of Service{{/tosLink}} and acknowledge that you have read our {{privacyLink}}Privacy Policy{{/privacyLink}} ',
+								'woocommerce'
+							),
+							components: {
+								tosLink: (
+									<Link
+										href="https://woocommerce.com/posts/terms-of-service-update/"
+										type="external"
+										target="_blank"
+									>
+										<></>
+									</Link>
+								),
+								privacyLink: (
+									<Link
+										href="https://automattic.com/privacy/"
+										type="external"
+										target="_blank"
+									>
+										<></>
+									</Link>
+								),
+							},
+						} ) }
 					</Text>
 					<Button href={ WC_PAY_SETUP_URL } isPrimary>
 						{ __( 'Get started', 'woocommerce' ) }
