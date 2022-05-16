@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { isProductTaskExperimentTreatment } from '@woocommerce/onboarding';
+
+/**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -14,6 +19,15 @@ import './purchase';
 
 const onboardingData = getAdminSetting( 'onboarding' );
 
+const possiblyImportProductTaskExperiment = async () => {
+	const isExperiment = await isProductTaskExperimentTreatment();
+	if ( isExperiment ) {
+		import( './experimental-products' );
+	} else {
+		import( './products' );
+	}
+};
+
 if (
 	window.wcAdminFeatures &&
 	window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
@@ -25,7 +39,7 @@ if (
 	window.wcAdminFeatures &&
 	window.wcAdminFeatures[ 'experimental-products-task' ]
 ) {
-	import( './experimental-products' );
+	possiblyImportProductTaskExperiment();
 } else {
 	import( './products' );
 }

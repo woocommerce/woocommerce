@@ -206,6 +206,9 @@ class WC_Install {
 		'6.5.0' => array(
 			'wc_update_650_approved_download_directories',
 		),
+		'6.5.1' => array(
+			'wc_update_651_approved_download_directories',
+		),
 	);
 
 	/**
@@ -765,6 +768,7 @@ class WC_Install {
 			'wc-admin-navigation-feedback',
 			'wc-admin-navigation-feedback-follow-up',
 			'wc-admin-set-up-additional-payment-types',
+			'wc-admin-deactivate-plugin',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(
@@ -1232,7 +1236,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	url varchar(256) NOT NULL,
 	enabled TINYINT(1) NOT NULL DEFAULT 0,
 	PRIMARY KEY (url_id),
-	KEY `url` (`url`)
+	KEY url (url($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	order_id bigint(20) unsigned NOT NULL,
