@@ -26,7 +26,7 @@ const hasValue = ( selector ) => {
 
 filterButton?.addEventListener( 'click', function () {
 	recordEvent( 'products_list_filter_click', {
-		search_string_length: searchInput.value.length,
+		search_string_length: searchInput?.value.length,
 		filter_category: productCategory.value !== '',
 		filter_product_type: productType.value,
 		filter_stock_status: stockStatus.value,
