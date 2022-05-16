@@ -9,19 +9,15 @@ import { createElement } from '@wordpress/element';
  */
 import { CustomerFeedbackSimple } from '../index';
 
-const mockRecordScoreCallback = jest.fn();
+const mockOnSelectCallback = jest.fn();
 
 describe( 'CustomerFeedbackSimple', () => {
 	it( 'should trigger recordScoreCallback when item is selected', () => {
-		render(
-			<CustomerFeedbackSimple
-				recordScoreCallback={ mockRecordScoreCallback }
-			/>
-		);
+		render( <CustomerFeedbackSimple onSelect={ mockOnSelectCallback } /> );
 
 		// Select the option.
 		fireEvent.click( screen.getAllByText( '🙂' )[ 0 ] );
 
-		expect( mockRecordScoreCallback ).toHaveBeenCalledWith( 4 );
+		expect( mockOnSelectCallback ).toHaveBeenCalledWith( 4 );
 	} );
 } );

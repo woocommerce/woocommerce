@@ -1,22 +1,15 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	Fragment,
-	useEffect,
-	useState,
-} from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
 
 type CustomerFeedbackSimpleProps = {
-	recordScoreCallback: ( score: number ) => void;
+	onSelect: ( score: number ) => void;
 	label: string;
-	feedbackScore?: number;
-	showFeedback?: boolean;
 };
 
 /**
@@ -30,17 +23,13 @@ type CustomerFeedbackSimpleProps = {
  *
  * Upon completion, the score and comments is sent to a callback function.
  *
- * @param {Object}   props                     Component props.
- * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {string}   props.label               Question to ask the customer.
- * @param {number}   props.feedbackScore       Feedback score.
- * @param {boolean}  props.showFeedback        Show feedback.
+ * @param {Object}   props          Component props.
+ * @param {Function} props.onSelect Function to call when the results are sent.
+ * @param {string}   props.label    Question to ask the customer.
  */
 const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
-	recordScoreCallback,
+	onSelect,
 	label,
-	feedbackScore = NaN,
-	showFeedback,
 } ) => {
 	const options = [
 		{
@@ -70,68 +59,35 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 		},
 	];
 
-	const [ score, setScore ] = useState( feedbackScore || NaN );
-
-	useEffect( () => {
-		if ( feedbackScore !== score ) {
-			setScore( feedbackScore );
-		}
-	}, [ feedbackScore ] );
-
-	useEffect( () => {
-		if ( ! isNaN( score ) ) {
-			recordScoreCallback( score );
-		}
-	}, [ score ] );
-
 	return (
 		<div className="customer-feedback-simple__container">
-			{ ! showFeedback ? (
-				<Fragment>
-					<Text
-						variant="subtitle.small"
-						as="p"
-						size="13"
-						lineHeight="16px"
-					>
-						{ label }
-					</Text>
+			<Text variant="subtitle.small" as="p" size="13" lineHeight="16px">
+				{ label }
+			</Text>
 
-					<div className="customer-feedback-simple__selection">
-						{ options.map( ( option ) => (
-							<Tooltip
-								text={ option.tooltip }
-								key={ option.value }
-								position="top center"
-							>
-								<Button
-									onClick={ () => setScore( option.value ) }
-								>
-									{ option.emoji }
-								</Button>
-							</Tooltip>
-						) ) }
-					</div>
-				</Fragment>
-			) : (
-				<div className="woocommerce-customer-effort-score__comments">
-					<Text
-						variant="subtitle.small"
-						as="p"
-						size="13"
-						lineHeight="16px"
+			<div className="customer-feedback-simple__selection">
+				{ options.map( ( option ) => (
+					<Tooltip
+						text={ option.tooltip }
+						key={ option.value }
+						position="top center"
 					>
-						🙌{ ' ' }
-						{ __( 'We appreciate your feedback!', 'woocommerce' ) }
-					</Text>
-				</div>
-			) }
+						<Button
+							onClick={ () => {
+								onSelect( option.value );
+							} }
+						>
+							{ option.emoji }
+						</Button>
+					</Tooltip>
+				) ) }
+			</div>
 		</div>
 	);
 };
 
 CustomerFeedbackSimple.propTypes = {
-	recordScoreCallback: PropTypes.func.isRequired,
+	onSelect: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
 };
 

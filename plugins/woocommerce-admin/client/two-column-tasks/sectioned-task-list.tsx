@@ -24,7 +24,7 @@ import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { SectionPanelTitle } from './section-panel-title';
 import { TaskListItem } from './task-list-item';
-import { TaskListCompletedHeaderWithCES } from './completed-header-with-ces';
+import { TaskListCompletedHeader } from './completed-header';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
@@ -42,7 +42,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	sections,
 	displayProgressHeader,
 	cesHeader = true,
-	showCESFeedback = false,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { profileItems } = useSelect( ( select ) => {
@@ -122,10 +121,10 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		return (
 			<>
 				{ cesHeader ? (
-					<TaskListCompletedHeaderWithCES
+					<TaskListCompletedHeader
 						hideTasks={ hideTasks }
 						keepTasks={ keepTasks }
-						showCES={ showCESFeedback }
+						enableCES={ true }
 					/>
 				) : (
 					<TaskListCompleted

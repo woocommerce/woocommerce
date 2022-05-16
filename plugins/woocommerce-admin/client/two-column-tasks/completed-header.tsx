@@ -18,19 +18,20 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './completed-header-with-ces.scss';
+import './completed-header.scss';
 import HeaderImage from './completed-celebration-header.svg';
 
 type TaskListCompletedHeaderProps = {
 	hideTasks: () => void;
 	keepTasks: () => void;
-	showCES: boolean;
+	enableCES: boolean;
 };
 
 const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
 	'woocommerce_admin_install_timestamp';
 const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 const CES_ACTION = 'store_setup';
+const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 
 function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 	if ( adminInstallTimestamp === 0 ) {
@@ -45,31 +46,46 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 	return storeAgeInWeeks;
 }
 
-export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderProps > = ( {
+export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > = ( {
 	hideTasks,
 	keepTasks,
-	showCES,
+	enableCES,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
-	const [ submittedScore, setSubmittedScore ] = useState( false );
+	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
 	const [ hideCES, setHideCES ] = useState( false );
-	const { storeAgeInWeeks, cesShownForActions } = useSelect(
+	const { storeAgeInWeeks, cesShownForActions, showCES } = useSelect(
 		( select: WCDataSelector ) => {
-			const { getOption } = select( OPTIONS_STORE_NAME );
+			const { getOption, hasFinishedResolution } = select(
+				OPTIONS_STORE_NAME
+			);
 
-			if ( showCES ) {
+			if ( enableCES ) {
+				const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
 				const adminInstallTimestamp: number =
 					getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
+				const cesActions = getOption< string[] >(
+					SHOWN_FOR_ACTIONS_OPTION_NAME
+				);
+				const loadingOptions =
+					! hasFinishedResolution( 'getOption', [
+						SHOWN_FOR_ACTIONS_OPTION_NAME,
+					] ) ||
+					! hasFinishedResolution( 'getOption', [
+						ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+					] );
 				return {
 					storeAgeInWeeks: getStoreAgeInWeeks(
 						adminInstallTimestamp
 					),
-					cesShownForActions:
-						getOption< string[] >(
-							SHOWN_FOR_ACTIONS_OPTION_NAME
-						) || [],
+					cesShownForActions: cesActions,
+					showCES:
+						! loadingOptions &&
+						allowTracking &&
+						! ( cesActions || [] ).includes( 'store_setup' ),
+					loading: loadingOptions,
 				};
 			}
 			return {};
@@ -77,12 +93,12 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 	);
 
 	useEffect( () => {
-		if ( submittedScore ) {
+		if ( hasSubmittedScore ) {
 			setTimeout( () => {
 				setHideCES( true );
 			}, 1200 );
 		}
-	}, [ submittedScore ] );
+	}, [ hasSubmittedScore ] );
 
 	const submitScore = ( recordedScore: number, comments?: string ) => {
 		recordEvent( 'ces_feedback', {
@@ -97,7 +113,7 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 				...( cesShownForActions || [] ),
 			],
 		} );
-		setSubmittedScore( true );
+		setHasSubmittedScore( true );
 	};
 
 	const recordScore = ( recordedScore: number ) => {
@@ -138,12 +154,12 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 								className="wooocommerce-task-card__finished-header-image"
 							/>
 
-							<h2>
+							<Text size="title" as="h2" lineHeight={ 1.4 }>
 								{ __(
 									"You've completed store setup",
 									'woocommerce'
 								) }
-							</h2>
+							</Text>
 							<Text
 								variant="subtitle.small"
 								as="p"
@@ -186,16 +202,30 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 							</div>
 						</div>
 					</CardHeader>
-					{ showCES && ! hideCES && (
+					{ showCES && ! hideCES && ! hasSubmittedScore && (
 						<CustomerFeedbackSimple
 							label={ __(
 								'How was your experience?',
 								'woocommerce'
 							) }
-							showFeedback={ submittedScore }
-							recordScoreCallback={ recordScore }
-							feedbackScore={ score }
+							onSelect={ recordScore }
 						/>
+					) }
+					{ hasSubmittedScore && ! hideCES && (
+						<div className="wooocommerce-task-card__header-ces-feedback">
+							<Text
+								variant="subtitle.small"
+								as="p"
+								size="13"
+								lineHeight="16px"
+							>
+								🙌{ ' ' }
+								{ __(
+									'We appreciate your feedback!',
+									'woocommerce'
+								) }
+							</Text>
+						</div>
 					) }
 				</Card>
 			</div>

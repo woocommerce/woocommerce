@@ -34,7 +34,7 @@ import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
-import { TaskListCompletedHeaderWithCES } from './completed-header-with-ces';
+import { TaskListCompletedHeader } from './completed-header';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -56,13 +56,8 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	displayProgressHeader,
 	cesHeader = true,
-	showCESFeedback = false,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
-		OPTIONS_STORE_NAME
-	);
 	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
@@ -236,10 +231,10 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return (
 			<>
 				{ cesHeader ? (
-					<TaskListCompletedHeaderWithCES
+					<TaskListCompletedHeader
 						hideTasks={ hideTasks }
 						keepTasks={ keepTasks }
-						showCES={ showCESFeedback }
+						enableCES={ true }
 					/>
 				) : (
 					<TaskListCompleted

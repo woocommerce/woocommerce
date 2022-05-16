@@ -117,7 +117,7 @@ function CustomerEffortScoreTracks( {
 
 	return (
 		<CustomerEffortScore
-			recordScoreCallback={ recordScore }
+			onSelect={ recordScore }
 			label={ label }
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
