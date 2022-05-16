@@ -22,12 +22,15 @@ jobs:
         with:
           node-version: '16'
       
-      - name: Cache modules
+      - name: Dependency caching
         uses: actions/cache@v3
+        id: cache-deps
         with:
           path: |
             ~/.pnpm-store
-          key: ${{ runner.os }}-npm-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ~/.local/share/pnpm/store
+            ~/.cache/composer/files
+          key: ${{ runner.os }}-pr-lint-test-js-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
       - name: Install PNPM
         run: npm install -g pnpm@^6.24.2

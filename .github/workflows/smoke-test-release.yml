@@ -15,15 +15,15 @@ jobs:
               with:
                   ref: trunk
 
-            - name: Cache modules
+            - name: Dependency caching
               uses: actions/cache@v3
               id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-smoke-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  ~/.local/share/pnpm/store
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-smoke-test-release-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -35,7 +35,6 @@ jobs:
               run: pnpm install
 
             - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
               run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Setup PHP
@@ -87,13 +86,15 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Cache modules
+            - name: Dependency caching
               uses: actions/cache@v3
               id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                key: ${{ runner.os }}-npm-smoke-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  ~/.local/share/pnpm/store
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-smoke-test-release-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Fetch Asset ID
               id: fetch_asset_id
@@ -176,13 +177,15 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Cache modules
+            - name: Dependency caching
               uses: actions/cache@v3
               id: cache-deps
               with:
                 path: |
                   ~/.pnpm-store
-                key: ${{ runner.os }}-npm-smoke-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  ~/.local/share/pnpm/store
+                  ~/.cache/composer/files
+                key: ${{ runner.os }}-smoke-test-release-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Fetch Asset ID
               id: fetch_asset_id
