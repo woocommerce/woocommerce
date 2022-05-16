@@ -2,10 +2,15 @@ name: Smoke test daily
 on:
     schedule:
         - cron: '25 3 * * *'
+env:
+  API_TEST_REPORT_ARTIFACT_NAME: api-test-report---daily
+
 jobs:
     login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
+        env:
+            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
             - name: Checkout code.
               uses: actions/checkout@v3
@@ -67,6 +72,16 @@ jobs:
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
                   pnpm exec wc-e2e test:e2e
                   pnpm exec wc-api-tests test api
+                  
+            - name: Archive API test report
+              if: always()
+              uses: actions/upload-artifact@v2
+              with:
+                  name: ${{ env.API_TEST_REPORT_ARTIFACT_NAME }}
+                  path: |
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
+                  retention-days: 7                    
 
     build:
         name: Build zip for PR
@@ -191,3 +206,21 @@ jobs:
               run: |
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
                   pnpm exec wc-e2e test:e2e
+
+    publish-test-reports:
+        name: Publish test reports
+        if: ${{ always() }}
+        runs-on: ubuntu-18.04
+        needs: [login-run, build, test-plugins]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+        steps:
+            - name: Publish API test report
+              run: |
+                  gh workflow run publish-report.yml \
+                    -f test_workflow=daily \
+                    -f test_type=api \
+                    -f run_id=$RUN_ID \
+                    -f artifact_name=$API_TEST_REPORT_ARTIFACT_NAME \
+                    --repo woocommerce/woocommerce-test-reports
