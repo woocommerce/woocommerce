@@ -84,30 +84,31 @@ class Loader {
 		*/
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 
-		add_action( 'admin_init', array( __CLASS__, 'is_using_installed_wc_admin_plugin' ) );
+		add_action( 'admin_init', array( __CLASS__, 'deactivate_wc_admin_plugin' ) );
 	}
 
 	/**
-	 * Verifies which plugin version is being used. If WooCommerce Admin is installed and activated but not in use
-	 * it will show a warning.
+	 * If WooCommerce Admin is installed and activated, it will attempt to deactivate and show a notice.
 	 */
-	public static function is_using_installed_wc_admin_plugin() {
-		if ( PluginsHelper::is_plugin_active( 'woocommerce-admin' ) ) {
-			$path = PluginsHelper::get_plugin_data( 'woocommerce-admin' );
-			if ( WC_ADMIN_VERSION_NUMBER !== $path['Version'] ) {
-				add_action(
-					'admin_notices',
-					function() {
-						echo '<div class="error"><p>';
-						printf(
-							/* translators: %s: is referring to the plugin's name. */
-							esc_html__( 'You have the %s plugin activated but it is not being used.', 'woocommerce' ),
-							'<code>WooCommerce Admin</code>'
-						);
-						echo '</p></div>';
-					}
-				);
-			}
+	public static function deactivate_wc_admin_plugin() {
+		$plugin_path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
+		if ( is_plugin_active( $plugin_path ) ) {
+			$path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
+			deactivate_plugins( $path );
+			$notice_action = is_network_admin() ? 'network_admin_notices' : 'admin_notices';
+			add_action(
+				$notice_action,
+				function() {
+					echo '<div class="error"><p>';
+					printf(
+						/* translators: %s: is referring to the plugin's name. */
+						esc_html__( '%1$s plugin has been deactivated to avoid conflicts with %2$s plugin.', 'woocommerce' ),
+						'<code>WooCommerce Admin</code>',
+						'<code>WooCommerce</code>'
+					);
+					echo '</p></div>';
+				}
+			);
 		}
 	}
 

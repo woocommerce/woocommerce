@@ -19,6 +19,7 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
 		"debug": "^4.3.3"
@@ -27,14 +28,17 @@
 		"access": "public"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "eslint src"
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@types/debug": "^4.1.7",
 		"@wordpress/eslint-plugin": "^11.0.0",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
@@ -45,7 +49,7 @@
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }

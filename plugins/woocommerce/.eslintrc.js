@@ -6,6 +6,7 @@ module.exports = {
 		es6: true,
 		node: true,
 	},
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	globals: {
 		wp: true,
 		wpApiSettings: true,

@@ -4,6 +4,7 @@
 - Shipping Zones API Tests
 - Shipping Methods API Tests
 - Complex Order API Tests
+- HTML report generation
 
 # 0.1.0
 

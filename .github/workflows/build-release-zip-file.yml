@@ -9,19 +9,38 @@ on:
 jobs:
   build:
     name: Build release zip file
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
+      - name: Checkout code.
         uses: actions/checkout@v3
+
+      - name: Get cached composer and pnpm directories
+        uses: actions/cache@v3
+        id: cache-deps
         with:
-          ref: ${{ github.event.inputs.ref || github.ref }}
-      - name: Build the zip file
-        id: build
-        uses: woocommerce/action-build@trunk
+          path: |
+            ~/.pnpm-store
+            plugins/woocommerce/packages
+            plugins/woocommerce/**/vendor
+          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
       - name: Unzip the file (prevents double zip problem)
-        run: unzip ${{ steps.build.outputs.zip_path }} -d zipfile
+        run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
+
       - name: Upload the zip file as an artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

@@ -29,6 +29,7 @@
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
+		"@woocommerce/explat": "workspace:*",
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/element": "^4.1.1",
 		"@wordpress/i18n": "^4.3.1",
@@ -37,9 +38,9 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
-		"@wordpress/eslint-plugin": "^11.0.0",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
@@ -53,17 +54,19 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm run build:js && pnpm run build:css",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "eslint src"
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }

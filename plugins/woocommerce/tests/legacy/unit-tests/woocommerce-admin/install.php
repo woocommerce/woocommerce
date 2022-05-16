@@ -125,15 +125,16 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	public function db_update_version_provider() {
 		return array(
 			// [DB Update version string, # of expected pending jobs]
-			array( '3.9.0', 33 ),
-			array( '4.0.0', 26 ),
-			array( '4.4.0', 22 ),
-			array( '4.5.0', 20 ),
-			array( '5.0.0', 16 ),
-			array( '5.6.0', 14 ),
-			array( '6.0.0', 7 ),
-			array( '6.3.0', 4 ),
-			array( '6.4.0', 0 ),
+			array( '3.9.0', 34 ),
+			array( '4.0.0', 27 ),
+			array( '4.4.0', 23 ),
+			array( '4.5.0', 21 ),
+			array( '5.0.0', 17 ),
+			array( '5.6.0', 15 ),
+			array( '6.0.0', 8 ),
+			array( '6.3.0', 5 ),
+			array( '6.4.0', 2 ),
+			array( '6.5.0', 1 ),
 		);
 	}
 

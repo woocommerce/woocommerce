@@ -1,4 +1,4 @@
-export default () => (
+export const UnionPay = () => (
 	/* eslint-disable */
 	<svg
 		width="52"

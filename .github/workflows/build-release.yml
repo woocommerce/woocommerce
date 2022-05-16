@@ -5,27 +5,47 @@ on:
 jobs:
   build:
     name: Build release asset
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
+      - name: Checkout code.
         uses: actions/checkout@v3
-      - name: Build
-        id: build
-        uses: woocommerce/action-build@trunk
+
+      - name: Get cached composer and pnpm directories
+        uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.pnpm-store
+            plugins/woocommerce/packages
+            plugins/woocommerce/**/vendor
+          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ steps.build.outputs.zip_path }}
+          asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce.zip
           asset_content_type: application/zip
   update-code-reference:
     if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
     name: Update Code Reference
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Invoke Code Reference build and deploy workflow
         uses: aurelien-baudet/workflow-dispatch@v2
@@ -38,7 +58,7 @@ jobs:
   run-release-smoke-tests:
     name: Execute Smoke test release
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Invoke release smoke testing workflow
         uses: aurelien-baudet/workflow-dispatch@v2

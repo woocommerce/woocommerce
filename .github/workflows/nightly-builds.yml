@@ -10,15 +10,35 @@ jobs:
       fail-fast: false
       matrix:
         build: [trunk]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           ref: ${{ matrix.build }}
-      - name: Build
-        id: build
-        uses: woocommerce/action-build@trunk
+
+      - name: Get cached composer and pnpm directories
+        uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.pnpm-store
+            plugins/woocommerce/packages
+            plugins/woocommerce/**/vendor
+          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Build zip
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
       - name: Deploy nightly build
         uses: WebFreak001/deploy-nightly@v1.1.0
         env:
@@ -26,13 +46,13 @@ jobs:
         with:
           upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/25945111/assets{?name,label}
           release_id: 25945111
-          asset_path: ${{ steps.build.outputs.zip_path }}
+          asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce-${{ matrix.build }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
   update:
     name: Update nightly tag commit ref
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Update nightly tag
         uses: richardsimko/github-tag-action@v1.0.5

@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Changed task_view experimental_product key to variant (technically a breaking change but since it was introduced in the same version it is fine) #32944

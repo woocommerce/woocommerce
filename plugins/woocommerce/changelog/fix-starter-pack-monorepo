@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Update create-extension script to function in the monorepo.

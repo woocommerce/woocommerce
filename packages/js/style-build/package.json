@@ -29,12 +29,14 @@
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"scripts": {
-		"lint": "eslint index.js"
+		"lint": "eslint index.js",
+		"lint:fix": "eslint index.js --fix",
+		"postinstall": "composer install"
 	},
 	"private": true,
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
-		"@wordpress/eslint-plugin": "^11.0.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
@@ -45,7 +47,7 @@
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"pnpm lint:fix"
 		]
 	}
 }

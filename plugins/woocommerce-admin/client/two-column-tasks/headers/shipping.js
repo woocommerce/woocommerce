@@ -8,19 +8,25 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import TimerImage from './timer.svg';
-import Shipping from './illustrations/shipping.js';
+import { WC_ASSET_URL } from '../../utils/admin-settings';
 
 const ShippingHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<Shipping className="svg-background" />
+			<img
+				alt={ __( 'Shipping illustration', 'woocommerce' ) }
+				src={
+					WC_ASSET_URL + 'images/task_list/shipping-illustration.png'
+				}
+				className="svg-background"
+			/>
 			<div className="woocommerce-task-header__contents">
 				<h1>
 					{ __( 'Set up shipping for your store', 'woocommerce' ) }
 				</h1>
 				<p>
 					{ __(
-						'Configure shipping zones and rates',
+						'Choose where and how you will ship your products, select shipping methods, and add fixed or calculated rates.',
 						'woocommerce'
 					) }
 				</p>

@@ -8,7 +8,7 @@ const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-web
 const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
 	.BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
-// const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
+const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 
 /**
  * Internal dependencies
@@ -48,6 +48,7 @@ const wpAdminScripts = [
 	'print-shipping-label-banner',
 	'beta-features-tracking-modal',
 	'payment-method-promotions',
+	'onboarding-load-sample-products-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -140,8 +141,7 @@ const webpackConfig = {
 	plugins: [
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
-		// Disable TS checker for now as it will block all development until all type inconsistencies are fixed
-		// new ForkTsCheckerWebpackPlugin(),
+		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -166,7 +166,14 @@ const webpackConfig = {
 
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
-			new WooCommerceDependencyExtractionWebpackPlugin(),
+			new WooCommerceDependencyExtractionWebpackPlugin( {
+				requestToExternal( request ) {
+					if ( request === '@wordpress/components/build/ui' ) {
+						// The external wp.components does not include ui components, so we need to skip requesting to external here.
+						return null;
+					}
+				},
+			} ),
 		// Reduces data for moment-timezone.
 		new MomentTimezoneDataPlugin( {
 			// This strips out timezone data before the year 2000 to make a smaller file.

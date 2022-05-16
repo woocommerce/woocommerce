@@ -16,9 +16,9 @@ const userEndpoint = '/wp/v2/users';
 /**
  * Utility function to delete all merchant created data store objects.
  *
- * @param repository
- * @param defaultObjectId
- * @param statuses Status of the object to check
+ * @param  repository
+ * @param  defaultObjectId
+ * @param  statuses        Status of the object to check
  * @return {Promise<void>}
  */
 const deleteAllRepositoryObjects = async (
@@ -226,13 +226,13 @@ export const withRestApi = {
 	/**
 	 * Adds a shipping zone along with a shipping method using the API.
 	 *
-	 * @param zoneName Shipping zone name.
-	 * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA.
-	 * @param zipCode Shipping zone zip code. Default is no zip code.
-	 * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
-	 * @param cost Shipping method cost. Default is no cost.
-	 * @param additionalZoneMethods Array of additional zone methods to add to the shipping zone.
-	 * @param {boolean} testResponse Test the response status code.
+	 * @param           zoneName              Shipping zone name.
+	 * @param           zoneLocation          Shiping zone location. Defaults to country:US. For states use: state:US:CA.
+	 * @param           zipCode               Shipping zone zip code. Default is no zip code.
+	 * @param           zoneMethod            Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
+	 * @param           cost                  Shipping method cost. Default is no cost.
+	 * @param           additionalZoneMethods Array of additional zone methods to add to the shipping zone.
+	 * @param {boolean} testResponse          Test the response status code.
 	 */
 	addShippingZoneAndMethod: async (
 		zoneName,
@@ -367,7 +367,7 @@ export const withRestApi = {
 	/**
 	 * Delete a customer account by their email address if the user exists.
 	 *
-	 * @param emailAddress Customer user account email address.
+	 * @param  emailAddress Customer user account email address.
 	 * @return {Promise<void>}
 	 */
 	deleteCustomerByEmail: async ( emailAddress ) => {
@@ -394,8 +394,8 @@ export const withRestApi = {
 	/**
 	 * Reset a settings group to default values except selects.
 	 *
-	 * @param settingsGroup
-	 * @param {boolean} testResponse Test the response status code.
+	 * @param           settingsGroup
+	 * @param {boolean} testResponse  Test the response status code.
 	 * @return {Promise<void>}
 	 */
 	resetSettingsGroupToDefault: async (
@@ -437,8 +437,8 @@ export const withRestApi = {
 	 * Update a setting to the supplied value.
 	 *
 	 * @param {string} settingsGroup The settings group to update.
-	 * @param {string} settingId The setting ID to update
-	 * @param {Object} payload An object with a key/value pair to update.
+	 * @param {string} settingId     The setting ID to update
+	 * @param {Object} payload       An object with a key/value pair to update.
 	 */
 	updateSettingOption: async ( settingsGroup, settingId, payload = {} ) => {
 		const settingsClient = Setting.restRepository( client );
@@ -447,9 +447,9 @@ export const withRestApi = {
 	/**
 	 * Update a payment gateway.
 	 *
-	 * @param {string} paymentGatewayId The ID of the payment gateway to update.
-	 * @param {Object} payload An object with the key/value pair to update.
-	 * @param {boolean} testResponse Test the response status code.
+	 * @param {string}  paymentGatewayId The ID of the payment gateway to update.
+	 * @param {Object}  payload          An object with the key/value pair to update.
+	 * @param {boolean} testResponse     Test the response status code.
 	 */
 	updatePaymentGateway: async (
 		paymentGatewayId,
@@ -467,7 +467,7 @@ export const withRestApi = {
 	/**
 	 * Create a batch of orders using the "Batch Create Order" API endpoint.
 	 *
-	 * @param orders Array of orders to be created
+	 * @param           orders       Array of orders to be created
 	 * @param {boolean} testResponse Test the response status code.
 	 */
 	batchCreateOrders: async ( orders, testResponse = true ) => {

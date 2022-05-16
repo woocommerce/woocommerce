@@ -6,19 +6,12 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
-	updateQueryString,
-	getHistory,
-	getNewPath,
-} from '@woocommerce/navigation';
-import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
-	TaskType,
 	getVisibleTasks,
-	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { List, TaskItem } from '@woocommerce/experimental';
+import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
 
 /**
@@ -30,6 +23,7 @@ import TaskListCompleted from './completed';
 import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { SectionPanelTitle } from './section-panel-title';
+import { TaskListItem } from './task-list-item';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
@@ -47,11 +41,8 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	sections,
 	displayProgressHeader,
 } ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
-		OPTIONS_STORE_NAME
-	);
-	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),
@@ -91,18 +82,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		}
 	}, [ query ] );
 
-	const onDismissTask = ( taskId: string ) => {
-		dismissTask( taskId );
-		createNotice( 'success', __( 'Task dismissed' ), {
-			actions: [
-				{
-					label: __( 'Undo', 'woocommerce-admin' ),
-					onClick: () => undoDismissTask( taskId ),
-				},
-			],
-		} );
-	};
-
 	const hideTasks = () => {
 		hideTaskList( id );
 	};
@@ -125,26 +104,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	if ( ! selectedHeaderCard ) {
 		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
-
-	const trackClick = ( task: TaskType ) => {
-		recordEvent( `${ eventPrefix }_click`, {
-			task_name: task.id,
-		} );
-	};
-
-	const onTaskSelected = ( task: TaskType ) => {
-		trackClick( task );
-		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = task.actionUrl;
-			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
-			}
-			return;
-		}
-
-		updateQueryString( { task: task.id } );
-	};
 
 	const getSectionTasks = ( sectionTaskIds: string[] ) => {
 		return visibleTasks.filter( ( task ) =>
@@ -226,52 +185,13 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 							<PanelRow>
 								<List animation="custom">
 									{ getSectionTasks( section.tasks ).map(
-										( task ) => {
-											const className = classnames(
-												'woocommerce-task-list__item',
-												{
-													'is-complete':
-														task.isComplete,
-													'is-disabled':
-														task.isDisabled,
-												}
-											);
-											return (
-												<TaskItem
-													key={ task.id }
-													className={ className }
-													title={ task.title }
-													completed={
-														task.isComplete
-													}
-													expanded={
-														! task.isComplete
-													}
-													content={ task.content }
-													onClick={ () => {
-														if (
-															! task.isDisabled
-														) {
-															onTaskSelected(
-																task
-															);
-														}
-													} }
-													onDismiss={
-														task.isDismissable
-															? () =>
-																	onDismissTask(
-																		task.id
-																	)
-															: undefined
-													}
-													action={ () => {} }
-													actionLabel={
-														task.actionLabel
-													}
-												/>
-											);
-										}
+										( task ) => (
+											<TaskListItem
+												key={ task.id }
+												task={ task }
+												eventPrefix={ eventPrefix }
+											/>
+										)
 									) }
 								</List>
 							</PanelRow>

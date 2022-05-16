@@ -200,9 +200,14 @@ class WC_Install {
 		),
 		'6.4.0' => array(
 			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
-			'wc_update_640_approved_download_directories',
 			'wc_admin_update_340_remove_is_primary_from_note_action',
 			'wc_update_640_db_version',
+		),
+		'6.5.0' => array(
+			'wc_update_650_approved_download_directories',
+		),
+		'6.5.1' => array(
+			'wc_update_651_approved_download_directories',
 		),
 	);
 
@@ -700,7 +705,7 @@ class WC_Install {
 		$settings = WC_Admin_Settings::get_settings_pages();
 
 		foreach ( $settings as $section ) {
-			if ( ! method_exists( $section, 'get_settings' ) ) {
+			if ( ! is_a( $section, 'WC_Settings_Page' ) || ! method_exists( $section, 'get_settings' ) ) {
 				continue;
 			}
 			$subsections = array_unique( array_merge( array( '' ), array_keys( $section->get_sections() ) ) );
@@ -762,6 +767,8 @@ class WC_Install {
 			'wc-admin-getting-started-ecommerce-webinar',
 			'wc-admin-navigation-feedback',
 			'wc-admin-navigation-feedback-follow-up',
+			'wc-admin-set-up-additional-payment-types',
+			'wc-admin-deactivate-plugin',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(
@@ -1229,7 +1236,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	url varchar(256) NOT NULL,
 	enabled TINYINT(1) NOT NULL DEFAULT 0,
 	PRIMARY KEY (url_id),
-	KEY `url` (`url`)
+	KEY url (url($max_index_length))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	order_id bigint(20) unsigned NOT NULL,

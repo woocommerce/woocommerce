@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds  a `search_sku` parameter to the v3 products endpoint. Allows for partial match search of the product SKU field.

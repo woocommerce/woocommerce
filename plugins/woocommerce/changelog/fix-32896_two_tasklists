@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update finish setup button logic to adhere to new Task List data structure. #32926

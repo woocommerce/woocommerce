@@ -58,7 +58,7 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**
