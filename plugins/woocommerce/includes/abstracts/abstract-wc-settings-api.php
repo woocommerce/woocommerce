@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+
 /**
  * WC_Settings_API class.
  */
@@ -853,42 +855,21 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Validate and sanitize 'Safe Text' fields.
+	 * Sanitize 'Safe Text' fields.
 	 *
-	 * Make sure the data is escaped correctly, etc. 'Safe Text' fields are similar to regular text fields, but a
-	 * smaller set of HTML tags are allowed. By default, this means `<br>`, `<img>`, `<p>` and `<span>` tags.
+	 * These fields are similar to regular text fields, but a much  smaller set of HTML tags are allowed. By default,
+	 * this means `<br>`, `<img>`, `<p>` and `<span>` tags.
 	 *
-	 * @param  string $key Field key.
+	 * Note: this is a sanitization method, rather than a validation method (the name is due to some historic naming
+	 * choices).
+	 *
+	 * @param  string $key   Field key.
 	 * @param  string $value Posted Value.
 	 *
 	 * @return string
 	 */
-	public function validate_safe_text_field( $key, $value ): string {
-		$value = is_null( $value ) ? '' : $value;
-
-		$default_allowed_tags = array(
-			'br'   => true,
-			'img'  => array(
-				'src'   => true,
-				'style' => true,
-				'title' => true,
-			),
-			'p'    => true,
-			'span' => true,
-		);
-
-		/**
-		 * Controls which tags (and attributes) may be used for custom payment gateway titles.
-		 *
-		 * @since 6.6.0
-		 *
-		 * @param array  $default_allowed_tags Array of allowed tags and attributes which will be supplied to wp_kses().
-		 * @param string $key                  Settings key for the value being filtered.
-		 * @param string $value                The value being filtered.
-		 */
-		$allowed_tags = (array) apply_filters( 'woocommerce_safe_text_field_allowed_tags', $default_allowed_tags, $key, $value );
-
-		return force_balance_tags( wp_kses( trim( stripslashes( $value ) ), $allowed_tags ) );
+	public function validate_safe_text_field( string $key, string $value ): string {
+		return ( new HtmlSanitizer( $value ) )->apply( HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS );
 	}
 
 	/**
