@@ -35,7 +35,7 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 		{
 			tooltip: __( 'Very difficult', 'woocommerce' ),
 			value: 1,
-			emoji: '😔',
+			emoji: '😞',
 		},
 		{
 			tooltip: __( 'Difficult', 'woocommerce' ),
