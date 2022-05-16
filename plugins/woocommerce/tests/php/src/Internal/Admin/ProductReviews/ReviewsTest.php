@@ -49,6 +49,8 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_get_view_page_capability() : void {
 
 		$this->assertEquals( 'moderate_comments', Reviews::get_capability() );
+		$this->assertEquals( 'moderate_comments', Reviews::get_capability( 'view' ) );
+		$this->assertEquals( 'edit_products', Reviews::get_capability( 'moderate' ) );
 
 		$callback = function() {
 			return 'manage_woocommerce';
