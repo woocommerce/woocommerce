@@ -6,7 +6,7 @@ import { isProductTaskExperimentTreatment } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '~/utils/admin-settings';
+import { isImportProductExperiment } from './product-task-experiment';
 
 import './PaymentGatewaySuggestions';
 import './shipping';
@@ -17,16 +17,10 @@ import './tax';
 import './woocommerce-payments';
 import './purchase';
 
-const onboardingData = getAdminSetting( 'onboarding' );
-
 const possiblyImportProductTaskExperiment = async () => {
 	const isExperiment = await isProductTaskExperimentTreatment();
 	if ( isExperiment ) {
-		if (
-			window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
-			onboardingData?.profile?.selling_venues &&
-			onboardingData?.profile?.selling_venues !== 'no'
-		) {
+		if ( isImportProductExperiment() ) {
 			import( './experimental-import-products' );
 		} else {
 			import( './experimental-products' );
