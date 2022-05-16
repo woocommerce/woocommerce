@@ -7,6 +7,7 @@ const actionButtons = document.querySelectorAll( '.row-actions span' );
 const bulkActions = document.querySelector( '#bulk-action-selector-top' );
 const bulkActionsButton = document.querySelector( '#doaction' );
 const bulkActionsCancelButton = document.querySelector( '#bulk-edit .cancel' );
+const bulkActionsUpdateButton = document.querySelector( '#bulk_edit' );
 const featuredButtons = document.querySelectorAll( '#the-list .featured a' );
 const filterButton = document.querySelector( '#post-query-submit' );
 const productCategory = document.querySelector( '#product_cat' );
@@ -23,7 +24,7 @@ const hasValue = ( selector ) => {
 	return !! element && element.value !== '' && element.value !== '-1';
 };
 
-filterButton.addEventListener( 'click', function () {
+filterButton?.addEventListener( 'click', function () {
 	recordEvent( 'products_list_filter_click', {
 		search_string_length: searchInput.value.length,
 		filter_category: productCategory.value !== '',
@@ -32,7 +33,7 @@ filterButton.addEventListener( 'click', function () {
 	} );
 } );
 
-bulkActionsButton.addEventListener( 'click', function () {
+bulkActionsButton?.addEventListener( 'click', function () {
 	const productNumber = document.querySelectorAll( '[name="post[]"]:checked' )
 		.length;
 	recordEvent( 'products_list_bulk_actions_click', {
@@ -41,7 +42,7 @@ bulkActionsButton.addEventListener( 'click', function () {
 	} );
 } );
 
-document.querySelector( '#bulk_edit' ).addEventListener( 'click', function () {
+bulkActionsUpdateButton?.addEventListener( 'click', function () {
 	recordEvent( 'products_list_bulk_edit_update', {
 		product_number: document.querySelector( '#bulk-titles' )?.children
 			.length,
@@ -69,7 +70,7 @@ document.querySelector( '#bulk_edit' ).addEventListener( 'click', function () {
 	} );
 } );
 
-bulkActionsCancelButton.addEventListener( 'click', function () {
+bulkActionsCancelButton?.addEventListener( 'click', function () {
 	recordEvent( 'products_list_bulk_edit_cancel' );
 } );
 
@@ -105,7 +106,7 @@ featuredButtons.forEach( ( button ) => {
 	} );
 } );
 
-searchButton.addEventListener( 'click', function () {
+searchButton?.addEventListener( 'click', function () {
 	recordEvent( 'products_search', {
 		search_string_length: searchInput.value.length,
 		filter_category: productCategory.value !== '',
