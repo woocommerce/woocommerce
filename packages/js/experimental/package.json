@@ -83,8 +83,7 @@
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint": "eslint src",
 		"lint:fix": "eslint src --fix",
-		"test": "pnpm run build && pnpm run test:nobuild",
-		"test:nobuild": "jest --config ./jest.config.json",
+		"test": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"lint-staged": {

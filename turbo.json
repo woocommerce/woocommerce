@@ -6,6 +6,7 @@
             "dependsOn":  [ "^build" ],
             "inputs": [
                 "src/**.js",
+                "src/**.jsx",
                 "src/**.ts",
                 "src/**.tsx",
                 "src/**.php",
@@ -18,6 +19,18 @@
                 "build-style/**",
                 "build-types/**"
             ]
+        },
+        "test": {
+            "dependsOn":  [ "build" ],
+            "inputs": [
+                "src/**.js",
+                "src/**.jsx",
+                "src/**.ts",
+                "src/**.tsx",
+                "src/**.php",
+                "includes/**.php"
+            ],
+            "outputs": []
         },
         "woocommerce#build": {
             "dependsOn":  [ 
