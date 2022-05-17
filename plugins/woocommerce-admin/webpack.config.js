@@ -49,6 +49,7 @@ const wpAdminScripts = [
 	'beta-features-tracking-modal',
 	'payment-method-promotions',
 	'onboarding-load-sample-products-notice',
+	'product-tracking',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
