@@ -55,6 +55,10 @@ class WcPaySubscriptionsPage {
 			return;
 		}
 
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return;
+		}
+
 		if ( ! $this->is_store_experiment_eligible() ) {
 			return;
 		}
