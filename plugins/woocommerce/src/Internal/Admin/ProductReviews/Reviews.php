@@ -554,7 +554,7 @@ class Reviews {
 	 * @param  string|mixed $text        Text to translate.
 	 * @return string|mixed              Translated text.
 	 */
-	public function edit_comments_screen_text( $translation, $text ) {
+	protected function edit_comments_screen_text( $translation, $text ) {
 		global $comment;
 
 		// Bail out if not a text we should replace.
