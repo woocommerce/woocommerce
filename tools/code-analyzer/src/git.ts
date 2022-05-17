@@ -5,7 +5,7 @@ import { CliUx } from '@oclif/core';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 
 /**
  * Fetch branches from origin.
@@ -83,4 +83,70 @@ export const generatePatch = (
 
 	CliUx.ux.action.stop();
 	return content;
+};
+
+export const getSchema = (
+	branch: string,
+	error: ( s: string ) => void
+): string | undefined => {
+	try {
+		// Make sure the branch is available.
+		fetchBranch( branch, error );
+		// Start spinner.
+		CliUx.ux.action.start( `Gathering schema from ${ branch }` );
+		// Save the current branch for later.
+		const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
+		// Checkout branch to compare
+		execSync( `git checkout ${ branch }` );
+
+		const getSchemaPath =
+			'wp-content/plugins/woocommerce/bin/get-schema.php';
+		let schema;
+
+		// Make sure get-schema.php exists.
+		if ( existsSync( getSchemaPath ) ) {
+			// Get the schema from wp cli
+			schema = execSync(
+				`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
+				{
+					cwd: 'plugins/woocommerce',
+					encoding: 'utf-8',
+				}
+			);
+		} else {
+			// Return to the current branch.
+			execSync( `git checkout ${ currentBranch }` );
+
+			throw new Error(
+				`File ${ getSchemaPath } does not exist in branch ${ branch }.`
+			);
+		}
+		// Return to the current branch.
+		execSync( `git checkout ${ currentBranch }` );
+
+		CliUx.ux.action.stop();
+		return schema;
+	} catch ( e ) {
+		error( `Unable to get schema for branch ${ branch }. \n${ e }` );
+	}
+};
+
+/**
+ * Generate a schema for each branch being compared.
+ *
+ * @param {string}   source  The GitHub repository.
+ * @param {string}   compare Branch/commit hash to compare against the base.
+ * @param {string}   base    Base branch/commit hash.
+ * @param {Function} error   error print method.
+ * @return {Array<string|undefined>} patch string.
+ */
+export const generateSchemaDiff = (
+	source: string,
+	compare: string,
+	base: string,
+	error: ( s: string ) => void
+): Array< string | undefined > => {
+	const baseSchema = getSchema( base, error );
+	const compareSchema = getSchema( compare, error );
+	return [ baseSchema, compareSchema ];
 };
