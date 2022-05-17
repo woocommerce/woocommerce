@@ -9,9 +9,14 @@ import { readFileSync } from 'fs';
  * Internal dependencies
  */
 import { MONOREPO_ROOT } from '../../const';
-import { printTemplateResults, printHookResults } from './print';
-import { getVersionRegex, getFilename, getPatches, getHookName } from './utils';
-import { generatePatch } from './git';
+import { printTemplateResults, printHookResults } from '../../print';
+import {
+	getVersionRegex,
+	getFilename,
+	getPatches,
+	getHookName,
+} from '../../utils';
+import { generatePatch } from '../../git';
 
 /**
  * Analyzer class
