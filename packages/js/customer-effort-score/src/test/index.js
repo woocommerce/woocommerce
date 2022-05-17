@@ -3,22 +3,37 @@
  */
 import { render, screen } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { CustomerEffortScore } from '../index';
+import { CustomerEffortScore } from '../customer-effort-score';
 
 const noop = () => {};
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		useDispatch: jest.fn().mockReturnValue( {
+			createNotice: jest.fn(),
+		} ),
+	};
+} );
 
 describe( 'CustomerEffortScore', () => {
 	it( 'should call createNotice with appropriate parameters', async () => {
 		const mockCreateNotice = jest.fn();
+		useDispatch.mockReturnValue( {
+			createNotice: mockCreateNotice,
+		} );
 		const icon = <span>icon</span>;
 
 		render(
 			<CustomerEffortScore
-				createNotice={ mockCreateNotice }
 				recordScoreCallback={ noop }
 				label={ 'label' }
 				onNoticeDismissedCallback={ noop }
@@ -41,6 +56,9 @@ describe( 'CustomerEffortScore', () => {
 
 	it( 'should not call createNotice on rerender', async () => {
 		const mockCreateNotice = jest.fn();
+		useDispatch.mockReturnValue( {
+			createNotice: mockCreateNotice,
+		} );
 
 		const { rerender } = render(
 			<CustomerEffortScore
@@ -53,7 +71,6 @@ describe( 'CustomerEffortScore', () => {
 		// Simulate rerender by changing label prop.
 		rerender(
 			<CustomerEffortScore
-				createNotice={ mockCreateNotice }
 				recordScoreCallback={ noop }
 				label={ 'label2' }
 			/>
@@ -65,7 +82,6 @@ describe( 'CustomerEffortScore', () => {
 	it( 'should not show dialog if no action is taken', async () => {
 		render(
 			<CustomerEffortScore
-				createNotice={ noop }
 				recordScoreCallback={ noop }
 				label={ 'label' }
 			/>
@@ -91,10 +107,12 @@ describe( 'CustomerEffortScore', () => {
 			// Modal shown callback should also be called.
 			expect( mockOnModalShownCallback ).toHaveBeenCalled();
 		};
+		useDispatch.mockReturnValue( {
+			createNotice,
+		} );
 
 		render(
 			<CustomerEffortScore
-				createNotice={ createNotice }
 				recordScoreCallback={ noop }
 				label={ 'label' }
 				onModalShownCallback={ mockOnModalShownCallback }

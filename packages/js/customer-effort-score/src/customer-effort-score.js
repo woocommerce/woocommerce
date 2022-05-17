@@ -4,13 +4,12 @@
 import { createElement, useState, useEffect } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import CustomerFeedbackModal from './customer-feedback-modal';
+import { CustomerFeedbackModal } from './customer-feedback-modal';
 
 const noop = () => {};
 
@@ -23,16 +22,14 @@ const noop = () => {};
  * @param {Object}   props                           Component props.
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
  * @param {string}   props.label                     The label displayed in the modal.
- * @param {Function} props.createNotice              Create a notice (snackbar).
  * @param {Function} props.onNoticeShownCallback     Function to call when the notice is shown.
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
-export function CustomerEffortScore( {
+function CustomerEffortScore( {
 	recordScoreCallback,
 	label,
-	createNotice,
 	onNoticeShownCallback = noop,
 	onNoticeDismissedCallback = noop,
 	onModalShownCallback = noop,
@@ -40,6 +37,7 @@ export function CustomerEffortScore( {
 } ) {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
+	const { createNotice } = useDispatch( 'core/notices2' );
 
 	useEffect( () => {
 		if ( ! shouldCreateNotice ) {
@@ -92,10 +90,6 @@ CustomerEffortScore.propTypes = {
 	 */
 	label: PropTypes.string.isRequired,
 	/**
-	 * Create a notice (snackbar).
-	 */
-	createNotice: PropTypes.func.isRequired,
-	/**
 	 * The function to call when the notice is shown.
 	 */
 	onNoticeShownCallback: PropTypes.func,
@@ -113,12 +107,4 @@ CustomerEffortScore.propTypes = {
 	icon: PropTypes.element,
 };
 
-export default compose(
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices2' );
-
-		return {
-			createNotice,
-		};
-	} )
-)( CustomerEffortScore );
+export { CustomerEffortScore };

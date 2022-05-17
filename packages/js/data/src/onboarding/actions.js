@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -9,6 +10,7 @@ import { apiFetch } from '@wordpress/data-controls';
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { DeprecatedTasks } from './deprecated-tasks';
+import { STORE_NAME as OPTIONS_STORE_NAME } from '../options/constants';
 
 export function getFreeExtensionsError( error ) {
 	return {
@@ -203,6 +205,14 @@ export function optimisticallyCompleteTaskRequest( taskId ) {
 	};
 }
 
+export function keepCompletedTaskListSuccess( taskListId, keepCompletedList ) {
+	return {
+		type: TYPES.KEEP_COMPLETED_TASKS_SUCCESS,
+		taskListId,
+		keepCompletedTaskList: keepCompletedList,
+	};
+}
+
 export function visitedTask( taskId ) {
 	return {
 		type: TYPES.VISITED_TASK,
@@ -258,6 +268,20 @@ export function getProductTypesError( error ) {
 		type: TYPES.GET_PRODUCT_TYPES_ERROR,
 		error,
 	};
+}
+
+export function* keepCompletedTaskList( taskListId ) {
+	const updateOptionsParams = {
+		woocommerce_task_list_keep_completed: 'yes',
+	};
+	const response = yield controls.dispatch(
+		OPTIONS_STORE_NAME,
+		'updateOptions',
+		updateOptionsParams
+	);
+	if ( response && response.success ) {
+		yield keepCompletedTaskListSuccess( taskListId, 'yes' );
+	}
 }
 
 export function* updateProfileItems( items ) {

@@ -81,9 +81,8 @@
 	}
 
 	h2 {
-		font-size: 1.5em;
-		font-weight: normal;
-		margin-top: 22px;
+		margin-top: $gap-large;
+		margin-bottom: $gap-small;
 	}
 
 	.wooocommerce-task-card__header {
@@ -92,7 +91,7 @@
 	}
 
 	button.is-secondary {
-		margin-right: 12px;
+		margin-right: $gap-small;
 	}
 }
 
