@@ -10,6 +10,7 @@ use WC_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil()
  */
 class ReviewsUtilTest extends WC_Unit_Test_Case {
+
 	/**
 	 * Sets the global vars before each test.
 	 */
@@ -35,16 +36,17 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::comments_clauses_without_product_reviews()
+	 * Tests that can get the comment clauses excluding product reviews.
 	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil::comments_clauses_without_product_reviews()
 	 * @dataProvider provider_can_get_comments_clauses_without_product_reviews
 	 *
-	 * @param string $current_screen_value the current screen value.
-	 * @param string $where_value the current WHERE clause value.
-	 * @param string $expected_join the expected JOIN value.
-	 * @param string $expected_where the expected WHERE value.
+	 * @param string $current_screen_value The current screen value.
+	 * @param string $where_value          The current WHERE clause value.
+	 * @param string $expected_join        The expected JOIN value.
+	 * @param string $expected_where       The expected WHERE value.
 	 */
-	public function test_can_get_comments_clauses_without_product_reviews( $current_screen_value, $where_value, $expected_join, $expected_where ) : void {
+	public function test_can_get_comments_clauses_without_product_reviews( string $current_screen_value, string $where_value, string $expected_join, string $expected_where ) : void {
 		global $wpdb, $current_screen;
 
 		$wpdb = (object) [ 'posts' => 'test_table' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited

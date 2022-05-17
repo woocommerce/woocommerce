@@ -3,9 +3,10 @@
 namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
 /**
- * An utility to handle comments that are product reviews.
+ * A utility class for handling comments that are product reviews.
  */
 class ReviewsUtil {
+
 	/**
 	 * Removes product reviews from the edit-comments page to fix the "Mine" tab counter.
 	 *
