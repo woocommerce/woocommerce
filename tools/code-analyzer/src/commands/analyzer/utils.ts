@@ -46,3 +46,17 @@ export const getPatches = ( content: string, regex: RegExp ): string[] => {
 
 	return changes;
 };
+
+/**
+ * Get hook name.
+ *
+ * @param {string} name Raw hook name.
+ * @return {string} Formatted hook name.
+ */
+export const getHookName = ( name: string ): string => {
+	if ( name.indexOf( ',' ) > -1 ) {
+		name = name.substring( 0, name.indexOf( ',' ) );
+	}
+
+	return name.replace( /(\'|\")/g, '' ).trim();
+};

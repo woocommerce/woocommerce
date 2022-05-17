@@ -12,7 +12,8 @@ import { execSync } from 'child_process';
  */
 import { MONOREPO_ROOT } from '../../const';
 import { printTemplateResults, printHookResults } from './print';
-import { getVersionRegex, getFilename, getPatches } from './utils';
+import { getVersionRegex, getFilename, getPatches, getHookName } from './utils';
+import { fetchBranch, getChanges } from './git';
 
 /**
  * Analyzer class
@@ -71,10 +72,11 @@ export default class Analyzer extends Command {
 
 		await this.validateArgs( flags.source );
 
-		const patchContent = await this.getChanges(
+		const patchContent = await getChanges(
 			flags.source,
 			args.compare,
-			flags.base
+			flags.base,
+			this.error
 		);
 
 		const pluginData = await this.getPluginData( flags.plugin );
@@ -155,77 +157,6 @@ export default class Analyzer extends Command {
 	}
 
 	/**
-	 * Fetch branches from origin.
-	 *
-	 * @param {string} branch branch/commit hash.
-	 * @return {Promise<boolean>} Promise.
-	 */
-	private async fetchBranch( branch: string ): Promise< boolean > {
-		CliUx.ux.action.start( `Fetching ${ branch }` );
-		const branches = execSync( 'git branch', {
-			encoding: 'utf-8',
-		} );
-
-		const branchExistsLocally = branches.includes( branch );
-
-		if ( branchExistsLocally ) {
-			CliUx.ux.action.stop();
-			return true;
-		}
-
-		try {
-			// Fetch branch.
-			execSync( `git fetch origin ${ branch }` );
-			// Create branch.
-			execSync( `git branch ${ branch } origin/${ branch }` );
-		} catch ( e ) {
-			this.error( `Unable to fetch ${ branch }` );
-		}
-
-		CliUx.ux.action.stop();
-		return true;
-	}
-
-	/**
-	 * Generate a patch file into the temp directory and return its contents
-	 *
-	 * @param {string} source  The GitHub repository.
-	 * @param {string} compare Branch/commit hash to compare against the base.
-	 * @param {string} base    Base branch/commit hash.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getChanges(
-		source: string,
-		compare: string,
-		base: string
-	): Promise< string > {
-		const filename = `${ source }-${ base }-${ compare }.patch`.replace(
-			/\//g,
-			'-'
-		);
-		const filepath = join( tmpdir(), filename );
-
-		await this.fetchBranch( base );
-		await this.fetchBranch( compare );
-
-		CliUx.ux.action.start( 'Generating patch for ' + compare );
-
-		try {
-			const diffCommand = `git diff ${ base }...${ compare } > ${ filepath }`;
-			execSync( diffCommand );
-		} catch ( e ) {
-			this.error(
-				'Unable to create diff. Check that git origin, base branch, and compare branch all exist.'
-			);
-		}
-
-		const content = readFileSync( filepath ).toString();
-
-		CliUx.ux.action.stop();
-		return content;
-	}
-
-	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
 	 * @param {string} content Patch content.
@@ -257,20 +188,6 @@ export default class Analyzer extends Command {
 		} else {
 			this.log( 'No new hooks found' );
 		}
-	}
-
-	/**
-	 * Get hook name.
-	 *
-	 * @param {string} name Raw hook name.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getHookName( name: string ): Promise< string > {
-		if ( name.indexOf( ',' ) > -1 ) {
-			name = name.substring( 0, name.indexOf( ',' ) );
-		}
-
-		return name.replace( /(\'|\")/g, '' ).trim();
 	}
 
 	/**
@@ -402,7 +319,7 @@ export default class Analyzer extends Command {
 					continue;
 				}
 
-				const name = await this.getHookName( hookName[ 3 ] );
+				const name = getHookName( hookName[ 3 ] );
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
 				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
