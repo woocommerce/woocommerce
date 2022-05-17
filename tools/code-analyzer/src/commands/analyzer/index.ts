@@ -73,19 +73,19 @@ export default class Analyzer extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
 
-		await this.validateArgs( flags.source );
+		this.validateArgs( flags.source );
 
-		const patchContent = await generatePatch(
+		const patchContent = generatePatch(
 			flags.source,
 			args.compare,
 			flags.base,
 			( e: string ): void => this.error( e )
 		);
 
-		const pluginData = await this.getPluginData( flags.plugin );
+		const pluginData = this.getPluginData( flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
-		await this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
+		this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
 	}
 
 	/**
@@ -93,7 +93,7 @@ export default class Analyzer extends Command {
 	 *
 	 * @param {string} source The GitHub repository we are merging.
 	 */
-	private async validateArgs( source: string ): Promise< void > {
+	private validateArgs( source: string ): void {
 		// We only support pulling from GitHub so the format needs to match that.
 		if ( ! source.match( /^[a-z0-9\-]+\/[a-z0-9\-]+$/ ) ) {
 			this.error(
@@ -106,9 +106,9 @@ export default class Analyzer extends Command {
 	 * Get plugin data
 	 *
 	 * @param {string} plugin Plugin slug.
-	 * @return {Promise<string[]>} Promise.
+	 * @return {string[]} Promise.
 	 */
-	private async getPluginData( plugin: string ): Promise< string[] > {
+	private getPluginData( plugin: string ): string[] {
 		/**
 		 * List of plugins from our monorepo.
 		 */
@@ -166,16 +166,16 @@ export default class Analyzer extends Command {
 	 * @param {string} version Current product version.
 	 * @param {string} output  Output style.
 	 */
-	private async scanChanges(
+	private scanChanges(
 		content: string,
 		version: string,
 		output: string
-	): Promise< void > {
-		const templates = await this.scanTemplates( content, version );
-		const hooks = await this.scanHooks( content, version, output );
+	): void {
+		const templates = this.scanTemplates( content, version );
+		const hooks = this.scanHooks( content, version, output );
 
 		if ( templates.size ) {
-			await printTemplateResults(
+			printTemplateResults(
 				templates,
 				output,
 				'TEMPLATE CHANGES',
@@ -186,11 +186,8 @@ export default class Analyzer extends Command {
 		}
 
 		if ( hooks.size ) {
-			await printHookResults(
-				hooks,
-				output,
-				'HOOKS',
-				( s: string ): void => this.log( s )
+			printHookResults( hooks, output, 'HOOKS', ( s: string ): void =>
+				this.log( s )
 			);
 		} else {
 			this.log( 'No new hooks found' );
@@ -204,10 +201,10 @@ export default class Analyzer extends Command {
 	 * @param {string} version Current product version.
 	 * @return {Promise<Map<string, string[]>>} Promise.
 	 */
-	private async scanTemplates(
+	private scanTemplates(
 		content: string,
 		version: string
-	): Promise< Map< string, string[] > > {
+	): Map< string, string[] > {
 		CliUx.ux.action.start( 'Scanning template changes' );
 
 		const report: Map< string, string[] > = new Map< string, string[] >();
@@ -261,11 +258,11 @@ export default class Analyzer extends Command {
 	 * @param {string} output  Output style.
 	 * @return {Promise<Map<string, Map<string, string[]>>>} Promise.
 	 */
-	private async scanHooks(
+	private scanHooks(
 		content: string,
 		version: string,
 		output: string
-	): Promise< Map< string, Map< string, string[] > > > {
+	): Map< string, Map< string, string[] > > {
 		CliUx.ux.action.start( 'Scanning for new hooks' );
 
 		const report: Map< string, Map< string, string[] > > = new Map<
