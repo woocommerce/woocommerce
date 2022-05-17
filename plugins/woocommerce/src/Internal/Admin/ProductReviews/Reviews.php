@@ -69,28 +69,11 @@ class Reviews {
 			-1
 		);
 
-		add_filter(
-			'parent_file',
-			function( $parent_file ) {
-				$this->edit_review_parent_file( $parent_file );
-			}
-		);
+		add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
 
-		add_filter(
-			'gettext',
-			function( $translation, $text ) {
-				$this->edit_comments_screen_text( $translation, $text );
-			},
-			10,
-			2
-		);
+		add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
 
-		add_action(
-			'admin_notices',
-			function() {
-				$this->display_notices();
-			}
-		);
+		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
 	/**
