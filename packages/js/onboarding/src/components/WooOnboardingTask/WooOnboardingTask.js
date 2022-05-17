@@ -58,8 +58,10 @@ const WooOnboardingTask = ( { id, variant, ...props } ) => {
 
 // We need this here just in case the experiment assignment takes awhile to load, so that we don't fire trackView with a blank experimentalVariant
 // Remove all of the code in this file related to experiments and variants when the product task experiment concludes and never speak of the existence of this code to anyone
-const pollForExperimentalVariant = ( id ) => {
-	if ( experimentalVariant ) {
+const pollForExperimentalVariant = ( id, count ) => {
+	if ( count > 20 ) {
+		trackView( id, 'experiment_timed_out' ); // if we can't fetch experiment after 4 seconds, give up
+	} else if ( experimentalVariant ) {
 		trackView( id, experimentalVariant );
 	} else {
 		setTimeout( () => pollForExperimentalVariant( id ), 200 );
@@ -71,7 +73,7 @@ WooOnboardingTask.Slot = ( { id, fillProps } ) => {
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	useEffect( () => {
 		if ( id === 'products' ) {
-			pollForExperimentalVariant( id );
+			pollForExperimentalVariant( id, 0 );
 		} else {
 			trackView( id );
 		}
