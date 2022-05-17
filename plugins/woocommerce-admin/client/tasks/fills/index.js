@@ -6,7 +6,7 @@ import { isProductTaskExperimentTreatment } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '~/utils/admin-settings';
+import { isImportProductExperiment } from './product-task-experiment';
 
 import './PaymentGatewaySuggestions';
 import './shipping';
@@ -17,12 +17,14 @@ import './tax';
 import './woocommerce-payments';
 import './purchase';
 
-const onboardingData = getAdminSetting( 'onboarding' );
-
 const possiblyImportProductTaskExperiment = async () => {
 	const isExperiment = await isProductTaskExperimentTreatment();
 	if ( isExperiment ) {
-		import( './experimental-products' );
+		if ( isImportProductExperiment() ) {
+			import( './experimental-import-products' );
+		} else {
+			import( './experimental-products' );
+		}
 	} else {
 		import( './products' );
 	}
@@ -30,14 +32,8 @@ const possiblyImportProductTaskExperiment = async () => {
 
 if (
 	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
-	onboardingData?.profile?.selling_venues &&
-	onboardingData?.profile?.selling_venues !== 'no'
-) {
-	import( './experimental-import-products' );
-} else if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-products-task' ]
+	( window.wcAdminFeatures[ 'experimental-import-products-task' ] ||
+		window.wcAdminFeatures[ 'experimental-products-task' ] )
 ) {
 	possiblyImportProductTaskExperiment();
 } else {
