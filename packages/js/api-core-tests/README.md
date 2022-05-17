@@ -159,4 +159,4 @@ This will output a `collection.json` file in this directory.
 
 This package makes use of the [SuperTest HTTP assertion package](https://www.npmjs.com/package/supertest). For more information on the `response` properties that are available can be found in the [SuperAgent documentation](https://visionmedia.github.io/superagent/#response-properties).
 
-For the list of WooCommerce API endpoints, expected responses, and more, please see the [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs).
+For the list of WooCommerce API endpoints, expected responses, and more, please see the [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/).
