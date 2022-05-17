@@ -69,7 +69,12 @@ class Reviews {
 			-1
 		);
 
-		add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
+		add_filter(
+			'parent_file',
+			function( $parent_file ) {
+				$this->edit_review_parent_file( $parent_file );
+			}
+		);
 
 		add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
 
