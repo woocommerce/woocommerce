@@ -46,9 +46,6 @@ jobs:
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
             - uses: actions/checkout@v3
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -82,9 +79,6 @@ jobs:
         name: Runs k6 Performance tests
         runs-on: ubuntu-20.04
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
             - uses: actions/checkout@v3
             - name: Install and Build
               uses: ./.github/actions/install-build
