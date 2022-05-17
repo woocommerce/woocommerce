@@ -191,6 +191,42 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'product-reviews', $submenu_file );
 	}
 
+	/**
+	 * Tests that it will override the headline text when editing or moderating a review or reply.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_comments_screen_text()
+	 * @dataProvider data_provider_edit_comments_screen_text
+	 *
+	 * @param string $translated_text Translated text.
+	 * @param string $original_text   Original text (raw).
+	 * @param bool   $is_review       Whether we should test a review comment.
+	 * @param bool   $is_reply        Whether we should test a reply to a review comment.
+	 * @param string $expected_text   Expected text output.
+	 *
+	 * @return void
+	 */
+	public function test_edit_comments_screen_text( string $translated_text, string $original_text, bool $is_review, bool $is_reply, string $expected_text ) : void {
+		global $comment;
+
+		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+		$review  = $this->factory()->comment->create_and_get( [ 'comment_post_ID' => $product ] );
+		$reply   = $this->factory()->comment->create_and_get(
+			[
+				'comment_post_ID' => $product,
+				'comment_parent'  => $review->comment_ID,
+			]
+		);
+
+		if ( ! $is_review ) {
+			$post    = $this->factory()->post->create();
+			$comment = $this->factory()->comment->create_and_get( [ 'comment_post_ID' => $post ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		} else {
+			$comment = $is_reply ? $reply : $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		$this->assertSame( $expected_text, ( wc_get_container()->get( Reviews::class ) )->edit_comments_screen_text( $translated_text, $original_text ) );
+	}
+
 	/** @see test_edit_comments_screen_text */
 	public function data_provider_edit_comments_screen_text() : Generator {
 		yield 'Regular comment' => [ 'Edit Comment', 'Edit Comment', false, false, 'Edit Comment' ];
