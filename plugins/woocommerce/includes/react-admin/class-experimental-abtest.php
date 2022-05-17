@@ -24,6 +24,18 @@ use Automattic\Jetpack\Connection\Client as Jetpack_Connection_client;
 /**
  * This class provides an interface to the Explat A/B tests.
  *
+ * Usage:
+ *
+ * $anon_id = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+ * $allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+ * $abtest = new \WooCommerce\Admin\Experimental_Abtest(
+ *      $anon_id,
+ *      'woocommerce',
+ *      $allow_tracking
+ * );
+ *
+ * $isTreatment = $abtest->get_variation('your-experiment-name') === 'treatment';
+ *
  * @internal This class is experimental and should not be used externally due to planned breaking changes.
  */
 final class Experimental_Abtest {
@@ -171,11 +183,16 @@ final class Experimental_Abtest {
 		}
 
 		// Make the request to the WP.com API.
-		$args     = array(
+		$args = array(
 			'experiment_name'  => $test_name,
 			'anon_id'          => rawurlencode( $this->anon_id ),
 			'woo_country_code' => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
 		);
+		/**
+		 * Get additional request args.
+		 *
+		 * @since 6.5.0
+		 */
 		$args     = apply_filters( 'woocommerce_explat_request_args', $args );
 		$response = $this->request_assignment( $args );
 
