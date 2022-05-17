@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
  * Internal dependencies
  */
 import { MONOREPO_ROOT } from '../../const';
+import { printTemplateResults } from './print';
 
 /**
  * Analyzer class
@@ -289,13 +290,14 @@ export default class Analyzer extends Command {
 	): Promise< void > {
 		const templates = await this.scanTemplates( content, version );
 		const hooks = await this.scanHooks( content, version, output );
-		// @todo: Scan for changes to database schema.
+		const databases = await this.scanDatabases( content, version );
 
 		if ( templates.size ) {
-			await this.printTemplateResults(
+			await printTemplateResults(
 				templates,
 				output,
-				'TEMPLATE CHANGES'
+				'TEMPLATE CHANGES',
+				this.log
 			);
 		} else {
 			this.log( 'No template changes found' );
@@ -305,48 +307,6 @@ export default class Analyzer extends Command {
 			await this.printHookResults( hooks, output, 'HOOKS' );
 		} else {
 			this.log( 'No new hooks found' );
-		}
-	}
-
-	/**
-	 * Print template results
-	 *
-	 * @param {Map<string, string[]>} data   Raw data.
-	 * @param {string}                output Output style.
-	 * @param {string}                title  Section title.
-	 */
-	private async printTemplateResults(
-		data: Map< string, string[] >,
-		output: string,
-		title: string
-	): Promise< void > {
-		if ( output === 'github' ) {
-			let opt = '\\n\\n### Template changes:';
-			for ( const [ key, value ] of data ) {
-				opt += `\\n* **file:** ${ key }`;
-				opt += `\\n  * ${ value[ 0 ].toUpperCase() }: ${ value[ 2 ] }`;
-				this.log(
-					`::${ value[ 0 ] } file=${ key },line=1,title=${ value[ 1 ] }::${ value[ 2 ] }`
-				);
-			}
-
-			this.log( `::set-output name=templates::${ opt }` );
-		} else {
-			this.log( `\n## ${ title }:` );
-			for ( const [ key, value ] of data ) {
-				this.log( 'FILE: ' + key );
-				this.log(
-					'---------------------------------------------------'
-				);
-				this.log(
-					` ${ value[ 0 ].toUpperCase() } | ${ value[ 1 ] } | ${
-						value[ 2 ]
-					}`
-				);
-				this.log(
-					'---------------------------------------------------'
-				);
-			}
 		}
 	}
 
@@ -416,6 +376,23 @@ export default class Analyzer extends Command {
 		}
 
 		return name.replace( /(\'|\")/g, '' ).trim();
+	}
+
+	/**
+	 * Scan patches for changes in the database
+	 *
+	 * @param {string} content Patch content.
+	 * @param {string} version Current product version.
+	 * @return {Promise<Map<string, string[]>>} Promise.
+	 */
+	private async scanDatabases(
+		content: string,
+		version: string
+	): Promise< Map< string, string[] > > {
+		CliUx.ux.action.start( 'Scanning database changes' );
+		const report: Map< string, string[] > = new Map< string, string[] >();
+		CliUx.ux.action.stop();
+		return report;
 	}
 
 	/**
