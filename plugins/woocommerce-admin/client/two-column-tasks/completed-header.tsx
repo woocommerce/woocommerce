@@ -24,13 +24,13 @@ import HeaderImage from './completed-celebration-header.svg';
 type TaskListCompletedHeaderProps = {
 	hideTasks: () => void;
 	keepTasks: () => void;
-	enableCES: boolean;
+	showCustomerEffortScore: boolean;
 };
 
 const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
 	'woocommerce_admin_install_timestamp';
 const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
-const CES_ACTION = 'store_setup';
+const CUSTOMER_EFFORT_SCORE_ACTION = 'store_setup';
 const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 
 function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
@@ -49,67 +49,69 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > = ( {
 	hideTasks,
 	keepTasks,
-	enableCES,
+	showCustomerEffortScore,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
-	const [ hideCES, setHideCES ] = useState( false );
-	const { storeAgeInWeeks, cesShownForActions, showCES } = useSelect(
-		( select: WCDataSelector ) => {
-			const { getOption, hasFinishedResolution } = select(
-				OPTIONS_STORE_NAME
-			);
-
-			if ( enableCES ) {
-				const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
-				const adminInstallTimestamp: number =
-					getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-				const cesActions = getOption< string[] >(
-					SHOWN_FOR_ACTIONS_OPTION_NAME
-				);
-				const loadingOptions =
-					! hasFinishedResolution( 'getOption', [
-						SHOWN_FOR_ACTIONS_OPTION_NAME,
-					] ) ||
-					! hasFinishedResolution( 'getOption', [
-						ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
-					] );
-				return {
-					storeAgeInWeeks: getStoreAgeInWeeks(
-						adminInstallTimestamp
-					),
-					cesShownForActions: cesActions,
-					showCES:
-						! loadingOptions &&
-						allowTracking &&
-						! ( cesActions || [] ).includes( 'store_setup' ),
-					loading: loadingOptions,
-				};
-			}
-			return {};
-		}
+	const [ hideCustomerEffortScore, setHideCustomerEffortScore ] = useState(
+		false
 	);
+	const {
+		storeAgeInWeeks,
+		cesShownForActions,
+		canShowCustomerEffortScore,
+	} = useSelect( ( select: WCDataSelector ) => {
+		const { getOption, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		);
+
+		if ( showCustomerEffortScore ) {
+			const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
+			const adminInstallTimestamp: number =
+				getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
+			const cesActions = getOption< string[] >(
+				SHOWN_FOR_ACTIONS_OPTION_NAME
+			);
+			const loadingOptions =
+				! hasFinishedResolution( 'getOption', [
+					SHOWN_FOR_ACTIONS_OPTION_NAME,
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+				] );
+			return {
+				storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
+				cesShownForActions: cesActions,
+				canShowCustomerEffortScore:
+					! loadingOptions &&
+					allowTracking &&
+					! ( cesActions || [] ).includes( 'store_setup' ),
+				loading: loadingOptions,
+			};
+		}
+		return {};
+	} );
 
 	useEffect( () => {
 		if ( hasSubmittedScore ) {
 			setTimeout( () => {
-				setHideCES( true );
+				setHideCustomerEffortScore( true );
 			}, 1200 );
 		}
 	}, [ hasSubmittedScore ] );
 
 	const submitScore = ( recordedScore: number, comments?: string ) => {
 		recordEvent( 'ces_feedback', {
-			action: CES_ACTION,
+			action: CUSTOMER_EFFORT_SCORE_ACTION,
 			score: recordedScore,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				CES_ACTION,
+				CUSTOMER_EFFORT_SCORE_ACTION,
 				...( cesShownForActions || [] ),
 			],
 		} );
@@ -124,7 +126,7 @@ export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > =
 			setScore( recordedScore );
 			setShowCesModal( true );
 			recordEvent( 'ces_view', {
-				action: CES_ACTION,
+				action: CUSTOMER_EFFORT_SCORE_ACTION,
 				store_age: storeAgeInWeeks,
 			} );
 		}
@@ -202,16 +204,18 @@ export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > =
 							</div>
 						</div>
 					</CardHeader>
-					{ showCES && ! hideCES && ! hasSubmittedScore && (
-						<CustomerFeedbackSimple
-							label={ __(
-								'How was your experience?',
-								'woocommerce'
-							) }
-							onSelect={ recordScore }
-						/>
-					) }
-					{ hasSubmittedScore && ! hideCES && (
+					{ canShowCustomerEffortScore &&
+						! hideCustomerEffortScore &&
+						! hasSubmittedScore && (
+							<CustomerFeedbackSimple
+								label={ __(
+									'How was your experience?',
+									'woocommerce'
+								) }
+								onSelect={ recordScore }
+							/>
+						) }
+					{ hasSubmittedScore && ! hideCustomerEffortScore && (
 						<div className="wooocommerce-task-card__header-ces-feedback">
 							<Text
 								variant="subtitle.small"
