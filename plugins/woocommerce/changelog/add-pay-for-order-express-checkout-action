@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds a `before_woocommerce_pay_form` action to the Pay for Order page.
