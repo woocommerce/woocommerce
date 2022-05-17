@@ -2,10 +2,8 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
-import { tmpdir } from 'os';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
@@ -13,7 +11,7 @@ import { execSync } from 'child_process';
 import { MONOREPO_ROOT } from '../../const';
 import { printTemplateResults, printHookResults } from './print';
 import { getVersionRegex, getFilename, getPatches, getHookName } from './utils';
-import { fetchBranch, getChanges } from './git';
+import { getChanges } from './git';
 
 /**
  * Analyzer class
