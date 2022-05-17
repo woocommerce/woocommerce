@@ -33,14 +33,14 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs after all the tests in the class.
 	 */
-	public static function tearDownAfterClass() {
+	public static function tearDownAfterClass(): void {
 		parent::tearDownAfterClass();
 	}
 
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		global $wpdb;
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';

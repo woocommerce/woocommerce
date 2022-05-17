@@ -5,15 +5,15 @@ describe( 'KeyChangeTransformation', () => {
 	let transformation: KeyChangeTransformation< DummyModel >;
 
 	beforeEach( () => {
-		transformation = new KeyChangeTransformation< DummyModel >(
-			{
-				name: 'new-name',
-			},
-		);
+		transformation = new KeyChangeTransformation< DummyModel >( {
+			name: 'new-name',
+		} );
 	} );
 
 	it( 'should transform to model', () => {
-		const transformed = transformation.toModel( { 'new-name': 'Test Name' } );
+		const transformed = transformation.toModel( {
+			'new-name': 'Test Name',
+		} );
 
 		expect( transformed ).toHaveProperty( 'name', 'Test Name' );
 		expect( transformed ).not.toHaveProperty( 'new-name' );

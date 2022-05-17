@@ -86,29 +86,12 @@ class WC_Product_CSV_Importer_Controller {
 	/**
 	 * Check whether a file is a valid CSV file.
 	 *
-	 * @todo Replace this method with wc_is_file_valid_csv() function.
 	 * @param string $file File path.
 	 * @param bool   $check_path Whether to also check the file is located in a valid location (Default: true).
 	 * @return bool
 	 */
 	public static function is_file_valid_csv( $file, $check_path = true ) {
-		/**
-		 * Can be used to override the decision to check the import file path.
-		 *
-		 * @param bool   $check_import_file_path If the import file path should be checked.
-		 * @param string $file                   Path of the file to be checked.
-		 */
-		if ( $check_path && apply_filters( 'woocommerce_product_csv_importer_check_import_file_path', true, $file ) && false !== stripos( $file, '://' ) ) {
-			return false;
-		}
-
-		$valid_filetypes = self::get_valid_csv_filetypes();
-		$filetype        = wp_check_filetype( $file, $valid_filetypes );
-		if ( in_array( $filetype['type'], $valid_filetypes, true ) ) {
-			return true;
-		}
-
-		return false;
+		return wc_is_file_valid_csv( $file, $check_path );
 	}
 
 	/**
@@ -611,7 +594,7 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Map columns using the user's lastest import mappings.
+	 * Map columns using the user's latest import mappings.
 	 *
 	 * @param  array $headers Header columns.
 	 * @return array

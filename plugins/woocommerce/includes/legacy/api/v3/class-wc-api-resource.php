@@ -97,10 +97,16 @@ class WC_API_Resource {
 		}
 
 		// Only custom post types have per-post type/permission checks
-		if ( 'customer' !== $type ) {
+		if ( 'customer' === $type ) {
+			return $id;
+		}
 
-			$post = get_post( $id );
+		$post = get_post( $id );
 
+		// Orders request are a special case.
+		$is_invalid_orders_request = ( 'shop_order' === $type && ( ! $post || ! is_a ( $post, 'WP_Post' ) || 'shop_order' !== $post->post_type ) && ! wc_rest_check_post_permissions( 'shop_order', 'read' ) );
+
+		if ( ! $is_invalid_orders_request ) {
 			if ( null === $post ) {
 				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %1$s found with the ID equal to %2$s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
 			}
@@ -112,28 +118,28 @@ class WC_API_Resource {
 			if ( $type !== $post_type ) {
 				return new WP_Error( "woocommerce_api_invalid_{$resource_name}", sprintf( __( 'Invalid %s', 'woocommerce' ), $resource_name ), array( 'status' => 404 ) );
 			}
+		}
 
-			// Validate permissions
-			switch ( $context ) {
+		// Validate permissions
+		switch ( $context ) {
 
-				case 'read':
-					if ( ! $this->is_readable( $post ) ) {
-						return new WP_Error( "woocommerce_api_user_cannot_read_{$resource_name}", sprintf( __( 'You do not have permission to read this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
-					}
-					break;
+			case 'read':
+				if ( $is_invalid_orders_request || ! $this->is_readable( $post ) ) {
+					return new WP_Error( "woocommerce_api_user_cannot_read_{$resource_name}", sprintf( __( 'You do not have permission to read this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+				}
+				break;
 
-				case 'edit':
-					if ( ! $this->is_editable( $post ) ) {
-						return new WP_Error( "woocommerce_api_user_cannot_edit_{$resource_name}", sprintf( __( 'You do not have permission to edit this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
-					}
-					break;
+			case 'edit':
+				if ( $is_invalid_orders_request || ! $this->is_editable( $post ) ) {
+					return new WP_Error( "woocommerce_api_user_cannot_edit_{$resource_name}", sprintf( __( 'You do not have permission to edit this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+				}
+				break;
 
-				case 'delete':
-					if ( ! $this->is_deletable( $post ) ) {
-						return new WP_Error( "woocommerce_api_user_cannot_delete_{$resource_name}", sprintf( __( 'You do not have permission to delete this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
-					}
-					break;
-			}
+			case 'delete':
+				if ( $is_invalid_orders_request || ! $this->is_deletable( $post ) ) {
+					return new WP_Error( "woocommerce_api_user_cannot_delete_{$resource_name}", sprintf( __( 'You do not have permission to delete this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+				}
+				break;
 		}
 
 		return $id;

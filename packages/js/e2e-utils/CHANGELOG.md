@@ -1,5 +1,9 @@
 # Unreleased
 
+## Fixed
+
+- Added the `root: true` flag to `e2e-utils` ESLint config file so that ESLint ignores other ancestor config files when checking that package. This solves a version conflict when running ESLint.
+
 ## Added
 
 - `createSimpleDownloadableProduct` component which creates a simple downloadable product, containing four parameters for title, price, download name and download limit.
@@ -14,6 +18,9 @@
 - `merchant.verifyDownloadableProductPermission()` to check that the attributes of an existing downloadable product permission are correct.
 - `merchant.openDownloadLink()` to open the url of a download in a new tab.
 - `merchant.verifyCannotDownloadFromBecause()` to check that a download cannot happen for a specific reason.
+
+## Changed
+- Removed `faker` dependency
 
 # 0.1.7
 

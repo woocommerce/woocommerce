@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Changes to reduce the risk of admin error messages being discarded prematurely.

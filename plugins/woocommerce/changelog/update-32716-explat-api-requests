@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add safeguards to ensure ExPlat API requests are valid

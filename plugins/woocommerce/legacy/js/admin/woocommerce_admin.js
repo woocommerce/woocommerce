@@ -208,7 +208,13 @@
 						'keepAlive': true
 					} ).css( 'cursor', 'help' );
 				});
-			});
+			})
+
+			.on( 'click', '.wc-confirm-delete', function( event ) {
+				if ( ! window.confirm( woocommerce_admin.i18n_confirm_delete ) ) {
+					event.stopPropagation();
+				}
+			} );
 
 		// Tooltips
 		$( document.body ).trigger( 'init_tooltips' );

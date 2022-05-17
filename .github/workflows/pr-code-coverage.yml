@@ -4,12 +4,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: plugins/woocommerce
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    runs-on: ubuntu-20.04
     services:
       database:
         image: mysql:5.6
@@ -20,7 +22,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 100
 
@@ -37,21 +39,28 @@ jobs:
           php --version
           composer --version
 
-      - name: Get cached composer directories
-        uses: actions/cache@v2
+      - name: Dependency caching
+        uses: actions/cache@v3
+        id: cache-deps
         with:
           path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+            ~/.pnpm-store
+            ~/.local/share/pnpm/store
+            ~/.cache/composer/files
+          key: ${{ runner.os }}-pr-code-coverage-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
 
-      - name: Setup and install composer
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Composer dependencies
         run: pnpm nx composer-install woocommerce
+        
+      - name: Build Admin feature config
+        run: |
+          pnpm nx build:feature-config woocommerce
 
       - name: Init DB and WP
         run: pnpm nx install-unit-test-db woocommerce

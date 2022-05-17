@@ -1,0 +1,67 @@
+{
+	"name": "@woocommerce/explat",
+	"version": "2.1.0",
+	"description": "WooCommerce component and utils for A/B testing.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"abtest",
+		"explat"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/explat/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types",
+	"react-native": "src/index",
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@automattic/explat-client": "^0.0.3",
+		"@automattic/explat-client-react-helpers": "^0.0.4",
+		"@wordpress/api-fetch": "^6.0.1",
+		"@wordpress/hooks": "^3.5.0",
+		"cookie": "^0.4.2",
+		"qs": "^6.10.3"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.17.5",
+		"@types/cookie": "^0.4.1",
+		"@types/node": "^17.0.21",
+		"@types/qs": "^6.9.7",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.12.0",
+		"jest": "^27.5.1",
+		"jest-cli": "^27.5.1",
+		"rimraf": "^3.0.2",
+		"ts-jest": "^27.1.3",
+		"typescript": "^4.6.2"
+	},
+	"scripts": {
+		"postinstall": "composer install",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix",
+		"test": "pnpm run build && pnpm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	}
+}

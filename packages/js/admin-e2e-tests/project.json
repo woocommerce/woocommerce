@@ -1,0 +1,31 @@
+{
+     "root": "packages/js/admin-e2e-tests",
+     "sourceRoot": "packages/js/admin-e2e-tests/src",
+     "projectType": "library",
+     "targets": {
+         "build": {
+             "executor": "@nrwl/workspace:run-script",
+             "options": {
+                 "script": "build"
+             }
+         },
+         "build-watch": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+                "script": "start"
+			}
+		},
+         "test": {
+             "executor": "@nrwl/workspace:run-script",
+             "options": {
+                 "script": "test"
+             }
+		 },
+	   "clean": {
+		 "executor": "@nrwl/workspace:run-script",
+		 "options": {
+		   "script": "clean"
+		 }
+	   }
+     }
+ }

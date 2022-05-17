@@ -1,0 +1,51 @@
+name: Lint and tests for JS packages and woocommerce-admin/client
+
+on:
+  pull_request:
+    paths:
+      - 'packages/js/**/**'
+      - 'plugins/woocommerce-admin/client/**'
+      - '!**.md'
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test-js:
+    name: Lint and Test JS
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Dependency caching
+        uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            ~/.pnpm-store
+            ~/.local/share/pnpm/store
+            ~/.cache/composer/files
+          key: ${{ runner.os }}-pr-lint-test-js-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: |
+          pnpm nx build woocommerce-admin
+          pnpm nx lint woocommerce-admin
+          pnpm nx lint:js-packages woocommerce-admin
+
+      - name: Test
+        run: |
+          pnpm nx build woocommerce-admin
+          pnpm nx test woocommerce-admin
+          pnpm nx test:packages woocommerce-admin

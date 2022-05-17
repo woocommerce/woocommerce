@@ -1,0 +1,82 @@
+{
+	"name": "@woocommerce/customer-effort-score",
+	"version": "2.0.1",
+	"description": "WooCommerce utility to measure user effort.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/customer-effort-score/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
+	"dependencies": {
+		"@woocommerce/experimental": "workspace:*",
+		"@wordpress/components": "^19.5.0",
+		"@wordpress/compose": "^5.1.2",
+		"@wordpress/data": "^6.3.0",
+		"@wordpress/element": "^4.1.1",
+		"@wordpress/i18n": "^4.3.1",
+		"@wordpress/notices": "^3.3.2",
+		"classnames": "^2.3.1",
+		"prop-types": "^15.8.1",
+		"react-transition-group": "^4.4.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.17.5",
+		"@testing-library/react": "^12.1.3",
+		"@types/prop-types": "^15.7.4",
+		"@types/wordpress__components": "^9.8.6",
+		"@woocommerce/style-build": "workspace:*",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/browserslist-config": "^4.1.1",
+		"concurrently": "^7.0.0",
+		"css-loader": "^3.6.0",
+		"eslint": "^8.12.0",
+		"jest": "^27.5.1",
+		"jest-cli": "^27.5.1",
+		"postcss-loader": "^3.0.0",
+		"rimraf": "^3.0.2",
+		"sass-loader": "^10.2.1",
+		"ts-jest": "^27.1.3",
+		"typescript": "^4.6.2",
+		"webpack": "^5.70.0",
+		"webpack-cli": "^3.3.12"
+	},
+	"peerDependencies": {
+		"react": "^17.0.0",
+		"react-dom": "^17.0.0"
+	},
+	"scripts": {
+		"postinstall": "composer install",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "pnpm run build:js && pnpm run build:css",
+		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"build:css": "webpack",
+		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix",
+		"test": "pnpm run build && pnpm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	}
+}

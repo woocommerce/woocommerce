@@ -12,7 +12,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	/**
 	 * TearDown.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 	}
@@ -20,7 +20,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	/**
 	 * Setup.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		WC()->cart->empty_cart();
 	}
