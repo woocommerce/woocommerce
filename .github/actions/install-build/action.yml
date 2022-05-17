@@ -1,26 +1,9 @@
 name: Install and Build (Composite)
 description: Installs and builds WooCommerce.
-inputs:
-  workflow_cache:
-    required: true
-    description: The workflow cache key.
-  workflow_name:
-    required: true
-    description: The name of the workflow.
 
 runs:
   using: "composite"
   steps:
-    - name: Dependency caching
-      uses: actions/cache@v3
-      id: cache-deps
-      with:
-        path: |
-          ~/.pnpm-store
-          ~/.local/share/pnpm/store
-          ~/.cache/composer/files
-        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
     - name: Install PNPM
       shell: bash
       run: npm install -g pnpm@^6.24.2

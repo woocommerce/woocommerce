@@ -7,26 +7,12 @@ jobs:
     name: Build release asset
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code.
-        uses: actions/checkout@v3
-
-      - name: Dependency caching
-        uses: actions/cache@v3
-        id: cache-deps
+      - uses: actions/checkout@v3
+      - name: Install and Build
+        uses: ./.github/actions/install-build
         with:
-          path: |
-            ~/.pnpm-store
-            ~/.local/share/pnpm/store
-            ~/.cache/composer/files
-          key: ${{ runner.os }}-build-release-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
+          workflow_name: build-releases
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Build zip
         working-directory: plugins/woocommerce
