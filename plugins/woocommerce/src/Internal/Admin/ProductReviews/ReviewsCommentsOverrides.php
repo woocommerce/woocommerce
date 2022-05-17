@@ -16,11 +16,28 @@ class ReviewsCommentsOverrides {
 	 */
 	public function __construct() {
 
-		add_action( 'admin_notices', [ $this, 'display_notices' ] );
+		add_action(
+			'admin_notices',
+			function() {
+				$this->display_notices();
+			}
+		);
 
-		add_filter( 'woocommerce_dismiss_notice_capability', [ $this, 'get_dismiss_capability' ], 10, 2 );
+		add_action(
+			'woocommerce_dismiss_notice_capability',
+			function( $default_capability, $notice_name ) {
+				$this->get_dismiss_capability( $default_capability, $notice_name );
+			},
+			10,
+			2
+		);
 
-		add_filter( 'comments_list_table_query_args', [ $this, 'exclude_reviews_from_comments' ] );
+		add_action(
+			'comments_list_table_query_args',
+			function( $args ) {
+				$this->exclude_reviews_from_comments( $args );
+			}
+		);
 	}
 
 	/**
