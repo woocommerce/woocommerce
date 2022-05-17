@@ -45,6 +45,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @param bool   $should_display_notices Whether notices should be displayed.
 	 *
 	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) : void {
 		global $current_screen;
@@ -64,7 +65,10 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		};
 		// phpcs:enable Squiz.Commenting
 
-		$instance->display_notices();
+		$method = ( new ReflectionClass( $instance ) )->getMethod( 'display_notices' );
+		$method->setAccessible( true );
+
+		$method->invoke( $instance );
 
 		$this->assertSame( (int) $should_display_notices, $instance->maybe_display_reviews_moved_notice_called );
 	}
@@ -190,17 +194,9 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 		$nonce = wp_create_nonce( 'woocommerce_hide_notices_nonce' );
 
-		$this->assertSame(
-			'<div class="notice notice-info is-dismissible">
-			<p><strong>Product reviews have moved!</strong></p>
-			<p>Product reviews can now be managed from Products &gt; Reviews.</p>
-			<p class="submit">
-				<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">Visit new location</a>
-			</p>
-			<button type="button" class="notice-dismiss" onclick="window.location = \'?wc-hide-notice=product_reviews_moved&#038;_wc_notice_nonce=' . $nonce . '\';"><span class="screen-reader-text">Dismiss this notice.</span></button>
-		</div>',
-			$output
-		);
+		$this->assertStringContainsString( '<div class="notice notice-info is-dismissible">', $output );
+		$this->assertStringContainsString( '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">', $output );
+		$this->assertStringContainsString( '<button type="button" class="notice-dismiss" onclick="window.location = \'?wc-hide-notice=product_reviews_moved&#038;_wc_notice_nonce=' . $nonce . '\';">', $output );
 	}
 
 	/**
@@ -212,9 +208,15 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @param string $expected_capability The expected capability.
 	 *
 	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_get_dismiss_capability( string $default_capability, string $notice_name, string $expected_capability ) : void {
-		$this->assertSame( $expected_capability, wc_get_container()->get( ReviewsCommentsOverrides::class )->get_dismiss_capability( $default_capability, $notice_name ) );
+		$overrides = wc_get_container()->get( ReviewsCommentsOverrides::class );
+
+		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'get_dismiss_capability' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_capability, $method->invoke( $overrides, $default_capability, $notice_name ) );
 	}
 
 	/** @see test_get_dismiss_capability() */
@@ -229,6 +231,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::exclude_reviews_from_comments()
 	 *
 	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_exclude_reviews_from_comments() : void {
 		$overrides = wc_get_container()->get( ReviewsCommentsOverrides::class );
@@ -239,7 +242,10 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( in_array( 'product', $original_args['post_type'] ) );
 
-		$new_args = $overrides->exclude_reviews_from_comments( $original_args );
+		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'exclude_reviews_from_comments' );
+		$method->setAccessible( true );
+
+		$new_args = $method->invoke( $overrides, $original_args );
 
 		$this->assertFalse( in_array( 'product', $new_args['post_type'] ) );
 	}
