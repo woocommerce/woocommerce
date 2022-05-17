@@ -67,13 +67,23 @@ class PostsToOrdersMigrationController {
 		$this->shipping_address_table_migrator = new PostToOrderAddressTableMigrator( 'shipping' );
 		$this->operation_data_table_migrator   = new PostToOrderOpTableMigrator();
 
-		$excluded_columns = array_keys( $this->order_table_migrator->get_meta_column_config() );
-		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->billing_address_table_migrator->get_meta_column_config() ) );
-		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->shipping_address_table_migrator->get_meta_column_config() ) );
-		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->operation_data_table_migrator->get_meta_column_config() ) );
+		$excluded_columns = $this->get_migrated_meta_keys();
 
-		$this->meta_table_migrator             = new PostMetaToOrderMetaMigrator( $excluded_columns );
-		$this->error_logger                    = new MigrationErrorLogger();
+		$this->meta_table_migrator = new PostMetaToOrderMetaMigrator( $excluded_columns );
+		$this->error_logger        = new MigrationErrorLogger();
+	}
+
+	/**
+	 * Helper method to get keys to migrate for migrations.
+	 *
+	 * @return int[]|string[]
+	 */
+	public function get_migrated_meta_keys() : array {
+		$migrated_keys = array_keys( $this->order_table_migrator->get_meta_column_config() );
+		$migrated_keys = array_merge( $migrated_keys, array_keys( $this->billing_address_table_migrator->get_meta_column_config() ) );
+		$migrated_keys = array_merge( $migrated_keys, array_keys( $this->shipping_address_table_migrator->get_meta_column_config() ) );
+		$migrated_keys = array_merge( $migrated_keys, array_keys( $this->operation_data_table_migrator->get_meta_column_config() ) );
+		return $migrated_keys;
 	}
 
 	/**
@@ -88,6 +98,20 @@ class PostsToOrdersMigrationController {
 		$this->operation_data_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		$this->meta_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		// TODO: Return merged error array.
+	}
+
+	/**
+	 * Verify whether the given order IDs were migrated properly or not.
+	 *
+	 * @param array $order_post_ids Order IDs.
+	 *
+	 * @return array Array of failed IDs along with columns.
+	 */
+	public function verify_migrated_orders( array $order_post_ids ): array {
+		return $this->order_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->billing_address_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->shipping_address_table_migrator->verify_migrated_data( $order_post_ids ) +
+			$this->operation_data_table_migrator->verify_migrated_data( $order_post_ids );
 	}
 
 	/**
