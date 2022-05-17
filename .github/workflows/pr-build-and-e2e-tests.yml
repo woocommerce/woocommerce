@@ -1,5 +1,8 @@
 name: Run tests against PR
-on: pull_request
+on:
+  pull_request:
+  workflow_dispatch:
+
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -9,35 +12,12 @@ jobs:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Dependency caching
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - name: Install and Build
+              uses: ./.github/actions/install-build
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              run: pnpm nx composer-install-no-dev woocommerce
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Run build
-              run: pnpm nx build woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
