@@ -45,11 +45,29 @@ class Reviews {
 			}
 		);
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
+		add_action(
+			'admin_enqueue_scripts',
+			function() {
+				$this->load_javascript();
+			}
+		);
 
 		// These ajax callbacks need a low priority to ensure they run before their WordPress core counterparts.
-		add_action( 'wp_ajax_edit-comment', [ $this, 'handle_edit_review' ], -1 );
-		add_action( 'wp_ajax_replyto-comment', [ $this, 'handle_reply_to_review' ], -1 );
+		add_action(
+			'wp_ajax_edit-comment',
+			function() {
+				$this->handle_edit_review();
+			},
+			-1
+		);
+
+		add_action(
+			'wp_ajax_replyto-comment',
+			function() {
+				$this->handle_reply_to_review();
+			},
+			-1
+		);
 
 		add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
 
@@ -131,7 +149,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function load_javascript() : void {
+	private function load_javascript() : void {
 		if ( $this->is_reviews_page() ) {
 			wp_enqueue_script( 'admin-comments' );
 			enqueue_comment_hotkeys_js();
@@ -172,7 +190,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function handle_edit_review(): void {
+	private function handle_edit_review(): void {
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_id = isset( $_POST['comment_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_ID'] ) ) : 0;
@@ -239,7 +257,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function handle_reply_to_review() : void {
+	private function handle_reply_to_review() : void {
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_post_ID = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
