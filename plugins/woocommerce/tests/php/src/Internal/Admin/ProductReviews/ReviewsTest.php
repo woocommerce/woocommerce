@@ -509,6 +509,7 @@ test2</p></div>',
 	 * @param bool $should_call_the_display_method Indicates if the display method should be called.
 	 *
 	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_display_notices( bool $is_reviews_page, bool $should_call_the_display_method ) : void {
 
@@ -523,7 +524,10 @@ test2</p></div>',
 		$mock->expects( $this->exactly( (int) $should_call_the_display_method ) )
 			->method( 'maybe_display_reviews_bulk_action_notice' );
 
-		$mock->display_notices();
+		$method = ( new ReflectionClass( $mock ) )->getMethod( 'display_notices' );
+		$method->setAccessible( true );
+
+		$method->invoke( $mock );
 	}
 
 	/** @see test_display_notices */

@@ -408,7 +408,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function display_notices() : void {
+	protected function display_notices() : void {
 
 		if ( $this->is_reviews_page() ) {
 			$this->maybe_display_reviews_bulk_action_notice();
