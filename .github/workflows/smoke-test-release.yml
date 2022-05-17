@@ -109,7 +109,7 @@ jobs:
               working-directory: package/woocommerce
               env:
                   LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
-              run: pnpm nx docker-up woocommerce
+              run: pnpm docker:up --filter=woocommerce
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -188,7 +188,7 @@ jobs:
               working-directory: package/woocommerce
               env:
                   LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
-              run: pnpm nx docker-up woocommerce
+              run: pnpm docker:up --filter=woocommerce
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce

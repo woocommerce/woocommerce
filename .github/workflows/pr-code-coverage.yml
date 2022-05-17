@@ -49,14 +49,16 @@ jobs:
         
       - name: Build Admin feature config
         run: |
-          pnpm nx build:feature-config woocommerce
+          pnpm build:feature-config --filter=woocommerce
 
       - name: Init DB and WP
-        run: pnpm nx install-unit-test-db woocommerce
+        working-directory: plugins/woocommerce
+        run: bash tests/bin/install.sh woo_test root root 127.0.0.1 latest
 
       - name: Run unit tests with code coverage. Allow to fail.
+        working-directory: plugins/woocommerce
         run: |
-          pnpm nx test-code-coverage woocommerce
+          RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh
           exit 0
       
       - name: Send code coverage to Codecov.

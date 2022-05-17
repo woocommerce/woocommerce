@@ -122,13 +122,11 @@ Run the following in a terminal/command line window
 
 - `pnpm install`
 
-- `pnpm nx composer-install woocommerce`
-
-- `pnpm nx build-assets woocommerce`
+- `pnpm exec turbo build --filter=woocommerce`
 
 - `npm install jest --global` (this only needs to be done once)
 
-- `pnpm nx docker-up woocommerce` (this will build the test site using Docker)
+- `pnpm docker:up --filter=woocommerce` (this will build the test site using Docker)
 
 - Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
 
@@ -154,9 +152,9 @@ Username: admin
 PW: password
 ```
 
-- Run `pnpm nx docker-down woocommerce` when you are done with running e2e tests and before making any changes to test site configuration.
+- Run `pnpm docker:down --filter=woocommerce` when you are done with running e2e tests and before making any changes to test site configuration.
 
-Note that running `pnpm nx docker-down woocommerce` and then `pnpm nx docker-up woocommerce` re-initializes the test container.
+Note that running `pnpm docker:down --filter=woocommerce` and then `pnpm docker:up --filter=woocommerce` re-initializes the test container.
 
 ### How to run tests in headless mode
 
@@ -274,7 +272,7 @@ The following variables can be used to specify the versions of WordPress, PHP an
 The full command to build the site will look as follows:
 
 ```
-TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 pnpm nx docker-up woocommerce
+TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 pnpm docker:up --filter=woocommerce
 ```
 
 ## Guide for writing e2e tests
