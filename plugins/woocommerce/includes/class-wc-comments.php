@@ -8,6 +8,8 @@
  * @version 2.3.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -37,7 +39,7 @@ class WC_Comments {
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_webhook_comments_from_feed_where' ) );
 
 		// Exclude product reviews.
-		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_product_reviews' ), 10, 1 );
+		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 1 );
 
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
@@ -75,23 +77,6 @@ class WC_Comments {
 			$open = false;
 		}
 		return $open;
-	}
-
-	/**
-	 * Removes product reviews from the edit-comments page to fix the "Mine" tab counter.
-	 *
-	 * @param  array|mixed $clauses A compacted array of comment query clauses.
-	 * @return array|mixed
-	 */
-	public static function exclude_product_reviews( $clauses ) {
-		global $wpdb, $current_screen;
-
-		if ( isset( $current_screen->base ) && 'edit-comments' === $current_screen->base ) {
-			$clauses['join']  .= " LEFT JOIN {$wpdb->posts} AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ";
-			$clauses['where'] .= ( $clauses['where'] ? ' AND ' : '' ) . " wp_posts_to_exclude_reviews.post_type NOT IN ('product') ";
-		}
-
-		return $clauses;
 	}
 
 	/**
