@@ -38,7 +38,13 @@ class Reviews {
 	 */
 	public function __construct() {
 
-		add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
+		add_action(
+			'admin_menu',
+			function() {
+				$this->add_reviews_page();
+			}
+		);
+
 		add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
 
 		// These ajax callbacks need a low priority to ensure they run before their WordPress core counterparts.
@@ -78,7 +84,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function add_reviews_page() : void {
+	private function add_reviews_page() : void {
 
 		$this->reviews_page_hook = add_submenu_page(
 			'edit.php?post_type=product',
