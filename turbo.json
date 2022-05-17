@@ -57,6 +57,14 @@
         "e2e": {
             "dependsOn":  [ "build" ],
             "cache": false
+        },
+        "e2e:debug": {
+            "dependsOn":  [ "build" ],
+            "cache": false
+        },
+        "e2e:dev": {
+            "dependsOn":  [ "build" ],
+            "cache": false
         }
     }
 }
