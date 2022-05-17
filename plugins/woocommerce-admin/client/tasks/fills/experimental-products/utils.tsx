@@ -20,13 +20,13 @@ export const getProductTypes = ( {
 }: {
 	exclude?: ProductTypeKey[];
 } = {} ): ProductType[] => {
-	if ( ! exclude ) {
-		return [ ...productTypes ];
+	if ( exclude && exclude?.length > 0 ) {
+		return productTypes.filter(
+			( productType ) => ! exclude.includes( productType.key )
+		);
 	}
 
-	return productTypes.filter(
-		( productType ) => ! exclude.includes( productType.key )
-	);
+	return [ ...productTypes ];
 };
 
 /**
