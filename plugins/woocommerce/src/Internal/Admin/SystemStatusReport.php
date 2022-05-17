@@ -34,7 +34,6 @@ class SystemStatusReport {
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_system_status_report', array( $this, 'system_status_report' ) );
-
 	}
 
 	/**
@@ -139,8 +138,11 @@ class SystemStatusReport {
 	 * Render option row.
 	 */
 	public function render_options() {
-		$all_options_expected = is_numeric( get_option( 'woocommerce_admin_install_timestamp' ) )
-		&& is_array( get_option( 'woocommerce_onboarding_profile', array() ) );
+		$woocommerce_admin_install_timestamp = get_option( 'woocommerce_admin_install_timestamp' );
+
+		$all_options_expected = is_numeric( $woocommerce_admin_install_timestamp )
+			&& 0 < (int) $woocommerce_admin_install_timestamp
+			&& is_array( get_option( 'woocommerce_onboarding_profile', array() ) );
 
 		?>
 			<tr>
