@@ -173,7 +173,6 @@ export default class Analyzer extends Command {
 	): Promise< void > {
 		const templates = await this.scanTemplates( content, version );
 		const hooks = await this.scanHooks( content, version, output );
-		const databases = await this.scanDatabases( content, version );
 
 		if ( templates.size ) {
 			await printTemplateResults(
@@ -191,23 +190,6 @@ export default class Analyzer extends Command {
 		} else {
 			this.log( 'No new hooks found' );
 		}
-	}
-
-	/**
-	 * Scan patches for changes in the database
-	 *
-	 * @param {string} content Patch content.
-	 * @param {string} version Current product version.
-	 * @return {Promise<Map<string, string[]>>} Promise.
-	 */
-	private async scanDatabases(
-		content: string,
-		version: string
-	): Promise< Map< string, string[] > > {
-		CliUx.ux.action.start( 'Scanning database changes' );
-		const report: Map< string, string[] > = new Map< string, string[] >();
-		CliUx.ux.action.stop();
-		return report;
 	}
 
 	/**
