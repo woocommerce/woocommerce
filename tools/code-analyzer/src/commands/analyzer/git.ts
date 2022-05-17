@@ -52,7 +52,7 @@ export const fetchBranch = async (
  * @param {Function} error   error print method.
  * @return {Promise<string>} Promise.
  */
-export const getChanges = async (
+export const generatePatch = async (
 	source: string,
 	compare: string,
 	base: string,

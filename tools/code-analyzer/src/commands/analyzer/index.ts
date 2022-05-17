@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import { MONOREPO_ROOT } from '../../const';
 import { printTemplateResults, printHookResults } from './print';
 import { getVersionRegex, getFilename, getPatches, getHookName } from './utils';
-import { getChanges } from './git';
+import { generatePatch } from './git';
 
 /**
  * Analyzer class
@@ -70,7 +70,7 @@ export default class Analyzer extends Command {
 
 		await this.validateArgs( flags.source );
 
-		const patchContent = await getChanges(
+		const patchContent = await generatePatch(
 			flags.source,
 			args.compare,
 			flags.base,
