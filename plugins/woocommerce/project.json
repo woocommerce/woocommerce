@@ -103,19 +103,19 @@
 		"test-e2e": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
-				"script": "test:e2e"
+				"script": "e2e"
 			}
 		},
 		"test-e2e-debug": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
-				"script": "test:e2e-debug"
+				"script": "e2e:debug"
 			}
 		},
 		"test-e2e-dev": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
-				"script": "test:e2e-dev"
+				"script": "e2e:dev"
 			}
 		},
 		"test-unit": {

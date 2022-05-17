@@ -2,6 +2,13 @@
     "$schema": "https://turborepo.org/schema.json",
     "baseBranch": "origin/trunk",
     "pipeline": {
+        "lint": {
+            "cache": false
+        },
+        "lint:fix": {
+            "cache": false
+        },
+
         "build": {
             "dependsOn":  [ "^build" ],
             "inputs": [
@@ -47,11 +54,8 @@
             "outputs": []
         },
 
-        "lint": {
-            "cache": false
-        },
-
-        "lint:fix": {
+        "e2e": {
+            "dependsOn":  [ "build" ],
             "cache": false
         }
     }
