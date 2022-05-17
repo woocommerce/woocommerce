@@ -49,7 +49,9 @@ export const Products = () => {
 	} );
 
 	const productTypeListItems = useProductTypeListItems(
-		getProductTypes( [ 'subscription' ] ),
+		getProductTypes( {
+			exclude: [ 'subscription' ],
+		} ),
 		[],
 		{
 			onClick: recordCompletionTime,
