@@ -42,6 +42,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->cpt_data_store = new WC_Order_Data_Store_CPT();
 	}
 
+	/**
+	 * Destroys system under test.
+	 */
 	public function tearDown(): void {
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
@@ -56,23 +59,23 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
-		$switch_to_data_store = function ( $data_store ) {
-			$this->data_store = $data_store;
-		};
-
+		wp_cache_flush();
 		$cot_order = new WC_Order();
 		$cot_order->set_id( $post_order_id );
-		$switch_to_data_store->call( $cot_order, $this->sut );
+		$this->switch_data_store( $cot_order, $this->sut );
 		$this->sut->read( $cot_order );
 
+		wp_cache_flush();
 		$post_order = new WC_Order();
 		$post_order->set_id( $post_order_id );
-		$switch_to_data_store->call( $post_order, $this->cpt_data_store );
+		$this->switch_data_store( $post_order, $this->cpt_data_store );
 		$this->cpt_data_store->read( $post_order );
 
-		$post_order_data    = $post_order->get_data();
-
-		$this->assertEquals( $post_order_data, $cot_order->get_data() );
+		$this->assertEquals( $post_order->get_base_data(), $cot_order->get_base_data() );
+		$post_order_meta_keys = wp_list_pluck( $post_order->get_meta_data(), 'key' );
+		foreach ( $post_order_meta_keys as $meta_key ) {
+			$this->assertEquals( $post_order->get_meta( $meta_key ), $cot_order->get_meta( $meta_key ) );
+		}
 	}
 
 	/**
@@ -80,7 +83,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function test_backfill_post_record() {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
-		$this->migrator->process_migration_for_ids( array( $post_order_id ) );
+		$this->migrator->migrate_orders( array( $post_order_id ) );
 
 		$post_data      = get_post( $post_order_id, ARRAY_A );
 		$post_meta_data = get_post_meta( $post_order_id );
@@ -110,9 +113,11 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->delete_all_meta_for_post( $post_order_id );
 
 		$this->assertEquals( 'migration_pending', get_post_status( $post_order_id ) ); // assert post was updated.
+		$this->assertEquals( array(), get_post_meta( $post_order_id ) ); // assert postmeta was deleted.
 
 		$cot_order = new WC_Order();
 		$cot_order->set_id( $post_order_id );
+		$this->switch_data_store( $cot_order, $this->sut );
 		$this->sut->read( $cot_order );
 		$this->sut->backfill_post_record( $cot_order );
 
@@ -135,7 +140,19 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	private function delete_all_meta_for_post( $post_id ) {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE post_id = %d", $post_id ) );
+		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $post_id ) );
 	}
 
+	/**
+	 * Helper method to allow switching data stores.
+	 *
+	 * @param WC_Order      $order Order object.
+	 * @param WC_Data_Store $data_store Data store object to switch order to.
+	 */
+	private function switch_data_store( $order, $data_store ) {
+		$update_data_store_func = function ( $data_store ) {
+			$this->data_store = $data_store;
+		};
+		$update_data_store_func->call( $order, $data_store );
+	}
 }
