@@ -1,8 +1,8 @@
 name: Run tests against PR
 on: pull_request
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     e2e-tests-run:
@@ -16,11 +16,11 @@ jobs:
               uses: actions/cache@v3
               id: cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  path: |
+                      ~/.pnpm-store
+                      ~/.local/share/pnpm/store
+                      ~/.cache/composer/files
+                  key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -34,7 +34,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Run build
               run: pnpm nx build woocommerce
@@ -73,11 +73,11 @@ jobs:
               uses: actions/cache@v3
               id: cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  path: |
+                      ~/.pnpm-store
+                      ~/.local/share/pnpm/store
+                      ~/.cache/composer/files
+                  key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -91,7 +91,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Run build
               run: pnpm nx build woocommerce
@@ -129,11 +129,11 @@ jobs:
               uses: actions/cache@v3
               id: cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                  path: |
+                      ~/.pnpm-store
+                      ~/.local/share/pnpm/store
+                      ~/.cache/composer/files
+                  key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -147,7 +147,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Run build
               run: pnpm nx build woocommerce
@@ -191,5 +191,4 @@ jobs:
                     -f artifact_name=$ARTIFACT_NAME \
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
-                    --repo woocommerce/woocommerce-test-reports
-
+                    --repo rodelgc/rep-fork
