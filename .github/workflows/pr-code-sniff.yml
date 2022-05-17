@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 100
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
