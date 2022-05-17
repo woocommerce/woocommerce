@@ -2,6 +2,7 @@ name: Smoke test daily
 on:
     schedule:
         - cron: '25 3 * * *'
+    workflow_dispatch:
 env:
   API_TEST_REPORT_ARTIFACT_NAME: api-test-report---daily
 
