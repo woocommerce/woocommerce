@@ -76,14 +76,7 @@ class Reviews {
 			}
 		);
 
-		add_filter(
-			'gettext',
-			function( $translation, $text ) {
-				$this->edit_comments_screen_text( $translation, $text );
-			},
-			10,
-			2
-		);
+		add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
 
 		add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
