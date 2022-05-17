@@ -85,7 +85,9 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( $list_table_property->getValue( $reviews ) );
 
-		$reviews->load_reviews_screen();
+		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'load_reviews_screen' );
+		$method->setAccessible( true );
+		$method->invoke( $reviews );
 
 		$this->assertInstanceOf( ReviewsListTable::class, $list_table_property->getValue( $reviews ) );
 	}

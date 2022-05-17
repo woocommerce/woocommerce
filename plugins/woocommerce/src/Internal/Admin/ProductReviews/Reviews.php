@@ -123,7 +123,12 @@ class Reviews {
 			[ $this, 'render_reviews_list_table' ]
 		);
 
-		add_action( "load-{$this->reviews_page_hook}", [ $this, 'load_reviews_screen' ] );
+		add_action(
+			"load-{$this->reviews_page_hook}",
+			function() {
+				$this->load_reviews_screen();
+			}
+		);
 	}
 
 	/**
@@ -593,7 +598,7 @@ class Reviews {
 	 *
 	 * @return void
 	 */
-	public function load_reviews_screen() : void {
+	protected function load_reviews_screen() : void {
 		$this->reviews_list_table = $this->make_reviews_list_table();
 		$this->reviews_list_table->process_bulk_action();
 	}
