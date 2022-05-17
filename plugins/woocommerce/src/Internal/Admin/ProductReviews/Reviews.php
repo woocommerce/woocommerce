@@ -514,7 +514,7 @@ class Reviews {
 	 * @param string|mixed $parent_file Parent menu item.
 	 * @return string
 	 */
-	public function edit_review_parent_file( $parent_file ) {
+	protected function edit_review_parent_file( $parent_file ) {
 		global $submenu_file, $current_screen;
 
 		if ( isset( $current_screen->id, $_GET['c'] ) && 'comment' === $current_screen->id ) {

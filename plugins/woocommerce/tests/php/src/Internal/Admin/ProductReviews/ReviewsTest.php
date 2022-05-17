@@ -171,6 +171,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_review_parent_file()
 	 *
 	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_edit_review_parent_file() : void {
 		global $submenu_file, $current_screen;
@@ -181,7 +182,10 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$_GET['c'] = $review;
 		$reviews = wc_get_container()->get( Reviews::class );
 
-		$this->assertSame( 'edit.php?post_type=product', $reviews->edit_review_parent_file( 'test' ) );
+		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'edit_review_parent_file' );
+		$method->setAccessible( true );
+
+		$this->assertSame( 'edit.php?post_type=product', $method->invoke( $reviews, 'test' ) );
 		$this->assertSame( 'product-reviews', $submenu_file );
 	}
 
