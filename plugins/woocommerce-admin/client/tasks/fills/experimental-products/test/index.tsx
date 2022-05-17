@@ -23,8 +23,11 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/onboarding', () => ( {
-	useProductTaskExperiment: jest.fn().mockReturnValue( [ false, 'stacked' ] ),
+jest.mock( '../use-product-layout-experiment', () => ( {
+	useProductTaskExperiment: jest.fn().mockReturnValue( {
+		isLoading: false,
+		experimentLayout: 'stacked',
+	} ),
 } ) );
 
 jest.mock( '../use-create-product-by-type', () => ( {
@@ -263,10 +266,12 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should show spinner when layout experiment is loading', async () => {
-		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => [
-			true,
-			'card',
-		] );
+		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => {
+			return {
+				isLoading: true,
+				experimentLayout: 'card',
+			};
+		} );
 		const { container } = render( <Products /> );
 		expect(
 			container.getElementsByClassName( 'components-spinner' )
@@ -274,10 +279,12 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should render card layout when experiment is assigned', async () => {
-		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => [
-			false,
-			'card',
-		] );
+		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => {
+			return {
+				isLoading: false,
+				experimentLayout: 'card',
+			};
+		} );
 		const { container } = render( <Products /> );
 		expect(
 			container.getElementsByClassName(
@@ -287,10 +294,12 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should render stacked layout when experiment is assigned', async () => {
-		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => [
-			false,
-			'stacked',
-		] );
+		( useProductTaskExperiment as jest.Mock ).mockImplementation( () => {
+			return {
+				isLoading: false,
+				experimentLayout: 'stacked',
+			};
+		} );
 		const { container } = render( <Products /> );
 		expect(
 			container.getElementsByClassName( 'woocommerce-products-stack' )

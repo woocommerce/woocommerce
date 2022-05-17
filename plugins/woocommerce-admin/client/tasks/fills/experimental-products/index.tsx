@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	WooOnboardingTask,
-} from '@woocommerce/onboarding';
+import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { Text } from '@woocommerce/experimental';
 import { registerPlugin } from '@wordpress/plugins';
 import { useMemo, useState } from '@wordpress/element';
@@ -29,7 +27,7 @@ import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import useRecordCompletionTime from '../use-record-completion-time';
 import { getCountryCode } from '~/dashboard/utils';
-import {useProductTaskExperiment} from "./use-product-layout-experiment";
+import { useProductTaskExperiment } from './use-product-layout-experiment';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -56,10 +54,10 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
-	const { 
+	const {
 		isLoading: isLoadingExperiment,
 		experimentLayout,
-	 } = useProductTaskExperiment();
+	} = useProductTaskExperiment();
 
 	const { isStoreInUS } = useSelect( ( select ) => {
 		const { getSettings } = select( SETTINGS_STORE_NAME );
@@ -188,10 +186,7 @@ export const Products = () => {
 };
 
 const ExperimentalProductsFill = () => {
-	const { 
-		isLoading,
-		experimentLayout,
-	 } = useProductTaskExperiment();
+	const { isLoading, experimentLayout } = useProductTaskExperiment();
 
 	return isLoading ? null : (
 		<WooOnboardingTask id="products" variant={ experimentLayout }>
