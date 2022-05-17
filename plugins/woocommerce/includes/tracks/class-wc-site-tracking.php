@@ -21,6 +21,8 @@ class WC_Site_Tracking {
 		 * Don't track users if a filter has been applied to turn it off.
 		 * `woocommerce_apply_tracking` will be deprecated. Please use
 		 * `woocommerce_apply_user_tracking` instead.
+		 *
+		 * @since 3.6.0
 		 */
 		if ( ! apply_filters( 'woocommerce_apply_user_tracking', true ) || ! apply_filters( 'woocommerce_apply_tracking', true ) ) {
 			return false;
@@ -62,6 +64,11 @@ class WC_Site_Tracking {
 	 * Adds the tracking function to the admin footer.
 	 */
 	public static function add_tracking_function() {
+		/**
+		 * Add global tracks event properties.
+		 *
+		 * @since 6.5.0
+		 */
 		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', array(), false );
 		?>
 		<!-- WooCommerce Tracks -->
@@ -73,8 +80,8 @@ class WC_Site_Tracking {
 					return;
 				}
 
-				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
-				var eventProperties = properties || {};
+				const eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
+				const eventProperties = properties || {};
 				eventProperties = { ...eventProperties, ...<?php echo json_encode( $filtered_properties ); ?> };
 				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
 					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
