@@ -12,6 +12,7 @@ import { execSync } from 'child_process';
  */
 import { MONOREPO_ROOT } from '../../const';
 import { printTemplateResults, printHookResults } from './print';
+import { getVersionRegex, getFilename, getPatches } from './utils';
 
 /**
  * Analyzer class
@@ -225,58 +226,6 @@ export default class Analyzer extends Command {
 	}
 
 	/**
-	 * Get patches
-	 *
-	 * @param {string} content Patch content.
-	 * @param {RegExp} regex   Regex to find specific patches.
-	 * @return {Promise<string[]>} Promise.
-	 */
-	private async getPatches(
-		content: string,
-		regex: RegExp
-	): Promise< string[] > {
-		const patches = content.split( 'diff --git ' );
-		const changes: string[] = [];
-
-		for ( const p in patches ) {
-			const patch = patches[ p ];
-			const id = patch.match( regex );
-
-			if ( id ) {
-				changes.push( patch );
-			}
-		}
-
-		return changes;
-	}
-
-	/**
-	 * Get filename from patch
-	 *
-	 * @param {string} str String to extract filename from.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getFilename( str: string ): Promise< string > {
-		return str.replace( /^a(.*)\s.*/, '$1' );
-	}
-
-	/**
-	 * Format version string for regex.
-	 *
-	 * @param {string} rawVersion Raw version number.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getVersionRegex( rawVersion: string ): Promise< string > {
-		const version = rawVersion.replace( /\./g, '\\.' );
-
-		if ( rawVersion.endsWith( '.0' ) ) {
-			return version + '|' + version.slice( 0, -3 ) + '\\n';
-		}
-
-		return version;
-	}
-
-	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
 	 * @param {string} content Patch content.
@@ -309,60 +258,6 @@ export default class Analyzer extends Command {
 			this.log( 'No new hooks found' );
 		}
 	}
-
-	// /**
-	//  * Print hook results
-	//  *
-	//  * @param {Map}    data   Raw data.
-	//  * @param {string} output Output style.
-	//  * @param {string} title  Section title.
-	//  */
-	// private async printHookResults(
-	// 	data: Map< string, Map< string, string[] > >,
-	// 	output: string,
-	// 	title: string
-	// ): Promise< void > {
-	// 	if ( output === 'github' ) {
-	// 		let opt = '\\n\\n### New hooks:';
-	// 		for ( const [ key, value ] of data ) {
-	// 			if ( value.size ) {
-	// 				opt += `\\n* **file:** ${ key }`;
-	// 				for ( const [ k, v ] of value ) {
-	// 					opt += `\\n  * ${ v[ 0 ].toUpperCase() }: ${ v[ 2 ] }`;
-	// 					this.log(
-	// 						`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
-	// 					);
-	// 				}
-	// 			}
-	// 		}
-
-	// 		this.log( `::set-output name=wphooks::${ opt }` );
-	// 	} else {
-	// 		this.log( `\n## ${ title }:` );
-	// 		for ( const [ key, value ] of data ) {
-	// 			if ( value.size ) {
-	// 				this.log( 'FILE: ' + key );
-	// 				this.log(
-	// 					'---------------------------------------------------'
-	// 				);
-	// 				for ( const [ k, v ] of value ) {
-	// 					this.log( 'HOOK: ' + k );
-	// 					this.log(
-	// 						'---------------------------------------------------'
-	// 					);
-	// 					this.log(
-	// 						` ${ v[ 0 ].toUpperCase() } | ${ v[ 1 ] } | ${
-	// 							v[ 2 ]
-	// 						}`
-	// 					);
-	// 					this.log(
-	// 						'---------------------------------------------------'
-	// 					);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	/**
 	 * Get hook name.
@@ -417,7 +312,7 @@ export default class Analyzer extends Command {
 
 		const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
 		const title = 'Template change detected';
-		const patches = await this.getPatches( content, matchPatches );
+		const patches = getPatches( content, matchPatches );
 		const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
 			/\./g,
 			'\\.'
@@ -427,7 +322,7 @@ export default class Analyzer extends Command {
 		for ( const p in patches ) {
 			const patch = patches[ p ];
 			const lines = patch.split( '\n' );
-			const filepath = await this.getFilename( lines[ 0 ] );
+			const filepath = getFilename( lines[ 0 ] );
 			let code = 'warning';
 			let message = 'This template may require a version bump!';
 
@@ -477,8 +372,8 @@ export default class Analyzer extends Command {
 		}
 
 		const matchPatches = /^a\/(.+).php/g;
-		const patches = await this.getPatches( content, matchPatches );
-		const verRegEx = await this.getVersionRegex( version );
+		const patches = getPatches( content, matchPatches );
+		const verRegEx = getVersionRegex( version );
 		const matchHooks = `@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp( matchHooks, 'gs' );
 
@@ -495,7 +390,7 @@ export default class Analyzer extends Command {
 			}
 
 			const lines = patch.split( '\n' );
-			const filepath = await this.getFilename( lines[ 0 ] );
+			const filepath = getFilename( lines[ 0 ] );
 
 			for ( const raw of results ) {
 				// Extract hook name and type.
