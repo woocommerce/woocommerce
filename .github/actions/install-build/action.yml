@@ -22,12 +22,15 @@ runs:
         key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
 
     - name: Install PNPM
+      shell: bash
       run: npm install -g pnpm@^6.24.2
 
     - name: Install dependencies
+      shell: bash
       run: pnpm install
 
     - name: Install Composer dependencies
+      shell: bash
       run: pnpm nx composer-install-no-dev woocommerce
 
     - name: Setup PHP
@@ -36,4 +39,5 @@ runs:
         php-version: '7.4'
 
     - name: Run build
+      shell: bash
       run: pnpm nx build woocommerce
