@@ -11,7 +11,7 @@ import { execSync } from 'child_process';
  * Internal dependencies
  */
 import { MONOREPO_ROOT } from '../../const';
-import { printTemplateResults } from './print';
+import { printTemplateResults, printHookResults } from './print';
 
 /**
  * Analyzer class
@@ -304,65 +304,65 @@ export default class Analyzer extends Command {
 		}
 
 		if ( hooks.size ) {
-			await this.printHookResults( hooks, output, 'HOOKS' );
+			await printHookResults( hooks, output, 'HOOKS', this.log );
 		} else {
 			this.log( 'No new hooks found' );
 		}
 	}
 
-	/**
-	 * Print hook results
-	 *
-	 * @param {Map}    data   Raw data.
-	 * @param {string} output Output style.
-	 * @param {string} title  Section title.
-	 */
-	private async printHookResults(
-		data: Map< string, Map< string, string[] > >,
-		output: string,
-		title: string
-	): Promise< void > {
-		if ( output === 'github' ) {
-			let opt = '\\n\\n### New hooks:';
-			for ( const [ key, value ] of data ) {
-				if ( value.size ) {
-					opt += `\\n* **file:** ${ key }`;
-					for ( const [ k, v ] of value ) {
-						opt += `\\n  * ${ v[ 0 ].toUpperCase() }: ${ v[ 2 ] }`;
-						this.log(
-							`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
-						);
-					}
-				}
-			}
+	// /**
+	//  * Print hook results
+	//  *
+	//  * @param {Map}    data   Raw data.
+	//  * @param {string} output Output style.
+	//  * @param {string} title  Section title.
+	//  */
+	// private async printHookResults(
+	// 	data: Map< string, Map< string, string[] > >,
+	// 	output: string,
+	// 	title: string
+	// ): Promise< void > {
+	// 	if ( output === 'github' ) {
+	// 		let opt = '\\n\\n### New hooks:';
+	// 		for ( const [ key, value ] of data ) {
+	// 			if ( value.size ) {
+	// 				opt += `\\n* **file:** ${ key }`;
+	// 				for ( const [ k, v ] of value ) {
+	// 					opt += `\\n  * ${ v[ 0 ].toUpperCase() }: ${ v[ 2 ] }`;
+	// 					this.log(
+	// 						`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
+	// 					);
+	// 				}
+	// 			}
+	// 		}
 
-			this.log( `::set-output name=wphooks::${ opt }` );
-		} else {
-			this.log( `\n## ${ title }:` );
-			for ( const [ key, value ] of data ) {
-				if ( value.size ) {
-					this.log( 'FILE: ' + key );
-					this.log(
-						'---------------------------------------------------'
-					);
-					for ( const [ k, v ] of value ) {
-						this.log( 'HOOK: ' + k );
-						this.log(
-							'---------------------------------------------------'
-						);
-						this.log(
-							` ${ v[ 0 ].toUpperCase() } | ${ v[ 1 ] } | ${
-								v[ 2 ]
-							}`
-						);
-						this.log(
-							'---------------------------------------------------'
-						);
-					}
-				}
-			}
-		}
-	}
+	// 		this.log( `::set-output name=wphooks::${ opt }` );
+	// 	} else {
+	// 		this.log( `\n## ${ title }:` );
+	// 		for ( const [ key, value ] of data ) {
+	// 			if ( value.size ) {
+	// 				this.log( 'FILE: ' + key );
+	// 				this.log(
+	// 					'---------------------------------------------------'
+	// 				);
+	// 				for ( const [ k, v ] of value ) {
+	// 					this.log( 'HOOK: ' + k );
+	// 					this.log(
+	// 						'---------------------------------------------------'
+	// 					);
+	// 					this.log(
+	// 						` ${ v[ 0 ].toUpperCase() } | ${ v[ 1 ] } | ${
+	// 							v[ 2 ]
+	// 						}`
+	// 					);
+	// 					this.log(
+	// 						'---------------------------------------------------'
+	// 					);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	/**
 	 * Get hook name.
