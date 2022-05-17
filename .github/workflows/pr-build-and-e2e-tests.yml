@@ -18,6 +18,11 @@ jobs:
                 workflow_name: pr-build-and-e2e-tests
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
             - name: Install and Build
               uses: ./.github/actions/install-build
 
@@ -54,6 +59,11 @@ jobs:
                 workflow_name: pr-build-and-e2e-tests
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+
             - name: Install and Build
               uses: ./.github/actions/install-build
 
@@ -88,6 +98,11 @@ jobs:
               with:
                 workflow_name: pr-build-and-e2e-tests
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build

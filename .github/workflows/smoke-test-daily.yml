@@ -12,40 +12,25 @@ jobs:
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
+            - uses: actions/checkout@v3
               with:
                   ref: trunk
 
-            - name: Dependency caching
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-smoke-test-daily-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
+                workflow_name: smoke-test-daily
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Install Jest
               run: pnpm install -g jest
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              run: pnpm nx composer-install-no-dev woocommerce
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Run smoke test.
               working-directory: plugins/woocommerce
@@ -86,18 +71,12 @@ jobs:
         name: Build zip for PR
         runs-on: ubuntu-20.04
         steps:
-          - name: Checkout code.
-            uses: actions/checkout@v3
+          - uses: actions/checkout@v3
 
-          - name: Dependency caching
-            uses: actions/cache@v3
-            id: cache-deps
+          - uses: ./.github/actions/cache-deps
             with:
-              path: |
-                ~/.pnpm-store
-                ~/.local/share/pnpm/store
-                ~/.cache/composer/files
-              key: ${{ runner.os }}-smoke-test-daily-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+              workflow_name: smoke-test-daily
+              workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
           - name: Install PNPM
             run: npm install -g pnpm@^6.24.2
@@ -150,36 +129,23 @@ jobs:
                   mkdir -p package/woocommerce
                   mkdir -p tmp/woocommerce
 
-            - name: Checkout code.
-              uses: actions/checkout@v3
+            - uses: actions/checkout@v3
               with:
                   path: package/woocommerce
 
-            - name: Dependency caching
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-smoke-test-daily-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              working-directory: package/woocommerce
-              run: pnpm install
+                workflow_name: smoke-test-daily
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Run build
+            - name: Install and Build
               working-directory: package/woocommerce
-              run: pnpm nx build woocommerce
+              uses: ./.github/actions/install-build
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3

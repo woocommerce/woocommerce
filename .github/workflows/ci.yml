@@ -4,6 +4,8 @@ on:
     branches:
       - trunk
       - 'release/**'
+  workflow_dispatch:
+
 defaults:
   run:
     shell: bash
@@ -37,8 +39,12 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: ci
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -53,24 +59,8 @@ jobs:
           php --version
           composer --version
 
-      - name: Dependency caching
-        uses: actions/cache@v3
-        id: cache-deps
-        with:
-          path: |
-            ~/.pnpm-store
-            ~/.local/share/pnpm/store
-            ~/.cache/composer/files
-          key: ${{ runner.os }}-ci-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Composer dependencies
-        run: pnpm nx composer-install woocommerce
+      - name: Install and Build
+        uses: ./.github/actions/install-build
 
       - name: Build Admin feature config
         run: pnpm nx build:feature-config woocommerce
