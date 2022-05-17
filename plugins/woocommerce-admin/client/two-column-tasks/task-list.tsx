@@ -234,7 +234,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 					<TaskListCompletedHeader
 						hideTasks={ hideTasks }
 						keepTasks={ keepTasks }
-						showCustomerEffortScore={ true }
+						customerEffortScore={ true }
 					/>
 				) : (
 					<TaskListCompleted

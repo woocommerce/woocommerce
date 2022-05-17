@@ -24,7 +24,7 @@ import HeaderImage from './completed-celebration-header.svg';
 type TaskListCompletedHeaderProps = {
 	hideTasks: () => void;
 	keepTasks: () => void;
-	showCustomerEffortScore: boolean;
+	customerEffortScore: boolean;
 };
 
 const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
@@ -49,7 +49,7 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > = ( {
 	hideTasks,
 	keepTasks,
-	showCustomerEffortScore,
+	customerEffortScore,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
@@ -67,7 +67,7 @@ export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > =
 			OPTIONS_STORE_NAME
 		);
 
-		if ( showCustomerEffortScore ) {
+		if ( customerEffortScore ) {
 			const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
 			const adminInstallTimestamp: number =
 				getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
