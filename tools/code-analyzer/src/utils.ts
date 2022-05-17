@@ -126,7 +126,11 @@ export const startWPEnv = async ( error: ( s: string ) => void ) => {
 			cwd: 'plugins/woocommerce',
 			encoding: 'utf-8',
 		} );
+	} catch ( e ) {
+		// If an error is produced here, it means wp-env is not initialized and therefor not running already.
+	}
 
+	try {
 		if ( await isWPEnvPortTaken() ) {
 			throw new Error(
 				'Unable to start wp-env. Make sure port 8888 is available or specify port number WP_ENV_PORT in .wp-env.override.json'
