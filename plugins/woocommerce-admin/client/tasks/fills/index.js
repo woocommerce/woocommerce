@@ -1,13 +1,8 @@
 /**
- * External dependencies
- */
-import { isProductTaskExperimentTreatment } from '@woocommerce/onboarding';
-
-/**
  * Internal dependencies
  */
+import { isProductTaskExperimentTreatment } from './experimental-products/use-product-layout-experiment';
 import { isImportProductExperiment } from './product-task-experiment';
-
 import './PaymentGatewaySuggestions';
 import './shipping';
 import './Marketing';

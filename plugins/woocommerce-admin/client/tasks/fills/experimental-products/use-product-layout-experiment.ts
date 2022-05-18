@@ -38,7 +38,7 @@ export const useProductTaskExperiment = () => {
 		} );
 	}, [ setExperimentLayout ] );
 
-	return [ isLoading, experimentLayout ];
+	return { isLoading, experimentLayout };
 };
 
 export default useProductTaskExperiment;
