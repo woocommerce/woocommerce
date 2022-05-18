@@ -26,7 +26,7 @@ class ReviewsCommentsOverrides {
 		add_filter(
 			'woocommerce_dismiss_admin_notice_capability',
 			function( $default_capability, $notice_name ) {
-				$this->get_dismiss_capability( $default_capability, $notice_name );
+				return $this->get_dismiss_capability( $default_capability, $notice_name );
 			},
 			10,
 			2
@@ -35,7 +35,7 @@ class ReviewsCommentsOverrides {
 		add_filter(
 			'comments_list_table_query_args',
 			function( $args ) {
-				$this->exclude_reviews_from_comments( $args );
+				return $this->exclude_reviews_from_comments( $args );
 			}
 		);
 	}
@@ -129,10 +129,10 @@ class ReviewsCommentsOverrides {
 	/**
 	 * Excludes product reviews from showing in the comments page.
 	 *
-	 * @param array $args {@see WP_Comment_Query} query args.
+	 * @param array|mixed $args {@see WP_Comment_Query} query args.
 	 * @return array
 	 */
-	protected function exclude_reviews_from_comments( $args ) {
+	protected function exclude_reviews_from_comments( $args ) : array {
 
 		if ( ! empty( $args['post_type'] ) && 'any' !== $args['post_type'] ) {
 			$post_types = (array) $args['post_type'];
@@ -144,6 +144,10 @@ class ReviewsCommentsOverrides {
 
 		if ( false !== $index ) {
 			unset( $post_types[ $index ] );
+		}
+
+		if ( ! is_array( $args ) ) {
+			$args = [];
 		}
 
 		$args['post_type'] = $post_types;
