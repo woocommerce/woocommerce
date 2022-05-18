@@ -16,17 +16,34 @@ class ReviewsCommentsOverrides {
 	 */
 	public function __construct() {
 
-		add_action( 'admin_notices', [ $this, 'display_notices' ] );
+		add_action(
+			'admin_notices',
+			function() {
+				$this->display_notices();
+			}
+		);
 
-		add_filter( 'woocommerce_dismiss_notice_capability', [ $this, 'get_dismiss_capability' ], 10, 2 );
+		add_action(
+			'woocommerce_dismiss_notice_capability',
+			function( $default_capability, $notice_name ) {
+				$this->get_dismiss_capability( $default_capability, $notice_name );
+			},
+			10,
+			2
+		);
 
-		add_filter( 'comments_list_table_query_args', [ $this, 'exclude_reviews_from_comments' ] );
+		add_action(
+			'comments_list_table_query_args',
+			function( $args ) {
+				$this->exclude_reviews_from_comments( $args );
+			}
+		);
 	}
 
 	/**
 	 * Renders admin notices.
 	 */
-	public function display_notices() : void {
+	protected function display_notices() : void {
 		$screen = get_current_screen();
 
 		if ( empty( $screen ) || 'edit-comments' !== $screen->base ) {
@@ -105,7 +122,7 @@ class ReviewsCommentsOverrides {
 	 * @param string|mixed $notice_name The notice name.
 	 * @return string
 	 */
-	public function get_dismiss_capability( $default_capability, $notice_name ) {
+	protected function get_dismiss_capability( $default_capability, $notice_name ) {
 		return self::REVIEWS_MOVED_NOTICE_ID === $notice_name ? Reviews::get_capability() : $default_capability;
 	}
 
@@ -115,7 +132,7 @@ class ReviewsCommentsOverrides {
 	 * @param array $args {@see WP_Comment_Query} query args.
 	 * @return array
 	 */
-	public function exclude_reviews_from_comments( $args ) {
+	protected function exclude_reviews_from_comments( $args ) {
 
 		if ( ! empty( $args['post_type'] ) && 'any' !== $args['post_type'] ) {
 			$post_types = (array) $args['post_type'];
