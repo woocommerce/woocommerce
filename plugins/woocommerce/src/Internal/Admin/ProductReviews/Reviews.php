@@ -72,7 +72,7 @@ class Reviews {
 		add_filter(
 			'parent_file',
 			function( $parent_file ) {
-				$this->edit_review_parent_file( $parent_file );
+				return $this->edit_review_parent_file( $parent_file );
 			}
 		);
 
