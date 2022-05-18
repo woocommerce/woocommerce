@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent errors and log a warning in the event the WP Filesystem cannot be initialized while updating the geoloc database.
