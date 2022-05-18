@@ -32,7 +32,7 @@ class ReviewsCommentsOverrides {
 			2
 		);
 
-		add_action(
+		add_filter(
 			'comments_list_table_query_args',
 			function( $args ) {
 				$this->exclude_reviews_from_comments( $args );
