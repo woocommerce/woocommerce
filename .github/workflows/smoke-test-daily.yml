@@ -159,6 +159,7 @@ jobs:
               working-directory: tmp
               run: |
                   unzip woocommerce.zip -d woocommerce
+                  ls -laR ./
                   rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Load docker images and start containers.
