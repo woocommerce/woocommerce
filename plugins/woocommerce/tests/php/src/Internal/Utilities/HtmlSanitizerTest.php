@@ -36,4 +36,27 @@ class HtmlSanitizerTest extends WC_Unit_Test_Case {
 			array( '</p> <p><img src="http://bar/icon.png" /> Purchase</p>', '<p><img src="http://bar/icon.png" /> Purchase</p>', 'Unbalanced tags are removed.' ),
 		);
 	}
+
+	/**
+	 * @testdox Tests that 'bad' string processor callbacks are handled correctly.
+	 */
+	public function test_handling_of_invalid_processor_callbacks() {
+		$sanitizer = new HtmlSanitizer( 'foo' );
+		$this->setExpectedIncorrectUsage( HtmlSanitizer::class . '::apply' );
+
+		$output = $sanitizer->apply(
+			array(
+				'pre_processors' => array(
+					'strtoupper',
+					'invalid_callback_1',
+				),
+				'post_processors' => array(
+					'invalid_callback_2',
+					'strrev',
+				),
+			)
+		);
+
+		$this->assertEquals( '', $output, 'When invalid callbacks are provided, an empty string will be returned.' );
+	}
 }

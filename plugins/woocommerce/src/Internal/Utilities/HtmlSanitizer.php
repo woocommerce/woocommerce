@@ -65,9 +65,7 @@ class HtmlSanitizer {
 		$output = $this->input;
 
 		if ( isset( $sanitizer_rules['pre_processors'] ) && is_array( $sanitizer_rules['pre_processors'] ) ) {
-			foreach ( $sanitizer_rules['pre_processors'] as $callback ) {
-				$output = $callback( $output );
-			}
+			$output = $this->apply_string_callbacks( $sanitizer_rules['pre_processors'], $output );
 		}
 
 		if ( isset( $sanitizer_rules['wp_kses_rules'] ) && is_array( $sanitizer_rules['wp_kses_rules'] ) ) {
@@ -75,11 +73,34 @@ class HtmlSanitizer {
 		}
 
 		if ( isset( $sanitizer_rules['post_processors'] ) && is_array( $sanitizer_rules['post_processors'] ) ) {
-			foreach ( $sanitizer_rules['post_processors'] as $callback ) {
-				$output = $callback( $output );
-			}
+			$output = $this->apply_string_callbacks( $sanitizer_rules['post_processors'], $output );
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Applies callbacks used to process the string before and after wp_kses().
+	 *
+	 * If a callback is invalid we will short-circuit and return an empty string, on the grounds that it is better to
+	 * output nothing than risky HTML. We also call the problem out via _doing_it_wrong() to highlight the problem (and
+	 * increase the chances of this being caught during development).
+	 *
+	 * @param callable[] $callbacks The callbacks used to mutate the string.
+	 * @param string     $string    The string being processed.
+	 *
+	 * @return string
+	 */
+	private function apply_string_callbacks( array $callbacks, string $string ): string {
+		foreach ( $callbacks as $callback ) {
+			if ( ! is_callable( $callback ) ) {
+				_doing_it_wrong( __CLASS__ . '::apply', esc_html__( 'String processors must be valid callbacks.', 'woocommerce' ), esc_html( WC()->version ) );
+				return '';
+			}
+
+			$string = (string) $callback( $string );
+		}
+
+		return $string;
 	}
 }
