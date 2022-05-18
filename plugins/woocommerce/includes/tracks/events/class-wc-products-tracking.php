@@ -235,7 +235,14 @@ class WC_Products_Tracking {
 		) {
 			return true;
 		}
-		// phpcs:enable
+
+		// New product.
+		if (
+			'post-new.php' === $hook &&
+			'product' === wp_unslash( $_GET['post_type'] )
+		) {
+			return true;
+		}
 
 		// Individual product.
 		if (
@@ -245,6 +252,7 @@ class WC_Products_Tracking {
 		) {
 			return true;
 		}
+		// phpcs:enable
 
 		return false;
 	}
