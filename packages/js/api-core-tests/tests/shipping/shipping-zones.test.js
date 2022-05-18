@@ -84,7 +84,7 @@ describe( 'Shipping zones API tests', () => {
 			param
 		);
 
-		expect( body ).toHaveLength( 2 ); // the test shipping zone, and the default 'Locations not covered by your other zones'
+		expect( body ).toHaveLength( 100 ); // the test shipping zone, and the default 'Locations not covered by your other zones'
 		expect( status ).toEqual( shippingZonesApi.listAll.responseCode );
 		expect( body ).toEqual(
 			expect.arrayContaining( [ { id: shippingZone.id } ] )
