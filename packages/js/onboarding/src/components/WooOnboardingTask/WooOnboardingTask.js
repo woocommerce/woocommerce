@@ -64,7 +64,7 @@ const pollForExperimentalVariant = ( id, count ) => {
 	} else if ( experimentalVariant ) {
 		trackView( id, experimentalVariant );
 	} else {
-		setTimeout( () => pollForExperimentalVariant( id ), 200 );
+		setTimeout( () => pollForExperimentalVariant( id, count + 1 ), 200 );
 	}
 };
 
