@@ -146,6 +146,8 @@ jobs:
 
             - name: Install and Build
               uses: ./package/woocommerce/.github/actions/install-build
+              with:
+                working_directory: package/woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
