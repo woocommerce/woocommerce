@@ -56,6 +56,7 @@ export const CountryInput = ( {
 				errorMessage={ errorMessage }
 				required={ required }
 				autoComplete={ autoComplete }
+				requireExactMatch={ true }
 			/>
 			{ autoComplete !== 'off' && (
 				<input
