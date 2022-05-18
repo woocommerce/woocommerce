@@ -18,16 +18,16 @@ export const importTypes = [
 			'woocommerce'
 		),
 		before: <PageIcon />,
-		href: getAdminLink(
-			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
-		),
-		onClick: () =>
-			recordEvent( 'tasklist_add_product', { method: 'import' } ),
+		onClick: () => {
+			recordEvent( 'tasklist_add_product', { method: 'import' } );
+			window.location.href = getAdminLink(
+				'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
+			);
+		},
 	},
 	{
 		key: 'from-cart2cart' as const,
 		title: __( 'FROM CART2CART', 'woocommerce' ),
-		href: 'https://woocommerce.com/products/cart2cart/?utm_medium=product',
 		content: interpolateComponents( {
 			mixedString: __(
 				'Migrate all store data like products, customers, and orders in no time with this 3rd party plugin. {{link}}Learn more{{/link}}',
@@ -35,12 +35,22 @@ export const importTypes = [
 			),
 			components: {
 				link: (
-					<ExternalLink href="https://woocommerce.com/products/cart2cart/?utm_medium=product"></ExternalLink>
+					<ExternalLink
+						href="https://woocommerce.com/products/cart2cart/?utm_medium=product"
+						onClickCapture={ ( e ) => e.preventDefault() }
+					></ExternalLink>
 				),
 			},
 		} ),
 		before: <ReblogIcon />,
-		onClick: () =>
-			recordEvent( 'tasklist_add_product', { method: 'migrate' } ),
+		onClick: () => {
+			recordEvent( 'tasklist_add_product', { method: 'migrate' } );
+			window
+				.open(
+					'https://woocommerce.com/products/cart2cart/?utm_medium=product',
+					'_blank'
+				)
+				?.focus();
+		},
 	},
 ];
