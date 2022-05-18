@@ -19,7 +19,7 @@ class OrdersTableDataStoreMeta {
 		global $wpdb;
 
 		return array(
-			'table'           => $wpdb->prefix . 'wc_orders_meta',
+			'table'           => OrdersTableDataStore::get_meta_table_name(),
 			'meta_id_field'   => 'id',
 			'object_id_field' => 'order_id',
 		);
