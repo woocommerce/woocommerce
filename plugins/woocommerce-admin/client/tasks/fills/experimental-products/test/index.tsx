@@ -5,6 +5,7 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useProductTaskExperiment } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -44,6 +45,15 @@ jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getSettings: () => ( {
+					general: {
+						woocommerce_default_country: 'US',
+					},
+				} ),
+			} ) )
+		);
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -72,6 +82,66 @@ describe( 'Products', () => {
 		expect( queryByText( 'Digital product' ) ).toBeInTheDocument();
 		expect( queryByRole( 'menu' )?.childElementCount ).toBe( 1 );
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should not render subscriptions products type when store is not in the US', () => {
+		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
+			profile: {
+				product_types: [ 'subscriptions' ],
+			},
+		} ) );
+		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getSettings: () => ( {
+					general: {
+						woocommerce_default_country: 'GB',
+					},
+				} ),
+			} ) )
+		);
+		const { queryByText } = render( <Products /> );
+
+		expect( queryByText( 'Subscription product' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should not render subscriptions products type when store country is unknown', () => {
+		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
+			profile: {
+				product_types: [ 'subscriptions' ],
+			},
+		} ) );
+		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getSettings: () => ( {
+					general: {
+						woocommerce_default_country: undefined,
+					},
+				} ),
+			} ) )
+		);
+		const { queryByText } = render( <Products /> );
+
+		expect( queryByText( 'Subscription product' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should render subscriptions products type when store is in the US', () => {
+		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
+			profile: {
+				product_types: [ 'subscriptions' ],
+			},
+		} ) );
+		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getSettings: () => ( {
+					general: {
+						woocommerce_default_country: 'US',
+					},
+				} ),
+			} ) )
+		);
+		const { queryByText } = render( <Products /> );
+
+		expect( queryByText( 'Subscription product' ) ).toBeInTheDocument();
 	} );
 
 	it( 'clicking on suggested product should fire event tasklist_product_template_selection with is_suggested:true and task_completion_time', () => {

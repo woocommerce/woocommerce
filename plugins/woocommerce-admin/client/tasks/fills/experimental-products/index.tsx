@@ -13,7 +13,8 @@ import { Button, Spinner } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
@@ -28,6 +29,7 @@ import { LoadSampleProductType } from './constants';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import useRecordCompletionTime from '../use-record-completion-time';
+import { getCountryCode } from '~/dashboard/utils';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -59,12 +61,31 @@ export const Products = () => {
 		experimentLayout,
 	] = useProductTaskExperiment();
 
+	const { isStoreInUS } = useSelect( ( select ) => {
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: settings = {} } = getSettings< {
+			general?: { [ key: string ]: unknown };
+		} >( 'general' );
+
+		const country =
+			typeof settings.woocommerce_default_country === 'string'
+				? settings.woocommerce_default_country
+				: '';
+
+		return {
+			isStoreInUS: getCountryCode( country ) === 'US',
+		};
+	} );
+
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
 
 	const productTypes = useProductTypeListItems(
-		getProductTypes(),
+		// Subscriptions only in the US
+		getProductTypes( {
+			exclude: isStoreInUS ? [] : [ 'subscription' ],
+		} ),
 		surfacedProductTypeKeys
 	);
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
