@@ -609,33 +609,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
-	 * Read metadata directly from database.
-	 *
-	 * @param \WC_Order $order Order object.
-	 *
-	 * @return array Metadata array.
-	 */
-	public function read_meta( &$order ) {
-		global $wpdb;
-		$meta_table = $this::get_meta_table_name();
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $meta_table is hardcoded.
-		$raw_meta_data = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-SELECT id as meta_id, meta_key, meta_value
-FROM $meta_table
-WHERE order_id = %d
-ORDER BY meta_id;
-",
-				$order->get_id()
-			)
-		);
-		// phpcs:enable
-
-		return $this->filter_raw_meta_data( $order, $raw_meta_data );
-	}
-
-	/**
 	 * Return order data for a single order ID.
 	 *
 	 * @param int $id Order ID.
