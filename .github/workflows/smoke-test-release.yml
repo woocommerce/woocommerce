@@ -70,6 +70,9 @@ jobs:
               with:
                   path: package/woocommerce
 
+            - name: Change dir to package/woocommerce
+              run: cd package/woocommerce
+
             - uses: ./.github/actions/cache-deps
               with:
                 workflow_name: smoke-test-release
@@ -91,9 +94,6 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
-
-            - name: Change dir to package/woocommerce
-              run: cd package/woocommerce
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -153,6 +153,9 @@ jobs:
               with:
                   path: package/woocommerce
 
+            - name: Change dir to package/woocommerce
+              run: cd package/woocommerce
+
             - uses: ./.github/actions/cache-deps
               with:
                 workflow_name: smoke-test-release
@@ -174,9 +177,6 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
-
-            - name: Change dir to package/woocommerce
-              run: cd package/woocommerce
 
             - name: Install and Build
               uses: ./.github/actions/install-build
