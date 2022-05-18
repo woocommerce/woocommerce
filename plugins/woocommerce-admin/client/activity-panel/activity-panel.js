@@ -49,6 +49,12 @@ const InboxPanel = lazy( () =>
 	)
 );
 
+const SetupTasksPanel = lazy( () =>
+	import(
+		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel'
+	)
+);
+
 export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
@@ -204,13 +210,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	};
 
 	const isPerformingSetupTask = () => {
-		return (
-			query.task &&
-			! query.path &&
-			( requestingTaskListOptions === true ||
-				( setupTaskListHidden === false &&
-					setupTaskListComplete === false ) )
-		);
+		return false;
 	};
 
 	const redirectToHomeScreen = () => {
@@ -236,25 +236,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
 			icon: <SetupProgress />,
-			onClick: () => {
-				const currentLocation = window.location.href;
-				const homescreenLocation = getAdminLink(
-					'admin.php?page=wc-admin'
-				);
-
-				// Don't navigate if we're already on the homescreen, this will cause an infinite loop
-				if ( currentLocation !== homescreenLocation ) {
-					// Ensure that if the user is trying to get to the task list they can see it even if
-					// it was dismissed.
-					if ( setupTaskListHidden === false ) {
-						redirectToHomeScreen();
-					} else {
-						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
-					}
-				}
-
-				return null;
-			},
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
@@ -337,6 +318,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
+			case 'setup':
+				return <SetupTasksPanel query={ query } />;
 			default:
 				return null;
 		}
