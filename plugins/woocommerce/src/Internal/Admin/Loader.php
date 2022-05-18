@@ -66,6 +66,7 @@ class Loader {
 		Translations::get_instance();
 		WCAdminUser::get_instance();
 		Settings::get_instance();
+		SystemStatusReport::get_instance();
 
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
