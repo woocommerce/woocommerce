@@ -66,7 +66,7 @@ jobs:
       - name: Extract and replace WooCommerce zip.
         working-directory: tmp/woocommerce-build
         run: |
-          mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
+          rsync -a woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
 
       - name: Copy Composer over to production
         run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build/woocommerce/woocommerce-production
