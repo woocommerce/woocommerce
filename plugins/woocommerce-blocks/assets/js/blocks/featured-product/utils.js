@@ -1,12 +1,10 @@
-export function calculateBackgroundImagePosition( coords ) {
+export function calculateImagePosition( coords ) {
 	if ( ! coords ) return {};
 
 	const x = Math.round( coords.x * 100 );
 	const y = Math.round( coords.y * 100 );
 
-	return {
-		objectPosition: `${ x }% ${ y }%`,
-	};
+	return `${ x }% ${ y }%`;
 }
 
 /**
@@ -19,4 +17,8 @@ export function dimRatioToClass( ratio ) {
 	return ratio === 0 || ratio === 50
 		? null
 		: `has-background-dim-${ 10 * Math.round( ratio / 10 ) }`;
+}
+
+export function backgroundImageStyles( url ) {
+	return { backgroundImage: `url(${ url })` };
 }

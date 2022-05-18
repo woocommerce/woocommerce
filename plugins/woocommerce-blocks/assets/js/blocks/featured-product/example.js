@@ -10,6 +10,8 @@ export const example = {
 		contentAlign: 'center',
 		dimRatio: 50,
 		editMode: false,
+		hasParallax: false,
+		isRepeated: false,
 		height: getSetting( 'default_height', 500 ),
 		mediaSrc: '',
 		overlayColor: '#000000',

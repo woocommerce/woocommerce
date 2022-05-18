@@ -50,7 +50,11 @@ import { crop, Icon, starEmpty } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { calculateBackgroundImagePosition, dimRatioToClass } from './utils';
+import {
+	backgroundImageStyles,
+	calculateImagePosition,
+	dimRatioToClass,
+} from './utils';
 import {
 	getImageSrcFromProduct,
 	getImageIdFromProduct,
@@ -265,10 +269,16 @@ const FeaturedProduct = ( {
 
 	const getInspectorControls = () => {
 		const url = attributes.mediaSrc || getImageSrcFromProduct( product );
-		const { focalPoint = { x: 0.5, y: 0.5 } } = attributes;
+		const {
+			focalPoint = { x: 0.5, y: 0.5 },
+			hasParallax,
+			isRepeated,
+		} = attributes;
 		// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
 		// so we need to check if it exists before using it.
 		const focalPointPickerExists = typeof FocalPointPicker === 'function';
+
+		const isImgElement = ! isRepeated && ! hasParallax;
 
 		return (
 			<>
@@ -313,50 +323,76 @@ const FeaturedProduct = ( {
 										'woo-gutenberg-products-block'
 									) }
 								>
-									<ToggleGroupControl
-										help={
-											<>
-												<p>
-													{ __(
-														'Choose “Cover” if you want the image to scale automatically to always fit its container.',
-														'woo-gutenberg-products-block'
-													) }
-												</p>
-												<p>
-													{ __(
-														'Note: by choosing “Cover” you will lose the ability to freely move the focal point precisely.',
-														'woo-gutenberg-products-block'
-													) }
-												</p>
-											</>
-										}
+									<ToggleControl
 										label={ __(
-											'Image fit',
+											'Fixed background',
 											'woo-gutenberg-products-block'
 										) }
-										value={ attributes.imageFit }
-										onChange={ ( value ) =>
+										checked={ hasParallax }
+										onChange={ () => {
 											setAttributes( {
-												imageFit: value,
-											} )
-										}
-									>
-										<ToggleGroupControlOption
+												hasParallax: ! hasParallax,
+											} );
+										} }
+									/>
+									<ToggleControl
+										label={ __(
+											'Repeated background',
+											'woo-gutenberg-products-block'
+										) }
+										checked={ isRepeated }
+										onChange={ () => {
+											setAttributes( {
+												isRepeated: ! isRepeated,
+											} );
+										} }
+									/>
+									{ ! isRepeated && (
+										<ToggleGroupControl
+											help={
+												<>
+													<p>
+														{ __(
+															'Choose “Cover” if you want the image to scale automatically to always fit its container.',
+															'woo-gutenberg-products-block'
+														) }
+													</p>
+													<p>
+														{ __(
+															'Note: by choosing “Cover” you will lose the ability to freely move the focal point precisely.',
+															'woo-gutenberg-products-block'
+														) }
+													</p>
+												</>
+											}
 											label={ __(
-												'None',
+												'Image fit',
 												'woo-gutenberg-products-block'
 											) }
-											value="none"
-										/>
-										<ToggleGroupControlOption
-											/* translators: "Cover" is a verb that indicates an image covering the entire container. */
-											label={ __(
-												'Cover',
-												'woo-gutenberg-products-block'
-											) }
-											value="cover"
-										/>
-									</ToggleGroupControl>
+											value={ attributes.imageFit }
+											onChange={ ( value ) =>
+												setAttributes( {
+													imageFit: value,
+												} )
+											}
+										>
+											<ToggleGroupControlOption
+												label={ __(
+													'None',
+													'woo-gutenberg-products-block'
+												) }
+												value="none"
+											/>
+											<ToggleGroupControlOption
+												/* translators: "Cover" is a verb that indicates an image covering the entire container. */
+												label={ __(
+													'Cover',
+													'woo-gutenberg-products-block'
+												) }
+												value="cover"
+											/>
+										</ToggleGroupControl>
+									) }
 									<FocalPointPicker
 										label={ __(
 											'Focal Point Picker',
@@ -370,30 +406,32 @@ const FeaturedProduct = ( {
 											} )
 										}
 									/>
-									<TextareaControl
-										label={ __(
-											'Alt text (alternative text)',
-											'woo-gutenberg-products-block'
-										) }
-										value={ attributes.alt }
-										onChange={ ( alt ) => {
-											setAttributes( { alt } );
-										} }
-										help={
-											<>
-												<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
+									{ isImgElement && (
+										<TextareaControl
+											label={ __(
+												'Alt text (alternative text)',
+												'woo-gutenberg-products-block'
+											) }
+											value={ attributes.alt }
+											onChange={ ( alt ) => {
+												setAttributes( { alt } );
+											} }
+											help={
+												<>
+													<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
+														{ __(
+															'Describe the purpose of the image',
+															'woo-gutenberg-products-block'
+														) }
+													</ExternalLink>
 													{ __(
-														'Describe the purpose of the image',
+														'Leaving it empty will use the product name.',
 														'woo-gutenberg-products-block'
 													) }
-												</ExternalLink>
-												{ __(
-													'Leaving it empty will use the product name.',
-													'woo-gutenberg-products-block'
-												) }
-											</>
-										}
-									/>
+												</>
+											}
+										/>
+									) }
 								</PanelBody>
 							) }
 							<PanelColorGradientSettings
@@ -454,6 +492,8 @@ const FeaturedProduct = ( {
 			contentAlign,
 			dimRatio,
 			focalPoint,
+			hasParallax,
+			isRepeated,
 			imageFit,
 			minHeight,
 			overlayColor,
@@ -471,6 +511,7 @@ const FeaturedProduct = ( {
 				'is-loading': ! product && isLoading,
 				'is-not-found': ! product && ! isLoading,
 				'has-background-dim': dimRatio !== 0,
+				'is-repeated': isRepeated,
 			},
 			contentAlign !== 'center' && `has-${ contentAlign }-content`
 		);
@@ -479,14 +520,31 @@ const FeaturedProduct = ( {
 			borderRadius: style?.border?.radius,
 		};
 
+		const backgroundImageStyle = {
+			objectPosition: calculateImagePosition( focalPoint ),
+			objectFit: imageFit,
+		};
+
+		const isImgElement = ! isRepeated && ! hasParallax;
+
 		const wrapperStyle = {
 			...getSpacingClassesAndStyles( attributes ).style,
 			minHeight,
 		};
 
-		const backgroundImageStyle = {
-			...calculateBackgroundImagePosition( focalPoint ),
-			objectFit: imageFit,
+		const backgroundDivStyle = {
+			...( ! isImgElement
+				? {
+						...backgroundImageStyles( backgroundImageSrc ),
+						backgroundPosition: calculateImagePosition(
+							focalPoint
+						),
+				  }
+				: undefined ),
+			...( ! isRepeated && {
+				backgroundRepeat: 'no-repeat',
+				backgroundSize: imageFit === 'cover' ? imageFit : 'auto',
+			} ),
 		};
 
 		const overlayStyle = {
@@ -504,25 +562,40 @@ const FeaturedProduct = ( {
 				/>
 				<div className={ classes } style={ containerStyle }>
 					<div
-						className="wc-block-featured-product__wrapper"
+						className={ classnames(
+							'wc-block-featured-product__wrapper'
+						) }
 						style={ wrapperStyle }
 					>
 						<div
 							className="wc-block-featured-product__overlay"
 							style={ overlayStyle }
 						/>
-						<img
-							alt={ product.short_description }
-							className="wc-block-featured-product__background-image"
-							src={ backgroundImageSrc }
-							style={ backgroundImageStyle }
-							onLoad={ ( e ) => {
-								setBackgroundImageSize( {
-									height: e.target?.naturalHeight,
-									width: e.target?.naturalWidth,
-								} );
-							} }
-						/>
+						{ isImgElement && (
+							<img
+								alt={ product.short_description }
+								className="wc-block-featured-product__background-image"
+								src={ backgroundImageSrc }
+								style={ backgroundImageStyle }
+								onLoad={ ( e ) => {
+									setBackgroundImageSize( {
+										height: e.target?.naturalHeight,
+										width: e.target?.naturalWidth,
+									} );
+								} }
+							/>
+						) }
+						{ ! isImgElement && (
+							<div
+								className={ classnames(
+									'wc-block-featured-product__background-image',
+									{
+										'has-parallax': hasParallax,
+									}
+								) }
+								style={ backgroundDivStyle }
+							/>
+						) }
 						<h2
 							className="wc-block-featured-product__title"
 							dangerouslySetInnerHTML={ {
@@ -736,6 +809,7 @@ export default compose( [
 			state = {
 				doUrlUpdate: false,
 			};
+
 			componentDidUpdate() {
 				const {
 					attributes,
@@ -757,9 +831,11 @@ export default compose( [
 					this.setState( { doUrlUpdate: false } );
 				}
 			}
+
 			triggerUrlUpdate = () => {
 				this.setState( { doUrlUpdate: true } );
 			};
+
 			render() {
 				return (
 					<ProductComponent
@@ -769,6 +845,7 @@ export default compose( [
 				);
 			}
 		}
+
 		return WrappedComponent;
 	}, 'withUpdateButtonAttributes' ),
 ] )( FeaturedProduct );

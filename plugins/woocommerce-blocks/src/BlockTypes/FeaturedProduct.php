@@ -68,7 +68,9 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		}
 		$attributes = wp_parse_args( $attributes, $this->defaults );
 
-		$attributes['height'] = isset( $attributes['height'] ) ? $attributes['height'] : wc_get_theme_support( 'featured_block::default_height', 500 );
+		$default_height       = wc_get_theme_support( 'featured_block::default_height', 500 );
+		$min_height           = $attributes['minHeight'] ?? $default_height;
+		$attributes['height'] = $attributes['height'] ?? $default_height;
 
 		$title = sprintf(
 			'<h2 class="wc-block-featured-product__title">%s</h2>',
@@ -92,13 +94,20 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			wp_kses_post( $product->get_price_html() )
 		);
 
-		$styles  = $this->get_styles( $attributes );
+		$image_url = esc_url( $this->get_image_url( $attributes, $product ) );
+
 		$classes = $this->get_classes( $attributes );
 
-		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-product" style="%2$s">', esc_attr( trim( $classes ) ), esc_attr( $styles ) );
-		$output .= '<div class="wc-block-featured-product__wrapper">';
+		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-product">', esc_attr( trim( $classes ) ) );
+		$output .= $this->render_wrapper( $attributes );
 		$output .= $this->render_overlay( $attributes );
-		$output .= $this->render_image( $attributes, $product );
+
+		if ( ! $attributes['isRepeated'] && ! $attributes['hasParallax'] ) {
+			$output .= $this->render_image( $attributes, $product, $image_url );
+		} else {
+			$output .= $this->render_bg_image( $attributes, $image_url );
+		}
+
 		$output .= $title;
 		if ( $attributes['showDesc'] ) {
 			$output .= $desc_str;
@@ -114,29 +123,39 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Renders the featured image
+	 * Returns the url of a product image
 	 *
 	 * @param array       $attributes Block attributes. Default empty array.
 	 * @param \WC_Product $product Product object.
 	 *
 	 * @return string
 	 */
-	private function render_image( $attributes, $product ) {
-		$style      = '';
+	private function get_image_url( $attributes, $product ) {
 		$image_size = 'large';
 		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
 			$image_size = 'full';
 		}
 
-		$style .= sprintf( 'object-fit: %s;', $attributes['imageFit'] );
-
 		if ( $attributes['mediaId'] ) {
-			$image = wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
-		} else {
-			$image = $this->get_image( $product, $image_size );
+			return wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
 		}
 
-		if ( is_array( $attributes['focalPoint'] ) && 2 === count( $attributes['focalPoint'] ) ) {
+		return $this->get_image( $product, $image_size );
+	}
+
+	/**
+	 * Renders the featured image
+	 *
+	 * @param array       $attributes Block attributes. Default empty array.
+	 * @param \WC_Product $product Product object.
+	 * @param string      $image_url Product image url.
+	 *
+	 * @return string
+	 */
+	private function render_image( $attributes, $product, $image_url ) {
+		$style = sprintf( 'object-fit: %s;', $attributes['imageFit'] );
+
+		if ( $this->hasFocalPoint( $attributes ) ) {
 			$style .= sprintf(
 				'object-position: %s%% %s%%;',
 				$attributes['focalPoint']['x'] * 100,
@@ -144,16 +163,53 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			);
 		}
 
-		if ( ! empty( $image ) ) {
+		if ( ! empty( $image_url ) ) {
 			return sprintf(
 				'<img alt="%1$s" class="wc-block-featured-product__background-image" src="%2$s" style="%3$s" />',
 				wp_kses_post( $attributes['alt'] ?: $product->get_name() ),
-				esc_url( $image ),
+				$image_url,
 				$style
 			);
 		}
 
 		return '';
+	}
+
+	/**
+	 * Renders the featured image as a div background.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $image_url Product image url.
+	 *
+	 * @return string
+	 */
+	private function render_bg_image( $attributes, $image_url ) {
+		$styles = $this->get_bg_styles( $attributes, $image_url );
+
+		$classes = [ 'wc-block-featured-product__background-image' ];
+
+		if ( $attributes['hasParallax'] ) {
+			$classes[] = ' has-parallax';
+		}
+
+		return sprintf( '<div class="%1$s" style="%2$s" /></div>', implode( ' ', $classes ), $styles );
+	}
+
+	/**
+	 * Renders the image wrapper.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 *
+	 * @return string
+	 */
+	private function render_wrapper( $attributes ) {
+		$min_height = $attributes['minHeight'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
+
+		if ( isset( $attributes['minHeight'] ) ) {
+			$style = sprintf( 'min-height:%dpx;', intval( $min_height ) );
+		}
+
+		return sprintf( '<div class="wc-block-featured-product__wrapper" style="%s">', esc_attr( $style ) );
 	}
 
 	/**
@@ -180,17 +236,29 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	/**
 	 * Get the styles for the wrapper element (background image, color).
 	 *
-	 * @param array $attributes Block attributes. Default empty array.
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $image_url Product image url.
 	 *
 	 * @return string
 	 */
-	public function get_styles( $attributes ) {
+	public function get_bg_styles( $attributes, $image_url ) {
 		$style = '';
 
-		$min_height = isset( $attributes['minHeight'] ) ? $attributes['minHeight'] : wc_get_theme_support( 'featured_block::default_height', 500 );
+		if ( $attributes['isRepeated'] || $attributes['hasParallax'] ) {
+			$style .= "background-image: url($image_url);";
+		}
 
-		if ( isset( $attributes['minHeight'] ) ) {
-			$style .= sprintf( 'min-height:%dpx;', intval( $min_height ) );
+		if ( ! $attributes['isRepeated'] ) {
+			$style .= 'background-repeat: no-repeat;';
+			$style .= 'background-size: ' . ( 'cover' === $attributes['imageFit'] ? $attributes['imageFit'] : 'auto' ) . ';';
+		}
+
+		if ( $this->hasFocalPoint( $attributes ) ) {
+			$style .= sprintf(
+				'background-position: %s%% %s%%;',
+				$attributes['focalPoint']['x'] * 100,
+				$attributes['focalPoint']['y'] * 100
+			);
 		}
 
 		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
@@ -228,6 +296,10 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			$classes[] = $attributes['className'];
 		}
 
+		if ( $attributes['isRepeated'] ) {
+			$classes[] = 'is-repeated';
+		}
+
 		$global_style_classes = StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );
 		$classes[]            = $global_style_classes;
 
@@ -253,6 +325,17 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		}
 
 		return $image;
+	}
+
+	/**
+	 * Returns whether the focal point is defined for the block.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 *
+	 * @return bool
+	 */
+	private function hasFocalPoint( $attributes ): bool {
+		return is_array( $attributes['focalPoint'] ) && 2 === count( $attributes['focalPoint'] );
 	}
 
 	/**
