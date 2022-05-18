@@ -134,11 +134,7 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Change dir to package/woocommerce
-              run: |
-                cd package/woocommerce
-
-            - uses: ~/package/woocommerce/.github/actions/cache-deps
+            - uses: ./package/woocommerce/.github/actions/cache-deps
               with:
                 workflow_name: smoke-test-daily
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
@@ -149,10 +145,7 @@ jobs:
                 php-version: '7.4'
 
             - name: Install and Build
-              uses: ~/package/woocommerce/.github/actions/install-build
-
-            - name: Change dir to root
-              run: cd ../..
+              uses: ./package/woocommerce/.github/actions/install-build
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
