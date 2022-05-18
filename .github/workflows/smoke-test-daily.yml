@@ -22,9 +22,6 @@ jobs:
                 workflow_name: smoke-test-daily
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - name: Install Jest
-              run: pnpm install -g jest
-
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -32,6 +29,9 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
+
+            - name: Install Jest
+              run: npm install -g jest
 
             - name: Run smoke test.
               working-directory: plugins/woocommerce
