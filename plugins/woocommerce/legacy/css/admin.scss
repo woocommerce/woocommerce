@@ -3714,6 +3714,13 @@ table.wc_shipping {
 			margin: 0 auto;
 		}
 	}
+
+	.description {
+		a {
+			color: #50575e;
+			text-decoration: underline;
+		}
+	}
 }
 
 .wc-shipping-zone-settings {
