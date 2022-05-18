@@ -156,7 +156,10 @@ jobs:
                   path: tmp
 
             - name: check dir
-              run: ls -laR ./
+              run: |
+                echo '--------'
+                pwd
+                ls -laR ./tmp
 
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp
