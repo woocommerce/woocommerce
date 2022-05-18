@@ -4,23 +4,33 @@
 import { recordEvent } from '@woocommerce/tracks';
 
 const actionButtons = document.querySelectorAll( '.row-actions span' );
-const bulkActions = document.querySelector( '#bulk-action-selector-top' );
+const bulkActions = document.querySelector(
+	'#bulk-action-selector-top'
+) as HTMLInputElement;
 const bulkActionsButton = document.querySelector( '#doaction' );
 const bulkActionsCancelButton = document.querySelector( '#bulk-edit .cancel' );
 const bulkActionsUpdateButton = document.querySelector( '#bulk_edit' );
 const featuredButtons = document.querySelectorAll( '#the-list .featured a' );
 const filterButton = document.querySelector( '#post-query-submit' );
-const productCategory = document.querySelector( '#product_cat' );
-const productType = document.querySelector( '#dropdown_product_type' );
+const productCategory = document.querySelector(
+	'#product_cat'
+) as HTMLInputElement;
+const productType = document.querySelector(
+	'#dropdown_product_type'
+) as HTMLInputElement;
 const searchButton = document.querySelector( '#search-submit' );
-const searchInput = document.querySelector( '#post-search-input' );
+const searchInput = document.querySelector(
+	'#post-search-input'
+) as HTMLInputElement;
 const sortableColumnHeaders = document.querySelectorAll(
 	'.wp-list-table.posts thead .sortable a, .wp-list-table.posts thead .sorted a'
 );
-const stockStatus = document.querySelector( '[name="stock_status"]' );
+const stockStatus = document.querySelector(
+	'[name="stock_status"]'
+) as HTMLInputElement;
 
-const hasValue = ( selector ) => {
-	const element = document.querySelector( selector );
+const hasValue = ( selector: string ) => {
+	const element = <HTMLInputElement>document.querySelector( selector );
 	return !! element && element.value !== '' && element.value !== '-1';
 };
 
@@ -76,9 +86,14 @@ bulkActionsCancelButton?.addEventListener( 'click', function () {
 
 actionButtons.forEach( ( button ) => {
 	button.addEventListener( 'click', function ( event ) {
-		const actionClass = event.target.parentElement.classList[ 0 ];
+		const actionClass = ( event.target as HTMLElement )?.parentElement
+			?.classList[ 0 ];
 
-		const actions = {
+		interface actionsInterface {
+			[ key: string ]: string;
+		}
+
+		const actions: actionsInterface = {
 			edit: 'edit',
 			inline: 'quick_edit',
 			trash: 'trash',
@@ -86,7 +101,7 @@ actionButtons.forEach( ( button ) => {
 			duplicate: 'duplicate',
 		};
 
-		if ( ! actions[ actionClass ] ) {
+		if ( ! actionClass || ! actions[ actionClass ] ) {
 			return;
 		}
 
@@ -98,7 +113,9 @@ actionButtons.forEach( ( button ) => {
 
 featuredButtons.forEach( ( button ) => {
 	button.addEventListener( 'click', function ( event ) {
-		const willFeature = event.target.classList.contains( 'not-featured' );
+		const willFeature = ( event.target as HTMLElement ).classList.contains(
+			'not-featured'
+		);
 
 		recordEvent( 'products_list_featured_click', {
 			featured: willFeature ? 'yes' : 'no',
@@ -117,7 +134,10 @@ searchButton?.addEventListener( 'click', function () {
 
 sortableColumnHeaders.forEach( ( header ) => {
 	header.addEventListener( 'click', function ( event ) {
-		const tableHeader = event.target.closest( 'th' );
+		const tableHeader = ( event.target as HTMLElement ).closest( 'th' );
+		if ( ! tableHeader ) {
+			return;
+		}
 		const willBeDescending = tableHeader.classList.contains( 'asc' );
 		recordEvent( 'products_list_column_header_click', {
 			field_slug: tableHeader.id,
