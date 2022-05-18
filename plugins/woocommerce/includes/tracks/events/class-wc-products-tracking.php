@@ -220,20 +220,44 @@ class WC_Products_Tracking {
 	}
 
 	/**
+	 * Check if a given the current hook and page is a products type page.
+	 *
+	 * @param string $hook Hook of the current page.
+	 * @return boolean
+	 */
+	protected function is_product_page( $hook ) {
+		// Product list page.
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			'edit.php' === $hook &&
+			isset( $_GET['post_type'] ) &&
+			'product' === wp_unslash( $_GET['post_type'] )
+		) {
+			return true;
+		}
+		// phpcs:enable
+
+		// Individual product.
+		if (
+			'post.php' === $hook &&
+			isset( $_GET['post'] ) &&
+			'product' === get_post_type( intval( $_GET['post'] ) )
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Adds the tracking scripts for product filtering actions.
 	 *
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_tracking_scripts( $hook ) {
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
-		if (
-			'edit.php' !== $hook ||
-			! isset( $_GET['post_type'] ) ||
-			'product' !== wp_unslash( $_GET['post_type'] )
-		) {
+		if ( ! $this->is_product_page( $hook ) ) {
 			return;
 		}
-		// phpcs:enable
 
 		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'product-tracking' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
