@@ -52,9 +52,9 @@ import {
 	dimRatioToClass,
 	getCategoryImageId,
 	getCategoryImageSrc,
+	calculateBackgroundImagePosition,
 } from './utils';
 import { withCategory } from '../../hocs';
-import { calculateBackgroundImagePosition } from '../featured-product/utils';
 import { ConstrainedResizable } from '../featured-product/block';
 
 const DEFAULT_EDITOR_SIZE = {
