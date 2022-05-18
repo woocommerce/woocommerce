@@ -179,7 +179,7 @@ class WC_Admin_Notices {
 			 * @param string $default_capability The default required capability.
 			 * @param string $notice_name The notice name.
 			 */
-			$required_capability = apply_filters( 'woocommerce_dismiss_notice_capability', 'manage_woocommerce', $notice_name );
+			$required_capability = apply_filters( 'woocommerce_dismiss_admin_notice_capability', 'manage_woocommerce', $notice_name );
 
 			if ( ! current_user_can( $required_capability ) ) {
 				wp_die( esc_html__( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );

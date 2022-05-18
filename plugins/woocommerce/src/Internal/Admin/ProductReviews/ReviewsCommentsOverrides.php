@@ -23,8 +23,8 @@ class ReviewsCommentsOverrides {
 			}
 		);
 
-		add_action(
-			'woocommerce_dismiss_notice_capability',
+		add_filter(
+			'woocommerce_dismiss_admin_notice_capability',
 			function( $default_capability, $notice_name ) {
 				$this->get_dismiss_capability( $default_capability, $notice_name );
 			},
