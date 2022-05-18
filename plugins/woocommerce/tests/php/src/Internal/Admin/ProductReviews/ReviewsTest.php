@@ -224,7 +224,12 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			$comment = $is_reply ? $reply : $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
-		$this->assertSame( $expected_text, ( wc_get_container()->get( Reviews::class ) )->edit_comments_screen_text( $translated_text, $original_text ) );
+		$reviews = ( wc_get_container()->get( Reviews::class ) );
+
+		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'edit_comments_screen_text' );
+		$method->setAccessible( true );
+
+		$this->assertSame( $expected_text, $method->invoke( $reviews, $translated_text, $original_text ) );
 	}
 
 	/** @see test_edit_comments_screen_text */
