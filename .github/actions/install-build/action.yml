@@ -1,0 +1,21 @@
+name: Install and Build (Composite)
+description: Installs and builds WooCommerce.
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install PNPM
+      shell: bash
+      run: npm install -g pnpm@^6.24.2
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install
+
+    - name: Install Composer dependencies
+      shell: bash
+      run: pnpm nx composer-install-no-dev woocommerce
+
+    - name: Run build
+      shell: bash
+      run: pnpm nx build woocommerce

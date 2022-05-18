@@ -1,5 +1,8 @@
 name: Run tests against PR
-on: pull_request
+on:
+  pull_request:
+  workflow_dispatch:
+
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -9,35 +12,19 @@ jobs:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Dependency caching
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              run: pnpm nx composer-install-no-dev woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -66,35 +53,19 @@ jobs:
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Dependency caching
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              run: pnpm nx composer-install woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -122,35 +93,19 @@ jobs:
         name: Runs k6 Performance tests
         runs-on: ubuntu-20.04
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Dependency caching
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  ~/.local/share/pnpm/store
-                  ~/.cache/composer/files
-                key: ${{ runner.os }}-pr-build-and-e2e-tests-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              run: pnpm nx composer-install woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: plugins/woocommerce/tests/e2e/docker

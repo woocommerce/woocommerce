@@ -15,28 +15,24 @@ jobs:
     name: Lint and Test JS
     runs-on: ubuntu-20.04
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
       
-      - name: Dependency caching
-        uses: actions/cache@v3
-        id: cache-deps
+      - uses: ./.github/actions/cache-deps
         with:
-          path: |
-            ~/.pnpm-store
-            ~/.local/share/pnpm/store
-            ~/.cache/composer/files
-          key: ${{ runner.os }}-pr-lint-test-js-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+          workflow_name: pr-lint-test-js
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install and Build
+        uses: ./.github/actions/install-build
 
       - name: Lint
         run: |
