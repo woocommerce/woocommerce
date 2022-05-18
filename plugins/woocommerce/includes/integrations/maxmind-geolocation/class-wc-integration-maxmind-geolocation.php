@@ -169,7 +169,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		// Allow us to easily interact with the filesystem.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		if ( ! WP_Filesystem() ) {
-			wc_get_logger()->notice( __( 'Failed to initialise WC_Filesystem API', 'woocommerce' ) );
+			wc_get_logger()->warning( __( 'Failed to initialise WC_Filesystem API while trying to update the MaxMind Geolocation database.', 'woocommerce' ) );
 			return;
 		}
 		global $wp_filesystem;
