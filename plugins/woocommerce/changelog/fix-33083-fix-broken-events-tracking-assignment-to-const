@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed broken event tracking by correcting 'const' to 'let' from a previous commit #33083

@@ -81,7 +81,7 @@ class WC_Site_Tracking {
 				}
 
 				const eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
-				const eventProperties = properties || {};
+				let eventProperties = properties || {};
 				eventProperties = { ...eventProperties, ...<?php echo json_encode( $filtered_properties ); ?> };
 				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
 					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
