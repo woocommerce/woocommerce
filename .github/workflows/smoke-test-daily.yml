@@ -155,13 +155,7 @@ jobs:
                   name: woocommerce
                   path: tmp
 
-            - name: check dir
-              run: |
-                echo '--------'
-                pwd
-                ls -laR ./tmp
-
-            - name: Replace WooCommerce zip.
+            - name: Replace WooCommerce.
               working-directory: tmp
               run: |
                   rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
