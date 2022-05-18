@@ -79,7 +79,7 @@ export default class Analyzer extends Command {
 			flags.source,
 			args.compare,
 			flags.base,
-			this.error
+			( e: string ): void => this.error( e )
 		);
 
 		const pluginData = await this.getPluginData( flags.plugin );
@@ -179,14 +179,19 @@ export default class Analyzer extends Command {
 				templates,
 				output,
 				'TEMPLATE CHANGES',
-				this.log
+				( s: string ): void => this.log( s )
 			);
 		} else {
 			this.log( 'No template changes found' );
 		}
 
 		if ( hooks.size ) {
-			await printHookResults( hooks, output, 'HOOKS', this.log );
+			await printHookResults(
+				hooks,
+				output,
+				'HOOKS',
+				( s: string ): void => this.log( s )
+			);
 		} else {
 			this.log( 'No new hooks found' );
 		}
