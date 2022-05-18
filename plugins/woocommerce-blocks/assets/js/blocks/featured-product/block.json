@@ -56,6 +56,14 @@
             "type": "string",
             "default": "none"
         },
+        "hasParallax": {
+            "type": "boolean",
+            "default": false
+        },
+        "isRepeated": {
+            "type": "boolean",
+            "default": false
+        },
         "mediaId": {
             "type": "number",
             "default": 0

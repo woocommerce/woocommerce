@@ -60,3 +60,14 @@ export {
 	getBackgroundImageStyles,
 	dimRatioToClass,
 };
+
+export function calculateBackgroundImagePosition( coords ) {
+	if ( ! coords ) return {};
+
+	const x = Math.round( coords.x * 100 );
+	const y = Math.round( coords.y * 100 );
+
+	return {
+		objectPosition: `${ x }% ${ y }%`,
+	};
+}
