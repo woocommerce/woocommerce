@@ -115,15 +115,15 @@ class PostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 				'type'        => 'date_epoch',
 				'destination' => 'date_paid_gmt',
 			),
-			'_paid_date'                    => array( // For compatibility with WC < 2.6
+			'_paid_date'                    => array( // For compatibility with WC < 2.6.
 				'type'        => 'date',
-				'destination' => 'date_paid_gmt'
+				'destination' => 'date_paid_gmt',
 			),
 			'_date_completed'               => array(
 				'type'        => 'date_epoch',
 				'destination' => 'date_completed_gmt',
 			),
-			'_completed_date'               => array( // For compatibility with WC < 2.6
+			'_completed_date'               => array( // For compatibility with WC < 2.6.
 				'type'        => 'date',
 				'destination' => 'date_completed_gmt',
 			),

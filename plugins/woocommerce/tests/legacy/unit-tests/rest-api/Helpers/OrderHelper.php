@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WC_Mock_Payment_Gateway;
+use WC_Order;
+use WC_Product;
 use \WC_Tax;
 use \WC_Shipping_Rate;
 use \WC_Order_Item_Shipping;
@@ -48,7 +50,7 @@ class OrderHelper {
 	/**
 	 * Create a order.
 	 *
-	 * @param int $customer_id Customer ID.
+	 * @param int        $customer_id Customer ID.
 	 * @param WC_Product $product Product object.
 	 *
 	 * @return WC_Order WC_Order object.
