@@ -23,6 +23,8 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
+import { History } from 'history';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -33,7 +35,7 @@ import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
-import { TaskListCompletedHeader } from './completed-header';
+import { isWCAdmin } from '~/dashboard/utils';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -192,15 +194,36 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		if ( ! task.isComplete ) {
 			updateTrackStartedCount( task.id );
 		}
+
 		if ( task.actionUrl ) {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
 				window.location.href = task.actionUrl;
-			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+				return;
 			}
+
+			if ( ! isWCAdmin( window.location.href ) ) {
+				window.location.href = getAdminLink(
+					getNewPath( {}, task.actionUrl, {} )
+				);
+				return;
+			}
+
+			( getHistory() as History ).push(
+				getNewPath( {}, task.actionUrl, {} )
+			);
+
 			return;
 		}
-		updateQueryString( { task: task.id } );
+
+		const taskPath = getNewPath( { task: task.id }, '/', {} );
+
+		if ( ! isWCAdmin( window.location.href ) ) {
+			window.location.href = getAdminLink( taskPath );
+			return;
+		}
+
+		window.document.documentElement.scrollTop = 0;
+		( getHistory() as History ).push( taskPath );
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {

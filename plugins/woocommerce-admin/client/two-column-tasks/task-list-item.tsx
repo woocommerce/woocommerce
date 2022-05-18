@@ -19,6 +19,13 @@ import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import classnames from 'classnames';
+import { History } from 'history';
+import { getAdminLink } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import { isWCAdmin } from '~/dashboard/utils';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -85,14 +92,32 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		if ( task.actionUrl ) {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
 				window.location.href = task.actionUrl;
-			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+				return;
 			}
+
+			if ( ! isWCAdmin( window.location.href ) ) {
+				window.location.href = getAdminLink(
+					getNewPath( {}, task.actionUrl, {} )
+				);
+				return;
+			}
+
+			( getHistory() as History ).push(
+				getNewPath( {}, task.actionUrl, {} )
+			);
+
+			return;
+		}
+
+		const taskPath = getNewPath( { task: task.id }, '/', {} );
+
+		if ( ! isWCAdmin( window.location.href ) ) {
+			window.location.href = getAdminLink( taskPath );
 			return;
 		}
 
 		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: task.id } );
+		( getHistory() as History ).push( taskPath );
 	};
 
 	const onDismiss = useCallback( () => {

@@ -150,15 +150,15 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			return;
 		}
 
+		const taskPath = getNewPath( { task: id }, '/', {} );
+
 		if ( ! isWCAdmin( window.location.href ) ) {
-			window.location.href = getAdminLink(
-				getNewPath( { task: id }, '/', {} )
-			);
+			window.location.href = getAdminLink( taskPath );
 			return;
 		}
 
 		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: id } );
+		( getHistory() as History ).push( taskPath );
 	}, [ id, isComplete, actionUrl ] );
 
 	const taskItemProps = {
