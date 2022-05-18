@@ -98,7 +98,7 @@ const WcPayBanner = () => {
 							components: {
 								tosLink: (
 									<Link
-										href="https://woocommerce.com/posts/terms-of-service-update/"
+										href="https://wordpress.com/tos/"
 										type="external"
 										target="_blank"
 									>
