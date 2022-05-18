@@ -135,7 +135,10 @@ jobs:
                   path: package/woocommerce
 
             - name: Change dir to package/woocommerce
-              run: cd package/woocommerce
+              run: |
+                cd package/woocommerce
+                pwd
+                ls -la
 
             - uses: ./.github/actions/cache-deps
               with:
