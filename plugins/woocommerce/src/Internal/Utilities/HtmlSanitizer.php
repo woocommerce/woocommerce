@@ -51,7 +51,8 @@ class HtmlSanitizer {
 	 * @see wp_kses()
 	 *
 	 * @param array $sanitizer_rules {
-	 *     Optional. If provided, one or more of the following keys should be set.
+	 *     Optional and defaults to self::TRIMMED_BALANCED_LOW_HTML_NO_LINKS. Otherwise, one or more of the following
+	 *     keys should be set.
 	 *
 	 *     @type array $pre_processors  Callbacks to run before invoking `wp_kses()`.
 	 *     @type array $wp_kses_rules   Element names and attributes to allow, per `wp_kses()`.
@@ -60,7 +61,7 @@ class HtmlSanitizer {
 	 *
 	 * @return string
 	 */
-	public function apply( array $sanitizer_rules ): string {
+	public function apply( array $sanitizer_rules = self::TRIMMED_BALANCED_LOW_HTML_NO_LINKS ): string {
 		$output = $this->input;
 
 		if ( isset( $sanitizer_rules['pre_processors'] ) && is_array( $sanitizer_rules['pre_processors'] ) ) {
