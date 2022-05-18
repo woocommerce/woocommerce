@@ -70,7 +70,7 @@ class OrdersTableDataStoreHelper {
 	public function format_value_for_db( $value, string $type ) {
 		switch ( $type ) {
 			case 'decimal':
-				$value = (float) $value;
+				$value = wc_format_decimal( $value, false, true );
 				break;
 			case 'int':
 				$value = (int) $value;
