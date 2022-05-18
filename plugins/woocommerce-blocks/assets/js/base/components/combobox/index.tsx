@@ -34,6 +34,7 @@ export interface ComboboxProps {
 	options: ComboboxControlOption[];
 	required?: boolean;
 	value: string;
+	requireExactMatch?: boolean;
 }
 
 /**
@@ -54,6 +55,7 @@ const Combobox = ( {
 	errorId: incomingErrorId,
 	instanceId = '0',
 	autoComplete = 'off',
+	requireExactMatch = false,
 }: ComboboxProps ): JSX.Element => {
 	const {
 		getValidationError,
@@ -136,7 +138,13 @@ const Combobox = ( {
 									normalizedFilterValue
 						);
 						if ( foundOption ) {
-							onChange( foundOption.value );
+							if ( ! requireExactMatch ) {
+								onChange( foundOption.value );
+								return;
+							}
+							if ( foundOption.label === filterValue ) {
+								onChange( foundOption.value );
+							}
 						}
 					}
 				} }
