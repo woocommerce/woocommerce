@@ -13,7 +13,7 @@ $max-width: 680px;
 		margin-bottom: 24px;
 	}
 
-	.wcpay-empty-subscriptions-page-payment-methods {
+	.wcpay-empty-subscriptions-page__payment-methods {
 		svg {
 			display: inline-block;
 			height: 35px;
@@ -23,18 +23,18 @@ $max-width: 680px;
 		}
 	}
 
-	.wcpay-empty-subscriptions-page-terms-of-service {
+	.wcpay-empty-subscriptions-page__terms-of-service {
 		display: block;
 		margin: 0.5em 0;
 	}
 
-	.subscriptions-page-onboarding-steps {
+	.subscriptions-page__onboarding-steps {
 		@include breakpoint( '>600px' ) {
 			display: flex;
 			flex-direction: row;
 		}
 
-		.subscriptions-page-onboarding-steps-item {
+		.subscriptions-page__onboarding-steps--item {
 			margin-top: 30px;
 
 			@include breakpoint( '>600px' ) {
@@ -44,7 +44,7 @@ $max-width: 680px;
 		}
 	}
 
-	.wcpay-empty-subscriptions-page-step-number {
+	.wcpay-empty-subscriptions-page__step-number {
 		background-color: $studio-woocommerce-purple-50;
 		color: $white;
 		font-size: 20px;

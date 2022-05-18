@@ -158,13 +158,13 @@ const GetStartedButton: React.FC< GetStartedButtonProps > = ( {
 };
 
 const StepNumber: React.FC = ( { children } ) => (
-	<span className="wcpay-empty-subscriptions-page-step-number">
+	<span className="wcpay-empty-subscriptions-page__step-number">
 		{ children }
 	</span>
 );
 
 const TermsOfService = () => (
-	<span className="wcpay-empty-subscriptions-page-terms-of-service">
+	<span className="wcpay-empty-subscriptions-page__terms-of-service">
 		{ createInterpolateElement(
 			__(
 				'By clicking “Get started”, the WooCommerce Payments plugin will be installed and you agree to the <a>Terms of Service</a>',
@@ -211,7 +211,7 @@ const MainContent: React.FC< MainContentProps > = ( { setHasError } ) => {
 
 			<h3>{ __( 'Accepted payment methods', 'woocommerce' ) }</h3>
 
-			<div className="wcpay-empty-subscriptions-page-payment-methods">
+			<div className="wcpay-empty-subscriptions-page__payment-methods">
 				<Visa />
 				<MasterCard />
 				<Amex />
@@ -243,8 +243,8 @@ const OnboardingSteps = () => (
 				'woocommerce'
 			) }
 		</h2>
-		<div className="subscriptions-page-onboarding-steps">
-			<div className="subscriptions-page-onboarding-steps-item">
+		<div className="subscriptions-page__onboarding-steps">
+			<div className="subscriptions-page__onboarding-steps--item">
 				<StepNumber>1</StepNumber>
 				<h3>
 					{ experimentAssignment === Treatment.A
@@ -266,7 +266,7 @@ const OnboardingSteps = () => (
 						  ) }
 				</p>
 			</div>
-			<div className="subscriptions-page-onboarding-steps-item">
+			<div className="subscriptions-page__onboarding-steps--item">
 				<StepNumber>2</StepNumber>
 				<h3>
 					{ experimentAssignment === Treatment.A
@@ -288,7 +288,7 @@ const OnboardingSteps = () => (
 						  ) }
 				</p>
 			</div>
-			<div className="subscriptions-page-onboarding-steps-item">
+			<div className="subscriptions-page__onboarding-steps--item">
 				<StepNumber>3</StepNumber>
 				<h3>
 					{ experimentAssignment === Treatment.A
