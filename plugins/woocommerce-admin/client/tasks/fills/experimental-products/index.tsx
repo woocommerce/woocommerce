@@ -70,7 +70,7 @@ export const Products = () => {
 		const country =
 			typeof settings.woocommerce_default_country === 'string'
 				? settings.woocommerce_default_country
-				: 'US';
+				: '';
 
 		return {
 			isStoreInUS: getCountryCode( country ) === 'US',
