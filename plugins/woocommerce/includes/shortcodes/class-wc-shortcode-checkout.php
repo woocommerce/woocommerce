@@ -183,11 +183,15 @@ class WC_Shortcode_Checkout {
 					current( $available_gateways )->set_current();
 				}
 
+				$order_button_text = apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) );
+
 				/**
 				 * Triggered right before the Pay for Order form, after validation of the order and customer.
 				 *
 				 * @param WC_Order $order             The order that is being paid for.
 				 * @param string   $order_button_text The text for the submit button.
+				 *
+				 * @since 6.6
 				 */
 				do_action( 'before_woocommerce_pay_form', $order, $order_button_text );
 
@@ -196,7 +200,7 @@ class WC_Shortcode_Checkout {
 					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
-						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
+						'order_button_text'  => $order_button_text,
 					)
 				);
 
