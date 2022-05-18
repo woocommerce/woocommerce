@@ -61,15 +61,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: woocommerce
-          path: tmp/woocommerce-build/woocommerce/woocommerce-production/woocommerce
-
-      - name: Extract and replace WooCommerce zip.
-        working-directory: tmp/woocommerce-build
-        run: |
-          rsync -a woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
+          path: tmp/woocommerce-build
 
       - name: Copy Composer over to production
-        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build/woocommerce/woocommerce-production
+        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build
 
       - name: Set up mirror
         working-directory: tmp/woocommerce-build
