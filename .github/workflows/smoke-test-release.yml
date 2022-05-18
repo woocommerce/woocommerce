@@ -92,9 +92,14 @@ jobs:
               with:
                 php-version: '7.4'
 
+            - name: Change dir to package/woocommerce
+              run: cd package/woocommerce
+
             - name: Install and Build
-              working-directory: package/woocommerce
               uses: ./.github/actions/install-build
+
+            - name: Change dir to root
+              run: cd ../..
 
             - name: Download WooCommerce release zip
               working-directory: tmp
@@ -170,9 +175,14 @@ jobs:
               with:
                 php-version: '7.4'
 
+            - name: Change dir to package/woocommerce
+              run: cd package/woocommerce
+
             - name: Install and Build
-              working-directory: package/woocommerce
               uses: ./.github/actions/install-build
+
+            - name: Change dir to root
+              run: cd ../..
 
             - name: Download WooCommerce release zip
               working-directory: tmp
