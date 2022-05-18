@@ -90,7 +90,7 @@ class WcPaySubscriptionsPage {
 	}
 
 	/**
-	 * Returns true if the store is eligible for the WooCommerce subsciptions empty state experiment.
+	 * Returns true if the store is eligible for the WooCommerce subscriptions empty state experiment.
 	 *
 	 * @return bool
 	 */
