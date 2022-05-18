@@ -155,11 +155,13 @@ jobs:
                   name: woocommerce
                   path: tmp
 
+            - name: check dir
+              run: ls -laR ./
+
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp
               run: |
                   unzip woocommerce.zip -d woocommerce
-                  ls -laR ./
                   rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Load docker images and start containers.
