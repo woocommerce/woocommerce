@@ -10,6 +10,19 @@ use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
  */
 class HtmlSanitizerTest extends WC_Unit_Test_Case {
 	/**
+	 * @var HtmlSanitizer
+	 */
+	private $sut;
+
+	/**
+	 * Set-up subject under test.
+	 */
+	public function set_up() {
+		$this->sut = wc_get_container()->get( HtmlSanitizer::class );
+		parent::set_up();
+	}
+
+	/**
 	 * @testdox Test inputs and outputs for the HtmlSanitizer's pre-configured TRIMMED_BALANCED_LOW_HTML_NO_LINKS rule.
 	 * @dataProvider expectations_for_trimmed_balanced_low_html_no_links_rule
 	 *
@@ -18,8 +31,7 @@ class HtmlSanitizerTest extends WC_Unit_Test_Case {
 	 * @param string $explanation Notes about why we expect this/what we're testing.
 	 */
 	public function test_trimmed_balanced_low_html_sanitizer( string $test_string, string $expected, string $explanation ) {
-		$sanitizer = new HtmlSanitizer( $test_string );
-		$this->assertEquals( $expected, $sanitizer->apply( HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS ), $explanation );
+		$this->assertEquals( $expected, $this->sut->sanitize( $test_string, HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS ), $explanation );
 	}
 
 	/**
@@ -41,10 +53,10 @@ class HtmlSanitizerTest extends WC_Unit_Test_Case {
 	 * @testdox Tests that 'bad' string processor callbacks are handled correctly.
 	 */
 	public function test_handling_of_invalid_processor_callbacks() {
-		$sanitizer = new HtmlSanitizer( 'foo' );
 		$this->setExpectedIncorrectUsage( HtmlSanitizer::class . '::apply' );
 
-		$output = $sanitizer->apply(
+		$output = $this->sut->sanitize(
+			'Test string',
 			array(
 				'pre_processors' => array(
 					'strtoupper',

@@ -305,7 +305,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_title() {
-		$title = ( new HtmlSanitizer( $this->title ) )->apply( HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS );
+		$title = wc_get_container()->get( HtmlSanitizer::class )->sanitize( $this->title, HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS );
 		return apply_filters( 'woocommerce_gateway_title', $title, $this->id );
 	}
 
