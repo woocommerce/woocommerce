@@ -701,8 +701,8 @@ export function getIntervalForQuery(
  * @param {string} query.chartType
  * @return {string} Current chart type.
  */
-export function getChartTypeForQuery( { chartType = '' }: Query ) {
-	if ( [ 'line', 'bar' ].includes( chartType ) ) {
+export function getChartTypeForQuery( { chartType }: Query ) {
+	if ( chartType !== undefined && [ 'line', 'bar' ].includes( chartType ) ) {
 		return chartType;
 	}
 	return 'line';
