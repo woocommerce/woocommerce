@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move the file for the DatabaseUtil class to the proper directory according to its namespace.
