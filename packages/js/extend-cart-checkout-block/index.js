@@ -1,4 +1,9 @@
 module.exports = {
-    templatesPath: __dirname,
-    npmDependencies: [ '@wordpress/env' ]
+	templatesPath: __dirname,
+	defaultValues: {
+		npmDevDependencies: [
+			'@woocommerce/dependency-extraction-webpack-plugin',
+			'@woocommerce/eslint-plugin',
+		],
+	},
 };
