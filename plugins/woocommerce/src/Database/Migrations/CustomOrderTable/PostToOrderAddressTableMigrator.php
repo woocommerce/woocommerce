@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
+use Automattic\WooCommerce\Database\Migrations\MetaToCustomTableMigrator;
+
 /**
  * Helper class to migrate records from the WordPress post table
  * to the custom order addresses table.

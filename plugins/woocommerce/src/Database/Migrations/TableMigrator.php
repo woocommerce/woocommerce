@@ -3,7 +3,7 @@
  * Base class for all the WP posts to order table migrator.
  */
 
-namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations;
 
 /**
  * Base class for implementing WP posts to order tables migrations handlers.
