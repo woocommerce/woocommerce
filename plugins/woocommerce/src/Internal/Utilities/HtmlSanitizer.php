@@ -94,7 +94,7 @@ class HtmlSanitizer {
 	private function apply_string_callbacks( array $callbacks, string $string ): string {
 		foreach ( $callbacks as $callback ) {
 			if ( ! is_callable( $callback ) ) {
-				_doing_it_wrong( __CLASS__ . '::apply', esc_html__( 'String processors must be valid callbacks.', 'woocommerce' ), esc_html( WC()->version ) );
+				_doing_it_wrong( __CLASS__ . '::apply', esc_html__( 'String processors must be an array of valid callbacks.', 'woocommerce' ), esc_html( WC()->version ) );
 				return '';
 			}
 
