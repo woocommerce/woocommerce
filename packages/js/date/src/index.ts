@@ -388,15 +388,21 @@ const getDateParamsFromQueryMemoized = memoize<
 		);
 
 		if ( typeof queryDefaults.period !== 'string' ) {
-			throw Error(
+			/* eslint-disable no-console */
+			console.warn(
 				`Unexpected default period type ${ queryDefaults.period }`
 			);
+			/* eslint-enable no-console */
+			queryDefaults.period = '';
 		}
 
 		if ( typeof queryDefaults.compare !== 'string' ) {
-			throw Error(
+			/* eslint-disable no-console */
+			console.warn(
 				`Unexpected default compare type ${ queryDefaults.compare }`
 			);
+			/* eslint-enable no-console */
+			queryDefaults.compare = '';
 		}
 
 		return {
