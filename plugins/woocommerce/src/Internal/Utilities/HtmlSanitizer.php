@@ -16,12 +16,17 @@ class HtmlSanitizer {
 		'wp_kses_rules'   => array(
 			'br'   => true,
 			'img'  => array(
+				'alt'   => true,
+				'class' => true,
 				'src'   => true,
 				'style' => true,
 				'title' => true,
 			),
 			'p'    => true,
-			'span' => true,
+			'span' => array(
+				'class' => true,
+				'title' => true,
+			),
 		),
 		'post_processors' => array(
 			'force_balance_tags',
