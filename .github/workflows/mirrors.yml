@@ -30,7 +30,9 @@ jobs:
         run: bash bin/build-zip.sh
 
       - name: Unzip the file (prevents double zip problem)
-        run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
+        run: |
+          unzip plugins/woocommerce/woocommerce.zip -d zipfile
+          ls -R
 
       - name: Upload the zip file as an artifact
         uses: actions/upload-artifact@v3
@@ -69,6 +71,7 @@ jobs:
       - name: Set up mirror
         working-directory: tmp/woocommerce-build
         run: |
+          ls -R
           touch mirrors.txt
           echo "woocommerce/woocommerce-production" >> mirrors.txt
 
