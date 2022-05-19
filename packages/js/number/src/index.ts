@@ -30,9 +30,13 @@ export function numberFormat(
 		precision = null,
 		decimalSeparator = '.',
 		thousandSeparator = ',',
-	}: NumberConfig,
-	number: number | string
+	}: Partial< NumberConfig >,
+	number?: number | string
 ) {
+	if ( number === undefined ) {
+		return '';
+	}
+
 	if ( typeof number !== 'number' ) {
 		number = parseFloat( number );
 	}
