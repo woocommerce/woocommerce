@@ -179,7 +179,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			$overlay_styles = 'background-color: #000000';
 		}
 
-		return sprintf( '<div class="wc-block-featured-category__overlay" style="%s"></div>', esc_attr( $overlay_styles ) );
+		return sprintf( '<div class="background-dim__overlay" style="%s"></div>', esc_attr( $overlay_styles ) );
 	}
 
 	/**
