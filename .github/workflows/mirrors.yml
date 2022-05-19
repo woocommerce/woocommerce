@@ -29,18 +29,13 @@ jobs:
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
 
-      - name: Unzip the file (prevents double zip problem)
-        run: |
-          unzip plugins/woocommerce/woocommerce.zip -d zipfile
-          ls -R
-
       - name: Upload the zip file as an artifact
         uses: actions/upload-artifact@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: woocommerce
-          path: zipfile
+          path: plugins/woocommerce/woocommerce.zip
           retention-days: 7
 
   mirror:
@@ -64,10 +59,14 @@ jobs:
           name: woocommerce
           path: tmp/woocommerce-build
 
-      - name: Replace WooCommerce.
+      - name: check dir
+        run: ls -R tmp/woocommerce-build
+
+      - name: Extract and replace WooCommerce zip.
         working-directory: tmp/woocommerce-build
         run: |
           mkdir -p woocommerce/woocommerce-production
+          unzip woocommerce.zip -d woocommerce/woocommerce-production
           mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
           rm -rf woocommerce/woocommerce-production/woocommerce
 
