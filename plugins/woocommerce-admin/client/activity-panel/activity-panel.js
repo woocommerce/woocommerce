@@ -3,10 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { lazy, useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
-import { getAdminLink } from '@woocommerce/settings';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -14,7 +13,7 @@ import {
 	useUser,
 	useUserPreferences,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -24,7 +23,6 @@ import { useSlot } from '@woocommerce/experimental';
 import './style.scss';
 import { IconFlag } from './icon-flag';
 import { isNotesPanelVisible } from './unread-indicators';
-import { isWCAdmin } from '~/dashboard/utils';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
@@ -173,7 +171,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
-	const { unhideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -210,15 +207,13 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	};
 
 	const isPerformingSetupTask = () => {
-		return false;
-	};
-
-	const redirectToHomeScreen = () => {
-		if ( isWCAdmin( window.location.href ) ) {
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} else {
-			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
-		}
+		return (
+			query.task &&
+			! query.path &&
+			( requestingTaskListOptions === true ||
+				( setupTaskListHidden === false &&
+					setupTaskListComplete === false ) )
+		);
 	};
 
 	// @todo Pull in dynamic unread status/count
