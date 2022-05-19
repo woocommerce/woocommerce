@@ -614,7 +614,7 @@ function wc_create_refund( $args = array() ) {
 			 *
 			 * Filter hook to modify the partially-refunded status conditions.
 			 *
-			 * @since 6.6.0
+			 * @since 6.7.0
 			 *
 			 * @param bool $is_partially_refunded Whether the order is partially refunded.
 			 * @param int  $order_id The order id.
