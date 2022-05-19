@@ -552,6 +552,7 @@ importers:
   packages/js/date:
     specifiers:
       '@babel/core': ^7.17.5
+      '@types/d3-time-format': ^2.3.0
       '@woocommerce/eslint-plugin': workspace:*
       '@wordpress/date': ^4.3.1
       '@wordpress/i18n': ^4.3.1
@@ -566,6 +567,7 @@ importers:
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
+      '@types/d3-time-format': 2.3.1
       '@wordpress/date': 4.4.1
       '@wordpress/i18n': 4.4.1
       moment: 2.29.1
@@ -13261,6 +13263,10 @@ packages:
     dependencies:
       '@types/node': 16.10.3
     dev: true
+
+  /@types/d3-time-format/2.3.1:
+    resolution: {integrity: sha512-fck0Z9RGfIQn3GJIEKVrp15h9m6Vlg0d5XXeiE/6+CQiBmMDZxfR21XtjEPuDeg7gC3bBM0SdieA5XF3GW1wKA==}
+    dev: false
 
   /@types/debug/4.1.7:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
