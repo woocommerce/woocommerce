@@ -609,8 +609,18 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
-			// Trigger notification emails.
-			if ( ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ) ) {
+			/**
+			 * Trigger notification emails.
+			 *
+			 * Filter hook to modify the partially-refunded status conditions.
+			 *
+			 * @since 6.7.0
+			 *
+			 * @param bool $is_partially_refunded Whether the order is partially refunded.
+			 * @param int  $order_id The order id.
+			 * @param int  $refund_id The refund id.
+			 */
+			if ( (bool) apply_filters( 'woocommerce_order_is_partially_refunded', ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ), $order->get_id(), $refund->get_id() ) ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
