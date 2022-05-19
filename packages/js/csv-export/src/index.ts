@@ -2,9 +2,21 @@
  * External dependencies
  */
 import moment from 'moment';
-import { saveAs } from 'browser-filesaver';
+import { saveAs } from 'browser-filesaver'; // TODO: Replace this with https://www.npmjs.com/package/file-saver since browser-filesaver is not maintained anymore.
 
-function escapeCSVValue( value ) {
+export type Header = {
+	label: string;
+	key: string;
+};
+
+export type RowItem = {
+	display: string;
+	value: string | number;
+};
+
+export type Rows = Array< RowItem[] >;
+
+function escapeCSVValue( value: string | number ) {
 	let stringValue = value.toString();
 
 	// Prevent CSV injection.
@@ -19,7 +31,7 @@ function escapeCSVValue( value ) {
 	return stringValue;
 }
 
-function getCSVHeaders( headers ) {
+function getCSVHeaders( headers: Header[] ) {
 	return Array.isArray( headers )
 		? headers
 				.map( ( header ) => escapeCSVValue( header.label ) )
@@ -27,7 +39,7 @@ function getCSVHeaders( headers ) {
 		: [];
 }
 
-function getCSVRows( rows ) {
+function getCSVRows( rows: Rows ) {
 	return Array.isArray( rows )
 		? rows
 				.map( ( row ) =>
@@ -51,11 +63,11 @@ function getCSVRows( rows ) {
 /**
  * Generates a CSV string from table contents
  *
- * @param {Array.<Object>}       headers Object with table header information
- * @param {Array.Array.<Object>} rows    Object with table rows information
+ * @param {Array.<Header>}        headers Object with table header information
+ * @param {Array.Array.<RowItem>} rows    Object with table rows information
  * @return {string}                           Table contents in a CSV format
  */
-export function generateCSVDataFromTable( headers, rows ) {
+export function generateCSVDataFromTable( headers: Header[], rows: Rows ) {
 	return [ getCSVHeaders( headers ), getCSVRows( rows ) ]
 		.filter( ( text ) => text.length )
 		.join( '\n' );
@@ -69,7 +81,10 @@ export function generateCSVDataFromTable( headers, rows ) {
  * @param {Object} [params={}] Object of key-values to append to the file name
  * @return {string}                Formatted file name
  */
-export function generateCSVFileName( name = '', params = {} ) {
+export function generateCSVFileName(
+	name = '',
+	params: Record< string, string > = {}
+) {
 	const fileNameSections = [
 		name.toLowerCase().replace( /[^a-z0-9]/g, '-' ),
 		moment().format( 'YYYY-MM-DD' ),
@@ -94,7 +109,7 @@ export function generateCSVFileName( name = '', params = {} ) {
  * @param {string} fileName Name of the file to download
  * @param {string} content  Contents of the file to download
  */
-export function downloadCSVFile( fileName, content ) {
+export function downloadCSVFile( fileName: string, content: BlobPart ) {
 	// eslint-disable-next-line no-undef
 	const blob = new Blob( [ content ], { type: 'text/csv;charset=utf-8' } );
 

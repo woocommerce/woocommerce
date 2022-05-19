@@ -23,6 +23,7 @@ jest.mock( 'browser-filesaver', () => ( {
 
 describe( 'generateCSVDataFromTable', () => {
 	it( 'should not crash when parameters are not arrays', () => {
+		// @ts-expect-error generateCSVDataFromTable() should only accept arrays.
 		expect( generateCSVDataFromTable( null, null ) ).toBe( '' );
 	} );
 
@@ -84,17 +85,26 @@ describe( 'generateCSVFileName', () => {
 
 describe( 'downloadCSVFile', () => {
 	it( "should download a CSV file name to users' browser", () => {
-		global.Blob = class Blob {
-			constructor( content, options ) {
+		const mockFn = jest.fn();
+		jest.spyOn( global, 'Blob' ).mockImplementation(
+			(
+				content?: BlobPart[] | undefined,
+				options?: BlobPropertyBag | undefined
+			) => {
 				return {
 					content,
 					options,
+					size: 0,
+					type: '',
+					arrayBuffer: mockFn,
+					slice: mockFn,
+					stream: mockFn,
+					text: mockFn,
 				};
 			}
-		};
+		);
 		const fileName = 'test.csv';
 		downloadCSVFile( fileName, mockCSVData );
-
 		// eslint-disable-next-line no-undef
 		const blob = new Blob( [ mockCSVData ], {
 			type: 'text/csv;charset=utf-8',
