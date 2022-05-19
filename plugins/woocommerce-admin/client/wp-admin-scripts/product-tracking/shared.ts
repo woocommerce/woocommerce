@@ -193,4 +193,111 @@ export const initProductScreenTracks = () => {
 				checkbox: ( event.target as HTMLInputElement ).checked,
 			} );
 		} );
+
+	// Product tags
+
+	document
+		.querySelector( '.tagadd' )
+		?.addEventListener( 'click', ( event ) => {
+			const tagInput = document.querySelector< HTMLInputElement >(
+				'#new-tag-product_tag'
+			);
+			if ( tagInput && tagInput.value && tagInput.value.length > 0 ) {
+				recordEvent( 'product_tags_add', {
+					page: 'product',
+					tag_string_length: tagInput.value.length,
+					tag_list_size:
+						( document.querySelector( '.tagchecklist' )?.children
+							.length || 0 ) + 1,
+					most_used: false,
+				} );
+			}
+		} );
+
+	function addMostUsedTagEventListener( event: Event ) {
+		recordEvent( 'product_tags_add', {
+			page: 'product',
+			tag_string_length: ( event.target as HTMLAnchorElement ).textContent
+				?.length,
+			tag_list_size:
+				( document.querySelector( '.tagchecklist' )?.children.length ||
+					0 ) + 1,
+			most_used: true,
+		} );
+	}
+
+	function addMostUsedTagsTracks() {
+		const tagCloudLinks = document.querySelectorAll(
+			'#tagcloud-product_tag .tag-cloud-link'
+		);
+		tagCloudLinks.forEach( ( button ) => {
+			button.removeEventListener( 'click', addMostUsedTagEventListener );
+			button.addEventListener( 'click', addMostUsedTagEventListener );
+		} );
+	}
+
+	function waitUntilMostUsedTagsIsPresent( func: () => void, tries = 0 ) {
+		if ( tries > 6 ) {
+			return;
+		}
+		setTimeout( () => {
+			const tagCloudContainer = document.querySelector(
+				'#tagcloud-product_tag'
+			);
+			if ( tagCloudContainer ) {
+				func();
+			} else {
+				waitUntilMostUsedTagsIsPresent( func, ++tries );
+			}
+		}, 500 );
+	}
+
+	document
+		.querySelector( '.tagcloud-link' )
+		?.addEventListener( 'click', () => {
+			waitUntilMostUsedTagsIsPresent( addMostUsedTagsTracks );
+		} );
+
+	// Attribute tracks.
+
+	function addNewTermEventHandler() {
+		recordEvent( 'product_attributes_add_term', {
+			page: 'product',
+		} );
+	}
+
+	function addNewAttributeTermTracks() {
+		const addNewTermButtons = document.querySelectorAll(
+			'.woocommerce_attribute .add_new_attribute'
+		);
+		addNewTermButtons.forEach( ( button ) => {
+			button.removeEventListener( 'click', addNewTermEventHandler );
+			button.addEventListener( 'click', addNewTermEventHandler );
+		} );
+	}
+	addNewAttributeTermTracks();
+
+	document
+		.querySelector( '.add_attribute' )
+		?.addEventListener( 'click', ( event ) => {
+			recordEvent( 'product_attributes_add', {
+				page: 'product',
+				enable_archive: '',
+				default_sort_order: '',
+			} );
+			setTimeout( () => {
+				addNewAttributeTermTracks();
+			}, 1000 );
+		} );
+
+	document
+		.querySelector( '.save_attributes' )
+		?.addEventListener( 'click', ( event ) => {
+			recordEvent( 'product_attributes_save', {
+				page: 'product',
+				attributes_count: document.querySelectorAll(
+					'.woocommerce_attribute'
+				).length,
+			} );
+		} );
 };
