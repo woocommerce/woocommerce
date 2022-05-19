@@ -3,26 +3,39 @@
  */
 import { recordEvent } from '@woocommerce/tracks';
 
-const actionButtons = document.querySelectorAll( '.row-actions span' );
+const addNewCategory = document.querySelector( '#addtag #submit' );
 
-actionButtons.forEach( ( button ) => {
-	button.addEventListener( 'click', function ( event ) {
-		const actionClass = event.target.parentElement.classList[ 0 ];
+function actionButtonEventHandler( event ) {
+	const actionClass = event.target.parentElement.classList[ 0 ];
 
-		const actions = {
-			edit: 'edit',
-			inline: 'quick_edit',
-			delete: 'delete',
-			view: 'preview',
-			make_default: 'make_default',
-		};
+	const actions = {
+		edit: 'edit',
+		inline: 'quick_edit',
+		delete: 'delete',
+		view: 'preview',
+		make_default: 'make_default',
+	};
 
-		if ( ! actions[ actionClass ] ) {
-			return;
-		}
+	if ( ! actions[ actionClass ] ) {
+		return;
+	}
 
-		recordEvent( 'product_category_list_action_click', {
-			selected_action: actions[ actionClass ],
-		} );
+	recordEvent( 'product_category_list_action_click', {
+		selected_action: actions[ actionClass ],
 	} );
+}
+
+function addActionButtonListeners() {
+	const actionButtons = document.querySelectorAll( '.row-actions span' );
+	actionButtons.forEach( ( button ) => {
+		button.removeEventListener( 'click', actionButtonEventHandler );
+		button.addEventListener( 'click', actionButtonEventHandler );
+	} );
+}
+addActionButtonListeners();
+
+addNewCategory?.addEventListener( 'click', function () {
+	setTimeout( () => {
+		addActionButtonListeners();
+	}, 1000 );
 } );

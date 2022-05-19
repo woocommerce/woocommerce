@@ -305,7 +305,7 @@ class WC_Products_Tracking {
 	public function possibly_add_attribute_tracking_scripts( $hook ) {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 		if (
-			'edit.php' !== $hook ||
+			'product_page_product_attributes' !== $hook ||
 			! isset( $_GET['page'] ) ||
 			'product_attributes' !== wp_unslash( $_GET['page'] )
 		) {
