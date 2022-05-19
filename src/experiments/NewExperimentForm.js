@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { withDispatch, withSelect } from '@wordpress/data';
+import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
@@ -12,7 +12,7 @@ import { useState } from '@wordpress/element';
 import { STORE_KEY } from './data/constants';
 import './data';
 
-function NewExperimentForm( {} ) {
+function NewExperimentForm( { addExperiment } ) {
 	const [ experimentName, setExperimentName ] = useState( null );
 	const [ source, setSource ] = useState( 'frontend' );
 	const [ variation, setVariation ] = useState( 'treatment' );
@@ -30,7 +30,7 @@ function NewExperimentForm( {} ) {
 	};
 
 	const AddNewExperiment = () => {
-		console.log( experimentName, source, variation );
+		addExperiment( experimentName, variation, source );
 	};
 
 	return (
@@ -56,6 +56,10 @@ function NewExperimentForm( {} ) {
 }
 
 export default compose(
-	withSelect( ( select ) => {} ),
-	withDispatch( ( dispatch ) => {} )
+	withDispatch( ( dispatch ) => {
+		const { addExperiment } = dispatch( STORE_KEY );
+		return {
+			addExperiment,
+		};
+	} )
 )( NewExperimentForm );

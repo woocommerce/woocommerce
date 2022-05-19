@@ -14,9 +14,17 @@ import {
 } from './constants';
 
 function toggleFrontendExperiment( experimentName, newVariation ) {
-	const storageItem = JSON.parse(
+	let storageItem = JSON.parse(
 		window.localStorage.getItem( EXPERIMENT_NAME_PREFIX + experimentName )
 	);
+
+	// If the experiment is not in localStorage, consider it as a new.
+	if ( storageItem === null ) {
+		storageItem = {
+			experimentName,
+			retrievedTimestamp: Date.now(),
+		};
+	}
 
 	storageItem.variationName = newVariation;
 	storageItem.ttl = 3600;
@@ -67,5 +75,20 @@ export function setExperiments( experiments ) {
 	return {
 		type: TYPES.SET_EXPERIMENTS,
 		experiments,
+	};
+}
+
+export function* addExperiment( experimentName, variation, source ) {
+	if ( source === 'frontend' ) {
+		toggleFrontendExperiment( experimentName, variation );
+	} else {
+		yield toggleBackendExperiment( experimentName, variation );
+	}
+
+	return {
+		type: TYPES.ADD_EXPERIMENT,
+		experimentName,
+		variation,
+		source,
 	};
 }
