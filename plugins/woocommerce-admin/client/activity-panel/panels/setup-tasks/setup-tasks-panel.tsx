@@ -3,7 +3,13 @@
  */
 import Tasks from '~/tasks';
 
-export const SetupTasksPanel = ( { query } ) => {
+type QueryTypeProps = {
+	query: {
+		task?: string;
+	};
+};
+
+export const SetupTasksPanel = ( { query }: QueryTypeProps ) => {
 	return (
 		<div className="woocommerce-setup-panel">
 			<Tasks query={ query } />

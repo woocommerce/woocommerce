@@ -49,7 +49,7 @@ const InboxPanel = lazy( () =>
 
 const SetupTasksPanel = lazy( () =>
 	import(
-		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel'
+		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
 	)
 );
 

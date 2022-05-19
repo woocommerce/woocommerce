@@ -177,18 +177,6 @@ export function getQuery() {
 }
 
 /**
- * Get the current filename from the path.
- *
- * @param {object} arguments  All arguments.
- * @param {object} arguments.path  The current path.
- * @return {String}  Current filename.
- */
-export function getFile( { path = getPath() } = {} ) {
-	const parts = path.split( '/' );
-	return parts[ parts.length - 1 ];
-}
-
-/**
  * This function returns an event handler for the given `param`
  *
  * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
