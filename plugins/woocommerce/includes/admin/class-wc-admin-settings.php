@@ -802,21 +802,21 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if( isset( $option['name'] ) ) {
 					$option['id'] = $option['name'];
 				}
-				
-				if ( ! isset( $option['name'] ) || ! isset( $option['type'] ) || ( isset( $option['is_option'] ) && false === $option['is_option'] ) ) {
+
+				if ( ! isset( $option['id'] ) || ! isset( $option['type'] ) || ( isset( $option['is_option'] ) && false === $option['is_option'] ) ) {
 					continue;
 				}
 
 				// Get posted value.
-				if ( strstr( $option['name'], '[' ) ) {
-					parse_str( $option['name'], $option_name_array );
+				if ( strstr( $option['id'], '[' ) ) {
+					parse_str( $option['id'], $option_name_array );
 					$option_name  = current( array_keys( $option_name_array ) );
 					$setting_name = key( $option_name_array[ $option_name ] );
 					$raw_value    = isset( $data[ $option_name ][ $setting_name ] ) ? wp_unslash( $data[ $option_name ][ $setting_name ] ) : null;
 				} else {
-					$option_name  = $option['name'];
+					$option_name  = $option['id'];
 					$setting_name = '';
-					$raw_value    = isset( $data[ $option['name'] ] ) ? wp_unslash( $data[ $option['name'] ] ) : null;
+					$raw_value    = isset( $data[ $option['id'] ] ) ? wp_unslash( $data[ $option['id'] ] ) : null;
 				}
 
 				// Format the value based on option type.
