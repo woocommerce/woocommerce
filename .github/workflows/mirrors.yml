@@ -64,11 +64,18 @@ jobs:
           name: woocommerce
           path: tmp/woocommerce-build
 
+      - name: Replace WooCommerce.
+        working-directory: tmp/woocommerce-build
+        run: |
+          mkdir -p woocommerce/woocommerce-production
+          mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
+          rm -rf woocommerce/woocommerce-production/woocommerce
+
       - name: Copy Composer over to production
-        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build/woocommerce
+        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build/woocommerce/woocommerce-production
 
       - name: Set up mirror
-        working-directory: tmp/woocommerce-build/woocommerce
+        working-directory: tmp/woocommerce-build
         run: |
           touch mirrors.txt
           echo "woocommerce/woocommerce-production" >> mirrors.txt
@@ -79,5 +86,5 @@ jobs:
           source-directory: ${{ github.workspace }}/monorepo
           token: ${{ secrets.API_TOKEN_GITHUB }}
           username: matticbot
-          working-directory: ${{ github.workspace }}/tmp/woocommerce-build/woocommerce
+          working-directory: ${{ github.workspace }}/tmp/woocommerce-build
         timeout-minutes: 5 # 2021-01-18: Successful runs seem to take about half a minute.
