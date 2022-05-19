@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Implement backfill for wp_post and wp_postmeta table for custom tables.

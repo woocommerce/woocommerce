@@ -1,4 +1,5 @@
 <?php // phpcs:ignore
+
 /**
  * Orders helper.
  *
@@ -12,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WC_Mock_Payment_Gateway;
+use WC_Order;
+use WC_Product;
 use \WC_Tax;
 use \WC_Shipping_Rate;
 use \WC_Order_Item_Shipping;
@@ -47,13 +50,13 @@ class OrderHelper {
 	/**
 	 * Create a order.
 	 *
-	 * @since   2.4
-	 * @version 3.0 New parameter $product.
-	 *
 	 * @param int        $customer_id Customer ID.
-	 * @param WC_Product $product     Product object.
+	 * @param WC_Product $product Product object.
 	 *
 	 * @return WC_Order WC_Order object.
+	 * @version 3.0 New parameter $product.
+	 *
+	 * @since   2.4
 	 */
 	public static function create_order( $customer_id = 1, $product = null ) {
 
@@ -133,6 +136,20 @@ class OrderHelper {
 	}
 
 	/**
+	 * Helper method to drop custom tables if present.
+	 */
+	public static function delete_order_custom_tables() {
+		$order_table_controller = wc_get_container()
+			->get( CustomOrdersTableController::class );
+		$order_table_controller->show_feature();
+		$synchronizer = wc_get_container()
+			->get( DataSynchronizer::class );
+		if ( $synchronizer->check_orders_table_exists() ) {
+			$synchronizer->delete_database_tables();
+		}
+	}
+
+	/**
 	 * Helper method to create custom tables if not present.
 	 */
 	public static function create_order_custom_table_if_not_exist() {
@@ -208,8 +225,8 @@ class OrderHelper {
 		$order->get_data_store()->set_download_permissions_granted( $order, true );
 		$order->get_data_store()->set_recorded_sales( $order, true );
 		$order->set_cart_hash( '1234' );
-		$order->update_meta_data( '_new_order_email_sent', 'true' );
-		$order->update_meta_data( '_order_stock_reduced', 'true' );
+		$order->get_data_store()->set_email_sent( $order, true );
+		$order->get_data_store()->stock_reduced( $order, true );
 		$order->set_date_paid( time() );
 		$order->set_date_completed( time() );
 		$order->calculate_shipping();

@@ -265,18 +265,30 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'type' => 'string',
 			'name' => 'prices_include_tax',
 		),
-		'coupon_usages_are_counted'   => array( 'type' => 'bool' ),
-		'download_permission_granted' => array( 'type' => 'bool' ),
+		'coupon_usages_are_counted'   => array(
+			'type' => 'bool',
+			'name' => 'recorded_coupon_usage_counts',
+		),
+		'download_permission_granted' => array(
+			'type' => 'bool',
+			'name' => 'download_permissions_granted',
+		),
 		'cart_hash'                   => array(
 			'type' => 'string',
 			'name' => 'cart_hash',
 		),
-		'new_order_email_sent'        => array( 'type' => 'string' ),
+		'new_order_email_sent'        => array(
+			'type' => 'string',
+			'name' => 'new_order_email_sent',
+		),
 		'order_key'                   => array(
 			'type' => 'string',
 			'name' => 'order_key',
 		),
-		'order_stock_reduced'         => array( 'type' => 'bool' ),
+		'order_stock_reduced'         => array(
+			'type' => 'bool',
+			'name' => 'stock_reduced',
+		),
 		'date_paid_gmt'               => array(
 			'type' => 'date',
 			'name' => 'date_paid',
@@ -299,7 +311,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		),
 		'discount_total_amount'       => array(
 			'type' => 'decimal',
-			'name' => 'discount_total_amount',
+			'name' => 'discount_total',
 		),
 		'recorded_sales'              => array( 'type' => 'bool' ),
 	);
@@ -327,6 +339,162 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		return $this->all_order_column_mapping;
+	}
+
+	/**
+	 * Backfills order details in to WP_Post DB. Uses WC_Order_Data_store_CPT.
+	 *
+	 * @param \WC_Order $order Order object to backfill.
+	 */
+	public function backfill_post_record( $order ) {
+		$cpt_data_store = new \WC_Order_Data_Store_CPT();
+		$cpt_data_store->update_order_from_object( $order );
+		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
+			if (
+				is_callable( array( $cpt_data_store, "set_$getter_name" ) ) &&
+				is_callable( array( $this, "get_$getter_name" ) )
+			) {
+				call_user_func_array(
+					array(
+						$cpt_data_store,
+						"set_$getter_name",
+					),
+					array(
+						$order,
+						$this->{"get_$getter_name"}( $order ),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Get information about whether permissions are granted yet.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return bool Whether permissions are granted.
+	 */
+	public function get_download_permissions_granted( $order ) {
+		return wc_string_to_bool( $order->get_meta( '_download_permissions_granted', true ) );
+	}
+
+	/**
+	 * Stores information about whether permissions were generated yet.
+	 *
+	 * @param \WC_Order $order Order ID or order object.
+	 * @param bool      $set True or false.
+	 */
+	public function set_download_permissions_granted( $order, $set ) {
+		return $order->update_meta_data( '_download_permissions_granted', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Gets information about whether sales were recorded.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return bool Whether sales are recorded.
+	 */
+	public function get_recorded_sales( $order ) {
+		return wc_string_to_bool( $order->get_meta( '_recorded_sales', true ) );
+	}
+
+	/**
+	 * Stores information about whether sales were recorded.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param bool      $set True or false.
+	 */
+	public function set_recorded_sales( $order, $set ) {
+		return $order->update_meta_data( '_recorded_sales', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Gets information about whether coupon counts were updated.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return bool Whether coupon counts were updated.
+	 */
+	public function get_recorded_coupon_usage_counts( $order ) {
+		return wc_string_to_bool( $order->get_meta( '_recorded_coupon_usage_counts', true ) );
+	}
+
+	/**
+	 * Stores information about whether coupon counts were updated.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param bool      $set True or false.
+	 */
+	public function set_recorded_coupon_usage_counts( $order, $set ) {
+		return $order->update_meta_data( '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Whether email have been sent for this order.
+	 *
+	 * @param \WC_Order|int $order Order object.
+	 *
+	 * @return bool Whether email is sent.
+	 */
+	public function get_email_sent( $order ) {
+		return wc_string_to_bool( $order->get_meta( '_new_order_email_sent', true ) );
+	}
+
+	/**
+	 * Stores information about whether email was sent.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @param bool      $set True or false.
+	 */
+	public function set_email_sent( $order, $set ) {
+		return $order->update_meta_data( '_new_order_email_sent', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Helper setter for email_sent.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return bool Whether email was sent.
+	 */
+	private function get_new_order_email_sent( $order ) {
+		return $this->get_email_sent( $order );
+	}
+
+	/**
+	 * Helper setter for new order email sent.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param bool      $set True or false.
+	 *
+	 * @return bool Whether email was sent.
+	 */
+	private function set_new_order_email_sent( $order, $set ) {
+		return $this->set_email_sent( $order, $set );
+	}
+
+	/**
+	 * Gets information about whether stock was reduced.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return bool Whether stock was reduced.
+	 */
+	public function get_stock_reduced( $order ) {
+		return wc_string_to_bool( $order->get_meta( '_order_stock_reduced', true ) );
+	}
+
+	/**
+	 * Stores information about whether stock was reduced.
+	 *
+	 * @param \WC_Order $order Order ID or order object.
+	 * @param bool      $set True or false.
+	 */
+	public function set_stock_reduced( $order, $set ) {
+		return $order->update_meta_data( '_order_stock_reduced', wc_string_to_bool( $set ) );
 	}
 
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
@@ -372,33 +540,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		return array();
 	}
 
-	public function get_download_permissions_granted( $order ) {
-		// TODO: Implement get_download_permissions_granted() method.
-		false;
-	}
-
-	public function set_download_permissions_granted( $order, $set ) {
-		// TODO: Implement set_download_permissions_granted() method.
-	}
-
-	public function get_recorded_sales( $order ) {
-		// TODO: Implement get_recorded_sales() method.
-		return false;
-	}
-
-	public function set_recorded_sales( $order, $set ) {
-		// TODO: Implement set_recorded_sales() method.
-	}
-
-	public function get_recorded_coupon_usage_counts( $order ) {
-		// TODO: Implement get_recorded_coupon_usage_counts() method.
-		return false;
-	}
-
-	public function set_recorded_coupon_usage_counts( $order, $set ) {
-		// TODO: Implement set_recorded_coupon_usage_counts() method.
-	}
-
 	public function get_order_type( $order_id ) {
 		// TODO: Implement get_order_type() method.
 		return 'shop_order';
@@ -418,6 +559,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		if ( ! $order->get_id() ) {
 			throw new \Exception( __( 'ID must be set for an order to be read', 'woocommerce' ) );
 		}
+		$order->read_meta_data();
 		$order_data = $this->get_order_data_for_id( $order->get_id() );
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
@@ -427,11 +569,40 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				$prop_setter_function_name = "set_{$prop_details['name']}";
 				if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
 					$order->{$prop_setter_function_name}( $order_data->{$prop_details['name']} );
+				} elseif ( is_callable( array( $this, $prop_setter_function_name ) ) ) {
+					$this->{$prop_setter_function_name}( $order, $order_data->{$prop_details['name']} );
 				}
 			}
 		}
 
 		$order->set_object_read();
+	}
+
+	/**
+	 * Read metadata directly from database.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return array Metadata array.
+	 */
+	public function read_meta( &$order ) {
+		global $wpdb;
+		$meta_table = $this::get_meta_table_name();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $meta_table is hardcoded.
+		$raw_meta_data = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+SELECT id as meta_id, meta_key, meta_value
+FROM $meta_table
+WHERE order_id = %d
+ORDER BY meta_id;
+",
+				$order->get_id()
+			)
+		);
+		// phpcs:enable
+
+		return $this->filter_raw_meta_data( $order, $raw_meta_data );
 	}
 
 	/**
@@ -537,6 +708,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 			"{$clauses['join']} AND $address_table_alias.address_type = %s",
 			$address_type
 		);
+
 		// phpcs:enable
 		return array(
 			'select' => $clauses['select'],
@@ -603,6 +775,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
+
 	/**
 	 * @param \WC_Order $order
 	 */
@@ -627,14 +800,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	}
 
 	public function release_held_coupons( $order, $save = true ) {
-		throw new \Exception( 'Unimplemented' );
-	}
-
-	public function get_stock_reduced( $order ) {
-		return false;
-	}
-
-	public function set_stock_reduced( $order, $set ) {
 		throw new \Exception( 'Unimplemented' );
 	}
 
