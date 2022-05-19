@@ -1,11 +1,11 @@
-# @woocommerce/create-block-template
+# @woocommerce/extend-cart-checkout-block
 
 This is a template to be used with `@wordpress/create-block` to create a WooCommerce Blocks extension starting point.
 
 ## Installation
 From your `plugins` directory run:
 ```
-npx @wordpress/create-block -t @woocommerce/create-block-template your_extension_name
+npx @wordpress/create-block -t @woocommerce/extend-cart-checkout-block your_extension_name
 ```
 
 When this has completed, go to your WordPress plugins page and activate the plugin.

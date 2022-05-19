@@ -1,5 +1,5 @@
 {
-  "name": "@woocommerce/create-block-template",
+  "name": "@woocommerce/extend-cart-checkout-block",
   "version": "1.21.0",
   "description": "",
   "main": "index.js",
@@ -16,5 +16,5 @@
   "bugs": {
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-block-template#readme"
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block#readme"
 }
