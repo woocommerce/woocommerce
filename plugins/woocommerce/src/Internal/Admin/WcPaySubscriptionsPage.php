@@ -177,7 +177,7 @@ class WcPaySubscriptionsPage {
 	}
 
 	/**
-	 * Enqueues an inline script WooCommerce registered pages for use
+	 * Enqueues an inline script on WooCommerce registered pages for use
 	 * on the WooCommerce → Subscriptions admin page.
 	 */
 	public function enqueue_scripts() {
@@ -185,10 +185,8 @@ class WcPaySubscriptionsPage {
 			return;
 		}
 
-		$experiment_assignment = 'A';
-
-		if ( $this->is_store_experiment_eligible() ) {
-			$experiment_assignment = $this->get_user_experiment_assignment();
+		if ( ! $this->is_store_experiment_eligible() ) {
+			return;
 		}
 
 		$data = array(
@@ -209,7 +207,7 @@ class WcPaySubscriptionsPage {
 			),
 			'dismissOptionKey'          => $this->user_dismissed_option,
 			'noThanksUrl'               => wc_admin_url(),
-			'experimentAssignment'      => $experiment_assignment,
+			'experimentAssignment'      => $this->get_user_experiment_assignment(),
 		);
 
 		wp_add_inline_script( WC_ADMIN_APP, 'window.wcWcpaySubscriptions = ' . wp_json_encode( $data ), 'before' );
