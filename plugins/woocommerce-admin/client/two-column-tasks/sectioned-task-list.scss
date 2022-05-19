@@ -127,3 +127,25 @@
 		}
 	}
 }
+
+.woocommerce-setup-panel {
+	h1 {
+		font-weight: 400;
+	}
+
+	.woocommerce-task-progress-header {
+		padding: $gap-large;
+		margin-bottom: $gap-smaller;
+		background: #fff;
+		border: 1px solid $gray-200;
+
+		.woocommerce-task-progress-header__title {
+			padding-top: 4px;
+		}
+
+		.woocommerce-ellipsis-menu {
+			display: none;
+		}
+
+	}
+}
