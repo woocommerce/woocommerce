@@ -22,6 +22,7 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
+		"@types/d3-time-format": "^2.3.0",
 		"@wordpress/date": "^4.3.1",
 		"@wordpress/i18n": "^4.3.1",
 		"moment": "^2.29.1",

@@ -117,11 +117,11 @@ export const appendTimestamp = ( date: moment.Moment, timeOfDay: string ) => {
 /**
  * Convert a string to Moment object
  *
- * @param {string} format - localized date string format
- * @param {string} str    - date string
+ * @param {string}  format - localized date string format
+ * @param {unknown} str    - date string or moment object
  * @return {moment.Moment|null} - Moment object representing given string
  */
-export function toMoment( format: string, str: string ) {
+export function toMoment( format: string, str: unknown ) {
 	if ( moment.isMoment( str ) ) {
 		return str.isValid() ? str : null;
 	}
@@ -889,7 +889,7 @@ export function loadLocaleData( {
 	weekdaysShort,
 }: {
 	userLocale: string;
-	weekdaysShort: moment.LocaleSpecification[ 'weekdaysMin' ];
+	weekdaysShort?: moment.LocaleSpecification[ 'weekdaysMin' ];
 } ) {
 	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.
 	if ( moment.locale() !== 'en' ) {
