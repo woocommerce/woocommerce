@@ -22,7 +22,9 @@ class HtmlSanitizer {
 				'style' => true,
 				'title' => true,
 			),
-			'p'    => true,
+			'p'    => array(
+				'class' => true,
+			),
 			'span' => array(
 				'class' => true,
 				'title' => true,
