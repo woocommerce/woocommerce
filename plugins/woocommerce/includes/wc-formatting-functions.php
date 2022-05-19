@@ -351,9 +351,9 @@ function wc_format_localized_price( $value ) {
  * @return string
  */
 function wc_format_localized_decimal( $value ) {
-	$locale = localeconv();
+	$locale        = localeconv();
 	$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
-	$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
+	$decimal       = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 	return apply_filters( 'woocommerce_format_localized_decimal', str_replace( '.', $decimal, strval( $value ) ), $value );
 }
 
@@ -1272,7 +1272,10 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-	$price = '<del aria-hidden="true">' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
+	$price  = '<span class="screen-reader-text">' . __( 'Previous price:', 'woocommerce' ) . '</span>';
+	$price .= '<del>' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del>';
+	$price .= '<span class="screen-reader-text">' . __( 'Discounted price:', 'woocommerce' ) . '</span>';
+	$price .= '<ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
 }
 
