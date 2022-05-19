@@ -151,9 +151,10 @@ class WcPaySubscriptionsPage {
 		// Get a single order that has been paid within the last 30 days.
 		$orders = wc_get_orders(
 			array(
-				'date_paid' => '>' . strtotime( '-30 days' ),
-				'limit'     => 1,
-				'return'    => 'ids',
+				'date_created' => '>' . strtotime( '-30 days' ),
+				'status'       => wc_get_is_paid_statuses(),
+				'limit'        => 1,
+				'return'       => 'ids',
 			)
 		);
 
