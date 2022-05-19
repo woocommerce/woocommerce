@@ -220,37 +220,34 @@ class WC_Products_Tracking {
 	}
 
 	/**
-	 * Check if a given the current hook and page is a products type page.
+	 * Get the product screen name if current hook and page is a products type page.
 	 *
 	 * @param string $hook Hook of the current page.
-	 * @return boolean
+	 * @return string|boolean
 	 */
-	protected function is_product_page( $hook ) {
-		// Product list page.
+	protected function get_product_screen( $hook ) {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 		if (
 			'edit.php' === $hook &&
 			isset( $_GET['post_type'] ) &&
 			'product' === wp_unslash( $_GET['post_type'] )
 		) {
-			return true;
+			return 'list';
 		}
 
-		// New product.
 		if (
 			'post-new.php' === $hook &&
 			'product' === wp_unslash( $_GET['post_type'] )
 		) {
-			return true;
+			return 'new';
 		}
 
-		// Individual product.
 		if (
 			'post.php' === $hook &&
 			isset( $_GET['post'] ) &&
 			'product' === get_post_type( intval( $_GET['post'] ) )
 		) {
-			return true;
+			return 'edit';
 		}
 		// phpcs:enable
 
@@ -263,7 +260,8 @@ class WC_Products_Tracking {
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_tracking_scripts( $hook ) {
-		if ( ! $this->is_product_page( $hook ) ) {
+		$product_screen = $this->get_product_screen( $hook );
+		if ( ! $product_screen ) {
 			return;
 		}
 
@@ -277,5 +275,7 @@ class WC_Products_Tracking {
 			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
+
+		wp_localize_script( 'wc-admin-product-tracking', 'productScreen', $product_screen );
 	}
 }

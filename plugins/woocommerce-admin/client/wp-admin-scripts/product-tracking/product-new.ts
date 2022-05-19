@@ -12,7 +12,7 @@ const initTracks = () => {
 	recordEvent( 'product_add_view' );
 };
 
-if ( window.location.pathname.split( '/' ).pop() === 'post-new.php' ) {
+if ( productScreen === 'new' ) {
 	initTracks();
 	initProductScreenTracks();
 }

@@ -13,6 +13,6 @@ const initTracks = () => {
 	initProductScreenTracks();
 };
 
-if ( window.location.pathname.split( '/' ).pop() === 'post.php' ) {
+if ( productScreen === 'edit' ) {
 	initTracks();
 }

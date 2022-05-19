@@ -153,6 +153,6 @@ const initTracks = () => {
 	} );
 };
 
-if ( window.location.pathname.split( '/' ).pop() === 'edit.php' ) {
+if ( productScreen === 'list' ) {
 	initTracks();
 }
