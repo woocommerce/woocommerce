@@ -46,7 +46,6 @@ jobs:
     steps:
       - name: Create directories
         run: |
-          mkdir -p tmp/woocommerce-build
           mkdir -p monorepo
 
       - name: Checkout monorepo

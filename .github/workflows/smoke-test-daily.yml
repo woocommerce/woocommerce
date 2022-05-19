@@ -22,9 +22,6 @@ jobs:
                 workflow_name: smoke-test-daily
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - name: Install Jest
-              run: pnpm install -g jest
-
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -32,6 +29,9 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
+
+            - name: Install Jest
+              run: npm install -g jest
 
             - name: Run smoke test.
               working-directory: plugins/woocommerce
@@ -91,16 +91,13 @@ jobs:
             working-directory: plugins/woocommerce
             run: bash bin/build-zip.sh
 
-          - name: Unzip the file (prevents double zip problem)
-            run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
-
           - name: Upload the zip file as an artifact
             uses: actions/upload-artifact@v3
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
               name: woocommerce
-              path: zipfile
+              path: plugins/woocommerce/woocommerce.zip
               retention-days: 7
 
     test-plugins:
@@ -134,7 +131,7 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - uses: ./.github/actions/cache-deps
+            - uses: ./package/woocommerce/.github/actions/cache-deps
               with:
                 workflow_name: smoke-test-daily
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
@@ -145,8 +142,9 @@ jobs:
                 php-version: '7.4'
 
             - name: Install and Build
-              working-directory: package/woocommerce
-              uses: ./.github/actions/install-build
+              uses: ./package/woocommerce/.github/actions/install-build
+              with:
+                working_directory: package/woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
@@ -157,8 +155,8 @@ jobs:
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp
               run: |
-                  unzip woocommerce.zip -d woocommerce
-                  rsync -a woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+                unzip woocommerce.zip -d .
+                rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce
