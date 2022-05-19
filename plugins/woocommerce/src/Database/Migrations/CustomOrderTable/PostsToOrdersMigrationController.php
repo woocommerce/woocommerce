@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
-use Automattic\WooCommerce\Database\Migrations\MigrationErrorLogger;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
