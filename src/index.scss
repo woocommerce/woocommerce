@@ -92,6 +92,32 @@
 	}
 }
 
+#wc-admin-test-helper-experiments {
+	.manual-input {
+		margin-bottom: 20px;
+		float: right;
+		.description {
+			text-align: right;
+			margin-bottom: 5px;
+		}
+		button {
+			height: 34px;
+			position: relative;
+			top: -1px;
+		}
+		input {
+			height: 34px;
+			width: 250px;
+		}
+		select {
+			height: 34px;
+			position: relative;
+			top: -2px;
+			margin-right: 2px;
+		}
+	}
+}
+
 #wc-admin-test-helper-rest-api-filters {
 	.btn-new {
 		float: right;

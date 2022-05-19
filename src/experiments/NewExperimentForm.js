@@ -1,0 +1,61 @@
+/**
+ * External dependencies
+ */
+import { withDispatch, withSelect } from '@wordpress/data';
+import { compose } from '@wordpress/compose';
+import { Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { STORE_KEY } from './data/constants';
+import './data';
+
+function NewExperimentForm( {} ) {
+	const [ experimentName, setExperimentName ] = useState( null );
+	const [ source, setSource ] = useState( 'frontend' );
+	const [ variation, setVariation ] = useState( 'treatment' );
+
+	const getInputValue = ( event ) => {
+		setExperimentName( event.target.value );
+	};
+
+	const getSourceInput = ( event ) => {
+		setSource( event.target.value );
+	};
+
+	const getVariationInput = ( event ) => {
+		setVariation( event.target.value );
+	};
+
+	const AddNewExperiment = () => {
+		console.log( experimentName, source, variation );
+	};
+
+	return (
+		<div className="manual-input">
+			<div className="description">
+				Don&apos;t see an experiment you want to test? Add it manually.
+			</div>
+			<input type="text" onChange={ getInputValue } />
+			<select value={ source } onChange={ getSourceInput }>
+				<option value="frontend">frontend</option>
+				<option value="backend">backend</option>
+			</select>
+			<select value={ variation } onChange={ getVariationInput }>
+				<option value="treatment">treatment</option>
+				<option value="control">control</option>
+			</select>
+
+			<Button isPrimary onClick={ AddNewExperiment }>
+				Add
+			</Button>
+		</div>
+	);
+}
+
+export default compose(
+	withSelect( ( select ) => {} ),
+	withDispatch( ( dispatch ) => {} )
+)( NewExperimentForm );

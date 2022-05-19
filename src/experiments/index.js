@@ -10,6 +10,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
  */
 import { STORE_KEY } from './data/constants';
 import './data';
+import NewExperimentForm from './NewExperimentForm';
 
 function Experiments( {
 	experiments,
@@ -43,6 +44,7 @@ function Experiments( {
 					<b>Allow usage of WooCommerce to be tracked</b>.
 				</p>
 			) }
+			<NewExperimentForm />
 			<table className="experiments wp-list-table striped table-view-list widefat">
 				<thead>
 					<tr>
