@@ -6,12 +6,12 @@
  * @param {string}                title  Section title.
  * @param {Function}              log    print method.
  */
-export const printTemplateResults = async (
+export const printTemplateResults = (
 	data: Map< string, string[] >,
 	output: string,
 	title: string,
 	log: ( s: string ) => void
-): Promise< void > => {
+): void => {
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### Template changes:';
 		for ( const [ key, value ] of data ) {
@@ -46,12 +46,12 @@ export const printTemplateResults = async (
  * @param {string}   title  Section title.
  * @param {Function} log    print method.
  */
-export const printHookResults = async (
+export const printHookResults = (
 	data: Map< string, Map< string, string[] > >,
 	output: string,
 	title: string,
 	log: ( s: string ) => void
-): Promise< void > => {
+): void => {
 	if ( output === 'github' ) {
 		let opt = '\\n\\n### New hooks:';
 		for ( const [ key, value ] of data ) {

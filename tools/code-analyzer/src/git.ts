@@ -12,12 +12,12 @@ import { readFileSync } from 'fs';
  *
  * @param {string}   branch branch/commit hash.
  * @param {Function} error  error print method.
- * @return {Promise<boolean>} Promise.
+ * @return {boolean} Promise.
  */
-export const fetchBranch = async (
+export const fetchBranch = (
 	branch: string,
 	error: ( s: string ) => void
-): Promise< boolean > => {
+): boolean => {
 	CliUx.ux.action.start( `Fetching ${ branch }` );
 	const branches = execSync( 'git branch', {
 		encoding: 'utf-8',
@@ -37,6 +37,7 @@ export const fetchBranch = async (
 		execSync( `git branch ${ branch } origin/${ branch }` );
 	} catch ( e ) {
 		error( `Unable to fetch ${ branch }` );
+		return false;
 	}
 
 	CliUx.ux.action.stop();
@@ -50,22 +51,22 @@ export const fetchBranch = async (
  * @param {string}   compare Branch/commit hash to compare against the base.
  * @param {string}   base    Base branch/commit hash.
  * @param {Function} error   error print method.
- * @return {Promise<string>} Promise.
+ * @return {string} patch string.
  */
-export const generatePatch = async (
+export const generatePatch = (
 	source: string,
 	compare: string,
 	base: string,
 	error: ( s: string ) => void
-): Promise< string > => {
+): string => {
 	const filename = `${ source }-${ base }-${ compare }.patch`.replace(
 		/\//g,
 		'-'
 	);
 	const filepath = join( tmpdir(), filename );
 
-	await fetchBranch( base, error );
-	await fetchBranch( compare, error );
+	fetchBranch( base, error );
+	fetchBranch( compare, error );
 
 	CliUx.ux.action.start( 'Generating patch for ' + compare );
 
