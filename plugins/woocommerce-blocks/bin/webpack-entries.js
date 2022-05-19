@@ -20,7 +20,9 @@ const blocks = {
 	'product-on-sale': {},
 	'product-top-rated': {},
 	'products-by-attribute': {},
-	'featured-product': {},
+	'featured-product': {
+		customDir: 'featured-items/featured-product',
+	},
 	'all-reviews': {
 		customDir: 'reviews/all-reviews',
 	},
@@ -32,7 +34,9 @@ const blocks = {
 	},
 	'product-search': {},
 	'product-tag': {},
-	'featured-category': {},
+	'featured-category': {
+		customDir: 'featured-items/featured-category',
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
