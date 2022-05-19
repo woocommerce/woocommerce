@@ -13,6 +13,15 @@ import { CustomerFeedbackModal } from './customer-feedback-modal';
 
 const noop = () => {};
 
+type CustomerEffortScoreProps = {
+	recordScoreCallback: ( score: number, comments: string ) => void;
+	label: string;
+	onNoticeShownCallback?: () => void;
+	onNoticeDismissedCallback?: () => void;
+	onModalShownCallback?: () => void;
+	icon?: React.ReactNode;
+};
+
 /**
  * Use `CustomerEffortScore` to gather a customer effort score.
  *
@@ -27,14 +36,14 @@ const noop = () => {};
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
-function CustomerEffortScore( {
+const CustomerEffortScore: React.FC< CustomerEffortScoreProps > = ( {
 	recordScoreCallback,
 	label,
 	onNoticeShownCallback = noop,
 	onNoticeDismissedCallback = noop,
 	onModalShownCallback = noop,
 	icon,
-} ) {
+} ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
 	const { createNotice } = useDispatch( 'core/notices2' );
@@ -78,7 +87,7 @@ function CustomerEffortScore( {
 			recordScoreCallback={ recordScoreCallback }
 		/>
 	);
-}
+};
 
 CustomerEffortScore.propTypes = {
 	/**
