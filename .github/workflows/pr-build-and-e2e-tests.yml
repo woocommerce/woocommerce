@@ -126,7 +126,7 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: ${{ always() }}
+        if: always() && (contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ))
         runs-on: ubuntu-18.04
         needs: [api-tests-run, e2e-tests-run, k6-tests-run]
         env:
