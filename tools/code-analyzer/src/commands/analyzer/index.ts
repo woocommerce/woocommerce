@@ -2,15 +2,21 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
-import { tmpdir } from 'os';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
  */
 import { MONOREPO_ROOT } from '../../const';
+import { printTemplateResults, printHookResults } from '../../print';
+import {
+	getVersionRegex,
+	getFilename,
+	getPatches,
+	getHookName,
+} from '../../utils';
+import { generatePatch } from '../../git';
 
 /**
  * Analyzer class
@@ -69,10 +75,11 @@ export default class Analyzer extends Command {
 
 		await this.validateArgs( flags.source );
 
-		const patchContent = await this.getChanges(
+		const patchContent = await generatePatch(
 			flags.source,
 			args.compare,
-			flags.base
+			flags.base,
+			( e: string ): void => this.error( e )
 		);
 
 		const pluginData = await this.getPluginData( flags.plugin );
@@ -153,129 +160,6 @@ export default class Analyzer extends Command {
 	}
 
 	/**
-	 * Fetch branches from origin.
-	 *
-	 * @param {string} branch branch/commit hash.
-	 * @return {Promise<boolean>} Promise.
-	 */
-	private async fetchBranch( branch: string ): Promise< boolean > {
-		CliUx.ux.action.start( `Fetching ${ branch }` );
-		const branches = execSync( 'git branch', {
-			encoding: 'utf-8',
-		} );
-
-		const branchExistsLocally = branches.includes( branch );
-
-		if ( branchExistsLocally ) {
-			CliUx.ux.action.stop();
-			return true;
-		}
-
-		try {
-			// Fetch branch.
-			execSync( `git fetch origin ${ branch }` );
-			// Create branch.
-			execSync( `git branch ${ branch } origin/${ branch }` );
-		} catch ( e ) {
-			this.error( `Unable to fetch ${ branch }` );
-		}
-
-		CliUx.ux.action.stop();
-		return true;
-	}
-
-	/**
-	 * Generate a patch file into the temp directory and return its contents
-	 *
-	 * @param {string} source  The GitHub repository.
-	 * @param {string} compare Branch/commit hash to compare against the base.
-	 * @param {string} base    Base branch/commit hash.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getChanges(
-		source: string,
-		compare: string,
-		base: string
-	): Promise< string > {
-		const filename = `${ source }-${ base }-${ compare }.patch`.replace(
-			/\//g,
-			'-'
-		);
-		const filepath = join( tmpdir(), filename );
-
-		await this.fetchBranch( base );
-		await this.fetchBranch( compare );
-
-		CliUx.ux.action.start( 'Generating patch for ' + compare );
-
-		try {
-			const diffCommand = `git diff ${ base }...${ compare } > ${ filepath }`;
-			execSync( diffCommand );
-		} catch ( e ) {
-			this.error(
-				'Unable to create diff. Check that git origin, base branch, and compare branch all exist.'
-			);
-		}
-
-		const content = readFileSync( filepath ).toString();
-
-		CliUx.ux.action.stop();
-		return content;
-	}
-
-	/**
-	 * Get patches
-	 *
-	 * @param {string} content Patch content.
-	 * @param {RegExp} regex   Regex to find specific patches.
-	 * @return {Promise<string[]>} Promise.
-	 */
-	private async getPatches(
-		content: string,
-		regex: RegExp
-	): Promise< string[] > {
-		const patches = content.split( 'diff --git ' );
-		const changes: string[] = [];
-
-		for ( const p in patches ) {
-			const patch = patches[ p ];
-			const id = patch.match( regex );
-
-			if ( id ) {
-				changes.push( patch );
-			}
-		}
-
-		return changes;
-	}
-
-	/**
-	 * Get filename from patch
-	 *
-	 * @param {string} str String to extract filename from.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getFilename( str: string ): Promise< string > {
-		return str.replace( /^a(.*)\s.*/, '$1' );
-	}
-
-	/**
-	 * Format version string for regex.
-	 *
-	 * @param {string} rawVersion Raw version number.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getVersionRegex( rawVersion: string ): Promise< string > {
-		const version = rawVersion.replace( /\./g, '\\.' );
-
-		if ( rawVersion.endsWith( '.0' ) ) {
-			return version + '|' + version.slice( 0, -3 ) + '\\n';
-		}
-
-		return version;
-	}
-
-	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
 	 * @param {string} content Patch content.
@@ -289,133 +173,28 @@ export default class Analyzer extends Command {
 	): Promise< void > {
 		const templates = await this.scanTemplates( content, version );
 		const hooks = await this.scanHooks( content, version, output );
-		// @todo: Scan for changes to database schema.
 
 		if ( templates.size ) {
-			await this.printTemplateResults(
+			await printTemplateResults(
 				templates,
 				output,
-				'TEMPLATE CHANGES'
+				'TEMPLATE CHANGES',
+				( s: string ): void => this.log( s )
 			);
 		} else {
 			this.log( 'No template changes found' );
 		}
 
 		if ( hooks.size ) {
-			await this.printHookResults( hooks, output, 'HOOKS' );
+			await printHookResults(
+				hooks,
+				output,
+				'HOOKS',
+				( s: string ): void => this.log( s )
+			);
 		} else {
 			this.log( 'No new hooks found' );
 		}
-	}
-
-	/**
-	 * Print template results
-	 *
-	 * @param {Map<string, string[]>} data   Raw data.
-	 * @param {string}                output Output style.
-	 * @param {string}                title  Section title.
-	 */
-	private async printTemplateResults(
-		data: Map< string, string[] >,
-		output: string,
-		title: string
-	): Promise< void > {
-		if ( output === 'github' ) {
-			let opt = '\\n\\n### Template changes:';
-			for ( const [ key, value ] of data ) {
-				opt += `\\n* **file:** ${ key }`;
-				opt += `\\n  * ${ value[ 0 ].toUpperCase() }: ${ value[ 2 ] }`;
-				this.log(
-					`::${ value[ 0 ] } file=${ key },line=1,title=${ value[ 1 ] }::${ value[ 2 ] }`
-				);
-			}
-
-			this.log( `::set-output name=templates::${ opt }` );
-		} else {
-			this.log( `\n## ${ title }:` );
-			for ( const [ key, value ] of data ) {
-				this.log( 'FILE: ' + key );
-				this.log(
-					'---------------------------------------------------'
-				);
-				this.log(
-					` ${ value[ 0 ].toUpperCase() } | ${ value[ 1 ] } | ${
-						value[ 2 ]
-					}`
-				);
-				this.log(
-					'---------------------------------------------------'
-				);
-			}
-		}
-	}
-
-	/**
-	 * Print hook results
-	 *
-	 * @param {Map}    data   Raw data.
-	 * @param {string} output Output style.
-	 * @param {string} title  Section title.
-	 */
-	private async printHookResults(
-		data: Map< string, Map< string, string[] > >,
-		output: string,
-		title: string
-	): Promise< void > {
-		if ( output === 'github' ) {
-			let opt = '\\n\\n### New hooks:';
-			for ( const [ key, value ] of data ) {
-				if ( value.size ) {
-					opt += `\\n* **file:** ${ key }`;
-					for ( const [ k, v ] of value ) {
-						opt += `\\n  * ${ v[ 0 ].toUpperCase() }: ${ v[ 2 ] }`;
-						this.log(
-							`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
-						);
-					}
-				}
-			}
-
-			this.log( `::set-output name=wphooks::${ opt }` );
-		} else {
-			this.log( `\n## ${ title }:` );
-			for ( const [ key, value ] of data ) {
-				if ( value.size ) {
-					this.log( 'FILE: ' + key );
-					this.log(
-						'---------------------------------------------------'
-					);
-					for ( const [ k, v ] of value ) {
-						this.log( 'HOOK: ' + k );
-						this.log(
-							'---------------------------------------------------'
-						);
-						this.log(
-							` ${ v[ 0 ].toUpperCase() } | ${ v[ 1 ] } | ${
-								v[ 2 ]
-							}`
-						);
-						this.log(
-							'---------------------------------------------------'
-						);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Get hook name.
-	 *
-	 * @param {string} name Raw hook name.
-	 * @return {Promise<string>} Promise.
-	 */
-	private async getHookName( name: string ): Promise< string > {
-		if ( name.indexOf( ',' ) > -1 ) {
-			name = name.substring( 0, name.indexOf( ',' ) );
-		}
-
-		return name.replace( /(\'|\")/g, '' ).trim();
 	}
 
 	/**
@@ -440,7 +219,7 @@ export default class Analyzer extends Command {
 
 		const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
 		const title = 'Template change detected';
-		const patches = await this.getPatches( content, matchPatches );
+		const patches = getPatches( content, matchPatches );
 		const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
 			/\./g,
 			'\\.'
@@ -450,7 +229,7 @@ export default class Analyzer extends Command {
 		for ( const p in patches ) {
 			const patch = patches[ p ];
 			const lines = patch.split( '\n' );
-			const filepath = await this.getFilename( lines[ 0 ] );
+			const filepath = getFilename( lines[ 0 ] );
 			let code = 'warning';
 			let message = 'This template may require a version bump!';
 
@@ -500,8 +279,8 @@ export default class Analyzer extends Command {
 		}
 
 		const matchPatches = /^a\/(.+).php/g;
-		const patches = await this.getPatches( content, matchPatches );
-		const verRegEx = await this.getVersionRegex( version );
+		const patches = getPatches( content, matchPatches );
+		const verRegEx = getVersionRegex( version );
 		const matchHooks = `@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp( matchHooks, 'gs' );
 
@@ -518,7 +297,7 @@ export default class Analyzer extends Command {
 			}
 
 			const lines = patch.split( '\n' );
-			const filepath = await this.getFilename( lines[ 0 ] );
+			const filepath = getFilename( lines[ 0 ] );
 
 			for ( const raw of results ) {
 				// Extract hook name and type.
@@ -530,7 +309,7 @@ export default class Analyzer extends Command {
 					continue;
 				}
 
-				const name = await this.getHookName( hookName[ 3 ] );
+				const name = getHookName( hookName[ 3 ] );
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
 				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
