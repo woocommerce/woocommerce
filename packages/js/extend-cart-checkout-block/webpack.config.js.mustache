@@ -1,31 +1,7 @@
 const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-
-const wcDepMap = {
-	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
-	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
-	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
-};
-
-const wcHandleMap = {
-	'@woocommerce/blocks-registry': 'wc-blocks-registry',
-	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
-	'@woocommerce/settings': 'wc-settings',
-};
-
-const requestToExternal = ( request ) => {
-	if ( wcDepMap[ request ] ) {
-		return wcDepMap[ request ];
-	}
-};
-
-const requestToHandle = ( request ) => {
-	if ( wcHandleMap[ request ] ) {
-		return wcHandleMap[ request ];
-	}
-};
 
 // Remove SASS rule from the default config so we can define our own.
 const defaultRules = defaultConfig.module.rules.filter( ( rule ) => {
@@ -83,10 +59,7 @@ module.exports = {
 			( plugin ) =>
 				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
 		),
-		new WooCommerceDependencyExtractionWebpackPlugin( {
-			requestToExternal,
-			requestToHandle,
-		} ),
+		new WooCommerceDependencyExtractionWebpackPlugin(),
 		new MiniCssExtractPlugin( {
 			filename: `[name].css`,
 		} ),
