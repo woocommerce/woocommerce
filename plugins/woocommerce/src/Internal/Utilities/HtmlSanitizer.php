@@ -37,27 +37,12 @@ class HtmlSanitizer {
 	);
 
 	/**
-	 * Input HTML string.
-	 *
-	 * @var string
-	 */
-	private $input;
-
-	/**
-	 * Sanitizes the provided HTML.
-	 *
-	 * @param string $input_html The HTML to be sanitized.
-	 */
-	public function __construct( string $input_html ) {
-		$this->input = $input_html;
-	}
-
-	/**
 	 * Sanitizes the HTML according to the provided rules.
 	 *
 	 * @see wp_kses()
 	 *
-	 * @param array $sanitizer_rules {
+	 * @param string $html HTML string to be sanitized.
+	 * @param array  $sanitizer_rules {
 	 *     Optional and defaults to self::TRIMMED_BALANCED_LOW_HTML_NO_LINKS. Otherwise, one or more of the following
 	 *     keys should be set.
 	 *
@@ -68,22 +53,20 @@ class HtmlSanitizer {
 	 *
 	 * @return string
 	 */
-	public function apply( array $sanitizer_rules = self::TRIMMED_BALANCED_LOW_HTML_NO_LINKS ): string {
-		$output = $this->input;
-
+	public function sanitize( string $html, array $sanitizer_rules = self::TRIMMED_BALANCED_LOW_HTML_NO_LINKS ): string {
 		if ( isset( $sanitizer_rules['pre_processors'] ) && is_array( $sanitizer_rules['pre_processors'] ) ) {
-			$output = $this->apply_string_callbacks( $sanitizer_rules['pre_processors'], $output );
+			$html = $this->apply_string_callbacks( $sanitizer_rules['pre_processors'], $html );
 		}
 
 		if ( isset( $sanitizer_rules['wp_kses_rules'] ) && is_array( $sanitizer_rules['wp_kses_rules'] ) ) {
-			$output = wp_kses( $output, $sanitizer_rules['wp_kses_rules'] );
+			$html = wp_kses( $html, $sanitizer_rules['wp_kses_rules'] );
 		}
 
 		if ( isset( $sanitizer_rules['post_processors'] ) && is_array( $sanitizer_rules['post_processors'] ) ) {
-			$output = $this->apply_string_callbacks( $sanitizer_rules['post_processors'], $output );
+			$html = $this->apply_string_callbacks( $sanitizer_rules['post_processors'], $html );
 		}
 
-		return $output;
+		return $html;
 	}
 
 	/**
