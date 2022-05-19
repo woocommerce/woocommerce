@@ -56,6 +56,12 @@ const WCPaymentsWelcomePage = lazy( () =>
 	)
 );
 
+const WCPaymentsSubscriptionsPage = lazy( () =>
+	import(
+		/* webpackChunkName: "wc-pay-subscriptions-page" */ '../subscriptions'
+	)
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = () => {
@@ -211,6 +217,22 @@ export const getPages = () => {
 				id: 'woocommerce-wc-pay-welcome-page',
 			},
 			wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'wc-pay-subscriptions-page' ] ) {
+		pages.push( {
+			container: WCPaymentsSubscriptionsPage,
+			path: '/subscriptions',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Subscriptions', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			navArgs: {
+				id: 'woocommerce-wcpay-subscriptions',
+			},
 			capability: 'manage_woocommerce',
 		} );
 	}
