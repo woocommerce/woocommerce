@@ -216,9 +216,9 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	}
 
 	/**
-	 * Migrate a batch of orders from the posts table to the corresponding table.
+	 * Migrate a batch of entities from the posts table to the corresponding table.
 	 *
-	 * @param array $entity_ids Ids of orders ro migrate.
+	 * @param array $entity_ids Ids of entities to migrate.
 	 *
 	 * @return void
 	 */

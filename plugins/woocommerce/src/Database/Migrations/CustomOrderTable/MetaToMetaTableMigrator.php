@@ -63,9 +63,9 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	}
 
 	/**
-	 * Migrate a batch of orders from the posts table to the corresponding table.
+	 * Migrate a batch of entities from the posts table to the corresponding table.
 	 *
-	 * @param array $entity_ids Ids of orders ro migrate.
+	 * @param array $entity_ids Ids of entities ro migrate.
 	 */
 	protected function process_migration_batch_for_ids_core( array $entity_ids ): void {
 		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
