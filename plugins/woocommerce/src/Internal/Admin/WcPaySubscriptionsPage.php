@@ -34,6 +34,13 @@ class WcPaySubscriptionsPage {
 	private $user_dismissed_option = 'woocommerce-wcpay-subscriptions_dismissed';
 
 	/**
+	 * The WooCommerce > Subscriptions menu item slug.
+	 *
+	 * @var string
+	 */
+	const SUBSCRIPTION_MENU_ITEM_SLUG = 'wc-admin&path=/subscriptions';
+
+	/**
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
@@ -82,7 +89,7 @@ class WcPaySubscriptionsPage {
 
 		// Add the "new" badge.
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-			if ( 'wc-admin&path=/subscriptions' === $menu_item[2] ) {
+			if ( self::SUBSCRIPTION_MENU_ITEM_SLUG === $menu_item[2] ) {
 				$submenu['woocommerce'][ $key ][0] .= sprintf( ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">%s</span></span>', esc_html( $new_badge_text ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
@@ -233,7 +240,7 @@ class WcPaySubscriptionsPage {
 			}
 
 			// Keep a record of the subscriptions item and remove it from its current place in the menu.
-			if ( 'wc-admin&path=/subscriptions' === $menu_item[2] ) {
+			if ( self::SUBSCRIPTION_MENU_ITEM_SLUG === $menu_item[2] ) {
 				$subscriptions_menu_item = $menu_item;
 				unset( $wc_admin_menu[ $key ] );
 			}
