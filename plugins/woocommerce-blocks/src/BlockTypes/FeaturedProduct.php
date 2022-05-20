@@ -205,9 +205,13 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	private function render_wrapper( $attributes ) {
 		$min_height = $attributes['minHeight'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
 
+		$style = '';
 		if ( isset( $attributes['minHeight'] ) ) {
 			$style = sprintf( 'min-height:%dpx;', intval( $min_height ) );
 		}
+
+		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
+		$style             .= $global_style_style;
 
 		return sprintf( '<div class="wc-block-featured-product__wrapper" style="%s">', esc_attr( $style ) );
 	}
