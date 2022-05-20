@@ -7,7 +7,11 @@ const config = {
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
 	retries: 1,
-	reporter: [ [ 'list' ], [ 'html', { outputFolder: 'e2e/output' } ] ],
+	reporter: [
+		[ 'list' ],
+		[ 'html', { outputFolder: 'e2e/output' } ],
+		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
+	],
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',
