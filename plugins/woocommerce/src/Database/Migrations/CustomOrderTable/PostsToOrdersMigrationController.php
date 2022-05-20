@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use function cli\err;
 
 /**
  * This is the main class used to perform the complete migration of orders
@@ -39,26 +40,28 @@ class PostsToOrdersMigrationController {
 	 */
 	public function __construct() {
 
-		$order_table_migrator            = new PostToOrderTableMigrator();
-		$billing_address_table_migrator  = new PostToOrderAddressTableMigrator( 'billing' );
-		$shipping_address_table_migrator = new PostToOrderAddressTableMigrator( 'shipping' );
-		$operation_data_table_migrator   = new PostToOrderOpTableMigrator();
+		$this->all_migrators   = array();
+		$this->all_migrators[] = new PostToOrderTableMigrator();
+		$this->all_migrators[] = new PostToOrderAddressTableMigrator( 'billing' );
+		$this->all_migrators[] = new PostToOrderAddressTableMigrator( 'shipping' );
+		$this->all_migrators[] = new PostToOrderOpTableMigrator();
+		$this->all_migrators[] = new PostMetaToOrderMetaMigrator( $this->get_migrated_meta_keys() );
+		$this->error_logger    = wc_get_logger();
+	}
 
-		$excluded_columns    = array_keys( $order_table_migrator->get_meta_column_config() );
-		$excluded_columns    = array_merge( $excluded_columns, array_keys( $billing_address_table_migrator->get_meta_column_config() ) );
-		$excluded_columns    = array_merge( $excluded_columns, array_keys( $shipping_address_table_migrator->get_meta_column_config() ) );
-		$excluded_columns    = array_merge( $excluded_columns, array_keys( $operation_data_table_migrator->get_meta_column_config() ) );
-		$meta_table_migrator = new PostMetaToOrderMetaMigrator( $excluded_columns );
-
-		$this->all_migrators = array(
-			$order_table_migrator,
-			$billing_address_table_migrator,
-			$shipping_address_table_migrator,
-			$operation_data_table_migrator,
-			$meta_table_migrator,
-		);
-
-		$this->error_logger = wc_get_logger();
+	/**
+	 * Helper method to get migrated keys for all the tables in this controller.
+	 *
+	 * @return string[] Array of meta keys.
+	 */
+	public function get_migrated_meta_keys() {
+		$migrated_meta_keys = array();
+		foreach ( $this->all_migrators as $migrator ) {
+			if ( method_exists( $migrator, 'get_meta_column_config' ) ) {
+				$migrated_meta_keys = array_merge( $migrated_meta_keys, $migrator->get_meta_column_config() );
+			}
+		}
+		return array_keys( $migrated_meta_keys );
 	}
 
 	/**
@@ -124,10 +127,13 @@ class PostsToOrdersMigrationController {
 	 * @return array Array of failed IDs along with columns.
 	 */
 	public function verify_migrated_orders( array $order_post_ids ): array {
-		return $this->order_table_migrator->verify_migrated_data( $order_post_ids ) +
-			$this->billing_address_table_migrator->verify_migrated_data( $order_post_ids ) +
-			$this->shipping_address_table_migrator->verify_migrated_data( $order_post_ids ) +
-			$this->operation_data_table_migrator->verify_migrated_data( $order_post_ids );
+		$errors = array();
+		foreach ( $this->all_migrators as $migrator ) {
+			if ( method_exists( $migrator, 'verify_migrated_data' ) ) {
+				$errors = $errors + $migrator->verify_migrated_data( $order_post_ids );
+			}
+		}
+		return $errors;
 	}
 
 	/**
