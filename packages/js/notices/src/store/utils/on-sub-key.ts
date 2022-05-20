@@ -1,4 +1,15 @@
 /**
+ * External dependencies
+ */
+import type { Reducer } from 'redux';
+
+/**
+ * Internal dependencies
+ */
+import { State, Notices } from '../types';
+import { Action } from '../actions';
+
+/**
  * Higher-order reducer creator which creates a combined reducer object, keyed
  * by a property on the action object.
  *
@@ -6,10 +17,9 @@
  *
  * @return {Function} Higher-order reducer.
  */
-export const onSubKey = ( actionProperty ) => ( reducer ) => (
-	state = {},
-	action
-) => {
+export const onSubKey = ( actionProperty: keyof Action ) => (
+	reducer: Reducer< Notices, Action >
+) => ( state: State = {}, action: Action ) => {
 	// Retrieve subkey from action. Do not track if undefined; useful for cases
 	// where reducer is scoped by action shape.
 	const key = action[ actionProperty ];
