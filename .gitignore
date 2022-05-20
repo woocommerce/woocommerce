@@ -84,6 +84,10 @@ plugins/woocommerce/includes/react-admin/feature-config.php
 # PHP lint
 phpcs-report.xml
 
+# Allure directories
+allure-report
+allure-results
+
 # Playwright output & working files
 /plugins/woocommerce/e2e/output
 /plugins/woocommerce/e2e/report
