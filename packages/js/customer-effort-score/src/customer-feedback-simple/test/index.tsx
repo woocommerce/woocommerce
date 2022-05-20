@@ -13,7 +13,12 @@ const mockOnSelectCallback = jest.fn();
 
 describe( 'CustomerFeedbackSimple', () => {
 	it( 'should trigger recordScoreCallback when item is selected', () => {
-		render( <CustomerFeedbackSimple onSelect={ mockOnSelectCallback } /> );
+		render(
+			<CustomerFeedbackSimple
+				onSelect={ mockOnSelectCallback }
+				label=""
+			/>
+		);
 
 		// Select the option.
 		fireEvent.click( screen.getAllByText( '🙂' )[ 0 ] );

@@ -27,7 +27,7 @@ jest.mock( '@wordpress/data', () => {
 describe( 'CustomerEffortScore', () => {
 	it( 'should call createNotice with appropriate parameters', async () => {
 		const mockCreateNotice = jest.fn();
-		useDispatch.mockReturnValue( {
+		( useDispatch as jest.Mock ).mockReturnValue( {
 			createNotice: mockCreateNotice,
 		} );
 		const icon = <span>icon</span>;
@@ -56,13 +56,12 @@ describe( 'CustomerEffortScore', () => {
 
 	it( 'should not call createNotice on rerender', async () => {
 		const mockCreateNotice = jest.fn();
-		useDispatch.mockReturnValue( {
+		( useDispatch as jest.Mock ).mockReturnValue( {
 			createNotice: mockCreateNotice,
 		} );
 
 		const { rerender } = render(
 			<CustomerEffortScore
-				createNotice={ mockCreateNotice }
 				recordScoreCallback={ noop }
 				label={ 'label' }
 			/>
@@ -93,7 +92,15 @@ describe( 'CustomerEffortScore', () => {
 
 	it( 'should show dialog if "Give feedback" callback is run', async () => {
 		const mockOnModalShownCallback = jest.fn();
-		const createNotice = ( ...args ) => {
+		const createNotice = (
+			...args: [
+				unknown,
+				unknown,
+				{
+					actions: [ { onClick: () => void } ];
+				}
+			]
+		) => {
 			// We're only interested in the 3rd argument.
 			const { actions } = args[ 2 ];
 
@@ -107,7 +114,7 @@ describe( 'CustomerEffortScore', () => {
 			// Modal shown callback should also be called.
 			expect( mockOnModalShownCallback ).toHaveBeenCalled();
 		};
-		useDispatch.mockReturnValue( {
+		( useDispatch as jest.Mock ).mockReturnValue( {
 			createNotice,
 		} );
 
