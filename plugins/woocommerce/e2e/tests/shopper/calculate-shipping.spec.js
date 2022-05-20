@@ -71,7 +71,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 				code: shippingCountryFR,
 			},
 		] );
-		// set hipping zone methods
+		// set shipping zone methods
 		await api.post( `shipping/zones/${ shippingZoneDEId }/methods`, {
 			method_id: 'free_shipping',
 		} );
