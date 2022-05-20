@@ -93,7 +93,7 @@ export type OrderLineItem = {
 	meta_data: OrderMetaData[];
 };
 
-export type OrderStatuses =
+export type OrderStatus =
 	| 'processing'
 	| 'pending'
 	| 'on-hold'
@@ -102,12 +102,12 @@ export type OrderStatuses =
 	| 'refunded'
 	| 'failed';
 
-export type Order = Omit< Schema.Post, 'status' > & {
+export type Order< Status = OrderStatus > = Omit< Schema.Post, 'status' > & {
 	id: number;
 	number: string;
 	order_key: string;
 	created_via: string;
-	status: OrderStatuses;
+	status: Status;
 	currency: string;
 	version: number;
 	prices_include_tax: boolean;
@@ -141,17 +141,19 @@ export type Order = Omit< Schema.Post, 'status' > & {
 
 export type PartialOrder = Partial< Order > & Pick< Order, 'id' >;
 
-export type OrderQuery = BaseQueryParams & {
-	status:
-		| 'any'
-		| 'pending'
-		| 'processing'
-		| 'on-hold'
-		| 'completed'
-		| 'cancelled'
-		| 'refunded'
-		| 'failed'
-		| 'trash';
+type OrdersQueryStatus =
+	| 'any'
+	| 'pending'
+	| 'processing'
+	| 'on-hold'
+	| 'completed'
+	| 'cancelled'
+	| 'refunded'
+	| 'failed'
+	| 'trash';
+
+export type OrdersQuery< Status = OrdersQueryStatus > = BaseQueryParams & {
+	status: Status;
 	customer: number;
 	product: number;
 	dp: number;

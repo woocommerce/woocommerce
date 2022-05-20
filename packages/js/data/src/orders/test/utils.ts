@@ -1,19 +1,19 @@
 /**
  * Internal dependencies
  */
-import { OrderQuery } from '../types';
+import { OrdersQuery } from '../types';
 import { getTotalOrderCountResourceName } from '../utils';
 
 describe( 'getTotalOrderCountResourceName()', () => {
 	it( "Ignores query params that don't affect total counts", () => {
-		const fullQuery: Partial< OrderQuery > = {
+		const fullQuery: Partial< OrdersQuery > = {
 			page: 2,
 			per_page: 10,
 			_fields: [ 'id', 'status', 'quantity', 'price' ],
 			status: 'completed',
 		};
 
-		const slimQuery: Partial< OrderQuery > = {
+		const slimQuery: Partial< OrdersQuery > = {
 			page: 1,
 			per_page: 1,
 			_fields: [ 'id' ],
@@ -26,14 +26,14 @@ describe( 'getTotalOrderCountResourceName()', () => {
 	} );
 
 	it( 'Accounts for query params that do affect total counts', () => {
-		const firstQuery: Partial< OrderQuery > = {
+		const firstQuery: Partial< OrdersQuery > = {
 			page: 2,
 			per_page: 10,
 			_fields: [ 'id', 'status', 'quantity', 'price' ],
 			status: 'completed',
 		};
 
-		const secondQuery: Partial< OrderQuery > = {
+		const secondQuery: Partial< OrdersQuery > = {
 			page: 1,
 			per_page: 1,
 			_fields: [ 'id' ],

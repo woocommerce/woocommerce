@@ -7,12 +7,12 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { getOrderResourceName, getTotalOrderCountResourceName } from './utils';
-import { OrderState } from './reducer';
-import { OrderQuery } from './types';
+import { OrdersState } from './reducer';
+import { OrdersQuery } from './types';
 import { WPDataSelector, WPDataSelectors } from '../types';
 
 export const getOrders = createSelector(
-	( state: OrderState, query: OrderQuery, defaultValue = undefined ) => {
+	( state: OrdersState, query: OrdersQuery, defaultValue = undefined ) => {
 		const resourceName = getOrderResourceName( query );
 		const ids = state.orders[ resourceName ]
 			? state.orders[ resourceName ].data
@@ -31,8 +31,8 @@ export const getOrders = createSelector(
 );
 
 export const getOrdersTotalCount = (
-	state: OrderState,
-	query: OrderQuery,
+	state: OrdersState,
+	query: OrdersQuery,
 	defaultValue = undefined
 ) => {
 	const resourceName = getTotalOrderCountResourceName( query );
@@ -42,7 +42,7 @@ export const getOrdersTotalCount = (
 	return totalCount;
 };
 
-export const getOrdersError = ( state: OrderState, query: OrderQuery ) => {
+export const getOrdersError = ( state: OrdersState, query: OrdersQuery ) => {
 	const resourceName = getOrderResourceName( query );
 	return state.errors[ resourceName ];
 };

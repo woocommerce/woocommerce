@@ -11,7 +11,7 @@ import { Actions } from './actions';
 import { PartialOrder } from './types';
 import { getOrderResourceName, getTotalOrderCountResourceName } from './utils';
 
-export type OrderState = {
+export type OrdersState = {
 	orders: Record<
 		string,
 		{
@@ -23,7 +23,7 @@ export type OrderState = {
 	data: Record< number, PartialOrder >;
 };
 
-const reducer: Reducer< OrderState, Actions > = (
+const reducer: Reducer< OrdersState, Actions > = (
 	state = {
 		orders: {},
 		ordersCount: {},
@@ -34,7 +34,7 @@ const reducer: Reducer< OrderState, Actions > = (
 ) => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
-			case TYPES.SET_ORDER:
+			case TYPES.GET_ORDER_SUCCESS:
 				const orderData = state.data || {};
 				return {
 					...state,
@@ -46,7 +46,7 @@ const reducer: Reducer< OrderState, Actions > = (
 						},
 					},
 				};
-			case TYPES.SET_ORDERS:
+			case TYPES.GET_ORDERS_SUCCESS:
 				const ids: number[] = [];
 				const nextOrders = payload.orders.reduce<
 					Record< number, PartialOrder >
@@ -67,7 +67,7 @@ const reducer: Reducer< OrderState, Actions > = (
 						...nextOrders,
 					},
 				};
-			case TYPES.SET_ORDERS_TOTAL_COUNT:
+			case TYPES.GET_ORDERS_TOTAL_COUNT_SUCCESS:
 				const totalResourceName = getTotalOrderCountResourceName(
 					payload.query
 				);
@@ -78,7 +78,9 @@ const reducer: Reducer< OrderState, Actions > = (
 						[ totalResourceName ]: payload.totalCount,
 					},
 				};
-			case TYPES.SET_ERROR:
+			case TYPES.GET_ORDER_ERROR:
+			case TYPES.GET_ORDERS_ERROR:
+			case TYPES.GET_ORDERS_TOTAL_COUNT_ERROR:
 				return {
 					...state,
 					errors: {

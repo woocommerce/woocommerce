@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { OrderQuery } from './types';
+import { OrdersQuery } from './types';
 
 const PRODUCT_PREFIX = 'order';
 
@@ -12,7 +12,7 @@ const PRODUCT_PREFIX = 'order';
  * @param {Object} query Query for orders.
  * @return {string} Resource name for orders.
  */
-export function getOrderResourceName( query: Partial< OrderQuery > ) {
+export function getOrderResourceName( query: Partial< OrdersQuery > ) {
 	return getResourceName( PRODUCT_PREFIX, query );
 }
 
@@ -25,7 +25,9 @@ export function getOrderResourceName( query: Partial< OrderQuery > ) {
  * @param {Object} query Query for order totals count.
  * @return {string} Resource name for order totals.
  */
-export function getTotalOrderCountResourceName( query: Partial< OrderQuery > ) {
+export function getTotalOrderCountResourceName(
+	query: Partial< OrdersQuery >
+) {
 	// Disable eslint rule because we're using this spread to omit properties
 	// that don't affect item totals count results.
 	// eslint-disable-next-line no-unused-vars, camelcase

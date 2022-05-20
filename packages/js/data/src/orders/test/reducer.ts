@@ -1,13 +1,13 @@
 /**
  * Internal dependencies
  */
-import reducer, { OrderState } from '../reducer';
+import reducer, { OrdersState } from '../reducer';
 import TYPES from '../action-types';
 import { getOrderResourceName, getTotalOrderCountResourceName } from '../utils';
 import { Actions } from '../actions';
-import { PartialOrder, OrderQuery } from '../types';
+import { PartialOrder, OrdersQuery } from '../types';
 
-const defaultState: OrderState = {
+const defaultState: OrdersState = {
 	orders: {},
 	ordersCount: {},
 	errors: {},
@@ -21,9 +21,9 @@ describe( 'orders reducer', () => {
 		expect( state ).not.toBe( defaultState );
 	} );
 
-	it( 'should handle SET_order', () => {
+	it( 'should handle GET_ORDER_SUCCESS', () => {
 		const itemType = 'guyisms';
-		const initialState: OrderState = {
+		const initialState: OrdersState = {
 			orders: {
 				[ itemType ]: {
 					data: [ 1, 2 ],
@@ -44,7 +44,7 @@ describe( 'orders reducer', () => {
 		};
 
 		const state = reducer( initialState, {
-			type: TYPES.SET_ORDER,
+			type: TYPES.GET_ORDER_SUCCESS,
 			id: update.id,
 			order: update,
 		} );
@@ -58,12 +58,12 @@ describe( 'orders reducer', () => {
 		expect( state.data[ 2 ].status ).toEqual( update.status );
 	} );
 
-	it( 'should handle SET_orderS', () => {
+	it( 'should handle GET_ORDERS_SUCCESS', () => {
 		const orders: PartialOrder[] = [ { id: 1 }, { id: 2 } ];
 		const totalCount = 45;
-		const query: Partial< OrderQuery > = { status: 'completed' };
+		const query: Partial< OrdersQuery > = { status: 'completed' };
 		const state = reducer( defaultState, {
-			type: TYPES.SET_ORDERS,
+			type: TYPES.GET_ORDERS_SUCCESS,
 			orders,
 			query,
 			totalCount,
@@ -79,15 +79,15 @@ describe( 'orders reducer', () => {
 		expect( state.data[ 2 ] ).toBe( orders[ 1 ] );
 	} );
 
-	it( 'should handle SET_orderS_TOTAL_COUNT', () => {
-		const initialQuery: Partial< OrderQuery > = {
+	it( 'should handle GET_ORDERS_TOTAL_COUNT_SUCCESS', () => {
+		const initialQuery: Partial< OrdersQuery > = {
 			status: 'completed',
 			page: 1,
 			per_page: 1,
 			_fields: [ 'id' ],
 		};
 		const resourceName = getTotalOrderCountResourceName( initialQuery );
-		const initialState: OrderState = {
+		const initialState: OrdersState = {
 			...defaultState,
 			ordersCount: {
 				[ resourceName ]: 1,
@@ -95,7 +95,7 @@ describe( 'orders reducer', () => {
 		};
 
 		// Additional coverage for getTotalCountResourceName().
-		const similarQueryForTotals: Partial< OrderQuery > = {
+		const similarQueryForTotals: Partial< OrdersQuery > = {
 			status: 'completed',
 			page: 2,
 			per_page: 10,
@@ -103,7 +103,7 @@ describe( 'orders reducer', () => {
 		};
 
 		const state = reducer( initialState, {
-			type: TYPES.SET_ORDERS_TOTAL_COUNT,
+			type: TYPES.GET_ORDERS_TOTAL_COUNT_SUCCESS,
 			query: similarQueryForTotals,
 			totalCount: 2,
 		} );
@@ -113,12 +113,12 @@ describe( 'orders reducer', () => {
 		} );
 	} );
 
-	it( 'should handle SET_ERROR', () => {
-		const query: Partial< OrderQuery > = { status: 'pending' };
+	it( 'should handle GET_ORDERS_ERROR', () => {
+		const query: Partial< OrdersQuery > = { status: 'pending' };
 		const resourceName = getOrderResourceName( query );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
-			type: TYPES.SET_ERROR,
+			type: TYPES.GET_ORDERS_ERROR,
 			query,
 			error,
 		} );
