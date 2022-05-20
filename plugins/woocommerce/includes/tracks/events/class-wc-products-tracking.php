@@ -138,15 +138,31 @@ class WC_Products_Tracking {
 						return;
 					}
 
+					var tagsText = $( '[name=\"tax_input[product_tag]\"]' ).val();
 					var currentStockValue = $( '#_stock' ).val();
 					var properties = {
+						attributes:				$( '.woocommerce_attribute' ).length,
+						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
+						'cross-sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
+						description:			$( '#content' ).val() ? 'Yes' : 'No',
+						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
+						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
+						menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
+						product_gallery:		$( '#product_images_container .product_images > li' ).length,
+						product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
 						product_type:			$( '#product-type' ).val(),
-						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Y' : 'N',
-						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Y' : 'N',
-						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Y' : 'N',
-						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Y' : 'N',
+						purchase_note:			$( '#_purchase_note' ).val() ? 'yes' : 'no',
+						sale_price:				$( '#_sale_price' ).val() ? 'yes' : 'no',
+						short_description:		$( '#excerpt' ).val() ? 'yes' : 'no',
+						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
+						tags:					tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+						upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
+						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
 					};
 
+					debugger;
 					window.wcTracks.recordEvent( 'product_update', properties );
 					hasRecordedEvent = true;
 				} );
