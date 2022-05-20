@@ -420,6 +420,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_download_permissions_granted( $order, $set, $save = true ) {
+		// XXX implement $save = true.
 		return $order->update_meta_data( '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
 
@@ -442,6 +443,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_recorded_sales( $order, $set, $save = true ) {
+		// XXX implement $save = true.
 		return $order->update_meta_data( '_recorded_sales', wc_bool_to_string( $set ) );
 	}
 
@@ -486,6 +488,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_email_sent( $order, $set, $save = true ) {
+		// XXX implement $save = true.
 		return $order->update_meta_data( '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
 
@@ -509,6 +512,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email was sent.
 	 */
 	private function set_new_order_email_sent( $order, $set, $save = true ) {
+		// XXX implement $save = true.
 		return $this->set_email_sent( $order, $set );
 	}
 
@@ -532,6 +536,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
 	public function set_stock_reduced( $order, $set, $save = true ) {
+		// XXX implement $save = true.
 		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
 		return $order->update_meta_data( '_order_stock_reduced', wc_string_to_bool( $set ) );
 	}
