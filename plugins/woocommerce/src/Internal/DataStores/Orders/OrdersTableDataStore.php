@@ -782,6 +782,92 @@ LEFT JOIN {$operational_data_clauses['join']}
 		return implode( ', ', $select_clauses );
 	}
 
+	/**
+	 * Persists order changes to the database.
+	 *
+	 * @param \WC_Order $order        The order.
+	 * @param boolean   $only_changes Whether to persist all order data or just changes in the object.
+	 * @return void
+	 */
+	protected function persist_order_to_db( $order, $only_changes = true ) {
+		global $wpdb;
+
+		// XXX implement case $only_changes = false.
+		$changes = $only_changes ? $order->get_changes() : array();
+
+		// Figure out what needs to be updated in the database.
+		$db_updates = array();
+
+		// wc_orders.
+		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
+		if ( $row ) {
+			$db_updates[] = array_merge(
+				array(
+					'table'        => self::get_orders_table_name(),
+					'where'        => array( 'id' => $order->get_id() ),
+					'where_format' => '%d',
+				),
+				$row
+			);
+		}
+
+		// wc_order_operational_data.
+		$row = $this->helper->get_db_row_from_order_changes(
+			array_merge(
+				$changes,
+				// XXX: manually persist some of the properties until the datastore/property design is finalized.
+				array(
+					'stock_reduced'                => $this->get_stock_reduced( $order ),
+					'download_permissions_granted' => $this->get_download_permissions_granted( $order ),
+					'new_order_email_sent'         => $this->get_email_sent( $order ),
+					'recorded_sales'               => $this->get_recorded_sales( $order ),
+					'recorded_coupon_usage_counts' => $this->get_recorded_coupon_usage_counts( $order ),
+				)
+			),
+			$this->operational_data_column_mapping
+		);
+		if ( $row ) {
+			$db_updates[] = array_merge(
+				array(
+					'table'        => self::get_operational_data_table_name(),
+					'where'        => array( 'order_id' => $order->get_id() ),
+					'where_format' => '%d',
+				),
+				$row
+			);
+		}
+
+		// wc_order_addresses.
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			$row = $this->helper->get_db_row_from_order_changes( $changes, $this->{$address_type . '_address_column_mapping'} );
+
+			if ( $row ) {
+				$db_updates[] = array_merge(
+					array(
+						'table'        => self::get_addresses_table_name(),
+						'where'        => array(
+							'order_id'     => $order->get_id(),
+							'address_type' => $address_type,
+						),
+						'where_format' => array( '%d', '%s' ),
+					),
+					$row
+				);
+			}
+		}
+
+		// Persist changes.
+		foreach ( $db_updates as $update ) {
+			$wpdb->update(
+				$update['table'],
+				$update['row'],
+				$update['where'],
+				array_values( $update['format'] ),
+				$update['where_format']
+			);
+		}
+	}
+
 
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
@@ -800,8 +886,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	public function update( &$order ) {
 		global $wpdb;
 
-		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
-
 		// Before updating, ensure date paid is set if missing.
 		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
@@ -810,6 +894,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 		if ( null === $order->get_date_created( 'edit' ) ) {
 			$order->set_date_created( time() );
 		}
+
+		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 
 		// Fetch changes.
 		$changes = $order->get_changes();
@@ -828,82 +914,24 @@ LEFT JOIN {$operational_data_clauses['join']}
 		// Update with latest changes.
 		$changes = $order->get_changes();
 
-		// Figure out what needs to be updated in the database.
-		$db_updates = array();
+		$this->persist_order_to_db( $order, $changes );
 
-		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
-		if ( $row ) {
-			// wc_orders.
-			$db_updates[] = array(
-				'table'        => self::get_orders_table_name(),
-				'where'        => array( 'id' => $order->get_id() ),
-				'where_format' => '%d',
-				'row'          => $row['row'],
-				'row_format'   => array_values( $row['format'] ),
-			);
+		// Update download permissions if necessary.
+		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
+			$data_store = \WC_Data_Store::load( 'customer-download' );
+			$data_store->update_user_by_order_id( $order->get_id(), $order->get_customer_id(), $order->get_billing_email() );
 		}
 
-		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping );
-		if ( $row ) {
-			// wc_order_operational_data.
-			$db_updates[] = array(
-				'table'        => self::get_operational_data_table_name(),
-				'where'        => array( 'order_id' => $order->get_id() ),
-				'where_format' => '%d',
-				'row'          => $row['row'],
-				'row_format'   => array_values( $row['format'] ),
-			);
-		}
-
-		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->billing_address_column_mapping );
-		if ( $row ) {
-			// wc_order_addresses: billing.
-			$db_updates[] = array(
-				'table'        => self::get_addresses_table_name(),
-				'where'        => array(
-					'order_id'     => $order->get_id(),
-					'address_type' => 'billing',
-				),
-				'where_format' => array( '%d', '%s' ),
-				'row'          => $row['row'],
-				'row_format'   => array_values( $row['format'] ),
-			);
-		}
-
-		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->shipping_address_column_mapping );
-		if ( $row ) {
-			// wc_order_addresses: shipping.
-			$db_updates[] = array(
-				'table'        => self::get_addresses_table_name(),
-				'where'        => array(
-					'order_id'     => $order->get_id(),
-					'address_type' => 'shipping',
-				),
-				'where_format' => array( '%d', '%s' ),
-				'row'          => $row['row'],
-				'row_format'   => array_values( $row['format'] ),
-			);
-		}
-
-		// Persist changes.
-		foreach ( $db_updates as $update ) {
-			$wpdb->update(
-				$update['table'],
-				$update['row'],
-				$update['where'],
-				$update['row_format'],
-				$update['where_format']
-			);
+		// Mark user account as active.
+		if ( array_key_exists( 'customer_id', $changes ) ) {
+			wc_update_user_last_active( $order->get_customer_id() );
 		}
 
 		$order->save_meta_data();
-
-		// TODO: legacy meta (_paid_date, completed_date)
-		// TODO: update download permissions.
-		// TODO: mark user account as active.
-
 		$order->apply_changes();
 		$this->clear_caches( $order );
+
+		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	public function get_coupon_held_keys( $order, $coupon_id = null ) {
