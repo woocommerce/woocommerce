@@ -49,7 +49,6 @@
 		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "^7.17.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/data": "workspace:*",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
