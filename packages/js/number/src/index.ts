@@ -1,13 +1,21 @@
-const numberFormatter = require( 'locutus/php/strings/number_format' );
+/**
+ * External dependencies
+ */
+import numberFormatter from 'locutus/php/strings/number_format';
 
 /**
  * Number formatting configuration object
  *
  * @typedef {Object} NumberConfig
- * @property {number} [precision]         Decimal precision.
- * @property {string} [decimalSeparator]  Decimal separator.
- * @property {string} [thousandSeparator] Character used to separate thousands groups.
+ * @property {number|string|null} [precision]         Decimal precision.
+ * @property {string}             [decimalSeparator]  Decimal separator.
+ * @property {string}             [thousandSeparator] Character used to separate thousands groups.
  */
+export type NumberConfig = {
+	precision: number | string | null;
+	decimalSeparator: string;
+	thousandSeparator: string;
+};
 
 /**
  * Formats a number using site's current locale
@@ -18,9 +26,17 @@ const numberFormatter = require( 'locutus/php/strings/number_format' );
  * @return {string} A formatted string.
  */
 export function numberFormat(
-	{ precision = null, decimalSeparator = '.', thousandSeparator = ',' },
-	number
+	{
+		precision = null,
+		decimalSeparator = '.',
+		thousandSeparator = ',',
+	}: Partial< NumberConfig >,
+	number?: number | string
 ) {
+	if ( number === undefined ) {
+		return '';
+	}
+
 	if ( typeof number !== 'number' ) {
 		number = parseFloat( number );
 	}
@@ -29,8 +45,7 @@ export function numberFormat(
 		return '';
 	}
 
-	let parsedPrecision = parseInt( precision, 10 );
-
+	let parsedPrecision = precision === null ? NaN : Number( precision );
 	if ( isNaN( parsedPrecision ) ) {
 		const [ , decimals ] = number.toString().split( '.' );
 		parsedPrecision = decimals ? decimals.length : 0;
@@ -54,7 +69,11 @@ export function numberFormat(
  * @param {number}       value        to format.
  * @return {string | number | null} A formatted string.
  */
-export function formatValue( numberConfig, type, value ) {
+export function formatValue(
+	numberConfig: NumberConfig,
+	type: string,
+	value: number
+) {
 	if ( ! Number.isFinite( value ) ) {
 		return null;
 	}
@@ -65,6 +84,7 @@ export function formatValue( numberConfig, type, value ) {
 		case 'number':
 			return numberFormat( { ...numberConfig, precision: null }, value );
 	}
+	return null;
 }
 
 /**
@@ -74,7 +94,7 @@ export function formatValue( numberConfig, type, value ) {
  * @param {number} secondaryValue the baseline which to calculdate the change against.
  * @return {?number} Percent change between the primaryValue from the secondaryValue.
  */
-export function calculateDelta( primaryValue, secondaryValue ) {
+export function calculateDelta( primaryValue: number, secondaryValue: number ) {
 	if (
 		! Number.isFinite( primaryValue ) ||
 		! Number.isFinite( secondaryValue )
