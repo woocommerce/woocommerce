@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the `is_editable`, `needs_payment`, and `needs_processing` boolean properties to order response objects in both v2 and v3 of the WC REST API.
