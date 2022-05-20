@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Fix typescript type errors in react admin ./client/wp-admin-scripts
