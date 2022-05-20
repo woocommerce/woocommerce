@@ -19,9 +19,6 @@ jobs:
                 workflow_name: smoke-test-release
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - name: Install Jest
-              run: pnpm install -g jest
-
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -29,6 +26,9 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
+
+            - name: Install Jest
+              run: npm install -g jest
 
             - name: Run smoke test.
               working-directory: plugins/woocommerce
@@ -70,7 +70,7 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - uses: ./.github/actions/cache-deps
+            - uses: ./package/woocommerce/.github/actions/cache-deps
               with:
                 workflow_name: smoke-test-release
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
@@ -93,8 +93,9 @@ jobs:
                 php-version: '7.4'
 
             - name: Install and Build
-              working-directory: package/woocommerce
-              uses: ./.github/actions/install-build
+              uses: ./package/woocommerce/.github/actions/install-build
+              with:
+                working_directory: package/woocommerce
 
             - name: Download WooCommerce release zip
               working-directory: tmp
@@ -148,7 +149,7 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - uses: ./.github/actions/cache-deps
+            - uses: ./package/woocommerce/.github/actions/cache-deps
               with:
                 workflow_name: smoke-test-release
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
@@ -171,8 +172,9 @@ jobs:
                 php-version: '7.4'
 
             - name: Install and Build
-              working-directory: package/woocommerce
-              uses: ./.github/actions/install-build
+              uses: ./package/woocommerce/.github/actions/install-build
+              with:
+                working_directory: package/woocommerce
 
             - name: Download WooCommerce release zip
               working-directory: tmp
