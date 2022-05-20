@@ -26,7 +26,6 @@ function getExperimentsFromFrontend() {
 		return {
 			name: key.replace( EXPERIMENT_NAME_PREFIX, '' ),
 			variation: objectValue.variationName || 'control',
-			source: 'frontend',
 		};
 	} );
 }
@@ -47,12 +46,22 @@ export function* getExperiments() {
 					experiment.option_value === 'control'
 						? 'control'
 						: 'treatment',
-				source: 'backend',
 			};
 		} );
-		yield setExperiments(
-			getExperimentsFromFrontend().concat( experimentsFromBackend )
-		);
+
+		// Remove duplicate.
+		const experiments = getExperimentsFromFrontend()
+			.concat( experimentsFromBackend )
+			.filter(
+				( value, index, self ) =>
+					index ===
+					self.findIndex(
+						( t ) =>
+							t.place === value.place && t.name === value.name
+					)
+			);
+
+		yield setExperiments( experiments );
 	} catch ( error ) {
 		throw new Error();
 	}

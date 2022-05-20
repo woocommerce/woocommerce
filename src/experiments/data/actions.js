@@ -53,21 +53,17 @@ function* toggleBackendExperiment( experimentName, newVariation ) {
 	}
 }
 
-export function* toggleExperiment( experimentName, currentVariation, source ) {
+export function* toggleExperiment( experimentName, currentVariation ) {
 	const newVariation =
 		currentVariation === 'control' ? 'treatment' : 'control';
 
-	if ( source === 'frontend' ) {
-		toggleFrontendExperiment( experimentName, newVariation );
-	} else {
-		yield toggleBackendExperiment( experimentName, newVariation );
-	}
+	toggleFrontendExperiment( experimentName, newVariation );
+	yield toggleBackendExperiment( experimentName, newVariation );
 
 	return {
 		type: TYPES.TOGGLE_EXPERIMENT,
 		experimentName,
 		newVariation,
-		source,
 	};
 }
 
@@ -78,17 +74,13 @@ export function setExperiments( experiments ) {
 	};
 }
 
-export function* addExperiment( experimentName, variation, source ) {
-	if ( source === 'frontend' ) {
-		toggleFrontendExperiment( experimentName, variation );
-	} else {
-		yield toggleBackendExperiment( experimentName, variation );
-	}
+export function* addExperiment( experimentName, variation ) {
+	toggleFrontendExperiment( experimentName, variation );
+	yield toggleBackendExperiment( experimentName, variation );
 
 	return {
 		type: TYPES.ADD_EXPERIMENT,
 		experimentName,
 		variation,
-		source,
 	};
 }

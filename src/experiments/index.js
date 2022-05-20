@@ -21,6 +21,7 @@ function Experiments( {
 	if ( isResolving ) {
 		return null;
 	}
+
 	return (
 		<div id="wc-admin-test-helper-experiments">
 			<h2>Experiments</h2>
@@ -50,38 +51,28 @@ function Experiments( {
 					<tr>
 						<th>Experiment</th>
 						<th>Variation</th>
-						<th>Source</th>
 						<th>Toggle</th>
 					</tr>
 				</thead>
 				<tbody>
-					{ experiments.map(
-						( { name, variation, source }, index ) => {
-							return (
-								<tr key={ index }>
-									<td className="experiment-name">
-										{ name }
-									</td>
-									<td align="center">{ variation }</td>
-									<td align="center">{ source }</td>
-									<td align="center">
-										<Button
-											onClick={ () => {
-												toggleExperiment(
-													name,
-													variation,
-													source
-												);
-											} }
-											isPrimary
-										>
-											Toggle
-										</Button>
-									</td>
-								</tr>
-							);
-						}
-					) }
+					{ experiments.map( ( { name, variation }, index ) => {
+						return (
+							<tr key={ index }>
+								<td className="experiment-name">{ name }</td>
+								<td align="center">{ variation }</td>
+								<td align="center">
+									<Button
+										onClick={ () => {
+											toggleExperiment( name, variation );
+										} }
+										isPrimary
+									>
+										Toggle
+									</Button>
+								</td>
+							</tr>
+						);
+					} ) }
 				</tbody>
 			</table>
 		</div>

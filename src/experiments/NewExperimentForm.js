@@ -14,15 +14,10 @@ import './data';
 
 function NewExperimentForm( { addExperiment } ) {
 	const [ experimentName, setExperimentName ] = useState( null );
-	const [ source, setSource ] = useState( 'frontend' );
 	const [ variation, setVariation ] = useState( 'treatment' );
 
 	const getInputValue = ( event ) => {
 		setExperimentName( event.target.value );
-	};
-
-	const getSourceInput = ( event ) => {
-		setSource( event.target.value );
 	};
 
 	const getVariationInput = ( event ) => {
@@ -30,7 +25,7 @@ function NewExperimentForm( { addExperiment } ) {
 	};
 
 	const AddNewExperiment = () => {
-		addExperiment( experimentName, variation, source );
+		addExperiment( experimentName, variation );
 	};
 
 	return (
@@ -39,10 +34,6 @@ function NewExperimentForm( { addExperiment } ) {
 				Don&apos;t see an experiment you want to test? Add it manually.
 			</div>
 			<input type="text" onChange={ getInputValue } />
-			<select value={ source } onChange={ getSourceInput }>
-				<option value="frontend">frontend</option>
-				<option value="backend">backend</option>
-			</select>
 			<select value={ variation } onChange={ getVariationInput }>
 				<option value="treatment">treatment</option>
 				<option value="control">control</option>
