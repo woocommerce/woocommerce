@@ -4,7 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sprintf } from '@wordpress/i18n';
-import { numberFormat } from '@woocommerce/number';
+import { NumberConfig, numberFormat } from '@woocommerce/number';
 import deprecated from '@wordpress/deprecated';
 
 /**
@@ -18,26 +18,106 @@ import deprecated from '@wordpress/deprecated';
  * @typedef {NumberConfig & CurrencyProps} CurrencyConfig
  */
 
+export type SymbolPosition = 'left' | 'right' | 'left_space' | 'right_space';
+
+export type CurrencyProps = {
+	code: string;
+	symbol: string;
+	symbolPosition: SymbolPosition;
+	priceFormat?: string;
+};
+
+export type CurrencyConfig = Partial< NumberConfig & CurrencyProps >;
+
+export type Currency = {
+	code: string;
+	symbol: string;
+	symbolPosition: string;
+	decimalSeparator: string;
+	priceFormat: string;
+	thousandSeparator: string;
+	precision: number;
+};
+
+export type CountryInfo = {
+	// https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/i18n/locale-info.php#L15-L28
+	currency_code: string;
+	currency_pos: SymbolPosition;
+	thousand_sep: string;
+	decimal_sep: string;
+	num_decimals: number;
+	weight_unit: string;
+	dimension_unit: string;
+	direction: string;
+	default_locale: string;
+	name: string;
+	singular: string;
+	plural: string;
+	short_symbol: string;
+	locales: string[];
+};
+
 /**
  *
  * @param {CurrencyConfig} currencySetting
  * @return {Object} currency object
  */
-const CurrencyFactory = function ( currencySetting ) {
-	let currency;
+const CurrencyFactory = function ( currencySetting?: CurrencyConfig ) {
+	let currency: Currency;
 
-	setCurrency( currencySetting );
+	function stripTags( str: string ) {
+		const tmp = document.createElement( 'DIV' );
+		tmp.innerHTML = str;
+		return tmp.textContent || tmp.innerText || '';
+	}
 
-	function setCurrency( setting ) {
+	/**
+	 * Get the default price format from a currency.
+	 *
+	 * @param {CurrencyConfig} config Currency configuration.
+	 * @return {string} Price format.
+	 */
+	function getPriceFormat( config: CurrencyConfig ) {
+		if ( config.priceFormat ) {
+			return stripTags( config.priceFormat.toString() );
+		}
+
+		switch ( config.symbolPosition ) {
+			case 'left':
+				return '%1$s%2$s';
+			case 'right':
+				return '%2$s%1$s';
+			case 'left_space':
+				return '%1$s %2$s';
+			case 'right_space':
+				return '%2$s %1$s';
+		}
+
+		return '%1$s%2$s';
+	}
+
+	function setCurrency( setting?: CurrencyConfig ) {
 		const defaultCurrency = {
 			code: 'USD',
 			symbol: '$',
-			symbolPosition: 'left',
+			symbolPosition: 'left' as const,
 			thousandSeparator: ',',
 			decimalSeparator: '.',
 			precision: 2,
 		};
 		const config = { ...defaultCurrency, ...setting };
+
+		let precision = config.precision;
+		if ( precision === null ) {
+			// eslint-disable-next-line no-console
+			console.warn( 'Currency precision is null' );
+			// eslint-enable-next-line no-console
+
+			precision = NaN;
+		} else if ( typeof precision === 'string' ) {
+			precision = parseInt( precision, 10 );
+		}
+
 		currency = {
 			code: config.code.toString(),
 			symbol: config.symbol.toString(),
@@ -45,14 +125,8 @@ const CurrencyFactory = function ( currencySetting ) {
 			decimalSeparator: config.decimalSeparator.toString(),
 			priceFormat: getPriceFormat( config ),
 			thousandSeparator: config.thousandSeparator.toString(),
-			precision: parseInt( config.precision, 10 ),
+			precision,
 		};
-	}
-
-	function stripTags( str ) {
-		const tmp = document.createElement( 'DIV' );
-		tmp.innerHTML = str;
-		return tmp.textContent || tmp.innerText || '';
 	}
 
 	/**
@@ -62,7 +136,7 @@ const CurrencyFactory = function ( currencySetting ) {
 	 * @param {boolean}       [useCode=false] Set to `true` to use the currency code instead of the symbol.
 	 * @return {?string} A formatted string.
 	 */
-	function formatAmount( number, useCode = false ) {
+	function formatAmount( number: number | string, useCode = false ) {
 		const formattedNumber = numberFormat( currency, number );
 
 		if ( formattedNumber === '' ) {
@@ -82,7 +156,7 @@ const CurrencyFactory = function ( currencySetting ) {
 	 * @param {number|string} number number to format
 	 * @return {?string} A formatted string.
 	 */
-	function formatCurrency( number ) {
+	function formatCurrency( number: number | string ) {
 		deprecated( 'Currency().formatCurrency', {
 			version: '5.0.0',
 			alternative: 'Currency().formatAmount',
@@ -90,31 +164,6 @@ const CurrencyFactory = function ( currencySetting ) {
 			hint: '`formatAmount` accepts the same arguments as formatCurrency',
 		} );
 		return formatAmount( number );
-	}
-
-	/**
-	 * Get the default price format from a currency.
-	 *
-	 * @param {CurrencyConfig} config Currency configuration.
-	 * @return {string} Price format.
-	 */
-	function getPriceFormat( config ) {
-		if ( config.priceFormat ) {
-			return stripTags( config.priceFormat.toString() );
-		}
-
-		switch ( config.symbolPosition ) {
-			case 'left':
-				return '%1$s%2$s';
-			case 'right':
-				return '%2$s%1$s';
-			case 'left_space':
-				return '%1$s %2$s';
-			case 'right_space':
-				return '%2$s %1$s';
-		}
-
-		return '%1$s%2$s';
 	}
 
 	/**
@@ -126,13 +175,16 @@ const CurrencyFactory = function ( currencySetting ) {
 	 * @return {CurrencyConfig | {}} Formatted currency data for country.
 	 */
 	function getDataForCountry(
-		countryCode,
-		localeInfo = {},
-		currencySymbols = {}
-	) {
-		const countryInfo = localeInfo[ countryCode ] || {};
-		const symbol = currencySymbols[ countryInfo.currency_code ];
+		countryCode: string,
+		localeInfo: Record< string, CountryInfo | undefined > = {},
+		currencySymbols: Record< string, string | undefined > = {}
+	): CurrencyConfig | Record< string, never > {
+		const countryInfo = localeInfo[ countryCode ];
+		if ( ! countryInfo ) {
+			return {};
+		}
 
+		const symbol = currencySymbols[ countryInfo.currency_code ];
 		if ( ! symbol ) {
 			return {};
 		}
@@ -146,6 +198,8 @@ const CurrencyFactory = function ( currencySetting ) {
 			precision: countryInfo.num_decimals,
 		};
 	}
+
+	setCurrency( currencySetting );
 
 	return {
 		getCurrencyConfig: () => {
@@ -164,7 +218,7 @@ const CurrencyFactory = function ( currencySetting ) {
 		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
 		 * @return {number} The original number rounded to a decimal point
 		 */
-		formatDecimal( number ) {
+		formatDecimal( number: number | string ) {
 			if ( typeof number !== 'number' ) {
 				number = parseFloat( number );
 			}
@@ -185,7 +239,7 @@ const CurrencyFactory = function ( currencySetting ) {
 		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
 		 * @return {string}               The original number rounded to a decimal point
 		 */
-		formatDecimalString( number ) {
+		formatDecimalString( number: number | string ) {
 			if ( typeof number !== 'number' ) {
 				number = parseFloat( number );
 			}
@@ -202,7 +256,7 @@ const CurrencyFactory = function ( currencySetting ) {
 		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
 		 * @return {Node|string} The number formatted as currency and rendered for display.
 		 */
-		render( number ) {
+		render( number: number | string ) {
 			if ( typeof number !== 'number' ) {
 				number = parseFloat( number );
 			}

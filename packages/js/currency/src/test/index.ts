@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import Currency from '../';
+import Currency from '..';
 
 describe( 'formatAmount', () => {
 	it( 'should use defaults (USD) when currency not passed in', () => {
@@ -37,7 +37,9 @@ describe( 'formatAmount', () => {
 	it( "should return empty string when given an input that isn't a number", () => {
 		const currency = Currency();
 		expect( currency.formatAmount( 'abc' ) ).toBe( '' );
+		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatAmount( false ) ).toBe( '' );
+		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatAmount( null ) ).toBe( '' );
 	} );
 } );
@@ -65,7 +67,9 @@ describe( 'currency.formatDecimal', () => {
 	it( "should return 0 when given an input that isn't a number", () => {
 		const currency = Currency();
 		expect( currency.formatDecimal( 'abc' ) ).toBe( 0 );
+		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatDecimal( false ) ).toBe( 0 );
+		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatDecimal( null ) ).toBe( 0 );
 	} );
 } );
@@ -93,7 +97,9 @@ describe( 'currency.formatDecimalString', () => {
 	it( "should return empty string when given an input that isn't a number", () => {
 		const currency = Currency();
 		expect( currency.formatDecimalString( 'abc' ) ).toBe( '' );
+		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatDecimalString( false ) ).toBe( '' );
+		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatDecimalString( null ) ).toBe( '' );
 	} );
 } );
