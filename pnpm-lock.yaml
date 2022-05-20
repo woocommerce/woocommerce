@@ -1182,6 +1182,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7
       '@babel/register': 7.12.1
+      '@playwright/test': ^1.22.1
       '@typescript-eslint/eslint-plugin': 3.10.1
       '@typescript-eslint/experimental-utils': 3.10.1
       '@typescript-eslint/parser': 3.10.1
@@ -1221,6 +1222,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@babel/register': 7.12.1_@babel+core@7.12.9
+      '@playwright/test': 1.22.1
       '@typescript-eslint/eslint-plugin': 3.10.1_aab05197bc2ab2306ca58e96baf5381b
       '@typescript-eslint/experimental-utils': 3.10.1_eslint@6.8.0+typescript@3.9.7
       '@typescript-eslint/parser': 3.10.1_eslint@6.8.0+typescript@3.9.7
@@ -10154,6 +10156,14 @@ packages:
       typescript: 4.2.4
     dev: true
 
+  /@playwright/test/1.22.1:
+    resolution: {integrity: sha512-8ouMBUboYslHom41W8bnSEn0TwlAMHhCACwOZeuiAgzukj7KobpZ+UBwrGE0jJ0UblJbKAQNRHXL+z7sDSkb6g==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.22.1
+    dev: true
+
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_06cd85ae30adde416cafc06517ba554d:
     resolution: {integrity: sha512-ccap6o7+y5L8cnvkZ9h8UXCGyy2DqtwCD+/N3Yru6lxMvcdkPKtdx13qd7sAC9s5qZktOmWf9lfUjsGOvSdYhg==}
     engines: {node: '>= 10.13'}
@@ -17574,7 +17584,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -17604,7 +17614,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /babel-messages/6.23.0:
@@ -20026,7 +20036,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -31827,6 +31837,12 @@ packages:
       find-up: 5.0.0
     dev: true
 
+  /playwright-core/1.22.1:
+    resolution: {integrity: sha512-H+ZUVYnceWNXrRf3oxTEKAr81QzFsCKu5Fp//fEjQvqgKkfA1iX3E9DBrPJpPNOrgVzcE+IqeI0fDmYJe6Ynnw==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
+
   /plur/4.0.0:
     resolution: {integrity: sha512-4UGewrYgqDFw9vV6zNV+ADmPAUAfJPKtGvb/VdpQAx25X5f3xXdGdyOEVFwkl8Hl/tl7+xbeHqSEM+D5/TirUg==}
     engines: {node: '>=10'}
@@ -33604,7 +33620,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /rc/1.2.8:
@@ -37138,7 +37154,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
@@ -37222,7 +37238,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
     dev: true
