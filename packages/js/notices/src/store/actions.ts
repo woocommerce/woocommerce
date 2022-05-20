@@ -56,29 +56,20 @@ export type Options = {
 export function createNotice(
 	status: Status = DEFAULT_STATUS,
 	content: string,
-	{
-		speak,
-		isDismissible,
-		context,
-		id,
-		actions,
-		type,
-		__unstableHTML,
-		icon,
-		explicitDismiss,
-		onDismiss,
-	}: Options = {
-		speak: true,
-		isDismissible: true,
-		context: DEFAULT_CONTEXT,
-		id: uniqueId( DEFAULT_CONTEXT ),
-		actions: [],
-		type: 'default',
-		icon: null,
-		explicitDismiss: false,
-		onDismiss: null,
-	}
+	options: Partial< Options > = {}
 ) {
+	const {
+		speak = true,
+		isDismissible = true,
+		context = DEFAULT_CONTEXT,
+		id = uniqueId( DEFAULT_CONTEXT ),
+		actions = [],
+		type = 'default',
+		__unstableHTML = false,
+		icon = null,
+		explicitDismiss = false,
+		onDismiss = null,
+	} = options;
 	// The supported value shape of content is currently limited to plain text
 	// strings. To avoid setting expectation that e.g. a WPElement could be
 	// supported, cast to a string.
