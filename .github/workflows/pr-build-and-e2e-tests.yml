@@ -33,7 +33,7 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
-              if: ${{ env.E2E_PLAYWRIGHT != true }}
+              if: env.E2E_PLAYWRIGHT != true
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
