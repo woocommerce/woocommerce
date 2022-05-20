@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make sure WooCommerce Admin is also being disabled on multi sites. #32981

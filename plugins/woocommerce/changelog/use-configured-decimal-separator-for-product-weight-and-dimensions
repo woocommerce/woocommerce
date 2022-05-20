@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use the configured decimal separator to format product weight and dimensions
