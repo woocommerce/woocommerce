@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Also allow getting category ID as option ID instead of term slug in wc-enhanced-select.

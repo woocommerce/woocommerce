@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Effectively synchronize orders from the posts table to the custom orders table.
