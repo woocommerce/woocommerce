@@ -613,7 +613,7 @@ class ReviewsListTable extends WP_List_Table {
 		/**
 		 * Filters the table columns.
 		 *
-		 * @since 6.6.0
+		 * @since 6.7.0
 		 *
 		 * @param array $columns
 		 */
@@ -1227,7 +1227,7 @@ class ReviewsListTable extends WP_List_Table {
 		 *
 		 * This action can be used to render custom columns that have been added.
 		 *
-		 * @since 6.6.0
+		 * @since 6.7.0
 		 *
 		 * @param WP_Comment $item The review or reply being rendered.
 		 */
@@ -1249,7 +1249,7 @@ class ReviewsListTable extends WP_List_Table {
 		/**
 		 * Filters the output of a column.
 		 *
-		 * @since 6.6.0
+		 * @since 6.7.0
 		 *
 		 * @param string     $output The column output.
 		 * @param WP_Comment $item   The product review being rendered.
