@@ -19,7 +19,7 @@ type CustomerEffortScoreProps = {
 	onNoticeShownCallback?: () => void;
 	onNoticeDismissedCallback?: () => void;
 	onModalShownCallback?: () => void;
-	icon?: React.ReactNode;
+	icon?: React.ReactElement | null;
 };
 
 /**
