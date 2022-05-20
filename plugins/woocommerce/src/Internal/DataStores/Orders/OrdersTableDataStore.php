@@ -343,7 +343,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'type' => 'decimal',
 			'name' => 'discount_total',
 		),
-		'recorded_sales'              => array( 'type' => 'bool' ),
+		'recorded_sales'              => array(
+			'type' => 'bool',
+			'name' => 'recorded_sales',
+		),
 	);
 
 	/**
@@ -414,8 +417,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order ID or order object.
 	 * @param bool      $set True or false.
+	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_download_permissions_granted( $order, $set ) {
+	public function set_download_permissions_granted( $order, $set, $save = true ) {
 		return $order->update_meta_data( '_download_permissions_granted', wc_bool_to_string( $set ) );
 	}
 
@@ -435,8 +439,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
+	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_recorded_sales( $order, $set ) {
+	public function set_recorded_sales( $order, $set, $save = true ) {
 		return $order->update_meta_data( '_recorded_sales', wc_bool_to_string( $set ) );
 	}
 
@@ -456,8 +461,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
+	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_recorded_coupon_usage_counts( $order, $set ) {
+	public function set_recorded_coupon_usage_counts( $order, $set, $save = true ) {
 		return $order->update_meta_data( '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
 	}
 
@@ -476,10 +482,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * Stores information about whether email was sent.
 	 *
 	 * @param \WC_Order $order Order object.
-	 *
 	 * @param bool      $set True or false.
+	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_email_sent( $order, $set ) {
+	public function set_email_sent( $order, $set, $save = true ) {
 		return $order->update_meta_data( '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
 
@@ -499,10 +505,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @param bool      $set True or false.
-	 *
+	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 * @return bool Whether email was sent.
 	 */
-	private function set_new_order_email_sent( $order, $set ) {
+	private function set_new_order_email_sent( $order, $set, $save = true ) {
 		return $this->set_email_sent( $order, $set );
 	}
 
@@ -514,6 +520,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether stock was reduced.
 	 */
 	public function get_stock_reduced( $order ) {
+		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
 		return wc_string_to_bool( $order->get_meta( '_order_stock_reduced', true ) );
 	}
 
@@ -522,8 +529,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Order $order Order ID or order object.
 	 * @param bool      $set True or false.
+	 * @param bool      $save Whether to persist changes to db immediately or not.
 	 */
-	public function set_stock_reduced( $order, $set ) {
+	public function set_stock_reduced( $order, $set, $save = true ) {
+		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
 		return $order->update_meta_data( '_order_stock_reduced', wc_string_to_bool( $set ) );
 	}
 
@@ -606,7 +615,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
 					$order->{$prop_setter_function_name}( $order_data->{$prop_details['name']} );
 				} elseif ( is_callable( array( $this, $prop_setter_function_name ) ) ) {
-					$this->{$prop_setter_function_name}( $order, $order_data->{$prop_details['name']} );
+					$this->{$prop_setter_function_name}( $order, $order_data->{$prop_details['name']}, false );
 				}
 			}
 		}
