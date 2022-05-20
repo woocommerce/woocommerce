@@ -154,7 +154,7 @@ describe( 'Container', () => {
 			window.location = new URL(
 				getAdminLink( 'admin.php?page=wc-admin&path=/child' )
 			);
-			getHistory().push( getAdminLink( '/child' ) );
+			getHistory().push( new URL( getAdminLink( '/child' ) ) );
 		} );
 
 		await waitFor( () =>
