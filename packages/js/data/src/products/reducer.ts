@@ -37,7 +37,7 @@ const reducer: Reducer< ProductState, Actions > = (
 ) => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
-			case TYPES.SET_PRODUCT:
+			case TYPES.GET_PRODUCT_SUCCESS:
 				const productData = state.data || {};
 				return {
 					...state,
@@ -49,7 +49,7 @@ const reducer: Reducer< ProductState, Actions > = (
 						},
 					},
 				};
-			case TYPES.SET_PRODUCTS:
+			case TYPES.GET_PRODUCTS_SUCCESS:
 				const ids: number[] = [];
 				const nextProducts = payload.products.reduce<
 					Record< number, PartialProduct >
@@ -70,7 +70,7 @@ const reducer: Reducer< ProductState, Actions > = (
 						...nextProducts,
 					},
 				};
-			case TYPES.SET_PRODUCTS_TOTAL_COUNT:
+			case TYPES.GET_PRODUCTS_TOTAL_COUNT_SUCCESS:
 				const totalResourceName = getTotalProductCountResourceName(
 					payload.query
 				);
@@ -81,7 +81,9 @@ const reducer: Reducer< ProductState, Actions > = (
 						[ totalResourceName ]: payload.totalCount,
 					},
 				};
-			case TYPES.SET_ERROR:
+			case TYPES.GET_PRODUCT_ERROR:
+			case TYPES.GET_PRODUCTS_ERROR:
+			case TYPES.GET_PRODUCTS_TOTAL_COUNT_ERROR:
 				return {
 					...state,
 					errors: {

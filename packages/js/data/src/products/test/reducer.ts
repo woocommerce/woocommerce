@@ -24,7 +24,7 @@ describe( 'products reducer', () => {
 		expect( state ).not.toBe( defaultState );
 	} );
 
-	it( 'should handle SET_PRODUCT', () => {
+	it( 'should handle GET_PRODUCT_SUCCESS', () => {
 		const itemType = 'guyisms';
 		const initialState: ProductState = {
 			products: {
@@ -47,7 +47,7 @@ describe( 'products reducer', () => {
 		};
 
 		const state = reducer( initialState, {
-			type: TYPES.SET_PRODUCT,
+			type: TYPES.GET_PRODUCT_SUCCESS,
 			id: update.id,
 			product: update,
 		} );
@@ -61,7 +61,7 @@ describe( 'products reducer', () => {
 		expect( state.data[ 2 ].status ).toEqual( update.status );
 	} );
 
-	it( 'should handle SET_PRODUCTS', () => {
+	it( 'should handle GET_PRODUCTS_SUCCESS', () => {
 		const products: PartialProduct[] = [
 			{ id: 1, name: 'Yum!' },
 			{ id: 2, name: 'Dynamite!' },
@@ -69,7 +69,7 @@ describe( 'products reducer', () => {
 		const totalCount = 45;
 		const query: Partial< ProductQuery > = { status: 'draft' };
 		const state = reducer( defaultState, {
-			type: TYPES.SET_PRODUCTS,
+			type: TYPES.GET_PRODUCTS_SUCCESS,
 			products,
 			query,
 			totalCount,
@@ -89,7 +89,7 @@ describe( 'products reducer', () => {
 		expect( state.data[ 2 ] ).toBe( products[ 1 ] );
 	} );
 
-	it( 'should handle SET_PRODUCTS_TOTAL_COUNT', () => {
+	it( 'should handle GET_PRODUCTS_TOTAL_COUNT_SUCCESS', () => {
 		const initialQuery: Partial< ProductQuery > = {
 			status: 'publish',
 			page: 1,
@@ -113,7 +113,7 @@ describe( 'products reducer', () => {
 		};
 
 		const state = reducer( initialState, {
-			type: TYPES.SET_PRODUCTS_TOTAL_COUNT,
+			type: TYPES.GET_PRODUCTS_TOTAL_COUNT_SUCCESS,
 			query: similarQueryForTotals,
 			totalCount: 2,
 		} );
@@ -123,12 +123,12 @@ describe( 'products reducer', () => {
 		} );
 	} );
 
-	it( 'should handle SET_ERROR', () => {
+	it( 'should handle GET_PRODUCTS_ERROR', () => {
 		const query: Partial< ProductQuery > = { status: 'draft' };
 		const resourceName = getProductResourceName( query );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
-			type: TYPES.SET_ERROR,
+			type: TYPES.GET_PRODUCTS_ERROR,
 			query,
 			error,
 		} );

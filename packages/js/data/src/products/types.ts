@@ -3,6 +3,11 @@
  */
 import { Schema } from '@wordpress/core-data';
 
+/**
+ * Internal dependencies
+ */
+import { BaseQueryParams } from '../types';
+
 export type Product = Schema.Post & {
 	id: number;
 	name: string;
@@ -25,18 +30,7 @@ export type Product = Schema.Post & {
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
-export type ProductQuery = {
-	context: string;
-	page: number;
-	per_page: number;
-	search: string;
-	_fields: string[];
-	after: string;
-	before: string;
-	exclude: string;
-	include: string;
-	offset: number;
-	order: 'asc' | 'desc';
+export type ProductQuery = BaseQueryParams & {
 	orderby:
 		| 'date'
 		| 'id'
@@ -46,13 +40,11 @@ export type ProductQuery = {
 		| 'price'
 		| 'popularity'
 		| 'rating';
-	parent: number[];
-	parent_exclude: number[];
 	slug: string;
 	status: 'any' | 'draft' | 'pending' | 'private' | 'publish' | 'future';
 	type: 'simple' | 'grouped' | 'external' | 'variable';
 	sku: string;
-	featured: string;
+	featured: boolean;
 	category: string;
 	tag: string;
 	shipping_class: string;
@@ -62,5 +54,5 @@ export type ProductQuery = {
 	on_sale: boolean;
 	min_price: string;
 	max_price: string;
-	stock_status: string;
+	stock_status: 'instock' | 'outofstock';
 };
