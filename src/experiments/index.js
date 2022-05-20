@@ -15,6 +15,7 @@ import NewExperimentForm from './NewExperimentForm';
 function Experiments( {
 	experiments,
 	toggleExperiment,
+	deleteExperiment,
 	isTrackingEnabled,
 	isResolving,
 } ) {
@@ -51,7 +52,7 @@ function Experiments( {
 					<tr>
 						<th>Experiment</th>
 						<th>Variation</th>
-						<th>Toggle</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -60,7 +61,7 @@ function Experiments( {
 							<tr key={ index }>
 								<td className="experiment-name">{ name }</td>
 								<td align="center">{ variation }</td>
-								<td align="center">
+								<td className="actions" align="center">
 									<Button
 										onClick={ () => {
 											toggleExperiment( name, variation );
@@ -68,6 +69,14 @@ function Experiments( {
 										isPrimary
 									>
 										Toggle
+									</Button>
+									<Button
+										onClick={ () => {
+											deleteExperiment( name );
+										} }
+										className="btn btn-danger"
+									>
+										Delete
 									</Button>
 								</td>
 							</tr>
@@ -91,10 +100,11 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { toggleExperiment } = dispatch( STORE_KEY );
+		const { toggleExperiment, deleteExperiment } = dispatch( STORE_KEY );
 
 		return {
 			toggleExperiment,
+			deleteExperiment,
 		};
 	} )
 )( Experiments );

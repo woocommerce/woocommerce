@@ -93,6 +93,11 @@
 }
 
 #wc-admin-test-helper-experiments {
+	.actions {
+		button {
+			margin-right: 5px;
+		}
+	}
 	.manual-input {
 		margin-bottom: 20px;
 		float: right;

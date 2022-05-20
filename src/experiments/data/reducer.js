@@ -9,6 +9,13 @@ const DEFAULT_STATE = {
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
 	switch ( action.type ) {
+		case TYPES.DELETE_EXPERIMENT:
+			return {
+				...state,
+				experiments: state.experiments.filter( ( experiment ) => {
+					return experiment.name !== action.experimentName;
+				} ),
+			};
 		case TYPES.ADD_EXPERIMENT:
 			const existingExperimentIndex = state.experiments.findIndex(
 				( element ) => {

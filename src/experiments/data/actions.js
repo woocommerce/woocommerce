@@ -84,3 +84,22 @@ export function* addExperiment( experimentName, variation ) {
 		variation,
 	};
 }
+
+export function* deleteExperiment( experimentName ) {
+	window.localStorage.removeItem( EXPERIMENT_NAME_PREFIX + experimentName );
+
+	const optionNames = [
+		TRANSIENT_NAME_PREFIX + experimentName,
+		TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName,
+	];
+
+	yield apiFetch( {
+		method: 'DELETE',
+		path: '/wc-admin-test-helper/options/' + optionNames.join( ',' ),
+	} );
+
+	return {
+		type: TYPES.DELETE_EXPERIMENT,
+		experimentName,
+	};
+}
