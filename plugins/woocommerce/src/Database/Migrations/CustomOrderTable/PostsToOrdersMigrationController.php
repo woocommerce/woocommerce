@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Utilities\ArrayUtil;
-use function cli\err;
 
 /**
  * This is the main class used to perform the complete migration of orders
