@@ -1,27 +1,29 @@
 name: Run tests against PR
 on:
-  pull_request:
-  workflow_dispatch:
+    pull_request:
+    workflow_dispatch:
 
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     e2e-tests-run:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
+        env:
+            E2E_PLAYWRIGHT: true
         steps:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -31,12 +33,28 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
+              if: env.E2E_PLAYWRIGHT == false
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
               run: pnpm exec wc-e2e test:e2e
+
+            - name: Run (Playwright) tests command.
+              if: env.E2E_PLAYWRIGHT == true
+              working-directory: plugins/woocommerce
+              run: pnpx playwright test --config=e2e/playwright.config.js
+
+            - name: Archive (Playwright) E2E test report
+              if: always() && ( env.E2E_PLAYWRIGHT == true )
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: |
+                      plugins/woocommerce/e2e/allure-results
+                      plugins/woocommerce/e2e/allure-report
+                  retention-days: 5
 
             - name: Archive E2E test screenshots
               uses: actions/upload-artifact@v3
@@ -56,13 +74,13 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -87,7 +105,7 @@ jobs:
                   path: |
                       ${{ env.API_TEST_REPORT_DIR }}/allure-results
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
-                  retention-days: 7
+                  retention-days: 5
 
     k6-tests-run:
         name: Runs k6 Performance tests
@@ -96,13 +114,13 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -134,17 +152,16 @@ jobs:
             PR_NUMBER: ${{ github.event.number }}
             RUN_ID: ${{ github.run_id }}
             COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+            API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
+            E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
         steps:
-            - name: Publish API test report
-              env:
-                  ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
+            - name: Publish test reports
               run: |
-                  gh workflow run publish-report.yml \
+                  gh workflow run publish-reports.yml \
                     -f test_workflow=pr \
-                    -f test_type=api \
                     -f run_id=$RUN_ID \
-                    -f artifact_name=$ARTIFACT_NAME \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f e2e_artifact=$E2E_ARTIFACT \
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
                     --repo woocommerce/woocommerce-test-reports
-
