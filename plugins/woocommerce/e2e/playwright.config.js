@@ -9,7 +9,7 @@ const config = {
 	retries: 1,
 	reporter: [
 		[ 'list' ],
-		[ 'html', { outputFolder: 'e2e/output' } ],
+		[ 'html', { outputFolder: 'output' } ],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
 	],
 	use: {
