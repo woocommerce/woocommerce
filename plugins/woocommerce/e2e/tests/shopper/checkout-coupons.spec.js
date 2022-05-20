@@ -22,7 +22,7 @@ const coupons = [
 const discounts = [ '$5.00', '$10.00', '$7.00' ];
 const totals = [ '$15.00', '$10.00', '$13.00' ];
 
-test.describe.only( 'Checkout coupons', () => {
+test.describe( 'Checkout coupons', () => {
 	let firstProductId;
 	const couponBatchId = new Array();
 
