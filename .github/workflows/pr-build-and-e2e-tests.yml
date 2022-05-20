@@ -12,7 +12,7 @@ jobs:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         env:
-            E2E_PLAYWRIGHT: true
+            E2E_PLAYWRIGHT: ${{ true }}
         steps:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
@@ -33,7 +33,7 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
-              if: env.E2E_PLAYWRIGHT == false
+              if: ${{ env.E2E_PLAYWRIGHT != true }}
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
