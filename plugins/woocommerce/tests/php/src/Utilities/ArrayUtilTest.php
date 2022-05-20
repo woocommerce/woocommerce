@@ -134,4 +134,38 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 'buzz', ArrayUtil::get_value_or_default( $array, 'fizz', 'buzz' ) );
 	}
+
+	/**
+	 * Data provider for test_to_ranges_string
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_test_to_ranges_string(): array {
+		return array(
+			array( '1', array( 1 ) ),
+			array( '1, 3, 5, 7, 9, 11, 13-15', array( 1, 3, 5, 7, 9, 11, 13, 14, 15 ) ),
+			array( '1-5', array( 1, 2, 3, 4, 5 ) ),
+			array( '7-10', array( 7, 8, 9, 10 ) ),
+			array( '1-3, 5, 7-8', array( 1, 2, 3, 5, 7, 8 ) ),
+			array( '1-5, 10-12', array( 1, 2, 3, 4, 5, 10, 11, 12 ) ),
+			array( '1-5, 7', array( 1, 2, 3, 4, 5, 7 ) ),
+			array( '10, 12-15', array( 10, 12, 13, 14, 15 ) ),
+			array( '10, 12-15, 101', array( 10, 12, 13, 14, 15, 101 ) ),
+			array( '1-5, 7, 10-12', array( 1, 2, 3, 4, 5, 7, 10, 11, 12 ) ),
+			array( '1-5, 7, 10-12, 101', array( 1, 2, 3, 4, 5, 7, 10, 11, 12, 101 ) ),
+			array( '1-5, 7, 10, 12, 14', array( 14, 12, 10, 1, 2, 3, 4, 5, 7 ) ),
+		);
+	}
+
+	/**
+	 * @testdox `to_ranges_string` works as expected with the default arguments.
+	 * @dataProvider data_provider_for_test_to_ranges_string
+	 *
+	 * @param string $expected_string The expected generated string.
+	 * @param array  $input_array The input array of numbers.
+	 */
+	public function test_to_ranges_string( string $expected_string, array $input_array ) {
+		$actual = ArrayUtil::to_ranges_string( $input_array );
+		$this->assertEquals( $expected_string, $actual );
+	}
 }
