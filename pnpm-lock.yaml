@@ -1198,6 +1198,7 @@ importers:
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/stylelint-config': 19.1.0
       allure-commandline: ^2.17.2
+      allure-playwright: ^2.0.0-beta.16
       autoprefixer: 9.8.6
       babel-eslint: 10.1.0
       chai: 4.2.0
@@ -1239,6 +1240,7 @@ importers:
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/stylelint-config': 19.1.0_stylelint@13.13.1
       allure-commandline: 2.17.2
+      allure-playwright: 2.0.0-beta.16
       autoprefixer: 9.8.6
       babel-eslint: 10.1.0_eslint@6.8.0
       chai: 4.2.0
@@ -16852,6 +16854,20 @@ packages:
       object-assign: 4.1.1
       uuid: 3.4.0
     dev: false
+
+  /allure-js-commons/2.0.0-beta.16:
+    resolution: {integrity: sha512-biAFm8FugPMA0THZpsWLdi+F8n1BeUTYkkpmQ4ZqUAKeg2xcw5arM0Qa4rq6Qs0HPLbdVS9Jj8fb7e/ahCr/Ig==}
+    dependencies:
+      mkdirp: 1.0.4
+      properties: 1.2.1
+      uuid: 8.3.2
+    dev: true
+
+  /allure-playwright/2.0.0-beta.16:
+    resolution: {integrity: sha512-0Nj2BLIIRFUCZn7CGSXYa7d1M+phmSzUwMD3fbHVxO+q10vNrY8Hf5IT2ITwWMtUHaTAE6uH58GPsa6DB9N3Xw==}
+    dependencies:
+      allure-js-commons: 2.0.0-beta.16
+    dev: true
 
   /alphanum-sort/1.0.2:
     resolution: {integrity: sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=}
@@ -33355,6 +33371,11 @@ packages:
       object-assign: 4.1.1
       react-is: 16.13.1
 
+  /properties/1.2.1:
+    resolution: {integrity: sha1-Dul6f8AgsaKlW4ZZ7aSqjYaQlL0=}
+    engines: {node: '>=0.10'}
+    dev: true
+
   /property-information/5.6.0:
     resolution: {integrity: sha512-YUHSPk+A30YPv+0Qf8i9Mbfe/C0hdPXk1s1jPVToV8pk8BQtpw10ct89Eo7OWkutrwqvT0eicAxlOg3dOAu8JA==}
     dependencies:
@@ -38583,7 +38604,6 @@ packages:
   /uuid/8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
-    dev: false
 
   /v8-compile-cache-lib/3.0.0:
     resolution: {integrity: sha512-mpSYqfsFvASnSn5qMiwrr4VKfumbPyONLCOPmsR3A6pTY/r0+tSaVbgPWSAIuzbk3lCTa+FForeTiO+wBQGkjA==}

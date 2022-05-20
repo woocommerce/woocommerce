@@ -57,6 +57,7 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/stylelint-config": "19.1.0",
 		"allure-commandline": "^2.17.2",
+		"allure-playwright": "^2.0.0-beta.16",
 		"autoprefixer": "9.8.6",
 		"babel-eslint": "10.1.0",
 		"chai": "4.2.0",
