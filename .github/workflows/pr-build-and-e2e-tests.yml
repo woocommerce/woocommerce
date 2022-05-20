@@ -51,6 +51,12 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx playwright test --config=e2e/playwright.config.js
 
+            - name: Generate E2E Test report.
+              if: always() && ( env.E2E_PLAYWRIGHT == true )
+              working-directory: plugins/woocommerce
+              run: pnpx allure generate --clean e2e/allure-results --output e2e/al
+lure-report              
+
             - name: Archive (Playwright) E2E test report
               if: always() && ( env.E2E_PLAYWRIGHT == true )
               uses: actions/upload-artifact@v3
