@@ -20,8 +20,8 @@ function actionButtonEventHandler( event ) {
 		return;
 	}
 
-	recordEvent( 'product_category_list_action_click', {
-		selected_action: actions[ actionClass ],
+	recordEvent( 'product_category_manage', {
+		option_selected: actions[ actionClass ],
 	} );
 }
 
