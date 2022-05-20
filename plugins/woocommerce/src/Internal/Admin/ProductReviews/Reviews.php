@@ -106,7 +106,7 @@ class Reviews {
 		 *
 		 * This is aligned to {@see \wc_rest_check_product_reviews_permissions()}
 		 *
-		 * @since 6.6.0
+		 * @since 6.7.0
 		 *
 		 * @param string $capability The capability (defaults to `moderate_comments` for viewing and `edit_products` for editing).
 		 * @param string $context    The context for which the capability is needed.
@@ -191,7 +191,7 @@ class Reviews {
 		/**
 		 * Filters whether the object is a review or a reply to a review.
 		 *
-		 * @since 6.6.0
+		 * @since 6.7.0
 		 *
 		 * @param bool             $is_review_or_reply Whether the object in context is a review or a reply to a review.
 		 * @param WP_Comment|mixed $object             The object in context.
@@ -645,7 +645,7 @@ class Reviews {
 		/**
 		 * Filters the contents of the product reviews list table output.
 		 *
-		 * @since 6.6.0
+		 * @since 6.7.0
 		 *
 		 * @param string           $output             The HTML output of the list table.
 		 * @param ReviewsListTable $reviews_list_table The reviews list table instance.
