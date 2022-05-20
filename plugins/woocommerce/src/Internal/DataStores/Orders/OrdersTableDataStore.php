@@ -587,10 +587,16 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function read( &$order ) {
 		$order->set_defaults();
 		if ( ! $order->get_id() ) {
-			throw new \Exception( __( 'ID must be set for an order to be read', 'woocommerce' ) );
+			throw new \Exception( __( 'ID must be set for an order to be read.', 'woocommerce' ) );
 		}
-		$order->read_meta_data();
+
 		$order_data = $this->get_order_data_for_id( $order->get_id() );
+		if ( ! $order_data ) {
+			throw new \Exception( __( 'Invalid order.', 'woocommerce' ) );
+		}
+
+		$order->read_meta_data();
+
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) ) {
@@ -605,7 +611,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			}
 		}
 
-		$order->set_object_read();
+		$order->set_object_read( true );
 	}
 
 	/**
