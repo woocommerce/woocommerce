@@ -64,6 +64,7 @@ jobs:
                   path: |
                       plugins/woocommerce/e2e/allure-results
                       plugins/woocommerce/e2e/allure-report
+                  if-no-files-found: ignore
                   retention-days: 5
 
             - name: Archive E2E test screenshots
