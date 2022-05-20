@@ -290,7 +290,5 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Remove `react-dates` from woo admin dependency  [#32954](https://github.com/woocommerce/woocommerce/pull/32954)
 * Update - Add status of admin items to system status report  [#33030](https://github.com/woocommerce/woocommerce/pull/33030)
 * Update - Update to record completion time in time frame format  [#32932](https://github.com/woocommerce/woocommerce/pull/32932)
-* Update - Woo Blocks 7.3.0 & 7.4.1  [#32627](https://github.com/woocommerce/woocommerce/pull/32627)
-* Update - Update to WooCommerce Blocks 7.4.3  [#32803](https://github.com/woocommerce/woocommerce/pull/32803)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
