@@ -236,7 +236,7 @@ defined( 'ABSPATH' ) || exit;
 							'custom_attributes' => array(
 								'step' => 'any',
 							),
-							'wrapper_class' => 'form-row',
+							'wrapper_class' => 'form-row form-row-full',
 						)
 					);
 
