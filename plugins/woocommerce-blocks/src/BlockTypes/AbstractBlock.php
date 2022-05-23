@@ -172,7 +172,20 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Generate an array of chunks paths for loading translation.
+	 */
+	protected function get_chunks_paths() {
+		foreach ( glob( \Automattic\WooCommerce\Blocks\Package::get_path() . "build/{$this->chunks_folder}/*-frontend.js" ) as $block_name ) {
+			$blocks[] = "{$this->chunks_folder}/" . basename( $block_name );
+		}
+
+		$chunks = preg_filter( '/.js/', '', $blocks );
+		return $chunks;
+	}
+	/**
 	 * Registers the block type with WordPress.
+	 *
+	 * @return string[] Chunks paths.
 	 */
 	protected function register_block_type() {
 		$block_settings = [
