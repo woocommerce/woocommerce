@@ -1873,7 +1873,7 @@ function wc_get_rounding_precision() {
  * @param  bool  $round If should round after adding precision.
  * @return int|float
  */
-function wc_add_number_precision( $value, $round = true ) {
+function wc_add_number_precision( float $value, bool $round = true ) {
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	$value          = $value * $cent_precision;
 	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
