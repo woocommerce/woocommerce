@@ -143,7 +143,7 @@ export const initProductScreenTracks = () => {
 		} );
 
 	document
-		.querySelectorAll( '#adv-settings input[type=checkbox]' )
+		.querySelectorAll( '#adv-settings .metabox-prefs input[type=checkbox]' )
 		.forEach( ( input ) => {
 			input.addEventListener( 'change', () => {
 				recordEvent( 'product_screen_elements', {
@@ -157,7 +157,7 @@ export const initProductScreenTracks = () => {
 		.querySelectorAll( 'input[name="screen_columns"]' )
 		.forEach( ( input ) => {
 			input.addEventListener( 'change', () => {
-				recordEvent( 'product_screen_elements', {
+				recordEvent( 'product_layout', {
 					selected_layout: ( input as HTMLInputElement ).value,
 				} );
 			} );
