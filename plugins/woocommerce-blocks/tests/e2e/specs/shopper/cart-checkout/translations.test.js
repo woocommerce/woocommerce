@@ -35,12 +35,13 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		const removeLink = await page.waitForSelector(
 			'.wc-block-cart-item__remove-link'
 		);
-		await expect( removeLink ).toMatch( 'Artikel verwijderen' );
+		await expect( removeLink ).toMatch( 'Verwijder item' );
 
 		const submitButton = await page.waitForSelector(
 			'.wc-block-cart__submit-button'
 		);
-		await expect( submitButton ).toMatch( 'Doorgaan naar afrekenen' );
+
+		await expect( submitButton ).toMatch( 'Ga naar afrekenen' );
 
 		const orderSummary = await page.$(
 			'.wp-block-woocommerce-cart-order-summary-block'
@@ -51,7 +52,7 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		await expect( orderSummary ).toMatch( 'Totaal' );
 	} );
 
-	it( 'USer can view translated Checkout block', async () => {
+	it( 'User can view translated Checkout block', async () => {
 		await shopper.block.goToCheckout();
 
 		const contactHeading = await page.$(
@@ -90,7 +91,7 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		await expect( orderSummary ).toMatch( 'Besteloverzicht' );
 		await expect( orderSummary ).toMatch( 'Subtotaal' );
 		await expect( orderSummary ).toMatch( 'Waardebon code' );
-		await expect( orderSummary ).toMatch( 'Verzendmethoden' );
+		await expect( orderSummary ).toMatch( 'Verzending' );
 		await expect( orderSummary ).toMatch( 'Totaal' );
 	} );
 } );

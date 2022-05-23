@@ -24,6 +24,13 @@ class MiniCart extends AbstractBlock {
 	protected $block_name = 'mini-cart';
 
 	/**
+	 * Chunks build folder.
+	 *
+	 * @var string
+	 */
+	protected $chunks_folder = 'mini-cart-contents-block';
+
+	/**
 	 * Array of scripts that will be lazy loaded when interacting with the block.
 	 *
 	 * @var string[]
@@ -187,9 +194,8 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
-			'src'          => $script_data['src'],
-			'version'      => $script_data['version'],
-			'translations' => $this->get_inner_blocks_translations(),
+			'src'     => $script_data['src'],
+			'version' => $script_data['version'],
 		);
 
 		// Re-add the filter.
@@ -476,33 +482,14 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Prepare translations for inner blocks and dependencies.
+	 * Register script and style assets for the block type before it is registered.
+	 *
+	 * This registers the scripts; it does not enqueue them.
 	 */
-	protected function get_inner_blocks_translations() {
-		$wp_scripts   = wp_scripts();
-		$translations = array();
-
-		$blocks = [
-			'mini-cart-contents-block/filled-cart',
-			'mini-cart-contents-block/empty-cart',
-			'mini-cart-contents-block/title',
-			'mini-cart-contents-block/items',
-			'mini-cart-contents-block/products-table',
-			'mini-cart-contents-block/footer',
-			'mini-cart-contents-block/shopping-button',
-		];
-		$chunks = preg_filter( '/$/', '-frontend', $blocks );
-
-		foreach ( $chunks as $chunk ) {
-			$handle = 'wc-blocks-' . $chunk . '-chunk';
-			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
-			$translations[] = $wp_scripts->print_translations( $handle, false );
-			wp_deregister_script( $handle );
-		}
-
-		$translations = array_filter( $translations );
-
-		return implode( '', $translations );
+	protected function register_block_type_assets() {
+		parent::register_block_type_assets();
+		$chunks = $this->get_chunks_paths();
+		$this->register_chunk_translations( $chunks );
 	}
 
 	/**

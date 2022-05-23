@@ -1,3 +1,4 @@
 #!/bin/sh
 BASENAME=$(basename "`pwd`")
-npm run wp-env run tests-cli './wp-content/plugins/'$BASENAME'/bin/wp-env-config.sh'
+# We need to pass the blocks plugin folder name to the script, the name can change depending on your local env and we can't hardcode it.
+npm run wp-env run tests-cli './wp-content/plugins/'$BASENAME'/bin/wp-env-config.sh' $BASENAME
