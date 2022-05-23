@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add decimal-place formatting to tax totals in the orders API response line items. Affects both v2 and v3 of the API.
