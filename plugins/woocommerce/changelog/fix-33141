@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use term ID to query category IDs in analytics #33164
