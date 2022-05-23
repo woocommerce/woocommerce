@@ -19,7 +19,7 @@ import Discover from '../images/cards/discover.js';
 import JCB from '../images/cards/jcb.js';
 import UnionPay from '../images/cards/unionpay.js';
 
-export const WCPayAcceptedMethods = () => (
+export const WCPayAcceptedMethods: React.VFC = () => (
 	<>
 		<Text as="h3" variant="label" weight="600" size="12" lineHeight="16px">
 			{ __( 'Accepted payment methods', 'woocommerce' ) }

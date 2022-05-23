@@ -19,7 +19,13 @@ export type TaskProps = {
 };
 
 export const Task: React.FC< TaskProps > = ( { query, task } ) => {
-	const id = query.task;
+	const id = query.task || '';
+	if ( ! id ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'No task id provided' );
+		// eslint-enable-next-line no-console
+	}
+
 	const {
 		invalidateResolutionForStoreSelector,
 		optimisticallyCompleteTask,

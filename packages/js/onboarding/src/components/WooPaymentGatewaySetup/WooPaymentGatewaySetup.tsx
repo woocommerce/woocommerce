@@ -4,6 +4,9 @@
 import { createElement } from '@wordpress/element';
 import { Slot, Fill } from '@wordpress/components';
 
+type WooPaymentGatewaySetupProps = {
+	id: string;
+};
 /**
  * WooCommerce Payment Gateway setup.
  *
@@ -12,7 +15,9 @@ import { Slot, Fill } from '@wordpress/components';
  * @param {Object} props    React props.
  * @param {string} props.id Setup id.
  */
-export const WooPaymentGatewaySetup = ( { id, ...props } ) => (
+export const WooPaymentGatewaySetup: React.FC< WooPaymentGatewaySetupProps > & {
+	Slot: React.VFC< Slot.Props & { id: string } >;
+} = ( { id, ...props } ) => (
 	<Fill name={ 'woocommerce_payment_gateway_setup_' + id } { ...props } />
 );
 
