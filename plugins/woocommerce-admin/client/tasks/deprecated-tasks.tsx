@@ -50,7 +50,6 @@ const DeprecatedWooOnboardingTaskFills = () => {
 	return (
 		<>
 			{ deprecatedTasks.map( ( task ) => (
-				// @ts-expect-error WooOnboardingTask is still a pure JS file
 				<WooOnboardingTask id={ task.id } key={ task.id }>
 					{ () => task.container }
 				</WooOnboardingTask>
