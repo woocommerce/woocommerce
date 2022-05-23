@@ -1196,7 +1196,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$accessibility_label = sprintf(
 				/* translators: 1: number representing a rating */
-				__( '%1$s out of 5', 'woocommerce' ),
+				__( '%1$d out of 5', 'woocommerce' ),
 				$rating
 			);
 
