@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	getEditedPostContent,
 	getAllBlocks,
 	switchUserToAdmin,
 	openDocumentSettingsSidebar,

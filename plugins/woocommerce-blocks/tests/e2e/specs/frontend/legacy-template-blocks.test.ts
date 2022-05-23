@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { URL } from 'url';
+
+/**
+ * Internal dependencies
+ */
 import { BASE_URL, useTheme } from '../../utils';
 const SELECTORS = {
 	productArchivePage: {

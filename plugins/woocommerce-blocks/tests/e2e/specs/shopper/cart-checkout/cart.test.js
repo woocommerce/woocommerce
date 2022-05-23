@@ -5,7 +5,7 @@ import { shopper, SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../../utils';
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// Skips all the tests if it's a WooCommerce Core process environment.
-	// eslint-disable-next-line jest/no-focused-tests
+	// eslint-disable-next-line jest/no-focused-tests, jest/expect-expect
 	test.only( `Skipping Cart & Checkout tests`, () => {} );
 }
 

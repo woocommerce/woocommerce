@@ -28,7 +28,7 @@ import {
 } from '../../../utils/constants';
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
-	// eslint-disable-next-line jest/no-focused-tests
+	// eslint-disable-next-line jest/no-focused-tests, jest/expect-expect
 	test.only( `Skipping checkout tests`, () => {} );
 }
 
@@ -36,6 +36,7 @@ describe( 'Merchant → Checkout → Can adjust T&S and Privacy Policy options',
 	beforeAll( async () => {
 		await shopper.goToShop();
 		await page.goto( `${ BASE_URL }/?setup_terms_and_privacy` );
+		// eslint-disable-next-line jest/no-standalone-expect
 		await expect( page ).toMatch( 'Terms & Privacy pages set up.' );
 		await shopper.block.emptyCart();
 	} );
@@ -43,6 +44,7 @@ describe( 'Merchant → Checkout → Can adjust T&S and Privacy Policy options',
 	afterAll( async () => {
 		await shopper.block.emptyCart();
 		await page.goto( `${ BASE_URL }/?teardown_terms_and_privacy` );
+		// eslint-disable-next-line jest/no-standalone-expect
 		await expect( page ).toMatch( 'Terms & Privacy pages teared down.' );
 	} );
 

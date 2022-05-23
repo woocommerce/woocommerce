@@ -1,5 +1,8 @@
+/* eslint-disable jest/no-conditional-expect */
+/**
+ * External dependencies
+ */
 import { URL } from 'url';
-
 import {
 	canvas,
 	deleteAllTemplates,
@@ -10,6 +13,10 @@ import {
 	getNormalPagePermalink,
 	visitPostOfType,
 } from '@woocommerce/blocks-test-utils';
+
+/**
+ * Internal dependencies
+ */
 import {
 	BASE_URL,
 	DEFAULT_TIMEOUT,
