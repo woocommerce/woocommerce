@@ -4,7 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
 
-export const RecommendedRibbon = ( { isLocalPartner = false } ) => {
+type RecommendedRibbonProps = {
+	isLocalPartner?: boolean;
+};
+
+export const RecommendedRibbon: React.VFC< RecommendedRibbonProps > = ( {
+	isLocalPartner = false,
+} ) => {
 	const text = isLocalPartner
 		? __( 'Local Partner', 'woocommerce' )
 		: __( 'Recommended', 'woocommerce' );

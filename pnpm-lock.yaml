@@ -1059,6 +1059,7 @@ importers:
     specifiers:
       '@automattic/interpolate-components': ^1.2.0
       '@babel/core': ^7.17.5
+      '@types/wordpress__data': ^6.0.0
       '@woocommerce/components': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/experimental': workspace:*
@@ -1095,6 +1096,7 @@ importers:
       gridicons: 3.4.0
     devDependencies:
       '@babel/core': 7.17.8
+      '@types/wordpress__data': 6.0.0
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       '@woocommerce/style-build': link:../style-build
       '@wordpress/browserslist-config': 4.1.2
@@ -13711,6 +13713,7 @@ packages:
       re-resizable: 4.11.0
     transitivePeerDependencies:
       - react
+      - react-dom
     dev: true
 
   /@types/wordpress__compose/4.0.1:
@@ -18577,7 +18580,7 @@ packages:
     dev: true
 
   /buffer-crc32/0.2.13:
-    resolution: {integrity: sha1-DTM+PwDqxQqhRUq9MO+MKl2ackI=}
+    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
 
   /buffer-fill/1.0.0:
     resolution: {integrity: sha1-+PeLdniYiO858gXNY39o5wISKyw=}

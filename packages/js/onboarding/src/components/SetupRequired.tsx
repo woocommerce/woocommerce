@@ -6,7 +6,7 @@ import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 
-export const SetupRequired = () => {
+export const SetupRequired: React.VFC = () => {
 	return (
 		<span className="woocommerce-task-payment__setup_required">
 			<NoticeOutlineIcon />

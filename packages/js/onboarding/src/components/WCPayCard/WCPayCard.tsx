@@ -13,7 +13,12 @@ import { __ } from '@wordpress/i18n';
 import { WCPayAcceptedMethods } from '../WCPayAcceptedMethods';
 import WCPayLogo from '../../images/wcpay-logo';
 
-export const WCPayCardHeader = ( {
+type WCPayCardHeaderProps = {
+	logoWidth?: number;
+	logoHeight?: number;
+};
+
+export const WCPayCardHeader: React.FC< WCPayCardHeaderProps > = ( {
 	logoWidth = 196,
 	logoHeight = 41,
 	children,
@@ -24,7 +29,13 @@ export const WCPayCardHeader = ( {
 	</CardHeader>
 );
 
-export const WCPayCardBody = ( {
+type WCPayCardBodyProps = {
+	description: string;
+	heading: string;
+	onLinkClick?: () => void;
+};
+
+export const WCPayCardBody: React.VFC< WCPayCardBodyProps > = ( {
 	description,
 	heading,
 	onLinkClick = () => {},
@@ -54,10 +65,10 @@ export const WCPayCardBody = ( {
 	</CardBody>
 );
 
-export const WCPayCardFooter = ( { children } ) => (
+export const WCPayCardFooter: React.FC = ( { children } ) => (
 	<CardFooter>{ children }</CardFooter>
 );
 
-export const WCPayCard = ( { children } ) => {
+export const WCPayCard: React.FC = ( { children } ) => {
 	return <Card className="woocommerce-task-payment-wcpay">{ children }</Card>;
 };

@@ -11,16 +11,16 @@ import { Slot, Fill } from '@wordpress/components';
  * @param {string} taskId  Task id.
  * @param {string} variant The variant of the task.
  */
-export const trackView = async ( taskId, variant ) => {
-	const activePlugins = wp.data
+export const trackView = async ( taskId: string, variant?: string ) => {
+	const activePlugins: string[] = wp.data
 		.select( 'wc/admin/plugins' )
 		.getActivePlugins();
 
-	const installedPlugins = wp.data
+	const installedPlugins: string[] = wp.data
 		.select( 'wc/admin/plugins' )
 		.getInstalledPlugins();
 
-	const isJetpackConnected = wp.data
+	const isJetpackConnected: boolean = wp.data
 		.select( 'wc/admin/plugins' )
 		.isJetpackConnected();
 
@@ -35,18 +35,29 @@ export const trackView = async ( taskId, variant ) => {
 	} );
 };
 
-let experimentalVariant;
+let experimentalVariant: string | undefined;
+type WooOnboardingTaskProps = {
+	id: string;
+	variant?: string;
+};
+
+type WooOnboardingTaskSlotProps = Slot.Props & {
+	id: string;
+};
+
 /**
  * A Fill for adding Onboarding tasks.
  *
  * @slotFill WooOnboardingTask
  * @scope woocommerce-tasks
- * @param {Object} props          React props.
- * @param {string} props.variant  The variant of the task.
- * @param {Object} props.children React component children
- * @param {string} props.id       Task id.
+ * @param {Object} props           React props.
+ * @param {string} [props.variant] The variant of the task.
+ * @param {Object} props.children  React component children
+ * @param {string} props.id        Task id.
  */
-const WooOnboardingTask = ( { id, variant, ...props } ) => {
+const WooOnboardingTask: React.FC< WooOnboardingTaskProps > & {
+	Slot: React.VFC< WooOnboardingTaskSlotProps >;
+} = ( { id, variant, ...props } ) => {
 	useEffect( () => {
 		if ( id === 'products' ) {
 			experimentalVariant = variant;
@@ -58,7 +69,7 @@ const WooOnboardingTask = ( { id, variant, ...props } ) => {
 
 // We need this here just in case the experiment assignment takes awhile to load, so that we don't fire trackView with a blank experimentalVariant
 // Remove all of the code in this file related to experiments and variants when the product task experiment concludes and never speak of the existence of this code to anyone
-const pollForExperimentalVariant = ( id, count ) => {
+const pollForExperimentalVariant = ( id: string, count: number ) => {
 	if ( count > 20 ) {
 		trackView( id, 'experiment_timed_out' ); // if we can't fetch experiment after 4 seconds, give up
 	} else if ( experimentalVariant ) {
