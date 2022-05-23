@@ -594,9 +594,9 @@ describe( 'Shopper → Mini Cart', () => {
 				);
 
 				await expect( page ).toMatchElement(
-					'.wc-block-mini-cart__title',
+					'.wc-block-mini-cart__footer-cart',
 					{
-						text: 'Je winkelwagen (1 stuk)',
+						text: 'Bekijk mijn winkelwagen',
 					}
 				);
 			} );
@@ -626,9 +626,9 @@ describe( 'Shopper → Mini Cart', () => {
 				);
 
 				await expect( page ).toMatchElement(
-					'.wc-block-mini-cart__title',
+					'.wc-block-mini-cart__footer-cart',
 					{
-						text: 'Je winkelwagen (1 stuk)',
+						text: 'Bekijk mijn winkelwagen',
 					}
 				);
 			} );

@@ -122,9 +122,7 @@ woocommerce_blocks_env = ${ NODE_ENV }
 			// Only concatenate modules in production, when not analyzing bundles.
 			concatenateModules:
 				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
-			splitChunks: {
-				automaticNameDelimiter: '--',
-			},
+			splitChunks: false,
 			minimizer: [
 				new TerserPlugin( {
 					cache: true,
@@ -222,7 +220,7 @@ const getMainConfig = ( options = {} ) => {
 			concatenateModules:
 				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
 			splitChunks: {
-				minSize: 0,
+				minSize: 10000, // makes the smallest chunk file 10kbs, this doesn't affect lazy loaded chunks.
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					commons: {
@@ -261,31 +259,31 @@ const getMainConfig = ( options = {} ) => {
 				patterns: [
 					{
 						from: './assets/js/blocks/checkout/block.json',
-						to: './checkout/block.json',
+						to: './checkout.block.json',
 					},
 					{
 						from:
 							'./assets/js/blocks/featured-items/featured-category/block.json',
-						to: './featured-category/block.json',
+						to: './featured-category.block.json',
 					},
 					{
 						from:
 							'./assets/js/blocks/featured-items/featured-product/block.json',
-						to: './featured-product/block.json',
+						to: './featured-product.block.json',
 					},
 					{
 						from:
 							'./assets/js/blocks/handpicked-products/block.json',
-						to: './handpicked-products/block.json',
+						to: './handpicked-products.block.json',
 					},
 					{
 						from: './assets/js/blocks/product-tag/block.json',
-						to: './product-tag/block.json',
+						to: './product-tag.block.json',
 					},
 					{
 						from:
 							'./assets/js/blocks/products-by-attribute/block.json',
-						to: './products-by-attribute/block.json',
+						to: './products-by-attribute.block.json',
 					},
 				],
 			} ),
@@ -378,7 +376,39 @@ const getFrontConfig = ( options = {} ) => {
 			concatenateModules:
 				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
 			splitChunks: {
-				automaticNameDelimiter: '--',
+				cacheGroups: {
+					default: false,
+					vendors: {
+						test: /[\\/]node_modules[\\/]/,
+						name( module ) {
+							const moduleFileName = module
+								.identifier()
+								.split( '/' )
+								.reduceRight( ( item ) => item );
+							return `vendor/${ moduleFileName }`;
+						},
+						automaticNameDelimiter: '--',
+						minSize: 20000,
+						priority: -20,
+					},
+					'wp-components': {
+						test: ( module ) => {
+							if (
+								module?.resource?.match(
+									/wordpress-components/
+								)
+							) {
+								return true;
+							}
+						},
+						name: 'wp/wp-components.js',
+						automaticNameDelimiter: '--',
+						reuseExistingChunk: true,
+						enforce: true,
+						minSize: 20000,
+						priority: -10,
+					},
+				},
 			},
 			minimizer: [
 				new TerserPlugin( {
