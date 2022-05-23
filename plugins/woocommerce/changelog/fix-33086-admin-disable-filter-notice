@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix notice on woocommerce_admin_disabled filter enabled
