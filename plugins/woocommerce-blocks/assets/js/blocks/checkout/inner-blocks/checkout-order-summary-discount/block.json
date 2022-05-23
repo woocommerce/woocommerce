@@ -8,7 +8,8 @@
 		"align": false,
 		"html": false,
 		"multiple": false,
-		"reusable": false
+		"reusable": false,
+		"lock": false
 	},
 	"attributes": {
 		"className": {
