@@ -482,28 +482,37 @@ const getCurrentDatesMemoized = memoize<
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd
-	) => ( {
-		primary: {
-			label: (
-				find( presetValues, ( item ) => item.value === period ) || {
-					label: '',
-				}
-			).label,
-			range: getRangeLabel( primaryStart, primaryEnd ),
-			after: primaryStart,
-			before: primaryEnd,
-		},
-		secondary: {
-			label: (
-				find( periods, ( item ) => item.value === compare ) || {
-					label: '',
-				}
-			).label,
-			range: getRangeLabel( secondaryStart, secondaryEnd ),
-			after: secondaryStart,
-			before: secondaryEnd,
-		},
-	} ),
+	) => {
+		const primaryItem = find(
+			presetValues,
+			( item ) => item.value === period
+		);
+		if ( ! primaryItem ) {
+			throw new Error( `Cannot find period: ${ period }` );
+		}
+		const secondaryItem = find(
+			periods,
+			( item ) => item.value === compare
+		);
+		if ( ! secondaryItem ) {
+			throw new Error( `Cannot find compare: ${ compare }` );
+		}
+
+		return {
+			primary: {
+				label: primaryItem.label,
+				range: getRangeLabel( primaryStart, primaryEnd ),
+				after: primaryStart,
+				before: primaryEnd,
+			},
+			secondary: {
+				label: secondaryItem.label,
+				range: getRangeLabel( secondaryStart, secondaryEnd ),
+				after: secondaryStart,
+				before: secondaryEnd,
+			},
+		};
+	},
 	(
 		period,
 		compare,
