@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import {
 	createNewPost,
 	deleteAllTemplates,
@@ -6,6 +9,10 @@ import {
 	publishPost,
 } from '@wordpress/e2e-test-utils';
 import { selectBlockByName } from '@woocommerce/blocks-test-utils';
+
+/**
+ * Internal dependencies
+ */
 import {
 	BASE_URL,
 	goToTemplateEditor,

@@ -38,6 +38,8 @@ module.exports = {
 			'@wordpress/hooks',
 			'@wordpress/keycodes',
 			'@wordpress/url',
+			'@woocommerce/blocks-test-utils',
+			'@woocommerce/e2e-utils',
 			'babel-jest',
 			'dotenv',
 			'jest-environment-puppeteer',

@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import {
 	canvas,
 	createNewPost,
@@ -6,8 +9,11 @@ import {
 	switchUserToAdmin,
 	publishPost,
 } from '@wordpress/e2e-test-utils';
-import { Frame } from 'puppeteer';
 import { selectBlockByName } from '@woocommerce/blocks-test-utils';
+
+/**
+ * Internal dependencies
+ */
 import {
 	BASE_URL,
 	goToTemplateEditor,
@@ -41,6 +47,8 @@ const block = {
 	foundProduct: '128GB USB Stick',
 };
 
+const { selectors } = block;
+
 const waitForAllProductsBlockLoaded = () =>
 	page.waitForSelector( selectors.frontend.productsList + '.is-loading', {
 		hidden: true,
@@ -50,8 +58,6 @@ const goToShopPage = () =>
 	page.goto( BASE_URL + '/shop', {
 		waitUntil: 'networkidle0',
 	} );
-
-const { selectors } = block;
 
 describe( `${ block.name } Block`, () => {
 	describe( 'with All Products Block', () => {
@@ -108,7 +114,7 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 			await insertBlock( block.name );
-			const canvasEl: Frame = canvas();
+			const canvasEl = canvas();
 
 			// It seems that .click doesn't work well with radio input element.
 			await canvasEl.$eval(

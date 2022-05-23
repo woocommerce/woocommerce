@@ -2,11 +2,15 @@
  * External dependencies
  */
 import { getAllBlocks, switchUserToAdmin } from '@wordpress/e2e-test-utils';
-import { insertBlockDontWaitForInsertClose } from '../../utils.js';
 import { visitBlockPage } from '@woocommerce/blocks-test-utils';
 
+/**
+ * Internal dependencies
+ */
+import { insertBlockDontWaitForInsertClose } from '../../utils.js';
+
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 )
-	// eslint-disable-next-line jest/no-focused-tests
+	// eslint-disable-next-line jest/no-focused-tests, jest/expect-expect
 	test.only( 'skipping all other things', () => {} );
 
 const block = {

@@ -21,7 +21,6 @@ import {
 	clickLink,
 } from '../../utils';
 import { shopper } from '../../../utils';
-import { Frame, Page } from 'puppeteer';
 
 const block = {
 	name: 'Active Product Filters',

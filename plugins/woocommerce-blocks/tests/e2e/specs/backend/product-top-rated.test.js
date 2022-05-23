@@ -5,6 +5,9 @@ import { getAllBlocks, switchUserToAdmin } from '@wordpress/e2e-test-utils';
 
 import { visitBlockPage } from '@woocommerce/blocks-test-utils';
 
+/**
+ * Internal dependencies
+ */
 import { insertBlockDontWaitForInsertClose } from '../../utils.js';
 
 const block = {
