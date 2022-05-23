@@ -7,15 +7,21 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import TYPES from './action-types';
+import {
+	ImportStatusQuery,
+	ImportStatus,
+	ImportTotals,
+	ImportTotalsQuery,
+} from './types';
 
-export function setImportStarted( activeImport ) {
+export function setImportStarted( activeImport: boolean ) {
 	return {
 		type: TYPES.SET_IMPORT_STARTED,
 		activeImport,
 	};
 }
 
-export function setImportPeriod( date, dateModified ) {
+export function setImportPeriod( date: string, dateModified: boolean ) {
 	if ( ! dateModified ) {
 		return {
 			type: TYPES.SET_IMPORT_PERIOD,
@@ -28,14 +34,17 @@ export function setImportPeriod( date, dateModified ) {
 	};
 }
 
-export function setSkipPrevious( skipPrevious ) {
+export function setSkipPrevious( skipPrevious: boolean ) {
 	return {
 		type: TYPES.SET_SKIP_IMPORTED,
 		skipPrevious,
 	};
 }
 
-export function setImportStatus( query, importStatus ) {
+export function setImportStatus(
+	query: ImportStatusQuery,
+	importStatus: ImportStatus
+) {
 	return {
 		type: TYPES.SET_IMPORT_STATUS,
 		importStatus,
@@ -43,7 +52,10 @@ export function setImportStatus( query, importStatus ) {
 	};
 }
 
-export function setImportTotals( query, importTotals ) {
+export function setImportTotals(
+	query: ImportTotalsQuery,
+	importTotals: ImportTotals
+) {
 	return {
 		type: TYPES.SET_IMPORT_TOTALS,
 		importTotals,
@@ -51,21 +63,33 @@ export function setImportTotals( query, importTotals ) {
 	};
 }
 
-export function setImportError( query, error ) {
+export function setImportError(
+	queryOrPath: ImportStatusQuery | ImportTotalsQuery | string,
+	error: unknown
+) {
 	return {
 		type: TYPES.SET_IMPORT_ERROR,
 		error,
-		query,
+		query: queryOrPath,
 	};
 }
 
-export function* updateImportation( path, importStarted = false ) {
+export function* updateImportation( path: string, importStarted = false ) {
 	yield setImportStarted( importStarted );
 	try {
-		const response = yield apiFetch( { path, method: 'POST' } );
+		const response: unknown = yield apiFetch( { path, method: 'POST' } );
 		return response;
 	} catch ( error ) {
 		yield setImportError( path, error );
 		throw error;
 	}
 }
+
+export type Action = ReturnType<
+	| typeof setImportStarted
+	| typeof setImportPeriod
+	| typeof setImportStatus
+	| typeof setImportTotals
+	| typeof setImportError
+	| typeof setSkipPrevious
+>;

@@ -1,40 +1,42 @@
 /**
+ * External dependencies
+ */
+
+import type { Reducer } from 'redux';
+
+/**
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { Action } from './actions';
 import { hashExportArgs } from './utils';
+import { ExportState } from './types';
 
-const exportReducer = (
+const reducer: Reducer< ExportState, Action > = (
 	state = {
 		errors: {},
 		requesting: {},
 		exportMeta: {},
 		exportIds: {},
 	},
-	{
-		error,
-		exportArgs,
-		exportId,
-		exportType,
-		isRequesting,
-		selector,
-		selectorArgs,
-		type,
-	}
+	action
 ) => {
-	switch ( type ) {
+	switch ( action.type ) {
 		case TYPES.SET_IS_REQUESTING:
 			return {
 				...state,
 				requesting: {
 					...state.requesting,
-					[ selector ]: {
-						...state.requesting[ selector ],
-						[ hashExportArgs( selectorArgs ) ]: isRequesting,
+					[ action.selector ]: {
+						...state.requesting[ action.selector ],
+						[ hashExportArgs(
+							action.selectorArgs
+						) ]: action.isRequesting,
 					},
 				},
 			};
 		case TYPES.SET_EXPORT_ID:
+			const { exportType, exportArgs, exportId } = action;
 			return {
 				...state,
 				exportMeta: {
@@ -60,9 +62,9 @@ const exportReducer = (
 				...state,
 				errors: {
 					...state.errors,
-					[ selector ]: {
-						...state.errors[ selector ],
-						[ hashExportArgs( selectorArgs ) ]: error,
+					[ action.selector ]: {
+						...state.errors[ action.selector ],
+						[ hashExportArgs( action.selectorArgs ) ]: action.error,
 					},
 				},
 			};
@@ -71,4 +73,5 @@ const exportReducer = (
 	}
 };
 
-export default exportReducer;
+export type State = ReturnType< typeof reducer >;
+export default reducer;

@@ -18,6 +18,7 @@ const defaultState = {
 
 describe( 'export reducer', () => {
 	it( 'should return a default state', () => {
+		// @ts-expect-error reducer action should not be empty but it is
 		const state = reducer( undefined, {} );
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );

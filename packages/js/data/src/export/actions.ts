@@ -1,11 +1,16 @@
 /**
  * Internal dependencies
  */
-import { fetchWithHeaders } from '../controls';
+import { fetchWithHeaders, FetchWithHeadersResponse } from '../controls';
 import TYPES from './action-types';
 import { NAMESPACE } from '../constants';
+import { SelectorArgs, ExportArgs } from './types';
 
-export function setExportId( exportType, exportArgs, exportId ) {
+export function setExportId(
+	exportType: string,
+	exportArgs: ExportArgs,
+	exportId: string
+) {
 	return {
 		type: TYPES.SET_EXPORT_ID,
 		exportType,
@@ -14,7 +19,11 @@ export function setExportId( exportType, exportArgs, exportId ) {
 	};
 }
 
-export function setIsRequesting( selector, selectorArgs, isRequesting ) {
+export function setIsRequesting(
+	selector: string,
+	selectorArgs: SelectorArgs,
+	isRequesting: boolean
+) {
 	return {
 		type: TYPES.SET_IS_REQUESTING,
 		selector,
@@ -23,7 +32,11 @@ export function setIsRequesting( selector, selectorArgs, isRequesting ) {
 	};
 }
 
-export function setError( selector, selectorArgs, error ) {
+export function setError(
+	selector: string,
+	selectorArgs: SelectorArgs,
+	error: unknown
+) {
 	return {
 		type: TYPES.SET_ERROR,
 		selector,
@@ -32,11 +45,14 @@ export function setError( selector, selectorArgs, error ) {
 	};
 }
 
-export function* startExport( type, args ) {
+export function* startExport( type: string, args: ExportArgs ) {
 	yield setIsRequesting( 'startExport', { type, args }, true );
 
 	try {
-		const response = yield fetchWithHeaders( {
+		const response: FetchWithHeadersResponse< {
+			export_id: string;
+			message: string;
+		} > = yield fetchWithHeaders( {
 			path: `${ NAMESPACE }/reports/${ type }/export`,
 			method: 'POST',
 			data: {
@@ -46,7 +62,6 @@ export function* startExport( type, args ) {
 		} );
 
 		yield setIsRequesting( 'startExport', { type, args }, false );
-
 		const { export_id: exportId, message } = response.data;
 
 		if ( exportId ) {
@@ -57,8 +72,18 @@ export function* startExport( type, args ) {
 
 		return response.data;
 	} catch ( error ) {
-		yield setError( 'startExport', { type, args }, error.message );
+		if ( error instanceof Error ) {
+			yield setError( 'startExport', { type, args }, error.message );
+		} else {
+			// eslint-disable-next-line no-console
+			console.error( `Unexpected Error: ${ JSON.stringify( error ) }` );
+			// eslint-enable-next-line no-console
+		}
 		yield setIsRequesting( 'startExport', { type, args }, false );
 		throw error;
 	}
 }
+
+export type Action = ReturnType<
+	typeof setExportId | typeof setError | typeof setIsRequesting
+>;

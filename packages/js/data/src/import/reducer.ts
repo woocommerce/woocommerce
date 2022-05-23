@@ -3,13 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import moment from 'moment';
+import type { Reducer } from 'redux';
 
 /**
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { ImportState } from './types';
+import { Action } from './actions';
 
-const reducer = (
+const reducer: Reducer< ImportState, Action > = (
 	state = {
 		activeImport: false,
 		importStatus: {},
@@ -22,19 +25,11 @@ const reducer = (
 		},
 		skipPrevious: true,
 	},
-	{
-		type,
-		query,
-		importStatus,
-		importTotals,
-		activeImport,
-		date,
-		error,
-		skipPrevious,
-	}
+	action
 ) => {
-	switch ( type ) {
+	switch ( action.type ) {
 		case TYPES.SET_IMPORT_STARTED:
+			const { activeImport } = action;
 			state = {
 				...state,
 				activeImport,
@@ -48,7 +43,7 @@ const reducer = (
 				...state,
 				period: {
 					...state.period,
-					label: date,
+					label: action.date,
 				},
 				activeImport: false,
 			};
@@ -57,7 +52,7 @@ const reducer = (
 			state = {
 				...state,
 				period: {
-					date,
+					date: action.date,
 					label: 'custom',
 				},
 				activeImport: false,
@@ -66,11 +61,12 @@ const reducer = (
 		case TYPES.SET_SKIP_IMPORTED:
 			state = {
 				...state,
-				skipPrevious,
+				skipPrevious: action.skipPrevious,
 				activeImport: false,
 			};
 			break;
 		case TYPES.SET_IMPORT_STATUS:
+			const { query, importStatus } = action;
 			state = {
 				...state,
 				importStatus: {
@@ -88,7 +84,7 @@ const reducer = (
 				...state,
 				importTotals: {
 					...state.importTotals,
-					[ JSON.stringify( query ) ]: importTotals,
+					[ JSON.stringify( action.query ) ]: action.importTotals,
 				},
 			};
 			break;
@@ -97,7 +93,7 @@ const reducer = (
 				...state,
 				errors: {
 					...state.errors,
-					[ JSON.stringify( query ) ]: error,
+					[ JSON.stringify( action.query ) ]: action.error,
 				},
 			};
 			break;
@@ -105,4 +101,5 @@ const reducer = (
 	return state;
 };
 
+export type State = ReturnType< typeof reducer >;
 export default reducer;
