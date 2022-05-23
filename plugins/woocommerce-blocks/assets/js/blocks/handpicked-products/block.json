@@ -22,10 +22,6 @@
             "type": "number",
             "default": 3
         },
-        "editMode": {
-            "type": "boolean",
-            "default": true
-        },
         "contentVisibility": {
             "type": "object",
             "default": {
@@ -60,6 +56,15 @@
         },
         "orderby": {
             "type": "string",
+            "enum": [
+                "date",
+                "popularity",
+                "price_asc",
+                "price_desc",
+                "rating",
+                "title",
+                "menu_order"
+            ],
             "default": "date"
         },
         "products": {
