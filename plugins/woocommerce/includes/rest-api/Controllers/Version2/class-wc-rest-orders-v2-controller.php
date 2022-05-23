@@ -242,10 +242,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$taxes = array();
 
 			foreach ( $data['taxes']['total'] as $tax_rate_id => $tax ) {
+				$subtotal = isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '';
+
 				$taxes[] = array(
 					'id'       => $tax_rate_id,
-					'total'    => $tax,
-					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '',
+					'total'    => wc_format_decimal( $tax, $this->request['dp'] ),
+					'subtotal' => $subtotal ? wc_format_decimal( $subtotal, $this->request['dp'] ) : $subtotal,
 				);
 			}
 			$data['taxes'] = $taxes;
