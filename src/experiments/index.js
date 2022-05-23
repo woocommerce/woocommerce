@@ -10,16 +10,19 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
  */
 import { STORE_KEY } from './data/constants';
 import './data';
+import NewExperimentForm from './NewExperimentForm';
 
 function Experiments( {
 	experiments,
 	toggleExperiment,
+	deleteExperiment,
 	isTrackingEnabled,
 	isResolving,
 } ) {
 	if ( isResolving ) {
 		return null;
 	}
+
 	return (
 		<div id="wc-admin-test-helper-experiments">
 			<h2>Experiments</h2>
@@ -43,43 +46,42 @@ function Experiments( {
 					<b>Allow usage of WooCommerce to be tracked</b>.
 				</p>
 			) }
+			<NewExperimentForm />
 			<table className="experiments wp-list-table striped table-view-list widefat">
 				<thead>
 					<tr>
 						<th>Experiment</th>
 						<th>Variation</th>
-						<th>Source</th>
-						<th>Toggle</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
-					{ experiments.map(
-						( { name, variation, source }, index ) => {
-							return (
-								<tr key={ index }>
-									<td className="experiment-name">
-										{ name }
-									</td>
-									<td align="center">{ variation }</td>
-									<td align="center">{ source }</td>
-									<td align="center">
-										<Button
-											onClick={ () => {
-												toggleExperiment(
-													name,
-													variation,
-													source
-												);
-											} }
-											isPrimary
-										>
-											Toggle
-										</Button>
-									</td>
-								</tr>
-							);
-						}
-					) }
+					{ experiments.map( ( { name, variation }, index ) => {
+						return (
+							<tr key={ index }>
+								<td className="experiment-name">{ name }</td>
+								<td align="center">{ variation }</td>
+								<td className="actions" align="center">
+									<Button
+										onClick={ () => {
+											toggleExperiment( name, variation );
+										} }
+										isPrimary
+									>
+										Toggle
+									</Button>
+									<Button
+										onClick={ () => {
+											deleteExperiment( name );
+										} }
+										className="btn btn-danger"
+									>
+										Delete
+									</Button>
+								</td>
+							</tr>
+						);
+					} ) }
 				</tbody>
 			</table>
 		</div>
@@ -98,10 +100,11 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { toggleExperiment } = dispatch( STORE_KEY );
+		const { toggleExperiment, deleteExperiment } = dispatch( STORE_KEY );
 
 		return {
 			toggleExperiment,
+			deleteExperiment,
 		};
 	} )
 )( Experiments );
