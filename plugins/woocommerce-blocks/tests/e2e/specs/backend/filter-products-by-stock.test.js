@@ -1,19 +1,18 @@
 /**
- * Internal dependencies
- */
-import { closeInserter, insertBlockDontWaitForInsertClose } from '../../utils';
-import { findLabelWithText } from '../../../utils';
-
-/**
  * External dependencies
  */
 import {
 	switchUserToAdmin,
-	clickButton,
 	getAllBlocks,
 	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
 import { visitBlockPage } from '@woocommerce/blocks-test-utils';
+
+/**
+ * Internal dependencies
+ */
+import { closeInserter, insertBlockDontWaitForInsertClose } from '../../utils';
+import { findLabelWithText } from '../../../utils';
 
 const block = {
 	name: 'Filter Products by Stock',

@@ -5,7 +5,6 @@ import {
 	openDocumentSettingsSidebar,
 	switchUserToAdmin,
 	getAllBlocks,
-	getEditedPostContent,
 } from '@wordpress/e2e-test-utils';
 import {
 	visitBlockPage,

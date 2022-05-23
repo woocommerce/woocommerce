@@ -1,3 +1,4 @@
+/* eslint-disable jest/expect-expect */
 /**
  * Internal dependencies
  */
@@ -19,7 +20,7 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 		await merchant.changeLanguage( 'en_EN' );
 	} );
 
-	it( 'User can view translated Cart block ', async () => {
+	it( 'User can view translated Cart block', async () => {
 		await shopper.goToShop();
 		await shopper.addToCartFromShopPage( '128GB USB Stick' );
 		await shopper.block.goToCart();
