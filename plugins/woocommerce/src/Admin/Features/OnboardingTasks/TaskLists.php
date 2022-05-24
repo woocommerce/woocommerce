@@ -133,6 +133,7 @@ class TaskLists {
 				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'                   => array(
 					'StoreDetails',
+					'Purchase',
 					'Products',
 					'WooCommercePayments',
 					'Payments',
@@ -158,6 +159,7 @@ class TaskLists {
 				'tasks'        => array(
 					'StoreCreation',
 					'StoreDetails',
+					'Purchase',
 					'Products',
 					'WooCommercePayments',
 					'Payments',
@@ -182,7 +184,7 @@ class TaskLists {
 							'/assets/images/task_list/basics-section-illustration.png',
 							WC_ADMIN_PLUGIN_FILE
 						),
-						'task_names'  => array( 'StoreCreation', 'StoreDetails', 'Products', 'Payments', 'WooCommercePayments' ),
+						'task_names'  => array( 'StoreCreation', 'StoreDetails', 'Purchase', 'Products', 'Payments', 'WooCommercePayments' ),
 					),
 					array(
 						'id'          => 'sales',
@@ -467,13 +469,13 @@ class TaskLists {
 	 *
 	 * @return number
 	 */
-	public static function setup_tasks_remaining () {
+	public static function setup_tasks_remaining() {
 
 		$active_list = self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ) ? 'setup_experiment_1' : ( self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ) ? 'setup_experiment_2' : 'setup' );
 
 		$setup_list = self::get_list( $active_list );
 
-		if( ! $setup_list || $setup_list->is_hidden() || $setup_list->is_complete() ) {
+		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->is_complete() ) {
 			return;
 		}
 
@@ -497,7 +499,7 @@ class TaskLists {
 
 		$tasks_count = self::setup_tasks_remaining();
 
-		if( ! $tasks_count ) {
+		if ( ! $tasks_count ) {
 			return;
 		}
 
