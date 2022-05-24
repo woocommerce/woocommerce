@@ -12,17 +12,16 @@ import './load-sample-product-confirm-modal.scss';
 
 type Props = {
 	onCancel: () => void;
-	onOK: () => void;
+	onImport: () => void;
 };
 
 export const LoadSampleProductConfirmModal: React.VFC< Props > = ( {
 	onCancel,
-	onOK,
+	onImport,
 } ) => {
 	return (
 		<Modal
 			className="woocommerce-products-load-sample-product-confirm-modal"
-			overlayClassName="woocommerce-products-load-sample-product-confirm-modal-overlay"
 			title="Load sample products"
 			onRequestClose={ onCancel }
 		>
@@ -35,7 +34,7 @@ export const LoadSampleProductConfirmModal: React.VFC< Props > = ( {
 				<Button isSecondary onClick={ onCancel }>
 					{ __( 'Cancel' ) }
 				</Button>
-				<Button isPrimary onClick={ onOK }>
+				<Button isPrimary onClick={ onImport }>
 					{ __( 'Import sample products' ) }
 				</Button>
 			</div>
