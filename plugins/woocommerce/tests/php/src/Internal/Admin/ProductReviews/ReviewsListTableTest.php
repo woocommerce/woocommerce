@@ -182,7 +182,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The product reviews page columns can be filtered.
+	 * @testdox `get_columns` returns columns for the product reviews page that can be filtered.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_columns()
 	 *
