@@ -35,8 +35,6 @@ class OrdersTableDataStoreHelper {
 	 * @return array
 	 */
 	public function get_db_row_from_order_changes( $changes, $column_mapping ) {
-		global $wpdb;
-
 		$row        = array();
 		$row_format = array();
 

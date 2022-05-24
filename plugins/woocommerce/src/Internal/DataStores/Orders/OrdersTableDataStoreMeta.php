@@ -16,8 +16,6 @@ class OrdersTableDataStoreMeta {
 	 * @return array Array elements: table, object_id_field, meta_id_field.
 	 */
 	protected function get_db_info() {
-		global $wpdb;
-
 		return array(
 			'table'           => OrdersTableDataStore::get_meta_table_name(),
 			'meta_id_field'   => 'id',
