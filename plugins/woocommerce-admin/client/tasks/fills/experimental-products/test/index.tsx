@@ -45,6 +45,9 @@ global.fetch = jest.fn().mockImplementation( () =>
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
+const confirmModalText =
+	"We'll import images from woocommerce.com to set up your sample products.";
+
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -238,31 +241,57 @@ describe( 'Products', () => {
 		expect( queryByText( 'View less product types' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should send a request to load sample products when the link is clicked', async () => {
+	it( 'should send a request to load sample products when the "Import sample products" button is clicked', async () => {
 		const fetchMock = jest.spyOn( global, 'fetch' );
 		const { queryByText, getByRole } = render( <Products /> );
 
 		userEvent.click(
 			getByRole( 'button', { name: 'View more product types' } )
 		);
-
 		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
 
 		userEvent.click(
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
-
 		await waitFor( () =>
-			expect( fetchMock ).toHaveBeenCalledWith(
-				'/wc-admin/onboarding/tasks/import_sample_products?_locale=user',
-				{
-					body: undefined,
-					credentials: 'include',
-					headers: { Accept: 'application/json, */*;q=0.1' },
-					method: 'POST',
-				}
-			)
+			expect( queryByText( confirmModalText ) ).toBeInTheDocument()
 		);
+
+		userEvent.click(
+			getByRole( 'button', { name: 'Import sample products' } )
+		);
+		await waitFor( () =>
+			expect( queryByText( confirmModalText ) ).not.toBeInTheDocument()
+		);
+
+		expect( fetchMock ).toHaveBeenCalledWith(
+			'/wc-admin/onboarding/tasks/import_sample_products?_locale=user',
+			{
+				body: undefined,
+				credentials: 'include',
+				headers: { Accept: 'application/json, */*;q=0.1' },
+				method: 'POST',
+			}
+		);
+	} );
+
+	it( 'should close the confirmation modal when the cancel button is clicked', async () => {
+		const { queryByText, getByRole } = render( <Products /> );
+
+		userEvent.click(
+			getByRole( 'button', { name: 'View more product types' } )
+		);
+		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
+
+		userEvent.click(
+			getByRole( 'link', { name: 'Load Sample Products' } )
+		);
+		await waitFor( () =>
+			expect( queryByText( confirmModalText ) ).toBeInTheDocument()
+		);
+
+		userEvent.click( getByRole( 'button', { name: 'Cancel' } ) );
+		expect( queryByText( confirmModalText ) ).not.toBeInTheDocument();
 	} );
 
 	it( 'should show spinner when layout experiment is loading', async () => {
