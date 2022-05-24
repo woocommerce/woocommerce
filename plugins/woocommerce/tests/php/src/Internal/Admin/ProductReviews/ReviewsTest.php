@@ -192,7 +192,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When editing or moderating a review or a reply to a review the page heading will be updated.
+	 * @testdox `edit_comments_screen_text` will update the page heading when editing or moderating a review or a reply to a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_comments_screen_text()
 	 * @dataProvider data_provider_edit_comments_screen_text
