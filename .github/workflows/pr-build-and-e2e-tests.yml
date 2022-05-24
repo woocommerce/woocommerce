@@ -7,10 +7,10 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
-jobs:
-    env:
-        E2E_PLAYWRIGHT: ${{ true }}
+env:
+    E2E_PLAYWRIGHT: ${{ true }}
 
+jobs:
     e2e-tests-run:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
