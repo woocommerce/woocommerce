@@ -1,10 +1,15 @@
 /**
+ * Internal dependencies
+ */
+import { OptionsState } from './types';
+
+/**
  * Get option from state tree.
  *
  * @param {Object} state - Reducer state
  * @param {Array}  name  - Option name
  */
-export const getOption = ( state, name ) => {
+export const getOption = ( state: OptionsState, name: string ) => {
 	return state[ name ];
 };
 
@@ -14,7 +19,10 @@ export const getOption = ( state, name ) => {
  * @param {Object} state - Reducer state
  * @param {string} name  - Option name
  */
-export const getOptionsRequestingError = ( state, name ) => {
+export const getOptionsRequestingError = (
+	state: OptionsState,
+	name: string
+) => {
 	return state.requestingErrors[ name ] || false;
 };
 
@@ -23,7 +31,7 @@ export const getOptionsRequestingError = ( state, name ) => {
  *
  * @param {Object} state - Reducer state
  */
-export const isOptionsUpdating = ( state ) => {
+export const isOptionsUpdating = ( state: OptionsState ) => {
 	return state.isUpdating || false;
 };
 
@@ -32,6 +40,6 @@ export const isOptionsUpdating = ( state ) => {
  *
  * @param {Object} state - Reducer state
  */
-export const getOptionsUpdatingError = ( state ) => {
+export const getOptionsUpdatingError = ( state: OptionsState ) => {
 	return state.updatingError || false;
 };
