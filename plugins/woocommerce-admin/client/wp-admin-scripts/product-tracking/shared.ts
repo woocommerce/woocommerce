@@ -279,25 +279,28 @@ export const initProductScreenTracks = () => {
 
 	document
 		.querySelector( '.add_attribute' )
-		?.addEventListener( 'click', ( event ) => {
-			recordEvent( 'product_attributes_add', {
-				page: 'product',
-				enable_archive: '',
-				default_sort_order: '',
-			} );
+		?.addEventListener( 'click', () => {
 			setTimeout( () => {
 				addNewAttributeTermTracks();
 			}, 1000 );
 		} );
 
+	const attributesCount = document.querySelectorAll(
+		'.woocommerce_attribute'
+	).length;
+
 	document
 		.querySelector( '.save_attributes' )
-		?.addEventListener( 'click', ( event ) => {
-			recordEvent( 'product_attributes_save', {
-				page: 'product',
-				attributes_count: document.querySelectorAll(
-					'.woocommerce_attribute'
-				).length,
-			} );
+		?.addEventListener( 'click', () => {
+			const newAttributesCount = document.querySelectorAll(
+				'.woocommerce_attribute'
+			).length;
+			if ( newAttributesCount > attributesCount ) {
+				recordEvent( 'product_attributes_add', {
+					page: 'product',
+					enable_archive: '',
+					default_sort_order: '',
+				} );
+			}
 		} );
 };
