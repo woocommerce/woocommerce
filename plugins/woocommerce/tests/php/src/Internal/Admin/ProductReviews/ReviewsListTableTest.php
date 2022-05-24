@@ -1129,7 +1129,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When no reviews are found for a given request a message is returned as the product reviews page table content.
+	 * @testdox `no_items` returns custom text when no reviews are found for a given request.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::no_items()
 	 * @dataProvider data_provider_no_items
