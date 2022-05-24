@@ -100,10 +100,10 @@ export const getSchema = (
 		execSync( `git checkout ${ branch }` );
 
 		const getSchemaPath =
-			'wp-content/plugins/woocommerce/bin/get-schema.php';
+			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
 		let schema;
 
-		// Make sure get-schema.php exists.
+		// Make sure wc-get-schema.php exists.
 		if ( existsSync( getSchemaPath ) ) {
 			// Get the schema from wp cli
 			schema = execSync(
