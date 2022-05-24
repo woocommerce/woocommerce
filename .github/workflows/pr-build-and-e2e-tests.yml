@@ -33,7 +33,7 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
-              if: !env.E2E_PLAYWRIGHT
+              if: env.E2E_PLAYWRIGHT != 'true'
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
@@ -42,22 +42,30 @@ jobs:
               run: pnpm exec wc-e2e test:e2e
 
             - name: Install Playwright supported browsers.
-              if: env.E2E_PLAYWRIGHT
+              if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
               run: pnpx playwright install
 
             - name: Run (Playwright) tests command.
-              if: env.E2E_PLAYWRIGHT
+              id: run_playwright_e2e_tests
+              if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
               run: pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Generate (Playwright) E2E Test report.
-              if: always() && env.E2E_PLAYWRIGHT
+              id: generate_playwright_e2e_test_report
+              if: |
+                  always() && 
+                  ( env.E2E_PLAYWRIGHT == 'true' ) &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
               working-directory: plugins/woocommerce
               run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
 
             - name: Archive (Playwright) E2E test report
-              if: always() && env.E2E_PLAYWRIGHT
+              if: env.E2E_PLAYWRIGHT == 'true'
               uses: actions/upload-artifact@v3
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
