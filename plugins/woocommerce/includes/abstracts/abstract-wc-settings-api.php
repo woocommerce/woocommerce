@@ -863,13 +863,13 @@ abstract class WC_Settings_API {
 	 * Note: this is a sanitization method, rather than a validation method (the name is due to some historic naming
 	 * choices).
 	 *
-	 * @param  string $key   Field key.
+	 * @param  string $key   Field key (currently unused).
 	 * @param  string $value Posted Value.
 	 *
 	 * @return string
 	 */
 	public function validate_safe_text_field( string $key, string $value ): string {
-		return ( new HtmlSanitizer( $value ) )->apply( HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS );
+		return wc_get_container()->get( HtmlSanitizer::class )->sanitize( $value, HtmlSanitizer::TRIMMED_BALANCED_LOW_HTML_NO_LINKS );
 	}
 
 	/**
