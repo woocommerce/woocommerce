@@ -189,11 +189,26 @@ a.button {
 	margin-bottom: 5rem;
 	margin-left: 0;
 	background: #eee;
+	color: $body-color;
+	border-top: 2px solid var( --wc-green );
+
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
 	width: 100%;
+
+	a {
+		color: #fff;
+
+		&:hover {
+			color: #fff;
+		}
+
+		&.button {
+			background: var( --wc-green );
+		}
+	}
 }
 
 .woocommerce-message,
@@ -210,24 +225,17 @@ a.button {
 }
 
 .woocommerce-message {
-	background: #eee;
-	color: $body-color;
+	border-color: var( --wc-blue );
+	a.button {
+		background: var( --wc-blue );
+	}
 }
 
 .woocommerce-error {
-	color: #fff;
-	background: #b22222;
+	border-color: $highlights-color;
 
-	a {
-		color: #fff;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&.button {
-			background: #111;
-		}
+	a.button {
+		background: $highlights-color;
 	}
 
 	> li {
@@ -240,25 +248,6 @@ a.button {
 	.woocommerce-error,
 	.woocommerce-info {
 		font-family: $headings;
-	}
-}
-
-.woocommerce-info {
-	background: #eee;
-	color: #000;
-	border-top: 2px solid $highlights-color;
-
-	a {
-		color: #444;
-
-		&:hover {
-			color: #000;
-		}
-
-		&.button {
-			background: $highlights-color;
-			color: #f5efe0;
-		}
 	}
 }
 
@@ -565,10 +554,6 @@ dl.variation,
 		.button.disabled {
 			opacity: 0.2;
 		}
-	}
-
-	.woocommerce-message {
-		flex-direction: row-reverse;
 	}
 
 	.woocommerce-Tabs-panel--additional_information,
