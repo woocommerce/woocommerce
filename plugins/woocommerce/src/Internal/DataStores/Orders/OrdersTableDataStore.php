@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,24 +23,24 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	protected $data_store_meta;
 
 	/**
-	 * Handles various db column <> order prop conversions.
+	 * The database util object to use.
 	 *
-	 * @var OrdersTableDataStoreHelper
+	 * @var DatabaseUtil
 	 */
-	protected $helper;
+	protected $database_util;
 
 
 	/**
 	 * Initialize the object.
 	 *
 	 * @internal
-	 * @param OrdersTableDataStoreMeta   $data_store_meta   Metadata helper.
-	 * @param OrdersTableDataStoreHelper $data_store_helper General datastore helper.
+	 * @param OrdersTableDataStoreMeta   $data_store_meta   Metadata instance.
+	 * @param DatabaseUtil               $database_util     The database util instance to use.
 	 * @return void
 	 */
-	final public function init( OrdersTableDataStoreMeta $data_store_meta, OrdersTableDataStoreHelper $data_store_helper ) {
+	final public function init( OrdersTableDataStoreMeta $data_store_meta, DatabaseUtil $database_util ) {
 		$this->data_store_meta = $data_store_meta;
-		$this->helper          = $data_store_helper;
+		$this->database_util   = $database_util;
 	}
 
 	/**
@@ -813,7 +814,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$db_updates = array();
 
 		// wc_orders.
-		$row = $this->helper->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
+		$row = $this->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
 		if ( $row ) {
 			$db_updates[] = array_merge(
 				array(
@@ -826,7 +827,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		// wc_order_operational_data.
-		$row = $this->helper->get_db_row_from_order_changes(
+		$row = $this->get_db_row_from_order_changes(
 			array_merge(
 				$changes,
 				// XXX: manually persist some of the properties until the datastore/property design is finalized.
@@ -853,7 +854,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		// wc_order_addresses.
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			$row = $this->helper->get_db_row_from_order_changes( $changes, $this->{$address_type . '_address_column_mapping'} );
+			$row = $this->get_db_row_from_order_changes( $changes, $this->{$address_type . '_address_column_mapping'} );
 
 			if ( $row ) {
 				$db_updates[] = array_merge(
@@ -880,6 +881,38 @@ LEFT JOIN {$operational_data_clauses['join']}
 				$update['where_format']
 			);
 		}
+	}
+
+	/**
+	 * Produces an array with keys 'row' and 'format' that can be passed to `$wpdb->update()` as the `$data` and
+	 * `$format` parameters. Values are taken from the order changes array and properly formatted for inclusion in the
+	 * database.
+	 *
+	 * @param array $changes        Order changes array.
+	 * @param array $column_mapping Table column mapping.
+	 * @return array
+	 */
+	private function get_db_row_from_order_changes( $changes, $column_mapping ) {
+		$row        = array();
+		$row_format = array();
+
+		foreach ( $column_mapping as $column => $details ) {
+			if ( ! isset( $details['name'] ) || ! array_key_exists( $details['name'], $changes ) ) {
+				continue;
+			}
+
+			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );
+			$row_format[ $column ] = $this->database_util->get_wpdb_format_for_type( $details['type'] );
+		}
+
+		if ( ! $row ) {
+			return false;
+		}
+
+		return array(
+			'row'    => $row,
+			'format' => $row_format,
+		);
 	}
 
 
@@ -1161,4 +1194,5 @@ CREATE TABLE $meta_table (
 			'_order_stock_reduced',
 		);
 	}
+
 }

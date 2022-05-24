@@ -133,4 +133,64 @@ AND index_name='$index_name'"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL
 	}
+
+	/**
+	 * Formats an object value of type `$type` for inclusion in the database.
+	 *
+	 * @param mixed  $value Raw value.
+	 * @param string $type  Data type.
+	 * @return mixed
+	 * @throws \Exception When an invalid type is passed.
+	 */
+	public function format_object_value_for_db( $value, string $type ) {
+		switch ( $type ) {
+			case 'decimal':
+				$value = wc_format_decimal( $value, false, true );
+				break;
+			case 'int':
+				$value = (int) $value;
+				break;
+			case 'bool':
+				$value = wc_string_to_bool( $value );
+				break;
+			case 'string':
+				$value = strval( $value );
+				break;
+			case 'date':
+				$value = $value ? ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' ) : null;
+				break;
+			case 'date_epoch':
+				$value = $value ? ( new \DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
+				break;
+			default:
+				throw new \Exception( 'Invalid type received: ' . $type );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Returns the `$wpdb` placeholder to use for data type `$type`.
+	 *
+	 * @param string $type Data type.
+	 * @return string
+	 * @throws \Exception When an invalid type is passed.
+	 */
+	public function get_wpdb_format_for_type( string $type ) {
+		static $wpdb_placeholder_for_type = array(
+			'int'        => '%d',
+			'decimal'    => '%f',
+			'string'     => '%s',
+			'date'       => '%s',
+			'date_epoch' => '%s',
+			'bool'       => '%d',
+		);
+
+		if ( ! isset( $wpdb_placeholder_for_type[ $type ] ) ) {
+			throw new \Exception( 'Invalid column type: ' . $type );
+		}
+
+		return $wpdb_placeholder_for_type[ $type ];
+	}
+
 }
