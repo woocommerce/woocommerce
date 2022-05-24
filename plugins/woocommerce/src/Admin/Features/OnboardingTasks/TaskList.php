@@ -407,7 +407,7 @@ class TaskList {
 			'isComplete'            => $this->is_complete(),
 			'tasks'                 => $tasks_json,
 			'eventPrefix'           => $this->prefix_event( '' ),
-			'displayProgressHeader' => $this->display_progress_header,
+			'displayProgressHeader' => $this->display_progress_header && ! $this->is_complete(),
 			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 			'sections'              => array_map(
 				function( $section ) {
