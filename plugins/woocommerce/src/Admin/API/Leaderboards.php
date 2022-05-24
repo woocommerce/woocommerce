@@ -53,6 +53,22 @@ class Leaderboards extends \WC_REST_Data_Controller {
 			)
 		);
 
+		foreach( [ 'customers', 'coupons', 'categories', 'products' ] as $endpoint ) {
+			register_rest_route(
+				$this->namespace,
+				'/' . $this->rest_base . '/' . $endpoint,
+				array(
+					array(
+						'methods'             => \WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'get_items' ),
+						'permission_callback' => array( $this, 'get_items_permissions_check' ),
+						'args'                => $this->get_collection_params(),
+					),
+					'schema' => array( $this, 'get_public_item_schema' ),
+				)
+			);
+		}
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/allowed',
@@ -369,9 +385,29 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	 */
 	public function get_items( $request ) {
 		$persisted_query = json_decode( $request['persisted_query'], true );
-		$leaderboards    = $this->get_leaderboards( $request['per_page'], $request['after'], $request['before'], $persisted_query );
-		$data            = array();
 
+		// Check which group (or all the leaderboards) we're requesting
+		$parts = explode( '/', $request->get_route() );
+		$endpoint = end( $parts );
+		switch( $endpoint ) {
+			case 'leaderboards':
+				$leaderboards = $this->get_leaderboards( $request['per_page'], $request['after'], $request['before'], $persisted_query );
+				break;
+			case 'customers':
+				$leaderboards = array( $this->get_customers_leaderboard( $request['per_page'], $request['after'], $request['before'], $persisted_query ) );
+				break;
+			case 'coupons':
+				$leaderboards = array( $this->get_coupons_leaderboard( $request['per_page'], $request['after'], $request['before'], $persisted_query ) );
+				break;
+			case 'categories':
+				$leaderboards = array( $this->get_categories_leaderboard( $request['per_page'], $request['after'], $request['before'], $persisted_query ) );
+				break;
+			case 'products':
+				$leaderboards = array( $this->get_products_leaderboard( $request['per_page'], $request['after'], $request['before'], $persisted_query ) );
+				break;
+		}
+
+		$data = array();
 		if ( ! empty( $leaderboards ) ) {
 			foreach ( $leaderboards as $leaderboard ) {
 				$response = $this->prepare_item_for_response( $leaderboard, $request );
