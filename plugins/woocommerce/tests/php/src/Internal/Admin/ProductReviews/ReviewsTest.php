@@ -41,7 +41,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Gets the filterable user capability for viewing the product reviews page.
+	 * @testdox `get_capability` gets the filterable user capability for viewing the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_capability()
 	 *
