@@ -25,7 +25,7 @@ export function* getProducts( query: Partial< ProductQuery > ) {
 		return items;
 	} catch ( error ) {
 		yield getProductsError( query, error );
-		return error;
+		throw error;
 	}
 }
 
@@ -44,5 +44,6 @@ export function* getProductsTotalCount( query: Partial< ProductQuery > ) {
 		return totalCount;
 	} catch ( error ) {
 		yield getProductsTotalCountError( query, error );
+		throw error;
 	}
 }
