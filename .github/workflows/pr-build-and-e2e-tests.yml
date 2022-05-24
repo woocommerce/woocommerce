@@ -45,7 +45,7 @@ jobs:
             - name: Install Playwright supported browsers.
               if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
-              run: pnpx playwright install
+              run: pnpx playwright install chromium
 
             - name: Run (Playwright) tests command.
               id: run_playwright_e2e_tests
