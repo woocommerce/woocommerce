@@ -56,19 +56,14 @@ class OrdersTableDataStoreMeta {
 	public function delete_meta( &$object, $meta ) {
 		global $wpdb;
 
-		if ( ! is_a( $meta, 'WC_Meta_Data' ) || ! isset( $meta->id ) ) {
+		if ( ! isset( $meta->id ) ) {
 			return false;
 		}
 
-		$db_info = $this->get_db_info();
+		$db_info   = $this->get_db_info();
+		$meta_id   = absint( $meta->id );
 
-		$meta_id      = absint( $meta->id );
-		$current_meta = $this->get_metadata_by_id( $meta_id );
-		if ( $current_meta ) {
-			return (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
-		}
-
-		return false;
+		return (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
 	}
 
 	/**
