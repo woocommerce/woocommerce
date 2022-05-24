@@ -61,16 +61,16 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content ) {
-		$id      = absint( isset( $attributes['productId'] ) ? $attributes['productId'] : 0 );
+		$id = absint( $attributes['productId'] ?? 0 );
+
 		$product = wc_get_product( $id );
 		if ( ! $product ) {
 			return '';
 		}
+
 		$attributes = wp_parse_args( $attributes, $this->defaults );
 
-		$default_height       = wc_get_theme_support( 'featured_block::default_height', 500 );
-		$min_height           = $attributes['minHeight'] ?? $default_height;
-		$attributes['height'] = $attributes['height'] ?? $default_height;
+		$attributes['height'] = $attributes['height'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
 
 		$title = sprintf(
 			'<h2 class="wc-block-featured-product__title">%s</h2>',
@@ -96,10 +96,11 @@ class FeaturedProduct extends AbstractDynamicBlock {
 
 		$image_url = esc_url( $this->get_image_url( $attributes, $product ) );
 
+		$styles  = $this->get_styles( $attributes );
 		$classes = $this->get_classes( $attributes );
 
-		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-product">', esc_attr( trim( $classes ) ) );
-		$output .= $this->render_wrapper( $attributes );
+		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-product" style="%2$s">', esc_attr( trim( $classes ) ), esc_attr( $styles ) );
+		$output .= '<div class="wc-block-featured-product__wrapper">';
 		$output .= $this->render_overlay( $attributes );
 
 		if ( ! $attributes['isRepeated'] && ! $attributes['hasParallax'] ) {
@@ -196,48 +197,6 @@ class FeaturedProduct extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Renders the image wrapper.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 *
-	 * @return string
-	 */
-	private function render_wrapper( $attributes ) {
-		$min_height = $attributes['minHeight'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
-
-		$style = '';
-		if ( isset( $attributes['minHeight'] ) ) {
-			$style = sprintf( 'min-height:%dpx;', intval( $min_height ) );
-		}
-
-		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
-		$style             .= $global_style_style;
-
-		return sprintf( '<div class="wc-block-featured-product__wrapper" style="%s">', esc_attr( $style ) );
-	}
-
-	/**
-	 * Renders the block overlay
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 *
-	 * @return string
-	 */
-	private function render_overlay( $attributes ) {
-		$overlay_styles = '';
-
-		if ( isset( $attributes['overlayColor'] ) ) {
-			$overlay_styles = sprintf( 'background-color: %s', $attributes['overlayColor'] );
-		} elseif ( isset( $attributes['overlayGradient'] ) ) {
-			$overlay_styles = sprintf( 'background-image: %s', $attributes['overlayGradient'] );
-		} else {
-			$overlay_styles = 'background-color: #000000';
-		}
-
-		return sprintf( '<div class="background-dim__overlay" style="%s"></div>', esc_attr( $overlay_styles ) );
-	}
-
-	/**
 	 * Get the styles for the wrapper element (background image, color).
 	 *
 	 * @param array  $attributes Block attributes. Default empty array.
@@ -269,6 +228,46 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		$style             .= $global_style_style;
 
 		return $style;
+	}
+
+	/**
+	 * Get the styles for the wrapper element (background image, color).
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string
+	 */
+	public function get_styles( $attributes ) {
+		$style = '';
+
+		$min_height = $attributes['minHeight'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
+
+		if ( isset( $attributes['minHeight'] ) ) {
+			$style .= sprintf( 'min-height:%dpx;', intval( $min_height ) );
+		}
+
+		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
+		$style             .= $global_style_style;
+
+		return $style;
+	}
+
+	/**
+	 * Renders the block overlay
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 *
+	 * @return string
+	 */
+	private function render_overlay( $attributes ) {
+		if ( isset( $attributes['overlayGradient'] ) ) {
+			$overlay_styles = sprintf( 'background-image: %s', $attributes['overlayGradient'] );
+		} elseif ( isset( $attributes['overlayColor'] ) ) {
+			$overlay_styles = sprintf( 'background-color: %s', $attributes['overlayColor'] );
+		} else {
+			$overlay_styles = 'background-color: #000000';
+		}
+
+		return sprintf( '<div class="background-dim__overlay" style="%s"></div>', esc_attr( $overlay_styles ) );
 	}
 
 	/**
