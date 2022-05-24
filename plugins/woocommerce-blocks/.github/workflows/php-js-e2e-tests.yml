@@ -11,15 +11,29 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+
+            - name: Cache node_modules
+              id: cache-node-modules
+              uses: actions/cache@v3
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
             - name: Setup node version and npm cache
               uses: actions/setup-node@v3
               with:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
-            - name: Npm install and build
-              run: |
-                  npm ci --no-optional
-                  FORCE_REDUCED_MOTION=true npm run build:e2e-test
+
+            - name: Install Node Dependencies
+              if: steps.cache-node-modules.outputs.cache-hit != 'true'
+              run: npm ci --no-optional
+
+            - name: Build Assets
+              run: FORCE_REDUCED_MOTION=true npm run build:e2e-test
+
             - name: blocks.ini setup
               run: |
                   echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
@@ -64,15 +78,28 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+
+            - name: Cache node_modules
+              id: cache-node-modules
+              uses: actions/cache@v3
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
             - name: Setup node version and npm cache
               uses: actions/setup-node@v3
               with:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
-            - name: Npm install and build
-              run: |
-                  npm ci --no-optional
-                  FORCE_REDUCED_MOTION=true npm run build:e2e-test
+
+            - name: Install Node Dependencies
+              if: steps.cache-node-modules.outputs.cache-hit != 'true'
+              run: npm ci --no-optional
+
+            - name: Build Assets
+              run: FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
             - name: blocks.ini setup
               run: |

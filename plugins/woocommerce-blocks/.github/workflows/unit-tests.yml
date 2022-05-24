@@ -11,20 +11,38 @@ jobs:
         name: Setup
         steps:
             - uses: actions/checkout@v3
+
+            - name: Cache node_modules
+              id: cache-node-modules
+              uses: actions/cache@v3
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
             - name: Setup node version and npm cache
               uses: actions/setup-node@v3
               with:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
-            - name: Npm install and build
-              run: |
-                  npm ci --no-optional
-                  FORCE_REDUCED_MOTION=true npm run build:e2e-test
+
+            - name: Install Node Dependencies
+              if: steps.cache-node-modules.outputs.cache-hit != 'true'
+              run: npm ci --no-optional
+
+            - name: Build Assets
+              run: FORCE_REDUCED_MOTION=true npm run build:e2e-test
+
+            - name: Store Build Assets
+              uses: actions/upload-artifact@v3
+              with:
+                  name: build-assets
+                  path: build/
 
             - name: Get Composer Cache Directory
               id: composer-cache
-              run: |
-                  echo "::set-output name=dir::$(composer config cache-files-dir)"
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
             - uses: actions/cache@v2
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
@@ -40,8 +58,7 @@ jobs:
                   tools: composer
 
             - name: Composer install
-              run: |
-                  composer install
+              run: composer install
 
     PHPUnitTests:
         name: PHP Unit Tests
@@ -50,23 +67,38 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
+
+            - name: Cache node_modules
+              id: cache-node-modules
+              uses: actions/cache@v3
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
             - name: Setup node version and npm cache
               uses: actions/setup-node@v3
               with:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
-            - name: Npm install #build is not needed
-              run: |
-                  npm ci --no-optional
+
+            - name: Download Build Assets
+              uses: actions/download-artifact@v3
+              with:
+                  name: build-assets
+
             - name: blocks.ini setup
-              run: |
-                  echo 'woocommerce_blocks_phase = 3' > blocks.ini
+              run: echo 'woocommerce_blocks_phase = 3' > blocks.ini
+
             - name: Setup Environment
               run: |
                   chmod -R 767 ./ #TODO: Might get implemented in wp-env
                   npm run wp-env start
+
             - name: Run PHPUnit tests
               run: npm run test:php
+
             - name: Run PHPUnit tests (WooCommerce Development Version)
               run: |
                   JSON='{"plugins": [".","https://downloads.wordpress.org/plugin/woocommerce.zip"]}'
@@ -78,23 +110,31 @@ jobs:
         name: JS Unit Tests
         needs: Setup
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v3
+
+            - name: Cache node_modules
+              id: cache-node-modules
+              uses: actions/cache@v3
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
             - name: Setup node version and npm cache
               uses: actions/setup-node@v3
               with:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
-            - name: Npm install and build
-              run: |
-                  npm ci --no-optional
-                  FORCE_REDUCED_MOTION=true npm run build:e2e-test
+
+            - name: Download Build Assets
+              uses: actions/download-artifact@v3
+              with:
+                  name: build-assets
 
             - name: blocks.ini setup
-              run: |
-                  echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
+              run: echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
 
             - name: Run JavaScript Unit tests
-              run: |
-                  npm run test
+              run: npm run test
