@@ -1872,7 +1872,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Each product review in the list table will have a column displaying a bubble with information about pending and approved reviews for the corresponding product.
+	 * @testdox `comments_bubble` displays a bubble with information about pending and approved reviews for the corresponding product.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::comments_bubble()
 	 * @dataProvider provider_comments_bubble
