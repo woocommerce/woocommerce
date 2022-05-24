@@ -799,7 +799,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			// Loop options and get values to save.
 			foreach ( $options as $option ) {
-				if( isset( $option['name'] ) ) {
+				if ( isset( $option['name'] ) ) {
 					$option['id'] = $option['name'];
 				}
 
