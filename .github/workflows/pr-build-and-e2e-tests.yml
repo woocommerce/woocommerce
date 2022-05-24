@@ -42,7 +42,7 @@ jobs:
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
               run: pnpm exec wc-e2e test:e2e
 
-            - name: Install Playwright supported browsers.
+            - name: Download and install Chromium browser.
               if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
               run: pnpx playwright install chromium
