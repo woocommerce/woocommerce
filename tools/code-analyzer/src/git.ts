@@ -101,28 +101,14 @@ export const getSchema = (
 
 		const getSchemaPath =
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
-		let schema;
-
-		console.log( __dirname );
-
-		// Make sure wc-get-schema.php exists.
-		if ( existsSync( getSchemaPath ) ) {
-			// Get the schema from wp cli
-			schema = execSync(
-				`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
-				{
-					cwd: 'plugins/woocommerce',
-					encoding: 'utf-8',
-				}
-			);
-		} else {
-			// Return to the current branch.
-			execSync( `git checkout ${ currentBranch }` );
-
-			throw new Error(
-				`File ${ getSchemaPath } does not exist in branch ${ branch }.`
-			);
-		}
+		// Get the schema from wp cli
+		const schema = execSync(
+			`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
+			{
+				cwd: 'plugins/woocommerce',
+				encoding: 'utf-8',
+			}
+		);
 		// Return to the current branch.
 		execSync( `git checkout ${ currentBranch }` );
 
