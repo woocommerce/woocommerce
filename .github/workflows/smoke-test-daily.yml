@@ -33,7 +33,7 @@ jobs:
             - name: Install Jest
               run: npm install -g jest
 
-            - name: Run smoke test.
+            - name: Run E2E smoke test.
               working-directory: plugins/woocommerce
               env:
                   SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
@@ -49,17 +49,28 @@ jobs:
                   TEST_RELEASE: 1
                   UPDATE_WC: 1
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
               run: |
                   pnpm exec wc-e2e docker:up
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
-                  pnpm exec wc-e2e test:e2e
-                  pnpm exec wc-api-tests test api
+                  # mytodo pnpm exec wc-e2e test:e2e
+
+            - name: Run API smoke tests
+              if: always()
+              id: run_api_tests
+              working-directory: plugins/woocommerce
+              env:
+                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
+                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+              run: pnpm exec wc-api-tests test api
                   
             - name: Archive API test report
-              if: always()
+              if: |
+                  always() &&
+                  (
+                    steps.run_api_tests.conclusion != 'cancelled' ||
+                    steps.run_api_tests.conclusion != 'skipped' ||
+                  )
               uses: actions/upload-artifact@v2
               with:
                   name: ${{ env.API_TEST_REPORT_ARTIFACT_NAME }}
