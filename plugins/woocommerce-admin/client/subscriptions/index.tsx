@@ -104,7 +104,6 @@ const NoThanksButton = () => {
 				);
 				updateOptions( {
 					[ dismissOptionKey ]: 'yes',
-					// @ts-expect-error updateOptions returns a Promise, but it is not typed in source.
 				} ).then( () => {
 					window.location.href = noThanksUrl;
 				} );
