@@ -103,6 +103,8 @@ export const getSchema = (
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
 		let schema;
 
+		console.log( __dirname );
+
 		// Make sure wc-get-schema.php exists.
 		if ( existsSync( getSchemaPath ) ) {
 			// Get the schema from wp cli
