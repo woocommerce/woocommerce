@@ -168,7 +168,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The product reviews menu item will be highlighted when editing a review.
+	 * @testdox `edit_review_parent_file` will highlight the product reviews menu item when editing a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_review_parent_file()
 	 *
