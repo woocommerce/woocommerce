@@ -26,7 +26,14 @@ import {
 	getDateFormatsForIntervalPhp,
 	getDateFormatsForIntervalD3,
 	dayTicksThreshold,
-} from '../';
+} from '..';
+declare global {
+	interface Window {
+		wcSettings: {
+			timeZone?: string;
+		};
+	}
+}
 
 jest.mock( 'moment', () => {
 	const m = jest.requireActual( 'moment' );
@@ -56,6 +63,7 @@ describe( 'appendTimestamp', () => {
 	} );
 
 	it( 'should throw and error if `timeOfDay` is not valid', () => {
+		// @ts-expect-error appendTimestamp should be called with timeOfDay param but this test is testing the error handling.
 		expect( () => appendTimestamp( moment( '2018-01-01' ) ) ).toThrow(
 			Error
 		);
@@ -71,12 +79,16 @@ describe( 'toMoment', () => {
 
 	it( 'should handle isoFormat dates', () => {
 		const myMoment = toMoment( 'YYYY', '2018-04-15' );
+		if ( myMoment === null ) fail( 'myMoment should not be null' );
+
 		expect( moment.isMoment( myMoment ) ).toBe( true );
 		expect( myMoment.isValid() ).toBe( true );
 	} );
 
 	it( 'should handle local formats', () => {
 		const longDate = toMoment( 'MMMM D, YYYY', 'April 15, 2018' );
+		if ( longDate === null ) fail( 'longDate should not be null' );
+
 		expect( moment.isMoment( longDate ) ).toBe( true );
 		expect( longDate.isValid() ).toBe( true );
 		expect( longDate.date() ).toBe( 15 );
@@ -84,6 +96,8 @@ describe( 'toMoment', () => {
 		expect( longDate.year() ).toBe( 2018 );
 
 		const shortDate = toMoment( 'DD/MM/YYYY', '15/04/2018' );
+		if ( shortDate === null ) fail( 'shortDate should not be null' );
+
 		expect( moment.isMoment( shortDate ) ).toBe( true );
 		expect( shortDate.isValid() ).toBe( true );
 		expect( shortDate.date() ).toBe( 15 );
