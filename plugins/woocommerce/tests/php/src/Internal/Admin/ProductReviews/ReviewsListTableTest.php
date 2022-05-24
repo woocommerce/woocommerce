@@ -82,7 +82,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Each row of the product reviews page table will have admin action links pertaining each review or comment.
+	 * @testdox `handle_row_actions` displays admin action links pertaining each review or comment.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::handle_row_actions()
 	 * @dataProvider data_provider_test_handle_row_actions
