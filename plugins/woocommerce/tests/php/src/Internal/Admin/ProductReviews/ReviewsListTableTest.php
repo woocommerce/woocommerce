@@ -26,7 +26,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that will output the reviews list table with the expected HTML elements.
+	 * @testdox `display` outputs the overall HTML content of product reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::display()
 	 *
@@ -46,7 +46,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can process the row output for a review or reply.
+	 * @testdox `single_row` will process the row output content for an individual review or reply in the product reviews page table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::single_row()
 	 *
@@ -82,7 +82,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can handle the row actions for a review in the Reviews page table.
+	 * @testdox Each row of the product reviews page table will have admin action links pertaining each review or comment.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::handle_row_actions()
 	 * @dataProvider data_provider_test_handle_row_actions
@@ -160,7 +160,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the product reviews' page columns.
+	 * @testdox `get_columns` returns the product reviews page table column names and labels.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_columns()
 	 *
@@ -182,7 +182,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the product reviews' page columns when a filter is applied.
+	 * @testdox The product reviews page columns can be filtered.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_columns()
 	 *
@@ -208,7 +208,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the primary column name.
+	 * @testdox `get_primary_column_name` will return the `comment` column as the primary column of the product reviews page list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_primary_column_name()
 	 *
@@ -224,6 +224,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testodx `cb` outputs the WordPress standard checkbox HTML for the product reviews page list table.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::cb()
 	 *
 	 * @dataProvider data_provider_test_column_cb()
@@ -271,7 +273,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the output of the review type column.
+	 * @testdox `column_type` outputs the HTML column content displaying the type of product review in the product reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_type()
 	 * @dataProvider data_provider_test_column_type()
@@ -310,7 +312,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can generate the column rating HTML output.
+	 * @testdox `column_rating` outputs the HTML column content displaying the review rating in the product reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_rating()
 	 * @dataProvider data_provider_test_column_rating()
@@ -354,7 +356,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output the author information.
+	 * @testdox `column_author` outputs the HTML column content displaying the review author in the product reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_author()
 	 * @dataProvider data_provider_column_author
@@ -410,7 +412,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the item author URL.
+	 * @testdox `get_item_author_url` returns the URL of the review author as output by {@see get_comment_author_url()}.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_item_author_url()
 	 * @dataProvider data_provider_test_get_item_author_url
@@ -450,7 +452,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get a review author url for display.
+	 * @testdox `get_item_author_url_for_display` will build the HTML output for the product review author URL when available.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_item_author_url_for_display()
 	 * @dataProvider data_provider_test_get_item_author_url_for_display()
@@ -483,7 +485,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output the review or reply date column.
+	 * @testdox `column_date` outputs the date HTML for the current review in the product reviews page table as output by {@see get_comment_date()}.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_date()
 	 * @dataProvider data_provider_test_column_date
@@ -538,7 +540,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it will output the product information for the corresponding review column.
+	 * @testdox `column_response` outputs the response HTML for the current review in the product reviews page table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_response()
 	 *
@@ -571,7 +573,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output the review or reply content.
+	 * @testdox `column_content` outputs the comment content HTML for the current review in the product reviews page table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_comment()
 	 *
@@ -618,7 +620,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the in reply to review text message for the review content column.
+	 * @testdox `get_in_reply_to_review_text` returns the in-reply-to-review text message for the review content column.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_in_reply_to_review_text()
 	 *
@@ -652,7 +654,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the bulk actions for the product reviews page.
+	 * @testdox `get_bulk_actions` returns the bulk actions available in the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_bulk_actions()
 	 * @dataProvider data_provider_get_bulk_actions
@@ -726,7 +728,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can set the product to filter reviews by.
+	 * @testdox `set_review_product` will set a given product post in the comments query when filtering reviews by product.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::set_review_product()
 	 *
@@ -761,7 +763,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can set the review status for the current request.
+	 * @testdox `set_review_status` will set the comment status in the comment query to filter results accordingly in the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::set_review_status()
 	 * @dataProvider data_provider_set_review_status
@@ -797,7 +799,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can set the review type when preparing items.
+	 * @testdox `set_review_type` will set the review type (e.g. review, reply) in the comments query to filter results in the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::set_review_type()
 	 * @dataProvider data_provider_set_review_type
@@ -836,7 +838,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the sortable columns for the reviews table.
+	 * @testdox `get_sortable_columns` returns a list of columns that can be sorted in the product reviews page table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_sortable_columns()
 	 *
@@ -861,7 +863,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the sort arguments for the current request.
+	 * @testdox `get_sort_arguments` will grab any sort arguments in the current request and return normalized comment query sort arguments for product reviews.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_sort_arguments()
 	 * @dataProvider data_provider_get_sort_arguments
@@ -961,7 +963,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the comment type argument for the current request.
+	 * @testdox `get_filter_type_arguments` will grab any review type arguments for the current request and return normalized comment query arguments for filtering product reviews by type.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_filter_type_arguments()
 	 * @dataProvider data_provider_get_filter_type_arguments
@@ -998,7 +1000,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can set the filter rating for the current request.
+	 * @testdox `get_filter_rating_arguments` will grab any review rating argument for the current request and return normalized comment query arguments for filtering product reviews by rating.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_filter_rating_arguments()
 	 *
@@ -1039,7 +1041,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the post ID argument for the current request.
+	 * @testdox `get_filter_product_arguments` will grab any product ID for the current request and return a normalized comment query argument for filtering product reviews by product.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_filter_product_arguments()
 	 *
@@ -1066,7 +1068,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the status arguments based on the current request.
+	 * @testdox `get_status_arguments` will grab any status for the current request and return a normalized comment query argument for filtering product reviews by status.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_status_arguments()
 	 * @dataProvider provider_get_status_arguments
@@ -1099,6 +1101,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `get_search_arguments` will grab any search term for the current request and return a normalized comment query argument for filtering product reviews by that term.
+	 *
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_search_arguments()
 	 * @dataProvider provider_get_search_arguments
 	 *
@@ -1125,7 +1129,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output the text for when no reviews are found.
+	 * @testdox When no reviews are found for a given request a message is returned as the product reviews page table content.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::no_items()
 	 * @dataProvider data_provider_no_items
@@ -1154,7 +1158,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can render the extra controls for the product reviews page.
+	 * @testdox The product reviews page will offer additional UI elements allowing merchants to filter the reviews to display.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::extra_tablenav()
 	 * @dataProvider data_provider_test_extra_tablenav()
@@ -1375,7 +1379,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output a filter by review type dropdown element.
+	 * @testdox `review_type_dropdown` outputs a dropdown HTML to filter reviews by type in the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::review_type_dropdown()
 	 * @dataProvider data_provider_test_review_type_dropdown
@@ -1414,7 +1418,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output a filter dropdown for review ratings.
+	 * @testdox `review_rating_dropdown` outputs a dropdown HTML to filter reviews by rating in the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::review_rating_dropdown()
 	 * @dataProvider data_provider_test_review_rating_dropdown
@@ -1451,7 +1455,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output the default column content and trigger an action hook for custom columns.
+	 * @testdox `column_default` will render any custom columns HTML in the product reviews page added by third parties.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_default()
 	 *
@@ -1480,7 +1484,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it will trigger a filter hook for columns.
+	 * @testdox Each column in the product reviews page table can be filtered by third parties.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::filter_column_output()
 	 *
@@ -1507,7 +1511,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output a product search field for the product in context.
+	 * @testdox `product_search` will render the product search form in the product reviews page to filter reviews for the given product.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::product_search()
 	 *
@@ -1532,7 +1536,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the reviews' status filter.
+	 * @testdox `get_status_filters` will return the status filters for the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_status_filters()
 	 *
@@ -1597,7 +1601,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get a view URL for the product reviews page.
+	 * @testodx `get_view_url` returns the admin URL for the product reviews page, which may include a specific type or product ID to filter default results for.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_view_url()
 	 * @dataProvider provider_get_view_url
@@ -1648,7 +1652,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can convert the status to a query value.
+	 * @testdox `convert_status_to_query_value` normalizes a review status to a query value for filtering results in the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::convert_status_to_query_value()
 	 * @dataProvider provider_convert_status_string_to_comment_approved
@@ -1678,7 +1682,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the product reviews count.
+	 * @testdox `get_review_count` gets the number of reviews of a given status for a given product.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_review_count()
 	 *
@@ -1756,7 +1760,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the product reviews page views.
+	 * @testdox `get_views` Returns a list of comment status links that point to matching views.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_views()
 	 *
@@ -1784,6 +1788,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `get_offset_arguments` ensures that the current comment query in the product reviews page displays the expected results according to pagination.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_offset_arguments()
 	 * @dataProvider provider_get_offset_arguments
 	 *
@@ -1818,7 +1824,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that `offset` and `number` values are always set to `0`, and that `count` is added to the array.
+	 * @testdox `get_total_comments_arguments` will return the product reviews total count.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_total_comments_arguments()
 	 *
@@ -1850,7 +1856,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * This is only testing the default value as we don't have a "current user".
+	 * @testdox `get_per_page` will return the number of product reviews to display per page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
 	 *
@@ -1866,6 +1872,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Each product review in the list table will have a column displaying a bubble with information about pending and approved reviews for the corresponding product.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::comments_bubble()
 	 * @dataProvider provider_comments_bubble
 	 *
