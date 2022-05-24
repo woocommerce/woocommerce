@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7bc0e7b8b67aae614f83e92080358133",
+    "content-hash": "2e381a6654b1e65324831bf233b7f68b",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -641,16 +641,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.4.0",
+            "version": "3.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "3218a33ff14b968f8cb05de9656c2efa1eeb1330"
+                "reference": "9ce261d7055650331d6d433c03bf188e6dd2b259"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3218a33ff14b968f8cb05de9656c2efa1eeb1330",
-                "reference": "3218a33ff14b968f8cb05de9656c2efa1eeb1330",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/9ce261d7055650331d6d433c03bf188e6dd2b259",
+                "reference": "9ce261d7055650331d6d433c03bf188e6dd2b259",
                 "shasum": ""
             },
             "require-dev": {
@@ -675,9 +675,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.4.0"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.4.1"
             },
-            "time": "2021-10-28T17:09:12+00:00"
+            "time": "2022-05-03T09:41:49+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -3021,5 +3021,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.3.0"
 }
