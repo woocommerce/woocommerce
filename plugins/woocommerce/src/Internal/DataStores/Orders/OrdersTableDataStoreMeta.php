@@ -152,7 +152,7 @@ class OrdersTableDataStoreMeta {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$meta = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$db_info['table']} WHERE {$db_info['meta_id_field']} = %d",
+				"SELECT {$db_info['meta_id_field']}, meta_key, meta_value, {$db_info['object_id_field']} FROM {$db_info['table']} WHERE {$db_info['meta_id_field']} = %d",
 				$meta_id
 			)
 		);
