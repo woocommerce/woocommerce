@@ -70,12 +70,6 @@ describe( 'Stack', () => {
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
 		await waitFor( () => expect( onClickLoadSampleProduct ).toBeCalled() );
-
-		expect( recordEvent ).toHaveBeenNthCalledWith(
-			1,
-			'task_completion_time',
-			{ task_name: 'products', time: '0-2s' }
-		);
 	} );
 
 	it( 'should fire the tasklist_add_product and task_completion_time events when the "Start Blank" link is clicked', async () => {
