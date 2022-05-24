@@ -1158,7 +1158,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The product reviews page will offer additional UI elements allowing merchants to filter the reviews to display.
+	 * @testdox `extra_tablenav` will offer additional UI elements allowing merchants to filter the reviews to display.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::extra_tablenav()
 	 * @dataProvider data_provider_test_extra_tablenav()
