@@ -109,29 +109,28 @@ class OrdersTableDataStoreMeta {
 	public function update_meta( &$object, $meta ) {
 		global $wpdb;
 
-		$current_meta = $this->get_metadata_by_id( $meta->id );
-		if ( $current_meta ) {
-			// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			$data = array(
-				'meta_key'   => $meta->key,
-				'meta_value' => maybe_serialize( $meta->value ),
-			);
-			// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-
-			$db_info = $this->get_db_info();
-
-			$result = $wpdb->update(
-				$db_info['table'],
-				$data,
-				array( $db_info['meta_id_field'] => $meta->id ),
-				'%s',
-				'%d'
-			);
-
-			return $result ? true : false;
+		if ( ! isset( $meta->id ) || empty( $meta->key ) || ! property_exists( $meta, 'value' ) ) {
+			return false;
 		}
 
-		return false;
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$data = array(
+			'meta_key'   => $meta->key,
+			'meta_value' => maybe_serialize( $meta->value ),
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+
+		$db_info = $this->get_db_info();
+
+		$result = $wpdb->update(
+			$db_info['table'],
+			$data,
+			array( $db_info['meta_id_field'] => $meta->id ),
+			'%s',
+			'%d'
+		);
+
+		return 1 === $result;
 	}
 
 	/**
