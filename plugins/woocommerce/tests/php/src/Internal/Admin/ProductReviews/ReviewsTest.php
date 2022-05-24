@@ -583,7 +583,7 @@ test2</p></div>',
 	}
 
 	/**
-	 * @testdox A comment object is considered a review or a reply if the `comment_type` is `comment` or `review` and the parent post is a product.
+	 * @testdox `is_review_or_reply` correctly determines if an object is a review or a reply to a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_review_or_reply()
 	 *
