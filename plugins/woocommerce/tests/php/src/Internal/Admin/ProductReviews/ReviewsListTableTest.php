@@ -1484,7 +1484,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Each column in the product reviews page table can be filtered by third parties.
+	 * @testdox `filter_column_output` allows columns in the product reviews page table to be filtered by third parties.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::filter_column_output()
 	 *
