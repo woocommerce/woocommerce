@@ -460,7 +460,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When a product reviews bulk action notice is to be displayed, it output the appropriate message HTML.
+	 * @testdox `maybe_display_reviews_bulk_action_notice` will output the appropriate message HTML for a product reviews bulk action notice.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::maybe_display_reviews_bulk_action_notice()
 	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
