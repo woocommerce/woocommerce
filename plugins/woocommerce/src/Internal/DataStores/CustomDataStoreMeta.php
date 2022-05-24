@@ -137,7 +137,7 @@ abstract class CustomDataStoreMeta {
 	public function update_meta( &$object, $meta ) {
 		global $wpdb;
 
-		if ( ! isset( $meta->id ) || empty( $meta->key ) || ! property_exists( $meta, 'value' ) ) {
+		if ( ! isset( $meta->id ) || empty( $meta->key ) ) {
 			return false;
 		}
 
