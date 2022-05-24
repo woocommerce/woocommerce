@@ -8,11 +8,12 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
+    env:
+        E2E_PLAYWRIGHT: ${{ true }}
+
     e2e-tests-run:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
-        env:
-            E2E_PLAYWRIGHT: ${{ true }}
         steps:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
@@ -175,16 +176,32 @@ jobs:
             PR_NUMBER: ${{ github.event.number }}
             RUN_ID: ${{ github.run_id }}
             COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-            API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
-            E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
         steps:
-            - name: Publish test reports
-              run: |
-                  gh workflow run publish-reports.yml \
-                    -f test_workflow=pr \
-                    -f run_id=$RUN_ID \
-                    -f api_artifact=$API_ARTIFACT \
-                    -f e2e_artifact=$E2E_ARTIFACT \
-                    -f pr_number=$PR_NUMBER \
-                    -f commit_sha=$COMMIT_SHA \
-                    --repo woocommerce/woocommerce-test-reports
+          - name: Publish API test report
+            if: env.E2E_PLAYWRIGHT != 'true'
+            env:
+                ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
+            run: |
+                gh workflow run publish-report.yml \
+                  -f test_workflow=pr \
+                  -f test_type=api \
+                  -f run_id=$RUN_ID \
+                  -f artifact_name=$ARTIFACT_NAME \
+                  -f pr_number=$PR_NUMBER \
+                  -f commit_sha=$COMMIT_SHA \
+                  --repo woocommerce/woocommerce-test-reports
+
+          - name: Publish API and (Playwright) E2E test reports
+            if: env.E2E_PLAYWRIGHT == 'true'
+            env:
+                API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
+                E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+            run: |
+                gh workflow run publish-reports.yml \
+                  -f test_workflow=pr \
+                  -f run_id=$RUN_ID \
+                  -f api_artifact=$API_ARTIFACT \
+                  -f e2e_artifact=$E2E_ARTIFACT \
+                  -f pr_number=$PR_NUMBER \
+                  -f commit_sha=$COMMIT_SHA \
+                  --repo woocommerce/woocommerce-test-reports
