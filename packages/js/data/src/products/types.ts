@@ -8,7 +8,19 @@ import { Schema } from '@wordpress/core-data';
  */
 import { BaseQueryParams } from '../types';
 
-export type Product = Schema.Post & {
+export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
+export type ProductStatus =
+	| 'draft'
+	| 'pending'
+	| 'private'
+	| 'publish'
+	| 'any'
+	| 'future';
+
+export type Product<
+	Status = ProductStatus,
+	Type = ProductType
+> = Schema.Post & {
 	id: number;
 	name: string;
 	slug: string;
@@ -17,8 +29,8 @@ export type Product = Schema.Post & {
 	date_created_gmt: string;
 	date_modified: string;
 	date_modified_gmt: string;
-	type: 'simple' | 'grouped' | 'external' | 'variable';
-	status: 'draft' | 'pending' | 'private' | 'publish' | 'any' | 'future';
+	type: Type;
+	status: Status;
 	featured: boolean;
 	description: string;
 	short_description: string;
@@ -30,7 +42,10 @@ export type Product = Schema.Post & {
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
-export type ProductQuery = BaseQueryParams & {
+export type ProductQuery<
+	Status = ProductStatus,
+	Type = ProductType
+> = BaseQueryParams & {
 	orderby:
 		| 'date'
 		| 'id'
@@ -41,8 +56,8 @@ export type ProductQuery = BaseQueryParams & {
 		| 'popularity'
 		| 'rating';
 	slug: string;
-	status: 'any' | 'draft' | 'pending' | 'private' | 'publish' | 'future';
-	type: 'simple' | 'grouped' | 'external' | 'variable';
+	status: Status;
+	type: Type;
 	sku: string;
 	featured: boolean;
 	category: string;
@@ -50,7 +65,7 @@ export type ProductQuery = BaseQueryParams & {
 	shipping_class: string;
 	attribute: string;
 	attribute_term: string;
-	tax_class: string;
+	tax_class: 'standard' | 'reduced-rate' | 'zero-rate';
 	on_sale: boolean;
 	min_price: string;
 	max_price: string;
