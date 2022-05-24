@@ -51,6 +51,13 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	public $delimiter;
 
 	/**
+	 * Error message for import.
+	 *
+	 * @var string
+	 */
+	public $import_error_message;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -89,6 +96,8 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 					add_filter( 'http_request_timeout', array( $this, 'bump_request_timeout' ) );
 
 					$this->import( $file );
+				} else {
+					$this->import_error( $this->import_error_message );
 				}
 				break;
 		}
@@ -194,6 +203,15 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	}
 
 	/**
+	 * Set the import error message.
+	 *
+	 * @param string $message Error message.
+	 */
+	protected function set_import_error_message( $message ) {
+		$this->import_error_message = $message;
+	}
+
+	/**
 	 * Handles the CSV upload and initial parsing of the file to prepare for.
 	 * displaying author import options.
 	 *
@@ -206,25 +224,34 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 			$file = wp_import_handle_upload();
 
 			if ( isset( $file['error'] ) ) {
-				$this->import_error( $file['error'] );
+				$this->set_import_error_message( $file['error'] );
+
+				return false;
 			}
 
 			if ( ! wc_is_file_valid_csv( $file['file'], false ) ) {
 				// Remove file if not valid.
 				wp_delete_attachment( $file['id'], true );
 
-				$this->import_error( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+				$this->set_import_error_message( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+
+				return false;
 			}
 
 			$this->id = absint( $file['id'] );
-		} elseif ( file_exists( ABSPATH . $file_url ) ) {
+		} elseif (
+			( 0 === stripos( realpath( ABSPATH . $file_url ), ABSPATH ) ) &&
+			file_exists( ABSPATH . $file_url )
+		) {
 			if ( ! wc_is_file_valid_csv( ABSPATH . $file_url ) ) {
-				$this->import_error( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+				$this->set_import_error_message( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+
+				return false;
 			}
 
 			$this->file_url = esc_attr( $file_url );
 		} else {
-			$this->import_error();
+			return false;
 		}
 
 		return true;

@@ -22,7 +22,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Tests will use this to verify the correct call count.
@@ -42,7 +42,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_attribute_taxonomies' );
 		remove_all_filters( 'sanitize_taxonomy_name' );
 

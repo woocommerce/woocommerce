@@ -169,7 +169,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
  * Validate reports request arguments.
  *
  * @since 2.6.0
- * @param mixed           $value   Value to valdate.
+ * @param mixed           $value   Value to validate.
  * @param WP_REST_Request $request Request instance.
  * @param string          $param   Param to validate.
  * @return WP_Error|boolean
@@ -342,14 +342,22 @@ function wc_rest_check_product_reviews_permissions( $context = 'read', $object_i
 	$permission = false;
 	$contexts   = array(
 		'read'   => 'moderate_comments',
-		'create' => 'moderate_comments',
-		'edit'   => 'moderate_comments',
-		'delete' => 'moderate_comments',
-		'batch'  => 'moderate_comments',
+		'create' => 'edit_products',
+		'edit'   => 'edit_products',
+		'delete' => 'edit_products',
+		'batch'  => 'edit_products',
 	);
 
+	if ( $object_id > 0 ) {
+		$object = get_comment( $object_id );
+
+		if ( ! is_a( $object, 'WP_Comment' ) || get_comment_type( $object ) !== 'review' ) {
+			return false;
+		}
+	}
+
 	if ( isset( $contexts[ $context ] ) ) {
-		$permission = current_user_can( $contexts[ $context ] );
+		$permission = current_user_can( $contexts[ $context ], $object_id );
 	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'product_review' );

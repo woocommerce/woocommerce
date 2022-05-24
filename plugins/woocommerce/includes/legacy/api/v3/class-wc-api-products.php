@@ -819,7 +819,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			$update = wp_update_term( $id, 'product_cat', $data );
 			if ( is_wp_error( $update ) ) {
-				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_catgory', __( 'Could not edit the category', 'woocommerce' ), 400 );
+				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_category', __( 'Could not edit the category', 'woocommerce' ), 400 );
 			}
 
 			if ( ! empty( $data['display'] ) ) {

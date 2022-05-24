@@ -55,8 +55,8 @@ export function orders() {
 		);
 		api_x_wp_nonce = findBetween(
 			response.body,
-			'wp-json\\/","nonce":"',
-			'",'
+			'wp.apiFetch.createNonceMiddleware( "',
+			'" )'
 		);
 
 		// Create request header with nonce value for use in subsequent requests.

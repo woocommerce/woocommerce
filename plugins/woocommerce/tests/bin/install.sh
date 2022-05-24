@@ -6,6 +6,18 @@ if [ $# -lt 3 ]; then
 	exit 1
 fi
 
+function check_command_exists {
+	if ! which "$1" > /dev/null; then
+		echo "It looks as if $1 is not installed. Please ensure it is installed and on the path."
+		exit 1
+	fi
+}
+
+# Basic pre-requisite checks
+check_command_exists "mysqladmin"
+check_command_exists "php"
+check_command_exists "svn"
+
 DB_NAME=$1
 DB_USER=$2
 DB_PASS=$3
@@ -107,6 +119,8 @@ install_test_suite() {
 		mkdir -p $WP_TESTS_DIR
 		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
 		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
+	else
+		echo -e "\nTest suite already installed at:\n\n\t$WP_TESTS_DIR\n\n(If you experience difficulties running the tests, consider removing it then re-running this script.)\n"
 	fi
 
 	if [ ! -f wp-tests-config.php ]; then

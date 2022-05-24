@@ -67,5 +67,48 @@ class ArrayUtil {
 	public static function get_value_or_default( array $array, string $key, $default = null ) {
 		return isset( $array[ $key ] ) ? $array[ $key ] : $default;
 	}
+
+	/**
+	 * Converts an array of numbers to a human-readable range, such as "1,2,3,5" to "1-3, 5". It also supports
+	 * floating point numbers, however with some perhaps unexpected / undefined behaviour if used within a range.
+	 * Source: https://stackoverflow.com/a/34254663/4574
+	 *
+	 * @param array     $items    An array (in any order, see $sort) of individual numbers.
+	 * @param string    $item_separator  The string that separates sequential range groups.  Defaults to ', '.
+	 * @param string    $range_separator The string that separates ranges.  Defaults to '-'.  A plausible example otherwise would be ' to '.
+	 * @param bool|true $sort     Sort the array prior to iterating?  You'll likely always want to sort, but if not, you can set this to false.
+	 *
+	 * @return string
+	 */
+	public static function to_ranges_string( array $items, string $item_separator = ', ', string $range_separator = '-', bool $sort = true ): string {
+		if ( $sort ) {
+			sort( $items );
+		}
+
+		$point = null;
+		$range = false;
+		$str   = '';
+
+		foreach ( $items as $i ) {
+			if ( null === $point ) {
+				$str .= $i;
+			} elseif ( ( $point + 1 ) === $i ) {
+				$range = true;
+			} else {
+				if ( $range ) {
+					$str  .= $range_separator . $point;
+					$range = false;
+				}
+				$str .= $item_separator . $i;
+			}
+			$point = $i;
+		}
+
+		if ( $range ) {
+			$str .= $range_separator . $point;
+		}
+
+		return $str;
+	}
 }
 

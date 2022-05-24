@@ -1,7 +1,5 @@
 module.exports = {
-	extends: [
-		'plugin:jest/recommended',
-	],
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	env: {
 		'jest/globals': true,
 	},

@@ -40,7 +40,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		global $wpdb;
 
 		parent::setUp();

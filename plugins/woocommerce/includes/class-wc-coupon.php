@@ -137,7 +137,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Checks the coupon type.
 	 *
-	 * @param  string $type Array or string of types.
+	 * @param  string|array $type Array or string of types.
 	 * @return bool
 	 */
 	public function is_type( $type ) {
@@ -263,7 +263,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Get the "indvidual use" checkbox status.
+	 * Get the "individual use" checkbox status.
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.

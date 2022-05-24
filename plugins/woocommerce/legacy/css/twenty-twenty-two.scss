@@ -1264,3 +1264,22 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 }
+
+.woocommerce-store-notice {
+	color: var(--wp--preset--color--black);
+	border-top: 2px solid var( --wp--preset--color--primary );
+	background: $tt2-gray;
+	padding: 2rem;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	z-index: 999;
+	margin: 0;
+
+	.woocommerce-store-notice__dismiss-link {
+		float: right;
+		margin-right: 4rem;
+	}
+}
+
