@@ -32,7 +32,7 @@ class PostsToOrdersMigrationController {
 	/**
 	 * The source name to use for logs.
 	 */
-	private const LOGS_SOURCE_NAME = 'posts-to-orders-migration';
+	public const LOGS_SOURCE_NAME = 'posts-to-orders-migration';
 
 	/**
 	 * PostsToOrdersMigrationController constructor.
@@ -67,6 +67,8 @@ class PostsToOrdersMigrationController {
 	 * @param array $order_post_ids List of post IDs of the orders to migrate.
 	 */
 	public function migrate_orders( array $order_post_ids ): void {
+		$this->error_logger = WC()->call_function( 'wc_get_logger' );
+
 		foreach ( $this->all_migrators as $migrator ) {
 			$this->do_orders_migration_step( $migrator, $order_post_ids );
 		}
@@ -83,7 +85,7 @@ class PostsToOrdersMigrationController {
 	private function do_orders_migration_step( object $migration_class, array $order_post_ids ): void {
 		$result = $migration_class->process_migration_batch_for_ids( $order_post_ids );
 
-		$errors    = $result['errors'];
+		$errors    = array_unique( $result['errors'] );
 		$exception = $result['exception'];
 		if ( null === $exception && empty( $errors ) ) {
 			return;
@@ -110,7 +112,7 @@ class PostsToOrdersMigrationController {
 				array(
 					'source'    => self::LOGS_SOURCE_NAME,
 					'ids'       => $order_post_ids,
-					'exception' => $exception,
+					'error    ' => $error,
 				)
 			);
 		}
