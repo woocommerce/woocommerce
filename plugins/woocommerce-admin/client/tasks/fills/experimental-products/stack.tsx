@@ -64,7 +64,6 @@ const Stack: React.FC< StackProps > = ( {
 									href=""
 									type="wc-admin"
 									onClick={ () => {
-										recordCompletionTime();
 										onClickLoadSampleProduct();
 										return false;
 									} }

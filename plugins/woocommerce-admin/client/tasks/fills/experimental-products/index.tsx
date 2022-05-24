@@ -25,6 +25,7 @@ import CardLayout from './card-layout';
 import { LoadSampleProductType } from './constants';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
+import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
 import useRecordCompletionTime from '../use-record-completion-time';
 import { getCountryCode } from '~/dashboard/utils';
 import { useProductTaskExperiment } from './use-product-layout-experiment';
@@ -54,6 +55,10 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
+	const [
+		isConfirmingLoadSampleProducts,
+		setIsConfirmingLoadSampleProducts,
+	] = useState( false );
 	const {
 		isLoading: isLoadingExperiment,
 		experimentLayout,
@@ -125,7 +130,7 @@ export const Products = () => {
 			if ( experimentLayout === 'card' ) {
 				surfacedProductTypes.push( {
 					...LoadSampleProductType,
-					onClick: loadSampleProduct,
+					onClick: () => setIsConfirmingLoadSampleProducts( true ),
 				} );
 			}
 		}
@@ -135,7 +140,6 @@ export const Products = () => {
 		isExpanded,
 		productTypesWithTimeRecord,
 		experimentLayout,
-		loadSampleProduct,
 	] );
 
 	return (
@@ -159,7 +163,9 @@ export const Products = () => {
 						{ experimentLayout === 'stacked' ? (
 							<Stack
 								items={ visibleProductTypes }
-								onClickLoadSampleProduct={ loadSampleProduct }
+								onClickLoadSampleProduct={ () =>
+									setIsConfirmingLoadSampleProducts( true )
+								}
 								showOtherOptions={ isExpanded }
 							/>
 						) : (
@@ -178,7 +184,21 @@ export const Products = () => {
 						/>
 						<Footer />
 					</div>
-					{ isLoadingSampleProducts && <LoadSampleProductModal /> }
+					{ isLoadingSampleProducts ? (
+						<LoadSampleProductModal />
+					) : (
+						isConfirmingLoadSampleProducts && (
+							<LoadSampleProductConfirmModal
+								onCancel={ () =>
+									setIsConfirmingLoadSampleProducts( false )
+								}
+								onImport={ () => {
+									setIsConfirmingLoadSampleProducts( false );
+									loadSampleProduct();
+								} }
+							/>
+						)
+					) }
 				</>
 			) }
 		</div>
