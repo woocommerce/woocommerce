@@ -38,6 +38,8 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `display_notices` determines whether to display notices for the $current_screen_base.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::display_notices()
 	 * @dataProvider provider_test_display_notices()
 	 *
@@ -81,6 +83,8 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `maybe_display_reviews_moved_notice` displays the notice if the $current_screen_base is 'edit-comments'.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::maybe_display_reviews_moved_notice()
 	 * @dataProvider provider_test_maybe_display_reviews_moved_notice()
 	 *
@@ -129,6 +133,8 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `maybe_display_reviews_moved_notice` determines whether the notice should be displayed based on user capabilities and notice dismissal state.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::should_display_reviews_moved_notice()
 	 * @dataProvider provider_test_should_display_reviews_moved_notice()
 	 *
@@ -176,6 +182,8 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `display_reviews_moved_notice` displays the notice.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::display_reviews_moved_notice()
 	 *
 	 * @return void
@@ -200,6 +208,8 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `get_dismiss_capability` returns the $expected_capability user capability for dismissing a $notice_name.
+	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::get_dismiss_capability()
 	 * @dataProvider provider_test_get_dismiss_capability()
 	 *
@@ -226,7 +236,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can exclude reviews from comments in the comments page.
+	 * @testdox `exclude_reviews_from_comments` excludes product reviews from the comment query in the comments page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides::exclude_reviews_from_comments()
 	 *

@@ -41,7 +41,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the capability to view the reviews page.
+	 * @testdox `get_capability` gets the filterable user capability for viewing the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_capability()
 	 *
@@ -65,7 +65,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that `load_reviews_screen()` creates an instance of {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable}.
+	 * @testdoxx `load_reviews_screen` creates an instance of {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable}.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_reviews_screen()
 	 *
@@ -93,7 +93,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can get the pending comment count bubble.
+	 * @testdox `get_pending_count_bubble` will return the HTML for the pending reviews (awaiting moderation).
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_pending_count_bubble()
 	 * @dataProvider data_provider_get_pending_count_bubble
@@ -168,7 +168,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it will override the parent file and the submenu file globals when editing a review.
+	 * @testdox `edit_review_parent_file` will highlight the product reviews menu item when editing a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_review_parent_file()
 	 *
@@ -192,7 +192,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it will override the headline text when editing or moderating a review or reply.
+	 * @testdox `edit_comments_screen_text` will update the page heading when editing or moderating a review or a reply to a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_comments_screen_text()
 	 * @dataProvider data_provider_edit_comments_screen_text
@@ -204,6 +204,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @param string $expected_text   Expected text output.
 	 *
 	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_edit_comments_screen_text( string $translated_text, string $original_text, bool $is_review, bool $is_reply, string $expected_text ) : void {
 		global $comment;
@@ -243,7 +244,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that can output the reviews list table and filter it.
+	 * @testdox `render_reviews_list_table` will output the filterable reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::render_reviews_list_table()
 	 *
@@ -282,7 +283,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that the reviews page is properly identified.
+	 * @testdox `is_reviews_page` will determine if the current screen is the product reviews page.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_reviews_page()
 	 * @dataProvider provider_is_reviews_page
@@ -331,7 +332,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that the admin notice messages are properly returned.
+	 * @testdox `get_bulk_action_notice_messages` the appropriate admin notice is displayed after a product review bulk action is processed.
 	 *
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_bulk_action_notice_messages()
 	 * @dataProvider provider_get_bulk_action_notice_messages
@@ -459,7 +460,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that a notice message will result in a valid HTML return.
+	 * @testdox `maybe_display_reviews_bulk_action_notice` will output the appropriate message HTML for a product reviews bulk action notice.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::maybe_display_reviews_bulk_action_notice()
 	 * @dataProvider provider_maybe_display_reviews_bulk_action_notice
@@ -511,7 +512,7 @@ test2</p></div>',
 	}
 
 	/**
-	 * Tests that the display method is called only for the reviews page.
+	 * @testdox `display_notices` will display any admin notices if the current page is the product reviews page.
 	 *
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::display_notices()
 	 * @dataProvider provider_display_notices
@@ -556,7 +557,7 @@ test2</p></div>',
 	}
 
 	/**
-	 * Tests scenarios that should return false.
+	 * @testdox `is_review_or_reply` determines if a given comment object is actually a review or a reply to a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_review_or_reply()
 	 * @dataProvider provider_is_review_or_reply
@@ -582,7 +583,7 @@ test2</p></div>',
 	}
 
 	/**
-	 * Tests different cases that require factories.
+	 * @testdox `is_review_or_reply` correctly determines if an object is a review or a reply to a review.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::is_review_or_reply()
 	 *
@@ -637,6 +638,8 @@ test2</p></div>',
 	}
 
 	/**
+	 * @testdox `get_reviews_page_url` returns the admin URL for the product reviews page.
+	 *
 	 * @covers Reviews::get_reviews_page_url()
 	 *
 	 * @return void
