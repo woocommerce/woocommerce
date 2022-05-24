@@ -332,7 +332,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox After a product review bulk action is processed, the appropriate admin notice is displayed.
+	 * @testdox `get_bulk_action_notice_messages` the appropriate admin notice is displayed after a product review bulk action is processed.
 	 *
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_bulk_action_notice_messages()
 	 * @dataProvider provider_get_bulk_action_notice_messages
