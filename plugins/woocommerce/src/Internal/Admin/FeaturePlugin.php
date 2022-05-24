@@ -116,14 +116,14 @@ class FeaturePlugin {
 		/**
 		 * Define the current WC Admin version.
 		 *
-		 * @deprecated 3.3.0
+		 * @deprecated 6.4.0
 		 * @var string
 		 */
 		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 			/**
 			  * Define the current WC Admin version.
 			  *
-			  * @deprecated 3.3.0
+			  * @deprecated 6.4.0
 			  * @var string
 			  */
 			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
@@ -193,6 +193,11 @@ class FeaturePlugin {
 	 * @param array $features Array of feature slugs.
 	 */
 	public function replace_supported_features( $features ) {
+		/**
+		 * Get additional feature config
+		 *
+		 * @since 6.5.0
+		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;

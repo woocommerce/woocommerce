@@ -52,6 +52,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
+					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
 				],
 			],
@@ -99,7 +100,7 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			],
-			'pinterest-for-woocommerce'     => [
+			'pinterest-for-woocommerce'         => [
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
@@ -460,6 +461,220 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
+			],
+			'tiktok-for-business'                            => [
+				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
+				'description'    =>
+					__( 'Grow your online sales by promoting your products on TikTok to over one billion monthly active users around the world.', 'woocommerce' ),
+				'is_visible'     => [
+					[
+						'type'     => 'or',
+						'operands' => [
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'US',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CA',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'MX',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'BE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CZ',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'DK',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'FI',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'FR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'DE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'GR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'HU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'IE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'IT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'RO',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'ES',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'GB',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NO',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NZ',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SG',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'MY',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'ID',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'VN',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'TH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'KR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'IL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'RU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'UA',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'TR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SA',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'BR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'JP',
+								'operation' => '=',
+							],
+						],
+					],
+				],
+				'is_built_by_wc' => false,
 			],
 		);
 

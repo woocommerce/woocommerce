@@ -28,6 +28,7 @@
 		"@automattic/interpolate-components": "^1.2.0",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
+		"@woocommerce/explat": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/element": "^4.1.1",
@@ -37,6 +38,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@types/wordpress__data": "^6.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
@@ -53,6 +55,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm run build:js && pnpm run build:css",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",

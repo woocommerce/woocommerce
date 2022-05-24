@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Options Controller.
  *
- * @deprecated since 3.1.0
+ * @deprecated since 6.2.0
  *
  * @extends WC_REST_Data_Controller
  */
@@ -179,6 +179,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_admin_install_timestamp',
 			'woocommerce_task_list_tracked_completed_tasks',
 			'woocommerce_show_marketplace_suggestions',
+			'woocommerce_task_list_reminder_bar_hidden',
 			'wc_connect_options',
 		);
 

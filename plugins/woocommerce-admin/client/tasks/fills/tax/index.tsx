@@ -265,7 +265,6 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => (
-		// @ts-expect-error WooOnboardingTask is still a pure JS file
 		<WooOnboardingTask id="tax">
 			{ ( { onComplete, query, task }: TaxProps ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />

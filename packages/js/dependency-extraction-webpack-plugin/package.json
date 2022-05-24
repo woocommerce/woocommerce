@@ -37,7 +37,8 @@
 	},
 	"scripts": {
 		"lint": "eslint src",
-		"lint:fix": "eslint src --fix"
+		"lint:fix": "eslint src --fix",
+		"postinstall": "composer install"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

@@ -20,6 +20,7 @@ function wc_get_screen_ids() {
 	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
+		$wc_screen_id . '_page_wc-orders',
 		$wc_screen_id . '_page_wc-reports',
 		$wc_screen_id . '_page_wc-shipping',
 		$wc_screen_id . '_page_wc-settings',

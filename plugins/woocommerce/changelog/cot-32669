@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add `read` method to custom order table datastore.

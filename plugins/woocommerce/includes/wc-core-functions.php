@@ -468,7 +468,7 @@ function get_woocommerce_currency() {
 /**
  * Get full list of currency codes.
  *
- * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ * Currency symbols and names should follow the Unicode CLDR recommendation (https://cldr.unicode.org/translation/currency-names-and-symbols)
  *
  * @return array
  */
@@ -654,7 +654,7 @@ function get_woocommerce_currencies() {
 /**
  * Get all available Currency symbols.
  *
- * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ * Currency symbols and names should follow the Unicode CLDR recommendation (https://cldr.unicode.org/translation/currency-names-and-symbols)
  *
  * @since 4.1.0
  * @return array
@@ -837,7 +837,7 @@ function get_woocommerce_currency_symbols() {
 /**
  * Get Currency symbol.
  *
- * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ * Currency symbols and names should follow the Unicode CLDR recommendation (https://cldr.unicode.org/translation/currency-names-and-symbols)
  *
  * @param string $currency Currency. (default: '').
  * @return string
@@ -1873,7 +1873,7 @@ function wc_get_rounding_precision() {
  * @param  bool  $round If should round after adding precision.
  * @return int|float
  */
-function wc_add_number_precision( $value, $round = true ) {
+function wc_add_number_precision( float $value, bool $round = true ) {
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	$value          = $value * $cent_precision;
 	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;

@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,6 +24,7 @@ class WC_Products_Tracking {
 		add_action( 'wp_after_insert_post', array( $this, 'track_product_published' ), 10, 4 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_tracking_scripts' ) );
 	}
 
 	/**
@@ -215,5 +217,33 @@ class WC_Products_Tracking {
 		// phpcs:enable
 
 		WC_Tracks::record_event( 'product_category_add', $properties );
+	}
+
+	/**
+	 * Adds the tracking scripts for product filtering actions.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_tracking_scripts( $hook ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			'edit.php' !== $hook ||
+			! isset( $_GET['post_type'] ) ||
+			'product' !== wp_unslash( $_GET['post_type'] )
+		) {
+			return;
+		}
+		// phpcs:enable
+
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'product-tracking' );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'wc-admin-product-tracking',
+			WCAdminAssets::get_url( 'wp-admin-scripts/product-tracking', 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			WCAdminAssets::get_file_version( 'js' ),
+			true
+		);
 	}
 }

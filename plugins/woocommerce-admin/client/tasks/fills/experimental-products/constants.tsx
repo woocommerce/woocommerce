@@ -11,9 +11,9 @@ import { Icon, chevronRight } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import Link from './icon/link_24px.svg';
-import Widget from './icon/widgets_24px.svg';
-import LightBulb from './icon/lightbulb_24px.svg';
+import Link from './icon/link_24px.js';
+import Widget from './icon/widgets_24px.js';
+import LightBulb from './icon/lightbulb_24px.js';
 
 export const productTypes = Object.freeze( [
 	{
@@ -60,14 +60,14 @@ export const productTypes = Object.freeze( [
 		key: 'grouped' as const,
 		title: __( 'Grouped product', 'woocommerce' ),
 		content: __( 'A collection of related products.', 'woocommerce' ),
-		before: <img src={ Widget } alt="Widget" />,
+		before: <Widget />,
 		after: <Icon icon={ chevronRight } />,
 	},
 	{
 		key: 'external' as const,
 		title: __( 'External product', 'woocommerce' ),
 		content: __( 'Link a product to an external website.', 'woocommerce' ),
-		before: <img src={ Link } alt="Link" />,
+		before: <Link />,
 		after: <Icon icon={ chevronRight } />,
 	},
 ] );
@@ -78,7 +78,7 @@ export const LoadSampleProductType = {
 	content: __(
 		'Load sample products and see what they look like in your store.'
 	),
-	before: <img src={ LightBulb } alt="Light Bulb" />,
+	before: <LightBulb />,
 	after: <Icon icon={ chevronRight } />,
 	className: 'woocommerce-products-list__item-load-sample-product',
 };

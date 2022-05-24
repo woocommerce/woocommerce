@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Admin\Features\Navigation;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 /**
  * CoreMenu class. Handles registering Core menu items.
@@ -59,14 +61,14 @@ class CoreMenu {
 		foreach ( $tabs as $key => $setting ) {
 			$order       += 10;
 			$menu_items[] = (
-				array(
-					'parent'     => 'woocommerce-settings',
-					'title'      => $setting,
-					'capability' => 'manage_woocommerce',
-					'id'         => 'settings-' . $key,
-					'url'        => 'admin.php?page=wc-settings&tab=' . $key,
-					'order'      => $order,
-				)
+			array(
+				'parent'     => 'woocommerce-settings',
+				'title'      => $setting,
+				'capability' => 'manage_woocommerce',
+				'id'         => 'settings-' . $key,
+				'url'        => 'admin.php?page=wc-settings&tab=' . $key,
+				'order'      => $order,
+			)
 			);
 		}
 
@@ -103,18 +105,18 @@ class CoreMenu {
 				'order' => 20,
 			),
 			$analytics_enabled ?
-			array(
-				'title' => __( 'Analytics', 'woocommerce' ),
-				'id'    => 'woocommerce-analytics',
-				'order' => 30,
-			) : null,
+				array(
+					'title' => __( 'Analytics', 'woocommerce' ),
+					'id'    => 'woocommerce-analytics',
+					'order' => 30,
+				) : null,
 			$analytics_enabled ?
-			array(
-				'title'  => __( 'Reports', 'woocommerce' ),
-				'id'     => 'woocommerce-reports',
-				'parent' => 'woocommerce-analytics',
-				'order'  => 200,
-			) : null,
+				array(
+					'title'  => __( 'Reports', 'woocommerce' ),
+					'id'     => 'woocommerce-reports',
+					'parent' => 'woocommerce-analytics',
+					'order'  => 200,
+				) : null,
 			array(
 				'title' => __( 'Marketing', 'woocommerce' ),
 				'id'    => 'woocommerce-marketing',
@@ -142,7 +144,7 @@ class CoreMenu {
 	 * @return array
 	 */
 	public static function get_items() {
-		$order_items       = Menu::get_post_type_items( 'shop_order', array( 'parent' => 'woocommerce-orders' ) );
+		$order_items       = self::get_order_menu_items();
 		$product_items     = Menu::get_post_type_items( 'product', array( 'parent' => 'woocommerce-products' ) );
 		$product_tag_items = Menu::get_taxonomy_items(
 			'product_tag',
@@ -189,6 +191,7 @@ class CoreMenu {
 		}
 
 		$home_item = array();
+		$setup_tasks_remaining = TaskLists::setup_tasks_remaining();
 		if ( defined( '\Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG' ) ) {
 			$home_item = array(
 				'id'              => 'woocommerce-home',
@@ -196,6 +199,7 @@ class CoreMenu {
 				'url'             => \Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG,
 				'order'           => 0,
 				'matchExpression' => 'page=wc-admin((?!path=).)*$',
+				'badge'           => $setup_tasks_remaining ? $setup_tasks_remaining : null,
 			);
 		}
 
@@ -247,6 +251,44 @@ class CoreMenu {
 			$setting_items,
 			// Legacy report items.
 			self::get_legacy_report_items()
+		);
+	}
+
+	/**
+	 * Supplies menu items for orders.
+	 *
+	 * This varies depending on whether we are actively using traditional post type-based orders or the new custom
+	 * table-based orders.
+	 *
+	 * @return ?array
+	 */
+	private static function get_order_menu_items(): ?array {
+		if ( ! wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+			return Menu::get_post_type_items( 'shop_order', array( 'parent' => 'woocommerce-orders' ) );
+		}
+
+		$main_orders_menu = array(
+			'title'      => __( 'Orders', 'woocommerce' ),
+			'capability' => 'edit_others_shop_orders',
+			'id'         => 'woocommerce-orders-default',
+			'url'        => 'admin.php?page=wc-orders',
+			'parent'     => 'woocommerce-orders',
+		);
+
+		$all_orders_entry          = $main_orders_menu;
+		$all_orders_entry['id']    = 'woocommerce-orders-all-items';
+		$all_orders_entry['order'] = 10;
+
+		$new_orders_entry          = $main_orders_menu;
+		$new_orders_entry['title'] = __( 'Add order', 'woocommerce' );
+		$new_orders_entry['id']    = 'woocommerce-orders-add-item';
+		$new_orders_entry['url']   = 'admin.php?page=TBD';
+		$new_orders_entry['order'] = 20;
+
+		return array(
+			'default' => $main_orders_menu,
+			'all'     => $all_orders_entry,
+			'new'     => $new_orders_entry,
 		);
 	}
 

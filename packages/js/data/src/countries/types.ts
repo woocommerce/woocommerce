@@ -41,7 +41,7 @@ export type Locales = {
 
 export type CountriesState = {
 	errors: {
-		[ key: string ]: string | RestApiError | undefined;
+		[ key: string ]: unknown;
 	};
 	locales: Locales;
 	countries: Country[];

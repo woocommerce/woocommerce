@@ -20,40 +20,33 @@ type ProgressHeaderProps = {
 export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 	taskListId,
 } ) => {
-	const {
-		loading,
-		tasksCount,
-		completedCount,
-		hasVisitedTasks,
-		disabledCompletedCount,
-	} = useSelect( ( select ) => {
-		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
-			taskListId
-		);
-		const finishedResolution = select(
-			ONBOARDING_STORE_NAME
-		).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-		const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
+	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
+		( select ) => {
+			const taskList = select( ONBOARDING_STORE_NAME ).getTaskList(
+				taskListId
+			);
+			const finishedResolution = select(
+				ONBOARDING_STORE_NAME
+			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
+			const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 
-		return {
-			loading: ! finishedResolution,
-			tasksCount: visibleTasks?.length,
-			completedCount: visibleTasks?.filter( ( task ) => task.isComplete )
-				.length,
-			disabledCompletedCount: visibleTasks?.filter(
-				( task ) => task.isComplete && task.isDisabled
-			).length,
-			hasVisitedTasks:
-				visibleTasks?.filter( ( task ) => task.isVisited ).length > 0,
-		};
-	} );
+			return {
+				loading: ! finishedResolution,
+				tasksCount: visibleTasks?.length,
+				completedCount: visibleTasks?.filter(
+					( task ) => task.isComplete
+				).length,
+				hasVisitedTasks:
+					visibleTasks?.filter(
+						( task ) =>
+							task.isVisited && task.id !== 'store_details'
+					).length > 0,
+			};
+		}
+	);
 
 	const progressTitle = useMemo( () => {
-		if (
-			( ! hasVisitedTasks &&
-				completedCount < 2 + disabledCompletedCount ) ||
-			completedCount === tasksCount
-		) {
+		if ( ! hasVisitedTasks || completedCount === tasksCount ) {
 			const siteTitle = getSetting( 'siteTitle' );
 			return siteTitle
 				? sprintf(
@@ -61,7 +54,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 						__( 'Welcome to %s', 'woocommerce' ),
 						siteTitle
 				  )
-				: __( 'Welcome', 'woocommerce' );
+				: __( 'Welcome to your store', 'woocommerce' );
 		}
 		if ( completedCount > 0 && completedCount < 4 ) {
 			return __( "Let's get you started", 'woocommerce' ) + '   🚀';
@@ -70,7 +63,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 			return __( 'You are on the right track', 'woocommerce' );
 		}
 		return __( 'You are almost there', 'woocommerce' );
-	}, [ completedCount, hasVisitedTasks ] );
+	}, [ completedCount, hasVisitedTasks, tasksCount ] );
 
 	if ( loading ) {
 		return null;

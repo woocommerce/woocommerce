@@ -13,8 +13,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 100
 
@@ -29,25 +28,13 @@ jobs:
           php --version
           composer --version
 
-      - name: Get cached composer and pnpm directories
-        uses: actions/cache@v3
-        id: cache-deps
+      - uses: ./.github/actions/cache-deps
         with:
-          path: |
-            ~/.pnpm-store
-            plugins/woocommerce/packages
-            plugins/woocommerce/**/vendor
-          key: ${{ runner.os }}-npm-composer-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+          workflow_name: pr-code-sniff
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-      - name: Install PNPM
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Composer dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: pnpm nx composer-install woocommerce
+      - name: Install and Build
+        uses: ./.github/actions/install-build
 
       - name: Run code sniff
         continue-on-error: true

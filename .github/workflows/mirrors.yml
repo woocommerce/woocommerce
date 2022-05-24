@@ -2,20 +2,32 @@ name: Mirrors
 on:
   push:
     branches: ["trunk", "release/**"]
+  workflow_dispatch:
+
 jobs:
   build:
     if: github.repository == 'woocommerce/woocommerce'
     name: Build WooCommerce zip
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code.
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: mirrors
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Install PNPM
-        run: npm install -g pnpm
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
 
       - name: Build zip
-        run: pnpm nx build-zip woocommerce
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
 
       - name: Upload the zip file as an artifact
         uses: actions/upload-artifact@v3
@@ -34,16 +46,12 @@ jobs:
     steps:
       - name: Create directories
         run: |
-          mkdir -p tmp/woocommerce-build
           mkdir -p monorepo
 
       - name: Checkout monorepo
         uses: actions/checkout@v3
         with:
           path: monorepo
-
-      - name: Copy Composer over to production
-        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build
 
       - name: Download WooCommerce ZIP
         uses: actions/download-artifact@v3
@@ -58,6 +66,9 @@ jobs:
           unzip woocommerce.zip -d woocommerce/woocommerce-production
           mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
           rm -rf woocommerce/woocommerce-production/woocommerce
+
+      - name: Copy Composer over to production
+        run: cp monorepo/plugins/woocommerce/composer.json tmp/woocommerce-build/woocommerce/woocommerce-production
 
       - name: Set up mirror
         working-directory: tmp/woocommerce-build

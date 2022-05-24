@@ -2,9 +2,9 @@
  * Take a string name and generate the slug for it.
  * Example: 'My plugin' => 'my-plugin'
  *
- * @param text string to convert to a slug
+ * @param  text string to convert to a slug
  *
- * Sourced from: https://gist.github.com/spyesx/561b1d65d4afb595f295
+ *              Sourced from: https://gist.github.com/spyesx/561b1d65d4afb595f295
  */
 export const getSlug = ( text ) => {
 	text = text.trim().toLowerCase();

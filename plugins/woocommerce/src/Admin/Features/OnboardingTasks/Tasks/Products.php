@@ -19,6 +19,7 @@ class Products extends Task {
 		parent::__construct( $task_list );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
 	}
 
 	/**
@@ -145,6 +146,42 @@ class Products extends Task {
 		wp_enqueue_script(
 			'onboarding-product-import-notice',
 			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			WC_VERSION,
+			true
+		);
+	}
+
+	/**
+	 * Adds a return to task list notice when completing the loading sample products action.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_load_sample_return_notice_script( $hook ) {
+		if ( 'edit.php' !== $hook || 'product' !== get_query_var( 'post_type' ) ) {
+			return;
+		}
+
+		$referer = wp_get_referer();
+		if ( ! $referer || 0 !== strpos( $referer, wc_admin_url() ) ) {
+			return;
+		}
+
+		if ( ! isset( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) ) {
+			return;
+		}
+
+		$task_id = sanitize_title_with_dashes( wp_unslash( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) );
+		if ( $task_id !== $this->get_id() || ! $this->is_complete() ) {
+			return;
+		}
+
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-notice' );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'onboarding-load-sample-products-notice',
+			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-load-sample-products-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
 			WC_VERSION,
 			true

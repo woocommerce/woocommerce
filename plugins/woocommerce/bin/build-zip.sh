@@ -11,13 +11,13 @@ mkdir -p "$DEST_PATH"
 
 echo "Installing PHP and JS dependencies..."
 pnpm install
-composer install || exit "$?"
+pnpm nx composer-install woocommerce || exit "$?"
 echo "Running JS Build..."
-pnpm run build || exit "$?"
+pnpm nx build woocommerce || exit "$?"
 echo "Cleaning up PHP dependencies..."
-composer install --no-dev || exit "$?"
+pnpm nx composer-install-no-dev woocommerce || exit "$?"
 echo "Run makepot..."
-composer run-script makepot || exit "$?"
+pnpm nx makepot woocommerce || exit "$?"
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
 

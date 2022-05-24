@@ -14,7 +14,7 @@
 	.woocommerce-list__item {
 		float: left;
 		border-radius: 3px;
-		border: 1px solid #dcdcde;
+		border: 1.5px solid #dcdcde;
 		width: 263px;
 		height: 226px;
 		text-align: center;
@@ -23,6 +23,9 @@
 		&:hover {
 			background-color: #fff;
 			border: 1.5px solid #007cba;
+			.woocommerce-list__item-title {
+				color: #1e1e1e;
+			}
 		}
 
 		.woocommerce-list__item-inner {

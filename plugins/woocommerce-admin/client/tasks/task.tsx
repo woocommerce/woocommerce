@@ -19,11 +19,35 @@ export type TaskProps = {
 };
 
 export const Task: React.FC< TaskProps > = ( { query, task } ) => {
-	const id = query.task;
+	const id = query.task || '';
+	if ( ! id ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'No task id provided' );
+		// eslint-enable-next-line no-console
+	}
+
 	const {
 		invalidateResolutionForStoreSelector,
 		optimisticallyCompleteTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
+
+	const updateBadge = useCallback( () => {
+		const badgeElement: HTMLElement | null = document.querySelector(
+			'.toplevel_page_woocommerce .remaining-tasks-badge'
+		);
+
+		if ( ! badgeElement ) {
+			return;
+		}
+
+		const currentBadgeCount = Number( badgeElement.innerText );
+
+		if ( currentBadgeCount === 1 ) {
+			badgeElement.remove();
+		}
+
+		badgeElement.innerHTML = String( currentBadgeCount - 1 );
+	}, [] );
 
 	const onComplete = useCallback(
 		( options ) => {
@@ -34,6 +58,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 					: getNewPath( {}, '/', {} )
 			);
 			invalidateResolutionForStoreSelector( 'getTaskLists' );
+			updateBadge();
 		},
 		[ id ]
 	);

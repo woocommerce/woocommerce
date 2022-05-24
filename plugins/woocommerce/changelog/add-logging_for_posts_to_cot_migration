@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Log errors during the posts to orders table migrations

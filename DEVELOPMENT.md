@@ -12,7 +12,7 @@ The following command installs WP-ENV globally.
 
 If you don't already have [pnpm](https://pnpm.io/installation) installed, you can quickly add it using NPM.
 
-`npm install -g pnpm`
+`npm install -g pnpm@^6.24.2`
 
 ## Starting WP-ENV
 

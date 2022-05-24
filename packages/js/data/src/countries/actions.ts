@@ -3,7 +3,6 @@
  */
 import TYPES from './action-types';
 import { Locales, Country } from './types';
-import { RestApiError } from '../types';
 
 export function getLocalesSuccess( locales: Locales ) {
 	return {
@@ -12,7 +11,7 @@ export function getLocalesSuccess( locales: Locales ) {
 	};
 }
 
-export function getLocalesError( error: RestApiError ) {
+export function getLocalesError( error: unknown ) {
 	return {
 		type: TYPES.GET_LOCALES_ERROR as const,
 		error,
@@ -26,7 +25,7 @@ export function getCountriesSuccess( countries: Country[] ) {
 	};
 }
 
-export function getCountriesError( error: RestApiError ) {
+export function getCountriesError( error: unknown ) {
 	return {
 		type: TYPES.GET_COUNTRIES_ERROR as const,
 		error,

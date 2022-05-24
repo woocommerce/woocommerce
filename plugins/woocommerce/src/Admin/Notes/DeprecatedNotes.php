@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
 /**
  * WC_Admin_Note.
  *
- * @deprecated since 1.7.0, use Note
+ * @deprecated since 4.8.0, use Note
  */
 class WC_Admin_Note extends DeprecatedClassFacade {
 	// These constants must be redeclared as to not break plugins that use them.
@@ -43,7 +43,7 @@ class WC_Admin_Note extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 
 	/**
 	 * Note constructor. Loads note data.
@@ -58,7 +58,7 @@ class WC_Admin_Note extends DeprecatedClassFacade {
 /**
  * WC_Admin_Notes.
  *
- * @deprecated since 1.7.0, use Notes
+ * @deprecated since 4.8.0, use Notes
  */
 class WC_Admin_Notes extends DeprecatedClassFacade {
 	/**
@@ -73,13 +73,13 @@ class WC_Admin_Notes extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Coupon_Page_Moved.
  *
- * @deprecated since 1.7.0, use CouponPageMoved
+ * @deprecated since 4.8.0, use CouponPageMoved
  */
 class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 	/**
@@ -94,13 +94,13 @@ class WC_Admin_Notes_Coupon_Page_Moved extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Customize_Store_With_Blocks.
  *
- * @deprecated since 1.7.0, use CustomizeStoreWithBlocks
+ * @deprecated since 4.8.0, use CustomizeStoreWithBlocks
  */
 class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 	/**
@@ -115,13 +115,13 @@ class WC_Admin_Notes_Customize_Store_With_Blocks extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Edit_Products_On_The_Move.
  *
- * @deprecated since 1.7.0, use EditProductsOnTheMove
+ * @deprecated since 4.8.0, use EditProductsOnTheMove
  */
 class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 	/**
@@ -136,13 +136,13 @@ class WC_Admin_Notes_Edit_Products_On_The_Move extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_EU_VAT_Number.
  *
- * @deprecated since 1.7.0, use EUVATNumber
+ * @deprecated since 4.8.0, use EUVATNumber
  */
 class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 	/**
@@ -157,13 +157,13 @@ class WC_Admin_Notes_EU_VAT_Number extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Facebook_Marketing_Expert.
  *
- * @deprecated since 1.7.0, use FacebookMarketingExpert
+ * @deprecated since 4.8.0, use FacebookMarketingExpert
  */
 class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 	/**
@@ -178,13 +178,13 @@ class WC_Admin_Notes_Facebook_Marketing_Expert extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_First_Product.
  *
- * @deprecated since 1.7.0, use FirstProduct
+ * @deprecated since 4.8.0, use FirstProduct
  */
 class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 	/**
@@ -199,13 +199,13 @@ class WC_Admin_Notes_First_Product extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Giving_Feedback_Notes.
  *
- * @deprecated since 1.7.0, use GivingFeedbackNotes
+ * @deprecated since 4.8.0, use GivingFeedbackNotes
  */
 class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 	/**
@@ -220,13 +220,13 @@ class WC_Admin_Notes_Giving_Feedback_Notes extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Insight_First_Sale.
  *
- * @deprecated since 1.7.0, use InsightFirstSale
+ * @deprecated since 4.8.0, use InsightFirstSale
  */
 class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 	/**
@@ -241,13 +241,13 @@ class WC_Admin_Notes_Insight_First_Sale extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Install_JP_And_WCS_Plugins.
  *
- * @deprecated since 1.7.0, use InstallJPAndWCSPlugins
+ * @deprecated since 4.8.0, use InstallJPAndWCSPlugins
  */
 class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 	/**
@@ -262,13 +262,13 @@ class WC_Admin_Notes_Install_JP_And_WCS_Plugins extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Launch_Checklist.
  *
- * @deprecated since 1.7.0, use LaunchChecklist
+ * @deprecated since 4.8.0, use LaunchChecklist
  */
 class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 	/**
@@ -283,13 +283,13 @@ class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Migrate_From_Shopify.
  *
- * @deprecated since 1.7.0, use MigrateFromShopify
+ * @deprecated since 4.8.0, use MigrateFromShopify
  */
 class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 	/**
@@ -304,13 +304,13 @@ class WC_Admin_Notes_Migrate_From_Shopify extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Mobile_App.
  *
- * @deprecated since 1.7.0, use MobileApp
+ * @deprecated since 4.8.0, use MobileApp
  */
 class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	/**
@@ -325,13 +325,13 @@ class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_New_Sales_Record.
  *
- * @deprecated since 1.7.0, use NewSalesRecord
+ * @deprecated since 4.8.0, use NewSalesRecord
  */
 class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 	/**
@@ -346,13 +346,13 @@ class WC_Admin_Notes_New_Sales_Record extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Onboarding_Email_Marketing.
  *
- * @deprecated since 1.7.0, use OnboardingEmailMarketing
+ * @deprecated since 4.8.0, use OnboardingEmailMarketing
  */
 class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 	/**
@@ -367,13 +367,13 @@ class WC_Admin_Notes_Onboarding_Email_Marketing extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Onboarding_Payments.
  *
- * @deprecated since 1.7.0, use OnboardingPayments
+ * @deprecated since 4.8.0, use OnboardingPayments
  */
 class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 	/**
@@ -388,13 +388,13 @@ class WC_Admin_Notes_Onboarding_Payments extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Online_Clothing_Store.
  *
- * @deprecated since 1.7.0, use OnlineClothingStore
+ * @deprecated since 4.8.0, use OnlineClothingStore
  */
 class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 	/**
@@ -409,13 +409,13 @@ class WC_Admin_Notes_Online_Clothing_Store extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Order_Milestones.
  *
- * @deprecated since 1.7.0, use OrderMilestones
+ * @deprecated since 4.8.0, use OrderMilestones
  */
 class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 	/**
@@ -430,13 +430,13 @@ class WC_Admin_Notes_Order_Milestones extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Performance_On_Mobile.
  *
- * @deprecated since 1.7.0, use PerformanceOnMobile
+ * @deprecated since 4.8.0, use PerformanceOnMobile
  */
 class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 	/**
@@ -451,13 +451,13 @@ class WC_Admin_Notes_Performance_On_Mobile extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Personalize_Store.
  *
- * @deprecated since 1.7.0, use PersonalizeStore
+ * @deprecated since 4.8.0, use PersonalizeStore
  */
 class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 	/**
@@ -472,13 +472,13 @@ class WC_Admin_Notes_Personalize_Store extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Real_Time_Order_Alerts.
  *
- * @deprecated since 1.7.0, use RealTimeOrderAlerts
+ * @deprecated since 4.8.0, use RealTimeOrderAlerts
  */
 class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 	/**
@@ -493,13 +493,13 @@ class WC_Admin_Notes_Real_Time_Order_Alerts extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Selling_Online_Courses.
  *
- * @deprecated since 1.7.0, use SellingOnlineCourses
+ * @deprecated since 4.8.0, use SellingOnlineCourses
  */
 class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 	/**
@@ -514,13 +514,13 @@ class WC_Admin_Notes_Selling_Online_Courses extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Test_Checkout.
  *
- * @deprecated since 1.7.0, use TestCheckout
+ * @deprecated since 4.8.0, use TestCheckout
  */
 class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 	/**
@@ -535,13 +535,13 @@ class WC_Admin_Notes_Test_Checkout extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Tracking_Opt_In.
  *
- * @deprecated since 1.7.0, use TrackingOptIn
+ * @deprecated since 4.8.0, use TrackingOptIn
  */
 class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 	/**
@@ -556,13 +556,13 @@ class WC_Admin_Notes_Tracking_Opt_In extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_Woo_Subscriptions_Notes.
  *
- * @deprecated since 1.7.0, use WooSubscriptionsNotes
+ * @deprecated since 4.8.0, use WooSubscriptionsNotes
  */
 class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 	/**
@@ -577,13 +577,13 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_WooCommerce_Payments.
  *
- * @deprecated since 1.7.0, use WooCommercePayments
+ * @deprecated since 4.8.0, use WooCommercePayments
  */
 class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 	/**
@@ -598,13 +598,13 @@ class WC_Admin_Notes_WooCommerce_Payments extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }
 
 /**
  * WC_Admin_Notes_WooCommerce_Subscriptions.
  *
- * @deprecated since 1.7.0, use WooCommerceSubscriptions
+ * @deprecated since 4.8.0, use WooCommerceSubscriptions
  */
 class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade {
 	/**
@@ -619,5 +619,5 @@ class WC_Admin_Notes_WooCommerce_Subscriptions extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $deprecated_in_version = '1.7.0';
+	protected static $deprecated_in_version = '4.8.0';
 }

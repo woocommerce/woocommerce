@@ -531,7 +531,7 @@ const merchant = {
 	/**
 	 * Deactivate a plugin by the plugin's name with the option to delete the plugin as well.
 	 *
-	 * @param {string} pluginName The name of the plugin to deactivate. For example, `WooCommerce`.
+	 * @param {string}  pluginName   The name of the plugin to deactivate. For example, `WooCommerce`.
 	 * @param {boolean} deletePlugin Pass in `true` to delete the plugin. Defaults to `false`.
 	 */
 	deactivatePlugin: async ( pluginName, deletePlugin = false ) => {

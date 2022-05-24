@@ -81,9 +81,8 @@
 	}
 
 	h2 {
-		font-size: 1.5em;
-		font-weight: normal;
-		margin-top: 22px;
+		margin-top: $gap-large;
+		margin-bottom: $gap-small;
 	}
 
 	.wooocommerce-task-card__header {
@@ -92,7 +91,13 @@
 	}
 
 	button.is-secondary {
-		margin-right: 12px;
+		margin-right: $gap-small;
+	}
+}
+
+.two-columns .woocommerce-task-dashboard__container.two-column-experiment {
+	.svg-background {
+		top: 15%;
 	}
 }
 
@@ -102,6 +107,10 @@
 	flex-direction: row;
 	margin: 0 auto;
 	justify-content: space-between;
+
+	&.woocommerce-task-list__setup_experiment_2 {
+		margin-bottom: $gap;
+	}
 
 	ul li.complete .woocommerce-task-list__item-title {
 		font-weight: 600;
@@ -130,12 +139,19 @@
 		}
 
 		.woocommerce-task-header__contents {
-			max-width: calc(60% - 2%);
+			@include breakpoint( '<782px') {
+				max-width: 380px;
+			}
+			@include breakpoint('<600px') {
+				max-width: 100%;
+			}
+
+			max-width: 65%;
 		}
 
 		.svg-background {
-			right: 2%;
-			width: 40%;
+			right: 6%;
+			width: 25%;
 		}
 	}
 
@@ -157,7 +173,7 @@
 			width: 100%;
 			border-right: 1px solid #e0e0e0;
 			border-top: none;
-			padding: 25px;
+			padding: $gap $gap-large;
 		}
 		li:last-child {
 			border-right: none;
@@ -176,6 +192,7 @@
 			position: absolute;
 			width: 100%;
 			height: 100%;
+			pointer-events: none;
 		}
 	}
 	.woocommerce-task-list__item:not(.complete) .woocommerce-task__icon {
@@ -264,6 +281,10 @@
 			color: $gray-600;
 		}
 
+		p:first-of-type {
+			margin-top: $gap-smallest;
+		}
+
 		// This is required in order to have svg image as background.
 		position: relative;
 		z-index: 1;
@@ -273,6 +294,7 @@
 		display: flex;
 		align-items: center;
 		line-height: 22px;
+		margin-bottom: 0;
 		img {
 			margin-right: 6px;
 		}

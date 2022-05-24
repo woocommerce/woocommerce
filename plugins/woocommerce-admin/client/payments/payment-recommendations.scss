@@ -12,8 +12,11 @@
 	}
 
 	.woocommerce-recommended-payments-banner__text_container {
-		width: 40%;
+		width: 46%;
 		margin-inline: 24px;
+		a {
+			margin-top: 0;
+		}
 
 		* {
 			margin-block: 1rem;
@@ -33,6 +36,7 @@
 
 	.woocommerce-recommended-payments-banner__footer_icon_container > svg {
 		height: 28px;
+		width: 51px;
 	}
 }
 
