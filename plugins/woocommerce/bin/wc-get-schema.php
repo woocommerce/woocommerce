@@ -9,7 +9,7 @@
 /**
  * Get database schema.
  */
-function get_schema() {
+function wc_get_schema() {
 	$schema = function () {
 		return static::get_schema();
 	};
@@ -17,4 +17,4 @@ function get_schema() {
 	return $schema->call( new \WC_Install() );
 }
 
-echo( esc_sql( get_schema() ) );
+echo( esc_sql( wc_get_schema() ) );
