@@ -10,11 +10,9 @@ import {
 	useValidationContext,
 	ValidationContextProvider,
 	CheckoutProvider,
+	SnackbarNoticesContainer,
 } from '@woocommerce/base-context';
-import {
-	StoreSnackbarNoticesProvider,
-	StoreNoticesContainer,
-} from '@woocommerce/base-context/providers';
+import { StoreNoticesContainer } from '@woocommerce/base-context/providers';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
@@ -170,34 +168,28 @@ const Block = ( {
 			) }
 			showErrorMessage={ CURRENT_USER_IS_ADMIN }
 		>
-			<StoreSnackbarNoticesProvider context="wc/checkout">
-				<StoreNoticesProvider>
-					<StoreNoticesContainer context="wc/checkout" />
-					<ValidationContextProvider>
-						{ /* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */ }
-						<SlotFillProvider>
-							<CheckoutProvider>
-								<SidebarLayout
-									className={ classnames(
-										'wc-block-checkout',
-										{
-											'has-dark-controls':
-												attributes.hasDarkControls,
-										}
-									) }
-								>
-									<Checkout attributes={ attributes }>
-										{ children }
-									</Checkout>
-									<ScrollOnError
-										scrollToTop={ scrollToTop }
-									/>
-								</SidebarLayout>
-							</CheckoutProvider>
-						</SlotFillProvider>
-					</ValidationContextProvider>
-				</StoreNoticesProvider>
-			</StoreSnackbarNoticesProvider>
+			<SnackbarNoticesContainer context="wc/checkout" />
+			<StoreNoticesProvider>
+				<StoreNoticesContainer context="wc/checkout" />
+				<ValidationContextProvider>
+					{ /* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */ }
+					<SlotFillProvider>
+						<CheckoutProvider>
+							<SidebarLayout
+								className={ classnames( 'wc-block-checkout', {
+									'has-dark-controls':
+										attributes.hasDarkControls,
+								} ) }
+							>
+								<Checkout attributes={ attributes }>
+									{ children }
+								</Checkout>
+								<ScrollOnError scrollToTop={ scrollToTop } />
+							</SidebarLayout>
+						</CheckoutProvider>
+					</SlotFillProvider>
+				</ValidationContextProvider>
+			</StoreNoticesProvider>
 		</BlockErrorBoundary>
 	);
 };

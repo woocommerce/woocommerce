@@ -1,1 +1,1 @@
-export * from './context';
+export * from './components/snackbar-notices-container';

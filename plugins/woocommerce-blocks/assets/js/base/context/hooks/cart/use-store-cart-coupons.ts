@@ -13,7 +13,6 @@ import type { StoreCartCoupon } from '@woocommerce/types';
  * Internal dependencies
  */
 import { useStoreCart } from './use-store-cart';
-import { useStoreSnackbarNotices } from '../use-store-snackbar-notices';
 import { useValidationContext } from '../../providers/validation';
 
 /**
@@ -27,7 +26,7 @@ import { useValidationContext } from '../../providers/validation';
 export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 	const { cartCoupons, cartIsLoading } = useStoreCart();
 	const { createErrorNotice } = useDispatch( 'core/notices' );
-	const { addSnackbarNotice } = useStoreSnackbarNotices();
+	const { createNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useValidationContext();
 
 	const results: Pick<
@@ -52,7 +51,8 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 				applyCoupon( couponCode )
 					.then( ( result ) => {
 						if ( result === true ) {
-							addSnackbarNotice(
+							createNotice(
+								'info',
 								sprintf(
 									/* translators: %s coupon code. */
 									__(
@@ -63,6 +63,8 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 								),
 								{
 									id: 'coupon-form',
+									type: 'snackbar',
+									context,
 								}
 							);
 						}
@@ -83,7 +85,8 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 				removeCoupon( couponCode )
 					.then( ( result ) => {
 						if ( result === true ) {
-							addSnackbarNotice(
+							createNotice(
+								'info',
 								sprintf(
 									/* translators: %s coupon code. */
 									__(
@@ -94,6 +97,8 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 								),
 								{
 									id: 'coupon-form',
+									type: 'snackbar',
+									context,
 								}
 							);
 						}
@@ -115,7 +120,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 				isRemovingCoupon,
 			};
 		},
-		[ createErrorNotice, addSnackbarNotice ]
+		[ createErrorNotice, createNotice ]
 	);
 
 	return {
