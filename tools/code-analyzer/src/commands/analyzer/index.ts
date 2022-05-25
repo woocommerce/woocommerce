@@ -268,7 +268,7 @@ export default class Analyzer extends Command {
 			return null;
 		}
 
-		const updateFunctionRegex = /\+\s*'(\d.\d.\d)' => array\(\n\+\s*'(.*)',\n\+\s*\),/m;
+		const updateFunctionRegex = /\+{1,2}\s*'(\d.\d.\d)' => array\(\n\+{1,2}\s*'(.*)',\n\+{1,2}\s*\),/m;
 		const match = databaseUpdatePatch.match( updateFunctionRegex );
 
 		if ( ! match ) {
