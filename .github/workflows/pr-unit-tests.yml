@@ -22,9 +22,9 @@ jobs:
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.8'
+          - wp: '5.9'
             php: 7.2
-          - wp: '5.7'
+          - wp: '5.8'
             php: 7.2
     services:
       database:
