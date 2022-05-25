@@ -18,3 +18,8 @@ export enum SHIPPING_ERROR_TYPES {
 	INVALID_ADDRESS = 'invalid_address',
 	UNKNOWN = 'unknown_error',
 }
+
+export type NoticeContext = {
+	setIsSuppressed: ( val: boolean ) => undefined;
+	isSuppressed: boolean;
+};
