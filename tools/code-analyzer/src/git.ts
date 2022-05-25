@@ -88,7 +88,7 @@ export const generatePatch = (
 export const getSchema = (
 	branch: string,
 	error: ( s: string ) => void
-): string | undefined => {
+): Array< string > => {
 	try {
 		// Make sure the branch is available.
 		fetchBranch( branch, error );
@@ -109,13 +109,29 @@ export const getSchema = (
 				encoding: 'utf-8',
 			}
 		);
+		const ordersSchema = execSync(
+			`wp-env run cli "wp eval 'echo (new Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore)->get_database_schema();'"`,
+			{
+				cwd: 'plugins/woocommerce',
+				encoding: 'utf-8',
+			}
+		);
+
+		const productAttributesSchema = execSync(
+			`wp-env run cli "wp eval 'echo (new Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator)->get_table_creation_sql();'"`,
+			{
+				cwd: 'plugins/woocommerce',
+				encoding: 'utf-8',
+			}
+		);
 		// Return to the current branch.
 		execSync( `git checkout ${ currentBranch }` );
 
 		CliUx.ux.action.stop();
-		return schema;
+		return [ schema, ordersSchema, productAttributesSchema ];
 	} catch ( e ) {
 		error( `Unable to get schema for branch ${ branch }. \n${ e }` );
+		return [];
 	}
 };
 
@@ -133,7 +149,7 @@ export const generateSchemaDiff = (
 	compare: string,
 	base: string,
 	error: ( s: string ) => void
-): Array< string | undefined > => {
+): Array< Array< string > > => {
 	const baseSchema = getSchema( base, error );
 	const compareSchema = getSchema( compare, error );
 	return [ baseSchema, compareSchema ];
