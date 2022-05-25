@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { getNewPath, navigateTo, isWCAdmin } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -18,7 +18,6 @@ import { getAdminLink } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { isWCAdmin } from '~/dashboard/utils';
 import './task-list.scss';
 
 export type TaskListItemProps = {
@@ -149,7 +148,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				trackClick();
 
 				if ( props.onClick ) {
-					if ( ! isWCAdmin( window.location.href ) ) {
+					if ( ! isWCAdmin() ) {
 						window.location.href = getAdminLink(
 							'admin.php?page=wc-admin'
 						);

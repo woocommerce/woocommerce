@@ -9,6 +9,7 @@ import {
 	getSearchWords,
 	getNewPath,
 	addHistoryListener,
+	isWCAdmin,
 } from '../index';
 
 global.window = Object.create( window );
@@ -257,6 +258,30 @@ describe( 'getSetOfIdsFromQuery', () => {
 			expect( getSetOfIdsFromQuery( '77,,8,foo,null,9' ) ).toEqual(
 				new Set( [ 77, 8, 9 ] )
 			);
+		} );
+	} );
+} );
+
+describe( 'isWCAdmin', () => {
+	it( 'correctly identifies WC admin urls', () => {
+		[
+			'https://example.com/wp-admin/admin.php?page=wc-admin',
+			'https://example.com/wp-admin/admin.php?page=wc-admin&foo=bar',
+			'/admin.php?page=wc-admin',
+			'/admin.php?page=wc-admin&foo=bar',
+		].forEach( ( url ) => {
+			expect( isWCAdmin( url ) ).toBe( true );
+		} );
+	} );
+
+	it( 'rejects URLs that are not WC admin urls', () => {
+		[
+			'https://example.com/wp-admin/edit.php?page=wc-admin',
+			'https://example.com/wp-admin/admin.php?page=other',
+			'/edit.php?page=wc-admin',
+			'/admin.php?page=other',
+		].forEach( ( url ) => {
+			expect( isWCAdmin( url ) ).toBe( false );
 		} );
 	} );
 } );
