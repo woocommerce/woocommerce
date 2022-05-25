@@ -409,6 +409,20 @@ actioned.
 }
 ```
 
+### Total Payments Value
+This passes when the total value of all payments for a given number of days
+compared to the provided value pass the operation test.
+
+```
+{
+	"type": "total_payments_value",
+	"days": "30",
+	"value": "actioned",
+	"operation": ">"
+}
+```
+`days`, `value`, and `operation` are all required.
+
 ### Option
 This passes when the option value matches the value using the operation.
 
