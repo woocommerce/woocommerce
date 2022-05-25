@@ -1,4 +1,4 @@
 /**
  * Internal dependencies
  */
-export const STORE_NAME = 'wc/admin/export';
+export const STORE_NAME = 'wc/admin/export' as const;

@@ -24,6 +24,7 @@ const defaultState = {
 
 describe( 'import reducer', () => {
 	it( 'should return a default state', () => {
+		// @ts-expect-error reducer action should not be empty but it is
 		const state = reducer( undefined, {} );
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );
@@ -113,7 +114,10 @@ describe( 'import reducer', () => {
 			error: { code: 'error' },
 		} );
 		const stringifiedQuery = JSON.stringify( query );
-
-		expect( state.errors[ stringifiedQuery ].code ).toBe( 'error' );
+		expect(
+			( state.errors[ stringifiedQuery ] as {
+				code: string;
+			} ).code
+		).toBe( 'error' );
 	} );
 } );
