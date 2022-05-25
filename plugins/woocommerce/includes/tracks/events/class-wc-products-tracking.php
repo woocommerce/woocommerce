@@ -209,7 +209,7 @@ class WC_Products_Tracking {
 			'sale_price'        => $product->get_sale_price() ? 'yes' : 'no',
 			'short_description' => $product->get_short_description() ? 'yes' : 'no',
 			'tags'              => count( $product->get_tag_ids() ),
-			'upsells'           => $product->get_upsell_ids() ? 'yes' : 'no',
+			'upsells'           => count( $product->get_upsell_ids() ) ? 'yes' : 'no',
 			'weight'            => $product->get_weight() ? 'yes' : 'no',
 		);
 
