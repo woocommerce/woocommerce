@@ -6,13 +6,8 @@ import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import {
-	updateQueryString,
-	getHistory,
-	getNewPath,
-} from '@woocommerce/navigation';
-import {
-	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
@@ -23,8 +18,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
-import { History } from 'history';
-import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -35,7 +28,7 @@ import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
-import { isWCAdmin } from '~/dashboard/utils';
+import { TaskListCompletedHeader } from './completed-header';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -196,34 +189,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 
 		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = task.actionUrl;
-				return;
-			}
-
-			if ( ! isWCAdmin( window.location.href ) ) {
-				window.location.href = getAdminLink(
-					getNewPath( {}, task.actionUrl, {} )
-				);
-				return;
-			}
-
-			( getHistory() as History ).push(
-				getNewPath( {}, task.actionUrl, {} )
-			);
-
+			navigateTo( { url: task.actionUrl } );
 			return;
 		}
 
-		const taskPath = getNewPath( { task: task.id }, '/', {} );
-
-		if ( ! isWCAdmin( window.location.href ) ) {
-			window.location.href = getAdminLink( taskPath );
-			return;
-		}
-
-		window.document.documentElement.scrollTop = 0;
-		( getHistory() as History ).push( taskPath );
+		navigateTo( { path: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {

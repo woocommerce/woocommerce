@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getHistory,
-	getNewPath,
-	updateQueryString,
-} from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -17,7 +13,6 @@ import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import { History } from 'history';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
@@ -133,32 +128,11 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const onClickDefault = useCallback( () => {
 		if ( actionUrl ) {
-			if ( actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
-				return;
-			}
-
-			if ( ! isWCAdmin( window.location.href ) ) {
-				window.location.href = getAdminLink(
-					getNewPath( {}, actionUrl, {} )
-				);
-				return;
-			}
-
-			( getHistory() as History ).push( getNewPath( {}, actionUrl, {} ) );
-
+			navigateTo( { url: actionUrl } );
 			return;
 		}
 
-		const taskPath = getNewPath( { task: id }, '/', {} );
-
-		if ( ! isWCAdmin( window.location.href ) ) {
-			window.location.href = getAdminLink( taskPath );
-			return;
-		}
-
-		window.document.documentElement.scrollTop = 0;
-		( getHistory() as History ).push( taskPath );
+		navigateTo( { path: getNewPath( { task: id }, '/', {} ) } );
 	}, [ id, isComplete, actionUrl ] );
 
 	const taskItemProps = {
