@@ -153,7 +153,7 @@ class WC_Products_Tracking {
 						product_gallery:		$( '#product_images_container .product_images > li' ).length,
 						product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
 						product_type:			$( '#product-type' ).val(),
-						purchase_note:			$( '#_purchase_note' ).val() ? 'yes' : 'no',
+						purchase_note:			$( '#_purchase_note' ).val().length ? 'yes' : 'no',
 						sale_price:				$( '#_sale_price' ).val() ? 'yes' : 'no',
 						short_description:		$( '#excerpt' ).val() ? 'yes' : 'no',
 						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
