@@ -18,7 +18,7 @@ This document gives an overview of some of the major architectural components/AP
 
 Much of the data and api interface for components in the Checkout Block are constructed and exposed via [usage of `React.Context`](https://reactjs.org/docs/context.html). In some cases the context maintains the "tree" state within the context itself (via `useReducer`) and in others it interacts with a global `wp.data` store (for data that communicates with the server).
 
-You can find type definitions (`typedef`) for contexts in [this file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/assets/js/type-defs/contexts.js).
+You can find type definitions (`typedef`) for contexts in [this file](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/assets/js/types/type-defs/contexts.js).
 
 #### Notices Context
 
