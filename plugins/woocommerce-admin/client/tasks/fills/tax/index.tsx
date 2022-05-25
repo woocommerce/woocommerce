@@ -135,7 +135,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		updateOptions( {
 			woocommerce_no_sales_tax: true,
 			woocommerce_calc_taxes: 'no',
-			// @ts-expect-error updateOptions returns a Promise, but it is not typed in source.
 		} ).then( () => {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		} );

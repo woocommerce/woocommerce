@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { controls as dataControls } from '@wordpress/data-controls';
+import { Action } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -9,10 +10,12 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { WC_ADMIN_NAMESPACE } from '../constants';
 
-let optionNames = [];
-const fetches = {};
+let optionNames: string[] = [];
+const fetches: {
+	[ key: string ]: Promise< unknown >;
+} = {};
 
-export const batchFetch = ( optionName ) => {
+export const batchFetch = ( optionName: string ) => {
 	return {
 		type: 'BATCH_FETCH',
 		optionName,
@@ -21,12 +24,15 @@ export const batchFetch = ( optionName ) => {
 
 export const controls = {
 	...dataControls,
-	BATCH_FETCH( { optionName } ) {
+	BATCH_FETCH( { optionName }: Action ) {
 		optionNames.push( optionName );
 
 		return new Promise( ( resolve ) => {
 			setTimeout( function () {
-				if ( fetches[ optionName ] ) {
+				if (
+					fetches.hasOwnProperty( optionName ) &&
+					fetches[ optionName ]
+				) {
 					return fetches[ optionName ].then( ( result ) => {
 						resolve( result );
 					} );

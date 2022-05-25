@@ -31,13 +31,14 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	eventPrefix,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
+
 	const {
+		visitedTask,
 		dismissTask,
 		undoDismissTask,
 		snoozeTask,
 		undoSnoozeTask,
-	} = useDispatch( OPTIONS_STORE_NAME );
-	const { visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( ONBOARDING_STORE_NAME );
 
 	const slot = useSlot(
 		`woocommerce_onboarding_task_list_item_${ task.id }`

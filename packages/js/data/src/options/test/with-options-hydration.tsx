@@ -39,7 +39,7 @@ describe( 'withOptionsHydration', () => {
 	const startResolutionMock = jest.fn();
 	const receiveOptionsMock = jest.fn();
 	beforeEach( () => {
-		useSelect.mockImplementation( ( callback ) => {
+		( useSelect as jest.Mock ).mockImplementation( ( callback ) => {
 			callback(
 				() => ( {
 					isResolving: isResolvingMock,

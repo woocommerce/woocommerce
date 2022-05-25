@@ -17,3 +17,18 @@ export type OptionsSelectors = {
 	isOptionsUpdating: WPDataSelector< typeof isOptionsUpdating >;
 	getOptionsUpdatingError: WPDataSelector< typeof getOptionsUpdatingError >;
 } & WPDataSelectors;
+
+export type Options = {
+	[ key: string ]: unknown;
+};
+
+export type OptionsState = {
+	isUpdating: boolean;
+	requestingErrors:
+		| {
+				[ name: string ]: unknown;
+		  }
+		| Record< string, never >;
+	error?: unknown;
+	updatingError?: unknown;
+} & Options;
