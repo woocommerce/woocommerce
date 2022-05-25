@@ -162,7 +162,6 @@ class WC_Products_Tracking {
 						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
 					};
 
-					debugger;
 					window.wcTracks.recordEvent( 'product_update', properties );
 					hasRecordedEvent = true;
 				} );
