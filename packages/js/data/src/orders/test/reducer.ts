@@ -75,8 +75,35 @@ describe( 'orders reducer', () => {
 		expect( state.orders[ resourceName ].data.includes( 1 ) ).toBeTruthy();
 		expect( state.orders[ resourceName ].data.includes( 2 ) ).toBeTruthy();
 
-		expect( state.data[ 1 ] ).toBe( orders[ 0 ] );
-		expect( state.data[ 2 ] ).toBe( orders[ 1 ] );
+		expect( state.data[ 1 ] ).toEqual( orders[ 0 ] );
+		expect( state.data[ 2 ] ).toEqual( orders[ 1 ] );
+	} );
+
+	it( 'GET_ORDERS_SUCCESS, should only update new order data if added', () => {
+		const orders: PartialOrder[] = [
+			{ id: 1 },
+			{ id: 2, total: '36.00', currency: 'CAD' },
+		];
+		const initialState = {
+			...defaultState,
+			data: {
+				1: { id: 1, total: '20.00' },
+				2: { id: 2, total: '34.00' },
+			},
+		};
+		const totalCount = 45;
+		const query: Partial< OrdersQuery > = { status: 'completed' };
+		const state = reducer( initialState, {
+			type: TYPES.GET_ORDERS_SUCCESS,
+			orders,
+			query,
+			totalCount,
+		} );
+
+		const resourceName = getOrderResourceName( query );
+
+		expect( state.data[ 1 ].total ).toEqual( initialState.data[ 1 ].total );
+		expect( state.data[ 2 ] ).toEqual( orders[ 1 ] );
 	} );
 
 	it( 'should handle GET_ORDERS_TOTAL_COUNT_SUCCESS', () => {

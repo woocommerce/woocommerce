@@ -9,7 +9,7 @@ describe( 'getTotalOrderCountResourceName()', () => {
 		const fullQuery: Partial< OrdersQuery > = {
 			page: 2,
 			per_page: 10,
-			_fields: [ 'id', 'status', 'quantity', 'price' ],
+			_fields: [ 'id', 'status', 'total' ],
 			status: 'completed',
 		};
 
@@ -29,7 +29,7 @@ describe( 'getTotalOrderCountResourceName()', () => {
 		const firstQuery: Partial< OrdersQuery > = {
 			page: 2,
 			per_page: 10,
-			_fields: [ 'id', 'status', 'quantity', 'price' ],
+			_fields: [ 'id', 'status', 'total' ],
 			status: 'completed',
 		};
 

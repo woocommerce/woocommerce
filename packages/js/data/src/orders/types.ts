@@ -152,7 +152,9 @@ type OrdersQueryStatus =
 	| 'failed'
 	| 'trash';
 
-export type OrdersQuery< Status = OrdersQueryStatus > = BaseQueryParams & {
+export type OrdersQuery< Status = OrdersQueryStatus > = BaseQueryParams<
+	keyof Order
+> & {
 	status: Status;
 	customer: number;
 	product: number;

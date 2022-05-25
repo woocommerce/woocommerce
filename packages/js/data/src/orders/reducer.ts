@@ -52,7 +52,10 @@ const reducer: Reducer< OrdersState, Actions > = (
 					Record< number, PartialOrder >
 				>( ( result, order ) => {
 					ids.push( order.id );
-					result[ order.id ] = order;
+					result[ order.id ] = {
+						...( state.data[ order.id ] || {} ),
+						...order,
+					};
 					return result;
 				}, {} );
 				const resourceName = getOrderResourceName( payload.query );

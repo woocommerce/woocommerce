@@ -12,6 +12,17 @@ import {
 import { request } from '../utils';
 
 export function* getOrders( query: Partial< OrdersQuery > ) {
+	// id is always required.
+	const ordersQuery = {
+		...query,
+	};
+	if (
+		ordersQuery &&
+		ordersQuery._fields &&
+		! ordersQuery._fields.includes( 'id' )
+	) {
+		ordersQuery._fields = [ 'id', ...ordersQuery._fields ];
+	}
 	try {
 		const {
 			items,
@@ -19,7 +30,7 @@ export function* getOrders( query: Partial< OrdersQuery > ) {
 		}: { items: Order[]; totalCount: number } = yield request<
 			OrdersQuery,
 			Order
-		>( WC_ORDERS_NAMESPACE, query );
+		>( WC_ORDERS_NAMESPACE, ordersQuery );
 		yield getOrdersTotalCountSuccess( query, totalCount );
 		yield getOrdersSuccess( query, items, totalCount );
 		return items;

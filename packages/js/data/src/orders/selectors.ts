@@ -8,7 +8,7 @@ import createSelector from 'rememo';
  */
 import { getOrderResourceName, getTotalOrderCountResourceName } from './utils';
 import { OrdersState } from './reducer';
-import { OrdersQuery } from './types';
+import { OrdersQuery, PartialOrder } from './types';
 import { WPDataSelector, WPDataSelectors } from '../types';
 
 export const getOrders = createSelector(
@@ -20,13 +20,34 @@ export const getOrders = createSelector(
 		if ( ! ids ) {
 			return defaultValue;
 		}
+		if ( query._fields ) {
+			return ids.map( ( id ) => {
+				return query._fields.reduce(
+					( product: PartialOrder, field: keyof PartialOrder ) => {
+						return {
+							...product,
+							[ field ]: state.data[ id ][ field ],
+						};
+					},
+					{} as PartialOrder
+				);
+			} );
+		}
 		return ids.map( ( id ) => {
 			return state.data[ id ];
 		} );
 	},
 	( state, query ) => {
 		const resourceName = getOrderResourceName( query );
-		return [ state.orders[ resourceName ] ];
+		const ids = state.orders[ resourceName ]
+			? state.orders[ resourceName ].data
+			: [];
+		return [
+			state.orders[ resourceName ],
+			...ids.map( ( id: number ) => {
+				return state.data[ id ];
+			} ),
+		];
 	}
 );
 
