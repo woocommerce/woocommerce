@@ -64,13 +64,13 @@ By default, the client will generate a payment gateway setup form from the setti
 
 ### WooPaymentGatewayConfigure
 
-To customize the configuration form used in the payment setup, you can use [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/onboarding/src/components/WooPaymentGatewayConfigure). 
+To customize the configuration form used in the payment setup, you can use [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/@woocommerce/onboarding/src/components/WooPaymentGatewayConfigure). 
 
 This will leave the default gateway installation and stepper in place, but allow the form to be customized as needed.
 
 ### WooPaymentGatewaySetup
 
-To completely override the stepper and default installation behavior, the gateway can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/onboarding/src/components/WooPaymentGatewaySetup).
+To completely override the stepper and default installation behavior, the gateway can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/@woocommerce/onboarding/src/components/WooPaymentGatewaySetup).
 
 ## Post install setup
 

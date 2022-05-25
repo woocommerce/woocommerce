@@ -88,7 +88,7 @@ The jest test sequencer uses the following test variables:
 
 If you need to modify the port for your local test environment (eg. port is already in use), edit `tests/e2e/config/default.json`. Only edit this file while your test container is `down`.
 
-This is also what you'll need to edit if you want to run tests against an external (or non-Docker) environment.  There are a few additional steps you'll have to take to ensure your environment is ready for testing. Complete [instructions are available here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/e2e-environment/external.md).
+This is also what you'll need to edit if you want to run tests against an external (or non-Docker) environment.  There are a few additional steps you'll have to take to ensure your environment is ready for testing. Complete [instructions are available here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/@woocommerce/e2e-environment/external.md).
 
 ### Jest test sequencer
 
@@ -292,7 +292,7 @@ In the WooCommerce Core repository the tests are in `tests/e2e/core-tests/specs/
 The following packages are used in write tests:
 
 - `@automattic/puppeteer-utils` - utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils).
-- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-utils).
+- `@woocommerce/e2e-utils` - this package contains utilities to simplify writing e2e tests specific to WooCommmerce. See details in the [package's repository](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/@woocommerce/e2e-utils).
 
 ### Creating test structure
 
@@ -382,6 +382,6 @@ The [WooCommerce E2E Tests Boilerplate repo](https://github.com/woocommerce/wooc
 
 ## Debugging tests
 
-The test sequencer (`pnpm nx test-e2e woocommerce`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
+The test sequencer (`pnpm nx test-e2e woocommerce`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/@woocommerce/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/@woocommerce/e2e-environment#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).

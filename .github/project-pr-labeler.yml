@@ -1,71 +1,62 @@
 'package: @woocommerce/api':
-- packages/js/api/**/*
+- packages/js/@woocommerce/api/**/*
 
 'package: @woocommerce/e2e-utils':
-- packages/js/e2e-utils/**/*
+- packages/js/@woocommerce/e2e-utils/**/*
 
 'package: @woocommerce/e2e-environment':
-- packages/js/e2e-environment/**/*
+- packages/js/@woocommerce/e2e-environment/**/*
 
 'package: @woocommerce/api-core-tests':
-- packages/js/api-core-tests/**/*
+- packages/js/@woocommerce/api-core-tests/**/*
 
 'package: @woocommerce/e2e-core-tests':
-- packages/js/e2e-core-tests/**/*
+- packages/js/@woocommerce/e2e-core-tests/**/*
 
 'package: @woocommerce/admin-e2e-tests':
-- packages/js/admin-e2e-tests/**/*
+- packages/js/@woocommerce/admin-e2e-tests/**/*
 
 'package: @woocommerce/components':
-- packages/js/components/**/*
+- packages/js/@woocommerce/components/**/*
 
 'package: @woocommerce/csv-export':
-- packages/js/csv-export/**/*
+- packages/js/@woocommerce/csv-export/**/*
 
 'package: @woocommerce/currency':
-- packages/js/currency/**/*
+- packages/js/@woocommerce/currency/**/*
 
 'package: @woocommerce/customer-effort-score':
-- packages/js/customer-effort-score/**/*
+- packages/js/@woocommerce/customer-effort-score/**/*
 
 'package: @woocommerce/data':
-- packages/js/data/**/*
+- packages/js/@woocommerce/data/**/*
 
 'package: @woocommerce/date':
-- packages/js/date/**/*
+- packages/js/@woocommerce/date/**/*
 
 'package: dependency-extraction-webpack-plugin':
-- packages/js/dependency-extraction-webpack-plugin/**/*
+- packages/js/@woocommerce/dependency-extraction-webpack-plugin/**/*
 
 'package: @woocommerce/eslint-plugin':
-- packages/js/eslint-plugin/**/*
+- packages/js/@woocommerce/eslint-plugin/**/*
 
 'package: @woocommerce/experimental':
-- packages/js/experimental/**/*
+- packages/js/@woocommerce/experimental/**/*
 
 'package: @woocommerce/explat':
-- packages/js/explat/**/*
-
-'package: @woocommerce/js-tests':
-- packages/js/js-tests/**/*
+- packages/js/@woocommerce/explat/**/*
 
 'package: @woocommerce/navigation':
-- packages/js/navigation/**/*
-
-'package: @woocommerce/notices':
-- packages/js/notices/**/*
+- packages/js/@woocommerce/navigation/**/*
 
 'package: @woocommerce/number':
-- packages/js/number/**/*
+- packages/js/@woocommerce/number/**/*
 
 'package: @woocommerce/onboarding':
-- packages/js/onboarding/**/*
-
-'package: @woocommerce/style-build':
-- packages/js/style-build/**/*
+- packages/js/@woocommerce/onboarding/**/*
 
 'package: @woocommerce/tracks':
-- packages/js/tracks/**/*
+- packages/js/@woocommerce/tracks/**/*
 
 'plugin: woocommerce':
 - plugins/woocommerce/**/*

@@ -61,7 +61,7 @@ jobs:
               with:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
-                      const script = require( './packages/js/e2e-environment/bin/post-results-to-github-pr.js' )
+                      const script = require( './packages/js/@woocommerce/e2e-environment/bin/post-results-to-github-pr.js' )
                       await script({github, context})
 
             - name: Run E2E tests.
@@ -92,7 +92,7 @@ jobs:
               with:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
-                      const script = require( './packages/js/e2e-environment/bin/post-results-to-github-pr.js' )
+                      const script = require( './packages/js/@woocommerce/e2e-environment/bin/post-results-to-github-pr.js' )
                       await script({github, context})
 
             - name: Remove label from pull request.
