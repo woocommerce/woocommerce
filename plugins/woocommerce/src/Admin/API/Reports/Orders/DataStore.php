@@ -353,6 +353,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( $is_variation ) {
 				$variation = wc_get_product( $product_data['id'] );
+				/**
+				 * Used to determine the separator for products and their variations titles.
+				 *
+				 * @since 6.6.0
+				 */
 				$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $variation );
 
 				if ( false === strpos( $product_data['name'], $separator ) ) {
@@ -554,5 +559,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->subquery = new SqlQuery( $this->context . '_subquery' );
 		$this->subquery->add_sql_clause( 'select', self::get_db_table_name() . '.order_id' );
 		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
+	}
+
+	/**
+	 * Get total sales for a given number of days.
+	 *
+	 * @param int $days Number of days.
+	 * @return float
+	 */
+	public function get_total_sales( $days ) {
+		global $wpdb;
+
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+		$table_name = self::get_db_table_name();
+		$amount     = $wpdb->get_col(
+			"SELECT SUM( total_sales ) FROM {$table_name} WHERE date_created >= DATE_SUB( NOW(), INTERVAL ${days} DAY )"
+		);
+		/* phpcs:enable */
+
+		return $amount;
 	}
 }
