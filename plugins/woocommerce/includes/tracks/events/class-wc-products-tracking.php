@@ -193,7 +193,7 @@ class WC_Products_Tracking {
 		$properties = array(
 			'attributes'        => count( $product->get_attributes() ),
 			'categories'        => count( $product->get_category_ids() ),
-			'cross-sells'       => count( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
+			'cross-sells'       => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
 			'description'       => $product->get_description() ? 'yes' : 'no',
 			'dimensions'        => wc_format_dimensions( $product->get_dimensions( false ) ) !== 'N/A' ? 'yes' : 'no',
 			'enable_reviews'    => $product->get_reviews_allowed() ? 'yes' : 'no',
@@ -209,7 +209,7 @@ class WC_Products_Tracking {
 			'sale_price'        => $product->get_sale_price() ? 'yes' : 'no',
 			'short_description' => $product->get_short_description() ? 'yes' : 'no',
 			'tags'              => count( $product->get_tag_ids() ),
-			'upsells'           => count( $product->get_upsell_ids() ) ? 'yes' : 'no',
+			'upsells'           => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
 			'weight'            => $product->get_weight() ? 'yes' : 'no',
 		);
 
