@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Removed unused react-router-dom dependency #33156
