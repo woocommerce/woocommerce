@@ -19,7 +19,6 @@ import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import classnames from 'classnames';
-import { History } from 'history';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -87,9 +86,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
 				window.location.href = task.actionUrl;
 			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, task.actionUrl, {} )
-				);
+				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
 			}
 			return;
 		}

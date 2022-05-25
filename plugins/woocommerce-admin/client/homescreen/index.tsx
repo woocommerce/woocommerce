@@ -10,7 +10,6 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import type { History } from 'history';
 /**
  * Internal dependencies
  */
@@ -31,9 +30,7 @@ const Homescreen = ( {
 	query,
 }: HomescreenProps ) => {
 	if ( hasFinishedResolution && ! profilerCompleted && ! profilerSkipped ) {
-		( getHistory() as History ).push(
-			getNewPath( {}, '/setup-wizard', {} )
-		);
+		getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
 	}
 
 	// @ts-expect-error Layout is a pure JS component
