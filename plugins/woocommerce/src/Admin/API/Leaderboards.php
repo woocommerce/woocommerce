@@ -53,7 +53,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 			)
 		);
 
-		foreach( [ 'customers', 'coupons', 'categories', 'products' ] as $endpoint ) {
+		foreach ( [ 'customers', 'coupons', 'categories', 'products' ] as $endpoint ) {
 			register_rest_route(
 				$this->namespace,
 				'/' . $this->rest_base . '/' . $endpoint,
@@ -386,10 +386,10 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	public function get_items( $request ) {
 		$persisted_query = json_decode( $request['persisted_query'], true );
 
-		// Check which group (or all the leaderboards) we're requesting
+		// Check which group (or all the leaderboards) we're requesting.
 		$parts = explode( '/', $request->get_route() );
 		$endpoint = end( $parts );
-		switch( $endpoint ) {
+		switch ( $endpoint ) {
 			case 'leaderboards':
 				$leaderboards = $this->get_leaderboards( $request['per_page'], $request['after'], $request['before'], $persisted_query );
 				break;
