@@ -281,9 +281,9 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * A utility function that navigates to a page, using a redirect
  * or the router as appropriate.
  *
- * @param {Object} args      All arguments.
- * @param {string} args.url  Relative or absolute url to navigate to.
- * @param {string} args.path Path to navigate to.
+ * @param {Object} args        - All arguments.
+ * @param {string} [args.url]  - Relative or absolute url to navigate to.
+ * @param {string} [args.path] - Path to navigate to.
  */
 export const navigateTo = ( { url, path } ) => {
 	if ( url && url.startsWith( 'http' ) ) {
@@ -299,6 +299,7 @@ export const navigateTo = ( { url, path } ) => {
 	}
 
 	window.document.documentElement.scrollTop = 0;
+
 	getHistory().push( newPath );
 };
 
