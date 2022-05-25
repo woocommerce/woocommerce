@@ -130,6 +130,41 @@
 * Update - Remove `react-dates` from woo admin dependency  [#32954](https://github.com/woocommerce/woocommerce/pull/32954)
 * Update - Add status of admin items to system status report  [#33030](https://github.com/woocommerce/woocommerce/pull/33030)
 * Update - Update to record completion time in time frame format  [#32932](https://github.com/woocommerce/woocommerce/pull/32932)
+* Update - Add confirmation dialog before loading the sample products  [#33167](https://github.com/woocommerce/woocommerce/pull/33167)
+
+**WooCommerce Blocks 7.5.0 & 7.6.0**
+
+* Enhancement - Add PHP templates support to the Active Product Filters block.  [#6295](https://github.com/woocommerce/woocommerce-blocks/pull/6295)
+* Enhancement - Enable Draft orders in WooCommerce Core.  [#6288](https://github.com/woocommerce/woocommerce-blocks/pull/6288)
+* Enhancement - Various enhancements to the Featured Category Block.  [#6276](https://github.com/woocommerce/woocommerce-blocks/pull/6276)
+* Enhancement - Allow adding the Filter Products by Stock block to Product Catalog templates to filter products.  [#6261](https://github.com/woocommerce/woocommerce-blocks/pull/6261)
+* Enhancement - Various enhancements to the Featured Product Block.  [#6181](https://github.com/woocommerce/woocommerce-blocks/pull/6181)
+* Enhancement - Allow saved payment methods labels other than card/eCheck to display brand & last 4 digits if present.  [#6177](https://github.com/woocommerce/woocommerce-blocks/pull/6177)
+* Enhancement - Featured Category: Add background color option.  [#6368](https://github.com/woocommerce/woocommerce-blocks/pull/6368)
+* Enhancement - Featured Product: Add background color option.  [#6367](https://github.com/woocommerce/woocommerce-blocks/pull/6367)
+* Enhancement - Added media controls allowing the user to edit images within the editor on a Featured Category block.  [#6360](https://github.com/woocommerce/woocommerce-blocks/pull/6360)
+* Enhancement - Added media controls allowing the user to edit images within the editor on a Featured Product block.  [#6348](https://github.com/woocommerce/woocommerce-blocks/pull/6348)
+* Enhancement - Add the alt text control to the Featured Category block media settings.  [#6341](https://github.com/woocommerce/woocommerce-blocks/pull/6341)
+* Enhancement - Hide the Product Tag Cloud from the Widgets screen in classic themes.  [#6327](https://github.com/woocommerce/woocommerce-blocks/pull/6327)
+* Enhancement - Add the alt text control to the Featured Product block media settings.  [#6308](https://github.com/woocommerce/woocommerce-blocks/pull/6308)
+* Enhancement - GridContentControl: Add product image control.  [#6302](https://github.com/woocommerce/woocommerce-blocks/pull/6302)
+* Fix - Filter Products by Attribute: Fix the page reload which happens when clicking the filter button on Woo templates using the Classic Template block [#6287](https://github.com/woocommerce/woocommerce-blocks/pull/6287)
+* Fix - Store API: Show visible attributes in simple products, and hidden attributes in variable products.  [#6274](https://github.com/woocommerce/woocommerce-blocks/pull/6274)
+* Fix - Add RTL support for the Mini Cart icon. [#6264](https://github.com/woocommerce/woocommerce-blocks/pull/6264)
+* Fix - Fix page load problem due to incorrect URL to certain assets. [#6260](https://github.com/woocommerce/woocommerce-blocks/pull/6260)
+* Fix - Make Filters Products by Price work with Active Filters block for the PHP rendered Classic Template. [#6245](https://github.com/woocommerce/woocommerce-blocks/pull/6245)
+* Fix - Fix page refresh when using filters with the All Products block on non-product archive templates for WooCommerce. [#6324](https://github.com/woocommerce/woocommerce-blocks/pull/6324)
+* Fix - Fix Customizer fatal error on PHP 8. [#6317](https://github.com/woocommerce/woocommerce-blocks/pull/6317)
+* Fix - Fix Featured Product block frontend mismatch. [#6263](https://github.com/woocommerce/woocommerce-blocks/pull/6263)
+* Fix - Fix attribute filter dropdown list z-index level. [#6294](https://github.com/woocommerce/woocommerce-blocks/pull/6294)
+* Fix - Product Query: Pass any product taxonomies existing in the URL parameters. [#6152](https://github.com/woocommerce/woocommerce-blocks/pull/6152)
+* Fix - Fix: Align Empty Mini Cart Contents block center in the Site Editor. [#6379](https://github.com/woocommerce/woocommerce-blocks/pull/6379)
+* Fix - Remove the Template panel from the Setting Sidebar for Shop page. [#6366](https://github.com/woocommerce/woocommerce-blocks/pull/6366)
+* Fix - Parse categories coming from the back-end as a json array. [#6358](https://github.com/woocommerce/woocommerce-blocks/pull/6358)
+* Fix - Update the default width of Classic Template to Wide width. [#6356](https://github.com/woocommerce/woocommerce-blocks/pull/6356)
+* Fix - Mini Cart block is not available from the Edit template screen. [#6351](https://github.com/woocommerce/woocommerce-blocks/pull/6351)
+* Fix - Fix Filter Products by Attribute block not working on PHP templates when Filter button was enabled. [#6332](https://github.com/woocommerce/woocommerce-blocks/pull/6332)
+
 
 = 6.5.1 2022-05-12 =
 
