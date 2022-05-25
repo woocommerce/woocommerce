@@ -10,6 +10,7 @@ module.exports = [
 	'@woocommerce/eslint-plugin',
 	'@woocommerce/experimental',
 	'@woocommerce/explat',
+	'@woocommerce/extend-cart-checkout-block',
 	'@woocommerce/navigation',
 	'@woocommerce/notices',
 	'@woocommerce/number',

@@ -935,6 +935,9 @@ importers:
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
+  packages/js/extend-cart-checkout-block:
+    specifiers: {}
+
   packages/js/js-tests:
     specifiers:
       '@babel/core': ^7.17.5
