@@ -82,7 +82,7 @@ class TimeInterval {
 	 * @param string $date_column_name Name of the date table column.
 	 * @return mixed
 	 */
-	public static function db_datetime_format( $time_interval, $table_name, $date_column_name ) {
+	public static function db_datetime_format( $time_interval, $table_name, $date_column_name = 'date_created' ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
 		if ( 1 === $first_day_of_week ) {
