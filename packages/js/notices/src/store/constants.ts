@@ -12,4 +12,4 @@ export const DEFAULT_CONTEXT = 'global';
  *
  * @type {string}
  */
-export const DEFAULT_STATUS = 'info';
+export const DEFAULT_STATUS = 'info' as const;

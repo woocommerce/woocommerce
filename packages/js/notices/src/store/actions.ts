@@ -2,22 +2,25 @@
  * External dependencies
  */
 import { uniqueId } from 'lodash';
+import { Status, Action as WPNoticeAction } from '@wordpress/notices';
 
 /**
  * Internal dependencies
  */
 import { DEFAULT_CONTEXT, DEFAULT_STATUS } from './constants';
 
-/**
- * @typedef {Object} WPNoticeAction Object describing a user action option associated with a notice.
- *
- * @property {string}    label   Message to use as action label.
- * @property {?string}   url     Optional URL of resource if action incurs
- *                               browser navigation.
- * @property {?Function} onClick Optional function to invoke when action is
- *                               triggered by user.
- *
- */
+export type Options = {
+	id: string;
+	context: string;
+	isDismissible: boolean;
+	type: string;
+	speak: boolean;
+	actions: Array< WPNoticeAction >;
+	icon: null | JSX.Element;
+	explicitDismiss: boolean;
+	onDismiss: ( () => void ) | null;
+	__unstableHTML?: boolean;
+};
 
 /**
  * Returns an action object used in signalling that a notice is to be created.
@@ -46,10 +49,15 @@ import { DEFAULT_CONTEXT, DEFAULT_STATUS } from './constants';
  *                                                             can't be dismissed by clicking
  *                                                             the body of the notice.
  * @param {Function}              [options.onDismiss]          Called when the notice is dismissed.
+ * @param {boolean}               [options.__unstableHTML]     Notice message as raw HTML.
  *
- * @return {Object} Action object.
+ * @return {Object} WPNoticeAction object.
  */
-export function createNotice( status = DEFAULT_STATUS, content, options = {} ) {
+export function createNotice(
+	status: Status = DEFAULT_STATUS,
+	content: string,
+	options: Partial< Options > = {}
+) {
 	const {
 		speak = true,
 		isDismissible = true,
@@ -62,14 +70,13 @@ export function createNotice( status = DEFAULT_STATUS, content, options = {} ) {
 		explicitDismiss = false,
 		onDismiss = null,
 	} = options;
-
 	// The supported value shape of content is currently limited to plain text
 	// strings. To avoid setting expectation that e.g. a WPElement could be
 	// supported, cast to a string.
 	content = String( content );
 
 	return {
-		type: 'CREATE_NOTICE',
+		type: 'CREATE_NOTICE' as const,
 		context,
 		notice: {
 			id,
@@ -98,7 +105,7 @@ export function createNotice( status = DEFAULT_STATUS, content, options = {} ) {
  *
  * @return {Object} Action object.
  */
-export function createSuccessNotice( content, options ) {
+export function createSuccessNotice( content: string, options: Options ) {
 	return createNotice( 'success', content, options );
 }
 
@@ -113,7 +120,7 @@ export function createSuccessNotice( content, options ) {
  *
  * @return {Object} Action object.
  */
-export function createInfoNotice( content, options ) {
+export function createInfoNotice( content: string, options: Options ) {
 	return createNotice( 'info', content, options );
 }
 
@@ -128,7 +135,7 @@ export function createInfoNotice( content, options ) {
  *
  * @return {Object} Action object.
  */
-export function createErrorNotice( content, options ) {
+export function createErrorNotice( content: string, options: Options ) {
 	return createNotice( 'error', content, options );
 }
 
@@ -143,7 +150,7 @@ export function createErrorNotice( content, options ) {
  *
  * @return {Object} Action object.
  */
-export function createWarningNotice( content, options ) {
+export function createWarningNotice( content: string, options: Options ) {
 	return createNotice( 'warning', content, options );
 }
 
@@ -156,10 +163,12 @@ export function createWarningNotice( content, options ) {
  *
  * @return {Object} Action object.
  */
-export function removeNotice( id, context = DEFAULT_CONTEXT ) {
+export function removeNotice( id: string, context: string = DEFAULT_CONTEXT ) {
 	return {
-		type: 'REMOVE_NOTICE',
+		type: 'REMOVE_NOTICE' as const,
 		id,
 		context,
 	};
 }
+
+export type Action = ReturnType< typeof createNotice | typeof removeNotice >;

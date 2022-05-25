@@ -1011,6 +1011,7 @@ importers:
 
   packages/js/notices:
     specifiers:
+      '@automattic/data-stores': ^2.0.1
       '@babel/core': ^7.17.5
       '@woocommerce/eslint-plugin': workspace:*
       '@wordpress/a11y': ^3.5.0
@@ -1019,6 +1020,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      redux: ^4.2.0
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1027,11 +1029,13 @@ importers:
       '@wordpress/data': 6.4.1
       '@wordpress/notices': 3.4.1
     devDependencies:
+      '@automattic/data-stores': 2.0.1_@wordpress+data@6.4.1
       '@babel/core': 7.17.8
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      redux: 4.2.0
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -34660,6 +34664,12 @@ packages:
     resolution: {integrity: sha512-SH8PglcebESbd/shgf6mii6EIoRM0zrQyjcuQ+ojmfxjTtE0z9Y8pa62iA/OJ58qjP6j27uyW4kUF4jl/jd6sw==}
     dependencies:
       '@babel/runtime': 7.17.7
+
+  /redux/4.2.0:
+    resolution: {integrity: sha512-oSBmcKKIuIR4ME29/AeNUnl5L+hvBq7OaJWzaptTQJAntaPvxIJqfnjbaEiCzzaIz+XmVILfqAM3Ob0aXLPfjA==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+    dev: true
 
   /reflect.ownkeys/0.2.0:
     resolution: {integrity: sha1-dJrO7H8/34tj+SegSAnpDFwLNGA=}

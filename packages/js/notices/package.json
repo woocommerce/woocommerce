@@ -20,6 +20,7 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
 		"@wordpress/a11y": "^3.5.0",
@@ -45,11 +46,13 @@
 		"lint:fix": "eslint src --fix"
 	},
 	"devDependencies": {
+		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "^7.17.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
+		"redux": "^4.2.0",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
 		"typescript": "^4.6.2"

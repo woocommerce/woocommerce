@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { DEFAULT_CONTEXT } from './constants';
+import { State } from './reducer';
 
 /** @typedef {import('./actions').WPNoticeAction} WPNoticeAction */
 
@@ -14,7 +15,7 @@ import { DEFAULT_CONTEXT } from './constants';
  *
  * @type {Array}
  */
-const DEFAULT_NOTICES = [];
+const DEFAULT_NOTICES: [  ] = [];
 
 /**
  * @typedef {Object} WPNotice Notice object.
@@ -51,6 +52,6 @@ const DEFAULT_NOTICES = [];
  *
  * @return {WPNotice[]} Array of notices.
  */
-export function getNotices( state, context = DEFAULT_CONTEXT ) {
+export function getNotices( state: State, context: string = DEFAULT_CONTEXT ) {
 	return state[ context ] || DEFAULT_NOTICES;
 }
