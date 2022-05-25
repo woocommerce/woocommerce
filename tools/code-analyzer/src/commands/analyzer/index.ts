@@ -20,6 +20,7 @@ import {
 	getFilename,
 	getPatches,
 	getHookName,
+	areSchemasEqual,
 } from '../../utils';
 import { generatePatch, generateSchemaDiff } from '../../git';
 
@@ -106,7 +107,7 @@ export default class Analyzer extends Command {
 				patchContent,
 				pluginData[ 0 ],
 				flags.output,
-				schemaDiff[ 0 ] === schemaDiff[ 1 ]
+				areSchemasEqual( schemaDiff )
 			);
 		} else {
 			this.scanChanges(
