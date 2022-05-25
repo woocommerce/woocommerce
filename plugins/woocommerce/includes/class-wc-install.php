@@ -209,9 +209,6 @@ class WC_Install {
 		'6.5.1' => array(
 			'wc_update_651_approved_download_directories',
 		),
-		'6.5.2' => array(
-			'wc_update_652_db_version',
-		),
 	);
 
 	/**
