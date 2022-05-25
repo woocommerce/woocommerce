@@ -12,6 +12,17 @@ import {
 import { request } from '../utils';
 
 export function* getProducts( query: Partial< ProductQuery > ) {
+	// id is always required.
+	const productsQuery = {
+		...query,
+	};
+	if (
+		productsQuery &&
+		productsQuery._fields &&
+		! productsQuery._fields.includes( 'id' )
+	) {
+		productsQuery._fields = [ 'id', ...productsQuery._fields ];
+	}
 	try {
 		const {
 			items,
@@ -19,7 +30,7 @@ export function* getProducts( query: Partial< ProductQuery > ) {
 		}: { items: Product[]; totalCount: number } = yield request<
 			ProductQuery,
 			Product
-		>( WC_PRODUCT_NAMESPACE, query );
+		>( WC_PRODUCT_NAMESPACE, productsQuery );
 		yield getProductsTotalCountSuccess( query, totalCount );
 		yield getProductsSuccess( query, items, totalCount );
 		return items;

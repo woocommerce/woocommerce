@@ -12,7 +12,7 @@ import {
 } from './utils';
 import { WPDataSelector, WPDataSelectors } from '../types';
 import { ProductState } from './reducer';
-import { ProductQuery } from './types';
+import { PartialProduct, ProductQuery } from './types';
 
 export const getProducts = createSelector(
 	( state: ProductState, query: ProductQuery, defaultValue = undefined ) => {
@@ -23,13 +23,37 @@ export const getProducts = createSelector(
 		if ( ! ids ) {
 			return defaultValue;
 		}
+		if ( query._fields ) {
+			return ids.map( ( id ) => {
+				return query._fields.reduce(
+					(
+						product: PartialProduct,
+						field: keyof PartialProduct
+					) => {
+						return {
+							...product,
+							[ field ]: state.data[ id ][ field ],
+						};
+					},
+					{} as PartialProduct
+				);
+			} );
+		}
 		return ids.map( ( id ) => {
 			return state.data[ id ];
 		} );
 	},
 	( state, query ) => {
 		const resourceName = getProductResourceName( query );
-		return [ state.products[ resourceName ] ];
+		const ids = state.products[ resourceName ]
+			? state.products[ resourceName ].data
+			: undefined;
+		return [
+			state.products[ resourceName ],
+			...( ids || [] ).map( ( id: number ) => {
+				return state.data[ id ];
+			} ),
+		];
 	}
 );
 

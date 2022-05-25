@@ -55,10 +55,14 @@ const reducer: Reducer< ProductState, Actions > = (
 					Record< number, PartialProduct >
 				>( ( result, product ) => {
 					ids.push( product.id );
-					result[ product.id ] = product;
+					result[ product.id ] = {
+						...( state.data[ product.id ] || {} ),
+						...product,
+					};
 					return result;
 				}, {} );
 				const resourceName = getProductResourceName( payload.query );
+
 				return {
 					...state,
 					products: {

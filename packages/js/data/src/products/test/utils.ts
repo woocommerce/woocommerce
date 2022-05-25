@@ -9,7 +9,7 @@ describe( 'getTotalProductCountResourceName()', () => {
 		const fullQuery: Partial< ProductQuery > = {
 			page: 2,
 			per_page: 10,
-			_fields: [ 'id', 'title', 'status', 'image', 'quantity', 'price' ],
+			_fields: [ 'id', 'title', 'status', 'price' ],
 			status: 'publish',
 		};
 
@@ -29,7 +29,7 @@ describe( 'getTotalProductCountResourceName()', () => {
 		const firstQuery: Partial< ProductQuery > = {
 			page: 2,
 			per_page: 10,
-			_fields: [ 'id', 'title', 'status', 'image', 'quantity', 'price' ],
+			_fields: [ 'id', 'title', 'status', 'price' ],
 			status: 'publish',
 		};
 

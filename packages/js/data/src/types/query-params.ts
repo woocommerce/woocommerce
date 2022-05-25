@@ -1,4 +1,4 @@
-export type BaseQueryParams = {
+export type BaseQueryParams< Fields = string > = {
 	context: string;
 	page: number;
 	per_page: number;
@@ -12,5 +12,5 @@ export type BaseQueryParams = {
 	orderby: 'date' | 'id' | 'include' | 'title' | 'slug';
 	parent: number[];
 	parent_exclude: number[];
-	_fields: string[];
+	_fields: Fields[];
 };

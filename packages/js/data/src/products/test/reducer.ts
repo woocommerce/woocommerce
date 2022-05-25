@@ -85,8 +85,53 @@ describe( 'products reducer', () => {
 			state.products[ resourceName ].data.includes( 2 )
 		).toBeTruthy();
 
-		expect( state.data[ 1 ] ).toBe( products[ 0 ] );
-		expect( state.data[ 2 ] ).toBe( products[ 1 ] );
+		expect( state.data[ 1 ] ).toEqual( products[ 0 ] );
+		expect( state.data[ 2 ] ).toEqual( products[ 1 ] );
+	} );
+
+	it( 'GET_PRODUCTS_SUCCESS should not remove previously added fields, only update new ones', () => {
+		const initialState: ProductState = {
+			...defaultState,
+			data: {
+				1: { id: 1, name: 'Yum!', price: '10.00', description: 'test' },
+				2: {
+					id: 2,
+					name: 'Dynamite!',
+					price: '10.00',
+					description: 'dynamite',
+				},
+			},
+		};
+
+		const products: PartialProduct[] = [
+			{ id: 1, name: 'Yum! Updated' },
+			{ id: 2, name: 'Dynamite!' },
+		];
+		const totalCount = 45;
+		const query: Partial< ProductQuery > = { status: 'draft' };
+		const state = reducer( initialState, {
+			type: TYPES.GET_PRODUCTS_SUCCESS,
+			products,
+			query,
+			totalCount,
+		} );
+
+		const resourceName = getProductResourceName( query );
+
+		expect( state.products[ resourceName ].data ).toHaveLength( 2 );
+		expect(
+			state.products[ resourceName ].data.includes( 1 )
+		).toBeTruthy();
+		expect(
+			state.products[ resourceName ].data.includes( 2 )
+		).toBeTruthy();
+
+		expect( state.data[ 1 ].name ).toEqual( products[ 0 ].name );
+		expect( state.data[ 1 ].price ).toEqual( initialState.data[ 1 ].price );
+		expect( state.data[ 1 ].description ).toEqual(
+			initialState.data[ 1 ].description
+		);
+		expect( state.data[ 2 ] ).toEqual( initialState.data[ 2 ] );
 	} );
 
 	it( 'should handle GET_PRODUCTS_TOTAL_COUNT_SUCCESS', () => {
