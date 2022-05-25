@@ -28,27 +28,44 @@ const getProductData = () => {
 };
 
 /**
+ * Get the publish date as a string.
+ *
+ * @param  prefix Prefix for date element selectors.
+ * @return string
+ */
+const getPublishDate = ( prefix = '' ) => {
+	const month = ( document.querySelector(
+		`#${ prefix }mm`
+	) as HTMLInputElement )?.value;
+	const day = ( document.querySelector(
+		`#${ prefix }jj`
+	) as HTMLInputElement )?.value;
+	const year = ( document.querySelector(
+		`#${ prefix }aa`
+	) as HTMLInputElement )?.value;
+	const hours = ( document.querySelector(
+		`#${ prefix }hh`
+	) as HTMLInputElement )?.value;
+	const seconds = ( document.querySelector(
+		`#${ prefix }mn`
+	) as HTMLInputElement )?.value;
+
+	return `${ month }-${ day }-${ year } ${ hours }:${ seconds }`;
+};
+
+/**
  * Get the data from the publishing widget.
  *
  * @return object
  */
 const getPublishingWidgetData = () => {
-	const month = ( document.querySelector( '#mm' ) as HTMLInputElement )
-		?.value;
-	const day = ( document.querySelector( '#jj' ) as HTMLInputElement )?.value;
-	const year = ( document.querySelector( '#aa' ) as HTMLInputElement )?.value;
-	const hours = ( document.querySelector( '#hh' ) as HTMLInputElement )
-		?.value;
-	const seconds = ( document.querySelector( '#mn' ) as HTMLInputElement )
-		?.value;
-
 	return {
 		status: ( document.querySelector( '#post_status' ) as HTMLInputElement )
 			?.value,
 		visibility: ( document.querySelector(
 			'input[name="visibility"]:checked'
 		) as HTMLInputElement )?.value,
-		date: `${ month }-${ day }-${ year } ${ hours }:${ seconds }`,
+		date: getPublishDate() !== getPublishDate( 'hidden_' ) ? 'yes' : 'no',
 		catalog_visibility: ( document.querySelector(
 			'input[name="_visibility"]:checked'
 		) as HTMLInputElement )?.value,
@@ -110,13 +127,19 @@ export const initProductScreenTracks = () => {
 			} );
 		} );
 
-	document.querySelector( '#publish' )?.addEventListener( 'click', () => {
-		recordEvent( 'product_publish_widget_save', {
-			...prefixObjectKeys( getPublishingWidgetData(), 'new_' ),
-			...prefixObjectKeys( initialPublishingData, 'current_' ),
-			...getProductData(),
+	document
+		.querySelectorAll(
+			'.save-post-status, .save-post-visibility, .save-timestamp, .save-post-visibility'
+		)
+		.forEach( ( button ) => {
+			button.addEventListener( 'click', () => {
+				recordEvent( 'product_publish_widget_save', {
+					...prefixObjectKeys( getPublishingWidgetData(), 'new_' ),
+					...prefixObjectKeys( initialPublishingData, 'current_' ),
+					...getProductData(),
+				} );
+			} );
 		} );
-	} );
 
 	document
 		.querySelectorAll( '.handle-order-lower, .handle-order-higher' )
