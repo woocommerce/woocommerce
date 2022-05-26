@@ -65,9 +65,9 @@ jobs:
               id: run_api_tests
               working-directory: plugins/woocommerce
               env:
-                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+                  USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
                   # Temporarily make verbose
                   VERBOSE: true
