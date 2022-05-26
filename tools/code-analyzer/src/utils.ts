@@ -61,8 +61,14 @@ export const getHookName = ( name: string ): string => {
 	return name.replace( /(\'|\")/g, '' ).trim();
 };
 
+/**
+ * Determine if schema diff object contains schemas that are equal.
+ *
+ * @param {Object} schemaDiff
+ * @return {boolean|void} If the schema diff describes schemas that are equal.
+ */
 export const areSchemasEqual = (
-	diff: {
+	schemaDiff: {
 		[ key: string ]: {
 			description: string;
 			base: string;
@@ -71,10 +77,10 @@ export const areSchemasEqual = (
 		};
 	} | void
 ): boolean => {
-	if ( ! diff ) {
+	if ( ! schemaDiff ) {
 		return false;
 	}
-	return ! Object.keys( diff ).some(
-		( d: string ) => diff[ d ].areEqual === false
+	return ! Object.keys( schemaDiff ).some(
+		( d: string ) => schemaDiff[ d ].areEqual === false
 	);
 };
