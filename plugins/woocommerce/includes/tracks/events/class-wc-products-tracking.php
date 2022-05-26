@@ -220,20 +220,50 @@ class WC_Products_Tracking {
 	}
 
 	/**
+	 * Get the product screen name if current hook and page is a products type page.
+	 *
+	 * @param string $hook Hook of the current page.
+	 * @return string|boolean
+	 */
+	protected function get_product_screen( $hook ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			'edit.php' === $hook &&
+			isset( $_GET['post_type'] ) &&
+			'product' === wp_unslash( $_GET['post_type'] )
+		) {
+			return 'list';
+		}
+
+		if (
+			'post-new.php' === $hook &&
+			'product' === wp_unslash( $_GET['post_type'] )
+		) {
+			return 'new';
+		}
+
+		if (
+			'post.php' === $hook &&
+			isset( $_GET['post'] ) &&
+			'product' === get_post_type( intval( $_GET['post'] ) )
+		) {
+			return 'edit';
+		}
+		// phpcs:enable
+
+		return false;
+	}
+
+	/**
 	 * Adds the tracking scripts for product filtering actions.
 	 *
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_tracking_scripts( $hook ) {
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
-		if (
-			'edit.php' !== $hook ||
-			! isset( $_GET['post_type'] ) ||
-			'product' !== wp_unslash( $_GET['post_type'] )
-		) {
+		$product_screen = $this->get_product_screen( $hook );
+		if ( ! $product_screen ) {
 			return;
 		}
-		// phpcs:enable
 
 		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'product-tracking' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
@@ -245,5 +275,7 @@ class WC_Products_Tracking {
 			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
+
+		wp_localize_script( 'wc-admin-product-tracking', 'productScreen', $product_screen );
 	}
 }
