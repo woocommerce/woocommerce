@@ -234,8 +234,8 @@ importers:
       '@woocommerce/data': workspace:*
       '@woocommerce/date': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
-      '@woocommerce/style-build': workspace:*
       '@wordpress/api-fetch': ^6.0.1
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
@@ -343,7 +343,7 @@ importers:
       '@testing-library/react': 12.1.4
       '@testing-library/user-event': 13.5.0_@testing-library+dom@8.11.3
       '@woocommerce/eslint-plugin': link:../eslint-plugin
-      '@woocommerce/style-build': link:../style-build
+      '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.2
       '@wordpress/scripts': 12.6.1_6cad74fe17bf42b947bda894b27e9dc2
       concurrently: 7.0.0
@@ -423,7 +423,7 @@ importers:
       '@types/wordpress__components': ^9.8.6
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/experimental': workspace:*
-      '@woocommerce/style-build': workspace:*
+      '@woocommerce/internal-style-build': workspace:*
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
       '@wordpress/compose': ^5.1.2
@@ -463,7 +463,7 @@ importers:
       '@types/prop-types': 15.7.4
       '@types/wordpress__components': 9.8.6
       '@woocommerce/eslint-plugin': link:../eslint-plugin
-      '@woocommerce/style-build': link:../style-build
+      '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.2
       concurrently: 7.0.0
       css-loader: 3.6.0_webpack@5.70.0
@@ -813,7 +813,7 @@ importers:
       '@types/react-transition-group': ^4.4.4
       '@woocommerce/components': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
-      '@woocommerce/style-build': workspace:*
+      '@woocommerce/internal-style-build': workspace:*
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
       '@wordpress/element': ^4.1.1
@@ -863,7 +863,7 @@ importers:
       '@types/dompurify': 2.3.3
       '@types/react-transition-group': 4.4.4
       '@woocommerce/eslint-plugin': link:../eslint-plugin
-      '@woocommerce/style-build': link:../style-build
+      '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.2
       concurrently: 7.0.0
       css-loader: 3.6.0_webpack@5.70.0
@@ -1002,6 +1002,47 @@ importers:
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
+  packages/js/internal-style-build:
+    specifiers:
+      '@automattic/color-studio': ^2.5.0
+      '@babel/core': ^7.17.5
+      '@woocommerce/eslint-plugin': workspace:*
+      '@wordpress/base-styles': ^4.3.0
+      '@wordpress/postcss-plugins-preset': ^1.6.0
+      css-loader: ^3.6.0
+      eslint: ^8.12.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      mini-css-extract-plugin: ^2.6.0
+      postcss-loader: ^3.0.0
+      rimraf: ^3.0.2
+      sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^5.70.0
+      webpack-remove-empty-scripts: ^0.7.3
+      webpack-rtl-plugin: ^2.0.0
+    dependencies:
+      '@automattic/color-studio': 2.5.0
+      '@wordpress/base-styles': 4.3.0
+      '@wordpress/postcss-plugins-preset': 1.6.0
+      css-loader: 3.6.0_webpack@5.70.0
+      mini-css-extract-plugin: 2.6.0_webpack@5.70.0
+      postcss-loader: 3.0.0
+      sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
+      webpack-remove-empty-scripts: 0.7.3_webpack@5.70.0
+      webpack-rtl-plugin: 2.0.0
+    devDependencies:
+      '@babel/core': 7.17.8
+      '@woocommerce/eslint-plugin': link:../eslint-plugin
+      eslint: 8.12.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
+      typescript: 4.6.2
+      webpack: 5.70.0
+
   packages/js/navigation:
     specifiers:
       '@babel/core': ^7.17.5
@@ -1077,7 +1118,7 @@ importers:
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/experimental': workspace:*
       '@woocommerce/explat': workspace:*
-      '@woocommerce/style-build': workspace:*
+      '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/tracks': workspace:*
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
@@ -1111,7 +1152,7 @@ importers:
       '@babel/core': 7.17.8
       '@types/wordpress__data': 6.0.0
       '@woocommerce/eslint-plugin': link:../eslint-plugin
-      '@woocommerce/style-build': link:../style-build
+      '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.2
       css-loader: 3.6.0_webpack@5.70.0
       eslint: 8.12.0
@@ -1124,47 +1165,6 @@ importers:
       typescript: 4.6.2
       webpack: 5.70.0_webpack-cli@3.3.12
       webpack-cli: 3.3.12_webpack@5.70.0
-
-  packages/js/style-build:
-    specifiers:
-      '@automattic/color-studio': ^2.5.0
-      '@babel/core': ^7.17.5
-      '@woocommerce/eslint-plugin': workspace:*
-      '@wordpress/base-styles': ^4.3.0
-      '@wordpress/postcss-plugins-preset': ^1.6.0
-      css-loader: ^3.6.0
-      eslint: ^8.12.0
-      jest: ^27.5.1
-      jest-cli: ^27.5.1
-      mini-css-extract-plugin: ^2.6.0
-      postcss-loader: ^3.0.0
-      rimraf: ^3.0.2
-      sass-loader: ^10.2.1
-      ts-jest: ^27.1.3
-      typescript: ^4.6.2
-      webpack: ^5.70.0
-      webpack-remove-empty-scripts: ^0.7.3
-      webpack-rtl-plugin: ^2.0.0
-    dependencies:
-      '@automattic/color-studio': 2.5.0
-      '@wordpress/base-styles': 4.3.0
-      '@wordpress/postcss-plugins-preset': 1.6.0
-      css-loader: 3.6.0_webpack@5.70.0
-      mini-css-extract-plugin: 2.6.0_webpack@5.70.0
-      postcss-loader: 3.0.0
-      sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
-      webpack-remove-empty-scripts: 0.7.3_webpack@5.70.0
-      webpack-rtl-plugin: 2.0.0
-    devDependencies:
-      '@babel/core': 7.17.8
-      '@woocommerce/eslint-plugin': link:../eslint-plugin
-      eslint: 8.12.0
-      jest: 27.5.1
-      jest-cli: 27.5.1
-      rimraf: 3.0.2
-      ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
-      typescript: 4.6.2
-      webpack: 5.70.0
 
   packages/js/tracks:
     specifiers:
@@ -1333,10 +1333,10 @@ importers:
       '@woocommerce/explat': workspace:*
       '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/internal-notices': workspace:*
+      '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
       '@woocommerce/number': workspace:*
       '@woocommerce/onboarding': workspace:*
-      '@woocommerce/style-build': workspace:*
       '@woocommerce/tracks': workspace:*
       '@wordpress/a11y': ^3.5.0
       '@wordpress/api-fetch': ^6.0.1
@@ -1537,10 +1537,10 @@ importers:
       '@woocommerce/explat': link:../../packages/js/explat
       '@woocommerce/internal-js-tests': link:../../packages/js/internal-js-tests
       '@woocommerce/internal-notices': link:../../packages/js/internal-notices
+      '@woocommerce/internal-style-build': link:../../packages/js/internal-style-build
       '@woocommerce/navigation': link:../../packages/js/navigation
       '@woocommerce/number': link:../../packages/js/number
       '@woocommerce/onboarding': link:../../packages/js/onboarding
-      '@woocommerce/style-build': link:../../packages/js/style-build
       '@woocommerce/tracks': link:../../packages/js/tracks
       '@wordpress/babel-preset-default': 6.6.1
       '@wordpress/browserslist-config': 4.1.2
@@ -10418,7 +10418,7 @@ packages:
     dev: true
 
   /@romainberger/css-diff/1.0.3:
-    resolution: {integrity: sha1-ztOHU11PQqQqwf4TwJ3pf1rhNEw=}
+    resolution: {integrity: sha512-zR2EvxtJvQXRxFtTnqazMsJADngyVIulzYQ+wVYWRC1Hw3e4gfEIbigX46wTsPUyjAI+lRXFrBSoCWcgZ6ZSlQ==}
     dependencies:
       lodash.merge: 4.6.2
       postcss: 5.2.18
@@ -16903,7 +16903,7 @@ packages:
     dev: true
 
   /alphanum-sort/1.0.2:
-    resolution: {integrity: sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=}
+    resolution: {integrity: sha512-0FcBfdcmaumGPQ0qPn7Q5qTgz/ooXgIyp1rf8ik5bGX8mpE2YHjC0P/eyQvxu1GURYQgq9ozf2mteQ5ZD9YiyQ==}
 
   /ansi-align/2.0.0:
     resolution: {integrity: sha1-w2rsy6VjuJzrVW82kPCx2eNUf38=}
@@ -18449,7 +18449,7 @@ packages:
     dev: true
 
   /boolbase/1.0.0:
-    resolution: {integrity: sha1-aN/1++YMUes3cl6p4+0xDcwed24=}
+    resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
   /boxen/1.3.0:
     resolution: {integrity: sha512-TNPjfTr432qx7yOjQyaXm3dSR0MH9vXp7eT1BFSl/C51g+EFnOR9hTg1IreahGBmDNCehscshe45f+C1TBZbLw==}
@@ -18824,19 +18824,19 @@ packages:
     dev: true
 
   /caller-callsite/2.0.0:
-    resolution: {integrity: sha1-hH4PzgoiN1CpoCfFSzNzGtMVQTQ=}
+    resolution: {integrity: sha512-JuG3qI4QOftFsZyOn1qq87fq5grLIyk1JYd5lJmdA+fG7aQ9pA/i3JIJGcO3q0MrRcHlOt1U+ZeHW8Dq9axALQ==}
     engines: {node: '>=4'}
     dependencies:
       callsites: 2.0.0
 
   /caller-path/2.0.0:
-    resolution: {integrity: sha1-Ro+DBE42mrIBD6xfBs7uFbsssfQ=}
+    resolution: {integrity: sha512-MCL3sf6nCSXOwCTzvPKhN18TU7AHTvdtam8DAogxcrJ8Rjfbbg7Lgng64H9Iy+vUV6VGFClN/TyxBkAebLRR4A==}
     engines: {node: '>=4'}
     dependencies:
       caller-callsite: 2.0.0
 
   /callsites/2.0.0:
-    resolution: {integrity: sha1-BuuE8A7qQT2oav/vrL/7Ngk7PFA=}
+    resolution: {integrity: sha512-ksWePWBloaWPxJYQ8TL0JHvtci6G5QTKwQ95RcWAa/lzoAKuAOflGdAK92hpHXjkwb8zLxoLNUoNYZgVsaJzvQ==}
     engines: {node: '>=4'}
 
   /callsites/3.1.0:
@@ -19529,7 +19529,7 @@ packages:
     dev: true
 
   /colors/0.6.2:
-    resolution: {integrity: sha1-JCP+ZnisDF2uiFLl0OW+CMmXq8w=}
+    resolution: {integrity: sha512-OsSVtHK8Ir8r3+Fxw/b4jS1ZLPXkV6ZxDRJQzeD7qo0SqMXWrHDM71DgYzPMHY8SFJ0Ao+nNU2p1MmwdzKqPrw==}
     engines: {node: '>=0.1.90'}
 
   /colors/1.0.3:
@@ -19565,7 +19565,7 @@ packages:
     dev: true
 
   /commander/2.1.0:
-    resolution: {integrity: sha1-0SG7roYNmZKj1Re6lvVliOR8Z4E=}
+    resolution: {integrity: sha512-J2wnb6TKniXNOtoHS8TSrG9IOQluPrsmyAJ8oCUJOBmv+uLBCyPYAZkD2jFvw2DCzIXNnISIM01NIvr35TkBMQ==}
     engines: {node: '>= 0.6.x'}
 
   /commander/2.20.3:
@@ -37328,7 +37328,7 @@ packages:
       uglify-js:
         optional: true
     dependencies:
-      jest-worker: 27.3.1
+      jest-worker: 27.5.1
       schema-utils: 3.1.1
       serialize-javascript: 6.0.0
       source-map: 0.6.1
@@ -37354,7 +37354,7 @@ packages:
       uglify-js:
         optional: true
     dependencies:
-      jest-worker: 27.3.1
+      jest-worker: 27.5.1
       schema-utils: 3.1.1
       serialize-javascript: 6.0.0
       source-map: 0.6.1

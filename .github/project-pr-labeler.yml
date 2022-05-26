@@ -55,9 +55,6 @@
 'package: @woocommerce/onboarding':
 - packages/js/onboarding/**/*
 
-'package: @woocommerce/style-build':
-- packages/js/style-build/**/*
-
 'package: @woocommerce/tracks':
 - packages/js/tracks/**/*
 

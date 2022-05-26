@@ -27,7 +27,7 @@
 		"@woocommerce/internal-notices": "packages/js/internal-notices",
 		"@woocommerce/number": "packages/js/number",
 		"@woocommerce/onboarding": "packages/js/onboarding",
-		"@woocommerce/style-build": "packages/js/style-build",
+		"@woocommerce/internal-style-build": "packages/js/internal-style-build",
 		"@woocommerce/tracks": "packages/js/tracks"
 	}
 }

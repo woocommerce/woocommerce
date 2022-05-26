@@ -152,7 +152,7 @@
 		"@woocommerce/internal-notices": "workspace:*",
 		"@woocommerce/number": "workspace:*",
 		"@woocommerce/onboarding": "workspace:*",
-		"@woocommerce/style-build": "workspace:*",
+		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/babel-preset-default": "^6.5.1",
 		"@wordpress/browserslist-config": "^4.1.1",
