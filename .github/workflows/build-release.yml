@@ -62,7 +62,7 @@ jobs:
           ref: refs/heads/trunk
           inputs: '{ "release_id": "${{ github.event.release.id }}" }'
   send-release-notification:
-    if: github.event.release.prerelease == false
+    if: github.event.release.prerelease == true
     name: Send Release Notification
     needs: build
     runs-on: ubuntu-20.04
