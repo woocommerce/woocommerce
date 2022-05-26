@@ -206,7 +206,7 @@ a.button {
 		}
 
 		&.button {
-			background: var( --wc-green );
+			background: #000000;
 		}
 	}
 }
@@ -226,17 +226,10 @@ a.button {
 
 .woocommerce-message {
 	border-color: var( --wc-blue );
-	a.button {
-		background: var( --wc-blue );
-	}
 }
 
 .woocommerce-error {
 	border-color: $highlights-color;
-
-	a.button {
-		background: $highlights-color;
-	}
 
 	> li {
 		margin: 0;
