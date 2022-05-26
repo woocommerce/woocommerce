@@ -21,7 +21,7 @@ class PluginFormatter extends Formatter implements FormatterPlugin {
 	 *
 	 * @var string
 	 */
-	public $epilogue = "---\n\n[See changelogs for previous versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).";
+	public $epilogue = "---\n\n[See changelogs for previous versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt). Test change";
 
 	/**
 	 * Entry pattern regex.
