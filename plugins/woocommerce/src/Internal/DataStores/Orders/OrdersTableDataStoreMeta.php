@@ -17,7 +17,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 *
 	 * @return string
 	 */
-    protected function get_table_name() {
+	protected function get_table_name() {
 		return OrdersTableDataStore::get_meta_table_name();
 	}
 

@@ -34,8 +34,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * Initialize the object.
 	 *
 	 * @internal
-	 * @param OrdersTableDataStoreMeta   $data_store_meta   Metadata instance.
-	 * @param DatabaseUtil               $database_util     The database util instance to use.
+	 * @param OrdersTableDataStoreMeta $data_store_meta Metadata instance.
+	 * @param DatabaseUtil             $database_util   The database util instance to use.
 	 * @return void
 	 */
 	final public function init( OrdersTableDataStoreMeta $data_store_meta, DatabaseUtil $database_util ) {
