@@ -107,15 +107,10 @@ export default class Analyzer extends Command {
 				patchContent,
 				pluginData[ 0 ],
 				flags.output,
-				areSchemasEqual( schemaDiff )
+				schemaDiff
 			);
 		} else {
-			this.scanChanges(
-				patchContent,
-				pluginData[ 0 ],
-				flags.output,
-				true
-			);
+			this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
 		}
 	}
 
@@ -202,7 +197,19 @@ export default class Analyzer extends Command {
 		content: string,
 		version: string,
 		output: string,
-		schemaEquality: boolean
+		schemaDiff: {
+			schema: { base: string; compare: string; areEqual: boolean };
+			OrdersTableDataStore: {
+				base: string;
+				compare: string;
+				areEqual: boolean;
+			};
+			ProductAttributesLookup: {
+				base: string;
+				compare: string;
+				areEqual: boolean;
+			};
+		} | void
 	): void {
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
@@ -227,7 +234,7 @@ export default class Analyzer extends Command {
 			this.log( 'No new hooks found' );
 		}
 
-		if ( ! schemaEquality ) {
+		if ( ! areSchemasEqual( schemaDiff ) ) {
 			printSchemaChange( version, output, ( s: string ): void =>
 				this.log( s )
 			);
