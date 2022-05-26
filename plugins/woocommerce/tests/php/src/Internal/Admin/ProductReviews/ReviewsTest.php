@@ -65,7 +65,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdoxx `load_reviews_screen` creates an instance of {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable}.
+	 * @testdox `load_reviews_screen` creates an instance of {@see \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable}.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_reviews_screen()
 	 *
