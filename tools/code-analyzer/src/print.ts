@@ -100,7 +100,12 @@ export const printHookResults = (
  */
 export const printSchemaChange = (
 	schemaDiff: {
-		[ key: string ]: { base: string; compare: string; areEqual: boolean };
+		[ key: string ]: {
+			description: string;
+			base: string;
+			compare: string;
+			areEqual: boolean;
+		};
 	} | void,
 	version: string,
 	output: string,
@@ -112,11 +117,14 @@ export const printSchemaChange = (
 	if ( output === 'github' ) {
 		// Add Github output here.
 	} else {
+		log( '\n## SCHEMA CHANGES' );
+		log( '---------------------------------------------------' );
+
 		Object.keys( schemaDiff ).forEach( ( key ) => {
 			if ( ! schemaDiff[ key ].areEqual ) {
-				log( '\n## SCHEMA CHANGES' );
-				log( '---------------------------------------------------' );
-				log( ` NOTICE | Schema changes detected in ${ version }` );
+				log(
+					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].description } as of ${ version }`
+				);
 				log( '---------------------------------------------------' );
 			}
 		} );

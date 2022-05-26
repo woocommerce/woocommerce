@@ -198,13 +198,8 @@ export default class Analyzer extends Command {
 		version: string,
 		output: string,
 		schemaDiff: {
-			schema: { base: string; compare: string; areEqual: boolean };
-			OrdersTableDataStore: {
-				base: string;
-				compare: string;
-				areEqual: boolean;
-			};
-			ProductAttributesLookup: {
+			[ key: string ]: {
+				description: string;
 				base: string;
 				compare: string;
 				areEqual: boolean;

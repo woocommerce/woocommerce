@@ -63,7 +63,12 @@ export const getHookName = ( name: string ): string => {
 
 export const areSchemasEqual = (
 	diff: {
-		[ key: string ]: { base: string; compare: string; areEqual: boolean };
+		[ key: string ]: {
+			description: string;
+			base: string;
+			compare: string;
+			areEqual: boolean;
+		};
 	} | void
 ): boolean => {
 	if ( ! diff ) {
