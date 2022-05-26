@@ -61,9 +61,14 @@ export const getHookName = ( name: string ): string => {
 	return name.replace( /(\'|\")/g, '' ).trim();
 };
 
-export const areSchemasEqual = ( diff: {
-	[ key: string ]: { base: string; compare: string; areEqual: boolean };
-} ): boolean => {
+export const areSchemasEqual = (
+	diff: {
+		[ key: string ]: { base: string; compare: string; areEqual: boolean };
+	} | void
+): boolean => {
+	if ( ! diff ) {
+		return false;
+	}
 	return ! Object.keys( diff ).some(
 		( d: string ) => diff[ d ].areEqual === false
 	);
