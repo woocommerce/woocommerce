@@ -10,6 +10,7 @@ import {
 	getNewPath,
 	addHistoryListener,
 	isWCAdmin,
+	navigateTo,
 } from '../index';
 
 global.window = Object.create( window );
@@ -283,5 +284,92 @@ describe( 'isWCAdmin', () => {
 		].forEach( ( url ) => {
 			expect( isWCAdmin( url ) ).toBe( false );
 		} );
+	} );
+} );
+
+describe( 'navigateTo', () => {
+	let oldLocation;
+
+	beforeAll( () => {
+		oldLocation = window.location;
+	} );
+
+	beforeEach( () => {
+		window.location = oldLocation;
+		jest.spyOn( getHistory(), 'push' );
+	} );
+
+	afterEach( () => {
+		getHistory().push.mockRestore();
+	} );
+
+	it( 'correctly redirects for absolute urls', () => {
+		delete window.location;
+		window.location = new URL( 'https://www.example.com' );
+
+		navigateTo( { url: 'http://www.google.com/' } );
+		expect( window.location.href ).toBe( 'http://www.google.com/' );
+	} );
+
+	it( 'correctly uses router when on wcadmin page', () => {
+		delete window.location;
+		window.location = new URL(
+			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		);
+
+		navigateTo( {
+			url: '/setup-wizard',
+		} );
+
+		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
+		expect( getHistory().push.mock.lastCall[ 0 ] ).toBe(
+			'admin.php?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
+
+	it( 'correctly redirects when not on wcadmin page', () => {
+		delete window.location;
+		window.location = new URL( 'http://localhost/wp-admin/order.php' );
+
+		navigateTo( {
+			url: '/setup-wizard',
+		} );
+
+		const resultUrl = new URL( window.location.href );
+
+		expect( getHistory().push ).not.toBeCalled();
+		expect( resultUrl.search ).toBe(
+			'?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
+
+	it( 'correctly utilizes path when provided on wcadmin page', () => {
+		delete window.location;
+		window.location = new URL(
+			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		);
+
+		navigateTo( {
+			path: getNewPath( { task: 'testtask' }, '/', {} ),
+		} );
+
+		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
+		expect( getHistory().push.mock.lastCall[ 0 ] ).toBe(
+			'admin.php?page=wc-admin&task=testtask'
+		);
+	} );
+
+	it( 'correctly utilizes path when provided not on wcadmin page', () => {
+		delete window.location;
+		window.location = new URL( 'http://localhost/wp-admin/order.php' );
+
+		navigateTo( {
+			path: getNewPath( { task: 'testtask' }, '/', {} ),
+		} );
+
+		const resultUrl = new URL( window.location.href );
+
+		expect( getHistory().push ).not.toBeCalled();
+		expect( resultUrl.search ).toBe( '?page=wc-admin&task=testtask' );
 	} );
 } );
