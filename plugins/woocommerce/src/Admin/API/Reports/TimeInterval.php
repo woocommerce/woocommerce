@@ -680,7 +680,7 @@ class TimeInterval {
 				case $current_month >= 10 && $current_month <= 12:
 					return array(
 						'start' => $current_year . '-07-01 00:00:00',
-						'end'   => $current_year . '-10-31 23:59:59',
+						'end'   => $current_year . '-09-31 23:59:59',
 					);
 			}
 		}
