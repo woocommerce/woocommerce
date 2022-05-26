@@ -74,7 +74,7 @@ jobs:
                   always() &&
                   (
                     steps.run_api_tests.conclusion != 'cancelled' ||
-                    steps.run_api_tests.conclusion != 'skipped' ||
+                    steps.run_api_tests.conclusion != 'skipped'
                   )
               uses: actions/upload-artifact@v2
               with:
