@@ -69,6 +69,8 @@ jobs:
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  # Temporarily make verbose
+                  VERBOSE: true
               run: pnpm exec wc-api-tests test hello
                   
             - name: Archive API test report
