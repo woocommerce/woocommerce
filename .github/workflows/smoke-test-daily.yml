@@ -38,8 +38,6 @@ jobs:
               run: npm install -g jest
 
             - name: Run E2E smoke test.
-              # Temporarily disable running jest e2e tests for testing
-              if: ${{ false }}
               working-directory: plugins/woocommerce
               env:
                   SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -58,7 +56,8 @@ jobs:
               run: |
                   pnpm exec wc-e2e docker:up
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
-                  pnpm exec wc-e2e test:e2e
+                  # Temporarily disable running all e2e tests after WC upgrade
+                  # pnpm exec wc-e2e test:e2e
 
             - name: Run API smoke tests
               if: always()
