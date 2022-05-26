@@ -46,9 +46,6 @@
 'package: @woocommerce/explat':
 - packages/js/explat/**/*
 
-'package: @woocommerce/js-tests':
-- packages/js/js-tests/**/*
-
 'package: @woocommerce/navigation':
 - packages/js/navigation/**/*
 

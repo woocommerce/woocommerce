@@ -22,7 +22,7 @@
 		"@woocommerce/eslint-plugin": "packages/js/eslint-plugin",
 		"@woocommerce/experimental": "packages/js/experimental",
 		"@woocommerce/explat": "packages/js/explat",
-		"@woocommerce/js-tests": "packages/js/js-tests",
+		"@woocommerce/internal-js-tests": "packages/js/internal-js-tests",
 		"@woocommerce/navigation": "packages/js/navigation",
 		"@woocommerce/notices": "packages/js/notices",
 		"@woocommerce/number": "packages/js/number",
