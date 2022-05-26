@@ -85,6 +85,13 @@ export const generatePatch = (
 	return content;
 };
 
+/**
+ * Get all schema strings found in WooCommerce.
+ *
+ * @param {string}   branch branch being compared.
+ * @param {Function} error  Error logging function.
+ * @return {Object}	Object of schema strings.
+ */
 export const getSchema = (
 	branch: string,
 	error: ( s: string ) => void
@@ -105,7 +112,7 @@ export const getSchema = (
 
 		const getSchemaPath =
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
-		// Get the schema from wp cli
+		// Get the WooCommerce schema from wp cli
 		const schema = execSync(
 			`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
 			{
@@ -113,7 +120,7 @@ export const getSchema = (
 				encoding: 'utf-8',
 			}
 		);
-
+		// Get the OrdersTableDataStore schema.
 		const OrdersTableDataStore = execSync(
 			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
 			{
@@ -121,6 +128,7 @@ export const getSchema = (
 				encoding: 'utf-8',
 			}
 		);
+		// Get the ProductAttributesLookup schema.
 		const ProductAttributesLookup = execSync(
 			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator)->get_table_creation_sql();\'"',
 			{
@@ -149,7 +157,7 @@ export const getSchema = (
  * @param {string}   compare Branch/commit hash to compare against the base.
  * @param {string}   base    Base branch/commit hash.
  * @param {Function} error   error print method.
- * @return {Object|void>} diff object.
+ * @return {Object|void}     diff object.
  */
 export const generateSchemaDiff = (
 	source: string,
