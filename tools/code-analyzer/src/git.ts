@@ -88,7 +88,11 @@ export const generatePatch = (
 export const getSchema = (
 	branch: string,
 	error: ( s: string ) => void
-): Array< string > => {
+): {
+	schema: string;
+	OrdersTableDataStore: string;
+	ProductAttributesLookup: string;
+} | void => {
 	try {
 		// Make sure the branch is available.
 		fetchBranch( branch, error );
@@ -110,14 +114,14 @@ export const getSchema = (
 			}
 		);
 
-		const ordersSchema = execSync(
+		const OrdersTableDataStore = execSync(
 			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
 			{
 				cwd: 'plugins/woocommerce',
 				encoding: 'utf-8',
 			}
 		);
-		const productAttributesSchema = execSync(
+		const ProductAttributesLookup = execSync(
 			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator)->get_table_creation_sql();\'"',
 			{
 				cwd: 'plugins/woocommerce',
@@ -128,10 +132,13 @@ export const getSchema = (
 		execSync( `git checkout ${ currentBranch }` );
 
 		CliUx.ux.action.stop();
-		return [ schema, ordersSchema, productAttributesSchema ];
+		return {
+			schema,
+			OrdersTableDataStore,
+			ProductAttributesLookup,
+		};
 	} catch ( e ) {
 		error( `Unable to get schema for branch ${ branch }. \n${ e }` );
-		return [];
 	}
 };
 
@@ -142,15 +149,46 @@ export const getSchema = (
  * @param {string}   compare Branch/commit hash to compare against the base.
  * @param {string}   base    Base branch/commit hash.
  * @param {Function} error   error print method.
- * @return {Array<string|undefined>} patch string.
+ * @return {Object|void>} diff object.
  */
 export const generateSchemaDiff = (
 	source: string,
 	compare: string,
 	base: string,
 	error: ( s: string ) => void
-): Array< Array< string > > => {
+): {
+	schema: { base: string; compare: string; areEqual: boolean };
+	OrdersTableDataStore: { base: string; compare: string; areEqual: boolean };
+	ProductAttributesLookup: {
+		base: string;
+		compare: string;
+		areEqual: boolean;
+	};
+} | void => {
 	const baseSchema = getSchema( base, error );
 	const compareSchema = getSchema( compare, error );
-	return [ baseSchema, compareSchema ];
+	if ( ! baseSchema || ! compareSchema ) {
+		return;
+	}
+	return {
+		schema: {
+			base: baseSchema.schema,
+			compare: compareSchema.schema,
+			areEqual: baseSchema.schema === compareSchema.schema,
+		},
+		OrdersTableDataStore: {
+			base: baseSchema.OrdersTableDataStore,
+			compare: compareSchema.OrdersTableDataStore,
+			areEqual:
+				baseSchema.OrdersTableDataStore ===
+				compareSchema.OrdersTableDataStore,
+		},
+		ProductAttributesLookup: {
+			base: baseSchema.ProductAttributesLookup,
+			compare: compareSchema.ProductAttributesLookup,
+			areEqual:
+				baseSchema.ProductAttributesLookup ===
+				compareSchema.ProductAttributesLookup,
+		},
+	};
 };
