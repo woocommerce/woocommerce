@@ -4,6 +4,11 @@
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
+ * Internal dependencies
+ */
+import { waitUntilElementIsPresent } from './utils';
+
+/**
  * Get the product data.
  *
  * @return object
@@ -196,6 +201,28 @@ export const initProductScreenTracks = () => {
 
 	// Product tags
 
+	function deleteTagEventListener( event: Event ) {
+		recordEvent( 'product_tags_delete', {
+			page: 'product',
+			tag_list_size:
+				document.querySelector( '.tagchecklist' )?.children.length || 0,
+		} );
+	}
+
+	function addTagsDeleteTracks() {
+		const tagsDeleteButtons = document.querySelectorAll(
+			'#product_tag .ntdelbutton'
+		);
+		tagsDeleteButtons.forEach( ( button ) => {
+			button.removeEventListener( 'click', deleteTagEventListener );
+			button.addEventListener( 'click', deleteTagEventListener );
+		} );
+	}
+	waitUntilElementIsPresent(
+		'#product_tag .tagchecklist',
+		addTagsDeleteTracks
+	);
+
 	document
 		.querySelector( '.tagadd' )
 		?.addEventListener( 'click', ( event ) => {
@@ -211,6 +238,9 @@ export const initProductScreenTracks = () => {
 							.length || 0 ) + 1,
 					most_used: false,
 				} );
+				setTimeout( () => {
+					addTagsDeleteTracks();
+				}, 500 );
 			}
 		} );
 
@@ -220,10 +250,10 @@ export const initProductScreenTracks = () => {
 			tag_string_length: ( event.target as HTMLAnchorElement ).textContent
 				?.length,
 			tag_list_size:
-				( document.querySelector( '.tagchecklist' )?.children.length ||
-					0 ) + 1,
+				document.querySelector( '.tagchecklist' )?.children.length || 0,
 			most_used: true,
 		} );
+		addTagsDeleteTracks();
 	}
 
 	function addMostUsedTagsTracks() {
@@ -236,26 +266,13 @@ export const initProductScreenTracks = () => {
 		} );
 	}
 
-	function waitUntilMostUsedTagsIsPresent( func: () => void, tries = 0 ) {
-		if ( tries > 6 ) {
-			return;
-		}
-		setTimeout( () => {
-			const tagCloudContainer = document.querySelector(
-				'#tagcloud-product_tag'
-			);
-			if ( tagCloudContainer ) {
-				func();
-			} else {
-				waitUntilMostUsedTagsIsPresent( func, ++tries );
-			}
-		}, 500 );
-	}
-
 	document
 		.querySelector( '.tagcloud-link' )
 		?.addEventListener( 'click', () => {
-			waitUntilMostUsedTagsIsPresent( addMostUsedTagsTracks );
+			waitUntilElementIsPresent(
+				'#tagcloud-product_tag',
+				addMostUsedTagsTracks
+			);
 		} );
 
 	// Attribute tracks.
