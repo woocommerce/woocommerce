@@ -213,11 +213,14 @@ jobs:
         needs: [login-run, build, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+            API_ARTIFACT: ${{ needs.login-run.outputs.api_artifact }}
+            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
         steps:
             - name: Publish API test report
               run: |
                   gh workflow run publish-test-reports-daily.yml \
-                    -f run_id=${{ github.run_id }} \
-                    -f api_artifact=${{ needs.login-run.outputs.api_artifact }} \
-                    -f commit_message=${{ needs.login-run.outputs.commit_message }} \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT
+                    -f commit_message=$COMMIT_MESSAGE \
                     --repo woocommerce/woocommerce-test-reports
