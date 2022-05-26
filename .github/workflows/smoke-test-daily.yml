@@ -50,7 +50,6 @@ jobs:
                   E2E_RETEST: 1
                   E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
-                  TEST_RELEASE: 1
                   UPDATE_WC: 1
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
