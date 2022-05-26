@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/e2e-builds",
+	"name": "@woocommerce/internal-e2e-builds",
 	"version": "0.1.0",
 	"description": "Utility build files for e2e packages",
 	"private": true,
