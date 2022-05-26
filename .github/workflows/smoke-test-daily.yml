@@ -5,10 +5,8 @@ on:
     workflow_dispatch:
     # Temporarily add push trigger. Remove before submitting for review.
     push:
-      branches: 
-        - 'e2e/rep-daily-slack'
-env:
-  API_TEST_REPORT_ARTIFACT_NAME: api-test-report---daily
+        branches:
+            - 'e2e/rep-daily-slack'
 
 jobs:
     login-run:
@@ -16,6 +14,9 @@ jobs:
         runs-on: ubuntu-20.04
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
+        outputs:
+            commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
+            api_artifact: ${{ steps.set_artifact.outputs.api_artifact }}
         steps:
             - uses: actions/checkout@v3
               with:
@@ -23,19 +24,25 @@ jobs:
 
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: smoke-test-daily
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: smoke-test-daily
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
 
             - name: Install Jest
               run: npm install -g jest
+
+            - name: Get latest commit message
+              id: get_commit_message
+              run: |
+                  COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+                  echo "::set-output name=commit_message::$COMMIT_MESSAGE"
 
             - name: Run E2E smoke test.
               working-directory: plugins/woocommerce
@@ -68,7 +75,11 @@ jobs:
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: pnpm exec wc-api-tests test api
-                  
+
+            - name: Set artifact name as job output
+              id: set_artifact
+              run: echo "::set-output name=api_artifact::api-test-report---daily"
+
             - name: Archive API test report
               if: |
                   always() &&
@@ -76,13 +87,13 @@ jobs:
                     steps.run_api_tests.conclusion != 'cancelled' ||
                     steps.run_api_tests.conclusion != 'skipped'
                   )
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.API_TEST_REPORT_ARTIFACT_NAME }}
+                  name: ${{ steps.set_artifact.outputs.api_artifact }}
                   path: |
                       ${{ env.API_TEST_REPORT_DIR }}/allure-results
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
-                  retention-days: 7                    
+                  retention-days: 5
 
     build:
         # Temporarily disable this job for testing
@@ -90,33 +101,33 @@ jobs:
         name: Build zip for PR
         runs-on: ubuntu-20.04
         steps:
-          - uses: actions/checkout@v3
+            - uses: actions/checkout@v3
 
-          - uses: ./.github/actions/cache-deps
-            with:
-              workflow_name: smoke-test-daily
-              workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+            - uses: ./.github/actions/cache-deps
+              with:
+                  workflow_name: smoke-test-daily
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-          - name: Install PNPM
-            run: npm install -g pnpm@^6.24.2
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
 
-          - name: Setup PHP
-            uses: shivammathur/setup-php@v2
-            with:
-              php-version: '7.4'
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.4'
 
-          - name: Build zip
-            working-directory: plugins/woocommerce
-            run: bash bin/build-zip.sh
+            - name: Build zip
+              working-directory: plugins/woocommerce
+              run: bash bin/build-zip.sh
 
-          - name: Upload the zip file as an artifact
-            uses: actions/upload-artifact@v3
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              name: woocommerce
-              path: plugins/woocommerce/woocommerce.zip
-              retention-days: 7
+            - name: Upload the zip file as an artifact
+              uses: actions/upload-artifact@v3
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  name: woocommerce
+                  path: plugins/woocommerce/woocommerce.zip
+                  retention-days: 7
 
     test-plugins:
         # Temporarily disable this job for testing
@@ -153,18 +164,18 @@ jobs:
 
             - uses: ./package/woocommerce/.github/actions/cache-deps
               with:
-                workflow_name: smoke-test-daily
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: smoke-test-daily
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./package/woocommerce/.github/actions/install-build
               with:
-                working_directory: package/woocommerce
+                  working_directory: package/woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
@@ -175,8 +186,8 @@ jobs:
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp
               run: |
-                unzip woocommerce.zip -d .
-                rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
+                  unzip woocommerce.zip -d .
+                  rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce
@@ -202,13 +213,11 @@ jobs:
         needs: [login-run, build, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-            RUN_ID: ${{ github.run_id }}
         steps:
             - name: Publish API test report
               run: |
-                  gh workflow run publish-report.yml \
-                    -f test_workflow=daily \
-                    -f test_type=api \
-                    -f run_id=$RUN_ID \
-                    -f artifact_name=$API_TEST_REPORT_ARTIFACT_NAME \
+                  gh workflow run publish-test-reports-daily.yml \
+                    -f run_id=${{ github.run_id }} \
+                    -f api_artifact=${{ needs.login-run.outputs.api_artifact }} \
+                    -f commit_message=${{ needs.login-run.outputs.commit_message }} \
                     --repo woocommerce/woocommerce-test-reports
