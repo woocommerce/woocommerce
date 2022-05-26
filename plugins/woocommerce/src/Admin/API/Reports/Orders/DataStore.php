@@ -562,21 +562,36 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Get total sales for a given number of days.
+	 * Get total sales for a given timeframe.
 	 *
-	 * @param int $days Number of days.
+	 * @param int $start_date Start date.
+	 * @param int $end_date End date.
 	 * @return float
 	 */
-	public function get_total_sales( $days ) {
+	public function get_total_sales( $start_date = null, $end_date = null ) {
 		global $wpdb;
 
-		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-		$table_name = self::get_db_table_name();
-		$amount     = $wpdb->get_col(
-			"SELECT SUM( total_sales ) FROM {$table_name} WHERE date_created >= DATE_SUB( NOW(), INTERVAL ${days} DAY )"
-		);
+		$table_name    = self::get_db_table_name();
+		$where_clauses = array();
+
+		if ( $start_date ) {
+			$where_clauses[] = $wpdb->prepare( 'date_created >= %s', $start_date );
+		}
+
+		if ( $end_date ) {
+			$where_clauses[] = $wpdb->prepare( 'date_created <= %s', $end_date );
+		}
+
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared */
+		$query = "SELECT SUM( total_sales ) FROM {$table_name}";
+
+		if ( ! empty( $where_clauses ) ) {
+			$query .= ' WHERE ' . implode( ' AND ', $where_clauses );
+		}
+
+		$amount     = $wpdb->get_col( $query );
 		/* phpcs:enable */
 
-		return $amount;
+		return $amount[0] ? $amount[0] : 0;
 	}
 }
