@@ -1020,7 +1020,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
-  key_id BIGINT UNSIGNED NOT NULL auto_increment,
+  key_id BIGINT UNSIGNED NOT NULL auto_increment BIG CHANGE,
   user_id BIGINT UNSIGNED NOT NULL,
   description varchar(200) NULL,
   permissions varchar(10) NOT NULL,
