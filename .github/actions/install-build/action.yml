@@ -20,11 +20,15 @@ runs:
       run: pnpm install
 
     - name: Install Composer dependencies
+      # Temporarily disable this step for testing
+      if: ${{ false }}    
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: pnpm nx composer-install-no-dev woocommerce
 
     - name: Run build
+      # Temporarily disable this step for testing
+      if: ${{ false }}       
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: pnpm nx build woocommerce
