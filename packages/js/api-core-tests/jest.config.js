@@ -8,6 +8,14 @@ const {
 const verboseOutput = VERBOSE === 'true';
 const { defaults } = require( 'jest-config' );
 
+/**
+ * Override the default timeout, if specified.
+ * Useful when running API tests against an externally hosted test site.
+ */
+const testTimeoutOverride = DEFAULT_TIMEOUT_OVERRIDE
+	? Number( DEFAULT_TIMEOUT_OVERRIDE )
+	: defaults.testTimeout;
+
 // Update the API path if the `USE_INDEX_PERMALINKS` flag is set
 const useIndexPermalinks = USE_INDEX_PERMALINKS === 'true';
 let apiPath = `${ BASE_URL }/?rest_route=/wc/v3/`;
@@ -45,9 +53,5 @@ module.exports = {
 	 */
 	testRunner: 'jasmine2',
 
-	/**
-	 * Allow the default timeout to be overridden using the DEFAULT_TIMEOUT_OVERRIDE environment variable.
-	 * Useful when running API tests against an externally hosted test site.
-	 */
-	testTimeout: DEFAULT_TIMEOUT_OVERRIDE ?? defaults.testTimeout,
+	testTimeout: testTimeoutOverride,
 };
