@@ -330,16 +330,22 @@ class TimeInterval {
 	public static function next_week_start( $datetime, $reversed = false ) {
 		$seven_days = new \DateInterval( 'P7D' );
 		// Default timezone set in wp-settings.php.
-		$default_timezone = new \DateTimeZone( date_default_timezone_get() );
+		$default_timezone = date_default_timezone_get();
 		// Timezone that the WP site uses in Settings > General.
-		$timezone   = $datetime->getTimezone();
-		$start_end_timestamp  = get_weekstartend( $datetime->setTimezone( $default_timezone )->format( 'Y-m-d' ) );
-
+		$original_timezone = $datetime->getTimezone();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		$start_end_timestamp  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
+		date_default_timezone_set( $default_timezone );
+		// @codingStandardsIgnoreEnd
 		if ( $reversed ) {
-			return \DateTime::createFromFormat( 'U', $start_end_timestamp['end'] )->sub( $seven_days )->setTimezone( $timezone );
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['end'] )->sub( $seven_days );
+		} else {
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['start'] )->add( $seven_days );
 		}
-		return \DateTime::createFromFormat( 'U', $start_end_timestamp['start'] )->add( $seven_days )->setTimezone( $timezone );
+		return \DateTime::createFromFormat( 'Y-m-d H:i:s', $result->format( 'Y-m-d H:i:s' ), $original_timezone );
 	}
+
 
 	/**
 	 * Returns a new DateTime object representing the next month start, or previous month end if reversed.
