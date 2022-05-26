@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/notices",
+	"name": "@woocommerce/internal-notices",
 	"version": "4.0.1",
 	"description": "State management for notices.",
 	"author": "The WordPress Contributors",
@@ -9,14 +9,14 @@
 		"gutenberg",
 		"notices"
 	],
-	"homepage": "https://github.com/WordPress/gutenberg/tree/master/packages/notices/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-notices/README.md",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/WordPress/gutenberg.git",
-		"directory": "packages/notices"
+		"url": "https://github.com/woocommerce/woocommerge.git",
+		"directory": "packages/js/internal-notices"
 	},
 	"bugs": {
-		"url": "https://github.com/WordPress/gutenberg/issues"
+		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
@@ -37,7 +37,6 @@
 	},
 	"private": true,
 	"scripts": {
-		"postinstall": "composer install",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",

@@ -49,9 +49,6 @@
 'package: @woocommerce/navigation':
 - packages/js/navigation/**/*
 
-'package: @woocommerce/notices':
-- packages/js/notices/**/*
-
 'package: @woocommerce/number':
 - packages/js/number/**/*
 
