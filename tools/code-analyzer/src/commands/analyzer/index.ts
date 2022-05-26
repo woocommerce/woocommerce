@@ -235,8 +235,11 @@ export default class Analyzer extends Command {
 		}
 
 		if ( ! areSchemasEqual( schemaDiff ) ) {
-			printSchemaChange( version, output, ( s: string ): void =>
-				this.log( s )
+			printSchemaChange(
+				schemaDiff,
+				version,
+				output,
+				( s: string ): void => this.log( s )
 			);
 		} else {
 			this.log( 'No new schema changes found' );
