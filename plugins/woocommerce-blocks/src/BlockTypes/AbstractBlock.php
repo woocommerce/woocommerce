@@ -180,7 +180,7 @@ abstract class AbstractBlock {
 	protected function get_chunks_paths( $chunks_folder ) {
 		$build_path = \Automattic\WooCommerce\Blocks\Package::get_path() . 'build/';
 		$blocks     = [];
-		if ( ! is_dir( $build_path ) ) {
+		if ( ! is_dir( $build_path . $chunks_folder ) ) {
 			return [];
 		}
 		foreach ( new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $build_path . $chunks_folder ) ) as $block_name ) {
