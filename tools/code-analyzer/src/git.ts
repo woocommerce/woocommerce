@@ -5,7 +5,7 @@ import { CliUx } from '@oclif/core';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync } from 'fs';
 
 /**
  * Fetch branches from origin.
