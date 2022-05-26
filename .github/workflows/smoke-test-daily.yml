@@ -67,7 +67,7 @@ jobs:
                   BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
-              run: pnpm exec wc-api-tests test api
+              run: pnpm exec wc-api-tests test hello
                   
             - name: Archive API test report
               if: |
