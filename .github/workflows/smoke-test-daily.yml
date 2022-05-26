@@ -3,6 +3,10 @@ on:
     schedule:
         - cron: '25 3 * * *'
     workflow_dispatch:
+    # Temporarily add push trigger. Remove before submitting for review.
+    push:
+      branches: 
+        - 'e2e/rep-daily-slack'
 env:
   API_TEST_REPORT_ARTIFACT_NAME: api-test-report---daily
 
