@@ -753,6 +753,28 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests when users manually set timezone by date_default_timezone_set in wp-settings.php.
+	 * Since we're using get_weekstartend, next_week_start should preemptively set
+	 * the date object with the default timezone.
+	 */
+	public function test_next_week_start_timezone_loop() {
+		$original_timezone = date_default_timezone_get();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'Europe/Berlin' );
+		$start_datetime = new \DateTime( '01-05-2022 00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$end_datetime = new \DateTime( '26-05-2022 00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$week_count = 0;
+		do {
+			$start_datetime = TimeInterval::next_week_start( $start_datetime, false );
+			$week_count++;
+		} while ( $start_datetime <= $end_datetime && $week_count < 10 );
+		date_default_timezone_set( $original_timezone );
+		// @codingStandardsIgnoreEnd
+		// Value more than 5 should mean that loop would've never terminated.
+		$this->assertEquals( 5, $week_count );
+	}
+
+	/**
 	 * Test function that returns beginning of next week or previous week end if reversed, for weeks starting on Sunday.
 	 */
 	public function test_next_week_start_Sunday_based_week() {
