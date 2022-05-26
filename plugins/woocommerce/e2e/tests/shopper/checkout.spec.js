@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe.only( 'Checkout page', () => {
+test.describe( 'Checkout page', () => {
 	const singleProductPrice = '9.99';
 	const simpleProductName = 'Checkout Page Product';
 	const twoProductPrice = ( singleProductPrice * 2 ).toString();
