@@ -1053,26 +1053,24 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 	}
 
 	if ( ! headers_sent() ) {
+		$options = apply_filters(
+			'woocommerce_set_cookie_options',
+			array(
+				'expires' => $expire,
+				'secure' => $secure,
+				'path' => COOKIEPATH ? COOKIEPATH : '/',
+				'domain' => COOKIE_DOMAIN,
+				'httponly' => apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ),
+			),
+			$name,
+			$value
+		);
 		if ( version_compare( PHP_VERSION, '7.3.0', '>=' ) ) {
-			setcookie(
-				$name,
-				$value,
-				apply_filters(
-					'woocommerce_set_cookie_options',
-					array(
-						'expires' => $expire,
-						'secure' => $secure,
-						'path' => COOKIEPATH ? COOKIEPATH : '/',
-						COOKIE_DOMAIN,
-						'httponly' => apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ),
-					),
-					$name,
-					$value
-				)
-			);
+			setcookie( $name, $value, $options );
 		} else {
-			setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
-		}	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
+			setcookie( $name, $value, $options['expires'], $options['path'], $options['domain'], $options['secure'], $options['httponly'] );
+		}
+	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 	}
