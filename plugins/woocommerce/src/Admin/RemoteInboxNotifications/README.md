@@ -410,18 +410,20 @@ actioned.
 ```
 
 ### Total Payments Value
-This passes when the total value of all payments for a given number of days
+This passes when the total value of all payments for a given timeframe
 compared to the provided value pass the operation test.
+
+`timeframe` can be one of `last_week`, `last_month`, `last_quarter`, `last_6_months`, `last_year`
 
 ```
 {
 	"type": "total_payments_value",
-	"days": "30",
+	"days": "last_month",
 	"value": "actioned",
 	"operation": ">"
 }
 ```
-`days`, `value`, and `operation` are all required.
+`timeframe`, `value`, and `operation` are all required.
 
 ### Option
 This passes when the option value matches the value using the operation.

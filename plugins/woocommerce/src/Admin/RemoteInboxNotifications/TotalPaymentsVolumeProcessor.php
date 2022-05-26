@@ -22,7 +22,7 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$value = Orders::get_total_sales( $rule->days );
+		$value = Orders::get_total_sales( $rule->timeframe );
 
 		return ComparisonOperation::compare(
 			$value,
@@ -39,7 +39,15 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool Pass/fail.
 	 */
 	public function validate( $rule ) {
-		if ( ! isset( $rule->days ) ) {
+		$allowed_timeframes = array(
+			'last_week',
+			'last_month',
+			'last_quarter',
+			'last_6_months',
+			'last_year',
+		);
+
+		if ( ! isset( $rule->timeframe ) || ! in_array( $rule->timeframe, $allowed_timeframes, true ) ) {
 			return false;
 		}
 
