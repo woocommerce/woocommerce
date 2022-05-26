@@ -157,9 +157,8 @@ export const generateSchemaDiff = (
 	base: string,
 	error: ( s: string ) => void
 ): {
-	schema: { base: string; compare: string; areEqual: boolean };
-	OrdersTableDataStore: { base: string; compare: string; areEqual: boolean };
-	ProductAttributesLookup: {
+	[ key: string ]: {
+		description: string;
 		base: string;
 		compare: string;
 		areEqual: boolean;
@@ -172,11 +171,13 @@ export const generateSchemaDiff = (
 	}
 	return {
 		schema: {
+			description: 'WooCommerce Base Schema',
 			base: baseSchema.schema,
 			compare: compareSchema.schema,
 			areEqual: baseSchema.schema === compareSchema.schema,
 		},
 		OrdersTableDataStore: {
+			description: 'OrdersTableDataStore Schema',
 			base: baseSchema.OrdersTableDataStore,
 			compare: compareSchema.OrdersTableDataStore,
 			areEqual:
@@ -184,6 +185,7 @@ export const generateSchemaDiff = (
 				compareSchema.OrdersTableDataStore,
 		},
 		ProductAttributesLookup: {
+			description: 'ProductAttributesLookup Schema',
 			base: baseSchema.ProductAttributesLookup,
 			compare: compareSchema.ProductAttributesLookup,
 			areEqual:
