@@ -592,6 +592,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$amount     = $wpdb->get_col( $query );
 		/* phpcs:enable */
 
-		return $amount[0] ? $amount[0] : 0;
+		return isset( $amount[0] ) && $amount[0] ? $amount[0] : 0;
 	}
 }
