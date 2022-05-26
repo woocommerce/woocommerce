@@ -85,6 +85,8 @@ jobs:
                   retention-days: 7                    
 
     build:
+        # Temporarily disable this job for testing
+        if: ${{ false }}
         name: Build zip for PR
         runs-on: ubuntu-20.04
         steps:
@@ -117,6 +119,8 @@ jobs:
               retention-days: 7
 
     test-plugins:
+        # Temporarily disable this job for testing
+        if: ${{ false }}
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
         needs: [build]
