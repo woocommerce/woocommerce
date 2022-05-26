@@ -3,7 +3,7 @@
  */
 import { recordEvent } from '@woocommerce/tracks';
 
-const addNewAttribute = document.querySelector( '#addtag #submit' );
+const addNewTag = document.querySelector( '#addtag #submit' );
 
 function actionButtonEventHandler( event ) {
 	const actionClass = event.target.parentElement.classList[ 0 ];
@@ -33,7 +33,7 @@ function addActionButtonListeners() {
 }
 addActionButtonListeners();
 
-addNewAttribute?.addEventListener( 'click', function () {
+addNewTag?.addEventListener( 'click', function () {
 	const archiveInput = document.querySelector( '#attribute_public' );
 	const sortOrder = document.querySelector( '#attribute_orderby' );
 	recordEvent( 'product_tags_add', {
