@@ -109,16 +109,16 @@ export const getSchema = (
 				encoding: 'utf-8',
 			}
 		);
+
 		const ordersSchema = execSync(
-			`wp-env run cli "wp eval 'echo (new Automattic/\WooCommerce/\Internal/\DataStores/\Orders/\OrdersTableDataStore)->get_database_schema();'"`,
+			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
 			{
 				cwd: 'plugins/woocommerce',
 				encoding: 'utf-8',
 			}
 		);
-
 		const productAttributesSchema = execSync(
-			`wp-env run cli "wp eval 'echo (new Automattic/\WooCommerce/\Internal/\ProductAttributesLookup/\DataRegenerator)->get_table_creation_sql();'"`,
+			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator)->get_table_creation_sql();\'"',
 			{
 				cwd: 'plugins/woocommerce',
 				encoding: 'utf-8',
