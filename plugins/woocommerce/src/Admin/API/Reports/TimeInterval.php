@@ -230,17 +230,14 @@ class TimeInterval {
 
 				return (int) floor( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS ) + 1 + $addendum;
 			case 'day':
-				$end_timestamp      = (int) $end_datetime->format( 'U' );
-				$start_timestamp    = (int) $start_datetime->format( 'U' );
-				$addendum           = 0;
+				$days               = $start_datetime->diff( $end_datetime )->format( '%r%a' );
 				$end_hour_min_sec   = (int) $end_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $end_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $end_datetime->format( 's' );
 				$start_hour_min_sec = (int) $start_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $start_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $start_datetime->format( 's' );
 				if ( $end_hour_min_sec < $start_hour_min_sec ) {
-					$addendum = 1;
+					$days++;
 				}
-				$diff_timestamp = $end_timestamp - $start_timestamp;
 
-				return (int) floor( ( (int) $diff_timestamp ) / DAY_IN_SECONDS ) + 1 + $addendum;
+				return $days + 1;
 			case 'week':
 				// @todo Optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
 				$week_count = 0;

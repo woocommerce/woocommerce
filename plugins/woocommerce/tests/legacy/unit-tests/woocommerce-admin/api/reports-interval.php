@@ -612,13 +612,29 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 					'year'    => 4,
 				),
 			),
+			// Test change of DST times.
+			array(
+				'start'      => '2021-10-01T00:00:00',
+				'end'        => '2021-10-31T23:59:59',
+				'week_start' => 1,
+				'timezone'   => 'EST',
+				'intervals'  => array(
+					'hour'    => 31 * 24,
+					'day'     => 31,
+					'week'    => 6,
+					'month'   => 1,
+					'quarter' => 1,
+					'year'    => 1,
+				),
+			),
 		);
 
 		foreach ( $test_settings as $setting ) {
 			update_option( 'start_of_week', $setting['week_start'] );
 			foreach ( $setting['intervals'] as $interval => $exp_value ) {
-				$start_datetime = new DateTime( $setting['start'], self::$local_tz );
-				$end_datetime   = new DateTime( $setting['end'], self::$local_tz );
+				$timezone       = isset( $setting['timezone'] ) ? new DateTimeZone( $setting['timezone'] ) : self::$local_tz;
+				$start_datetime = new DateTime( $setting['start'], $timezone );
+				$end_datetime   = new DateTime( $setting['end'], $timezone );
 				$this->assertEquals( $exp_value, TimeInterval::intervals_between( $start_datetime, $end_datetime, $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
 			}
 		}
