@@ -639,7 +639,7 @@ class TimeInterval {
 	 * @param DateTime|null $current_date DateTime of current date to compare.
 	 * @return array
 	 */
-	public function get_timeframe_dates( $timeframe, $current_date = null ) {
+	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
 		if ( ! $current_date ) {
 			$current_date = new \DateTime();
 		}

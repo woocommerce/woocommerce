@@ -7,7 +7,8 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as Orders;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Rule processor that passes when a store's payments volume exceeds a provided amount.
@@ -22,7 +23,9 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$value = Orders::get_total_sales( $rule->timeframe );
+		$dates      = TimeInterval::get_timeframe_dates( $rule->timeframe );
+		$data_store = new OrdersDataStore();
+		$value      = $data_store->get_total_sales( $dates['start'], $dates['end'] );
 
 		return ComparisonOperation::compare(
 			$value,
