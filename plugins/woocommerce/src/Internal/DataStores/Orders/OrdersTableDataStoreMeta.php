@@ -5,12 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Internal\DataStores\CustomDataStoreMeta;
+use Automattic\WooCommerce\Internal\DataStores\CustomMetaDataStore;
 
 /**
  * Mimics a WP metadata (i.e. add_metadata(), get_metadata() and friends) implementation using a custom table.
  */
-class OrdersTableDataStoreMeta extends CustomDataStoreMeta {
+class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 
 	/**
 	 * Returns the name of the table used for storage.

@@ -1,24 +1,23 @@
 <?php
 /**
- * CustomDataStoreMeta class file.
+ * CustomMetaDataStore class file.
  */
 
 namespace Automattic\WooCommerce\Internal\DataStores;
-
 
 /**
  * Implements functions similar to WP's add_metadata(), get_metadata(), and friends using a custom table.
  *
  * @see WC_Data_Store_WP For an implementation using WP's metadata functions and tables.
  */
-abstract class CustomDataStoreMeta {
+abstract class CustomMetaDataStore {
 
 	/**
 	 * Returns the name of the table used for storage.
 	 *
 	 * @return string
 	 */
-	protected abstract function get_table_name();
+	abstract protected function get_table_name();
 
 	/**
 	 * Returns the name of the field/column used for identifiying metadata entries.
@@ -88,8 +87,8 @@ abstract class CustomDataStoreMeta {
 			return false;
 		}
 
-		$db_info   = $this->get_db_info();
-		$meta_id   = absint( $meta->id );
+		$db_info = $this->get_db_info();
+		$meta_id = absint( $meta->id );
 
 		return (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
 	}
