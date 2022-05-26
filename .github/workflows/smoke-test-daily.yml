@@ -69,9 +69,7 @@ jobs:
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  # Temporarily make verbose
-                  VERBOSE: true
-              run: pnpm exec wc-api-tests test hello
+              run: pnpm exec wc-api-tests test api
                   
             - name: Archive API test report
               if: |
