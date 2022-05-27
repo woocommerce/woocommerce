@@ -61,7 +61,7 @@ jobs:
               uses: izhangzhihao/delete-comment@master
               with:
                   github_token: ${{ secrets.API_TOKEN_GITHUB }}
-                  delete_user_name: woocommercebot
+                  delete_user_name: matticbot
                   issue_number: ${{ github.event.number }}
             - name: Add label
               if: ${{ needs.analyze.outputs.results }}
