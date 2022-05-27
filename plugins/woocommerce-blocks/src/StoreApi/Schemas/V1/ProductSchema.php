@@ -518,7 +518,14 @@ class ProductSchema extends AbstractSchema {
 	 */
 	protected function get_low_stock_remaining( \WC_Product $product ) {
 		$remaining_stock = $this->get_remaining_stock( $product );
+		$stock_format    = get_option( 'woocommerce_stock_format' );
 
+		// Don't show the low stock badge if the settings doesn't allow it.
+		if ( 'no_amount' === $stock_format ) {
+			return null;
+		}
+
+		// Show the low stock badge if the remaining stock is below or equal to the threshold.
 		if ( ! is_null( $remaining_stock ) && $remaining_stock <= wc_get_low_stock_amount( $product ) ) {
 			return max( $remaining_stock, 0 );
 		}
