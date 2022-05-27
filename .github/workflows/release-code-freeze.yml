@@ -33,3 +33,45 @@ jobs:
         run: php release-code-freeze.php
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-slack:
+    name: "Sends code freeze notification to Slack"
+    runs-on: ubuntu-20.04
+    needs: maybe-create-next-milestone-and-release-branch
+    steps:
+      - name: Get outgoing release version
+        uses: actions/github-script@v6
+        id: outgoing
+        with:
+          script: |
+              const latest = await github.rest.repos.getLatestRelease({
+                owner: 'woocommerce',
+                repo: 'woocommerce'
+              });
+
+              let version = parseFloat( latest.data.tag_name ) + 0.1;
+              version = parseFloat( version ).toPrecision( 2 );
+
+              return version;
+      - name: Get next release version
+        uses: actions/github-script@v6
+        id: next
+        with:
+          script: |
+              const latest = await github.rest.repos.getLatestRelease({
+                owner: 'woocommerce',
+                repo: 'woocommerce'
+              });
+
+              let version = parseFloat( latest.data.tag_name ) + 0.2;
+              version = parseFloat( version ).toPrecision( 2 );
+
+              return version;
+      - name: Slack
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
+        with:
+         slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+         slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+         slack-text: ":warning-8c: ${{ steps.outgoing.outputs.result }} Code Freeze :ice_cube:
+The automation to cut the release branch for ${{ steps.outgoing.outputs.result }} has run. Any PRs that were not already merged will be a part of ${{ steps.next.outputs.result }} by default. If you have something that needs to make ${{ steps.outgoing.outputs.result }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>."
