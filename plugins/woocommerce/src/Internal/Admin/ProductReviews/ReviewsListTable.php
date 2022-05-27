@@ -1275,6 +1275,8 @@ class ReviewsListTable extends WP_List_Table {
 
 			ob_start();
 
+			echo '<input type="hidden" name="comment_status" value="' . esc_attr( $comment_status ?? 'all' ) . '" />';
+
 			$this->review_type_dropdown( $comment_type );
 			$this->review_rating_dropdown( $this->current_reviews_rating );
 			$this->product_search( $this->current_product_for_reviews );
