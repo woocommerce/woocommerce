@@ -687,7 +687,9 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Returns the current action select in bulk actions menu
+	 * Returns the current action select in bulk actions menu.
+	 *
+	 * This is overridden in order to support `delete_all` for use in {@see ReviewsListTable::process_bulk_action()}
 	 *
 	 * @return string
 	 */
