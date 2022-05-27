@@ -7,6 +7,11 @@
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.0.2"
 	},
+	"config": {
+		"platform": {
+			"php": "7.2"
+		}
+	},
 	"extra": {
 		"changelogger": {
 			"formatter": {
