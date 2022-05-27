@@ -621,7 +621,7 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 				'intervals'  => array(
 					'hour'    => 31 * 24,
 					'day'     => 31,
-					'week'    => 6,
+					'week'    => 5,
 					'month'   => 1,
 					'quarter' => 1,
 					'year'    => 1,
