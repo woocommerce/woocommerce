@@ -951,8 +951,8 @@
 	    var $img = $(this).find('img').first();
 		$img
 		.data({
-			srcset: $img.srcset,
-			src: $img.src
+			src: $img.attr('src'),
+			srcset: $img.attr('srcset')
 		})
 		.removeAttr('src srcset')
 		.addClass('flexslider-deferred');
