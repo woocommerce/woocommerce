@@ -20,50 +20,60 @@ class WCActionUpdateController {
 	const ACTION_GROUP = 'wc_updates';
 
 	/**
-	 * Starts an update.
-	 *
-	 * @param string $updater_class_name Class name of an updater, must be child class of `WCActionUpdater`.
+	 * WCActionUpdateController constructor.
+	 * Schedules necessary actions.
 	 */
-	public function start_update( string $updater_class_name ) {
-		$pending_updates = $this->get_pending_updates();
-		if ( in_array( $updater_class_name, array_keys( $pending_updates ) ) ) {
-			return;
-		}
-		$pending_updates[] = $updater_class_name;
-		$this->set_pending_updates( $pending_updates );
-
-		if ( ! as_has_scheduled_action( self::UPDATE_CRON_NAME ) ) {
-			as_schedule_recurring_action(
-				$this->get_start_timestamp_for_recurring_action(),
-				$this->get_recurring_time_internval(),
-				self::UPDATE_CRON_NAME,
-				$this->get_recurring_action_arguments(),
-				self::ACTION_GROUP
-			);
-		}
+	public function __construct() {
+		add_action( self::UPDATE_CRON_NAME, array( $this, 'schedule_updates' ) );
+		add_action( self::UPDATE_SINGLE_MIGRATION_ACTION, array( $this, 'process_single_update' ), 10, 2 );
 	}
 
 	/**
-	 * Schedules update for all updaters that may be stuck.
+	 * Starts an update.
+	 *
+	 * @param string $updater_class_name Fully qualified class name of an updater, must be child class of `WCActionUpdater`.
+	 */
+	public function start_update( string $updater_class_name ) {
+		$pending_updates = $this->get_pending_updates();
+		if ( ! in_array( $updater_class_name, array_keys( $pending_updates ) ) ) {
+			$pending_updates[] = $updater_class_name;
+			$this->set_pending_updates( $pending_updates );
+		}
+		$this->schedule_init_cron();
+	}
+
+	/**
+	 * Helper method to start update cron.
+	 */
+	private function schedule_init_cron() {
+		as_schedule_single_action(
+			$this->get_start_timestamp_for_init_action(),
+			self::UPDATE_CRON_NAME,
+			$this->get_args_for_init_cron(),
+			self::ACTION_GROUP
+		);
+	}
+
+	/**
+	 * Schedules update for all updaters that may be stuck. This method will be called in a action.
 	 */
 	public function schedule_updates() {
 		$pending_updates = $this->get_pending_updates();
 		if ( empty( $pending_updates ) ) {
-			as_unschedule_action( self::UPDATE_CRON_NAME );
 			return;
 		}
 		foreach ( $pending_updates as $update_name ) {
-			if ( $this->already_scheduled( $update_name ) ) {
-				continue;
+			if ( ! $this->already_scheduled( $update_name ) ) {
+				$this->schedule_next_batch( $update_name );
 			}
-			$this->schedule_next_batch( $update_name );
 		}
+		$this->schedule_init_cron();
 	}
 
 	/**
 	 * Process update for a scheduled updater.
 	 *
-	 * @param string $update_name Class of the updater. Must be child class `WCActionUpdater`.
+	 * @param string $update_name Fully qualified class name of the updater. Must be child class `WCActionUpdater`.
 	 */
 	public function process_single_update( string $update_name ) {
 		$updater = $this->get_updater_instance( $update_name );
@@ -72,13 +82,14 @@ class WCActionUpdateController {
 			$this->schedule_next_batch( $update_name );
 		} else {
 			$this->mark_pending_update_complete( $update_name );
+			$updater->mark_update_complete();
 		}
 	}
 
 	/**
 	 * Scheduler next update batch.
 	 *
-	 * @param string $update_name Name of the updator.
+	 * @param string $update_name Fully qualified class name of the updator.
 	 *
 	 * @return int Action ID.
 	 */
@@ -88,8 +99,9 @@ class WCActionUpdateController {
 
 	/**
 	 * Whether the given updater is already scheduled.
+	 * Differs from `as_has_scheduled_action` in that this excludes actions in progress.
 	 *
-	 * @param string $update_name Name of the updator.
+	 * @param string $update_name Fully qualified class name of the updator.
 	 *
 	 * @return bool Whether it's already scheduled.
 	 */
@@ -113,7 +125,7 @@ class WCActionUpdateController {
 	 *
 	 * @return array List of pending updates.
 	 */
-	private function get_pending_updates() : array {
+	public function get_pending_updates() : array {
 		return get_option( self::PENDING_UPDATES_OPTION, array() );
 	}
 
@@ -122,7 +134,7 @@ class WCActionUpdateController {
 	 *
 	 * @param string $updater Name of updater class which will be marked compete.
 	 */
-	public function mark_pending_update_complete( string $updater ) {
+	protected function mark_pending_update_complete( string $updater ) {
 		$pending_migrations = $this->get_pending_updates();
 		if ( in_array( $updater, $pending_migrations ) ) {
 			$pending_migrations = array_diff( $pending_migrations, array( $updater ) );
@@ -140,20 +152,11 @@ class WCActionUpdateController {
 	}
 
 	/**
-	 * Get time interval in between recurring update actions.
-	 *
-	 * @return int Time interval between recurring update.
-	 */
-	private function get_recurring_time_internval() {
-		return time() + MINUTE_IN_SECONDS;
-	}
-
-	/**
 	 * Start timestamp for first recurring action.
 	 *
 	 * @return int time internval.
 	 */
-	private function get_start_timestamp_for_recurring_action() {
+	private function get_start_timestamp_for_init_action() {
 		return time() + MINUTE_IN_SECONDS;
 	}
 
@@ -162,8 +165,19 @@ class WCActionUpdateController {
 	 *
 	 * @return array
 	 */
-	private function get_recurring_action_arguments() {
+	private function get_args_for_init_cron() {
 		return array();
+	}
+
+	/**
+	 * Check if a particular update is in progress.
+	 *
+	 * @param string $update_name Fully qualified class name of updator.
+	 *
+	 * @return bool Whether the update is in progress.
+	 */
+	public function is_update_in_progress( string $update_name ) : bool {
+		return in_array( $update_name, $this->get_pending_updates() );
 	}
 
 }

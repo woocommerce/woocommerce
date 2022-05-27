@@ -23,10 +23,8 @@ abstract class WCActionUpdater {
 	 * Process data for current batch.
 	 *
 	 * @param array $batch Batch details.
-	 *
-	 * @return bool Whether batch processing was successful or not.
 	 */
-	abstract protected function process_for_batch( array $batch ) : bool;
+	abstract protected function process_for_batch( array $batch );
 
 	/**
 	 * Get total number of pending records that require update.
@@ -94,7 +92,7 @@ abstract class WCActionUpdater {
 		$current_status['total_time_spent'] += $time_taken;
 		$current_status['last_processed']    = null !== $last_error ?
 			$this->get_last_processed_in_errored_batch( $last_error, $batch ) : end( $batch );
-		$current_status['last_error']        = $last_error->getMessage();
+		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;
 		update_option( $this->get_update_option_name(), $current_status, false );
 	}
 
@@ -134,5 +132,12 @@ abstract class WCActionUpdater {
 	 */
 	private function get_update_option_name() {
 		return "wc_update_{$this->get_update_name()}";
+	}
+
+	/**
+	 * Executed by updatecontroller when update is complete. Child classes may want to do custom action here, such as showing notices if they want to.
+	 */
+	public function mark_update_complete() {
+		// No op. Child classes may want to override this method is something needs to be done on update complete.
 	}
 }

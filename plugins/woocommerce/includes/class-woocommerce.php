@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Updates\WCActionUpdateController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -227,6 +228,7 @@ final class WooCommerce {
 		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
 		wc_get_container()->get( CustomOrdersTableController::class );
 		wc_get_container()->get( OptionSanitizer::class );
+		wc_get_container()->get( WCActionUpdateController::class );
 	}
 
 	/**
@@ -351,9 +353,11 @@ final class WooCommerce {
 		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		/**
-		 * Filter to specify if the current request is a REST API request.
+		 * Whether this is a REST API request.
+		 *
+		 * @since 3.6.0
 		 */
-		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
 	}
 
 	/**
