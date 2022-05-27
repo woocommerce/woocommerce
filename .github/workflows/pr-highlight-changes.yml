@@ -20,7 +20,7 @@ jobs:
               run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF" -o github
             - name: Print results
               id: results
-              run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}"
+              run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"
     comment:
         name: Add comment to hightlight changes
         needs: analyze
