@@ -1222,7 +1222,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'expected_elements' => [],
 			'expected_end' => '</div>',
 			'not_expected_elements' => [
-				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
@@ -1238,7 +1237,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'expected_elements' => [],
 			'expected_end' => '</div>',
 			'not_expected_elements' => [
-				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',

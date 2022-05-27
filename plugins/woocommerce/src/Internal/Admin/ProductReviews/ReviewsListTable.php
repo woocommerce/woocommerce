@@ -1275,18 +1275,15 @@ class ReviewsListTable extends WP_List_Table {
 
 			ob_start();
 
+			echo '<input type="hidden" name="comment_status" value="' . esc_attr( $comment_status ?? 'all' ) . '" />';
+
 			$this->review_type_dropdown( $comment_type );
 			$this->review_rating_dropdown( $this->current_reviews_rating );
 			$this->product_search( $this->current_product_for_reviews );
 
-			$output = ob_get_clean();
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-			if ( ! empty( $output ) && $this->has_items() ) {
-
-				echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
-				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, [ 'id' => 'post-query-submit' ] );
-			}
+			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, [ 'id' => 'post-query-submit' ] );
 		}
 
 		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $this->has_items() && $this->current_user_can_moderate_reviews ) {
