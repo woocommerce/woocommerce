@@ -156,7 +156,8 @@ export const printDatabaseUpdates = (
 	log: ( s: string ) => void
 ): void => {
 	if ( output === 'github' ) {
-		// Add Github output here.
+		const githubCommentContent = `\\n\\n### New database updates:\\n * **${ updateFunctionName }** introduced in ${ updateFunctionVersion }`;
+		log( `::set-output name=database::${ githubCommentContent }` );
 	} else {
 		log( '\n## DATABASE UPDATES' );
 		log( '---------------------------------------------------' );
