@@ -56,6 +56,22 @@ class Purchase extends Task {
 	public function get_title() {
 		$products = $this->get_paid_products_and_themes();
 
+		if ( $this->get_parent_option( 'use_completed_title' ) && $this->is_complete() ) {
+			return count( $products['remaining'] ) === 1
+				? sprintf(
+					/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+					__(
+						'You added %s',
+						'woocommerce'
+					),
+					$products['remaining'][0]
+				)
+				: __(
+					'You added paid extensions',
+					'woocommerce'
+				);
+		}
+
 		return count( $products['remaining'] ) === 1
 			? sprintf(
 				/* translators: %1$s: list of product names comma separated, %2%s the last product name */
