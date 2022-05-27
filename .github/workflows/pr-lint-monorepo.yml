@@ -1,7 +1,8 @@
 name: Run lint checks potentially affecting projects across the monorepo
-on: pull_request
-  branches:
-    - trunk
+on:
+  pull_request:
+    branches:
+      - 'trunk'
 concurrency:
   group: changelogger-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
