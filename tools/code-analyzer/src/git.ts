@@ -109,6 +109,11 @@ export const getSchema = (
 		const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
 		// Checkout branch to compare
 		execSync( `git checkout ${ branch }` );
+		// Make sure wp-env is running
+		execSync( 'wp-env start', {
+			cwd: 'plugins/woocommerce',
+			encoding: 'utf-8',
+		} );
 
 		const getSchemaPath =
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
