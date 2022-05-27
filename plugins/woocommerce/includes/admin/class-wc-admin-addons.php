@@ -26,12 +26,6 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_featured() {
-		/**
-		 * Test hook GH printout
-		 *
-		 * @since 6.6.0
-		 */
-		do_action( 'woocommerce_test_hook_gh_printout' );
 		$featured = get_transient( 'wc_addons_featured_2' );
 		if ( false === $featured ) {
 			$headers = array();
