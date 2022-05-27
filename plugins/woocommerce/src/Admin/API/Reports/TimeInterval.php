@@ -329,13 +329,23 @@ class TimeInterval {
 	 */
 	public static function next_week_start( $datetime, $reversed = false ) {
 		$seven_days = new \DateInterval( 'P7D' );
-		$start_end  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
-
+		// Default timezone set in wp-settings.php.
+		$default_timezone = date_default_timezone_get();
+		// Timezone that the WP site uses in Settings > General.
+		$original_timezone = $datetime->getTimezone();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		$start_end_timestamp  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
+		date_default_timezone_set( $default_timezone );
+		// @codingStandardsIgnoreEnd
 		if ( $reversed ) {
-			return \DateTime::createFromFormat( 'U', $start_end['end'] )->sub( $seven_days );
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['end'] )->sub( $seven_days );
+		} else {
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['start'] )->add( $seven_days );
 		}
-		return \DateTime::createFromFormat( 'U', $start_end['start'] )->add( $seven_days );
+		return \DateTime::createFromFormat( 'Y-m-d H:i:s', $result->format( 'Y-m-d H:i:s' ), $original_timezone );
 	}
+
 
 	/**
 	 * Returns a new DateTime object representing the next month start, or previous month end if reversed.
