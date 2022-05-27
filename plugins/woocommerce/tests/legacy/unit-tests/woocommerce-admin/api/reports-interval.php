@@ -769,6 +769,45 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests for the exact datetime returned by next_week_start to make sure it
+	 * returns the exact time and timezone with shifting timezones
+	 * between PHP settings and WordPress config.
+	 */
+	public function test_next_week_start_correct_timezone_calculation() {
+		$original_timezone = date_default_timezone_get();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		$start_datetime = new \DateTime( '2022-05-02T00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$next_week_datetime = TimeInterval::next_week_start( $start_datetime, false );
+		date_default_timezone_set( $original_timezone );
+		// @codingStandardsIgnoreEnd
+		$this->assertEquals( '2022-05-09T00:00:00', $next_week_datetime->format( TimeInterval::$iso_datetime_format ) );
+		$this->assertEquals( 'Europe/Berlin', $next_week_datetime->getTimezone()->getName() );
+	}
+
+	/**
+	 * Tests when users manually set timezone by date_default_timezone_set in wp-settings.php.
+	 * Since we're using get_weekstartend, next_week_start should preemptively set
+	 * the date object with the default timezone.
+	 */
+	public function test_next_week_start_timezone_loop() {
+		$original_timezone = date_default_timezone_get();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'Europe/Berlin' );
+		$start_datetime = new \DateTime( '01-05-2022T00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$end_datetime = new \DateTime( '26-05-2022T00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$week_count = 0;
+		do {
+			$start_datetime = TimeInterval::next_week_start( $start_datetime, false );
+			$week_count++;
+		} while ( $start_datetime <= $end_datetime && $week_count < 10 );
+		date_default_timezone_set( $original_timezone );
+		// @codingStandardsIgnoreEnd
+		// Value more than 5 should mean that loop never terminated.
+		$this->assertEquals( 5, $week_count );
+	}
+
+	/**
 	 * Test function that returns beginning of next week or previous week end if reversed, for weeks starting on Sunday.
 	 */
 	public function test_next_week_start_Sunday_based_week() {
