@@ -318,7 +318,7 @@ describe( 'navigateTo', () => {
 		);
 
 		navigateTo( {
-			url: '/setup-wizard',
+			url: getNewPath( {}, '/setup-wizard', {} ),
 		} );
 
 		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
@@ -332,7 +332,7 @@ describe( 'navigateTo', () => {
 		window.location = new URL( 'http://localhost/wp-admin/order.php' );
 
 		navigateTo( {
-			url: '/setup-wizard',
+			url: getNewPath( {}, '/setup-wizard', {} ),
 		} );
 
 		const resultUrl = new URL( window.location.href );
@@ -343,33 +343,21 @@ describe( 'navigateTo', () => {
 		);
 	} );
 
-	it( 'correctly utilizes path when provided on wcadmin page', () => {
+	it( 'correctly redirects when navigating to non-wcadmin page', () => {
 		delete window.location;
 		window.location = new URL(
 			'http://localhost/wp-admin/admin.php?page=wc-admin'
 		);
 
 		navigateTo( {
-			path: getNewPath( { task: 'testtask' }, '/', {} ),
-		} );
-
-		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
-		expect( getHistory().push.mock.lastCall[ 0 ] ).toBe(
-			'admin.php?page=wc-admin&task=testtask'
-		);
-	} );
-
-	it( 'correctly utilizes path when provided not on wcadmin page', () => {
-		delete window.location;
-		window.location = new URL( 'http://localhost/wp-admin/order.php' );
-
-		navigateTo( {
-			path: getNewPath( { task: 'testtask' }, '/', {} ),
+			url: 'orders.php',
 		} );
 
 		const resultUrl = new URL( window.location.href );
 
 		expect( getHistory().push ).not.toBeCalled();
-		expect( resultUrl.search ).toBe( '?page=wc-admin&task=testtask' );
+		expect( resultUrl.toString() ).toBe(
+			'http://localhost/wp-admin/orders.php'
+		);
 	} );
 } );

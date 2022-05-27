@@ -7,7 +7,6 @@ import { parse } from 'qs';
 import { pick } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { Slot, Fill } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -282,13 +281,13 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * or the router as appropriate.
  *
  * @param {Object} args                        - All arguments.
- * @param {string} [args.url]                  - Relative path or absolute url to navigate to.
+ * @param {string} args.url                    - Relative path or absolute url to navigate to
  * @param {string} [args.directory=/wp-admin/] - Path directory, defaultsl to admin path.
  */
 export const navigateTo = ( { url, directory = '/wp-admin/' } ) => {
 	const parsedUrl = new URL(
-		`${ url }`,
-		`${ window.location.origin }${ directory }`
+		`${ ! url.startsWith( 'http' ) && directory ? directory : '' }${ url }`,
+		window.location.origin
 	);
 
 	if ( isWCAdmin() && isWCAdmin( String( parsedUrl ) ) ) {

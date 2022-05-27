@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { getNewPath, navigateTo, isWCAdmin } from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -13,7 +13,6 @@ import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -127,7 +126,11 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const onClickDefault = useCallback( () => {
 		if ( actionUrl ) {
-			navigateTo( { url: getNewPath( {}, actionUrl, {} ) } );
+			navigateTo( {
+				url: actionUrl.startsWith( 'http' )
+					? actionUrl
+					: getNewPath( {}, actionUrl, {} ),
+			} );
 			return;
 		}
 

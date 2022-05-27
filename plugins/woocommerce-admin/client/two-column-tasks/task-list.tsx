@@ -189,7 +189,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 
 		if ( task.actionUrl ) {
-			navigateTo( { url: getNewPath( {}, task.actionUrl, {} ) } );
+			navigateTo( {
+				url: task.actionUrl.startsWith( 'http' )
+					? task.actionUrl
+					: getNewPath( {}, task.actionUrl, {} ),
+			} );
 			return;
 		}
 

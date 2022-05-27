@@ -79,7 +79,11 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		trackClick();
 
 		if ( task.actionUrl ) {
-			navigateTo( { url: getNewPath( {}, task.actionUrl, {} ) } );
+			navigateTo( {
+				url: task.actionUrl.startsWith( 'http' )
+					? task.actionUrl
+					: getNewPath( {}, task.actionUrl, {} ),
+			} );
 			return;
 		}
 
