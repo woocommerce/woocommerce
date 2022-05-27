@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -16,7 +16,7 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ORDERS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -27,6 +27,8 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getCountryCode } from '~/dashboard/utils';
+import { CurrencyContext } from '~/lib/currency-context';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -64,7 +66,7 @@ const renderEmptyCard = () => {
 	);
 };
 
-function renderOrders( orders ) {
+function renderOrders( orders, getFormattedOrderTotal ) {
 	if ( orders.length === 0 ) {
 		return renderEmptyCard();
 	}
@@ -148,10 +150,10 @@ function renderOrders( orders ) {
 	orders.forEach( ( order ) => {
 		const {
 			date_created_gmt: dateCreatedGmt,
-			products,
+			line_items: lineItems,
 			id: orderId,
 		} = order;
-		const productsCount = products ? products.length : 0;
+		const productsCount = lineItems ? lineItems.length : 0;
 
 		cards.push(
 			<ActivityCard
@@ -180,7 +182,12 @@ function renderOrders( orders ) {
 								productsCount
 							) }
 						</span>
-						<span>{ order.total_formatted }</span>
+						<span>
+							{ getFormattedOrderTotal(
+								order.total,
+								order.currency
+							) }
+						</span>
 					</div>
 				}
 			>
@@ -215,19 +222,42 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			_fields: [
 				'id',
 				'number',
+				'currency',
 				'status',
-				'total_formatted',
+				'total',
 				'customer',
-				'products',
+				'line_items',
 				'customer_id',
 				'date_created_gmt',
 			],
 		} ),
 		[ orderStatuses ]
 	);
+
+	const currencyContext = useContext( CurrencyContext );
+
+	const getFormattedOrderTotal = ( total, countryState ) => {
+		if ( ! countryState ) {
+			return null;
+		}
+
+		const country = getCountryCode( countryState );
+		const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
+			'onboarding',
+			{}
+		);
+		const currency = currencyContext.getDataForCountry(
+			country,
+			localeInfo,
+			currencySymbols
+		);
+		currencyContext.setCurrency( currency );
+		return currencyContext.formatAmount( total );
+	};
+
 	const { orders = [], isRequesting, isError } = useSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } = select(
-			ITEMS_STORE_NAME
+		const { getOrders, hasFinishedResolution, getOrdersError } = select(
+			ORDERS_STORE_NAME
 		);
 
 		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
@@ -235,10 +265,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 		}
 
 		/* eslint-disable @wordpress/no-unused-vars-before-return */
-		const orderItems = getItems( 'orders', actionableOrdersQuery, null );
+		const orderItems = getOrders( actionableOrdersQuery, null );
 
-		const isRequestingActionable = isResolving( 'getItems', [
-			'orders',
+		const isRequestingActionable = hasFinishedResolution( 'getOrders', [
 			actionableOrdersQuery,
 		] );
 
@@ -248,9 +277,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			orderItems === null
 		) {
 			return {
-				isError: Boolean(
-					getItemsError( 'orders', actionableOrdersQuery )
-				),
+				isError: Boolean( getOrdersError( actionableOrdersQuery ) ),
 				isRequesting: true,
 				orderStatuses,
 			};
@@ -262,7 +289,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 
 		return {
 			orders: actionableOrders,
-			isError: Boolean( getItemsError( 'orders', actionableOrders ) ),
+			isError: Boolean( getOrdersError( actionableOrders ) ),
 			isRequesting: isRequestingActionable,
 			orderStatuses,
 		};
@@ -318,7 +345,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 						lines={ 1 }
 					/>
 				) : (
-					renderOrders( orders )
+					renderOrders( orders, getFormattedOrderTotal )
 				) }
 			</Section>
 		</>
