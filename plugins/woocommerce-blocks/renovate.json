@@ -17,22 +17,19 @@
 			"rangeStrategy": "bump"
 		},
 		{
-			"updateTypes": [ "patch", "pin", "digest" ],
+			"matchUpdateTypes": [ "patch", "pin", "digest" ],
 			"depTypeList": [ "dev" ],
-			"automerge": true,
-			"rangeStrategy": "bump"
+			"automerge": true
 		},
 		{
-			"updateTypes": [ "major", "minor" ],
+			"matchUpdateTypes": [ "major", "minor" ],
 			"depTypeList": [ "dev" ],
-			"automerge": false,
-			"rangeStrategy": "bump"
+			"automerge": false
 		},
 		{
-			"updateTypes": [ "major", "minor", "patch", "pin", "digest" ],
+			"matchUpdateTypes": [ "major", "minor", "patch", "pin", "digest" ],
 			"depTypeList": [ "devDependencies" ],
 			"automerge": true,
-			"rangeStrategy": "bump",
 			"prPriority": 1
 		}
 	],
