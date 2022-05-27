@@ -209,9 +209,6 @@ class WC_Install {
 		'6.5.1' => array(
 			'wc_update_651_approved_download_directories',
 		),
-		'6.5.2' => array(
-			'wc_update_652_test_change',
-		),
 	);
 
 	/**
@@ -1023,7 +1020,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
-  key_id BIGINT UNSIGNED NOT NULL auto_increment BIG CHANGE,
+  key_id BIGINT UNSIGNED NOT NULL auto_increment,
   user_id BIGINT UNSIGNED NOT NULL,
   description varchar(200) NULL,
   permissions varchar(10) NOT NULL,
