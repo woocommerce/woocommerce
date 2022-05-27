@@ -69,6 +69,7 @@ export const printHookResults = (
 		log( `::set-output name=wphooks::${ opt }` );
 	} else {
 		log( `\n## ${ title }:` );
+		log( '---------------------------------------------------' );
 		for ( const [ key, value ] of data ) {
 			if ( value.size ) {
 				log( 'FILE: ' + key );
