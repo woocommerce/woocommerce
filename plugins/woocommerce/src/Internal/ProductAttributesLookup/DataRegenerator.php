@@ -477,7 +477,7 @@ class DataRegenerator {
  term_id bigint(20) NOT NULL,
  is_variation_attribute tinyint(1) NOT NULL,
  in_stock tinyint(1) NOT NULL,
- INDEX is_variation_attribute_term_id (is_variation_attribute, term_id),
+ INDEX is_variation_attribute_term_id (is_variation_attribute, term_id) BIG CHANGE,
  PRIMARY KEY  ( `product_or_parent_id`, `term_id`, `product_id`, `taxonomy` )
 ) $collate;";
 	}
