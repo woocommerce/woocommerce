@@ -13,6 +13,6 @@ const initTracks = () => {
 	initProductScreenTracks();
 };
 
-if ( productScreen === 'edit' ) {
+if ( productScreen && productScreen.name === 'edit' ) {
 	initTracks();
 }

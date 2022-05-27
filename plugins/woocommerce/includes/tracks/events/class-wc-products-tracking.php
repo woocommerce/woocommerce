@@ -208,7 +208,7 @@ class WC_Products_Tracking {
 			return;
 		}
 
-		$category = get_term( $category_id, 'product_cat' );
+		$category        = get_term( $category_id, 'product_cat' );
 		$parent_category = $category->parent > 0 ? 'Other' : 'None';
 		if ( $category->parent > 0 ) {
 			$parent = get_term( $category_id, 'product_cat' );
@@ -286,6 +286,12 @@ class WC_Products_Tracking {
 			true
 		);
 
-		wp_localize_script( 'wc-admin-product-tracking', 'productScreen', $product_screen );
+		wp_localize_script(
+			'wc-admin-product-tracking',
+			'productScreen',
+			array(
+				'name' => $product_screen,
+			)
+		);
 	}
 }

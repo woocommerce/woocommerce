@@ -153,6 +153,6 @@ const initTracks = () => {
 	} );
 };
 
-if ( productScreen === 'list' ) {
+if ( productScreen && productScreen.name === 'list' ) {
 	initTracks();
 }

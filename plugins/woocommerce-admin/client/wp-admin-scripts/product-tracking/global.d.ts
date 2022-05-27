@@ -1,1 +1,1 @@
-declare const productScreen: string;
+declare const productScreen: { name: string };
