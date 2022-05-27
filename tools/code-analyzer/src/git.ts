@@ -116,6 +116,11 @@ export const getSchema = (
 
 		// Checkout branch to compare
 		execSync( `git checkout ${ branch }` );
+		// Make sure wp-env is running
+		execSync( 'wp-env start', {
+			cwd: 'plugins/woocommerce',
+			encoding: 'utf-8',
+		} );
 
 		const getSchemaPath =
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
