@@ -217,7 +217,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['name'] = $value['id'];
 				}
 				if ( ! isset( $value['title'] ) ) {
-					$value['title'] = isset( $value['name'] ) ? $value['name'] : '';
+					$value['title'] = '';
 				}
 				if ( ! isset( $value['class'] ) ) {
 					$value['class'] = '';
