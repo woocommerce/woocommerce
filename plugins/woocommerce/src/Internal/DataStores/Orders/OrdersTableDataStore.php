@@ -826,7 +826,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		$sql = "
 CREATE TABLE $orders_table_name (
-	id bigint(20) unsigned auto_increment,
+	id bigint(40) unsigned auto_increment,
 	status varchar(20) null,
 	currency varchar(10) null,
 	tax_amount decimal(26,8) null,
