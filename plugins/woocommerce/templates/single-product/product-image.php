@@ -54,11 +54,13 @@ $wrapper_classes   = apply_filters(
 		do_action( 'woocommerce_product_thumbnails' );
 		?>
 	</figure>
-	<?php if ( $flexslider_nav && $post_thumbnail_id && $nav_thumbnails_ids = $product->get_gallery_image_ids() ) {
+	<?php
+	if ( $flexslider_nav && $post_thumbnail_id && $nav_thumbnails_ids = $product->get_gallery_image_ids() ) {
 		echo '<ol class="flex-control-nav flex-control-thumbs">';
 		foreach ( array_merge( array( $post_thumbnail_id ), $nav_thumbnails_ids ) as $count => $attachment_id ) {
 			echo apply_filters( 'woocommerce_single_product_image_nav_html', wc_get_gallery_image_html( $attachment_id, $count ), $attachment_id ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 		}
 		echo '</ol>';
-	} ?>
+	}
+	?>
 </div>

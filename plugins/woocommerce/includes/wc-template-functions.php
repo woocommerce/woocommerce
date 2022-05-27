@@ -1568,8 +1568,8 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $flexslider_nav || is_bool($main_image)  ? 'woocommerce_single' : $thumbnail_size );
 
 
-	// Gallery uses true false to indicate whether it is the main image
-	if (is_bool($main_image)) {
+	// Gallery uses true false to indicate whether it is the main image.
+	if ( is_bool( $main_image ) ) {
 		$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 		$image_params = array(
 			'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
@@ -1582,11 +1582,11 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 			'loading'                 => esc_attr( $main_image ? 'eager' : 'lazy' ),
 		);
 	} else {
-		// Nav use int values in order to have different parameters
+		// Nav use int values in order to have different parameters.
 		$image_params = array(
-			'alt' => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-			'loading' => ($main_image <= apply_filters( 'woocommerce_product_thumbnails_columns', 4 )) ? null : 'lazy',
-			'class' => $main_image === 0 ? 'flex-active'  : '', // if is the first image set the flex-active class on init
+			'alt'     => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			'loading' => ( $main_image <= apply_filters( 'woocommerce_product_thumbnails_columns', 4 ) ) ? null : 'lazy',
+			'class'   => 0 === $main_image ? 'flex-active' : '', // If is the first image set the flex-active class on init.
 		);
 	}
 
