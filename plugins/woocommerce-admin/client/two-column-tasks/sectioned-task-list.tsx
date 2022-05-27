@@ -54,6 +54,10 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	const [ openPanel, setOpenPanel ] = useState< string | null >(
 		sections?.find( ( section ) => ! section.isComplete )?.id || null
 	);
+	const [
+		isCompletedCardVisible,
+		setIsCompletedCardVisible,
+	] = useState< boolean >( true );
 
 	const prevQueryRef = useRef( query );
 
@@ -96,6 +100,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		updateOptions( {
 			...updateOptionsParams,
 		} );
+		setIsCompletedCardVisible( false );
 	};
 
 	let selectedHeaderCard = visibleTasks.find(
@@ -117,7 +122,11 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
-	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
+	if (
+		isComplete &&
+		keepCompletedTaskList !== 'yes' &&
+		isCompletedCardVisible
+	) {
 		return (
 			<>
 				{ cesHeader ? (
