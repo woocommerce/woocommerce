@@ -1171,7 +1171,7 @@
 				  srcset: $(this).attr('data-srcset')
 			  })
 			  .removeAttr('data-src data-srcset loading')
-			  .removeClass('flex-deferred');
+			  .removeClass('flexslider-deferred');
 	  })
   });
 
