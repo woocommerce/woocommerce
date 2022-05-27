@@ -19,7 +19,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
-use \Automattic\WooCommerce\Internal\Admin\Notes\NavigationNudge;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
@@ -169,7 +168,6 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new WelcomeToWooCommerceForStoreUsers();
 		new ManageStoreActivityFromHomeScreen();
-		new NavigationNudge();
 		new MagentoMigration();
 
 		// Initialize MerchantEmailNotifications.
