@@ -687,6 +687,19 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Returns the current action select in bulk actions menu
+	 *
+	 * @return string
+	 */
+	public function current_action() {
+		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
+			return 'delete_all';
+		}
+
+		return parent::current_action();
+	}
+
+	/**
 	 * Processes the bulk actions.
 	 *
 	 * @return void
