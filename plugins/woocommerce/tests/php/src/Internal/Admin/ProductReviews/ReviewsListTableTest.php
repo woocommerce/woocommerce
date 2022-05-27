@@ -1969,9 +1969,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function test_current_action( bool $delete_all_isset, bool $delete_all_2_isset, $expected ) {
 		if ( $delete_all_isset ) {
 			$_REQUEST['delete_all'] = 'Empty Trash';
+		} else {
+			unset( $_REQUEST['delete_all'] );
 		}
 		if ( $delete_all_2_isset ) {
 			$_REQUEST['delete_all2'] = 'Empty Trash';
+		} else {
+			unset( $_REQUEST['delete_all2'] );
 		}
 
 		$this->assertSame( $expected, $this->get_reviews_list_table()->current_action() );
