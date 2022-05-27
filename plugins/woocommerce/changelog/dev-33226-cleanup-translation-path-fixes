@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Removed temporary codepath added in #32603 since translation paths have been updated #33226
