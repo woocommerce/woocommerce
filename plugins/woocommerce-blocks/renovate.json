@@ -2,6 +2,7 @@
 	"extends": [ "config:base" ],
 	"lockFileMaintenance": { "enabled": true },
 	"ignoreDeps": [ "husky" ],
+	"prConcurrentLimit": 5,
 	"schedule": [ "before 3am on wednesday" ],
 	"composer": {
 		"enabled": false
@@ -16,13 +17,23 @@
 			"rangeStrategy": "bump"
 		},
 		{
-			"updateTypes": [ "minor", "patch", "pin", "digest" ],
-			"automerge": true
+			"updateTypes": [ "patch", "pin", "digest" ],
+			"depTypeList": [ "dev" ],
+			"automerge": true,
+			"rangeStrategy": "bump"
+		},
+		{
+			"updateTypes": [ "major", "minor" ],
+			"depTypeList": [ "dev" ],
+			"automerge": false,
+			"rangeStrategy": "bump"
 		},
 		{
 			"updateTypes": [ "major", "minor", "patch", "pin", "digest" ],
 			"depTypeList": [ "devDependencies" ],
-			"automerge": true
+			"automerge": true,
+			"rangeStrategy": "bump",
+			"prPriority": 1
 		}
 	],
 	"rebaseWhen": "conflicted"
