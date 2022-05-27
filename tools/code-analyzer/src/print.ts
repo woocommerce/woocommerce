@@ -115,7 +115,14 @@ export const printSchemaChange = (
 		return;
 	}
 	if ( output === 'github' ) {
-		// Add Github output here.
+		let githubCommentContent = '\\n\\n### New schema changes:';
+		Object.keys( schemaDiff ).forEach( ( key ) => {
+			if ( ! schemaDiff[ key ].areEqual ) {
+				githubCommentContent += `\\n* **Schema:** ${ schemaDiff[ key ].description } introduced in ${ version }`;
+			}
+		} );
+
+		log( `::set-output name=schema::${ githubCommentContent }` );
 	} else {
 		log( '\n## SCHEMA CHANGES' );
 		log( '---------------------------------------------------' );

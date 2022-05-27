@@ -91,11 +91,8 @@ export default class Analyzer extends Command {
 		const pluginData = this.getPluginData( flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
-		// Avoid running this on CI for now, and only run schema diffs in the monorepo.
-		if (
-			flags.output === 'console' &&
-			flags.source === 'woocommerce/woocommerce'
-		) {
+		// Run schema diffs only in the monorepo.
+		if ( flags.source === 'woocommerce/woocommerce' ) {
 			const schemaDiff = await generateSchemaDiff(
 				flags.source,
 				args.compare,
