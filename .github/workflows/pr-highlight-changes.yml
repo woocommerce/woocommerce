@@ -42,7 +42,7 @@ jobs:
                         issue_number: context.issue.number,
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                        body: '## New hook, template, or database changes in this PR${{ needs.analyze.outputs.results }}'
                       })
             - name: Update comment
               if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
@@ -54,7 +54,7 @@ jobs:
                         comment_id: ${{ steps.find-comment.outputs.comment-id }},
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                        body: '## New hook, template, or database changes in this PR${{ needs.analyze.outputs.results }}'
                       })
             - name: Delete comment
               if: ${{ !needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
