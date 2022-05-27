@@ -632,6 +632,7 @@ class Reviews {
 
 				<input type="hidden" name="page" value="<?php echo esc_attr( $page ); ?>" />
 				<input type="hidden" name="post_type" value="product" />
+				<input type="hidden" name="pagegen_timestamp" value="<?php echo esc_attr( current_time( 'mysql', true ) ); ?>" />
 
 				<?php $this->reviews_list_table->search_box( __( 'Search Reviews', 'woocommerce' ), 'reviews' ); ?>
 

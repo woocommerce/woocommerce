@@ -277,6 +277,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<form id="reviews-filter" method="get">', $output );
 		$this->assertStringContainsString( '<input type="hidden" name="page" value="' . Reviews::MENU_SLUG . '" />', $output );
 		$this->assertStringContainsString( '<input type="hidden" name="post_type" value="product" />', $output );
+		$this->assertStringContainsString( '<input type="hidden" name="pagegen_timestamp" value="', $output );
 		$this->assertStringEndsWith( 'custom additional content', $output );
 
 		remove_all_filters( 'woocommerce_product_reviews_list_table' );
