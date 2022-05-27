@@ -281,26 +281,23 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * A utility function that navigates to a page, using a redirect
  * or the router as appropriate.
  *
- * @param {Object} args        - All arguments.
- * @param {string} [args.url]  - Relative or absolute url to navigate to.
- * @param {string} [args.path] - Path to navigate to.
+ * @param {Object} args                        - All arguments.
+ * @param {string} [args.url]                  - Relative path or absolute url to navigate to.
+ * @param {string} [args.directory=/wp-admin/] - Path directory, defaultsl to admin path.
  */
-export const navigateTo = ( { url, path } ) => {
-	if ( url && url.startsWith( 'http' ) ) {
-		window.location.href = url;
+export const navigateTo = ( { url, directory = '/wp-admin/' } ) => {
+	const parsedUrl = new URL(
+		`${ url }`,
+		`${ window.location.origin }${ directory }`
+	);
+
+	if ( isWCAdmin() && isWCAdmin( String( parsedUrl ) ) ) {
+		window.document.documentElement.scrollTop = 0;
+		getHistory().push( `admin.php${ parsedUrl.search }` );
 		return;
 	}
 
-	const newPath = path ? path : getNewPath( {}, url, {} );
-
-	if ( ! isWCAdmin() ) {
-		window.location.href = getAdminLink( newPath );
-		return;
-	}
-
-	window.document.documentElement.scrollTop = 0;
-
-	getHistory().push( newPath );
+	window.location.href = String( parsedUrl );
 };
 
 /**

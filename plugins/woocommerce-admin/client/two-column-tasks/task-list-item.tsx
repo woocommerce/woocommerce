@@ -79,11 +79,11 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		trackClick();
 
 		if ( task.actionUrl ) {
-			navigateTo( { url: task.actionUrl } );
+			navigateTo( { url: getNewPath( {}, task.actionUrl, {} ) } );
 			return;
 		}
 
-		navigateTo( { path: getNewPath( { task: task.id }, '/', {} ) } );
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const onDismiss = useCallback( () => {

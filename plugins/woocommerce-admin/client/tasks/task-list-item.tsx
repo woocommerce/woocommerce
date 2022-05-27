@@ -127,11 +127,11 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const onClickDefault = useCallback( () => {
 		if ( actionUrl ) {
-			navigateTo( { url: actionUrl } );
+			navigateTo( { url: getNewPath( {}, actionUrl, {} ) } );
 			return;
 		}
 
-		navigateTo( { path: getNewPath( { task: id }, '/', {} ) } );
+		navigateTo( { url: getNewPath( { task: id }, '/', {} ) } );
 	}, [ id, isComplete, actionUrl ] );
 
 	const taskItemProps = {
@@ -148,13 +148,6 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				trackClick();
 
 				if ( props.onClick ) {
-					if ( ! isWCAdmin() ) {
-						window.location.href = getAdminLink(
-							'admin.php?page=wc-admin'
-						);
-						return;
-					}
-
 					return props.onClick();
 				}
 

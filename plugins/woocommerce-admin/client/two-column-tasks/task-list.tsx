@@ -189,11 +189,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 
 		if ( task.actionUrl ) {
-			navigateTo( { url: task.actionUrl } );
+			navigateTo( { url: getNewPath( {}, task.actionUrl, {} ) } );
 			return;
 		}
 
-		navigateTo( { path: getNewPath( { task: task.id }, '/', {} ) } );
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
