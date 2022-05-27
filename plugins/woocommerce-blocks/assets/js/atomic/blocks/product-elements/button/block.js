@@ -142,8 +142,8 @@ const AddToCartButton = ( {
 			} );
 		};
 	} else {
-		buttonProps.onClick = () => {
-			addToCart();
+		buttonProps.onClick = async () => {
+			await addToCart();
 			dispatchStoreEvent( 'cart-add-item', {
 				product,
 			} );
