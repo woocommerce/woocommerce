@@ -691,7 +691,9 @@ class ReviewsListTable extends WP_List_Table {
 	 *
 	 * This is overridden in order to support `delete_all` for use in {@see ReviewsListTable::process_bulk_action()}
 	 *
-	 * @return string
+	 * {@see WP_Comments_List_Table::current_action()} for reference.
+	 *
+	 * @return string|false
 	 */
 	public function current_action() {
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) ) {
