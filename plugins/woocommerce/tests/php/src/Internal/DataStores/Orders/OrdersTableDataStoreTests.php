@@ -134,6 +134,68 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests update() on the COT datastore.
+	 */
+	public function test_cot_datastore_update() {
+		static $props_to_update   = array(
+			'billing_first_name' => 'John',
+			'billing_last_name'  => 'Doe',
+			'shipping_phone'     => '555-55-55',
+			'status'             => 'on-hold',
+			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
+		);
+		static $datastore_updates = array(
+			'email_sent' => true,
+		);
+		static $meta_to_update    = array(
+			'my_meta_key' => array( 'my', 'custom', 'meta' ),
+		);
+
+		// Set up order.
+		$post_order = OrderHelper::create_order();
+		$this->migrator->migrate_orders( array( $post_order->get_id() ) );
+
+		// Read order using the COT datastore.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $post_order->get_id() );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+
+		// Make some changes to the order and save.
+		$order->set_props( $props_to_update );
+
+		foreach ( $meta_to_update as $meta_key => $meta_value ) {
+			$order->add_meta_data( $meta_key, $meta_value, true );
+		}
+
+		foreach ( $datastore_updates as $prop => $value ) {
+			$this->sut->{"set_$prop"}( $order, $value );
+		}
+
+		$order->save();
+
+		// Re-read order and make sure changes were persisted.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $post_order->get_id() );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+
+		foreach ( $props_to_update as $prop => $value ) {
+			$this->assertEquals( $order->{"get_$prop"}( 'edit' ), $value );
+		}
+
+		foreach ( $meta_to_update as $meta_key => $meta_value ) {
+			$this->assertEquals( $order->get_meta( $meta_key, true, 'edit' ), $meta_value );
+		}
+
+		foreach ( $datastore_updates as $prop => $value ) {
+			$this->assertEquals( $this->sut->{"get_$prop"}( $order ), $value );
+		}
+	}
+
+	/**
 	 * Helper function to delete all meta for post.
 	 *
 	 * @param int $post_id Post ID to delete data for.
