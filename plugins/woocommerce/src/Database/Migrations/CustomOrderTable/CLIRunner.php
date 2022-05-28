@@ -356,8 +356,8 @@ class CLIRunner {
 
 			WP_CLI::debug(
 				sprintf(
-				// Translators: %1$d is the batch number, %2$f is time taken to process batch.
-					__( 'Batch %1$d (%2$d orders) completed in %3$f seconds.', 'woocommerce' ),
+					/* Translators: %1$d is the batch number, %2$d is time taken to process batch. */
+					__( 'Batch %1$d (%2$d orders) completed in %3$d seconds.', 'woocommerce' ),
 					$batch_count,
 					count( $order_ids ),
 					$batch_total_time
@@ -378,7 +378,7 @@ class CLIRunner {
 		if ( 0 === count( $failed_ids ) ) {
 			return WP_CLI::success(
 				sprintf(
-					/* Translators: %1$d is the number of migrated orders and %2$f is time taken */
+					/* Translators: %1$d is the number of migrated orders and %2$d is time taken. */
 					_n(
 						'%1$d order was verified in %2$d seconds.',
 						'%1$d orders were verified in %2$d seconds.',
@@ -404,7 +404,7 @@ class CLIRunner {
 							'woocommerce'
 						),
 						$processed,
-						$total_time,
+						$total_time
 					),
 					sprintf(
 						/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
