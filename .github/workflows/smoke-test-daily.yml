@@ -40,7 +40,7 @@ jobs:
             - name: Get latest commit message
               id: get_commit_message
               run: |
-                  COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+                  COMMIT_MESSAGE=$(git log --pretty=format:%s -1)
                   echo "::set-output name=commit_message::$COMMIT_MESSAGE"
 
             - name: Run E2E smoke test.
