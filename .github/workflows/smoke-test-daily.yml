@@ -16,7 +16,6 @@ jobs:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
-            api_artifact: ${{ steps.set_artifact.outputs.api_artifact }}
         steps:
             - uses: actions/checkout@v3
               with:
@@ -76,10 +75,6 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: pnpm exec wc-api-tests test api
 
-            - name: Set artifact name as job output
-              id: set_artifact
-              run: echo "::set-output name=api_artifact::api-test-report---daily"
-
             - name: Archive API test report
               if: |
                   always() &&
@@ -89,7 +84,7 @@ jobs:
                   )
               uses: actions/upload-artifact@v3
               with:
-                  name: ${{ steps.set_artifact.outputs.api_artifact }}
+                  name: api-test-report---daily
                   path: |
                       ${{ env.API_TEST_REPORT_DIR }}/allure-results
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
@@ -214,7 +209,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
-            API_ARTIFACT: ${{ needs.login-run.outputs.api_artifact }}
+            API_ARTIFACT: api-test-report---daily
             COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
         steps:
             - name: Publish API test report
