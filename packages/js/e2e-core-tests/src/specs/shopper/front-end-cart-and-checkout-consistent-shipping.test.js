@@ -139,7 +139,8 @@ const runCartAndCheckoutConsistentShippingTest = () => {
 			} );
 		} );
 
-		it( 'shows no shipping available on the cart page and checkout page for Netherlands', async () => {
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'shows no shipping available on the cart page and checkout page for Netherlands', async () => {
 			// Add product to cart as a shopper
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( productId );
