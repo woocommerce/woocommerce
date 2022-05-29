@@ -217,5 +217,5 @@ jobs:
                   gh workflow run publish-test-reports-daily.yml \
                     -f run_id=$RUN_ID \
                     -f api_artifact=$API_ARTIFACT \
-                    -f commit_message=$COMMIT_MESSAGE \
+                    -f commit_message="$COMMIT_MESSAGE" \
                     --repo woocommerce/woocommerce-test-reports
