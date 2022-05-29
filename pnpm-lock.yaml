@@ -485,6 +485,7 @@ importers:
       '@babel/runtime': ^7.17.2
       '@testing-library/react': ^12.1.3
       '@testing-library/react-hooks': ^7.0.2
+      '@types/md5': ^2.3.2
       '@types/wordpress__compose': ^4.0.1
       '@types/wordpress__core-data': ^2.4.5
       '@types/wordpress__data': ^6.0.0
@@ -536,6 +537,7 @@ importers:
       '@babel/runtime': 7.17.7
       '@testing-library/react': 12.1.4
       '@testing-library/react-hooks': 7.0.2
+      '@types/md5': 2.3.2
       '@types/wordpress__compose': 4.0.1
       '@types/wordpress__core-data': 2.4.5
       '@types/wordpress__data': 6.0.0
@@ -933,6 +935,9 @@ importers:
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
+  packages/js/extend-cart-checkout-block:
+    specifiers: {}
+
   packages/js/js-tests:
     specifiers:
       '@babel/core': ^7.17.5
@@ -1009,6 +1014,7 @@ importers:
 
   packages/js/notices:
     specifiers:
+      '@automattic/data-stores': ^2.0.1
       '@babel/core': ^7.17.5
       '@woocommerce/eslint-plugin': workspace:*
       '@wordpress/a11y': ^3.5.0
@@ -1017,6 +1023,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      redux: ^4.2.0
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1025,11 +1032,13 @@ importers:
       '@wordpress/data': 6.4.1
       '@wordpress/notices': 3.4.1
     devDependencies:
+      '@automattic/data-stores': 2.0.1_@wordpress+data@6.4.1
       '@babel/core': 7.17.8
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      redux: 4.2.0
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1188,6 +1197,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7
       '@babel/register': 7.12.1
+      '@playwright/test': ^1.22.1
       '@typescript-eslint/eslint-plugin': 3.10.1
       '@typescript-eslint/experimental-utils': 3.10.1
       '@typescript-eslint/parser': 3.10.1
@@ -1198,10 +1208,12 @@ importers:
       '@woocommerce/e2e-environment': workspace:*
       '@woocommerce/e2e-utils': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/woocommerce-rest-api': ^1.0.1
       '@wordpress/babel-plugin-import-jsx-pragma': 1.1.3
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/stylelint-config': 19.1.0
       allure-commandline: ^2.17.2
+      allure-playwright: ^2.0.0-beta.16
       autoprefixer: 9.8.6
       babel-eslint: 10.1.0
       chai: 4.2.0
@@ -1227,6 +1239,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@babel/register': 7.12.1_@babel+core@7.12.9
+      '@playwright/test': 1.22.1
       '@typescript-eslint/eslint-plugin': 3.10.1_aab05197bc2ab2306ca58e96baf5381b
       '@typescript-eslint/experimental-utils': 3.10.1_eslint@6.8.0+typescript@3.9.7
       '@typescript-eslint/parser': 3.10.1_eslint@6.8.0+typescript@3.9.7
@@ -1237,10 +1250,12 @@ importers:
       '@woocommerce/e2e-environment': link:../../packages/js/e2e-environment
       '@woocommerce/e2e-utils': link:../../packages/js/e2e-utils
       '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
+      '@woocommerce/woocommerce-rest-api': 1.0.1
       '@wordpress/babel-plugin-import-jsx-pragma': 1.1.3_@babel+core@7.12.9
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/stylelint-config': 19.1.0_stylelint@13.13.1
       allure-commandline: 2.17.2
+      allure-playwright: 2.0.0-beta.16
       autoprefixer: 9.8.6
       babel-eslint: 10.1.0_eslint@6.8.0
       chai: 4.2.0
@@ -1673,6 +1688,16 @@ importers:
       ts-node: 10.5.0_506ca6ef959d35afcce359030b1bc9ff
       tslib: 2.3.1
       typescript: 4.6.2
+
+  tools/create-extension:
+    specifiers:
+      chalk: ^4.1.2
+      fs-extra: 10.1.0
+      promptly: ^3.2.0
+    dependencies:
+      chalk: 4.1.2
+      fs-extra: 10.1.0
+      promptly: 3.2.0
 
   tools/monorepo-merge:
     specifiers:
@@ -10160,6 +10185,14 @@ packages:
       typescript: 4.2.4
     dev: true
 
+  /@playwright/test/1.22.1:
+    resolution: {integrity: sha512-8ouMBUboYslHom41W8bnSEn0TwlAMHhCACwOZeuiAgzukj7KobpZ+UBwrGE0jJ0UblJbKAQNRHXL+z7sDSkb6g==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.22.1
+    dev: true
+
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_06cd85ae30adde416cafc06517ba554d:
     resolution: {integrity: sha512-ccap6o7+y5L8cnvkZ9h8UXCGyy2DqtwCD+/N3Yru6lxMvcdkPKtdx13qd7sAC9s5qZktOmWf9lfUjsGOvSdYhg==}
     engines: {node: '>= 10.13'}
@@ -13428,6 +13461,10 @@ packages:
   /@types/lodash/4.14.180:
     resolution: {integrity: sha512-XOKXa1KIxtNXgASAnwj7cnttJxS4fksBRywK/9LzRV5YxrF80BXZIGeQSuoESQ/VkUj30Ae0+YcuHc15wJCB2g==}
 
+  /@types/md5/2.3.2:
+    resolution: {integrity: sha512-v+JFDu96+UYJ3/UWzB0mEglIS//MZXgRaJ4ubUPwOM0gvLc/kcQ3TWNYwENEK7/EcXGQVrW8h/XqednSjBd/Og==}
+    dev: true
+
   /@types/mdast/3.0.10:
     resolution: {integrity: sha512-W864tg/Osz1+9f4lrGTZpCSO5/z4608eUp19tbozkq2HJK6i3z1kT0H9tlADXuYIb1YYOBByU4Jsqkk75q48qA==}
     dependencies:
@@ -14347,7 +14384,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      debug: 4.3.3
+      debug: 4.3.4
       eslint-visitor-keys: 1.3.0
       glob: 7.2.0
       is-glob: 4.0.3
@@ -14391,7 +14428,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 3.10.1
       '@typescript-eslint/visitor-keys': 3.10.1
-      debug: 4.3.3
+      debug: 4.3.4
       glob: 7.2.0
       is-glob: 4.0.3
       lodash: 4.17.21
@@ -14947,6 +14984,16 @@ packages:
       object.fromentries: 2.0.5
       prop-types: 15.7.2
       react: 17.0.2
+    dev: true
+
+  /@woocommerce/woocommerce-rest-api/1.0.1:
+    resolution: {integrity: sha512-YBk3EEYE0zax/egx6Rhpbu6hcCFyZpYQrjH9JO4NUGU3n3T0W9Edn7oAUbjL/c7Oezcg+UaQluCaKjY/B3zwxg==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      axios: 0.19.2
+      create-hmac: 1.1.7
+      oauth-1.0a: 2.2.6
+      url-parse: 1.5.10
     dev: true
 
   /@wordpress/a11y/3.4.1:
@@ -16842,6 +16889,20 @@ packages:
       uuid: 3.4.0
     dev: false
 
+  /allure-js-commons/2.0.0-beta.16:
+    resolution: {integrity: sha512-biAFm8FugPMA0THZpsWLdi+F8n1BeUTYkkpmQ4ZqUAKeg2xcw5arM0Qa4rq6Qs0HPLbdVS9Jj8fb7e/ahCr/Ig==}
+    dependencies:
+      mkdirp: 1.0.4
+      properties: 1.2.1
+      uuid: 8.3.2
+    dev: true
+
+  /allure-playwright/2.0.0-beta.16:
+    resolution: {integrity: sha512-0Nj2BLIIRFUCZn7CGSXYa7d1M+phmSzUwMD3fbHVxO+q10vNrY8Hf5IT2ITwWMtUHaTAE6uH58GPsa6DB9N3Xw==}
+    dependencies:
+      allure-js-commons: 2.0.0-beta.16
+    dev: true
+
   /alphanum-sort/1.0.2:
     resolution: {integrity: sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=}
 
@@ -17356,6 +17417,13 @@ packages:
       is-buffer: 2.0.5
     dev: true
 
+  /axios/0.19.2:
+    resolution: {integrity: sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==}
+    deprecated: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
+    dependencies:
+      follow-redirects: 1.5.10
+    dev: true
+
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
@@ -17585,7 +17653,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -17615,7 +17683,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /babel-messages/6.23.0:
@@ -20037,7 +20105,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -23585,6 +23653,13 @@ packages:
         optional: true
     dev: false
 
+  /follow-redirects/1.5.10:
+    resolution: {integrity: sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==}
+    engines: {node: '>=4.0'}
+    dependencies:
+      debug: 3.1.0
+    dev: true
+
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
     dependencies:
@@ -23901,6 +23976,15 @@ packages:
       path-is-absolute: 1.0.1
       rimraf: 2.7.1
     dev: true
+
+  /fs-extra/10.1.0:
+    resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
+    engines: {node: '>=12'}
+    dependencies:
+      graceful-fs: 4.2.9
+      jsonfile: 6.1.0
+      universalify: 2.0.0
+    dev: false
 
   /fs-extra/6.0.1:
     resolution: {integrity: sha512-GnyIkKhhzXZUWFCaJzvyDLEEgDkPfb4/TPvJCJVuS8MWZgoSsErf++QpiAlDnKFcqhRlm+tIOcencCjyJE6ZCA==}
@@ -30971,7 +31055,6 @@ packages:
 
   /oauth-1.0a/2.2.6:
     resolution: {integrity: sha512-6bkxv3N4Gu5lty4viIcIAnq5GbxECviMBeKR3WX/q87SPQ8E8aursPZUtsXDnxCs787af09WPRBLqYrf/lwoYQ==}
-    dev: false
 
   /oauth-sign/0.9.0:
     resolution: {integrity: sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==}
@@ -31836,6 +31919,12 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       find-up: 5.0.0
+    dev: true
+
+  /playwright-core/1.22.1:
+    resolution: {integrity: sha512-H+ZUVYnceWNXrRf3oxTEKAr81QzFsCKu5Fp//fEjQvqgKkfA1iX3E9DBrPJpPNOrgVzcE+IqeI0fDmYJe6Ynnw==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: true
 
   /plur/4.0.0:
@@ -33295,7 +33384,6 @@ packages:
     resolution: {integrity: sha512-WnR9obtgW+rG4oUV3hSnNGl1pHm3V1H/qD9iJBumGSmVsSC5HpZOLuu8qdMb6yCItGfT7dcRszejr/5P3i9Pug==}
     dependencies:
       read: 1.0.7
-    dev: true
 
   /prompts/2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
@@ -33324,6 +33412,11 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+
+  /properties/1.2.1:
+    resolution: {integrity: sha1-Dul6f8AgsaKlW4ZZ7aSqjYaQlL0=}
+    engines: {node: '>=0.10'}
+    dev: true
 
   /property-information/5.6.0:
     resolution: {integrity: sha512-YUHSPk+A30YPv+0Qf8i9Mbfe/C0hdPXk1s1jPVToV8pk8BQtpw10ct89Eo7OWkutrwqvT0eicAxlOg3dOAu8JA==}
@@ -33516,6 +33609,10 @@ packages:
     deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
     dev: true
 
+  /querystringify/2.2.0:
+    resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
+    dev: true
+
   /queue-microtask/1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -33615,7 +33712,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /rc/1.2.8:
@@ -34460,7 +34557,6 @@ packages:
     engines: {node: '>=0.8'}
     dependencies:
       mute-stream: 0.0.8
-    dev: true
 
   /readable-stream/2.3.7:
     resolution: {integrity: sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw==}
@@ -34654,6 +34750,12 @@ packages:
     resolution: {integrity: sha512-SH8PglcebESbd/shgf6mii6EIoRM0zrQyjcuQ+ojmfxjTtE0z9Y8pa62iA/OJ58qjP6j27uyW4kUF4jl/jd6sw==}
     dependencies:
       '@babel/runtime': 7.17.7
+
+  /redux/4.2.0:
+    resolution: {integrity: sha512-oSBmcKKIuIR4ME29/AeNUnl5L+hvBq7OaJWzaptTQJAntaPvxIJqfnjbaEiCzzaIz+XmVILfqAM3Ob0aXLPfjA==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+    dev: true
 
   /reflect.ownkeys/0.2.0:
     resolution: {integrity: sha1-dJrO7H8/34tj+SegSAnpDFwLNGA=}
@@ -37149,7 +37251,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
@@ -37233,7 +37335,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
     dev: true
@@ -38398,6 +38500,13 @@ packages:
       prepend-http: 1.0.4
     dev: true
 
+  /url-parse/1.5.10:
+    resolution: {integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==}
+    dependencies:
+      querystringify: 2.2.0
+      requires-port: 1.0.0
+    dev: true
+
   /url/0.10.3:
     resolution: {integrity: sha1-Ah5NnHcF8hu/N9A861h2dAJ3TGQ=}
     dependencies:
@@ -38542,7 +38651,6 @@ packages:
   /uuid/8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
-    dev: false
 
   /v8-compile-cache-lib/3.0.0:
     resolution: {integrity: sha512-mpSYqfsFvASnSn5qMiwrr4VKfumbPyONLCOPmsR3A6pTY/r0+tSaVbgPWSAIuzbk3lCTa+FForeTiO+wBQGkjA==}
@@ -39232,7 +39340,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5_webpack@4.46.0
       watchpack: 1.7.5
-      webpack-cli: 3.3.12_webpack@5.70.0
+      webpack-cli: 3.3.12_webpack@4.46.0
       webpack-sources: 1.4.3
     dev: true
 

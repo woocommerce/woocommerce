@@ -3,3 +3,4 @@ packages:
     - 'plugins/**'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
+    - 'tools/create-extension'

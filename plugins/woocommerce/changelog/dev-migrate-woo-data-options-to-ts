@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix type errors in ./client after migrating options store to TS

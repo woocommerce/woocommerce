@@ -255,6 +255,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Register the global mocks to use in the mockable LegacyProxy.
+	 *
+	 * @param array $mocks An associative array where keys are global names and values are the replacements for each global.
+	 */
+	public function register_legacy_proxy_global_mocks( array $mocks ) {
+		wc_get_container()->get( LegacyProxy::class )->register_global_mocks( $mocks );
+	}
+
+	/**
 	 * Asserts that a certain callable output is equivalent to a given piece of HTML.
 	 *
 	 * "Equivalent" means that the string representations of the HTML pieces are equal

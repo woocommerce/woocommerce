@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Suppressing warnings for malformed metadata in product template downloads.

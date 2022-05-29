@@ -49,7 +49,7 @@
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:packages": "pnpm run --filter ../../packages/js/ --filter !api-core-tests test",
 		"test:update-snapshots": "pnpm run test:client -- --updateSnapshot && pnpm run --filter @woocommerce/components test:update-snapshots",
-		"test:watch": "tsc --build || concurrently \"pnpm run test:client -- --watch\" \"pnpm run:packages -- test:nobuild --parallel -- --watch\"",
+		"test:watch": "pnpm run test:client -- --watch",
 		"ts:check": "tsc --build ./tsconfig.json --pretty",
 		"ts:check:watch": "npm run ts:check -- --watch"
 	},

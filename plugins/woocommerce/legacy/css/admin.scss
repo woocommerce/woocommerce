@@ -1971,7 +1971,7 @@ ul.wc_coupon_list_block {
 					display: block;
 					text-align: center;
 
-					&::before {
+					&:empty::before {
 
 						@include icon_dashicons("\f128");
 						width: 38px;
