@@ -29,6 +29,18 @@ class CustomOrdersTableController {
 	private const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
 
 	/**
+	 * The name of the option that tells whether database transactions are to be used or not for data synchronization.
+	 */
+	public const USE_DB_TRANSACTIONS_OPTION = 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync';
+
+	/**
+	 * The name of the option to store the transaction isolation level to use when database transactions are enabled.
+	 */
+	public const DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION = 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync';
+
+	public const DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL = 'REPEATABLE READ';
+
+	/**
 	 * The data store object to use.
 	 *
 	 * @var OrdersTableDataStore
@@ -381,6 +393,25 @@ class CustomOrdersTableController {
 					);
 				}
 			}
+
+			$settings[] = array(
+				'desc' => __( 'Use database transactions for the orders data synchronization', 'woocommerce' ),
+				'id'   => self::USE_DB_TRANSACTIONS_OPTION,
+				'type' => 'checkbox',
+			);
+
+			$settings[] = array(
+				'desc'    => __( 'Database transaction isolation level to use', 'woocommerce' ),
+				'id'      => self::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION,
+				'type'    => 'select',
+				'options' => array(
+					'REPEATABLE READ'  => 'REPEATABLE READ',
+					'READ COMMITTED'   => 'READ COMMITTED',
+					'READ UNCOMMITTED' => 'READ UNCOMMITTED',
+					'SERIALIZABLE'     => 'SERIALIZABLE',
+				),
+				'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
+			);
 		} else {
 			$settings[] = array(
 				'title' => __( 'Custom orders tables', 'woocommerce' ),
