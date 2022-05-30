@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
- import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
+import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
