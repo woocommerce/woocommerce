@@ -1,5 +1,7 @@
 Significance: patch
 Type: fix
-Comment: This PR adds a check to be sure that we are checking an array. In this way, we can avoid a PHP warning.
+
+Add guard to avoid error when $block_templates is null.
+
 
 
