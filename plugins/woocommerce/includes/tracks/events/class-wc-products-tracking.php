@@ -23,8 +23,11 @@ class WC_Products_Tracking {
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
 		add_action( 'wp_after_insert_post', array( $this, 'track_product_published' ), 10, 4 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
+		add_action( 'edited_product_cat', array( $this, 'track_product_category_updated' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_tracking_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_product_tracking_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_attribute_tracking_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_tag_tracking_scripts' ) );
 	}
 
 	/**
@@ -230,7 +233,27 @@ class WC_Products_Tracking {
 	}
 
 	/**
-	 * Get the product screen name if current hook and page is a products type page.
+	 * Send a Tracks event when a product category is updated.
+	 *
+	 * @param int $category_id Category ID.
+	 */
+	public function track_product_category_updated( $category_id ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// Only track category creation from the edit product screen or the
+		// category management screen (which both occur via AJAX).
+		if (
+			empty( $_POST['action'] ) ||
+			( 'editedtag' !== $_POST['action'] && 'inline-save-tax' !== $_POST['action'] )
+		) {
+			return;
+		}
+		// phpcs:enable
+
+		WC_Tracks::record_event( 'product_category_update' );
+	}
+
+	/**
+	 * Adds the tracking scripts for product filtering actions.
 	 *
 	 * @param string $hook Hook of the current page.
 	 * @return string|boolean
@@ -269,7 +292,7 @@ class WC_Products_Tracking {
 	 *
 	 * @param string $hook Page hook.
 	 */
-	public function possibly_add_tracking_scripts( $hook ) {
+	public function possibly_add_product_tracking_scripts( $hook ) {
 		$product_screen = $this->get_product_screen( $hook );
 		if ( ! $product_screen ) {
 			return;
@@ -292,6 +315,100 @@ class WC_Products_Tracking {
 			array(
 				'name' => $product_screen,
 			)
+		);
+	}
+
+	/**
+	 * Adds the tracking scripts for product attributes filtering actions.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_attribute_tracking_scripts( $hook ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			'product_page_product_attributes' !== $hook ||
+			! isset( $_GET['page'] ) ||
+			'product_attributes' !== wp_unslash( $_GET['page'] )
+		) {
+			return;
+		}
+		// phpcs:enable
+
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'attributes-tracking' );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'wc-admin-attributes-tracking',
+			WCAdminAssets::get_url( 'wp-admin-scripts/attributes-tracking', 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			WCAdminAssets::get_file_version( 'js' ),
+			true
+		);
+	}
+
+	/**
+	 * Adds the tracking scripts for tags and categories filtering actions.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_tag_tracking_scripts( $hook ) {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			'edit-tags.php' !== $hook ||
+			! isset( $_GET['post_type'] ) ||
+			'product' !== wp_unslash( $_GET['post_type'] )
+		) {
+			return;
+		}
+		// phpcs:enable
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if (
+			isset( $_GET['taxonomy'] ) &&
+			'product_tag' === wp_unslash( $_GET['taxonomy'] )
+		) {
+			// phpcs:enable
+			$tags_script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'tags-tracking' );
+			$tags_script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $tags_script_assets_filename;
+
+			wp_enqueue_script(
+				'wc-admin-tags-tracking',
+				WCAdminAssets::get_url( 'wp-admin-scripts/tags-tracking', 'js' ),
+				array_merge( array( WC_ADMIN_APP ), $tags_script_assets ['dependencies'] ),
+				WCAdminAssets::get_file_version( 'js' ),
+				true
+			);
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if (
+			isset( $_GET['taxonomy'] ) &&
+			'product_cat' === wp_unslash( $_GET['taxonomy'] )
+		) {
+			// phpcs:enable
+			$category_script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'category-tracking' );
+			$category_script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $category_script_assets_filename;
+
+			wp_enqueue_script(
+				'wc-admin-category-tracking',
+				WCAdminAssets::get_url( 'wp-admin-scripts/category-tracking', 'js' ),
+				array_merge( array( WC_ADMIN_APP ), $category_script_assets ['dependencies'] ),
+				WCAdminAssets::get_file_version( 'js' ),
+				true
+			);
+			return;
+		}
+
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'add-term-tracking' );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'wc-admin-add-term-tracking',
+			WCAdminAssets::get_url( 'wp-admin-scripts/add-term-tracking', 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			WCAdminAssets::get_file_version( 'js' ),
+			true
 		);
 	}
 }
