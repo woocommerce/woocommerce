@@ -71,6 +71,7 @@ class WC_CLI_Update_Command {
 			$progress->tick();
 		}
 
+		WC_Install::update_db_version();
 		$progress->finish();
 
 		WC_Admin_Notices::remove_notice( 'update', true );
