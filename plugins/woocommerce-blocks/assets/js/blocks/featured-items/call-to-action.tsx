@@ -5,7 +5,17 @@ import classnames from 'classnames';
 import { RichText, InnerBlocks } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
-export const CallToAction = ( { itemId, linkText, permalink } ) => {
+interface CallToActionProps {
+	itemId: number | 'preview';
+	linkText: string;
+	permalink: string;
+}
+
+export const CallToAction = ( {
+	itemId,
+	linkText,
+	permalink,
+}: CallToActionProps ) => {
 	const buttonClasses = classnames(
 		'wp-block-button__link',
 		'is-style-fill'

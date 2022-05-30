@@ -3,17 +3,27 @@
 /**
  * External dependencies
  */
+import type { BlockAlignment } from '@wordpress/blocks';
+import { ProductResponseItem } from '@woocommerce/types';
 import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles } from '@wordpress/block-editor';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import { isEmpty } from 'lodash';
-import { useCallback, useState } from 'react';
+import {
+	ComponentType,
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useState,
+} from 'react';
+import { WP_REST_API_Category } from 'wp-types';
 
 /**
  * Internal dependencies
  */
 import { CallToAction } from './call-to-action';
 import { ConstrainedResizable } from './constrained-resizable';
+import { EditorBlock, GenericBlockUIConfig } from './types';
 import { useBackgroundImage } from './use-background-image';
 import {
 	dimRatioToClass,
@@ -21,9 +31,75 @@ import {
 	getClassPrefixFromName,
 } from './utils';
 
-export const withFeaturedItem = ( { emptyMessage, icon, label } ) => (
-	Component
-) => ( props ) => {
+interface WithFeaturedItemConfig extends GenericBlockUIConfig {
+	emptyMessage: string;
+}
+
+export interface FeaturedItemRequiredAttributes {
+	contentAlign: BlockAlignment;
+	dimRatio: number;
+	focalPoint: { x: number; y: number };
+	hasParallax: boolean;
+	imageFit: 'cover' | 'none';
+	isRepeated: boolean;
+	linkText: string;
+	mediaId: number;
+	mediaSrc: string;
+	minHeight: number;
+	overlayColor: string;
+	overlayGradient: string;
+	showDesc: boolean;
+	showPrice: boolean;
+}
+
+interface FeaturedCategoryRequiredAttributes
+	extends FeaturedItemRequiredAttributes {
+	categoryId: number | 'preview';
+	productId: never;
+}
+
+interface FeaturedProductRequiredAttributes
+	extends FeaturedItemRequiredAttributes {
+	categoryId: never;
+	productId: number | 'preview';
+}
+
+interface FeaturedItemRequiredProps< T > {
+	attributes: (
+		| FeaturedCategoryRequiredAttributes
+		| FeaturedProductRequiredAttributes
+	 ) &
+		EditorBlock< T >[ 'attributes' ] & {
+			// This is hardcoded because border is not yet included in Gutenberg's
+			// official types.
+			style: { border?: { radius?: number } };
+		};
+	isLoading: boolean;
+	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
+	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
+}
+
+interface FeaturedCategoryProps< T > extends FeaturedItemRequiredProps< T > {
+	category: WP_REST_API_Category;
+	product: never;
+}
+
+interface FeaturedProductProps< T > extends FeaturedItemRequiredProps< T > {
+	category: never;
+	product: ProductResponseItem;
+}
+
+type FeaturedItemProps< T extends EditorBlock< T > > =
+	| ( T & FeaturedCategoryProps< T > )
+	| ( T & FeaturedProductProps< T > );
+
+export const withFeaturedItem = ( {
+	emptyMessage,
+	icon,
+	label,
+}: WithFeaturedItemConfig ) => < T extends EditorBlock< T > >(
+	Component: ComponentType< T >
+) => ( props: FeaturedItemProps< T > ) => {
 	const [ isEditingImage ] = props.useEditingImage;
 
 	const {
@@ -62,7 +138,7 @@ export const withFeaturedItem = ( { emptyMessage, icon, label } ) => (
 			<CallToAction
 				itemId={ categoryId || productId }
 				linkText={ linkText }
-				permalink={ ( category || product ).permalink }
+				permalink={ ( category || product ).permalink as string }
 			/>
 		);
 	};
@@ -159,8 +235,10 @@ export const withFeaturedItem = ( { emptyMessage, icon, label } ) => (
 									style={ backgroundImageStyle }
 									onLoad={ ( e ) => {
 										setBackgroundImageSize( {
-											height: e.target?.naturalHeight,
-											width: e.target?.naturalWidth,
+											height:
+												e.currentTarget?.naturalHeight,
+											width:
+												e.currentTarget?.naturalWidth,
 										} );
 									} }
 								/>

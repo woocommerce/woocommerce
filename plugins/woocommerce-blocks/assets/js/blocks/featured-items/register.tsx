@@ -1,9 +1,13 @@
+// Disabling because of `__experimental` property names.
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /**
  * External dependencies
  */
+import type { BlockConfiguration } from '@wordpress/blocks';
 import { FunctionComponent } from 'react';
 import { InnerBlocks } from '@wordpress/block-editor';
-import { BlockConfiguration, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
@@ -12,10 +16,39 @@ import { isFeaturePluginBuild } from '@woocommerce/block-settings';
  */
 import { Edit } from './edit';
 
+type CSSDirections = 'top' | 'right' | 'bottom' | 'left';
+
+interface ExtendedBlockSupports {
+	supports: {
+		color?: {
+			background: string;
+			gradients: boolean;
+			link: boolean;
+			text: string;
+			__experimentalDuotone?: string;
+		};
+		spacing?: {
+			margin: boolean | CSSDirections[];
+			padding: boolean | CSSDirections[];
+			__experimentalDefaultControls?: {
+				margin?: boolean;
+				padding?: boolean;
+			};
+			__experimentalSkipSerialization?: boolean;
+		};
+		__experimentalBorder?: {
+			color: boolean;
+			radius: boolean;
+			width: boolean;
+			__experimentalSkipSerialization?: boolean;
+		};
+	};
+}
+
 export function register(
 	Block: FunctionComponent,
 	example: { attributes: Record< string, unknown > },
-	metadata: BlockConfiguration,
+	metadata: BlockConfiguration & ExtendedBlockSupports,
 	settings: Partial< BlockConfiguration >
 ): void {
 	const DEFAULT_SETTINGS = {

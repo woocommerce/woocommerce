@@ -9,7 +9,10 @@ import { useCallback, useEffect, useRef } from 'react';
 /**
  * Throttles a function inside a React functional component
  */
-export function useThrottle< T extends ( ...args: unknown[] ) => unknown >(
+// Disabling this as lodash expects this and I didn't make using `unknown`
+// work in practice.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useThrottle< T extends ( ...args: any[] ) => any >(
 	cb: T,
 	delay: number,
 	options?: ThrottleSettings

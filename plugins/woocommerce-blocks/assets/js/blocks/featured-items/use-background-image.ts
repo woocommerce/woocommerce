@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { WP_REST_API_Category } from 'wp-types';
+import { ProductResponseItem } from '@woocommerce/types';
 import {
 	getImageSrcFromProduct,
 	getImageIdFromProduct,
@@ -16,7 +18,24 @@ import {
 	getCategoryImageId,
 } from './featured-category/utils';
 
-export function useBackgroundImage( { blockName, item, mediaId, mediaSrc } ) {
+interface BackgroundProps {
+	blockName: string;
+	item: ProductResponseItem | WP_REST_API_Category;
+	mediaId: number | undefined;
+	mediaSrc: string | undefined;
+}
+
+interface BackgroundImage {
+	backgroundImageId: number;
+	backgroundImageSrc: string;
+}
+
+export function useBackgroundImage( {
+	blockName,
+	item,
+	mediaId,
+	mediaSrc,
+}: BackgroundProps ): BackgroundImage {
 	const [ backgroundImageId, setBackgroundImageId ] = useState( 0 );
 	const [ backgroundImageSrc, setBackgroundImageSrc ] = useState( '' );
 
@@ -26,8 +45,8 @@ export function useBackgroundImage( { blockName, item, mediaId, mediaSrc } ) {
 		} else {
 			setBackgroundImageId(
 				blockName === BLOCK_NAMES.featuredProduct
-					? getImageIdFromProduct( item )
-					: getCategoryImageId( item )
+					? getImageIdFromProduct( item as ProductResponseItem )
+					: getCategoryImageId( item as WP_REST_API_Category )
 			);
 		}
 	}, [ blockName, item, mediaId ] );
@@ -38,8 +57,8 @@ export function useBackgroundImage( { blockName, item, mediaId, mediaSrc } ) {
 		} else {
 			setBackgroundImageSrc(
 				blockName === BLOCK_NAMES.featuredProduct
-					? getImageSrcFromProduct( item )
-					: getCategoryImageSrc( item )
+					? getImageSrcFromProduct( item as ProductResponseItem )
+					: getCategoryImageSrc( item as WP_REST_API_Category )
 			);
 		}
 	}, [ blockName, item, mediaSrc ] );

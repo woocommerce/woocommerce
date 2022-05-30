@@ -3,6 +3,8 @@
 /**
  * External dependencies
  */
+import { ComponentType } from 'react';
+import { WP_REST_API_Category } from 'wp-types';
 import { __ } from '@wordpress/i18n';
 import {
 	InspectorControls as GutenbergInspectorControls,
@@ -19,12 +21,66 @@ import {
 	TextareaControl,
 	ExternalLink,
 } from '@wordpress/components';
+import { LooselyMustHave, ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { useBackgroundImage } from './use-background-image';
 import { BLOCK_NAMES } from './constants';
+import { FeaturedItemRequiredAttributes } from './with-featured-item';
+import { EditorBlock, ImageFit } from './types';
+
+type InspectorControlRequiredKeys =
+	| 'dimRatio'
+	| 'focalPoint'
+	| 'hasParallax'
+	| 'imageFit'
+	| 'isRepeated'
+	| 'overlayColor'
+	| 'overlayGradient'
+	| 'showDesc';
+
+interface InspectorControlsRequiredAttributes
+	extends LooselyMustHave<
+		FeaturedItemRequiredAttributes,
+		InspectorControlRequiredKeys
+	> {
+	alt: string;
+	backgroundImageSrc: string;
+	contentPanel: JSX.Element | undefined;
+}
+
+interface InspectorControlsProps extends InspectorControlsRequiredAttributes {
+	setAttributes: (
+		attrs: Partial< InspectorControlsRequiredAttributes >
+	) => void;
+	// Gutenberg doesn't provide some types, so we have to hard-code them here
+	setGradient: ( newGradientValue: string ) => void;
+}
+
+interface WithInspectorControlsRequiredProps< T > {
+	attributes: InspectorControlsRequiredAttributes &
+		EditorBlock< T >[ 'attributes' ];
+	setAttributes: InspectorControlsProps[ 'setAttributes' ];
+}
+
+interface WithInspectorControlsCategoryProps< T >
+	extends WithInspectorControlsRequiredProps< T > {
+	category: WP_REST_API_Category;
+	product: never;
+}
+
+interface WithInspectorControlsProductProps< T >
+	extends WithInspectorControlsRequiredProps< T > {
+	category: never;
+	product: ProductResponseItem;
+	showPrice: boolean;
+}
+
+type WithInspectorControlsProps< T extends EditorBlock< T > > =
+	| ( T & WithInspectorControlsCategoryProps< T > )
+	| ( T & WithInspectorControlsProductProps< T > );
 
 export const InspectorControls = ( {
 	alt,
@@ -33,14 +89,14 @@ export const InspectorControls = ( {
 	dimRatio,
 	focalPoint = { x: 0.5, y: 0.5 },
 	hasParallax,
-	isRepeated,
 	imageFit,
+	isRepeated,
 	overlayColor,
 	overlayGradient,
 	setAttributes,
 	setGradient,
 	showDesc,
-} ) => {
+}: InspectorControlsProps ) => {
 	// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
 	// so we need to check if it exists before using it.
 	const focalPointPickerExists = typeof FocalPointPicker === 'function';
@@ -118,7 +174,7 @@ export const InspectorControls = ( {
 										'woo-gutenberg-products-block'
 									) }
 									value={ imageFit }
-									onChange={ ( value ) =>
+									onChange={ ( value: ImageFit ) =>
 										setAttributes( {
 											imageFit: value,
 										} )
@@ -161,7 +217,7 @@ export const InspectorControls = ( {
 										'woo-gutenberg-products-block'
 									) }
 									value={ alt }
-									onChange={ ( value ) => {
+									onChange={ ( value: string ) => {
 										setAttributes( { alt: value } );
 									} }
 									help={
@@ -190,9 +246,9 @@ export const InspectorControls = ( {
 							{
 								colorValue: overlayColor,
 								gradientValue: overlayGradient,
-								onColorChange: ( value ) =>
+								onColorChange: ( value: string ) =>
 									setAttributes( { overlayColor: value } ),
-								onGradientChange: ( value ) => {
+								onGradientChange: ( value: string ) => {
 									setGradient( value );
 									setAttributes( {
 										overlayGradient: value,
@@ -212,7 +268,7 @@ export const InspectorControls = ( {
 							) }
 							value={ dimRatio }
 							onChange={ ( value ) =>
-								setAttributes( { dimRatio: value } )
+								setAttributes( { dimRatio: value as number } )
 							}
 							min={ 0 }
 							max={ 100 }
@@ -226,7 +282,9 @@ export const InspectorControls = ( {
 	);
 };
 
-export const withInspectorControls = ( Component ) => ( props ) => {
+export const withInspectorControls = < T extends EditorBlock< T > >(
+	Component: ComponentType< T >
+) => ( props: WithInspectorControlsProps< T > ) => {
 	const { attributes, name, setAttributes } = props;
 	const {
 		alt,
@@ -257,17 +315,18 @@ export const withInspectorControls = ( Component ) => ( props ) => {
 		blockName: name,
 	} );
 
-	const contentPanel = name === BLOCK_NAMES.featuredProduct && (
-		<ToggleControl
-			label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
-			checked={ showPrice }
-			onChange={ () =>
-				setAttributes( {
-					showPrice: ! showPrice,
-				} )
-			}
-		/>
-	);
+	const contentPanel =
+		name === BLOCK_NAMES.featuredProduct ? (
+			<ToggleControl
+				label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
+				checked={ showPrice }
+				onChange={ () =>
+					setAttributes( {
+						showPrice: ! showPrice,
+					} )
+				}
+			/>
+		) : undefined;
 
 	return (
 		<>

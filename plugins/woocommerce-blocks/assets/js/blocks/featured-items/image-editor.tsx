@@ -3,6 +3,9 @@
 /**
  * External dependencies
  */
+import { ComponentType, Dispatch, SetStateAction } from 'react';
+import { WP_REST_API_Category } from 'wp-types';
+import { ProductResponseItem } from '@woocommerce/types';
 import {
 	__experimentalImageEditingProvider as ImageEditingProvider,
 	__experimentalImageEditor as GutenbergImageEditor,
@@ -12,7 +15,43 @@ import {
  * Internal dependencies
  */
 import { BLOCK_NAMES, DEFAULT_EDITOR_SIZE } from './constants';
+import { EditorBlock } from './types';
 import { useBackgroundImage } from './use-background-image';
+
+type MediaAttributes = { mediaId: number; mediaSrc: string };
+type MediaSize = { height: number; width: number };
+
+interface WithImageEditorRequiredProps< T > {
+	attributes: MediaAttributes & EditorBlock< T >[ 'attributes' ];
+	backgroundImageSize: MediaSize;
+	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
+	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
+}
+
+interface WithImageEditorCategoryProps< T >
+	extends WithImageEditorRequiredProps< T > {
+	category: WP_REST_API_Category;
+	product: never;
+}
+
+interface WithImageEditorProductProps< T >
+	extends WithImageEditorRequiredProps< T > {
+	category: never;
+	product: ProductResponseItem;
+}
+
+type WithImageEditorProps< T extends EditorBlock< T > > =
+	| ( T & WithImageEditorCategoryProps< T > )
+	| ( T & WithImageEditorProductProps< T > );
+
+interface ImageEditorProps {
+	backgroundImageId: number;
+	backgroundImageSize: MediaSize;
+	backgroundImageSrc: string;
+	isEditingImage: boolean;
+	setAttributes: ( attrs: MediaAttributes ) => void;
+	setIsEditingImage: ( value: boolean ) => void;
+}
 
 export const ImageEditor = ( {
 	backgroundImageId,
@@ -21,7 +60,7 @@ export const ImageEditor = ( {
 	isEditingImage,
 	setAttributes,
 	setIsEditingImage,
-} ) => {
+}: ImageEditorProps ) => {
 	return (
 		<>
 			<ImageEditingProvider
@@ -33,7 +72,7 @@ export const ImageEditor = ( {
 				naturalWidth={
 					backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
 				}
-				onSaveImage={ ( { id, url } ) => {
+				onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
 					setAttributes( { mediaId: id, mediaSrc: url } );
 				} }
 				isEditing={ isEditingImage }
@@ -53,7 +92,9 @@ export const ImageEditor = ( {
 	);
 };
 
-export const withImageEditor = ( Component ) => ( props ) => {
+export const withImageEditor = < T extends EditorBlock< T > >(
+	Component: ComponentType< T >
+) => ( props: WithImageEditorProps< T > ) => {
 	const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
 
 	const { attributes, backgroundImageSize, name, setAttributes } = props;

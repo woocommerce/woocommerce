@@ -3,9 +3,7 @@
  */
 import { withProduct } from '@woocommerce/block-hocs';
 import { withSpokenMessages } from '@wordpress/components';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { starEmpty } from '@wordpress/icons';
 
@@ -19,6 +17,7 @@ import { withApiError } from '../with-api-error';
 import { withEditMode } from '../with-edit-mode';
 import { withEditingImage } from '../with-editing-image';
 import { withFeaturedItem } from '../with-featured-item';
+import { withUpdateButtonAttributes } from '../with-update-button-attributes';
 
 const GENERIC_CONFIG = {
 	icon: starEmpty,
@@ -26,6 +25,7 @@ const GENERIC_CONFIG = {
 };
 
 const BLOCK_CONTROL_CONFIG = {
+	...GENERIC_CONFIG,
 	cropLabel: __( 'Edit product image', 'woo-gutenberg-products-block' ),
 	editLabel: __( 'Edit selected product', 'woo-gutenberg-products-block' ),
 };
@@ -53,61 +53,7 @@ const EDIT_MODE_CONFIG = {
 export default compose( [
 	withProduct,
 	withSpokenMessages,
-	withSelect( ( select, { clientId }, { dispatch } ) => {
-		const Block = select( 'core/block-editor' ).getBlock( clientId );
-		const buttonBlockId = Block?.innerBlocks[ 0 ]?.clientId || '';
-		const currentButtonAttributes =
-			Block?.innerBlocks[ 0 ]?.attributes || {};
-		const updateBlockAttributes = ( attributes ) => {
-			if ( buttonBlockId ) {
-				dispatch( 'core/block-editor' ).updateBlockAttributes(
-					buttonBlockId,
-					attributes
-				);
-			}
-		};
-		return { updateBlockAttributes, currentButtonAttributes };
-	} ),
-	createHigherOrderComponent( ( ProductComponent ) => {
-		class WrappedComponent extends Component {
-			state = {
-				doUrlUpdate: false,
-			};
-			componentDidUpdate() {
-				const {
-					attributes,
-					updateBlockAttributes,
-					currentButtonAttributes,
-					product,
-				} = this.props;
-				if (
-					this.state.doUrlUpdate &&
-					! attributes.editMode &&
-					product?.permalink &&
-					currentButtonAttributes?.url &&
-					product.permalink !== currentButtonAttributes.url
-				) {
-					updateBlockAttributes( {
-						...currentButtonAttributes,
-						url: product.permalink,
-					} );
-					this.setState( { doUrlUpdate: false } );
-				}
-			}
-			triggerUrlUpdate = () => {
-				this.setState( { doUrlUpdate: true } );
-			};
-			render() {
-				return (
-					<ProductComponent
-						triggerUrlUpdate={ this.triggerUrlUpdate }
-						{ ...this.props }
-					/>
-				);
-			}
-		}
-		return WrappedComponent;
-	}, 'withUpdateButtonAttributes' ),
+	withUpdateButtonAttributes,
 	withEditingImage,
 	withEditMode( EDIT_MODE_CONFIG ),
 	withFeaturedItem( CONTENT_CONFIG ),

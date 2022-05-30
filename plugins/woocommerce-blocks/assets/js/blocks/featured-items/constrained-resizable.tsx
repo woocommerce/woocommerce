@@ -10,20 +10,22 @@ import { ResizableBox } from '@wordpress/components';
  */
 import { useThrottle } from '../../utils/useThrottle';
 
+type ResizeCallback = Exclude< ResizableBox.Props[ 'onResize' ], undefined >;
+
 export const ConstrainedResizable = ( {
 	className = '',
 	onResize,
 	...props
-} ) => {
+}: ResizableBox.Props ): JSX.Element => {
 	const [ isResizing, setIsResizing ] = useState( false );
 
 	const classNames = classnames( className, {
 		'is-resizing': isResizing,
 	} );
-	const throttledResize = useThrottle(
-		( event, direction, elt ) => {
+	const throttledResize = useThrottle< ResizeCallback >(
+		( event, direction, elt, _delta ) => {
 			if ( ! isResizing ) setIsResizing( true );
-			onResize( event, direction, elt );
+			onResize?.( event, direction, elt, _delta );
 		},
 		50,
 		{ leading: true }
@@ -35,7 +37,7 @@ export const ConstrainedResizable = ( {
 			enable={ { bottom: true } }
 			onResize={ throttledResize }
 			onResizeStop={ ( ...args ) => {
-				onResize( ...args );
+				onResize?.( ...args );
 				setIsResizing( false );
 			} }
 			{ ...props }

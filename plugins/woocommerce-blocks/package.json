@@ -113,6 +113,7 @@
 		"@types/react": "17.0.45",
 		"@types/react-dom": "17.0.16",
 		"@types/wordpress__block-editor": "6.0.6",
+		"@types/wordpress__blocks": "^11.0.1",
 		"@types/wordpress__compose": "4.0.1",
 		"@types/wordpress__data": "4.6.11",
 		"@types/wordpress__data-controls": "2.2.0",
@@ -199,6 +200,7 @@
 		"webpack-bundle-analyzer": "4.5.0",
 		"webpack-cli": "3.3.12",
 		"webpack-rtl-plugin": "2.0.0",
+		"wp-types": "^3.59.1",
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
