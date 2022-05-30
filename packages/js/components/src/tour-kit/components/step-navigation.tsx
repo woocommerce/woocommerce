@@ -22,6 +22,7 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 } ) => {
 	const isFirstStep = currentStepIndex === 0;
 	const isLastStep = currentStepIndex === steps.length - 1;
+	const { primaryButtonText } = steps[ currentStepIndex ].meta;
 
 	const NextButton = (
 		<Button
@@ -30,7 +31,7 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 			onClick={ onNextStep }
 			ref={ setInitialFocusedElement }
 		>
-			{ __( 'Next', 'woocommerce' ) }
+			{ primaryButtonText || __( 'Next', 'woocommerce' ) }
 		</Button>
 	);
 
@@ -58,7 +59,7 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 						className="woocommerce-tour-kit-step-navigation__done-btn"
 						onClick={ onDismiss( 'done-btn' ) }
 					>
-						{ __( 'Done', 'woocommerce' ) }
+						{ primaryButtonText || __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			);

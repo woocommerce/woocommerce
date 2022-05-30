@@ -33,6 +33,7 @@ function Tour() {
           descriptions: {
             desktop: 'Lorem ipsum dolor sit amet.',
           },
+          primaryButtonText: "Done"
         },
 			},
 		],

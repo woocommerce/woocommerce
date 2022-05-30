@@ -15,6 +15,7 @@ export interface WooStep extends Step {
 			desktop: string | React.ReactElement | null;
 			mobile?: string | React.ReactElement | null;
 		};
+		primaryButtonText?: string;
 	};
 }
 export type WooOptions = Options;
