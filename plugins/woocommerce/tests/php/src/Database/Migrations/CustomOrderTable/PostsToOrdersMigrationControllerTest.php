@@ -4,21 +4,16 @@
  */
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ShippingHelper;
+use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
+use Automattic\WooCommerce\Testing\Tools\ReplacementObject;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Class PostsToOrdersMigrationControllerTest.
  */
 class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
-
-	/**
-	 * @var DataSynchronizer
-	 */
-	private $synchronizer;
 
 	/**
 	 * @var PostsToOrdersMigrationController
@@ -362,5 +357,123 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( "TRUNCATE table $table;" );
 		}
+	}
+
+	/**
+	 * @testdox Database errors appearing during migrations are properly logged.
+	 */
+	public function test_database_errors_during_migrations_are_logged() {
+		global $wpdb;
+
+		$fake_logger = $this->use_fake_logger();
+
+		$wpdb_mock = new DynamicDecorator( $wpdb );
+		$this->register_legacy_proxy_global_mocks( array( 'wpdb' => $wpdb_mock ) );
+
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) {
+				$wpdb_mock = $args[0];
+				$query     = $args[1];
+
+				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
+					$wpdb_mock->state = 'Something failed!';
+				}
+			}
+		);
+
+		$wpdb_mock->register_property_get_replacement(
+			'last_error',
+			function( $replacement_object ) {
+				if ( $replacement_object->state ) {
+					return $replacement_object->state;
+				} else {
+					return $replacement_object->original_object->last_error;
+				}
+			}
+		);
+
+		$this->sut->migrate_orders( array( 1, 2, 3 ) );
+
+		$actual_errors = $fake_logger->errors;
+		usort(
+			$actual_errors,
+			function( $a, $b ) {
+				return strcmp( $a['message'], $b['message'] );
+			}
+		);
+
+		$this->assertEquals( 'PostMetaToOrderMetaMigrator: when processing ids 1-3: Something failed!', $actual_errors[0]['message'] );
+		$this->assertEquals( array( 1, 2, 3 ), $actual_errors[0]['data']['ids'] );
+		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
+	}
+
+	/**
+	 * @testdox Exceptions thrown during migrations are properly logged.
+	 */
+	public function test_exceptions_during_migrations_are_logged() {
+		global $wpdb;
+
+		$exception = new \Exception( 'Something failed!' );
+
+		$fake_logger = $this->use_fake_logger();
+
+		$wpdb_mock = new DynamicDecorator( $wpdb );
+		$this->register_legacy_proxy_global_mocks( array( 'wpdb' => $wpdb_mock ) );
+
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) use ( $exception ) {
+				$query = $args[1];
+
+				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
+					throw $exception;
+				}
+			}
+		);
+
+		$this->sut->migrate_orders( array( 1, 2, 3 ) );
+
+		$actual_errors = $fake_logger->errors;
+		usort(
+			$actual_errors,
+			function( $a, $b ) {
+				return strcmp( $a['message'], $b['message'] );
+			}
+		);
+
+		$this->assertTrue( StringUtil::starts_with( $actual_errors[0]['message'], 'PostMetaToOrderMetaMigrator: when processing ids 1-3: (Exception) Something failed!' ) );
+		$this->assertEquals( $exception, $actual_errors[0]['data']['exception'] );
+		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
+	}
+
+	/**
+	 * Register a fake logger to be returned by wc_get_logger, and return it.
+	 *
+	 * @return object The fake logger registered.
+	 */
+	private function use_fake_logger() {
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $errors = array();
+
+			public function error( $message, $data ) {
+				$this->errors[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
+		return $fake_logger;
 	}
 }

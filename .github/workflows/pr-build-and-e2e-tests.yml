@@ -3,9 +3,12 @@ on:
   pull_request:
   workflow_dispatch:
 
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  E2E_PLAYWRIGHT: ${{ false }}
 
 jobs:
     e2e-tests-run:
@@ -31,12 +34,50 @@ jobs:
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
+              if: env.E2E_PLAYWRIGHT != 'true'
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
               run: pnpm exec wc-e2e test:e2e
+
+            - name: Download and install Chromium browser.
+              if: env.E2E_PLAYWRIGHT == 'true'
+              working-directory: plugins/woocommerce
+              run: pnpx playwright install chromium
+
+            - name: Run (Playwright) tests command.
+              id: run_playwright_e2e_tests
+              if: env.E2E_PLAYWRIGHT == 'true'
+              working-directory: plugins/woocommerce
+              run: pnpx playwright test --config=e2e/playwright.config.js
+
+            - name: Generate (Playwright) E2E Test report.
+              id: generate_e2e_report
+              if: |
+                  always() && 
+                  ( env.E2E_PLAYWRIGHT == 'true' ) &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
+
+            - name: Archive (Playwright) E2E test report
+              if: |
+                  always() &&
+                  env.E2E_PLAYWRIGHT == 'true' &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: |
+                      plugins/woocommerce/e2e/allure-results
+                      plugins/woocommerce/e2e/allure-report
+                  if-no-files-found: ignore
+                  retention-days: 5
 
             - name: Archive E2E test screenshots
               uses: actions/upload-artifact@v3
@@ -62,7 +103,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -87,7 +128,7 @@ jobs:
                   path: |
                       ${{ env.API_TEST_REPORT_DIR }}/allure-results
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
-                  retention-days: 7
+                  retention-days: 5
 
     k6-tests-run:
         name: Runs k6 Performance tests
@@ -102,7 +143,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -126,8 +167,13 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: always() && (contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ))
-        runs-on: ubuntu-18.04
+        if: |
+            always() && 
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
         needs: [api-tests-run, e2e-tests-run, k6-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
@@ -136,6 +182,7 @@ jobs:
             COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         steps:
             - name: Publish API test report
+              if: env.E2E_PLAYWRIGHT != 'true'
               env:
                   ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
               run: |
@@ -148,3 +195,17 @@ jobs:
                     -f commit_sha=$COMMIT_SHA \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Publish API and (Playwright) E2E test reports
+              if: env.E2E_PLAYWRIGHT == 'true'
+              env:
+                  API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
+                  E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+              run: |
+                  gh workflow run publish-reports.yml \
+                    -f test_workflow=pr \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f e2e_artifact=$E2E_ARTIFACT \
+                    -f pr_number=$PR_NUMBER \
+                    -f commit_sha=$COMMIT_SHA \
+                    --repo woocommerce/woocommerce-test-reports

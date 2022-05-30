@@ -57,7 +57,7 @@ abstract class TableMigrator {
 	 * @return mixed Whatever $wpdb->query returns.
 	 */
 	protected function db_query( string $query ) {
-		global $wpdb;
+		$wpdb = WC()->get_global( 'wpdb' );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->query( $query );
@@ -77,7 +77,7 @@ abstract class TableMigrator {
 	 * @return mixed Whatever $wpdb->get_results returns.
 	 */
 	protected function db_get_results( string $query = null, string $output = OBJECT ) {
-		global $wpdb;
+		$wpdb = WC()->get_global( 'wpdb' );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->get_results( $query, $output );

@@ -6,7 +6,6 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { History } from 'history';
 /**
  * Internal dependencies
  */
@@ -52,7 +51,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	const onComplete = useCallback(
 		( options ) => {
 			optimisticallyCompleteTask( id );
-			( getHistory() as History ).push(
+			getHistory().push(
 				options && options.redirectPath
 					? options.redirectPath
 					: getNewPath( {}, '/', {} )
