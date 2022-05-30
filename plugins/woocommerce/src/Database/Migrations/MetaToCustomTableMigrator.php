@@ -233,14 +233,21 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			return;
 		}
 
-		$entity_ids       = array_keys( $data['data'] );
-		$already_migrated = $this->get_already_migrated_records( $entity_ids );
+		$entity_ids               = array_keys( $data['data'] );
+		$data_to_insert_or_update = $this->get_data_to_insert_or_update( $entity_ids );
+		$data_to_insert           = array_filter(
+			$data_to_insert_or_update,
+			function( $value ) {
+				return null === $value->destination_id;
+			}
+		);
+		$data_to_update           = array_diff_key( $data_to_insert_or_update, $data_to_insert );
 
-		$to_insert = array_diff_key( $data['data'], $already_migrated );
+		$to_insert = array_intersect_key( $data['data'], $data_to_insert );
 		$this->process_insert_batch( $to_insert );
 
-		$to_update = array_intersect_key( $data['data'], $already_migrated );
-		$this->process_update_batch( $to_update, $already_migrated );
+		$to_update = array_intersect_key( $data['data'], $data_to_update );
+		$this->process_update_batch( $to_update, $data_to_update );
 	}
 
 	/**
@@ -255,27 +262,25 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 		$queries = $this->generate_insert_sql_for_batch( $batch );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
-		$actual_processed_count = $this->db_query( $queries );
-		$this->db_query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
-		$this->maybe_add_insert_or_update_mismatch_error( 'insert', $batch, $actual_processed_count );
+		$processed_rows_count = $this->db_query( $queries );
+		$this->maybe_add_insert_or_update_error( 'insert', $processed_rows_count );
 	}
 
 	/**
 	 * Process batch for update into destination table.
 	 *
 	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
-	 * @param array $already_migrated Maps rows to update data with their original IDs.
+	 * @param array $ids_mapping Maps rows to update data with their original IDs.
 	 */
-	private function process_update_batch( array $batch, array $already_migrated ): void {
+	private function process_update_batch( array $batch, array $ids_mapping ): void {
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
 
-		$queries = $this->generate_update_sql_for_batch( $batch, $already_migrated );
+		$queries = $this->generate_update_sql_for_batch( $batch, $ids_mapping );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
-		$actual_processed_count = $this->db_query( $queries );
-		$this->db_query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
-		$this->maybe_add_insert_or_update_mismatch_error( 'update', $batch, $actual_processed_count );
+		$processed_rows_count = $this->db_query( $queries ) / 2;
+		$this->maybe_add_insert_or_update_error( 'update', $processed_rows_count );
 	}
 
 
@@ -322,7 +327,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	}
 
 	/**
-	 * Fetch id mappings for records that are already inserted, or can be considered duplicates.
+	 * Fetch id mappings for records that are already inserted and need update, and for missing records.
 	 *
 	 * @param array $entity_ids List of entity IDs to verify.
 	 *
@@ -330,12 +335,12 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 * array(
 	 *      '$source_id1' => array(
 	 *          'source_id' => $source_id1,
-	 *          'destination_id' => $destination_id1,
+	 *          'destination_id' => $destination_id1 (null if record is still not present in destination table)
 	 *      ),
 	 *      ...
 	 * )
 	 */
-	protected function get_already_migrated_records( array $entity_ids ): array {
+	protected function get_data_to_insert_or_update( array $entity_ids ): array {
 		global $wpdb;
 
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
@@ -348,6 +353,30 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 		$entity_id_placeholder = implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) );
 
+		// Filter out already existing and not modified records according to the column mapping.
+		// The IFNULL and CHAR(0) "hack" is needed because NULLs can't be directly compared in SQL.
+		$where_statement     = array();
+		$core_column_mapping = array_filter(
+			$this->core_column_mapping,
+			function( $mapping ) {
+				return ! isset( $mapping['select_clause'] );
+			}
+		);
+		foreach ( $core_column_mapping as $column_name => $mapping ) {
+			if ( $column_name === $source_primary_key_column ) {
+				continue;
+			}
+			$where_statement[] =
+				"IFNULL(source.$column_name,CHAR(0)) != IFNULL(destination.{$mapping['destination']},CHAR(0))"
+				. ( 'string' === $mapping['type'] ? ' COLLATE ' . $wpdb->collate : '' );
+		}
+		$where_statement = trim( implode( ' OR ', $where_statement ) );
+		if ( '' !== $where_statement ) {
+			$where_statement = " AND ( $where_statement )";
+		}
+
+		$additional_where = $this->get_additional_where_clause_for_get_data_to_insert_or_update( $entity_ids );
+
 		$already_migrated_entity_ids = $this->db_get_results(
 			$wpdb->prepare(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
@@ -355,9 +384,14 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
 FROM `$destination_table` destination
 JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
-WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
-				",
-				$entity_ids
+WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )$where_statement $additional_where
+UNION
+SELECT source.`$source_primary_key_column` as source_id, null as destination_id
+FROM `$destination_table` destination
+RIGHT OUTER JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
+WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) AND destination.`$destination_source_join_column` IS NULL $additional_where
+",
+				array_merge( $entity_ids, $entity_ids )
 			)
 		// phpcs:enable
 		);
@@ -365,6 +399,15 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
 		return array_column( $already_migrated_entity_ids, null, 'source_id' );
 	}
 
+	/**
+	 * Get additional string to be appended to the WHERE clause of the SQL query used by get_data_to_insert_or_update.
+	 *
+	 * @param array $entity_ids The ids of the entities being inserted or updated.
+	 * @return string Additional string for the WHERE clause, must either be empty or start with "AND" or "OR".
+	 */
+	protected function get_additional_where_clause_for_get_data_to_insert_or_update( array $entity_ids ): string {
+		return '';
+	}
 
 	/**
 	 * Helper method to build query used to fetch data from core source table.
@@ -566,7 +609,7 @@ WHERE
 	 */
 	public function verify_migrated_data( array $source_ids ) : array {
 		global $wpdb;
-		$query   = $this->build_verification_query( $source_ids );
+		$query = $this->build_verification_query( $source_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query should already be prepared.
 		$results = $wpdb->get_results( $query, ARRAY_A );
 
@@ -644,7 +687,7 @@ WHERE $where_clause
 		$source_ids_placeholder   = implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) );
 
 		return $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both $source_table and $source_primary_id_column is hardcoded.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			"$source_table.$source_primary_id_column IN ($source_ids_placeholder)",
 			$source_ids
 		);
@@ -686,9 +729,9 @@ WHERE $where_clause
 					$failed_ids[ $row[ $primary_key_column ] ] = array();
 				}
 				$failed_ids[ $row[ $primary_key_column ] ][] = array(
-					'column' => $column_name,
+					'column'         => $column_name,
 					'original_value' => $row[ $source_alias ],
-					'new_value' => $row[ $destination_alias ],
+					'new_value'      => $row[ $destination_alias ],
 				);
 			}
 		}
@@ -715,9 +758,9 @@ WHERE $where_clause
 					$failed_ids[ $row[ $primary_key_column ] ] = array();
 				}
 				$failed_ids[ $row[ $primary_key_column ] ][] = array(
-					'column' => $meta_key,
+					'column'         => $meta_key,
 					'original_value' => $row[ $meta_alias ],
-					'new_value' => $row[ $destination_alias ],
+					'new_value'      => $row[ $destination_alias ],
 				);
 			}
 		}
@@ -736,7 +779,7 @@ WHERE $where_clause
 	 * @return array Processed row.
 	 */
 	private function pre_process_row( $row, $schema, $alias, $destination_alias ) {
-		if ( in_array( $schema['type'], array( 'int', 'decimal' ) ) ) {
+		if ( in_array( $schema['type'], array( 'int', 'decimal' ), true ) ) {
 			$row[ $alias ]             = wc_format_decimal( $row[ $alias ], false, true );
 			$row[ $destination_alias ] = wc_format_decimal( $row[ $destination_alias ], false, true );
 		}
