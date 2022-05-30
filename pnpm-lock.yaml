@@ -40,6 +40,7 @@ importers:
       '@wordpress/prettier-config': ^1.1.1
       babel-loader: ^8.2.3
       chalk: ^4.1.2
+      copy-webpack-plugin: ^10.2.4
       core-js: ^3.21.1
       css-loader: ^6.7.0
       glob: ^7.2.0
@@ -57,6 +58,7 @@ importers:
       sass: ^1.49.9
       sass-loader: ^10.2.1
       typescript: 4.2.4
+      url-loader: ^1.1.2
       webpack: ^5.70.0
       wp-textdomain: 1.0.1
     dependencies:
@@ -99,6 +101,7 @@ importers:
       '@wordpress/prettier-config': 1.1.1
       babel-loader: 8.2.3_d3f6fe5812216e437b67a6bf164a056c
       chalk: 4.1.2
+      copy-webpack-plugin: 10.2.4_webpack@5.70.0
       core-js: 3.21.1
       css-loader: 6.7.1_webpack@5.70.0
       glob: 7.2.0
@@ -115,6 +118,7 @@ importers:
       sass: 1.49.9
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       typescript: 4.2.4
+      url-loader: 1.1.2_webpack@5.70.0
       webpack: 5.70.0
 
   packages/js/admin-e2e-tests:
@@ -9568,7 +9572,7 @@ packages:
     dependencies:
       '@nrwl/tao': 12.10.0
       ejs: 3.1.6
-      ignore: 5.1.9
+      ignore: 5.2.0
       rxjs: 6.6.7
       semver: 7.3.4
       tslib: 2.3.1
@@ -9738,7 +9742,7 @@ packages:
       enquirer: 2.3.6
       fast-glob: 3.2.7
       fs-extra: 9.1.0
-      ignore: 5.1.9
+      ignore: 5.2.0
       jsonc-parser: 3.0.0
       nx: 13.3.5
       rxjs: 6.6.7
@@ -14403,7 +14407,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      debug: 4.3.3
+      debug: 4.3.4
       eslint-visitor-keys: 1.3.0
       glob: 7.2.0
       is-glob: 4.0.3
@@ -17135,7 +17139,7 @@ packages:
     dev: true
 
   /array-union/1.0.2:
-    resolution: {integrity: sha1-mjRBDk9OPaI96jdb5b5w8kd47Dk=}
+    resolution: {integrity: sha512-Dxr6QJj/RdU/hCaBjOfxW+q6lyuVE6JFWIrAUpuOOhoJJoQ99cUn3igRaHVB5P9WrgFVN0FfArM3x0cueOU8ng==}
     engines: {node: '>=0.10.0'}
     dependencies:
       array-uniq: 1.0.3
@@ -17651,7 +17655,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -17681,7 +17685,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
   /babel-messages/6.23.0:
@@ -19814,7 +19818,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.0.0
       serialize-javascript: 6.0.0
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /copy-webpack-plugin/9.1.0_webpack@5.70.0:
@@ -19823,9 +19827,9 @@ packages:
     peerDependencies:
       webpack: ^5.1.0
     dependencies:
-      fast-glob: 3.2.7
+      fast-glob: 3.2.11
       glob-parent: 6.0.2
-      globby: 11.0.4
+      globby: 11.1.0
       normalize-path: 3.0.0
       schema-utils: 3.1.1
       serialize-javascript: 6.0.0
@@ -20103,7 +20107,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0
+      webpack: 4.46.0_webpack-cli@3.3.12
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -33666,7 +33670,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
   /rc/1.2.8:
@@ -36828,7 +36832,7 @@ packages:
       stylus: '>=0.52.4'
       webpack: ^5.0.0
     dependencies:
-      fast-glob: 3.2.7
+      fast-glob: 3.2.11
       klona: 2.0.5
       normalize-path: 3.0.0
       stylus: 0.55.0
@@ -37158,7 +37162,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0
+      webpack: 4.46.0_webpack-cli@3.3.12
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
@@ -38356,7 +38360,7 @@ packages:
       loader-utils: 1.4.0
       mime: 2.5.2
       schema-utils: 1.0.0
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /url-loader/3.0.0_webpack@4.46.0:
@@ -39235,7 +39239,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5_webpack@4.46.0
       watchpack: 1.7.5
-      webpack-cli: 3.3.12_webpack@4.46.0
+      webpack-cli: 3.3.12_webpack@5.70.0
       webpack-sources: 1.4.3
     dev: true
 
