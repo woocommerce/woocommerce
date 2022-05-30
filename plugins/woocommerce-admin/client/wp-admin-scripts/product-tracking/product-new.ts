@@ -12,7 +12,7 @@ const initTracks = () => {
 	recordEvent( 'product_add_view' );
 };
 
-if ( productScreen === 'new' ) {
+if ( productScreen && productScreen.name === 'new' ) {
 	initTracks();
 	initProductScreenTracks();
 }
