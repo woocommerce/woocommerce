@@ -151,7 +151,6 @@
 
 		.svg-background {
 			right: 6%;
-			width: 25%;
 		}
 	}
 
@@ -241,6 +240,11 @@
 		flex: 1;
 		overflow: hidden;
 		width: 100%;
+
+		img {
+			max-height: 150px;
+			width: auto;
+		}
 	}
 
 	.svg-background {

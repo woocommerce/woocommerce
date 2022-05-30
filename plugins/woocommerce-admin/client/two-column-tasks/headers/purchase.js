@@ -14,17 +14,17 @@ const PurchaseHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
-				alt={ __( 'Payment illustration', 'woocommerce' ) }
+				alt={ __( 'Purchase illustration', 'woocommerce' ) }
 				src={
-					WC_ASSET_URL + 'images/task_list/payment-illustration.png'
+					WC_ASSET_URL + 'images/task_list/purchase-illustration.png'
 				}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Add paid extensions', 'woocommerce' ) }</h1>
+				<h1>{ task.title }</h1>
 				<p>
 					{ __(
-						'Continue to checkout to to add amazing new features to your store.',
+						'Good choice! You chose to add amazing new features to your store. Continue to checkout to complete your purchase.',
 						'woocommerce'
 					) }
 				</p>
