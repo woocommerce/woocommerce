@@ -54,36 +54,52 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		$products = $this->get_paid_products_and_themes();
+		$products   = $this->get_paid_products_and_themes();
+		$first_product    = count( $products['remaining'] ) >= 1 ? $products['remaining'][0] : false;
+		$additional_count = count( $products['remaining'] ) - 1;
 
 		if ( $this->get_parent_option( 'use_completed_title' ) && $this->is_complete() ) {
 			return count( $products['remaining'] ) === 1
 				? sprintf(
-					/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+					/* translators: %1$s: a purchased product name */
 					__(
-						'You added %s',
+						'You added %1$s',
 						'woocommerce'
 					),
-					$products['remaining'][0]
+					$first_product
 				)
-				: __(
-					'You added paid extensions',
-					'woocommerce'
+				: sprintf(
+					/* translators: %1$s: a purchased product name, %2$d the number of other products purchased */
+					_n(
+						'You added %1$s and %2$d other product',
+						'You added %1$s and %2$d other products',
+						$additional_count,
+						'woocommerce'
+					),
+					$products['remaining'][0],
+					$additional_count
 				);
 		}
 
 		return count( $products['remaining'] ) === 1
 			? sprintf(
-				/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+				/* translators: %1$s: a purchaseable product name */
 				__(
 					'Add %s to my store',
 					'woocommerce'
 				),
 				$products['remaining'][0]
 			)
-			: __(
-				'Add paid extensions to my store',
-				'woocommerce'
+			: sprintf(
+				/* translators: %1$s: a purchaseable product name, %2$d the number of other products to purchase */
+				_n(
+					'Add %1$s and %2$d more product to my store',
+					'Add %1$s and %2$d more products to my store',
+					$additional_count,
+					'woocommerce'
+				),
+				$products['remaining'][0],
+				$additional_count
 			);
 	}
 
