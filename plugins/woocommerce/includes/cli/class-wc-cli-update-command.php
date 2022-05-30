@@ -63,10 +63,6 @@ class WC_CLI_Update_Command {
 
 		foreach ( $callbacks_to_run as $update_callback ) {
 			call_user_func( $update_callback );
-			$result = false;
-			while ( $result ) {
-				$result = (bool) call_user_func( $update_callback );
-			}
 			$update_count ++;
 			$progress->tick();
 		}
