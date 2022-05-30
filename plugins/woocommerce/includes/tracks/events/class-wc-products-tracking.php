@@ -138,13 +138,14 @@ class WC_Products_Tracking {
 						return;
 					}
 
-					var tagsText = $( '[name=\"tax_input[product_tag]\"]' ).val();
+					var tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 					var currentStockValue = $( '#_stock' ).val();
+					var description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.activeEditor.getContent();
 					var properties = {
 						attributes:				$( '.woocommerce_attribute' ).length,
 						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
 						'cross-sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
-						description:			$( '#content' ).val().length ? 'Yes' : 'No',
+						description:			description_value.length ? 'Yes' : 'No',
 						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
