@@ -233,21 +233,20 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			return;
 		}
 
-		$entity_ids               = array_keys( $data['data'] );
-		$data_to_insert_or_update = $this->get_data_to_insert_or_update( $entity_ids );
-		$data_to_insert           = array_filter(
-			$data_to_insert_or_update,
-			function( $value ) {
-				return null === $value->destination_id;
-			}
-		);
-		$data_to_update           = array_diff_key( $data_to_insert_or_update, $data_to_insert );
+		$entity_ids       = array_keys( $data['data'] );
+		$existing_records = $this->get_already_existing_records( $entity_ids );
 
-		$to_insert = array_intersect_key( $data['data'], $data_to_insert );
+		$to_insert = array_diff_key( $data['data'], $existing_records );
 		$this->process_insert_batch( $to_insert );
 
-		$to_update = array_intersect_key( $data['data'], $data_to_update );
-		$this->process_update_batch( $to_update, $data_to_update );
+		$existing_records = array_filter(
+			$existing_records,
+			function( $record_data ) {
+				return '1' === $record_data->modified;
+			}
+		);
+		$to_update        = array_intersect_key( $data['data'], $existing_records );
+		$this->process_update_batch( $to_update, $existing_records );
 	}
 
 	/**
@@ -327,7 +326,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	}
 
 	/**
-	 * Fetch id mappings for records that are already inserted and need update, and for missing records.
+	 * Fetch id mappings for records that are already inserted in the destination table.
 	 *
 	 * @param array $entity_ids List of entity IDs to verify.
 	 *
@@ -335,12 +334,13 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 * array(
 	 *      '$source_id1' => array(
 	 *          'source_id' => $source_id1,
-	 *          'destination_id' => $destination_id1 (null if record is still not present in destination table)
+	 *          'destination_id' => $destination_id1
+	 *          'modified' => 0 if it can be determined that the row doesn't need update, 1 otherwise
 	 *      ),
 	 *      ...
 	 * )
 	 */
-	protected function get_data_to_insert_or_update( array $entity_ids ): array {
+	protected function get_already_existing_records( array $entity_ids ): array {
 		global $wpdb;
 
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
@@ -353,9 +353,9 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 		$entity_id_placeholder = implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) );
 
-		// Filter out already existing and not modified records according to the column mapping.
+		// Additional SQL to check if the row needs update according to the column mapping.
 		// The IFNULL and CHAR(0) "hack" is needed because NULLs can't be directly compared in SQL.
-		$where_statement     = array();
+		$modified_selector   = array();
 		$core_column_mapping = array_filter(
 			$this->core_column_mapping,
 			function( $mapping ) {
@@ -366,13 +366,16 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			if ( $column_name === $source_primary_key_column ) {
 				continue;
 			}
-			$where_statement[] =
+			$modified_selector[] =
 				"IFNULL(source.$column_name,CHAR(0)) != IFNULL(destination.{$mapping['destination']},CHAR(0))"
 				. ( 'string' === $mapping['type'] ? ' COLLATE ' . $wpdb->collate : '' );
 		}
-		$where_statement = trim( implode( ' OR ', $where_statement ) );
-		if ( '' !== $where_statement ) {
-			$where_statement = " AND ( $where_statement )";
+
+		if ( empty( $modified_selector ) ) {
+			$modified_selector = ', 1 AS modified';
+		} else {
+			$modified_selector = trim( implode( ' OR ', $modified_selector ) );
+			$modified_selector = ", if( $modified_selector, 1, 0 ) AS modified";
 		}
 
 		$additional_where = $this->get_additional_where_clause_for_get_data_to_insert_or_update( $entity_ids );
@@ -381,17 +384,12 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			$wpdb->prepare(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
 				"
-SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
+SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id $modified_selector
 FROM `$destination_table` destination
 JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
-WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )$where_statement $additional_where
-UNION
-SELECT source.`$source_primary_key_column` as source_id, null as destination_id
-FROM `$destination_table` destination
-RIGHT OUTER JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
-WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) AND destination.`$destination_source_join_column` IS NULL $additional_where
+WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) $additional_where
 ",
-				array_merge( $entity_ids, $entity_ids )
+				$entity_ids
 			)
 		// phpcs:enable
 		);
