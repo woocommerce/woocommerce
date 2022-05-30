@@ -16,7 +16,10 @@ const withTransformSingleSelectToMultipleSelect = createHigherOrderComponent(
 			render() {
 				const { selected } = this.props;
 				const isNil = selected === null || selected === undefined;
-				return (
+
+				return Array.isArray( selected ) ? (
+					<OriginalComponent { ...this.props } />
+				) : (
 					<OriginalComponent
 						{ ...this.props }
 						selected={ isNil ? [] : [ selected ] }
