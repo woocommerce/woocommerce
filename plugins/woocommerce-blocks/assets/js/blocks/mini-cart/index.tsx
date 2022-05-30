@@ -6,6 +6,7 @@ import { cart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
 import type { BlockConfiguration } from '@wordpress/blocks';
+import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -33,6 +34,12 @@ const settings: BlockConfiguration = {
 		html: false,
 		multiple: false,
 		color: true,
+		typography: {
+			fontSize: true,
+			...( isFeaturePluginBuild() && {
+				__experimentalFontFamily: true,
+			} ),
+		},
 	},
 	example: {
 		attributes: {
