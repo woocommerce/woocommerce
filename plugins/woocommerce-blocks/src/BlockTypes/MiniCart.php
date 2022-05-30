@@ -150,22 +150,6 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
-		/**
-		 * Temporary remove the this filter so $wp_scripts->print_translations
-		 * calls won't accident print the translations scripts for the block
-		 * when inserted as a widget.
-		 *
-		 * $wp_scripts->print_translations() calls load_script_textdomain()
-		 * which calls load_script_translations() containing the below filter.
-		 *
-		 * In Customzier, woocommerce_blocks_get_i18n_data_json doesn't exist
-		 * at the time of this filter call. So we need checking for its
-		 * existence to prevent fatal error.
-		 */
-		if ( function_exists( 'woocommerce_blocks_get_i18n_data_json' ) ) {
-			remove_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
-		}
-
 		$script_data = $this->asset_api->get_script_data( 'build/mini-cart-component-frontend.js' );
 
 		$num_dependencies = count( $script_data['dependencies'] );
@@ -194,14 +178,10 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
-			'src'     => $script_data['src'],
-			'version' => $script_data['version'],
+			'src'          => $script_data['src'],
+			'version'      => $script_data['version'],
+			'translations' => $this->get_inner_blocks_translations(),
 		);
-
-		// Re-add the filter.
-		if ( function_exists( 'woocommerce_blocks_get_i18n_data_json' ) ) {
-			add_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
-		}
 
 		$this->asset_data_registry->add(
 			'mini_cart_block_frontend_dependencies',
@@ -482,16 +462,26 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Register script and style assets for the block type before it is registered.
-	 *
-	 * This registers the scripts; it does not enqueue them.
+	 * Prepare translations for inner blocks and dependencies.
 	 */
-	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
+	protected function get_inner_blocks_translations() {
+		$wp_scripts   = wp_scripts();
+		$translations = array();
+
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--mini-cart-contents-block' );
 		$shared_chunks = [ 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' ];
-		$this->register_chunk_translations( array_merge( $chunks, $vendor_chunks, $shared_chunks ) );
+
+		foreach ( array_merge( $chunks, $vendor_chunks, $shared_chunks ) as $chunk ) {
+			$handle = 'wc-blocks-' . $chunk . '-chunk';
+			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
+			$translations[] = $wp_scripts->print_translations( $handle, false );
+			wp_deregister_script( $handle );
+		}
+
+		$translations = array_filter( $translations );
+
+		return implode( '', $translations );
 	}
 
 	/**
