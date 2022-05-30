@@ -10,7 +10,6 @@ import TourKit, { TourStepRenderer } from '@automattic/tour-kit';
  */
 import TourKitStep from './components/step';
 import type { WooConfig } from './types';
-import './style.scss';
 
 interface Props {
 	config: WooConfig;
