@@ -23,7 +23,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
-import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -197,9 +196,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			if ( task.actionUrl.startsWith( 'http' ) ) {
 				window.location.href = task.actionUrl;
 			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, task.actionUrl, {} )
-				);
+				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
 			}
 			return;
 		}

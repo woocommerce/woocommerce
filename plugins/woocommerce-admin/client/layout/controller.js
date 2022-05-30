@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Component, Suspense, lazy } from '@wordpress/element';
+import { Suspense, lazy } from '@wordpress/element';
+import { useRef, useEffect } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
@@ -258,56 +259,66 @@ export const getPages = () => {
 	return filteredPages;
 };
 
-export class Controller extends Component {
-	componentDidMount() {
+function usePrevious( value ) {
+	const ref = useRef();
+	useEffect( () => {
+		ref.current = value;
+	}, [ value ] );
+	return ref.current;
+}
+
+export const Controller = ( { ...props } ) => {
+	const prevProps = usePrevious( props );
+
+	useEffect( () => {
 		window.document.documentElement.scrollTop = 0;
 		window.document.body.classList.remove( 'woocommerce-admin-is-loading' );
-	}
+	}, [] );
 
-	componentDidUpdate( prevProps ) {
-		const prevBaseQuery = omit(
-			prevProps.query,
-			'chartType',
-			'filter',
-			'paged'
-		);
-		const baseQuery = omit(
-			this.props.query,
-			'chartType',
-			'filter',
-			'paged'
-		);
+	useEffect( () => {
+		if ( prevProps ) {
+			const prevBaseQuery = omit(
+				prevProps.query,
+				'chartType',
+				'filter',
+				'paged'
+			);
+			const baseQuery = omit(
+				props.query,
+				'chartType',
+				'filter',
+				'paged'
+			);
 
-		if (
-			prevProps.query.paged > 1 &&
-			! isEqual( prevBaseQuery, baseQuery )
-		) {
-			getHistory().replace( getNewPath( { paged: 1 } ) );
+			if (
+				prevProps.query.paged > 1 &&
+				! isEqual( prevBaseQuery, baseQuery )
+			) {
+				getHistory().replace( getNewPath( { paged: 1 } ) );
+			}
+
+			if ( prevProps.match.url !== props.match.url ) {
+				window.document.documentElement.scrollTop = 0;
+			}
 		}
+	}, [ props, prevProps ] );
 
-		if ( prevProps.match.url !== this.props.match.url ) {
-			window.document.documentElement.scrollTop = 0;
-		}
-	}
+	const { page, match, query } = props;
+	const { url, params } = match;
 
-	render() {
-		const { page, match, query } = this.props;
-		const { url, params } = match;
-
-		window.wpNavMenuUrlUpdate( query );
-		window.wpNavMenuClassChange( page, url );
-		return (
-			<Suspense fallback={ <Spinner /> }>
-				<page.container
-					params={ params }
-					path={ url }
-					pathMatch={ page.path }
-					query={ query }
-				/>
-			</Suspense>
-		);
-	}
-}
+	window.wpNavMenuUrlUpdate( query );
+	window.wpNavMenuClassChange( page, url );
+	return (
+		<Suspense fallback={ <Spinner /> }>
+			<page.container
+				params={ params }
+				path={ url }
+				pathMatch={ page.path }
+				query={ query }
+			/>
+		</Suspense>
+	);
+};
 
 /**
  * Update an anchor's link in sidebar to include persisted queries. Leave excluded screens
