@@ -102,7 +102,10 @@ const Tour = ( {
 						desktop: 'Lorem ipsum dolor sit amet.',
 						mobile: 'Lorem ipsum dolor sit amet.',
 					},
-					primaryButtonText: 'Done!',
+					primaryButton: {
+						isDisabled: true,
+						text: 'Keep editing',
+					},
 				},
 			},
 		],

@@ -22,16 +22,19 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 } ) => {
 	const isFirstStep = currentStepIndex === 0;
 	const isLastStep = currentStepIndex === steps.length - 1;
-	const { primaryButtonText } = steps[ currentStepIndex ].meta;
+	const { primaryButton = { text: '', isDisabled: false } } = steps[
+		currentStepIndex
+	].meta;
 
 	const NextButton = (
 		<Button
 			className="woocommerce-tour-kit-step-navigation__next-btn"
 			isPrimary
+			disabled={ primaryButton.isDisabled }
 			onClick={ onNextStep }
 			ref={ setInitialFocusedElement }
 		>
-			{ primaryButtonText || __( 'Next', 'woocommerce' ) }
+			{ primaryButton.text || __( 'Next', 'woocommerce' ) }
 		</Button>
 	);
 
@@ -56,10 +59,11 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 					{ BackButton }
 					<Button
 						isPrimary
+						disabled={ primaryButton.isDisabled }
 						className="woocommerce-tour-kit-step-navigation__done-btn"
 						onClick={ onDismiss( 'done-btn' ) }
 					>
-						{ primaryButtonText || __( 'Done', 'woocommerce' ) }
+						{ primaryButton.text || __( 'Done', 'woocommerce' ) }
 					</Button>
 				</div>
 			);
