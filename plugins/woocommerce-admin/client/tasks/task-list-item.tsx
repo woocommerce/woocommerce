@@ -17,7 +17,6 @@ import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -134,9 +133,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			if ( actionUrl.startsWith( 'http' ) ) {
 				window.location.href = actionUrl;
 			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, actionUrl, {} )
-				);
+				getHistory().push( getNewPath( {}, actionUrl, {} ) );
 			}
 			return;
 		}

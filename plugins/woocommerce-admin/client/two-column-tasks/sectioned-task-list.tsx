@@ -50,7 +50,10 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+	const {
+		hideTaskList,
+		keepCompletedTaskList: keepCompletedTasks,
+	} = useDispatch( ONBOARDING_STORE_NAME );
 	const [ openPanel, setOpenPanel ] = useState< string | null >(
 		sections?.find( ( section ) => ! section.isComplete )?.id || null
 	);
@@ -89,13 +92,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const keepTasks = () => {
-		const updateOptionsParams = {
-			woocommerce_task_list_keep_completed: 'yes',
-		};
-
-		updateOptions( {
-			...updateOptionsParams,
-		} );
+		keepCompletedTasks( id );
 	};
 
 	let selectedHeaderCard = visibleTasks.find(

@@ -1,8 +1,3 @@
-/**
- * Internal dependencies
- */
-import { RestApiError } from '../types';
-
 export type SettingProperties = {
 	label?: string;
 	label_class?: string[];

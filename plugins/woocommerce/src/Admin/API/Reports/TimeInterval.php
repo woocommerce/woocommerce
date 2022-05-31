@@ -230,17 +230,14 @@ class TimeInterval {
 
 				return (int) floor( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS ) + 1 + $addendum;
 			case 'day':
-				$end_timestamp      = (int) $end_datetime->format( 'U' );
-				$start_timestamp    = (int) $start_datetime->format( 'U' );
-				$addendum           = 0;
+				$days               = $start_datetime->diff( $end_datetime )->format( '%r%a' );
 				$end_hour_min_sec   = (int) $end_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $end_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $end_datetime->format( 's' );
 				$start_hour_min_sec = (int) $start_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $start_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $start_datetime->format( 's' );
 				if ( $end_hour_min_sec < $start_hour_min_sec ) {
-					$addendum = 1;
+					$days++;
 				}
-				$diff_timestamp = $end_timestamp - $start_timestamp;
 
-				return (int) floor( ( (int) $diff_timestamp ) / DAY_IN_SECONDS ) + 1 + $addendum;
+				return $days + 1;
 			case 'week':
 				// @todo Optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
 				$week_count = 0;
@@ -330,13 +327,23 @@ class TimeInterval {
 	 */
 	public static function next_week_start( $datetime, $reversed = false ) {
 		$seven_days = new \DateInterval( 'P7D' );
-		$start_end  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
-
+		// Default timezone set in wp-settings.php.
+		$default_timezone = date_default_timezone_get();
+		// Timezone that the WP site uses in Settings > General.
+		$original_timezone = $datetime->getTimezone();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		$start_end_timestamp  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
+		date_default_timezone_set( $default_timezone );
+		// @codingStandardsIgnoreEnd
 		if ( $reversed ) {
-			return \DateTime::createFromFormat( 'U', $start_end['end'] )->sub( $seven_days );
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['end'] )->sub( $seven_days );
+		} else {
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['start'] )->add( $seven_days );
 		}
-		return \DateTime::createFromFormat( 'U', $start_end['start'] )->add( $seven_days );
+		return \DateTime::createFromFormat( 'Y-m-d H:i:s', $result->format( 'Y-m-d H:i:s' ), $original_timezone );
 	}
+
 
 	/**
 	 * Returns a new DateTime object representing the next month start, or previous month end if reversed.

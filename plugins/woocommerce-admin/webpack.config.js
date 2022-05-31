@@ -50,6 +50,10 @@ const wpAdminScripts = [
 	'payment-method-promotions',
 	'onboarding-load-sample-products-notice',
 	'product-tracking',
+	'add-term-tracking',
+	'attributes-tracking',
+	'category-tracking',
+	'tags-tracking',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
