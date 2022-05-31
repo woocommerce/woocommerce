@@ -70,9 +70,12 @@ interface FeaturedItemRequiredProps< T > {
 		| FeaturedProductRequiredAttributes
 	 ) &
 		EditorBlock< T >[ 'attributes' ] & {
-			// This is hardcoded because border is not yet included in Gutenberg's
-			// official types.
-			style: { border?: { radius?: number } };
+			// This is hardcoded because border and color are not yet included
+			// in Gutenberg's official types.
+			style: {
+				border?: { radius?: number };
+				color?: { text?: string };
+			};
 		};
 	isLoading: boolean;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
@@ -187,6 +190,7 @@ export const withFeaturedItem = ( {
 
 		const containerStyle = {
 			borderRadius: style?.border?.radius,
+			color: style?.color?.text,
 		};
 
 		const wrapperStyle = {
