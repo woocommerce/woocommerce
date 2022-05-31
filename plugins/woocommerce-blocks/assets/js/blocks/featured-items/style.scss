@@ -152,7 +152,8 @@
 		}
 	}
 
-	&__title {
+	& &__title {
+		color: inherit;
 		margin-top: 0;
 
 		div {
