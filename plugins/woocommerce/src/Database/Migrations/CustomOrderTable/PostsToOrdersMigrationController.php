@@ -70,12 +70,13 @@ class PostsToOrdersMigrationController {
 	 * @param array $order_post_ids List of post IDs of the orders to migrate.
 	 */
 	public function migrate_orders( array $order_post_ids ): void {
+		$this->error_logger = WC()->call_function( 'wc_get_logger' );
+
 		$using_transactions = $this->maybe_start_transaction();
 		if ( null === $using_transactions ) {
 			return;
 		}
 
-		$this->error_logger = WC()->call_function( 'wc_get_logger' );
 		$errors_were_logged = false;
 
 		foreach ( $this->all_migrators as $migrator ) {
