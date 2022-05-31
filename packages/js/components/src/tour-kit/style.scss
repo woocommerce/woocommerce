@@ -1,5 +1,7 @@
 .woocommerce-tour-kit{
 	box-shadow: 0 0 8px rgba( 0, 0, 0, 0.15 );
+	position: absolute;
+	z-index: 9999;
 
 	.woocommerce-tour-kit-step {
 		width: 350px;
