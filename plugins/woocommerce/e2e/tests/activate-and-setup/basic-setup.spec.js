@@ -8,7 +8,7 @@ test.describe( 'Store owner can finish initial store setup', () => {
 		await page.check( '#woocommerce_calc_taxes' );
 		await page.click( 'text=Save changes' );
 		// Verify changes have been saved
-		expect( page.isChecked( '#woocommerce_calc_taxes' ) ).toBeTruthy();
+		expect( page.locator( '#woocommerce_calc_taxes' ) ).toBeChecked();
 	} );
 
 	test( 'can configure permalink settings', async ( { page } ) => {

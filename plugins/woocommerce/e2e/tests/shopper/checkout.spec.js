@@ -1,5 +1,9 @@
 const { test, expect } = require( '@playwright/test' );
+const { ShopCheckoutHelper } = require( '../helpers/shop-checkout' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+
+const guestEmail = 'checkout-guest@example.com';
+const customerEmail = 'checkout-customer@example.com';
 
 test.describe( 'Checkout page', () => {
 	const singleProductPrice = '9.99';
@@ -178,6 +182,7 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows guest customer to place an order', async ( { page } ) => {
+		const shopCheckoutHelper = new ShopCheckoutHelper( page );
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
 			await page.waitForLoadState( 'networkidle' );
@@ -191,17 +196,7 @@ test.describe( 'Checkout page', () => {
 			twoProductPrice
 		);
 
-		await page.fill( '#billing_first_name', 'John' );
-		await page.fill( '#billing_last_name', 'Smith' );
-		await page.fill( '#billing_company', 'WooCommerce' );
-		await page.selectOption( '#billing_country', 'US' );
-		await page.fill( '#billing_address_1', 'addr1' );
-		await page.fill( '#billing_address_2', 'addr2' );
-		await page.fill( '#billing_city', 'San Francisco' );
-		await page.selectOption( '#billing_state', 'CA' );
-		await page.fill( '#billing_postcode', '94017' );
-		await page.fill( '#billing_phone', '555 555-5555' );
-		await page.fill( '#billing_email', 'checkout-guest@example.com' );
+		shopCheckoutHelper.fillBillingInfo( guestEmail );
 
 		await page.click( 'text=Cash on delivery' );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
@@ -224,6 +219,7 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
+		const shopCheckoutHelper = new ShopCheckoutHelper( page );
 		await page.goto( 'wp-admin' );
 		await page.fill( 'input[name="log"]', 'customer' );
 		await page.fill( 'input[name="pwd"]', 'password' );
@@ -242,17 +238,7 @@ test.describe( 'Checkout page', () => {
 			twoProductPrice
 		);
 
-		await page.fill( '#billing_first_name', 'Jane' );
-		await page.fill( '#billing_last_name', 'Smith' );
-		await page.fill( '#billing_company', 'WooCommerce' );
-		await page.selectOption( '#billing_country', 'US' );
-		await page.fill( '#billing_address_1', 'addr1' );
-		await page.fill( '#billing_address_2', 'addr2' );
-		await page.fill( '#billing_city', 'San Francisco' );
-		await page.selectOption( '#billing_state', 'CA' );
-		await page.fill( '#billing_postcode', '94017' );
-		await page.fill( '#billing_phone', '555 555-5555' );
-		await page.fill( '#billing_email', 'checkout-customer@example.com' );
+		shopCheckoutHelper.fillBillingInfo( customerEmail );
 
 		await page.click( 'text=Cash on delivery' );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
