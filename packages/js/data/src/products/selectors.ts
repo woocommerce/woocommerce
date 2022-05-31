@@ -77,7 +77,16 @@ export const getProductsError = (
 	return state.errors[ resourceName ];
 };
 
+export const getCreateProductError = (
+	state: ProductState,
+	query: ProductQuery
+) => {
+	const resourceName = getProductResourceName( query );
+	return state.errors[ resourceName ];
+};
+
 export type ProductsSelectors = {
+	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
 	getProducts: WPDataSelector< typeof getProducts >;
 	getProductsTotalCount: WPDataSelector< typeof getProductsTotalCount >;
 	getProductsError: WPDataSelector< typeof getProductsError >;

@@ -8,7 +8,7 @@ import {
 	getTotalProductCountResourceName,
 } from '../utils';
 import { Actions } from '../actions';
-import { PartialProduct, ProductQuery } from '../types';
+import { PartialProduct, ProductQuery, Product } from '../types';
 
 const defaultState: ProductState = {
 	products: {},
@@ -170,6 +170,36 @@ describe( 'products reducer', () => {
 
 	it( 'should handle GET_PRODUCTS_ERROR', () => {
 		const query: Partial< ProductQuery > = { status: 'draft' };
+		const resourceName = getProductResourceName( query );
+		const error = 'Baaam!';
+		const state = reducer( defaultState, {
+			type: TYPES.GET_PRODUCTS_ERROR,
+			query,
+			error,
+		} );
+
+		expect( state.errors[ resourceName ] ).toBe( error );
+	} );
+
+	it( 'should handle CREATE_PRODUCT_SUCCESS', () => {
+		const update: PartialProduct = {
+			id: 2,
+			name: 'Off the hook!',
+			status: 'draft',
+		};
+
+		const state = reducer( defaultState, {
+			type: TYPES.CREATE_PRODUCT_SUCCESS,
+			id: update.id,
+			product: update,
+		} );
+
+		expect( state.data[ 2 ].name ).toEqual( update.name );
+		expect( state.data[ 2 ].status ).toEqual( update.status );
+	} );
+
+	it( 'should handle CREATE_PRODUCT_ERROR', () => {
+		const query: Partial< Product > = { name: 'Donkey Sauce' };
 		const resourceName = getProductResourceName( query );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
