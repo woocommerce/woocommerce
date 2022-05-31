@@ -5,7 +5,7 @@ register_woocommerce_admin_test_helper_rest_route(
 );
 
 function tools_trigger_wca_install() {
-	Automattic\WooCommerce\Admin\Install::install();
+	\WC_Install::install();
 
 	return true;
 }
