@@ -84,8 +84,8 @@ const PriceSlider = ( {
 	const minRange = useRef< HTMLInputElement >( null );
 	const maxRange = useRef< HTMLInputElement >( null );
 
-	// We want step to default to 10 major units, e.g. $10.
-	const stepValue = step ? step : 10 * 10 ** currency.minorUnit;
+	// We want step to default to 1 major unit, e.g. $1.
+	const stepValue = step ? step : 10 ** currency.minorUnit;
 
 	const [ minPriceInput, setMinPriceInput ] = useState( minPrice );
 	const [ maxPriceInput, setMaxPriceInput ] = useState( maxPrice );
