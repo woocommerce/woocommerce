@@ -87,7 +87,7 @@ export const InspectorControls = ( {
 	backgroundImageSrc,
 	contentPanel,
 	dimRatio,
-	focalPoint = { x: 0.5, y: 0.5 },
+	focalPoint,
 	hasParallax,
 	imageFit,
 	isRepeated,
