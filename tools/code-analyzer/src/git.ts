@@ -8,6 +8,11 @@ import { tmpdir } from 'os';
 import { readFileSync } from 'fs';
 
 /**
+ * Internal dependencies
+ */
+import { startWPEnv } from './utils';
+
+/**
  * Fetch branches from origin.
  *
  * @param {string}   branch branch/commit hash.
@@ -100,13 +105,15 @@ export const getSchema = (
 	OrdersTableDataStore: string;
 	ProductAttributesLookup: string;
 } | void => {
+	// Save the current branch for later.
+	const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
+
 	try {
 		// Make sure the branch is available.
 		fetchBranch( branch, error );
 		// Start spinner.
 		CliUx.ux.action.start( `Gathering schema from ${ branch }` );
-		// Save the current branch for later.
-		const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
+
 		// Checkout branch to compare
 		execSync( `git checkout ${ branch }` );
 
@@ -146,6 +153,9 @@ export const getSchema = (
 			ProductAttributesLookup,
 		};
 	} catch ( e ) {
+		// Return to the current branch.
+		execSync( `git checkout ${ currentBranch }` );
+
 		error( `Unable to get schema for branch ${ branch }. \n${ e }` );
 	}
 };
@@ -159,19 +169,22 @@ export const getSchema = (
  * @param {Function} error   error print method.
  * @return {Object|void}     diff object.
  */
-export const generateSchemaDiff = (
+export const generateSchemaDiff = async (
 	source: string,
 	compare: string,
 	base: string,
 	error: ( s: string ) => void
-): {
+): Promise< {
 	[ key: string ]: {
 		description: string;
 		base: string;
 		compare: string;
 		areEqual: boolean;
 	};
-} | void => {
+} | void > => {
+	// Be sure the wp-env engine is started.
+	await startWPEnv( error );
+
 	const baseSchema = getSchema( base, error );
 	const compareSchema = getSchema( compare, error );
 	if ( ! baseSchema || ! compareSchema ) {

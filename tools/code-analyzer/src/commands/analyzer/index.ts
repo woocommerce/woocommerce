@@ -96,7 +96,7 @@ export default class Analyzer extends Command {
 			flags.output === 'console' &&
 			flags.source === 'woocommerce/woocommerce'
 		) {
-			const schemaDiff = generateSchemaDiff(
+			const schemaDiff = await generateSchemaDiff(
 				flags.source,
 				args.compare,
 				flags.base,
