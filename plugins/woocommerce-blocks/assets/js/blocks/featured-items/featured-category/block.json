@@ -51,7 +51,10 @@
         },
         "focalPoint": {
             "type": "object",
-            "default": false
+            "default": {
+                "x": 0.5,
+                "y": 0.5
+            }
         },
         "imageFit": {
             "type": "string",
