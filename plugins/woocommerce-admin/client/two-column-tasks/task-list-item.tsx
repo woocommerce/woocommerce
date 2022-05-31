@@ -80,9 +80,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 		if ( task.actionUrl ) {
 			navigateTo( {
-				url: task.actionUrl.startsWith( 'http' )
-					? task.actionUrl
-					: getNewPath( {}, task.actionUrl, {} ),
+				url: task.actionUrl,
 			} );
 			return;
 		}

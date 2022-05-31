@@ -127,9 +127,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const onClickDefault = useCallback( () => {
 		if ( actionUrl ) {
 			navigateTo( {
-				url: actionUrl.startsWith( 'http' )
-					? actionUrl
-					: getNewPath( {}, actionUrl, {} ),
+				url: actionUrl,
 			} );
 			return;
 		}

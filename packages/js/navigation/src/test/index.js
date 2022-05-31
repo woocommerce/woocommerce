@@ -360,4 +360,36 @@ describe( 'navigateTo', () => {
 			'https://vagrant.local/wp/wp-admin/orders.php'
 		);
 	} );
+
+	it( 'correctly parses url and uses router for non-root relative path', () => {
+		delete window.location;
+		window.location = new URL(
+			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		);
+
+		navigateTo( {
+			url: '/setup-wizard',
+		} );
+
+		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
+		expect( getHistory().push.mock.lastCall[ 0 ] ).toBe(
+			'admin.php?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
+
+	it( 'correctly redirects when navigating to non-root relative path', () => {
+		delete window.location;
+		window.location = new URL( 'http://localhost/wp-admin/orders.php' );
+
+		navigateTo( {
+			url: '/setup-wizard',
+		} );
+
+		const resultUrl = new URL( window.location.href );
+
+		expect( getHistory().push ).not.toBeCalled();
+		expect( resultUrl.toString() ).toBe(
+			'https://vagrant.local/wp/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
 } );
