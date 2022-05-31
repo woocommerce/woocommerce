@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import { getByTextWithMarkup } from '@woocommerce/js-tests';
+import { getByTextWithMarkup } from '@woocommerce/internal-js-tests';
 
 /**
  * Internal dependencies

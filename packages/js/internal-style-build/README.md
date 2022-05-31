@@ -5,14 +5,14 @@ This is a partial [Webpack](https://webpack.js.org/) config for building WooComm
 
 ## Usage
 
-Create a `webpack.config.js` in your package root that defines the `entry` and `output`, making use of the `rules` and `plugins` from `@woocommerce/style-build`.
+Create a `webpack.config.js` in your package root that defines the `entry` and `output`, making use of the `rules` and `plugins` from `@woocommerce/internal-style-build`.
 
 ***Note:*** The `entry` should be named `'build-style'` so the CSS will get picked up by the main `client/` application's `CopyWebpackPlugin` config.
 
 ```js
 // packages/<package-name>/webpack.config.js
 
-import { webpackConfig } from '@woocommerce/style-build';
+import { webpackConfig } from '@woocommerce/internal-style-build';
 
 module.exports = {
 	mode: process.env.NODE_ENV || 'development',

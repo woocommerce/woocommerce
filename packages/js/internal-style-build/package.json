@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/style-build",
+	"name": "@woocommerce/internal-style-build",
 	"version": "1.0.0",
 	"description": "WooCommerce Components SASS Build",
 	"author": "Automattic",
@@ -8,7 +8,7 @@
 		"wordpress",
 		"woocommerce"
 	],
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/style-build/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-style-build/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
@@ -30,8 +30,7 @@
 	},
 	"scripts": {
 		"lint": "eslint index.js",
-		"lint:fix": "eslint index.js --fix",
-		"postinstall": "composer install"
+		"lint:fix": "eslint index.js --fix"
 	},
 	"private": true,
 	"devDependencies": {

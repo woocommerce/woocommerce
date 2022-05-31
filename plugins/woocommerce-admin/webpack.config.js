@@ -15,7 +15,7 @@ const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
  */
 const AsyncChunkSrcVersionParameterPlugin = require( './chunk-src-version-param' );
 const UnminifyWebpackPlugin = require( './unminify' );
-const { webpackConfig: styleConfig } = require( '@woocommerce/style-build' );
+const { webpackConfig: styleConfig } = require( '@woocommerce/internal-style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -30,7 +30,7 @@ const wcAdminPackages = [
 	'experimental',
 	'explat',
 	'navigation',
-	'notices',
+	'internal-notices',
 	'number',
 	'data',
 	'tracks',

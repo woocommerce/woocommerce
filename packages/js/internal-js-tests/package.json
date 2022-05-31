@@ -1,14 +1,14 @@
 {
-	"name": "@woocommerce/js-tests",
+	"name": "@woocommerce/internal-js-tests",
 	"version": "1.1.0",
 	"description": "JavaScript test tooling.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/js-tests/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-js-tests/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git",
-		"directory": "packages/js-tests"
+		"directory": "packages/internal-js-tests"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
@@ -17,7 +17,6 @@
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
 	"scripts": {
-		"postinstall": "composer install",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
