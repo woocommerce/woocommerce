@@ -55,6 +55,7 @@ const wpAdminScripts = [
 	'attributes-tracking',
 	'category-tracking',
 	'tags-tracking',
+	'product-tour',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
