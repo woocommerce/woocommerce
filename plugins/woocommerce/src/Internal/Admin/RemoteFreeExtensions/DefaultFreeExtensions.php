@@ -105,7 +105,7 @@ class DefaultFreeExtensions {
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
-				'is_built_by_wc' => false,
+				'is_built_by_wc' => true,
 			],
 			'mailpoet'                          => [
 				'name'           => __( 'MailPoet', 'woocommerce' ),
@@ -462,7 +462,7 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
 			],
-			'tiktok-for-business'                            => [
+			'tiktok-for-business'               => [
 				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
 				'description'    =>
