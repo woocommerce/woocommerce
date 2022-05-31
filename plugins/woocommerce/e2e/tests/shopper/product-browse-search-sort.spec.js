@@ -1,15 +1,15 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const singleProductPrice1 = '79.99';
-const singleProductPrice2 = '89.99';
-const singleProductPrice3 = '99.99';
+const singleProductPrice1 = '979.99';
+const singleProductPrice2 = '989.99';
+const singleProductPrice3 = '999.99';
 
-const simpleProductName = 'A Search and Browse Product';
+const simpleProductName = 'AAA Search and Browse Product';
 
-const categoryA = 'Clothing';
-const categoryB = 'Audio';
-const categoryC = 'Hardware';
+const categoryA = 'Dogs';
+const categoryB = 'Cats';
+const categoryC = 'Fish';
 
 let categoryAId, categoryBId, categoryCId, product1Id, product2Id, product3Id;
 
@@ -86,23 +86,11 @@ test.describe(
 				consumerSecret: process.env.CONSUMER_SECRET,
 				version: 'wc/v3',
 			} );
-			await api.delete( `products/${ product1Id }`, {
-				force: true,
+			await api.post( 'products/batch', {
+				delete: [ product1Id, product2Id, product3Id ],
 			} );
-			await api.delete( `products/${ product2Id }`, {
-				force: true,
-			} );
-			await api.delete( `products/${ product3Id }`, {
-				force: true,
-			} );
-			await api.delete( `products/categories/${ categoryAId }`, {
-				force: true,
-			} );
-			await api.delete( `products/categories/${ categoryBId }`, {
-				force: true,
-			} );
-			await api.delete( `products/categories/${ categoryCId }`, {
-				force: true,
+			await api.post( 'products/categories/batch', {
+				delete: [ categoryAId, categoryBId, categoryCId ],
 			} );
 		} );
 
@@ -144,7 +132,8 @@ test.describe(
 			);
 		} );
 
-		// ! The last two sorts could run into trouble with parallel execution if there are other products
+		// ! The last test could run into trouble with parallel execution if there are other products
+		// ! Not guaranteed that the last created product will come from this test
 		test( 'should let user sort the products in the shop', async ( {
 			page,
 		} ) => {
@@ -154,30 +143,30 @@ test.describe(
 			await page.selectOption( '.orderby', 'price-desc' );
 			// last product is most expensive
 			await expect(
-				page.locator( 'h2.woocommerce-loop-product__title >> nth=0' )
+				page.locator( 'ul.products > li:nth-child(1)' )
 			).toContainText( `${ simpleProductName } 3` );
 			await expect(
-				page.locator( 'h2.woocommerce-loop-product__title >> nth=2' )
+				page.locator( 'ul.products > li:nth-child(3)' )
 			).toContainText( `${ simpleProductName } 1` );
 
 			// sort by price low to high
 			await page.selectOption( '.orderby', 'price' );
 			// last product is most expensive
 			await expect(
-				page.locator( 'h2.woocommerce-loop-product__title >> nth=0' )
+				page.locator( 'ul.products > li:nth-last-child(3)' )
 			).toContainText( `${ simpleProductName } 1` );
 			await expect(
-				page.locator( 'h2.woocommerce-loop-product__title >> nth=2' )
+				page.locator( 'ul.products > li:nth-last-child(1)' )
 			).toContainText( `${ simpleProductName } 3` );
 
 			// sort by latest to oldest created
 			await page.selectOption( '.orderby', 'date' );
 			// last product is most recently created
 			await expect(
-				page.locator( 'h2.woocommerce-loop-product__title >> nth=0' )
+				page.locator( 'ul.products > li:nth-child(1)' )
 			).toContainText( `${ simpleProductName } 3` );
 			await expect(
-				page.locator( 'h2.woocommerce-loop-product__title >> nth=2' )
+				page.locator( 'ul.products > li:nth-child(3)' )
 			).toContainText( `${ simpleProductName } 1` );
 		} );
 	}
