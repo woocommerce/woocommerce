@@ -7,6 +7,7 @@ const filePathOverride = path.resolve(
 );
 
 const productIds = [];
+const categoryIds = [];
 
 const productNames = [
 	'V-Neck T-Shirt',
@@ -77,10 +78,19 @@ const productPricesOverride = [
 	'$115.00',
 	'$120.00',
 ];
+const productCategories = [
+	'Clothing',
+	'Hoodies',
+	'Tshirts',
+	'Accessories',
+	'Music',
+	'Decor',
+];
+
 const errorMessage =
 	'Invalid file type. The importer supports CSV and TXT file formats.';
 
-test.describe( 'Import Products from a CSV file', () => {
+test.describe.only( 'Import Products from a CSV file', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -105,6 +115,21 @@ test.describe( 'Import Products from a CSV file', () => {
 		} );
 		// batch delete all products in the array
 		await api.post( 'products/batch', { delete: [ ...productIds ] } );
+		// get a list of all product categories
+		await api.get( 'products/categories' ).then( ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				// if the product category is one that was created, add it to the array
+				for ( let j = 0; j < productCategories.length; j++ ) {
+					if ( response.data[ i ].name === productCategories[ j ] ) {
+						categoryIds.push( response.data[ i ].id );
+					}
+				}
+			}
+		} );
+		// batch delete all categories in the array
+		await api.post( 'products/categories/batch', {
+			delete: [ ...categoryIds ],
+		} );
 	} );
 
 	test( 'should show error message if you go without providing CSV file', async ( {
