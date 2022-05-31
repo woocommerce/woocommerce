@@ -357,7 +357,7 @@ describe( 'navigateTo', () => {
 
 		expect( getHistory().push ).not.toBeCalled();
 		expect( resultUrl.toString() ).toBe(
-			'http://localhost/wp-admin/orders.php'
+			'https://vagrant.local/wp/wp-admin/orders.php'
 		);
 	} );
 } );

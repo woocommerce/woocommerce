@@ -280,15 +280,13 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * A utility function that navigates to a page, using a redirect
  * or the router as appropriate.
  *
- * @param {Object} args                        - All arguments.
- * @param {string} args.url                    - Relative path or absolute url to navigate to
- * @param {string} [args.directory=/wp-admin/] - Path directory, defaultsl to admin path.
+ * @param {Object} args     - All arguments.
+ * @param {string} args.url - Relative path or absolute url to navigate to
  */
-export const navigateTo = ( { url, directory = '/wp-admin/' } ) => {
-	const parsedUrl = new URL(
-		`${ ! url.startsWith( 'http' ) && directory ? directory : '' }${ url }`,
-		window.location.origin
-	);
+export const navigateTo = ( { url } ) => {
+	const parsedUrl = url.startsWith( 'http' )
+		? new URL( url )
+		: new URL( `${ window.wcSettings.adminUrl }${ url }` );
 
 	if ( isWCAdmin() && isWCAdmin( String( parsedUrl ) ) ) {
 		window.document.documentElement.scrollTop = 0;
