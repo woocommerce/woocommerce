@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
@@ -24,8 +24,16 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 */
 	public function process( $rule, $stored_state ) {
 		$dates      = TimeInterval::get_timeframe_dates( $rule->timeframe );
-		$data_store = new OrdersDataStore();
-		$value      = $data_store->get_total_sales( $dates['start'], $dates['end'] );
+		$reports_revenue = new RevenueQuery(
+			array(
+				'before' => $dates['end'],
+				'after'  => $dates['start'],
+				'interval' => 'year',
+				'fields' => array( 'total_sales' ),
+			)
+		);
+		$report_data    = $reports_revenue->get_data();
+		$value          = $report_data->totals->total_sales;
 
 		return ComparisonOperation::compare(
 			$value,

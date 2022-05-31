@@ -560,38 +560,4 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->subquery->add_sql_clause( 'select', self::get_db_table_name() . '.order_id' );
 		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
 	}
-
-	/**
-	 * Get total sales for a given timeframe.
-	 *
-	 * @param int $start_date Start date.
-	 * @param int $end_date End date.
-	 * @return float
-	 */
-	public function get_total_sales( $start_date = null, $end_date = null ) {
-		global $wpdb;
-
-		$table_name    = self::get_db_table_name();
-		$where_clauses = array();
-
-		if ( $start_date ) {
-			$where_clauses[] = $wpdb->prepare( 'date_created >= %s', $start_date );
-		}
-
-		if ( $end_date ) {
-			$where_clauses[] = $wpdb->prepare( 'date_created <= %s', $end_date );
-		}
-
-		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared */
-		$query = "SELECT SUM( total_sales ) FROM {$table_name}";
-
-		if ( ! empty( $where_clauses ) ) {
-			$query .= ' WHERE ' . implode( ' AND ', $where_clauses );
-		}
-
-		$amount     = $wpdb->get_col( $query );
-		/* phpcs:enable */
-
-		return isset( $amount[0] ) && $amount[0] ? $amount[0] : 0;
-	}
 }

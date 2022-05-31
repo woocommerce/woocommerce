@@ -222,44 +222,4 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $data->total );
 		$this->assertEquals( $order_2->get_id(), $data->data[0]['order_id'] );
 	}
-
-	/**
-	 * Test that we get the correct sales volume based on provided dates.
-	 */
-	public function test_total_sales_by_date() {
-		WC_Helper_Reports::reset_stats_dbs();
-
-		$simple_product = new WC_Product_Simple();
-		$simple_product->set_name( 'Simple Product' );
-		$simple_product->set_regular_price( 25 );
-		$simple_product->save();
-
-		$order_1 = WC_Helper_Order::create_order( 1, $simple_product );
-		$order_1->set_total( 25 );
-		$order_1->set_status( 'completed' );
-		$order_1->set_date_created( '2022-01-02T00:00' );
-		$order_1->save();
-
-		$order_2 = WC_Helper_Order::create_order( 1, $simple_product );
-		$order_2->set_total( 25 );
-		$order_2->set_status( 'completed' );
-		$order_2->set_date_created( '2022-03-24T00:00' );
-		$order_2->save();
-
-		$order_3 = WC_Helper_Order::create_order( 1, $simple_product );
-		$order_3->set_total( 25 );
-		$order_3->set_status( 'completed' );
-		$order_3->set_date_created( '2021-07-04T00:00' );
-		$order_3->save();
-
-		WC_Helper_Queue::run_all_pending();
-
-		$data_store  = new OrdersDataStore();
-		$total_sales = $data_store->get_total_sales();
-		$this->assertEquals( 75, $total_sales );
-		$total_sales = $data_store->get_total_sales( '2022-01-01T00:00', '2022-04-01T00:00' );
-		$this->assertEquals( 50, $total_sales );
-		$total_sales = $data_store->get_total_sales( '2021-01-01T00:00', '2021-12-01T23:59' );
-		$this->assertEquals( 25, $total_sales );
-	}
 }
