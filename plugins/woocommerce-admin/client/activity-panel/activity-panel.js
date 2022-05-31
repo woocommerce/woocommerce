@@ -236,8 +236,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isPerformingSetupTask() &&
-				( ! isHomescreen() || isEmbedded ),
+				! isHomescreen(),
 		};
 
 		const help = {
