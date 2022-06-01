@@ -210,4 +210,54 @@ describe( 'products reducer', () => {
 
 		expect( state.errors[ resourceName ] ).toBe( error );
 	} );
+
+	it( 'should handle UPDATE_PRODUCT_SUCCESS', () => {
+		const itemType = 'guyisms';
+		const initialState: ProductState = {
+			products: {
+				[ itemType ]: {
+					data: [ 1, 2 ],
+				},
+			},
+			productsCount: {
+				'total-guyisms:{}': 2,
+			},
+			errors: {},
+			data: {
+				1: { id: 1, name: 'Donkey', status: 'draft' },
+				2: { id: 2, name: 'Sauce', status: 'publish' },
+			},
+		};
+		const product: PartialProduct = {
+			id: 2,
+			name: 'Holy smokes!',
+			status: 'draft',
+		};
+
+		const state = reducer( initialState, {
+			type: TYPES.UPDATE_PRODUCT_SUCCESS,
+			id: product.id,
+			product,
+		} );
+
+		expect( state.products ).toEqual( initialState.products );
+		expect( state.errors ).toEqual( initialState.errors );
+
+		expect( state.data[ 1 ] ).toEqual( initialState.data[ 1 ] );
+		expect( state.data[ 2 ].id ).toEqual( initialState.data[ 2 ].id );
+		expect( state.data[ 2 ].title ).toEqual( initialState.data[ 2 ].title );
+		expect( state.data[ 2 ].name ).toEqual( product.name );
+	} );
+
+	it( 'should handle UPDATE_PRODUCT_ERROR', () => {
+		const id = 1;
+		const error = 'Baaam!';
+		const state = reducer( defaultState, {
+			type: TYPES.UPDATE_PRODUCT_ERROR,
+			id,
+			error,
+		} );
+
+		expect( state.errors[ `update/${ id }` ] ).toBe( error );
+	} );
 } );
