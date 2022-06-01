@@ -23,7 +23,22 @@ if ( ! $order ) {
 	return;
 }
 
-$order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
+/**
+ * Select the desired Order Item Types.
+ *
+ * @since 3.0.0
+ *
+ * @param string The order item type.
+ */
+$order_items = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
+
+/**
+ * The Purchase Note order statuses.
+ *
+ * @since 3.0.0
+ *
+ * @param array The purchase note statuses.
+ */
 $show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
 $downloads             = $order->get_downloadable_items();
@@ -40,7 +55,16 @@ if ( $show_downloads ) {
 }
 ?>
 <section class="woocommerce-order-details">
-	<?php do_action( 'woocommerce_order_details_before_order_table', $order ); ?>
+	<?php
+	/**
+	 * Action fires before the Order details table.
+	 *
+	 * @since Unknown
+	 *
+	 * @param WC_Order $order The Order object.
+	 */
+	do_action( 'woocommerce_order_details_before_order_table', $order );
+	?>
 
 	<h2 class="woocommerce-order-details__title"><?php esc_html_e( 'Order details', 'woocommerce' ); ?></h2>
 
@@ -55,7 +79,8 @@ if ( $show_downloads ) {
 
 		<tbody>
 			<?php
-			do_action( 'woocommerce_order_details_before_order_table_items', $order );
+			/** This action is documented elsewhere in this file. */
+			do_action( 'woocommerce_order_details_before_order_table_items', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 			foreach ( $order_items as $item_id => $item ) {
 				$product = $item->get_product();
@@ -73,6 +98,13 @@ if ( $show_downloads ) {
 				);
 			}
 
+			/**
+			 * Action fires after the Order details table items.
+			 *
+			 * @since Unknown
+			 *
+			 * @param WC_Order $order The Order object.
+			 */
 			do_action( 'woocommerce_order_details_after_order_table_items', $order );
 			?>
 		</tbody>
@@ -83,7 +115,7 @@ if ( $show_downloads ) {
 				?>
 					<tr>
 						<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
-						<td><?php echo ( 'payment_method' === $key ) ? esc_html( $total['value'] ) : wp_kses_post( $total['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+						<td><?php echo wp_kses_post( $total['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 					</tr>
 					<?php
 			}
@@ -97,7 +129,16 @@ if ( $show_downloads ) {
 		</tfoot>
 	</table>
 
-	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
+	<?php
+	/**
+	 * Action fires before the Order details table.
+	 *
+	 * @since Unknown
+	 *
+	 * @param WC_Order $order The Order object.
+	 */
+	do_action( 'woocommerce_order_details_after_order_table', $order );
+	?>
 </section>
 
 <?php
