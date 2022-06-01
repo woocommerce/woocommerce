@@ -52,7 +52,7 @@
 		{ "path": "./packages/js/explat" },
 		{ "path": "./packages/js/internal-js-tests" },
 		{ "path": "./packages/js/navigation" },
-		{ "path": "./packages/js/internal-notices" },
+		{ "path": "./packages/js/notices" },
 		{ "path": "./packages/js/number" },
 		{ "path": "./packages/js/onboarding" },
 		{ "path": "./packages/js/tracks" }
