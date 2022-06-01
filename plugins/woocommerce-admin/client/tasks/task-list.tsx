@@ -30,6 +30,7 @@ export type TaskListProps = TaskListType & {
 	twoColumns?: boolean;
 	keepCompletedTaskList?: 'yes' | 'no';
 	cesHeader?: boolean;
+	context?: string;
 };
 
 export const TaskList: React.FC< TaskListProps > = ( {
@@ -41,6 +42,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isExpandable = false,
 	displayProgressHeader = false,
 	query,
+	context,
 } ) => {
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
@@ -64,6 +66,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( eventPrefix + 'view', {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context,
 		} );
 	};
 
@@ -104,6 +107,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			isExpandable={ isExpandable }
 			task={ task }
 			setExpandedTask={ setExpandedTask }
+			context={ context }
 		/>
 	) );
 

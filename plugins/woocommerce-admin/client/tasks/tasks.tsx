@@ -33,6 +33,7 @@ import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-
 
 export type TasksProps = {
 	query: { task?: string };
+	context?: string;
 };
 
 function getTaskListComponent( taskListId: string ) {
@@ -59,7 +60,10 @@ function getTaskListPlaceholderComponent(
 	}
 }
 
-export const Tasks: React.FC< TasksProps > = ( { query } ) => {
+export const Tasks: React.FC< TasksProps > = ( {
+	query,
+	context = 'homescreen',
+} ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -172,6 +176,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 								}
 								query={ query }
 								twoColumns={ false }
+								context={ context }
 								{ ...taskList }
 							/>
 							{ isToggleable && (

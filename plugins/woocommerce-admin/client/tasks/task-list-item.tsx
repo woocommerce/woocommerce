@@ -26,6 +26,7 @@ export type TaskListItemProps = {
 	task: TaskType & {
 		onClick?: () => void;
 	};
+	context?: string;
 };
 
 export const TaskListItem: React.FC< TaskListItemProps > = ( {
@@ -33,6 +34,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	isExpanded = false,
 	setExpandedTask,
 	task,
+	context,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
@@ -117,6 +119,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( 'tasklist_click', {
 			task_name: id,
+			context,
 		} );
 
 		if ( ! isComplete ) {

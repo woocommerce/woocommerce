@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
 	TaskType,
 	useUserPreferences,
 } from '@woocommerce/data';
@@ -19,11 +18,13 @@ import classnames from 'classnames';
 export type TaskListItemProps = {
 	task: TaskType;
 	eventPrefix?: string;
+	context?: string;
 };
 
 export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 	eventPrefix,
+	context,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
@@ -68,6 +69,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( `${ eventPrefix }click`, {
 			task_name: task.id,
+			context,
 		} );
 
 		if ( ! task.isComplete ) {

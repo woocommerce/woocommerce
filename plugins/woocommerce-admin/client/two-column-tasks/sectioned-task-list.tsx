@@ -37,6 +37,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	sections,
 	displayProgressHeader,
 	cesHeader = true,
+	context,
 } ) => {
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
@@ -64,6 +65,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ eventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context,
 		} );
 	};
 
@@ -191,6 +193,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 												key={ task.id }
 												task={ task }
 												eventPrefix={ eventPrefix }
+												context={ context }
 											/>
 										)
 									) }

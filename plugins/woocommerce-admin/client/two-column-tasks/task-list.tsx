@@ -37,6 +37,7 @@ export type TaskListProps = TaskListType & {
 		task?: string;
 	};
 	cesHeader?: boolean;
+	context?: string;
 };
 
 export const TaskList: React.FC< TaskListProps > = ( {
@@ -50,6 +51,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	displayProgressHeader,
 	cesHeader = true,
+	context,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
@@ -83,6 +85,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ listEventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context,
 		} );
 	};
 
@@ -179,6 +182,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const trackClick = ( task: TaskType ) => {
 		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
+			context,
 		} );
 	};
 
