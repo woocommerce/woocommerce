@@ -140,7 +140,7 @@ class WC_Products_Tracking {
 
 					var tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 					var currentStockValue = $( '#_stock' ).val();
-					var description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.activeEditor.getContent();
+					var description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
 					var properties = {
 						attributes:				$( '.woocommerce_attribute' ).length,
 						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
