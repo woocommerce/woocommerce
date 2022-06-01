@@ -149,6 +149,9 @@ const ProductTour = () => {
 							'woocommerce'
 						),
 					},
+					primaryButton: {
+						text: __( 'Keep editing', 'woocommerce' ),
+					},
 				},
 			},
 		],
