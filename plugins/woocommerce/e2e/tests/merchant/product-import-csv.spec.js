@@ -90,7 +90,7 @@ const productCategories = [
 const errorMessage =
 	'Invalid file type. The importer supports CSV and TXT file formats.';
 
-test.describe.only( 'Import Products from a CSV file', () => {
+test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.afterAll( async ( { baseURL } ) => {
