@@ -64,6 +64,6 @@ $GLOBALS['woocommerce'] = WC();
 /**
  * Hook
  *
- * @since 6.6
+ * @since 6.6.0
  */
 do_action( 'new_hook' );
