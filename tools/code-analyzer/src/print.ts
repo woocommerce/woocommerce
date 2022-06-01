@@ -120,7 +120,7 @@ export const printSchemaChange = (
 		let githubCommentContent = '\\n\\n### New schema changes:';
 		Object.keys( schemaDiff ).forEach( ( key ) => {
 			if ( ! schemaDiff[ key ].areEqual ) {
-				githubCommentContent += `\\n* **Schema:** ${ schemaDiff[ key ].description } introduced in ${ version }`;
+				githubCommentContent += `\\n* **Schema:** ${ schemaDiff[ key ].method } introduced in ${ version }`;
 			}
 		} );
 
