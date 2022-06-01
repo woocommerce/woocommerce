@@ -1013,7 +1013,7 @@ class WC_Install {
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  session_key char(32) NOT NULL TEEEEEEST,
+  session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (session_id),
