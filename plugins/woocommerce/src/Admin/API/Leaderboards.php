@@ -55,6 +55,19 @@ class Leaderboards extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/allowed',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_allowed_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_allowed_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/(?P<leaderboard>\w+)',
 			array(
 				'args' => array(
@@ -70,19 +83,6 @@ class Leaderboards extends \WC_REST_Data_Controller {
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/allowed',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_allowed_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_public_allowed_item_schema' ),
 			)
 		);
 	}
