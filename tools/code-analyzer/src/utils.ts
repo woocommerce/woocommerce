@@ -117,9 +117,9 @@ export const isWPEnvPortTaken = () => {
  * Start wp-engine.
  *
  * @param {Function} error error print method.
+ * @return {boolean} if starting the container succeeded.
  */
 export const startWPEnv = async ( error: ( s: string ) => void ) => {
-	let message = '';
 	try {
 		// Stop wp-env if its already running.
 		execSync( 'wp-env stop', {
@@ -137,10 +137,36 @@ export const startWPEnv = async ( error: ( s: string ) => void ) => {
 			cwd: 'plugins/woocommerce',
 			encoding: 'utf-8',
 		} );
+		return true;
 	} catch ( e ) {
+		let message = '';
 		if ( e instanceof Error ) {
 			message = e.message;
+			error( message );
 		}
-		error( message );
+		return false;
+	}
+};
+
+/**
+ * Stop wp-engine.
+ *
+ * @param {Function} error error print method.
+ * @return {boolean} if stopping the container succeeded.
+ */
+export const stopWPEnv = ( error: ( s: string ) => void ): boolean => {
+	try {
+		execSync( 'wp-env stop', {
+			cwd: 'plugins/woocommerce',
+			encoding: 'utf-8',
+		} );
+		return true;
+	} catch ( e ) {
+		let message = '';
+		if ( e instanceof Error ) {
+			message = e.message;
+			error( message );
+		}
+		return false;
 	}
 };

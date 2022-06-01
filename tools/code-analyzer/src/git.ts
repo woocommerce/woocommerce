@@ -10,7 +10,7 @@ import { readFileSync } from 'fs';
 /**
  * Internal dependencies
  */
-import { startWPEnv } from './utils';
+import { startWPEnv, stopWPEnv } from './utils';
 
 /**
  * Fetch branches from origin.
@@ -187,6 +187,9 @@ export const generateSchemaDiff = async (
 
 	const baseSchema = getSchema( base, error );
 	const compareSchema = getSchema( compare, error );
+
+	stopWPEnv( error );
+
 	if ( ! baseSchema || ! compareSchema ) {
 		return;
 	}
