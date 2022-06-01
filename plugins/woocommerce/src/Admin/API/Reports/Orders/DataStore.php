@@ -356,7 +356,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				/**
 				 * Used to determine the separator for products and their variations titles.
 				 *
-				 * @since 6.6.0
+				 * @since 4.0.0
 				 */
 				$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $variation );
 
