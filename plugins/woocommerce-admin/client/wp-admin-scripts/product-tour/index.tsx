@@ -148,6 +148,4 @@ const ProductTour = () => {
 	return <TourKit config={ config } />;
 };
 
-window.onload = function () {
-	render( <ProductTour />, document.body.appendChild( root ) );
-};
+render( <ProductTour />, document.body.appendChild( root ) );
