@@ -209,6 +209,9 @@ class WC_Install {
 		'6.5.1' => array(
 			'wc_update_651_approved_download_directories',
 		),
+		'6.5.5' => array(
+			'wc_update_651_approved_download_directories',
+		),
 	);
 
 	/**
@@ -1013,7 +1016,7 @@ class WC_Install {
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  session_key char(32) NOT NULL,
+  session_key char(64) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY  (session_id),
