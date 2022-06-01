@@ -427,6 +427,7 @@ export async function verifyValueOfElementAttribute(
  * @param {string} selector Selector of the element you want to click.
  */
 export async function click( selector ) {
+	await waitForSelector( page, selector );
 	const isDisabled =
 		( await getSelectorAttribute( selector, 'disabled' ) ) !== null;
 	expect( isDisabled ).toBeFalsy();
