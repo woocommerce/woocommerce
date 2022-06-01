@@ -77,6 +77,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
 		$args['customers']           = $request['customers'];
+		$args['users']               = $request['users'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -185,6 +186,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since 4.0.0
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_customers', $response, $report, $request );
 	}
@@ -573,6 +575,15 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'type' => 'integer',
 			),
 		);
+		$params['users']                   = array(
+			'description'       => __( 'Limit result to items with specified user ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
 
 		return $params;
 	}
@@ -632,6 +643,13 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'postcode'        => $item['postcode'],
 		);
 
+		/**
+		 * Filter the column values of an item being exported.
+		 *
+		 * @param object $export_item Key value pair of Column ID => Row Value.
+		 * @param object $item        Single report item/row.
+		 * @since 4.0.0
+		 */
 		return apply_filters(
 			'woocommerce_report_customers_prepare_export_item',
 			$export_item,
