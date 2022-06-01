@@ -31,12 +31,12 @@ jobs:
               id: find-comment
               with:
                   issue-number: ${{ github.event.number }}
-                  comment-author: matticbot
+                  comment-author: woocommercebot
             - name: Add comment
               if: ${{ needs.analyze.outputs.results && (steps.find-comment.outputs.comment-id == '') }}
               uses: actions/github-script@v5
               with:
-                  github-token: ${{ secrets.API_TOKEN_GITHUB }}
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   script: |
                       github.rest.issues.createComment({
                         issue_number: context.issue.number,
@@ -48,7 +48,7 @@ jobs:
               if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
               uses: actions/github-script@v5
               with:
-                  github-token: ${{ secrets.API_TOKEN_GITHUB }}
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   script: |
                       github.rest.issues.updateComment({
                         comment_id: ${{ steps.find-comment.outputs.comment-id }},
@@ -60,14 +60,14 @@ jobs:
               if: ${{ !needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
               uses: izhangzhihao/delete-comment@master
               with:
-                  github_token: ${{ secrets.API_TOKEN_GITHUB }}
-                  delete_user_name: matticbot
+                  github_token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+                  delete_user_name: woocommercebot
                   issue_number: ${{ github.event.number }}
             - name: Add label
               if: ${{ needs.analyze.outputs.results }}
               uses: actions/github-script@v5
               with:
-                  github-token: ${{ secrets.API_TOKEN_GITHUB }}
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   script: |
                       github.rest.issues.addLabels({
                         issue_number: context.issue.number,
@@ -80,7 +80,7 @@ jobs:
               continue-on-error: true
               uses: actions/github-script@v5
               with:
-                  github-token: ${{ secrets.API_TOKEN_GITHUB }}
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
                   script: |
                       github.rest.issues.removeLabel({
                         issue_number: context.issue.number,
