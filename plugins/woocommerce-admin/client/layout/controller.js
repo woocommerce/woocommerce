@@ -13,6 +13,7 @@ import {
 	getHistory,
 	getQueryExcludedScreens,
 	getScreenFromPath,
+	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
 
@@ -20,7 +21,6 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import getReports from '../analytics/report/get-reports';
-import { isWCAdmin } from '../dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
 

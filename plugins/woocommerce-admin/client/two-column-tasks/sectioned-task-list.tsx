@@ -1,15 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	OPTIONS_STORE_NAME,
-	ONBOARDING_STORE_NAME,
-	getVisibleTasks,
-} from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, getVisibleTasks } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
@@ -43,7 +38,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	displayProgressHeader,
 	cesHeader = true,
 } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
