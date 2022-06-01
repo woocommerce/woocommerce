@@ -103,10 +103,10 @@ export function* createProduct( data: Partial< Product > ) {
 			data,
 		} );
 
-		createProductSuccess( product.id, product );
+		yield createProductSuccess( product.id, product );
 		return product;
 	} catch ( error ) {
-		createProductError( data, error );
+		yield createProductError( data, error );
 		throw error;
 	}
 }
