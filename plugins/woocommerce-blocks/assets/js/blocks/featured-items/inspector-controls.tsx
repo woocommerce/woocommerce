@@ -155,18 +155,23 @@ export const InspectorControls = ( {
 								<ToggleGroupControl
 									help={
 										<>
-											<p>
+											<span
+												style={ {
+													display: 'block',
+													marginBottom: '1em',
+												} }
+											>
 												{ __(
 													'Choose “Cover” if you want the image to scale automatically to always fit its container.',
 													'woo-gutenberg-products-block'
 												) }
-											</p>
-											<p>
+											</span>
+											<span>
 												{ __(
 													'Note: by choosing “Cover” you will lose the ability to freely move the focal point precisely.',
 													'woo-gutenberg-products-block'
 												) }
-											</p>
+											</span>
 										</>
 									}
 									label={ __(
