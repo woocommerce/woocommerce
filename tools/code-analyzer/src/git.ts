@@ -184,6 +184,7 @@ export const generateSchemaDiff = async (
 		description: string;
 		base: string;
 		compare: string;
+		method: string;
 		areEqual: boolean;
 	};
 } | void > => {
@@ -203,12 +204,15 @@ export const generateSchemaDiff = async (
 			description: 'WooCommerce Base Schema',
 			base: baseSchema.schema,
 			compare: compareSchema.schema,
+			method: 'WC_Install->get_schema',
 			areEqual: baseSchema.schema === compareSchema.schema,
 		},
 		OrdersTableDataStore: {
 			description: 'OrdersTableDataStore Schema',
 			base: baseSchema.OrdersTableDataStore,
 			compare: compareSchema.OrdersTableDataStore,
+			method:
+				'Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore->get_database_schema',
 			areEqual:
 				baseSchema.OrdersTableDataStore ===
 				compareSchema.OrdersTableDataStore,
@@ -217,6 +221,8 @@ export const generateSchemaDiff = async (
 			description: 'ProductAttributesLookup Schema',
 			base: baseSchema.ProductAttributesLookup,
 			compare: compareSchema.ProductAttributesLookup,
+			method:
+				'Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator->get_table_creation_sql',
 			areEqual:
 				baseSchema.ProductAttributesLookup ===
 				compareSchema.ProductAttributesLookup,

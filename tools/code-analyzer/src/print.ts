@@ -105,6 +105,7 @@ export const printSchemaChange = (
 			description: string;
 			base: string;
 			compare: string;
+			method: string;
 			areEqual: boolean;
 		};
 	} | void,
@@ -131,7 +132,7 @@ export const printSchemaChange = (
 		Object.keys( schemaDiff ).forEach( ( key ) => {
 			if ( ! schemaDiff[ key ].areEqual ) {
 				log(
-					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].description } as of ${ version }`
+					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].method } as of ${ version }`
 				);
 				log( '---------------------------------------------------' );
 			}
