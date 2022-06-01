@@ -213,6 +213,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['id'] ) ) {
 					$value['id'] = '';
 				}
+
+				// The 'field_name' key can be used when it is useful to specify an input field name that is different
+				// from the input field ID. We use the key 'field_name' because 'name' is already in use for a different
+				// purpose.
 				if ( ! isset( $value['field_name'] ) ) {
 					$value['field_name'] = $value['id'];
 				}
