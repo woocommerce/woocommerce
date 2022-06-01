@@ -46,11 +46,15 @@ class WC_Admin_Pointers {
 	 * Pointers for creating a product.
 	 */
 	public function create_product_tutorial() {
-		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
 		if ( Features::is_enabled( 'experimental-product-tour' ) ) {
+			global $wp_post_types;
+			$labels          = $wp_post_types['product']->labels;
+			$labels->add_new = 'Enable guided mode';
+
 			$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-homepage-notice' );
 			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
@@ -61,6 +65,10 @@ class WC_Admin_Pointers {
 				WC_VERSION,
 				true
 			);
+			return;
+		}
+
+		if ( ! isset( $_GET['tutorial'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 

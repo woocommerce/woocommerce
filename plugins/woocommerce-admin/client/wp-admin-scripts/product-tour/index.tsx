@@ -10,11 +10,21 @@ root.setAttribute( 'id', 'product-tour-root' );
 
 const ProductTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
-
 	useEffect( () => {
 		// Delay tour show up because Task Reminder Bar changes the product name input position after this component is first rendered
 		// TODO: use a better way to handle this.
 		setTimeout( () => setShowTour( true ), 1500 );
+
+		const enableGuideModeBtn = Array.from(
+			window.document.querySelectorAll( '.page-title-action' )
+		).find( ( el ) => el.textContent === 'Enable guided mode' );
+
+		if ( enableGuideModeBtn ) {
+			enableGuideModeBtn.addEventListener( 'click', ( e ) => {
+				e.preventDefault();
+				setShowTour( true );
+			} );
+		}
 	}, [] );
 
 	const config = {
