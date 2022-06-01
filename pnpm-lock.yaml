@@ -1226,7 +1226,6 @@ importers:
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0
       eslint-plugin-jest: 23.20.0
-      github-contributors-list: https://github.com/woocommerce/github-contributors-list/tarball/master
       istanbul: 1.0.0-alpha.2
       jest: ^25.1.0
       mocha: 7.2.0
@@ -1268,7 +1267,6 @@ importers:
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0_eslint@6.8.0
       eslint-plugin-jest: 23.20.0_eslint@6.8.0+typescript@3.9.7
-      github-contributors-list: '@github.com/woocommerce/github-contributors-list/tarball/master'
       istanbul: 1.0.0-alpha.2
       jest: 25.5.4
       mocha: 7.2.0
@@ -29794,12 +29792,6 @@ packages:
       markdown-it: 10.0.0
     dev: true
 
-  /marked/0.6.3:
-    resolution: {integrity: sha512-Fqa7eq+UaxfMriqzYLayfqAE40WN03jf+zHjT18/uXNuzjq3TY0XTbrAoPeqSJrAmPz11VuUA+kBPYOhHt9oOQ==}
-    engines: {node: '>=0.10.0'}
-    hasBin: true
-    dev: true
-
   /mathml-tag-names/2.1.3:
     resolution: {integrity: sha512-APMBEanjybaPzUrfqU0IMU5I0AswKMH7k8OTLs0vvV4KZpExkTkY87nR/zpbuTPj+gARop7aGUbl11pnDfW6xg==}
     dev: true
@@ -30066,10 +30058,6 @@ packages:
   /merge-stream/2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
 
-  /merge/1.2.1:
-    resolution: {integrity: sha512-VjFo4P5Whtj4vsLzsYBu5ayHhoHJ0UqNm7ibvShmbmoz7tGi0vXaoJbGdB+GmDMLUdg8DpQXEIeVDAe8MaABvQ==}
-    dev: true
-
   /merge2/1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
@@ -30266,10 +30254,6 @@ packages:
       arrify: 1.0.1
       is-plain-obj: 1.1.0
       kind-of: 6.0.3
-    dev: true
-
-  /minimist/1.2.0:
-    resolution: {integrity: sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=}
     dev: true
 
   /minimist/1.2.5:
@@ -39982,19 +39966,6 @@ packages:
 
   /zwitch/1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
-    dev: true
-
-  '@github.com/woocommerce/github-contributors-list/tarball/master':
-    resolution: {tarball: https://github.com/woocommerce/github-contributors-list/tarball/master}
-    name: github-contributors-list
-    version: 1.2.3
-    hasBin: true
-    dependencies:
-      marked: 0.6.3
-      merge: 1.2.1
-      minimist: 1.2.0
-      q: 1.5.1
-      sprintf-js: 1.1.2
     dev: true
 
   github.com/Automattic/puppeteer-utils/0f3ec50:
