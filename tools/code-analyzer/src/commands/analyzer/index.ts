@@ -199,6 +199,7 @@ export default class Analyzer extends Command {
 				description: string;
 				base: string;
 				compare: string;
+				method: string;
 				areEqual: boolean;
 			};
 		} | void
