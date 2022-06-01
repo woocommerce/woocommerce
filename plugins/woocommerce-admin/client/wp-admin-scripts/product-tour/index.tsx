@@ -3,6 +3,7 @@
  */
 import { render, useEffect, useState } from '@wordpress/element';
 import { TourKit } from '@woocommerce/components';
+import qs from 'qs';
 import { __ } from '@wordpress/i18n';
 
 const root = document.createElement( 'div' );
@@ -11,9 +12,12 @@ root.setAttribute( 'id', 'product-tour-root' );
 const ProductTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
 	useEffect( () => {
-		// Delay tour show up because Task Reminder Bar changes the product name input position after this component is first rendered
-		// TODO: use a better way to handle this.
-		setTimeout( () => setShowTour( true ), 1500 );
+		const query = qs.parse( window.location.search.slice( 1 ) );
+		if ( query && query.tutorial === 'true' ) {
+			// Delay tour show up because Task Reminder Bar changes the product name input position after this component is first rendered
+			// TODO: use a better way to handle this.
+			setTimeout( () => setShowTour( true ), 1500 );
+		}
 
 		const enableGuideModeBtn = Array.from(
 			window.document.querySelectorAll( '.page-title-action' )
