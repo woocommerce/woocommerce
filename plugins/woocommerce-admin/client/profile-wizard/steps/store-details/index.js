@@ -526,7 +526,7 @@ export default compose(
 			isAgreeMarketing:
 				typeof profileItems.is_agree_marketing === 'boolean'
 					? profileItems.is_agree_marketing
-					: true,
+					: false,
 			storeEmail:
 				typeof profileItems.store_email === 'string'
 					? profileItems.store_email
