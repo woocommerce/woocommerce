@@ -159,12 +159,9 @@ export const Tasks: React.FC< TasksProps > = ( {
 						? id.endsWith( 'two_column' )
 						: ! id.endsWith( 'two_column' )
 				)
+				.filter( ( { isVisible } ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
-					const { id, isHidden, isVisible, isToggleable } = taskList;
-
-					if ( ! isVisible ) {
-						return null;
-					}
+					const { id, isHidden, isToggleable } = taskList;
 
 					const TaskListComponent = getTaskListComponent( id );
 					return (
