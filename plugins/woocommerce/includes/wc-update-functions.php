@@ -2435,7 +2435,7 @@ function wc_update_651_approved_download_directories() {
  * Purges the comments count cache after 6.7.0 split reviews from the comments page.
  */
 function wc_update_670_purge_comments_count_cache() {
-	if (! is_callable('WC_Comments::delete_comments_count_cache')) {
+	if ( ! is_callable( 'WC_Comments::delete_comments_count_cache' ) ) {
 		return;
 	}
 
