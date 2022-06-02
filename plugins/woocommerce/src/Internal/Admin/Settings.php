@@ -121,7 +121,7 @@ class Settings {
 			$settings['orderStatuses'] = self::get_order_statuses( wc_get_order_statuses() );
 			$settings['stockStatuses'] = self::get_order_statuses( wc_get_product_stock_status_options() );
 			$settings['currency']      = self::get_currency_settings();
-			$settings['locale']        = [
+			$settings['locale']        = array(
 				'siteLocale'    => isset( $settings['siteLocale'] )
 					? $settings['siteLocale']
 					: get_locale(),
@@ -131,7 +131,7 @@ class Settings {
 				'weekdaysShort' => isset( $settings['l10n']['weekdaysShort'] )
 					? $settings['l10n']['weekdaysShort']
 					: array_values( $wp_locale->weekday_abbrev ),
-			];
+			);
 		}
 
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
@@ -157,7 +157,7 @@ class Settings {
 			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
 			foreach ( $preload_settings as $group ) {
 				$group_settings   = $setting_options->get_group_settings( $group );
-				$preload_settings = [];
+				$preload_settings = array();
 				foreach ( $group_settings as $option ) {
 					if ( array_key_exists( 'id', $option ) && array_key_exists( 'value', $option ) ) {
 						$preload_settings[ $option['id'] ] = $option['value'];
@@ -178,9 +178,12 @@ class Settings {
 		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );
 		$settings['commentModeration']    = get_option( 'comment_moderation' );
 		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
-		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
-		// and `wcAssetUrl` can be used in its place throughout the codebase.
-		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
+
+		/**
+		 * @deprecated 6.7.0
+		 * @var string
+		 */
+		$settings['wcAdminAssetUrl'] = WC_ADMIN_IMAGES_FOLDER_URL;
 		$settings['wcVersion']       = WC_VERSION;
 		$settings['siteUrl']         = site_url();
 		$settings['shopUrl']         = get_permalink( wc_get_page_id( 'shop' ) );
@@ -204,7 +207,7 @@ class Settings {
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
 				? $settings['dataEndpoints']
-				: [];
+				: array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
