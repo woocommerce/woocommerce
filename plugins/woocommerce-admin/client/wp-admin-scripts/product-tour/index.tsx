@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render, useEffect, useState } from '@wordpress/element';
-import { TourKit } from '@woocommerce/components';
+import { TourKit, TourKitTypes } from '@woocommerce/components';
 import qs from 'qs';
 import { __ } from '@wordpress/i18n';
 
@@ -31,7 +31,17 @@ const ProductTour = () => {
 		}
 	}, [] );
 
-	const config = {
+	const config: TourKitTypes.WooConfig = {
+		options: {
+			effects: {
+				spotlight: {},
+				arrowIndicator: true,
+				autoScroll: {
+					behavior: 'smooth',
+					block: 'center',
+				},
+			},
+		},
 		steps: [
 			{
 				referenceElements: {
