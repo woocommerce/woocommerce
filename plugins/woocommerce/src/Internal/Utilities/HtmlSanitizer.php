@@ -19,7 +19,6 @@ class HtmlSanitizer {
 				'alt'   => true,
 				'class' => true,
 				'src'   => true,
-				'style' => true,
 				'title' => true,
 			),
 			'p'    => array(
