@@ -3,11 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
-	TaskListType,
-} from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';

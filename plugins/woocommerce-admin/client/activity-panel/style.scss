@@ -204,16 +204,15 @@
 	}
 	transform: translateX(100%);
 	@include activity-panel-slide();
-	position: fixed;
+	position: absolute;
 	right: 0;
-	top: #{$header-height + $adminbar-height-mobile};
+	top: 100%;
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
 	@include breakpoint( '>782px' ) {
 		height: calc(100vh - #{$header-height + $adminbar-height});
-		top: #{$header-height + $adminbar-height};
 	}
 	.has-woocommerce-navigation & {
 		height: calc(100vh - #{$header-height});
