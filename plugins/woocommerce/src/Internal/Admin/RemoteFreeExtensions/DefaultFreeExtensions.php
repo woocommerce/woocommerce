@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
+
 defined( 'ABSPATH' ) || exit;
 
 
@@ -235,34 +237,8 @@ class DefaultFreeExtensions {
 								'operation' => '=',
 							],
 						],
-						[
-							'type'         => 'option',
-							'transformers' => [
-								[
-									'use'       => 'dot_notation',
-									'arguments' => [
-										'path' => 'industry',
-									],
-								],
-								[
-									'use'       => 'array_column',
-									'arguments' => [
-										'key' => 'slug',
-									],
-								],
-								[
-									'use'       => 'array_search',
-									'arguments' => [
-										'value' => 'cbd-other-hemp-derived-products',
-									],
-								],
-							],
-							'option_name'  => 'woocommerce_onboarding_profile',
-							'value'        => 'cbd-other-hemp-derived-products',
-							'default'      => '',
-							'operation'    => '!=',
-						],
 					],
+					DefaultPaymentGateways::get_rules_for_cbd( false ),
 				],
 				'is_built_by_wc' => true,
 			],
@@ -307,7 +283,7 @@ class DefaultFreeExtensions {
 									],
 									'option_name'  => 'woocommerce_onboarding_profile',
 									'value'        => 1,
-									'default'      => '',
+									'default'      => array(),
 									'operation'    => '!=',
 								],
 							],
