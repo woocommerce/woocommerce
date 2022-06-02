@@ -61,7 +61,7 @@ class WC_Admin_Pointers {
 
 			if ( 'simple' === $product_type ) {
 				$labels          = $wp_post_types['product']->labels;
-				$labels->add_new = 'Enable guided mode';
+				$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
 
 				$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-homepage-notice' );
 				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
