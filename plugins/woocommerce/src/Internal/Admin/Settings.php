@@ -90,6 +90,7 @@ class Settings {
 	public static function get_currency_settings() {
 		$code = get_woocommerce_currency();
 
+		//phpcs:ignore
 		return apply_filters(
 			'wc_currency_settings',
 			array(
@@ -134,6 +135,7 @@ class Settings {
 			);
 		}
 
+		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
 		if ( class_exists( 'Jetpack' ) ) {
 			$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
@@ -145,6 +147,7 @@ class Settings {
 			);
 		}
 
+		//phpcs:ignore
 		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
 		if ( ! empty( $preload_options ) ) {
 			foreach ( $preload_options as $option ) {
@@ -152,6 +155,7 @@ class Settings {
 			}
 		}
 
+		//phpcs:ignore
 		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
 		if ( ! empty( $preload_settings ) ) {
 			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
@@ -180,6 +184,9 @@ class Settings {
 		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
 
 		/**
+		 * Deprecate wcAdminAssetUrl as we no longer need it after The Merge.
+		 * Use wcAssetUrl instead.
+		 *
 		 * @deprecated 6.7.0
 		 * @var string
 		 */
@@ -202,6 +209,7 @@ class Settings {
 		// E.g An extension that added statuses is now inactive or removed.
 		$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 		// The separator used for attributes found in Variation titles.
+		//phpcs:ignore
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
