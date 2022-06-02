@@ -49,43 +49,6 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		}
 	}
 
-
-	/**
-	 * Run maybe_update_db_version and confirm the expected jobs are pushed to the queue.
-	 *
-	 * @dataProvider db_update_version_provider
-	 *
-	 * @param string $db_update_version WC version to test.
-	 * @param int    $expected_jobs_count # of expected jobs.
-	 *
-	 * @return void
-	 */
-	public function test_running_db_updates( $db_update_version, $expected_jobs_count ) {
-		update_option( 'woocommerce_db_version', $db_update_version );
-		add_filter(
-			'woocommerce_enable_auto_update_db',
-			function() {
-				return true;
-			}
-		);
-
-		$class  = new ReflectionClass( WC_Install::class );
-		$method = $class->getMethod( 'maybe_update_db_version' );
-		$method->setAccessible( true );
-		$method->invoke( $class );
-
-		$pending_jobs = WC_Helper_Queue::get_all_pending();
-		$pending_jobs = array_filter(
-			$pending_jobs,
-			function( $pending_job ) {
-				return $pending_job->get_hook() === 'woocommerce_run_update_callback';
-			}
-		);
-
-		$this->assertCount( $expected_jobs_count, $pending_jobs );
-	}
-
-
 	/**
 	 * Ensure that a DB version callback is defined when there are updates.
 	 */
@@ -115,27 +78,6 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	public function test_cron_job_creation() {
 		$this->assertNotFalse( wp_next_scheduled( 'wc_admin_daily' ) );
 		$this->assertNotFalse( wp_next_scheduled( 'generate_category_lookup_table' ) );
-	}
-
-	/**
-	 * Data provider that returns DB Update version string and # of expected pending jobs.
-	 *
-	 * @return array[]
-	 */
-	public function db_update_version_provider() {
-		return array(
-			// [DB Update version string, # of expected pending jobs]
-			array( '3.9.0', 34 ),
-			array( '4.0.0', 27 ),
-			array( '4.4.0', 23 ),
-			array( '4.5.0', 21 ),
-			array( '5.0.0', 17 ),
-			array( '5.6.0', 15 ),
-			array( '6.0.0', 8 ),
-			array( '6.3.0', 5 ),
-			array( '6.4.0', 2 ),
-			array( '6.5.0', 1 ),
-		);
 	}
 
 	/**
