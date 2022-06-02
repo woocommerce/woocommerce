@@ -110,7 +110,22 @@ class FeaturePlugin {
 		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_PLUGIN_FILE );
-		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
+
+		/**
+		 * Define the WC Admin Images Folder URL.
+		 *
+		 * @deprecated 6.7.0
+		 * @var string
+		 */
+		if ( ! defined( 'WC_ADMIN_IMAGES_FOLDER_URL' ) ) {
+			/**
+			 * Define the WC Admin Images Folder URL.
+			 *
+			 * @deprecated 6.7.0
+			 * @var string
+			 */
+			define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
+		}
 
 		/**
 		 * Define the current WC Admin version.
