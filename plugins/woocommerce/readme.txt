@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, rodrigosprimo
 Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.8
 Tested up to: 6.0
-Requires PHP: 7.0
+Requires PHP: 7.2
 Stable tag: 6.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -259,6 +259,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Use the configured decimal separator to format product weight and dimensions  [#32746](https://github.com/woocommerce/woocommerce/pull/32746)
 * Fix - Fix dashboard and analytics crashing with certain timezone configuration  [#33206](https://github.com/woocommerce/woocommerce/pull/33206)
 * Fix - Fix clicking on edges of product task cards  [#33235](https://github.com/woocommerce/woocommerce/pull/33235)
+* Fix - Add guard to avoid error when $block_templates is null.  [#33180](https://github.com/woocommerce/woocommerce/pull/33180)
+* Fix - Add woo install timestamp to server experimental assignment requests.  [#33300](https://github.com/woocommerce/woocommerce/pull/33300)
 * Performance - Fix system status API requests that only query some fields  [#32823](https://github.com/woocommerce/woocommerce/pull/32823)
 * Tweak - For Vietnam, the second street address line should be displayed but not required.  [#32610](https://github.com/woocommerce/woocommerce/pull/32610)
 * Tweak - Comment: We're adding extra protections to a newly introduced feature; a further changelog entry is not needed.  [#32771](https://github.com/woocommerce/woocommerce/pull/32771)
