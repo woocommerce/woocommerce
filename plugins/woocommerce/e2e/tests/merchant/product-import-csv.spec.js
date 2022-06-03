@@ -10,44 +10,44 @@ const productIds = [];
 const categoryIds = [];
 
 const productNames = [
-	'V-Neck T-Shirt',
-	'Hoodie',
-	'Hoodie with Logo',
-	'T-Shirt',
-	'Beanie',
-	'Belt',
-	'Cap',
-	'Sunglasses',
-	'Hoodie with Pocket',
-	'Hoodie with Zipper',
-	'Long Sleeve Tee',
-	'Polo',
-	'Album',
-	'Single',
-	'T-Shirt with Logo',
-	'Beanie with Logo',
-	'Logo Collection',
-	'WordPress Pennant',
+	'Imported V-Neck T-Shirt',
+	'Imported Hoodie',
+	'Imported Hoodie with Logo',
+	'Imported T-Shirt',
+	'Imported Beanie',
+	'Imported Belt',
+	'Imported Cap',
+	'Imported Sunglasses',
+	'Imported Hoodie with Pocket',
+	'Imported Hoodie with Zipper',
+	'Imported Long Sleeve Tee',
+	'Imported Polo',
+	'Imported Album',
+	'Imported Single',
+	'Imported T-Shirt with Logo',
+	'Imported Beanie with Logo',
+	'Imported Logo Collection',
+	'Imported WordPress Pennant',
 ];
 const productNamesOverride = [
-	'V-Neck T-Shirt Override',
-	'Hoodie Override',
-	'Hoodie with Logo Override',
-	'T-Shirt Override',
-	'Beanie Override',
-	'Belt Override',
-	'Cap Override',
-	'Sunglasses Override',
-	'Hoodie with Pocket Override',
-	'Hoodie with Zipper Override',
-	'Long Sleeve Tee Override',
-	'Polo Override',
-	'Album Override',
-	'Single Override',
-	'T-Shirt with Logo Override',
-	'Beanie with Logo Override',
-	'Logo Collection Override',
-	'WordPress Pennant Override',
+	'Imported V-Neck T-Shirt Override',
+	'Imported Hoodie Override',
+	'Imported Hoodie with Logo Override',
+	'Imported T-Shirt Override',
+	'Imported Beanie Override',
+	'Imported Belt Override',
+	'Imported Cap Override',
+	'Imported Sunglasses Override',
+	'Imported Hoodie with Pocket Override',
+	'Imported Hoodie with Zipper Override',
+	'Imported Long Sleeve Tee Override',
+	'Imported Polo Override',
+	'Imported Album Override',
+	'Imported Single Override',
+	'Imported T-Shirt with Logo Override',
+	'Imported Beanie with Logo Override',
+	'Imported Logo Collection Override',
+	'Imported WordPress Pennant Override',
 ];
 const productPricesOverride = [
 	'$111.05',
@@ -170,6 +170,10 @@ test.describe( 'Import Products from a CSV file', () => {
 		// View the products
 		await page.click( 'text=View products' );
 
+		// Search for "import" to narrow the results to just the products we imported
+		await page.fill( '#post-search-input', 'Imported' );
+		await page.click( '#search-submit' );
+
 		// Compare imported products to what's expected
 		await page.waitForSelector( 'a.row-title' );
 		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
@@ -205,6 +209,10 @@ test.describe( 'Import Products from a CSV file', () => {
 
 		// View the products
 		await page.click( 'text=View products' );
+
+		// Search for "import" to narrow the results to just the products we imported
+		await page.fill( '#post-search-input', 'Imported' );
+		await page.click( '#search-submit' );
 
 		// Compare imported products to what's expected
 		await page.waitForSelector( 'a.row-title' );

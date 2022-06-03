@@ -82,6 +82,10 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
 		await page.waitForLoadState( 'networkidle' );
+		// search to narrow it down to just the messages we want
+		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.fill( '#s-search-input', customerEmail );
+		await page.click( '#search-submit' );
 		await expect(
 			page.locator( 'td.column-receiver >> nth=0' )
 		).toContainText( customerEmail );

@@ -107,6 +107,7 @@ test.describe( 'Cart applying coupons', () => {
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			'Coupon code applied successfully.'
 		);
+		await page.waitForLoadState( 'networkidle' );
 		// try to apply the same coupon
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
 		await page.click( 'text=Apply coupon' );
@@ -131,6 +132,8 @@ test.describe( 'Cart applying coupons', () => {
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			'Coupon code applied successfully.'
 		);
+
+		await page.waitForLoadState( 'networkidle' );
 		await page.fill( '#coupon_code', coupons[ 2 ].code );
 		await page.click( 'text=Apply coupon' );
 		// successful
@@ -165,6 +168,7 @@ test.describe( 'Cart applying coupons', () => {
 		);
 
 		await page.click( 'a.woocommerce-remove-coupon' );
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			'$20.00'

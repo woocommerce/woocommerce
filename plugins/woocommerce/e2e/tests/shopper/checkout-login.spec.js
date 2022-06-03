@@ -51,6 +51,10 @@ test.describe( 'Shopper Checkout Login Account', () => {
 				phone,
 			},
 		} );
+		// enable a payment method
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -80,6 +84,10 @@ test.describe( 'Shopper Checkout Login Account', () => {
 				country: '',
 				phone: '',
 			},
+		} );
+		// disable payment method
+		await api.put( 'payment_gateways/cod', {
+			enabled: false,
 		} );
 	} );
 

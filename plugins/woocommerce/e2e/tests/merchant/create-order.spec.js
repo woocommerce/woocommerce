@@ -1,6 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+const simpleProductName = 'Add new order simple product';
+const variableProductName = 'Add new order variable product';
+const externalProductName = 'Add new order external product';
+const groupedProductName = 'Add new order grouped product';
 const taxClasses = [
 	{
 		name: 'Tax Class Simple',
@@ -30,7 +34,7 @@ const taxRates = [
 	},
 ];
 const taxClassSlugs = [];
-const taxTotals = [ '$10.00', '$60.00', '$240.00' ];
+const taxTotals = [ '$10.00', '$20.00', '$240.00' ];
 let simpleProductId,
 	variableProductId,
 	externalProductId,
@@ -53,41 +57,32 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			value: 'yes',
 		} );
 		// add tax classes
-		let a = 0;
-		for ( const tax in taxClasses ) {
-			api.post( 'taxes/classes', taxClasses[ tax ] ).then(
-				( response ) => {
-					taxClassSlugs[ a ] = response.data.slug;
-					a++;
-					// add tax rates
-					for ( const rate in taxRates ) {
-						api.post( 'taxes', taxRates[ rate ] );
-					}
-				}
-			);
+		for ( let i = 0; i < taxClasses.length; i++ ) {
+			await api
+				.post( 'taxes/classes', taxClasses[ i ] )
+				.then( ( response ) => {
+					taxClassSlugs[ i ] = response.data.slug;
+				} );
 		}
-		// make sure the taxes are all created before creating products
-		api.get( 'taxes/classes' ).then( ( response ) => {
-			while ( true ) {
-				if ( Object.keys( response.data ).length === 3 ) {
-					api.post( 'products', {
-						name: 'Simple Product 273722',
-						type: 'simple',
-						regular_price: '100',
-						tax_class: 'Tax Class Simple',
-					} ).then( ( resp ) => {
-						simpleProductId = resp.data.id;
-					} );
-					break;
-				}
-			}
-		} );
+		// attach rates to the classes
+		for ( let i = 0; i < taxRates.length; i++ ) {
+			await api.post( 'taxes', taxRates[ i ] );
+		}
 		// create simple product
-
+		await api
+			.post( 'products', {
+				name: simpleProductName,
+				type: 'simple',
+				regular_price: '100',
+				tax_class: 'Tax Class Simple',
+			} )
+			.then( ( resp ) => {
+				simpleProductId = resp.data.id;
+			} );
 		// create variable product
 		const variations = [
 			{
-				regular_price: '200',
+				regular_price: '100',
 				attributes: [
 					{
 						name: 'Size',
@@ -101,7 +96,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 				tax_class: 'Tax Class Variable',
 			},
 			{
-				regular_price: '300',
+				regular_price: '100',
 				attributes: [
 					{
 						name: 'Size',
@@ -117,7 +112,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		];
 		await api
 			.post( 'products', {
-				name: 'Variable Product 024611',
+				name: variableProductName,
 				type: 'variable',
 				tax_class: 'Tax Class Variable',
 			} )
@@ -133,7 +128,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		// create external product
 		await api
 			.post( 'products', {
-				name: 'External product 786794',
+				name: externalProductName,
 				regular_price: '800',
 				tax_class: 'Tax Class External',
 				external_url: 'https://wordpress.org/plugins/woocommerce',
@@ -156,7 +151,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			} );
 		await api
 			.post( 'products', {
-				name: 'Grouped Product 858012',
+				name: groupedProductName,
 				regular_price: '29.99',
 				grouped_products: [ subProductAId, subProductBId ],
 				type: 'grouped',
@@ -167,22 +162,26 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// cleans up all products after run
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.delete( `products/${ simpleProductId }`, { force: true } );
-		await api.delete( `products/${ variableProductId }`, { force: true } );
-		await api.delete( `products/${ externalProductId }`, { force: true } );
-		await api.delete( `products/${ subProductAId }`, { force: true } );
-		await api.delete( `products/${ subProductBId }`, { force: true } );
-		await api.delete( `products/${ groupedProductId }`, { force: true } );
+		// cleans up all products after run
+		await api.post( 'products/batch', {
+			delete: [
+				simpleProductId,
+				variableProductId,
+				externalProductId,
+				subProductAId,
+				subProductBId,
+				groupedProductId,
+			],
+		} );
 		// clean up tax classes and rates
-		for ( const key in taxClassSlugs ) {
-			await api.delete( `taxes/classes/${ taxClassSlugs[ key ] }`, {
+		for ( let i = 0; i < taxClassSlugs.length; i++ ) {
+			await api.delete( `taxes/classes/${ taxClassSlugs[ i ] }`, {
 				force: true,
 			} );
 		}
@@ -231,7 +230,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.click( 'text=Search for a product…' );
 		await page.type(
 			'input:below(:text("Search for a product…"))',
-			'Simple Product 273722'
+			simpleProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
@@ -240,7 +239,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.click( 'text=Search for a product…' );
 		await page.type(
 			'input:below(:text("Search for a product…"))',
-			'Variable Product 024611'
+			variableProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
@@ -249,7 +248,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.click( 'text=Search for a product…' );
 		await page.type(
 			'input:below(:text("Search for a product…"))',
-			'Grouped Product 858012'
+			groupedProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
@@ -258,7 +257,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.click( 'text=Search for a product…' );
 		await page.type(
 			'input:below(:text("Search for a product…"))',
-			'External product 786794'
+			externalProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
@@ -268,16 +267,16 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// assert that products added
 		await expect( page.locator( 'td.name > a >> nth=0' ) ).toContainText(
-			'Simple Product 273722'
+			simpleProductName
 		);
 		await expect( page.locator( 'td.name > a >> nth=1' ) ).toContainText(
-			'Variable Product 024611'
+			variableProductName
 		);
 		await expect( page.locator( 'td.name > a >> nth=2' ) ).toContainText(
-			'Grouped Product 858012'
+			groupedProductName
 		);
 		await expect( page.locator( 'td.name > a >> nth=3' ) ).toContainText(
-			'External product 786794'
+			externalProductName
 		);
 
 		// Recalculate taxes

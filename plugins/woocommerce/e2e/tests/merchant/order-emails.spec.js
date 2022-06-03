@@ -5,7 +5,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	const customerBilling = {
-		email: 'john.doe@example.com',
+		email: 'john.doe.merchant.test@example.com',
 	};
 	const adminEmail = 'admin@woocommercecoree2etestsuite.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
@@ -46,6 +46,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ newOrderId }`, { force: true } );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
@@ -65,16 +66,16 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			.then( ( response ) => {
 				newOrderId = response.data.id;
 			} );
-
+		// search to narrow it down to just the messages we want
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.fill( '#s-search-input', customerBilling.email );
+		await page.click( '#search-submit' );
 		await expect(
 			page.locator( 'td.column-receiver >> nth=1' )
 		).toContainText( adminEmail );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
-
-		await api.delete( `orders/${ newOrderId }`, { force: true } );
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
@@ -89,6 +90,10 @@ test.describe( 'Merchant > Order Action emails received', () => {
 
 		// confirm the message was delivered in the logs
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		// search to narrow it down to just the messages we want
+		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.fill( '#s-search-input', customerBilling.email );
+		await page.click( '#search-submit' );
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			adminEmail
 		);
@@ -106,6 +111,10 @@ test.describe( 'Merchant > Order Action emails received', () => {
 
 		// confirm the message was delivered in the logs
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		// search to narrow it down to just the messages we want
+		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.fill( '#s-search-input', customerBilling.email );
+		await page.click( '#search-submit' );
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			customerBilling.email
 		);

@@ -62,8 +62,12 @@ test.describe( 'Payment setup task', () => {
 			page.locator( 'div.components-snackbar__content' )
 		).toContainText( 'Direct bank transfer details added successfully' );
 
-		// show other payment methods
-		await page.click( 'button.toggle-button' );
+		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
+			// other payment methods are already shown
+		} else {
+			// show other payment methods
+			await page.click( 'button.toggle-button' );
+		}
 
 		await expect(
 			page.locator(
@@ -82,8 +86,12 @@ test.describe( 'Payment setup task', () => {
 			.click()
 			.catch( () => {} );
 
-		// show other payment methods
-		await page.click( 'button.toggle-button' );
+		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
+			// other payment methods are already shown
+		} else {
+			// show other payment methods
+			await page.click( 'button.toggle-button' );
+		}
 
 		// enable COD payment option
 		await page.click(
@@ -92,8 +100,12 @@ test.describe( 'Payment setup task', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await expect( page.locator( 'h1' ) ).toContainText( 'Set up payments' );
-		// show other payment methods
-		await page.click( 'button.toggle-button' );
+		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
+			// other payment methods are already shown
+		} else {
+			// show other payment methods
+			await page.click( 'button.toggle-button' );
+		}
 		await expect(
 			page.locator(
 				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > a'

@@ -132,8 +132,6 @@ test.describe(
 			);
 		} );
 
-		// ! The last test could run into trouble with parallel execution if there are other products
-		// ! Not guaranteed that the last created product will come from this test
 		test( 'should let user sort the products in the shop', async ( {
 			page,
 		} ) => {
@@ -158,16 +156,6 @@ test.describe(
 			await expect(
 				page.locator( 'ul.products > li:nth-last-child(1)' )
 			).toContainText( `${ simpleProductName } 3` );
-
-			// sort by latest to oldest created
-			await page.selectOption( '.orderby', 'date' );
-			// last product is most recently created
-			await expect(
-				page.locator( 'ul.products > li:nth-child(1)' )
-			).toContainText( `${ simpleProductName } 3` );
-			await expect(
-				page.locator( 'ul.products > li:nth-child(3)' )
-			).toContainText( `${ simpleProductName } 1` );
 		} );
 	}
 );

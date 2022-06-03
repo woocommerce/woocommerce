@@ -267,7 +267,7 @@ test.describe( 'Checkout page', () => {
 		await page.fill( 'input[name="log"]', 'admin' );
 		await page.fill( 'input[name="pwd"]', 'password' );
 		await page.click( 'text=Log In' );
-		await page.waitForLoadState( 'networkidle' );
+
 		// load the order placed as a guest
 		await page.goto(
 			`wp-admin/post.php?post=${ guestOrderId }&action=edit`
