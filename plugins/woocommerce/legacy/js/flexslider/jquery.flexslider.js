@@ -948,14 +948,16 @@
 
     slider.setup = function(type) {
 	  slider.slides.slice(1).each( function () {
-	    var $img = $(this).find('img').first();
-		$img
-		.data({
-			src: $img.attr('src'),
-			srcset: $img.attr('srcset')
-		})
-		.removeAttr('src srcset')
-		.addClass('flexslider-deferred');
+        if ( document.readyState !== 'complete' ) {
+          var $img = $(this).find('img').first()
+          $img
+            .data({
+              src: $img.attr('src'),
+              srcset: $img.attr('srcset')
+            })
+            .removeAttr('src srcset')
+            .addClass('flexslider-deferred');
+        }
       })
       // SLIDE:
       if (!fade) {
@@ -1163,16 +1165,16 @@
     focused = false;
   }).on( 'focus', function ( e ) {
     focused = true;
-  }).on( 'load', function () {
-	  $('.woocommerce-product-gallery__wrapper .flexslider-deferred').each(function () {
-		  $(this)
-			  .prop({
-				  src: $(this).attr('data-src'),
-				  srcset: $(this).attr('data-srcset')
-			  })
-			  .removeAttr('data-src data-srcset loading')
-			  .removeClass('flexslider-deferred');
-	  })
+  }).on('load', function () {
+    $('.woocommerce-product-gallery__wrapper .flexslider-deferred').each(function () {
+      $(this)
+        .prop({
+          src: $(this).attr('data-src'),
+          srcset: $(this).attr('data-srcset')
+        })
+        .removeAttr('data-src data-srcset loading')
+        .removeClass('flexslider-deferred');
+    })
   });
 
   //FlexSlider: Default Settings
