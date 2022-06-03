@@ -46,23 +46,14 @@
 'package: @woocommerce/explat':
 - packages/js/explat/**/*
 
-'package: @woocommerce/js-tests':
-- packages/js/js-tests/**/*
-
 'package: @woocommerce/navigation':
 - packages/js/navigation/**/*
-
-'package: @woocommerce/notices':
-- packages/js/notices/**/*
 
 'package: @woocommerce/number':
 - packages/js/number/**/*
 
 'package: @woocommerce/onboarding':
 - packages/js/onboarding/**/*
-
-'package: @woocommerce/style-build':
-- packages/js/style-build/**/*
 
 'package: @woocommerce/tracks':
 - packages/js/tracks/**/*

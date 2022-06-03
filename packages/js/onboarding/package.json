@@ -40,7 +40,7 @@
 		"@babel/core": "^7.17.5",
 		"@types/wordpress__data": "^6.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/style-build": "workspace:*",
+		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
 		"css-loader": "^3.6.0",
 		"eslint": "^8.12.0",

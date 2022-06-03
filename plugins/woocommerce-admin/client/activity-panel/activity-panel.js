@@ -3,10 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { lazy, useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
-import { getAdminLink } from '@woocommerce/settings';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -14,7 +13,7 @@ import {
 	useUser,
 	useUserPreferences,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -24,7 +23,6 @@ import { useSlot } from '@woocommerce/experimental';
 import './style.scss';
 import { IconFlag } from './icon-flag';
 import { isNotesPanelVisible } from './unread-indicators';
-import { isWCAdmin } from '~/dashboard/utils';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
@@ -46,6 +44,12 @@ const HelpPanel = lazy( () =>
 const InboxPanel = lazy( () =>
 	import(
 		/* webpackChunkName: "activity-panels-inbox" */ './panels/inbox/inbox-panel'
+	)
+);
+
+const SetupTasksPanel = lazy( () =>
+	import(
+		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
 	)
 );
 
@@ -167,7 +171,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
-	const { unhideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -213,14 +216,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		);
 	};
 
-	const redirectToHomeScreen = () => {
-		if ( isWCAdmin( window.location.href ) ) {
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} else {
-			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
-		}
-	};
-
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
 		const activity = {
@@ -236,32 +231,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
 			icon: <SetupProgress />,
-			onClick: () => {
-				const currentLocation = window.location.href;
-				const homescreenLocation = getAdminLink(
-					'admin.php?page=wc-admin'
-				);
-
-				// Don't navigate if we're already on the homescreen, this will cause an infinite loop
-				if ( currentLocation !== homescreenLocation ) {
-					// Ensure that if the user is trying to get to the task list they can see it even if
-					// it was dismissed.
-					if ( setupTaskListHidden === false ) {
-						redirectToHomeScreen();
-					} else {
-						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
-					}
-				}
-
-				return null;
-			},
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isPerformingSetupTask() &&
-				( ! isHomescreen() || isEmbedded ),
+				! isHomescreen(),
 		};
 
 		const help = {
@@ -337,6 +312,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
+			case 'setup':
+				return <SetupTasksPanel query={ query } />;
 			default:
 				return null;
 		}

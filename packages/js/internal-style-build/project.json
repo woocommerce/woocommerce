@@ -1,0 +1,6 @@
+{
+	"root": "packages/js/internal-style-build",
+	"sourceRoot": "packages/js/internal-style-build/src",
+	"projectType": "library",
+	"targets": {}
+}

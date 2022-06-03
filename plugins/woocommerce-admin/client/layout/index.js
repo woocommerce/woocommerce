@@ -25,7 +25,7 @@ import {
 	withOptionsHydration,
 } from '@woocommerce/data';
 import { recordPageView } from '@woocommerce/tracks';
-import '@woocommerce/notices';
+import '@woocommerce/internal-notices';
 import { PluginArea } from '@wordpress/plugins';
 
 /**

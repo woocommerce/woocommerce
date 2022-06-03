@@ -3,7 +3,7 @@
 	"projects": {
 		"@woocommerce/api": "packages/js/api",
 		"@woocommerce/api-core-tests": "packages/js/api-core-tests",
-		"@woocommerce/e2e-builds": "packages/js/e2e-builds",
+		"@woocommerce/internal-e2e-builds": "packages/js/internal-e2e-builds",
 		"@woocommerce/e2e-core-tests": "packages/js/e2e-core-tests",
 		"@woocommerce/e2e-environment": "packages/js/e2e-environment",
 		"@woocommerce/e2e-utils": "packages/js/e2e-utils",
@@ -22,12 +22,12 @@
 		"@woocommerce/eslint-plugin": "packages/js/eslint-plugin",
 		"@woocommerce/experimental": "packages/js/experimental",
 		"@woocommerce/explat": "packages/js/explat",
-		"@woocommerce/js-tests": "packages/js/js-tests",
+		"@woocommerce/internal-js-tests": "packages/js/internal-js-tests",
 		"@woocommerce/navigation": "packages/js/navigation",
-		"@woocommerce/notices": "packages/js/notices",
+		"@woocommerce/internal-notices": "packages/js/internal-notices",
 		"@woocommerce/number": "packages/js/number",
 		"@woocommerce/onboarding": "packages/js/onboarding",
-		"@woocommerce/style-build": "packages/js/style-build",
+		"@woocommerce/internal-style-build": "packages/js/internal-style-build",
 		"@woocommerce/tracks": "packages/js/tracks"
 	}
 }

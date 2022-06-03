@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix broken design of Single Product template in block themes when product had no reviews or additional info

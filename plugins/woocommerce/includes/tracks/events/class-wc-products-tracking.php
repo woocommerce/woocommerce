@@ -141,13 +141,29 @@ class WC_Products_Tracking {
 						return;
 					}
 
+					var tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 					var currentStockValue = $( '#_stock' ).val();
+					var description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
 					var properties = {
+						attributes:				$( '.woocommerce_attribute' ).length,
+						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
+						'cross-sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
+						description:			description_value.length ? 'Yes' : 'No',
+						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
+						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
+						menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
+						product_gallery:		$( '#product_images_container .product_images > li' ).length,
+						product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
 						product_type:			$( '#product-type' ).val(),
-						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Y' : 'N',
-						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Y' : 'N',
-						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Y' : 'N',
-						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Y' : 'N',
+						purchase_note:			$( '#_purchase_note' ).val().length ? 'yes' : 'no',
+						sale_price:				$( '#_sale_price' ).val() ? 'yes' : 'no',
+						short_description:		$( '#excerpt' ).val().length ? 'yes' : 'no',
+						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
+						tags:					tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+						upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
+						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
 					};
 
 					window.wcTracks.recordEvent( 'product_update', properties );
@@ -179,11 +195,26 @@ class WC_Products_Tracking {
 		$product = wc_get_product( $post_id );
 
 		$properties = array(
-			'product_id'      => $post_id,
-			'product_type'    => $product->get_type(),
-			'is_downloadable' => $product->is_downloadable() ? 'yes' : 'no',
-			'is_virtual'      => $product->is_virtual() ? 'yes' : 'no',
-			'manage_stock'    => $product->get_manage_stock() ? 'yes' : 'no',
+			'attributes'        => count( $product->get_attributes() ),
+			'categories'        => count( $product->get_category_ids() ),
+			'cross-sells'       => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
+			'description'       => $product->get_description() ? 'yes' : 'no',
+			'dimensions'        => wc_format_dimensions( $product->get_dimensions( false ) ) !== 'N/A' ? 'yes' : 'no',
+			'enable_reviews'    => $product->get_reviews_allowed() ? 'yes' : 'no',
+			'is_downloadable'   => $product->is_downloadable() ? 'yes' : 'no',
+			'is_virtual'        => $product->is_virtual() ? 'yes' : 'no',
+			'manage_stock'      => $product->get_manage_stock() ? 'yes' : 'no',
+			'menu_order'        => $product->get_menu_order() ? 'yes' : 'no',
+			'product_id'        => $post_id,
+			'product_gallery'   => count( $product->get_gallery_image_ids() ),
+			'product_image'     => $product->get_image_id() ? 'yes' : 'no',
+			'product_type'      => $product->get_type(),
+			'purchase_note'     => $product->get_purchase_note() ? 'yes' : 'no',
+			'sale_price'        => $product->get_sale_price() ? 'yes' : 'no',
+			'short_description' => $product->get_short_description() ? 'yes' : 'no',
+			'tags'              => count( $product->get_tag_ids() ),
+			'upsells'           => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
+			'weight'            => $product->get_weight() ? 'yes' : 'no',
 		);
 
 		WC_Tracks::record_event( 'product_add_publish', $properties );

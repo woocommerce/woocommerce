@@ -3,8 +3,6 @@ on:
     schedule:
         - cron: '25 3 * * *'
     workflow_dispatch:
-env:
-  API_TEST_REPORT_ARTIFACT_NAME: api-test-report---daily
 
 jobs:
     login-run:
@@ -12,6 +10,8 @@ jobs:
         runs-on: ubuntu-20.04
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
+        outputs:
+            commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
             - uses: actions/checkout@v3
               with:
@@ -33,40 +33,57 @@ jobs:
             - name: Install Jest
               run: npm install -g jest
 
-            - name: Run smoke test.
+            - name: Get latest commit message
+              id: get_commit_message
+              run: |
+                  COMMIT_MESSAGE=$(git log --pretty=format:%s -1)
+                  echo "::set-output name=commit_message::$COMMIT_MESSAGE"
+
+            - name: Run E2E smoke test.
               working-directory: plugins/woocommerce
               env:
-                  SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  SMOKE_TEST_ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
-                  SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
-                  SMOKE_TEST_CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
-                  SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
+                  SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
+                  SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+                  SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+                  SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
                   WC_E2E_SCREENSHOTS: 1
                   E2E_RETEST: 1
                   E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: 'C02DS4NE72S'
-                  TEST_RELEASE: 1
+                  E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
                   UPDATE_WC: 1
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
               run: |
                   pnpm exec wc-e2e docker:up
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
                   pnpm exec wc-e2e test:e2e
-                  pnpm exec wc-api-tests test api
-                  
-            - name: Archive API test report
+
+            - name: Run API smoke tests
               if: always()
-              uses: actions/upload-artifact@v2
+              id: run_api_tests
+              working-directory: plugins/woocommerce
+              env:
+                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+                  USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+              run: pnpm exec wc-api-tests test api
+
+            - name: Archive API test report
+              if: |
+                  always() &&
+                  (
+                    steps.run_api_tests.conclusion != 'cancelled' ||
+                    steps.run_api_tests.conclusion != 'skipped'
+                  )
+              uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.API_TEST_REPORT_ARTIFACT_NAME }}
+                  name: api-test-report---daily
                   path: |
                       ${{ env.API_TEST_REPORT_DIR }}/allure-results
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
-                  retention-days: 7                    
+                  retention-days: 5
 
     build:
         name: Build zip for PR
@@ -167,7 +184,7 @@ jobs:
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+                  E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
@@ -177,18 +194,19 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: ${{ always() }}
-        runs-on: ubuntu-18.04
+        if: always()
+        runs-on: ubuntu-20.04
         needs: [login-run, build, test-plugins]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}
+            API_ARTIFACT: api-test-report---daily
+            COMMIT_MESSAGE: ${{ needs.login-run.outputs.commit_message }}
         steps:
             - name: Publish API test report
               run: |
-                  gh workflow run publish-report.yml \
-                    -f test_workflow=daily \
-                    -f test_type=api \
+                  gh workflow run publish-test-reports-daily.yml \
                     -f run_id=$RUN_ID \
-                    -f artifact_name=$API_TEST_REPORT_ARTIFACT_NAME \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f commit_message="$COMMIT_MESSAGE" \
                     --repo woocommerce/woocommerce-test-reports

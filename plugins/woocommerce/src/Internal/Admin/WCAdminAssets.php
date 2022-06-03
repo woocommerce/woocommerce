@@ -253,7 +253,7 @@ class WCAdminAssets {
 			'wc-experimental',
 			'wc-customer-effort-score',
 			// NOTE: This should be removed when Gutenberg is updated and the notices package is removed from WooCommerce Admin.
-			'wc-notices',
+			'wc-internal-notices',
 			'wc-number',
 			'wc-tracks',
 			'wc-date',
@@ -365,7 +365,7 @@ class WCAdminAssets {
 				'wc-navigation',
 				// NOTE: This should be removed when Gutenberg is updated and
 				// the notices package is removed from WooCommerce Admin.
-				'wc-notices',
+				'wc-internal-notices',
 				'wc-number',
 				'wc-date',
 				'wc-components',

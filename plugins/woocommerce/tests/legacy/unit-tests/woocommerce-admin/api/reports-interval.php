@@ -1013,4 +1013,107 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			TimeInterval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00', '2019-01-15T00:00:00' ), null, 'param' )
 		);
 	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_week" timeframes.
+	 */
+	public function test_timeframes_last_week() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_week', $datetime );
+
+		$this->assertEquals( '2022-05-16 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-05-22 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-05-16' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_week', $datetime );
+
+		$this->assertEquals( '2022-05-09 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-05-15 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-01-02' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_week', $datetime );
+
+		$this->assertEquals( '2021-12-20 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-26 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_month" timeframes.
+	 */
+	public function test_timeframes_last_month() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_month', $datetime );
+
+		$this->assertEquals( '2022-04-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-04-30 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2021-01-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_month', $datetime );
+
+		$this->assertEquals( '2020-12-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2020-12-31 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_quarter" timeframes.
+	 */
+	public function test_timeframes_last_quarter() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2022-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-03-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-01-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2021-10-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-07-18' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2022-04-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-06-30 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-11-07' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2022-07-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-09-31 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_6_months" timeframes.
+	 */
+	public function test_timeframes_last_6_months() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_6_months', $datetime );
+
+		$this->assertEquals( '2021-07-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2021-09-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_6_months', $datetime );
+
+		$this->assertEquals( '2021-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-06-30 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_year" timeframes.
+	 */
+	public function test_timeframes_last_year() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_year', $datetime );
+
+		$this->assertEquals( '2021-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2021-09-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_year', $datetime );
+
+		$this->assertEquals( '2020-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2020-12-31 23:59:59', $dates['end'] );
+	}
 }

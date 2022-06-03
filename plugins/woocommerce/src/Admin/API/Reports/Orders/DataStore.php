@@ -353,6 +353,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( $is_variation ) {
 				$variation = wc_get_product( $product_data['id'] );
+				/**
+				 * Used to determine the separator for products and their variations titles.
+				 *
+				 * @since 4.0.0
+				 */
 				$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $variation );
 
 				if ( false === strpos( $product_data['name'], $separator ) ) {

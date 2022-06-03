@@ -235,6 +235,10 @@
 		@include single-column;
 	}
 
+	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents-container {
+		padding: 16px;
+	}
+
 	.woocommerce-task-header__contents-container {
 		padding: 20px 24px;
 		position: relative;

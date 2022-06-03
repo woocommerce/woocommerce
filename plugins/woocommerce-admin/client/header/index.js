@@ -6,9 +6,7 @@ import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { Text, useSlot } from '@woocommerce/experimental';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -20,12 +18,13 @@ import {
 	WooHeaderItem,
 	WooHeaderPageTitle,
 } from './utils';
-import { TasksReminderBar } from '../tasks';
+import { TasksReminderBar, useActiveSetupTasklist } from '../tasks';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
+	const activeSetupList = useActiveSetupTasklist();
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const pageTitle = sections.slice( -1 )[ 0 ];
 	const isScrolled = useIsScrolled();
@@ -95,32 +94,12 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const { activeSetuplist } = useSelect( ( select ) => {
-		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
-
-		const visibleSetupList = taskLists
-			.filter( ( list ) => list.isVisible )
-			.filter( ( list ) =>
-				[
-					'setup_experiment_1',
-					'setup_experiment_2',
-					'setup',
-				].includes( list.id )
-			);
-
-		return {
-			activeSetuplist: visibleSetupList.length
-				? visibleSetupList[ 0 ].id
-				: null,
-		};
-	} );
-
 	return (
 		<div className={ className } ref={ headerElement }>
-			{ activeSetuplist && (
+			{ activeSetupList && (
 				<TasksReminderBar
 					updateBodyMargin={ updateBodyMargin }
-					taskListId={ activeSetuplist }
+					taskListId={ activeSetupList }
 				/>
 			) }
 			<div className="woocommerce-layout__header-wrapper">
