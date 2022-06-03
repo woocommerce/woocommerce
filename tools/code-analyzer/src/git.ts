@@ -103,7 +103,6 @@ export const getSchema = (
 ): {
 	schema: string;
 	OrdersTableDataStore: string;
-	ProductAttributesLookup: string;
 } | void => {
 	// Save the current branch for later.
 	const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
@@ -135,14 +134,6 @@ export const getSchema = (
 				encoding: 'utf-8',
 			}
 		);
-		// Get the ProductAttributesLookup schema.
-		const ProductAttributesLookup = execSync(
-			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator)->get_table_creation_sql();\'"',
-			{
-				cwd: 'plugins/woocommerce',
-				encoding: 'utf-8',
-			}
-		);
 		// Return to the current branch.
 		execSync( `git checkout ${ currentBranch }` );
 
@@ -150,7 +141,6 @@ export const getSchema = (
 		return {
 			schema,
 			OrdersTableDataStore,
-			ProductAttributesLookup,
 		};
 	} catch ( e ) {
 		// Return to the current branch.
@@ -207,14 +197,6 @@ export const generateSchemaDiff = async (
 			areEqual:
 				baseSchema.OrdersTableDataStore ===
 				compareSchema.OrdersTableDataStore,
-		},
-		ProductAttributesLookup: {
-			description: 'ProductAttributesLookup Schema',
-			base: baseSchema.ProductAttributesLookup,
-			compare: compareSchema.ProductAttributesLookup,
-			areEqual:
-				baseSchema.ProductAttributesLookup ===
-				compareSchema.ProductAttributesLookup,
 		},
 	};
 };
