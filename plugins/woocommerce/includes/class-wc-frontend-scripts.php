@@ -484,6 +484,23 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
 					'review_rating_required'    => wc_review_ratings_required() ? 'yes' : 'no',
+					/**
+					 * Flexslider options.
+					 *
+					 * @since 2.7.0
+					 *
+					 * @param bool    $is_rtl             Whether locale is RTL.
+					 * @param string  $animation_type     The type of animation. Accepts 'slide' or 'fade'.
+					 * @param bool    $height_transition  Allow height of the slider to animate smoothly in horizontal mode.
+					 * @param bool    $nav                Create navigation for previous/next navigation.
+					 * @param string  $controlNav         Create navigation for paging control of each slide.
+					 * @param string  $manualControls     Declare custom control navigation, accepts a valid jQuery selector.
+					 * @param bool    $slideshow          Create navigation for previous/next navigation.
+					 * @param int     $animationSpeed     Set the speed of animations, in milliseconds.
+					 * @param bool    $animationLoop      Enable the animation loop (start over after finishing).
+					 * @param bool    $allowOneSlide      Whether to allow a slider comprised of a single slide.
+					 *
+					 */
 					'flexslider'                => apply_filters(
 						'woocommerce_single_product_carousel_options',
 						array(
@@ -492,6 +509,13 @@ class WC_Frontend_Scripts {
 							'smoothHeight'   => true,
 							'directionNav'   => false,
 							'controlNav'     => 'thumbnails',
+							/**
+							 * Controls if manual controls for the single product flexslider should be enabled.
+							 *
+							 * @since 6.7.0
+							 *
+							 * @param bool $enable Enable manual controls.
+							 */
 							'manualControls' => apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) ) ? '.flex-control-nav img' : null,
 							'slideshow'      => false,
 							'animationSpeed' => 500,

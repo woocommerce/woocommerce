@@ -1559,6 +1559,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
  */
 function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
+	/** This filter is documented in includes/class-wc-frontend-scripts.php */
 	$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) );
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
@@ -1585,6 +1586,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		// Nav use int values in order to have different parameters.
 		$image_params = array(
 			'alt'     => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			/** This filter is documented in includes/wc-template-functions.php */
 			'loading' => ( $main_image <= apply_filters( 'woocommerce_product_thumbnails_columns', 4 ) ) ? null : 'lazy',
 			'class'   => 0 === $main_image ? 'flex-active' : '', // If is the first image set the flex-active class on init.
 		);
