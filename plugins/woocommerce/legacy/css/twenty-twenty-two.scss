@@ -253,6 +253,7 @@ $tt2-gray: #f7f7f7;
 
 	div.product {
 		position: relative;
+		overflow: auto;
 
 		> span.onsale {
 			position: absolute;
