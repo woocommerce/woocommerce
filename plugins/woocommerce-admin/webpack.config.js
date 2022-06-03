@@ -30,7 +30,7 @@ const wcAdminPackages = [
 	'experimental',
 	'explat',
 	'navigation',
-	'internal-notices',
+	'notices',
 	'number',
 	'data',
 	'tracks',

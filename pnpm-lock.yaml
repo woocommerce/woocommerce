@@ -973,7 +973,7 @@ importers:
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
-  packages/js/internal-notices:
+  packages/js/notices:
     specifiers:
       '@automattic/data-stores': ^2.0.1
       '@babel/core': ^7.17.5
@@ -1332,7 +1332,7 @@ importers:
       '@woocommerce/experimental': workspace:*
       '@woocommerce/explat': workspace:*
       '@woocommerce/internal-js-tests': workspace:*
-      '@woocommerce/internal-notices': workspace:*
+      '@woocommerce/notices': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
       '@woocommerce/number': workspace:*
@@ -1536,7 +1536,7 @@ importers:
       '@woocommerce/experimental': link:../../packages/js/experimental
       '@woocommerce/explat': link:../../packages/js/explat
       '@woocommerce/internal-js-tests': link:../../packages/js/internal-js-tests
-      '@woocommerce/internal-notices': link:../../packages/js/internal-notices
+      '@woocommerce/notices': link:../../packages/js/notices
       '@woocommerce/internal-style-build': link:../../packages/js/internal-style-build
       '@woocommerce/navigation': link:../../packages/js/navigation
       '@woocommerce/number': link:../../packages/js/number

@@ -24,7 +24,7 @@
 		"@woocommerce/explat": "packages/js/explat",
 		"@woocommerce/internal-js-tests": "packages/js/internal-js-tests",
 		"@woocommerce/navigation": "packages/js/navigation",
-		"@woocommerce/internal-notices": "packages/js/internal-notices",
+		"@woocommerce/notices": "packages/js/notices",
 		"@woocommerce/number": "packages/js/number",
 		"@woocommerce/onboarding": "packages/js/onboarding",
 		"@woocommerce/internal-style-build": "packages/js/internal-style-build",
