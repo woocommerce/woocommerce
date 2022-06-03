@@ -78,7 +78,24 @@ class WC_Settings_Tracking {
 			return;
 		}
 
+		// This is not used for site option storing/updates,
+		// which are yes/no *_enabled*.
+		// It is merely setting up $this->updated_options[] array
+		// with property names used in tracking events.
+		if ( 'woocommerce_analytics_enabled' === $option_name && 'no' === $new_value ) {
+			$option_name = 'woocommerce_analytics_disabled';
+		}
+		if ( 'woocommerce_navigation_enabled' === $option_name && 'no' === $new_value ) {
+			$option_name = 'woocommerce_navigation_disabled';
+		}
 		$this->updated_options[] = $option_name;
+
+		/**
+		 * Fire recording Tracks events.
+		 *
+		 * @since 2.4.0
+		 */
+		do_action( 'woocommerce_update_options' );
 	}
 
 	/**
