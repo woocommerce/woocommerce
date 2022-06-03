@@ -12,6 +12,7 @@
 - A `specs/data` folder to store page element data.
 - Tests to verify that different top-level menus and their associated sub-menus load successfully.
 - Test scaffolding via `npx wc-e2e install @woocommerce/e2e-core-tests`
+- Tests to check shipping cost calculation consistency between cart and checkout pages.
 
 ## Changed
 
