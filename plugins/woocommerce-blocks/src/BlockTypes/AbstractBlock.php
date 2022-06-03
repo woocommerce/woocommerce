@@ -210,7 +210,7 @@ abstract class AbstractBlock {
 		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
 		// Prefer to register with metadata if the path is set in the block's class.
 		if ( ! empty( $metadata_path ) ) {
-			register_block_type(
+			register_block_type_from_metadata(
 				$metadata_path,
 				$block_settings
 			);
