@@ -55,11 +55,11 @@ class Purchase extends Task {
 	 */
 	public function get_title() {
 		$products   = $this->get_paid_products_and_themes();
-		$first_product    = count( $products['remaining'] ) >= 1 ? $products['remaining'][0] : false;
-		$additional_count = count( $products['remaining'] ) - 1;
+		$first_product    = count( $products['purchaseable'] ) >= 1 ? $products['purchaseable'][0]['label'] : false;
+		$additional_count = count( $products['purchaseable'] ) - 1;
 
 		if ( $this->get_parent_option( 'use_completed_title' ) && $this->is_complete() ) {
-			return count( $products['remaining'] ) === 1
+			return count( $products['purchaseable'] ) === 1
 				? sprintf(
 					/* translators: %1$s: a purchased product name */
 					__(
@@ -76,19 +76,19 @@ class Purchase extends Task {
 						$additional_count,
 						'woocommerce'
 					),
-					$products['remaining'][0],
+					$first_product,
 					$additional_count
 				);
 		}
 
-		return count( $products['remaining'] ) === 1
+		return count( $products['purchaseable'] ) === 1
 			? sprintf(
 				/* translators: %1$s: a purchaseable product name */
 				__(
 					'Add %s to my store',
 					'woocommerce'
 				),
-				$products['remaining'][0]
+				$first_product
 			)
 			: sprintf(
 				/* translators: %1$s: a purchaseable product name, %2$d the number of other products to purchase */
@@ -98,7 +98,7 @@ class Purchase extends Task {
 					$additional_count,
 					'woocommerce'
 				),
-				$products['remaining'][0],
+				$first_product,
 				$additional_count
 			);
 	}

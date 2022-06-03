@@ -240,11 +240,6 @@
 		flex: 1;
 		overflow: hidden;
 		width: 100%;
-
-		img {
-			max-height: 150px;
-			width: auto;
-		}
 	}
 
 	.svg-background {
@@ -260,6 +255,10 @@
 		position: absolute;
 		z-index: 0;
 		right: 6%;
+		max-width: 25%;
+		max-height: 150px;
+		width: auto;
+		height: auto;
 
 		.admin-theme-color {
 			fill: var(--wp-admin-theme-color);

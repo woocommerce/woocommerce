@@ -1,16 +1,29 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useState, useCallback } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import CartModal from '~/dashboard/components/cart-modal';
 import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../utils/admin-settings';
 
-const PurchaseHeader = ( { task, goToTask } ) => {
+const PurchaseHeader = ( { task } ) => {
+	const [ cartModalOpen, setCartModalOpen ] = useState( false );
+
+	const toggleCartModal = useCallback( () => {
+		if ( ! cartModalOpen ) {
+			recordEvent( 'tasklist_purchase_extensions' );
+		}
+
+		setCartModalOpen( ! cartModalOpen );
+	}, [ cartModalOpen ] );
+
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
@@ -31,7 +44,7 @@ const PurchaseHeader = ( { task, goToTask } ) => {
 				<Button
 					isSecondary={ task.isComplete }
 					isPrimary={ ! task.isComplete }
-					onClick={ goToTask }
+					onClick={ toggleCartModal }
 				>
 					{ __( 'Continue', 'woocommerce' ) }
 				</Button>
@@ -40,6 +53,12 @@ const PurchaseHeader = ( { task, goToTask } ) => {
 					<span>{ task.time }</span>
 				</p>
 			</div>
+			{ cartModalOpen && (
+				<CartModal
+					onClose={ () => toggleCartModal() }
+					onClickPurchaseLater={ () => toggleCartModal() }
+				/>
+			) }
 		</div>
 	);
 };
