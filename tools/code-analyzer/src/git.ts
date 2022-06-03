@@ -103,7 +103,6 @@ export const getSchema = (
 ): {
 	schema: string;
 	OrdersTableDataStore: string;
-	ProductAttributesLookup: string;
 } | void => {
 	// Save the current branch for later.
 	const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
@@ -116,11 +115,6 @@ export const getSchema = (
 
 		// Checkout branch to compare
 		execSync( `git checkout ${ branch }` );
-		// Make sure wp-env is running
-		execSync( 'wp-env start', {
-			cwd: 'plugins/woocommerce',
-			encoding: 'utf-8',
-		} );
 
 		const getSchemaPath =
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
@@ -140,14 +134,6 @@ export const getSchema = (
 				encoding: 'utf-8',
 			}
 		);
-		// Get the ProductAttributesLookup schema.
-		const ProductAttributesLookup = execSync(
-			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator)->get_table_creation_sql();\'"',
-			{
-				cwd: 'plugins/woocommerce',
-				encoding: 'utf-8',
-			}
-		);
 		// Return to the current branch.
 		execSync( `git checkout ${ currentBranch }` );
 
@@ -155,7 +141,6 @@ export const getSchema = (
 		return {
 			schema,
 			OrdersTableDataStore,
-			ProductAttributesLookup,
 		};
 	} catch ( e ) {
 		// Return to the current branch.
@@ -184,7 +169,6 @@ export const generateSchemaDiff = async (
 		description: string;
 		base: string;
 		compare: string;
-		method: string;
 		areEqual: boolean;
 	};
 } | void > => {
@@ -204,28 +188,15 @@ export const generateSchemaDiff = async (
 			description: 'WooCommerce Base Schema',
 			base: baseSchema.schema,
 			compare: compareSchema.schema,
-			method: 'WC_Install->get_schema',
 			areEqual: baseSchema.schema === compareSchema.schema,
 		},
 		OrdersTableDataStore: {
 			description: 'OrdersTableDataStore Schema',
 			base: baseSchema.OrdersTableDataStore,
 			compare: compareSchema.OrdersTableDataStore,
-			method:
-				'Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore->get_database_schema',
 			areEqual:
 				baseSchema.OrdersTableDataStore ===
 				compareSchema.OrdersTableDataStore,
-		},
-		ProductAttributesLookup: {
-			description: 'ProductAttributesLookup Schema',
-			base: baseSchema.ProductAttributesLookup,
-			compare: compareSchema.ProductAttributesLookup,
-			method:
-				'Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator->get_table_creation_sql',
-			areEqual:
-				baseSchema.ProductAttributesLookup ===
-				compareSchema.ProductAttributesLookup,
 		},
 	};
 };
