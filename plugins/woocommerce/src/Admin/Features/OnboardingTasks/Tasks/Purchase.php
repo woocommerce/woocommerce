@@ -55,7 +55,13 @@ class Purchase extends Task {
 	 */
 	public function get_title() {
 		$products   = $this->get_paid_products_and_themes();
-		$first_product    = count( $products['purchaseable'] ) >= 1 ? $products['purchaseable'][0]['label'] : false;
+		$first_product    = count( $products['purchaseable'] ) >= 1 ? $products['purchaseable'][0] : false;
+
+		if ( ! $first_product ) {
+			return null;
+		}
+
+		$product_label    = isset( $first_product['label'] ) ? $first_product['label'] : $first_product['title'];
 		$additional_count = count( $products['purchaseable'] ) - 1;
 
 		if ( $this->get_parent_option( 'use_completed_title' ) && $this->is_complete() ) {
@@ -66,7 +72,7 @@ class Purchase extends Task {
 						'You added %1$s',
 						'woocommerce'
 					),
-					$first_product
+					$product_label
 				)
 				: sprintf(
 					/* translators: %1$s: a purchased product name, %2$d the number of other products purchased */
@@ -76,7 +82,7 @@ class Purchase extends Task {
 						$additional_count,
 						'woocommerce'
 					),
-					$first_product,
+					$product_label,
 					$additional_count
 				);
 		}
@@ -88,7 +94,7 @@ class Purchase extends Task {
 					'Add %s to my store',
 					'woocommerce'
 				),
-				$first_product
+				$product_label
 			)
 			: sprintf(
 				/* translators: %1$s: a purchaseable product name, %2$d the number of other products to purchase */
@@ -98,7 +104,7 @@ class Purchase extends Task {
 					$additional_count,
 					'woocommerce'
 				),
-				$first_product,
+				$product_label,
 				$additional_count
 			);
 	}
