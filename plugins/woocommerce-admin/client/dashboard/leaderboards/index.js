@@ -122,16 +122,21 @@ const Leaderboards = ( props ) => {
 						hiddenBlocks,
 						onToggleHiddenBlock,
 					} ) }
-					<SelectControl
-						className="woocommerce-dashboard__dashboard-leaderboards__select"
-						label={ __( 'Rows per table', 'woocommerce' ) }
-						value={ rowsPerTable }
-						options={ Array.from( { length: 20 }, ( v, key ) => ( {
-							v: key + 1,
-							label: key + 1,
-						} ) ) }
-						onChange={ setRowsPerTable }
-					/>
+					<MenuItem>
+						<SelectControl
+							className="woocommerce-dashboard__dashboard-leaderboards__select"
+							label={ __( 'Rows per table', 'woocommerce' ) }
+							value={ rowsPerTable }
+							options={ Array.from(
+								{ length: 20 },
+								( v, key ) => ( {
+									v: key + 1,
+									label: key + 1,
+								} )
+							) }
+							onChange={ setRowsPerTable }
+						/>
+					</MenuItem>
 					<Controls
 						onToggle={ onToggle }
 						onMove={ onMove }

@@ -225,7 +225,6 @@ registerPlugin( 'wc-admin-onboarding-task-marketing', {
 	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => (
-		// @ts-expect-error WooOnboardingTask is still a pure JS file
 		<WooOnboardingTask id="marketing">
 			{ ( { onComplete }: MarketingProps ) => {
 				return <Marketing onComplete={ onComplete } />;

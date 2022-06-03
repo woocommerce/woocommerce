@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add role="presentation" to table on the add-to-cart form as an accessibility enhancement.

@@ -6,23 +6,18 @@ import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import {
-	updateQueryString,
-	getHistory,
-	getNewPath,
-} from '@woocommerce/navigation';
-import {
-	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
 	getVisibleTasks,
 	TaskListType,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
-import { History } from 'history';
 
 /**
  * Internal dependencies
@@ -33,6 +28,7 @@ import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
+import { TaskListCompletedHeader } from './completed-header';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -40,6 +36,7 @@ export type TaskListProps = TaskListType & {
 	query: {
 		task?: string;
 	};
+	cesHeader?: boolean;
 };
 
 export const TaskList: React.FC< TaskListProps > = ( {
@@ -52,16 +49,20 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	keepCompletedTaskList,
 	isComplete,
 	displayProgressHeader,
+	cesHeader = true,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { profileItems } = useSelect( ( select ) => {
+	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList, visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const {
+		hideTaskList,
+		visitedTask,
+		keepCompletedTaskList: keepCompletedTasks,
+	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;
@@ -108,13 +109,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const keepTasks = () => {
-		const updateOptionsParams = {
-			woocommerce_task_list_keep_completed: 'yes',
-		};
-
-		updateOptions( {
-			...updateOptionsParams,
-		} );
+		keepCompletedTasks( id );
 	};
 
 	const renderMenu = () => {
@@ -192,17 +187,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		if ( ! task.isComplete ) {
 			updateTrackStartedCount( task.id );
 		}
+
 		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = task.actionUrl;
-			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, task.actionUrl, {} )
-				);
-			}
+			navigateTo( {
+				url: task.actionUrl,
+			} );
 			return;
 		}
-		updateQueryString( { task: task.id } );
+
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
@@ -226,14 +219,22 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
-	if ( isComplete && ! keepCompletedTaskList ) {
+	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
 			<>
-				<TaskListCompleted
-					hideTasks={ hideTasks }
-					keepTasks={ keepTasks }
-					twoColumns={ false }
-				/>
+				{ cesHeader ? (
+					<TaskListCompletedHeader
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						customerEffortScore={ true }
+					/>
+				) : (
+					<TaskListCompleted
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						twoColumns={ false }
+					/>
+				) }
 			</>
 		);
 	}

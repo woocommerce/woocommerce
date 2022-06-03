@@ -89,6 +89,7 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 					dismissedTasks={ dismissedTasks || [] }
 					isComplete={ isTaskListComplete }
 					query={ query }
+					cesHeader={ false }
 					tasks={ setupTasks }
 					title={ __( 'Get ready to start selling', 'woocommerce' ) }
 				/>

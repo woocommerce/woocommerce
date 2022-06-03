@@ -79,28 +79,29 @@ class TimeInterval {
 	 *
 	 * @param string $time_interval Time interval.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
+	 * @param string $date_column_name Name of the date table column.
 	 * @return mixed
 	 */
-	public static function db_datetime_format( $time_interval, $table_name ) {
+	public static function db_datetime_format( $time_interval, $table_name, $date_column_name = 'date_created' ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
 		if ( 1 === $first_day_of_week ) {
 			// Week begins on Monday, ISO 8601.
-			$week_format = "DATE_FORMAT({$table_name}.date_created, '%x-%v')";
+			$week_format = "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%x-%v')";
 		} else {
 			// Week begins on day other than specified by ISO 8601, needs to be in sync with function simple_week_number.
-			$week_format = "CONCAT(YEAR({$table_name}.date_created), '-', LPAD( FLOOR( ( DAYOFYEAR({$table_name}.date_created) + ( ( DATE_FORMAT(MAKEDATE(YEAR({$table_name}.date_created),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
+			$week_format = "CONCAT(YEAR({$table_name}.`{$date_column_name}`), '-', LPAD( FLOOR( ( DAYOFYEAR({$table_name}.`{$date_column_name}`) + ( ( DATE_FORMAT(MAKEDATE(YEAR({$table_name}.`{$date_column_name}`),1), '%w') - $first_day_of_week + 7 ) % 7 ) - 1 ) / 7  ) + 1 , 2, '0'))";
 
 		}
 
 		// Whenever this is changed, double check method time_interval_id to make sure they are in sync.
 		$mysql_date_format_mapping = array(
-			'hour'    => "DATE_FORMAT({$table_name}.date_created, '%Y-%m-%d %H')",
-			'day'     => "DATE_FORMAT({$table_name}.date_created, '%Y-%m-%d')",
+			'hour'    => "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%Y-%m-%d %H')",
+			'day'     => "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%Y-%m-%d')",
 			'week'    => $week_format,
-			'month'   => "DATE_FORMAT({$table_name}.date_created, '%Y-%m')",
-			'quarter' => "CONCAT(YEAR({$table_name}.date_created), '-', QUARTER({$table_name}.date_created))",
-			'year'    => "YEAR({$table_name}.date_created)",
+			'month'   => "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%Y-%m')",
+			'quarter' => "CONCAT(YEAR({$table_name}.`{$date_column_name}`), '-', QUARTER({$table_name}.`{$date_column_name}`))",
+			'year'    => "YEAR({$table_name}.`{$date_column_name}`)",
 
 		);
 
@@ -229,17 +230,14 @@ class TimeInterval {
 
 				return (int) floor( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS ) + 1 + $addendum;
 			case 'day':
-				$end_timestamp      = (int) $end_datetime->format( 'U' );
-				$start_timestamp    = (int) $start_datetime->format( 'U' );
-				$addendum           = 0;
+				$days               = $start_datetime->diff( $end_datetime )->format( '%r%a' );
 				$end_hour_min_sec   = (int) $end_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $end_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $end_datetime->format( 's' );
 				$start_hour_min_sec = (int) $start_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $start_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $start_datetime->format( 's' );
 				if ( $end_hour_min_sec < $start_hour_min_sec ) {
-					$addendum = 1;
+					$days++;
 				}
-				$diff_timestamp = $end_timestamp - $start_timestamp;
 
-				return (int) floor( ( (int) $diff_timestamp ) / DAY_IN_SECONDS ) + 1 + $addendum;
+				return $days + 1;
 			case 'week':
 				// @todo Optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
 				$week_count = 0;
@@ -329,13 +327,23 @@ class TimeInterval {
 	 */
 	public static function next_week_start( $datetime, $reversed = false ) {
 		$seven_days = new \DateInterval( 'P7D' );
-		$start_end  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
-
+		// Default timezone set in wp-settings.php.
+		$default_timezone = date_default_timezone_get();
+		// Timezone that the WP site uses in Settings > General.
+		$original_timezone = $datetime->getTimezone();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		$start_end_timestamp  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
+		date_default_timezone_set( $default_timezone );
+		// @codingStandardsIgnoreEnd
 		if ( $reversed ) {
-			return \DateTime::createFromFormat( 'U', $start_end['end'] )->sub( $seven_days );
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['end'] )->sub( $seven_days );
+		} else {
+			$result = \DateTime::createFromFormat( 'U', $start_end_timestamp['start'] )->add( $seven_days );
 		}
-		return \DateTime::createFromFormat( 'U', $start_end['start'] )->add( $seven_days );
+		return \DateTime::createFromFormat( 'Y-m-d H:i:s', $result->format( 'Y-m-d H:i:s' ), $original_timezone );
 	}
+
 
 	/**
 	 * Returns a new DateTime object representing the next month start, or previous month end if reversed.
@@ -622,5 +630,81 @@ class TimeInterval {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get dates from a timeframe string.
+	 *
+	 * @param int           $timeframe Timeframe to use.  One of: last_week|last_month|last_quarter|last_6_months|last_year.
+	 * @param DateTime|null $current_date DateTime of current date to compare.
+	 * @return array
+	 */
+	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
+		if ( ! $current_date ) {
+			$current_date = new \DateTime();
+		}
+		$current_year  = $current_date->format( 'Y' );
+		$current_month = $current_date->format( 'm' );
+
+		if ( 'last_week' === $timeframe ) {
+			return array(
+				'start' => $current_date->modify( 'last week monday' )->format( 'Y-m-d 00:00:00' ),
+				'end'   => $current_date->modify( 'this sunday' )->format( 'Y-m-d 23:59:59' ),
+			);
+		}
+
+		if ( 'last_month' === $timeframe ) {
+			return array(
+				'start' => $current_date->modify( 'first day of previous month' )->format( 'Y-m-d 00:00:00' ),
+				'end'   => $current_date->modify( 'last day of this month' )->format( 'Y-m-d 23:59:59' ),
+			);
+		}
+
+		if ( 'last_quarter' === $timeframe ) {
+			switch ( $current_month ) {
+				case $current_month >= 1 && $current_month <= 3:
+					return array(
+						'start' => ( $current_year - 1 ) . '-10-01 00:00:00',
+						'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',
+					);
+				case $current_month >= 4 && $current_month <= 6:
+					return array(
+						'start' => $current_year . '-01-01 00:00:00',
+						'end'   => $current_year . '-03-31 23:59:59',
+					);
+				case $current_month >= 7 && $current_month <= 9:
+					return array(
+						'start' => $current_year . '-04-01 00:00:00',
+						'end'   => $current_year . '-06-30 23:59:59',
+					);
+				case $current_month >= 10 && $current_month <= 12:
+					return array(
+						'start' => $current_year . '-07-01 00:00:00',
+						'end'   => $current_year . '-09-31 23:59:59',
+					);
+			}
+		}
+
+		if ( 'last_6_months' === $timeframe ) {
+			if ( $current_month >= 1 && $current_month <= 6 ) {
+				return array(
+					'start' => ( $current_year - 1 ) . '-07-01 00:00:00',
+					'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',
+				);
+			}
+			return array(
+				'start' => $current_year . '-01-01 00:00:00',
+				'end'   => $current_year . '-06-30 23:59:59',
+			);
+		}
+
+		if ( 'last_year' === $timeframe ) {
+			return array(
+				'start' => ( $current_year - 1 ) . '-01-01 00:00:00',
+				'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',
+			);
+		}
+
+		return false;
 	}
 }

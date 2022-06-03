@@ -68,6 +68,7 @@ class Loader {
 		Translations::get_instance();
 		WCAdminUser::get_instance();
 		Settings::get_instance();
+		SystemStatusReport::get_instance();
 
 		wc_get_container()->get( Reviews::class );
 		wc_get_container()->get( ReviewsCommentsOverrides::class );
@@ -96,11 +97,13 @@ class Loader {
 	 * If WooCommerce Admin is installed and activated, it will attempt to deactivate and show a notice.
 	 */
 	public static function deactivate_wc_admin_plugin() {
-		if ( PluginsHelper::is_plugin_active( 'woocommerce-admin' ) ) {
+		$plugin_path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
+		if ( is_plugin_active( $plugin_path ) ) {
 			$path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
 			deactivate_plugins( $path );
+			$notice_action = is_network_admin() ? 'network_admin_notices' : 'admin_notices';
 			add_action(
-				'admin_notices',
+				$notice_action,
 				function() {
 					echo '<div class="error"><p>';
 					printf(
@@ -347,7 +350,9 @@ class Loader {
 				$group_settings   = $setting_options->get_group_settings( $group );
 				$preload_settings = [];
 				foreach ( $group_settings as $option ) {
-					$preload_settings[ $option['id'] ] = $option['value'];
+					if ( array_key_exists( 'id', $option ) && array_key_exists( 'value', $option ) ) {
+						$preload_settings[ $option['id'] ] = $option['value'];
+					}
 				}
 				$settings['preloadSettings'][ $group ] = $preload_settings;
 			}

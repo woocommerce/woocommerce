@@ -27,6 +27,7 @@ declare global {
 			'transient-notices': boolean;
 			'wc-pay-promotion': boolean;
 			'wc-pay-welcome-page': boolean;
+			'wc-pay-subscriptions-page': boolean;
 		};
 	}
 }

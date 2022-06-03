@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Moved out product task experiment hook to onboarding package, added ExPlat logic to backend calls

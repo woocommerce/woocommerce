@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix onboarding task type errors after migrating woo.onboarding to TS

@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getHistory,
-	getNewPath,
-	updateQueryString,
-} from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -19,7 +15,6 @@ import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import classnames from 'classnames';
-import { History } from 'history';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -31,13 +26,14 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	eventPrefix,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
+
 	const {
+		visitedTask,
 		dismissTask,
 		undoDismissTask,
 		snoozeTask,
 		undoSnoozeTask,
-	} = useDispatch( OPTIONS_STORE_NAME );
-	const { visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( ONBOARDING_STORE_NAME );
 
 	const slot = useSlot(
 		`woocommerce_onboarding_task_list_item_${ task.id }`
@@ -83,18 +79,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		trackClick();
 
 		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = task.actionUrl;
-			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, task.actionUrl, {} )
-				);
-			}
+			navigateTo( {
+				url: task.actionUrl,
+			} );
 			return;
 		}
 
-		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: task.id } );
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const onDismiss = useCallback( () => {

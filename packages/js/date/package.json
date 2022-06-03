@@ -19,11 +19,14 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
+		"@types/d3-time-format": "^2.3.0",
 		"@wordpress/date": "^4.3.1",
 		"@wordpress/i18n": "^4.3.1",
 		"moment": "^2.29.1",
+		"moment-timezone": "^0.5.34",
 		"qs": "^6.10.3"
 	},
 	"devDependencies": {

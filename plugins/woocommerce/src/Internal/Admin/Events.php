@@ -38,7 +38,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use \Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ManageOrdersOnTheGo;
 use \Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\NavigationNudge;
 use \Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Internal\Admin\Notes\UpdateStoreDetails;
@@ -136,7 +135,6 @@ class Events {
 		AddingAndManangingProducts::possibly_add_note();
 		CustomizingProductCatalog::possibly_add_note();
 		FirstDownlaodableProduct::possibly_add_note();
-		NavigationNudge::possibly_add_note();
 		CompleteStoreDetails::possibly_add_note();
 		UpdateStoreDetails::possibly_add_note();
 		PaymentsRemindMeLater::possibly_add_note();
@@ -147,7 +145,6 @@ class Events {
 	 * Deletes notes that should be deleted.
 	 */
 	protected function possibly_delete_notes() {
-		NavigationNudge::delete_if_not_applicable();
 		PaymentsRemindMeLater::delete_if_not_applicable();
 	}
 
@@ -181,7 +178,6 @@ class Events {
 		AddingAndManangingProducts::possibly_update_note();
 		CustomizingProductCatalog::possibly_update_note();
 		FirstDownlaodableProduct::possibly_update_note();
-		NavigationNudge::possibly_update_note();
 		CompleteStoreDetails::possibly_update_note();
 		UpdateStoreDetails::possibly_update_note();
 		PaymentsRemindMeLater::possibly_update_note();

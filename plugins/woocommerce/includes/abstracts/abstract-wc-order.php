@@ -635,7 +635,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_total( $value ) {
-		$this->set_prop( 'discount_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'discount_total', wc_format_decimal( $value, false, true ) );
 	}
 
 	/**
@@ -645,7 +645,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'discount_tax', wc_format_decimal( $value, false, true ) );
 	}
 
 	/**
@@ -655,7 +655,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_total( $value ) {
-		$this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_total', wc_format_decimal( $value, false, true ) );
 	}
 
 	/**
@@ -665,7 +665,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_tax', wc_format_decimal( $value, false, true ) );
 		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 
@@ -676,7 +676,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_cart_tax( $value ) {
-		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'cart_tax', wc_format_decimal( $value, false, true ) );
 		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 

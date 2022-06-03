@@ -1048,12 +1048,63 @@ function wc_print_js() {
  * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
-	if ( ! apply_filters( 'woocommerce_set_cookie_enabled', true, $name ,$value, $expire, $secure ) ) {
+	/**
+	 * Controls whether the cookie should be set via wc_setcookie().
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param bool    $set_cookie_enabled If wc_setcookie() should set the cookie.
+	 * @param string  $name               Cookie name.
+	 * @param string  $value              Cookie value.
+	 * @param integer $expire             When the cookie should expire.
+	 * @param bool    $secure             If the cookie should only be served over HTTPS.
+	 */
+	if ( ! apply_filters( 'woocommerce_set_cookie_enabled', true, $name, $value, $expire, $secure ) ) {
 		return;
 	}
 
 	if ( ! headers_sent() ) {
-		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
+		/**
+		 * Controls the options to be specified when setting the cookie.
+		 *
+		 * @see   https://www.php.net/manual/en/function.setcookie.php
+		 * @since 6.7.0
+		 *
+		 * @param array  $cookie_options Cookie options.
+		 * @param string $name           Cookie name.
+		 * @param string $value          Cookie value.
+		 */
+		$options = apply_filters(
+			'woocommerce_set_cookie_options',
+			array(
+				'expires'  => $expire,
+				'secure'   => $secure,
+				'path'     => COOKIEPATH ? COOKIEPATH : '/',
+				'domain'   => COOKIE_DOMAIN,
+				/**
+				 * Controls whether the cookie should only be accessible via the HTTP protocol, or if it should also be
+				 * accessible to Javascript.
+				 *
+				 * @see   https://www.php.net/manual/en/function.setcookie.php
+				 * @since 3.3.0
+				 *
+				 * @param bool   $httponly If the cookie should only be accessible via the HTTP protocol.
+				 * @param string $name     Cookie name.
+				 * @param string $value    Cookie value.
+				 * @param int    $expire   When the cookie should expire.
+				 * @param bool   $secure   If the cookie should only be served over HTTPS.
+				 */
+				'httponly' => apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ),
+			),
+			$name,
+			$value
+		);
+
+		if ( version_compare( PHP_VERSION, '7.3.0', '>=' ) ) {
+			setcookie( $name, $value, $options );
+		} else {
+			setcookie( $name, $value, $options['expires'], $options['path'], $options['domain'], $options['secure'], $options['httponly'] );
+		}
 	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
@@ -1873,7 +1924,7 @@ function wc_get_rounding_precision() {
  * @param  bool  $round If should round after adding precision.
  * @return int|float
  */
-function wc_add_number_precision( $value, $round = true ) {
+function wc_add_number_precision( float $value, bool $round = true ) {
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	$value          = $value * $cent_precision;
 	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;

@@ -9,6 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { box, comment, page } from '@wordpress/icons';
 import { createSlotFill } from '@wordpress/components';
+import { isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import {
 	getUnreadOrders,
 } from '~/homescreen/activity-panel/orders/utils';
 import { getUnapprovedReviews } from '~/homescreen/activity-panel/reviews/utils';
-import { isWCAdmin } from '~/dashboard/utils';
 import { Bell } from './icons/bell';
 
 const EXTENDED_TASK_LIST_ID = 'extended_task_list';
@@ -56,7 +56,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	};
 
 	const { Slot } = createSlotFill( ABBREVIATED_NOTIFICATION_SLOT_NAME );
-	const isWCAdminPage = isWCAdmin( window.location.href );
+	const isWCAdminPage = isWCAdmin();
 
 	return (
 		<div className="woocommerce-abbreviated-notifications">

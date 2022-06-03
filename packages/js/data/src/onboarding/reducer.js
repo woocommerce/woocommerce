@@ -72,6 +72,7 @@ const onboarding = (
 		taskListId,
 		taskList,
 		taskLists,
+		keepCompletedTaskList,
 	}
 ) => {
 	switch ( type ) {
@@ -370,6 +371,17 @@ const onboarding = (
 				taskLists: {
 					...state.taskLists,
 					[ taskListId ]: taskList,
+				},
+			};
+		case TYPES.KEEP_COMPLETED_TASKS_SUCCESS:
+			return {
+				...state,
+				taskLists: {
+					...state.taskLists,
+					[ taskListId ]: {
+						...state.taskLists[ taskListId ],
+						keepCompletedTaskList,
+					},
 				},
 			};
 		case TYPES.OPTIMISTICALLY_COMPLETE_TASK_REQUEST:

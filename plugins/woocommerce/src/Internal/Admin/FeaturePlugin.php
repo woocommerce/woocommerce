@@ -19,7 +19,6 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
-use \Automattic\WooCommerce\Internal\Admin\Notes\NavigationNudge;
 use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
@@ -111,19 +110,34 @@ class FeaturePlugin {
 		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_PLUGIN_FILE );
-		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
+
+		/**
+		 * Define the WC Admin Images Folder URL.
+		 *
+		 * @deprecated 6.7.0
+		 * @var string
+		 */
+		if ( ! defined( 'WC_ADMIN_IMAGES_FOLDER_URL' ) ) {
+			/**
+			 * Define the WC Admin Images Folder URL.
+			 *
+			 * @deprecated 6.7.0
+			 * @var string
+			 */
+			define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
+		}
 
 		/**
 		 * Define the current WC Admin version.
 		 *
-		 * @deprecated 3.3.0
+		 * @deprecated 6.4.0
 		 * @var string
 		 */
 		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 			/**
 			  * Define the current WC Admin version.
 			  *
-			  * @deprecated 3.3.0
+			  * @deprecated 6.4.0
 			  * @var string
 			  */
 			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
@@ -169,7 +183,6 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new WelcomeToWooCommerceForStoreUsers();
 		new ManageStoreActivityFromHomeScreen();
-		new NavigationNudge();
 		new MagentoMigration();
 
 		// Initialize MerchantEmailNotifications.
@@ -193,6 +206,11 @@ class FeaturePlugin {
 	 * @param array $features Array of feature slugs.
 	 */
 	public function replace_supported_features( $features ) {
+		/**
+		 * Get additional feature config
+		 *
+		 * @since 6.5.0
+		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;

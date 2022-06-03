@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Specify a maximum index size for the URL column in the Download Directories table.

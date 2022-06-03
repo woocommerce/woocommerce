@@ -15,48 +15,26 @@ jobs:
         if: "${{ contains(github.event.label.name, 'run: smoke tests') }}"
         runs-on: ubuntu-20.04
         steps:
-            - name: Create dirs.
-              run: |
-                  mkdir -p code/woocommerce
-                  mkdir -p package/woocommerce
-                  mkdir -p tmp/woocommerce
+            - uses: actions/checkout@v3
 
-            - name: Checkout code.
-              uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                  path: package/woocommerce
+                workflow_name: pr-smoke-test
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - name: Get cached composer and pnpm directories
-              uses: actions/cache@v3
-              id: cache-deps
+            - name: Install Jest
+              run: pnpm install -g jest
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
               with:
-                path: |
-                  ~/.pnpm-store
-                  package/woocommerce/plugins/woocommerce/packages
-                  package/woocommerce/plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-smoke-test-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+                php-version: '7.4'
 
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              working-directory: package/woocommerce/plugins/woocommerce
-              if: steps.cache-deps.outputs.cache-hit != 'true'
-              run: pnpm nx composer-install-no-dev woocommerce
-
-            - name: Install prerequisites.
-              working-directory: package/woocommerce/plugins/woocommerce
-              id: installation
-              run: |
-                  pnpm nx build-assets woocommerce
-                  pnpm install jest
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Run smoke test.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               if: always()
               env:
                   SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -83,11 +61,11 @@ jobs:
               with:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
-                      const script = require( './package/woocommerce/packages/js/e2e-environment/bin/post-results-to-github-pr.js' )
+                      const script = require( './packages/js/e2e-environment/bin/post-results-to-github-pr.js' )
                       await script({github, context})
 
             - name: Run E2E tests.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               if: always()
               env:
                   SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -114,7 +92,7 @@ jobs:
               with:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
-                      const script = require( './package/woocommerce/packages/js/e2e-environment/bin/post-results-to-github-pr.js' )
+                      const script = require( './packages/js/e2e-environment/bin/post-results-to-github-pr.js' )
                       await script({github, context})
 
             - name: Remove label from pull request.

@@ -31,7 +31,7 @@ import InboxPanel from '../inbox-panel';
 import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
-import { TasksPlaceholder } from '../tasks';
+import { TasksPlaceholder, useActiveSetupTasklist } from '../tasks';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
@@ -41,6 +41,7 @@ import { WelcomeModal } from './welcome-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { ProgressTitle } from '../task-lists';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -75,6 +76,7 @@ export const Layout = ( {
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task;
+	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const {
 		isLoadingExperimentAssignment,
@@ -199,6 +201,11 @@ export const Layout = ( {
 
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
+				{ activeSetupTaskList &&
+					isDashboardShown &&
+					[ 'setup_experiment_1', 'setup_experiment_2' ].includes(
+						activeSetupTaskList
+					) && <ProgressTitle taskListId={ activeSetupTaskList } /> }
 				<Tasks query={ query } />
 			</Suspense>
 		);

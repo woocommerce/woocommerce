@@ -242,7 +242,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param array $query_args Query args.
 	 * @return array
 	 */
-	public function get_objects( $query_args ) {
+	protected function get_objects( $query_args ) {
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			add_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );

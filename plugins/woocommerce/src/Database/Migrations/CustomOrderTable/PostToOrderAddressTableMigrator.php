@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
+use Automattic\WooCommerce\Database\Migrations\MetaToCustomTableMigrator;
+
 /**
  * Helper class to migrate records from the WordPress post table
  * to the custom order addresses table.
@@ -34,7 +36,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return array Config.
 	 */
-	public function get_schema_config(): array {
+	protected function get_schema_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
 		$this->table_names = array(
@@ -73,7 +75,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *
 	 * @return \string[][] Config.
 	 */
-	public function get_core_column_mapping(): array {
+	protected function get_core_column_mapping(): array {
 		$type = $this->type;
 
 		return array(
@@ -159,7 +161,7 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	 *      ...
 	 * )
 	 */
-	public function get_already_migrated_records( array $entity_ids ): array {
+	protected function get_already_migrated_records( array $entity_ids ): array {
 		global $wpdb;
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
 		$source_destination_join_column = $this->schema_config['source']['entity']['destination_rel_column'];
@@ -188,5 +190,19 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) AND dest
 		);
 
 		return array_column( $already_migrated_entity_ids, null, 'source_id' );
+	}
+
+	/**
+	 * Helper function to generate where clause for fetching data for verification.
+	 *
+	 * @param array $source_ids Array of IDs from source table.
+	 *
+	 * @return string WHERE clause.
+	 */
+	protected function get_where_clause_for_verification( $source_ids ) {
+		global $wpdb;
+		$query = parent::get_where_clause_for_verification( $source_ids );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $query should already be prepared, $schema_config is hardcoded.
+		return $wpdb->prepare( "$query AND {$this->schema_config['destination']['table_name']}.address_type = %s", $this->type );
 	}
 }

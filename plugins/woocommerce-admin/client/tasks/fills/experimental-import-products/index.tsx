@@ -21,11 +21,16 @@ import useProductTypeListItems from '../experimental-products/use-product-types-
 import { getProductTypes } from '../experimental-products/utils';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
+import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
 import useRecordCompletionTime from '../use-record-completion-time';
 
 export const Products = () => {
 	const [ showStacks, setStackVisibility ] = useState< boolean >( false );
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+	const [
+		isConfirmingLoadSampleProducts,
+		setIsConfirmingLoadSampleProducts,
+	] = useState( false );
 
 	const importTypesWithTimeRecord = useMemo(
 		() =>
@@ -49,7 +54,10 @@ export const Products = () => {
 	} );
 
 	const productTypeListItems = useProductTypeListItems(
-		getProductTypes( [ 'subscription' ] ),
+		getProductTypes( {
+			exclude: [ 'subscription' ],
+		} ),
+		[],
 		{
 			onClick: recordCompletionTime,
 		}
@@ -58,7 +66,9 @@ export const Products = () => {
 	const StacksComponent = (
 		<Stacks
 			items={ productTypeListItems }
-			onClickLoadSampleProduct={ loadSampleProduct }
+			onClickLoadSampleProduct={ () =>
+				setIsConfirmingLoadSampleProducts( true )
+			}
 		/>
 	);
 
@@ -80,7 +90,21 @@ export const Products = () => {
 				</Button>
 				{ showStacks && StacksComponent }
 			</div>
-			{ isLoadingSampleProducts && <LoadSampleProductModal /> }
+			{ isLoadingSampleProducts ? (
+				<LoadSampleProductModal />
+			) : (
+				isConfirmingLoadSampleProducts && (
+					<LoadSampleProductConfirmModal
+						onCancel={ () =>
+							setIsConfirmingLoadSampleProducts( false )
+						}
+						onImport={ () => {
+							setIsConfirmingLoadSampleProducts( false );
+							loadSampleProduct();
+						} }
+					/>
+				)
+			) }
 		</div>
 	);
 };
@@ -89,8 +113,7 @@ registerPlugin( 'wc-admin-onboarding-task-products', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
 	render: () => (
-		// @ts-expect-error WooOnboardingTask is a pure JS component.
-		<WooOnboardingTask id="products">
+		<WooOnboardingTask id="products" variant="import">
 			<Products />
 		</WooOnboardingTask>
 	),
