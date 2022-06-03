@@ -40,6 +40,18 @@ export type Product<
 	sale_price: string;
 };
 
+export type MutableProperties =
+	| 'name'
+	| 'slug'
+	| 'type'
+	| 'status'
+	| 'featured'
+	| 'description'
+	| 'short_description'
+	| 'sku'
+	| 'regular_price'
+	| 'sale_price';
+
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
 export type ProductQuery<

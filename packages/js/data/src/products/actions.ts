@@ -8,7 +8,12 @@ import { DispatchFromMap } from '@automattic/data-stores';
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { PartialProduct, Product, ProductQuery } from './types';
+import {
+	MutableProperties,
+	PartialProduct,
+	Product,
+	ProductQuery,
+} from './types';
 import { WC_PRODUCT_NAMESPACE } from './constants';
 
 export function getProductSuccess( id: number, product: PartialProduct ) {
@@ -95,7 +100,7 @@ export function getProductsTotalCountError(
 	};
 }
 
-export function* createProduct( data: Partial< Product > ) {
+export function* createProduct( data: Pick< Product, MutableProperties > ) {
 	try {
 		const product: Product = yield apiFetch( {
 			path: WC_PRODUCT_NAMESPACE,
