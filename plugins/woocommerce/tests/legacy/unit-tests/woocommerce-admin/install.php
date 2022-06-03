@@ -135,6 +135,7 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 			array( '6.3.0', 5 ),
 			array( '6.4.0', 2 ),
 			array( '6.5.0', 1 ),
+			array( '6.7.0', 1 ),
 		);
 	}
 
