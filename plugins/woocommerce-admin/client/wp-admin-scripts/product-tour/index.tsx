@@ -32,15 +32,32 @@ const ProductTour = () => {
 	}, [] );
 
 	const config: TourKitTypes.WooConfig = {
+		placement: 'bottom-start',
 		options: {
 			effects: {
 				spotlight: {},
 				arrowIndicator: true,
-				autoScroll: {
-					behavior: 'smooth',
-					block: 'center',
-				},
+				// autoScroll: {
+				// 	behavior: 'smooth',
+				// 	block: 'center',
+				// },
 			},
+			popperModifiers: [
+				{
+					name: 'arrow',
+					options: {
+						padding: ( {
+							popper,
+						}: {
+							popper: { width: number };
+						} ) => {
+							return {
+								right: popper.width - 34,
+							};
+						},
+					},
+				},
+			],
 		},
 		steps: [
 			{
