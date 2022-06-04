@@ -1961,12 +1961,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::current_action()
 	 * @dataProvider provider_current_action
 	 *
-	 * @param bool        $delete_all_isset   If `delete_all` isset.
-	 * @param bool        $delete_all_2_isset If `delete_all2` isset.
-	 * @param string|bool $expected           Expected result of the method.
+	 * @param bool $delete_all_isset   If `delete_all` isset.
+	 * @param bool $delete_all_2_isset If `delete_all2` isset.
 	 * @return void
 	 */
-	public function test_current_action( bool $delete_all_isset, bool $delete_all_2_isset, $expected ) {
+	public function test_current_action( bool $delete_all_isset, bool $delete_all_2_isset ) {
 		if ( $delete_all_isset ) {
 			$_REQUEST['delete_all'] = 'Empty Trash';
 		} else {
@@ -1978,15 +1977,19 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			unset( $_REQUEST['delete_all2'] );
 		}
 
-		$this->assertSame( $expected, $this->get_reviews_list_table()->current_action() );
+		if ( ! $delete_all_isset && ! $delete_all_2_isset ) {
+			$this->assertNotSame( 'delete_all', $this->get_reviews_list_table()->current_action() );
+		} else {
+			$this->assertSame( 'delete_all', $this->get_reviews_list_table()->current_action() );
+		}
 	}
 
 	/** @see test_current_action */
 	public function provider_current_action(): Generator {
-		yield 'delete all isset' => [ true, false, 'delete_all' ];
-		yield 'delete all 2 isset' => [ false, true, 'delete_all' ];
-		yield 'both deletes are set' => [ true, true, 'delete_all' ];
-		yield 'neither deletes are set' => [ false, false, false ];
+		yield 'delete all isset' => [ true, false ];
+		yield 'delete all 2 isset' => [ false, true ];
+		yield 'both deletes are set' => [ true, true ];
+		yield 'neither deletes are set' => [ false, false ];
 	}
 
 }
