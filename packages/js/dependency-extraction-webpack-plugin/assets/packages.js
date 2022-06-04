@@ -12,7 +12,7 @@ module.exports = [
 	'@woocommerce/explat',
 	'@woocommerce/extend-cart-checkout-block',
 	'@woocommerce/navigation',
-	'@woocommerce/internal-notices',
+	'@woocommerce/notices',
 	'@woocommerce/number',
 	'@woocommerce/tracks',
 	// wc-blocks packages

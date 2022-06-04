@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/internal-notices",
+	"name": "@woocommerce/notices",
 	"version": "4.0.1",
 	"description": "State management for notices.",
 	"author": "The WordPress Contributors",
@@ -9,11 +9,11 @@
 		"gutenberg",
 		"notices"
 	],
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-notices/README.md",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/notices/README.md",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerge.git",
-		"directory": "packages/js/internal-notices"
+		"directory": "packages/js/notices"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
