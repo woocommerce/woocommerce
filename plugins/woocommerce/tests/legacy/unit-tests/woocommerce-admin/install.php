@@ -81,6 +81,29 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider that returns DB Update version string and # of expected pending jobs.
+	 *
+	 * @return array[]
+	 */
+	public function db_update_version_provider() {
+		return array(
+			// [DB Update version string, # of expected pending jobs]
+			array( '3.9.0', 35 ),
+			array( '4.0.0', 28 ),
+			array( '4.4.0', 24 ),
+			array( '4.5.0', 22 ),
+			array( '5.0.0', 18 ),
+			array( '5.6.0', 16 ),
+			array( '6.0.0', 9 ),
+			array( '6.3.0', 6 ),
+			array( '6.4.0', 3 ),
+			array( '6.5.0', 2 ),
+			array( '6.6.0', 1 ),
+			array( '6.7.0', 0 ),
+		);
+	}
+
+	/**
 	 * Test missed DB version number update.
 	 * See: https:// github.com/woocommerce/woocommerce-admin/issues/5058
 	 */

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a new Product Reviews admin screen, and remove reviews from the existing Comments admin screen.
