@@ -43,6 +43,11 @@ class WC_Regenerate_Images {
 			return;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
 
@@ -68,6 +73,11 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function filter_image_get_intermediate_size( $data, $attachment_id, $size ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! is_string( $size ) || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
 			return $data;
 		}
@@ -199,11 +209,20 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_resize_images', true ) ) {
 			return $image;
 		}
 
-		// List of sizes we want to resize. Ignore others.
+		/**
+		 * List of sizes we want to resize. Ignore others.
+		 *
+		 * @since
+		 */
 		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single', 'shop_thumbnail', 'shop_catalog', 'shop_single' ) ), true ) ) {
 			return $image;
 		}

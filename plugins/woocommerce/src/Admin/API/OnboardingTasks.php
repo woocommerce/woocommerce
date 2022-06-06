@@ -318,12 +318,22 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( file_exists( $csv_file ) && class_exists( 'WC_Product_CSV_Importer' ) ) {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			add_filter( 'locale', '__return_false', 9999 );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
 			$args           = array(
 				'parse'   => true,
 				'mapping' => self::get_header_mappings( $csv_file ),
 			);
-			$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
+			$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 
 			$importer = new $importer_class( $csv_file, $args );
 			$import   = $importer->import();
@@ -382,6 +392,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public static function create_product_from_template( $request ) {
 		$template_name = $request->get_param( 'template_name' );
 		$template_path = __DIR__ . '/Templates/' . $template_name . '_product.csv';
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$template_path = apply_filters( 'woocommerce_product_template_csv_file_path', $template_path, $template_name );
 
 		$import = self::import_sample_products_from_csv( $template_path );
@@ -416,6 +431,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public static function get_header_mappings( $file ) {
 		include_once WC_ABSPATH . 'includes/admin/importers/mappings/mappings.php';
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$importer_class  = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
 		$importer        = new $importer_class( $file, array() );
 		$raw_headers     = $importer->get_raw_keys();
@@ -561,6 +581,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			 * Modify the template/content of the default homepage.
 			 *
 			 * @param string $template The default homepage template.
+			 * @since
 			 */
 			return apply_filters( 'woocommerce_admin_onboarding_homepage_template', $template );
 		}
@@ -582,7 +603,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		<!-- wp:woocommerce/featured-product /-->';
 
-		/** This filter is documented in src/API/OnboardingTasks.php. */
+		/**
+														  * @since This filter is documented in src/API/OnboardingTasks.php. */
 		return apply_filters( 'woocommerce_admin_onboarding_homepage_template', $template );
 	}
 
@@ -596,6 +618,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$industry_images = array();
 		$industries      = OnboardingIndustries::get_allowed_industries();
 		foreach ( $industries as $industry_slug => $label ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/other-small.jpg', $industry_slug );
 		}
 		return $industry_images;
@@ -764,6 +791,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$lists
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return rest_ensure_response( array_values( apply_filters( 'woocommerce_admin_onboarding_tasks', $json ) ) );
 	}
 

@@ -247,6 +247,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$taxonomy_label       = wc_attribute_label( $taxonomy );
 
 			/* translators: %s: taxonomy name */
+			/**
+			 *
+			 *
+			 * @since
+			 */
 			$any_label      = apply_filters( 'woocommerce_layered_nav_any_label', sprintf( __( 'Any %s', 'woocommerce' ), $taxonomy_label ), $taxonomy_label, $taxonomy );
 			$multiple       = 'or' === $query_type;
 			$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
@@ -447,6 +452,11 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			if ( $count > 0 || $option_is_set ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$link      = apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy );
 				$term_html = '<a rel="nofollow" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a>';
 			} else {
@@ -454,10 +464,20 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$term_html = '<span>' . esc_html( $term->name ) . '</span>';
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$term_html .= ' ' . apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
 
 			echo '<li class="woocommerce-widget-layered-nav-list__item wc-layered-nav-term ' . ( $option_is_set ? 'woocommerce-widget-layered-nav-list__item--chosen chosen' : '' ) . '">';
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.EscapeOutput.OutputNotEscaped
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count );
 			echo '</li>';
 		}

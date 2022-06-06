@@ -99,6 +99,11 @@ class PaymentGatewaysController {
 
 		$gateway_id = sanitize_text_field( wp_unslash( $_GET['connection-return'] ) );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_admin_payment_gateway_connection_return', $gateway_id );
 	}
 

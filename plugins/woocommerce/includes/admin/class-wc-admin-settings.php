@@ -60,6 +60,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
 			}
 
@@ -74,9 +79,23 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			check_admin_referer( 'woocommerce-settings' );
 
-			// Trigger actions.
+			/**
+			 * Trigger actions.
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_settings_save_' . $current_tab );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_update_options_' . $current_tab );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_update_options' );
 
 			self::add_message( __( 'Your settings have been saved.', 'woocommerce' ) );
@@ -87,6 +106,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			WC()->query->init_query_vars();
 			WC()->query->add_endpoints();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_settings_saved' );
 		}
 
@@ -133,6 +157,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_settings_start' );
 
 			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
@@ -148,7 +177,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				)
 			);
 
-			// Get tabs for the settings page.
+			/**
+			 * Get tabs for the settings page.
+			 *
+			 * @since
+			 */
 			$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
 			include dirname( __FILE__ ) . '/views/html-admin-settings.php';
@@ -277,6 +310,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 						echo '<table class="form-table">' . "\n\n";
 						if ( ! empty( $value['id'] ) ) {
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) );
 						}
 						break;
@@ -290,10 +328,20 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					// Section Ends.
 					case 'sectionend':
 						if ( ! empty( $value['id'] ) ) {
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_end' );
 						}
 						echo '</table>';
 						if ( ! empty( $value['id'] ) ) {
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_settings_' . sanitize_title( $value['id'] ) . '_after' );
 						}
 						break;
@@ -430,8 +478,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Radio inputs.
 					case 'radio':
-						$option_value = $value['value'];
-						$disabled_values = ArrayUtil::get_value_or_default($value, 'disabled', array());
+						$option_value    = $value['value'];
+						$disabled_values = ArrayUtil::get_value_or_default( $value, 'disabled', array() );
 
 						?>
 						<tr valign="top">
@@ -450,7 +498,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												name="<?php echo esc_attr( $value['field_name'] ); ?>"
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
-												<?php if( in_array( $key, $disabled_values ) ) { echo 'disabled'; } ?>
+												<?php
+												if ( in_array( $key, $disabled_values ) ) {
+													echo 'disabled'; }
+												?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
 												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
@@ -733,6 +784,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Default: run an action.
 					default:
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
 						break;
 				}
@@ -868,6 +924,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				 */
 				if ( has_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ) ) ) {
 					wc_deprecated_function( 'The woocommerce_update_option_X action', '2.4.0', 'woocommerce_admin_settings_sanitize_option filter' );
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_update_option_' . sanitize_title( $option['type'] ), $option );
 					continue;
 				}
@@ -909,6 +970,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				 * Fire an action before saved.
 				 *
 				 * @deprecated 2.4.0 - doesn't allow manipulation of values!
+				 * @since
 				 */
 				do_action( 'woocommerce_update_option', $option );
 			}

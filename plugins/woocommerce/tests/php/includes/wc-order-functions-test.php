@@ -39,7 +39,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$line_item = reset( $items );
 
 		// Force a restock of one item.
-		$refunded_items = array();
+		$refunded_items                         = array();
 		$refunded_items[ $line_item->get_id() ] = array(
 			'qty' => 1,
 		);

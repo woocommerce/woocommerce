@@ -36,7 +36,11 @@ class WC_Order_Factory {
 			$classname = false;
 		}
 
-		// Filter classname so that the class can be overridden if extended.
+		/**
+		 * Filter classname so that the class can be overridden if extended.
+		 *
+		 * @since
+		 */
 		$classname = apply_filters( 'woocommerce_order_class', $classname, $order_type, $order_id );
 
 		if ( ! class_exists( $classname ) ) {
@@ -93,6 +97,11 @@ class WC_Order_Factory {
 					break;
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$classname = apply_filters( 'woocommerce_get_order_item_classname', $classname, $item_type, $id );
 
 			if ( $classname && class_exists( $classname ) ) {

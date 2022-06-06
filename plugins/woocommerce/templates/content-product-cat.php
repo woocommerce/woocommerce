@@ -25,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * The woocommerce_before_subcategory hook.
 	 *
 	 * @hooked woocommerce_template_loop_category_link_open - 10
+	 * @since
 	 */
 	do_action( 'woocommerce_before_subcategory', $category );
 
@@ -32,6 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * The woocommerce_before_subcategory_title hook.
 	 *
 	 * @hooked woocommerce_subcategory_thumbnail - 10
+	 * @since
 	 */
 	do_action( 'woocommerce_before_subcategory_title', $category );
 
@@ -39,11 +41,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * The woocommerce_shop_loop_subcategory_title hook.
 	 *
 	 * @hooked woocommerce_template_loop_category_title - 10
+	 * @since
 	 */
 	do_action( 'woocommerce_shop_loop_subcategory_title', $category );
 
 	/**
 	 * The woocommerce_after_subcategory_title hook.
+	 * @since
 	 */
 	do_action( 'woocommerce_after_subcategory_title', $category );
 
@@ -51,6 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * The woocommerce_after_subcategory hook.
 	 *
 	 * @hooked woocommerce_template_loop_category_link_close - 10
+	 * @since
 	 */
 	do_action( 'woocommerce_after_subcategory', $category );
 	?>

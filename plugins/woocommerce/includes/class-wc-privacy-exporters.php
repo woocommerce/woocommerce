@@ -179,6 +179,11 @@ class WC_Privacy_Exporters {
 			return array();
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$props_to_export = apply_filters(
 			'woocommerce_privacy_export_customer_personal_data_props',
 			array(
@@ -214,6 +219,11 @@ class WC_Privacy_Exporters {
 				$value = $customer->{"get_$prop"}( 'edit' );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( 'woocommerce_privacy_export_customer_personal_data_prop_value', $value, $prop, $customer );
 
 			if ( $value ) {
@@ -244,7 +254,12 @@ class WC_Privacy_Exporters {
 	 * @return array
 	 */
 	protected static function get_order_personal_data( $order ) {
-		$personal_data   = array();
+		$personal_data = array();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$props_to_export = apply_filters(
 			'woocommerce_privacy_export_order_personal_data_props',
 			array(
@@ -288,6 +303,11 @@ class WC_Privacy_Exporters {
 					break;
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( 'woocommerce_privacy_export_order_personal_data_prop', $value, $prop, $order );
 
 			if ( $value ) {
@@ -298,7 +318,11 @@ class WC_Privacy_Exporters {
 			}
 		}
 
-		// Export meta data.
+		/**
+		 * Export meta data.
+		 *
+		 * @since
+		 */
 		$meta_to_export = apply_filters(
 			'woocommerce_privacy_export_order_personal_data_meta',
 			array(
@@ -311,6 +335,11 @@ class WC_Privacy_Exporters {
 
 		if ( ! empty( $meta_to_export ) && is_array( $meta_to_export ) ) {
 			foreach ( $meta_to_export as $meta_key => $name ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( 'woocommerce_privacy_export_order_personal_data_meta_value', $order->get_meta( $meta_key ), $meta_key, $order );
 
 				if ( $value ) {

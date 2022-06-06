@@ -225,6 +225,7 @@ class Synchronize {
 				 * Controls whether shortcodes should be resolved and validated using the Approved Download Directory feature.
 				 *
 				 * @param bool $should_validate
+				 * @since
 				 */
 				if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $downloadable->get_type_of_file_path() ) {
 					$download_file = do_shortcode( $download_file );

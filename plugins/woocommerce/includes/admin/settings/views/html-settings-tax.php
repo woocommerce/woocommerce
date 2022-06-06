@@ -135,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'<input class="current-page" id="current-page-selector" type="text" name="paged" value="{{ data.current_page }}" size="<# print( data.qty_pages.toString().length ) #>" aria-describedby="table-paging">',
 							'<span class="total-pages">{{ data.qty_pages }}</span>'
 						);
-					?>
+						?>
 				</span>
 
 				<a class="tablenav-pages-navspan" data-goto="<# print( Math.min( data.qty_pages, parseInt( data.current_page, 10 ) + 1 ) ) #>">

@@ -49,16 +49,38 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 	public function generate_response( $data ) {
 		if ( isset( $_GET['_jsonp'] ) ) {
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! apply_filters( 'woocommerce_api_jsonp_enabled', true ) ) {
 				WC()->api->server->send_status( 400 );
-				return wp_json_encode( array( array( 'code' => 'woocommerce_api_jsonp_disabled', 'message' => __( 'JSONP support is disabled on this site', 'woocommerce' ) ) ) );
+				return wp_json_encode(
+					array(
+						array(
+							'code'    => 'woocommerce_api_jsonp_disabled',
+							'message' => __(
+								'JSONP support is disabled on this site',
+								'woocommerce'
+							),
+						),
+					)
+				);
 			}
 
 			$jsonp_callback = $_GET['_jsonp'];
 
 			if ( ! wp_check_jsonp_callback( $jsonp_callback ) ) {
 				WC()->api->server->send_status( 400 );
-				return wp_json_encode( array( array( 'code' => 'woocommerce_api_jsonp_callback_invalid', __( 'The JSONP callback function is invalid', 'woocommerce' ) ) ) );
+				return wp_json_encode(
+					array(
+						array(
+							'code' => 'woocommerce_api_jsonp_callback_invalid',
+							__( 'The JSONP callback function is invalid', 'woocommerce' ),
+						),
+					)
+				);
 			}
 
 			WC()->api->server->header( 'X-Content-Type-Options', 'nosniff' );

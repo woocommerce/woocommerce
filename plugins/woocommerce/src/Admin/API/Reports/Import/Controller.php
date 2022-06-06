@@ -173,6 +173,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_reports_import', $response, $item, $request );
 	}

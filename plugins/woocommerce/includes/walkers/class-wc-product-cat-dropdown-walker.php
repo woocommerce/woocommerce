@@ -55,6 +55,11 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 			$pad = '';
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$cat_name = apply_filters( 'list_product_cats', $cat->name, $cat );
 		$value    = ( isset( $args['value'] ) && 'id' === $args['value'] ) ? $cat->term_id : $cat->slug;
 		$output  .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $value ) . '"';

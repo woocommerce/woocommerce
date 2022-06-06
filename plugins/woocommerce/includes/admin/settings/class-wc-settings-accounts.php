@@ -229,6 +229,11 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_' . $this->id . '_settings',
 			$account_settings

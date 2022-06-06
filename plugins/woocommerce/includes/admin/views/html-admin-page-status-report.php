@@ -427,6 +427,11 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			</td>
 		</tr>
 		<?php
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
 		foreach ( $rows as $row ) {
 			if ( ! empty( $row['success'] ) ) {

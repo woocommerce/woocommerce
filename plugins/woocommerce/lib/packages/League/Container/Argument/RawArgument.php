@@ -2,28 +2,26 @@
 
 namespace Automattic\WooCommerce\Vendor\League\Container\Argument;
 
-class RawArgument implements RawArgumentInterface
-{
-    /**
-     * @var mixed
-     */
-    protected $value;
+class RawArgument implements RawArgumentInterface {
 
-    /**
-     * Construct.
-     *
-     * @param mixed $value
-     */
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
+	/**
+	 * @var mixed
+	 */
+	protected $value;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
+	/**
+	 * Construct.
+	 *
+	 * @param mixed $value
+	 */
+	public function __construct( $value ) {
+		$this->value = $value;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getValue() {
+		return $this->value;
+	}
 }

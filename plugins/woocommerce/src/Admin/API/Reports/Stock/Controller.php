@@ -335,6 +335,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Product       $product   The original product object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_stock', $response, $product, $request );
 	}

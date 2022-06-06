@@ -54,6 +54,11 @@ class CoreMenu {
 
 		// Calling this method adds pages to the below tabs filter on non-settings pages.
 		\WC_Admin_Settings::get_settings_pages();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
 		$menu_items = array();
@@ -190,7 +195,7 @@ class CoreMenu {
 			$wca_items[] = $item;
 		}
 
-		$home_item = array();
+		$home_item             = array();
 		$setup_tasks_remaining = TaskLists::setup_tasks_remaining();
 		if ( defined( '\Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG' ) ) {
 			$home_item = array(
@@ -303,6 +308,11 @@ class CoreMenu {
 			'tools'  => __( 'Utilities', 'woocommerce' ),
 			'logs'   => __( 'Logs', 'woocommerce' ),
 		);
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$tabs = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 
 		$order = 1;
@@ -446,6 +456,11 @@ class CoreMenu {
 			'wc-status',
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_navigation_core_excluded_items', $excluded_items );
 	}
 }

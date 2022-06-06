@@ -195,11 +195,16 @@ abstract class WP_Background_Process extends WP_Async_Request {
 
 		$key = $this->identifier . '_batch_%';
 
-		$count = $wpdb->get_var( $wpdb->prepare( "
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				"
 			SELECT COUNT(*)
 			FROM {$table}
 			WHERE {$column} LIKE %s
-		", $key ) );
+		",
+				$key
+			)
+		);
 
 		return ! ( $count > 0 );
 	}
@@ -229,7 +234,12 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	protected function lock_process() {
 		$this->start_time = time(); // Set start time of current process.
 
-		$lock_duration = ( property_exists( $this, 'queue_lock_time' ) ) ? $this->queue_lock_time : 60; // 1 minute
+		$lock_duration = ( property_exists( $this, 'queue_lock_time' ) ) ? $this->queue_lock_time : 60;
+		/**
+		 * 1 minute
+		 *
+		 * @since
+		 */
 		$lock_duration = apply_filters( $this->identifier . '_queue_lock_time', $lock_duration );
 
 		set_site_transient( $this->identifier . '_process_lock', microtime(), $lock_duration );
@@ -270,13 +280,18 @@ abstract class WP_Background_Process extends WP_Async_Request {
 
 		$key = $this->identifier . '_batch_%';
 
-		$query = $wpdb->get_row( $wpdb->prepare( "
+		$query = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT *
 			FROM {$table}
 			WHERE {$column} LIKE %s
 			ORDER BY {$key_column} ASC
 			LIMIT 1
-		", $key ) );
+		",
+				$key
+			)
+		);
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$column;
@@ -349,6 +364,11 @@ abstract class WP_Background_Process extends WP_Async_Request {
 			$return = true;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( $this->identifier . '_memory_exceeded', $return );
 	}
 
@@ -382,6 +402,11 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @return bool
 	 */
 	protected function time_exceeded() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$finish = $this->start_time + apply_filters( $this->identifier . '_default_time_limit', 20 ); // 20 seconds
 		$return = false;
 
@@ -389,6 +414,11 @@ abstract class WP_Background_Process extends WP_Async_Request {
 			$return = true;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( $this->identifier . '_time_exceeded', $return );
 	}
 
@@ -411,9 +441,19 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @return mixed
 	 */
 	public function schedule_cron_healthcheck( $schedules ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$interval = apply_filters( $this->identifier . '_cron_interval', 5 );
 
 		if ( property_exists( $this, 'cron_interval' ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$interval = apply_filters( $this->identifier . '_cron_interval', $this->cron_interval );
 		}
 

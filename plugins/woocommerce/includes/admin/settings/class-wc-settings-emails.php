@@ -218,6 +218,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 			);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
 
@@ -293,6 +298,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				<thead>
 					<tr>
 						<?php
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$columns = apply_filters(
 							'woocommerce_email_setting_columns',
 							array(
@@ -352,6 +362,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 									</td>';
 										break;
 									default:
+										/**
+										 * Hook
+										 *
+										 * @since
+										 */
 										do_action( 'woocommerce_email_setting_column_' . $key, $email );
 										break;
 								}

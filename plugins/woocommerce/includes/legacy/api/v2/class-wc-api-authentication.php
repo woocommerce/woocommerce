@@ -172,11 +172,17 @@ class WC_API_Authentication {
 
 		$consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
 
-		$keys = $wpdb->get_row( $wpdb->prepare( "
+		$keys = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE consumer_key = '%s'
-		", $consumer_key ), ARRAY_A );
+		",
+				$consumer_key
+			),
+			ARRAY_A
+		);
 
 		if ( empty( $keys ) ) {
 			throw new Exception( __( 'Consumer key is invalid.', 'woocommerce' ), 401 );

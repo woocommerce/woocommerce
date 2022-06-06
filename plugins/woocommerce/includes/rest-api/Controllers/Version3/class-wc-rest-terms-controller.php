@@ -319,6 +319,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * @param array           $prepared_args Array of arguments to be
 		 *                                       passed to get_terms.
 		 * @param WP_REST_Request $request       The current request.
+		 * @since
 		 */
 		$prepared_args = apply_filters( "woocommerce_rest_{$taxonomy}_query", $prepared_args, $request );
 
@@ -436,6 +437,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * @param WP_Term         $term      Inserted Term object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating term, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, true );
 
@@ -525,6 +527,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * @param WP_Term         $term      Inserted Term object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating term, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, false );
 
@@ -574,6 +577,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * @param WP_Term          $term     The deleted term.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_{$taxonomy}", $term, $response, $request );
 

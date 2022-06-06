@@ -243,8 +243,18 @@ class WC_Admin_Meta_Boxes {
 
 		// Check the post type.
 		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ), true ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_process_shop_order_meta', $post_id, $post );
 		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon' ), true ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 		}
 	}

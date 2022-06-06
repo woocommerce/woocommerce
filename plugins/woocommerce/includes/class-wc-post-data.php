@@ -462,6 +462,11 @@ class WC_Post_Data {
 		global $wpdb;
 
 		if ( in_array( get_post_type( $postid ), wc_get_order_types(), true ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query(
@@ -473,6 +478,11 @@ class WC_Post_Data {
 				"
 			); // WPCS: unprepared SQL ok.
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
 	}
@@ -484,11 +494,21 @@ class WC_Post_Data {
 	 */
 	public static function delete_order_downloadable_permissions( $postid ) {
 		if ( in_array( get_post_type( $postid ), wc_get_order_types(), true ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_delete_order_downloadable_permissions', $postid );
 
 			$data_store = WC_Data_Store::load( 'customer-download' );
 			$data_store->delete_by_order_id( $postid );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_deleted_order_downloadable_permissions', $postid );
 		}
 	}

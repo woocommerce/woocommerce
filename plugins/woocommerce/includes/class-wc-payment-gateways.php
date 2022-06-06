@@ -84,7 +84,11 @@ class WC_Payment_Gateways {
 			$load_gateways[] = 'WC_Gateway_Paypal';
 		}
 
-		// Filter.
+		/**
+		 * Filter.
+		 *
+		 * @since
+		 */
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
 
 		// Get sort order option.
@@ -160,6 +164,11 @@ class WC_Payment_Gateways {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array_filter( (array) apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways ), array( $this, 'filter_valid_gateway_class' ) );
 	}
 

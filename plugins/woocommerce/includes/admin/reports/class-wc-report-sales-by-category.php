@@ -65,6 +65,11 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		$term_ids[]  = $category_id;
 		$product_ids = get_objects_in_term( $term_ids, 'product_cat' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array_unique( apply_filters( 'woocommerce_report_sales_by_category_get_products_in_category', $product_ids, $category_id ) );
 	}
 
@@ -342,18 +347,18 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 							<?php
 								$index = 0;
 								foreach ( $chart_data as $data ) {
-									$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
-									$width  = $this->barwidth / sizeof( $chart_data );
-									$offset = ( $width * $index );
-									$series = $data['data'];
+								$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
+								$width  = $this->barwidth / sizeof( $chart_data );
+								$offset = ( $width * $index );
+								$series = $data['data'];
 
-									foreach ( $series as $key => $series_data ) {
-										$series[ $key ][0] = $series_data[0] + $offset;
+								foreach ( $series as $key => $series_data ) {
+									$series[ $key ][0] = $series_data[0] + $offset;
 									}
 
-									$series = wp_json_encode( $series );
+								$series = wp_json_encode( $series );
 
-									echo '{
+								echo '{
 											label: "' . esc_js( $data['category'] ) . '",
 											data: JSON.parse( decodeURIComponent( "' . rawurlencode( $series ) . '" ) ),
 											color: "' . $color . '",
@@ -370,7 +375,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 											enable_tooltip: true,
 											prepend_label: true
 										},';
-									$index++;
+								$index++;
 								}
 							?>
 						];

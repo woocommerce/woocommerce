@@ -64,6 +64,11 @@ class WC_Gateway_Paypal_API_Handler {
 			'CURRENCYCODE'    => $order->get_currency(),
 			'COMPLETETYPE'    => 'Complete',
 		);
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_paypal_capture_request', $request, $order, $amount );
 	}
 
@@ -91,6 +96,11 @@ class WC_Gateway_Paypal_API_Handler {
 			$request['CURRENCYCODE'] = $order->get_currency();
 			$request['REFUNDTYPE']   = 'Partial';
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_paypal_refund_request', $request, $order, $amount, $reason );
 	}
 

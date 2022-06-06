@@ -75,6 +75,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 		 * @param WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
 		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}
@@ -86,17 +87,17 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => $this->taxonomy,
-			'type'                 => 'object',
-			'properties'           => array(
-				'id' => array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => $this->taxonomy,
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'        => array(
 					'description' => __( 'Shipping class name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -104,7 +105,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug' => array(
+				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -120,7 +121,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
-				'count' => array(
+				'count'       => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),

@@ -55,6 +55,11 @@ class WC_Widget_Product_Tag_Cloud extends WC_Widget {
 		echo '<div class="tagcloud">';
 
 		wp_tag_cloud(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_product_tag_cloud_widget_args',
 				array(

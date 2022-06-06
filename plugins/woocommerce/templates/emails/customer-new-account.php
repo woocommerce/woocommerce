@@ -17,6 +17,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php /* translators: %s: Customer username */ ?>
@@ -36,4 +41,9 @@ if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_email_footer', $email );

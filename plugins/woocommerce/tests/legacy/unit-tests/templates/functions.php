@@ -180,14 +180,17 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	public function test_hidden_field() {
-		$actual_html = woocommerce_form_field('test',
-		array(
-			'type' => 'hidden',
-			'id' => 'test_field',
-			'input_class' => array( 'test-field' ),
-			'custom_attributes' => array( 'data-total' => '10' ),
-			'return' => true
-		), 'test value');
+		$actual_html   = woocommerce_form_field(
+			'test',
+			array(
+				'type'              => 'hidden',
+				'id'                => 'test_field',
+				'input_class'       => array( 'test-field' ),
+				'custom_attributes' => array( 'data-total' => '10' ),
+				'return'            => true,
+			),
+			'test value'
+		);
 		$expected_html = '<p class="form-row " id="test_field_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="hidden" class="input-hidden test-field" name="test" id="test_field" value="test value" data-total="10" /></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );

@@ -95,7 +95,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			return;
 		}
 
-		// This filter allows custom coupon objects to be created on the fly.
+		/**
+		 * This filter allows custom coupon objects to be created on the fly.
+		 *
+		 * @since
+		 */
 		$coupon = apply_filters( 'woocommerce_get_shop_coupon_data', false, $data, $this );
 
 		if ( $coupon ) {
@@ -462,6 +466,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_coupon_get_discount_amount',
 			NumberUtil::round( min( $discount, $discounting_amount ), wc_get_rounding_precision() ),
@@ -878,6 +887,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function is_valid_for_cart() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_is_valid_for_cart', $this->is_type( wc_get_cart_coupon_types() ), $this );
 	}
 
@@ -890,6 +904,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function is_valid_for_product( $product, $values = array() ) {
 		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
 		}
 
@@ -927,6 +946,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$valid = false;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_is_valid_for_product', $valid, $product, $this, $values );
 	}
 
@@ -968,6 +992,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$msg = '';
 				break;
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_message', $msg, $msg_code, $this );
 	}
 
@@ -1070,6 +1099,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = '';
 				break;
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_error', $err, $err_code, $this );
 	}
 
@@ -1093,7 +1127,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = '';
 				break;
 		}
-		// When using this static method, there is no $this to pass to filter.
+
+		/**
+		 * When using this static method, there is no $this to pass to filter.
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_error', $err, $err_code, null );
 	}
 }

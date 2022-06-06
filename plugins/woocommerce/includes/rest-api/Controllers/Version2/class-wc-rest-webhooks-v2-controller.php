@@ -69,6 +69,7 @@ class WC_REST_Webhooks_V2_Controller extends WC_REST_Webhooks_V1_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Webhook       $webhook  Webhook object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
 	}

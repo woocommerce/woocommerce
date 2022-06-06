@@ -59,6 +59,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Payment_Gateways_V2_Co
 		 * @param WP_REST_Response   $response The response object.
 		 * @param WC_Payment_Gateway $gateway  Payment gateway object.
 		 * @param WP_REST_Request    $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_payment_gateway', $response, $gateway, $request );
 	}

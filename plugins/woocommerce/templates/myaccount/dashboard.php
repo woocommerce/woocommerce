@@ -68,6 +68,7 @@ $allowed_html = array(
 	 * Deprecated woocommerce_before_my_account action.
 	 *
 	 * @deprecated 2.6.0
+	 * @since
 	 */
 	do_action( 'woocommerce_before_my_account' );
 
@@ -75,6 +76,7 @@ $allowed_html = array(
 	 * Deprecated woocommerce_after_my_account action.
 	 *
 	 * @deprecated 2.6.0
+	 * @since
 	 */
 	do_action( 'woocommerce_after_my_account' );
 

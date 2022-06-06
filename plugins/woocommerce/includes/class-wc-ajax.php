@@ -33,6 +33,11 @@ class WC_AJAX {
 	 * @return string
 	 */
 	public static function get_endpoint( $request = '' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), home_url( '/', 'relative' ) ) ), $request ) );
 	}
 
@@ -87,6 +92,11 @@ class WC_AJAX {
 		if ( $action ) {
 			self::wc_ajax_headers();
 			$action = sanitize_text_field( $action );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'wc_ajax_' . $action );
 			wp_die();
 		}
@@ -185,6 +195,11 @@ class WC_AJAX {
 		$mini_cart = ob_get_clean();
 
 		$data = array(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'fragments' => apply_filters(
 				'woocommerce_add_to_cart_fragments',
 				array(
@@ -271,6 +286,11 @@ class WC_AJAX {
 	private static function update_order_review_expired() {
 		wp_send_json(
 			array(
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'fragments' => apply_filters(
 					'woocommerce_update_order_review_fragments',
 					array(
@@ -289,10 +309,20 @@ class WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_update_order_review_expired', true ) ) {
 			self::update_order_review_expired();
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_checkout_update_order_review', isset( $_POST['post_data'] ) ? wp_unslash( $_POST['post_data'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -378,6 +408,11 @@ class WC_AJAX {
 				'result'    => empty( $messages ) ? 'success' : 'failure',
 				'messages'  => $messages,
 				'reload'    => $reload_checkout,
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'fragments' => apply_filters(
 					'woocommerce_update_order_review_fragments',
 					array(
@@ -400,9 +435,19 @@ class WC_AJAX {
 			return;
 		}
 
-		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
-		$product           = wc_get_product( $product_id );
-		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'] ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$product_id = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+		$product    = wc_get_product( $product_id );
+		$quantity   = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'] ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 		$product_status    = get_post_status( $product_id );
 		$variation_id      = 0;
@@ -416,6 +461,11 @@ class WC_AJAX {
 
 		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && 'publish' === $product_status ) {
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
 			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
@@ -429,6 +479,11 @@ class WC_AJAX {
 			// If there was an error adding to the cart, redirect to the product page to show any errors.
 			$data = array(
 				'error'       => true,
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
 			);
 
@@ -524,6 +579,11 @@ class WC_AJAX {
 				WC()->payment_gateways();
 
 				$order->update_status( $status, '', true );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_order_edit_status', $order->get_id(), $status );
 			}
 		}
@@ -570,7 +630,17 @@ class WC_AJAX {
 
 		$attribute->set_id( wc_attribute_taxonomy_id_by_name( sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) ) );
 		$attribute->set_name( sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$attribute->set_visible( apply_filters( 'woocommerce_attribute_default_visibility', 1 ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$attribute->set_variation( apply_filters( 'woocommerce_attribute_default_is_variation', 0 ) );
 
 		if ( $attribute->is_taxonomy() ) {
@@ -765,6 +835,11 @@ class WC_AJAX {
 		$data_store    = WC_Data_Store::load( 'customer-download' );
 		$data_store->delete_by_id( $permission_id );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_ajax_revoke_access_to_product_download', $download_id, $product_id, $order_id, $permission_id );
 
 		wp_die();
@@ -867,6 +942,11 @@ class WC_AJAX {
 		$data['date_created']  = $data['date_created'] ? $data['date_created']->getTimestamp() : null;
 		$data['date_modified'] = $data['date_modified'] ? $data['date_modified']->getTimestamp() : null;
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$customer_data = apply_filters( 'woocommerce_ajax_get_customer_details', $data, $customer, $user_id );
 		wp_send_json( $customer_data );
 	}
@@ -945,25 +1025,45 @@ class WC_AJAX {
 					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
 				}
 				$validation_error = new WP_Error();
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
 				if ( $validation_error->get_error_code() ) {
 					/* translators: %s: error message */
 					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
 				}
-				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
+				$item_id = $order->add_product( $product, $qty, array( 'order' => $order ) );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
 
 				// We do not perform any stock operations here because they will be handled when order is moved to a status where stock operations are applied (like processing, completed etc).
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
 
 			/* translators: %s item name. */
 			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
 			$data = get_post_meta( $order_id );
@@ -1515,7 +1615,12 @@ class WC_AJAX {
 
 			$note_classes   = array( 'note' );
 			$note_classes[] = $is_customer_note ? 'customer-note' : '';
-			$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
+			$note_classes = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
 			?>
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 				<div class="note_content">
@@ -1580,6 +1685,11 @@ class WC_AJAX {
 		if ( ! empty( $_GET['limit'] ) ) {
 			$limit = absint( $_GET['limit'] );
 		} else {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
@@ -1632,6 +1742,11 @@ class WC_AJAX {
 			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
 	}
 
@@ -1655,6 +1770,11 @@ class WC_AJAX {
 		if ( ! empty( $_GET['limit'] ) ) {
 			$limit = absint( $_GET['limit'] );
 		} else {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
@@ -1735,6 +1855,11 @@ class WC_AJAX {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_customers', $found_customers ) );
 	}
 
@@ -1787,6 +1912,11 @@ class WC_AJAX {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
 	}
 
@@ -1828,6 +1958,11 @@ class WC_AJAX {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_pages', $pages_results ) );
 	}
 
@@ -1896,6 +2031,7 @@ class WC_AJAX {
 			 * When a single product has gotten it's ordering updated.
 			 * $id The product ID
 			 * $index The new menu order
+			* @since
 			*/
 			do_action( 'woocommerce_after_single_product_ordering', $id, $index );
 		}
@@ -1912,6 +2048,11 @@ class WC_AJAX {
 
 		WC_Post_Data::delete_product_query_transients();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
 		// phpcs:enable
@@ -2019,6 +2160,11 @@ class WC_AJAX {
 				$refund   = wc_get_order( $refund_id );
 				$order_id = $refund->get_parent_id();
 				$refund->delete( true );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_refund_deleted', $refund_id, $order_id );
 			}
 		}
@@ -2212,6 +2358,11 @@ class WC_AJAX {
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
 		WC_Meta_Box_Product_Data::save_variations( $product_id, get_post( $product_id ) );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_ajax_save_product_variations', $product_id );
 
 		$errors = WC_Admin_Meta_Boxes::$meta_box_errors;
@@ -2659,6 +2810,11 @@ class WC_AJAX {
 		$data        = ! empty( $_POST['data'] ) ? wc_clean( wp_unslash( $_POST['data'] ) ) : array();
 		$variations  = array();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_bulk_edit_variations_need_children', true ) ) {
 			$variations = get_posts(
 				array(
@@ -2674,9 +2830,19 @@ class WC_AJAX {
 		if ( method_exists( __CLASS__, "variation_bulk_action_$bulk_action" ) ) {
 			call_user_func( array( __CLASS__, "variation_bulk_action_$bulk_action" ), $variations, $data );
 		} else {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_bulk_edit_variations_default', $bulk_action, $data, $product_id, $variations );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_bulk_edit_variations', $bulk_action, $data, $product_id, $variations );
 		WC_Product_Variable::sync( $product_id );
 		wc_delete_product_transients( $product_id );
@@ -2923,6 +3089,11 @@ class WC_AJAX {
 					$option_key      = $shipping_method->get_instance_option_key();
 					if ( $wpdb->delete( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'instance_id' => $instance_id ) ) ) {
 						delete_option( $option_key );
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
 					}
 					continue;
@@ -2943,6 +3114,11 @@ class WC_AJAX {
 				if ( isset( $method_data['enabled'] ) ) {
 					$is_enabled = absint( 'yes' === $method_data['enabled'] );
 					if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $is_enabled ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method_id, $zone_id, $is_enabled );
 					}
 				}
@@ -3056,6 +3232,11 @@ class WC_AJAX {
 				wp_update_term( $term_id, 'product_shipping_class', $update_args );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_shipping_classes_save_class', $term_id, $data );
 		}
 
@@ -3103,15 +3284,30 @@ class WC_AJAX {
 						wp_send_json_error( 'needs_setup' );
 						wp_die();
 					} else {
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						do_action( 'woocommerce_update_option', $option );
 						$gateway->update_option( 'enabled', 'yes' );
 					}
 				} else {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_update_option', $option );
 					// Disable the gateway.
 					$gateway->update_option( 'enabled', 'no' );
 				}
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_update_options' );
 				wp_send_json_success( ! wc_string_to_bool( $enabled ) );
 				wp_die();

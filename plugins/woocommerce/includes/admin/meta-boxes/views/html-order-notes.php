@@ -15,7 +15,12 @@ defined( 'ABSPATH' ) || exit;
 			$css_class   = array( 'note' );
 			$css_class[] = $note->customer_note ? 'customer-note' : '';
 			$css_class[] = 'system' === $note->added_by ? 'system-note' : '';
-			$css_class   = apply_filters( 'woocommerce_order_note_class', array_filter( $css_class ), $note );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
+			$css_class = apply_filters( 'woocommerce_order_note_class', array_filter( $css_class ), $note );
 			?>
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $css_class ) ); ?>">
 				<div class="note_content">

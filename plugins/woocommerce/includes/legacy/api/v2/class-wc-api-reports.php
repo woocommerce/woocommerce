@@ -36,7 +36,7 @@ class WC_API_Reports extends WC_API_Resource {
 
 		# GET /reports
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_reports' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_reports' ), WC_API_Server::READABLE ),
 		);
 
 		# GET /reports/sales
@@ -107,10 +107,10 @@ class WC_API_Reports extends WC_API_Resource {
 		for ( $i = 0; $i <= $this->report->chart_interval; $i ++ ) {
 
 			switch ( $this->report->chart_groupby ) {
-				case 'day' :
+				case 'day':
 					$time = date( 'Y-m-d', strtotime( "+{$i} DAY", $this->report->start_date ) );
 					break;
-				default :
+				default:
 					$time = date( 'Y-m', strtotime( "+{$i} MONTH", $this->report->start_date ) );
 					break;
 			}
@@ -121,7 +121,7 @@ class WC_API_Reports extends WC_API_Resource {
 				if ( date( ( 'day' == $this->report->chart_groupby ) ? 'Y-m-d' : 'Y-m', strtotime( $customer->user_registered ) ) == $time ) {
 					$customer_count++;
 				}
- 			}
+			}
 
 			$period_totals[ $time ] = array(
 				'sales'     => wc_format_decimal( 0.00, 2 ),
@@ -154,7 +154,7 @@ class WC_API_Reports extends WC_API_Resource {
 				continue;
 			}
 
-			$period_totals[ $time ]['orders']   = (int) $order->count;
+			$period_totals[ $time ]['orders'] = (int) $order->count;
 		}
 
 		// add total order items for each period
@@ -179,7 +179,7 @@ class WC_API_Reports extends WC_API_Resource {
 			$period_totals[ $time ]['discount'] = wc_format_decimal( $discount->discount_amount, 2 );
 		}
 
-		$sales_data  = array(
+		$sales_data = array(
 			'total_sales'       => $report_data->total_sales,
 			'net_sales'         => $report_data->net_sales,
 			'average_sales'     => $report_data->average_sales,
@@ -194,6 +194,11 @@ class WC_API_Reports extends WC_API_Resource {
 			'total_customers'   => $total_customers,
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, $this->report, $fields, $this->server ) );
 	}
 
@@ -217,27 +222,29 @@ class WC_API_Reports extends WC_API_Resource {
 		// set date filtering
 		$this->setup_report( $filter );
 
-		$top_sellers = $this->report->get_order_report_data( array(
-			'data' => array(
-				'_product_id' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => '',
-					'name'            => 'product_id',
+		$top_sellers = $this->report->get_order_report_data(
+			array(
+				'data'         => array(
+					'_product_id' => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => '',
+						'name'            => 'product_id',
+					),
+					'_qty'        => array(
+						'type'            => 'order_item_meta',
+						'order_item_type' => 'line_item',
+						'function'        => 'SUM',
+						'name'            => 'order_item_qty',
+					),
 				),
-				'_qty' => array(
-					'type'            => 'order_item_meta',
-					'order_item_type' => 'line_item',
-					'function'        => 'SUM',
-					'name'            => 'order_item_qty',
-				),
-			),
-			'order_by'     => 'order_item_qty DESC',
-			'group_by'     => 'product_id',
-			'limit'        => isset( $filter['limit'] ) ? absint( $filter['limit'] ) : 12,
-			'query_type'   => 'get_results',
-			'filter_range' => true,
-		) );
+				'order_by'     => 'order_item_qty DESC',
+				'group_by'     => 'product_id',
+				'limit'        => isset( $filter['limit'] ) ? absint( $filter['limit'] ) : 12,
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+			)
+		);
 
 		$top_sellers_data = array();
 
@@ -254,6 +261,11 @@ class WC_API_Reports extends WC_API_Resource {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'top_sellers' => apply_filters( 'woocommerce_api_report_response', $top_sellers_data, $this->report, $fields, $this->server ) );
 	}
 
@@ -279,7 +291,7 @@ class WC_API_Reports extends WC_API_Resource {
 
 				// overwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges
 				$_GET['start_date'] = $this->server->parse_datetime( $filter['date_min'] );
-				$_GET['end_date'] = isset( $filter['date_max'] ) ? $this->server->parse_datetime( $filter['date_max'] ) : null;
+				$_GET['end_date']   = isset( $filter['date_max'] ) ? $this->server->parse_datetime( $filter['date_max'] ) : null;
 
 			} else {
 

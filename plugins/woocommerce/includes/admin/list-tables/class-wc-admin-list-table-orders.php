@@ -310,6 +310,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public static function get_order_preview_item_html( $order ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$hidden_order_itemmeta = apply_filters(
 			'woocommerce_hidden_order_itemmeta',
 			array(
@@ -328,8 +333,18 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			)
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$line_items = apply_filters( 'woocommerce_admin_order_preview_line_items', $order->get_items(), $order );
-		$columns    = apply_filters(
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$columns = apply_filters(
 			'woocommerce_admin_order_preview_line_item_columns',
 			array(
 				'product'  => __( 'Product', 'woocommerce' ),
@@ -362,7 +377,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		foreach ( $line_items as $item_id => $item ) {
 
 			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
-			$row_class      = apply_filters( 'woocommerce_admin_html_order_preview_item_class', '', $item, $order );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
+			$row_class = apply_filters( 'woocommerce_admin_html_order_preview_item_class', '', $item, $order );
 
 			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . ( $row_class ? ' ' . esc_attr( $row_class ) : '' ) . '">';
 
@@ -400,6 +420,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 						$html .= wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
 						break;
 					default:
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$html .= apply_filters( 'woocommerce_admin_order_preview_line_item_column_' . sanitize_key( $column ), '', $item, $item_id, $order );
 						break;
 				}
@@ -461,6 +486,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return wc_render_action_buttons( apply_filters( 'woocommerce_admin_order_preview_actions', $actions, $order ) );
 	}
 
@@ -494,6 +524,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$billing_address  = $order->get_formatted_billing_address();
 		$shipping_address = $order->get_formatted_shipping_address();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_admin_order_preview_get_order_details',
 			array(
@@ -524,6 +559,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public function handle_bulk_actions( $redirect_to, $action, $ids ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$ids     = apply_filters( 'woocommerce_bulk_action_ids', array_reverse( array_map( 'absint', $ids ) ), $action, 'order' );
 		$changed = 0;
 
@@ -534,6 +574,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				$order = wc_get_order( $id );
 
 				if ( $order ) {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_remove_order_personal_data', $order );
 					$changed++;
 				}
@@ -551,6 +596,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				foreach ( $ids as $id ) {
 					$order = wc_get_order( $id );
 					$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_order_edit_status', $id, $new_status );
 					$changed++;
 				}

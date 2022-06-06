@@ -51,6 +51,11 @@ class Server {
 	 * @return array List of Namespaces and Main controller classes.
 	 */
 	protected function get_rest_namespaces() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_rest_api_get_rest_namespaces',
 			array(

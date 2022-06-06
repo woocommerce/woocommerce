@@ -151,11 +151,16 @@ class WC_API_Taxes extends WC_API_Resource {
 			);
 
 			// Get locales from a tax rate
-			$locales = $wpdb->get_results( $wpdb->prepare( "
+			$locales = $wpdb->get_results(
+				$wpdb->prepare(
+					"
 				SELECT location_code, location_type
 				FROM {$wpdb->prefix}woocommerce_tax_rate_locations
 				WHERE tax_rate_id = %d
-			", $id ) );
+			",
+					$id
+				)
+			);
 
 			if ( ! is_wp_error( $tax ) && ! is_null( $tax ) ) {
 				foreach ( $locales as $locale ) {
@@ -163,6 +168,11 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'tax' => apply_filters( 'woocommerce_api_tax_response', $tax_data, $tax, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -189,6 +199,11 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_tax', __( 'You do not have permission to create tax rates', 'woocommerce' ), 401 );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_tax_data', $data['tax'], $this );
 
 			$tax_data = array(
@@ -228,6 +243,11 @@ class WC_API_Taxes extends WC_API_Resource {
 				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_tax', $id, $data );
 
 			$this->server->send_status( 201 );
@@ -269,7 +289,12 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( $tax->get_error_code(), $tax->get_error_message(), $error_data['status'] );
 			}
 
-			$current_data   = $tax['tax'];
+			$current_data = $tax['tax'];
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data           = apply_filters( 'woocommerce_api_edit_tax_data', $data, $this );
 			$tax_data       = array();
 			$default_fields = array(
@@ -317,6 +342,11 @@ class WC_API_Taxes extends WC_API_Resource {
 				WC_Tax::_update_tax_rate_cities( $id, wc_clean( $data['city'] ) );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_tax_rate', $id, $data );
 
 			return $this->get_tax( $id );
@@ -412,7 +442,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		// Filter by tax class
 		if ( ! empty( $args['tax_rate_class'] ) ) {
 			$tax_rate_class = esc_sql( 'standard' !== $args['tax_rate_class'] ? sanitize_title( $args['tax_rate_class'] ) : '' );
-			$query .= " AND tax_rate_class = '$tax_rate_class'";
+			$query         .= " AND tax_rate_class = '$tax_rate_class'";
 		}
 
 		// Order tax rates
@@ -457,7 +487,12 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_taxes_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'taxes' ), 400 );
 			}
 
-			$data  = $data['taxes'];
+			$data = $data['taxes'];
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'taxes' );
 
 			// Limit bulk operation
@@ -483,7 +518,10 @@ class WC_API_Taxes extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$taxes[] = array(
 							'id'    => $tax_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
+							'error' => array(
+								'code'    => $edit->get_error_code(),
+								'message' => $edit->get_error_message(),
+							),
 						);
 					} else {
 						$taxes[] = $edit['tax'];
@@ -496,7 +534,10 @@ class WC_API_Taxes extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$taxes[] = array(
 							'id'    => $tax_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
+							'error' => array(
+								'code'    => $new->get_error_code(),
+								'message' => $new->get_error_message(),
+							),
 						);
 					} else {
 						$taxes[] = $new['tax'];
@@ -504,6 +545,11 @@ class WC_API_Taxes extends WC_API_Resource {
 				}
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'taxes' => apply_filters( 'woocommerce_api_taxes_bulk_response', $taxes, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -537,12 +583,28 @@ class WC_API_Taxes extends WC_API_Resource {
 			$classes = WC_Tax::get_tax_classes();
 
 			foreach ( $classes as $class ) {
-				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
-					'slug' => sanitize_title( $class ),
-					'name' => $class,
-				), $class, $fields, $this );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
+				$tax_classes[] = apply_filters(
+					'woocommerce_api_tax_class_response',
+					array(
+						'slug' => sanitize_title( $class ),
+						'name' => $class,
+					),
+					$class,
+					$fields,
+					$this
+				);
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'tax_classes' => apply_filters( 'woocommerce_api_tax_classes_response', $tax_classes, $classes, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -582,6 +644,11 @@ class WC_API_Taxes extends WC_API_Resource {
 				return new WP_Error( 'woocommerce_api_' . $tax_class->get_error_code(), $tax_class->get_error_message(), 401 );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_tax_class', $tax_class['slug'], $data );
 
 			$this->server->send_status( 201 );

@@ -79,12 +79,22 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 			); // WPCS: slow query ok.
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$r = new WP_Query( apply_filters( 'woocommerce_recently_viewed_products_widget_query_args', $query_args ) );
 
 		if ( $r->have_posts() ) {
 
 			$this->widget_start( $args, $instance );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
 
 			$template_args = array(
@@ -96,6 +106,11 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );

@@ -31,7 +31,7 @@ class WC_Meta_Box_Order_Actions {
 			$theorder = wc_get_order( $post->ID );
 		}
 
-		$theorder = $theorder instanceof WC_Order ? $theorder : null;
+		$theorder      = $theorder instanceof WC_Order ? $theorder : null;
 		$order_actions = self::get_available_order_actions_for_order( $theorder );
 		?>
 		<ul class="order_actions submitbox">
@@ -90,6 +90,11 @@ class WC_Meta_Box_Order_Actions {
 			$action = wc_clean( wp_unslash( $_POST['wc_order_action'] ) ); // @codingStandardsIgnoreLine
 
 			if ( 'send_order_details' === $action ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_before_resend_order_emails', $order, 'customer_invoice' );
 
 				// Send the customer invoice email.
@@ -100,6 +105,11 @@ class WC_Meta_Box_Order_Actions {
 				// Note the event.
 				$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true );
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_after_resend_order_email', $order, 'customer_invoice' );
 
 				// Change the post saved message.
@@ -107,6 +117,11 @@ class WC_Meta_Box_Order_Actions {
 
 			} elseif ( 'send_order_details_admin' === $action ) {
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_before_resend_order_emails', $order, 'new_order' );
 
 				WC()->payment_gateways();
@@ -115,6 +130,11 @@ class WC_Meta_Box_Order_Actions {
 				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order, true );
 				remove_filter( 'woocommerce_new_order_email_allows_resend', '__return_true' );
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_after_resend_order_email', $order, 'new_order' );
 
 				// Change the post saved message.
@@ -129,6 +149,11 @@ class WC_Meta_Box_Order_Actions {
 			} else {
 
 				if ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
 				}
 			}

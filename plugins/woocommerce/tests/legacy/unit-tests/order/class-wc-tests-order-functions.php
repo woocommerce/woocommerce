@@ -22,6 +22,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_statuses() {
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$order_statuses = apply_filters(
 			'wc_order_statuses',
 			array(
@@ -1445,7 +1450,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit' => 2,
+				'usage_limit'          => 2,
 				'usage_limit_per_user' => 2,
 			)
 		);
@@ -1488,7 +1493,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit' => 1,
+				'usage_limit'          => 1,
 				'usage_limit_per_user' => 1,
 			)
 		);
@@ -1525,7 +1530,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit' => 2,
+				'usage_limit'          => 2,
 				'usage_limit_per_user' => 2,
 			)
 		);
@@ -1569,12 +1574,22 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		// Test custom key.
 		$key       = 'foo123bar';
 		$order_key = wc_generate_order_key( $key );
-		$expected  = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$expected = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 		$this->assertEquals( $expected, $order_key );
 
 		// Test default key.
 		$order_key = wc_generate_order_key();
-		$prefix    = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$prefix = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' );
 		$this->assertStringStartsWith( $prefix, $order_key );
 		$this->assertEquals( 13, strlen( str_replace( $prefix, '', $order_key ) ) );
 	}

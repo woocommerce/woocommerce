@@ -304,6 +304,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 *
 			 * @param int $tax_rate_id Tax Rate ID.
 			 * @param int $order_id    Order ID.
+			 * @since
 			 */
 			do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
 
@@ -329,6 +330,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $tax_rate_id Tax Rate ID.
 		 * @param int $order_id    Order ID.
+		 * @since
 		 */
 		do_action( 'woocommerce_analytics_delete_tax', 0, $order_id );
 

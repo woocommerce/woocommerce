@@ -142,6 +142,7 @@ trait SchedulerTraits {
 		 *
 		 * @param int    $batch_size Batch size.
 		 * @param string $action Batch action name.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_analytics_regenerate_batch_size', $batch_size, static::$name, $action );
 	}
@@ -306,6 +307,11 @@ trait SchedulerTraits {
 		if (
 			// Skip scheduling if Action Scheduler tables have not been initialized.
 			! get_option( 'schema-ActionScheduler_StoreSchema' ) ||
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_analytics_disable_action_scheduling', false )
 		) {
 			call_user_func_array( array( static::class, $action_name ), $args );

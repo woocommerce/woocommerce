@@ -289,7 +289,7 @@ class UI {
 
 		wp_safe_redirect( $redirect );
 			exit;
-}
+	}
 
 	/**
 	 * Handles turning on/off the entire approved download directory system (vs enabling
@@ -299,9 +299,9 @@ class UI {
 	 */
 	private function process_on_off( string $action ) {
 		switch ( $action ) {
-				case 'turn-on':
-					$this->register->set_mode( Register::MODE_ENABLED );
-					break;
+			case 'turn-on':
+				$this->register->set_mode( Register::MODE_ENABLED );
+				break;
 
 			case 'turn-off':
 				$this->register->set_mode( Register::MODE_DISABLED );

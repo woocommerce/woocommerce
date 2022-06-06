@@ -198,7 +198,7 @@ class WC_Tests_API_Product_Reviews_V2 extends WC_REST_Unit_Test_Case {
 				'date_created_gmt'     => $data['date_created_gmt'],
 				'product_id'           => $product->get_id(),
 				'product_name'         => $product->get_name(),
-				'product_permalink'	   => $product->get_permalink(),
+				'product_permalink'    => $product->get_permalink(),
 				'status'               => 'approved',
 				'reviewer'             => 'Admin',
 				'reviewer_email'       => 'woo@woo.local',

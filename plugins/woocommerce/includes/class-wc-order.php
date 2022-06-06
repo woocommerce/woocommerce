@@ -103,12 +103,22 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id() );
 
 			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', false );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( $this->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( 'on-hold', 'pending', 'failed', 'cancelled' ), $this ) ) ) {
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );
@@ -116,11 +126,26 @@ class WC_Order extends WC_Abstract_Order {
 				if ( ! $this->get_date_paid( 'edit' ) ) {
 					$this->set_date_paid( time() );
 				}
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_payment_complete', $this->get_id() );
 			} else {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id() );
 			}
 		} catch ( Exception $e ) {
@@ -192,6 +217,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param WC_Order $order            Order data.
 		 * @param string   $tax_display      Type of tax display.
 		 * @param bool     $display_refunded If should include refunded value.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this, $tax_display, $display_refunded );
 	}
@@ -263,6 +289,11 @@ class WC_Order extends WC_Abstract_Order {
 			);
 
 			if ( $manual_update ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
@@ -289,6 +320,11 @@ class WC_Order extends WC_Abstract_Order {
 	public function maybe_set_date_paid() {
 		// This logic only runs if the date_paid prop has not been set yet.
 		if ( ! $this->get_date_paid( 'edit' ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$payment_completed_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this );
 
 			if ( $this->has_status( $payment_completed_status ) ) {
@@ -361,6 +397,11 @@ class WC_Order extends WC_Abstract_Order {
 
 		if ( $status_transition ) {
 			try {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this );
 
 				if ( ! empty( $status_transition['from'] ) ) {
@@ -370,11 +411,26 @@ class WC_Order extends WC_Abstract_Order {
 					// Note the transition occurred.
 					$this->add_status_transition_note( $transition_note, $status_transition );
 
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
 
 					// Work out if this was for a payment, and trigger a payment_status hook instead.
 					if (
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this ), true )
 						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
 					) {
@@ -478,6 +534,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_order_number() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return (string) apply_filters( 'woocommerce_order_number', $this->get_id(), $this );
 	}
 
@@ -537,6 +598,11 @@ class WC_Order extends WC_Abstract_Order {
 			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
 
 			if ( 'view' === $context ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );
 			}
 		}
@@ -843,6 +909,11 @@ class WC_Order extends WC_Abstract_Order {
 	public function get_date_paid( $context = 'view' ) {
 		$date_paid = $this->get_prop( 'date_paid', $context );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( 'view' === $context && ! $date_paid && version_compare( $this->get_version( 'edit' ), '3.0', '<' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
 			// In view context, return a date if missing.
 			$date_paid = $this->get_date_created( 'edit' );
@@ -869,6 +940,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array The stored address after filter.
 	 */
 	public function get_address( $type = 'billing' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_order_address', array_merge( $this->data[ $type ], $this->get_prop( $type, 'view' ) ), $type, $this );
 	}
 
@@ -883,8 +959,18 @@ class WC_Order extends WC_Abstract_Order {
 		// Remove name and company before generate the Google Maps URL.
 		unset( $address['first_name'], $address['last_name'], $address['company'], $address['phone'] );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$address = apply_filters( 'woocommerce_shipping_address_map_url_parts', $address, $this );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_address_map_url', 'https://maps.google.com/maps?&q=' . rawurlencode( implode( ', ', $address ) ) . '&z=16', $this );
 	}
 
@@ -915,6 +1001,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_billing_address( $empty_content = '' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$raw_address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
 		$address     = WC()->countries->get_formatted_address( $raw_address );
 
@@ -940,6 +1031,11 @@ class WC_Order extends WC_Abstract_Order {
 		$raw_address = $this->get_address( 'shipping' );
 
 		if ( $this->has_shipping_address() ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$raw_address = apply_filters( 'woocommerce_order_formatted_shipping_address', $raw_address, $this );
 			$address     = WC()->countries->get_formatted_address( $raw_address );
 		}
@@ -1398,6 +1494,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_editable() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'wc_order_is_editable', in_array( $this->get_status(), array( 'pending', 'on-hold', 'auto-draft' ), true ), $this );
 	}
 
@@ -1408,6 +1509,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_paid() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_is_paid', $this->has_status( wc_get_is_paid_statuses() ), $this );
 	}
 
@@ -1417,6 +1523,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_download_permitted() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( 'completed' ) || ( 'yes' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) && $this->has_status( 'processing' ) ), $this );
 	}
 
@@ -1430,6 +1541,11 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$hide          = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
 		$needs_address = false;
 
@@ -1442,6 +1558,11 @@ class WC_Order extends WC_Abstract_Order {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_needs_shipping_address', $needs_address, $hide, $this );
 	}
 
@@ -1509,6 +1630,11 @@ class WC_Order extends WC_Abstract_Order {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_get_downloadable_items', $downloads, $this );
 	}
 
@@ -1518,7 +1644,17 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function needs_payment() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$valid_order_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_status( $valid_order_statuses ) && $this->get_total() > 0 ), $this, $valid_order_statuses );
 	}
 
@@ -1552,6 +1688,11 @@ class WC_Order extends WC_Abstract_Order {
 
 						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
 
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
 							$needs_processing = 1;
 							break;
@@ -1593,6 +1734,11 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_checkout_payment_url', $pay_url, $this );
 	}
 
@@ -1605,6 +1751,11 @@ class WC_Order extends WC_Abstract_Order {
 		$order_received_url = wc_get_endpoint_url( 'order-received', $this->get_id(), wc_get_checkout_url() );
 		$order_received_url = add_query_arg( 'key', $this->get_order_key(), $order_received_url );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_checkout_order_received_url', $order_received_url, $this );
 	}
 
@@ -1615,6 +1766,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url',
 			wp_nonce_url(
@@ -1639,6 +1795,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string The unescaped cancel-order URL.
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_get_cancel_order_url_raw',
 			add_query_arg(
@@ -1678,6 +1839,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_view_order_url() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_view_order_url', wc_get_endpoint_url( 'view-order', $this->get_id(), wc_get_page_permalink( 'myaccount' ) ), $this );
 	}
 
@@ -1688,6 +1854,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_edit_order_url() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_edit_order_url', get_admin_url( null, 'post.php?post=' . $this->get_id() . '&action=edit' ), $this );
 	}
 
@@ -1720,6 +1891,11 @@ class WC_Order extends WC_Abstract_Order {
 			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // WPCS: input var ok.
 			$comment_author_email  = sanitize_email( $comment_author_email );
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$commentdata = apply_filters(
 			'woocommerce_new_order_note_data',
 			array(
@@ -1744,6 +1920,11 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $is_customer_note ) {
 			add_comment_meta( $comment_id, 'is_customer_note', 1 );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action(
 				'woocommerce_new_customer_note',
 				array(
@@ -1927,6 +2108,11 @@ class WC_Order extends WC_Abstract_Order {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_item_count_refunded', $count, $item_type, $this );
 	}
 
@@ -2098,6 +2284,11 @@ class WC_Order extends WC_Abstract_Order {
 		$this->add_order_item_totals_refund_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
 
@@ -2109,6 +2300,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function is_created_via( $modus ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
 	}
 }

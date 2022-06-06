@@ -26,6 +26,11 @@ class Survey {
 	public static function get_url( $path, $query = array() ) {
 		$url = self::SURVEY_URL . $path;
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$query_args = apply_filters( 'woocommerce_admin_survey_query', $query );
 
 		if ( ! empty( $query_args ) ) {

@@ -17,6 +17,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_before_shipping_calculator' ); ?>
 
 <form class="woocommerce-shipping-calculator" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">

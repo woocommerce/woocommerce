@@ -19,6 +19,11 @@ defined( 'ABSPATH' ) || exit;
 
 global $product;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 $heading = apply_filters( 'woocommerce_product_additional_information_heading', __( 'Additional information', 'woocommerce' ) );
 
 ?>

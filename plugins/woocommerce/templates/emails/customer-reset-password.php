@@ -44,4 +44,9 @@ if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_email_footer', $email );

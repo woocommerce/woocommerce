@@ -270,6 +270,11 @@ class WC_Shop_Customizer {
 	 * @return string
 	 */
 	public function sanitize_default_catalog_orderby( $value ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$options = apply_filters(
 			'woocommerce_default_catalog_orderby_options',
 			array(
@@ -440,6 +445,11 @@ class WC_Shop_Customizer {
 				'section'     => 'woocommerce_product_catalog',
 				'settings'    => 'woocommerce_default_catalog_orderby',
 				'type'        => 'select',
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'choices'     => apply_filters(
 					'woocommerce_default_catalog_orderby_options',
 					array(
@@ -524,9 +534,19 @@ class WC_Shop_Customizer {
 	 */
 	private function add_product_images_section( $wp_customize ) {
 		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
-			$regen_description = ''; // Nothing to report; Jetpack will handle magically.
+			$regen_description = '';
+			/**
+			 * Nothing to report; Jetpack will handle magically.
+			 *
+			 * @since
+			 */
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {
 			$regen_description = __( 'After publishing your changes, new image sizes will be generated automatically.', 'woocommerce' );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && is_multisite() ) {
 			/* translators: 1: tools URL 2: regen thumbs url */
 			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you regenerate thumbnails. You can do this from the <a href="%1$s" target="_blank">tools section in WooCommerce</a> or by using a plugin such as <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status&tab=tools' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );

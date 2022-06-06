@@ -119,10 +119,20 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				$link_ratings = implode( ',', array_merge( $rating_filter, array( $rating ) ) );
 			}
 
-			$class       = in_array( $rating, $rating_filter, true ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
+			$class = in_array( $rating, $rating_filter, true ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings, $link ) : remove_query_arg( 'rating_filter' ) );
 			$rating_html = wc_get_star_rating_html( $rating );
 			$count_html  = wp_kses(
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ),
 				array(
 					'em'     => array(),

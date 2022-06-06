@@ -31,8 +31,14 @@ class ActionsProxy {
 	 * @param mixed  ...$parameters Additional parameters to pass to the callback functions.
 	 *
 	 * @return mixed The filtered value after all hooked functions are applied to it.
+	 * @since
 	 */
 	public function apply_filters( $tag, $value, ...$parameters ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( $tag, $value, ...$parameters );
 	}
 

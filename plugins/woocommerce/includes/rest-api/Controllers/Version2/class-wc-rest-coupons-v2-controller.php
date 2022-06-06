@@ -44,7 +44,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -56,7 +58,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						array(
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
 								'required'    => true,
@@ -70,7 +73,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -108,7 +113,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -219,6 +226,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -317,6 +325,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WC_Data         $coupon   Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $coupon, $request, $creating );
 	}
@@ -348,7 +357,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'status' => array(
+				'status'                      => array(
 					'description' => __( 'The status of the coupon. Should always be draft, published, or pending review', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),

@@ -566,7 +566,7 @@ WHERE
 	 */
 	public function verify_migrated_data( array $source_ids ) : array {
 		global $wpdb;
-		$query   = $this->build_verification_query( $source_ids );
+		$query = $this->build_verification_query( $source_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query should already be prepared.
 		$results = $wpdb->get_results( $query, ARRAY_A );
 
@@ -686,9 +686,9 @@ WHERE $where_clause
 					$failed_ids[ $row[ $primary_key_column ] ] = array();
 				}
 				$failed_ids[ $row[ $primary_key_column ] ][] = array(
-					'column' => $column_name,
+					'column'         => $column_name,
 					'original_value' => $row[ $source_alias ],
-					'new_value' => $row[ $destination_alias ],
+					'new_value'      => $row[ $destination_alias ],
 				);
 			}
 		}
@@ -715,9 +715,9 @@ WHERE $where_clause
 					$failed_ids[ $row[ $primary_key_column ] ] = array();
 				}
 				$failed_ids[ $row[ $primary_key_column ] ][] = array(
-					'column' => $meta_key,
+					'column'         => $meta_key,
 					'original_value' => $row[ $meta_alias ],
-					'new_value' => $row[ $destination_alias ],
+					'new_value'      => $row[ $destination_alias ],
 				);
 			}
 		}

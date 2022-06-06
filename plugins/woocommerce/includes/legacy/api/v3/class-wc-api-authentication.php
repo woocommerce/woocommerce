@@ -168,11 +168,17 @@ class WC_API_Authentication {
 
 		$consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
 
-		$keys = $wpdb->get_row( $wpdb->prepare( "
+		$keys = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
 			FROM {$wpdb->prefix}woocommerce_api_keys
 			WHERE consumer_key = '%s'
-		", $consumer_key ), ARRAY_A );
+		",
+				$consumer_key
+			),
+			ARRAY_A
+		);
 
 		if ( empty( $keys ) ) {
 			throw new Exception( __( 'Consumer key is invalid.', 'woocommerce' ), 401 );
@@ -243,7 +249,7 @@ class WC_API_Authentication {
 		}
 
 		// Normalize parameter key/values
-		$params = $this->normalize_parameters( $params );
+		$params           = $this->normalize_parameters( $params );
 		$query_parameters = array();
 		foreach ( $params as $param_key => $param_value ) {
 			if ( is_array( $param_value ) ) {
@@ -264,7 +270,7 @@ class WC_API_Authentication {
 
 		$hash_algorithm = strtolower( str_replace( 'HMAC-', '', $params['oauth_signature_method'] ) );
 
-		$secret = $keys['consumer_secret'] . '&';
+		$secret    = $keys['consumer_secret'] . '&';
 		$signature = base64_encode( hash_hmac( $hash_algorithm, $string_to_sign, $secret, true ) );
 
 		if ( ! hash_equals( $signature, $consumer_signature ) ) {
@@ -293,8 +299,8 @@ class WC_API_Authentication {
 	 * @return array normalized parameters
 	 */
 	private function normalize_parameters( $parameters ) {
-		$keys = WC_API_Authentication::urlencode_rfc3986( array_keys( $parameters ) );
-		$values = WC_API_Authentication::urlencode_rfc3986( array_values( $parameters ) );
+		$keys       = WC_API_Authentication::urlencode_rfc3986( array_keys( $parameters ) );
+		$values     = WC_API_Authentication::urlencode_rfc3986( array_values( $parameters ) );
 		$parameters = array_combine( $keys, $values );
 		return $parameters;
 	}

@@ -56,6 +56,11 @@ class WC_CLI_Runner {
 	public static function after_wp_load() {
 		global $wp_rest_server;
 		$wp_rest_server = new WP_REST_Server();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		$request = new WP_REST_Request( 'GET', '/' );
@@ -118,7 +123,7 @@ class WC_CLI_Runner {
 			'slug'         => __( 'The slug for the resource.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
-		$positional_args = array_keys( $supported_ids );
+		$positional_args    = array_keys( $supported_ids );
 		$parent             = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 

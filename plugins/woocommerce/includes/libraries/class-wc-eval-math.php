@@ -26,7 +26,10 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 *
 		 * @var array
 		 */
-		public static $v = array( 'e' => 2.71, 'pi' => 3.14 );
+		public static $v = array(
+			'e'  => 2.71,
+			'pi' => 3.14,
+		);
 
 		/**
 		 * User-defined functions.
@@ -57,9 +60,9 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 */
 		public static function evaluate( $expr ) {
 			self::$last_error = null;
-			$expr = trim( $expr );
+			$expr             = trim( $expr );
 			if ( substr( $expr, -1, 1 ) == ';' ) {
-				$expr = substr( $expr, 0, strlen( $expr ) -1 ); // strip semicolons at the end
+				$expr = substr( $expr, 0, strlen( $expr ) - 1 ); // strip semicolons at the end
 			}
 			// ===============
 			// is it a variable assignment?
@@ -79,7 +82,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				if ( in_array( $matches[1], self::$fb ) ) { // make sure it isn't built in
 					return self::trigger( "cannot redefine built-in function '$matches[1]()'" );
 				}
-				$args = explode( ",", preg_replace( "/\s+/", "", $matches[2] ) ); // get the arguments
+				$args = explode( ',', preg_replace( '/\s+/', '', $matches[2] ) ); // get the arguments
 				if ( ( $stack = self::nfx( $matches[3] ) ) === false ) {
 					return false; // see if it can be converted to postfix
 				}
@@ -94,7 +97,10 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 						}
 					}
 				}
-				self::$f[ $fnn ] = array( 'args' => $args, 'func' => $stack );
+				self::$f[ $fnn ] = array(
+					'args' => $args,
+					'func' => $stack,
+				);
 				return true;
 				// ===============
 			} else {
@@ -111,18 +117,31 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 */
 		private static function nfx( $expr ) {
 
-			$index = 0;
-			$stack = new WC_Eval_Math_Stack;
+			$index  = 0;
+			$stack  = new WC_Eval_Math_Stack;
 			$output = array(); // postfix form of expression, to be passed to pfx()
-			$expr = trim( $expr );
+			$expr   = trim( $expr );
 
 			$ops   = array( '+', '-', '*', '/', '^', '_' );
-			$ops_r = array( '+' => 0, '-' => 0, '*' => 0, '/' => 0, '^' => 1 ); // right-associative operator?
-			$ops_p = array( '+' => 0, '-' => 0, '*' => 1, '/' => 1, '_' => 1, '^' => 2 ); // operator precedence
+			$ops_r = array(
+				'+' => 0,
+				'-' => 0,
+				'*' => 0,
+				'/' => 0,
+				'^' => 1,
+			); // right-associative operator?
+			$ops_p = array(
+				'+' => 0,
+				'-' => 0,
+				'*' => 1,
+				'/' => 1,
+				'_' => 1,
+				'^' => 2,
+			); // operator precedence
 
 			$expecting_op = false; // we use this in syntax-checking the expression
 			// and determining when a - is a negation
-			if ( preg_match( "/[^\w\s+*^\/()\.,-]/", $expr, $matches ) ) { // make sure the characters are all good
+			if ( preg_match( '/[^\w\s+*^\/()\.,-]/', $expr, $matches ) ) { // make sure the characters are all good
 				return self::trigger( "illegal character '{$matches[0]}'" );
 			}
 
@@ -159,20 +178,20 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 							$output[] = $o2;
 						}
 					}
-					if ( preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) { // did we just close a function?
-						$fnn = $matches[1]; // get the function name
+					if ( preg_match( '/^([A-Za-z]\w*)\($/', $stack->last( 2 ), $matches ) ) { // did we just close a function?
+						$fnn       = $matches[1]; // get the function name
 						$arg_count = $stack->pop(); // see how many arguments there were (cleverly stored on the stack, thank you)
-						$output[] = $stack->pop(); // pop the function and push onto the output
+						$output[]  = $stack->pop(); // pop the function and push onto the output
 						if ( in_array( $fnn, self::$fb ) ) { // check the argument count
 							if ( $arg_count > 1 ) {
 								return self::trigger( "too many arguments ($arg_count given, 1 expected)" );
 							}
 						} elseif ( array_key_exists( $fnn, self::$f ) ) {
 							if ( count( self::$f[ $fnn ]['args'] ) != $arg_count ) {
-								return self::trigger( "wrong number of arguments ($arg_count given, " . count( self::$f[ $fnn ]['args'] ) . " expected)" );
+								return self::trigger( "wrong number of arguments ($arg_count given, " . count( self::$f[ $fnn ]['args'] ) . ' expected)' );
 							}
 						} else { // did we somehow push a non-function on the stack? this should never happen
-							return self::trigger( "internal error" );
+							return self::trigger( 'internal error' );
 						}
 					}
 					$index++;
@@ -186,7 +205,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 						}
 					}
 					// make sure there was a function
-					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) {
+					if ( ! preg_match( '/^([A-Za-z]\w*)\($/', $stack->last( 2 ), $matches ) ) {
 						return self::trigger( "unexpected ','" );
 					}
 					$stack->push( $stack->pop() + 1 ); // increment the argument count
@@ -200,15 +219,15 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 					// ===============
 				} elseif ( $ex and ! $expecting_op ) { // do we now have a function/variable/number?
 					$expecting_op = true;
-					$val = $match[1];
-					if ( preg_match( "/^([A-Za-z]\w*)\($/", $val, $matches ) ) { // may be func, or variable w/ implicit multiplication against parentheses...
+					$val          = $match[1];
+					if ( preg_match( '/^([A-Za-z]\w*)\($/', $val, $matches ) ) { // may be func, or variable w/ implicit multiplication against parentheses...
 						if ( in_array( $matches[1], self::$fb ) or array_key_exists( $matches[1], self::$f ) ) { // it's a func
 							$stack->push( $val );
 							$stack->push( 1 );
 							$stack->push( '(' );
 							$expecting_op = false;
 						} else { // it's a var w/ implicit multiplication
-							$val = $matches[1];
+							$val      = $matches[1];
 							$output[] = $val;
 						}
 					} else { // it's a plain old var or num
@@ -221,7 +240,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				} elseif ( in_array( $op, $ops ) and ! $expecting_op ) {
 					return self::trigger( "unexpected operator '$op'" );
 				} else { // I don't even want to know what you did to get here
-					return self::trigger( "an unexpected error occurred" );
+					return self::trigger( 'an unexpected error occurred' );
 				}
 				if ( strlen( $expr ) == $index ) {
 					if ( in_array( $op, $ops ) ) { // did we end with an operator? bad.
@@ -261,10 +280,10 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				// if the token is a binary operator, pop two values off the stack, do the operation, and push the result back on
 				if ( in_array( $token, array( '+', '-', '*', '/', '^' ) ) ) {
 					if ( is_null( $op2 = $stack->pop() ) ) {
-						return self::trigger( "internal error" );
+						return self::trigger( 'internal error' );
 					}
 					if ( is_null( $op1 = $stack->pop() ) ) {
-						return self::trigger( "internal error" );
+						return self::trigger( 'internal error' );
 					}
 					switch ( $token ) {
 						case '+':
@@ -290,7 +309,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 				} elseif ( '_' === $token ) {
 					$stack->push( -1 * $stack->pop() );
 					// if the token is a function, pop arguments off the stack, hand them to the function, and push the result back on
-				} elseif ( ! preg_match( "/^([a-z]\w*)\($/", $token, $matches ) ) {
+				} elseif ( ! preg_match( '/^([a-z]\w*)\($/', $token, $matches ) ) {
 					if ( is_numeric( $token ) ) {
 						$stack->push( $token );
 					} elseif ( array_key_exists( $token, self::$v ) ) {
@@ -304,7 +323,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 			}
 			// when we're out of tokens, the stack should have a single element, the final result
 			if ( 1 != $stack->count ) {
-				return self::trigger( "internal error" );
+				return self::trigger( 'internal error' );
 			}
 			return $stack->pop();
 		}
@@ -333,9 +352,9 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 * it to begin with)
 		 */
 		private static function debugPrintCallingFunction() {
-			$file = 'n/a';
-			$func = 'n/a';
-			$line = 'n/a';
+			$file       = 'n/a';
+			$func       = 'n/a';
+			$line       = 'n/a';
 			$debugTrace = debug_backtrace();
 			if ( isset( $debugTrace[1] ) ) {
 				$file = $debugTrace[1]['file'] ? $debugTrace[1]['file'] : 'n/a';
@@ -397,7 +416,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 *
 		 * @return mixed
 		 */
-		public function last( $n=1 ) {
+		public function last( $n = 1 ) {
 			$key = $this->count - $n;
 			return array_key_exists( $key, $this->stack ) ? $this->stack[ $key ] : null;
 		}

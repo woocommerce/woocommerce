@@ -221,6 +221,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 * @param array  $query_args The original arguments for the request.
 			 * @param string $field      The object type.
 			 * @param string $context    The data store context.
+			 * @since
 			 */
 			$ip_addresses = apply_filters( 'woocommerce_analytics_' . $field, $ip_addresses, $query_args, $field, $this->context );
 

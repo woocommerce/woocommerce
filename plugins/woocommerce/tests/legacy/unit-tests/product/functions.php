@@ -913,6 +913,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product_types() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$product_types = (array) apply_filters(
 			'product_type_selector',
 			array(
@@ -1067,6 +1072,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 3.6.0
 	 */
 	public function test_wc_get_product_stock_status_options() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$status_options = (array) apply_filters(
 			'woocommerce_product_stock_status_options',
 			array(

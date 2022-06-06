@@ -83,12 +83,12 @@ class Marketing {
 		}
 
 		PageController::get_instance()->connect_page(
-			[
+			array(
 				'id'         => 'woocommerce-marketing',
 				'title'      => 'Marketing',
 				'capability' => 'manage_woocommerce',
 				'path'       => 'wc-admin&path=/marketing',
-			]
+			)
 		);
 	}
 
@@ -99,12 +99,17 @@ class Marketing {
 		$this->register_overview_page();
 
 		$controller = PageController::get_instance();
-		$defaults   = [
+		$defaults   = array(
 			'parent'        => 'woocommerce-marketing',
 			'existing_page' => false,
-		];
+		);
 
-		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', [] );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', array() );
 		foreach ( $marketing_pages as $marketing_page ) {
 			if ( ! is_array( $marketing_page ) ) {
 				continue;
@@ -132,7 +137,7 @@ class Marketing {
 
 		// First register the page.
 		PageController::get_instance()->register_page(
-			[
+			array(
 				'id'       => 'woocommerce-marketing-overview',
 				'title'    => __( 'Overview', 'woocommerce' ),
 				'path'     => 'wc-admin&path=/marketing',
@@ -141,7 +146,7 @@ class Marketing {
 					'parent' => 'woocommerce-marketing',
 					'order'  => 10,
 				),
-			]
+			)
 		);
 
 		// Now fix the path, since register_page() gets it wrong.
@@ -196,7 +201,7 @@ class Marketing {
 
 		if ( false === $plugins ) {
 			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.1/recommendations.json' );
-			$plugins = [];
+			$plugins = array();
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
 				$plugins = json_decode( $request['body'], true );
@@ -251,21 +256,21 @@ class Marketing {
 			);
 
 			$request = wp_remote_get( $request_url );
-			$posts   = [];
+			$posts   = array();
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
 				$raw_posts = json_decode( $request['body'], true );
 
 				foreach ( $raw_posts as $raw_post ) {
-					$post = [
+					$post = array(
 						'title'         => html_entity_decode( $raw_post['title']['rendered'] ),
 						'date'          => $raw_post['date_gmt'],
 						'link'          => $raw_post['link'],
 						'author_name'   => isset( $raw_post['author_name'] ) ? html_entity_decode( $raw_post['author_name'] ) : '',
 						'author_avatar' => isset( $raw_post['author_avatar_url'] ) ? $raw_post['author_avatar_url'] : '',
-					];
+					);
 
-					$featured_media = $raw_post['_embedded']['wp:featuredmedia'] ?? [];
+					$featured_media = $raw_post['_embedded']['wp:featuredmedia'] ?? array();
 					if ( count( $featured_media ) > 0 ) {
 						$image         = current( $featured_media );
 						$post['image'] = add_query_arg(

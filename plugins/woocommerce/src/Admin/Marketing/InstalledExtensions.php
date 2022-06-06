@@ -19,7 +19,7 @@ class InstalledExtensions {
 	 * Valid extensions statuses are: installed, activated, configured
 	 */
 	public static function get_data() {
-		$data = [];
+		$data = array();
 
 		$automatewoo = self::get_automatewoo_extension_data();
 		$mailchimp   = self::get_mailchimp_extension_data();
@@ -71,7 +71,7 @@ class InstalledExtensions {
 	 * @return array
 	 */
 	public static function get_allowed_plugins() {
-		return [
+		return array(
 			'automatewoo',
 			'mailchimp-for-woocommerce',
 			'creative-mail-by-constant-contact',
@@ -81,7 +81,7 @@ class InstalledExtensions {
 			'hubspot-for-woocommerce',
 			'woocommerce-amazon-ebay-integration',
 			'mailpoet',
-		];
+		);
 	}
 
 	/**
@@ -335,13 +335,13 @@ class InstalledExtensions {
 			return false;
 		}
 
-		return [
+		return array(
 			'slug'        => $slug,
 			'status'      => $status,
 			'name'        => $plugin_data['Name'],
 			'description' => html_entity_decode( wp_trim_words( $plugin_data['Description'], 20 ) ),
 			'supportUrl'  => 'https://woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
-		];
+		);
 	}
 
 }

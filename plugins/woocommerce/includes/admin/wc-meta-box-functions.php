@@ -191,7 +191,8 @@ function woocommerce_wp_select( $field ) {
 
 	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field     = wp_parse_args(
-		$field, array(
+		$field,
+		array(
 			'class'             => 'select short',
 			'style'             => '',
 			'wrapper_class'     => '',

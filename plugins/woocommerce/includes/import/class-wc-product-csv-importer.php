@@ -531,7 +531,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		$images    = array();
+		$images = array();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$separator = apply_filters( 'woocommerce_product_import_image_separator', ',' );
 
 		foreach ( $this->explode_values( $value, $separator ) as $image ) {
@@ -767,6 +772,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$callbacks[] = $callback;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_importer_formatting_callbacks', $callbacks, $this );
 	}
 
@@ -790,6 +800,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return array
 	 */
 	protected function expand_data( $data ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$data = apply_filters( 'woocommerce_product_importer_pre_expand_data', $data );
 
 		// Images field maps to image and gallery id fields.
@@ -974,6 +989,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			$data = array();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
 
 			foreach ( $row as $id => $value ) {
@@ -1002,6 +1022,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			 *
 			 * @param array $parsed_data Parsed data.
 			 * @param WC_Product_Importer $importer Importer instance.
+			 * @since
 			 */
 			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
 		}
@@ -1056,6 +1077,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;

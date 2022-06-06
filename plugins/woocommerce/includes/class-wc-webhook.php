@@ -145,6 +145,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 * @param bool       $should_deliver True if the webhook should be sent, or false to not send it.
 		 * @param WC_Webhook $this The current webhook class.
 		 * @param mixed      $arg First hook argument.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_webhook_should_deliver', $should_deliver, $this, $arg );
 	}
@@ -332,6 +333,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'cookies'     => array(),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$http_args = apply_filters( 'woocommerce_webhook_http_args', $http_args, $arg, $this->get_id() );
 
 		// Add custom headers.
@@ -351,6 +357,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		$this->log_delivery( $delivery_id, $http_args, $response, $duration );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_webhook_delivery', $http_args, $response, $duration, $arg, $this->get_id() );
 	}
 
@@ -378,6 +389,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				break;
 
 			case 'order':
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
 				break;
 
@@ -478,6 +494,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		// Restore the current user.
 		wp_set_current_user( $current_user );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
 	}
 
@@ -491,6 +512,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string
 	 */
 	public function generate_signature( $payload ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$hash_algo = apply_filters( 'woocommerce_webhook_hash_algorithm', 'sha256', $payload, $this->get_id() );
 
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
@@ -591,9 +617,19 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	private function failed_delivery() {
 		$failures = $this->get_failure_count();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
 			$this->set_status( 'disabled' );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 		} else {
 			$this->set_failure_count( ++$failures );
@@ -676,6 +712,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_name', $this->get_prop( 'name', $context ), $this->get_id() );
 	}
 
@@ -692,6 +733,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string status
 	 */
 	public function get_status( $context = 'view' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_status', $this->get_prop( 'status', $context ), $this->get_id() );
 	}
 
@@ -728,6 +774,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string
 	 */
 	public function get_secret( $context = 'view' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_secret', $this->get_prop( 'secret', $context ), $this->get_id() );
 	}
 
@@ -740,6 +791,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string
 	 */
 	public function get_topic( $context = 'view' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_topic', $this->get_prop( 'topic', $context ), $this->get_id() );
 	}
 
@@ -752,6 +808,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return string
 	 */
 	public function get_delivery_url( $context = 'view' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_delivery_url', $this->get_prop( 'delivery_url', $context ), $this->get_id() );
 	}
 
@@ -1014,6 +1075,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$topic_hooks = apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $this );
 
 		return isset( $topic_hooks[ $topic ] ) ? $topic_hooks[ $topic ] : array();
@@ -1032,6 +1098,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$hooks = $this->get_topic_hooks( $this->get_topic() );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_hooks', $hooks, $this->get_id() );
 	}
 
@@ -1044,6 +1115,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function get_resource() {
 		$topic = explode( '.', $this->get_topic() );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_resource', $topic[0], $this->get_id() );
 	}
 
@@ -1056,6 +1132,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function get_event() {
 		$topic = explode( '.', $this->get_topic() );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_webhook_event', isset( $topic[1] ) ? $topic[1] : '', $this->get_id() );
 	}
 

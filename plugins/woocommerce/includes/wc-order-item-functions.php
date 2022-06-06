@@ -36,6 +36,11 @@ function wc_add_order_item( $order_id, $item_array ) {
 	$item_id    = $data_store->add_order_item( $order_id, $item_array );
 	$item       = WC_Order_Factory::get_order_item( $item_id );
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_new_order_item', $item_id, $item, $order_id );
 
 	return $item_id;
@@ -59,6 +64,11 @@ function wc_update_order_item( $item_id, $args ) {
 		return false;
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_update_order_item', $item_id, $args );
 
 	return true;
@@ -81,10 +91,20 @@ function wc_delete_order_item( $item_id ) {
 
 	$data_store = WC_Data_Store::load( 'order-item' );
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_before_delete_order_item', $item_id );
 
 	$data_store->delete_order_item( $item_id );
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_delete_order_item', $item_id );
 
 	return true;

@@ -6,119 +6,113 @@ use Generator;
 use Automattic\WooCommerce\Vendor\League\Container\ContainerAwareTrait;
 use Automattic\WooCommerce\Vendor\League\Container\Exception\NotFoundException;
 
-class DefinitionAggregate implements DefinitionAggregateInterface
-{
-    use ContainerAwareTrait;
+class DefinitionAggregate implements DefinitionAggregateInterface {
 
-    /**
-     * @var DefinitionInterface[]
-     */
-    protected $definitions = [];
+	use ContainerAwareTrait;
 
-    /**
-     * Construct.
-     *
-     * @param DefinitionInterface[] $definitions
-     */
-    public function __construct(array $definitions = [])
-    {
-        $this->definitions = array_filter($definitions, function ($definition) {
-            return ($definition instanceof DefinitionInterface);
-        });
-    }
+	/**
+	 * @var DefinitionInterface[]
+	 */
+	protected $definitions = array();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function add(string $id, $definition, bool $shared = false) : DefinitionInterface
-    {
-        if (!$definition instanceof DefinitionInterface) {
-            $definition = new Definition($id, $definition);
-        }
+	/**
+	 * Construct.
+	 *
+	 * @param DefinitionInterface[] $definitions
+	 */
+	public function __construct( array $definitions = array() ) {
+		$this->definitions = array_filter(
+			$definitions,
+			function ( $definition ) {
+				return ( $definition instanceof DefinitionInterface );
+			}
+		);
+	}
 
-        $this->definitions[] = $definition
-            ->setAlias($id)
-            ->setShared($shared)
-        ;
+	/**
+	 * {@inheritdoc}
+	 */
+	public function add( string $id, $definition, bool $shared = false ) : DefinitionInterface {
+		if ( ! $definition instanceof DefinitionInterface ) {
+			$definition = new Definition( $id, $definition );
+		}
 
-        return $definition;
-    }
+		$this->definitions[] = $definition
+			->setAlias( $id )
+			->setShared( $shared );
 
-    /**
-     * {@inheritdoc}
-     */
-    public function has(string $id) : bool
-    {
-        foreach ($this->getIterator() as $definition) {
-            if ($id === $definition->getAlias()) {
-                return true;
-            }
-        }
+		return $definition;
+	}
 
-        return false;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function has( string $id ) : bool {
+		foreach ( $this->getIterator() as $definition ) {
+			if ( $id === $definition->getAlias() ) {
+				return true;
+			}
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function hasTag(string $tag) : bool
-    {
-        foreach ($this->getIterator() as $definition) {
-            if ($definition->hasTag($tag)) {
-                return true;
-            }
-        }
+		return false;
+	}
 
-        return false;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function hasTag( string $tag ) : bool {
+		foreach ( $this->getIterator() as $definition ) {
+			if ( $definition->hasTag( $tag ) ) {
+				return true;
+			}
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getDefinition(string $id) : DefinitionInterface
-    {
-        foreach ($this->getIterator() as $definition) {
-            if ($id === $definition->getAlias()) {
-                return $definition->setLeagueContainer($this->getLeagueContainer());
-            }
-        }
+		return false;
+	}
 
-        throw new NotFoundException(sprintf('Alias (%s) is not being handled as a definition.', $id));
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getDefinition( string $id ) : DefinitionInterface {
+		foreach ( $this->getIterator() as $definition ) {
+			if ( $id === $definition->getAlias() ) {
+				return $definition->setLeagueContainer( $this->getLeagueContainer() );
+			}
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function resolve(string $id, bool $new = false)
-    {
-        return $this->getDefinition($id)->resolve($new);
-    }
+		throw new NotFoundException( sprintf( 'Alias (%s) is not being handled as a definition.', $id ) );
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function resolveTagged(string $tag, bool $new = false) : array
-    {
-        $arrayOf = [];
+	/**
+	 * {@inheritdoc}
+	 */
+	public function resolve( string $id, bool $new = false ) {
+		return $this->getDefinition( $id )->resolve( $new );
+	}
 
-        foreach ($this->getIterator() as $definition) {
-            if ($definition->hasTag($tag)) {
-                $arrayOf[] = $definition->setLeagueContainer($this->getLeagueContainer())->resolve($new);
-            }
-        }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function resolveTagged( string $tag, bool $new = false ) : array {
+		$arrayOf = array();
 
-        return $arrayOf;
-    }
+		foreach ( $this->getIterator() as $definition ) {
+			if ( $definition->hasTag( $tag ) ) {
+				$arrayOf[] = $definition->setLeagueContainer( $this->getLeagueContainer() )->resolve( $new );
+			}
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getIterator() : Generator
-    {
-        $count = count($this->definitions);
+		return $arrayOf;
+	}
 
-        for ($i = 0; $i < $count; $i++) {
-            yield $this->definitions[$i];
-        }
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getIterator() : Generator {
+		$count = count( $this->definitions );
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			yield $this->definitions[ $i ];
+		}
+	}
 }

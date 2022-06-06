@@ -62,6 +62,11 @@ class Screen {
 	 * Returns an array of filtered screen ids.
 	 */
 	public static function get_screen_ids() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_navigation_screen_ids', self::$screen_ids );
 	}
 
@@ -69,6 +74,11 @@ class Screen {
 	 * Returns an array of registered post types.
 	 */
 	public static function get_post_types() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_navigation_post_types', self::$post_types );
 	}
 
@@ -76,6 +86,11 @@ class Screen {
 	 * Returns an array of registered post types.
 	 */
 	public static function get_taxonomies() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_navigation_taxonomies', self::$taxonomies );
 	}
 
@@ -156,6 +171,7 @@ class Screen {
 			 * Adds the ability to skip disabling of the WP toolbar.
 			 *
 			 * @param boolean $bool WP Toolbar disabled.
+			 * @since
 			 */
 			if ( apply_filters( 'woocommerce_navigation_wp_toolbar_disabled', true ) ) {
 				$classes .= ' is-wp-toolbar-disabled';

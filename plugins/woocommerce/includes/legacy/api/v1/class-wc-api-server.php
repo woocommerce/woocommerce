@@ -82,7 +82,10 @@ class WC_API_Server {
 	 *
 	 * @var array
 	 */
-	public $params = array( 'GET' => array(), 'POST' => array() );
+	public $params = array(
+		'GET'  => array(),
+		'POST' => array(),
+	);
 
 	/**
 	 * Request headers
@@ -143,6 +146,11 @@ class WC_API_Server {
 		} elseif ( $this->is_xml_request() ) {
 			$handler_class = 'WC_API_XML_Handler';
 		} else {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
 		}
 
@@ -157,7 +165,11 @@ class WC_API_Server {
 	 */
 	public function check_authentication() {
 
-		// allow plugins to remove default authentication or add their own authentication
+		/**
+		 * allow plugins to remove default authentication or add their own authentication
+		 *
+		 * @since
+		 */
 		$user = apply_filters( 'woocommerce_api_check_authentication', null, $this );
 
 		// API requests run under the context of the authenticated user
@@ -186,7 +198,10 @@ class WC_API_Server {
 		$errors = array();
 		foreach ( (array) $error->errors as $code => $messages ) {
 			foreach ( (array) $messages as $message ) {
-				$errors[] = array( 'code' => $code, 'message' => $message );
+				$errors[] = array(
+					'code'    => $code,
+					'message' => $message,
+				);
 			}
 		}
 		return array( 'errors' => $errors );
@@ -203,16 +218,32 @@ class WC_API_Server {
 	 */
 	public function serve_request() {
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_server_before_serve', $this );
 
 		$this->header( 'Content-Type', $this->handler->get_content_type(), true );
 
-		// the API is enabled by default
+		/**
+		 * the API is enabled by default
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_api_enabled', true, $this ) || ( 'no' === get_option( 'woocommerce_api_enabled' ) ) ) {
 
 			$this->send_status( 404 );
 
-			echo $this->handler->generate_response( array( 'errors' => array( 'code' => 'woocommerce_api_disabled', 'message' => 'The WooCommerce API is disabled on this site' ) ) );
+			echo $this->handler->generate_response(
+				array(
+					'errors' => array(
+						'code'    => 'woocommerce_api_disabled',
+						'message' => 'The WooCommerce API is disabled on this site',
+					),
+				)
+			);
 
 			return;
 		}
@@ -235,7 +266,12 @@ class WC_API_Server {
 		}
 
 		// This is a filter rather than an action, since this is designed to be
-		// re-entrant if needed
+
+		/**
+		 * re-entrant if needed
+		 *
+		 * @since
+		 */
 		$served = apply_filters( 'woocommerce_api_serve_request', false, $result, $this );
 
 		if ( ! $served ) {
@@ -274,6 +310,11 @@ class WC_API_Server {
 			'/' => array( array( $this, 'get_index' ), self::READABLE ),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$endpoints = apply_filters( 'woocommerce_api_endpoints', $endpoints );
 
 		// Normalise the endpoints
@@ -323,7 +364,7 @@ class WC_API_Server {
 
 		foreach ( $this->get_routes() as $route => $handlers ) {
 			foreach ( $handlers as $handler ) {
-				$callback = $handler[0];
+				$callback  = $handler[0];
 				$supported = isset( $handler[1] ) ? $handler[1] : self::METHOD_GET;
 
 				if ( ! ( $supported & $method ) ) {
@@ -358,6 +399,11 @@ class WC_API_Server {
 				$args['_headers'] = $this->headers;
 				$args['_files']   = $this->files;
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$args = apply_filters( 'woocommerce_api_dispatch_args', $args, $callback );
 
 				// Allow plugins to halt the request via this filter
@@ -397,7 +443,7 @@ class WC_API_Server {
 			$ref_func = new ReflectionFunction( $callback );
 		}
 
-		$wanted = $ref_func->getParameters();
+		$wanted             = $ref_func->getParameters();
 		$ordered_parameters = array();
 
 		foreach ( $wanted as $param ) {
@@ -434,15 +480,15 @@ class WC_API_Server {
 				'wc_version'  => WC()->version,
 				'routes'      => array(),
 				'meta'        => array(
-					'timezone'			 => wc_timezone_string(),
-					'currency'       	 => get_woocommerce_currency(),
+					'timezone'           => wc_timezone_string(),
+					'currency'           => get_woocommerce_currency(),
 					'currency_format'    => get_woocommerce_currency_symbol(),
-					'tax_included'   	 => wc_prices_include_tax(),
-					'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
-					'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
-					'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
+					'tax_included'       => wc_prices_include_tax(),
+					'weight_unit'        => get_option( 'woocommerce_weight_unit' ),
+					'dimension_unit'     => get_option( 'woocommerce_dimension_unit' ),
+					'ssl_enabled'        => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
 					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
-					'links'          	 => array(
+					'links'              => array(
 						'help' => 'https://woocommerce.github.io/woocommerce/rest-api/',
 					),
 				),
@@ -453,7 +499,7 @@ class WC_API_Server {
 		foreach ( $this->get_routes() as $route => $callbacks ) {
 			$data = array();
 
-			$route = preg_replace( '#\(\?P(<\w+?>).*?\)#', '$1', $route );
+			$route   = preg_replace( '#\(\?P(<\w+?>).*?\)#', '$1', $route );
 			$methods = array();
 			foreach ( self::$method_map as $name => $bitmask ) {
 				foreach ( $callbacks as $callback ) {
@@ -478,8 +524,18 @@ class WC_API_Server {
 					}
 				}
 			}
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$available['store']['routes'][ $route ] = apply_filters( 'woocommerce_api_endpoints_description', $data );
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_api_index', $available );
 	}
 
@@ -551,7 +607,7 @@ class WC_API_Server {
 			$total       = $query->get_total();
 			$total_pages = $query->total_pages;
 
-		// WP_Query
+			// WP_Query
 		} else {
 
 			$page        = $query->get( 'paged' );
@@ -571,7 +627,7 @@ class WC_API_Server {
 			// first/prev
 			if ( $page > 1 ) {
 				$this->link_header( 'first', $this->get_paginated_url( 1 ) );
-				$this->link_header( 'prev', $this->get_paginated_url( $page -1 ) );
+				$this->link_header( 'prev', $this->get_paginated_url( $page - 1 ) );
 			}
 
 			// next
@@ -588,6 +644,11 @@ class WC_API_Server {
 		$this->header( 'X-WC-Total', $total );
 		$this->header( 'X-WC-TotalPages', $total_pages );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_pagination_headers', $this, $query );
 	}
 
@@ -723,7 +784,11 @@ class WC_API_Server {
 	public function get_headers( $server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
+		$additional = array(
+			'CONTENT_LENGTH' => true,
+			'CONTENT_MD5'    => true,
+			'CONTENT_TYPE'   => true,
+		);
 
 		foreach ( $server as $key => $value ) {
 			if ( strpos( $key, 'HTTP_' ) === 0 ) {

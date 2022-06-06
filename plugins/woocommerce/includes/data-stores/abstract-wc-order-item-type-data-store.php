@@ -57,6 +57,11 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$item->apply_changes();
 		$this->clear_cache( $item );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_new_order_item', $item->get_id(), $item, $item->get_order_id() );
 	}
 
@@ -88,6 +93,11 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$item->apply_changes();
 		$this->clear_cache( $item );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_order_item', $item->get_id(), $item, $item->get_order_id() );
 	}
 
@@ -101,9 +111,19 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	public function delete( &$item, $args = array() ) {
 		if ( $item->get_id() ) {
 			global $wpdb;
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_before_delete_order_item', $item->get_id() );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_items', array( 'order_item_id' => $item->get_id() ) );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_order_itemmeta', array( 'order_item_id' => $item->get_id() ) );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_delete_order_item', $item->get_id() );
 			$this->clear_cache( $item );
 		}

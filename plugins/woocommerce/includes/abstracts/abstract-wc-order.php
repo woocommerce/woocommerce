@@ -180,6 +180,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 *
 			 * @param WC_Data          $this The object being saved.
 			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 * @since
 			 */
 			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -196,6 +197,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 *
 			 * @param WC_Data          $this The object being saved.
 			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 * @since
 			 */
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -348,7 +350,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$status = $this->get_prop( 'status', $context );
 
 		if ( empty( $status ) && 'view' === $context ) {
-			// In view context, return the default status if no status has been set.
+
+			/**
+			 * In view context, return the default status if no status has been set.
+			 *
+			 * @since
+			 */
 			$status = apply_filters( 'woocommerce_default_order_status', 'pending' );
 		}
 		return $status;
@@ -442,6 +449,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			$total_discount = $this->get_discount_total() + $this->get_discount_tax();
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_get_total_discount', NumberUtil::round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
 
@@ -452,6 +464,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_subtotal() {
 		$subtotal = NumberUtil::round( $this->get_cart_subtotal_for_order(), wc_get_price_decimals() );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
@@ -479,11 +496,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount, array( 'currency' => $this->get_currency() ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_order_hide_zero_taxes', true ) ) {
 			$amounts    = array_filter( wp_list_pluck( $tax_totals, 'amount' ) );
 			$tax_totals = array_intersect_key( $tax_totals, $amounts );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_get_tax_totals', $tax_totals, $this );
 	}
 
@@ -744,6 +771,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	protected function type_to_group( $type ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$type_to_group = apply_filters(
 			'woocommerce_order_type_to_group',
 			array(
@@ -779,6 +811,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
 	}
 
@@ -846,6 +883,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
 			$names[] = $shipping_method->get_name();
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_shipping_method', implode( ', ', $names ), $this );
 	}
 
@@ -881,6 +923,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$count += $item->get_quantity();
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_item_count', $count, $item_type, $this );
 	}
 
@@ -937,6 +984,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} elseif ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
 			return 'coupon_lines';
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_items_key', '', $item );
 	}
 
@@ -1466,6 +1518,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$token_ids[] = $token->get_id();
 		$this->data_store->update_payment_token_ids( $this, $token_ids );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_payment_token_added_to_order', $this->get_id(), $token->get_id(), $token, $token_ids );
 		return $token->get_id();
 	}
@@ -1558,6 +1615,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['city']     = WC()->countries->get_base_city();
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
 	}
 
@@ -1587,6 +1649,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param array $args Added in 3.0.0 to pass things like location.
 	 */
 	public function calculate_taxes( $args = array() ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
@@ -1597,6 +1664,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
 		// Trigger tax recalculation for all items.
@@ -1730,6 +1802,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
 		$fees_total        = 0;
@@ -1783,6 +1860,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
 		$this->set_total( NumberUtil::round( $cart_total + $fees_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
 		$this->save();
@@ -1811,6 +1893,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
 	}
 
@@ -1835,6 +1922,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_amount_line_subtotal', $subtotal, $this, $item, $inc_tax, $round );
 	}
 
@@ -1859,6 +1951,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_amount_item_total', $total, $this, $item, $inc_tax, $round );
 	}
 
@@ -1881,6 +1978,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_amount_line_total', $total, $this, $item, $inc_tax, $round );
 	}
 
@@ -1899,6 +2001,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax = $round ? wc_round_tax_total( $tax ) : $tax;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_amount_item_tax', $tax, $item, $round, $this );
 	}
 
@@ -1909,6 +2016,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_line_tax( $item ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
 	}
 
@@ -1936,6 +2048,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array( 'currency' => $this->get_currency() ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $subtotal, $item, $this );
 	}
 
@@ -1946,6 +2063,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_formatted_order_total() {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_currency() ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
 
@@ -1996,6 +2118,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_subtotal_to_display', $subtotal, $compound, $this );
 	}
 
@@ -2016,6 +2143,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
 
 				if ( (float) $this->get_shipping_tax() > 0 && $this->get_prices_include_tax() ) {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			} else {
@@ -2024,11 +2156,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
 
 				if ( (float) $this->get_shipping_tax() > 0 && ! $this->get_prices_include_tax() ) {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			}
 
 			/* translators: %s: method */
+			/**
+			 *
+			 *
+			 * @since
+			 */
 			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
 
 		} elseif ( $this->get_shipping_method() ) {
@@ -2037,6 +2179,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping = __( 'Free!', 'woocommerce' );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this, $tax_display );
 	}
 
@@ -2049,6 +2196,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display && 'excl' === get_option( 'woocommerce_tax_display_cart' ) ), array( 'currency' => $this->get_currency() ) ), $this );
 	}
 
@@ -2110,6 +2262,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $fees ) {
 			foreach ( $fees as $id => $fee ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				if ( apply_filters( 'woocommerce_get_order_item_totals_excl_free_fees', empty( $fee['line_total'] ) && empty( $fee['line_tax'] ), $id ) ) {
 					continue;
 				}
@@ -2176,6 +2333,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->add_order_item_totals_tax_rows( $total_rows, $tax_display );
 		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
 
@@ -2195,6 +2357,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function has_status( $status ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status, $this, $status );
 	}
 

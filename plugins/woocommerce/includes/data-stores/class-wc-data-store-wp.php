@@ -110,6 +110,11 @@ class WC_Data_Store_WP {
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
 		$this->internal_meta_keys = array_merge( array_map( array( $this, 'prefix_key' ), $object->get_data_keys() ), $this->internal_meta_keys );
 		$meta_data                = array_filter( $raw_meta_data, array( $this, 'exclude_internal_meta_keys' ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( "woocommerce_data_store_wp_{$this->meta_type}_read_meta", $meta_data, $object, $this );
 	}
 
@@ -317,6 +322,11 @@ class WC_Data_Store_WP {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_wp_query_args', $wp_query_args, $query_vars );
 	}
 
@@ -559,6 +569,11 @@ class WC_Data_Store_WP {
 			)
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'wp_search_stopwords', $stopwords );
 	}
 

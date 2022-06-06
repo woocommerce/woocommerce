@@ -48,6 +48,11 @@ add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
 function wc_customer_edit_account_url() {
 	$edit_account_url = wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) );
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_customer_edit_account_url', $edit_account_url );
 }
 
@@ -60,6 +65,11 @@ function wc_customer_edit_account_url() {
  * @return string       Address slug i18n.
  */
 function wc_edit_address_i18n( $id, $flip = false ) {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$slugs = apply_filters(
 		'woocommerce_edit_address_slugs',
 		array(
@@ -127,6 +137,11 @@ function wc_get_account_menu_items() {
 		}
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_account_menu_items', $items, $endpoints );
 }
 
@@ -159,6 +174,11 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$classes[] = 'is-active';
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$classes = apply_filters( 'woocommerce_account_menu_item_classes', $classes, $endpoint );
 
 	return implode( ' ', array_map( 'sanitize_html_class', $classes ) );
@@ -190,6 +210,11 @@ function wc_get_account_endpoint_url( $endpoint ) {
  * @return array
  */
 function wc_get_account_orders_columns() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$columns = apply_filters(
 		'woocommerce_account_orders_columns',
 		array(
@@ -201,7 +226,11 @@ function wc_get_account_orders_columns() {
 		)
 	);
 
-	// Deprecated filter since 2.6.0.
+	/**
+	 * Deprecated filter since 2.6.0.
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_my_account_my_orders_columns', $columns );
 }
 
@@ -212,6 +241,11 @@ function wc_get_account_orders_columns() {
  * @return array
  */
 function wc_get_account_downloads_columns() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$columns = apply_filters(
 		'woocommerce_account_downloads_columns',
 		array(
@@ -237,6 +271,11 @@ function wc_get_account_downloads_columns() {
  * @return array
  */
 function wc_get_account_payment_methods_columns() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters(
 		'woocommerce_account_payment_methods_columns',
 		array(
@@ -254,6 +293,11 @@ function wc_get_account_payment_methods_columns() {
  * @return array
  */
 function wc_get_account_payment_methods_types() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters(
 		'woocommerce_payment_methods_types',
 		array(
@@ -295,10 +339,20 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['pay'] );
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ), true ) ) {
 		unset( $actions['cancel'] );
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 }
 
@@ -328,6 +382,11 @@ function wc_get_account_formatted_address( $address_type = 'billing', $customer_
 		unset( $address['email'], $address['tel'] );
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return WC()->countries->get_formatted_address( apply_filters( 'woocommerce_my_account_my_address_formatted_address', $address, $customer->get_id(), $address_type ) );
 }
 
@@ -370,6 +429,11 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$list[ $type ][ $key ] = apply_filters( 'woocommerce_payment_methods_list_item', $list[ $type ][ $key ], $payment_token );
 	}
 	return $list;

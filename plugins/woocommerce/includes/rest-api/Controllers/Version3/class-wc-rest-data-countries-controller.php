@@ -162,6 +162,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $data     The original country's states list.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_country', $response, $item, $request );
 	}

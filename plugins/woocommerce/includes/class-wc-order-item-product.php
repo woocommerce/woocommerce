@@ -209,6 +209,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_backorder_meta() {
 		$product = $this->get_product();
 		if ( $product && $product->backorders_require_notification() && $product->is_on_backorder( $this->get_quantity() ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$this->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this ), $this->get_quantity() - max( 0, $product->get_stock_quantity() ), true );
 		}
 	}
@@ -332,9 +337,19 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 		// Backwards compatible filter from WC_Order::get_product_from_item().
 		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_item_product', $product, $this );
 	}
 
@@ -400,6 +415,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
 	}
 

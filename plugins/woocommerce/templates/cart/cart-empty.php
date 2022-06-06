@@ -20,6 +20,11 @@ defined( 'ABSPATH' ) || exit;
 /*
  * @hooked wc_empty_cart_message - 10
  */
+/**
+ *
+ *
+ * @since
+ */
 do_action( 'woocommerce_cart_is_empty' );
 
 if ( wc_get_page_id( 'shop' ) > 0 ) : ?>

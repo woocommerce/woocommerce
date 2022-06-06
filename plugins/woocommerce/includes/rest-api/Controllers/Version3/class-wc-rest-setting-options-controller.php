@@ -49,7 +49,8 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 	 */
 	public function allowed_setting_keys( $key ) {
 		return in_array(
-			$key, array(
+			$key,
+			array(
 				'id',
 				'group_id',
 				'label',
@@ -61,7 +62,8 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 				'options',
 				'value',
 				'option_key',
-			), true
+			),
+			true
 		);
 	}
 
@@ -76,6 +78,11 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
 		if ( empty( $settings ) ) {

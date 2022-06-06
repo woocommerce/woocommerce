@@ -192,12 +192,12 @@ class DefaultPaymentGateways {
 						'operands' => (object) array(
 							(object) array(
 								'type'    => 'not',
-								'operand' => [
+								'operand' => array(
 									(object) array(
 										'type'    => 'plugins_activated',
-										'plugins' => [ 'woocommerce-admin' ],
+										'plugins' => array( 'woocommerce-admin' ),
 									),
-								],
+								),
 							),
 							(object) array(
 								'type'     => 'plugin_version',

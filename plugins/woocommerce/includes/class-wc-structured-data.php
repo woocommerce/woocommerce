@@ -91,6 +91,11 @@ class WC_Structured_Data {
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
 		foreach ( $data as $type => $value ) {
 			$data[ $type ] = count( $value ) > 1 ? array( '@graph' => $value ) : $value[0];
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data[ $type ] = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, $type, $value ) + $data[ $type ];
 		}
 
@@ -99,6 +104,11 @@ class WC_Structured_Data {
 
 		if ( ! empty( $data ) ) {
 			if ( 1 < count( $data ) ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$data = apply_filters( 'woocommerce_structured_data_context', array( '@context' => 'https://schema.org/' ), $data, '', '' ) + array( '@graph' => $data );
 			} else {
 				$data = $data[0];
@@ -121,6 +131,11 @@ class WC_Structured_Data {
 		$types[] = 'breadcrumblist';
 		$types[] = 'order';
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', $types ) );
 	}
 
@@ -268,6 +283,11 @@ class WC_Structured_Data {
 				),
 			);
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
@@ -325,6 +345,11 @@ class WC_Structured_Data {
 			return;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
@@ -365,6 +390,11 @@ class WC_Structured_Data {
 			'name'  => get_comment_author( $comment->comment_ID ),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_review', $markup, $comment ) );
 	}
 
@@ -404,6 +434,11 @@ class WC_Structured_Data {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_breadcrumblist', $markup, $breadcrumbs ) );
 	}
 
@@ -423,6 +458,11 @@ class WC_Structured_Data {
 			'query-input' => 'required name=search_term_string',
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_website', $markup ) );
 	}
 
@@ -455,6 +495,11 @@ class WC_Structured_Data {
 
 		$markup_offers = array();
 		foreach ( $order->get_items() as $item ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 				continue;
 			}
@@ -472,11 +517,21 @@ class WC_Structured_Data {
 					'priceCurrency'    => $order->get_currency(),
 					'eligibleQuantity' => array(
 						'@type' => 'QuantitativeValue',
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'value' => apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item ),
 					),
 				),
 				'itemOffered'        => array(
 					'@type' => 'Product',
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'name'  => wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible ) ),
 					'sku'   => $product_exists ? $product->get_sku() : '',
 					'image' => $product_exists ? wp_get_attachment_image_url( $product->get_image_id() ) : '',
@@ -533,6 +588,11 @@ class WC_Structured_Data {
 			'target' => $order_url,
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_order', $markup, $sent_to_admin, $order ), true );
 	}
 }

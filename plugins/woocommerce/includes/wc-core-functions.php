@@ -228,6 +228,11 @@ function wc_get_path_define_tokens() {
 		}
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_path_define_tokens', $path_tokens );
 }
 
@@ -277,7 +282,11 @@ function wc_get_template_part( $slug, $name = '' ) {
 		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
 	}
 
-	// Allow 3rd party plugins to filter template file from their plugin.
+	/**
+	 * Allow 3rd party plugins to filter template file from their plugin.
+	 *
+	 * @since
+	 */
 	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
 
 	if ( $template ) {
@@ -309,7 +318,11 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin.
+	/**
+	 * Allow 3rd party plugin filter template file from their plugin.
+	 *
+	 * @since
+	 */
 	$filter_template = apply_filters( 'wc_get_template', $template, $template_name, $args, $template_path, $default_path );
 
 	if ( $filter_template !== $template ) {
@@ -340,10 +353,20 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		extract( $args ); // @codingStandardsIgnoreLine
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
 	include $action_args['located'];
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
 
@@ -416,7 +439,11 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 		}
 	}
 
-	// Return what we found.
+	/**
+	 * Return what we found.
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path );
 }
 
@@ -462,6 +489,11 @@ function wc_clear_template_cache() {
  * @return string
  */
 function get_woocommerce_currency() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_currency', get_option( 'woocommerce_currency' ) );
 }
 
@@ -477,6 +509,11 @@ function get_woocommerce_currencies() {
 
 	if ( ! isset( $currencies ) ) {
 		$currencies = array_unique(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_currencies',
 				array(
@@ -661,6 +698,11 @@ function get_woocommerce_currencies() {
  */
 function get_woocommerce_currency_symbols() {
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$symbols = apply_filters(
 		'woocommerce_currency_symbols',
 		array(
@@ -851,6 +893,11 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 
 	$currency_symbol = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : '';
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
 
@@ -990,6 +1037,11 @@ function wc_get_image_size( $image_size ) {
 		}
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$size = apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
 
 	wp_cache_set( $cache_key, $size, 'woocommerce' );
@@ -1205,6 +1257,11 @@ function flush_rewrite_rules_on_shop_page_save() {
 	$shop_page_id = wc_get_page_id( 'shop' );
 
 	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ), true ) ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
@@ -1325,6 +1382,11 @@ function wc_format_country_state_string( $country_string ) {
  * @return array
  */
 function wc_get_base_location() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$default = apply_filters( 'woocommerce_get_base_location', get_option( 'woocommerce_default_country', 'US:CA' ) );
 
 	return wc_format_country_state_string( $default );
@@ -1342,7 +1404,12 @@ function wc_get_base_location() {
 function wc_get_customer_default_location() {
 	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
 	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', 'US:CA' );
-	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
+	$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
 	// Geolocation takes priority if used and if geolocation is possible.
 	if ( 'geolocation' === $set_default_location_to || 'geolocation_ajax' === $set_default_location_to ) {
@@ -1366,6 +1433,11 @@ function wc_get_customer_default_location() {
 		$location['state']   = '';
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );
 }
 
@@ -1507,6 +1579,11 @@ function wc_transaction_query( $type = 'start', $force = false ) {
  * @return string Url to cart page
  */
 function wc_get_cart_url() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
 }
 
@@ -1526,6 +1603,11 @@ function wc_get_checkout_url() {
 		}
 	}
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 }
 
@@ -1566,6 +1648,11 @@ function wc_get_credit_card_type_label( $type ) {
 	$type = str_replace( '-', ' ', $type );
 	$type = str_replace( '_', ' ', $type );
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$labels = apply_filters(
 		'woocommerce_credit_card_type_labels',
 		array(
@@ -1578,6 +1665,11 @@ function wc_get_credit_card_type_label( $type ) {
 		)
 	);
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
 }
 
@@ -1996,6 +2088,11 @@ function wc_remove_number_precision_deep( $value ) {
 function wc_get_logger() {
 	static $logger = null;
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$class = apply_filters( 'woocommerce_logging_class', 'WC_Logger' );
 
 	if ( null !== $logger && is_string( $class ) && is_a( $logger, $class ) ) {
@@ -2072,6 +2169,11 @@ function wc_print_r( $expression, $return = false ) {
 		),
 	);
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$alternatives = apply_filters( 'woocommerce_print_r_alternatives', $alternatives, $expression );
 
 	foreach ( $alternatives as $alternative ) {
@@ -2428,6 +2530,11 @@ function wc_is_wp_default_theme_active() {
  * @since 3.3.0
  */
 function wc_cleanup_session_data() {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 	$session       = new $session_class();
 

@@ -219,6 +219,11 @@ class Controller extends \WC_REST_Reports_Controller {
 			return;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$items = apply_filters(
 			'woocommerce_rest_performance_indicators_jetpack_items',
 			array(
@@ -330,6 +335,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-admin/issues/1282
 		 * @param array $indicators A list of ordered indicators.
+		 * @since
 		 */
 		$stat_order = apply_filters(
 			'woocommerce_rest_report_sort_performance_indicators',
@@ -446,6 +452,11 @@ class Controller extends \WC_REST_Reports_Controller {
 				'chart'  => $chart,
 				'label'  => $label,
 				'format' => $format,
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'value'  => apply_filters( 'woocommerce_rest_performance_indicators_data_value', $data, $stat, $report, $chart, $query_args ),
 			);
 		}
@@ -492,6 +503,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_performance_indicators', $response, $stat_data, $request );
 	}

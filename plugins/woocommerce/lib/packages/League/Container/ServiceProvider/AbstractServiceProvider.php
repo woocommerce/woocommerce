@@ -4,43 +4,40 @@ namespace Automattic\WooCommerce\Vendor\League\Container\ServiceProvider;
 
 use Automattic\WooCommerce\Vendor\League\Container\ContainerAwareTrait;
 
-abstract class AbstractServiceProvider implements ServiceProviderInterface
-{
-    use ContainerAwareTrait;
+abstract class AbstractServiceProvider implements ServiceProviderInterface {
 
-    /**
-     * @var array
-     */
-    protected $provides = [];
+	use ContainerAwareTrait;
 
-    /**
-     * @var string
-     */
-    protected $identifier;
+	/**
+	 * @var array
+	 */
+	protected $provides = array();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function provides(string $alias) : bool
-    {
-        return in_array($alias, $this->provides, true);
-    }
+	/**
+	 * @var string
+	 */
+	protected $identifier;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setIdentifier(string $id) : ServiceProviderInterface
-    {
-        $this->identifier = $id;
+	/**
+	 * {@inheritdoc}
+	 */
+	public function provides( string $alias ) : bool {
+		return in_array( $alias, $this->provides, true );
+	}
 
-        return $this;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function setIdentifier( string $id ) : ServiceProviderInterface {
+		$this->identifier = $id;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getIdentifier() : string
-    {
-        return $this->identifier ?? get_class($this);
-    }
+		return $this;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getIdentifier() : string {
+		return $this->identifier ?? get_class( $this );
+	}
 }

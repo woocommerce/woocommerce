@@ -148,6 +148,11 @@ class WC_Product_External extends WC_Product {
 	 * @return bool
 	 */
 	public function is_purchasable() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_is_purchasable', false, $this );
 	}
 
@@ -158,6 +163,11 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $this->get_product_url(), $this );
 	}
 
@@ -168,6 +178,11 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function single_add_to_cart_text() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_single_add_to_cart_text', $this->get_button_text() ? $this->get_button_text() : _x( 'Buy product', 'placeholder', 'woocommerce' ), $this );
 	}
 
@@ -178,6 +193,11 @@ class WC_Product_External extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_text() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->get_button_text() ? $this->get_button_text() : _x( 'Buy product', 'placeholder', 'woocommerce' ), $this );
 	}
 
@@ -189,6 +209,11 @@ class WC_Product_External extends WC_Product {
 	 */
 	public function add_to_cart_description() {
 		/* translators: %s: Product title */
+		/**
+		 *
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_description', $this->get_button_text() ? $this->get_button_text() : sprintf( __( 'Buy &ldquo;%s&rdquo;', 'woocommerce' ), $this->get_name() ), $this );
 	}
 }

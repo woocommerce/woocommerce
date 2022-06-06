@@ -89,6 +89,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_title() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_title', $this->parent_data['title'], $this );
 	}
 
@@ -200,6 +205,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 				$this->get_permalink()
 			)
 		) : $this->get_permalink();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
 
@@ -214,6 +224,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'sku', $this->parent_data['sku'], $this );
 		}
 		return $value;
@@ -230,6 +245,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'weight', $this->parent_data['weight'], $this );
 		}
 		return $value;
@@ -246,6 +266,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'length', $this->parent_data['length'], $this );
 		}
 		return $value;
@@ -262,6 +287,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'width', $this->parent_data['width'], $this );
 		}
 		return $value;
@@ -278,6 +308,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'height', $this->parent_data['height'], $this );
 		}
 		return $value;
@@ -302,6 +337,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 			}
 
 			if ( 'view' === $context ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . 'tax_class', $value, $this );
 			}
 		}
@@ -336,6 +376,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'stock_quantity', $this->parent_data['stock_quantity'], $this );
 		}
 		return $value;
@@ -353,6 +398,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'backorders', $this->parent_data['backorders'], $this );
 		}
 		return $value;
@@ -369,6 +419,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$image_id = $this->get_prop( 'image_id', $context );
 
 		if ( 'view' === $context && ! $image_id ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
 		}
 
@@ -387,6 +442,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . 'purchase_note', $this->parent_data['purchase_note'], $this );
 		}
 		return $value;
@@ -403,6 +463,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
 
 		if ( 'view' === $context && ! $shipping_class_id ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$shipping_class_id = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $this->parent_data['shipping_class_id'], $this );
 		}
 
@@ -416,6 +481,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_catalog_visibility( $context = 'view' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( $this->get_hook_prefix() . 'catalog_visibility', $this->parent_data['catalog_visibility'], $this );
 	}
 
@@ -547,6 +617,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function is_purchasable() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_variation_is_purchasable', $this->variation_is_visible() && parent::is_purchasable() && ( 'publish' === $this->parent_data['status'] || current_user_can( 'edit_post', $this->get_parent_id() ) ), $this );
 	}
 
@@ -558,6 +633,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function variation_is_active() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_variation_is_active', true, $this );
 	}
 
@@ -569,6 +649,11 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function variation_is_visible() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_variation_is_visible', 'publish' === get_post_status( $this->get_id() ) && '' !== $this->get_price(), $this->get_id(), $this->get_parent_id(), $this );
 	}
 

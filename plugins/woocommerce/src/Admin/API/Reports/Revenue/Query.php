@@ -58,10 +58,20 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args = apply_filters( 'woocommerce_analytics_revenue_query_args', $this->get_query_vars() );
 
 		$data_store = \WC_Data_Store::load( 'report-revenue-stats' );
 		$results    = $data_store->get_data( $args );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_analytics_revenue_select_query', $results, $args );
 	}
 }

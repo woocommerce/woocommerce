@@ -72,8 +72,18 @@ class WC_Product_Query extends WC_Object_Query {
 	 * @return array|object of WC_Product objects
 	 */
 	public function get_products() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args    = apply_filters( 'woocommerce_product_object_query_args', $this->get_query_vars() );
 		$results = WC_Data_Store::load( 'product' )->query( $args );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_object_query', $results, $args );
 	}
 }

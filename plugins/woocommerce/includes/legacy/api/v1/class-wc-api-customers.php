@@ -59,7 +59,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		# GET /customers
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_customers' ),     WC_API_SERVER::READABLE ),
+			array( array( $this, 'get_customers' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/count
@@ -69,7 +69,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		# GET /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
+			array( array( $this, 'get_customer' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/<id>/orders
@@ -168,6 +168,11 @@ class WC_API_Customers extends WC_API_Resource {
 			),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'customer' => apply_filters( 'woocommerce_api_customer_response', $customer_data, $customer, $fields, $this->server ) );
 	}
 
@@ -257,13 +262,15 @@ class WC_API_Customers extends WC_API_Resource {
 			return $id;
 		}
 
-		$order_ids = wc_get_orders( array(
-			'customer' => $id,
-			'limit'    => -1,
-			'orderby'  => 'date',
-			'order'    => 'ASC',
-			'return'   => 'ids',
-		) );
+		$order_ids = wc_get_orders(
+			array(
+				'customer' => $id,
+				'limit'    => -1,
+				'orderby'  => 'date',
+				'order'    => 'ASC',
+				'return'   => 'ids',
+			)
+		);
 
 		if ( empty( $order_ids ) ) {
 			return array( 'orders' => array() );
@@ -275,6 +282,11 @@ class WC_API_Customers extends WC_API_Resource {
 			$orders[] = current( WC()->api->WC_API_Orders->get_order( $order_id, $fields ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'orders' => apply_filters( 'woocommerce_api_customer_orders_response', $orders, $id, $fields, $order_ids, $this->server ) );
 	}
 
@@ -337,7 +349,7 @@ class WC_API_Customers extends WC_API_Resource {
 
 		// helper members for pagination headers
 		$query->total_pages = ceil( $query->get_total() / $users_per_page );
-		$query->page = $page;
+		$query->page        = $page;
 
 		return $query;
 	}

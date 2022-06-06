@@ -25,9 +25,11 @@ function extract_from_phar( $path ) {
 
 	copy( $path, $tmp_path );
 
-	register_shutdown_function( function() use ( $tmp_path ) {
-		@unlink( $tmp_path );
-	} );
+	register_shutdown_function(
+		function() use ( $tmp_path ) {
+			@unlink( $tmp_path );
+		}
+	);
 
 	return $tmp_path;
 }
@@ -48,14 +50,14 @@ function load_dependencies() {
 		}
 	}
 
-	if ( !$has_autoload ) {
+	if ( ! $has_autoload ) {
 		fputs( STDERR, "Internal error: Can't find Composer autoloader.\nTry running: composer install\n" );
-		exit(3);
+		exit( 3 );
 	}
 }
 
 function get_vendor_paths() {
-	$vendor_paths = array(
+	$vendor_paths        = array(
 		WP_CLI_ROOT . '/../../../vendor',  // part of a larger project / installed via Composer (preferred)
 		WP_CLI_ROOT . '/vendor',           // top-level project / installed as Git clone
 	);
@@ -88,8 +90,9 @@ function load_all_commands() {
 	$iterator = new \DirectoryIterator( $cmd_dir );
 
 	foreach ( $iterator as $filename ) {
-		if ( '.php' != substr( $filename, -4 ) )
+		if ( '.php' != substr( $filename, -4 ) ) {
 			continue;
+		}
 
 		include_once "$cmd_dir/$filename";
 	}
@@ -119,7 +122,7 @@ function iterator_map( $it, $fn ) {
 		$it = new \ArrayIterator( $it );
 	}
 
-	if ( !method_exists( $it, 'add_transform' ) ) {
+	if ( ! method_exists( $it, 'add_transform' ) ) {
 		$it = new Transform( $it );
 	}
 
@@ -156,7 +159,7 @@ function find_file_upward( $files, $dir = null, $stop_check = null ) {
 		}
 
 		$parent_dir = dirname( $dir );
-		if ( empty($parent_dir) || $parent_dir === $dir ) {
+		if ( empty( $parent_dir ) || $parent_dir === $dir ) {
 			break;
 		}
 		$dir = $parent_dir;
@@ -166,8 +169,9 @@ function find_file_upward( $files, $dir = null, $stop_check = null ) {
 
 function is_path_absolute( $path ) {
 	// Windows
-	if ( isset($path[1]) && ':' === $path[1] )
+	if ( isset( $path[1] ) && ':' === $path[1] ) {
 		return true;
+	}
 
 	return $path[0] === '/';
 }
@@ -192,10 +196,11 @@ function assoc_args_to_str( $assoc_args ) {
 	$str = '';
 
 	foreach ( $assoc_args as $key => $value ) {
-		if ( true === $value )
+		if ( true === $value ) {
 			$str .= " --$key";
-		else
+		} else {
 			$str .= " --$key=" . escapeshellarg( $value );
+		}
 	}
 
 	return $str;
@@ -206,8 +211,9 @@ function assoc_args_to_str( $assoc_args ) {
  * returns the final command, with the parameters escaped.
  */
 function esc_cmd( $cmd ) {
-	if ( func_num_args() < 2 )
+	if ( func_num_args() < 2 ) {
 		trigger_error( 'esc_cmd() requires at least two arguments.', E_USER_WARNING );
+	}
 
 	$args = func_get_args();
 
@@ -220,15 +226,17 @@ function locate_wp_config() {
 	static $path;
 
 	if ( null === $path ) {
-		if ( file_exists( ABSPATH . 'wp-config.php' ) )
+		if ( file_exists( ABSPATH . 'wp-config.php' ) ) {
 			$path = ABSPATH . 'wp-config.php';
-		elseif ( file_exists( ABSPATH . '../wp-config.php' ) && ! file_exists( ABSPATH . '/../wp-settings.php' ) )
+		} elseif ( file_exists( ABSPATH . '../wp-config.php' ) && ! file_exists( ABSPATH . '/../wp-settings.php' ) ) {
 			$path = ABSPATH . '../wp-config.php';
-		else
+		} else {
 			$path = false;
+		}
 
-		if ( $path )
+		if ( $path ) {
 			$path = realpath( $path );
+		}
 	}
 
 	return $path;
@@ -285,7 +293,7 @@ function wp_version_compare( $since, $operator ) {
  */
 function format_items( $format, $items, $fields ) {
 	$assoc_args = compact( 'format', 'fields' );
-	$formatter = new \WP_CLI\Formatter( $assoc_args );
+	$formatter  = new \WP_CLI\Formatter( $assoc_args );
 	$formatter->display_items( $items );
 }
 
@@ -345,11 +353,11 @@ function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
 	$tmpdir = get_temp_dir();
 
 	do {
-		$tmpfile = basename( $filename );
-		$tmpfile = preg_replace( '|\.[^.]*$|', '', $tmpfile );
+		$tmpfile  = basename( $filename );
+		$tmpfile  = preg_replace( '|\.[^.]*$|', '', $tmpfile );
 		$tmpfile .= '-' . substr( md5( rand() ), 0, 6 );
-		$tmpfile = $tmpdir . $tmpfile . '.tmp';
-		$fp = @fopen( $tmpfile, 'x' );
+		$tmpfile  = $tmpdir . $tmpfile . '.tmp';
+		$fp       = @fopen( $tmpfile, 'x' );
 		if ( ! $fp && is_writable( $tmpdir ) && file_exists( $tmpfile ) ) {
 			$tmpfile = '';
 			continue;
@@ -357,7 +365,7 @@ function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
 		if ( $fp ) {
 			fclose( $fp );
 		}
-	} while( ! $tmpfile );
+	} while ( ! $tmpfile );
 
 	if ( ! $tmpfile ) {
 		\WP_CLI::error( 'Error creating temporary file.' );
@@ -367,16 +375,17 @@ function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
 	file_put_contents( $tmpfile, $input );
 
 	$editor = getenv( 'EDITOR' );
-	if ( !$editor ) {
-		if ( isset( $_SERVER['OS'] ) && false !== strpos( $_SERVER['OS'], 'indows' ) )
+	if ( ! $editor ) {
+		if ( isset( $_SERVER['OS'] ) && false !== strpos( $_SERVER['OS'], 'indows' ) ) {
 			$editor = 'notepad';
-		else
+		} else {
 			$editor = 'vi';
+		}
 	}
 
 	$descriptorspec = array( STDIN, STDOUT, STDERR );
-	$process = proc_open( "$editor " . escapeshellarg( $tmpfile ), $descriptorspec, $pipes );
-	$r = proc_close( $process );
+	$process        = proc_open( "$editor " . escapeshellarg( $tmpfile ), $descriptorspec, $pipes );
+	$r              = proc_close( $process );
 	if ( $r ) {
 		exit( $r );
 	}
@@ -385,8 +394,9 @@ function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
 
 	unlink( $tmpfile );
 
-	if ( $output === $input )
+	if ( $output === $input ) {
 		return false;
+	}
 
 	return $output;
 }
@@ -398,14 +408,14 @@ function launch_editor_for_input( $input, $filename = 'WP-CLI' ) {
 function mysql_host_to_cli_args( $raw_host ) {
 	$assoc_args = array();
 
-	$host_parts = explode( ':',  $raw_host );
+	$host_parts = explode( ':', $raw_host );
 	if ( count( $host_parts ) == 2 ) {
 		list( $assoc_args['host'], $extra ) = $host_parts;
-		$extra = trim( $extra );
+		$extra                              = trim( $extra );
 		if ( is_numeric( $extra ) ) {
-			$assoc_args['port'] = intval( $extra );
+			$assoc_args['port']     = intval( $extra );
 			$assoc_args['protocol'] = 'tcp';
-		} else if ( $extra !== '' ) {
+		} elseif ( $extra !== '' ) {
 			$assoc_args['socket'] = $extra;
 		}
 	} else {
@@ -416,8 +426,9 @@ function mysql_host_to_cli_args( $raw_host ) {
 }
 
 function run_mysql_command( $cmd, $assoc_args, $descriptors = null ) {
-	if ( !$descriptors )
+	if ( ! $descriptors ) {
 		$descriptors = array( STDIN, STDOUT, STDERR );
+	}
 
 	if ( isset( $assoc_args['host'] ) ) {
 		$assoc_args = array_merge( $assoc_args, mysql_host_to_cli_args( $assoc_args['host'] ) );
@@ -432,14 +443,17 @@ function run_mysql_command( $cmd, $assoc_args, $descriptors = null ) {
 	$final_cmd = $cmd . assoc_args_to_str( $assoc_args );
 
 	$proc = proc_open( $final_cmd, $descriptors, $pipes );
-	if ( !$proc )
-		exit(1);
+	if ( ! $proc ) {
+		exit( 1 );
+	}
 
 	$r = proc_close( $proc );
 
 	putenv( 'MYSQL_PWD=' . $old_pass );
 
-	if ( $r ) exit( $r );
+	if ( $r ) {
+		exit( $r );
+	}
 }
 
 /**
@@ -448,14 +462,18 @@ function run_mysql_command( $cmd, $assoc_args, $descriptors = null ) {
  * IMPORTANT: Automatic HTML escaping is disabled!
  */
 function mustache_render( $template_name, $data = array() ) {
-	if ( ! file_exists( $template_name ) )
+	if ( ! file_exists( $template_name ) ) {
 		$template_name = WP_CLI_ROOT . "/templates/$template_name";
+	}
 
 	$template = file_get_contents( $template_name );
 
-	$m = new \Mustache_Engine( array(
-		'escape' => function ( $val ) { return $val; }
-	) );
+	$m = new \Mustache_Engine(
+		array(
+			'escape' => function ( $val ) {
+				return $val; },
+		)
+	);
 
 	return $m->render( $template, $data );
 }
@@ -489,8 +507,9 @@ function mustache_render( $template_name, $data = array() ) {
  * @return cli\progress\Bar|WP_CLI\NoOp
  */
 function make_progress_bar( $message, $count ) {
-	if ( \cli\Shell::isPiped() )
+	if ( \cli\Shell::isPiped() ) {
 		return new \WP_CLI\NoOp;
+	}
 
 	return new \cli\progress\Bar( $message, $count );
 }
@@ -498,7 +517,7 @@ function make_progress_bar( $message, $count ) {
 function parse_url( $url ) {
 	$url_parts = \parse_url( $url );
 
-	if ( !isset( $url_parts['scheme'] ) ) {
+	if ( ! isset( $url_parts['scheme'] ) ) {
 		$url_parts = parse_url( 'http://' . $url );
 	}
 
@@ -509,7 +528,7 @@ function parse_url( $url ) {
  * Check if we're running in a Windows environment (cmd.exe).
  */
 function is_windows() {
-	return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+	return strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN';
 }
 
 /**
@@ -521,7 +540,7 @@ function is_windows() {
 function replace_path_consts( $source, $path ) {
 	$replacements = array(
 		'__FILE__' => "'$path'",
-		'__DIR__'  => "'" . dirname( $path ) . "'"
+		'__DIR__'  => "'" . dirname( $path ) . "'",
 	);
 
 	$old = array_keys( $replacements );
@@ -558,29 +577,30 @@ function http_request( $method, $url, $data = null, $headers = array(), $options
 	if ( inside_phar() ) {
 		// cURL can't read Phar archives
 		$options['verify'] = extract_from_phar(
-		WP_CLI_ROOT . '/vendor' . $cert_path );
+			WP_CLI_ROOT . '/vendor' . $cert_path
+		);
 	} else {
-		foreach( get_vendor_paths() as $vendor_path ) {
+		foreach ( get_vendor_paths() as $vendor_path ) {
 			if ( file_exists( $vendor_path . $cert_path ) ) {
 				$options['verify'] = $vendor_path . $cert_path;
 				break;
 			}
 		}
-		if ( empty( $options['verify'] ) ){
-			WP_CLI::error_log( "Cannot find SSL certificate." );
+		if ( empty( $options['verify'] ) ) {
+			WP_CLI::error_log( 'Cannot find SSL certificate.' );
 		}
 	}
 
 	try {
 		$request = \Requests::request( $url, $headers, $data, $method, $options );
 		return $request;
-	} catch( \Requests_Exception $ex ) {
+	} catch ( \Requests_Exception $ex ) {
 		// Handle SSL certificate issues gracefully
 		\WP_CLI::warning( $ex->getMessage() );
 		$options['verify'] = false;
 		try {
 			return \Requests::request( $url, $headers, $data, $method, $options );
-		} catch( \Requests_Exception $ex ) {
+		} catch ( \Requests_Exception $ex ) {
 			\WP_CLI::error( $ex->getMessage() );
 		}
 	}
@@ -605,20 +625,20 @@ function increment_version( $current_version, $new_version ) {
 	switch ( $new_version ) {
 		case 'same':
 			// do nothing
-		break;
+			break;
 
 		case 'patch':
 			$current_version[0][2]++;
 
 			$current_version = array( $current_version[0] ); // drop possible pre-release info
-		break;
+			break;
 
 		case 'minor':
 			$current_version[0][1]++;
 			$current_version[0][2] = 0;
 
 			$current_version = array( $current_version[0] ); // drop possible pre-release info
-		break;
+			break;
 
 		case 'major':
 			$current_version[0][0]++;
@@ -626,11 +646,11 @@ function increment_version( $current_version, $new_version ) {
 			$current_version[0][2] = 0;
 
 			$current_version = array( $current_version[0] ); // drop possible pre-release info
-		break;
+			break;
 
 		default: // not a keyword
 			$current_version = array( array( $new_version ) );
-		break;
+			break;
 	}
 
 	// reconstruct version string
@@ -655,12 +675,12 @@ function get_named_sem_ver( $new_version, $original_version ) {
 		return '';
 	}
 
-	$parts = explode( '-', $original_version );
+	$parts                         = explode( '-', $original_version );
 	list( $major, $minor, $patch ) = explode( '.', $parts[0] );
 
 	if ( Semver::satisfies( $new_version, "{$major}.{$minor}.x" ) ) {
 		return 'patch';
-	} else if ( Semver::satisfies( $new_version, "{$major}.x.x" ) ) {
+	} elseif ( Semver::satisfies( $new_version, "{$major}.x.x" ) ) {
 		return 'minor';
 	} else {
 		return 'major';
@@ -701,12 +721,13 @@ function get_temp_dir() {
 		return rtrim( $path ) . '/';
 	};
 
-	if ( $temp )
+	if ( $temp ) {
 		return $trailingslashit( $temp );
+	}
 
 	if ( function_exists( 'sys_get_temp_dir' ) ) {
 		$temp = sys_get_temp_dir();
-	} else if ( ini_get( 'upload_tmp_dir' ) ) {
+	} elseif ( ini_get( 'upload_tmp_dir' ) ) {
 		$temp = ini_get( 'upload_tmp_dir' );
 	} else {
 		$temp = '/tmp/';
@@ -735,7 +756,7 @@ function get_temp_dir() {
 function parse_ssh_url( $url, $component = -1 ) {
 	preg_match( '#^([^:/~]+)(:([\d]+))?((/|~)(.+))?$#', $url, $matches );
 	$bits = array();
-	foreach( array(
+	foreach ( array(
 		1 => 'host',
 		3 => 'port',
 		4 => 'path',

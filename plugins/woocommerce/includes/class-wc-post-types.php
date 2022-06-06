@@ -46,13 +46,28 @@ class WC_Post_Types {
 			return;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_register_taxonomy' );
 
 		$permalinks = wc_get_permalink_structure();
 
 		register_taxonomy(
 			'product_type',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_product_type',
 				array(
@@ -69,7 +84,17 @@ class WC_Post_Types {
 
 		register_taxonomy(
 			'product_visibility',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product', 'product_variation' ) ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_product_visibility',
 				array(
@@ -86,7 +111,17 @@ class WC_Post_Types {
 
 		register_taxonomy(
 			'product_cat',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_product_cat',
 				array(
@@ -129,7 +164,17 @@ class WC_Post_Types {
 
 		register_taxonomy(
 			'product_tag',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_taxonomy_objects_product_tag', array( 'product' ) ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_product_tag',
 				array(
@@ -173,7 +218,17 @@ class WC_Post_Types {
 
 		register_taxonomy(
 			'product_shipping_class',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array( 'product', 'product_variation' ) ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_product_shipping_class',
 				array(
@@ -257,6 +312,11 @@ class WC_Post_Types {
 						'rewrite'               => false,
 						'sort'                  => false,
 						'public'                => 1 === $tax->attribute_public,
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'show_in_nav_menus'     => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
 						'capabilities'          => array(
 							'manage_terms' => 'manage_product_terms',
@@ -274,11 +334,21 @@ class WC_Post_Types {
 						);
 					}
 
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
 				}
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_after_register_taxonomy' );
 	}
 
@@ -290,6 +360,11 @@ class WC_Post_Types {
 			return;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_register_post_type' );
 
 		$permalinks = wc_get_permalink_structure();
@@ -308,13 +383,18 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		$theme_support =  wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+		$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
 		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 
 		register_post_type(
 			'product',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_register_post_type_product',
 				array(
@@ -371,6 +451,11 @@ class WC_Post_Types {
 
 		register_post_type(
 			'product_variation',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_register_post_type_product_variation',
 				array(
@@ -386,6 +471,11 @@ class WC_Post_Types {
 
 		wc_register_order_type(
 			'shop_order',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_register_post_type_shop_order',
 				array(
@@ -427,6 +517,11 @@ class WC_Post_Types {
 
 		wc_register_order_type(
 			'shop_order_refund',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_register_post_type_shop_order_refund',
 				array(
@@ -450,6 +545,11 @@ class WC_Post_Types {
 		if ( 'yes' === get_option( 'woocommerce_enable_coupons' ) ) {
 			register_post_type(
 				'shop_coupon',
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_register_post_type_shop_coupon',
 					array(
@@ -490,6 +590,11 @@ class WC_Post_Types {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_after_register_post_type' );
 	}
 
@@ -558,6 +663,11 @@ class WC_Post_Types {
 	 */
 	public static function register_post_status() {
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$order_statuses = apply_filters(
 			'woocommerce_register_shop_order_post_statuses',
 			array(

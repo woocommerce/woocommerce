@@ -179,9 +179,9 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 
 		/**
 		 * Generate set password URL link for a new user.
-		 * 
+		 *
 		 * See also Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount and wp_new_user_notification.
-		 * 
+		 *
 		 * @since 6.0.0
 		 * @return string
 		 */
@@ -189,13 +189,13 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 			// Generate a magic link so user can set initial password.
 			$key = get_password_reset_key( $this->object );
 			if ( ! is_wp_error( $key ) ) {
-				$action                 = 'newaccount';
+				$action = 'newaccount';
 				return wc_get_account_endpoint_url( 'lost-password' ) . "?action=$action&key=$key&login=" . rawurlencode( $this->object->user_login );
 			} else {
 				// Something went wrong while getting the key for new password URL, send customer to the generic password reset.
 				return wc_get_account_endpoint_url( 'lost-password' );
 			}
-		} 
+		}
 	}
 
 endif;

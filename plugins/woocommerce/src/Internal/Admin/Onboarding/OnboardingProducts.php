@@ -69,6 +69,11 @@ class OnboardingProducts {
 			$products['subscriptions']['product'] = 27147;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_admin_onboarding_product_types', $products );
 	}
 

@@ -79,6 +79,7 @@ class Taxes extends \WC_REST_Taxes_Controller {
 		 *
 		 * @param array           $prepared_args Array of arguments for $wpdb->get_results().
 		 * @param WP_REST_Request $request       The current request.
+		 * @since
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_tax_query', $prepared_args, $request );
 

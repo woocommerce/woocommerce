@@ -62,6 +62,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							$topics = apply_filters(
 								'woocommerce_webhook_topics',
 								array(
@@ -157,6 +162,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * Fires within the webhook editor, after the Webhook Data fields have rendered.
 	 *
 	 * @param WC_Webhook $webhook
+	 * @since
 	 */
 	do_action( 'woocommerce_webhook_options', $webhook );
 	?>

@@ -71,6 +71,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			WC_Payment_Tokens::set_users_default( $token->get_user_id(), $token_id );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_new_payment_token', $token_id, $token );
 	}
 
@@ -120,7 +125,17 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			WC_Payment_Tokens::set_users_default( $token->get_user_id(), $token->get_id() );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_payment_token_object_updated_props', $token, $updated_props );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_payment_token_updated', $token->get_id() );
 	}
 
@@ -135,6 +150,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $token->get_id() ), array( '%d' ) );
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $token->get_id() ), array( '%d' ) );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_payment_token_deleted', $token->get_id(), $token );
 	}
 
@@ -169,6 +189,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			$this->read_extra_data( $token );
 			$token->read_meta_data();
 			$token->set_object_read( true );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_payment_token_loaded', $token );
 		} else {
 			throw new Exception( __( 'Invalid payment token.', 'woocommerce' ) );

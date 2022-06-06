@@ -124,7 +124,11 @@ class WC_Admin_Webhooks {
 
 		$webhook->save();
 
-		// Run actions.
+		/**
+		 * Run actions.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_webhook_options_save', $webhook->get_id() );
 		if ( $errors ) {
 			// Redirect to webhook edit page to avoid settings save actions.
@@ -208,7 +212,7 @@ class WC_Admin_Webhooks {
 			$webhook_id = absint( $_GET['edit-webhook'] ); // WPCS: input var okay, CSRF ok.
 			$webhook    = new WC_Webhook( $webhook_id );
 
-			include __DIR__ .  '/settings/views/html-webhooks-edit.php';
+			include __DIR__ . '/settings/views/html-webhooks-edit.php';
 			return;
 		}
 

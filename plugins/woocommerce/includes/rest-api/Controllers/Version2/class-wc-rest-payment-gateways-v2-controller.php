@@ -37,7 +37,9 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -48,7 +50,9 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -208,6 +212,11 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 
 		// Update options.
 		$gateway->settings = $settings;
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		update_option( $gateway->get_option_key(), apply_filters( 'woocommerce_gateway_' . $gateway->id . '_settings_values', $settings, $gateway ) );
 
 		// Update order.
@@ -274,6 +283,7 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response   $response The response object.
 		 * @param WC_Payment_Gateway $gateway  Payment gateway object.
 		 * @param WP_REST_Request    $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_payment_gateway', $response, $gateway, $request );
 	}

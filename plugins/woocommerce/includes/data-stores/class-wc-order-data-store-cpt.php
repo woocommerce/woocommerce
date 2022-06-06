@@ -108,6 +108,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_order_key( wc_generate_order_key() );
 		}
 		parent::create( $order );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
@@ -177,7 +182,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
-		// Before updating, ensure date paid is set if missing.
+
+		/**
+		 * Before updating, ensure date paid is set if missing.
+		 *
+		 * @since
+		 */
 		if ( ! $order->get_date_paid( 'edit' ) && version_compare( $order->get_version( 'edit' ), '3.0', '<' ) && $order->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $order->needs_processing() ? 'processing' : 'completed', $order->get_id(), $order ) ) ) {
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
@@ -192,8 +202,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$new_status = $order->get_status( 'edit' );
 
 		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft' ), true ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_new_order', $order->get_id(), $order );
 		} else {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_update_order', $order->get_id(), $order );
 		}
 	}
@@ -316,6 +336,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			wc_update_user_last_active( $order->get_customer_id() );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
@@ -596,6 +621,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 */
 		$search_fields = array_map(
 			'wc_clean',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_shop_order_search_fields',
 				array(
@@ -606,7 +636,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				)
 			)
 		);
-		$order_ids     = array();
+		$order_ids = array();
 
 		if ( is_numeric( $term ) ) {
 			$order_ids[] = absint( $term );
@@ -634,6 +664,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
 	}
 
@@ -940,6 +975,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
 	}
 

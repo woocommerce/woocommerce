@@ -109,79 +109,79 @@ abstract class WC_Legacy_Cart {
 		$value = '';
 
 		switch ( $name ) {
-			case 'dp' :
+			case 'dp':
 				$value = wc_get_price_decimals();
 				break;
-			case 'prices_include_tax' :
+			case 'prices_include_tax':
 				$value = wc_prices_include_tax();
 				break;
-			case 'round_at_subtotal' :
+			case 'round_at_subtotal':
 				$value = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 				break;
-			case 'cart_contents_total' :
+			case 'cart_contents_total':
 				$value = $this->get_cart_contents_total();
 				break;
-			case 'total' :
+			case 'total':
 				$value = $this->get_total( 'edit' );
 				break;
-			case 'subtotal' :
+			case 'subtotal':
 				$value = $this->get_subtotal() + $this->get_subtotal_tax();
 				break;
-			case 'subtotal_ex_tax' :
+			case 'subtotal_ex_tax':
 				$value = $this->get_subtotal();
 				break;
-			case 'tax_total' :
+			case 'tax_total':
 				$value = $this->get_fee_tax() + $this->get_cart_contents_tax();
 				break;
-			case 'fee_total' :
+			case 'fee_total':
 				$value = $this->get_fee_total();
 				break;
-			case 'discount_cart' :
+			case 'discount_cart':
 				$value = $this->get_discount_total();
 				break;
-			case 'discount_cart_tax' :
+			case 'discount_cart_tax':
 				$value = $this->get_discount_tax();
 				break;
-			case 'shipping_total' :
+			case 'shipping_total':
 				$value = $this->get_shipping_total();
 				break;
-			case 'shipping_tax_total' :
+			case 'shipping_tax_total':
 				$value = $this->get_shipping_tax();
 				break;
-			case 'display_totals_ex_tax' :
-			case 'display_cart_ex_tax' :
+			case 'display_totals_ex_tax':
+			case 'display_cart_ex_tax':
 				$value = ! $this->display_prices_including_tax();
 				break;
-			case 'cart_contents_weight' :
+			case 'cart_contents_weight':
 				$value = $this->get_cart_contents_weight();
 				break;
-			case 'cart_contents_count' :
+			case 'cart_contents_count':
 				$value = $this->get_cart_contents_count();
 				break;
-			case 'coupons' :
+			case 'coupons':
 				$value = $this->get_coupons();
 				break;
 
 			// Arrays returned by reference to allow modification without notices. TODO: Remove in 4.0.
-			case 'taxes' :
+			case 'taxes':
 				wc_deprecated_function( 'WC_Cart->taxes', '3.2', sprintf( 'getters (%s) and setters (%s)', 'WC_Cart::get_cart_contents_taxes()', 'WC_Cart::set_cart_contents_taxes()' ) );
-				$value = &$this->totals[ 'cart_contents_taxes' ];
+				$value = &$this->totals['cart_contents_taxes'];
 				break;
-			case 'shipping_taxes' :
+			case 'shipping_taxes':
 				wc_deprecated_function( 'WC_Cart->shipping_taxes', '3.2', sprintf( 'getters (%s) and setters (%s)', 'WC_Cart::get_shipping_taxes()', 'WC_Cart::set_shipping_taxes()' ) );
-				$value = &$this->totals[ 'shipping_taxes' ];
+				$value = &$this->totals['shipping_taxes'];
 				break;
-			case 'coupon_discount_amounts' :
+			case 'coupon_discount_amounts':
 				$value = &$this->coupon_discount_totals;
 				break;
-			case 'coupon_discount_tax_amounts' :
+			case 'coupon_discount_tax_amounts':
 				$value = &$this->coupon_discount_tax_totals;
 				break;
-			case 'fees' :
+			case 'fees':
 				wc_deprecated_function( 'WC_Cart->fees', '3.2', sprintf( 'the fees API (%s)', 'WC_Cart::get_fees' ) );
 
 				// Grab fees from the new API.
-				$new_fees   = $this->fees_api()->get_fees();
+				$new_fees = $this->fees_api()->get_fees();
 
 				// Add new fees to the legacy prop so it can be adjusted via legacy property.
 				$this->fees = $new_fees;
@@ -190,10 +190,10 @@ abstract class WC_Legacy_Cart {
 				$value = &$this->fees;
 				break;
 			// Deprecated args. TODO: Remove in 4.0.
-			case 'tax' :
+			case 'tax':
 				wc_deprecated_argument( 'WC_Cart->tax', '2.3', 'Use WC_Tax directly' );
 				$this->tax = new WC_Tax();
-				$value = $this->tax;
+				$value     = $this->tax;
 				break;
 			case 'discount_total':
 				wc_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
@@ -215,54 +215,54 @@ abstract class WC_Legacy_Cart {
 	 */
 	public function __set( $name, $value ) {
 		switch ( $name ) {
-			case 'cart_contents_total' :
+			case 'cart_contents_total':
 				$this->set_cart_contents_total( $value );
 				break;
-			case 'total' :
+			case 'total':
 				$this->set_total( $value );
 				break;
-			case 'subtotal' :
+			case 'subtotal':
 				$this->set_subtotal( $value );
 				break;
-			case 'subtotal_ex_tax' :
+			case 'subtotal_ex_tax':
 				$this->set_subtotal( $value );
 				break;
-			case 'tax_total' :
+			case 'tax_total':
 				$this->set_cart_contents_tax( $value );
 				$this->set_fee_tax( 0 );
 				break;
-			case 'taxes' :
+			case 'taxes':
 				$this->set_cart_contents_taxes( $value );
 				break;
-			case 'shipping_taxes' :
+			case 'shipping_taxes':
 				$this->set_shipping_taxes( $value );
 				break;
-			case 'fee_total' :
+			case 'fee_total':
 				$this->set_fee_total( $value );
 				break;
-			case 'discount_cart' :
+			case 'discount_cart':
 				$this->set_discount_total( $value );
 				break;
-			case 'discount_cart_tax' :
+			case 'discount_cart_tax':
 				$this->set_discount_tax( $value );
 				break;
-			case 'shipping_total' :
+			case 'shipping_total':
 				$this->set_shipping_total( $value );
 				break;
-			case 'shipping_tax_total' :
+			case 'shipping_tax_total':
 				$this->set_shipping_tax( $value );
 				break;
-			case 'coupon_discount_amounts' :
+			case 'coupon_discount_amounts':
 				$this->set_coupon_discount_totals( $value );
 				break;
-			case 'coupon_discount_tax_amounts' :
+			case 'coupon_discount_tax_amounts':
 				$this->set_coupon_discount_tax_totals( $value );
 				break;
-			case 'fees' :
+			case 'fees':
 				wc_deprecated_function( 'WC_Cart->fees', '3.2', sprintf( 'the fees API (%s)', 'WC_Cart::add_fee' ) );
 				$this->fees = $value;
 				break;
-			default :
+			default:
 				$this->$name = $value;
 				break;
 		}
@@ -271,12 +271,18 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Methods moved to session class in 3.2.0.
 	 */
-	public function get_cart_from_session() { $this->session->get_cart_from_session(); }
-	public function maybe_set_cart_cookies() { $this->session->maybe_set_cart_cookies(); }
-	public function set_session() { $this->session->set_session(); }
-	public function get_cart_for_session() { return $this->session->get_cart_for_session(); }
-	public function persistent_cart_update() { $this->session->persistent_cart_update(); }
-	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
+	public function get_cart_from_session() {
+		$this->session->get_cart_from_session(); }
+	public function maybe_set_cart_cookies() {
+		$this->session->maybe_set_cart_cookies(); }
+	public function set_session() {
+		$this->session->set_session(); }
+	public function get_cart_for_session() {
+		return $this->session->get_cart_for_session(); }
+	public function persistent_cart_update() {
+		$this->session->persistent_cart_update(); }
+	public function persistent_cart_destroy() {
+		$this->session->persistent_cart_destroy(); }
 
 	/**
 	 * Get the total of all cart discounts.
@@ -300,7 +306,7 @@ abstract class WC_Legacy_Cart {
 	 * Renamed for consistency.
 	 *
 	 * @param string $coupon_code
-	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
+	 * @return bool True if the coupon is applied, false if it does not exist or cannot be applied.
 	 */
 	public function add_discount( $coupon_code ) {
 		return $this->apply_coupon( $coupon_code );
@@ -398,6 +404,11 @@ abstract class WC_Legacy_Cart {
 		} else {
 			$discounts_before_tax = false;
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_cart_discounts_before_tax', $discounts_before_tax, $this );
 	}
 

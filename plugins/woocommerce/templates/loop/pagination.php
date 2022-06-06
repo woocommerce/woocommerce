@@ -31,6 +31,11 @@ if ( $total <= 1 ) {
 <nav class="woocommerce-pagination">
 	<?php
 	echo paginate_links(
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		apply_filters(
 			'woocommerce_pagination_args',
 			array( // WPCS: XSS ok.

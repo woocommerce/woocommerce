@@ -173,7 +173,7 @@ trait NoteTraits {
 				self::update_note_field_if_changed( $note_in_db, $note, 'type' ),
 				self::update_note_field_if_changed( $note_in_db, $note, 'locale' ),
 				self::update_note_field_if_changed( $note_in_db, $note, 'source' ),
-				self::update_note_field_if_changed( $note_in_db, $note, 'actions' )
+				self::update_note_field_if_changed( $note_in_db, $note, 'actions' ),
 			),
 			true
 		);
@@ -205,14 +205,14 @@ trait NoteTraits {
 		return false;
 	}
 
-/**
-	 * Update a note field of note1 if it's different from note2 with getter and setter.
-	 *
-	 * @param Note   $note1 Note to update.
-	 * @param Note   $note2 Note to compare against.
-	 * @param string $field_name Field to update.
-	 * @return bool True if the field was updated.
-	 */
+	/**
+		 * Update a note field of note1 if it's different from note2 with getter and setter.
+		 *
+		 * @param Note   $note1 Note to update.
+		 * @param Note   $note2 Note to compare against.
+		 * @param string $field_name Field to update.
+		 * @return bool True if the field was updated.
+		 */
 	private static function update_note_field_if_changed( $note1, $note2, $field_name ) {
 		// We need to serialize the stdObject to compare it.
 		$note1_field_value = self::possibly_convert_object_to_array(

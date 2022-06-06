@@ -107,6 +107,7 @@ final class ReserveStock {
 				 * @param int|float             $quantity Quantity.
 				 * @param WC_Order              $order    Order data.
 				 * @param WC_Order_Item_Product $item Order item data.
+				 * @since
 				 */
 				$item_quantity = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 

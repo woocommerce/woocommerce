@@ -162,6 +162,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				),
 			);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_settings', $settings );
 	}
 
@@ -389,7 +394,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-shipping-classes' );
 
-		// Extendable columns to show on the shipping classes screen.
+		/**
+		 * Extendable columns to show on the shipping classes screen.
+		 *
+		 * @since
+		 */
 		$shipping_class_columns = apply_filters(
 			'woocommerce_shipping_classes_columns',
 			array(

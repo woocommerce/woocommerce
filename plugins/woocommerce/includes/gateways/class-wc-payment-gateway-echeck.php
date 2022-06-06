@@ -53,6 +53,11 @@ class WC_Payment_Gateway_ECheck extends WC_Payment_Gateway {
 			</p>',
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_echeck_form_fields', $default_fields, $this->id ) );
 		?>
 

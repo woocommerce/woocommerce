@@ -17,6 +17,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
 /* translators: %1$s: Order ID. %2$s: Order date */
@@ -51,4 +56,9 @@ if ( $sent_to_admin ) {
 	echo "\n" . sprintf( esc_html__( 'View order: %s', 'woocommerce' ), esc_url( $order->get_edit_order_url() ) ) . "\n";
 }
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text, $email );

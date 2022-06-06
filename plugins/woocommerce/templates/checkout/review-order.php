@@ -26,11 +26,26 @@ defined( 'ABSPATH' ) || exit;
 	</thead>
 	<tbody>
 		<?php
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_review_order_before_cart_contents' );
 
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
 				?>
 				<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
@@ -47,6 +62,11 @@ defined( 'ABSPATH' ) || exit;
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_review_order_after_cart_contents' );
 		?>
 	</tbody>

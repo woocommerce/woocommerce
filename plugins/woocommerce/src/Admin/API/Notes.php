@@ -479,9 +479,9 @@ class Notes extends \WC_REST_CRUD_Controller {
 			$note = NotesRepository::get_note( $note_ids[0] );
 			NotesRepository::update_note(
 				$note,
-				[
+				array(
 					'status' => Note::E_WC_ADMIN_NOTE_ACTIONED,
-				]
+				)
 			);
 		}
 

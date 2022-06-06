@@ -115,8 +115,8 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		$has_template            = false;
-		$template_filename       = $template_name . '.html';
+		$has_template      = false;
+		$template_filename = $template_name . '.html';
 		// Since Gutenberg 12.1.0, the conventions for block templates directories have changed,
 		// we should check both these possible directories for backwards-compatibility.
 		$possible_templates_dirs = array( 'templates', 'block-templates' );
@@ -201,6 +201,11 @@ class WC_Template_Loader {
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$templates   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
 		$templates[] = 'woocommerce.php';
 

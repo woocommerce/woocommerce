@@ -30,6 +30,11 @@ class WC_Helper_API {
 	 * The URL can be changed on plugins_loaded before priority 10.
 	 */
 	public static function load() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		self::$api_base = apply_filters( 'woocommerce_helper_api_base', 'https://woocommerce.com/wp-json/helper/1.0' );
 	}
 
@@ -53,6 +58,7 @@ class WC_Helper_API {
 		/**
 		 * Allow developers to filter the request args passed to wp_safe_remote_request().
 		 * Useful to remove sslverify when working on a local api dev environment.
+		 * @since
 		 */
 		$args = apply_filters( 'woocommerce_helper_api_request_args', $args, $endpoint );
 

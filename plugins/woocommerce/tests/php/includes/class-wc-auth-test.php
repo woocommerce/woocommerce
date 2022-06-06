@@ -20,10 +20,10 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 		$create_keys    = $reflected_auth->getMethod( 'create_keys' );
 		$create_keys->setAccessible( true );
 
-		$app_name     = 'This_app_name_is_very_long_and_meant_to_exceed_the_column_length_of_200_characters_';
-		$app_name    .= $app_name;
-		$app_user_id  = 1;
-		$scope        = 'read_write';
+		$app_name    = 'This_app_name_is_very_long_and_meant_to_exceed_the_column_length_of_200_characters_';
+		$app_name   .= $app_name;
+		$app_user_id = 1;
+		$scope       = 'read_write';
 
 		$key_data = $create_keys->invoke( $wc_auth, $app_name, $app_user_id, $scope );
 

@@ -358,7 +358,7 @@ class WCAdminAssets {
 	 */
 	public function inject_wc_settings_dependencies() {
 		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
-			$handles_for_injection = [
+			$handles_for_injection = array(
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
@@ -370,7 +370,7 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
-			];
+			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = wp_scripts()->query( $handle, 'registered' );
 				if ( $script instanceof _WP_Dependency ) {

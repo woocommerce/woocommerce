@@ -171,6 +171,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_method_title() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_gateway_method_title', $this->method_title, $this );
 	}
 
@@ -180,6 +185,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_method_description() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_gateway_method_description', $this->method_description, $this );
 	}
 
@@ -228,6 +238,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_checkout_url() );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
 
@@ -246,6 +261,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = sprintf( $this->view_transaction_url, $transaction_id );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_transaction_url', $return_url, $order, $this );
 	}
 
@@ -304,6 +324,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_title() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_gateway_title', $this->title, $this->id );
 	}
 
@@ -313,6 +338,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_description() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_gateway_description', $this->description, $this->id );
 	}
 
@@ -325,6 +355,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
 
@@ -417,6 +452,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	public function supports( $feature ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
@@ -506,6 +546,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			checked( $token->is_default(), true, false )
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_payment_gateway_get_saved_payment_method_option_html', $html, $token, $this );
 	}
 
@@ -516,6 +561,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 2.6.0
 	 */
 	public function get_new_payment_method_option_html() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$label = apply_filters( 'woocommerce_payment_gateway_get_new_payment_method_option_html_label', $this->new_method_label ? $this->new_method_label : __( 'Use a new payment method', 'woocommerce' ), $this );
 		$html  = sprintf(
 			'<li class="woocommerce-SavedPaymentMethods-new">
@@ -526,6 +576,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_html( $label )
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_payment_gateway_get_new_payment_method_option_html', $html, $this );
 	}
 
@@ -544,6 +599,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_html__( 'Save to account', 'woocommerce' )
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		echo apply_filters( 'woocommerce_payment_gateway_save_new_payment_method_option_html', $html, $this ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 

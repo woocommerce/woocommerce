@@ -77,6 +77,11 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			$default_fields['card-cvc-field'] = $cvc_field;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$fields = wp_parse_args( $fields, apply_filters( 'woocommerce_credit_card_form_fields', $default_fields, $this->id ) );
 		?>
 

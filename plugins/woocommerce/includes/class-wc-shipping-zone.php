@@ -205,6 +205,11 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 		uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_zone_shipping_methods', $methods, $raw_methods, $allowed_classes, $this );
 	}
 
@@ -269,6 +274,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		 *
 		 * @param WC_Data          $this The object being saved.
 		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @since
 		 */
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -283,6 +289,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		 *
 		 * @param WC_Data          $this The object being saved.
 		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @since
 		 */
 		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -351,6 +358,11 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @return boolean
 	 */
 	public function is_valid_location_type( $type ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return in_array( $type, apply_filters( 'woocommerce_valid_location_types', array( 'postcode', 'state', 'country', 'continent' ) ), true );
 	}
 
@@ -428,6 +440,11 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		}
 
 		if ( $instance_id ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_shipping_zone_method_added', $instance_id, $type, $this->get_id() );
 		}
 
@@ -452,6 +469,11 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 		if ( $method ) {
 			$this->data_store->delete_method( $instance_id );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method->method_id, $this->get_id() );
 		}
 

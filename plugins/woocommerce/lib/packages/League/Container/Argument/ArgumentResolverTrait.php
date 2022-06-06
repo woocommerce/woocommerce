@@ -9,112 +9,118 @@ use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
 
-trait ArgumentResolverTrait
-{
-    /**
-     * {@inheritdoc}
-     */
-    public function resolveArguments(array $arguments) : array
-    {
-        return array_map(function ($argument) {
-            $justStringValue = false;
+trait ArgumentResolverTrait {
 
-            if ($argument instanceof RawArgumentInterface) {
-                return $argument->getValue();
-            } elseif ($argument instanceof ClassNameInterface) {
-                $id = $argument->getClassName();
-            } elseif (!is_string($argument)) {
-                return $argument;
-            } else {
-                $justStringValue = true;
-                $id = $argument;
-            }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function resolveArguments( array $arguments ) : array {
+		return array_map(
+			function ( $argument ) {
+				$justStringValue = false;
 
-            $container = null;
+				if ( $argument instanceof RawArgumentInterface ) {
+					return $argument->getValue();
+				} elseif ( $argument instanceof ClassNameInterface ) {
+					$id = $argument->getClassName();
+				} elseif ( ! is_string( $argument ) ) {
+					return $argument;
+				} else {
+					$justStringValue = true;
+					$id              = $argument;
+				}
 
-            try {
-                $container = $this->getLeagueContainer();
-            } catch (ContainerException $e) {
-                if ($this instanceof ReflectionContainer) {
-                    $container = $this;
-                }
-            }
+				$container = null;
 
-            if ($container !== null) {
-                try {
-                    return $container->get($id);
-                } catch (NotFoundException $exception) {
-                    if ($argument instanceof ClassNameWithOptionalValue) {
-                        return $argument->getOptionalValue();
-                    }
+				try {
+					$container = $this->getLeagueContainer();
+				} catch ( ContainerException $e ) {
+					if ( $this instanceof ReflectionContainer ) {
+						$container = $this;
+					}
+				}
 
-                    if ($justStringValue) {
-                        return $id;
-                    }
+				if ( $container !== null ) {
+					try {
+						return $container->get( $id );
+					} catch ( NotFoundException $exception ) {
+						if ( $argument instanceof ClassNameWithOptionalValue ) {
+							return $argument->getOptionalValue();
+						}
 
-                    throw $exception;
-                }
-            }
+						if ( $justStringValue ) {
+							return $id;
+						}
 
-            if ($argument instanceof ClassNameWithOptionalValue) {
-                return $argument->getOptionalValue();
-            }
+						throw $exception;
+					}
+				}
 
-            // Just a string value.
-            return $id;
-        }, $arguments);
-    }
+				if ( $argument instanceof ClassNameWithOptionalValue ) {
+					return $argument->getOptionalValue();
+				}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reflectArguments(ReflectionFunctionAbstract $method, array $args = []) : array
-    {
-        $arguments = array_map(function (ReflectionParameter $param) use ($method, $args) {
-            $name = $param->getName();
-            $type = $param->getType();
+				// Just a string value.
+				return $id;
+			},
+			$arguments
+		);
+	}
 
-            if (array_key_exists($name, $args)) {
-                return new RawArgument($args[$name]);
-            }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function reflectArguments( ReflectionFunctionAbstract $method, array $args = array() ) : array {
+		$arguments = array_map(
+			function ( ReflectionParameter $param ) use ( $method, $args ) {
+				$name = $param->getName();
+				$type = $param->getType();
 
-            if ($type) {
-                if (PHP_VERSION_ID >= 70200) {
-                    $typeName = $type->getName();
-                } else {
-                    $typeName = (string) $type;
-                }
+				if ( array_key_exists( $name, $args ) ) {
+					return new RawArgument( $args[ $name ] );
+				}
 
-                $typeName = ltrim($typeName, '?');
+				if ( $type ) {
+					if ( PHP_VERSION_ID >= 70200 ) {
+						$typeName = $type->getName();
+					} else {
+						$typeName = (string) $type;
+					}
 
-                if ($param->isDefaultValueAvailable()) {
-                    return new ClassNameWithOptionalValue($typeName, $param->getDefaultValue());
-                }
+					$typeName = ltrim( $typeName, '?' );
 
-                return new ClassName($typeName);
-            }
+					if ( $param->isDefaultValueAvailable() ) {
+						return new ClassNameWithOptionalValue( $typeName, $param->getDefaultValue() );
+					}
 
-            if ($param->isDefaultValueAvailable()) {
-                return new RawArgument($param->getDefaultValue());
-            }
+					return new ClassName( $typeName );
+				}
 
-            throw new NotFoundException(sprintf(
-                'Unable to resolve a value for parameter (%s) in the function/method (%s)',
-                $name,
-                $method->getName()
-            ));
-        }, $method->getParameters());
+				if ( $param->isDefaultValueAvailable() ) {
+					return new RawArgument( $param->getDefaultValue() );
+				}
 
-        return $this->resolveArguments($arguments);
-    }
+				throw new NotFoundException(
+					sprintf(
+						'Unable to resolve a value for parameter (%s) in the function/method (%s)',
+						$name,
+						$method->getName()
+					)
+				);
+			},
+			$method->getParameters()
+		);
 
-    /**
-     * @return ContainerInterface
-     */
-    abstract public function getContainer() : ContainerInterface;
+		return $this->resolveArguments( $arguments );
+	}
 
-    /**
-     * @return Container
-     */
-    abstract public function getLeagueContainer() : Container;
+	/**
+	 * @return ContainerInterface
+	 */
+	abstract public function getContainer() : ContainerInterface;
+
+	/**
+	 * @return Container
+	 */
+	abstract public function getLeagueContainer() : Container;
 }

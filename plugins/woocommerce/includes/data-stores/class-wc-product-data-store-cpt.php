@@ -113,6 +113,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$id = wp_insert_post(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_new_product_data',
 				array(
@@ -149,6 +154,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->save_meta_data();
 			$product->apply_changes();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_new_product', $id, $product );
 		}
 	}
@@ -190,6 +200,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_extra_data( $product );
 		$product->set_object_read( true );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_read', $product->get_id() );
 	}
 
@@ -272,6 +287,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$product->apply_changes();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_product', $product->get_id(), $product );
 	}
 
@@ -297,13 +317,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( $args['force_delete'] ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_before_delete_' . $post_type, $id );
 			wp_delete_post( $id );
 			$product->set_id( 0 );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_delete_' . $post_type, $id );
 		} else {
 			wp_trash_post( $id );
 			$product->set_status( 'trash' );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_trash_' . $post_type, $id );
 		}
 	}
@@ -499,6 +534,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$download = new WC_Product_Download();
 				$download->set_id( $key );
 				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$download->set_file( apply_filters( 'woocommerce_file_download_path', $value['file'], $product, $key ) );
 				$downloads[] = $download;
 			}
@@ -660,16 +700,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_variation_set_stock', $product );
 			} else {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_product_set_stock', $product );
 			}
 		}
 
 		if ( in_array( 'stock_status', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			} else {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			}
 		}
@@ -678,7 +738,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
-		// Trigger action so 3rd parties can deal with updated props.
+		/**
+		 * Trigger action so 3rd parties can deal with updated props.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
 
 		// After handling, we can reset the props array.
@@ -756,6 +820,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
 			}
 		}
@@ -834,8 +903,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_process_product_file_download_paths', $product->get_parent_id(), $product->get_id(), $downloads );
 			} else {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
 			}
 
@@ -860,6 +939,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
 			$this->updated_props[] = 'product_type';
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
 		}
 	}
@@ -1027,6 +1111,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return (int) apply_filters( 'woocommerce_get_product_id_by_sku', $id, $sku );
 	}
 
@@ -1215,6 +1304,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'product_variation_linked', $variation_id );
 
 			$count ++;
@@ -1271,6 +1365,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'limit'       => $limit + 10,
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
@@ -1354,6 +1453,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product_id_with_stock
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
 
 		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
@@ -1423,6 +1527,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $new_stock, $operation );
 
 		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
@@ -1582,6 +1691,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null, $include = null, $exclude = null ) {
 		global $wpdb;
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$custom_results = apply_filters( 'woocommerce_product_pre_search_products', false, $term, $type, $include_variations, $all_statuses, $limit );
 
 		if ( is_array( $custom_results ) ) {
@@ -2017,6 +2131,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['orderby'] = 'post__in';
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
 	}
 

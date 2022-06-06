@@ -127,6 +127,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		 *
 		 * @param array $parsed_data Parsed data.
 		 * @param WC_Product_Importer $importer Importer instance.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_product_importer_parsed_data', $this->parsed_data, $this );
 	}
@@ -212,6 +213,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$product = wc_get_product_object( 'simple', $id );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_import_get_product_object', $product, $data );
 	}
 
@@ -224,7 +230,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 */
 	protected function process_item( $data ) {
 		try {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_import_before_process_item', $data );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_product_import_process_item_data', $data );
 
 			// Get product ID from SKU if created during the importation.
@@ -277,9 +293,19 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$this->set_image_data( $object, $data );
 			$this->set_meta_data( $object, $data );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
 			$object->save();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_import_inserted_product_object', $object, $data );
 
 			return array(
@@ -683,7 +709,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		$taxonomy_name = wc_attribute_taxonomy_name( $attribute_name );
 		register_taxonomy(
 			$taxonomy_name,
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_' . $taxonomy_name,
 				array(
@@ -723,6 +759,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		if ( $current_memory >= $memory_limit ) {
 			$return = true;
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_importer_memory_exceeded', $return );
 	}
 
@@ -755,11 +796,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return bool
 	 */
 	protected function time_exceeded() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$finish = $this->start_time + apply_filters( 'woocommerce_product_importer_default_time_limit', 20 ); // 20 seconds
 		$return = false;
 		if ( time() >= $finish ) {
 			$return = true;
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_importer_time_exceeded', $return );
 	}
 

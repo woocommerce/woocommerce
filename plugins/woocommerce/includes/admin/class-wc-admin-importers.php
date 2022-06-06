@@ -180,7 +180,17 @@ class WC_Admin_Importers {
 								// Register the taxonomy now so that the import works!
 								register_taxonomy(
 									$term['domain'],
+									/**
+									 * Hook
+									 *
+									 * @since
+									 */
 									apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
+									/**
+									 * Hook
+									 *
+									 * @since
+									 */
 									apply_filters(
 										'woocommerce_taxonomy_args_' . $term['domain'],
 										array(
@@ -219,7 +229,12 @@ class WC_Admin_Importers {
 			'delimiter'       => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
 			'start_pos'       => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
 			'mapping'         => isset( $_POST['mapping'] ) ? (array) wc_clean( wp_unslash( $_POST['mapping'] ) ) : array(), // PHPCS: input var ok.
-			'update_existing' => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false, // PHPCS: input var ok.
+			'update_existing' => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false,
+			/**
+			 * PHPCS: input var ok.
+			 *
+			 * @since
+			 */
 			'lines'           => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
 			'parse'           => true,
 		);

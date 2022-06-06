@@ -33,7 +33,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function query_args( $args, $request ) {
 		if ( ! empty( $request['code'] ) ) {
-			$id = wc_get_coupon_id_by_code( $request['code'] );
+			$id               = wc_get_coupon_id_by_code( $request['code'] );
 			$args['post__in'] = array( $id );
 		}
 
@@ -87,6 +87,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -120,9 +121,9 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
-					case 'code' :
-						$coupon_code = wc_format_coupon_code( $value );
-						$id          = $coupon->get_id() ? $coupon->get_id() : 0;
+					case 'code':
+						$coupon_code  = wc_format_coupon_code( $value );
+						$id           = $coupon->get_id() ? $coupon->get_id() : 0;
 						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
 						if ( $id_from_code ) {
@@ -131,17 +132,17 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 
 						$coupon->set_code( $coupon_code );
 						break;
-					case 'meta_data' :
+					case 'meta_data':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
 								$coupon->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 							}
 						}
 						break;
-					case 'description' :
+					case 'description':
 						$coupon->set_description( wp_filter_post_kses( $value ) );
 						break;
-					default :
+					default:
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
 							$coupon->{"set_{$key}"}( $value );
 						}
@@ -158,6 +159,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param WC_Coupon       $coupon        The coupon object.
 		 * @param WP_REST_Request $request       Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $coupon, $request );
 	}

@@ -6,101 +6,97 @@ use Generator;
 use Automattic\WooCommerce\Vendor\League\Container\{ContainerAwareInterface, ContainerAwareTrait};
 use Automattic\WooCommerce\Vendor\League\Container\Exception\ContainerException;
 
-class ServiceProviderAggregate implements ServiceProviderAggregateInterface
-{
-    use ContainerAwareTrait;
+class ServiceProviderAggregate implements ServiceProviderAggregateInterface {
 
-    /**
-     * @var ServiceProviderInterface[]
-     */
-    protected $providers = [];
+	use ContainerAwareTrait;
 
-    /**
-     * @var array
-     */
-    protected $registered = [];
+	/**
+	 * @var ServiceProviderInterface[]
+	 */
+	protected $providers = array();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function add($provider) : ServiceProviderAggregateInterface
-    {
-        if (is_string($provider) && $this->getContainer()->has($provider)) {
-            $provider = $this->getContainer()->get($provider);
-        } elseif (is_string($provider) && class_exists($provider)) {
-            $provider = new $provider;
-        }
+	/**
+	 * @var array
+	 */
+	protected $registered = array();
 
-        if (in_array($provider, $this->providers, true)) {
-            return $this;
-        }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function add( $provider ) : ServiceProviderAggregateInterface {
+		if ( is_string( $provider ) && $this->getContainer()->has( $provider ) ) {
+			$provider = $this->getContainer()->get( $provider );
+		} elseif ( is_string( $provider ) && class_exists( $provider ) ) {
+			$provider = new $provider;
+		}
 
-        if ($provider instanceof ContainerAwareInterface) {
-            $provider->setLeagueContainer($this->getLeagueContainer());
-        }
+		if ( in_array( $provider, $this->providers, true ) ) {
+			return $this;
+		}
 
-        if ($provider instanceof BootableServiceProviderInterface) {
-            $provider->boot();
-        }
+		if ( $provider instanceof ContainerAwareInterface ) {
+			$provider->setLeagueContainer( $this->getLeagueContainer() );
+		}
 
-        if ($provider instanceof ServiceProviderInterface) {
-            $this->providers[] = $provider;
+		if ( $provider instanceof BootableServiceProviderInterface ) {
+			$provider->boot();
+		}
 
-            return $this;
-        }
+		if ( $provider instanceof ServiceProviderInterface ) {
+			$this->providers[] = $provider;
 
-        throw new ContainerException(
-            'A service provider must be a fully qualified class name or instance ' .
-            'of (\Automattic\WooCommerce\Vendor\League\Container\ServiceProvider\ServiceProviderInterface)'
-        );
-    }
+			return $this;
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function provides(string $service) : bool
-    {
-        foreach ($this->getIterator() as $provider) {
-            if ($provider->provides($service)) {
-                return true;
-            }
-        }
+		throw new ContainerException(
+			'A service provider must be a fully qualified class name or instance ' .
+			'of (\Automattic\WooCommerce\Vendor\League\Container\ServiceProvider\ServiceProviderInterface)'
+		);
+	}
 
-        return false;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function provides( string $service ) : bool {
+		foreach ( $this->getIterator() as $provider ) {
+			if ( $provider->provides( $service ) ) {
+				return true;
+			}
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getIterator() : Generator
-    {
-        $count = count($this->providers);
+		return false;
+	}
 
-        for ($i = 0; $i < $count; $i++) {
-            yield $this->providers[$i];
-        }
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getIterator() : Generator {
+		$count = count( $this->providers );
 
-    /**
-     * {@inheritdoc}
-     */
-    public function register(string $service)
-    {
-        if (false === $this->provides($service)) {
-            throw new ContainerException(
-                sprintf('(%s) is not provided by a service provider', $service)
-            );
-        }
+		for ( $i = 0; $i < $count; $i++ ) {
+			yield $this->providers[ $i ];
+		}
+	}
 
-        foreach ($this->getIterator() as $provider) {
-            if (in_array($provider->getIdentifier(), $this->registered, true)) {
-                continue;
-            }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function register( string $service ) {
+		if ( false === $this->provides( $service ) ) {
+			throw new ContainerException(
+				sprintf( '(%s) is not provided by a service provider', $service )
+			);
+		}
 
-            if ($provider->provides($service)) {
-                $provider->register();
-                $this->registered[] = $provider->getIdentifier();
-            }
-        }
-    }
+		foreach ( $this->getIterator() as $provider ) {
+			if ( in_array( $provider->getIdentifier(), $this->registered, true ) ) {
+				continue;
+			}
+
+			if ( $provider->provides( $service ) ) {
+				$provider->register();
+				$this->registered[] = $provider->getIdentifier();
+			}
+		}
+	}
 }

@@ -124,5 +124,11 @@ function wc_beta_tester_setting_list() {
 		'woocommerce_version',
 		'woocommerce_weight_unit'
 	);
+
+    /**
+     * Hook
+     *
+     * @since
+     */
 	return apply_filters( 'wc_beta_tester_setting_list', $settings_list );
 }

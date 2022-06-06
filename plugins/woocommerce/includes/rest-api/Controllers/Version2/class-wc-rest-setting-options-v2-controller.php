@@ -39,7 +39,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				'args'   => array(
 					'group' => array(
 						'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -56,7 +58,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				'args'   => array(
 					'group' => array(
 						'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -74,7 +78,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			array(
 				'args'   => array(
 					'group' => array(
 						'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -159,6 +165,11 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() );
 
 		if ( empty( $settings ) ) {
@@ -448,7 +459,8 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function allowed_setting_keys( $key ) {
 		return in_array(
-			$key, array(
+			$key,
+			array(
 				'id',
 				'label',
 				'description',
@@ -472,7 +484,8 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function is_setting_type_valid( $type ) {
 		return in_array(
-			$type, array(
+			$type,
+			array(
 				'text',         // Validates with validate_setting_text_field.
 				'email',        // Validates with validate_setting_text_field.
 				'number',       // Validates with validate_setting_text_field.

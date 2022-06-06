@@ -35,7 +35,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		# GET /coupons
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_coupons' ), WC_API_Server::READABLE ),
 		);
 
 		# GET /coupons/count
@@ -45,7 +45,7 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		# GET /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_coupon' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'get_coupon' ), WC_API_Server::READABLE ),
 		);
 
 		# GET /coupons/code/<code>, note that coupon codes can contain spaces, dashes and underscores
@@ -134,6 +134,11 @@ class WC_API_Coupons extends WC_API_Resource {
 			'customer_emails'              => $coupon->get_email_restrictions(),
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
 	}
 

@@ -16,8 +16,8 @@ class Process {
 		$proc = new self;
 
 		$proc->command = $command;
-		$proc->cwd = $cwd;
-		$proc->env = $env;
+		$proc->cwd     = $cwd;
+		$proc->env     = $env;
 
 		return $proc;
 	}
@@ -48,14 +48,16 @@ class Process {
 		$stderr = stream_get_contents( $pipes[2] );
 		fclose( $pipes[2] );
 
-		return new ProcessRun( array(
-			'stdout' => $stdout,
-			'stderr' => $stderr,
-			'return_code' => proc_close( $proc ),
-			'command' => $this->command,
-			'cwd' => $cwd,
-			'env' => $this->env
-		) );
+		return new ProcessRun(
+			array(
+				'stdout'      => $stdout,
+				'stderr'      => $stderr,
+				'return_code' => proc_close( $proc ),
+				'command'     => $this->command,
+				'cwd'         => $cwd,
+				'env'         => $this->env,
+			)
+		);
 	}
 
 	/**
@@ -66,7 +68,7 @@ class Process {
 	public function run_check() {
 		$r = $this->run();
 
-		if ( $r->return_code || !empty( $r->STDERR ) ) {
+		if ( $r->return_code || ! empty( $r->STDERR ) ) {
 			throw new \RuntimeException( $r );
 		}
 

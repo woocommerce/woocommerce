@@ -333,7 +333,17 @@ class WC_Helper_Product {
 			// Register as taxonomy.
 			register_taxonomy(
 				$taxonomy_name,
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_taxonomy_args_' . $taxonomy_name,
 					array(

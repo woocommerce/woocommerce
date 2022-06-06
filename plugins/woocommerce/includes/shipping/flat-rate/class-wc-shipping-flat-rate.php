@@ -66,7 +66,11 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
 
-		// Allow 3rd parties to process shipping cost arguments.
+		/**
+		 * Allow 3rd parties to process shipping cost arguments.
+		 *
+		 * @since
+		 */
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
 		$locale         = localeconv();
 		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );
@@ -212,6 +216,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		 *
 		 * Previously there were (overly complex) options to add additional rates however this was not user.
 		 * friendly and goes against what Flat Rate Shipping was originally intended for.
+		 * @since
 		 */
 		do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate );
 	}

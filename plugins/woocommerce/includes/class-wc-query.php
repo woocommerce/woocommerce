@@ -230,6 +230,11 @@ class WC_Query {
 	 * @return array
 	 */
 	public function get_query_vars() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_query_vars', $this->query_vars );
 	}
 
@@ -496,9 +501,18 @@ class WC_Query {
 		$q->set( 'meta_query', $this->get_meta_query( $q->get( 'meta_query' ), true ) );
 		$q->set( 'tax_query', $this->get_tax_query( $q->get( 'tax_query' ), true ) );
 		$q->set( 'wc_query', 'product_query' );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
-		// Work out how many products to query.
+		/**
+		 * Work out how many products to query.
+		 *
+		 * @since
+		 */
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 
 		// Store reference to this query.
@@ -515,6 +529,11 @@ class WC_Query {
 		);
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
 
@@ -566,6 +585,11 @@ class WC_Query {
 				if ( is_search() ) {
 					$orderby_value = 'relevance';
 				} else {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
 				}
 			}
@@ -619,6 +643,11 @@ class WC_Query {
 				break;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args, $orderby, $order );
 	}
 
@@ -650,6 +679,11 @@ class WC_Query {
 		 * Kicks in when prices excluding tax are displayed including tax.
 		 */
 		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 
@@ -744,6 +778,11 @@ class WC_Query {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
 	}
 
@@ -814,6 +853,11 @@ class WC_Query {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
 	}
 
@@ -906,7 +950,12 @@ class WC_Query {
 						}
 
 						$query_type                                    = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : '';
-						self::$chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+						self::$chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms );
+						/**
+						 * Ensures correct encoding.
+						 *
+						 * @since
+						 */
 						self::$chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 					}
 				}

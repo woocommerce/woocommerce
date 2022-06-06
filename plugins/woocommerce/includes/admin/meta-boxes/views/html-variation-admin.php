@@ -236,7 +236,7 @@ defined( 'ABSPATH' ) || exit;
 							'custom_attributes' => array(
 								'step' => 'any',
 							),
-							'wrapper_class' => 'form-row',
+							'wrapper_class'     => 'form-row',
 						)
 					);
 
@@ -409,7 +409,7 @@ defined( 'ABSPATH' ) || exit;
 
 							if ( $downloadable_files ) {
 								foreach ( $downloadable_files as $key => $file ) {
-									$disabled_download = isset( $file['enabled'] ) && false === $file['enabled'];
+									$disabled_download         = isset( $file['enabled'] ) && false === $file['enabled'];
 									$disabled_downloads_count += (int) $disabled_download;
 									include __DIR__ . '/html-product-variation-download.php';
 								}
@@ -421,8 +421,8 @@ defined( 'ABSPATH' ) || exit;
 								<th colspan="1">
 									<a href="#" class="button insert" data-row="
 									<?php
-									$key  = '';
-									$file = array(
+									$key               = '';
+									$file              = array(
 										'file' => '',
 										'name' => '',
 									);

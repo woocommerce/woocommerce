@@ -46,6 +46,11 @@ class WC_Breadcrumb {
 	 * @return array
 	 */
 	public function get_breadcrumb() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_breadcrumb', $this->crumbs, $this );
 	}
 
@@ -150,6 +155,11 @@ class WC_Breadcrumb {
 			$terms = wc_get_product_terms(
 				$post->ID,
 				'product_cat',
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_breadcrumb_product_terms_args',
 					array(
@@ -160,6 +170,11 @@ class WC_Breadcrumb {
 			);
 
 			if ( $terms ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 				$this->term_ancestors( $main_term->term_id, 'product_cat' );
 				$this->add_crumb( $main_term->name, get_term_link( $main_term ) );

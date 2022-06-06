@@ -106,19 +106,25 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'     => '_sku',
-				'value'   => $skus,
-				'compare' => 'IN',
-			) );
+			$args['meta_query'] = $this->add_meta_query(
+				$args,
+				array(
+					'key'     => '_sku',
+					'value'   => $skus,
+					'compare' => 'IN',
+				)
+			);
 		}
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'   => '_tax_class',
-				'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
-			) );
+			$args['meta_query'] = $this->add_meta_query(
+				$args,
+				array(
+					'key'   => '_tax_class',
+					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
+				)
+			);
 		}
 
 		// Price filter.
@@ -128,10 +134,13 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 
 		// Filter product in stock or out of stock.
 		if ( is_bool( $request['in_stock'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, array(
-				'key'   => '_stock_status',
-				'value' => true === $request['in_stock'] ? 'instock' : 'outofstock',
-			) );
+			$args['meta_query'] = $this->add_meta_query(
+				$args,
+				array(
+					'key'   => '_stock_status',
+					'value' => true === $request['in_stock'] ? 'instock' : 'outofstock',
+				)
+			);
 		}
 
 		// Filter by on sale products.
@@ -191,6 +200,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -647,7 +657,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 
 			// Update taxonomies.
 			if ( isset( $data['attributes'] ) ) {
-				$attributes = array();
+				$attributes        = array();
 				$parent_attributes = $product->get_attributes();
 
 				foreach ( $data['attributes'] as $attribute ) {
@@ -692,6 +702,11 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 
 			$variation->save();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_rest_save_product_variation', $variation->get_id(), $menu_order, $data );
 		}
 
@@ -761,11 +776,13 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Delete product attachments.
-		$attachments = get_posts( array(
-			'post_parent' => $id,
-			'post_status' => 'any',
-			'post_type'   => 'attachment',
-		) );
+		$attachments = get_posts(
+			array(
+				'post_parent' => $id,
+				'post_status' => 'any',
+				'post_type'   => 'attachment',
+			)
+		);
 
 		foreach ( (array) $attachments as $attachment ) {
 			wp_delete_attachment( $attachment->ID, true );

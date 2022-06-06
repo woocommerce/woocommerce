@@ -40,15 +40,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 								?>
 								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo esc_attr( $i ); ?>][]">
 									<?php
-									$args      = array(
+									$args = array(
 										'orderby'    => ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name',
 										'hide_empty' => 0,
 									);
+									/**
+									 * Hook
+									 *
+									 * @since
+									 */
 									$all_terms = get_terms( $attribute->get_taxonomy(), apply_filters( 'woocommerce_product_attribute_terms', $args ) );
 									if ( $all_terms ) {
 										foreach ( $all_terms as $term ) {
 											$options = $attribute->get_options();
 											$options = ! empty( $options ) ? $options : array();
+											/**
+											 * Hook
+											 *
+											 * @since
+											 */
 											echo '<option value="' . esc_attr( $term->term_id ) . '"' . wc_selected( $term->term_id, $options ) . '>' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $term->name, $term ) ) . '</option>';
 										}
 									}
@@ -60,6 +70,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php
 							}
 
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
 						} else {
 							/* translators: %s: WC_DELIMITER */

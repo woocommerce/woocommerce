@@ -83,7 +83,7 @@ class Favorites {
 			);
 		}
 
-		$remaining = array_values( array_diff( $all_favorites, [ $item_id ] ) );
+		$remaining = array_values( array_diff( $all_favorites, array( $item_id ) ) );
 
 		self::set_meta_value( $user_id, $remaining );
 

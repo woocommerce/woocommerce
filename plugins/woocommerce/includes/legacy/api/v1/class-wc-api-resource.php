@@ -132,22 +132,38 @@ class WC_API_Resource {
 
 			// resources created after specified date
 			if ( ! empty( $request_args['created_at_min'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'after' => $this->server->parse_datetime( $request_args['created_at_min'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_date_gmt',
+					'after'     => $this->server->parse_datetime( $request_args['created_at_min'] ),
+					'inclusive' => true,
+				);
 			}
 
 			// resources created before specified date
 			if ( ! empty( $request_args['created_at_max'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'before' => $this->server->parse_datetime( $request_args['created_at_max'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_date_gmt',
+					'before'    => $this->server->parse_datetime( $request_args['created_at_max'] ),
+					'inclusive' => true,
+				);
 			}
 
 			// resources updated after specified date
 			if ( ! empty( $request_args['updated_at_min'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'after' => $this->server->parse_datetime( $request_args['updated_at_min'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_modified_gmt',
+					'after'     => $this->server->parse_datetime( $request_args['updated_at_min'] ),
+					'inclusive' => true,
+				);
 			}
 
 			// resources updated before specified date
 			if ( ! empty( $request_args['updated_at_max'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'before' => $this->server->parse_datetime( $request_args['updated_at_max'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_modified_gmt',
+					'before'    => $this->server->parse_datetime( $request_args['updated_at_max'] ),
+					'inclusive' => true,
+				);
 			}
 		}
 
@@ -248,7 +264,7 @@ class WC_API_Resource {
 			return $data;
 		}
 
-		$fields = explode( ',', $fields );
+		$fields     = explode( ',', $fields );
 		$sub_fields = array();
 
 		// get sub fields

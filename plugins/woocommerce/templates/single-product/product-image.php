@@ -24,9 +24,19 @@ if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
 
 global $product;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
 $post_thumbnail_id = $product->get_image_id();
-$wrapper_classes   = apply_filters(
+/**
+ * Hook
+ *
+ * @since
+ */
+$wrapper_classes = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
 		'woocommerce-product-gallery',
@@ -47,8 +57,18 @@ $wrapper_classes   = apply_filters(
 			$html .= '</div>';
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $post_thumbnail_id ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_thumbnails' );
 		?>
 	</figure>

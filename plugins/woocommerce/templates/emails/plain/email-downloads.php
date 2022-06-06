@@ -24,6 +24,11 @@ foreach ( $downloads as $download ) {
 		echo wp_kses_post( $column_name ) . ': ';
 
 		if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, $plain_text );
 		} else {
 			switch ( $column_id ) {

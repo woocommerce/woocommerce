@@ -77,6 +77,11 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 		$current_user = wp_get_current_user();
 
 		if ( empty( $current_user ) || ( $current_user instanceof WP_User && ! $current_user->exists() ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters(
 				WC_WCCOM_Site::AUTH_ERROR_FILTER_NAME,
 				new WP_Error(

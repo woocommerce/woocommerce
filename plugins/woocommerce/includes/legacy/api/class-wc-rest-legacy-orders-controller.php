@@ -62,12 +62,17 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 
 		// Search by product.
 		if ( ! empty( $request['product'] ) ) {
-			$order_ids = $wpdb->get_col( $wpdb->prepare( "
+			$order_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"
 				SELECT order_id
 				FROM {$wpdb->prefix}woocommerce_order_items
 				WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = %d )
 				AND order_item_type = 'line_item'
-			 ", $request['product'] ) );
+			 ",
+					$request['product']
+				)
+			);
 
 			// Force WP_Query return empty if don't found any order.
 			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
@@ -150,6 +155,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -174,14 +180,14 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
-					case 'billing' :
-					case 'shipping' :
+					case 'billing':
+					case 'shipping':
 						$this->update_address( $order, $value, $key );
 						break;
-					case 'line_items' :
-					case 'shipping_lines' :
-					case 'fee_lines' :
-					case 'coupon_lines' :
+					case 'line_items':
+					case 'shipping_lines':
+					case 'fee_lines':
+					case 'coupon_lines':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
@@ -194,14 +200,14 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 							}
 						}
 						break;
-					case 'meta_data' :
+					case 'meta_data':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
 								$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 							}
 						}
 						break;
-					default :
+					default:
 						if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 							$order->{"set_{$key}"}( $value );
 						}
@@ -218,6 +224,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param WC_Order           $order      The Order object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $order, $request );
 	}
@@ -246,7 +253,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 		try {
 			// Make sure customer exists.
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
 			// Make sure customer is part of blog.

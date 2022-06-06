@@ -43,6 +43,11 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 
 		$id = $this->insert_new_download_permission( $data );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_grant_product_download_access', $data );
 
 		return $id;
@@ -73,6 +78,11 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			$download->apply_changes();
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_grant_product_download_access', $data );
 	}
 
@@ -112,7 +122,17 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 
 		$result = $wpdb->insert(
 			$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_downloadable_file_permission_data', $data ),
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_downloadable_file_permission_format', $format, $data )
 		);
 

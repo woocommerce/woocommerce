@@ -11,8 +11,18 @@ defined( 'ABSPATH' ) || exit;
 
 $product      = $item->get_product();
 $product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
-$thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
-$row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
+/**
+ * Hook
+ *
+ * @since
+ */
+$thumbnail = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
+/**
+ * Hook
+ *
+ * @since
+ */
+$row_class = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
 ?>
 <tr class="item <?php echo esc_attr( $row_class ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
 	<td class="thumb">
@@ -67,6 +77,11 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			?>
 		</div>
 		<?php
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$step = apply_filters( 'woocommerce_quantity_input_step', '1', $product );
 
 			/**
@@ -77,7 +92,12 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			* @param   WC_Product  $product The product that is being edited.
 			* @param   string      $context The context in which the quantity editor is shown, 'edit' or 'refund'.
 			*/
-			$step_edit   = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'edit' );
+			$step_edit = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'edit' );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$step_refund = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'refund' );
 
 			/**
@@ -88,7 +108,12 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			* @param   WC_Product  $product The product that is being edited.
 			* @param   string      $context The context in which the quantity editor is shown, 'edit' or 'refund'.
 			*/
-			$min_edit   = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'edit' );
+			$min_edit = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'edit' );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$min_refund = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'refund' );
 		?>
 		<div class="edit" style="display: none;">

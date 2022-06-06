@@ -34,8 +34,8 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		# GET/POST /coupons
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_coupons' ),     WC_API_Server::READABLE ),
-			array( array( $this, 'create_coupon' ),   WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_coupons' ), WC_API_Server::READABLE ),
+			array( array( $this, 'create_coupon' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /coupons/count
@@ -45,8 +45,8 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		# GET/PUT/DELETE /coupons/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_coupon' ),    WC_API_Server::READABLE ),
-			array( array( $this, 'edit_coupon' ),   WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'get_coupon' ), WC_API_Server::READABLE ),
+			array( array( $this, 'edit_coupon' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
 			array( array( $this, 'delete_coupon' ), WC_API_SERVER::DELETABLE ),
 		);
 
@@ -142,6 +142,11 @@ class WC_API_Coupons extends WC_API_Resource {
 				'description'                  => $coupon->get_description(),
 			);
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -217,6 +222,11 @@ class WC_API_Coupons extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_coupon', __( 'You do not have permission to create coupons', 'woocommerce' ), 401 );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_coupon_data', $data, $this );
 
 			// Check if coupon code is specified
@@ -266,7 +276,7 @@ class WC_API_Coupons extends WC_API_Resource {
 				'post_author'  => get_current_user_id(),
 				'post_type'    => 'shop_coupon',
 				'post_excerpt' => $coupon_data['description'],
-	 		);
+			);
 
 			$id = wp_insert_post( $new_coupon, true );
 
@@ -294,7 +304,17 @@ class WC_API_Coupons extends WC_API_Resource {
 			update_post_meta( $id, 'maximum_amount', wc_format_decimal( $coupon_data['maximum_amount'] ) );
 			update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $coupon_data['customer_emails'] ) ) );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_coupon', $id, $data );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_new_coupon', $id );
 
 			$this->server->send_status( 201 );
@@ -330,6 +350,11 @@ class WC_API_Coupons extends WC_API_Resource {
 				return $id;
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_coupon_data', $data, $id, $this );
 
 			if ( isset( $data['code'] ) ) {
@@ -342,7 +367,12 @@ class WC_API_Coupons extends WC_API_Resource {
 					throw new WC_API_Exception( 'woocommerce_api_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), 400 );
 				}
 
-				$updated = wp_update_post( array( 'ID' => intval( $id ), 'post_title' => $coupon_code ) );
+				$updated = wp_update_post(
+					array(
+						'ID'         => intval( $id ),
+						'post_title' => $coupon_code,
+					)
+				);
 
 				if ( 0 === $updated ) {
 					throw new WC_API_Exception( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce' ), 400 );
@@ -350,7 +380,12 @@ class WC_API_Coupons extends WC_API_Resource {
 			}
 
 			if ( isset( $data['description'] ) ) {
-				$updated = wp_update_post( array( 'ID' => intval( $id ), 'post_excerpt' => $data['description'] ) );
+				$updated = wp_update_post(
+					array(
+						'ID'           => intval( $id ),
+						'post_excerpt' => $data['description'],
+					)
+				);
 
 				if ( 0 === $updated ) {
 					throw new WC_API_Exception( 'woocommerce_api_cannot_update_coupon', __( 'Failed to update coupon', 'woocommerce' ), 400 );
@@ -430,7 +465,17 @@ class WC_API_Coupons extends WC_API_Resource {
 				update_post_meta( $id, 'customer_email', array_filter( array_map( 'sanitize_email', $data['customer_emails'] ) ) );
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_coupon', $id, $data );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_update_coupon', $id );
 
 			return $this->get_coupon( $id );
@@ -457,6 +502,11 @@ class WC_API_Coupons extends WC_API_Resource {
 			return $id;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_delete_coupon', $id, $this );
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
@@ -521,7 +571,12 @@ class WC_API_Coupons extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_coupons_data', sprintf( __( 'No %1$s data specified to create/edit %1$s', 'woocommerce' ), 'coupons' ), 400 );
 			}
 
-			$data  = $data['coupons'];
+			$data = $data['coupons'];
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'coupons' );
 
 			// Limit bulk operation
@@ -547,7 +602,10 @@ class WC_API_Coupons extends WC_API_Resource {
 					if ( is_wp_error( $edit ) ) {
 						$coupons[] = array(
 							'id'    => $coupon_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
+							'error' => array(
+								'code'    => $edit->get_error_code(),
+								'message' => $edit->get_error_message(),
+							),
 						);
 					} else {
 						$coupons[] = $edit['coupon'];
@@ -560,7 +618,10 @@ class WC_API_Coupons extends WC_API_Resource {
 					if ( is_wp_error( $new ) ) {
 						$coupons[] = array(
 							'id'    => $coupon_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
+							'error' => array(
+								'code'    => $new->get_error_code(),
+								'message' => $new->get_error_message(),
+							),
 						);
 					} else {
 						$coupons[] = $new['coupon'];
@@ -568,6 +629,11 @@ class WC_API_Coupons extends WC_API_Resource {
 				}
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'coupons' => apply_filters( 'woocommerce_api_coupons_bulk_response', $coupons, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );

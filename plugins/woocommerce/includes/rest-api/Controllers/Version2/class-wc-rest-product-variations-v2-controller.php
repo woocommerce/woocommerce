@@ -44,7 +44,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				'args'   => array(
 					'product_id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
@@ -67,7 +69,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'product_id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
@@ -112,7 +116,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				'args'   => array(
 					'product_id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
@@ -232,6 +238,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -460,6 +467,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		 * @param WC_Data         $variation Object object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param bool            $creating  If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $variation, $request, $creating );
 	}
@@ -488,7 +496,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error(
-				"woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array(
+				"woocommerce_rest_{$this->post_type}_invalid_id",
+				__( 'Invalid ID.', 'woocommerce' ),
+				array(
 					'status' => 404,
 				)
 			);
@@ -503,13 +513,16 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		 *
 		 * @param boolean $supports_trash Whether the object type support trashing.
 		 * @param WC_Data $object         The object being considered for trashing support.
+		 * @since
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new WP_Error(
 				/* translators: %s: post type */
-				"woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array(
+				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
+				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ),
+				array(
 					'status' => rest_authorization_required_code(),
 				)
 			);
@@ -527,7 +540,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			if ( ! $supports_trash ) {
 				return new WP_Error(
 					/* translators: %s: post type */
-					'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array(
+					'woocommerce_rest_trash_not_supported',
+					sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ),
+					array(
 						'status' => 501,
 					)
 				);
@@ -538,7 +553,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 				if ( 'trash' === $object->get_status() ) {
 					return new WP_Error(
 						/* translators: %s: post type */
-						'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array(
+						'woocommerce_rest_already_trashed',
+						sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ),
+						array(
 							'status' => 410,
 						)
 					);
@@ -552,7 +569,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		if ( ! $result ) {
 			return new WP_Error(
 				/* translators: %s: post type */
-				'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array(
+				'woocommerce_rest_cannot_delete',
+				sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ),
+				array(
 					'status' => 500,
 				)
 			);
@@ -569,6 +588,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		 * @param WC_Data          $object   The deleted or trashed object.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
 
@@ -596,7 +616,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 					$injected_items[] = is_array( $item ) ? array_merge(
 						array(
 							'product_id' => $product_id,
-						), $item
+						),
+						$item
 					) : $item;
 				}
 				$body_params[ $batch_type ] = $injected_items;

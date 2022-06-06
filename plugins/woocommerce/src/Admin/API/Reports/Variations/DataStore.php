@@ -236,6 +236,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_variations_extended_attributes', $this->extended_attributes, $product_data );
 				$parent_product      = wc_get_product( $product_data['product_id'] );
 				$attributes          = array();
@@ -301,6 +306,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return boolean
 	 */
 	protected function should_exclude_simple_products( array $query_args ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'experimental_woocommerce_analytics_variations_should_exclude_simple_products', true, $query_args );
 	}
 
@@ -311,14 +321,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function fill_deleted_product_name( array &$products ) {
 		global $wpdb;
-		$product_variation_ids = [];
+		$product_variation_ids = array();
 		// Find products with missing extended_info.name.
 		foreach ( $products as $key => $product ) {
 			if ( ! isset( $product['extended_info']['name'] ) ) {
-				$product_variation_ids[ $key ] = [
+				$product_variation_ids[ $key ] = array(
 					'product_id'   => $product['product_id'],
 					'variation_id' => $product['variation_id'],
-				];
+				);
 			}
 		}
 
@@ -359,7 +369,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// phpcs:ignore
 		$results = $wpdb->get_results( $query );
-		$index   = [];
+		$index   = array();
 		foreach ( $results as $result ) {
 			$index[ $result->product_id . '_' . $result->variation_id ] = $result->order_item_name;
 		}

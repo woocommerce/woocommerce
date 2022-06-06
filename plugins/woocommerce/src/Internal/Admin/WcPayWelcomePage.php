@@ -43,12 +43,12 @@ class WcPayWelcomePage {
 			'title'    => __( 'Payments', 'woocommerce' ),
 			'path'     => '/wc-pay-welcome-page',
 			'position' => '56',
-			'nav_args' => [
+			'nav_args' => array(
 				'title'        => __( 'WooCommerce Payments', 'woocommerce' ),
 				'is_category'  => false,
 				'menuId'       => 'plugins',
 				'is_top_level' => true,
-			],
+			),
 			'icon'     => $menu_icon,
 		);
 

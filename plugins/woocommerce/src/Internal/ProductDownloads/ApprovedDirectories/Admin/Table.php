@@ -141,8 +141,8 @@ class Table extends WP_List_Table {
 	 */
 	public function get_columns() {
 		return array(
-			'cb'    => '<input type="checkbox" />',
-			'title' => _x( 'URL', 'Approved product download directories', 'woocommerce' ),
+			'cb'      => '<input type="checkbox" />',
+			'title'   => _x( 'URL', 'Approved product download directories', 'woocommerce' ),
 			'enabled' => _x( 'Enabled', 'Approved product download directories', 'woocommerce' ),
 		);
 	}

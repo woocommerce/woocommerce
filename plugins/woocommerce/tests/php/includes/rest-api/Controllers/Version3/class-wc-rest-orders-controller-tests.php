@@ -81,7 +81,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -99,7 +99,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_orders_get_each_field_one_by_one() {
 		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order                    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );

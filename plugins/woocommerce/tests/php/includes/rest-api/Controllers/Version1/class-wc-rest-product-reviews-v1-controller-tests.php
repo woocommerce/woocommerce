@@ -123,7 +123,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 		);
 
 		$nonexistent_product_id = $this->product_id * 10;
-		$api_request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $nonexistent_product_id . '/reviews/' . $this->review_id );
+		$api_request            = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $nonexistent_product_id . '/reviews/' . $this->review_id );
 		$api_request->set_param( 'product_id', $nonexistent_product_id );
 		$api_request->set_param( 'id', $this->review_id );
 
@@ -155,7 +155,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 			array(
 				'comment_post_ID' => $this->product_id,
 				'comment_type'    => 'comment',
-				'comment_content' => 'I am a regular comment (typically left by an admin/shop manager as a response to product reviews.'
+				'comment_content' => 'I am a regular comment (typically left by an admin/shop manager as a response to product reviews.',
 			)
 		);
 

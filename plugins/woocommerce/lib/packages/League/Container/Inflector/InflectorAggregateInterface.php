@@ -5,23 +5,23 @@ namespace Automattic\WooCommerce\Vendor\League\Container\Inflector;
 use IteratorAggregate;
 use Automattic\WooCommerce\Vendor\League\Container\ContainerAwareInterface;
 
-interface InflectorAggregateInterface extends ContainerAwareInterface, IteratorAggregate
-{
-    /**
-     * Add an inflector to the aggregate.
-     *
-     * @param string   $type
-     * @param callable $callback
-     *
-     * @return Inflector
-     */
-    public function add(string $type, callable $callback = null) : Inflector;
+interface InflectorAggregateInterface extends ContainerAwareInterface, IteratorAggregate {
 
-    /**
-     * Applies all inflectors to an object.
-     *
-     * @param  object $object
-     * @return object
-     */
-    public function inflect($object);
+	/**
+	 * Add an inflector to the aggregate.
+	 *
+	 * @param string   $type
+	 * @param callable $callback
+	 *
+	 * @return Inflector
+	 */
+	public function add( string $type, callable $callback = null) : Inflector;
+
+	/**
+	 * Applies all inflectors to an object.
+	 *
+	 * @param  object $object
+	 * @return object
+	 */
+	public function inflect( $object);
 }

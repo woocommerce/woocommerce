@@ -231,6 +231,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param array           $prepared_args Array of arguments for $wpdb->get_results().
 		 * @param WP_REST_Request $request       The current request.
+		 * @since
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_tax_query', $prepared_args, $request );
 
@@ -412,6 +413,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 * @param stdClass        $tax       Data used to create the tax.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_tax', $tax, $request, true );
 
@@ -468,6 +470,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 * @param stdClass        $tax       Data used to create the tax.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating tax, false when updating tax.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_tax', $tax, $request, false );
 
@@ -516,6 +519,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 * @param stdClass         $tax      The tax data.
 		 * @param WP_REST_Response $response The response returned from the API.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_delete_tax', $tax, $response, $request );
 
@@ -564,6 +568,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param stdClass         $tax      Tax object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_tax', $response, $tax, $request );
 	}

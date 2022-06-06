@@ -58,6 +58,11 @@ class WC_Session_Handler extends WC_Session {
 	 * Constructor for the session class.
 	 */
 	public function __construct() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->_cookie = apply_filters( 'woocommerce_cookie', 'wp_woocommerce_session_' . COOKIEHASH );
 		$this->_table  = $GLOBALS['wpdb']->prefix . 'woocommerce_sessions';
 	}
@@ -174,6 +179,11 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	protected function use_secure_cookie() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'wc_session_use_secure_cookie', wc_site_is_https() && is_ssl() );
 	}
 
@@ -190,7 +200,17 @@ class WC_Session_Handler extends WC_Session {
 	 * Set session expiration.
 	 */
 	public function set_session_expiration() {
-		$this->_session_expiring   = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) ); // 47 Hours.
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$this->_session_expiring = time() + intval( apply_filters( 'wc_session_expiring', 60 * 60 * 47 ) );
+		/**
+		 * 47 Hours.
+		 *
+		 * @since
+		 */
 		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) ); // 48 Hours.
 	}
 

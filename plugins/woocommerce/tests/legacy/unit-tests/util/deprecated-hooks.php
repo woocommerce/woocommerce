@@ -142,6 +142,11 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$this->setExpectedDeprecated( 'woocommerce_product_width' );
 		add_filter( 'woocommerce_product_width', array( $this, 'toggle_value' ) );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$new_width = apply_filters( 'woocommerce_product_get_width', $test_width );
 		$this->assertEquals( 0, $new_width );
 	}
@@ -161,6 +166,11 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 
 		$this->setExpectedDeprecated( 'woocommerce_order_edit_product' );
 		add_action( 'woocommerce_order_edit_product', array( $this, 'set_meta' ), 10, 2 );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_order_item', $test_item_id, $test_item, $test_order_id );
 
 		$order_update_worked = (bool) get_post_meta( $test_order_id, 'wc_deprecated_hook_test_item1_meta', 1 );

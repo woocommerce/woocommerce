@@ -48,6 +48,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						'cbvalue' => 'open',
 					)
 				);
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_product_options_reviews' );
 			?>
 		</div>

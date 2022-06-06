@@ -24,6 +24,11 @@ class OnboardingIndustries {
 	 */
 	public static function get_allowed_industries() {
 		/* With "use_description" we turn the description input on. With "description_label" we set the input label */
+		/**
+		 *
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_admin_onboarding_industries',
 			array(

@@ -130,6 +130,11 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
@@ -223,6 +228,11 @@ function woocommerce_get_formatted_product_name( $product ) {
 function woocommerce_legacy_paypal_ipn() {
 	if ( ! empty( $_GET['paypalListener'] ) && 'paypal_standard_IPN' === $_GET['paypalListener'] ) {
 		WC()->payment_gateways();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_wc_gateway_paypal' );
 	}
 }
@@ -351,7 +361,7 @@ function woocommerce_locate_template( $template_name, $template_path = '', $defa
 /**
  * @deprecated 3.0
  */
-function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = "" ) {
+function woocommerce_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = '' ) {
 	wc_deprecated_function( __FUNCTION__, '3.0', 'wc_mail' );
 	wc_mail( $to, $subject, $message, $headers, $attachments );
 }
@@ -916,19 +926,19 @@ function woocommerce_get_product_schema() {
 
 	global $product;
 
-	$schema = "Product";
+	$schema = 'Product';
 
 	// Downloadable product schema handling
 	if ( $product->is_downloadable() ) {
 		switch ( $product->download_type ) {
-			case 'application' :
-				$schema = "SoftwareApplication";
+			case 'application':
+				$schema = 'SoftwareApplication';
 				break;
-			case 'music' :
-				$schema = "MusicAlbum";
+			case 'music':
+				$schema = 'MusicAlbum';
 				break;
-			default :
-				$schema = "Product";
+			default:
+				$schema = 'Product';
 				break;
 		}
 	}
@@ -1028,6 +1038,11 @@ function wc_get_min_max_price_meta_query( $args ) {
 	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
 	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters(
 		'woocommerce_get_min_max_price_meta_query',
 		array(

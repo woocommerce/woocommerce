@@ -79,7 +79,12 @@ class WC_Data_Store {
 	 */
 	public function __construct( $object_type ) {
 		$this->object_type = $object_type;
-		$this->stores      = apply_filters( 'woocommerce_data_stores', $this->stores );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$this->stores = apply_filters( 'woocommerce_data_stores', $this->stores );
 
 		// If this object type can't be found, check to see if we can load one
 		// level up (so if product-type isn't found, we try product).
@@ -89,6 +94,11 @@ class WC_Data_Store {
 		}
 
 		if ( array_key_exists( $object_type, $this->stores ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$store = apply_filters( 'woocommerce_' . $object_type . '_data_store', $this->stores[ $object_type ] );
 			if ( is_object( $store ) ) {
 				if ( ! $store instanceof WC_Object_Data_Store_Interface ) {

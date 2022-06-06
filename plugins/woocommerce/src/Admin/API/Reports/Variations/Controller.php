@@ -63,6 +63,7 @@ class Controller extends ReportsController implements ExportableInterface {
 		 * @ignore
 		 *
 		 * @param array $collection_params List of parameters.
+		 * @since
 		 */
 		$collection_params = apply_filters(
 			'experimental_woocommerce_analytics_variations_collection_params',
@@ -139,6 +140,7 @@ class Controller extends ReportsController implements ExportableInterface {
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_variations', $response, $report, $request );
 	}

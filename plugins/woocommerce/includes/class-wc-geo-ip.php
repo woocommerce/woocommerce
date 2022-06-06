@@ -1190,7 +1190,7 @@ class WC_Geo_IP {
 		} else {
 			if ( $this->filehandle = fopen( $filename, 'rb' ) ) {
 				if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
-					$s_array = fstat( $this->filehandle );
+					$s_array             = fstat( $this->filehandle );
 					$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
 				}
 			} else {
@@ -1317,7 +1317,7 @@ class WC_Geo_IP {
 						|| ( self::GEOIP_ASNUM_EDITION_V6 == $this->databaseType )
 					) {
 						$this->databaseSegments = 0;
-						$buf = fread( $this->filehandle, self::SEGMENT_RECORD_LENGTH );
+						$buf                    = fread( $this->filehandle, self::SEGMENT_RECORD_LENGTH );
 
 						for ( $j = 0; $j < self::SEGMENT_RECORD_LENGTH; $j++ ) {
 							$this->databaseSegments += ( ord( $buf[ $j ] ) << ( $j * 8 ) );
@@ -1537,8 +1537,8 @@ class WC_Geo_IP {
 				}
 			}
 
-			$bnum = 127 - $depth;
-			$idx = $bnum >> 3;
+			$bnum   = 127 - $depth;
+			$idx    = $bnum >> 3;
 			$b_mask = 1 << ( $bnum & 7 ^ 7 );
 			if ( ( $v6vec[ $idx ] & $b_mask ) > 0 ) {
 				if ( $x[1] >= $this->databaseSegments ) {

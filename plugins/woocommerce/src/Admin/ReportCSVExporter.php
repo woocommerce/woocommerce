@@ -294,7 +294,12 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 			$value = isset( $item[ $column_name ] ) ? $item[ $column_name ] : null;
 
 			if ( has_filter( "woocommerce_export_{$this->export_type}_column_{$column_name}" ) ) {
-				// Filter for 3rd parties.
+
+				/**
+				 * Filter for 3rd parties.
+				 *
+				 * @since
+				 */
 				$value = apply_filters( "woocommerce_export_{$this->export_type}_column_{$column_name}", '', $item );
 
 			} elseif ( is_callable( array( $this, "get_column_value_{$column_name}" ) ) ) {
@@ -327,6 +332,11 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 			$row = $this->get_raw_row_data( $item );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( "woocommerce_export_{$this->export_type}_row_data", $row, $item );
 	}
 }

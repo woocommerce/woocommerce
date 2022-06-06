@@ -1168,6 +1168,11 @@ function wc_update_260_zone_methods() {
 			// $changes contains keys (old method ids) and values (new instance ids) if extra processing is needed in plugins.
 			// Store this to an option so extensions can pick it up later, then fire an action.
 			update_option( 'woocommerce_updated_instance_ids', $changes );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_updated_instance_ids', $changes );
 		}
 	}
@@ -2065,7 +2070,12 @@ function wc_update_370_db_version() {
  * be publicly accessible.
  */
 function wc_update_390_move_maxmind_database() {
-	// Make sure to use all of the correct filters to pull the local database path.
+
+	/**
+	 * Make sure to use all of the correct filters to pull the local database path.
+	 *
+	 * @since
+	 */
 	$old_path = apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', 2 );
 
 	// Generate a prefix for the old file and store it in the integration as it would expect it.
@@ -2075,8 +2085,18 @@ function wc_update_390_move_maxmind_database() {
 	// Generate the new path in the same way that the integration will.
 	$uploads_dir = wp_upload_dir();
 	$new_path    = trailingslashit( $uploads_dir['basedir'] ) . 'woocommerce_uploads/' . $prefix . '-GeoLite2-Country.mmdb';
-	$new_path    = apply_filters( 'woocommerce_geolocation_local_database_path', $new_path, 2 );
-	$new_path    = apply_filters( 'woocommerce_maxmind_geolocation_database_path', $new_path );
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
+	$new_path = apply_filters( 'woocommerce_geolocation_local_database_path', $new_path, 2 );
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
+	$new_path = apply_filters( 'woocommerce_maxmind_geolocation_database_path', $new_path );
 
 	// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	@rename( $old_path, $new_path );

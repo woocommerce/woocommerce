@@ -40,6 +40,11 @@ class WC_Privacy_Erasers {
 			return $response;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$props_to_erase = apply_filters(
 			'woocommerce_privacy_erase_customer_personal_data_props',
 			array(
@@ -80,6 +85,11 @@ class WC_Privacy_Erasers {
 				}
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$erased = apply_filters( 'woocommerce_privacy_erase_customer_personal_data_prop', $erased, $prop, $customer );
 
 			if ( $erased ) {
@@ -136,6 +146,11 @@ class WC_Privacy_Erasers {
 
 		if ( 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				if ( apply_filters( 'woocommerce_privacy_erase_order_personal_data', $erasure_enabled, $order ) ) {
 					self::remove_order_personal_data( $order );
 
@@ -189,7 +204,11 @@ class WC_Privacy_Erasers {
 
 		$customer_download_data_store = WC_Data_Store::load( 'customer-download' );
 
-		// Revoke download permissions.
+		/**
+		 * Revoke download permissions.
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_privacy_erase_download_personal_data', $erasure_enabled, $email_address ) ) {
 			if ( $user instanceof WP_User ) {
 				$result = $customer_download_data_store->delete_by_user_id( (int) $user->ID );
@@ -294,7 +313,11 @@ class WC_Privacy_Erasers {
 		// Set all new props and persist the new data to the database.
 		$order->set_props( $anonymized_data );
 
-		// Remove meta data.
+		/**
+		 * Remove meta data.
+		 *
+		 * @since
+		 */
 		$meta_to_remove = apply_filters(
 			'woocommerce_privacy_remove_order_personal_data_meta',
 			array(

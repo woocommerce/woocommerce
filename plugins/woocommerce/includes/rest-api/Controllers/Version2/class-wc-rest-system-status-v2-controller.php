@@ -850,7 +850,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				)
 			);
 
-			// WC Core tables to check existence of.
+			/**
+			 * WC Core tables to check existence of.
+			 *
+			 * @since
+			 */
 			$core_tables = apply_filters(
 				'woocommerce_database_tables',
 				array(
@@ -1113,6 +1117,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$scan_files[] = 'taxonomy-product_tag.php';
 
 			foreach ( $scan_files as $file ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
 
 				if ( file_exists( $located ) ) {
@@ -1252,16 +1261,31 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			),
 			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_cart_page_id',
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 				'block'     => 'woocommerce/cart',
 			),
 			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_checkout_page_id',
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 				'block'     => 'woocommerce/checkout',
 			),
 			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 				'block'     => '',
 			),
@@ -1306,7 +1330,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			// Block checks.
 			if ( $values['block'] && get_post( $page_id ) ) {
 				$block_required = true;
-				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
+				$block_present  = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
 			}
 
 			// Wrap up our findings into an output array.
@@ -1358,6 +1382,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response   $response The response object.
 		 * @param mixed              $system_status System status
 		 * @param WP_REST_Request    $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_system_status', $response, $system_status, $request );
 	}

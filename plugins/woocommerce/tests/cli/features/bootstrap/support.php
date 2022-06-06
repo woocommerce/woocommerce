@@ -4,44 +4,45 @@
 
 function assertEquals( $expected, $actual ) {
 	if ( $expected != $actual ) {
-		throw new Exception( "Actual value: " . var_export( $actual, true ) );
+		throw new Exception( 'Actual value: ' . var_export( $actual, true ) );
 	}
 }
 
 function assertNumeric( $actual ) {
-	if ( !is_numeric( $actual ) ) {
-		throw new Exception( "Actual value: " . var_export( $actual, true ) );
+	if ( ! is_numeric( $actual ) ) {
+		throw new Exception( 'Actual value: ' . var_export( $actual, true ) );
 	}
 }
 
 function assertNotNumeric( $actual ) {
 	if ( is_numeric( $actual ) ) {
-		throw new Exception( "Actual value: " . var_export( $actual, true ) );
+		throw new Exception( 'Actual value: ' . var_export( $actual, true ) );
 	}
 }
 
 function checkString( $output, $expected, $action, $message = false ) {
 	switch ( $action ) {
 
-	case 'be':
-		$r = $expected === rtrim( $output, "\n" );
-		break;
+		case 'be':
+			$r = $expected === rtrim( $output, "\n" );
+			break;
 
-	case 'contain':
-		$r = false !== strpos( $output, $expected );
-		break;
+		case 'contain':
+			$r = false !== strpos( $output, $expected );
+			break;
 
-	case 'not contain':
-		$r = false === strpos( $output, $expected );
-		break;
+		case 'not contain':
+			$r = false === strpos( $output, $expected );
+			break;
 
-	default:
-		throw new Behat\Behat\Exception\PendingException();
+		default:
+			throw new Behat\Behat\Exception\PendingException();
 	}
 
-	if ( !$r ) {
-		if ( false === $message )
+	if ( ! $r ) {
+		if ( false === $message ) {
 			$message = $output;
+		}
 		throw new Exception( $message );
 	}
 }
@@ -56,7 +57,7 @@ function compareTables( $expected_rows, $actual_rows, $output ) {
 	unset( $expected_rows[0] );
 
 	$missing_rows = array_diff( $expected_rows, $actual_rows );
-	if ( !empty( $missing_rows ) ) {
+	if ( ! empty( $missing_rows ) ) {
 		throw new \Exception( $output );
 	}
 }
@@ -68,13 +69,15 @@ function compareContents( $expected, $actual ) {
 
 	if ( is_object( $expected ) ) {
 		foreach ( get_object_vars( $expected ) as $name => $value ) {
-			if ( ! compareContents( $value, $actual->$name ) )
+			if ( ! compareContents( $value, $actual->$name ) ) {
 				return false;
+			}
 		}
-	} else if ( is_array( $expected ) ) {
+	} elseif ( is_array( $expected ) ) {
 		foreach ( $expected as $key => $value ) {
-			if ( ! compareContents( $value, $actual[$key] ) )
+			if ( ! compareContents( $value, $actual[ $key ] ) ) {
 				return false;
+			}
 		}
 	} else {
 		return $expected === $actual;
@@ -120,7 +123,7 @@ function checkThatJsonStringContainsJsonString( $actualJson, $expectedJson ) {
 	$actualValue   = json_decode( $actualJson );
 	$expectedValue = json_decode( $expectedJson );
 
-	if ( !$actualValue ) {
+	if ( ! $actualValue ) {
 		return false;
 	}
 
@@ -139,11 +142,12 @@ function checkThatJsonStringContainsJsonString( $actualJson, $expectedJson ) {
 function checkThatCsvStringContainsValues( $actualCSV, $expectedCSV ) {
 	$actualCSV = array_map( 'str_getcsv', explode( PHP_EOL, $actualCSV ) );
 
-	if ( empty( $actualCSV ) )
+	if ( empty( $actualCSV ) ) {
 		return false;
+	}
 
 	// Each sample must have headers
-	$actualHeaders = array_values( array_shift( $actualCSV ) );
+	$actualHeaders   = array_values( array_shift( $actualCSV ) );
 	$expectedHeaders = array_values( array_shift( $expectedCSV ) );
 
 	// Each expectedCSV must exist somewhere in actualCSV in the proper column
@@ -152,12 +156,14 @@ function checkThatCsvStringContainsValues( $actualCSV, $expectedCSV ) {
 		$expected_row = array_combine( $expectedHeaders, $expected_row );
 		foreach ( $actualCSV as $actual_row ) {
 
-			if ( count( $actualHeaders ) != count( $actual_row ) )
+			if ( count( $actualHeaders ) != count( $actual_row ) ) {
 				continue;
+			}
 
 			$actual_row = array_intersect_key( array_combine( $actualHeaders, $actual_row ), $expected_row );
-			if ( $actual_row == $expected_row )
+			if ( $actual_row == $expected_row ) {
 				$expectedResult++;
+			}
 		}
 	}
 
@@ -179,7 +185,7 @@ function checkThatYamlStringContainsYamlString( $actualYaml, $expectedYaml ) {
 	$actualValue   = spyc_load( $actualYaml );
 	$expectedValue = spyc_load( $expectedYaml );
 
-	if ( !$actualValue ) {
+	if ( ! $actualValue ) {
 		return false;
 	}
 

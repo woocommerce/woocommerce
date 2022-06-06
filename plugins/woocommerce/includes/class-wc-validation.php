@@ -120,6 +120,11 @@ class WC_Validation {
 				break;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_validate_postcode', $valid, $postcode, $country );
 	}
 

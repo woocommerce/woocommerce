@@ -5,72 +5,68 @@ namespace Automattic\WooCommerce\Vendor\League\Container;
 use Automattic\WooCommerce\Vendor\League\Container\Exception\ContainerException;
 use Psr\Container\ContainerInterface;
 
-trait ContainerAwareTrait
-{
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+trait ContainerAwareTrait {
 
-    /**
-     * @var Container
-     */
-    protected $leagueContainer;
+	/**
+	 * @var ContainerInterface
+	 */
+	protected $container;
 
-    /**
-     * Set a container.
-     *
-     * @param ContainerInterface $container
-     *
-     * @return self
-     */
-    public function setContainer(ContainerInterface $container) : ContainerAwareInterface
-    {
-        $this->container = $container;
+	/**
+	 * @var Container
+	 */
+	protected $leagueContainer;
 
-        return $this;
-    }
+	/**
+	 * Set a container.
+	 *
+	 * @param ContainerInterface $container
+	 *
+	 * @return self
+	 */
+	public function setContainer( ContainerInterface $container ) : ContainerAwareInterface {
+		$this->container = $container;
 
-    /**
-     * Get the container.
-     *
-     * @return ContainerInterface
-     */
-    public function getContainer() : ContainerInterface
-    {
-        if ($this->container instanceof ContainerInterface) {
-            return $this->container;
-        }
+		return $this;
+	}
 
-        throw new ContainerException('No container implementation has been set.');
-    }
+	/**
+	 * Get the container.
+	 *
+	 * @return ContainerInterface
+	 */
+	public function getContainer() : ContainerInterface {
+		if ( $this->container instanceof ContainerInterface ) {
+			return $this->container;
+		}
 
-    /**
-     * Set a container.
-     *
-     * @param Container $container
-     *
-     * @return self
-     */
-    public function setLeagueContainer(Container $container) : ContainerAwareInterface
-    {
-        $this->container = $container;
-        $this->leagueContainer = $container;
+		throw new ContainerException( 'No container implementation has been set.' );
+	}
 
-        return $this;
-    }
+	/**
+	 * Set a container.
+	 *
+	 * @param Container $container
+	 *
+	 * @return self
+	 */
+	public function setLeagueContainer( Container $container ) : ContainerAwareInterface {
+		$this->container       = $container;
+		$this->leagueContainer = $container;
 
-    /**
-     * Get the container.
-     *
-     * @return Container
-     */
-    public function getLeagueContainer() : Container
-    {
-        if ($this->leagueContainer instanceof Container) {
-            return $this->leagueContainer;
-        }
+		return $this;
+	}
 
-        throw new ContainerException('No container implementation has been set.');
-    }
+	/**
+	 * Get the container.
+	 *
+	 * @return Container
+	 */
+	public function getLeagueContainer() : Container {
+		if ( $this->leagueContainer instanceof Container ) {
+			return $this->leagueContainer;
+		}
+
+		throw new ContainerException( 'No container implementation has been set.' );
+	}
 }

@@ -75,7 +75,7 @@ class Coupons {
 			__( 'Coupons', 'woocommerce' ),
 			'manage_options',
 			'coupons-moved',
-			[ $this, 'coupon_menu_moved' ]
+			array( $this, 'coupon_menu_moved' )
 		);
 	}
 

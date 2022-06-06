@@ -215,6 +215,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original list of continent(s), countries, and states.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_continent', $response, $item, $request );
 	}

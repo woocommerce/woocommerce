@@ -104,7 +104,7 @@ class WC_API_Resource {
 		$post = get_post( $id );
 
 		// Orders request are a special case.
-		$is_invalid_orders_request = ( 'shop_order' === $type && ( ! $post || ! is_a ( $post, 'WP_Post' ) || 'shop_order' !== $post->post_type ) && ! wc_rest_check_post_permissions( 'shop_order', 'read' ) );
+		$is_invalid_orders_request = ( 'shop_order' === $type && ( ! $post || ! is_a( $post, 'WP_Post' ) || 'shop_order' !== $post->post_type ) && ! wc_rest_check_post_permissions( 'shop_order', 'read' ) );
 
 		if ( ! $is_invalid_orders_request ) {
 			if ( null === $post ) {
@@ -164,22 +164,38 @@ class WC_API_Resource {
 
 			// resources created after specified date
 			if ( ! empty( $request_args['created_at_min'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'after' => $this->server->parse_datetime( $request_args['created_at_min'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_date_gmt',
+					'after'     => $this->server->parse_datetime( $request_args['created_at_min'] ),
+					'inclusive' => true,
+				);
 			}
 
 			// resources created before specified date
 			if ( ! empty( $request_args['created_at_max'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_date_gmt', 'before' => $this->server->parse_datetime( $request_args['created_at_max'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_date_gmt',
+					'before'    => $this->server->parse_datetime( $request_args['created_at_max'] ),
+					'inclusive' => true,
+				);
 			}
 
 			// resources updated after specified date
 			if ( ! empty( $request_args['updated_at_min'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'after' => $this->server->parse_datetime( $request_args['updated_at_min'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_modified_gmt',
+					'after'     => $this->server->parse_datetime( $request_args['updated_at_min'] ),
+					'inclusive' => true,
+				);
 			}
 
 			// resources updated before specified date
 			if ( ! empty( $request_args['updated_at_max'] ) ) {
-				$args['date_query'][] = array( 'column' => 'post_modified_gmt', 'before' => $this->server->parse_datetime( $request_args['updated_at_max'] ), 'inclusive' => true );
+				$args['date_query'][] = array(
+					'column'    => 'post_modified_gmt',
+					'before'    => $this->server->parse_datetime( $request_args['updated_at_max'] ),
+					'inclusive' => true,
+				);
 			}
 		}
 
@@ -234,6 +250,11 @@ class WC_API_Resource {
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args = apply_filters( 'woocommerce_api_query_args', $args, $request_args );
 
 		return array_merge( $base_args, $args );
@@ -315,7 +336,7 @@ class WC_API_Resource {
 			return $data;
 		}
 
-		$fields = explode( ',', $fields );
+		$fields     = explode( ',', $fields );
 		$sub_fields = array();
 
 		// get sub fields
@@ -472,6 +493,11 @@ class WC_API_Resource {
 			$permission = current_user_can( $post_type->cap->delete_post, $post->ID );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_api_check_permission', $permission, $context, $post, $post_type );
 	}
 }

@@ -8,7 +8,17 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 if ( apply_filters( 'woocommerce_checkout_show_terms', true ) && function_exists( 'wc_terms_and_conditions_checkbox_enabled' ) ) {
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_checkout_before_terms_and_conditions' );
 
 	?>
@@ -36,5 +46,10 @@ if ( apply_filters( 'woocommerce_checkout_show_terms', true ) && function_exists
 	</div>
 	<?php
 
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_checkout_after_terms_and_conditions' );
 }

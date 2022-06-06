@@ -203,6 +203,11 @@ class WC_Report_Customers extends WC_Admin_Report {
 		);
 
 		$users_query = new WP_User_Query(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_admin_report_customers_user_query_args',
 				array(

@@ -61,15 +61,15 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 		wc_doing_it_wrong( $key, 'Coupon properties should not be accessed directly.', '3.0' );
 
 		switch ( $key ) {
-			case 'id' :
+			case 'id':
 				$value = $this->get_id();
-			break;
-			case 'exists' :
+				break;
+			case 'exists':
 				$value = $this->get_id() > 0;
-			break;
-			case 'coupon_custom_fields' :
+				break;
+			case 'coupon_custom_fields':
 				$legacy_custom_fields = array();
-				$custom_fields = $this->get_id() ? $this->get_meta_data() : array();
+				$custom_fields        = $this->get_id() ? $this->get_meta_data() : array();
 				if ( ! empty( $custom_fields ) ) {
 					foreach ( $custom_fields as  $cf_value ) {
 						// legacy only supports 1 key
@@ -77,60 +77,60 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 					}
 				}
 				$value = $legacy_custom_fields;
-			break;
-			case 'type' :
-			case 'discount_type' :
+				break;
+			case 'type':
+			case 'discount_type':
 				$value = $this->get_discount_type();
-			break;
-			case 'amount' :
-			case 'coupon_amount' :
+				break;
+			case 'amount':
+			case 'coupon_amount':
 				$value = $this->get_amount();
-			break;
-			case 'code' :
+				break;
+			case 'code':
 				$value = $this->get_code();
-			break;
-			case 'individual_use' :
+				break;
+			case 'individual_use':
 				$value = ( true === $this->get_individual_use() ) ? 'yes' : 'no';
-			break;
-			case 'product_ids' :
+				break;
+			case 'product_ids':
 				$value = $this->get_product_ids();
-			break;
-			case 'exclude_product_ids' :
+				break;
+			case 'exclude_product_ids':
 				$value = $this->get_excluded_product_ids();
-			break;
-			case 'usage_limit' :
+				break;
+			case 'usage_limit':
 				$value = $this->get_usage_limit();
-			break;
-			case 'usage_limit_per_user' :
+				break;
+			case 'usage_limit_per_user':
 				$value = $this->get_usage_limit_per_user();
-			break;
-			case 'limit_usage_to_x_items' :
+				break;
+			case 'limit_usage_to_x_items':
 				$value = $this->get_limit_usage_to_x_items();
-			break;
-			case 'usage_count' :
+				break;
+			case 'usage_count':
 				$value = $this->get_usage_count();
-			break;
-			case 'expiry_date' :
+				break;
+			case 'expiry_date':
 				$value = ( $this->get_date_expires() ? $this->get_date_expires()->date( 'Y-m-d' ) : '' );
-			break;
-			case 'product_categories' :
+				break;
+			case 'product_categories':
 				$value = $this->get_product_categories();
-			break;
-			case 'exclude_product_categories' :
+				break;
+			case 'exclude_product_categories':
 				$value = $this->get_excluded_product_categories();
-			break;
-			case 'minimum_amount' :
+				break;
+			case 'minimum_amount':
 				$value = $this->get_minimum_amount();
-			break;
-			case 'maximum_amount' :
+				break;
+			case 'maximum_amount':
 				$value = $this->get_maximum_amount();
-			break;
-			case 'customer_email' :
+				break;
+			case 'customer_email':
 				$value = $this->get_email_restrictions();
-			break;
-			default :
+				break;
+			default:
 				$value = '';
-			break;
+				break;
 		}
 
 		return $value;

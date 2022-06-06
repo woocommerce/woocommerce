@@ -39,7 +39,9 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -58,6 +60,11 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$groups = apply_filters( 'woocommerce_settings_groups', array() );
 		if ( empty( $groups ) ) {
 			return new WP_Error( 'rest_setting_groups_empty', __( 'No setting groups have been registered.', 'woocommerce' ), array( 'status' => 500 ) );

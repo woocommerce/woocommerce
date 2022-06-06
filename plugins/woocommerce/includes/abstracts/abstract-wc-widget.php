@@ -162,6 +162,11 @@ abstract class WC_Widget extends WP_Widget {
 	public function widget_start( $args, $instance ) {
 		echo $args['before_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$title = apply_filters( 'widget_title', $this->get_instance_title( $instance ), $instance, $this->id_base );
 
 		if ( $title ) {
@@ -226,6 +231,7 @@ abstract class WC_Widget extends WP_Widget {
 
 			/**
 			 * Sanitize the value of a setting.
+			 * @since
 			 */
 			$instance[ $key ] = apply_filters( 'woocommerce_widget_settings_sanitize_option', $instance[ $key ], $new_instance, $key, $setting );
 		}
@@ -309,6 +315,11 @@ abstract class WC_Widget extends WP_Widget {
 
 				// Default: run an action.
 				default:
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_widget_field_' . $setting['type'], $key, $value, $setting, $instance );
 					break;
 			}
@@ -385,6 +396,11 @@ abstract class WC_Widget extends WP_Widget {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_widget_get_current_page_url', $link, $this );
 	}
 
@@ -403,6 +419,11 @@ abstract class WC_Widget extends WP_Widget {
 			$widget_id_for_cache = $widget_id . '-' . ( is_ssl() ? 'https' : 'http' );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_cached_widget_id', $widget_id_for_cache );
 	}
 }

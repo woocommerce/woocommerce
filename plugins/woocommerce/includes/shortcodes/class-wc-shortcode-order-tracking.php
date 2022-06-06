@@ -49,9 +49,19 @@ class WC_Shortcode_Order_Tracking {
 			} elseif ( ! $order_email ) {
 				wc_print_notice( __( 'Please enter a valid email address', 'woocommerce' ), 'error' );
 			} else {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$order = wc_get_order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 
 				if ( $order && $order->get_id() && strtolower( $order->get_billing_email() ) === strtolower( $order_email ) ) {
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_track_order', $order->get_id() );
 					wc_get_template(
 						'order/tracking.php',

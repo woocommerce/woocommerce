@@ -52,6 +52,11 @@ class WC_Widget_Cart extends WC_Widget {
 	 * @param array $instance Widget instance.
 	 */
 	public function widget( $args, $instance ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_widget_cart_is_hidden', is_cart() || is_checkout() ) ) {
 			return;
 		}

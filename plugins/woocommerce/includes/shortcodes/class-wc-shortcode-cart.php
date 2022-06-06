@@ -31,6 +31,11 @@ class WC_Shortcode_Cart {
 			$address['postcode'] = isset( $_POST['calc_shipping_postcode'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_postcode'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 			$address['city']     = isset( $_POST['calc_shipping_city'] ) ? wc_clean( wp_unslash( $_POST['calc_shipping_city'] ) ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$address = apply_filters( 'woocommerce_cart_calculate_shipping_address', $address );
 
 			if ( $address['postcode'] && ! WC_Validation::is_postcode( $address['postcode'], $address['country'] ) ) {
@@ -54,6 +59,11 @@ class WC_Shortcode_Cart {
 
 			wc_add_notice( __( 'Shipping costs updated.', 'woocommerce' ), 'notice' );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_calculated_shipping' );
 
 		} catch ( Exception $e ) {
@@ -69,6 +79,11 @@ class WC_Shortcode_Cart {
 	 * @param array $atts Shortcode attributes.
 	 */
 	public static function output( $atts ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_output_cart_shortcode_content', true ) ) {
 			return;
 		}
@@ -87,7 +102,11 @@ class WC_Shortcode_Cart {
 			WC()->cart->calculate_totals();
 		}
 
-		// Check cart items are valid.
+		/**
+		 * Check cart items are valid.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_check_cart_items' );
 
 		// Calc totals.

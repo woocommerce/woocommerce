@@ -308,7 +308,11 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$expected_csv .= implode( ',', $coupon_2_csv ) . PHP_EOL;
 		$expected_csv .= implode( ',', $coupon_1_csv ) . PHP_EOL;
 
-		// Ensure our exporter and report controller have been loaded.
+		/**
+		 * Ensure our exporter and report controller have been loaded.
+		 *
+		 * @since
+		 */
 		do_action( 'rest_api_init' );
 
 		// Run the export and compare values.

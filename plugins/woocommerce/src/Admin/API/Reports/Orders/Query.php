@@ -34,9 +34,19 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args       = apply_filters( 'woocommerce_analytics_orders_query_args', $this->get_query_vars() );
 		$data_store = \WC_Data_Store::load( 'report-orders' );
 		$results    = $data_store->get_data( $args );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_analytics_orders_select_query', $results, $args );
 	}
 }

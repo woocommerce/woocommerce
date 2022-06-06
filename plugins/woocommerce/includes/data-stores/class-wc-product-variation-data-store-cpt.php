@@ -140,6 +140,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$id = wp_insert_post(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_new_product_variation_data',
 				array(
@@ -178,6 +183,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$this->clear_caches( $product );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_new_product_variation', $id, $product );
 		}
 	}
@@ -271,6 +281,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$this->clear_caches( $product );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_product_variation', $product->get_id(), $product );
 	}
 
@@ -305,11 +320,26 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
-		$separator                 = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
-		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
+		$separator    = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
+		$title_base   = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_suffix = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_variation_title', $title_suffix ? $title_base . $separator . $title_suffix : $title_base, $product, $title_base, $title_suffix );
 	}
 

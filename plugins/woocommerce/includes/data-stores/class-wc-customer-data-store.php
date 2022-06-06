@@ -119,6 +119,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_password( '' );
 
 		wp_update_user(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_update_customer_args',
 				array(
@@ -134,6 +139,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_new_customer', $customer->get_id(), $customer );
 	}
 
@@ -175,6 +185,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		$customer->read_meta_data();
 		$customer->set_object_read( true );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_customer_loaded', $customer );
 	}
 
@@ -186,6 +201,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function update( &$customer ) {
 		wp_update_user(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_update_customer_args',
 				array(
@@ -212,6 +232,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_customer', $customer->get_id(), $customer );
 	}
 
@@ -237,6 +262,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$id = $customer->get_id();
 		wp_delete_user( $id, $args['reassign'] );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_delete_customer', $id );
 	}
 
@@ -317,6 +347,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_customer_object_updated_props', $customer, $updated_props );
 	}
 
@@ -328,6 +363,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$last_order = apply_filters(
 			'woocommerce_customer_get_last_order',
 			get_user_meta( $customer->get_id(), '_last_order', true ),
@@ -367,6 +407,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$count = apply_filters(
 			'woocommerce_customer_get_order_count',
 			get_user_meta( $customer->get_id(), '_order_count', true ),
@@ -401,6 +446,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$spent = apply_filters(
 			'woocommerce_customer_get_total_spent',
 			get_user_meta( $customer->get_id(), '_money_spent', true ),
@@ -413,6 +463,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 			$spent    = $wpdb->get_var(
 				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_customer_get_total_spent_query',
 					"SELECT SUM(meta2.meta_value)
@@ -448,12 +503,22 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return array
 	 */
 	public function search_customers( $term, $limit = '' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$results = apply_filters( 'woocommerce_customer_pre_search_customers', false, $term, $limit );
 		if ( is_array( $results ) ) {
 			return $results;
 		}
 
 		$query = new WP_User_Query(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_customer_search_customers',
 				array(
@@ -469,6 +534,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 
 		$query2 = new WP_User_Query(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_customer_search_customers',
 				array(
@@ -511,7 +581,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return array
 	 */
 	public function get_user_ids_for_billing_email( $emails ) {
-		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$emails      = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 		$users_query = new WP_User_Query(
 			array(
 				'fields'     => 'ID',

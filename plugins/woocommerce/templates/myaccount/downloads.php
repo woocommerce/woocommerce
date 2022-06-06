@@ -24,6 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 $downloads     = WC()->customer->get_downloadable_products();
 $has_downloads = (bool) $downloads;
 
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_before_account_downloads', $has_downloads ); ?>
 
 <?php if ( $has_downloads ) : ?>

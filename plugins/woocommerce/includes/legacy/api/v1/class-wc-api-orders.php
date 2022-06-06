@@ -36,7 +36,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		# GET /orders
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_orders' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_orders' ), WC_API_Server::READABLE ),
 		);
 
 		# GET /orders/count
@@ -46,7 +46,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		# GET|PUT /orders/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_order' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'get_order' ), WC_API_Server::READABLE ),
 			array( array( $this, 'edit_order' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
@@ -132,12 +132,12 @@ class WC_API_Orders extends WC_API_Resource {
 			'cart_discount'             => wc_format_decimal( 0, 2 ),
 			'order_discount'            => wc_format_decimal( 0, 2 ),
 			'shipping_methods'          => $order->get_shipping_method(),
-			'payment_details' => array(
+			'payment_details'           => array(
 				'method_id'    => $order->get_payment_method(),
 				'method_title' => $order->get_payment_method_title(),
 				'paid'         => ! is_null( $order->get_date_paid() ),
 			),
-			'billing_address' => array(
+			'billing_address'           => array(
 				'first_name' => $order->get_billing_first_name(),
 				'last_name'  => $order->get_billing_last_name(),
 				'company'    => $order->get_billing_company(),
@@ -150,7 +150,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'email'      => $order->get_billing_email(),
 				'phone'      => $order->get_billing_phone(),
 			),
-			'shipping_address' => array(
+			'shipping_address'          => array(
 				'first_name' => $order->get_shipping_first_name(),
 				'last_name'  => $order->get_shipping_last_name(),
 				'company'    => $order->get_shipping_company(),
@@ -230,6 +230,11 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order' => apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server ) );
 	}
 
@@ -297,7 +302,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		$id = $this->validate_request( $id, 'shop_order', 'delete' );
 
-		return $this->delete( $id, 'order',  ( 'true' === $force ) );
+		return $this->delete( $id, 'order', ( 'true' === $force ) );
 	}
 
 	/**
@@ -341,6 +346,11 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $id, $fields, $notes, $this->server ) );
 	}
 

@@ -57,6 +57,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $note     Order note object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_order_note', $response, $note, $request );
 	}
@@ -95,6 +96,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {
 		 * @param WP_Comment      $note      New order note object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_order_note', $note, $request, true );
 

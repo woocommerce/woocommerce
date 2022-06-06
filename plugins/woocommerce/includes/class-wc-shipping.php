@@ -119,6 +119,11 @@ class WC_Shipping {
 	 * Initialize shipping.
 	 */
 	public function init() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_shipping_init' );
 	}
 
@@ -145,6 +150,11 @@ class WC_Shipping {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_methods', $shipping_methods );
 	}
 
@@ -177,7 +187,11 @@ class WC_Shipping {
 			$this->register_shipping_method( $method_class );
 		}
 
-		// Methods can register themselves manually through this hook if necessary.
+		/**
+		 * Methods can register themselves manually through this hook if necessary.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_load_shipping_methods', $package );
 
 		// Return loaded methods.
@@ -239,6 +253,11 @@ class WC_Shipping {
 			);
 			$this->shipping_classes = ! is_wp_error( $classes ) ? $classes : array();
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_shipping_classes', $this->shipping_classes );
 	}
 
@@ -364,6 +383,7 @@ class WC_Shipping {
 			 * @see https://gist.github.com/woogists/271654709e1d27648546e83253c1a813 for cache invalidation methods.
 			 * @param array $package['rates'] Package rates.
 			 * @param array $package Package of cart items.
+			 * @since
 			 */
 			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
 

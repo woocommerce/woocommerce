@@ -32,8 +32,8 @@ class Init {
 		}
 
 		add_filter( 'woocommerce_payment_gateways', array( __CLASS__, 'possibly_register_pre_install_wc_pay_promotion_gateway' ) );
-		add_filter( 'option_woocommerce_gateway_order', [ __CLASS__, 'set_gateway_top_of_list' ] );
-		add_filter( 'default_option_woocommerce_gateway_order', [ __CLASS__, 'set_gateway_top_of_list' ] );
+		add_filter( 'option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
+		add_filter( 'default_option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
 
 		$rtl = is_rtl() ? '.rtl' : '';
 
@@ -82,6 +82,11 @@ class Init {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return false;
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
 			return false;
 		}

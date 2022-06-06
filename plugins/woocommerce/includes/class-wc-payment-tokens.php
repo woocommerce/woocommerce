@@ -77,6 +77,11 @@ class WC_Payment_Tokens {
 			)
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_customer_payment_tokens', $tokens, $customer_id, $gateway_id );
 	}
 
@@ -128,6 +133,11 @@ class WC_Payment_Tokens {
 			)
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_order_payment_tokens', $tokens, $order_id );
 	}
 
@@ -195,6 +205,11 @@ class WC_Payment_Tokens {
 		foreach ( $users_tokens as $token ) {
 			if ( $token_id === $token->get_id() ) {
 				$data_store->set_default_status( $token->get_id(), true );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_payment_token_set_default', $token_id, $token );
 			} else {
 				$data_store->set_default_status( $token->get_id(), false );

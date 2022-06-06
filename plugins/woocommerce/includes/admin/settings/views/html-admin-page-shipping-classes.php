@@ -80,6 +80,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php
 					break;
 				default:
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_shipping_classes_column_' . $class );
 					break;
 			}

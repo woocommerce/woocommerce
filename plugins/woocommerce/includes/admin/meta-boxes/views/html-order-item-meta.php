@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Hook
+ *
+ * @since
+ */
 $hidden_order_itemmeta = apply_filters(
 	'woocommerce_hidden_order_itemmeta',
 	array(

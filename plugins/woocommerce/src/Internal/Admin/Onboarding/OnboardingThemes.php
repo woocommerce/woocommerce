@@ -142,6 +142,11 @@ class OnboardingThemes {
 			set_transient( self::THEMES_TRANSIENT, $themes, DAY_IN_SECONDS );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$themes = apply_filters( 'woocommerce_admin_onboarding_themes', $themes );
 		return array_values( $themes );
 	}
@@ -217,6 +222,11 @@ class OnboardingThemes {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_admin_onboarding_themes_whitelist', $allowed_themes );
 	}
 

@@ -27,12 +27,22 @@ class WC_Integrations {
 	 */
 	public function __construct() {
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_integrations_init' );
 
 		$load_integrations = array(
 			'WC_Integration_MaxMind_Geolocation',
 		);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$load_integrations = apply_filters( 'woocommerce_integrations', $load_integrations );
 
 		// Load integration classes.

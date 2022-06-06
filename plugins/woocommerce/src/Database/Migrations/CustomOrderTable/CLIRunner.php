@@ -440,7 +440,7 @@ class CLIRunner {
 		$meta_table                   = OrdersTableDataStore::get_meta_table_name();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
-		$query           = $wpdb->prepare(
+		$query       = $wpdb->prepare(
 			"
 SELECT {$wpdb->postmeta}.post_id as entity_id, {$wpdb->postmeta}.meta_key, {$wpdb->postmeta}.meta_value
 FROM $wpdb->postmeta
@@ -478,17 +478,17 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		foreach ( $normalized_source_data as $order_id => $meta ) {
 			foreach ( $meta as $meta_key => $values ) {
 				$migrated_meta_values = isset( $normalized_migrated_meta_data[ $order_id ][ $meta_key ] ) ? $normalized_migrated_meta_data[ $order_id ][ $meta_key ] : array();
-				$diff = array_diff( $values, $migrated_meta_values );
+				$diff                 = array_diff( $values, $migrated_meta_values );
 
 				if ( count( $diff ) ) {
 					if ( ! isset( $failed_ids[ $order_id ] ) ) {
 						$failed_ids[ $order_id ] = array();
 					}
 					$failed_ids[ $order_id ][] = array(
-						'order_id'   => $order_id,
-						'meta_key'   => $meta_key,
+						'order_id'         => $order_id,
+						'meta_key'         => $meta_key,
 						'orig_meta_values' => $values,
-						'new_meta_values' => $migrated_meta_values,
+						'new_meta_values'  => $migrated_meta_values,
 					);
 				}
 			}

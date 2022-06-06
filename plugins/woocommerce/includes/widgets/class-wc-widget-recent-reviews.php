@@ -70,6 +70,11 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		if ( $comments ) {
 			$this->widget_start( $args, $instance );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_review_list', '<ul class="product_list_widget">' ) );
 
 			foreach ( (array) $comments as $comment ) {
@@ -82,6 +87,11 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 				);
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_review_list', '</ul>' ) );
 
 			$this->widget_end( $args );

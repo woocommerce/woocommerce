@@ -228,6 +228,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					continue;
 				}
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
 				foreach ( $extended_attributes as $extended_attribute ) {
 					if ( 'variations' === $extended_attribute ) {
@@ -473,6 +478,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 *
 			 * @param int $order_item_id Order Item ID.
 			 * @param int $order_id      Order ID.
+			 * @since
 			 */
 			do_action( 'woocommerce_analytics_update_product', $order_item_id, $order->get_id() );
 
@@ -512,6 +518,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $product_id Product ID.
 		 * @param int $order_id   Order ID.
+		 * @since
 		 */
 		do_action( 'woocommerce_analytics_delete_product', 0, $order_id );
 

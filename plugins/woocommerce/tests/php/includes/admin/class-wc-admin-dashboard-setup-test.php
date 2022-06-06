@@ -19,7 +19,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
 		update_option( 'woocommerce_default_country', 'JP' );
-		$password   = wp_generate_password( 8, false, false );
+		$password    = wp_generate_password( 8, false, false );
 		$this->admin = wp_insert_user(
 			array(
 				'user_login' => "test_admin$password",
@@ -113,8 +113,8 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * Tests widget does not display when user cannot manage woocommerce.
 	 */
 	public function test_widget_does_not_display_when_missing_capabilities() {
-		$password  = wp_generate_password( 8, false, false );
-		$author    = wp_insert_user(
+		$password = wp_generate_password( 8, false, false );
+		$author   = wp_insert_user(
 			array(
 				'user_login' => "test_author$password",
 				'user_pass'  => $password,

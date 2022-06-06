@@ -71,6 +71,11 @@ class WC_Tax {
 		} else {
 			$taxes = self::calc_exclusive_tax( $price, $rates );
 		}
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_calc_tax', $taxes, $price, $rates, $price_includes_tax, $deprecated );
 	}
 
@@ -83,6 +88,11 @@ class WC_Tax {
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
 		$taxes = self::calc_exclusive_tax( $price, $rates );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 
@@ -100,6 +110,11 @@ class WC_Tax {
 	 * @return float
 	 */
 	public static function round( $in ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_tax_round', NumberUtil::round( $in, wc_get_rounding_precision() ), $in );
 	}
 
@@ -131,6 +146,11 @@ class WC_Tax {
 		$non_compound_price = $price;
 
 		foreach ( $compound_rates as $key => $compound_rate ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$tax_amount         = apply_filters( 'woocommerce_price_inc_tax_amount', $non_compound_price - ( $non_compound_price / ( 1 + ( $compound_rate / 100 ) ) ), $key, $rates[ $key ], $price );
 			$taxes[ $key ]     += $tax_amount;
 			$non_compound_price = $non_compound_price - $tax_amount;
@@ -140,8 +160,13 @@ class WC_Tax {
 		$regular_tax_rate = 1 + ( array_sum( $regular_rates ) / 100 );
 
 		foreach ( $regular_rates as $key => $regular_rate ) {
-			$the_rate       = ( $regular_rate / 100 ) / $regular_tax_rate;
-			$net_price      = $price - ( $the_rate * $non_compound_price );
+			$the_rate  = ( $regular_rate / 100 ) / $regular_tax_rate;
+			$net_price = $price - ( $the_rate * $non_compound_price );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$tax_amount     = apply_filters( 'woocommerce_price_inc_tax_amount', $price - $net_price, $key, $rates[ $key ], $price );
 			$taxes[ $key ] += $tax_amount;
 		}
@@ -173,6 +198,11 @@ class WC_Tax {
 				}
 
 				$tax_amount = $price * ( $rate['rate'] / 100 );
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price ); // ADVANCED: Allow third parties to modify this rate.
 
 				if ( ! isset( $taxes[ $key ] ) ) {
@@ -191,7 +221,12 @@ class WC_Tax {
 				}
 				$the_price_inc_tax = $price + ( $pre_compound_total );
 				$tax_amount        = $the_price_inc_tax * ( $rate['rate'] / 100 );
-				$tax_amount        = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total ); // ADVANCED: Allow third parties to modify this rate.
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
+				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total ); // ADVANCED: Allow third parties to modify this rate.
 
 				if ( ! isset( $taxes[ $key ] ) ) {
 					$taxes[ $key ] = $tax_amount;
@@ -249,6 +284,11 @@ class WC_Tax {
 			wp_cache_set( $cache_key, $matched_tax_rates, 'taxes' );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_find_rates', $matched_tax_rates, $args );
 	}
 
@@ -438,6 +478,11 @@ class WC_Tax {
 			$found_priority[] = $found_rate->tax_rate_priority;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_matched_tax_rates', $matched_tax_rates, $country, $state, $postcode, $city, $tax_class );
 	}
 
@@ -468,6 +513,11 @@ class WC_Tax {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_tax_location', $location, $tax_class, $customer );
 	}
 
@@ -511,6 +561,11 @@ class WC_Tax {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_matched_rates', $matched_tax_rates, $tax_class, $customer );
 	}
 
@@ -521,6 +576,11 @@ class WC_Tax {
 	 * @return array
 	 */
 	public static function get_base_tax_rates( $tax_class = '' ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_base_tax_rates',
 			self::find_rates(
@@ -655,6 +715,11 @@ class WC_Tax {
 			$compound = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return (bool) apply_filters( 'woocommerce_rate_compound', $compound, $key );
 	}
 
@@ -679,6 +744,11 @@ class WC_Tax {
 			$rate_name = WC()->countries->tax_or_vat();
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_rate_label', $rate_name, $key );
 	}
 
@@ -691,6 +761,11 @@ class WC_Tax {
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
 		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 
@@ -742,6 +817,11 @@ class WC_Tax {
 			$code_string = strtoupper( implode( '-', array_filter( $code ) ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_rate_code', $code_string, $key );
 	}
 
@@ -1049,6 +1129,11 @@ class WC_Tax {
 
 		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $tax_rate );
 
 		return $tax_rate_id;
@@ -1106,6 +1191,11 @@ class WC_Tax {
 
 		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
 	}
 
@@ -1125,6 +1215,11 @@ class WC_Tax {
 
 		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
 	}
 

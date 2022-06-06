@@ -85,7 +85,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -97,9 +97,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 10,
 					'refund_total' => 0,
@@ -140,7 +140,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -152,9 +152,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 10,
 					'refund_total' => 0,
@@ -193,7 +193,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -205,9 +205,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -248,7 +248,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -260,9 +260,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -304,7 +304,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -316,9 +316,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -363,7 +363,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -375,9 +375,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,

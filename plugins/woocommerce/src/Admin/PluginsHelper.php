@@ -150,6 +150,7 @@ class PluginsHelper {
 		 * Filter the list of plugins to install.
 		 *
 		 * @param array $plugins A list of the plugins to install.
+		 * @since
 		 */
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
 
@@ -199,6 +200,11 @@ class PluginsHelper {
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_plugins_install_api_error', $slug, $api );
 
 				$errors->add(
@@ -229,6 +235,11 @@ class PluginsHelper {
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
 				$errors->add(
@@ -292,6 +303,7 @@ class PluginsHelper {
 		 * Filter the list of plugins to activate.
 		 *
 		 * @param array $plugins A list of the plugins to activate.
+		 * @since
 		 */
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_activate', $plugins );
 
@@ -314,6 +326,11 @@ class PluginsHelper {
 
 			$result = activate_plugin( $path );
 			if ( ! is_null( $result ) ) {
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_plugins_activate_error', $slug, $result );
 
 				$errors->add(
@@ -379,7 +396,7 @@ class PluginsHelper {
 	 * @return array Array of action data.
 	 */
 	public static function get_action_data( $actions ) {
-		$data = [];
+		$data = array();
 
 		foreach ( $actions as $action_id => $action ) {
 			$store  = new \ActionScheduler_DBStore();

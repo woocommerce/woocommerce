@@ -40,6 +40,11 @@ class WC_Shortcode_My_Account {
 		}
 
 		if ( ! is_user_logged_in() || isset( $wp->query_vars['lost-password'] ) ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
@@ -88,6 +93,11 @@ class WC_Shortcode_My_Account {
 							ob_clean(); // Clear previous buffer.
 							wc_set_notices( $notices );
 							wc_print_notices();
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
 							break;
 						}
@@ -210,6 +220,11 @@ class WC_Shortcode_My_Account {
 				}
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$address[ $key ]['value'] = apply_filters( 'woocommerce_my_account_edit_address_field_value', $value, $key, $load_address );
 		}
 
@@ -217,6 +232,11 @@ class WC_Shortcode_My_Account {
 			'myaccount/form-edit-address.php',
 			array(
 				'load_address' => $load_address,
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'address'      => apply_filters( 'woocommerce_address_to_edit', $address, $load_address ),
 			)
 		);
@@ -286,13 +306,22 @@ class WC_Shortcode_My_Account {
 			$user_data = get_user_by( 'login', $login );
 		}
 
-		// If no user found, check if it login is email and lookup user based on email.
+		/**
+		 * If no user found, check if it login is email and lookup user based on email.
+		 *
+		 * @since
+		 */
 		if ( ! $user_data && is_email( $login ) && apply_filters( 'woocommerce_get_username_from_email', true ) ) {
 			$user_data = get_user_by( 'email', $login );
 		}
 
 		$errors = new WP_Error();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'lostpassword_post', $errors, $user_data );
 
 		if ( $errors->get_error_code() ) {
@@ -316,8 +345,18 @@ class WC_Shortcode_My_Account {
 		// Redefining user_login ensures we return the right case in the email.
 		$user_login = $user_data->user_login;
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'retrieve_password', $user_login );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$allow = apply_filters( 'allow_password_reset', true, $user_data->ID );
 
 		if ( ! $allow ) {
@@ -337,7 +376,12 @@ class WC_Shortcode_My_Account {
 		$key = get_password_reset_key( $user_data );
 
 		// Send email notification.
-		WC()->mailer(); // Load email classes.
+		WC()->mailer();
+		/**
+		 * Load email classes.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_reset_password_notification', $user_login, $key );
 
 		return true;
@@ -371,11 +415,21 @@ class WC_Shortcode_My_Account {
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
 		self::set_reset_password_cookie();
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
 		}
@@ -405,10 +459,20 @@ class WC_Shortcode_My_Account {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit();
 		} else {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'before_woocommerce_add_payment_method' );
 
 			wc_get_template( 'myaccount/form-add-payment-method.php' );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'after_woocommerce_add_payment_method' );
 		}
 	}

@@ -86,6 +86,7 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 		 * @param WP_REST_Response $response   The response object.
 		 * @param WP_User          $user_data  User object used to create response.
 		 * @param WP_REST_Request  $request    Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer', $response, $user_data, $request );
 	}

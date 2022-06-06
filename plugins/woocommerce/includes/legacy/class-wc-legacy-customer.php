@@ -38,7 +38,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 			'is_vat_exempt',
 			'calculated_shipping',
 		);
-		$key = $this->filter_legacy_key( $key );
+		$key         = $this->filter_legacy_key( $key );
 		return in_array( $key, $legacy_keys );
 	}
 

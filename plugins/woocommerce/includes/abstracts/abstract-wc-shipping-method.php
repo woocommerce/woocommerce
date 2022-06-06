@@ -152,6 +152,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return bool True if the shipping method supports the feature, false otherwise.
 	 */
 	public function supports( $feature ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
@@ -198,6 +203,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_method_title() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_method_title', $this->method_title, $this );
 	}
 
@@ -208,6 +218,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_method_description() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_method_description', $this->method_description, $this );
 	}
 
@@ -217,6 +232,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_title() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );
 	}
 
@@ -263,6 +283,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $args Arguments (default: array()).
 	 */
 	public function add_rate( $args = array() ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args = apply_filters(
 			'woocommerce_shipping_method_add_rate_args',
 			wp_parse_args(
@@ -323,6 +348,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$rate->add_meta_data( __( 'Items', 'woocommerce' ), implode( ', ', $items_in_package ) );
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->rates[ $args['id'] ] = apply_filters( 'woocommerce_shipping_method_add_rate', $rate, $args, $this );
 	}
 
@@ -395,6 +425,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $available, $package, $this );
 	}
 
@@ -465,7 +500,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			return $this->get_instance_option( $key, $empty_value );
 		}
 
-		// Return global option.
+		/**
+		 * Return global option.
+		 *
+		 * @since
+		 */
 		$option = apply_filters( 'woocommerce_shipping_' . $this->id . '_option', parent::get_option( $key, $empty_value ), $key, $this );
 		return $option;
 	}
@@ -492,6 +531,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			$this->instance_settings[ $key ] = $empty_value;
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$instance_option = apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_option', $this->instance_settings[ $key ], $key, $this );
 		return $instance_option;
 	}
@@ -504,6 +548,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->instance_form_fields ) );
 	}
 
@@ -564,6 +613,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ), 'yes' );
 	}
 }

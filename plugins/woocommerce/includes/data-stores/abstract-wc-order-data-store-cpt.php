@@ -63,6 +63,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		$id = wp_insert_post(
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_new_order_data',
 				array(
@@ -199,10 +204,20 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
 			$order->set_id( 0 );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_delete_order', $id );
 		} else {
 			wp_trash_post( $id );
 			$order->set_status( 'trash' );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_trash_order', $id );
 		}
 	}
@@ -226,6 +241,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order_status = $order->get_status( 'edit' );
 
 		if ( ! $order_status ) {
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$order_status = apply_filters( 'woocommerce_default_order_status', 'pending' );
 		}
 
@@ -346,6 +366,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			}
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 

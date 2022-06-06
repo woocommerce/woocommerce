@@ -276,6 +276,11 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	 * @param mixed $new_value Current value.
 	 */
 	public function display_missing_license_key_notice( $old_value, $new_value ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true ) ) {
 			return;
 		}

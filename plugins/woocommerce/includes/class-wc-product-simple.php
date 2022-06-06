@@ -48,6 +48,11 @@ class WC_Product_Simple extends WC_Product {
 				( function_exists( 'is_feed' ) && is_feed() ) || ( function_exists( 'is_404' ) && is_404() ) ? $this->get_permalink() : ''
 			)
 		) : $this->get_permalink();
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
 	}
 
@@ -59,6 +64,11 @@ class WC_Product_Simple extends WC_Product {
 	public function add_to_cart_text() {
 		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read more', 'woocommerce' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
 
@@ -72,6 +82,11 @@ class WC_Product_Simple extends WC_Product {
 		/* translators: %s: Product title */
 		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add &ldquo;%s&rdquo; to your cart', 'woocommerce' ) : __( 'Read more about &ldquo;%s&rdquo;', 'woocommerce' );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( $text, $this->get_name() ), $this );
 	}
 }

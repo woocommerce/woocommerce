@@ -76,6 +76,11 @@ if ( ! class_exists( 'WC_Admin_Customize', false ) ) :
 			// Include missing lost password.
 			$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$endpoints = apply_filters( 'woocommerce_custom_nav_menu_items', $endpoints );
 
 			foreach ( $endpoints as $endpoint => $title ) {

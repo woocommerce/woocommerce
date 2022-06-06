@@ -27,17 +27,37 @@ if ( ! $tab_exists ) {
 				echo '<a href="' . esc_html( admin_url( 'admin.php?page=wc-settings&tab=' . esc_attr( $slug ) ) ) . '" class="nav-tab ' . ( $current_tab === $slug ? 'nav-tab-active' : '' ) . '">' . esc_html( $label ) . '</a>';
 			}
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_settings_tabs' );
 
 			?>
 		</nav>
 		<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
 		<?php
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_sections_' . $current_tab );
 
 			self::show_messages();
 
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_settings_' . $current_tab );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
 		?>
 		<p class="submit">

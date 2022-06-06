@@ -39,10 +39,20 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args = apply_filters( 'woocommerce_analytics_taxes_query_args', $this->get_query_vars() );
 
 		$data_store = \WC_Data_Store::load( 'report-taxes' );
 		$results    = $data_store->get_data( $args );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_analytics_taxes_select_query', $results, $args );
 	}
 }

@@ -140,7 +140,17 @@ class WC_Admin_Reports {
 			);
 		}
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compatibility.
 
 		foreach ( $reports as $key => $report_group ) {
@@ -167,6 +177,11 @@ class WC_Admin_Reports {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
 		$class = 'WC_Report_' . str_replace( '-', '_', $name );
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		include_once apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class );
 
 		if ( ! class_exists( $class ) ) {

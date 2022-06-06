@@ -58,41 +58,41 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 		wc_doing_it_wrong( $key, 'Webhook properties should not be accessed directly.', '3.2' );
 
 		switch ( $key ) {
-			case 'id' :
+			case 'id':
 				$value = $this->get_id();
 				break;
-			case 'status' :
+			case 'status':
 				$value = $this->get_status();
 				break;
-			case 'post_data' :
+			case 'post_data':
 				$value = null;
 				break;
-			case 'delivery_url' :
+			case 'delivery_url':
 				$value = $this->get_delivery_url();
 				break;
-			case 'secret' :
+			case 'secret':
 				$value = $this->get_secret();
 				break;
-			case 'topic' :
+			case 'topic':
 				$value = $this->get_topic();
 				break;
-			case 'hooks' :
+			case 'hooks':
 				$value = $this->get_hooks();
 				break;
-			case 'resource' :
+			case 'resource':
 				$value = $this->get_resource();
 				break;
-			case 'event' :
+			case 'event':
 				$value = $this->get_event();
 				break;
-			case 'failure_count' :
+			case 'failure_count':
 				$value = $this->get_failure_count();
 				break;
-			case 'api_version' :
+			case 'api_version':
 				$value = $this->get_api_version();
 				break;
 
-			default :
+			default:
 				$value = '';
 				break;
 		} // End switch().

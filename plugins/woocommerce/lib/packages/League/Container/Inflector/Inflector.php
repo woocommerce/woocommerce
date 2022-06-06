@@ -6,118 +6,111 @@ use Automattic\WooCommerce\Vendor\League\Container\Argument\ArgumentResolverInte
 use Automattic\WooCommerce\Vendor\League\Container\Argument\ArgumentResolverTrait;
 use Automattic\WooCommerce\Vendor\League\Container\ContainerAwareTrait;
 
-class Inflector implements ArgumentResolverInterface, InflectorInterface
-{
-    use ArgumentResolverTrait;
-    use ContainerAwareTrait;
+class Inflector implements ArgumentResolverInterface, InflectorInterface {
 
-    /**
-     * @var string
-     */
-    protected $type;
+	use ArgumentResolverTrait;
+	use ContainerAwareTrait;
 
-    /**
-     * @var callable|null
-     */
-    protected $callback;
+	/**
+	 * @var string
+	 */
+	protected $type;
 
-    /**
-     * @var array
-     */
-    protected $methods = [];
+	/**
+	 * @var callable|null
+	 */
+	protected $callback;
 
-    /**
-     * @var array
-     */
-    protected $properties = [];
+	/**
+	 * @var array
+	 */
+	protected $methods = array();
 
-    /**
-     * Construct.
-     *
-     * @param string        $type
-     * @param callable|null $callback
-     */
-    public function __construct(string $type, callable $callback = null)
-    {
-        $this->type     = $type;
-        $this->callback = $callback;
-    }
+	/**
+	 * @var array
+	 */
+	protected $properties = array();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getType() : string
-    {
-        return $this->type;
-    }
+	/**
+	 * Construct.
+	 *
+	 * @param string        $type
+	 * @param callable|null $callback
+	 */
+	public function __construct( string $type, callable $callback = null ) {
+		$this->type     = $type;
+		$this->callback = $callback;
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function invokeMethod(string $name, array $args) : InflectorInterface
-    {
-        $this->methods[$name] = $args;
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getType() : string {
+		return $this->type;
+	}
 
-        return $this;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function invokeMethod( string $name, array $args ) : InflectorInterface {
+		$this->methods[ $name ] = $args;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function invokeMethods(array $methods) : InflectorInterface
-    {
-        foreach ($methods as $name => $args) {
-            $this->invokeMethod($name, $args);
-        }
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function invokeMethods( array $methods ) : InflectorInterface {
+		foreach ( $methods as $name => $args ) {
+			$this->invokeMethod( $name, $args );
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setProperty(string $property, $value) : InflectorInterface
-    {
-        $this->properties[$property] = $this->resolveArguments([$value])[0];
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function setProperty( string $property, $value ) : InflectorInterface {
+		$this->properties[ $property ] = $this->resolveArguments( array( $value ) )[0];
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setProperties(array $properties) : InflectorInterface
-    {
-        foreach ($properties as $property => $value) {
-            $this->setProperty($property, $value);
-        }
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function setProperties( array $properties ) : InflectorInterface {
+		foreach ( $properties as $property => $value ) {
+			$this->setProperty( $property, $value );
+		}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function inflect($object)
-    {
-        $properties = $this->resolveArguments(array_values($this->properties));
-        $properties = array_combine(array_keys($this->properties), $properties);
+		return $this;
+	}
 
-        // array_combine() can technically return false
-        foreach ($properties ?: [] as $property => $value) {
-            $object->{$property} = $value;
-        }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function inflect( $object ) {
+		$properties = $this->resolveArguments( array_values( $this->properties ) );
+		$properties = array_combine( array_keys( $this->properties ), $properties );
 
-        foreach ($this->methods as $method => $args) {
-            $args = $this->resolveArguments($args);
+		// array_combine() can technically return false
+		foreach ( $properties ?: array() as $property => $value ) {
+			$object->{$property} = $value;
+		}
 
-            /** @var callable $callable */
-            $callable = [$object, $method];
-            call_user_func_array($callable, $args);
-        }
+		foreach ( $this->methods as $method => $args ) {
+			$args = $this->resolveArguments( $args );
 
-        if ($this->callback !== null) {
-            call_user_func($this->callback, $object);
-        }
-    }
+			/** @var callable $callable */
+			$callable = array( $object, $method );
+			call_user_func_array( $callable, $args );
+		}
+
+		if ( $this->callback !== null ) {
+			call_user_func( $this->callback, $object );
+		}
+	}
 }

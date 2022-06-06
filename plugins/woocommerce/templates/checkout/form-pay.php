@@ -33,6 +33,11 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 			<?php if ( count( $order->get_items() ) > 0 ) : ?>
 				<?php foreach ( $order->get_items() as $item_id => $item ) : ?>
 					<?php
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 						continue;
 					}
@@ -40,12 +45,27 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 						<td class="product-name">
 							<?php
+								/**
+								 * Hook
+								 *
+								 * @since
+								 */
 								echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
 
+								/**
+								 * Hook
+								 *
+								 * @since
+								 */
 								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
 
 								wc_display_item_meta( $item );
 
+								/**
+								 * Hook
+								 *
+								 * @since
+								 */
 								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, false );
 							?>
 						</td>

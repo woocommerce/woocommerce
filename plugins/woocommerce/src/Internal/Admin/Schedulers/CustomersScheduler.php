@@ -62,6 +62,11 @@ class CustomersScheduler extends ImportScheduler {
 	 * @param bool     $skip_existing Skip already imported customers.
 	 */
 	public static function get_items( $limit = 10, $page = 1, $days = false, $skip_existing = false ) {
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$customer_roles = apply_filters( 'woocommerce_analytics_import_customer_roles', array( 'customer' ) );
 		$query_args     = array(
 			'fields'   => 'ID',

@@ -186,6 +186,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -686,6 +687,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$base_data['description'] = 'view' === $context ? wpautop( do_shortcode( $product->get_description() ) ) : $product->get_description( $context );
 					break;
 				case 'short_description':
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$base_data['short_description'] = 'view' === $context ? apply_filters( 'woocommerce_short_description', $product->get_short_description() ) : $product->get_short_description( $context );
 					break;
 				case 'sku':
@@ -1258,6 +1264,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WC_Data         $product  Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $product, $request, $creating );
 	}
@@ -1284,6 +1291,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 					if ( is_wp_error( $upload ) ) {
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
 							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 						} else {
@@ -1411,6 +1423,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			$download = new WC_Product_Download();
 			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[] = $download;
 		}
@@ -1553,6 +1570,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param boolean $supports_trash Whether the object type support trashing.
 		 * @param WC_Data $object         The object being considered for trashing support.
+		 * @since
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
@@ -1645,6 +1663,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WC_Data          $object   The deleted or trashed object.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
 

@@ -78,8 +78,8 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$product->set_regular_price( 23.85 );
 		$product->save();
 
-		$shipping_rate   = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '9.5', array(), 'flat_rate' );
-		$shipping_item   = new WC_Order_Item_Shipping();
+		$shipping_rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '9.5', array(), 'flat_rate' );
+		$shipping_item = new WC_Order_Item_Shipping();
 		$shipping_item->set_props(
 			array(
 				'method_title' => $shipping_rate->label,
@@ -151,7 +151,7 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$checkout = WC_Checkout::instance();
-		$order = new WC_Order();
+		$order    = new WC_Order();
 		$checkout->set_data_from_cart( $order );
 		$this->assertEquals( 3.05, $order->get_total_tax() );
 		$this->assertEquals( 36.04, $order->get_total() );

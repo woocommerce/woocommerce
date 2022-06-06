@@ -26,6 +26,11 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = new WP_Test_Spy_REST_Server();
 		$this->server   = $wp_rest_server;
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'rest_api_init' );
 
 		// Reset payment gateways.

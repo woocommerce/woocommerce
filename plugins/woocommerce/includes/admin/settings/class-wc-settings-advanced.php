@@ -63,6 +63,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Cart page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
+					/**
+					 *
+					 *
+					 * @since
+					 */
 					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
 					'id'       => 'woocommerce_cart_page_id',
 					'type'     => 'single_select_page_with_search',
@@ -83,6 +88,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Checkout page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
+					/**
+					 *
+					 *
+					 * @since
+					 */
 					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
 					'id'       => 'woocommerce_checkout_page_id',
 					'type'     => 'single_select_page_with_search',
@@ -103,6 +113,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'My account page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
+					/**
+					 *
+					 *
+					 * @since
+					 */
 					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) ),
 					'id'       => 'woocommerce_myaccount_page_id',
 					'type'     => 'single_select_page_with_search',
@@ -312,6 +327,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 			);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$settings = apply_filters( 'woocommerce_settings_pages', $settings );
 
 		if ( wc_site_is_https() ) {
@@ -374,6 +394,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 			);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_com_integration_settings', $settings );
 	}
 
@@ -404,6 +429,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 			);
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_settings_rest_api', $settings );
 	}
 
@@ -456,6 +486,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		global $current_section;
 
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_rest_api_valid_to_save', ! in_array( $current_section, array( 'keys', 'webhooks' ), true ) ) ) {
 			// Prevent the T&Cs and checkout page from being set to the same page.
 			if ( isset( $_POST['woocommerce_terms_page_id'], $_POST['woocommerce_checkout_page_id'] ) && $_POST['woocommerce_terms_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
