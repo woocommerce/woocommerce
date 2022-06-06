@@ -34,3 +34,15 @@
 		display: block;
 	}
 }
+
+
+.wp-block-woocommerce-classic-template__placeholder-wireframe {
+	display: flex;
+	flex-direction: column;
+}
+
+.wp-block-woocommerce-classic-template__placeholder-migration-button-container {
+	justify-content: center;
+	align-items: center;
+	margin: 0 auto;
+}
