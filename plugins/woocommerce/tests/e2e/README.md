@@ -122,7 +122,7 @@ Run the following in a terminal/command line window
 
 - `pnpm install`
 
-- `pnpm exec turbo build --filter=woocommerce`
+- `pnpm exec turbo run build --filter=woocommerce`
 
 - `npm install jest --global` (this only needs to be done once)
 
