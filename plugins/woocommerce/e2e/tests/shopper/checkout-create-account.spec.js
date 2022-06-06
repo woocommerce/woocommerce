@@ -4,7 +4,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const billingEmail = 'test-account@example.com';
 
 test.describe( 'Shopper Checkout Create Account', () => {
-	let productId, shippingZoneId;
+	let productId, orderId, shippingZoneId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -45,6 +45,9 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
 		} );
+		await api.put( 'payment_gateways/cod', {
+			enabled: true,
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -57,6 +60,9 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
+		await api.delete( `orders/${ orderId }`, {
+			force: true,
+		} );
 		await api.put(
 			'settings/account/woocommerce_enable_signup_and_login_from_checkout',
 			{
@@ -65,6 +71,9 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		);
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
 			force: true,
+		} );
+		await api.put( 'payment_gateways/cod', {
+			enabled: false,
 		} );
 		// clear out the customer we create during the test
 		await api.get( 'customers' ).then( ( response ) => {
@@ -83,18 +92,18 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		context.clearCookies();
 
 		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.goto( `shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
-		await page.goto( '/checkout/' );
 	} );
 
 	test( 'can create an account during checkout', async ( { page } ) => {
-		await page.fill( '#billing_first_name', 'John' );
-		await page.fill( '#billing_last_name', 'Doe' );
-		await page.fill( '#billing_address_1', 'addr1' );
-		await page.fill( '#billing_address_2', 'addr2' );
-		await page.fill( '#billing_city', 'San Francisco' );
-		await page.fill( '#billing_postcode', '94107' );
+		await page.goto( 'checkout/' );
+		await page.fill( '#billing_first_name', 'Bart' );
+		await page.fill( '#billing_last_name', 'Simpson' );
+		await page.fill( '#billing_address_1', '742 Evergreen Terrace' );
+		await page.fill( '#billing_address_2', 'c/o Maggie Simpson' );
+		await page.fill( '#billing_city', 'Springfield' );
+		await page.fill( '#billing_postcode', '97403' );
 		await page.fill( '#billing_phone', '123456789' );
 		await page.fill( '#billing_email', billingEmail );
 
@@ -105,6 +114,16 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'Order received'
 		);
+
+		// get order ID from the page
+		const orderReceivedHtmlElement = await page.$(
+			'.woocommerce-order-overview__order.order'
+		);
+		const orderReceivedText = await page.evaluate(
+			( element ) => element.textContent,
+			orderReceivedHtmlElement
+		);
+		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( '/my-account/' );
 		// confirms that an account was created
@@ -117,9 +136,9 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await page.fill( '#password', 'password' );
 		await page.click( 'text=Log in' );
 
-		await page.goto( '/wp-admin/users.php' );
-		await expect(
-			page.locator( 'td.email.column-email > a >> nth=2' )
-		).toContainText( billingEmail );
+		await page.goto( 'wp-admin/users.php' );
+		await expect( page.locator( 'tbody#the-list' ) ).toContainText(
+			billingEmail
+		);
 	} );
 } );
