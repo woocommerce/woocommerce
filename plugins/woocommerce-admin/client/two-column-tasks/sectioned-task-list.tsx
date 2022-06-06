@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState, useContext } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, getVisibleTasks } from '@woocommerce/data';
@@ -20,6 +20,7 @@ import { ProgressHeader } from '~/task-lists/progress-header';
 import { SectionPanelTitle } from './section-panel-title';
 import { TaskListItem } from './task-list-item';
 import { TaskListCompletedHeader } from './completed-header';
+import { TasksContext } from '~/tasks';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
@@ -37,7 +38,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	sections,
 	displayProgressHeader,
 	cesHeader = true,
-	context,
 } ) => {
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
@@ -52,6 +52,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	const [ openPanel, setOpenPanel ] = useState< string | null >(
 		sections?.find( ( section ) => ! section.isComplete )?.id || null
 	);
+	const { context } = useContext( TasksContext );
 
 	const prevQueryRef = useRef( query );
 
@@ -193,7 +194,6 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 												key={ task.id }
 												task={ task }
 												eventPrefix={ eventPrefix }
-												context={ context }
 											/>
 										)
 									) }

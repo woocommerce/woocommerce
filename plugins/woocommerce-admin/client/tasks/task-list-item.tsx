@@ -10,13 +10,14 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
  */
+import { TasksContext } from '~/tasks';
 import './task-list.scss';
 
 export type TaskListItemProps = {
@@ -26,7 +27,6 @@ export type TaskListItemProps = {
 	task: TaskType & {
 		onClick?: () => void;
 	};
-	context?: string;
 };
 
 export const TaskListItem: React.FC< TaskListItemProps > = ( {
@@ -34,9 +34,9 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	isExpanded = false,
 	setExpandedTask,
 	task,
-	context,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
+	const { context } = useContext( TasksContext );
 
 	const {
 		dismissTask,

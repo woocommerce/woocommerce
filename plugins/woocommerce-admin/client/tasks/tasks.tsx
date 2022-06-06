@@ -4,7 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect } from '@wordpress/element';
+import {
+	Fragment,
+	useEffect,
+	createContext,
+	useState,
+} from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
@@ -35,6 +40,14 @@ export type TasksProps = {
 	query: { task?: string };
 	context?: string;
 };
+
+export type TasksContextProps = {
+	context: string;
+};
+
+export const TasksContext = createContext< TasksContextProps >( {
+	context: '',
+} );
 
 function getTaskListComponent( taskListId: string ) {
 	switch ( taskListId ) {
@@ -70,6 +83,9 @@ export const Tasks: React.FC< TasksProps > = ( {
 	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
 		'woocommerce_tasklist_progression'
 	);
+	const [ tasksContext ] = useState( {
+		context,
+	} );
 
 	const { isResolving, taskLists } = useSelect(
 		( select: WCDataSelector ) => {
@@ -152,7 +168,7 @@ export const Tasks: React.FC< TasksProps > = ( {
 	}
 
 	return (
-		<>
+		<TasksContext.Provider value={ tasksContext }>
 			{ taskLists
 				.filter( ( { id }: TaskListType ) =>
 					experimentAssignment?.variationName === 'treatment'
@@ -173,7 +189,6 @@ export const Tasks: React.FC< TasksProps > = ( {
 								}
 								query={ query }
 								twoColumns={ false }
-								context={ context }
 								{ ...taskList }
 							/>
 							{ isToggleable && (
@@ -204,6 +219,6 @@ export const Tasks: React.FC< TasksProps > = ( {
 						</Fragment>
 					);
 				} ) }
-		</>
+		</TasksContext.Provider>
 	);
 };

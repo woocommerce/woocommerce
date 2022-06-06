@@ -10,21 +10,24 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import classnames from 'classnames';
 
+/**
+ * Internal dependencies
+ */
+import { TasksContext } from '~/tasks';
+
 export type TaskListItemProps = {
 	task: TaskType;
 	eventPrefix?: string;
-	context?: string;
 };
 
 export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 	eventPrefix,
-	context,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
@@ -35,6 +38,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		snoozeTask,
 		undoSnoozeTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
+
+	const { context } = useContext( TasksContext );
 
 	const slot = useSlot(
 		`woocommerce_onboarding_task_list_item_${ task.id }`

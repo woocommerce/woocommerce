@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useRef, useState, createElement } from '@wordpress/element';
+import {
+	useEffect,
+	useRef,
+	useState,
+	createElement,
+	useContext,
+} from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
@@ -29,6 +35,7 @@ import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
 import { TaskListCompletedHeader } from './completed-header';
+import { TasksContext } from '~/tasks';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -37,7 +44,6 @@ export type TaskListProps = TaskListType & {
 		task?: string;
 	};
 	cesHeader?: boolean;
-	context?: string;
 };
 
 export const TaskList: React.FC< TaskListProps > = ( {
@@ -51,7 +57,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	displayProgressHeader,
 	cesHeader = true,
-	context,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
@@ -73,6 +78,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} >( {} );
 	const [ activeTaskId, setActiveTaskId ] = useState( '' );
 	const [ showDismissModal, setShowDismissModal ] = useState( false );
+	const { context } = useContext( TasksContext );
 
 	const prevQueryRef = useRef( query );
 

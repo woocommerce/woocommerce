@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState, useContext } from '@wordpress/element';
 import { Card, CardHeader } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
@@ -21,6 +21,7 @@ import { TaskListItem } from './task-list-item';
 import { TaskListMenu } from './task-list-menu';
 import './task-list.scss';
 import { ProgressHeader } from '~/task-lists/progress-header';
+import { TasksContext } from '~/tasks';
 
 export type TaskListProps = TaskListType & {
 	query: {
@@ -30,7 +31,6 @@ export type TaskListProps = TaskListType & {
 	twoColumns?: boolean;
 	keepCompletedTaskList?: 'yes' | 'no';
 	cesHeader?: boolean;
-	context?: string;
 };
 
 export const TaskList: React.FC< TaskListProps > = ( {
@@ -42,7 +42,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isExpandable = false,
 	displayProgressHeader = false,
 	query,
-	context,
 } ) => {
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
@@ -53,6 +52,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} );
 	const prevQueryRef = useRef( query );
 	const visibleTasks = getVisibleTasks( tasks );
+	const { context } = useContext( TasksContext );
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed
@@ -107,7 +107,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			isExpandable={ isExpandable }
 			task={ task }
 			setExpandedTask={ setExpandedTask }
-			context={ context }
 		/>
 	) );
 

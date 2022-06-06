@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import Tasks from '~/tasks';
+import { Tasks } from '~/tasks';
 
 type QueryTypeProps = {
 	query: {
