@@ -137,12 +137,12 @@ class WC_Products_Tracking {
 				var hasRecordedEvent = false;
 				var isBlockEditor = false;
 
-				$( '#publish' ).on( 'click', function() {
+				function sendTracks() {
 					if ( hasRecordedEvent ) {
 						return;
 					}
-					
-					if ( $( '.block-editor' )[0] ) {
+
+					if (  $( '.block-editor' ) && $( '.block-editor' )[0] ) {
 						 isBlockEditor = true;
 					}
 
@@ -174,7 +174,15 @@ class WC_Products_Tracking {
 
 					window.wcTracks.recordEvent( 'product_update', properties );
 					hasRecordedEvent = true;
-				} );
+				};
+
+				if ( $( '#publish' ) ) {
+					$( '#publish' ).on( 'click', sendTracks);
+					return;
+				}
+
+				$( '.editor-post-publish-button' ).on( 'click', sendTracks);
+
 			}
 			"
 		);
