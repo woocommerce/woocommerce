@@ -135,10 +135,15 @@ class WC_Products_Tracking {
 			if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
 				var initialStockValue = $( '#_stock' ).val();
 				var hasRecordedEvent = false;
+				var isBlockEditor = false;
 
 				$( '#publish' ).on( 'click', function() {
 					if ( hasRecordedEvent ) {
 						return;
+					}
+					
+					if ( $( '.block-editor' )[0] ) {
+						 isBlockEditor = true;
 					}
 
 					var tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
@@ -151,6 +156,7 @@ class WC_Products_Tracking {
 						description:			description_value.length ? 'Yes' : 'No',
 						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_block_editor:		isBlockEditor,
 						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
 						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
 						menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
