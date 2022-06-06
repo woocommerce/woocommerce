@@ -142,7 +142,7 @@ class WC_Products_Tracking {
 						return;
 					}
 
-					if (  $( '.block-editor' ) && $( '.block-editor' )[0] ) {
+					if ( $( '.block-editor' ).length !== 0 && $( '.block-editor' )[0] ) {
 						 isBlockEditor = true;
 					}
 
@@ -176,7 +176,7 @@ class WC_Products_Tracking {
 					hasRecordedEvent = true;
 				};
 
-				if ( $( '#publish' ) ) {
+				if ( $( '#publish' ).length !== 0 ) {
 					$( '#publish' ).on( 'click', sendTracks);
 					return;
 				}
