@@ -2,8 +2,9 @@
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\StoreApi\Authentication;
 use Automattic\WooCommerce\StoreApi\Formatters;
+use Automattic\WooCommerce\StoreApi\Authentication;
+use Automattic\WooCommerce\StoreApi\Legacy;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
@@ -23,6 +24,7 @@ final class StoreApi {
 			'rest_api_init',
 			function() {
 				self::container()->get( Authentication::class )->init();
+				self::container()->get( Legacy::class )->init();
 				self::container()->get( RoutesController::class )->register_all_routes();
 			}
 		);
@@ -51,6 +53,12 @@ final class StoreApi {
 				Authentication::class,
 				function () {
 					return new Authentication();
+				}
+			);
+			$container->register(
+				Legacy::class,
+				function () {
+					return new Legacy();
 				}
 			);
 			$container->register(
