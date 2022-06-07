@@ -231,6 +231,9 @@ class WcPaySubscriptionsPage {
 		$wc_admin_menu           = array();
 		$subscriptions_menu_item = null;
 
+		if ( ! isset( $submenu['woocommerce'] ) ) {
+			return;
+		}
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			$wc_admin_menu[ $key ] = $menu_item;
 
