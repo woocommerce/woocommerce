@@ -76,6 +76,7 @@ interface FeaturedItemRequiredProps< T > {
 				border?: { radius?: number };
 				color?: { text?: string };
 			};
+			textColor?: string;
 		};
 	isLoading: boolean;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
@@ -170,6 +171,7 @@ export const withFeaturedItem = ( {
 			showDesc,
 			showPrice,
 			style,
+			textColor,
 		} = attributes;
 
 		const classes = classnames(
@@ -190,7 +192,9 @@ export const withFeaturedItem = ( {
 
 		const containerStyle = {
 			borderRadius: style?.border?.radius,
-			color: style?.color?.text,
+			color: textColor
+				? `var(--wp--preset--color--${ textColor })`
+				: style?.color?.text,
 		};
 
 		const wrapperStyle = {
