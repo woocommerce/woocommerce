@@ -8,6 +8,7 @@
 require_once __DIR__ . '/test-task.php';
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
  * class WC_Admin_Tests_OnboardingTasks_TaskList
@@ -89,6 +90,13 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	 * Tests that lists can be hidden.
 	 */
 	public function test_visible() {
+		$this->assertFalse( $this->list->is_visible() );
+		$this->list->add_task(
+			new TestTask(
+				new TaskList(),
+				array( 'id' => 'my-task' )
+			)
+		);
 		$this->assertTrue( $this->list->is_visible() );
 	}
 

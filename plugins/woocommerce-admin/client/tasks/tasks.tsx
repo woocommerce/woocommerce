@@ -175,7 +175,7 @@ export const Tasks: React.FC< TasksProps > = ( {
 						? id.endsWith( 'two_column' )
 						: ! id.endsWith( 'two_column' )
 				)
-				.filter( ( { isVisible } ) => isVisible )
+				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
 
