@@ -23,7 +23,7 @@ The release pull request has been created! This checklist is a guide to follow f
 * [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
   *  Note: The zip file is functionally equivalent to what gets released except the version bump.
 * [ ] Create the testing notes for the release. 
-  * [ ] For each pull request linked in the changelog grab the `User Facing Testing` notes from the PR's description. 
+  * [ ] For each pull request that belongs to the current release, grab the `User Facing Testing` notes from the PR's description. Be sure that the `Do not include in the Testing Notes is not flagged` checkbox is unchecked.
   * [ ] Add the notes to `docs/testing/releases`
   * [ ] Update the `docs/testing/releases/README.md` file index.
 * [ ] Copy a link to the release zip you created earlier into the testing notes. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
