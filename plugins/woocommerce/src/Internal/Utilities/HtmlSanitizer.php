@@ -9,9 +9,10 @@ class HtmlSanitizer {
 	/**
 	 * Rules for allowing minimal HTML (breaks, images, paragraphs and spans) without any links.
 	 */
-	public const TRIMMED_BALANCED_LOW_HTML_NO_LINKS = array(
+	public const LOW_HTML_BALANCED_TAGS_NO_LINKS = array(
 		'pre_processors'  => array(
 			'stripslashes',
+			'force_balance_tags',
 		),
 		'wp_kses_rules'   => array(
 			'br'   => true,
@@ -29,10 +30,6 @@ class HtmlSanitizer {
 				'title' => true,
 			),
 		),
-		'post_processors' => array(
-			'force_balance_tags',
-			'trim',
-		),
 	);
 
 	/**
@@ -47,12 +44,11 @@ class HtmlSanitizer {
 	 *
 	 *     @type array $pre_processors  Callbacks to run before invoking `wp_kses()`.
 	 *     @type array $wp_kses_rules   Element names and attributes to allow, per `wp_kses()`.
-	 *     @type array $post_processors Callbacks to run after invoking `wp_kses()`.
 	 * }
 	 *
 	 * @return string
 	 */
-	public function sanitize( string $html, array $sanitizer_rules = self::TRIMMED_BALANCED_LOW_HTML_NO_LINKS ): string {
+	public function sanitize( string $html, array $sanitizer_rules = self::LOW_HTML_BALANCED_TAGS_NO_LINKS ): string {
 		if ( isset( $sanitizer_rules['pre_processors'] ) && is_array( $sanitizer_rules['pre_processors'] ) ) {
 			$html = $this->apply_string_callbacks( $sanitizer_rules['pre_processors'], $html );
 		}
@@ -62,13 +58,7 @@ class HtmlSanitizer {
 			? $sanitizer_rules['wp_kses_rules']
 			: array();
 
-		$html = wp_kses( $html, $kses_rules );
-
-		if ( isset( $sanitizer_rules['post_processors'] ) && is_array( $sanitizer_rules['post_processors'] ) ) {
-			$html = $this->apply_string_callbacks( $sanitizer_rules['post_processors'], $html );
-		}
-
-		return $html;
+		return wp_kses( $html, $kses_rules );
 	}
 
 	/**
