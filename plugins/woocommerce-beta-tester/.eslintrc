@@ -1,5 +1,6 @@
 {
 	"root": true,
+	"extends": [ "plugin:@woocommerce/eslint-plugin/recommended" ],
 	"env": {
 		"browser": true,
 		"node": true
@@ -17,7 +18,14 @@
 				"code": 140
 			}
 		],
-		"no-console": 1
+		"no-console": 1,
+		// temporary conversion to warnings until the below are all handled.
+		"@wordpress/i18n-translator-comments": "warn",
+		"@wordpress/valid-sprintf": "warn",
+		"jsdoc/check-tag-names": [
+			"error",
+			{ "definedTags": [ "jest-environment" ] }
+		]
 	},
 	"parserOptions": {
 		"ecmaVersion": 6
