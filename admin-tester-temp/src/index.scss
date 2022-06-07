@@ -1,0 +1,155 @@
+#woocommerce-admin-test-helper-app-root {
+	.btn-danger {
+		color: #fff;
+		background-color: #dc3545;
+		border-color: #dc3545;
+	}
+
+	.btn-primary {
+		color: #fff;
+		background-color: #007bff;
+		border-color: #007bff;
+	}
+}
+
+.woocommerce-admin-test-helper__main-tab-panel {
+	.active-tab {
+		box-shadow: inset 0 1.5px #007cba;
+		box-shadow: inset 0 1.5px var( --wp-admin-theme-color );
+	}
+}
+
+.woocommerce-admin-test-helper__action-status {
+	color: #007cba;
+	color: var( --wp-admin-theme-color );
+	font-family: monospace;
+}
+
+.woocommerce-admin-test-helper__add-notes {
+	width: 410px;
+	display: flex;
+	justify-content: space-between;
+	.components-base-control__field {
+		margin-bottom: 0;
+		padding-top: 3px;
+	}
+}
+
+#wc-admin-test-helper-options {
+	div.search-box {
+		float: right;
+		margin-bottom: 10px;
+	}
+
+	.align-center {
+		text-align: center;
+	}
+
+	.components-notice {
+		margin: 0px 0px 10px 0px;
+	}
+}
+
+.wca-test-helper-option-editor {
+	width: 100%;
+	height: 300px;
+}
+
+.wca-test-helper-edit-btn-save {
+	float: right;
+}
+
+#wc-admin-test-helper-tools,
+#wc-admin-test-helper-experiments {
+	table.tools,
+	table.experiments {
+		thead th {
+			text-align: center;
+		}
+		tbody td {
+			vertical-align: middle;
+			&.command {
+				white-space: nowrap;
+			}
+			.trigger-cron-job {
+				width: 40%;
+				padding-top: 4px;
+				.components-base-control__field {
+					margin-bottom: 0;
+				}
+			}
+		}
+	}
+	.components-notice {
+		margin: 0px 0px 10px 0px;
+	}
+	.tracking-disabled {
+		border: 1px solid #cc99c2;
+		border-left: 4px solid #cc99c2;
+		line-height: 1.5em;
+		background: #fff;
+		padding: 10px;
+	}
+}
+
+#wc-admin-test-helper-experiments {
+	.actions {
+		button {
+			margin-right: 5px;
+		}
+	}
+	.manual-input {
+		margin-bottom: 20px;
+		float: right;
+		.description {
+			text-align: right;
+			margin-bottom: 5px;
+		}
+		button {
+			height: 34px;
+			position: relative;
+			top: -1px;
+		}
+		input {
+			height: 34px;
+			width: 250px;
+		}
+		select {
+			height: 34px;
+			position: relative;
+			top: -2px;
+			margin-right: 2px;
+		}
+	}
+}
+
+#wc-admin-test-helper-rest-api-filters {
+	.btn-new {
+		float: right;
+	}
+}
+
+form.rest-api-filter-new-form {
+	.grid {
+		display: grid;
+		grid-template-columns: max-content max-content;
+		grid-gap: 5px;
+		input[type='text'] {
+			width: 350px;
+		}
+		label {
+			text-align: right;
+		}
+		label:after {
+			content: ':';
+		}
+	}
+
+	.btn-new {
+		color: #fff;
+		background-color: #007bff;
+		border-color: #007bff;
+		float: right;
+		margin-top: 10px;
+	}
+}

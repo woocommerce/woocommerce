@@ -1,0 +1,53 @@
+{
+	"name": "woocommerce-admin-test-helper",
+	"title": "WooCommerce Admin Test Helper",
+	"license": "GPL-3.0-or-later",
+	"version": "0.7.6",
+	"description": "woocommerce-admin-test-helper",
+	"scripts": {
+		"build": "wp-scripts build",
+		"check-engines": "wp-scripts check-engines",
+		"check-licenses": "wp-scripts check-licenses",
+		"format:js": "wp-scripts format-js",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"lint:md:docs": "wp-scripts lint-md-docs",
+		"lint:md:js": "wp-scripts lint-md-js",
+		"lint:pkg-json": "wp-scripts lint-pkg-json",
+		"packages-update": "wp-scripts packages-update",
+		"start": "wp-scripts start",
+		"test:e2e": "wp-scripts test-e2e",
+		"test:unit": "wp-scripts test-unit-js",
+		"zip": "./bin/build-zip.sh",
+		"release": "./bin/release-to-github.sh",
+		"prepare": "husky install"
+	},
+	"devDependencies": {
+		"@woocommerce/dependency-extraction-webpack-plugin": "1.4.0",
+		"@woocommerce/eslint-plugin": "1.1.0",
+		"@wordpress/prettier-config": "^1.0.1",
+		"@wordpress/scripts": "^13.0.3",
+		"husky": "^7.0.4",
+		"lint-staged": "^12.3.7",
+		"prettier": "npm:wp-prettier@^2.2.1-beta-1"
+	},
+	"dependencies": {
+		"@woocommerce/data": "^1.1.1",
+		"@wordpress/api-fetch": "^3.21.5",
+		"@wordpress/components": "^12.0.7",
+		"@wordpress/compose": "^3.24.4",
+		"@wordpress/data": "^4.26.7",
+		"@wordpress/data-controls": "^1.20.7",
+		"@wordpress/element": "^2.19.1",
+		"@wordpress/hooks": "^2.11.1"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"npm run format:js",
+			"npm run lint:js"
+		],
+		"*.scss": [
+			"npm run lint:css"
+		]
+	}
+}
