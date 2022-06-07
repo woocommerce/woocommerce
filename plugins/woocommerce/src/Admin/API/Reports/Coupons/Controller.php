@@ -40,15 +40,16 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                  = array();
-		$args['before']        = $request['before'];
-		$args['after']         = $request['after'];
-		$args['page']          = $request['page'];
-		$args['per_page']      = $request['per_page'];
-		$args['orderby']       = $request['orderby'];
-		$args['order']         = $request['order'];
-		$args['coupons']       = (array) $request['coupons'];
-		$args['extended_info'] = $request['extended_info'];
+		$args                        = array();
+		$args['before']              = $request['before'];
+		$args['after']               = $request['after'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['orderby']             = $request['orderby'];
+		$args['order']               = $request['order'];
+		$args['coupons']             = (array) $request['coupons'];
+		$args['extended_info']       = $request['extended_info'];
+		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		return $args;
 	}
 
@@ -284,6 +285,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['force_cache_refresh'] = array(
+			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

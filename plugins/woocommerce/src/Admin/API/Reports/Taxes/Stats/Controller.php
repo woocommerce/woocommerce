@@ -69,17 +69,18 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args              = array();
-		$args['before']    = $request['before'];
-		$args['after']     = $request['after'];
-		$args['interval']  = $request['interval'];
-		$args['page']      = $request['page'];
-		$args['per_page']  = $request['per_page'];
-		$args['orderby']   = $request['orderby'];
-		$args['order']     = $request['order'];
-		$args['taxes']     = (array) $request['taxes'];
-		$args['segmentby'] = $request['segmentby'];
-		$args['fields']    = $request['fields'];
+		$args                        = array();
+		$args['before']              = $request['before'];
+		$args['after']               = $request['after'];
+		$args['interval']            = $request['interval'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['orderby']             = $request['orderby'];
+		$args['order']               = $request['order'];
+		$args['taxes']               = (array) $request['taxes'];
+		$args['segmentby']           = $request['segmentby'];
+		$args['fields']              = $request['fields'];
+		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		return $args;
 	}
@@ -395,6 +396,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			'items'             => array(
 				'type' => 'string',
 			),
+		);
+		$params['force_cache_refresh'] = array(
+			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

@@ -425,6 +425,12 @@ class Controller extends \WC_REST_Reports_Controller {
 				'type' => 'string',
 			),
 		);
+		$params['force_cache_refresh'] = array(
+			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
 	}
