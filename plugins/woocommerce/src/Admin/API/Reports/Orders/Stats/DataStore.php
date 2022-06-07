@@ -284,6 +284,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'category_includes' => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$query_args = $this->parse_cache_options( $query_args );
 		$this->normalize_timezones( $query_args, $defaults );
 
 		/*
@@ -413,6 +414,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->set_cached_data( $cache_key, $data );
 		}
+
+		$this->maybe_add_cache_debug_data( $data, $query_args );
 
 		return $data;
 	}
