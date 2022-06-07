@@ -1566,7 +1566,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		);
 
 		/**
-		 * Filters whether apply base tax for local pickup shipping or not.
+		 * Filters whether apply base tax for local pickup shipping method or not.
 		 *
 		 * @since 6.7.0
 		 * @param boolean apply_base_tax Whether apply base tax for local pickup. Default true.
