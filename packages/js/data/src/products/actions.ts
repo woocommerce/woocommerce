@@ -55,12 +55,11 @@ export function createProductError(
 }
 
 function updateProductSuccess( id: number, product: Partial< Product > ) {
-	const obj = {
+	return {
 		type: TYPES.UPDATE_PRODUCT_SUCCESS as const,
 		id,
 		product,
 	};
-	return obj;
 }
 
 export function updateProductError( id: number, error: unknown ) {
@@ -133,7 +132,10 @@ export function* createProduct( data: Pick< Product, MutableProperties > ) {
 	}
 }
 
-export function* updateProduct( id: number, data: Partial< Product > ) {
+export function* updateProduct(
+	id: number,
+	data: Pick< Product, MutableProperties >
+) {
 	try {
 		const product: Product = yield apiFetch( {
 			path: `${ WC_PRODUCT_NAMESPACE }/${ id }`,
