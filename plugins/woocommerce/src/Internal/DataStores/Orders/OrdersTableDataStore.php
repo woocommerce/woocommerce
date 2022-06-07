@@ -961,7 +961,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		// Update with latest changes.
 		$changes = $order->get_changes();
 
-		$this->persist_order_to_db( $order, $changes );
+		$this->persist_order_to_db( $order, true );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
