@@ -36,6 +36,7 @@ import {
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useActiveSetupTasklist } from '~/tasks';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -61,6 +62,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
+	const activeSetupList = useActiveSetupTasklist();
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -137,6 +139,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
+		setupTasksCompleteCount,
+		setupTasksCount,
 		previewSiteBtnTrackData,
 	} = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -144,7 +148,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			ONBOARDING_STORE_NAME
 		);
 
-		const isSetupTaskListHidden = getTaskList( 'setup' )?.isHidden;
+		const setupList = getTaskList( activeSetupList );
+
+		const isSetupTaskListHidden = setupList?.isHidden;
 		const extendedTaskList = getTaskList( 'extended' );
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
@@ -160,8 +166,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			requestingTaskListOptions: ! hasFinishedResolution(
 				'getTaskLists'
 			),
-			setupTaskListComplete: getTaskList( 'setup' )?.isComplete,
+			setupTaskListComplete: setupList?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
+			setupTasksCount: setupList?.tasks.length,
+			setupTasksCompleteCount: setupList?.tasks.filter(
+				( task ) => task.isComplete
+			).length,
 			isCompletedTask: Boolean(
 				query.task && getTask( query.task )?.isComplete
 			),
@@ -230,7 +240,14 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const setup = {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
-			icon: <SetupProgress />,
+			icon: (
+				<SetupProgress
+					setupTasksComplete={ setupTasksCompleteCount }
+					setupCompletePercent={ Math.ceil(
+						( setupTasksCompleteCount / setupTasksCount ) * 100
+					) }
+				/>
+			),
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&

@@ -28,13 +28,6 @@
 				stroke: currentColor;
 			}
 		}
-
-		// custom progress icon, requires specific coloring
-		&.setup-progress {
-			path:first-child {
-				stroke: '#DCDCDE';
-			}
-		}
 	}
 
 	.woocommerce-layout__homescreen-display-options {
