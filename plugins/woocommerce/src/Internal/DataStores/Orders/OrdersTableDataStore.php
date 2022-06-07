@@ -819,6 +819,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @return string
 	 */
 	public function get_database_schema() {
+		global $wpdb;
+
+		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+
 		$orders_table_name           = $this->get_orders_table_name();
 		$addresses_table_name        = $this->get_addresses_table_name();
 		$operational_data_table_name = $this->get_operational_data_table_name();
@@ -845,7 +849,7 @@ CREATE TABLE $orders_table_name (
 	KEY status (status),
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email)
-);
+) $collate;
 CREATE TABLE $addresses_table_name (
 	id bigint(20) unsigned auto_increment primary key,
 	order_id bigint(20) unsigned NOT NULL,
@@ -863,7 +867,7 @@ CREATE TABLE $addresses_table_name (
 	phone varchar(100) null,
 	KEY order_id (order_id),
 	KEY address_type_order_id (address_type, order_id)
-);
+) $collate;
 CREATE TABLE $operational_data_table_name (
 	id bigint(20) unsigned auto_increment primary key,
 	order_id bigint(20) unsigned NULL,
@@ -885,14 +889,14 @@ CREATE TABLE $operational_data_table_name (
 	recorded_sales tinyint(1) NULL,
 	KEY order_id (order_id),
 	KEY order_key (order_key)
-);
+) $collate;
 CREATE TABLE $meta_table (
 	id bigint(20) unsigned auto_increment primary key,
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
 	KEY meta_key_value (meta_key, meta_value(100))
-);
+) $collate;
 ";
 
 		return $sql;
