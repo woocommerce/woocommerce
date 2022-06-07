@@ -67,7 +67,6 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$args['category_includes']   = (array) $request['categories'];
 		$args['segmentby']           = $request['segmentby'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-		$args['debug_cache']         = $request['debug_cache'];
 
 		// For backwards compatibility, `customer` is aliased to `customer_type`.
 		if ( empty( $request['customer_type'] ) && ! empty( $request['customer'] ) ) {
@@ -100,10 +99,6 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		foreach ( $report_data->intervals as $interval_data ) {
 			$item                    = $this->prepare_item_for_response( $interval_data, $request );
 			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
-		}
-
-		if ( isset( $report_data->debug_cache ) ) {
-			$out_data['debug_cache'] = $report_data->debug_cache;
 		}
 
 		$response = rest_ensure_response( $out_data );
@@ -578,12 +573,6 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		);
 		$params['force_cache_refresh'] = array(
 			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['debug_cache']         = array(
-			'description'       => __( 'Include cache debugging info in the response.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',

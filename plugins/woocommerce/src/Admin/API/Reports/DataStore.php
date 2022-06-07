@@ -137,6 +137,13 @@ class DataStore extends SqlQuery {
 				self::get_db_table_name()
 			);
 		}
+
+		// Utilize enveloped responses to include debugging info.
+		// See https://querymonitor.com/blog/2021/05/debugging-wordpress-rest-api-requests/
+		if ( isset( $_GET['_envelope'] ) ) {
+			$this->debug_cache = true;
+			add_filter( 'rest_envelope_response', array( $this, 'add_debug_cache_to_envelope' ), 999 );
+		}
 	}
 
 	/**
@@ -175,40 +182,25 @@ class DataStore extends SqlQuery {
 	}
 
 	/**
-	 * Find and handle query parameters that are actually for setting cache options.
-	 *
-	 * This should be called before generating the cache key since it potentially alters the query parameters array.
-	 *
-	 * Supported cache options:
-	 * - bool $force_cache_refresh Sets a class property to bypass the cache for the current query.
-	 * - bool $debug_cache         Sets a class property to add debugging info to the returned data.
-	 *
-	 * @param array $params Query parameters.
-	 *
-	 * @return array
-	 */
-	protected function parse_cache_options( $params ) {
-		if ( isset( $params['force_cache_refresh'] ) && true === $params['force_cache_refresh'] ) {
-			$this->force_cache_refresh = true;
-		}
-
-		if ( isset( $params['debug_cache'] ) && true === $params['debug_cache'] ) {
-			$this->debug_cache = true;
-		}
-
-		unset( $params['force_cache_refresh'] );
-		unset( $params['debug_cache'] );
-
-		return $params;
-	}
-
-	/**
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
+		if ( isset( $params['force_cache_refresh'] ) ) {
+			if ( true === $params['force_cache_refresh'] ) {
+				$this->force_cache_refresh = true;
+			}
+
+			// We don't want this param in the key.
+			unset( $params['force_cache_refresh'] );
+		}
+
+		if ( true === $this->debug_cache ) {
+			$this->debug_cache_data['query_args'] = $params;
+		}
+
 		return implode(
 			'_',
 			array(
@@ -229,19 +221,21 @@ class DataStore extends SqlQuery {
 		if ( true === $this->debug_cache ) {
 			$this->debug_cache_data['should_use_cache']    = $this->should_use_cache();
 			$this->debug_cache_data['force_cache_refresh'] = $this->force_cache_refresh;
+			$this->debug_cache_data['cache_hit']           = false;
 		}
 
 		if ( $this->should_use_cache() && false === $this->force_cache_refresh ) {
 			$cached_data = Cache::get( $cache_key );
 
+			$cache_hit = ! ! $cached_data;
 			if ( true === $this->debug_cache ) {
-				$this->debug_cache_data['cache_hit'] = ! ! $cached_data;
+				$this->debug_cache_data['cache_hit'] = $cache_hit;
 			}
 
 			return $cached_data;
 		}
 
-		// Reset cache options.
+		// Cached item has now functionally been refreshed. Reset the option.
 		$this->force_cache_refresh = false;
 
 		return false;
@@ -263,33 +257,18 @@ class DataStore extends SqlQuery {
 	}
 
 	/**
-	 * Add debugging information to a data object.
+	 * Add cache debugging information to an enveloped API response.
 	 *
-	 * This should be called after set_cached_data so that the debugging info is not included in the cache.
+	 * @param array $envelope
 	 *
-	 * @param \stdClass $data       The data to add debuggin info to.
-	 * @param array     $query_args Query parameters.
-	 *
-	 * @return \stdClass
+	 * @return array
 	 */
-	protected function maybe_add_cache_debug_data( $data, $query_args = array() ) {
-		if ( true === $this->debug_cache && is_object( $data ) ) {
-			if ( ! isset( $this->debug_cache_data['cache_hit'] ) ) {
-				$this->debug_cache_data['cache_hit'] = false;
-			}
-
-			if ( ! empty( $query_args ) ) {
-				$this->debug_cache_data['query_args'] = $query_args;
-			}
-
-			$data->debug_cache = $this->debug_cache_data;
-
-			// Reset debugging options.
-			$this->debug_cache = false;
-			$this->debug_cache_data = array();
+	public function add_debug_cache_to_envelope( $envelope ) {
+		if ( ! empty( $this->debug_cache_data ) ) {
+			$envelope['debug_cache'] = $this->debug_cache_data;
 		}
 
-		return $data;
+		return $envelope;
 	}
 
 	/**
