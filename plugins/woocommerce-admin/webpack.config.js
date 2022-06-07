@@ -15,7 +15,9 @@ const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
  */
 const AsyncChunkSrcVersionParameterPlugin = require( './chunk-src-version-param' );
 const UnminifyWebpackPlugin = require( './unminify' );
-const { webpackConfig: styleConfig } = require( '@woocommerce/internal-style-build' );
+const {
+	webpackConfig: styleConfig,
+} = require( '@woocommerce/internal-style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -185,9 +187,7 @@ const webpackConfig = {
 			startYear: 2000,
 		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
-		// Adds the script version parameter to the chunk URLs for cache busting
-		// TODO: Partially replace with __webpack_get_script_filename__ in app with Webpack 5.x.
-		// The CSS chunk portion will need to remain, as it originates in MiniCssExtractPlugin.
+		// Adds the script version parameter to the CSS chunk URLs for cache busting
 		new AsyncChunkSrcVersionParameterPlugin(),
 		// We only want to generate unminified files in the development phase.
 		WC_ADMIN_PHASE === 'development' &&
