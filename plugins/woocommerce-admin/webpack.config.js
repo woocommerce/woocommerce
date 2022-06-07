@@ -13,7 +13,6 @@ const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 /**
  * Internal dependencies
  */
-const AsyncChunkSrcVersionParameterPlugin = require( './chunk-src-version-param' );
 const UnminifyWebpackPlugin = require( './unminify' );
 const {
 	webpackConfig: styleConfig,
@@ -187,8 +186,6 @@ const webpackConfig = {
 			startYear: 2000,
 		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
-		// Adds the script version parameter to the CSS chunk URLs for cache busting
-		new AsyncChunkSrcVersionParameterPlugin(),
 		// We only want to generate unminified files in the development phase.
 		WC_ADMIN_PHASE === 'development' &&
 			// Generate unminified files to load the unminified version when `define( 'SCRIPT_DEBUG', true );` is set in wp-config.
