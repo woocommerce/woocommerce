@@ -67,26 +67,20 @@ jobs:
              pnpm nx composer-dump-autoload woocommerce
            fi
 
-      - name: Prepare Test Environment
-        run: |
-          cd plugins/woocommerce
-          WP_VERSION="${{ matrix.wp }}"
-          if [[ $WP_VERSION == 'latest' ]]; then
-            WP_VERSION="\"https://wordpress.org/latest.zip\""
-          elif [[ $WP_VERSION == 'nightly' ]]; then
-            WP_VERSION="\"https://wordpress.org/nightly-builds/wordpress-latest.zip\""
-          elif [[ $WP_VERSION == '5.8' ]]; then
-            WP_VERSION="\"https://wordpress.org/wordpress-5.8.4.zip\""
-          elif [[ $WP_VERSION == '5.7' ]]; then
-            WP_VERSION="\"https://wordpress.org/wordpress-5.7.6.zip\""
-          else
-            WP_VERSION="\"WordPress/WordPress#$WP_VERSION\""
-          fi
-          echo "{ \"phpVersion\": \"${{ matrix.php }}\", \"core\": $WP_VERSION }" > .wp-env.override.json
-
       - name: Run Tests
         run: |
           cd plugins/woocommerce
-          npm -g install @wordpress/env
-          wp-env start
+          WP_ENV_CORE="${{ matrix.wp }}"
+          if [[ WP_ENV_CORE == 'latest' ]]; then
+            WP_ENV_CORE="\"https://wordpress.org/latest.zip\""
+          elif [[ WP_ENV_CORE == 'nightly' ]]; then
+            WP_ENV_CORE="\"https://wordpress.org/nightly-builds/wordpress-latest.zip\""
+          elif [[ WP_ENV_CORE == '5.8' ]]; then
+            WP_ENV_CORE="\"https://wordpress.org/wordpress-5.8.4.zip\""
+          elif [[ WP_ENV_CORE == '5.7' ]]; then
+            WP_ENV_CORE="\"https://wordpress.org/wordpress-5.7.6.zip\""
+          else
+            WP_ENV_CORE="\"WordPress/WordPress#WP_ENV_CORE\""
+          fi
+          WP_ENV_PHP_VERSION="${{ matrix.php }}" pnpm wp-env start
           pnpm nx test-unit woocommerce

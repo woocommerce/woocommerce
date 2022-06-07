@@ -47,10 +47,8 @@ jobs:
         run: |
           cd plugins/woocommerce
           composer require "wp-phpunit/wp-phpunit" "^5.9" --dev --no-scripts
-          echo "{ \"phpVersion\": \"7.4\", \"core\": \"WordPress/WordPress#5.9\" }" > .wp-env.override.json
-          npm -g install @wordpress/env
-          wp-env start
-          wp-env run tests-wordpress "chmod 755 wp-content wp-content/plugins wp-content/uploads"
+          WP_ENV_CORE="WordPress/WordPress#5.9" WP_ENV_PHP_VERSION="7.4" pnpm wp-env start
+          pnpm wp-env run tests-wordpress chmod 755 wp-content wp-content/plugins wp-content/uploads
           pnpm nx test-code-coverage woocommerce || true
       
       - name: Send code coverage to Codecov.
