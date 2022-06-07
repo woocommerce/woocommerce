@@ -15,7 +15,7 @@
 	"devDependencies": {
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/scripts": "^13.0.3",
+		"@wordpress/scripts": "^23.2.0",
 		"eslint": "5.16.0",
 		"uglify-js": "^3.5.3"
 	},
@@ -37,7 +37,7 @@
 	},
 	"scripts": {
 		"postinstall": "composer install",
-		"build": "pnpm run uglify && wp-scripts build",
+		"build": "wp-scripts build && pnpm run uglify",
 		"build:zip": "./bin/build-zip.sh",
 		"build:dev": "pnpm run lint:js && pnpm run build",
 		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
