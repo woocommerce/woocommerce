@@ -22,6 +22,16 @@ import { WcAdminPaymentsGatewaysBannerSlot } from './payments/payments-settings-
 // eslint-disable-next-line no-undef,camelcase
 __webpack_public_path__ = global.wcAdminAssets.path;
 
+// Modify webpack to load all async JS chunks with a script version param.
+// https://webpack.js.org/api/module-variables/#__webpack_get_script_filename__-webpack-specific
+// eslint-disable-next-line no-undef,camelcase
+const oldFn = __webpack_get_script_filename__;
+// eslint-disable-next-line no-undef,camelcase
+__webpack_get_script_filename__ = ( chunk ) => {
+	const filename = oldFn( chunk );
+	return filename + '?ver=' + window.wcAdminAssets.version;
+};
+
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
 const settingsGroup = 'wc_admin';
