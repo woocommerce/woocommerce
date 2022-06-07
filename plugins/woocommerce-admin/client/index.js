@@ -25,11 +25,20 @@ __webpack_public_path__ = global.wcAdminAssets.path;
 // Modify webpack to load all async JS chunks with a script version param.
 // https://webpack.js.org/api/module-variables/#__webpack_get_script_filename__-webpack-specific
 // eslint-disable-next-line no-undef,camelcase
-const oldFn = __webpack_get_script_filename__;
+const oldGetScriptFileNameFn = __webpack_get_script_filename__;
 // eslint-disable-next-line no-undef,camelcase
 __webpack_get_script_filename__ = ( chunk ) => {
-	const filename = oldFn( chunk );
-	return filename + '?ver=' + window.wcAdminAssets.version;
+	const filename = oldGetScriptFileNameFn( chunk );
+	return `${ filename }?ver=${ window.wcAdminAssets.version }`;
+};
+
+// Modify webpack to load all async CSS chunks with a script version param.
+// eslint-disable-next-line no-undef,camelcase
+const oldMinCssFn = __webpack_require__.miniCssF;
+// eslint-disable-next-line no-undef,camelcase
+__webpack_require__.miniCssF = ( chunkId ) => {
+	const filename = oldMinCssFn( chunkId );
+	return `${ filename }?ver=${ window.wcAdminAssets.version }`;
 };
 
 const appRoot = document.getElementById( 'root' );
