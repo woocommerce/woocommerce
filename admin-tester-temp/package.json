@@ -18,8 +18,6 @@
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
 		"test:unit": "wp-scripts test-unit-js",
-		"zip": "./bin/build-zip.sh",
-		"release": "./bin/release-to-github.sh",
 		"prepare": "husky install"
 	},
 	"devDependencies": {
