@@ -71,4 +71,11 @@ class HtmlSanitizerTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '', $output, 'When invalid callbacks are provided, an empty string will be returned.' );
 	}
+
+	/**
+	 * @testdox An empty ruleset is equivalent to asking that all HTML elements be removed.
+	 */
+	public function test_no_kses_rules_specified() {
+		$this->assertEquals( 'foo', $this->sut->sanitize( '<p>foo</p>', array() ) );
+	}
 }

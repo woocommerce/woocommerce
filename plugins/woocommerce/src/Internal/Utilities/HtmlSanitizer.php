@@ -57,9 +57,12 @@ class HtmlSanitizer {
 			$html = $this->apply_string_callbacks( $sanitizer_rules['pre_processors'], $html );
 		}
 
-		if ( isset( $sanitizer_rules['wp_kses_rules'] ) && is_array( $sanitizer_rules['wp_kses_rules'] ) ) {
-			$html = wp_kses( $html, $sanitizer_rules['wp_kses_rules'] );
-		}
+		// If no KSES rules are specified, assume all HTML should be stripped.
+		$kses_rules = isset( $sanitizer_rules['wp_kses_rules'] ) && is_array( $sanitizer_rules['wp_kses_rules'] )
+			? $sanitizer_rules['wp_kses_rules']
+			: array();
+
+		$html = wp_kses( $html, $kses_rules );
 
 		if ( isset( $sanitizer_rules['post_processors'] ) && is_array( $sanitizer_rules['post_processors'] ) ) {
 			$html = $this->apply_string_callbacks( $sanitizer_rules['post_processors'], $html );
