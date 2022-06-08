@@ -11,25 +11,6 @@ root.setAttribute( 'id', 'product-tour-root' );
 
 const ProductTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
-	useEffect( () => {
-		const query = qs.parse( window.location.search.slice( 1 ) );
-		if ( query && query.tutorial === 'true' ) {
-			// Delay tour show up because Task Reminder Bar changes the product name input position after this component is first rendered
-			// TODO: use a better way to handle this.
-			setTimeout( () => setShowTour( true ), 1500 );
-		}
-
-		// Overwrite the default behavior of the "Enable guided mode" button when a user clicks it.
-		const enableGuideModeBtn = Array.from(
-			window.document.querySelectorAll( '.page-title-action' )
-		).find( ( el ) => el.textContent === 'Enable guided mode' );
-		if ( enableGuideModeBtn ) {
-			enableGuideModeBtn.addEventListener( 'click', ( e ) => {
-				e.preventDefault();
-				setShowTour( true );
-			} );
-		}
-	}, [] );
 
 	const config: TourKitTypes.WooConfig = {
 		placement: 'bottom-start',
@@ -43,7 +24,7 @@ const ProductTour = () => {
 				},
 				arrowIndicator: true,
 				autoScroll: {
-					behavior: 'smooth',
+					behavior: 'auto',
 					block: 'center',
 				},
 			},
@@ -70,6 +51,9 @@ const ProductTour = () => {
 				referenceElements: {
 					desktop: '#title',
 				},
+				focusElement: {
+					desktop: '#title',
+				},
 				meta: {
 					heading: __( 'Product name', 'woocommerce' ),
 					descriptions: {
@@ -83,6 +67,10 @@ const ProductTour = () => {
 			{
 				referenceElements: {
 					desktop: '#wp-content-editor-container',
+				},
+				focusElement: {
+					iframe: '#content_ifr',
+					desktop: '#tinymce',
 				},
 				meta: {
 					heading: __(
@@ -101,6 +89,9 @@ const ProductTour = () => {
 				referenceElements: {
 					desktop: '#woocommerce-product-data',
 				},
+				focusElement: {
+					desktop: '#_regular_price',
+				},
 				meta: {
 					heading: __( 'Add your product data', 'woocommerce' ),
 					descriptions: {
@@ -114,6 +105,10 @@ const ProductTour = () => {
 			{
 				referenceElements: {
 					desktop: '#postexcerpt',
+				},
+				focusElement: {
+					iframe: '#excerpt_ifr',
+					desktop: '#tinymce',
 				},
 				meta: {
 					heading: __(
@@ -132,6 +127,9 @@ const ProductTour = () => {
 				referenceElements: {
 					desktop: '#postimagediv',
 				},
+				focusElement: {
+					desktop: '#set-post-thumbnail',
+				},
 				meta: {
 					heading: __( 'Add your product image', 'woocommerce' ),
 					descriptions: {
@@ -145,6 +143,9 @@ const ProductTour = () => {
 			{
 				referenceElements: {
 					desktop: '#tagsdiv-product_tag',
+				},
+				focusElement: {
+					desktop: '#new-tag-product_tag',
 				},
 				meta: {
 					heading: __( 'Add your product tags', 'woocommerce' ),
@@ -174,6 +175,9 @@ const ProductTour = () => {
 				referenceElements: {
 					desktop: '#submitdiv',
 				},
+				focusElement: {
+					desktop: '#submitdiv',
+				},
 				meta: {
 					heading: __( 'Publish your product 🎉', 'woocommerce' ),
 					descriptions: {
@@ -190,6 +194,55 @@ const ProductTour = () => {
 		],
 		closeHandler: () => setShowTour( false ),
 	};
+
+	useEffect( () => {
+		let intervalId: NodeJS.Timeout;
+
+		const bindEnableGuideModeBtnEvent = () => {
+			// Overwrite the default behavior of the "Enable guided mode" button when a user clicks it.
+			const enableGuideModeBtn = Array.from(
+				window.document.querySelectorAll( '.page-title-action' )
+			).find( ( el ) => el.textContent === 'Enable guided mode' );
+
+			if ( enableGuideModeBtn ) {
+				enableGuideModeBtn.addEventListener( 'click', ( e ) => {
+					e.preventDefault();
+					setShowTour( true );
+				} );
+			}
+		};
+
+		const waitInitialElementReadyAndShowTour = () => {
+			// Wait until the initial element position is ready and then show the tour.
+			const initialElement = document.querySelector(
+				config.steps[ 0 ].referenceElements?.desktop || ''
+			);
+			let lastInitialElementTop = initialElement?.getBoundingClientRect()
+				.top;
+
+			intervalId = setInterval( () => {
+				const top = initialElement?.getBoundingClientRect().top;
+				if ( lastInitialElementTop === top ) {
+					setShowTour( true );
+					if ( intervalId ) {
+						clearInterval( intervalId );
+					}
+				}
+				lastInitialElementTop = top;
+			}, 1000 );
+		};
+
+		const query = qs.parse( window.location.search.slice( 1 ) );
+		if ( query && query.tutorial === 'true' ) {
+			waitInitialElementReadyAndShowTour();
+		}
+
+		bindEnableGuideModeBtnEvent();
+
+		return () => clearInterval( intervalId );
+		// only run once
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	if ( ! showTour ) {
 		return null;
