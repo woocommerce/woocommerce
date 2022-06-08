@@ -13,5 +13,4 @@ phpcs.xml
 # build files
 woocommerce-beta-tester.zip
 node_modules/
-build/
 bin/
