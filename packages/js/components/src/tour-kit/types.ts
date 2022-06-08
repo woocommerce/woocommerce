@@ -16,7 +16,9 @@ export interface WooStep extends Step {
 			mobile?: string | React.ReactElement | null;
 		};
 		primaryButton?: {
+			/** Set a text for the button. Default to "Done" for the last step and "Next" for the other steps  */
 			text?: string;
+			/** Disable the button or not. Default to False */
 			isDisabled?: boolean;
 		};
 	};
