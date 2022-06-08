@@ -12,6 +12,7 @@ import {
 	OPTIONS_STORE_NAME,
 	useUser,
 	useUserPreferences,
+	getVisibleTasks,
 } from '@woocommerce/data';
 import { getHistory } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -151,6 +152,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const setupList = getTaskList( activeSetupList );
 
 		const isSetupTaskListHidden = setupList?.isHidden;
+		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
@@ -168,8 +170,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 			setupTaskListComplete: setupList?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
-			setupTasksCount: setupList?.tasks.length,
-			setupTasksCompleteCount: setupList?.tasks.filter(
+			setupTasksCount: setupVisibleTasks.length,
+			setupTasksCompleteCount: setupVisibleTasks.filter(
 				( task ) => task.isComplete
 			).length,
 			isCompletedTask: Boolean(

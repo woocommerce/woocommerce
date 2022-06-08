@@ -6,11 +6,9 @@ import { TaskType } from './types';
 /**
  * Filters tasks to only visible tasks, taking in account snoozed tasks.
  */
-export function getVisibleTasks( tasks: TaskType[] ) {
-	const nowTimestamp = Date.now();
-	return tasks.filter(
+export const getVisibleTasks = ( tasks: TaskType[] ) =>
+	tasks.filter(
 		( task ) =>
 			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
+			( ! task.isSnoozed || task.snoozedUntil < Date.now() )
 	);
-}
