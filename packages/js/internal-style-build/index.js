@@ -34,12 +34,26 @@ module.exports = {
 								],
 							},
 							webpackImporter: true,
-							additionalData:
-								'@use "sass:math";' +
-								'@import "_colors"; ' +
-								'@import "_variables"; ' +
-								'@import "_breakpoints"; ' +
-								'@import "_mixins"; ',
+							additionalData: ( content, loaderContext ) => {
+								const { resourcePath } = loaderContext;
+								if ( resourcePath.includes( '@automattic+' ) ) {
+									/*
+									 * Skip adding additional data for @automattic/* packages to
+									 * fix "SassError: @use rules must be written before any other rules."
+									 * @automattic/* packages have included '@use "sass:math" and other necessary imports.
+									 */
+									return content;
+								}
+
+								return (
+									'@use "sass:math";' +
+									'@import "_colors"; ' +
+									'@import "_variables"; ' +
+									'@import "_breakpoints"; ' +
+									'@import "_mixins"; ' +
+									content
+								);
+							},
 						},
 					},
 				],
