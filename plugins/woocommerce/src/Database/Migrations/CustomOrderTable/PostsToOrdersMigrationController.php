@@ -102,7 +102,8 @@ class PostsToOrdersMigrationController {
 			return false;
 		}
 
-		$transaction_isolation_level             = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
+		$transaction_isolation_level = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
+		$this->verify_transaction_isolation_level( $transaction_isolation_level );
 		$set_transaction_isolation_level_command = "SET TRANSACTION ISOLATION LEVEL $transaction_isolation_level";
 
 		if ( ! $this->db_query( $set_transaction_isolation_level_command ) ) {
@@ -110,6 +111,19 @@ class PostsToOrdersMigrationController {
 		}
 
 		return $this->db_query( 'START TRANSACTION' ) ? true : null;
+	}
+
+	/**
+	 * Verify that a given database transaction isolation level name is valid, and throw an exception if not.
+	 *
+	 * @param string $transaction_isolation_level Transaction isolation level name to check.
+	 * @return void
+	 * @throws \Exception Invalid transaction isolation level name.
+	 */
+	private function verify_transaction_isolation_level( string $transaction_isolation_level ): void {
+		if ( ! in_array( $transaction_isolation_level, CustomOrdersTableController::get_valid_transaction_isolation_levels(), true ) ) {
+			throw new \Exception( 'Invalid database transaction isolation level name ' . $transaction_isolation_level );
+		}
 	}
 
 	/**

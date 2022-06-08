@@ -400,16 +400,12 @@ class CustomOrdersTableController {
 				'type' => 'checkbox',
 			);
 
-			$settings[] = array(
+			$isolation_level_names = self::get_valid_transaction_isolation_levels();
+			$settings[]            = array(
 				'desc'    => __( 'Database transaction isolation level to use', 'woocommerce' ),
 				'id'      => self::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION,
 				'type'    => 'select',
-				'options' => array(
-					'REPEATABLE READ'  => 'REPEATABLE READ',
-					'READ COMMITTED'   => 'READ COMMITTED',
-					'READ UNCOMMITTED' => 'READ UNCOMMITTED',
-					'SERIALIZABLE'     => 'SERIALIZABLE',
-				),
+				'options' => array_combine( $isolation_level_names, $isolation_level_names ),
 				'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
 			);
 		} else {
@@ -428,6 +424,20 @@ class CustomOrdersTableController {
 		$settings[] = array( 'type' => 'sectionend' );
 
 		return $settings;
+	}
+
+	/**
+	 * Get the valid database transaction isolation level names.
+	 *
+	 * @return string[]
+	 */
+	public static function get_valid_transaction_isolation_levels() {
+		return array(
+			'REPEATABLE READ',
+			'READ COMMITTED',
+			'READ UNCOMMITTED',
+			'SERIALIZABLE',
+		);
 	}
 
 	/**

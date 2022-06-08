@@ -42,6 +42,14 @@ class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+	}
+
+	/**
 	 * Test that migration for a normal order happens as expected.
 	 */
 	public function test_migration_for_normal_order() {
@@ -539,14 +547,14 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 */
 	public function test_db_transaction_completes_if_configured_and_no_errors() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SOME_LEVEL' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
 
 		$this->use_wpdb_mock();
 
 		$this->create_and_migrate_order();
 
 		$expected = array(
-			'SET TRANSACTION ISOLATION LEVEL SOME_LEVEL',
+			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
 			'START TRANSACTION',
 			'COMMIT',
 		);
@@ -554,12 +562,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->assertEquals( $expected, $this->executed_transaction_statements );
 	}
 
+
+	/**
+	 * @testdox An exception is thrown if an invalid transaction isolation level is configured.
+	 */
+	public function test_exception_is_thrown_on_invalid_transaction_isolation_level() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'INVALID_LEVEL' );
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid database transaction isolation level name INVALID_LEVEL' );
+
+		$this->use_wpdb_mock();
+
+		$this->create_and_migrate_order();
+	}
+
 	/**
 	 * @testdox Database transactions are used and rolled back on migrations with database error.
 	 */
 	public function test_db_transaction_is_rolled_back_on_db_error() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SOME_LEVEL' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
@@ -574,7 +598,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->create_and_migrate_order();
 
 		$expected = array(
-			'SET TRANSACTION ISOLATION LEVEL SOME_LEVEL',
+			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
 			'START TRANSACTION',
 			'ROLLBACK',
 		);
@@ -587,7 +611,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 */
 	public function test_db_transaction_is_rolled_back_on_exception() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SOME_LEVEL' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
@@ -600,7 +624,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->create_and_migrate_order();
 
 		$expected = array(
-			'SET TRANSACTION ISOLATION LEVEL SOME_LEVEL',
+			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
 			'START TRANSACTION',
 			'ROLLBACK',
 		);
@@ -613,7 +637,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 */
 	public function test_db_transaction_related_errors_are_logged() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SOME_LEVEL' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
 
 		$fake_logger = $this->use_fake_logger();
 		$this->use_wpdb_mock( 'error' );
@@ -622,7 +646,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$actual_error = $fake_logger->errors[0];
 
-		$this->assertEquals( 'PostsToOrdersMigrationController: when executing SET TRANSACTION ISOLATION LEVEL SOME_LEVEL: Something failed!', $actual_error['message'] );
+		$this->assertEquals( 'PostsToOrdersMigrationController: when executing SET TRANSACTION ISOLATION LEVEL SERIALIZABLE: Something failed!', $actual_error['message'] );
 		$this->assertEquals( 'Something failed!', $actual_error['data']['error'] );
 		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_error['data']['source'] );
 	}
@@ -630,9 +654,9 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	/**
 	 * @testdox Database errors on transaction related exceptions are logged.
 	 */
-	public function test_foo_transaction_related_exceptions_are_logged() {
+	public function test_transaction_related_exceptions_are_logged() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SOME_LEVEL' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
 
 		$fake_logger = $this->use_fake_logger();
 		$exception   = new \Exception( 'Something failed!' );
@@ -642,7 +666,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$actual_error = $fake_logger->errors[0];
 
-		$this->assertTrue( StringUtil::starts_with( $actual_error['message'], 'PostsToOrdersMigrationController: when executing SET TRANSACTION ISOLATION LEVEL SOME_LEVEL: (Exception) Something failed!' ) );
+		$this->assertTrue( StringUtil::starts_with( $actual_error['message'], 'PostsToOrdersMigrationController: when executing SET TRANSACTION ISOLATION LEVEL SERIALIZABLE: (Exception) Something failed!' ) );
 		$this->assertEquals( $exception, $actual_error['data']['exception'] );
 		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_error['data']['source'] );
 	}
