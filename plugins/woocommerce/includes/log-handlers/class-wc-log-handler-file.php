@@ -54,6 +54,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$log_size_limit = 5 * 1024 * 1024;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->log_size_limit = apply_filters( 'woocommerce_log_file_size_limit', $log_size_limit );
 
 		add_action( 'plugins_loaded', array( $this, 'write_cached_logs' ) );
@@ -119,6 +125,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			} else {
 				$handle = 'log';
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 			$time    = date_i18n( 'm-d-Y @ H:i:s' );
 			$entry   = "{$time} - {$message}";
@@ -238,6 +250,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$result = true;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_log_clear', $handle );
 
 		return $result;
@@ -261,6 +279,12 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_log_remove', $handle, $removed );
 		}
 		return $removed;

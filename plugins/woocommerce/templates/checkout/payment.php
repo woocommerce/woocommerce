@@ -18,6 +18,12 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! wp_doing_ajax() ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_review_order_before_payment' );
 }
 ?>
@@ -57,5 +63,11 @@ if ( ! wp_doing_ajax() ) {
 </div>
 <?php
 if ( ! wp_doing_ajax() ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_review_order_after_payment' );
 }

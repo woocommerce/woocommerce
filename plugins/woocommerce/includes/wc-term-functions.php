@@ -28,6 +28,12 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 
 	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
 		$orderby = wc_attribute_orderby( $taxonomy );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	} elseif ( in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ), true ) ) {
 		$orderby = 'menu_order';
 	}
@@ -178,6 +184,12 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		return array();
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_product_terms', _wc_get_cached_product_terms( $product_id, $taxonomy, $args ), $product_id, $taxonomy, $args );
 }
 
@@ -331,6 +343,7 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 
 		/**
 		 * After a term has had it's order set.
+		* @since
 		*/
 		do_action( 'woocommerce_after_set_term_order', $term, $index, $taxonomy );
 
@@ -524,6 +537,12 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 		return $terms;
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ), true ) ) {
 		return $terms;
 	}

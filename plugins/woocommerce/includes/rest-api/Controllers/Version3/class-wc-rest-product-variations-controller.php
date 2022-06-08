@@ -95,6 +95,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -313,6 +314,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		 * @param WC_Data         $variation Object object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param bool            $creating  If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $variation, $request, $creating );
 	}
@@ -369,6 +371,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 				if ( is_wp_error( $upload ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), array( $image ) ) ) {
 						throw new WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
 					}

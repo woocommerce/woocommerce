@@ -172,6 +172,12 @@ class WC_Gateway_Paypal_Request {
 			return $paypal_args;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_paypal_args',
 			array_merge(
@@ -192,12 +198,24 @@ class WC_Gateway_Paypal_Request {
 	protected function get_paypal_args( $order ) {
 		WC_Gateway_Paypal::log( 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$force_one_line_item = apply_filters( 'woocommerce_paypal_force_one_line_item', false, $order );
 
 		if ( ( wc_tax_enabled() && wc_prices_include_tax() ) || ! $this->line_items_valid( $order ) ) {
 			$force_one_line_item = true;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$paypal_args = apply_filters(
 			'woocommerce_paypal_args',
 			array_merge(
@@ -380,6 +398,12 @@ class WC_Gateway_Paypal_Request {
 			$item_names[] = $item_name . ' x ' . $item->get_quantity();
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_paypal_get_order_item_names', implode( ', ', $item_names ), $order );
 	}
 
@@ -409,6 +433,12 @@ class WC_Gateway_Paypal_Request {
 			$item_name .= ' (' . $item_meta . ')';
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_paypal_get_order_item_name', $item_name, $order, $item );
 	}
 
@@ -489,6 +519,12 @@ class WC_Gateway_Paypal_Request {
 	protected function add_line_item( $item_name, $quantity = 1, $amount = 0.0, $item_number = '' ) {
 		$index = ( count( $this->line_items ) / 4 ) + 1;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$item = apply_filters(
 			'woocommerce_paypal_line_item',
 			array(

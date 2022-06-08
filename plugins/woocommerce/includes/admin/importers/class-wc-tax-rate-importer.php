@@ -199,6 +199,12 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	public function import_end() {
 		echo '<p>' . esc_html__( 'All done!', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax' ) ) . '">' . esc_html__( 'View tax rates', 'woocommerce' ) . '</a></p>';
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'import_end' );
 	}
 
@@ -285,6 +291,12 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 		$action = 'admin.php?import=woocommerce_tax_rate_csv&step=1';
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$bytes      = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
 		$size       = size_format( $bytes );
 		$upload_dir = wp_upload_dir();

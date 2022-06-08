@@ -20,4 +20,10 @@ foreach ( $email_actions as $an_action ) {
 }
 echo "\n\n----------------------------------------\n\n";
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

@@ -78,7 +78,19 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return WC_Product_CSV_Importer
 	 */
 	public static function get_importer( $file, $args = array() ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 		return new $importer_class( $file, $args );
 	}
@@ -100,6 +112,12 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	protected static function get_valid_csv_filetypes() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_csv_product_import_valid_filetypes',
 			array(
@@ -136,6 +154,12 @@ class WC_Product_CSV_Importer_Controller {
 			),
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->steps = apply_filters( 'woocommerce_product_csv_importer_steps', $default_steps );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -267,6 +291,12 @@ class WC_Product_CSV_Importer_Controller {
 	 * Output information about the uploading process.
 	 */
 	protected function upload_form() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$bytes      = apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
 		$size       = size_format( $bytes );
 		$upload_dir = wp_upload_dir();
@@ -491,6 +521,12 @@ class WC_Product_CSV_Importer_Controller {
 		 * @hooked wc_importer_default_english_mappings - 100
 		 */
 		$default_columns = $this->normalize_columns_names(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_csv_product_import_mapping_default_columns',
 				array(
@@ -544,6 +580,12 @@ class WC_Product_CSV_Importer_Controller {
 
 		$special_columns = $this->get_special_columns(
 			$this->normalize_columns_names(
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_csv_product_import_mapping_special_columns',
 					array(
@@ -590,6 +632,12 @@ class WC_Product_CSV_Importer_Controller {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_csv_product_import_mapped_columns', $headers, $raw_headers );
 	}
 
@@ -738,6 +786,12 @@ class WC_Product_CSV_Importer_Controller {
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_csv_product_import_mapping_options', $options, $item );
 	}
 }

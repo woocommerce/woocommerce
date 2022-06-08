@@ -151,13 +151,23 @@ class WC_API extends WC_Legacy_API {
 			// Make sure gateways are available for request.
 			WC()->payment_gateways();
 
-			// Trigger generic action before request hook.
+			
+			/**
+			 * Trigger generic action before request hook.
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_request', $api_request );
 
 			// Is there actually something hooked into this API request? If not trigger 400 - Bad request.
 			status_header( has_action( 'woocommerce_api_' . $api_request ) ? 200 : 400 );
 
-			// Trigger an action which plugins can hook into to fulfill the request.
+			
+			/**
+			 * Trigger an action which plugins can hook into to fulfill the request.
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_' . $api_request );
 
 			// Done, clear buffer and exit.

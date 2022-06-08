@@ -133,6 +133,12 @@ class Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_EMAIL,
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_note_types', $allowed_types );
 	}
 
@@ -150,6 +156,12 @@ class Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_SENT,
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_note_statuses', $allowed_statuses );
 	}
 

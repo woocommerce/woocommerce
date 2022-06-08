@@ -303,6 +303,12 @@ class WC_Email extends WC_Settings_API {
 				$legacy_replace[ $legacy_key ] = $replace;
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$string = str_replace( apply_filters( 'woocommerce_email_format_string_find', $legacy_find, $this ), apply_filters( 'woocommerce_email_format_string_replace', $legacy_replace, $this ), $string );
 		}
 
@@ -318,6 +324,12 @@ class WC_Email extends WC_Settings_API {
 	 * Set the locale to the store locale for customer emails to make sure emails are in the store language.
 	 */
 	public function setup_locale() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $this->is_customer_email() && apply_filters( 'woocommerce_email_setup_locale', true ) ) {
 			wc_switch_to_site_locale();
 		}
@@ -327,6 +339,12 @@ class WC_Email extends WC_Settings_API {
 	 * Restore the locale to the default locale. Use after finished with setup_locale.
 	 */
 	public function restore_locale() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $this->is_customer_email() && apply_filters( 'woocommerce_email_restore_locale', true ) ) {
 			wc_restore_locale();
 		}
@@ -373,6 +391,12 @@ class WC_Email extends WC_Settings_API {
 	public function get_additional_content() {
 		$content = $this->get_option( 'additional_content', '' );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $content ), $this->object, $this );
 	}
 
@@ -382,6 +406,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_subject() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 	}
 
@@ -391,6 +421,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object, $this );
 	}
 
@@ -400,6 +436,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_recipient() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object, $this );
 		$recipients = array_map( 'trim', explode( ',', $recipient ) );
 		$recipients = array_filter( $recipients, 'is_email' );
@@ -422,6 +464,12 @@ class WC_Email extends WC_Settings_API {
 			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object, $this );
 	}
 
@@ -431,6 +479,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_attachments() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object, $this );
 	}
 
@@ -462,6 +516,12 @@ class WC_Email extends WC_Settings_API {
 				break;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_content_type', $content_type, $this, $default_content_type );
 	}
 
@@ -471,6 +531,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_title() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_title', $this->title, $this );
 	}
 
@@ -480,6 +546,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_description() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_description', $this->description, $this );
 	}
 
@@ -492,6 +564,12 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_option( $key, $empty_value = null ) {
 		$value = parent::get_option( $key, $empty_value );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_get_option', $value, $this, $value, $key, $empty_value );
 	}
 
@@ -501,6 +579,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object, $this );
 	}
 
@@ -561,6 +645,12 @@ class WC_Email extends WC_Settings_API {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
 			$css_inliner_class = CssInliner::class;
@@ -569,6 +659,12 @@ class WC_Email extends WC_Settings_API {
 				try {
 					$css_inliner = CssInliner::fromHtml( $content )->inlineCss( $css );
 
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_emogrifier', $css_inliner, $this );
 
 					$dom_document = $css_inliner->getDomDocument();
@@ -625,6 +721,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_name( $from_name = '' ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this, $from_name );
 		return wp_specialchars_decode( esc_html( $from_name ), ENT_QUOTES );
 	}
@@ -636,6 +738,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_address( $from_email = '' ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$from_email = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this, $from_email );
 		return sanitize_email( $from_email );
 	}
@@ -655,8 +763,26 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, wp_specialchars_decode( $subject ), $message, $headers, $attachments ), $this );
 		$return               = $mail_callback( ...$mail_callback_params );
 
@@ -817,6 +943,12 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_theme_template_file( $template ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return get_stylesheet_directory() . '/' . apply_filters( 'woocommerce_template_directory', 'woocommerce', $template ) . '/' . $template;
 	}
 
@@ -834,6 +966,12 @@ class WC_Email extends WC_Settings_API {
 
 				// Locate template file.
 				$core_file     = $this->template_base . $template;
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
 
 				// Copy template file.
@@ -844,6 +982,7 @@ class WC_Email extends WC_Settings_API {
 				 *
 				 * @param string $template_type The copied template type
 				 * @param string $email The email object
+				 * @since
 				 */
 				do_action( 'woocommerce_copy_email_template', $template_type, $this );
 
@@ -876,6 +1015,7 @@ class WC_Email extends WC_Settings_API {
 					 *
 					 * @param string $template The deleted template type
 					 * @param string $email The email object
+					 * @since
 					 */
 					do_action( 'woocommerce_delete_email_template', $template_type, $this );
 					?>
@@ -937,6 +1077,7 @@ class WC_Email extends WC_Settings_API {
 		 * Action hook fired before displaying email settings.
 		 *
 		 * @param string $email The email object
+		 * @since
 		 */
 		do_action( 'woocommerce_email_settings_before', $this );
 		?>
@@ -950,6 +1091,7 @@ class WC_Email extends WC_Settings_API {
 		 * Action hook fired after displaying email settings.
 		 *
 		 * @param string $email The email object
+		 * @since
 		 */
 		do_action( 'woocommerce_email_settings_after', $this );
 		?>
@@ -974,7 +1116,19 @@ class WC_Email extends WC_Settings_API {
 
 					$local_file    = $this->get_theme_template_file( $template );
 					$core_file     = $this->template_base . $template;
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$template_file = apply_filters( 'woocommerce_locate_core_template', $core_file, $template, $this->template_base, $this->id );
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$template_dir  = apply_filters( 'woocommerce_template_directory', 'woocommerce', $template );
 					?>
 					<div class="template <?php echo esc_attr( $template_type ); ?>">

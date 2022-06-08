@@ -236,6 +236,7 @@ class WC_REST_Shipping_Zone_Methods_V2_Controller extends WC_REST_Shipping_Zones
 		 * @param object           $method
 		 * @param WP_REST_Response $response        The response data.
 		 * @param WP_REST_Request  $request         The request sent to the API.
+		 * @since
 		 */
 		do_action( 'rest_delete_product_review', $method, $response, $request );
 
@@ -314,6 +315,12 @@ class WC_REST_Shipping_Zone_Methods_V2_Controller extends WC_REST_Shipping_Zones
 				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			update_option( $method->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method ) );
 		}
 
@@ -326,6 +333,12 @@ class WC_REST_Shipping_Zone_Methods_V2_Controller extends WC_REST_Shipping_Zones
 		// Update if this method is enabled or not.
 		if ( isset( $request['enabled'] ) ) {
 			if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $request['enabled'] ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method->id, $request['zone_id'], $request['enabled'] );
 				$method->enabled = ( true === $request['enabled'] ? 'yes' : 'no' );
 			}

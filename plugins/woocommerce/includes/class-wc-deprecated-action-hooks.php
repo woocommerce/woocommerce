@@ -124,6 +124,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Shipping' ) || is_a( $item, 'WC_Order_Item_Fee' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item );
 				}
 				break;
@@ -132,6 +138,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Coupon' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item->get_code(), $item->get_discount(), $item->get_discount_tax() );
 				}
 				break;
@@ -140,6 +152,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Tax' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item->get_rate_id(), $item->get_tax_total(), $item->get_shipping_tax_total() );
 				}
 				break;
@@ -148,6 +166,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item->legacy_package_key );
 				}
 				break;
@@ -156,6 +180,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $item_id, $item->legacy_values, $item->legacy_cart_item_key );
 				}
 				break;
@@ -164,6 +194,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Fee' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item->legacy_fee, $item->legacy_fee_key );
 				}
 				break;
@@ -172,6 +208,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item, $item->get_product() );
 				}
 				break;
@@ -180,6 +222,12 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 			case 'woocommerce_order_update_fee':
 			case 'woocommerce_order_update_tax':
 				if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( $old_hook, $order_id, $item_id, $item );
 				}
 				break;

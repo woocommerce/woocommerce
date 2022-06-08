@@ -19,6 +19,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
 <?php if ( $has_orders ) : ?>

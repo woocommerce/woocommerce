@@ -55,6 +55,12 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	public function test_updating_options_triggers_ces() {
 		$ces = new CustomerEffortScoreTracks();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_options' );
 
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
@@ -77,8 +83,19 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	public function test_the_queue_does_not_allow_duplicate() {
 		$ces = new CustomerEffortScoreTracks();
 
-		// Fire the action twice to trigger the queueing process twice.
+		
+		/**
+		 * Fire the action twice to trigger the queueing process twice.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_options' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_options' );
 
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
@@ -102,6 +119,12 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 		$ces = new CustomerEffortScoreTracks();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_options' );
 
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );
@@ -118,6 +141,12 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 		$current_tab = 'test_tab';
 		$ces         = new CustomerEffortScoreTracks();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_options' );
 
 		$queue_items = get_option( $ces::CES_TRACKS_QUEUE_OPTION_NAME, array() );

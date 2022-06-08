@@ -25,6 +25,12 @@ class Query extends ReportsQuery {
 	public function get_data() {
 		$data_store = \WC_Data_Store::load( 'report-stock-stats' );
 		$results    = $data_store->get_data();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_analytics_stock_stats_query', $results );
 	}
 }

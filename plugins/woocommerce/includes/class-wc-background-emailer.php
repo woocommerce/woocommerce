@@ -132,6 +132,12 @@ class WC_Background_Emailer extends WC_Background_Process {
 			'blocking'  => false,
 			'body'      => $this->data,
 			'cookies'   => $cookies,
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
 		);
 	}

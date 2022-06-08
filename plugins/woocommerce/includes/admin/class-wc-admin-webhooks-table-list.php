@@ -94,6 +94,12 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>',
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$actions     = apply_filters( 'webhook_row_actions', $actions, $webhook );
 		$row_actions = array();
 

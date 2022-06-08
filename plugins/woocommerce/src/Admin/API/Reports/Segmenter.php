@@ -383,6 +383,12 @@ class Segmenter {
 				$id           = $segment->get_id();
 				$segments[]   = $id;
 				$product_name = $segment->get_name();
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$separator    = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $segment );
 				$attributes   = wc_get_formatted_variation( $segment, true, false );
 

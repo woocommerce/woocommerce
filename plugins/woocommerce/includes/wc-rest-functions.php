@@ -45,6 +45,12 @@ function wc_rest_prepare_date_response( $date, $utc = true ) {
  * @return array
  */
 function wc_rest_allowed_image_mime_types() {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters(
 		'woocommerce_rest_allowed_image_mime_types',
 		array(
@@ -117,6 +123,12 @@ function wc_rest_upload_image_from_url( $image_url ) {
 		return new WP_Error( 'woocommerce_rest_invalid_image', sprintf( __( 'Invalid image: %s', 'woocommerce' ), $file['error'] ), array( 'status' => 400 ) );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_rest_api_uploaded_image_from_url', $file, $image_url );
 
 	return $file;
@@ -240,6 +252,12 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		$permission       = current_user_can( $post_type_object->cap->$cap, $object_id );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
 }
 
@@ -264,6 +282,12 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 	if ( in_array( $context, array( 'edit', 'delete' ), true ) && wc_current_user_has_role( 'shop_manager' ) ) {
 		$permission                  = false;
 		$user_data                   = get_userdata( $object_id );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 
 		if ( isset( $user_data->roles ) ) {
@@ -278,6 +302,12 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		$permission = current_user_can( $contexts[ $context ], $object_id );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'user' );
 }
 
@@ -303,6 +333,12 @@ function wc_rest_check_product_term_permissions( $taxonomy, $context = 'read', $
 	$taxonomy_object = get_taxonomy( $taxonomy );
 	$permission      = current_user_can( $taxonomy_object->cap->$cap, $object_id );
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $taxonomy );
 }
 
@@ -327,6 +363,12 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 
 	$permission = current_user_can( $objects[ $object ] );
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
 }
 
@@ -360,5 +402,11 @@ function wc_rest_check_product_reviews_permissions( $context = 'read', $object_i
 		$permission = current_user_can( $contexts[ $context ], $object_id );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'product_review' );
 }

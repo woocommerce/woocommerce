@@ -76,6 +76,12 @@ class WC_Emails {
 	 * Hook in all transactional emails.
 	 */
 	public static function init_transactional_emails() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$email_actions = apply_filters(
 			'woocommerce_email_actions',
 			array(
@@ -104,6 +110,12 @@ class WC_Emails {
 			)
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_defer_transactional_emails', false ) ) {
 			self::$background_emailer = new WC_Background_Emailer();
 
@@ -145,6 +157,12 @@ class WC_Emails {
 	 * @param array  $args Email args (default: []).
 	 */
 	public static function send_queued_transactional_email( $filter = '', $args = array() ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_allow_send_queued_transactional_email', true, $filter, $args ) ) {
 			self::instance(); // Init self so emails exist.
 
@@ -207,7 +225,12 @@ class WC_Emails {
 		// Hook for replacing {site_title} in email-footer.
 		add_filter( 'woocommerce_email_footer_text', array( $this, 'replace_placeholders' ) );
 
-		// Let 3rd parties unhook the above via this hook.
+		
+		/**
+		 * Let 3rd parties unhook the above via this hook.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_email', $this );
 	}
 
@@ -230,6 +253,12 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
 		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 	}
 
@@ -331,10 +360,22 @@ class WC_Emails {
 		// Buffer.
 		ob_start();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_email_header', $email_heading, null );
 
 		echo wpautop( wptexturize( $message ) ); // WPCS: XSS ok.
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_email_footer', null );
 
 		// Get contents.
@@ -441,6 +482,12 @@ class WC_Emails {
 		}
 
 		$downloads = $order->get_downloadable_items();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$columns   = apply_filters(
 			'woocommerce_email_downloads_columns',
 			array(
@@ -485,6 +532,12 @@ class WC_Emails {
 	 * @param bool     $plain_text    If is plain text email.
 	 */
 	public function order_meta( $order, $sent_to_admin = false, $plain_text = false ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$fields = apply_filters( 'woocommerce_email_order_meta_fields', array(), $sent_to_admin, $order );
 
 		/**
@@ -551,6 +604,12 @@ class WC_Emails {
 			return;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$fields = array_filter( apply_filters( 'woocommerce_email_customer_details_fields', array(), $sent_to_admin, $order ), array( $this, 'customer_detail_field_is_valid' ) );
 
 		if ( ! empty( $fields ) ) {
@@ -631,10 +690,40 @@ class WC_Emails {
 		);
 
 		wp_mail(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient' ), $product, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_subject_low_stock', $subject, $product, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_content_low_stock', $message, $product ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_headers', '', 'low_stock', $product, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'low_stock', $product, null )
 		);
 	}
@@ -665,10 +754,40 @@ class WC_Emails {
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 
 		wp_mail(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_recipient_no_stock', get_option( 'woocommerce_stock_email_recipient' ), $product, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_subject_no_stock', $subject, $product, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_content_no_stock', $message, $product ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_headers', '', 'no_stock', $product, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'no_stock', $product, null )
 		);
 	}
@@ -703,10 +822,40 @@ class WC_Emails {
 		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_subject_backorder', $subject, $args, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_content_backorder', $message, $args ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_headers', '', 'backorder', $args, null ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args, null )
 		);
 	}

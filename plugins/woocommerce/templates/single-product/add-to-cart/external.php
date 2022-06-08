@@ -17,6 +17,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 <form class="cart" action="<?php echo esc_url( $product_url ); ?>" method="get">

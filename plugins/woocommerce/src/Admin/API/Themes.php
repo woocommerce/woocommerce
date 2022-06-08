@@ -106,6 +106,7 @@ class Themes extends \WC_REST_Data_Controller {
 			 * Fires when a theme is successfully installed.
 			 *
 			 * @param string $theme The theme name.
+			 * @since
 			 */
 			do_action( 'woocommerce_theme_installed', $theme );
 		} else {
@@ -146,6 +147,7 @@ class Themes extends \WC_REST_Data_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_themes', $response, $item, $request );
 	}
@@ -199,6 +201,12 @@ class Themes extends \WC_REST_Data_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_rest_themes_collection_params', $params );
 	}
 }

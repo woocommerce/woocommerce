@@ -120,6 +120,12 @@ class Init {
 			$controllers = array_merge( $controllers, $analytics_controllers );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 
 		foreach ( $controllers as $controller ) {

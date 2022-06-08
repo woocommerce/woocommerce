@@ -233,6 +233,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param stdClass         $data     The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_sales', $response, (object) $sales_data, $request );
 	}

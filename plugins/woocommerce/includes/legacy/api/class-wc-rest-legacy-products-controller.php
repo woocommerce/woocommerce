@@ -191,6 +191,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -692,6 +693,12 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 
 			$variation->save();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_rest_save_product_variation', $variation->get_id(), $menu_order, $data );
 		}
 

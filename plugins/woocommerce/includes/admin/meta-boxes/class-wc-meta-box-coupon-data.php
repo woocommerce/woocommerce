@@ -41,6 +41,12 @@ class WC_Meta_Box_Coupon_Data {
 
 			<ul class="coupon_data_tabs wc-tabs" style="display:none;">
 				<?php
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$coupon_data_tabs = apply_filters(
 					'woocommerce_coupon_data_tabs',
 					array(
@@ -121,11 +127,23 @@ class WC_Meta_Box_Coupon_Data {
 						'desc_tip'          => true,
 						'class'             => 'date-picker',
 						'custom_attributes' => array(
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							'pattern' => apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ),
 						),
 					)
 				);
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_coupon_options', $coupon->get_id(), $coupon );
 
 				?>
@@ -388,6 +406,12 @@ class WC_Meta_Box_Coupon_Data {
 			)
 		);
 		$coupon->save();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}
 }

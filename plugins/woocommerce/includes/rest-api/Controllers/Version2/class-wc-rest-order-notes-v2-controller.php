@@ -110,6 +110,7 @@ class WC_REST_Order_Notes_V2_Controller extends WC_REST_Order_Notes_V1_Controlle
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $note     Order note object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_order_note', $response, $note, $request );
 	}

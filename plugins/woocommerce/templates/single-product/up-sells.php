@@ -23,6 +23,12 @@ if ( $upsells ) : ?>
 
 	<section class="up-sells upsells products">
 		<?php
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$heading = apply_filters( 'woocommerce_product_upsells_products_heading', __( 'You may also like&hellip;', 'woocommerce' ) );
 
 		if ( $heading ) :

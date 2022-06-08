@@ -398,6 +398,12 @@ abstract class WC_Legacy_Cart {
 		} else {
 			$discounts_before_tax = false;
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_cart_discounts_before_tax', $discounts_before_tax, $this );
 	}
 

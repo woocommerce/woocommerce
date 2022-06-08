@@ -100,6 +100,12 @@ class WC_Admin_Report {
 			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
 			'parent_order_status' => false,
 		);
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
 		$args         = wp_parse_args( $args, $default_args );
 
@@ -109,6 +115,12 @@ class WC_Admin_Report {
 			return '';
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$order_status = apply_filters( 'woocommerce_reports_order_statuses', $order_status );
 
 		$query  = array();
@@ -333,6 +345,12 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$query = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query = implode( ' ', $query );
 
@@ -345,6 +363,12 @@ class WC_Admin_Report {
 		if ( $debug || $nocache ) {
 			self::enable_big_selects();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		} else {
 			$query_hash = md5( $query_type . $query );
@@ -352,6 +376,12 @@ class WC_Admin_Report {
 			if ( $result === null ) {
 				self::enable_big_selects();
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 			}
 			$this->set_cached_query( $query_hash, $result );

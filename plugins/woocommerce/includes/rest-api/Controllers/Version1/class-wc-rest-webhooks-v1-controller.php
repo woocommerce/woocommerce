@@ -244,6 +244,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param array           $args    Array of arguments for $wpdb->get_results().
 		 * @param WP_REST_Request $request The current request.
+		 * @since
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_webhook_query', $args, $request );
 		unset( $prepared_args['page'] );
@@ -351,6 +352,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 * @param WC_Webhook      $webhook  Webhook data.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_webhook_object", $webhook, $request, true );
 
@@ -431,6 +433,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 * @param WC_Webhook      $webhook  Webhook data.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_webhook_object", $webhook, $request, false );
 
@@ -476,6 +479,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 * @param WC_Webhook       $webhook     The deleted or trashed item.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_webhook_object", $webhook, $response, $request );
 
@@ -531,6 +535,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 * @param stdClass        $data An object representing a single item prepared
 		 *                                       for inserting or updating the database.
 		 * @param WP_REST_Request $request       Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
 	}
@@ -577,6 +582,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Webhook       $webhook  Webhook object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
 	}

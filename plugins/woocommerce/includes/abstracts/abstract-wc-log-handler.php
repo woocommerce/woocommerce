@@ -43,6 +43,12 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 		$level_string = strtoupper( $level );
 		$entry        = "{$time_string} {$level_string} {$message}";
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_format_log_entry',
 			$entry,

@@ -85,6 +85,12 @@ class WC_Twenty_Nineteen {
 			'has_rtl' => true,
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_twenty_nineteen_styles', $styles );
 	}
 
@@ -109,6 +115,12 @@ class WC_Twenty_Nineteen {
 			return $css;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$lightness = absint( apply_filters( 'twentynineteen_custom_colors_lightness', 33 ) );
 		$lightness = $lightness . '%';
 

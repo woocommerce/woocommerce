@@ -112,6 +112,12 @@ class Controller extends ReportsController implements ExportableInterface {
 		if ( $_product ) {
 			$file_path                   = $_product->get_file_download_path( $data['download_id'] );
 			$filename                    = basename( $file_path );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$response->data['file_name'] = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
 			$response->data['file_path'] = $file_path;
 		} else {
@@ -131,6 +137,7 @@ class Controller extends ReportsController implements ExportableInterface {
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_downloads', $response, $report, $request );
 	}

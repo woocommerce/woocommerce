@@ -83,8 +83,20 @@ class WC_Order_Query extends WC_Object_Query {
 	 * @throws Exception When WC_Data_Store validation fails.
 	 */
 	public function get_orders() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args    = apply_filters( 'woocommerce_order_query_args', $this->get_query_vars() );
 		$results = WC_Data_Store::load( 'order' )->query( $args );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_query', $results, $args );
 	}
 }

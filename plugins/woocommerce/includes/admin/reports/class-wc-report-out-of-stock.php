@@ -37,6 +37,12 @@ class WC_Report_Out_Of_Stock extends WC_Report_Stock {
 
 		$stock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$query_from = apply_filters(
 			'woocommerce_report_out_of_stock_query_from',
 			$wpdb->prepare(

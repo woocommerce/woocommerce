@@ -80,7 +80,12 @@ class OnboardingSetupWizard {
 			return;
 		}
 
-		// Setup wizard redirect.
+		
+		/**
+		 * Setup wizard redirect.
+		 *
+		 * @since
+		 */
 		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
 			$do_redirect        = true;
 			$current_page       = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
@@ -94,6 +99,12 @@ class OnboardingSetupWizard {
 			// On these pages, or during these events, disable the redirect.
 			if (
 				( 'wc-admin' === $current_page && $is_onboarding_path ) ||
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ||
 				isset( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification
 			) {
@@ -232,6 +243,12 @@ class OnboardingSetupWizard {
 		$settings['onboarding']['localeInfo']      = include WC()->plugin_path() . '/i18n/locale-info.php';
 		$settings['onboarding']['profile']         = $profile;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_admin_onboarding_preloaded_data', $settings );
 	}
 

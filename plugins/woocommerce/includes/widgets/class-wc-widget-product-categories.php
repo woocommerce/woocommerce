@@ -136,6 +136,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			$terms = wc_get_product_terms(
 				$post->ID,
 				'product_cat',
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_product_categories_widget_product_terms_args',
 					array(
@@ -146,6 +152,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			);
 
 			if ( $terms ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$main_term           = apply_filters( 'woocommerce_product_categories_widget_main_term', $terms[0], $terms );
 				$this->current_cat   = $main_term;
 				$this->cat_ancestors = get_ancestors( $main_term->term_id, 'product_cat' );
@@ -226,6 +238,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 		if ( $dropdown ) {
 			wc_product_dropdown_categories(
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				apply_filters(
 					'woocommerce_product_categories_widget_dropdown_args',
 					wp_parse_args(
@@ -291,6 +309,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 			echo '<ul class="product-categories">';
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			wp_list_categories( apply_filters( 'woocommerce_product_categories_widget_args', $list_args ) );
 
 			echo '</ul>';

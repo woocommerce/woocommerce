@@ -17,6 +17,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_auth_page_header' ); ?>
 
 <h1>

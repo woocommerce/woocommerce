@@ -46,6 +46,12 @@ function wc_empty_cart() {
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 		return;
 	}
@@ -119,6 +125,12 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	// Output success messages.
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
 		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
@@ -127,14 +139,32 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
 		wc_deprecated_function( 'The wc_add_to_cart_message filter', '3.0', 'wc_add_to_cart_message_html' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$message = apply_filters( 'wc_add_to_cart_message', $message, $product_id );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$message = apply_filters( 'wc_add_to_cart_message_html', $message, $products, $show_qty );
 
 	if ( $return ) {
 		return $message;
 	} else {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		wc_add_notice( $message, apply_filters( 'woocommerce_add_to_cart_notice_type', 'success' ) );
 	}
 }
@@ -216,6 +246,12 @@ function wc_cart_totals_shipping_html() {
 			foreach ( $package['contents'] as $item_id => $values ) {
 				$product_names[ $item_id ] = $values['data']->get_name() . ' &times;' . $values['quantity'];
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$product_names = apply_filters( 'woocommerce_shipping_package_details_array', $product_names, $package );
 		}
 
@@ -225,6 +261,12 @@ function wc_cart_totals_shipping_html() {
 				'package'                  => $package,
 				'available_methods'        => $package['rates'],
 				'show_package_details'     => count( $packages ) > 1,
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
 				/* translators: %d: shipping package number */
@@ -244,6 +286,12 @@ function wc_cart_totals_shipping_html() {
  * Get taxes total.
  */
 function wc_cart_totals_taxes_total_html() {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	echo apply_filters( 'woocommerce_cart_totals_taxes_total_html', wc_price( WC()->cart->get_taxes_total() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
@@ -289,9 +337,21 @@ function wc_cart_totals_coupon_html( $coupon ) {
 		$discount_amount_html = __( 'Free shipping coupon', 'woocommerce' );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
 	$coupon_html          = $discount_amount_html . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	echo wp_kses( apply_filters( 'woocommerce_cart_totals_coupon_html', $coupon_html, $coupon, $discount_amount_html ), array_replace_recursive( wp_kses_allowed_html( 'post' ), array( 'a' => array( 'data-coupon' => true ) ) ) ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
 }
 
@@ -329,6 +389,12 @@ function wc_cart_totals_order_total_html() {
 		}
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	echo apply_filters( 'woocommerce_cart_totals_order_total_html', $value ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
@@ -340,6 +406,12 @@ function wc_cart_totals_order_total_html() {
 function wc_cart_totals_fee_html( $fee ) {
 	$cart_totals_fee_html = WC()->cart->display_prices_including_tax() ? wc_price( $fee->total + $fee->tax ) : wc_price( $fee->total );
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	echo apply_filters( 'woocommerce_cart_totals_fee_html', $cart_totals_fee_html, $fee ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
@@ -368,6 +440,12 @@ function wc_cart_totals_shipping_method_label( $method ) {
 		}
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_cart_shipping_method_full_label', $label, $method );
 }
 
@@ -429,6 +507,12 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
 		WC()->session->set( 'shipping_method_counts', $method_counts );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
 	return $chosen_method;
@@ -458,6 +542,12 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 			break;
 		}
 	}
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 }
 
@@ -492,6 +582,12 @@ function wc_shipping_methods_have_changed( $key, $package ) {
 function wc_get_cart_item_data_hash( $product ) {
 	return md5(
 		wp_json_encode(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_cart_item_data_to_validate',
 				array(

@@ -21,6 +21,12 @@ $render_refunds = (bool) apply_filters( 'woocommerce_admin_order_should_render_r
 global $wpdb;
 
 $payment_gateway     = wc_get_payment_gateway_by_order( $order );
+
+/**
+ * Hook
+ *
+ * @since
+ */
 $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_order_item_types', 'line_item' ) );
 $discounts           = $order->get_items( 'discount' );
 $line_items_fee      = $order->get_items( 'fee' );
@@ -68,12 +74,30 @@ if ( wc_tax_enabled() ) {
 		<tbody id="order_line_items">
 			<?php
 			foreach ( $line_items as $item_id => $item ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_before_order_item_' . $item->get_type() . '_html', $item_id, $item, $order );
 
 				include __DIR__ . '/html-order-item.php';
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_order_item_' . $item->get_type() . '_html', $item_id, $item, $order );
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_admin_order_items_after_line_items', $order->get_id() );
 			?>
 		</tbody>
@@ -82,6 +106,12 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_fee as $item_id => $item ) {
 				include __DIR__ . '/html-order-fee.php';
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_id() );
 			?>
 		</tbody>
@@ -91,6 +121,12 @@ if ( wc_tax_enabled() ) {
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include __DIR__ . '/html-order-shipping.php';
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_admin_order_items_after_shipping', $order->get_id() );
 			?>
 		</tbody>
@@ -102,6 +138,12 @@ if ( wc_tax_enabled() ) {
 				foreach ( $refunds as $refund ) {
 					include __DIR__ . '/html-order-refund.php';
 				}
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_admin_order_items_after_refunds', $order->get_id() );
 			}
 			?>
@@ -124,6 +166,12 @@ if ( wc_tax_enabled() ) {
 					<li class="<?php echo esc_attr( $class ); ?>">
 						<?php if ( $post_id ) : ?>
 							<?php
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							$post_url = apply_filters(
 								'woocommerce_admin_order_item_coupon_url',
 								add_query_arg(
@@ -297,7 +345,12 @@ if ( wc_tax_enabled() ) {
 			<button type="button" class="button refund-items"><?php esc_html_e( 'Refund', 'woocommerce' ); ?></button>
 		<?php endif; ?>
 		<?php
-			// Allow adding custom buttons.
+			
+			/**
+			 * Allow adding custom buttons.
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_order_item_add_action_buttons', $order );
 		?>
 		<?php if ( $order->is_editable() ) : ?>
@@ -313,7 +366,12 @@ if ( wc_tax_enabled() ) {
 		<button type="button" class="button add-order-tax"><?php esc_html_e( 'Add tax', 'woocommerce' ); ?></button>
 	<?php endif; ?>
 	<?php
-		// Allow adding custom buttons.
+		
+		/**
+		 * Allow adding custom buttons.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_add_line_buttons', $order );
 	?>
 	<button type="button" class="button cancel-action"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>

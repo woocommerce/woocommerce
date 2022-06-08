@@ -101,6 +101,12 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$subject = $this->get_option( 'subject_full', $this->get_default_subject() );
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
 		}
 
@@ -115,6 +121,12 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$heading = $this->get_option( 'heading_full', $this->get_default_heading() );
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $heading ), $this->object, $this );
 		}
 

@@ -16,4 +16,10 @@ echo wp_kses_post( sprintf( __( 'Download your %1$s Report: %2$s', 'woocommerce'
 
 echo "\n\n----------------------------------------\n\n";
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

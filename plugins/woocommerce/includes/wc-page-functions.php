@@ -51,6 +51,12 @@ function wc_get_page_id( $page ) {
 		$page = 'myaccount';
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
 
 	return $page ? absint( $page ) : -1;
@@ -71,6 +77,12 @@ function wc_get_page_permalink( $page, $fallback = null ) {
 		$permalink = is_null( $fallback ) ? get_home_url() : $fallback;
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_' . $page . '_page_permalink', $permalink );
 }
 
@@ -115,6 +127,12 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 		$url = add_query_arg( $endpoint, $value, $permalink );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_get_endpoint_url', $url, $endpoint, $value, $permalink );
 }
 

@@ -82,6 +82,12 @@ class Init {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return false;
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
 			return false;
 		}

@@ -201,6 +201,12 @@ class WC_Template_Loader {
 	 * @return string[]
 	 */
 	private static function get_template_loader_files( $default_file ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$templates   = apply_filters( 'woocommerce_template_loader_files', array(), $default_file );
 		$templates[] = 'woocommerce.php';
 

@@ -56,7 +56,12 @@ class WC_Meta_Box_Product_Images {
 								<li><a href="#" class="delete tips" data-tip="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></li>
 							</ul>
 							<?php
-							// Allow for extra info to be exposed or extra action to be executed for this attachment.
+							
+							/**
+							 * Allow for extra info to be exposed or extra action to be executed for this attachment.
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_admin_after_product_gallery_item', $thepostid, $attachment_id );
 							?>
 						</li>

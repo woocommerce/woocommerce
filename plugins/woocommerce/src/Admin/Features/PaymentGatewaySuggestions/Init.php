@@ -64,15 +64,33 @@ class Init {
 	 */
 	public static function get_specs() {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', DefaultPaymentGateways::get_all() );
 		}
 		$specs = PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		// Fetch specs if they don't yet exist.
 		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', DefaultPaymentGateways::get_all() );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', $specs );
 	}
 
@@ -90,6 +108,12 @@ class Init {
 			return false;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_allow_payment_recommendations', true );
 	}
 

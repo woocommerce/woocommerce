@@ -74,6 +74,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		}
 
 		$coupon_id = wp_insert_post(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_new_coupon_data',
 				array(
@@ -96,6 +102,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			delete_transient( 'rest_api_coupons_type_count' );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_new_coupon', $coupon_id, $coupon );
 		}
 	}
@@ -148,6 +160,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		);
 		$coupon->read_meta_data();
 		$coupon->set_object_read( true );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_coupon_loaded', $coupon );
 	}
 
@@ -190,6 +208,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_coupon', $coupon->get_id(), $coupon );
 	}
 
@@ -221,9 +245,21 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code(), 'coupons' );
 
 			$coupon->set_id( 0 );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_delete_coupon', $id );
 		} else {
 			wp_trash_post( $id );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_trash_coupon', $id );
 		}
 	}
@@ -288,6 +324,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $this->updated_props );
 	}
 
@@ -314,6 +356,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->set_used_by( (array) get_post_meta( $coupon->get_id(), '_used_by' ) );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_increase_coupon_usage_count', $coupon, $new_count, $used_by );
 
 		return $new_count;
@@ -378,6 +426,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_decrease_coupon_usage_count', $coupon, $new_count, $used_by );
 
 		return $new_count;
@@ -489,6 +543,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @return int
 	 */
 	private function get_tentative_held_time() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_hold_minutes', ( (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) ) ) * 60;
 	}
 
@@ -509,6 +569,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			return null;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 			return null;
 		}
@@ -606,6 +672,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			return null;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 			return null;
 		}

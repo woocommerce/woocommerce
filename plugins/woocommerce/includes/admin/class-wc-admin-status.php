@@ -63,6 +63,7 @@ class WC_Admin_Status {
 				 * Fires after a WooCommerce system status tool has been executed.
 				 *
 				 * @param array  $tool  Details about the tool that has been executed.
+				 * @since
 				 */
 				do_action( 'woocommerce_system_status_tool_executed', $tool );
 			} else {

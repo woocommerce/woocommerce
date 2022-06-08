@@ -185,6 +185,7 @@ class Loader {
 		 * This class needs to be removed by those feature components (like <ProfileWizard />).
 		 *
 		 * @param bool $is_loading If WooCommerce Admin is loading a fullscreen view.
+		 * @since
 		 */
 		$is_loading = apply_filters( 'woocommerce_admin_is_loading', false );
 
@@ -325,6 +326,12 @@ class Loader {
 			];
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
 		if ( class_exists( 'Jetpack' ) ) {
 			$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
@@ -336,6 +343,12 @@ class Loader {
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
 		if ( ! empty( $preload_options ) ) {
 			foreach ( $preload_options as $option ) {
@@ -343,6 +356,12 @@ class Loader {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
 		if ( ! empty( $preload_settings ) ) {
 			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
@@ -389,7 +408,12 @@ class Loader {
 		// We may have synced orders with a now-unregistered status.
 		// E.g An extension that added statuses is now inactive or removed.
 		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
-		// The separator used for attributes found in Variation titles.
+		
+		/**
+		 * The separator used for attributes found in Variation titles.
+		 *
+		 * @since
+		 */
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
@@ -535,6 +559,12 @@ class Loader {
 	public static function get_currency_settings() {
 		$code = get_woocommerce_currency();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'wc_currency_settings',
 			array(

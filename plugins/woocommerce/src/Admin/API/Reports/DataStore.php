@@ -109,6 +109,12 @@ class DataStore extends SqlQuery {
 		$this->assign_report_columns();
 
 		if ( property_exists( $this, 'report_columns' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$this->report_columns = apply_filters(
 				'woocommerce_admin_report_columns',
 				$this->report_columns,
@@ -149,6 +155,7 @@ class DataStore extends SqlQuery {
 		 *
 		 * @param bool $use_cache Whether or not to use cache.
 		 * @param string $cache_key The report's cache key. Used to identify the report.
+		 * @since
 		 */
 		return (bool) apply_filters( 'woocommerce_analytics_report_should_use_cache', true, $this->cache_key );
 	}
@@ -542,6 +549,12 @@ class DataStore extends SqlQuery {
 	 */
 	protected function cast_numbers( $array ) {
 		$retyped_array = array();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$column_types  = apply_filters( 'woocommerce_rest_reports_column_types', $this->column_types, $array );
 		foreach ( $array as $column_name => $value ) {
 			if ( is_array( $value ) ) {
@@ -588,6 +601,12 @@ class DataStore extends SqlQuery {
 	protected static function get_excluded_report_order_statuses() {
 		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
 		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 	}
 
@@ -1362,6 +1381,7 @@ class DataStore extends SqlQuery {
 		 * @param array  $query_args The original arguments for the request.
 		 * @param string $field      The object type.
 		 * @param string $context    The data store context.
+		 * @since
 		 */
 		$ids = apply_filters( 'woocommerce_analytics_' . $field, $ids, $query_args, $field, $this->context );
 

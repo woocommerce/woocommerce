@@ -58,6 +58,12 @@ class WC_Product_Factory {
 	 * @return string
 	 */
 	public static function get_product_classname( $product_id, $product_type ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, 'variation' === $product_type ? 'product_variation' : 'product', $product_id );
 
 		if ( ! $classname || ! class_exists( $classname ) ) {
@@ -75,7 +81,12 @@ class WC_Product_Factory {
 	 * @return string|false
 	 */
 	public static function get_product_type( $product_id ) {
-		// Allow the overriding of the lookup in this function. Return the product type here.
+		
+		/**
+		 * Allow the overriding of the lookup in this function. Return the product type here.
+		 *
+		 * @since
+		 */
 		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
 		if ( ! $override ) {
 			return WC_Data_Store::load( 'product' )->get_product_type( $product_id );

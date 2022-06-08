@@ -86,6 +86,12 @@ class WC_Admin_Addons {
 			);
 
 			if ( is_wp_error( $raw_featured ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
 
 				$message = self::is_ssl_error( $raw_featured->get_error_message() )
@@ -99,6 +105,12 @@ class WC_Admin_Addons {
 
 			$response_code = (int) wp_remote_retrieve_response_code( $raw_featured );
 			if ( 200 !== $response_code ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
 
 				/* translators: %d: HTTP error code. */
@@ -120,6 +132,12 @@ class WC_Admin_Addons {
 
 			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 			if ( empty( $featured ) || ! is_array( $featured ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
 				$message = __( 'Our request to the featured API got a malformed response.', 'woocommerce' );
 				self::output_empty( $message );
@@ -191,12 +209,24 @@ class WC_Admin_Addons {
 		);
 
 		if ( is_wp_error( $raw_extensions ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $raw_extensions->get_error_message() );
 			return $raw_extensions;
 		}
 
 		$response_code = (int) wp_remote_retrieve_response_code( $raw_extensions );
 		if ( 200 !== $response_code ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
 			return new WP_Error(
 				'error',
@@ -213,6 +243,12 @@ class WC_Admin_Addons {
 		$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
 
 		if ( ! is_object( $addons ) || ! isset( $addons->products ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
 			return new WP_Error( 'error', __( 'Our request to the search API got a malformed response.', 'woocommerce' ) );
 		}
@@ -238,6 +274,12 @@ class WC_Admin_Addons {
 				}
 			}
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
 	}
 
@@ -285,6 +327,12 @@ class WC_Admin_Addons {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_addons_section_data', $section_data->products, $section_id );
 	}
 
@@ -1019,6 +1067,12 @@ class WC_Admin_Addons {
 		$search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
 
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_helper_output' );
 			return;
 		}
@@ -1117,6 +1171,12 @@ class WC_Admin_Addons {
 
 		WC_Install::background_installer( $wcpay_plugin_id, $wcpay_plugin );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_addon_installed', $wcpay_plugin_id, $section );
 
 		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );

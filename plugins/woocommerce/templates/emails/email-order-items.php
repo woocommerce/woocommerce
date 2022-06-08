@@ -26,6 +26,12 @@ foreach ( $items as $item_id => $item ) :
 	$purchase_note = '';
 	$image         = '';
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		continue;
 	}
@@ -43,10 +49,21 @@ foreach ( $items as $item_id => $item ) :
 
 		// Show title/image etc.
 		if ( $show_image ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) );
 		}
 
-		// Product name.
+		
+		/**
+		 * Product name.
+		 *
+		 * @since
+		 */
 		echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
 
 		// SKU.
@@ -54,7 +71,12 @@ foreach ( $items as $item_id => $item ) :
 			echo wp_kses_post( ' (#' . $sku . ')' );
 		}
 
-		// allow other plugins to add additional product information here.
+		
+		/**
+		 * Allow other plugins to add additional product information here.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
 		wc_display_item_meta(
@@ -64,7 +86,12 @@ foreach ( $items as $item_id => $item ) :
 			)
 		);
 
-		// allow other plugins to add additional product information here.
+		
+		/**
+		 * Allow other plugins to add additional product information here.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 
 		?>
@@ -79,6 +106,12 @@ foreach ( $items as $item_id => $item ) :
 			} else {
 				$qty_display = esc_html( $qty );
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item ) );
 			?>
 		</td>

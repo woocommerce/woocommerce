@@ -133,6 +133,7 @@ class WC_REST_Report_Top_Sellers_V1_Controller extends WC_REST_Report_Sales_V1_C
 		 * @param WP_REST_Response $response   The response object.
 		 * @param stdClass         $top_seller The original report object.
 		 * @param WP_REST_Request  $request    Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_top_sellers', $response, $top_seller, $request );
 	}

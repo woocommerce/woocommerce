@@ -47,6 +47,12 @@ class ImageAttachment {
 		$upload = wc_rest_upload_image_from_url( esc_url_raw( $src ) );
 
 		if ( is_wp_error( $upload ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $this->object_id, $images ) ) {
 				throw new \WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 			} else {

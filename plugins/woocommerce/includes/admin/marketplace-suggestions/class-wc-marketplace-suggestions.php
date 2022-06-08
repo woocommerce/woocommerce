@@ -183,7 +183,12 @@ class WC_Marketplace_Suggestions {
 			return false;
 		}
 
-		// User can disabled all suggestions via filter.
+		
+		/**
+		 * User can disabled all suggestions via filter.
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_allow_marketplace_suggestions', true );
 	}
 

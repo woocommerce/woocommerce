@@ -23,6 +23,12 @@ defined( 'ABSPATH' ) || exit;
 	<?php
 	if ( $order ) :
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_before_thankyou', $order->get_id() );
 		?>
 

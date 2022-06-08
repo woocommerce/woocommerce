@@ -38,6 +38,12 @@ class WC_Meta_Box_Order_Data {
 	 */
 	public static function init_address_fields() {
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		self::$billing_fields = apply_filters(
 			'woocommerce_admin_billing_fields',
 			array(
@@ -90,6 +96,12 @@ class WC_Meta_Box_Order_Data {
 			)
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		self::$shipping_fields = apply_filters(
 			'woocommerce_admin_shipping_fields',
 			array(
@@ -473,6 +485,12 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
 								echo '<p class="order_note"><strong>' . __( 'Customer provided note:', 'woocommerce' ) . '</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
 							}
@@ -510,6 +528,12 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) :
 								?>
 								<p class="form-field form-field-wide">

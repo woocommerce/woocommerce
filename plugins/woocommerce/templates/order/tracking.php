@@ -23,6 +23,12 @@ $notes = $order->get_customer_order_notes();
 <p class="order-info">
 	<?php
 	echo wp_kses_post(
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		apply_filters(
 			'woocommerce_order_tracking_status',
 			sprintf(

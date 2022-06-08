@@ -143,6 +143,12 @@ class WC_API_Server {
 		} elseif ( $this->is_xml_request() ) {
 			$handler_class = 'WC_API_XML_Handler';
 		} else {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
 		}
 
@@ -157,7 +163,12 @@ class WC_API_Server {
 	 */
 	public function check_authentication() {
 
-		// allow plugins to remove default authentication or add their own authentication
+		
+		/**
+		 * Allow plugins to remove default authentication or add their own authentication
+		 *
+		 * @since
+		 */
 		$user = apply_filters( 'woocommerce_api_check_authentication', null, $this );
 
 		// API requests run under the context of the authenticated user
@@ -203,11 +214,22 @@ class WC_API_Server {
 	 */
 	public function serve_request() {
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_server_before_serve', $this );
 
 		$this->header( 'Content-Type', $this->handler->get_content_type(), true );
 
-		// the API is enabled by default
+		
+		/**
+		 * The API is enabled by default
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_api_enabled', true, $this ) || ( 'no' === get_option( 'woocommerce_api_enabled' ) ) ) {
 
 			$this->send_status( 404 );
@@ -235,7 +257,12 @@ class WC_API_Server {
 		}
 
 		// This is a filter rather than an action, since this is designed to be
-		// re-entrant if needed
+		
+		/**
+		 * Re-entrant if needed
+		 *
+		 * @since
+		 */
 		$served = apply_filters( 'woocommerce_api_serve_request', false, $result, $this );
 
 		if ( ! $served ) {
@@ -274,6 +301,12 @@ class WC_API_Server {
 			'/' => array( array( $this, 'get_index' ), self::READABLE ),
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$endpoints = apply_filters( 'woocommerce_api_endpoints', $endpoints );
 
 		// Normalise the endpoints
@@ -358,6 +391,12 @@ class WC_API_Server {
 				$args['_headers'] = $this->headers;
 				$args['_files']   = $this->files;
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$args = apply_filters( 'woocommerce_api_dispatch_args', $args, $callback );
 
 				// Allow plugins to halt the request via this filter
@@ -478,8 +517,20 @@ class WC_API_Server {
 					}
 				}
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$available['store']['routes'][ $route ] = apply_filters( 'woocommerce_api_endpoints_description', $data );
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_api_index', $available );
 	}
 
@@ -588,6 +639,12 @@ class WC_API_Server {
 		$this->header( 'X-WC-Total', $total );
 		$this->header( 'X-WC-TotalPages', $total_pages );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_pagination_headers', $this, $query );
 	}
 

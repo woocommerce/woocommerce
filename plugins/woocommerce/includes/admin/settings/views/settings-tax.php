@@ -130,4 +130,10 @@ if ( ! wc_shipping_enabled() ) {
 	unset( $settings['shipping-tax-class'] );
 }
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 return apply_filters( 'woocommerce_tax_settings', $settings );

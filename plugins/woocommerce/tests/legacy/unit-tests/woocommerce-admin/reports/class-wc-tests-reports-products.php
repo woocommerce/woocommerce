@@ -465,7 +465,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Ensures the report params get mapped and sanitized for exports.
+		
+		/**
+		 * Ensures the report params get mapped and sanitized for exports.
+		 *
+		 * @since
+		 */
 		do_action( 'rest_api_init' );
 
 		$args = array(

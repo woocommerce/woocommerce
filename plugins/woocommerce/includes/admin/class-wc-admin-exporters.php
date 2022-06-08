@@ -164,6 +164,12 @@ class WC_Admin_Exporters {
 		$exporter->set_page( $step );
 		$exporter->generate_file();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$query_args = apply_filters(
 			'woocommerce_export_get_ajax_query_args',
 			array(

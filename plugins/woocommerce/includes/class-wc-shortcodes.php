@@ -40,6 +40,12 @@ class WC_Shortcodes {
 		);
 
 		foreach ( $shortcodes as $shortcode => $function ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			add_shortcode( apply_filters( "{$shortcode}_shortcode_tag", $shortcode ), $function );
 		}
 
@@ -181,6 +187,12 @@ class WC_Shortcodes {
 			'child_of'   => $atts['parent'],
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$product_categories = apply_filters(
 			'woocommerce_product_categories',
 			get_terms( 'product_cat', $args )

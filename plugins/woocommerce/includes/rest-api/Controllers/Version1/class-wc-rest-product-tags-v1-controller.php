@@ -75,6 +75,7 @@ class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
 		 * @param WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
 		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}

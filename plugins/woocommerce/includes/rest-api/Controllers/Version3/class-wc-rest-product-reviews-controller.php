@@ -465,6 +465,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * @param WP_Comment      $review   Inserted or updated comment object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating True when creating a comment, false when updating.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_product_review', $review, $request, true );
 
@@ -573,7 +574,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$review = get_comment( $id );
 
-		/** This action is documented in includes/api/class-wc-rest-product-reviews-controller.php */
+		/**
+																					   * @since This action is documented in includes/api/class-wc-rest-product-reviews-controller.php */
 		do_action( 'woocommerce_rest_insert_product_review', $review, $request, false );
 
 		$fields_update = $this->update_additional_fields_for_object( $review, $request );
@@ -652,6 +654,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * @param WP_Comment       $review   The deleted review data.
 		 * @param WP_REST_Response $response The response returned from the API.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_delete_review', $review, $response, $request );
 
@@ -724,6 +727,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $review   Product review object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_review', $response, $review, $request );
 	}

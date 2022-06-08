@@ -19,6 +19,12 @@ defined( 'ABSPATH' ) || exit;
 
 $text_align = is_rtl() ? 'right' : 'left';
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
 
 <h2>

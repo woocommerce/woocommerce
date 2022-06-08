@@ -70,6 +70,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 * @ignore
 		 *
 		 * @param array $collection_params List of parameters.
+		 * @since
 		 */
 		$collection_params = apply_filters( 'experimental_woocommerce_analytics_variations_stats_collection_params', $this->get_collection_params() );
 		$registered        = array_keys( $collection_params );
@@ -149,6 +150,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_variations_stats', $response, $report, $request );
 	}

@@ -13,6 +13,12 @@ $tabs        = array(
 	'tools'  => __( 'Tools', 'woocommerce' ),
 	'logs'   => __( 'Logs', 'woocommerce' ),
 );
+
+/**
+ * Hook
+ *
+ * @since
+ */
 $tabs        = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 ?>
 <div class="wrap woocommerce">
@@ -38,6 +44,12 @@ $tabs        = apply_filters( 'woocommerce_admin_status_tabs', $tabs );
 			break;
 		default:
 			if ( array_key_exists( $current_tab, $tabs ) && has_action( 'woocommerce_admin_status_content_' . $current_tab ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_admin_status_content_' . $current_tab );
 			} else {
 				WC_Admin_Status::status_report();

@@ -403,6 +403,12 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce' ), 404 );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
 		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
 
@@ -449,6 +455,12 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_helper_connect_start' );
 
 		$connect_url = add_query_arg(
@@ -530,6 +542,12 @@ class Plugins extends \WC_REST_Data_Controller {
 		delete_transient( '_woocommerce_helper_subscriptions' );
 		\WC_Helper_Updater::flush_updates_cache();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_helper_connected' );
 
 		return array(

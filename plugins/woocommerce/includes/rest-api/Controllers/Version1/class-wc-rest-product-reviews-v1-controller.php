@@ -267,6 +267,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param array           $prepared_review The prepared comment data for `wp_insert_comment`.
 		 * @param WP_REST_Request $request          Request used to insert the comment.
+		 * @since
 		 */
 		$prepared_review = apply_filters( 'rest_pre_insert_product_review', $prepared_review, $request );
 
@@ -286,6 +287,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * @param WP_Comment      $product_review Inserted object.
 		 * @param WP_REST_Request $request        Request object.
 		 * @param boolean         $creating       True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_product_review", $product_review, $request, true );
 
@@ -339,6 +341,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * @param WP_Comment         $comment      Inserted object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_product_review", $product_review, $request, true );
 
@@ -376,6 +379,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param boolean $supports_trash        Whether the object supports trashing.
 		 * @param WP_Post $product_review        The object being considered for trashing support.
+		 * @since
 		 */
 		$supports_trash = apply_filters( 'rest_product_review_trashable', ( EMPTY_TRASH_DAYS > 0 ), $product_review );
 
@@ -406,6 +410,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * @param object           $product_review  The deleted item.
 		 * @param WP_REST_Response $response        The response data.
 		 * @param WP_REST_Request  $request         The request sent to the API.
+		 * @since
 		 */
 		do_action( 'rest_delete_product_review', $product_review, $response, $request );
 
@@ -445,6 +450,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $review   Product review object used to create response.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_review', $response, $review, $request );
 	}
@@ -486,6 +492,12 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			$prepared_review['comment_date_gmt'] = $request['date_created_gmt'];
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'rest_preprocess_product_review', $prepared_review, $request );
 	}
 

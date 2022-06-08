@@ -243,10 +243,22 @@ class WC_Install {
 		$requires_update = version_compare( $wc_version, $wc_code_version, '<' );
 		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) && $requires_update ) {
 			self::install();
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_updated' );
 			do_action_deprecated( 'woocommerce_admin_updated', array(), $wc_code_version, 'woocommerce_updated' );
 			// If there is no woocommerce_version option, consider it as a new install.
 			if ( ! $wc_version ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_newly_installed' );
 				do_action_deprecated( 'woocommerce_admin_newly_installed', array(), $wc_code_version, 'woocommerce_newly_installed' );
 			}
@@ -385,8 +397,26 @@ class WC_Install {
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'woocommerce_admin_install_timestamp', time() );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_flush_rewrite_rules' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_installed' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_admin_installed' );
 	}
 
@@ -502,6 +532,12 @@ class WC_Install {
 	 */
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
 				self::update();
 			} else {
@@ -615,6 +651,12 @@ class WC_Install {
 		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
 		if ( '' !== $held_duration ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
 			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
@@ -627,6 +669,12 @@ class WC_Install {
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_rate_limits' );
 
@@ -652,6 +700,12 @@ class WC_Install {
 	public static function create_pages() {
 		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$pages = apply_filters(
 			'woocommerce_create_pages',
 			array(
@@ -663,16 +717,34 @@ class WC_Install {
 				'cart'           => array(
 					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']<!-- /wp:shortcode -->',
 				),
 				'checkout'       => array(
 					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']<!-- /wp:shortcode -->',
 				),
 				'myaccount'      => array(
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']<!-- /wp:shortcode -->',
 				),
 				'refund_returns' => array(
@@ -774,6 +846,12 @@ class WC_Install {
 			'wc-admin-deactivate-plugin',
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$additional_obsolete_notes_names = apply_filters(
 			'woocommerce_admin_obsolete_notes_names',
 			array()
@@ -1409,6 +1487,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		 * If WooCommerce plugins need to add new tables, they can inject them here.
 		 *
 		 * @param array $tables An array of WooCommerce-specific database table names.
+		 * @since
 		 */
 		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
 
@@ -1602,7 +1681,12 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 	 * Create files/directories.
 	 */
 	private static function create_files() {
-		// Bypass if filesystem is read-only and/or non-standard upload system is used.
+		
+		/**
+		 * Bypass if filesystem is read-only and/or non-standard upload system is used.
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_install_skip_create_files', false ) ) {
 			return;
 		}
@@ -1732,12 +1816,36 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		}
 
 		$row_meta = array(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'docs'    => '<a href="' . esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/documentation/plugins/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'apidocs' => '<a href="' . esc_url( apply_filters( 'woocommerce_apidocs_url', 'https://docs.woocommerce.com/wc-apidocs/' ) ) . '" aria-label="' . esc_attr__( 'View WooCommerce API docs', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>',
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'support' => '<a href="' . esc_url( apply_filters( 'woocommerce_community_support_url', 'https://wordpress.org/support/plugin/woocommerce/' ) ) . '" aria-label="' . esc_attr__( 'Visit community forums', 'woocommerce' ) . '">' . esc_html__( 'Community support', 'woocommerce' ) . '</a>',
 		);
 
 		if ( WCConnectionHelper::is_connected() ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$row_meta['premium_support'] = '<a href="' . esc_url( apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' ) ) . '" aria-label="' . esc_attr__( 'Visit premium customer support', 'woocommerce' ) . '">' . esc_html__( 'Premium support', 'woocommerce' ) . '</a>';
 		}
 

@@ -100,6 +100,12 @@ class WC_Order_Item_Meta {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$output = apply_filters( 'woocommerce_order_items_meta_display', $output, $this, $flat );
 
 		if ( $return ) {
@@ -151,11 +157,23 @@ class WC_Order_Item_Meta {
 				$formatted_meta[ $meta_id ] = array(
 					'key'   => $meta->key,
 					'label' => wc_attribute_label( $attribute_key, $this->product ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value, $meta, $this->item ),
 				);
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_items_meta_get_formatted', $formatted_meta, $this );
 	}
 
@@ -205,6 +223,12 @@ class WC_Order_Item_Meta {
 				$formatted_meta[ $formatted_meta_key ] = array(
 					'key'   => $meta_key,
 					'label' => wc_attribute_label( $attribute_key, $this->product ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value, $this->meta, $this->item ),
 				);
 			}

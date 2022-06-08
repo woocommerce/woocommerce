@@ -162,6 +162,12 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$send_email  = isset( $request['email'] ) ? $request['email'] : false;
 
 		$default_export_id = str_replace( '.', '', microtime( true ) );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$export_id         = apply_filters( 'woocommerce_admin_export_id', $default_export_id );
 		$export_id         = (string) sanitize_file_name( $export_id );
 

@@ -230,6 +230,12 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order' => apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server ) );
 	}
 
@@ -341,6 +347,12 @@ class WC_API_Orders extends WC_API_Resource {
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $id, $fields, $notes, $this->server ) );
 	}
 

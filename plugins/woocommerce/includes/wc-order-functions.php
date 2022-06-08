@@ -100,6 +100,12 @@ function wc_get_order_statuses() {
 		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
 	);
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'wc_order_statuses', $order_statuses );
 }
 
@@ -121,6 +127,12 @@ function wc_is_order_status( $maybe_status ) {
  * @return array
  */
 function wc_get_is_paid_statuses() {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_order_is_paid_statuses', array( 'processing', 'completed' ) );
 }
 
@@ -131,6 +143,12 @@ function wc_get_is_paid_statuses() {
  * @return array
  */
 function wc_get_is_pending_statuses() {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_order_is_pending_statuses', array( 'pending' ) );
 }
 
@@ -160,6 +178,12 @@ function wc_generate_order_key( $key = '' ) {
 		$key = wp_generate_password( 13, false );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 }
 
@@ -240,6 +264,12 @@ function wc_get_order_types( $for = '' ) {
 			break;
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'wc_order_types', $order_types, $for );
 }
 
@@ -391,6 +421,12 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$download = apply_filters( 'woocommerce_downloadable_file_permission', $download, $product, $order, $qty, $item );
 
 	return $download->save();
@@ -428,6 +464,12 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	}
 
 	$order->get_data_store()->set_download_permissions_granted( $order, true );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_grant_product_download_permissions', $order_id );
 }
 add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
@@ -473,6 +515,12 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Do the same for regular cache.
 	WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 }
 
@@ -621,10 +669,28 @@ function wc_create_refund( $args = array() ) {
 			 * @param int  $refund_id The refund id.
 			 */
 			if ( (bool) apply_filters( 'woocommerce_order_is_partially_refunded', ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ), $order->get_id(), $refund->get_id() ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', 'refunded', $order->get_id(), $refund->get_id() );
 
 				if ( $parent_status ) {
@@ -633,7 +699,19 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
 
 	} catch ( Exception $e ) {
@@ -700,6 +778,12 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
  * @param array    $refunded_line_items Refunded items list.
  */
 function wc_restock_refunded_items( $order, $refunded_line_items ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( ! apply_filters( 'woocommerce_can_restock_refunded_items', true, $order, $refunded_line_items ) ) {
 		return;
 	}
@@ -751,6 +835,12 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 
 		$item->save();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
 	}
 }
@@ -863,6 +953,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	 * Called when sales for an order are recorded
 	 *
 	 * @param int $order_id order id
+	 * @since
 	 */
 	do_action( 'woocommerce_recorded_sales', $order_id );
 }
@@ -938,6 +1029,12 @@ function wc_cancel_unpaid_orders() {
 	// Re-schedule the event before cancelling orders
 	// this way in case of a DB timeout or (plugin) crash the event is always scheduled for retry.
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
 	wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 
@@ -952,6 +1049,12 @@ function wc_cancel_unpaid_orders() {
 		foreach ( $unpaid_orders as $unpaid_order ) {
 			$order = wc_get_order( $unpaid_order );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
@@ -990,6 +1093,12 @@ function wc_get_order_note( $data ) {
 		return null;
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return (object) apply_filters(
 		'woocommerce_get_order_note',
 		array(

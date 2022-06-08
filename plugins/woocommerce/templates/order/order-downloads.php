@@ -39,6 +39,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td class="<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 						<?php
 						if ( has_action( 'woocommerce_account_downloads_column_' . $column_id ) ) {
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							do_action( 'woocommerce_account_downloads_column_' . $column_id, $download );
 						} else {
 							switch ( $column_id ) {

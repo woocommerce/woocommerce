@@ -1250,7 +1250,12 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Test cart item key.
 		$cart_item_key = 'test';
 
-		// Do the check.
+		
+		/**
+		 * Do the check.
+		 *
+		 * @since
+		 */
 		$this->assertEquals( apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' ), wc_get_cart_remove_url( $cart_item_key ) );
 	}
 
@@ -1459,6 +1464,12 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->assertEquals( apply_filters( 'woocommerce_cart_total', wc_price( WC()->cart->total ) ), WC()->cart->get_total() );
 	}
 
@@ -1524,6 +1535,12 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			$needs_shipping_address = true;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->assertEquals( apply_filters( 'woocommerce_cart_needs_shipping_address', $needs_shipping_address ), WC()->cart->needs_shipping_address() );
 	}
 

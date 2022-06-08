@@ -312,6 +312,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 					if ( is_wp_error( $upload ) ) {
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
 							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 						} else {
@@ -794,6 +800,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		 * @param WC_Data         $product  Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $product, $request, $creating );
 	}

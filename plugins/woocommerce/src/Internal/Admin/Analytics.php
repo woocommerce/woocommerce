@@ -309,6 +309,12 @@ class Analytics {
 			),
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_analytics_report_menu_items', $report_pages );
 	}
 

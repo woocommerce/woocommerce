@@ -215,6 +215,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
 	}
 
@@ -270,6 +276,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product', __( 'You do not have permission to create products', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_product_data', $data, $this );
 
 			// Check if product title is specified.
@@ -344,6 +356,12 @@ class WC_API_Products extends WC_API_Resource {
 				$this->save_variations( $product, $data );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_product', $id, $data );
 
 			// Clear cache/transients.
@@ -387,6 +405,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			$product = wc_get_product( $id );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_product_data', $data, $this );
 
 			// Product title.
@@ -448,6 +472,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			$product->save();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_product', $id, $data );
 
 			// Clear cache/transients.
@@ -481,6 +511,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		$product = wc_get_product( $id );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_delete_product', $id, $this );
 
 		// If we're forcing, then delete permanently.
@@ -560,6 +596,12 @@ class WC_API_Products extends WC_API_Resource {
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'product_reviews' => apply_filters( 'woocommerce_api_product_reviews_response', $reviews, $id, $fields, $comments, $this->server ) );
 	}
 
@@ -600,6 +642,12 @@ class WC_API_Products extends WC_API_Resource {
 
 		$orders = WC()->api->WC_API_Orders->get_orders( $fields, $filter, $status, $page );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'orders' => apply_filters( 'woocommerce_api_product_orders_response', $orders['orders'], $id, $filter, $fields, $this->server ) );
 	}
 
@@ -627,6 +675,12 @@ class WC_API_Products extends WC_API_Resource {
 				$product_categories[] = current( $this->get_product_category( $term_id, $fields ) );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_categories' => apply_filters( 'woocommerce_api_product_categories_response', $product_categories, $terms, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -685,6 +739,12 @@ class WC_API_Products extends WC_API_Resource {
 				'count'       => intval( $term->count ),
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_category' => apply_filters( 'woocommerce_api_product_category_response', $product_category, $id, $fields, $term, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -722,6 +782,12 @@ class WC_API_Products extends WC_API_Resource {
 			);
 
 			$data = wp_parse_args( $data['product_category'], $defaults );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_product_category_data', $data, $this );
 
 			// Check parent.
@@ -757,6 +823,12 @@ class WC_API_Products extends WC_API_Resource {
 				update_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_product_category', $id, $data );
 
 			$this->server->send_status( 201 );
@@ -792,6 +864,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_category', __( 'You do not have permission to edit product categories', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data     = apply_filters( 'woocommerce_api_edit_product_category_data', $data, $this );
 			$category = $this->get_product_category( $id );
 
@@ -830,6 +908,12 @@ class WC_API_Products extends WC_API_Resource {
 				update_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_product_category', $id, $data );
 
 			return $this->get_product_category( $id );
@@ -861,6 +945,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_category', __( 'Could not delete the category', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_product_category', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_category' ) );
@@ -893,6 +983,12 @@ class WC_API_Products extends WC_API_Resource {
 				$product_tags[] = current( $this->get_product_tag( $term_id, $fields ) );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_tags' => apply_filters( 'woocommerce_api_product_tags_response', $product_tags, $terms, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -939,6 +1035,12 @@ class WC_API_Products extends WC_API_Resource {
 				'count'       => intval( $term->count ),
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_tag' => apply_filters( 'woocommerce_api_product_tag_response', $tag, $id, $fields, $term, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -971,6 +1073,12 @@ class WC_API_Products extends WC_API_Resource {
 			);
 
 			$data = wp_parse_args( $data['product_tag'], $defaults );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_product_tag_data', $data, $this );
 
 			$insert = wp_insert_term( $data['name'], 'product_tag', $data );
@@ -979,6 +1087,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 			$id = $insert['term_id'];
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_product_tag', $id, $data );
 
 			$this->server->send_status( 201 );
@@ -1012,6 +1126,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_tag', __( 'You do not have permission to edit product tags', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_product_tag_data', $data, $this );
 			$tag  = $this->get_product_tag( $id );
 
@@ -1024,6 +1144,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_tag', __( 'Could not edit the tag', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_product_tag', $id, $data );
 
 			return $this->get_product_tag( $id );
@@ -1053,6 +1179,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_tag', __( 'Could not delete the tag', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_product_tag', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_tag' ) );
@@ -1194,6 +1326,12 @@ class WC_API_Products extends WC_API_Resource {
 			'shipping_class'     => $product->get_shipping_class(),
 			'shipping_class_id'  => ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null,
 			'description'        => wpautop( do_shortcode( $product->get_description() ) ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
 			'reviews_allowed'    => $product->get_reviews_allowed(),
 			'average_rating'     => wc_format_decimal( $product->get_average_rating(), 2 ),
@@ -1230,6 +1368,12 @@ class WC_API_Products extends WC_API_Resource {
 	private function get_product_menu_order( $product ) {
 		$menu_order = $product->get_menu_order();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_api_product_menu_order', $menu_order, $product );
 	}
 
@@ -1749,7 +1893,12 @@ class WC_API_Products extends WC_API_Resource {
 			$product = $this->save_default_attributes( $product, $data );
 		}
 
-		// Do action for product type
+		
+		/**
+		 * Do action for product type
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_process_product_meta_' . $product->get_type(), $product->get_id(), $data );
 
 		return $product;
@@ -1947,6 +2096,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			$variation->save();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_save_product_variation', $variation_id, $menu_order, $variation );
 		}
 
@@ -2033,6 +2188,12 @@ class WC_API_Products extends WC_API_Resource {
 			$download = new WC_Product_Download();
 			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;
 		}
@@ -2229,6 +2390,12 @@ class WC_API_Products extends WC_API_Resource {
 			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload->get_error_message(), 400 );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for );
 
 		return $upload;
@@ -2408,6 +2575,12 @@ class WC_API_Products extends WC_API_Resource {
 				);
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_attributes' => apply_filters( 'woocommerce_api_product_attributes_response', $product_attributes, $attribute_taxonomies, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -2459,6 +2632,12 @@ class WC_API_Products extends WC_API_Resource {
 				'has_archives' => (bool) $attribute->attribute_public,
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_attribute' => apply_filters( 'woocommerce_api_product_attribute_response', $product_attribute, $id, $fields, $attribute, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -2527,6 +2706,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_product_attribute', __( 'You do not have permission to create product attributes', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_product_attribute_data', $data, $this );
 
 			if ( ! isset( $data['name'] ) ) {
@@ -2572,6 +2757,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $wpdb->insert_id;
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_product_attribute', $id, $data );
 
 			// Clear transients.
@@ -2613,6 +2804,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_attribute', __( 'You do not have permission to edit product attributes', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data      = apply_filters( 'woocommerce_api_edit_product_attribute_data', $data, $this );
 			$attribute = $this->get_product_attribute( $id );
 
@@ -2659,6 +2856,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute', __( 'Could not edit the attribute', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_product_attribute', $id, $data );
 
 			// Clear transients.
@@ -2721,7 +2924,19 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_attribute_deleted', $id, $attribute_name, $taxonomy );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_product_attribute', $id, $this );
 
 			// Clear transients.
@@ -2771,6 +2986,12 @@ class WC_API_Products extends WC_API_Resource {
 				);
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_attribute_terms' => apply_filters( 'woocommerce_api_product_attribute_terms_response', $attribute_terms, $terms, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -2824,6 +3045,12 @@ class WC_API_Products extends WC_API_Resource {
 				'count' => $term->count,
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_attribute_term' => apply_filters( 'woocommerce_api_product_attribute_response', $attribute_term, $id, $fields, $term, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -2861,6 +3088,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_product_attribute_term_data', $data, $this );
 
 			// Check if attribute term name is specified.
@@ -2884,6 +3117,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $term['term_id'];
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_product_attribute_term', $id, $data );
 
 			$this->server->send_status( 201 );
@@ -2927,6 +3166,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_product_attribute_term_data', $data, $this );
 
 			$args = array();
@@ -2947,6 +3192,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_attribute_term', $term->get_error_message(), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_product_attribute_term', $id, $data );
 
 			return $this->get_product_attribute_term( $attribute_id, $id );
@@ -2989,6 +3240,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_attribute_term', $term->get_error_message(), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_product_attribute_term', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
@@ -3042,6 +3299,12 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$data  = $data['products'];
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'products' );
 
 			// Limit bulk operation
@@ -3096,6 +3359,12 @@ class WC_API_Products extends WC_API_Resource {
 				}
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'products' => apply_filters( 'woocommerce_api_products_bulk_response', $products, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -3125,6 +3394,12 @@ class WC_API_Products extends WC_API_Resource {
 				$product_shipping_classes[] = current( $this->get_product_shipping_class( $term_id, $fields ) );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_shipping_classes' => apply_filters( 'woocommerce_api_product_shipping_classes_response', $product_shipping_classes, $terms, $fields, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -3169,6 +3444,12 @@ class WC_API_Products extends WC_API_Resource {
 				'count'       => intval( $term->count ),
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'product_shipping_class' => apply_filters( 'woocommerce_api_product_shipping_class_response', $product_shipping_class, $id, $fields, $term, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -3204,6 +3485,12 @@ class WC_API_Products extends WC_API_Resource {
 			);
 
 			$data = wp_parse_args( $data['product_shipping_class'], $defaults );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_product_shipping_class_data', $data, $this );
 
 			// Check parent.
@@ -3222,6 +3509,12 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $insert['term_id'];
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_product_shipping_class', $id, $data );
 
 			$this->server->send_status( 201 );
@@ -3257,6 +3550,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_edit_product_shipping_class', __( 'You do not have permission to edit product shipping classes', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data           = apply_filters( 'woocommerce_api_edit_product_shipping_class_data', $data, $this );
 			$shipping_class = $this->get_product_shipping_class( $id );
 
@@ -3269,6 +3568,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_edit_product_shipping_class', __( 'Could not edit the shipping class', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_product_shipping_class', $id, $data );
 
 			return $this->get_product_shipping_class( $id );
@@ -3300,6 +3605,12 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_shipping_class', __( 'Could not delete the shipping class', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_product_shipping_class', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_shipping_class' ) );

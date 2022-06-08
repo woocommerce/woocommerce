@@ -53,6 +53,12 @@ abstract class WC_Integration extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_method_title() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_integration_title', $this->method_title, $this );
 	}
 
@@ -62,6 +68,12 @@ abstract class WC_Integration extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_method_description() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_integration_description', $this->method_description, $this );
 	}
 

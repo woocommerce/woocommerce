@@ -253,6 +253,7 @@ class WC_Admin_Attributes {
 												 *
 												 * @todo Remove in 4.0.0
 												 * @deprecated 2.4.0
+												 * @since
 												 */
 												do_action( 'woocommerce_admin_attribute_types' );
 											?>
@@ -429,6 +430,7 @@ class WC_Admin_Attributes {
 												 *
 												 * @todo Remove in 4.0.0
 												 * @deprecated 2.4.0
+												 * @since
 												 */
 												do_action( 'woocommerce_admin_attribute_types' );
 											?>

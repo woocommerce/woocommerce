@@ -129,6 +129,12 @@ abstract class WP_Async_Request {
 			'blocking'  => false,
 			'body'      => $this->data,
 			'cookies'   => $_COOKIE,
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
 		);
 	}

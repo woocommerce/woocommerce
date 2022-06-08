@@ -113,6 +113,12 @@ if ( ! empty( $shipping_classes ) ) {
 	);
 }
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 if ( apply_filters( 'woocommerce_enable_deprecated_additional_flat_rates', $this->get_option( 'options', false ) ) ) {
 	$settings['additional_rates'] = array(
 		'title'       => __( 'Additional rates', 'woocommerce' ),

@@ -203,6 +203,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			 * @param WC_Data         $object    Inserted object.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @since
 			 */
 			do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, true );
 		} catch ( WC_Data_Exception $e ) {
@@ -250,6 +251,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			 * @param WC_Data         $object    Inserted object.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @since
 			 */
 			do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, false );
 		} catch ( WC_Data_Exception $e ) {
@@ -336,6 +338,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 * @since
 		 */
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_object_query", $args, $request );
 
@@ -456,6 +459,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 *
 		 * @param boolean $supports_trash Whether the object type support trashing.
 		 * @param WC_Data $object         The object being considered for trashing support.
+		 * @since
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
@@ -501,6 +505,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 * @param WC_Data          $object   The deleted or trashed object.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
 
@@ -687,6 +692,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 *
 		 * @param array        $query_params JSON Schema-formatted collection parameters.
 		 * @param WP_Post_Type $post_type    Post type object.
+		 * @since
 		 */
 		return apply_filters( "rest_{$this->post_type}_collection_params", $params, $this->post_type );
 	}

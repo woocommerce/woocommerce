@@ -8,6 +8,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 $my_orders_columns = apply_filters(
 	'woocommerce_my_account_my_orders_columns',
 	array(
@@ -20,6 +26,12 @@ $my_orders_columns = apply_filters(
 );
 
 $customer_orders = get_posts(
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	apply_filters(
 		'woocommerce_my_account_my_orders_query',
 		array(

@@ -117,6 +117,12 @@ class WC_Report_Stock extends WP_List_Table {
 				} else {
 					$stock_html = '<mark class="outofstock">' . __( 'Out of stock', 'woocommerce' ) . '</mark>';
 				}
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				echo apply_filters( 'woocommerce_admin_stock_html', $stock_html, $product );
 				break;
 
@@ -144,6 +150,12 @@ class WC_Report_Stock extends WP_List_Table {
 						);
 					}
 
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
 
 					foreach ( $actions as $action ) {
@@ -187,6 +199,12 @@ class WC_Report_Stock extends WP_List_Table {
 
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$per_page              = apply_filters( 'woocommerce_admin_stock_report_products_per_page', 20 );
 
 		$this->get_items( $current_page, $per_page );

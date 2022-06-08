@@ -31,7 +31,12 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 				$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 			}
 
-			// Allow filtering of checkout URL
+			
+			/**
+			 * Allow filtering of checkout URL
+			 *
+			 * @since
+			 */
 			$checkout_url = apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
@@ -119,6 +124,12 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	public function test_wc_cart_totals_coupon_label() {
 		$coupon = WC_Helper_Coupon::create_coupon();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->expectOutputString( apply_filters( 'woocommerce_cart_totals_coupon_label', 'Coupon: ' . $coupon->get_code() ), wc_cart_totals_coupon_label( $coupon ) );
 	}
 
@@ -130,6 +141,12 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_cart_url() {
 		$cart_page_url = wc_get_page_permalink( 'cart' );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->assertEquals( apply_filters( 'woocommerce_get_cart_url', $cart_page_url ? $cart_page_url : '' ), wc_get_cart_url() );
 	}
 

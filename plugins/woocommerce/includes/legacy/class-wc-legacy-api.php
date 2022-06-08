@@ -144,7 +144,12 @@ class WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v3/class-wc-api-taxes.php' );
 		include_once( dirname( __FILE__ ) . '/api/v3/class-wc-api-webhooks.php' );
 
-		// Allow plugins to load other response handlers or resource classes.
+		
+		/**
+		 * Allow plugins to load other response handlers or resource classes.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_loaded' );
 	}
 
@@ -157,6 +162,12 @@ class WC_Legacy_API {
 	 */
 	public function register_resources( $server ) {
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$api_classes = apply_filters( 'woocommerce_api_classes',
 			array(
 				'WC_API_Coupons',
@@ -199,12 +210,22 @@ class WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-api-products.php' );
 		include_once( dirname( __FILE__ ) . '/api/v1/class-wc-api-reports.php' );
 
-		// Allow plugins to load other response handlers or resource classes.
+		
+		/**
+		 * Allow plugins to load other response handlers or resource classes.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_loaded' );
 
 		$this->server = new WC_API_Server( $GLOBALS['wp']->query_vars['wc-api-route'] );
 
-		// Register available resources for legacy v1 REST API request.
+		
+		/**
+		 * Register available resources for legacy v1 REST API request.
+		 *
+		 * @since
+		 */
 		$api_classes = apply_filters( 'woocommerce_api_classes',
 			array(
 				'WC_API_Customers',
@@ -246,12 +267,22 @@ class WC_Legacy_API {
 		include_once( dirname( __FILE__ ) . '/api/v2/class-wc-api-reports.php' );
 		include_once( dirname( __FILE__ ) . '/api/v2/class-wc-api-webhooks.php' );
 
-		// allow plugins to load other response handlers or resource classes.
+		
+		/**
+		 * Allow plugins to load other response handlers or resource classes.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_loaded' );
 
 		$this->server = new WC_API_Server( $GLOBALS['wp']->query_vars['wc-api-route'] );
 
-		// Register available resources for legacy v2 REST API request.
+		
+		/**
+		 * Register available resources for legacy v2 REST API request.
+		 *
+		 * @since
+		 */
 		$api_classes = apply_filters( 'woocommerce_api_classes',
 			array(
 				'WC_API_Customers',

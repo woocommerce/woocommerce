@@ -20,6 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 foreach ( $items as $item_id => $item ) :
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 		$product       = $item->get_product();
 		$sku           = '';
@@ -31,15 +37,32 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
 		if ( $show_sku && $sku ) {
 			echo ' (#' . $sku . ')';
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
 		echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 
-		// allow other plugins to add additional product information here.
+		
+		/**
+		 * Allow other plugins to add additional product information here.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo strip_tags(
@@ -55,7 +78,12 @@ foreach ( $items as $item_id => $item ) :
 			)
 		);
 
-		// allow other plugins to add additional product information here.
+		
+		/**
+		 * Allow other plugins to add additional product information here.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 	}
 	// Note.

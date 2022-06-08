@@ -58,6 +58,12 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$query_args = apply_filters(
 			'woocommerce_top_rated_products_widget_args',
 			array(
@@ -79,6 +85,12 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 			$this->widget_start( $args, $instance );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
 
 			$template_args = array(
@@ -91,6 +103,12 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 				wc_get_template( 'content-widget-product.php', $template_args );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_after_widget_product_list', '</ul>' ) );
 
 			$this->widget_end( $args );

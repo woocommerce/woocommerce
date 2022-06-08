@@ -248,6 +248,12 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 			return $unfiltered_sizes;
 		}
 		$in_filter      = true;
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$filtered_sizes = apply_filters( 'woocommerce_regenerate_images_intermediate_image_sizes', $unfiltered_sizes );
 		$in_filter      = false;
 		return $filtered_sizes;

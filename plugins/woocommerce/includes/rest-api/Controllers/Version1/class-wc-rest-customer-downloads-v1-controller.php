@@ -126,6 +126,7 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response  The response object.
 		 * @param stdObject        $download  Download object used to create response.
 		 * @param WP_REST_Request  $request   Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer_download', $response, $download, $request );
 	}

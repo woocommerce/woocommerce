@@ -38,6 +38,12 @@ class WC_Logger implements WC_Logger_Interface {
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array() );
 		}
 
@@ -104,6 +110,12 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @return bool
 	 */
 	public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$message = apply_filters( 'woocommerce_logger_add_message', $message, $handle );
 		$this->log(
 			$level,
@@ -303,6 +315,12 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @since 3.4.0
 	 */
 	public function clear_expired_logs() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$days      = absint( apply_filters( 'woocommerce_logger_days_to_retain_logs', 30 ) );
 		$timestamp = strtotime( "-{$days} days" );
 

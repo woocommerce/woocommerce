@@ -58,5 +58,5 @@ function wc_get_container() : \Psr\Container\ContainerInterface {
 	return $GLOBALS['wc_container'];
 }
 
-// Global for backwards compatibility..
+// Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();

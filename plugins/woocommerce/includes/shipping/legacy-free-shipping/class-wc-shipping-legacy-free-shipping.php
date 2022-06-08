@@ -231,6 +231,12 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 				break;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package, $this );
 	}
 

@@ -129,6 +129,12 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 	 * @return boolean
 	 */
 	protected function should_exclude_simple_products( array $query_args ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'experimental_woocommerce_analytics_variations_stats_should_exclude_simple_products', true, $query_args );
 	}
 

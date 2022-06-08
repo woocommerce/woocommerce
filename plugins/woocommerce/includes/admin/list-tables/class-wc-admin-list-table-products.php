@@ -57,6 +57,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		echo '</div>';
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'wc_marketplace_suggestions_products_empty_state' );
 
 		echo '</div>';
@@ -229,6 +235,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
 		}
 	}
@@ -246,6 +258,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
 		}
 	}
@@ -280,6 +298,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$stock_html .= ' (' . wc_stock_amount( $this->object->get_stock_quantity() ) . ')';
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		echo wp_kses_post( apply_filters( 'woocommerce_admin_stock_html', $stock_html, $this->object ) );
 	}
 
@@ -298,6 +322,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$filters = apply_filters(
 			'woocommerce_products_admin_list_table_filters',
 			array(
@@ -313,6 +343,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 		$output = ob_get_clean();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
 	}
 
@@ -324,6 +360,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	protected function render_products_category_filter() {
 		$categories_count = (int) wp_count_terms( 'product_cat' );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $categories_count <= apply_filters( 'woocommerce_product_category_filter_threshold', 100 ) ) {
 			wc_product_dropdown_categories(
 				array(

@@ -209,6 +209,7 @@ abstract class WC_Data {
 		 *
 		 * @param WC_Data          $this The object being saved.
 		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @since
 		 */
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -223,6 +224,7 @@ abstract class WC_Data {
 		 *
 		 * @param WC_Data          $this The object being saved.
 		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @since
 		 */
 		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
@@ -349,6 +351,12 @@ abstract class WC_Data {
 		}
 
 		if ( 'view' === $context ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
 		}
 
@@ -794,6 +802,12 @@ abstract class WC_Data {
 			$value = array_key_exists( $prop, $this->changes ) ? $this->changes[ $prop ] : $this->data[ $prop ];
 
 			if ( 'view' === $context ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}

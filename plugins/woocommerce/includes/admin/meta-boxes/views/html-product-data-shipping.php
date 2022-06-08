@@ -36,6 +36,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_options_dimensions' );
 		?>
 	</div>
@@ -60,6 +66,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</p>
 		<?php
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_options_shipping' );
 		?>
 	</div>

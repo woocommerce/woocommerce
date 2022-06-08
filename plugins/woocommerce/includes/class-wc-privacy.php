@@ -127,6 +127,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>' .
 			'</div>';
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'wc_privacy_policy_content', $content );
 	}
 
@@ -181,6 +187,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		}
 
 		return self::trash_orders_query(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_trash_pending_orders_query_args',
 				array(
@@ -208,6 +220,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		}
 
 		return self::trash_orders_query(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_trash_failed_orders_query_args',
 				array(
@@ -235,6 +253,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		}
 
 		return self::trash_orders_query(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_trash_cancelled_orders_query_args',
 				array(
@@ -283,6 +307,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		}
 
 		return self::anonymize_orders_query(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_anonymize_completed_orders_query_args',
 				array(
@@ -348,6 +378,12 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			array(
 				'fields'     => 'ID',
 				'number'     => $limit,
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'role__in'   => apply_filters(
 					'woocommerce_delete_inactive_account_roles',
 					array(

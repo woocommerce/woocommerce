@@ -152,6 +152,12 @@ class WC_Discounts {
 	 * @return object[]
 	 */
 	public function get_items_to_validate() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_coupon_get_items_to_validate', $this->get_items(), $this );
 	}
 
@@ -365,6 +371,12 @@ class WC_Discounts {
 
 			// See how many and what price to apply to.
 			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$apply_quantity    = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 			$price_to_discount = ( $price_to_discount / $item->quantity ) * $apply_quantity;
 
@@ -372,7 +384,12 @@ class WC_Discounts {
 			$discount = floor( $price_to_discount * ( $coupon_amount / 100 ) );
 
 			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
-				// Send through the legacy filter, but not as cents.
+				
+				/**
+				 * Send through the legacy filter, but not as cents.
+				 *
+				 * @since
+				 */
 				$filtered_discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 
 				if ( $filtered_discount !== $discount ) {
@@ -429,15 +446,32 @@ class WC_Discounts {
 			// Run coupon calculations.
 			if ( $limit_usage_qty ) {
 				$apply_quantity = $limit_usage_qty - $applied_count < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 				$discount       = min( $amount, $item->price / $item->quantity ) * $apply_quantity;
 			} else {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$apply_quantity = apply_filters( 'woocommerce_coupon_get_apply_quantity', $item->quantity, $item, $coupon, $this );
 				$discount       = $amount * $apply_quantity;
 			}
 
 			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
-				// Send through the legacy filter, but not as cents.
+				
+				/**
+				 * Send through the legacy filter, but not as cents.
+				 *
+				 * @since
+				 */
 				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
 
@@ -518,6 +552,12 @@ class WC_Discounts {
 
 			// See how many and what price to apply to.
 			$apply_quantity = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 
 			// Run coupon calculations.
@@ -529,7 +569,12 @@ class WC_Discounts {
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
-		// Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc).
+		
+		/**
+		 * Allow post-processing for custom coupon types (e.g. calculating discrepancy, etc).
+		 *
+		 * @since
+		 */
 		$this->discounts[ $coupon->get_code() ] = apply_filters( 'woocommerce_coupon_custom_discounts_array', $this->discounts[ $coupon->get_code() ], $coupon );
 
 		return array_sum( $this->discounts[ $coupon->get_code() ] );
@@ -656,6 +701,12 @@ class WC_Discounts {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $coupon && $user_id && apply_filters( 'woocommerce_coupon_validate_user_usage_limit', $coupon->get_usage_limit_per_user() > 0, $user_id, $coupon, $this ) && $coupon->get_id() && $coupon->get_data_store() ) {
 			$data_store  = $coupon->get_data_store();
 			$usage_count = $data_store->get_usage_by_user_id( $coupon, $user_id );
@@ -683,6 +734,12 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_expiry_date( $coupon ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $coupon->get_date_expires() && apply_filters( 'woocommerce_coupon_validate_expiry_date', time() > $coupon->get_date_expires()->getTimestamp(), $coupon, $this ) ) {
 			throw new Exception( __( 'This coupon has expired.', 'woocommerce' ), 107 );
 		}
@@ -701,6 +758,12 @@ class WC_Discounts {
 	protected function validate_coupon_minimum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -720,6 +783,12 @@ class WC_Discounts {
 	protected function validate_coupon_maximum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
 			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
@@ -995,6 +1064,12 @@ class WC_Discounts {
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), 100 );
 			}
@@ -1005,6 +1080,7 @@ class WC_Discounts {
 			 * @param string    $error_message Error message.
 			 * @param int       $error_code    Error code.
 			 * @param WC_Coupon $coupon        Coupon data.
+			 * @since
 			 */
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 

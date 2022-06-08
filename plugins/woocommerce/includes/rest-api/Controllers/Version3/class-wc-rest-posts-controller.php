@@ -212,6 +212,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
 
@@ -290,6 +291,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * @param WP_Post         $post      Post object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
 
@@ -347,6 +349,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 * @since
 		 */
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
 		$query_args = $this->prepare_items_query( $args, $request );
@@ -430,6 +433,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 * @param boolean $supports_trash Whether the item type support trashing.
 		 * @param WP_Post $post           The Post object being considered for trashing support.
+		 * @since
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
 
@@ -473,6 +477,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * @param object           $post     The deleted or trashed item.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
 
@@ -519,6 +524,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 				 * The dynamic portion of the hook name, $var, refers to the query_var key.
 				 *
 				 * @param mixed $prepared_args[ $var ] The query_var value.
+				 * @since
 				 */
 				$query_args[ $var ] = apply_filters( "woocommerce_rest_query_var-{$var}", $prepared_args[ $var ] );
 			}
@@ -551,6 +557,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 * Allows adjusting of the default query vars that are made public.
 		 *
 		 * @param array  Array of allowed WP_Query query vars.
+		 * @since
 		 */
 		$valid_vars = apply_filters( 'query_vars', $wp->public_query_vars );
 
@@ -568,6 +575,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			 *
 			 * @param array $private_query_vars Array of allowed query vars for authorized users.
 			 * }
+			 * @since
 			 */
 			$private = apply_filters( 'woocommerce_rest_private_query_vars', $wp->private_query_vars );
 			$valid_vars = array_merge( $valid_vars, $private );
@@ -604,6 +612,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 		 *
 		 *    @param string $allowed_query_var The query var to allow.
 		 * }
+		 * @since
 		 */
 		$valid_vars = apply_filters( 'woocommerce_rest_query_vars', $valid_vars );
 

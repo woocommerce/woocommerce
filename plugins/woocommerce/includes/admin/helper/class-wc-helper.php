@@ -46,6 +46,12 @@ class WC_Helper {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_helper_loaded' );
 	}
 
@@ -744,6 +750,7 @@ class WC_Helper {
 
 		/**
 		 * Fires when the Helper connection process is initiated.
+		 * @since
 		 */
 		do_action( 'woocommerce_helper_connect_start' );
 
@@ -773,6 +780,7 @@ class WC_Helper {
 		if ( ! empty( $_GET['deny'] ) ) {
 			/**
 			 * Fires when the Helper connection process is denied/cancelled.
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_denied' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-addons&section=helper' ) );
@@ -832,6 +840,7 @@ class WC_Helper {
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
+		 * @since
 		 */
 		do_action( 'woocommerce_helper_connected' );
 
@@ -872,6 +881,7 @@ class WC_Helper {
 
 		/**
 		 * Fires when the Helper has been disconnected.
+		 * @since
 		 */
 		do_action( 'woocommerce_helper_disconnected' );
 
@@ -912,6 +922,7 @@ class WC_Helper {
 
 		/**
 		 * Fires when Helper subscriptions are refreshed.
+		 * @since
 		 */
 		do_action( 'woocommerce_helper_subscriptions_refresh' );
 
@@ -972,6 +983,7 @@ class WC_Helper {
 			 * @param int    $product_id Product ID being activated.
 			 * @param string $product_key Subscription product key.
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $product_key, $activation_response );
 		} else {
@@ -981,6 +993,7 @@ class WC_Helper {
 			 * @param int    $product_id Product ID being activated.
 			 * @param string $product_key Subscription product key.
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
@@ -1043,6 +1056,7 @@ class WC_Helper {
 			 * @param int    $product_id Product ID being deactivated.
 			 * @param string $product_key Subscription product key.
 			 * @param array  $deactivation_response The response object from wp_safe_remote_request().
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_subscription_deactivate_success', $product_id, $product_key, $deactivation_response );
 		} else {
@@ -1054,6 +1068,7 @@ class WC_Helper {
 			 * @param int    $product_id Product ID being deactivated.
 			 * @param string $product_key Subscription product key.
 			 * @param array  $deactivation_response The response object from wp_safe_remote_request().
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $product_key, $deactivation_response );
 		}
@@ -1405,6 +1420,7 @@ class WC_Helper {
 			 * @param int    $product_id Product ID being activated.
 			 * @param string $product_key Subscription product key.
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $product_key, $activation_response );
 		} else {
@@ -1416,6 +1432,7 @@ class WC_Helper {
 			 * @param int    $product_id Product ID being activated.
 			 * @param string $product_key Subscription product key.
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
+			 * @since
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
@@ -1486,6 +1503,7 @@ class WC_Helper {
 				 * @param int    $product_id Product ID being deactivated.
 				 * @param string $product_key Subscription product key.
 				 * @param array  $deactivation_response The response object from wp_safe_remote_request().
+				 * @since
 				 */
 				do_action( 'woocommerce_helper_subscription_deactivate_success', $product_id, $product_key, $deactivation_response );
 			} else {
@@ -1495,6 +1513,7 @@ class WC_Helper {
 				 * @param int    $product_id Product ID being deactivated.
 				 * @param string $product_key Subscription product key.
 				 * @param array  $deactivation_response The response object from wp_safe_remote_request().
+				 * @since
 				 */
 				do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $product_key, $deactivation_response );
 			}
@@ -1511,6 +1530,12 @@ class WC_Helper {
 	 * Various Helper-related admin notices.
 	 */
 	public static function admin_notices() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_helper_suppress_admin_notices', false ) ) {
 			return;
 		}

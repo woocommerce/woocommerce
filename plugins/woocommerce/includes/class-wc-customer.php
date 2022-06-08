@@ -185,7 +185,12 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function get_taxable_address() {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
-		// Check shipping method at this point to see if we need special handling.
+		
+		/**
+		 * Check shipping method at this point to see if we need special handling.
+		 *
+		 * @since
+		 */
 		if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && count( array_intersect( wc_get_chosen_shipping_method_ids(), apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) > 0 ) {
 			$tax_based_on = 'base';
 		}
@@ -207,6 +212,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			$city     = $this->get_shipping_city();
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
 	}
 
@@ -220,6 +231,12 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( $this->get_id() ) {
 			$downloads = wc_get_customer_available_downloads( $this->get_id() );
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_customer_get_downloadable_products', $downloads );
 	}
 
@@ -455,6 +472,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
 
 			if ( 'view' === $context ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );
 			}
 		}
@@ -477,6 +500,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			$value   = array_merge( $this->data[ $prop ], $changes );
 
 			if ( 'view' === $context ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}
@@ -620,6 +649,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			$value   = array_merge( $this->data[ $prop ], $changes );
 
 			if ( 'view' === $context ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$value = apply_filters( $this->get_hook_prefix() . $prop, $value, $this );
 			}
 		}

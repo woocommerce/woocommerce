@@ -87,6 +87,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -158,6 +159,7 @@ class WC_REST_Legacy_Coupons_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param WC_Coupon       $coupon        The coupon object.
 		 * @param WP_REST_Request $request       Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $coupon, $request );
 	}

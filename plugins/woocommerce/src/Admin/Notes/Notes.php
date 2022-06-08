@@ -348,6 +348,7 @@ class Notes {
 		 *
 		 * @param string $name The triggered action name.
 		 * @param Note   $note The corresponding Note.
+		 * @since
 		 */
 		do_action( 'woocommerce_note_action', $triggered_action->name, $note );
 
@@ -356,6 +357,7 @@ class Notes {
 		 * For more specific targeting of note actions.
 		 *
 		 * @param Note $note The corresponding Note.
+		 * @since
 		 */
 		do_action( 'woocommerce_note_action_' . $triggered_action->name, $note );
 

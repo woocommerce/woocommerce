@@ -291,6 +291,12 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 			);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_general_settings', $settings );
 	}
 

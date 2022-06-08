@@ -62,6 +62,12 @@ abstract class WC_Settings_API {
 	 * @return array of options
 	 */
 	public function get_form_fields() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_settings_api_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->form_fields ) );
 	}
 
@@ -192,6 +198,12 @@ abstract class WC_Settings_API {
 
 		$this->settings[ $key ] = $value;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return update_option( $this->get_option_key(), apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
 	}
 
@@ -217,7 +229,19 @@ abstract class WC_Settings_API {
 		}
 
 		$option_key = $this->get_option_key();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
         do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
         return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
 	}
 

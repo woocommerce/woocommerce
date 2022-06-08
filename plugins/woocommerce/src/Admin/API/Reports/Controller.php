@@ -150,6 +150,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 * 'url' => '', and 'path' => '/wc-ext/v1/...'.
 		 *
 		 * @param array $endpoints The list of allowed reports..
+		 * @since
 		 */
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
 
@@ -269,6 +270,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report', $response, $report, $request );
 	}

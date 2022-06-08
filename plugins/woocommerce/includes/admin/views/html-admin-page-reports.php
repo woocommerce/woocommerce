@@ -31,6 +31,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '">' . esc_html( $report_group['title'] ) . '</a>';
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'wc_reports_tabs' );
 		?>
 	</nav>

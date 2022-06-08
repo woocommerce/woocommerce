@@ -107,6 +107,12 @@ class WC_Geolocation {
 
 		if ( false === $external_ip_address ) {
 			$external_ip_address     = '0.0.0.0';
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$ip_lookup_services      = apply_filters( 'woocommerce_geolocation_ip_lookup_apis', self::$ip_lookup_apis );
 			$ip_lookup_services_keys = array_keys( $ip_lookup_services );
 			shuffle( $ip_lookup_services_keys );
@@ -116,6 +122,12 @@ class WC_Geolocation {
 				$response         = wp_safe_remote_get( $service_endpoint, array( 'timeout' => 2 ) );
 
 				if ( ! is_wp_error( $response ) && rest_is_ip_address( $response['body'] ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
 					break;
 				}
@@ -136,7 +148,12 @@ class WC_Geolocation {
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
-		// Filter to allow custom geolocation of the IP address.
+		
+		/**
+		 * Filter to allow custom geolocation of the IP address.
+		 *
+		 * @since
+		 */
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
 		if ( false !== $country_code ) {
@@ -264,6 +281,12 @@ class WC_Geolocation {
 		$country_code = get_transient( 'geoip_' . $ip_address );
 
 		if ( false === $country_code ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$geoip_services = apply_filters( 'woocommerce_geolocation_geoip_apis', self::$geoip_apis );
 
 			if ( empty( $geoip_services ) ) {
@@ -289,6 +312,12 @@ class WC_Geolocation {
 							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
 							break;
 						default:
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							$country_code = apply_filters( 'woocommerce_geolocation_geoip_response_' . $service_name, '', $response['body'] );
 							break;
 					}

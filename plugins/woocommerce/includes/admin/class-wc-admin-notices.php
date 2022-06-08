@@ -199,6 +199,12 @@ class WC_Admin_Notices {
 
 		update_user_meta( get_current_user_id(), 'dismissed_' . $name . '_notice', true );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_hide_' . $name . '_notice' );
 	}
 
@@ -230,6 +236,12 @@ class WC_Admin_Notices {
 		wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );
 
 		foreach ( $notices as $notice ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
 				add_action( 'admin_notices', array( __CLASS__, self::$core_notices[ $notice ] ) );
 			} else {
@@ -430,6 +442,12 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_' . WC_PHP_MIN_REQUIREMENTS_NOTICE . '_notice', true ) ) ) {
 			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
 			return;
@@ -501,6 +519,12 @@ class WC_Admin_Notices {
 	 * Notice about the completion of the product downloads sync, with further advice for the site operator.
 	 */
 	public static function download_directories_sync_complete() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$notice_dismissed = apply_filters(
 			'woocommerce_hide_download_directories_sync_complete',
 			get_user_meta( get_current_user_id(), 'download_directories_sync_complete', true )
@@ -522,6 +546,12 @@ class WC_Admin_Notices {
 	 */
 	public static function maxmind_missing_license_key_notice() {
 		$user_dismissed_notice   = get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$filter_dismissed_notice = ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true );
 
 		if ( $user_dismissed_notice || $filter_dismissed_notice ) {
@@ -538,6 +568,12 @@ class WC_Admin_Notices {
 	 * @since 4.0
 	 */
 	public static function redirect_download_method_notice() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_hide_redirect_method_nag', get_user_meta( get_current_user_id(), 'dismissed_redirect_download_method_notice', true ) ) ) {
 			self::remove_notice( 'redirect_download_method' );
 			return;
@@ -564,6 +600,12 @@ class WC_Admin_Notices {
 	 * Notice about base tables missing.
 	 */
 	public static function base_tables_missing_notice() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$notice_dismissed = apply_filters(
 			'woocommerce_hide_base_tables_missing_nag',
 			get_user_meta( get_current_user_id(), 'dismissed_base_tables_missing_notice', true )

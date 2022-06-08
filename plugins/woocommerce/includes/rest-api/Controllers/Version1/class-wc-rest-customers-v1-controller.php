@@ -266,6 +266,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		 *
 		 * @param array           $prepared_args Array of arguments for WP_User_Query.
 		 * @param WP_REST_Request $request       The current request.
+		 * @since
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_customer_query', $prepared_args, $request );
 
@@ -354,6 +355,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			 * @param WP_User         $user_data Data used to create the customer.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating customer, false when updating customer.
+			 * @since
 			 */
 			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, true );
 
@@ -438,6 +440,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			 * @param WP_User         $customer  Data used to create the customer.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating customer, false when updating customer.
+			 * @since
 			 */
 			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, false );
 
@@ -501,6 +504,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		 * @param WP_User          $user_data User data.
 		 * @param WP_REST_Response $response  The response returned from the API.
 		 * @param WP_REST_Request  $request   The request sent to the API.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_delete_customer', $user_data, $response, $request );
 
@@ -556,6 +560,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response   The response object.
 		 * @param WP_User          $user_data  User object used to create response.
 		 * @param WP_REST_Request  $request    Request object.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer', $response, $user_data, $request );
 	}

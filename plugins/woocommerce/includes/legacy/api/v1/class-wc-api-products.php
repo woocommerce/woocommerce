@@ -124,6 +124,12 @@ class WC_API_Products extends WC_API_Resource {
 			$product_data['parent'] = $this->get_product_data( $product->get_parent_id() );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'product' => apply_filters( 'woocommerce_api_product_response', $product_data, $product, $fields, $this->server ) );
 	}
 
@@ -226,6 +232,12 @@ class WC_API_Products extends WC_API_Resource {
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'product_reviews' => apply_filters( 'woocommerce_api_product_reviews_response', $reviews, $id, $fields, $comments, $this->server ) );
 	}
 
@@ -322,7 +334,19 @@ class WC_API_Products extends WC_API_Resource {
 			'shipping_taxable'   => $product->is_shipping_taxable(),
 			'shipping_class'     => $product->get_shipping_class(),
 			'shipping_class_id'  => ( 0 !== $product->get_shipping_class_id() ) ? $product->get_shipping_class_id() : null,
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'description'        => apply_filters( 'the_content', $product->get_description() ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'short_description'  => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
 			'reviews_allowed'    => $product->get_reviews_allowed(),
 			'average_rating'     => wc_format_decimal( $product->get_average_rating(), 2 ),
@@ -339,6 +363,12 @@ class WC_API_Products extends WC_API_Resource {
 			'download_limit'     => $product->get_download_limit(),
 			'download_expiry'    => $product->get_download_expiry(),
 			'download_type'      => 'standard',
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'purchase_note'      => apply_filters( 'the_content', $product->get_purchase_note() ),
 			'total_sales'        => $product->get_total_sales(),
 			'variations'         => array(),

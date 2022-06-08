@@ -25,6 +25,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_options_sku' );
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
@@ -39,6 +45,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				)
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_options_stock' );
 
 			echo '<div class="stock_fields show_if_simple show_if_variable">';
@@ -90,6 +102,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				)
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_options_stock_fields' );
 
 			echo '</div>';
@@ -107,6 +125,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			)
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_options_stock_status' );
 		?>
 	</div>
@@ -123,6 +147,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			)
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_options_sold_individually' );
 		?>
 	</div>

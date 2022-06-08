@@ -134,6 +134,12 @@ class WC_API_Coupons extends WC_API_Resource {
 			'customer_emails'              => $coupon->get_email_restrictions(),
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
 	}
 

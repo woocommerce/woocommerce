@@ -161,6 +161,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		// Handle qty if set.
 		if ( isset( $args['qty'] ) ) {
 			if ( $product->backorders_require_notification() && $product->is_on_backorder( $args['qty'] ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$item->add_meta_data( apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $item ), $args['qty'] - max( 0, $product->get_stock_quantity() ), true );
 			}
 			$args['subtotal'] = $args['subtotal'] ? $args['subtotal'] : wc_get_price_excluding_tax( $product, array( 'qty' => $args['qty'] ) );
@@ -170,6 +176,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item->set_order_id( $this->get_id() );
 		$item->set_props( $args );
 		$item->save();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_edit_product', $this->get_id(), $item->get_id(), $args, $product );
 
 		return $item->get_id();
@@ -206,6 +218,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item->set_props( $args );
 		$item->save();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_update_coupon', $this->get_id(), $item->get_id(), $args );
 
 		return $item->get_id();
@@ -243,6 +261,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item->save();
 		$this->calculate_shipping();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_update_shipping', $this->get_id(), $item->get_id(), $args );
 
 		return $item->get_id();
@@ -274,6 +298,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item->set_props( $args );
 		$item->save();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_update_fee', $this->get_id(), $item->get_id(), $args );
 
 		return $item->get_id();
@@ -305,6 +335,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		$item->set_props( $args );
 		$item->save();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_update_tax', $this->get_id(), $item->get_id(), $args );
 
 		return $item->get_id();
@@ -323,6 +359,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} else {
 			$product = false;
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_product_from_item', $product, $item, $this );
 	}
 
@@ -751,6 +793,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 */
 	public function get_order_currency() {
 		wc_deprecated_function( 'WC_Order::get_order_currency', '3.0', 'WC_Order::get_currency' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_order_currency', $this->get_currency(), $this );
 	}
 }

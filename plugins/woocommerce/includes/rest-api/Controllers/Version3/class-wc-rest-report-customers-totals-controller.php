@@ -113,6 +113,7 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_customers_count', $response, $report, $request );
 	}

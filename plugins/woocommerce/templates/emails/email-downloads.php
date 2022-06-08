@@ -36,6 +36,12 @@ $text_align = is_rtl() ? 'right' : 'left';
 				<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;">
 					<?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, $plain_text );
 					} else {
 						switch ( $column_id ) {

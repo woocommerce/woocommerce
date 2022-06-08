@@ -117,6 +117,7 @@ class ListTable extends WP_List_Table {
 			<?php
 			/**
 			 * Renders after the 'blank state' message for the order list table has rendered.
+			 * @since
 			 */
 			do_action( 'wc_marketplace_suggestions_orders_empty_state' );
 			?>
@@ -458,6 +459,12 @@ class ListTable extends WP_List_Table {
 				human_time_diff( $order->get_date_created()->getTimestamp(), time() )
 			);
 		} else {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$show_date = $order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'M j, Y', 'woocommerce' ) ) );
 		}
 		printf(
@@ -583,6 +590,7 @@ class ListTable extends WP_List_Table {
 		 * are registered.
 		 *
 		 * @param WC_Order $order Current order object.
+		 * @since
 		 */
 		do_action( 'woocommerce_admin_order_actions_start', $order );
 
@@ -609,6 +617,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param array    $action Order actions.
 		 * @param WC_Order $order  Current order object.
+		 * @since
 		 */
 		$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
 
@@ -620,6 +629,7 @@ class ListTable extends WP_List_Table {
 		 * are rendered.
 		 *
 		 * @param WC_Order $order Current order object.
+		 * @since
 		 */
 		do_action( 'woocommerce_admin_order_actions_end', $order );
 

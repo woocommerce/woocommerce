@@ -213,6 +213,12 @@ class WC_Plugin_Updates {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_plugins_with_header', $matches, $header, $plugins );
 	}
 
@@ -231,6 +237,12 @@ class WC_Plugin_Updates {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_plugins_for_woocommerce', $matches, $plugins );
 	}
 }

@@ -64,6 +64,12 @@ class WC_Twenty_Twenty_One {
 			'has_rtl' => true,
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_twenty_twenty_one_styles', $styles );
 	}
 

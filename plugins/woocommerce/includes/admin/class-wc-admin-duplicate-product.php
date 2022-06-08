@@ -38,6 +38,12 @@ class WC_Admin_Duplicate_Product {
 	public function dupe_link( $actions, $post ) {
 		global $the_product;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) {
 			return $actions;
 		}
@@ -73,6 +79,12 @@ class WC_Admin_Duplicate_Product {
 	public function dupe_button() {
 		global $post;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! current_user_can( apply_filters( 'woocommerce_duplicate_product_capability', 'manage_woocommerce' ) ) ) {
 			return;
 		}
@@ -112,7 +124,12 @@ class WC_Admin_Duplicate_Product {
 
 		$duplicate = $this->product_duplicate( $product );
 
-		// Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
+		
+		/**
+		 * Hook rename to match other woocommerce_product_* hooks, and to move away from depending on a response from the wp_posts table.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_duplicate', $duplicate, $product );
 		wc_do_deprecated_action( 'woocommerce_duplicate_product', array( $duplicate->get_id(), $this->get_product_to_duplicate( $product_id ) ), '3.0', 'Use woocommerce_product_duplicate action instead.' );
 
@@ -136,6 +153,12 @@ class WC_Admin_Duplicate_Product {
 		 * @since 2.6
 		 */
 		$meta_to_exclude = array_filter(
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters(
 				'woocommerce_duplicate_product_exclude_meta',
 				array(),
@@ -177,7 +200,12 @@ class WC_Admin_Duplicate_Product {
 		// Save parent product.
 		$duplicate->save();
 
-		// Duplicate children of a variable product.
+		
+		/**
+		 * Duplicate children of a variable product.
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $product ) && $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $child_id ) {
 				$child           = wc_get_product( $child_id );

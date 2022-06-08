@@ -69,6 +69,12 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_load_cart_from_session' );
 		$this->cart->set_totals( WC()->session->get( 'cart_totals', null ) );
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
@@ -126,6 +132,12 @@ final class WC_Cart_Session {
 			 */
 			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
 				$update_cart_session = true;
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 			} elseif ( ! $product->is_purchasable() ) {
@@ -141,14 +153,32 @@ final class WC_Cart_Session {
 				 */
 				$message = apply_filters( 'woocommerce_cart_item_removed_message', $message, $product );
 				wc_add_notice( $message, 'error' );
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 			} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
 				$update_cart_session = true;
 				/* translators: %1$s: product name. %2$s product permalink */
 				$message = sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() );
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$message = apply_filters( 'woocommerce_cart_item_removed_because_modified_message', $message, $product );
 				wc_add_notice( $message, 'notice' );
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 			} else {
@@ -160,6 +190,12 @@ final class WC_Cart_Session {
 					)
 				);
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
 
 				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
@@ -169,9 +205,21 @@ final class WC_Cart_Session {
 
 		// If it's not empty, it's been already populated by the loop above.
 		if ( ! empty( $cart_contents ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$this->cart->set_cart_contents( apply_filters( 'woocommerce_cart_contents_changed', $cart_contents ) );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
@@ -231,6 +279,12 @@ final class WC_Cart_Session {
 		WC()->session->set( 'coupon_discount_tax_totals', $this->cart->get_coupon_discount_tax_totals() );
 		WC()->session->set( 'removed_cart_contents', $this->cart->get_removed_cart_contents() );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_cart_updated' );
 	}
 
@@ -254,6 +308,12 @@ final class WC_Cart_Session {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			update_user_meta(
 				get_current_user_id(),
@@ -269,6 +329,12 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 		}
@@ -303,6 +369,12 @@ final class WC_Cart_Session {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_set_cart_cookies', $set );
 	}
 
@@ -315,6 +387,12 @@ final class WC_Cart_Session {
 	private function get_saved_cart() {
 		$saved_cart = array();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
 
@@ -339,10 +417,22 @@ final class WC_Cart_Session {
 	private function populate_cart_from_order( $order_id, $cart ) {
 		$order = wc_get_order( $order_id );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! $order->get_id() || ! $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( 'completed' ) ) ) || ! current_user_can( 'order_again', $order->get_id() ) ) {
 			return;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_empty_cart_when_order_again', true ) ) {
 			$cart = array();
 		}
@@ -351,10 +441,22 @@ final class WC_Cart_Session {
 		$order_items      = $order->get_items();
 
 		foreach ( $order_items as $item ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$product_id     = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
 			$quantity       = $item->get_quantity();
 			$variation_id   = (int) $item->get_variation_id();
 			$variations     = array();
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$cart_item_data = apply_filters( 'woocommerce_order_again_cart_item_data', array(), $item, $order );
 			$product        = $item->get_product();
 
@@ -381,6 +483,12 @@ final class WC_Cart_Session {
 				}
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations, $cart_item_data ) ) {
 				continue;
 			}
@@ -388,6 +496,12 @@ final class WC_Cart_Session {
 			// Add to cart directly.
 			$cart_id          = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 			$product_data     = wc_get_product( $variation_id ? $variation_id : $product_id );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$cart[ $cart_id ] = apply_filters(
 				'woocommerce_add_order_again_cart_item',
 				array_merge(

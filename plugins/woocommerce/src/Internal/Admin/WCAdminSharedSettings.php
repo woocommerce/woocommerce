@@ -58,6 +58,12 @@ class WCAdminSharedSettings {
 			\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )->add(
 				$this->settings_prefix,
 				function() {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					return apply_filters( 'woocommerce_admin_shared_settings', array() );
 				},
 				true

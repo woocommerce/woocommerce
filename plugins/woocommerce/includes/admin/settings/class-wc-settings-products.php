@@ -206,7 +206,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 			);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$settings = apply_filters( 'woocommerce_products_general_settings', $settings );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_settings', $settings );
 	}
 
@@ -342,6 +354,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 			);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_inventory_settings', $settings );
 	}
 
@@ -381,6 +399,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'options'  => array(
 						'force'     => __( 'Force downloads', 'woocommerce' ),
 						'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'redirect'  => apply_filters( 'woocommerce_redirect_only_method_is_secure', false ) ? __( 'Redirect only', 'woocommerce' ) : __( 'Redirect only (Insecure)', 'woocommerce' ),
 					),
 					'autoload' => false,
@@ -440,6 +464,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 			);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_downloadable_products_settings', $settings );
 	}
 

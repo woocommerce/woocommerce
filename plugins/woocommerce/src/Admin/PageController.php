@@ -106,6 +106,7 @@ class PageController {
 		 *   @type int          position     Menu item position.
 		 *   @type boolean      js_page      If this is a JS-powered page.
 		 * }
+		 * @since
 		 */
 		$options = apply_filters( 'woocommerce_navigation_connect_page_options', $options );
 
@@ -163,7 +164,12 @@ class PageController {
 
 		// Bail if this isn't a page registered with this controller.
 		if ( false === $current_page ) {
-			// Filter documentation below.
+			
+			/**
+			 * Filter documentation below.
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_navigation_get_breadcrumbs', array( '' ), $current_page );
 		}
 
@@ -207,6 +213,7 @@ class PageController {
 		 *
 		 * @param array         $breadcrumbs Navigation pieces (breadcrumbs).
 		 * @param array|boolean $current_page The connected page data or false if not identified.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_navigation_get_breadcrumbs', $breadcrumbs, $current_page );
 	}
@@ -249,7 +256,12 @@ class PageController {
 	public function get_current_screen_id() {
 		$current_screen = get_current_screen();
 		if ( ! $current_screen ) {
-			// Filter documentation below.
+			
+			/**
+			 * Filter documentation below.
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_navigation_current_screen_id', false, $current_screen );
 		}
 
@@ -275,7 +287,12 @@ class PageController {
 			}
 		}
 
-		// Pages with default tab values.
+		
+		/**
+		 * Pages with default tab values.
+		 *
+		 * @since
+		 */
 		$pages_with_tabs = apply_filters(
 			'woocommerce_navigation_pages_with_tabs',
 			array(
@@ -290,6 +307,12 @@ class PageController {
 		$wc_emails    = \WC_Emails::instance();
 		$wc_email_ids = array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$tabs_with_sections = apply_filters(
 			'woocommerce_navigation_page_tab_sections',
 			array(
@@ -343,6 +366,7 @@ class PageController {
 		 *
 		 * @param string|boolean $screen_id The screen id or false if not identified.
 		 * @param WP_Screen      $current_screen The current WP_Screen.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_navigation_current_screen_id', implode( '-', $screen_pieces ), $current_screen );
 	}
@@ -387,6 +411,7 @@ class PageController {
 		 *
 		 * @param boolean       $is_connected_page True if the current page is connected.
 		 * @param array|boolean $current_page The connected page data or false if not identified.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_navigation_is_connected_page', $is_connected_page, $current_page );
 	}
@@ -412,6 +437,7 @@ class PageController {
 		 *
 		 * @param boolean       $is_registered_page True if the current page was registered with this controller.
 		 * @param array|boolean $current_page The registered page data or false if not identified.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_navigation_is_registered_page', $is_registered_page, $current_page );
 	}

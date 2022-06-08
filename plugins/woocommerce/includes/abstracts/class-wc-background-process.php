@@ -159,9 +159,21 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	 * @return array
 	 */
 	public function schedule_cron_healthcheck( $schedules ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$interval = apply_filters( $this->identifier . '_cron_interval', 5 );
 
 		if ( property_exists( $this, 'cron_interval' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$interval = apply_filters( $this->identifier . '_cron_interval', $this->cron_interval );
 		}
 

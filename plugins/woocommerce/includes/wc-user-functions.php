@@ -19,6 +19,12 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
@@ -44,6 +50,12 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		if ( email_exists( $email ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return new WP_Error( 'registration-error-email-exists', apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $email ) );
 		}
 
@@ -75,14 +87,32 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		// Use WP_Error to handle registration errors.
 		$errors = new WP_Error();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_register_post', $username, $email, $errors );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$errors = apply_filters( 'woocommerce_registration_errors', $errors, $username, $email );
 
 		if ( $errors->get_error_code() ) {
 			return $errors;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$new_customer_data = apply_filters(
 			'woocommerce_new_customer_data',
 			array_merge(
@@ -102,6 +132,12 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 			return $customer_id;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 
 		return $customer_id;
@@ -258,6 +294,12 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 				wc_downloadable_product_permissions( $order->get_id(), true );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 
 			if ( get_post_status( $order_id ) === 'wc-completed' ) {
@@ -310,6 +352,12 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	global $wpdb;
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$result = apply_filters( 'woocommerce_pre_customer_bought_product', null, $customer_email, $user_id, $product_id );
 
 	if ( null !== $result ) {
@@ -502,6 +550,12 @@ function wc_modify_editable_roles( $roles ) {
 		unset( $roles['administrator'] );
 
 		if ( wc_current_user_has_role( 'shop_manager' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 			return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
 		}
@@ -540,6 +594,12 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
 						// Shop managers can only edit customer info.
 						$userdata                    = get_userdata( $args[0] );
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 						if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 							$caps[] = 'do_not_allow';
@@ -561,6 +621,12 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
  */
 function wc_get_customer_download_permissions( $customer_id ) {
 	$data_store = WC_Data_Store::load( 'customer-download' );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id );
 }
 
@@ -619,7 +685,12 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				continue;
 			}
 
-			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
+			
+			/**
+			 * Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
+			 *
+			 * @since
+			 */
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
 				$download_file['name'],
@@ -657,6 +728,12 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		}
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_customer_available_downloads', $downloads, $customer_id );
 }
 
@@ -758,6 +835,12 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  * @param string $_meta_value Value of the meta that was changed.
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
 
 	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
@@ -789,6 +872,12 @@ function wc_set_user_last_update_time( $user_id ) {
  * @return array
  */
 function wc_get_customer_saved_methods_list( $customer_id ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
 }
 

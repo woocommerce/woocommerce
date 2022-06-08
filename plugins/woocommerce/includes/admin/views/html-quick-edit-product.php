@@ -139,6 +139,12 @@ defined( 'ABSPATH' ) || exit;
 				<span class="input-text-wrap">
 					<select class="visibility" name="_visibility">
 						<?php
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$options = apply_filters(
 							'woocommerce_product_visibility_options',
 							array(

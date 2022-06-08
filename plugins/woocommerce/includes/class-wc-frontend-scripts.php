@@ -55,6 +55,12 @@ class WC_Frontend_Scripts {
 	public static function get_styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters(
 			'woocommerce_enqueue_styles',
 			array(
@@ -69,6 +75,12 @@ class WC_Frontend_Scripts {
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
 					'deps'    => 'woocommerce-layout',
 					'version' => $version,
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
 					'has_rtl' => true,
 				),
@@ -90,6 +102,12 @@ class WC_Frontend_Scripts {
 	 * @return string
 	 */
 	private static function get_asset_url( $path ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_asset_url', plugins_url( $path, WC_PLUGIN_FILE ), $path );
 	}
 
@@ -454,6 +472,12 @@ class WC_Frontend_Scripts {
 
 			$name                        = str_replace( '-', '_', $handle ) . '_params';
 			self::$wp_localize_scripts[] = $handle;
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			wp_localize_script( $handle, $name, apply_filters( $name, $data ) );
 		}
 	}
@@ -484,6 +508,12 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
 					'review_rating_required'    => wc_review_ratings_required() ? 'yes' : 'no',
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'flexslider'                => apply_filters(
 						'woocommerce_single_product_carousel_options',
 						array(
@@ -498,9 +528,33 @@ class WC_Frontend_Scripts {
 							'allowOneSlide'  => false,
 						)
 					),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'zoom_enabled'              => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'zoom_options'              => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'photoswipe_enabled'        => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'photoswipe_options'        => apply_filters(
 						'woocommerce_single_product_photoswipe_options',
 						array(
@@ -511,6 +565,12 @@ class WC_Frontend_Scripts {
 							'showAnimationDuration' => 0,
 						)
 					),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'flexslider_enabled'        => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 				break;
@@ -549,7 +609,19 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'ajax_url'        => WC()->ajax_url(),
 					'wc_ajax_url'     => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'cart_hash_key'   => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'fragment_name'   => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
 					'request_timeout' => 5000,
 				);
@@ -559,6 +631,12 @@ class WC_Frontend_Scripts {
 					'ajax_url'                => WC()->ajax_url(),
 					'wc_ajax_url'             => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'i18n_view_cart'          => esc_attr__( 'View cart', 'woocommerce' ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'cart_url'                => apply_filters( 'woocommerce_add_to_cart_redirect', wc_get_cart_url(), null ),
 					'is_cart'                 => is_cart(),
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
@@ -593,7 +671,19 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-password-strength-meter':
 				$params = array(
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'stop_checkout'         => apply_filters( 'woocommerce_enforce_password_strength_meter_on_checkout', false ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
 					'i18n_password_hint'    => esc_attr( wp_get_password_hint() ),
@@ -605,6 +695,12 @@ class WC_Frontend_Scripts {
 
 		$params = apply_filters_deprecated( $handle . '_params', array( $params ), '3.0.0', 'woocommerce_get_script_data' );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_script_data', $params, $handle );
 	}
 

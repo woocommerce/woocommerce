@@ -60,6 +60,12 @@ class WC_Queue {
 			wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before plugins_loaded.', 'woocommerce' ), '3.5.0' );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_queue_class', self::$default_cass );
 	}
 

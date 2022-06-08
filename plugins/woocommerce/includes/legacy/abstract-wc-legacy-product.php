@@ -162,6 +162,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_variation_default_attributes() {
 		wc_deprecated_function( 'WC_Product_Variable::get_variation_default_attributes', '3.0', 'WC_Product::get_default_attributes' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_default_attributes', $this->get_default_attributes(), $this );
 	}
 
@@ -297,6 +303,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_price_html_from_to( $from, $to ) {
 		wc_deprecated_function( 'WC_Product::get_price_html_from_to', '3.0', 'wc_format_sale_price' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_price_html_from_to', wc_format_sale_price( $from, $to ), $from, $to, $this );
 	}
 
@@ -415,6 +427,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_parent() {
 		wc_deprecated_function( 'WC_Product::get_parent', '3.0', 'WC_Product::get_parent_id' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_parent', absint( $this->get_post_data()->post_parent ), $this );
 	}
 
@@ -426,6 +444,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_upsells() {
 		wc_deprecated_function( 'WC_Product::get_upsells', '3.0', 'WC_Product::get_upsell_ids' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_upsell_ids', $this->get_upsell_ids(), $this );
 	}
 
@@ -437,6 +461,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_cross_sells() {
 		wc_deprecated_function( 'WC_Product::get_cross_sells', '3.0', 'WC_Product::get_cross_sell_ids' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_product_crosssell_ids', $this->get_cross_sell_ids(), $this );
 	}
 
@@ -630,6 +660,12 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function enable_dimensions_display() {
 		wc_deprecated_function( 'WC_Product::enable_dimensions_display', '3.0' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'wc_product_enable_dimensions_display', true ) && ( $this->has_dimensions() || $this->has_weight() || $this->child_has_weight() || $this->child_has_dimensions() );
 	}
 

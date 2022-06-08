@@ -54,10 +54,28 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 
 		$result = $wpdb->insert(
 			$wpdb->prefix . self::get_table_name(),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_downloadable_product_download_log_insert_data', $data ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			apply_filters( 'woocommerce_downloadable_product_download_log_insert_format', $format, $data )
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_downloadable_product_download_log_insert', $data );
 
 		if ( $result ) {

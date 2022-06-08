@@ -103,6 +103,12 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	public function check_response() {
 		global $wp;
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$order_id = apply_filters( 'woocommerce_thankyou_order_id', absint( $wp->query_vars['order-received'] ) );
 
 		$this->check_response_for_order( $order_id );

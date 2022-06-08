@@ -171,6 +171,12 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_id() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_id', $this->data['id'], $this );
 	}
 
@@ -181,6 +187,12 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_method_id() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_method_id', $this->data['method_id'], $this );
 	}
 
@@ -191,6 +203,12 @@ class WC_Shipping_Rate {
 	 * @return int
 	 */
 	public function get_instance_id() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_instance_id', $this->data['instance_id'], $this );
 	}
 
@@ -200,6 +218,12 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_label() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_label', $this->data['label'], $this );
 	}
 
@@ -210,6 +234,12 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_cost() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_cost', $this->data['cost'], $this );
 	}
 
@@ -220,6 +250,12 @@ class WC_Shipping_Rate {
 	 * @return array
 	 */
 	public function get_taxes() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_taxes', $this->data['taxes'], $this );
 	}
 
@@ -229,6 +265,12 @@ class WC_Shipping_Rate {
 	 * @return array
 	 */
 	public function get_shipping_tax() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_get_shipping_tax', count( $this->taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? array_sum( $this->taxes ) : 0, $this );
 	}
 

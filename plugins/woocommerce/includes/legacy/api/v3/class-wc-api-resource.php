@@ -234,6 +234,12 @@ class WC_API_Resource {
 		// resource page
 		$args['paged'] = ( isset( $request_args['page'] ) ) ? absint( $request_args['page'] ) : 1;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$args = apply_filters( 'woocommerce_api_query_args', $args, $request_args );
 
 		return array_merge( $base_args, $args );
@@ -472,6 +478,12 @@ class WC_API_Resource {
 			$permission = current_user_can( $post_type->cap->delete_post, $post->ID );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_api_check_permission', $permission, $context, $post, $post_type );
 	}
 }

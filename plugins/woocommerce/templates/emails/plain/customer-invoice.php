@@ -55,6 +55,7 @@ echo "\n----------------------------------------\n\n";
  * Hook for the woocommerce_email_order_meta.
  *
  * @hooked WC_Emails::order_meta() Shows order meta data.
+ * @since
  */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
@@ -63,6 +64,7 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  *
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
+ * @since
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
@@ -76,4 +78,10 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

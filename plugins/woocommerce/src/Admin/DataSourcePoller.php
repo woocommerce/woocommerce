@@ -110,6 +110,12 @@ abstract class DataSourcePoller {
 			$this->read_specs_from_data_sources();
 			$specs = get_transient( $this->args['transient_name'] );
 		}
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$specs = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
 		return false !== $specs ? $specs : array();
 	}
@@ -121,6 +127,12 @@ abstract class DataSourcePoller {
 	 */
 	public function read_specs_from_data_sources() {
 		$specs        = array();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$data_sources = apply_filters( self::FILTER_NAME, $this->data_sources, $this->id );
 
 		// Note that this merges the specs from the data sources based on the

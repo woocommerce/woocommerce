@@ -23,7 +23,19 @@ if ( ! $order ) {
 	return;
 }
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 $order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
+
+/**
+ * Hook
+ *
+ * @since
+ */
 $show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
 $downloads             = $order->get_downloadable_items();
@@ -55,6 +67,12 @@ if ( $show_downloads ) {
 
 		<tbody>
 			<?php
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
 			foreach ( $order_items as $item_id => $item ) {
@@ -73,6 +91,12 @@ if ( $show_downloads ) {
 				);
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_order_details_after_order_table_items', $order );
 			?>
 		</tbody>

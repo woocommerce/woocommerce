@@ -287,6 +287,12 @@ class WC_Admin_Post_Types {
 	 */
 	public function bulk_and_quick_edit_hook( $post_id, $post ) {
 		remove_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ) );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_bulk_and_quick_edit', $post_id, $post );
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 	}
@@ -444,6 +450,12 @@ class WC_Admin_Post_Types {
 
 		$product->save();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_quick_edit_save', $product );
 	}
 
@@ -515,7 +527,12 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		// Handle price - remove dates and set to lowest.
+		
+		/**
+		 * Handle price - remove dates and set to lowest.
+		 *
+		 * @since
+		 */
 		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external' ) );
 		$can_product_type_change_price = false;
 		foreach ( $change_price_product_types as $product_type ) {
@@ -582,6 +599,12 @@ class WC_Admin_Post_Types {
 
 		$product->save();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
 
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -801,6 +824,12 @@ class WC_Admin_Post_Types {
 	 * Run a filter when uploading a downloadable product.
 	 */
 	public function woocommerce_media_upload_downloadable_product() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'media_upload_file' );
 	}
 

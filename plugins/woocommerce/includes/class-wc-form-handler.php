@@ -123,7 +123,12 @@ class WC_Form_Handler {
 				$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : '';
 			}
 
-			// Hook to allow modification of value.
+			
+			/**
+			 * Hook to allow modification of value.
+			 *
+			 * @since
+			 */
 			$value = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $value );
 
 			// Validation: Required fields.
@@ -195,6 +200,7 @@ class WC_Form_Handler {
 		 * @param string      $load_address Type of address e.g. billing or shipping.
 		 * @param array       $address The address fields.
 		 * @param WC_Customer $customer The customer object being saved. @since 3.6.0
+		 * @since
 		 */
 		do_action( 'woocommerce_after_save_address_validation', $user_id, $load_address, $address, $customer );
 
@@ -206,6 +212,12 @@ class WC_Form_Handler {
 
 		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
 
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
@@ -261,7 +273,12 @@ class WC_Form_Handler {
 			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
 		}
 
-		// Handle required fields.
+		
+		/**
+		 * Handle required fields.
+		 *
+		 * @since
+		 */
 		$required_fields = apply_filters(
 			'woocommerce_save_account_details_required_fields',
 			array(
@@ -345,6 +362,12 @@ class WC_Form_Handler {
 
 			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
 			wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
@@ -396,6 +419,12 @@ class WC_Form_Handler {
 
 			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_before_pay_action', $order );
 
 				WC()->customer->set_props(
@@ -442,6 +471,12 @@ class WC_Form_Handler {
 							if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
 								$result['order_id'] = $order_id;
 
+
+								/**
+								 * Hook
+								 *
+								 * @since
+								 */
 								$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
 								wp_redirect( $result['redirect'] ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
@@ -458,6 +493,12 @@ class WC_Form_Handler {
 					exit;
 				}
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_after_pay_action', $order );
 
 			}
@@ -477,6 +518,12 @@ class WC_Form_Handler {
 				return;
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( ! apply_filters( 'woocommerce_add_payment_method_form_is_valid', true ) ) {
 				return;
 			}
@@ -484,6 +531,12 @@ class WC_Form_Handler {
 			// Test rate limit.
 			$current_user_id = get_current_user_id();
 			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$delay           = (int) apply_filters( 'woocommerce_payment_gateway_add_payment_method_delay', 20 );
 
 			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
@@ -632,6 +685,12 @@ class WC_Form_Handler {
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				wc_add_notice( $removed_notice, apply_filters( 'woocommerce_cart_item_removed_notice_type', 'success' ) );
 			}
 
@@ -668,14 +727,24 @@ class WC_Form_Handler {
 						continue;
 					}
 
-					// Sanitize.
+					
+					/**
+					 * Sanitize.
+					 *
+					 * @since
+					 */
 					$quantity = apply_filters( 'woocommerce_stock_amount_cart_item', wc_stock_amount( preg_replace( '/[^0-9\.]/', '', $cart_totals[ $cart_item_key ]['qty'] ) ), $cart_item_key );
 
 					if ( '' === $quantity || $quantity === $values['quantity'] ) {
 						continue;
 					}
 
-					// Update cart validation.
+					
+					/**
+					 * Update cart validation.
+					 *
+					 * @since
+					 */
 					$passed_validation = apply_filters( 'woocommerce_update_cart_validation', true, $cart_item_key, $values, $quantity );
 
 					// is_sold_individually.
@@ -692,7 +761,12 @@ class WC_Form_Handler {
 				}
 			}
 
-			// Trigger action - let 3rd parties update the cart if they need to and update the $cart_updated variable.
+			
+			/**
+			 * Trigger action - let 3rd parties update the cart if they need to and update the $cart_updated variable.
+			 *
+			 * @since
+			 */
 			$cart_updated = apply_filters( 'woocommerce_update_cart_action_cart_updated', $cart_updated );
 
 			if ( $cart_updated ) {
@@ -703,6 +777,12 @@ class WC_Form_Handler {
 				wp_safe_redirect( wc_get_checkout_url() );
 				exit;
 			} elseif ( $cart_updated ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				wc_add_notice( __( 'Cart updated.', 'woocommerce' ), apply_filters( 'woocommerce_cart_updated_notice_type', 'success' ) );
 				$referer = remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), ( wp_get_referer() ? wp_get_referer() : wc_get_cart_url() ) );
 				wp_safe_redirect( $referer );
@@ -736,6 +816,12 @@ class WC_Form_Handler {
 			$order_id         = absint( $_GET['order_id'] );
 			$order            = wc_get_order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) );
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
@@ -745,8 +831,20 @@ class WC_Form_Handler {
 				WC()->session->set( 'order_awaiting_payment', false );
 				$order->update_status( 'cancelled', __( 'Order cancelled by customer.', 'woocommerce' ) );
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				wc_add_notice( apply_filters( 'woocommerce_order_cancelled_notice', __( 'Your order was cancelled.', 'woocommerce' ) ), apply_filters( 'woocommerce_order_cancelled_notice_type', 'notice' ) );
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_cancelled_order', $order->get_id() );
 
 			} elseif ( $user_can_cancel && ! $order_can_cancel ) {
@@ -776,6 +874,12 @@ class WC_Form_Handler {
 
 		wc_nocache_headers();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( wp_unslash( $_REQUEST['add-to-cart'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$was_added_to_cart = false;
 		$adding_to_cart    = wc_get_product( $product_id );
@@ -784,6 +888,12 @@ class WC_Form_Handler {
 			return;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$add_to_cart_handler = apply_filters( 'woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart );
 
 		if ( 'variable' === $add_to_cart_handler || 'variation' === $add_to_cart_handler ) {
@@ -791,6 +901,12 @@ class WC_Form_Handler {
 		} elseif ( 'grouped' === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url ); // Custom handler.
 		} else {
 			$was_added_to_cart = self::add_to_cart_handler_simple( $product_id );
@@ -798,6 +914,12 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
 
 			if ( $url ) {
@@ -819,6 +941,12 @@ class WC_Form_Handler {
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) ) {
@@ -850,7 +978,12 @@ class WC_Form_Handler {
 				}
 				$quantity_set = true;
 
-				// Add to cart validation.
+				
+				/**
+				 * Add to cart validation.
+				 *
+				 * @since
+				 */
 				$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $item, $quantity );
 
 				// Suppress total recalculation until finished.
@@ -901,6 +1034,12 @@ class WC_Form_Handler {
 			$variations[ sanitize_title( wp_unslash( $key ) ) ] = wp_unslash( $value );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
 		if ( ! $passed_validation ) {
@@ -942,6 +1081,12 @@ class WC_Form_Handler {
 				);
 
 				$validation_error = new WP_Error();
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$validation_error = apply_filters( 'woocommerce_process_login_errors', $validation_error, $creds['user_login'], $creds['user_password'] );
 
 				if ( $validation_error->get_error_code() ) {
@@ -961,7 +1106,12 @@ class WC_Form_Handler {
 					}
 				}
 
-				// Perform the login.
+				
+				/**
+				 * Perform the login.
+				 *
+				 * @since
+				 */
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
@@ -980,7 +1130,19 @@ class WC_Form_Handler {
 					exit;
 				}
 			} catch ( Exception $e ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				wc_add_notice( apply_filters( 'login_errors', $e->getMessage() ), 'error' );
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_login_failed' );
 			}
 		}
@@ -1046,6 +1208,12 @@ class WC_Form_Handler {
 
 			$errors = new WP_Error();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'validate_password_reset', $errors, $user );
 
 			wc_add_wp_error_notices( $errors );
@@ -1053,6 +1221,12 @@ class WC_Form_Handler {
 			if ( 0 === wc_notice_count( 'error' ) ) {
 				WC_Shortcode_My_Account::reset_password( $user, $posted_fields['password_1'] );
 
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_customer_reset_password', $user );
 
 				wp_safe_redirect( add_query_arg( 'password-reset', 'true', wc_get_page_permalink( 'myaccount' ) ) );
@@ -1077,6 +1251,12 @@ class WC_Form_Handler {
 
 			try {
 				$validation_error  = new WP_Error();
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$validation_error  = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $username, $password, $email );
 				$validation_errors = $validation_error->get_error_messages();
 
@@ -1101,7 +1281,12 @@ class WC_Form_Handler {
 					wc_add_notice( __( 'Your account was created successfully. Your login details have been sent to your email address.', 'woocommerce' ) );
 				}
 
-				// Only redirect after a forced login - otherwise output a success notice.
+				
+				/**
+				 * Only redirect after a forced login - otherwise output a success notice.
+				 *
+				 * @since
+				 */
 				if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
 					wc_set_customer_auth_cookie( $new_customer );
 
@@ -1113,6 +1298,12 @@ class WC_Form_Handler {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 					exit;
 				}

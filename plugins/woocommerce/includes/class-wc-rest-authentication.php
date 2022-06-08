@@ -64,6 +64,12 @@ class WC_REST_Authentication {
 		// Allow third party plugins use our authentication methods.
 		$third_party = ( false !== strpos( $request_uri, $rest_prefix . 'wc-' ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
 	}
 

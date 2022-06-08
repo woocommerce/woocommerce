@@ -17,6 +17,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_before_lost_password_form' );
 ?>
 
@@ -42,4 +48,10 @@ do_action( 'woocommerce_before_lost_password_form' );
 
 </form>
 <?php
+
+/**
+ * Hook
+ *
+ * @since
+ */
 do_action( 'woocommerce_after_lost_password_form' );

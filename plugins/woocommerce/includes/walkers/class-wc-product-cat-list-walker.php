@@ -102,6 +102,12 @@ class WC_Product_Cat_List_Walker extends Walker {
 			$output .= ' current-cat-parent';
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$output .= '"><a href="' . get_term_link( $cat_id, $this->tree_type ) . '">' . apply_filters( 'list_product_cats', $cat->name, $cat ) . '</a>';
 
 		if ( $args['show_count'] ) {

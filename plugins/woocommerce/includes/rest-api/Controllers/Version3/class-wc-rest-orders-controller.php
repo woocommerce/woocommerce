@@ -159,6 +159,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * @param WC_Data         $order    Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
 	}

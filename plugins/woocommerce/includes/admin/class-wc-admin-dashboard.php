@@ -87,6 +87,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
 			$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
 			$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
 			$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
@@ -96,6 +102,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
@@ -127,6 +139,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 
 			$reports = new WC_Admin_Report();
@@ -183,6 +201,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$this->status_widget_order_rows();
 			$this->status_widget_stock_rows( $is_wc_admin_disabled );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
 			echo '</ul>';
 		}
@@ -343,6 +367,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		public function recent_reviews() {
 			global $wpdb;
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$query_from = apply_filters(
 				'woocommerce_report_recent_reviews_query_from',
 				"FROM {$wpdb->comments} comments

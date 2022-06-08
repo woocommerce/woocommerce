@@ -40,8 +40,20 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// Fire actions to let 3rd parties know the stock is about to be changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_variation_before_set_stock', $product_with_stock );
 		} else {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_before_set_stock', $product_with_stock );
 		}
 
@@ -58,8 +70,20 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// Fire actions to let 3rd parties know the stock changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
 		} else {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_product_set_stock', $product_with_stock );
 		}
 
@@ -97,6 +121,12 @@ function wc_maybe_reduce_stock_levels( $order_id ) {
 	}
 
 	$stock_reduced  = $order->get_data_store()->get_stock_reduced( $order_id );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$trigger_reduce = apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! $stock_reduced, $order_id );
 
 	// Only continue if we're reducing stock.
@@ -156,7 +186,12 @@ function wc_reduce_stock_levels( $order_id ) {
 	} else {
 		$order = wc_get_order( $order_id );
 	}
-	// We need an order, and a store with stock management to continue.
+	
+	/**
+	 * We need an order, and a store with stock management to continue.
+	 *
+	 * @since
+	 */
 	if ( ! $order || 'yes' !== get_option( 'woocommerce_manage_stock' ) || ! apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) ) {
 		return;
 	}
@@ -183,6 +218,7 @@ function wc_reduce_stock_levels( $order_id ) {
 		 * @param int|float             $quantity Quantity.
 		 * @param WC_Order              $order    Order data.
 		 * @param WC_Order_Item_Product $item Order item data.
+		 * @since
 		 */
 		$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 		$item_name = $product->get_formatted_name();
@@ -206,6 +242,12 @@ function wc_reduce_stock_levels( $order_id ) {
 
 	wc_trigger_stock_change_notifications( $order, $changes );
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_reduce_order_stock', $order );
 }
 
@@ -228,12 +270,30 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 		$order_notes[]    = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
 		$low_stock_amount = absint( wc_get_low_stock_amount( wc_get_product( $change['product']->get_id() ) ) );
 		if ( $change['to'] <= $no_stock_amount ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_no_stock', wc_get_product( $change['product']->get_id() ) );
 		} elseif ( $change['to'] <= $low_stock_amount ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_low_stock', wc_get_product( $change['product']->get_id() ) );
 		}
 
 		if ( $change['to'] < 0 ) {
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action(
 				'woocommerce_product_on_backorder',
 				array(
@@ -262,7 +322,12 @@ function wc_increase_stock_levels( $order_id ) {
 		$order = wc_get_order( $order_id );
 	}
 
-	// We need an order, and a store with stock management to continue.
+	
+	/**
+	 * We need an order, and a store with stock management to continue.
+	 *
+	 * @since
+	 */
 	if ( ! $order || 'yes' !== get_option( 'woocommerce_manage_stock' ) || ! apply_filters( 'woocommerce_can_restore_order_stock', true, $order ) ) {
 		return;
 	}
@@ -302,6 +367,12 @@ function wc_increase_stock_levels( $order_id ) {
 		$order->add_order_note( __( 'Stock levels increased:', 'woocommerce' ) . ' ' . implode( ', ', $changes ) );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	do_action( 'woocommerce_restore_order_stock', $order );
 }
 

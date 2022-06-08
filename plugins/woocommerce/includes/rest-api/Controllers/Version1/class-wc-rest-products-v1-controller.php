@@ -470,6 +470,12 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			'featured'              => $product->is_featured(),
 			'catalog_visibility'    => $product->get_catalog_visibility(),
 			'description'           => wpautop( do_shortcode( $product->get_description() ) ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'short_description'     => apply_filters( 'woocommerce_short_description', $product->get_short_description() ),
 			'sku'                   => $product->get_sku(),
 			'price'                 => $product->get_price(),
@@ -626,6 +632,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param WP_REST_Request    $request    Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -724,6 +731,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		 * @param WC_Product       $product An object representing a single item prepared
 		 *                                       for inserting or updating the database.
 		 * @param WP_REST_Request $request       Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $product, $request );
 	}
@@ -753,6 +761,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			 * @param WP_Post         $post      Post data.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
+			 * @since
 			 */
 			do_action( 'woocommerce_rest_insert_product', $post, $request, true );
 			$request->set_param( 'context', 'edit' );
@@ -796,6 +805,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			 * @param WP_Post         $post      Post data.
 			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
+			 * @since
 			 */
 			do_action( 'woocommerce_rest_insert_product', $post, $request, false );
 			$request->set_param( 'context', 'edit' );
@@ -853,6 +863,12 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 					if ( is_wp_error( $upload ) ) {
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
 							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 						} else {
@@ -962,6 +978,12 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			$download = new WC_Product_Download();
 			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;
 		}
@@ -1532,6 +1554,12 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 			$variation->save();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_rest_save_product_variation', $variation->get_id(), $menu_order, $data );
 		}
 
@@ -1648,6 +1676,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		 *
 		 * @param boolean $supports_trash Whether the item type support trashing.
 		 * @param WP_Post $post           The Post object being considered for trashing support.
+		 * @since
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_trashable", $supports_trash, $post );
 
@@ -1716,6 +1745,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		 * @param object           $post     The deleted or trashed item.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
 

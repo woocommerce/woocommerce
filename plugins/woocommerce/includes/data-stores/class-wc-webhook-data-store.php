@@ -61,6 +61,12 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		$this->delete_transients( $webhook->get_status( 'edit' ) );
 		WC_Cache_Helper::invalidate_cache_group( 'webhooks' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_new_webhook', $webhook_id, $webhook );
 	}
 
@@ -101,6 +107,12 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			);
 			$webhook->set_object_read( true );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_webhook_loaded', $webhook );
 		} else {
 			throw new Exception( __( 'Invalid webhook.', 'woocommerce' ) );
@@ -163,6 +175,12 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$webhook->deliver_ping();
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_webhook_updated', $webhook->get_id() );
 	}
 
@@ -186,6 +204,12 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$this->delete_transients( 'all' );
 		wp_cache_delete( $webhook->get_id(), 'webhooks' );
 		WC_Cache_Helper::invalidate_cache_group( 'webhooks' );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_webhook_deleted', $webhook->get_id(), $webhook );
 	}
 

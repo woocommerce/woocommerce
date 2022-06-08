@@ -73,7 +73,12 @@ class WC_Admin {
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
-		// Help Tabs.
+		
+		/**
+		 * Help Tabs.
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 			include_once __DIR__ . '/class-wc-admin-help.php';
 		}
@@ -157,6 +162,12 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! wp_doing_ajax() && isset( $_SERVER['SCRIPT_FILENAME'] ) && basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_FILENAME'] ) ) ) !== 'admin-post.php' ) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
@@ -173,6 +184,12 @@ class WC_Admin {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_prevent_admin_access', $prevent_access ) ) {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
@@ -203,7 +220,12 @@ class WC_Admin {
 			// create a new email.
 			$email = new WC_Email();
 
-			// wrap the content with the email template and then add styles.
+			
+			/**
+			 * Wrap the content with the email template and then add styles.
+			 *
+			 * @since
+			 */
 			$message = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
 
 			// print the preview email.
@@ -231,7 +253,12 @@ class WC_Admin {
 		// Set only WC pages.
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
-		// Check to make sure we're on a WooCommerce admin page.
+		
+		/**
+		 * Check to make sure we're on a WooCommerce admin page.
+		 *
+		 * @since
+		 */
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages, true ) ) ) {
 			// Change the footer text.
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {

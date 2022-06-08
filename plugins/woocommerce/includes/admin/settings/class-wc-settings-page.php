@@ -127,6 +127,12 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				$settings = $this->get_settings_for_section_core( $section_id );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $section_id );
 		}
 
@@ -153,6 +159,12 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_sections() {
 			$sections = $this->get_own_sections();
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 		}
 
@@ -246,6 +258,12 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			if ( $section_id ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $section_id );
 			}
 		}

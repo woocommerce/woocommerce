@@ -194,6 +194,12 @@ class WC_API_Reports extends WC_API_Resource {
 			'total_customers'   => $total_customers,
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'sales' => apply_filters( 'woocommerce_api_report_response', $sales_data, $this->report, $fields, $this->server ) );
 	}
 
@@ -254,6 +260,12 @@ class WC_API_Reports extends WC_API_Resource {
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'top_sellers' => apply_filters( 'woocommerce_api_report_response', $top_sellers_data, $this->report, $fields, $this->server ) );
 	}
 

@@ -14,6 +14,12 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		// 10 is expected priority of the hook.
 		$this->assertEquals( 10, has_action( 'woocommerce_email_header', array( $email_object, 'email_header' ) ) );
 		ob_start();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_email_header', 'header' );
 		$content = ob_get_contents();
 		ob_end_clean();
@@ -29,6 +35,12 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		// 10 is expected priority of the hook.
 		$this->assertEquals( 10, has_action( 'woocommerce_email_footer', array( $email_object, 'email_footer' ) ) );
 		ob_start();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_email_footer' );
 		$content = ob_get_contents();
 		ob_end_clean();

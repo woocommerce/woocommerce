@@ -25,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Each tab is an array containing title, callback and priority.
  *
  * @see woocommerce_default_product_tabs()
+ * @since
  */
 $product_tabs = apply_filters( 'woocommerce_product_tabs', array() );
 

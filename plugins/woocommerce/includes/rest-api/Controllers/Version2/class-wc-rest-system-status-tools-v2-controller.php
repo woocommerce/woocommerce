@@ -219,7 +219,12 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			);
 		}
 
-		// Jetpack does the image resizing heavy lifting so you don't have to.
+		
+		/**
+		 * Jetpack does the image resizing heavy lifting so you don't have to.
+		 *
+		 * @since
+		 */
 		if ( ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) || ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			unset( $tools['regenerate_thumbnails'] );
 		}
@@ -228,6 +233,12 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			unset( $tools['clear_template_cache'] );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_debug_tools', $tools );
 	}
 
@@ -310,6 +321,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		 *
 		 * @param array           $tool    Details about the tool that has been executed.
 		 * @param WP_REST_Request $request The current WP_REST_Request object.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_system_status_tool', $tool, $request );
 
@@ -541,7 +553,12 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			case 'db_update_routine':
 				$blog_id = get_current_blog_id();
 				// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
-				// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
+				
+				/**
+				 * This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
+				 *
+				 * @since
+				 */
 				do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
 				$message = __( 'Database upgrade routine has been scheduled to run in the background.', 'woocommerce' );
 				break;

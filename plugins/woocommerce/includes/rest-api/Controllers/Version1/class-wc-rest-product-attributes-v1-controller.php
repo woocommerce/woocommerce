@@ -295,6 +295,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 * @param stdObject       $attribute Inserted attribute object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating attribute, false when updating.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, true );
 
@@ -365,6 +366,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 * @param stdObject       $attribute Inserted attribute object.
 		 * @param WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating attribute, false when updating.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, false );
 
@@ -409,6 +411,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 * @param stdObject        $attribute     The deleted attribute.
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since
 		 */
 		do_action( 'woocommerce_rest_delete_product_attribute', $attribute, $response, $request );
 
@@ -448,6 +451,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original attribute object.
 		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_attribute', $response, $item, $request );
 	}

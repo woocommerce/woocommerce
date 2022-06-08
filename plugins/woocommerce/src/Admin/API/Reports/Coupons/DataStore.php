@@ -417,6 +417,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 *
 			 * @param int $coupon_id Coupon ID.
 			 * @param int $order_id  Order ID.
+			 * @since
 			 */
 			do_action( 'woocommerce_analytics_update_coupon', $coupon_id, $order_id );
 
@@ -455,6 +456,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $coupon_id Coupon ID.
 		 * @param int $order_id  Order ID.
+		 * @since
 		 */
 		do_action( 'woocommerce_analytics_delete_coupon', 0, $order_id );
 

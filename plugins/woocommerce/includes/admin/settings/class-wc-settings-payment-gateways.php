@@ -62,6 +62,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				),
 			);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_payment_gateways_settings', $settings );
 	}
 
@@ -133,6 +139,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							'action'      => '',
 						);
 
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$columns = apply_filters( 'woocommerce_payment_gateways_setting_columns', $default_columns );
 
 						foreach ( $columns as $key => $column ) {
@@ -149,6 +161,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 							foreach ( $columns as $key => $column ) {
 								if ( ! array_key_exists( $key, $default_columns ) ) {
+
+									/**
+									 * Hook
+									 *
+									 * @since
+									 */
 									do_action( 'woocommerce_payment_gateways_setting_column_' . $key, $gateway );
 									continue;
 								}
@@ -266,6 +284,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			// There is a section - this may be a gateway or custom section.
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
 				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
 					$wc_payment_gateways->init();
 				}

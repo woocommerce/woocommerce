@@ -45,9 +45,21 @@ class WC_Tracker {
 			return;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! apply_filters( 'woocommerce_tracker_send_override', $override ) ) {
 			// Send a maximum of once per week by default.
 			$last_send = self::get_last_send_time();
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			if ( $last_send && $last_send > apply_filters( 'woocommerce_tracker_last_send_interval', strtotime( '-1 week' ) ) ) {
 				return;
 			}
@@ -84,6 +96,12 @@ class WC_Tracker {
 	 * @return int|bool
 	 */
 	private static function get_last_send_time() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_tracker_last_send_time', get_option( 'woocommerce_tracker_last_send', false ) );
 	}
 
@@ -119,6 +137,12 @@ class WC_Tracker {
 
 		// General site info.
 		$data['url']   = home_url();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
 		$data['theme'] = self::get_theme_info();
 
@@ -172,12 +196,23 @@ class WC_Tracker {
 			$data['mini_cart_block'] = self::get_mini_cart_info();
 		}
 
-		// WooCommerce Admin info.
+		
+		/**
+		 * WooCommerce Admin info.
+		 *
+		 * @since
+		 */
 		$data['wc_admin_disabled'] = apply_filters( 'woocommerce_admin_disabled', false ) ? 'yes' : 'no';
 
 		// Mobile info.
 		$data['wc_mobile_usage'] = self::get_woocommerce_mobile_usage();
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
 
@@ -668,6 +703,12 @@ class WC_Tracker {
 	 */
 	private static function get_all_template_overrides() {
 		$override_data  = array();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 		$scanned_files  = array();
 

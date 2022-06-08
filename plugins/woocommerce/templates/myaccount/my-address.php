@@ -20,6 +20,12 @@ defined( 'ABSPATH' ) || exit;
 $customer_id = get_current_user_id();
 
 if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$get_addresses = apply_filters(
 		'woocommerce_my_account_get_addresses',
 		array(
@@ -29,6 +35,12 @@ if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
 		$customer_id
 	);
 } else {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$get_addresses = apply_filters(
 		'woocommerce_my_account_get_addresses',
 		array(

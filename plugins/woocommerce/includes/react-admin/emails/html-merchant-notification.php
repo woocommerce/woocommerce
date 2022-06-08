@@ -7,8 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-/*
+/**
  * @hooked WC_Emails::email_header() Output the email header
+ * @since
  */
 do_action( 'woocommerce_email_header', $email_heading, $email );
 ?>
@@ -63,7 +64,8 @@ $buttons_styles   = "
 	<img src="<?php echo esc_url( $opened_tracking_url ); ?>" />
 </div>
 <?php
-/*
+/**
  * @hooked WC_Emails::email_footer() Output the email footer
+ * @since
  */
 do_action( 'woocommerce_email_footer', $email );

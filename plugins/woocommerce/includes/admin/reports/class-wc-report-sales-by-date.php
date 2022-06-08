@@ -440,7 +440,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		// Item items ordered in this period, even if refunded.
 		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
 
-		// 3rd party filtering of report data
+		
+		/**
+		 * 3rd party filtering of report data
+		 *
+		 * @since
+		 */
 		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
 	}
 
@@ -673,7 +678,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				$data['tax_amounts'][ $order_amount_key ][1];
 		}
 
-		// 3rd party filtering of report data.
+		
+		/**
+		 * 3rd party filtering of report data.
+		 *
+		 * @since
+		 */
 		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data );
 
 		// Encode in json format.

@@ -144,7 +144,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'operator' => 'NOT IN',
 				);
 			}
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$children['all']     = get_posts( apply_filters( 'woocommerce_variable_children_args', $all_args, $product, false ) );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$children['visible'] = get_posts( apply_filters( 'woocommerce_variable_children_args', $visible_only_args, $product, true ) );
 
 			set_transient( $children_transient_name, $children, DAY_IN_SECONDS * 30 );
@@ -296,8 +308,26 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$variation = wc_get_product( $variation_id );
 
 					if ( $variation ) {
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price( 'edit' ), $variation, $product );
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
 
 						// Skip empty prices.
@@ -363,6 +393,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
 						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, wc_get_price_decimals() );
 
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
 					}
 				}
@@ -378,6 +414,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			/**
 			 * Give plugins one last chance to filter the variation prices array which has been generated and store locally to the class.
 			 * This value may differ from the transient cache. It is filtered once before storing locally.
+			 * @since
 			 */
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
 		}
@@ -419,6 +456,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return md5( wp_json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display ) ) );
 	}
 
@@ -668,11 +711,29 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( ! empty( $variation_ids ) ) {
 			foreach ( $variation_ids as $variation_id ) {
 				if ( $force_delete ) {
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_before_delete_product_variation', $variation_id );
 					wp_delete_post( $variation_id, true );
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_delete_product_variation', $variation_id );
 				} else {
 					wp_trash_post( $variation_id );
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					do_action( 'woocommerce_trash_product_variation', $variation_id );
 				}
 			}

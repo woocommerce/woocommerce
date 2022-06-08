@@ -105,6 +105,12 @@ class WC_API_XML_Handler implements WC_API_Handler {
 				break;
 
 			default:
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				$data = apply_filters( 'woocommerce_api_xml_data', $data, $root_element );
 				break;
 		}

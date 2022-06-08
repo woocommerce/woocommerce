@@ -32,10 +32,22 @@ function wc_admin_get_core_pages_to_connect() {
 		),
 		'wc-settings' => array(
 			'title' => __( 'Settings', 'woocommerce' ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'tabs'  => apply_filters( 'woocommerce_settings_tabs_array', array() ),
 		),
 		'wc-status'   => array(
 			'title' => __( 'Status', 'woocommerce' ),
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			'tabs'  => apply_filters(
 				'woocommerce_admin_status_tabs',
 				array(

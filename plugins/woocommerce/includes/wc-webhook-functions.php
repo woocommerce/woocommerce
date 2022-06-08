@@ -22,7 +22,12 @@ function wc_webhook_execute_queue() {
 	foreach ( $wc_queued_webhooks as $data ) {
 		// Webhooks are processed in the background by default
 		// so as to avoid delays or failures in delivery from affecting the
-		// user who triggered it.
+		
+		/**
+		 * User who triggered it.
+		 *
+		 * @since
+		 */
 		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $data['webhook'], $data['arg'] ) ) {
 
 			$queue_args = array(
@@ -111,7 +116,19 @@ function wc_is_webhook_valid_topic( $topic ) {
 		return false;
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$valid_events    = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted', 'restored' ) );
 
 	if ( in_array( $data[0], $valid_resources, true ) && in_array( $data[1], $valid_events, true ) ) {
@@ -139,6 +156,12 @@ function wc_is_webhook_valid_status( $status ) {
  * @return array
  */
 function wc_get_webhook_statuses() {
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters(
 		'woocommerce_webhook_statuses',
 		array(

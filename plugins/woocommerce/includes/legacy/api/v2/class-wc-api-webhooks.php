@@ -124,6 +124,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 			'updated_at'   => $this->server->format_datetime( $webhook->get_date_modified() ? $webhook->get_date_modified()->getTimestamp() : 0, false, false ), // API gives UTC times.
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'webhook' => apply_filters( 'woocommerce_api_webhook_response', $webhook_data, $webhook, $fields, $this ) );
 	}
 
@@ -178,6 +184,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_webhooks', __( 'You do not have permission to create webhooks.', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_webhook_data', $data, $this );
 
 			// validate topic
@@ -190,6 +202,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_url', __( 'Webhook delivery URL must be a valid URL starting with http:// or https://', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$webhook_data = apply_filters( 'woocommerce_new_webhook_data', array(
 				'post_type'     => 'shop_webhook',
 				'post_status'   => 'publish',
@@ -215,6 +233,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_webhook', $webhook->get_id(), $this );
 
 			return $this->get_webhook( $webhook->get_id() );
@@ -250,6 +274,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 				return $id;
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_webhook_data', $data, $id, $this );
 
 			$webhook = wc_get_webhook( $id );
@@ -294,6 +324,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 
 			$webhook->save();
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_webhook', $webhook->get_id(), $this );
 
 			return $this->get_webhook( $webhook->get_id() );
@@ -319,6 +355,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 			return $id;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_delete_webhook', $id, $this );
 
 		$webhook = wc_get_webhook( $id );
@@ -449,6 +491,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_webhook_delivery_id', __( 'Invalid webhook delivery.', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'webhook_delivery' => apply_filters( 'woocommerce_api_webhook_delivery_response', array(), $id, $fields, $log, $webhook_id, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );

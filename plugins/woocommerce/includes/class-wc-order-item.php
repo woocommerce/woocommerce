@@ -236,6 +236,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_taxes( false );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;
@@ -298,11 +304,29 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$formatted_meta[ $meta->id ] = (object) array(
 				'key'           => $meta->key,
 				'value'         => $meta->value,
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key, $meta, $this ),
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value, $meta, $this ) ) ),
 			);
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_order_item_get_formatted_meta_data', $formatted_meta, $this );
 	}
 

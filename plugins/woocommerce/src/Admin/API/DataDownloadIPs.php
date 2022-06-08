@@ -106,6 +106,7 @@ class DataDownloadIPs extends \WC_REST_Data_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @since
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_download_ip', $response, $item, $request );
 	}

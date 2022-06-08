@@ -86,6 +86,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			$schema['properties'][ $field_name ] = $field_options['schema'];
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$schema['properties'] = apply_filters( 'woocommerce_rest_' . $object_type . '_schema', $schema['properties'] );
 
 		return $schema;
@@ -177,6 +183,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	protected function check_batch_limit( $items ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$limit = apply_filters( 'woocommerce_rest_batch_items_limit', 100, $this->get_normalized_rest_base() );
 		$total = 0;
 

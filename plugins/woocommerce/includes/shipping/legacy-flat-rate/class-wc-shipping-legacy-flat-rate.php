@@ -251,6 +251,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		 *          // Add it to WC.
 		 *          $method->add_rate( $new_rate );
 		 *      }.
+		 * @since
 		 */
 		do_action( 'woocommerce_flat_rate_shipping_add_rate', $this, $rate );
 	}

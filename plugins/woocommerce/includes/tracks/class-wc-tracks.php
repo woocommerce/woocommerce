@@ -39,7 +39,12 @@ class WC_Tracks {
 		}
 		$prefixed_event_name = self::PREFIX . $event_name;
 
-		// Allow event props to be filtered to enable adding site-wide props.
+		
+		/**
+		 * Allow event props to be filtered to enable adding site-wide props.
+		 *
+		 * @since
+		 */
 		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $properties, $prefixed_event_name );
 
 		// Delete _ui and _ut protected properties.

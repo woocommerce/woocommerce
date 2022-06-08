@@ -505,6 +505,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -609,6 +610,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 * @since
 		 */
 		$args = apply_filters( 'woocommerce_rest_orders_prepare_object_query', $args, $request );
 
@@ -692,6 +694,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WC_Data         $order    Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 * @since
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
 	}
@@ -978,6 +981,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Prepare item data.
 		$item = $this->$method( $posted, $action, $item );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
 		// If creating the order, add the item to it.

@@ -77,6 +77,12 @@ class WC_Shortcode_Checkout {
 	 */
 	private static function order_pay( $order_id ) {
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'before_woocommerce_pay' );
 
 		$order_id = absint( $order_id );
@@ -146,6 +152,12 @@ class WC_Shortcode_Checkout {
 								continue;
 							}
 
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
 								/* translators: %s: product name */
 								throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
@@ -160,6 +172,12 @@ class WC_Shortcode_Checkout {
 							$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
 							$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
+
+							/**
+							 * Hook
+							 *
+							 * @since
+							 */
 							if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
 								/* translators: 1: product name 2: quantity in stock */
 								throw new Exception( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
@@ -238,6 +256,12 @@ class WC_Shortcode_Checkout {
 			wc_print_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'after_woocommerce_pay' );
 	}
 
@@ -249,8 +273,19 @@ class WC_Shortcode_Checkout {
 	private static function order_received( $order_id = 0 ) {
 		$order = false;
 
-		// Get the order.
+		
+		/**
+		 * Get the order.
+		 *
+		 * @since
+		 */
 		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) ) ); // WPCS: input var ok, CSRF ok.
 
 		if ( $order_id > 0 ) {
@@ -280,15 +315,30 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout.
 	 */
 	private static function checkout() {
-		// Show non-cart errors.
+		
+		/**
+		 * Show non-cart errors.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_before_checkout_form_cart_notices' );
 
-		// Check cart has contents.
+		
+		/**
+		 * Check cart has contents.
+		 *
+		 * @since
+		 */
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 			return;
 		}
 
-		// Check cart contents for errors.
+		
+		/**
+		 * Check cart contents for errors.
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_check_cart_items' );
 
 		// Calc totals.

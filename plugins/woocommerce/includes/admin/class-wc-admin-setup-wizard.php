@@ -180,7 +180,12 @@ class WC_Admin_Setup_Wizard {
 	protected function should_show_wc_admin_onboarding() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
 		// As of WooCommerce 4.1, all new sites should use the latest OBW from wc-admin package.
-		// This filter will allow for forcing the old wizard while we migrate e2e tests.
+		
+		/**
+		 * This filter will allow for forcing the old wizard while we migrate e2e tests.
+		 *
+		 * @since
+		 */
 		return ! apply_filters( 'woocommerce_setup_wizard_force_legacy', false );
 	}
 
@@ -279,6 +284,12 @@ class WC_Admin_Setup_Wizard {
 			unset( $default_steps['activate'] );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
 		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // WPCS: CSRF ok, input var ok.
 

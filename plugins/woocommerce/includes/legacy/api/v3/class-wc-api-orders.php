@@ -316,6 +316,12 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_data['coupon_lines'][] = $coupon_line;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order' => apply_filters( 'woocommerce_api_order_response', $order_data, $order, $fields, $this->server ) );
 	}
 
@@ -382,6 +388,12 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_statuses[ str_replace( 'wc-', '', $slug ) ] = $name;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order_statuses' => apply_filters( 'woocommerce_api_order_statuses_response', $order_statuses, $this ) );
 	}
 
@@ -407,6 +419,12 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_create_order', __( 'You do not have permission to create orders', 'woocommerce' ), 401 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_order_data', $data, $this );
 
 			// default order args, note that status is checked for validity in wc_create_order()
@@ -501,7 +519,19 @@ class WC_API_Orders extends WC_API_Resource {
 
 			wc_delete_shop_order_transients( $order );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_new_order', $order->get_id() );
 
 			return $this->get_order( $order->get_id() );
@@ -552,6 +582,12 @@ class WC_API_Orders extends WC_API_Resource {
 				return $id;
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data  = apply_filters( 'woocommerce_api_edit_order_data', $data, $id, $this );
 			$order = wc_get_order( $id );
 
@@ -662,7 +698,19 @@ class WC_API_Orders extends WC_API_Resource {
 
 			wc_delete_shop_order_transients( $order );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_update_order', $order->get_id() );
 
 			return $this->get_order( $id );
@@ -690,6 +738,12 @@ class WC_API_Orders extends WC_API_Resource {
 
 		wc_delete_shop_order_transients( $id );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_delete_order', $id, $this );
 
 		return $this->delete( $id, 'order',  ( 'true' === $force ) );
@@ -1268,6 +1322,12 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_notes[] = current( $this->get_order_note( $order_id, $note->comment_ID, $fields ) );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order_notes' => apply_filters( 'woocommerce_api_order_notes_response', $order_notes, $order_id, $fields, $notes, $this->server ) );
 	}
 
@@ -1310,6 +1370,12 @@ class WC_API_Orders extends WC_API_Resource {
 				'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -1345,6 +1411,12 @@ class WC_API_Orders extends WC_API_Resource {
 
 			$order = wc_get_order( $order_id );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_order_note_data', $data, $order_id, $this );
 
 			// note content is required
@@ -1364,6 +1436,12 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_order_note', $note_id, $order_id, $this );
 
 			return $this->get_order_note( $order->get_id(), $note_id );
@@ -1419,6 +1497,12 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_order_note_id', __( 'The order note ID provided is not associated with the order', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_order_note_data', $data, $note->comment_ID, $order->get_id(), $this );
 
 			// Note content
@@ -1438,6 +1522,12 @@ class WC_API_Orders extends WC_API_Resource {
 				update_comment_meta( $note->comment_ID, 'is_customer_note', true === $data['customer_note'] ? 1 : 0 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_order_note', $note->comment_ID, $order->get_id(), $this );
 
 			return $this->get_order_note( $order->get_id(), $note->comment_ID );
@@ -1490,6 +1580,12 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_order_note', __( 'This order note cannot be deleted', 'woocommerce' ), 500 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_order_note', $note->comment_ID, $order_id, $this );
 
 			return array( 'message' => __( 'Permanently deleted order note', 'woocommerce' ) );
@@ -1527,6 +1623,12 @@ class WC_API_Orders extends WC_API_Resource {
 			$order_refunds[] = current( $this->get_order_refund( $order_id, $refund_id, $fields ) );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return array( 'order_refunds' => apply_filters( 'woocommerce_api_order_refunds_response', $order_refunds, $order_id, $fields, $refund_items, $this ) );
 	}
 
@@ -1603,6 +1705,12 @@ class WC_API_Orders extends WC_API_Resource {
 				'line_items' => $line_items,
 			);
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'order_refund' => apply_filters( 'woocommerce_api_order_refund_response', $order_refund, $id, $fields, $refund, $order_id, $this ) );
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -1637,6 +1745,12 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_order_id', __( 'Order ID is invalid', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_create_order_refund_data', $data, $order_id, $this );
 
 			// Refund amount is required
@@ -1678,6 +1792,12 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_create_order_refund', $refund->get_id(), $order_id, $this );
 
 			return $this->get_order_refund( $order_id, $refund->get_id() );
@@ -1731,6 +1851,12 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_order_refund_id', __( 'The order refund ID provided is not associated with the order.', 'woocommerce' ), 400 );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$data = apply_filters( 'woocommerce_api_edit_order_refund_data', $data, $refund->ID, $order_id, $this );
 
 			// Update reason
@@ -1747,6 +1873,12 @@ class WC_API_Orders extends WC_API_Resource {
 				update_post_meta( $refund->ID, '_refund_amount', wc_format_decimal( $data['amount'] ) );
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_edit_order_refund', $refund->ID, $order_id, $this );
 
 			return $this->get_order_refund( $order_id, $refund->ID );
@@ -1794,6 +1926,12 @@ class WC_API_Orders extends WC_API_Resource {
 
 			wc_delete_shop_order_transients( $order_id );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_api_delete_order_refund', $refund->ID, $order_id, $this );
 
 			return $this->delete( $refund->ID, 'refund', true );
@@ -1821,6 +1959,12 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$data  = $data['orders'];
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			$limit = apply_filters( 'woocommerce_api_bulk_limit', 100, 'orders' );
 
 			// Limit bulk operation
@@ -1867,6 +2011,12 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 			}
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			return array( 'orders' => apply_filters( 'woocommerce_api_orders_bulk_response', $orders, $this ) );
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );

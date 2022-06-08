@@ -56,6 +56,12 @@ class WC_CLI_Runner {
 	public static function after_wp_load() {
 		global $wp_rest_server;
 		$wp_rest_server = new WP_REST_Server();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		$request = new WP_REST_Request( 'GET', '/' );

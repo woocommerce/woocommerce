@@ -84,6 +84,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// @deprecated 2.3.
 			if ( has_action( 'woocommerce_admin_css' ) ) {
+
+				/**
+				 * Hook
+				 *
+				 * @since
+				 */
 				do_action( 'woocommerce_admin_css' );
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 			}
@@ -269,6 +275,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 					'i18n_variation_count_single'         => esc_js( __( '%qty% variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
+
+					/**
+					 * Hook
+					 *
+					 * @since
+					 */
 					'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
 				);
 
@@ -298,9 +310,33 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'woocommerce_admin_meta_boxes_coupon',
 					array(
 						'generate_button_text' => esc_html__( 'Generate coupon code', 'woocommerce' ),
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ23456789' ),
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'char_length'          => apply_filters( 'woocommerce_coupon_code_generator_character_length', 8 ),
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
+
+						/**
+						 * Hook
+						 *
+						 * @since
+						 */
 						'suffix'               => apply_filters( 'woocommerce_coupon_code_generator_suffix', '' ),
 					)
 				);
@@ -384,7 +420,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
 			}
 
-			// Term ordering - only when sorting by term_order.
+			
+			/**
+			 * Term ordering - only when sorting by term_order.
+			 *
+			 * @since
+			 */
 			if ( ( strstr( $screen_id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( wp_unslash( $_GET['taxonomy'] ), apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) {
 
 				wp_register_script( 'woocommerce_term_ordering', WC()->plugin_url() . '/assets/js/admin/term-ordering' . $suffix . '.js', array( 'jquery-ui-sortable' ), $version );
@@ -405,7 +446,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_product_ordering' );
 			}
 
-			// Reports Pages.
+			
+			/**
+			 * Reports Pages.
+			 *
+			 * @since
+			 */
 			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports', 'dashboard' ) ) ) ) {
 				wp_register_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), $version );
 

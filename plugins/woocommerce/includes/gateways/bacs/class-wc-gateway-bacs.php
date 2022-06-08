@@ -34,6 +34,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	public function __construct() {
 
 		$this->id                 = 'bacs';
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->icon               = apply_filters( 'woocommerce_bacs_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = __( 'Direct bank transfer', 'woocommerce' );
@@ -233,6 +239,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		}
 		// phpcs:enable
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_update_option', array( 'id' => 'woocommerce_bacs_accounts' ) );
 		update_option( 'woocommerce_bacs_accounts', $accounts );
 	}
@@ -290,6 +302,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		// Get sortcode label in the $locale array and use appropriate one.
 		$sortcode = isset( $locale[ $country ]['sortcode']['label'] ) ? $locale[ $country ]['sortcode']['label'] : __( 'Sort code', 'woocommerce' );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$bacs_accounts = apply_filters( 'woocommerce_bacs_accounts', $this->account_details, $order_id );
 
 		if ( ! empty( $bacs_accounts ) ) {
@@ -305,7 +323,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 				$account_html .= '<ul class="wc-bacs-bank-details order_details bacs_details">' . PHP_EOL;
 
-				// BACS account fields shown on the thanks page and in emails.
+				
+				/**
+				 * BACS account fields shown on the thanks page and in emails.
+				 *
+				 * @since
+				 */
 				$account_fields = apply_filters(
 					'woocommerce_bacs_account_fields',
 					array(
@@ -361,7 +384,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( $order->get_total() > 0 ) {
-			// Mark as on-hold (we're awaiting the payment).
+			
+			/**
+			 * Mark as on-hold (we're awaiting the payment).
+			 *
+			 * @since
+			 */
 			$order->update_status( apply_filters( 'woocommerce_bacs_process_payment_order_status', 'on-hold', $order ), __( 'Awaiting BACS payment', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();
@@ -387,7 +415,12 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		if ( empty( $this->locale ) ) {
 
-			// Locale information to be used - only those that are not 'Sort Code'.
+			
+			/**
+			 * Locale information to be used - only those that are not 'Sort Code'.
+			 *
+			 * @since
+			 */
 			$this->locale = apply_filters(
 				'woocommerce_get_bacs_locale',
 				array(

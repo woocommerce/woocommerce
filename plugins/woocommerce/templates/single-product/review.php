@@ -30,6 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		 * The woocommerce_review_before hook
 		 *
 		 * @hooked woocommerce_review_display_gravatar - 10
+		 * @since
 		 */
 		do_action( 'woocommerce_review_before', $comment );
 		?>
@@ -41,6 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * The woocommerce_review_before_comment_meta hook.
 			 *
 			 * @hooked woocommerce_review_display_rating - 10
+			 * @since
 			 */
 			do_action( 'woocommerce_review_before_comment_meta', $comment );
 
@@ -48,18 +50,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * The woocommerce_review_meta hook.
 			 *
 			 * @hooked woocommerce_review_display_meta - 10
+			 * @since
 			 */
 			do_action( 'woocommerce_review_meta', $comment );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_review_before_comment_text', $comment );
 
 			/**
 			 * The woocommerce_review_comment_text hook
 			 *
 			 * @hooked woocommerce_review_display_comment_text - 10
+			 * @since
 			 */
 			do_action( 'woocommerce_review_comment_text', $comment );
 
+
+			/**
+			 * Hook
+			 *
+			 * @since
+			 */
 			do_action( 'woocommerce_review_after_comment_text', $comment );
 			?>
 

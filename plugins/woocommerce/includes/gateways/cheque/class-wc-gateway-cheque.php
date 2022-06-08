@@ -26,6 +26,12 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 		$this->id                 = 'cheque';
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = _x( 'Check payments', 'Check payment method', 'woocommerce' );
@@ -118,7 +124,12 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( $order->get_total() > 0 ) {
-			// Mark as on-hold (we're awaiting the cheque).
+			
+			/**
+			 * Mark as on-hold (we're awaiting the cheque).
+			 *
+			 * @since
+			 */
 			$order->update_status( apply_filters( 'woocommerce_cheque_process_payment_order_status', 'on-hold', $order ), _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();

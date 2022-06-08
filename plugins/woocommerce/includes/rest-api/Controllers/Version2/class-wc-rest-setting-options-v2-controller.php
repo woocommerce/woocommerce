@@ -159,6 +159,12 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() );
 
 		if ( empty( $settings ) ) {

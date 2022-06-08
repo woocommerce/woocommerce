@@ -130,6 +130,12 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( wp_doing_ajax() || WC()->is_rest_api_request() ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
@@ -223,6 +229,12 @@ function woocommerce_get_formatted_product_name( $product ) {
 function woocommerce_legacy_paypal_ipn() {
 	if ( ! empty( $_GET['paypalListener'] ) && 'paypal_standard_IPN' === $_GET['paypalListener'] ) {
 		WC()->payment_gateways();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_api_wc_gateway_paypal' );
 	}
 }
@@ -1028,6 +1040,12 @@ function wc_get_min_max_price_meta_query( $args ) {
 	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
 	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	return apply_filters(
 		'woocommerce_get_min_max_price_meta_query',
 		array(

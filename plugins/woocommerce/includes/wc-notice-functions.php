@@ -81,9 +81,21 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 
 	// Backward compatibility.
 	if ( 'success' === $notice_type ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
 
 	if ( ! empty( $message ) ) {
@@ -138,6 +150,12 @@ function wc_print_notices( $return = false ) {
 	}
 
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'success', 'notice' ) );
 
 	// Buffer output.
@@ -183,9 +201,21 @@ function wc_print_notices( $return = false ) {
  */
 function wc_print_notice( $message, $notice_type = 'success', $data = array() ) {
 	if ( 'success' === $notice_type ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
+
+	/**
+	 * Hook
+	 *
+	 * @since
+	 */
 	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
 
 	wc_get_template(

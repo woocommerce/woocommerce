@@ -57,6 +57,12 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		wp_delete_post( $id );
 		wp_cache_delete( $refund_cache_key, 'orders' );
 		$order->set_id( 0 );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_delete_order_refund', $id );
 	}
 
@@ -104,6 +110,12 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 			$updated_props[] = $prop;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_refund_object_updated_props', $refund, $updated_props );
 	}
 

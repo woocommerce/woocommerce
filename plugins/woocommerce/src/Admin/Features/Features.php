@@ -73,6 +73,12 @@ class Features {
 	 * @return array Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_features() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		return apply_filters( 'woocommerce_admin_features', array() );
 	}
 
@@ -155,6 +161,7 @@ class Features {
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
 		 *
 		 * @param bool $disabled False.
+		 * @since
 		 */
 		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
 			return array_values( array_diff( $features, $optional_feature_keys ) );
@@ -252,6 +259,12 @@ class Features {
 	 * @return array
 	 */
 	public static function add_features_section( $sections ) {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$features = apply_filters(
 			'woocommerce_settings_features',
 			array()
@@ -277,11 +290,23 @@ class Features {
 			return $settings;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$features = apply_filters(
 			'woocommerce_settings_features',
 			array()
 		);
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 
 		if ( ! $features_disabled && empty( $features ) ) {

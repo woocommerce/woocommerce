@@ -101,6 +101,12 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			$this->set_taxes( false );
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		do_action( 'woocommerce_order_item_fee_after_calculate_taxes', $this, $calculate_tax_for );
 
 		return true;

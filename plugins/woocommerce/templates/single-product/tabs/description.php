@@ -19,6 +19,12 @@ defined( 'ABSPATH' ) || exit;
 
 global $post;
 
+
+/**
+ * Hook
+ *
+ * @since
+ */
 $heading = apply_filters( 'woocommerce_product_description_heading', __( 'Description', 'woocommerce' ) );
 
 ?>

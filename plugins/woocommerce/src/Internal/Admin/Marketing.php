@@ -104,6 +104,12 @@ class Marketing {
 			'existing_page' => false,
 		];
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', [] );
 		foreach ( $marketing_pages as $marketing_page ) {
 			if ( ! is_array( $marketing_page ) ) {

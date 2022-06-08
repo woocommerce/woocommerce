@@ -22,6 +22,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_statuses() {
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$order_statuses = apply_filters(
 			'wc_order_statuses',
 			array(
@@ -1569,11 +1575,23 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		// Test custom key.
 		$key       = 'foo123bar';
 		$order_key = wc_generate_order_key( $key );
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$expected  = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' . $key );
 		$this->assertEquals( $expected, $order_key );
 
 		// Test default key.
 		$order_key = wc_generate_order_key();
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$prefix    = 'wc_' . apply_filters( 'woocommerce_generate_order_key', 'order_' );
 		$this->assertStringStartsWith( $prefix, $order_key );
 		$this->assertEquals( 13, strlen( str_replace( $prefix, '', $order_key ) ) );

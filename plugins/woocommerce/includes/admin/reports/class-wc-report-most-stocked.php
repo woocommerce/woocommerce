@@ -30,6 +30,12 @@ class WC_Report_Most_Stocked extends WC_Report_Stock {
 
 		$stock = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 0 ) );
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		$query_from = apply_filters(
 			'woocommerce_report_most_stocked_query_from',
 			$wpdb->prepare(

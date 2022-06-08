@@ -86,6 +86,12 @@ class WC_HTTPS {
 	 * Template redirect - if we end up on a page ensure it has the correct http/https url.
 	 */
 	public static function force_https_template_redirect() {
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! is_ssl() && ( is_checkout() || is_account_page() || apply_filters( 'woocommerce_force_ssl_checkout', false ) ) ) {
 
 			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
@@ -106,6 +112,12 @@ class WC_HTTPS {
 			return;
 		}
 
+
+		/**
+		 * Hook
+		 *
+		 * @since
+		 */
 		if ( ! wc_site_is_https() && is_ssl() && $_SERVER['REQUEST_URI'] && ! is_checkout() && ! wp_doing_ajax() && ! is_account_page() && apply_filters( 'woocommerce_unforce_ssl_checkout', true ) ) {
 
 			if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
