@@ -26,7 +26,7 @@ export interface WooStep extends Step {
 	focusElement?: {
 		desktop?: string;
 		mobile?: string;
-		/** Iframe container of the focus element. Default to null */
+		/** Iframe HTML selector. Default to null. If set, it will find the focus element in the iframe */
 		iframe?: string;
 	};
 }
