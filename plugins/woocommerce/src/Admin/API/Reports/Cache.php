@@ -84,7 +84,7 @@ class Cache {
 			'value'   => $value,
 		);
 
-		$result = set_transient( $key, $transient_value, WEEK_IN_SECONDS );
+		$result = set_transient( $key, $transient_value, DAY_IN_SECONDS );
 
 		return $result;
 	}
