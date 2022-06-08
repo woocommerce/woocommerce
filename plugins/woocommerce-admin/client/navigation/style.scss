@@ -23,6 +23,9 @@
 	}
 
 	.components-navigation__menu {
+		scrollbar-color: $gray-700;
+		scrollbar-width: 8px;
+
 		&::-webkit-scrollbar-thumb {
 			border-radius: 10px;
 			background-color: $gray-700;
