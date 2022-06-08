@@ -10,14 +10,16 @@ import { createElement } from '@wordpress/element';
  */
 import type { WooTourStepRendererProps } from '../types';
 
-type Props = Omit< WooTourStepRendererProps, 'onMinimize' >;
+type Props = Omit<
+	WooTourStepRendererProps,
+	'onMinimize' | 'setInitialFocusedElement'
+>;
 
 const StepNavigation: React.FunctionComponent< Props > = ( {
 	currentStepIndex,
 	onNextStep,
 	onPreviousStep,
 	onDismiss,
-	setInitialFocusedElement,
 	steps,
 } ) => {
 	const isFirstStep = currentStepIndex === 0;
@@ -32,7 +34,6 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 			isPrimary
 			disabled={ primaryButton.isDisabled }
 			onClick={ onNextStep }
-			ref={ setInitialFocusedElement }
 		>
 			{ primaryButton.text || __( 'Next', 'woocommerce' ) }
 		</Button>

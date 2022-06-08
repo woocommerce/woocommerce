@@ -3,7 +3,7 @@
  */
 import { withViewportMatch } from '@wordpress/viewport';
 import { Card, CardBody, CardFooter, CardHeader } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,6 +11,36 @@ import { createElement } from '@wordpress/element';
 import StepNavigation from './step-navigation';
 import StepControls from './step-controls';
 import type { WooTourStepRendererProps } from '../types';
+
+const getFocusElement = (
+	focusElementSelector: string | null,
+	iframeSelector: string | null
+) => {
+	if ( ! focusElementSelector ) {
+		return null;
+	}
+
+	if ( iframeSelector ) {
+		const iframeElement = document.querySelector< HTMLIFrameElement >(
+			iframeSelector
+		);
+		if ( ! iframeElement ) {
+			return null;
+		}
+		const innerDoc =
+			iframeElement.contentDocument ||
+			( iframeElement.contentWindow &&
+				iframeElement.contentWindow.document );
+
+		if ( ! innerDoc ) {
+			return null;
+		}
+
+		return innerDoc.querySelector< HTMLElement >( focusElementSelector );
+	}
+
+	return document.querySelector< HTMLElement >( focusElementSelector );
+};
 
 const Step: React.FunctionComponent<
 	WooTourStepRendererProps & {
@@ -30,6 +60,28 @@ const Step: React.FunctionComponent<
 	const description =
 		descriptions[ isViewportMobile ? 'mobile' : 'desktop' ] ??
 		descriptions.desktop;
+
+	const focusElementSelector =
+		steps[ currentStepIndex ].focusElement?.[
+			isViewportMobile ? 'mobile' : 'desktop'
+		] || null;
+
+	const iframeSelector =
+		steps[ currentStepIndex ].focusElement?.iframe || null;
+
+	const focusElement = getFocusElement(
+		focusElementSelector,
+		iframeSelector
+	);
+
+	/*
+	 * Focus the element when step renders.
+	 */
+	useEffect( () => {
+		if ( focusElement ) {
+			setInitialFocusedElement( focusElement );
+		}
+	}, [ focusElement, setInitialFocusedElement ] );
 
 	return (
 		<Card className="woocommerce-tour-kit-step" isElevated>
@@ -51,7 +103,6 @@ const Step: React.FunctionComponent<
 					onNextStep={ onNextStep }
 					onPreviousStep={ onPreviousStep }
 					onDismiss={ onDismiss }
-					setInitialFocusedElement={ setInitialFocusedElement }
 					steps={ steps }
 				></StepNavigation>
 			</CardFooter>

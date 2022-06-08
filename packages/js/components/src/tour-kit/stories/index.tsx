@@ -75,6 +75,9 @@ const Tour = ( {
 					desktop: '.storybook__tourkit-references-b',
 					mobile: '.storybook__tourkit-references-b',
 				},
+				focusElement: {
+					desktop: '.storybook__tourkit-references-b input',
+				},
 				meta: {
 					heading: 'Shipping zones',
 					descriptions: {

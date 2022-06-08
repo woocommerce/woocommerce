@@ -22,6 +22,13 @@ export interface WooStep extends Step {
 			isDisabled?: boolean;
 		};
 	};
+	/** Auto apply the focus state for the element. Default to null */
+	focusElement?: {
+		desktop?: string;
+		mobile?: string;
+		/** Iframe container of the focus element. Default to null */
+		iframe?: string;
+	};
 }
 export type WooOptions = Options;
 

@@ -67,6 +67,7 @@ The main API for configuring a tour is the config object. See example usage and 
 `config.steps`: An array of objects that define the content we wish to render on the page. Each step defined by:
 
 - `referenceElements` (optional): A set of `desktop` & `mobile` selectors to render the step near.
+- `focusElement` (optional):  A set of `desktop` & `mobile` & `iframe` selectors to automatically focus.
 - `meta`: Arbitrary object that encloses the content we want to render for each step.
 - `classNames` (optional): An array or CSV of CSS classes applied to a step.
 
