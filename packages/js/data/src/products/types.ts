@@ -10,17 +10,23 @@ import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
 export type ProductStatus =
+	| 'deleted'
 	| 'draft'
 	| 'pending'
 	| 'private'
 	| 'publish'
 	| 'any'
+	| 'trash'
 	| 'future';
 
-export type Product<
-	Status = ProductStatus,
-	Type = ProductType
-> = Schema.Post & {
+export type DeleteProductType = {
+	force: boolean;
+};
+
+export type Product< Status = ProductStatus, Type = ProductType > = Omit<
+	Schema.Post,
+	'status'
+> & {
 	id: number;
 	name: string;
 	slug: string;
