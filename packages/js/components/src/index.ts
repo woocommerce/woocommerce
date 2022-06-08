@@ -58,3 +58,5 @@ export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';
 export { DynamicForm } from './dynamic-form';
+export { default as TourKit } from './tour-kit';
+export * as TourKitTypes from './tour-kit/types';

@@ -138,6 +138,9 @@ const webpackConfig = {
 			// Reduce bundle size by omitting Node crypto library.
 			// See https://github.com/woocommerce/woocommerce-admin/pull/5768
 			crypto: 'empty',
+			// Ignore fs, path to skip resolve errors for @automattic/calypso-config
+			fs: false,
+			path: false,
 		},
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
