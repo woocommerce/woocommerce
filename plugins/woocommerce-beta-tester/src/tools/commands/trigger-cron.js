@@ -1,5 +1,5 @@
 /**
- * External dependencies.
+ * External dependencies
  */
 import { SelectControl } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';

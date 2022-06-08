@@ -4,6 +4,7 @@
  * @package
  */
 
+// eslint-disable-next-line no-undef
 jQuery( function ( $ ) {
 	/**
 	 * Version information
@@ -22,7 +23,7 @@ jQuery( function ( $ ) {
 		/**
 		 * Handler for showing/hiding version information modal
 		 *
-		 * @param  event
+		 * @param {Event} event
 		 */
 		showModal( event ) {
 			event.preventDefault();
@@ -37,7 +38,9 @@ jQuery( function ( $ ) {
 			$( this ).WCBackboneModal( {
 				template: 'wc-beta-tester-version-info',
 				variable: {
+					// eslint-disable-next-line no-undef
 					version: wc_beta_tester_version_info_params.version,
+					// eslint-disable-next-line no-undef
 					description: wc_beta_tester_version_info_params.description,
 				},
 			} );

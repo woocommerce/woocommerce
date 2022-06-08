@@ -104,7 +104,7 @@ function RestAPIFilters( {
 					>
 						<div className="grid">
 							<label htmlFor="endpoint">Endpoint</label>
-							<input type="text" name="endpoint" autoFocus />
+							<input type="text" name="endpoint" />
 							<label htmlFor="jsonPath">Dot Notation</label>
 							<input type="text" name="dotNotation" />
 							<label htmlFor="replacement">Replacement </label>

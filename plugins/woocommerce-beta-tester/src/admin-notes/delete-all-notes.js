@@ -1,5 +1,5 @@
 /**
- * External dependencies.
+ * External dependencies
  */
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';

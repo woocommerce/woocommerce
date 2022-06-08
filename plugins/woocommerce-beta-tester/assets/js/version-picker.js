@@ -4,6 +4,7 @@
  * @package
  */
 
+// eslint-disable-next-line no-undef
 jQuery( function ( $ ) {
 	/**
 	 * Version picker
@@ -13,7 +14,7 @@ jQuery( function ( $ ) {
 		 * Initialize Version Information click
 		 */
 		init() {
-			instance = this;
+			const instance = this;
 			instance.new_version = undefined;
 
 			$( '#wcbt-modal-version-switch-confirm' ).on(
@@ -32,12 +33,15 @@ jQuery( function ( $ ) {
 		/**
 		 * Handler for showing/hiding version switch modal
 		 *
-		 * @param  event
+		 * @param {Event} event
 		 */
 		showConfirmVersionSwitchModal( event ) {
 			event.preventDefault();
 
+			const instance = this;
+
 			if ( ! instance.new_version ) {
+				// eslint-disable-next-line no-undef
 				alert( wc_beta_tester_version_picker_params.i18n_pick_version );
 			} else {
 				$( this ).WCBackboneModal( {
@@ -57,7 +61,7 @@ jQuery( function ( $ ) {
 		/**
 		 * Submit form to switch version of WooCommerce.
 		 *
-		 * @param  event
+		 * @param {Event} event
 		 */
 		submitSwitchVersionForm( event ) {
 			event.preventDefault();

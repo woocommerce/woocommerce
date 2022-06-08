@@ -12,8 +12,7 @@ import { API_NAMESPACE } from './constants';
 /**
  * Initialize the state
  *
- * @param {Array} filter
- * @param         filters
+ * @param {Array} filters
  */
 export function setFilters( filters ) {
 	return {

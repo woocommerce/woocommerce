@@ -25,7 +25,9 @@
 		"jsdoc/check-tag-names": [
 			"error",
 			{ "definedTags": [ "jest-environment" ] }
-		]
+		],
+		"react/react-in-jsx-scope": "off",
+		"no-alert": "off"
 	},
 	"parserOptions": {
 		"ecmaVersion": 6

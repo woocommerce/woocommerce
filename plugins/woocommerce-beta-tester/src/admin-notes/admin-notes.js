@@ -1,5 +1,5 @@
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { DeleteAllNotes } from './delete-all-notes';
 import { AddNote } from './add-note';

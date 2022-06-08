@@ -1610,6 +1610,7 @@ importers:
 
   plugins/woocommerce-beta-tester:
     specifiers:
+      '@types/prop-types': ^15.7.4
       '@woocommerce/data': workspace:*
       '@woocommerce/dependency-extraction-webpack-plugin': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
@@ -1624,6 +1625,7 @@ importers:
       eslint: 5.16.0
       uglify-js: ^3.5.3
     dependencies:
+      '@types/prop-types': 15.7.4
       '@woocommerce/data': link:../../packages/js/data
       '@wordpress/api-fetch': 3.23.1
       '@wordpress/components': 12.0.9_@wordpress+data@4.27.3
@@ -15214,8 +15216,8 @@ packages:
       webpack: 4.x.x || 5.x.x
       webpack-cli: 4.x.x
     dependencies:
-      webpack: 5.70.0_webpack-cli@4.9.2
-      webpack-cli: 4.9.2_b04de8011015a40c567469bf79798750
+      webpack: 5.70.0_09a0288cc3aa3015774a489e904fdd90
+      webpack-cli: 4.9.2_ef5a9a6d45a146bbab2769a98537c0d5
     dev: true
 
   /@webpack-cli/info/1.4.1_webpack-cli@4.9.2:
@@ -15224,7 +15226,7 @@ packages:
       webpack-cli: 4.x.x
     dependencies:
       envinfo: 7.8.1
-      webpack-cli: 4.9.2_b04de8011015a40c567469bf79798750
+      webpack-cli: 4.9.2_ef5a9a6d45a146bbab2769a98537c0d5
     dev: true
 
   /@webpack-cli/serve/1.6.1_webpack-cli@4.9.2:
@@ -15236,7 +15238,7 @@ packages:
       webpack-dev-server:
         optional: true
     dependencies:
-      webpack-cli: 4.9.2_b04de8011015a40c567469bf79798750
+      webpack-cli: 4.9.2_ef5a9a6d45a146bbab2769a98537c0d5
     dev: true
 
   /@wojtekmaj/enzyme-adapter-react-17/0.6.6_enzyme@3.11.0:
@@ -18414,7 +18416,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -18444,7 +18446,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /babel-messages/6.23.0:
@@ -20932,7 +20934,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -31746,7 +31748,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.0.0
-      webpack: 5.70.0
+      webpack: 5.70.0_09a0288cc3aa3015774a489e904fdd90
 
   /mini-svg-data-uri/1.4.3:
     resolution: {integrity: sha512-gSfqpMRC8IxghvMcxzzmMnWpXAChSA+vy4cia33RgerMS8Fex95akUyQZPbxJJmeBGiGmK7n/1OpUX8ksRjIdA==}
@@ -35561,7 +35563,7 @@ packages:
     dependencies:
       loader-utils: 2.0.2
       schema-utils: 3.1.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /rc/1.2.8:
@@ -37395,7 +37397,7 @@ packages:
       klona: 2.0.5
       neo-async: 2.6.2
       sass: 1.49.9
-      webpack: 5.70.0
+      webpack: 5.70.0_09a0288cc3aa3015774a489e904fdd90
     dev: true
 
   /sass-loader/8.0.2_sass@1.49.9+webpack@4.46.0:
@@ -37950,7 +37952,7 @@ packages:
       abab: 2.0.5
       iconv-lite: 0.6.3
       source-map-js: 0.6.2
-      webpack: 5.70.0
+      webpack: 5.70.0_09a0288cc3aa3015774a489e904fdd90
     dev: true
 
   /source-map-resolve/0.5.3:
@@ -39196,7 +39198,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
@@ -39307,7 +39309,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
     dev: true
