@@ -212,6 +212,9 @@ class WC_Install {
 		'6.7.0' => array(
 			'wc_update_670_purge_comments_count_cache',
 		),
+		'6.7.1' => array(
+			'wc_update_671_test',
+		),
 	);
 
 	/**
@@ -1015,7 +1018,7 @@ class WC_Install {
 
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
-  session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT BIG CHANGE,
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry BIGINT UNSIGNED NOT NULL,
