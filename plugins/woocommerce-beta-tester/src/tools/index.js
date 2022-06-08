@@ -12,7 +12,12 @@ import { default as commands } from './commands';
 import { STORE_KEY } from './data/constants';
 import './data';
 
-function Tools( { actions, currentlyRunningCommands, messages, comandParams } ) {
+function Tools( {
+	actions,
+	currentlyRunningCommands,
+	messages,
+	comandParams,
+} ) {
 	actions = actions();
 	return (
 		<div id="wc-admin-test-helper-tools">
@@ -38,28 +43,32 @@ function Tools( { actions, currentlyRunningCommands, messages, comandParams } ) 
 					</tr>
 				</thead>
 				<tbody>
-					{ commands.map( ( { action, command, description }, index ) => {
-						const params = comandParams[ action ] ?? false;
-						return (
-							<tr key={ index }>
-								<td className="command">{ command }</td>
-								<td>{ description }</td>
-								<td>
-									<Button
-										onClick={ () => actions[ action ]( params ) }
-										disabled={
-											currentlyRunningCommands[
-												command
-											]
-										}
-										isPrimary
-									>
-										Run
-									</Button>
-								</td>
-							</tr>
-						);
-					} ) }
+					{ commands.map(
+						( { action, command, description }, index ) => {
+							const params = comandParams[ action ] ?? false;
+							return (
+								<tr key={ index }>
+									<td className="command">{ command }</td>
+									<td>{ description }</td>
+									<td>
+										<Button
+											onClick={ () =>
+												actions[ action ]( params )
+											}
+											disabled={
+												currentlyRunningCommands[
+													command
+												]
+											}
+											isPrimary
+										>
+											Run
+										</Button>
+									</td>
+								</tr>
+							);
+						}
+					) }
 				</tbody>
 			</table>
 		</div>
@@ -68,7 +77,9 @@ function Tools( { actions, currentlyRunningCommands, messages, comandParams } ) 
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getCurrentlyRunning, getMessages, getCommandParams } = select( STORE_KEY );
+		const { getCurrentlyRunning, getMessages, getCommandParams } = select(
+			STORE_KEY
+		);
 		return {
 			currentlyRunningCommands: getCurrentlyRunning(),
 			messages: getMessages(),

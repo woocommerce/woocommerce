@@ -13,6 +13,6 @@ const appRoot = document.getElementById(
 	'woocommerce-admin-test-helper-app-root'
 );
 
-if (appRoot) {
-	render(<App />, appRoot);
+if ( appRoot ) {
+	render( <App />, appRoot );
 }

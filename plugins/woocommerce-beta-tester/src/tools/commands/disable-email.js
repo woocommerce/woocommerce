@@ -17,7 +17,7 @@ export const DisableEmail = () => {
 	} );
 
 	const getEmailStatus = () => {
-		switch( isEmailDisabled ) {
+		switch ( isEmailDisabled ) {
 			case 'yes':
 				return 'WooCommerce emails are turned off 🔴';
 			case 'no':
@@ -27,11 +27,7 @@ export const DisableEmail = () => {
 			default:
 				return 'Loading ...';
 		}
-	}
+	};
 
-	return (
-		<div className="disable-wc-email">
-			{ getEmailStatus() }
-		</div>
-	);
+	return <div className="disable-wc-email">{ getEmailStatus() }</div>;
 };

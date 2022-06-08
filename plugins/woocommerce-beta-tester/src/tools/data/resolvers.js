@@ -28,21 +28,21 @@ export function* getCronJobs() {
 }
 
 export function* getDBUpdateVersions() {
-	const path = `${API_NAMESPACE}/tools/get-update-versions/v1`;
+	const path = `${ API_NAMESPACE }/tools/get-update-versions/v1`;
 
 	try {
-		const response = yield apiFetch({
+		const response = yield apiFetch( {
 			path,
 			method: 'GET',
-		});
-		yield setDBUpdateVersions(response);
-	} catch (error) {
-		throw new Error(error);
+		} );
+		yield setDBUpdateVersions( response );
+	} catch ( error ) {
+		throw new Error( error );
 	}
 }
 
 export function* getIsEmailDisabled() {
-	const path = `${API_NAMESPACE}/tools/get-email-status/v1`;
+	const path = `${ API_NAMESPACE }/tools/get-email-status/v1`;
 
 	try {
 		const response = yield apiFetch( {

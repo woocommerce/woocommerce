@@ -13,39 +13,39 @@ export const TRIGGER_UPDATE_CALLBACKS_ACTION_NAME =
 	'runSelectedUpdateCallbacks';
 
 export const TriggerUpdateCallbacks = () => {
-	const { dbUpdateVersions } = useSelect((select) => {
-		const { getDBUpdateVersions } = select(STORE_KEY);
+	const { dbUpdateVersions } = useSelect( ( select ) => {
+		const { getDBUpdateVersions } = select( STORE_KEY );
 		return {
 			dbUpdateVersions: getDBUpdateVersions(),
 		};
-	});
+	} );
 
-	const { updateCommandParams } = useDispatch(STORE_KEY);
+	const { updateCommandParams } = useDispatch( STORE_KEY );
 
-	function onCronChange(version) {
-		updateCommandParams(TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {
+	function onCronChange( version ) {
+		updateCommandParams( TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {
 			version,
-		});
+		} );
 	}
 
 	function getOptions() {
-		return dbUpdateVersions.map((version) => {
+		return dbUpdateVersions.map( ( version ) => {
 			return { label: version, value: version };
-		});
+		} );
 	}
 
 	return (
 		<div className="trigger-cron-job">
-			{!dbUpdateVersions ? (
+			{ ! dbUpdateVersions ? (
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
 					label="Select a version to run"
-					onChange={onCronChange}
+					onChange={ onCronChange }
 					labelPosition="side"
-					options={getOptions().reverse()}
+					options={ getOptions().reverse() }
 				/>
-			)}
+			) }
 		</div>
 	);
 };

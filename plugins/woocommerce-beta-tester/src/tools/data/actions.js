@@ -9,21 +9,21 @@ import { apiFetch } from '@wordpress/data-controls';
 import TYPES from './action-types';
 import { API_NAMESPACE } from './constants';
 
-export function addCurrentlyRunning(command) {
+export function addCurrentlyRunning( command ) {
 	return {
 		type: TYPES.ADD_CURRENTLY_RUNNING,
 		command,
 	};
 }
 
-export function removeCurrentlyRunning(command) {
+export function removeCurrentlyRunning( command ) {
 	return {
 		type: TYPES.REMOVE_CURRENTLY_RUNNING,
 		command,
 	};
 }
 
-export function addMessage(source, message) {
+export function addMessage( source, message ) {
 	return {
 		type: TYPES.ADD_MESSAGE,
 		source,
@@ -31,7 +31,7 @@ export function addMessage(source, message) {
 	};
 }
 
-export function updateMessage(source, message, status) {
+export function updateMessage( source, message, status ) {
 	return {
 		type: TYPES.ADD_MESSAGE,
 		source,
@@ -40,14 +40,14 @@ export function updateMessage(source, message, status) {
 	};
 }
 
-export function removeMessage(source) {
+export function removeMessage( source ) {
 	return {
 		type: TYPES.REMOVE_MESSAGE,
 		source,
 	};
 }
 
-export function updateCommandParams(source, params) {
+export function updateCommandParams( source, params ) {
 	return {
 		type: TYPES.ADD_COMMAND_PARAMS,
 		source,
@@ -55,83 +55,83 @@ export function updateCommandParams(source, params) {
 	};
 }
 
-export function setCronJobs(cronJobs) {
+export function setCronJobs( cronJobs ) {
 	return {
 		type: TYPES.SET_CRON_JOBS,
 		cronJobs,
 	};
 }
 
-export function setDBUpdateVersions(versions) {
+export function setDBUpdateVersions( versions ) {
 	return {
 		type: TYPES.SET_DB_UPDATE_VERSIONS,
 		versions,
 	};
 }
 
-export function setIsEmailDisabled(isEmailDisabled) {
+export function setIsEmailDisabled( isEmailDisabled ) {
 	return {
 		type: TYPES.IS_EMAIL_DISABLED,
 		isEmailDisabled,
 	};
 }
 
-function* runCommand(commandName, func) {
+function* runCommand( commandName, func ) {
 	try {
-		yield addCurrentlyRunning(commandName);
-		yield addMessage(commandName, 'Executing...');
+		yield addCurrentlyRunning( commandName );
+		yield addMessage( commandName, 'Executing...' );
 		yield func();
-		yield removeCurrentlyRunning(commandName);
-		yield updateMessage(commandName, 'Successful!');
-	} catch (e) {
-		yield updateMessage(commandName, e.message, 'error');
-		yield removeCurrentlyRunning(commandName);
+		yield removeCurrentlyRunning( commandName );
+		yield updateMessage( commandName, 'Successful!' );
+	} catch ( e ) {
+		yield updateMessage( commandName, e.message, 'error' );
+		yield removeCurrentlyRunning( commandName );
 	}
 }
 
 export function* triggerWcaInstall() {
-	yield runCommand('Trigger WCA Install', function* () {
-		yield apiFetch({
+	yield runCommand( 'Trigger WCA Install', function* () {
+		yield apiFetch( {
 			path: API_NAMESPACE + '/tools/trigger-wca-install/v1',
 			method: 'POST',
-		});
-	});
+		} );
+	} );
 }
 
 export function* resetOnboardingWizard() {
-	yield runCommand('Reset Onboarding Wizard', function* () {
+	yield runCommand( 'Reset Onboarding Wizard', function* () {
 		const optionsToDelete = [
 			'woocommerce_task_list_tracked_completed_tasks',
 			'woocommerce_onboarding_profile',
 			'_transient_wc_onboarding_themes',
 		];
-		yield apiFetch({
+		yield apiFetch( {
 			method: 'DELETE',
-			path: `${API_NAMESPACE}/options/${optionsToDelete.join(',')}`,
-		});
-	});
+			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+	} );
 }
 
 export function* resetJetpackConnection() {
-	yield runCommand('Reset Jetpack Connection', function* () {
-		yield apiFetch({
+	yield runCommand( 'Reset Jetpack Connection', function* () {
+		yield apiFetch( {
 			method: 'DELETE',
-			path: `${API_NAMESPACE}/options/jetpack_options`,
-		});
-	});
+			path: `${ API_NAMESPACE }/options/jetpack_options`,
+		} );
+	} );
 }
 
 export function* enableTrackingDebug() {
-	yield runCommand('Enable WC Admin Tracking Debug Mode', function* () {
-		window.localStorage.setItem('debug', 'wc-admin:*');
-	});
+	yield runCommand( 'Enable WC Admin Tracking Debug Mode', function* () {
+		window.localStorage.setItem( 'debug', 'wc-admin:*' );
+	} );
 }
 
 export function* updateStoreAge() {
-	yield runCommand('Update Installation timestamp', function* () {
+	yield runCommand( 'Update Installation timestamp', function* () {
 		const today = new Date();
-		const dd = String(today.getDate()).padStart(2, '0');
-		const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+		const dd = String( today.getDate() ).padStart( 2, '0' );
+		const mm = String( today.getMonth() + 1 ).padStart( 2, '0' ); //January is 0!
 		const yyyy = today.getFullYear();
 
 		// eslint-disable-next-line no-alert
@@ -140,72 +140,73 @@ export function* updateStoreAge() {
 			yyyy + '/' + mm + '/' + dd
 		);
 
-		if (numberOfDays !== null) {
-			const dates = numberOfDays.split('/');
+		if ( numberOfDays !== null ) {
+			const dates = numberOfDays.split( '/' );
 			const newTimestamp = Math.round(
-				new Date(dates[0], dates[1] - 1, dates[2]).getTime() / 1000
+				new Date( dates[ 0 ], dates[ 1 ] - 1, dates[ 2 ] ).getTime() /
+					1000
 			);
 			const payload = {
-				woocommerce_admin_install_timestamp: JSON.parse(newTimestamp),
+				woocommerce_admin_install_timestamp: JSON.parse( newTimestamp ),
 			};
-			yield apiFetch({
+			yield apiFetch( {
 				method: 'POST',
 				path: '/wc-admin/options',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify(payload),
-			});
+				body: JSON.stringify( payload ),
+			} );
 		}
-	});
+	} );
 }
 
 export function* runWcAdminDailyJob() {
-	yield runCommand('Run wc_admin_daily job', function* () {
-		yield apiFetch({
+	yield runCommand( 'Run wc_admin_daily job', function* () {
+		yield apiFetch( {
 			path: API_NAMESPACE + '/tools/run-wc-admin-daily/v1',
 			method: 'POST',
-		});
-	});
+		} );
+	} );
 }
 
 export function* deleteAllProducts() {
-	if (!confirm('Are you sure you want to delete all of the products?')) {
+	if ( ! confirm( 'Are you sure you want to delete all of the products?' ) ) {
 		return;
 	}
 
-	yield runCommand('Delete all products', function* () {
-		yield apiFetch({
-			path: `${API_NAMESPACE}/tools/delete-all-products/v1`,
+	yield runCommand( 'Delete all products', function* () {
+		yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/delete-all-products/v1`,
 			method: 'POST',
-		});
-	});
+		} );
+	} );
 }
 
-export function* runSelectedCronJob(params) {
-	yield runCommand('Run selected cron job', function* () {
-		yield apiFetch({
+export function* runSelectedCronJob( params ) {
+	yield runCommand( 'Run selected cron job', function* () {
+		yield apiFetch( {
 			path: API_NAMESPACE + '/tools/run-wc-admin-daily/v1',
 			method: 'POST',
 			data: params,
-		});
-	});
+		} );
+	} );
 }
 
-export function* runSelectedUpdateCallbacks(params) {
-	yield runCommand('Run version update callbacks', function* () {
-		yield apiFetch({
+export function* runSelectedUpdateCallbacks( params ) {
+	yield runCommand( 'Run version update callbacks', function* () {
+		yield apiFetch( {
 			path: API_NAMESPACE + '/tools/trigger-selected-update-callbacks/v1',
 			method: 'POST',
 			data: params,
-		});
-	});
+		} );
+	} );
 }
 
 export function* runDisableEmail() {
-	yield runCommand('Disable/Enable WooCommerce emails', function* () {
-		const response = yield apiFetch({
-			path: `${API_NAMESPACE}/tools/toggle-emails/v1`,
+	yield runCommand( 'Disable/Enable WooCommerce emails', function* () {
+		const response = yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/toggle-emails/v1`,
 			method: 'POST',
-		});
+		} );
 		yield setIsEmailDisabled( response );
-	});
+	} );
 }

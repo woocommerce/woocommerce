@@ -5,7 +5,6 @@ import { useState } from '@wordpress/element';
 import { Button, SelectControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
-
 export const AddNote = () => {
 	const [ isAdding, setIsAdding ] = useState( false );
 	const [ hasAdded, setHasAdded ] = useState( false );
@@ -42,8 +41,7 @@ export const AddNote = () => {
 				},
 			} );
 			setHasAdded( true );
-		}
-		catch ( ex ) {
+		} catch ( ex ) {
 			setErrorMessage( ex.message );
 		}
 
@@ -62,16 +60,18 @@ export const AddNote = () => {
 	}
 
 	function getAddNoteDescription() {
-		switch ( noteType ){
+		switch ( noteType ) {
 			case 'email':
 				return (
 					<>
-						This will add a new <strong>email</strong> note. Enable email insights{' '}
+						This will add a new <strong>email</strong> note. Enable
+						email insights{ ' ' }
 						<a href="/wp-admin/admin.php?page=wc-settings&tab=email">
 							here
-						</a>{' '}
+						</a>{ ' ' }
 						and run the cron to send the note by email.
-					</>);
+					</>
+				);
 			default:
 				return (
 					<>
@@ -84,10 +84,12 @@ export const AddNote = () => {
 
 	return (
 		<>
-			<p><strong>Add a note</strong></p>
+			<p>
+				<strong>Add a note</strong>
+			</p>
 			<div>
 				{ getAddNoteDescription() }
-				<br/>
+				<br />
 				<div className="woocommerce-admin-test-helper__add-notes">
 					<Button
 						onClick={ triggerAddNote }
@@ -120,7 +122,7 @@ export const AddNote = () => {
 						value={ noteLayout }
 					/>
 				</div>
-				<br/>
+				<br />
 				<span className="woocommerce-admin-test-helper__action-status">
 					{ isAdding && 'Adding, please wait' }
 					{ hasAdded && 'Note added' }
