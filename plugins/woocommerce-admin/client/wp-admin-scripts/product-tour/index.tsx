@@ -229,7 +229,7 @@ const ProductTour = () => {
 					}
 				}
 				lastInitialElementTop = top;
-			}, 1000 );
+			}, 500 );
 		};
 
 		const query = qs.parse( window.location.search.slice( 1 ) );
