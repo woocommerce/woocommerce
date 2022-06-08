@@ -244,11 +244,74 @@ const ProductTour = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
+	// Add a focus class to product description & short description when editor is focused.
+	useEffect( () => {
+		if ( ! showTour ) {
+			return;
+		}
+		const addClassToIframeWhenChildFocus = (
+			iframeSelector: string,
+			childSelector: string
+		) => {
+			const iframe = document.querySelector< HTMLIFrameElement >(
+				iframeSelector
+			);
+			const innerDoc =
+				iframe?.contentDocument ||
+				( iframe?.contentWindow && iframe?.contentWindow.document );
+
+			if ( innerDoc ) {
+				const child = innerDoc.querySelector< HTMLElement >(
+					childSelector
+				);
+
+				const onFocus = () => {
+					iframe?.classList.add( 'focus-within' );
+				};
+				const onBlur = () => iframe?.classList.remove( 'focus-within' );
+
+				child?.addEventListener( 'focus', onFocus );
+				child?.addEventListener( 'blur', onBlur );
+
+				return () => {
+					child?.removeEventListener( 'focus', onFocus );
+					child?.removeEventListener( 'blur', onBlur );
+				};
+			}
+			return () => ( {} );
+		};
+
+		const clearContentIFrameEvent = addClassToIframeWhenChildFocus(
+			'#content_ifr',
+			'#tinymce'
+		);
+		const clearExcerptIFrameEvent = addClassToIframeWhenChildFocus(
+			'#excerpt_ifr',
+			'#tinymce'
+		);
+
+		return () => {
+			clearContentIFrameEvent();
+			clearExcerptIFrameEvent();
+		};
+	}, [ showTour ] );
+
 	if ( ! showTour ) {
 		return null;
 	}
 
-	return <TourKit config={ config } />;
+	return (
+		<>
+			<style>
+				{ `
+					#content_ifr.focus-within, #excerpt_ifr.focus-within {
+						border: 1.5px solid #007CBA;
+					}
+				` }
+			</style>
+			<TourKit config={ config } />
+		</>
+	);
 };
 
 render( <ProductTour />, document.body.appendChild( root ) );
