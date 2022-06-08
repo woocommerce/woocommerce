@@ -26,12 +26,6 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_featured() {
-		/**
-		 * Woo Test Hook
-		 * 
-		 * @since 6.7.0
-		 */
-		add_action( 'woo_test_hook' );
 		$featured = get_transient( 'wc_addons_featured_2' );
 		if ( false === $featured ) {
 			$headers = array();
