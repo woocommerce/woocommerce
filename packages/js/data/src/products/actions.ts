@@ -9,7 +9,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import TYPES from './action-types';
 import {
-	MutableProperties,
+	ReadOnlyProperties,
 	PartialProduct,
 	Product,
 	ProductQuery,
@@ -116,7 +116,7 @@ export function getProductsTotalCountError(
 	};
 }
 
-export function* createProduct( data: Pick< Product, MutableProperties > ) {
+export function* createProduct( data: Omit< Product, ReadOnlyProperties > ) {
 	try {
 		const product: Product = yield apiFetch( {
 			path: WC_PRODUCT_NAMESPACE,
@@ -134,7 +134,7 @@ export function* createProduct( data: Pick< Product, MutableProperties > ) {
 
 export function* updateProduct(
 	id: number,
-	data: Pick< Product, MutableProperties >
+	data: Omit< Product, ReadOnlyProperties >
 ) {
 	try {
 		const product: Product = yield apiFetch( {
