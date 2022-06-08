@@ -35,12 +35,17 @@ const ProductTour = () => {
 		placement: 'bottom-start',
 		options: {
 			effects: {
-				spotlight: {},
+				spotlight: {
+					interactivity: {
+						enabled: true,
+						rootElementSelector: '#wpwrap',
+					},
+				},
 				arrowIndicator: true,
-				// autoScroll: {
-				// 	behavior: 'smooth',
-				// 	block: 'center',
-				// },
+				autoScroll: {
+					behavior: 'smooth',
+					block: 'center',
+				},
 			},
 			popperModifiers: [
 				{
