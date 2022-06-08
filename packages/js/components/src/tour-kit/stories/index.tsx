@@ -7,6 +7,7 @@ import { createElement, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
+import '../style.scss';
 
 import WooTourKit from '..';
 import type { WooConfig, WooOptions } from '../types';
@@ -25,6 +26,11 @@ const References = () => {
 				</div>
 				<div className={ 'storybook__tourkit-references-b' }>
 					<p>Reference B</p>
+					<div style={ { display: 'grid', placeItems: 'center' } }>
+						<input
+							style={ { margin: 'auto', display: 'block' } }
+						></input>
+					</div>
 				</div>
 				<div className={ 'storybook__tourkit-references-c' }>
 					<p>Reference C</p>
@@ -40,11 +46,14 @@ const References = () => {
 const Tour = ( {
 	onClose,
 	options,
+	placement,
 }: {
 	onClose: () => void;
 	options?: WooOptions;
+	placement?: WooConfig[ 'placement' ];
 } ) => {
 	const config: WooConfig = {
+		placement,
 		steps: [
 			{
 				referenceElements: {
@@ -119,7 +128,13 @@ const Tour = ( {
 	return <WooTourKit config={ config } />;
 };
 
-const StoryTour = ( { options = {} }: { options?: WooOptions } ) => {
+const StoryTour = ( {
+	options = {},
+	placement,
+}: {
+	options?: WooConfig[ 'options' ];
+	placement?: WooConfig[ 'placement' ];
+} ) => {
 	const [ showTour, setShowTour ] = useState( false );
 
 	return (
@@ -132,6 +147,7 @@ const StoryTour = ( { options = {} }: { options?: WooOptions } ) => {
 			) }
 			{ showTour && (
 				<Tour
+					placement={ placement }
 					onClose={ () => setShowTour( false ) }
 					options={ options }
 				/>
@@ -161,3 +177,33 @@ export const Overlay = () => (
 		} }
 	/>
 );
+export const SpotlightInteractivity = () => (
+	<StoryTour
+		options={ {
+			effects: {
+				spotlight: {
+					interactivity: {
+						rootElementSelector: '#root',
+						enabled: true,
+					},
+				},
+			},
+		} }
+	/>
+);
+export const AutoScroll = () => (
+	<>
+		<div style={ { height: '10vh' } }></div>
+		<StoryTour
+			options={ {
+				effects: {
+					autoScroll: {
+						behavior: 'smooth',
+					},
+				},
+			} }
+		/>
+	</>
+);
+
+export const Placement = () => <StoryTour placement={ 'left' } />;
