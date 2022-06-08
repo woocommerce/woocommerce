@@ -28,6 +28,14 @@
 				stroke: currentColor;
 			}
 		}
+
+		.setup-progress-slice {
+			stroke: none;
+		}
+
+		.setup-progress-ring {
+			stroke-width: 2px;
+		}
 	}
 
 	.woocommerce-layout__homescreen-display-options {
