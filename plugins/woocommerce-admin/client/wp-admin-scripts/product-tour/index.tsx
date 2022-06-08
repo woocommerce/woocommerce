@@ -19,10 +19,10 @@ const ProductTour = () => {
 			setTimeout( () => setShowTour( true ), 1500 );
 		}
 
+		// Overwrite the default behavior of the "Enable guided mode" button when a user clicks it.
 		const enableGuideModeBtn = Array.from(
 			window.document.querySelectorAll( '.page-title-action' )
 		).find( ( el ) => el.textContent === 'Enable guided mode' );
-
 		if ( enableGuideModeBtn ) {
 			enableGuideModeBtn.addEventListener( 'click', ( e ) => {
 				e.preventDefault();
@@ -57,6 +57,7 @@ const ProductTour = () => {
 							popper: { width: number };
 						} ) => {
 							return {
+								// Align the arrow to the left of the popper.
 								right: popper.width - 34,
 							};
 						},

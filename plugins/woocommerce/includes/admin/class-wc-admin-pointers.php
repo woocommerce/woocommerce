@@ -55,7 +55,8 @@ class WC_Admin_Pointers {
 
 		if (
 			Features::is_enabled( 'experimental-product-tour' ) &&
-			isset( $post )
+			isset( $post ) &&
+			isset( $wp_post_types )
 		) {
 			$product_type = WC_Product_Factory::get_product_type( $post->id );
 
