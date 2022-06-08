@@ -173,8 +173,12 @@ export function deleteProductError( id: number, error: unknown ) {
 	};
 }
 
-export function* removeProduct( id: number, { force }: DeleteProductType ) {
+export function* removeProduct(
+	id: number,
+	type: DeleteProductType = { force: false }
+) {
 	try {
+		const { force } = type;
 		const url = force
 			? `${ WC_PRODUCT_NAMESPACE }/${ id }?force=true`
 			: `${ WC_PRODUCT_NAMESPACE }/${ id }`;
