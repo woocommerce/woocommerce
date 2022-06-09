@@ -40,6 +40,37 @@ describe( 'StoreDetails', () => {
 		} );
 	} );
 	describe( 'Email validation test cases', () => {
+		test( 'should fail email validation and disable continue button when isAgreeMarketing is true and email is empty', async () => {
+			const container = render(
+				<StoreDetails
+					{ ...testProps }
+					initialValues={ {
+						addressLine1: 'address1',
+						addressLine2: 'address2',
+						city: 'city',
+						countryState: 'state',
+						postCode: '123',
+						isAgreeMarketing: true,
+						storeEmail: 'wordpress@example.com',
+					} }
+				/>
+			);
+			const emailInput = container.getByLabelText( 'Email address' );
+			await userEvent.clear( emailInput );
+			userEvent.tab();
+			expect(
+				container.queryByText(
+					'Please enter your email address to subscribe'
+				)
+			).toBeInTheDocument();
+
+			expect(
+				container.queryByRole( 'button', {
+					name: 'Continue',
+				} ).disabled
+			).toBe( true );
+		} );
+
 		// test cases taken from wordpress php is_email test cases
 		// https://github.com/WordPress/wordpress-develop/blob/2648a5f984b8abf06872151898e3a61d3458a628/tests/phpunit/tests/formatting/isEmail.php
 		test.each( [
