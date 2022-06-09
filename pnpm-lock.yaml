@@ -979,37 +979,6 @@ importers:
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
-  packages/js/notices:
-    specifiers:
-      '@automattic/data-stores': ^2.0.1
-      '@babel/core': ^7.17.5
-      '@woocommerce/eslint-plugin': workspace:*
-      '@wordpress/a11y': ^3.5.0
-      '@wordpress/data': ^6.3.0
-      '@wordpress/notices': ^3.3.2
-      eslint: ^8.12.0
-      jest: ^27.5.1
-      jest-cli: ^27.5.1
-      redux: ^4.2.0
-      rimraf: ^3.0.2
-      ts-jest: ^27.1.3
-      typescript: ^4.6.2
-    dependencies:
-      '@wordpress/a11y': 3.5.0
-      '@wordpress/data': 6.4.1
-      '@wordpress/notices': 3.4.1
-    devDependencies:
-      '@automattic/data-stores': 2.0.1_@wordpress+data@6.4.1
-      '@babel/core': 7.17.8
-      '@woocommerce/eslint-plugin': link:../eslint-plugin
-      eslint: 8.12.0
-      jest: 27.5.1
-      jest-cli: 27.5.1
-      redux: 4.2.0
-      rimraf: 3.0.2
-      ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
-      typescript: 4.6.2
-
   packages/js/internal-style-build:
     specifiers:
       '@automattic/color-studio': ^2.5.0
@@ -1088,6 +1057,37 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
+      typescript: 4.6.2
+
+  packages/js/notices:
+    specifiers:
+      '@automattic/data-stores': ^2.0.1
+      '@babel/core': ^7.17.5
+      '@woocommerce/eslint-plugin': workspace:*
+      '@wordpress/a11y': ^3.5.0
+      '@wordpress/data': ^6.3.0
+      '@wordpress/notices': ^3.3.2
+      eslint: ^8.12.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      redux: ^4.2.0
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+    dependencies:
+      '@wordpress/a11y': 3.5.0
+      '@wordpress/data': 6.4.1
+      '@wordpress/notices': 3.4.1
+    devDependencies:
+      '@automattic/data-stores': 2.0.1_@wordpress+data@6.4.1
+      '@babel/core': 7.17.8
+      '@woocommerce/eslint-plugin': link:../eslint-plugin
+      eslint: 8.12.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      redux: 4.2.0
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1338,9 +1338,9 @@ importers:
       '@woocommerce/experimental': workspace:*
       '@woocommerce/explat': workspace:*
       '@woocommerce/internal-js-tests': workspace:*
-      '@woocommerce/notices': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
+      '@woocommerce/notices': workspace:*
       '@woocommerce/number': workspace:*
       '@woocommerce/onboarding': workspace:*
       '@woocommerce/tracks': workspace:*
@@ -1542,9 +1542,9 @@ importers:
       '@woocommerce/experimental': link:../../packages/js/experimental
       '@woocommerce/explat': link:../../packages/js/explat
       '@woocommerce/internal-js-tests': link:../../packages/js/internal-js-tests
-      '@woocommerce/notices': link:../../packages/js/notices
       '@woocommerce/internal-style-build': link:../../packages/js/internal-style-build
       '@woocommerce/navigation': link:../../packages/js/navigation
+      '@woocommerce/notices': link:../../packages/js/notices
       '@woocommerce/number': link:../../packages/js/number
       '@woocommerce/onboarding': link:../../packages/js/onboarding
       '@woocommerce/tracks': link:../../packages/js/tracks
@@ -18871,7 +18871,7 @@ packages:
       mississippi: 3.0.0
       mkdirp: 0.5.5
       move-concurrently: 1.0.1
-      promise-inflight: 1.0.1_bluebird@3.7.2
+      promise-inflight: 1.0.1
       rimraf: 2.7.1
       ssri: 6.0.2
       unique-filename: 1.1.1
@@ -33850,17 +33850,6 @@ packages:
         optional: true
     dev: true
 
-  /promise-inflight/1.0.1_bluebird@3.7.2:
-    resolution: {integrity: sha1-mEcocL8igTL8vdhoEputEsPAKeM=}
-    peerDependencies:
-      bluebird: '*'
-    peerDependenciesMeta:
-      bluebird:
-        optional: true
-    dependencies:
-      bluebird: 3.7.2
-    dev: true
-
   /promise-retry/2.0.1:
     resolution: {integrity: sha512-y+WKFlBR8BGXnsNlIHFGPZmyDf3DFMoLhaflAnyZgV6rG6xu+JwesTo2Q9R6XwYmtmwAFCkAk3e35jEdoeh/3g==}
     engines: {node: '>=10'}
@@ -39854,7 +39843,7 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.4.5_webpack@4.46.0
       watchpack: 1.7.5
-      webpack-cli: 3.3.12_webpack@5.70.0
+      webpack-cli: 3.3.12_webpack@4.46.0
       webpack-sources: 1.4.3
     transitivePeerDependencies:
       - supports-color

@@ -6,6 +6,9 @@
  * @version 2.4.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Admin\Features\Features;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -44,6 +47,29 @@ class WC_Admin_Pointers {
 	 */
 	public function create_product_tutorial() {
 		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		global $wp_post_types;
+
+		if (
+			Features::is_enabled( 'experimental-product-tour' ) &&
+			isset( $_GET['spotlight'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			isset( $wp_post_types )
+		) {
+			$labels          = $wp_post_types['product']->labels;
+			$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
+
+			$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-homepage-notice' );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+			wp_enqueue_script(
+				'product-tutorial',
+				WCAdminAssets::get_url( 'wp-admin-scripts/product-tour', 'js' ),
+				array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+				WC_VERSION,
+				true
+			);
 			return;
 		}
 
