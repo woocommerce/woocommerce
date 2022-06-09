@@ -42,8 +42,9 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 ) {
 
 const removeDismissedCompatibilityNoticesFromLocalStorage = async () => {
 	await page.evaluate( () => {
-		// eslint-disable-next-line no-undef
-		localStorage.removeItem( 'wc-blocks_dismissed_compatibility_notices' );
+		window.localStorage.removeItem(
+			'wc-blocks_dismissed_compatibility_notices'
+		);
 	} );
 };
 
@@ -82,8 +83,7 @@ describe( `${ block.name } Block`, () => {
 
 		it( "after the compatibility notice is dismissed, it doesn't appear again", async () => {
 			await page.evaluate( () => {
-				// eslint-disable-next-line no-undef
-				localStorage.setItem(
+				window.localStorage.setItem(
 					'wc-blocks_dismissed_compatibility_notices',
 					'["mini-cart"]'
 				);
@@ -132,8 +132,7 @@ describe( `${ block.name } Block`, () => {
 
 		it( "after the compatibility notice is dismissed, it doesn't appear again", async () => {
 			await page.evaluate( () => {
-				// eslint-disable-next-line no-undef
-				localStorage.setItem(
+				window.localStorage.setItem(
 					'wc-blocks_dismissed_compatibility_notices',
 					'["mini-cart"]'
 				);
