@@ -2,17 +2,30 @@
  * External dependencies
  */
 import { render, useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import qs from 'qs';
-import { __ } from '@wordpress/i18n';
 
-const root = document.createElement( 'div' );
-root.setAttribute( 'id', 'product-tour-root' );
+/**
+ * Internal dependencies
+ */
+import { useTmceIframeFocusStyle } from './use-tmce-iframe-focus-style';
+import { useActiveEditorType } from './use-active-editor-type';
+import {
+	bindEnableGuideModeClickEvent,
+	waitUntilElementTopNotChange,
+} from './utils';
 
-const ProductTour = () => {
-	const [ showTour, setShowTour ] = useState< boolean >( false );
-
-	const config: TourKitTypes.WooConfig = {
+const getTourConfig = ( {
+	isExcerptEditorTmceActive,
+	isContentEditorTmceActive,
+	closeHandler,
+}: {
+	isExcerptEditorTmceActive: boolean;
+	isContentEditorTmceActive: boolean;
+	closeHandler: () => void;
+} ): TourKitTypes.WooConfig => {
+	return {
 		placement: 'bottom-start',
 		options: {
 			effects: {
@@ -66,11 +79,15 @@ const ProductTour = () => {
 			},
 			{
 				referenceElements: {
-					desktop: '#wp-content-editor-container',
+					desktop: '#wp-content-wrap',
 				},
 				focusElement: {
-					iframe: '#content_ifr',
-					desktop: '#tinymce',
+					iframe: isContentEditorTmceActive
+						? '#content_ifr'
+						: undefined,
+					desktop: isContentEditorTmceActive
+						? '#tinymce'
+						: '#wp-content-editor-container > .wp-editor-area',
 				},
 				meta: {
 					heading: __(
@@ -107,8 +124,12 @@ const ProductTour = () => {
 					desktop: '#postexcerpt',
 				},
 				focusElement: {
-					iframe: '#excerpt_ifr',
-					desktop: '#tinymce',
+					iframe: isExcerptEditorTmceActive
+						? '#excerpt_ifr'
+						: undefined,
+					desktop: isExcerptEditorTmceActive
+						? '#tinymce'
+						: '#wp-excerpt-editor-container > .wp-editor-area',
 				},
 				meta: {
 					heading: __(
@@ -192,109 +213,53 @@ const ProductTour = () => {
 				},
 			},
 		],
-		closeHandler: () => setShowTour( false ),
+		closeHandler,
 	};
+};
+
+const ProductTour = () => {
+	const [ showTour, setShowTour ] = useState< boolean >( false );
+
+	const { isTmce: isContentEditorTmceActive } = useActiveEditorType( {
+		editorWrapSelector: '#wp-content-wrap',
+	} );
+	const { isTmce: isExcerptEditorTmceActive } = useActiveEditorType( {
+		editorWrapSelector: '#wp-excerpt-wrap',
+	} );
+
+	const { style: contentTmceIframeFocusStyle } = useTmceIframeFocusStyle( {
+		isActive: showTour && isContentEditorTmceActive,
+		iframeSelector: '#content_ifr',
+	} );
+	const { style: excerptTmceIframeFocusStyle } = useTmceIframeFocusStyle( {
+		isActive: showTour && isExcerptEditorTmceActive,
+		iframeSelector: '#excerpt_ifr',
+	} );
+
+	const tourConfig = getTourConfig( {
+		isContentEditorTmceActive,
+		isExcerptEditorTmceActive,
+		closeHandler: () => setShowTour( false ),
+	} );
 
 	useEffect( () => {
-		let intervalId: NodeJS.Timeout;
-
-		const bindEnableGuideModeBtnEvent = () => {
-			// Overwrite the default behavior of the "Enable guided mode" button when a user clicks it.
-			const enableGuideModeBtn = Array.from(
-				window.document.querySelectorAll( '.page-title-action' )
-			).find( ( el ) => el.textContent === 'Enable guided mode' );
-
-			if ( enableGuideModeBtn ) {
-				enableGuideModeBtn.addEventListener( 'click', ( e ) => {
-					e.preventDefault();
-					setShowTour( true );
-				} );
-			}
-		};
-
-		const waitInitialElementReadyAndShowTour = () => {
-			// Wait until the initial element position is ready and then show the tour.
-			const initialElement = document.querySelector(
-				config.steps[ 0 ].referenceElements?.desktop || ''
-			);
-			let lastInitialElementTop = initialElement?.getBoundingClientRect()
-				.top;
-
-			intervalId = setInterval( () => {
-				const top = initialElement?.getBoundingClientRect().top;
-				if ( lastInitialElementTop === top ) {
-					setShowTour( true );
-					if ( intervalId ) {
-						clearInterval( intervalId );
-					}
-				}
-				lastInitialElementTop = top;
-			}, 500 );
-		};
+		bindEnableGuideModeClickEvent( ( e ) => {
+			e.preventDefault();
+			setShowTour( true );
+		} );
 
 		const query = qs.parse( window.location.search.slice( 1 ) );
 		if ( query && query.tutorial === 'true' ) {
-			waitInitialElementReadyAndShowTour();
+			const intervalId = waitUntilElementTopNotChange(
+				tourConfig.steps[ 0 ].referenceElements?.desktop || '',
+				() => setShowTour( true ),
+				500
+			);
+			return () => clearInterval( intervalId );
 		}
-
-		bindEnableGuideModeBtnEvent();
-
-		return () => clearInterval( intervalId );
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
-
-	// Add a focus class to product description & short description when editor is focused.
-	useEffect( () => {
-		if ( ! showTour ) {
-			return;
-		}
-		const addClassToIframeWhenChildFocus = (
-			iframeSelector: string,
-			childSelector: string
-		) => {
-			const iframe = document.querySelector< HTMLIFrameElement >(
-				iframeSelector
-			);
-			const innerDoc =
-				iframe?.contentDocument ||
-				( iframe?.contentWindow && iframe?.contentWindow.document );
-
-			if ( innerDoc ) {
-				const child = innerDoc.querySelector< HTMLElement >(
-					childSelector
-				);
-
-				const onFocus = () => {
-					iframe?.classList.add( 'focus-within' );
-				};
-				const onBlur = () => iframe?.classList.remove( 'focus-within' );
-
-				child?.addEventListener( 'focus', onFocus );
-				child?.addEventListener( 'blur', onBlur );
-
-				return () => {
-					child?.removeEventListener( 'focus', onFocus );
-					child?.removeEventListener( 'blur', onBlur );
-				};
-			}
-			return () => ( {} );
-		};
-
-		const clearContentIFrameEvent = addClassToIframeWhenChildFocus(
-			'#content_ifr',
-			'#tinymce'
-		);
-		const clearExcerptIFrameEvent = addClassToIframeWhenChildFocus(
-			'#excerpt_ifr',
-			'#tinymce'
-		);
-
-		return () => {
-			clearContentIFrameEvent();
-			clearExcerptIFrameEvent();
-		};
-	}, [ showTour ] );
 
 	if ( ! showTour ) {
 		return null;
@@ -303,15 +268,17 @@ const ProductTour = () => {
 	return (
 		<>
 			<style>
-				{ `
-					#content_ifr.focus-within, #excerpt_ifr.focus-within {
+				{ contentTmceIframeFocusStyle }
+				{ excerptTmceIframeFocusStyle }
+				{ `.wp-editor-area:focus {
 						border: 1.5px solid #007CBA;
-					}
-				` }
+					}` }
 			</style>
-			<TourKit config={ config } />
+			<TourKit config={ tourConfig } />
 		</>
 	);
 };
 
+const root = document.createElement( 'div' );
+root.setAttribute( 'id', 'product-tour-root' );
 render( <ProductTour />, document.body.appendChild( root ) );
