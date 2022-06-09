@@ -10,7 +10,7 @@ import { readFileSync } from 'fs';
 /**
  * Internal dependencies
  */
-import { startWPEnv, stopWPEnv } from './utils';
+import { startWPEnv, stopWPEnv, isValidCommitHash } from './utils';
 
 /**
  * Fetch branches from origin.
@@ -35,13 +35,20 @@ export const fetchBranch = (
 		return true;
 	}
 
+	if ( isValidCommitHash( branch ) ) {
+		// The hash is valid and available in history. No need to fetch anything.
+		return true;
+	}
+
 	try {
 		// Fetch branch.
 		execSync( `git fetch origin ${ branch }` );
 		// Create branch.
 		execSync( `git branch ${ branch } origin/${ branch }` );
 	} catch ( e ) {
-		error( `Unable to fetch ${ branch }` );
+		error(
+			`Unable to fetch ${ branch }. Supply a valid branch name or commit hash.`
+		);
 		return false;
 	}
 
