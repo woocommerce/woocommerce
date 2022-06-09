@@ -54,8 +54,7 @@ describe( `${ block.name } Block`, () => {
 			beforeAll( async () => {
 				// make sure CartCheckoutCompatibilityNotice will appear
 				await page.evaluate( () => {
-					// eslint-disable-next-line no-undef
-					localStorage.removeItem(
+					window.localStorage.removeItem(
 						'wc-blocks_dismissed_compatibility_notices'
 					);
 				} );
@@ -73,8 +72,7 @@ describe( `${ block.name } Block`, () => {
 		describe( 'after compatibility notice is dismissed', () => {
 			beforeAll( async () => {
 				await page.evaluate( () => {
-					// eslint-disable-next-line no-undef
-					localStorage.setItem(
+					window.localStorage.setItem(
 						'wc-blocks_dismissed_compatibility_notices',
 						'["cart"]'
 					);
@@ -85,8 +83,7 @@ describe( `${ block.name } Block`, () => {
 
 			afterAll( async () => {
 				await page.evaluate( () => {
-					// eslint-disable-next-line no-undef
-					localStorage.removeItem(
+					window.localStorage.removeItem(
 						'wc-blocks_dismissed_compatibility_notices'
 					);
 				} );
