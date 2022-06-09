@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clean up unused remote inbox notifications option #33373
