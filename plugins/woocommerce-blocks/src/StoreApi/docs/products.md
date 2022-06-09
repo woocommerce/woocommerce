@@ -2,9 +2,8 @@
 
 The store products API provides public product data so it can be rendered on the client side.
 
-- [List Products](#list-products)
-- [Single Product](#single-product)
-- [](#)
+-   [List Products](#list-products)
+-   [Single Product](#single-product)
 
 ## List Products
 
@@ -190,7 +189,9 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 }
 ```
 
-## <!-- FEEDBACK -->
+<!-- FEEDBACK -->
+
+---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 

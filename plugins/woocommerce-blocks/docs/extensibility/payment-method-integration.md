@@ -4,21 +4,21 @@ The checkout block has an API interface for payment methods to integrate that co
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Client Side integration](#client-side-integration)
-  - [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
-    - [`name` (required)](#name-required)
-    - [`content` (required)](#content-required)
-    - [`edit` (required)](#edit-required)
-    - [`canMakePayment` (required):](#canmakepayment-required)
-    - [`paymentMethodId`](#paymentmethodid)
-    - [`supports:features`](#supportsfeatures)
-  - [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
-  - [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
-- [Server Side Integration](#server-side-integration)
-  - [Processing Payment](#processing-payment)
-  - [Registering Assets](#registering-assets)
-  - [Hooking into the Checkout processing by the Store API.](#hooking-into-the-checkout-processing-by-the-store-api)
-  - [Putting it all together](#putting-it-all-together)
+-   [Client Side integration](#client-side-integration)
+    -   [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
+        -   [`name` (required)](#name-required)
+        -   [`content` (required)](#content-required)
+        -   [`edit` (required)](#edit-required)
+        -   [`canMakePayment` (required):](#canmakepayment-required)
+        -   [`paymentMethodId`](#paymentmethodid)
+        -   [`supports:features`](#supportsfeatures)
+    -   [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
+    -   [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
+-   [Server Side Integration](#server-side-integration)
+    -   [Processing Payment](#processing-payment)
+    -   [Registering Assets](#registering-assets)
+    -   [Hooking into the Checkout processing by the Store API.](#hooking-into-the-checkout-processing-by-the-store-api)
+    -   [Putting it all together](#putting-it-all-together)
 
 ## Client Side integration
 
@@ -34,13 +34,13 @@ In both cases, the client side integration is done using registration methods ex
 
 To register an express payment method, you use the `registerExpressPaymentMethod` function from the blocks registry. An example of importing this for use in your JavaScript file is:
 
-_Aliased import_
+#### Aliased import
 
 ```js
 import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 ```
 
-_wc global_
+#### `wc global`
 
 ```js
 const { registerExpressPaymentMethod } = wc.wcBlocksRegistry;
@@ -81,11 +81,11 @@ This should be a React node that will output in the express payment method area 
 
 This should be a React node that will be output in the express payment method area when the block is rendered in the editor. It will be cloned in the rendering process. When cloned, this React node will receive props from the payment method interface to checkout (but they will contain preview data).
 
-#### `canMakePayment` (required):
+#### `canMakePayment` (required)
 
 A callback to determine whether the payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order.
 
-```
+```ts
 canMakePayment( {
     cart: Cart,
     cartTotals: CartTotals,
@@ -120,13 +120,13 @@ This is an array of payment features supported by the gateway. It is used to cro
 
 To register a payment method, you use the `registerPaymentMethod` function from the blocks registry. An example of importing this for use in your JavaScript file is:
 
-_Aliased import_
+#### Aliased import
 
 ```js
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 ```
 
-_wc global_
+#### `wc global`
 
 ```js
 const { registerPaymentMethod } = wc.wcBlocksRegistry;
@@ -193,7 +193,7 @@ In your class:
 -   Define a `get_payment_method_script_handles_for_admin` function. Include this if your payment method has a script you _only_ want to load in the editor context for the checkout block. Include here any script from `get_payment_method_script_handles` that is also needed in the admin.
 -   Define a `get_payment_method_data` function. You can return from this function an associative array of data you want to be exposed for your payment method client side. This data will be available client side via `wc.wcSettings.getSetting`. So for instance if you assigned `stripe` as the value of the `name` property for this class, client side you can access any data via: `wc.wcSettings.getSetting( 'stripe_data' )`. That would return an object matching the shape of the associative array you returned from this function.
 
-### Hooking into the Checkout processing by the Store API.
+### Hooking into the Checkout processing by the Store API
 
 There may be some cases where the fallback legacy processing of Checkout requests from the StoreAPI mentioned earlier doesn't work for your existing payment method integration. For these cases, there is also an [action hook you can implement to hook into the server side processing of the order](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/308e968c700028180cab391f2223eb0a43dd2d4d/src/RestApi/StoreApi/Routes/Checkout.php#L350-L361). **Note:** a good place to register your callback on this hook is in the `initialize` method of the payment method class you created from the above instructions.
 
@@ -240,10 +240,11 @@ function my_extension_woocommerce_blocks_support() {
 As an example, you can see how the Stripe extension adds it's integration in this [pull request](https://github.com/woocommerce/woocommerce-gateway-stripe/pull/1467/files).
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/payment-method-integration.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

@@ -131,10 +131,12 @@ A function that needs to return true when the filtered value is passed in order 
 Filters are implemented throughout the Mini Cart, Cart and Checkout Blocks, as well as some components. For a list of filters, [see this document](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/available-filters.md). You can also search for [usage of `__experimentalApplyCheckoutFilter` within the source code](https://github.com/woocommerce/woocommerce-gutenberg-products-block/search?q=__experimentalApplyCheckoutFilter).
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./packages/checkout/filter-registry/README.md)
+
 <!-- /FEEDBACK -->
 

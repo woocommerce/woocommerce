@@ -86,18 +86,18 @@ get_formatter( 'currency' )->format( [
 
 returns
 
-```
-  'price' => '1800'
-  'regular_price' => '1800'
-  'sale_price' => '1800'
-  'price_range' => null
-  'currency_code' => 'GBP'
-  'currency_symbol' => '£'
-  'currency_minor_unit' => 2
-  'currency_decimal_separator' => '.'
-  'currency_thousand_separator' => ','
-  'currency_prefix' => '£'
-  'currency_suffix' => ''
+```text
+'price' => '1800'
+'regular_price' => '1800'
+'sale_price' => '1800'
+'price_range' => null
+'currency_code' => 'GBP'
+'currency_symbol' => '£'
+'currency_minor_unit' => 2
+'currency_decimal_separator' => '.'
+'currency_thousand_separator' => ','
+'currency_prefix' => '£'
+'currency_suffix' => ''
 ```
 
 ## HtmlFormatter
@@ -123,13 +123,17 @@ get_formatter( 'html' )->format(
 ```
 
 returns
-`alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.`
+
+```text
+alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.
+```
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/extend-rest-api-formatters.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->
