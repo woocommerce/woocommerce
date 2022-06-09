@@ -1,5 +1,14 @@
 # Schema Store
 
+## Table of contents <!-- omit in toc -->
+
+-   [Table of contents](#table-of-contents)
+-   [Actions](#actions)
+    -   [`receiveRoutes( routes, namespace = '/wc/blocks' )`](#receiveroutes-routes-namespace--wcblocks-)
+-   [Selectors](#selectors)
+    -   [`getRoute( namespace, resourceName, ids = [] )`](#getroute-namespace-resourcename-ids---)
+    -   [`getRoutes( namespace )`](#getroutes-namespace-)
+
 To utilize this store you will import the `SCHEMA_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
 ```js
@@ -43,3 +52,13 @@ wp.data.select( SCHEMA_STORE_KEY ).getRoute( '/wc/blocks', 'products', [ 20 ] );
 ### `getRoutes( namespace )`
 
 This will return all the registered routes for the given namespace as a flat array.
+
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/blocks/feature-flags-and-experimental-interfaces.md)
+
+<!-- /FEEDBACK -->

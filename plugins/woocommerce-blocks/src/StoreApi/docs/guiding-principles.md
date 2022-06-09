@@ -1,15 +1,17 @@
 # Store API Guiding principles <!-- omit in toc -->
 
-The following principles should be considered when extending, creating, or updating endpoints in the Store API.
+## Table of Contents <!-- omit in toc -->
 
--   [Routes must include a well-defined JSON schema](#routes-must-include-a-well-defined-json-schema)
--   [Routes should be designed around resources with a single type of schema](#routes-should-be-designed-around-resources-with-a-single-type-of-schema)
-    -   [Error Handling](#error-handling)
-    -   [Cart Operations](#cart-operations)
--   [Exposed data must belong to the current user or be non-sensitive](#exposed-data-must-belong-to-the-current-user-or-be-non-sensitive)
--   [Collections of resources should be paginated](#collections-of-resources-should-be-paginated)
--   [API Responses should use standard HTTP status codes](#api-responses-should-use-standard-http-status-codes)
--   [Breaking changes should be avoided where possible](#breaking-changes-should-be-avoided-where-possible)
+- [Routes must include a well-defined JSON schema](#routes-must-include-a-well-defined-json-schema)
+- [Routes should be designed around resources with a single type of schema](#routes-should-be-designed-around-resources-with-a-single-type-of-schema)
+    - [Error Handling](#error-handling)
+    - [Cart Operations](#cart-operations)
+- [Exposed data must belong to the current user or be non-sensitive](#exposed-data-must-belong-to-the-current-user-or-be-non-sensitive)
+- [Collections of resources should be paginated](#collections-of-resources-should-be-paginated)
+- [API Responses should use standard HTTP status codes](#api-responses-should-use-standard-http-status-codes)
+- [Breaking changes should be avoided where possible](#breaking-changes-should-be-avoided-where-possible)
+
+The following principles should be considered when extending, creating, or updating endpoints in the Store API.
 
 ## Routes must include a [well-defined JSON schema](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/)
 
@@ -29,12 +31,12 @@ If you’re struggling to define a consistent schema, your approach may be flawe
 
 ```php
 tags: [
-     "my-tag": {
-          // ...tag data
-     },
-     "my-other-tag": {
-          // ...tag data
-     }
+  "my-tag": {
+    // ...tag data
+  },
+  "my-other-tag": {
+    // ...tag data
+  }
 ]
 ```
 
@@ -42,14 +44,14 @@ However, this is difficult to represent in Schema and is not predictable for the
 
 ```php
 tags: [
-     {
-          "slug": "my-tag",
-          // ...tag data
-     },
-     {
-          "slug": "my-other-tag",
-          // ...tag data
-     }
+  {
+    "slug": "my-tag",
+    // ...tag data
+  },
+  {
+    "slug": "my-other-tag",
+    // ...tag data
+  }
 ]
 ```
 
@@ -58,7 +60,7 @@ tags: [
 Routes should be designed around resources (nouns) rather than operations (verbs). Routes should also return only one type of data defined by their Schema. For example:
 
 | Route                    | Resource type | Expected data               |
-| :----------------------- | :------------ | :-------------------------- |
+| ------------------------ | ------------- | --------------------------- |
 | `wc/store/v1/cart`       | Cart          | A cart object               |
 | `wc/store/v1/cart/items` | Cart Item     | A list of cart item objects |
 | `wc/store/v1/products`   | Product       | A list of product objects   |
@@ -131,7 +133,7 @@ The version will not increase for bug fixes unless the scope of the bug causes a
 
 <!-- FEEDBACK -->
 
----
+--
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 

@@ -1,4 +1,9 @@
-# Icons
+# Icons <!-- omit in toc -->
+
+## Table of contents <!-- omit in toc -->
+
+-   [Usage](#usage)
+-   [Adding Icons](#adding-icons)
 
 WooCommerce Blocks Icons Library.
 
@@ -25,3 +30,13 @@ Before adding a new icon, make sure the icon is not already included in the [Lib
 3. Remove width and height since they're handled by Icon.
 4. Remove any hardcoded colors on the svg. If necessary, use `CurrentColor`.
 5. Export the Icon in `./library/index.js`.
+
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
+
+<!-- /FEEDBACK -->

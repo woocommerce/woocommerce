@@ -1,16 +1,126 @@
-# WooCommerce Blocks Handbook
+# WooCommerce Blocks Handbook <!-- omit in toc -->
+
+## Table of Contents <!-- omit in toc -->
+
+- [Contributors](#contributors)
+- [Internal developers](#internal-developers)
+- [Third-party developers](#third-party-developers)
+- [Designers](#designers)
+- [Developer Resources](#developer-resources)
+- [Tutorials](#tutorials)
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
-| Document                                          | Description                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Contributing](contributors/getting-started.md)   | These documents explain how you can contribute to the development of the blocks plugin, development best practices, and how to help with testing.                                                                                                                               |
-| [Blocks](blocks/README.md)                        | This documentation covers functionality specific to certain Blocks.                                                                                                                                                                                                             |
-| [Block Client APIs](block-client-apis/README.md)  | This documentation covers API interfaces within Blocks. In most cases, these docs describe APIs and interfaces that are internal only, and thus are provided to assist with developing the blocks in this repository. Documentation will tend to focus on high level overviews. |
-| [Store API (REST API)](../src/StoreApi/README.md) | These documents cover the Store API used to get product data on the frontend.                                                                                                                                                                                                   |
-| [Extensibility](extensibility/README.md)          | These documents cover extensibility of WooCommerce Blocks.                                                                                                                                                                                                                      |
-| [Theming](theming/README.md)                      | These documents cover theming for blocks, styles, CSS classnames and other theming best practices.                                                                                                                                                                              |
-| [Templates](templates/README.md)                  | These documents provide a technical overview of WooCommerce block template (parts) functionality.                                                                                                                                                                               |
+## Contributors
+
+> Want to contribute to the WooCommerce Blocks plugin? The following documents offer information that can help you get started.
+
+-   [Contributing](contributors/contributing/README.md)
+    -   [Getting Started](contributors/contributing/getting-started.md)
+    -   [Coding Guidelines](contributors/contributing/coding-guidelines.md)
+    -   [Block Script Assets](contributors/contributing/block-assets.md)
+    -   [CSS Build System](contributors/contributing/css-build-system.md)
+    -   [JavaScript Build System](contributors/contributing/javascript-build-system.md)
+    -   [JavaScript Testing](contributors/contributing/javascript-testing.md)
+    -   [Storybook & Components](contributors/contributing/storybook-and-components.md)
+
+## Internal developers
+
+> Are you an internal developer? The following documents offer information about the different blocks, the Block Client APIs, the Store API, the templates and the testing process.
+
+-   [Blocks](internal-developers/blocks/README.md)
+    -   [Stock Reservation during Checkout](internal-developers/blocks/stock-reservation.md)
+    -   [Features Flags and Experimental interfaces](internal-developers/blocks/feature-flags-and-experimental-interfaces.md)
+-   [Block Data](../assets/js/data/README.md)
+    -   [Collections Store](../assets/js/data/collections/README.md)
+    -   [Query State Store](../assets/js/data/query-state/README.md)
+    -   [Schema Store](../assets/js/data/schema/README.md)
+-   [Block Client APIs](internal-developers/block-client-apis/README.md)
+    -   [Checkout API interface](internal-developers/block-client-apis/checkout/checkout-api.md)
+    -   [Checkout Flow and Events](internal-developers/block-client-apis/checkout/checkout-flow-and-events.md)
+    -   [Notices](internal-developers/block-client-apis/notices.md)
+-   [Editor Components](../assets/js/editor-components/README.md)
+    -   [SearchListControl](../assets/js/editor-components/search-list-control/README.md)
+    -   [Tag](../assets/js/editor-components/tag/README.md)
+    -   [TextToolbarButton](../assets/js/editor-components/text-toolbar-button/README.md)
+-   [Icons](../assets/js/icons/README.md)
+-   [Legacy Build](../assets/js/legacy/README.md)
+-   [Store API (REST API)](../src/StoreApi/README.md)
+-   [Storybook](../storybook/README.md)
+-   [Templates](internal-developers/templates/README.md)
+    -   [BlockTemplateController.php](internal-developers/templates/block-template-controller.md)
+    -   [ClassicTemplate.php](internal-developers/templates/classic-template.md)
+    -   [Classic Template Block](../assets/js/blocks/classic-template/README.md)
+-   [Testing](internal-developers/testing/README.md)
+    -   [When to employ end to end testing](internal-developers/testing/when-to-employ-e2e-testing.md)
+    -   [Smoke Testing](internal-developers/testing/smoke-testing.md)
+    -   [Cart and Checkout Testing](internal-developers/testing/cart-checkout/README.md)
+        -   [General Flow](internal-developers/testing/cart-checkout/general-flow.md)
+        -   [Editor](internal-developers/testing/cart-checkout/editor.md)
+        -   [Shipping](internal-developers/testing/cart-checkout/shipping.md)
+        -   [Payments](internal-developers/testing/cart-checkout/payment.md)
+        -   [Items](internal-developers/testing/cart-checkout/items.md)
+        -   [Taxes](internal-developers/testing/cart-checkout/taxes.md)
+        -   [Coupons](internal-developers/testing/cart-checkout/coupons.md)
+        -   [Compatibility](internal-developers/testing/cart-checkout/compatibility.md)
+    -   [Releases](internal-developers/testing/releases/README.md)
+
+## Third-party developers
+
+> Are you a third-party developer? The following documents explain how to extend the WooCommerce Blocks plugin with your custom extension.
+
+-   [Extensibility](third-party-developers/extensibility/README.md)
+    -   Hooks
+        -   [Actions](third-party-developers/extensibility/hooks/actions.md)
+        -   [Filters](third-party-developers/extensibility/hooks/filters.md)
+    -   REST API
+        -   [Exposing your data in the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md)
+        -   [Available endpoints to extend with ExtendSchema](third-party-developers/extensibility/rest-api/available-endpoints-to-extend.md)
+        -   [Adding an endpoint to ExtendSchema](third-party-developers/extensibility/rest-api/extend-rest-api-new-endpoint.md)
+        -   [Available Formatters](third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
+        -   [Updating the cart with the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
+    -   Checkout Payment Methods
+        -   [Checkout Flow and Events](third-party-developers/extensibility/checkout-payment-methods/checkout-flow-and-events.md)
+        -   [Payment Method Integration](third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
+        -   [Filtering Payment Methods](third-party-developers/extensibility/checkout-payment-methods/filtering-payment-methods.md)
+    -   Checkout Block
+        -   [IntegrationInterface](third-party-developers/extensibility/checkout-block/integration-interface.md)
+        -   [Available Filters](third-party-developers/extensibility/checkout-block/available-filters.md)
+        -   [Slots and Fills](third-party-developers/extensibility/checkout-block/slot-fills.md)
+        -   [Available Slot Fills](third-party-developers/extensibility/checkout-block/available-slot-fills.md)
+        -   [DOM Events](third-party-developers/extensibility/checkout-block/dom-events.md)
+        -   [Blocks Registry](../packages/checkout/blocks-registry/README.md)
+        -   [Components](../packages/checkout/components/README.md)
+        -   [Filter Registry](../packages/checkout/filter-registry/README.md)
+        -   [Slot and Fill](../packages/checkout/slot/README.md)
+        -   [Utilities](../packages/checkout/utils/README.md)
+
+## Designers
+
+> Are you a designer? The following documents explain how to apply design-changes to the WooCommerce Blocks plugin.
+
+-   [Theming](designers/theming/README.md)
+    -   [All Products & filters](designers/theming/all-products-and-filters.md)
+    -   [Cart and Checkout](designers/theming/cart-and-checkout.md)
+    -   [Class names update in 4.6.0](designers/theming/class-names-update-460.md)
+    -   [Class names update in 3.4.0](designers/theming/class-names-update-340.md)
+    -   [Class names update in 3.3.0](designers/theming/class-names-update-330.md)
+    -   [Class names update in 2.8.0](designers/theming/class-names-update-280.md)
+    -   [Product grid blocks style update in 2.7.0](designers/theming/product-grid-270.md)
+
+## Developer Resources
+
+The following posts from <https://developer.woocommerce.com/category/developer-resources/>, provide deeper insights into the WooCommerce Blocks development.
+
+-   [Store API is now considered stable](https://developer.woocommerce.com/2022/03/25/store-api-is-now-considered-stable/)
+-   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woocommerce.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
+
+## Tutorials
+
+The following tutorials from <https://developer.woocommerce.com/category/tutorials/>, help you extending the WooCommerce Blocks plugin.
+
+-   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
+-   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
 
 <!-- FEEDBACK -->
 
@@ -21,4 +131,3 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
 
 <!-- /FEEDBACK -->
-

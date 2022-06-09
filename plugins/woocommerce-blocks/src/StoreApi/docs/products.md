@@ -1,9 +1,11 @@
 # Products API <!-- omit in toc -->
 
-The store products API provides public product data so it can be rendered on the client side.
+## Table of Contents <!-- omit in toc -->
 
--   [List Products](#list-products)
--   [Single Product](#single-product)
+- [List Products](#list-products)
+- [Single Product](#single-product)
+
+The store products API provides public product data so it can be rendered on the client side.
 
 ## List Products
 
