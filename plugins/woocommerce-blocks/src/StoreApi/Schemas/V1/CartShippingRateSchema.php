@@ -238,9 +238,11 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return object
 	 */
 	protected function prepare_package_destination_response( $package ) {
+		// If address_1 fails check address for back compatability.
+		$address = isset( $package['destination']['address_1'] ) ? $package['destination']['address_1'] : $package['destination']['address'];
 		return (object) $this->prepare_html_response(
 			[
-				'address_1' => $package['destination']['address_1'],
+				'address_1' => $address,
 				'address_2' => $package['destination']['address_2'],
 				'city'      => $package['destination']['city'],
 				'state'     => $package['destination']['state'],
