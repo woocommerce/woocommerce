@@ -175,6 +175,12 @@ export const stopWPEnv = ( error: ( s: string ) => void ): boolean => {
 	}
 };
 
+/**
+ * Check if branch string is actually a commit hash and exists in git history.
+ *
+ * @param {string } branch branch name or commit hash.
+ * @return {boolean} If string is valid commit hash.
+ */
 export const isValidCommitHash = ( branch: string ): boolean => {
 	try {
 		// See if hash is valid and exists in the history.

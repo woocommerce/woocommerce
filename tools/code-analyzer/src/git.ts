@@ -46,7 +46,9 @@ export const fetchBranch = (
 		// Create branch.
 		execSync( `git branch ${ branch } origin/${ branch }` );
 	} catch ( e ) {
-		error( `Unable to fetch ${ branch }` );
+		error(
+			`Unable to fetch ${ branch }. Supply a valid branch name or commit hash.`
+		);
 		return false;
 	}
 
