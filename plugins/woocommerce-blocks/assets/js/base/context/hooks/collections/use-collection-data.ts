@@ -13,10 +13,14 @@ import { useQueryStateByContext, useQueryStateByKey } from '../use-query-state';
 import { useCollection } from './use-collection';
 import { useQueryStateContext } from '../../providers/query-state-context';
 
-const buildCollectionDataQuery = ( collectionDataQueryState ) => {
+const buildCollectionDataQuery = (
+	collectionDataQueryState: Record< string, unknown >
+) => {
 	const query = collectionDataQueryState;
 
-	if ( collectionDataQueryState.calculate_attribute_counts ) {
+	if (
+		Array.isArray( collectionDataQueryState.calculate_attribute_counts )
+	) {
 		query.calculate_attribute_counts = sortBy(
 			collectionDataQueryState.calculate_attribute_counts.map(
 				( { taxonomy, queryType } ) => {
@@ -33,12 +37,22 @@ const buildCollectionDataQuery = ( collectionDataQueryState ) => {
 	return query;
 };
 
+interface UseCollectionDataProps {
+	queryAttribute?: {
+		taxonomy: string;
+		queryType: string;
+	};
+	queryPrices?: boolean;
+	queryStock?: boolean;
+	queryState: Record< string, unknown >;
+}
+
 export const useCollectionData = ( {
 	queryAttribute,
 	queryPrices,
 	queryStock,
 	queryState,
-} ) => {
+}: UseCollectionDataProps ) => {
 	let context = useQueryStateContext();
 	context = `${ context }-collection-data`;
 
