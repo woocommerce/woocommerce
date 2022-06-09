@@ -211,6 +211,7 @@ class WC_Install {
 		),
 		'6.7.0' => array(
 			'wc_update_670_purge_comments_count_cache',
+			'wc_update_670_delete_deprecated_remote_inbox_notifications_option',
 		),
 	);
 
