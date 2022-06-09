@@ -1,4 +1,12 @@
-# Collections Store
+# Collections Store <!-- omit in toc -->
+
+## Table of Contents <!-- omit in toc -->
+
+- [Actions](#actions)
+    - [`receiveCollection( namespace, resourceName, queryString, ids = [], items = [], replace = false )`](#receivecollection-namespace-resourcename-querystring-ids---items---replace--false-)
+- [Selectors](#selectors)
+    - [`getCollection( namespace, resourceName, query = null, ids=[] )`](#getcollection-namespace-resourcename-query--null-ids-)
+    - [`getCollectionHeader( namespace, resourceName, header, query = null, ids = [])`](#getcollectionheader-namespace-resourcename-header-query--null-ids--)
 
 To utilize this store you will import the COLLECTIONS_STORE_KEY in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
@@ -51,3 +59,13 @@ If the collection does not have any matching headers for the given arguments, th
 | `header`       | string | The header key for the header.                                                                                           |
 | `query`        | Object | The query arguments for the collection. Eg. `{ order: 'ASC', sortBy: Price }`                                            |
 | `ids`          | Array  | If the collection route has placeholders for ids you provide the values for those placeholders in this array (in order). |
+
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/blocks/feature-flags-and-experimental-interfaces.md)
+
+<!-- /FEEDBACK -->

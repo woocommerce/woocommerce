@@ -1,11 +1,13 @@
 # Cart Items API <!-- omit in toc -->
 
--   [List Cart Items](#list-cart-items)
--   [Single Cart Item](#single-cart-item)
--   [Add Cart Item](#add-cart-item)
--   [Edit Single Cart Item](#edit-single-cart-item)
--   [Delete Single Cart Item](#delete-single-cart-item)
--   [Delete All Cart Items](#delete-all-cart-items)
+## Table of Contents <!-- omit in toc -->
+
+- [List Cart Items](#list-cart-items)
+- [Single Cart Item](#single-cart-item)
+- [Add Cart Item](#add-cart-item)
+- [Edit Single Cart Item](#edit-single-cart-item)
+- [Delete Single Cart Item](#delete-single-cart-item)
+- [Delete All Cart Items](#delete-all-cart-items)
 
 ## List Cart Items
 

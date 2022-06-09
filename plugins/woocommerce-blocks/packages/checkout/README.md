@@ -1,13 +1,13 @@
 # Checkout <!-- omit in toc -->
 
-Components and utilities making it possible to integrate with the WooCommerce Mini Cart, Cart and Checkout Blocks.
-
 ## Table of Contents <!-- omit in toc -->
 
 -   [Installation](#installation)
 -   [Usage](#usage)
     -   [Aliased imports](#aliased-imports)
 -   [Folder Structure Overview](#folder-structure-overview)
+
+Components and utilities making it possible to integrate with the WooCommerce Mini Cart, Cart and Checkout Blocks.
 
 ## Installation
 

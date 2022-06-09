@@ -59,7 +59,11 @@ const generate = ( hooks ) => {
 			].filter( Boolean );
 		} ),
 	];
-	createDocs( 'docs/extensibility/actions.md', jsonDocs );
+
+	createDocs(
+		'docs/third-party-developers/extensibility/hooks/actions.md',
+		jsonDocs
+	);
 	console.log( chalk.green( 'Done!' ) );
 };
 
