@@ -8,12 +8,12 @@ This is a list of available endpoints that you can extend. If you want to add a 
 
 The main cart endpoint is extensible via ExtendSchema. The data is available via the `extensions` key in the response.
 
-### Passed Parameters:
+### Passed Parameters
 
 -   `data_callback`: none.
 -   `schema_callback`: none.
 
-### Key:
+### Key
 
 -   `CartSchema::IDENTIFIER`
 
@@ -21,12 +21,12 @@ The main cart endpoint is extensible via ExtendSchema. The data is available via
 
 The items endpoint, which is also available on `wc/store/cart` inside the `items` key. The data would be available inside each item of the `items` array.
 
-### Passed Parameters:
+### Passed Parameters
 
 -   `data_callback`: `$cart_item`.
 -   `schema_callback` none.
 
-### Key:
+### Key
 
 -   `CartItemSchema::IDENTIFIER`
 
@@ -34,20 +34,21 @@ The items endpoint, which is also available on `wc/store/cart` inside the `items
 
 The main products endpoint is extensible via ExtendSchema. The data is available via the `extensions` key for each `product` in the response array.
 
-### Passed Parameters:
+### Passed Parameters
 
 -   `data_callback`: `$product`.
 -   `schema_callback` none.
 
-### Key:
+### Key
 
 -   `ProductSchema::IDENTIFIER`
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/available-endpoints-to-extend.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

@@ -1,3 +1,5 @@
+# Validate Cart
+
 ```php
 // The action callback function.
 function my_function_callback( $errors, $cart ) {

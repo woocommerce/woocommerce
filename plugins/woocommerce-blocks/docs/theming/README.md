@@ -38,7 +38,7 @@ Some of our components have responsive classes depending on the container width.
 Those classes are:
 
 | Container width | Class name  |
-|-----------------|-------------|
+| --------------- | ----------- |
 | >700px          | `is-large`  |
 | 521px-700px     | `is-medium` |
 | 401px-520px     | `is-small`  |
@@ -81,10 +81,12 @@ WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. H
 -   [Class names update in 4.6.0](./class-names-update-460.md)
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/theming/README.md)
+
 <!-- /FEEDBACK -->
 

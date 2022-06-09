@@ -25,28 +25,29 @@ All class names assigned to an element must be prefixed. We use different prefix
 
 As a rule of thumb, this is the relation between location in the source tree and class name used:
 
-| Location in the tree        | Class names used                                      | Can be styled by themes? |
-| --------------------------- | ----------------------------------------------------- | :----------------------: |
-| assets/js/atomic/blocks     | `.wc-block-components-`                               |            ✓             |
-| assets/js/base/components   | `.wc-block-components-`                               |            ✓             |
-| assets/js/blocks            | Frontend: `.wc-block-`<br>Editor: `.wc-block-editor-` |          ✓<br>✘          |
-| assets/js/editor-components | `.wc-block-editor-components-`                        |            ✘             |
+| Location in the tree        | Class names used               | Can be styled by themes? |
+| --------------------------- | ------------------------------ | :----------------------: |
+| assets/js/atomic/blocks     | `.wc-block-components-`        |            ✓             |
+| assets/js/base/components   | `.wc-block-components-`        |            ✓             |
+| assets/js/blocks            | Frontend: `.wc-block-`         |            ✓             |
+| assets/js/blocks            | Editor: `.wc-block-editor-`    |            ✘             |
+| assets/js/editor-components | `.wc-block-editor-components-` |            ✘             |
 
 After the prefix, class names are built using BEM:
 
 A **root element** (or **Block** in BEM notation) is a standalone entity that is meaningful on its own. Whilst they can be nested and interact with each other, semantically they remain equal; there is no precedence or hierarchy.
 
-    Example: `wc-block-directory-name`
+Example: `wc-block-directory-name`
 
 Any descendant of the component's root element must append a dash-delimited descriptor, separated from the base by two consecutive underscores `__`.
 
 A **child element** (or **Element** in BEM notation) has no standalone meaning and is semantically tied to its block.
 
-    Example: `wc-block-directory-name__descriptor-foo-bar`
+Example: `wc-block-directory-name__descriptor-foo-bar`
 
 Finally, A **modifier** is a flag on an element which can be used to change appearance, behavior or state.
 
-    Example: `wc-block-directory-name__descriptor-foo-bar--state`
+Example: `wc-block-directory-name__descriptor-foo-bar--state`
 
 The **root element** is considered to be the highest ancestor element returned by the default export in the index.js. Notably, if your folder contains multiple files, each with their own default exported component, only the element rendered by that of index.js can be considered the root. All others should be treated as **descendants**.
 
@@ -109,24 +110,27 @@ Imagine we are styling the radio control input but our styles are conflicting wi
 
 Theme A:
 
-```
-input[type="radio"] { // specificity 0, 1, 1
+```css
+input[type='radio'] {
+	// specificity 0, 1, 1
 	background: red;
 }
 ```
 
 Theme B:
 
-```
-input[type="radio"]:checked { // specificity 0, 2, 1
+```css
+input[type='radio']:checked {
+	// specificity 0, 2, 1
 	background: blue;
 }
 ```
 
 And these are the styles of the block:
 
-```
-.wc-block-components-radio-control__input { // specificity 0, 1, 0
+```css
+.wc-block-components-radio-control__input {
+	// specificity 0, 1, 0
 	background: #fff;
 }
 ```
@@ -135,12 +139,12 @@ As you can see, the styles coming from the themes have higher specificity, so ou
 
 1. Never use `!important` rules in CSS to engage in a specificity war with a theme.
 2. Never use ID selectors.
-3. Try wrapping the entire component/block CSS with the root class name of that component:
-   For example:
+3. Try wrapping the entire component/block CSS with the root class name of that component, for example:
 
-```
+```css
 .wc-block-components-radio-control {
-	.wc-block-components-radio-control__input { // specificity 0, 2, 0, we win theme A!
+	.wc-block-components-radio-control__input {
+		// specificity 0, 2, 0, we win theme A!
 		background: #fff;
 	}
 }
@@ -148,10 +152,12 @@ As you can see, the styles coming from the themes have higher specificity, so ou
 
 4. Try adding an extra css class (or tag selector) to increase specificity. When doing so, add a comment explaining it.
 
-```
+```css
 .wc-block-components-radio-control {
 	// Extra class for specificity.
-	.wc-block-components-radio-control__option .wc-block-components-radio-control__input { // specificity 0, 3, 0, we win theme B!
+	.wc-block-components-radio-control__option
+		.wc-block-components-radio-control__input {
+		// specificity 0, 3, 0, we win theme B!
 		background: #fff;
 	}
 }
@@ -162,10 +168,11 @@ As you can see, the styles coming from the themes have higher specificity, so ou
 Notice in the worst case scenario we would have increased selector specificity by 2 classes (0, 2, 0). That shouldn't make it too difficult for other themes to write styles on top of ours.
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/coding-guidelines.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

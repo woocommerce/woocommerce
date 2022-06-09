@@ -8,8 +8,8 @@ Before you can start modifying files you'll want to clone this repository locall
 
 To do so from the command line, ensure you have [`git`](https://git-scm.com) installed on your machine, and run the clone command:
 
-```
-$ git clone https://github.com/woocommerce/woocommerce-gutenberg-products-block.git
+```sh
+git clone https://github.com/woocommerce/woocommerce-gutenberg-products-block.git
 ```
 
 ## Configuring your WordPress site
@@ -116,7 +116,7 @@ With the extension installed, ESLint will use the `.eslintrc.js` file in the roo
 
 To use Prettier, you should install the [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extension in Visual Studio Code. You can then configure it to be the default formatter and to automatically fix issues on save, by adding the following to your settings.
 
-```
+```js
 "[javascript]": {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true
@@ -129,17 +129,17 @@ This will use the `.prettierrc.js` file in the root folder of the Blocks plugin 
 
 You’ll find a handful of scripts in `package.json` that performs the automated tests and linting. You can run the following commands to execute automated tests in your terminal:
 
-- JS tests: `npm run test`
-
-- Run `npm run wp-env` command to setup the development environment in Docker.
+-   JS tests: `npm run test`
+-   Run `npm run wp-env` command to setup the development environment in Docker.
 
 To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/contributors/javascript-testing.md).
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/getting-started.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

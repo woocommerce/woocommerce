@@ -10,17 +10,17 @@ This is the feature plugin for WooCommerce + Gutenberg. This plugin serves as a 
 
 Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
-- [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
-- [User documentation](https://docs.woocommerce.com/document/woocommerce-blocks/)
+-   [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
+-   [User documentation](https://docs.woocommerce.com/document/woocommerce-blocks/)
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Documentation](#documentation)
-  - [Code Documentation](#code-documentation)
-- [Installing the plugin version](#installing-the-plugin-version)
-- [Installing the development version](#installing-the-development-version)
-- [Getting started with block development](#getting-started-with-block-development)
-- [Long-term vision](#long-term-vision)
+-   [Documentation](#documentation)
+    -   [Code Documentation](#code-documentation)
+-   [Installing the plugin version](#installing-the-plugin-version)
+-   [Installing the development version](#installing-the-development-version)
+-   [Getting started with block development](#getting-started-with-block-development)
+-   [Long-term vision](#long-term-vision)
 
 ## Documentation
 
@@ -30,17 +30,16 @@ If you want to see what we're working on for future versions, or want to help ou
 
 ### Code Documentation
 
-- [Blocks](./assets/js/blocks) - Documentation for specific Blocks.
-- [Editor Components](assets/js/editor-components) - Shared components used in WooCommerce blocks for the editor (Gutenberg) UI.
-- [WooCommerce Blocks Handbook](./docs) - Documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
-- [WooCommerce Blocks Storybook](https://woocommerce.github.io/woocommerce-gutenberg-products-block/) - Contains a list and demo of components used in the plugin.
+-   [Blocks](./assets/js/blocks) - Documentation for specific Blocks.
+-   [Editor Components](assets/js/editor-components) - Shared components used in WooCommerce blocks for the editor (Gutenberg) UI.
+-   [WooCommerce Blocks Handbook](./docs) - Documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
+-   [WooCommerce Blocks Storybook](https://woocommerce.github.io/woocommerce-gutenberg-products-block/) - Contains a list and demo of components used in the plugin.
 
 ## Installing the plugin version
 
 We release a new version of WooCommerce Blocks onto WordPress.org every few weeks, which can be used as an easier way to preview the features.
 
 > Note: The plugin follows a policy of supporting the "L0" strategy for version support. What this means is that the plugin will require the most recent version of WordPress, and the most recent version of WooCommerce core at the time of a release. You can read more about [this policy here](https://developer.woocommerce.com/?p=9998).
->
 
 1. Make sure you have the latest available versions of WordPress and WooCommerce on your site.
 2. The plugin version is available on WordPress.org. [Download the plugin version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
@@ -54,9 +53,9 @@ We release a new version of WooCommerce Blocks onto WordPress.org every few week
 4. `npm install` to install the dependencies.
 5. `composer install` to install core dependencies.
 6. To compile the code, run any of the following commands
-   1. `npm run build` (production build).
-   2. `npm run dev` (development build).
-   3. `npm start` (development build + watching for changes).
+    1. `npm run build` (production build).
+    2. `npm run dev` (development build).
+    3. `npm start` (development build + watching for changes).
 7. Activate the plugin.
 
 The source code is in the `assets/` folder and the compiled code is built into `build/`.

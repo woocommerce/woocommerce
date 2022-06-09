@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.7.0/schema.json",
+    "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.7.3/schema.json",
     "hooks": [
         {
             "name": "__experimental_woocommerce_blocks_add_data_attributes_to_block",
@@ -880,7 +880,7 @@
                 "tags": [
                     {
                         "name": "param",
-                        "content": "Quantity limit which defaults to 99 unless sold individually.",
+                        "content": "Quantity limit which defaults to 9999 unless sold individually.",
                         "types": [
                             "integer"
                         ],

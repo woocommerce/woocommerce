@@ -1,4 +1,4 @@
-name: JavaScript and CSS Linting
+name: JavaScript, CSS and Markdown Linting
 
 on:
     pull_request:
@@ -93,3 +93,20 @@ jobs:
 
             - name: Lint CSS
               run: npm run lint:css
+
+    MDLintingCheck:
+        name: Lint MD
+        needs: Setup
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
+            - name: Install Node dependencies
+              run: npm ci --no-optional
+            - name: Lint MD
+              run: npm run lint:md:docs

@@ -1,3 +1,5 @@
+# Payment Gateway Featured List
+
 ```php
 // The action callback function.
 function my_function_callback( $features, $gateway ) {

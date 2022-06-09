@@ -1,42 +1,44 @@
-- [Filtering payment methods in the Checkout block](#filtering-payment-methods-in-the-checkout-block)
-  - [The problem](#the-problem)
-  - [The solution](#the-solution)
-  - [Importing](#importing)
-  - [Signature](#signature)
-    - [Extension namespace collision](#extension-namespace-collision)
-  - [Usage example](#usage-example)
-  - [Callbacks registered for payment methods](#callbacks-registered-for-payment-methods)
-- [Filtering payment methods using requirements](#filtering-payment-methods-using-requirements)
-  - [The problem](#the-problem-1)
-  - [The solution](#the-solution-1)
-  - [Basic usage](#basic-usage)
-  - [Putting it all together](#putting-it-all-together)
+# Filtering payment methods
 
-# Filtering payment methods in the Checkout block
+-   [Filtering payment methods in the Checkout block](#filtering-payment-methods-in-the-checkout-block)
+    -   [The problem](#the-problem)
+    -   [The solution](#the-solution)
+    -   [Importing](#importing)
+    -   [Signature](#signature)
+        -   [Extension namespace collision](#extension-namespace-collision)
+    -   [Usage example](#usage-example)
+    -   [Callbacks registered for payment methods](#callbacks-registered-for-payment-methods)
+-   [Filtering payment methods using requirements](#filtering-payment-methods-using-requirements)
+    -   [The problem](#the-problem-1)
+    -   [The solution](#the-solution-1)
+    -   [Basic usage](#basic-usage)
+    -   [Putting it all together](#putting-it-all-together)
 
-## The problem
+## Filtering payment methods in the Checkout block
+
+### The problem
 
 You're an extension developer, and your extension is conditionally hiding payment gateways on the checkout step. You need to be able to hide payment gateways on the Checkout block using a front-end extensibility point.
 
-## The solution
+### The solution
 
 WooCommerce Blocks provides a function called `registerPaymentMethodExtensionCallbacks` which allows extensions to register callbacks for specific payment methods to determine if they can make payments.
 
-## Importing
+### Importing
 
-_Aliased import_
+#### Aliased import
 
 ```js
 import { registerPaymentMethodExtensionCallbacks } from '@woocommerce/blocks-registry';
 ```
 
-_wc global_
+#### `wc global`
 
 ```js
 const { registerPaymentMethodExtensionCallbacks } = wc.wcBlocksRegistry;
 ```
 
-## Signature
+### Signature
 
 | Parameter   | Description                                                                                                         | Type                                              |
 | ----------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -45,11 +47,11 @@ const { registerPaymentMethodExtensionCallbacks } = wc.wcBlocksRegistry;
 
 Read more below about [callbacks](#callbacks-registered-for-payment-methods).
 
-### Extension namespace collision
+#### Extension namespace collision
 
 When trying to register callbacks under an extension namespace already used with `registerPaymentMethodExtensionCallbacks`, the registration will be aborted and you will be notified that you are not using a unique namespace. This will be shown in the JavaScript console.
 
-## Usage example
+### Usage example
 
 ```js
 registerPaymentMethodExtensionCallbacks( 'my-hypothetical-extension', {
@@ -62,11 +64,11 @@ registerPaymentMethodExtensionCallbacks( 'my-hypothetical-extension', {
 } );
 ```
 
-## Callbacks registered for payment methods
+### Callbacks registered for payment methods
 
 Extensions can register only one callback per payment method:
 
-```
+```text
 payment_method_name: ( arg ) => {...}
 ```
 
@@ -96,9 +98,9 @@ interface CanMakePaymentArgument {
 
 If you need data that is not available in the parameter received by the callback you can consider [exposing your data in the Store API](extend-rest-api-add-data.md).
 
-# Filtering payment methods using requirements
+## Filtering payment methods using requirements
 
-## The problem
+### The problem
 
 Your extension has added functionality to your store in such a way that only specific payment gateways can process
 orders that contain certain products.
@@ -107,7 +109,7 @@ Using the example of `Bookings` if the shopper adds a `Bookable` product to thei
 and you, the merchant, want to confirm all bookings before taking payment. You would still need to capture the customer's
 checkout details but not their payment method at that point.
 
-## The solution
+### The solution
 
 To allow the shopper to check out without entering payment details, but still require them to fill in the other
 checkout details it is possible to create a new payment method which will handle carts containing a `Bookable` item.
@@ -120,7 +122,7 @@ For more information on how to register a payment method with WooCommerce Blocks
 [Payment method integration](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/payment-method-integration.md)
 documentation.
 
-## Basic usage
+### Basic usage
 
 Following the documentation for registering payment methods linked above, you should register your payment method with a
 unique `supports` feature, for example `booking_availability`. This will be used to isolate it and prevent other methods
@@ -132,7 +134,7 @@ requirements of the cart are. Below is an example of doing this for our `Bookabl
 Then you will need to use the `register_payment_requirements` on the `ExtendSchema` class to tell the Checkout block
 to execute a callback to check for requirements.
 
-## Putting it all together
+### Putting it all together
 
 This code example assumes there is some class called `Pseudo_Booking_Class` that has the `cart_contains_bookable_product`
 method available. The implementation of this method is not relevant here.
@@ -180,10 +182,11 @@ with a `Bookable` item in your cart, any method that does not `supports` the `bo
 not display, while yours, the one that _does_ support this requirement _will_ display.
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/filtering-payment-methods.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

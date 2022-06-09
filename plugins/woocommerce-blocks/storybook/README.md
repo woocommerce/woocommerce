@@ -78,7 +78,7 @@ The default export defines the metadata for your component. The most important t
 
 As mentioned, Storybook will try to infer the best control for your property type (e.g. an on/off switch for a `boolean`, etc.). However, there are times in which you want different options.
 
-Here is a link to the official Storybook documentation: https://storybook.js.org/docs/react/essentials/controls
+Here is a link to the official Storybook documentation: <https://storybook.js.org/docs/react/essentials/controls>
 
 But a TL;DR of most common usecases:
 
@@ -142,7 +142,7 @@ Usually, you want a story with the name `Default`, and other stories with intere
 }
 ```
 
-Full official docs: https://storybook.js.org/docs/react/writing-stories/introduction
+Full official docs: <https://storybook.js.org/docs/react/writing-stories/introduction>
 
 ### Snippets
 
@@ -166,7 +166,7 @@ While this is true for many cases (often you don't need to create a different st
 
 ### Can I create stories with mixed components?
 
-Yes, and it'd be awesome to see how our components interact with each other, especially in the context of blocks. At the time of writing, we have no such stories, however, here is a link to the official docs if you want to give a go at implementing this: https://storybook.js.org/docs/react/workflows/stories-for-multiple-components
+Yes, and it'd be awesome to see how our components interact with each other, especially in the context of blocks. At the time of writing, we have no such stories, however, here is a link to the official docs if you want to give a go at implementing this: <https://storybook.js.org/docs/react/workflows/stories-for-multiple-components>
 
 ## Tips
 
@@ -223,7 +223,7 @@ export default {
 
 Your component files can have `default` exports, but in order to play well with the automatic doc generation, they should **always** have named exports as well.
 
-See: https://github.com/strothj/react-docgen-typescript-loader/issues/75
+See: <https://github.com/strothj/react-docgen-typescript-loader/issues/75>
 
 ### Controlled components
 
@@ -271,7 +271,7 @@ const Template: Story< MyControlledComponentProps > = ( args ) => {
 
 Note that this makes things a bit more complex, so it is recommended to do only when it makes sense for a controlled value to still have a Storybook control.
 
-At the time of writing, there is a known bug that doesn't keep number inputs in sync: https://github.com/storybookjs/storybook/issues/15924
+At the time of writing, there is a known bug that doesn't keep number inputs in sync: <https://github.com/storybookjs/storybook/issues/15924>
 
 ### Simulating interactions
 
@@ -291,7 +291,7 @@ export default {
 };
 ```
 
-Full action docs: https://storybook.js.org/docs/react/essentials/actions
+Full action docs: <https://storybook.js.org/docs/react/essentials/actions>
 
 **However**, you might want to simulate some sort of behavior from your component, for example show how a `Retry` button triggers a loading state. In this case you can use `useArgs`:
 
@@ -319,4 +319,4 @@ We expose the `INTERACTION_TIMEOUT` constant from `@woocommerce/storybook-contro
 
 ### Context providers
 
-See example: `assets/js/base/components/country-input/stories/index.tsx`
+See example: <assets/js/base/components/country-input/stories/index.tsx>

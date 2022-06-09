@@ -4,21 +4,21 @@ This document gives an overview of the flow for the checkout in the WooCommerce 
 
 ## Table of Contents <!-- omit in toc -->
 
-- [General Concepts](#general-concepts)
-  - [Tracking flow through status](#tracking-flow-through-status)
-    - [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
-      - [Special States:](#special-states)
-    - [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
-    - [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
-  - [Emitting Events](#emitting-events)
-    - [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
-    - [`onPaymentProcessing`](#onpaymentprocessing)
-    - [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
-    - [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
-    - [`onShippingRateSuccess`](#onshippingratesuccess)
-    - [`onShippingRateFail`](#onshippingratefail)
-    - [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
-    - [`onShippingRateSelectFail`](#onshippingrateselectfail)
+-   [General Concepts](#general-concepts)
+    -   [Tracking flow through status](#tracking-flow-through-status)
+        -   [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
+            -   [Special States:](#special-states)
+        -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
+        -   [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
+    -   [Emitting Events](#emitting-events)
+        -   [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
+        -   [`onPaymentProcessing`](#onpaymentprocessing)
+        -   [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
+        -   [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
+        -   [`onShippingRateSuccess`](#onshippingratesuccess)
+        -   [`onShippingRateFail`](#onshippingratefail)
+        -   [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
+        -   [`onShippingRateSelectFail`](#onshippingrateselectfail)
 
 The architecture of the Checkout Block is derived from the following principles:
 
@@ -74,7 +74,7 @@ The following boolean flags available related to status are:
 
 **isComplete**: When the checkout status is `COMPLETE` this flag is true. Checkout will have this status after all observers on the events emitted during the `AFTER_PROCESSING` status are completed successfully. When checkout is at this status, the shopper's browser will be redirected to the value of `redirectUrl` at that point (usually the `order-received` route).
 
-##### Special States:
+##### Special States
 
 The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various state in the checkout.
 
@@ -252,7 +252,7 @@ This event emitter will execute through each registered observer (passing in not
 
 When a payment method returns a non-truthy value, if it returns a valid response type the event emitter will update various internal statuses according to the response. Here's the possible response types that will get handled by the emitter:
 
-**success**
+#### Success
 
 A response is considered a success response when it at a minimum is an object with this shape:
 
@@ -268,7 +268,7 @@ When a success response is returned, the payment method context status will be c
 
 If `billingData` or `shippingData` properties aren't in the response object, then the state for the data is left alone.
 
-**fail**
+#### Fail
 
 A response is considered a fail response when it at a minimum is an object with this shape:
 
@@ -283,7 +283,7 @@ When a fail response is returned by an observer, the payment method context stat
 -   `paymentMethodData`: (same as for success responses).
 -   `billingData`: (same as for success responses).
 
-**error**
+#### Error
 
 A response is considered an error response when it at a minimum is an object with this shape:
 
@@ -474,10 +474,11 @@ This event emitter is fired when a shipping rate selection is not being persiste
 This event emitter doesn't care about any registered observer response and will simply execute all registered observers passing them the current error status in the context.
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/checkout-flow-and-events.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

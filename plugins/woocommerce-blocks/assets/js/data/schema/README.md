@@ -5,7 +5,8 @@ To utilize this store you will import the `SCHEMA_STORE_KEY` in any module refer
 ```js
 import { SCHEMA_STORE_KEY } from '@woocommerce/block-data';
 ```
-##  Actions
+
+## Actions
 
 The following actions are used for dispatching data to this store state.
 
@@ -26,17 +27,18 @@ This returns an action object used to update the store with the provided list of
 
 This is used for retrieving a route for the given namespace, resource name and (if necessary) ids.
 
-Example:  If you are looking for a route for a single product on the `wc/blocks` namespace, then you'd have `[20]` as the ids.
+Example: If you are looking for a route for a single product on the `wc/blocks` namespace, then you'd have `[20]` as the ids.
 
 ```js
 // '/wc/blocks/products/20'
-wp.data.select( SCHEMA_STORE_KEY ).getRoute( '/wc/blocks', 'products', [20] );
+wp.data.select( SCHEMA_STORE_KEY ).getRoute( '/wc/blocks', 'products', [ 20 ] );
 ```
-| Argument    | Type   | Description                                                    |
-| ----------- | ------ | -------------------------------------------------------------- |
-| `namespace` | string | Namespace for the route (eg. `/wc/blocks`)                     |
+
+| Argument       | Type   | Description                                                       |
+| -------------- | ------ | ----------------------------------------------------------------- |
+| `namespace`    | string | Namespace for the route (eg. `/wc/blocks`)                        |
 | `resourceName` | string | The resource name for the route (eg. `products/attributes/terms`) |
-| `ids`       | array  | Only needed if the route has placeholders for ids.             |
+| `ids`          | array  | Only needed if the route has placeholders for ids.                |
 
 ### `getRoutes( namespace )`
 

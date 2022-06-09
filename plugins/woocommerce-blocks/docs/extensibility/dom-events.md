@@ -20,10 +20,10 @@ This event is the equivalent to the jQuery event `added_to_cart` triggered by Wo
 
 _Example usage in WC Blocks:_ Cart and Mini Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
 
-#### `detail` parameters:
+#### `detail` parameters
 
 | Parameter          | Type    | Default value | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-|--------------------|---------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------ | ------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `preserveCartData` | boolean | `false`       | Whether Cart data in the store should be preserved. By default, it's `false` so any `wc-blocks_added_to_cart` event will invalidate cart data and blocks listening to it will refetch cart data again. However, if the code triggering the event already updates the store (ie: All Products block), it can set `preserveCartData: true` to avoid the other blocks refetching the data again. |
 
 ### `wc-blocks_removed_from_cart`
@@ -32,12 +32,12 @@ This event is the equivalent to the jQuery event `removed_from_cart` triggered b
 
 _Example usage in WC Blocks:_ Cart and Mini Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
 
-
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/dom-events.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->
