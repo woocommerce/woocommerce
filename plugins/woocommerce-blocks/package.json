@@ -156,7 +156,7 @@
 		"copy-webpack-plugin": "6.4.1",
 		"core-js": "3.16.2",
 		"create-file-webpack": "1.0.2",
-		"cross-env": "6.0.3",
+		"cross-env": "7.0.3",
 		"cssnano": "4.1.11",
 		"deep-freeze": "0.0.1",
 		"eslint-import-resolver-typescript": "2.5.0",
