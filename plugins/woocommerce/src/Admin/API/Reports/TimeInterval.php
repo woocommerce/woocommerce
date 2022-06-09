@@ -631,4 +631,80 @@ class TimeInterval {
 
 		return true;
 	}
+
+	/**
+	 * Get dates from a timeframe string.
+	 *
+	 * @param int           $timeframe Timeframe to use.  One of: last_week|last_month|last_quarter|last_6_months|last_year.
+	 * @param DateTime|null $current_date DateTime of current date to compare.
+	 * @return array
+	 */
+	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
+		if ( ! $current_date ) {
+			$current_date = new \DateTime();
+		}
+		$current_year  = $current_date->format( 'Y' );
+		$current_month = $current_date->format( 'm' );
+
+		if ( 'last_week' === $timeframe ) {
+			return array(
+				'start' => $current_date->modify( 'last week monday' )->format( 'Y-m-d 00:00:00' ),
+				'end'   => $current_date->modify( 'this sunday' )->format( 'Y-m-d 23:59:59' ),
+			);
+		}
+
+		if ( 'last_month' === $timeframe ) {
+			return array(
+				'start' => $current_date->modify( 'first day of previous month' )->format( 'Y-m-d 00:00:00' ),
+				'end'   => $current_date->modify( 'last day of this month' )->format( 'Y-m-d 23:59:59' ),
+			);
+		}
+
+		if ( 'last_quarter' === $timeframe ) {
+			switch ( $current_month ) {
+				case $current_month >= 1 && $current_month <= 3:
+					return array(
+						'start' => ( $current_year - 1 ) . '-10-01 00:00:00',
+						'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',
+					);
+				case $current_month >= 4 && $current_month <= 6:
+					return array(
+						'start' => $current_year . '-01-01 00:00:00',
+						'end'   => $current_year . '-03-31 23:59:59',
+					);
+				case $current_month >= 7 && $current_month <= 9:
+					return array(
+						'start' => $current_year . '-04-01 00:00:00',
+						'end'   => $current_year . '-06-30 23:59:59',
+					);
+				case $current_month >= 10 && $current_month <= 12:
+					return array(
+						'start' => $current_year . '-07-01 00:00:00',
+						'end'   => $current_year . '-09-31 23:59:59',
+					);
+			}
+		}
+
+		if ( 'last_6_months' === $timeframe ) {
+			if ( $current_month >= 1 && $current_month <= 6 ) {
+				return array(
+					'start' => ( $current_year - 1 ) . '-07-01 00:00:00',
+					'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',
+				);
+			}
+			return array(
+				'start' => $current_year . '-01-01 00:00:00',
+				'end'   => $current_year . '-06-30 23:59:59',
+			);
+		}
+
+		if ( 'last_year' === $timeframe ) {
+			return array(
+				'start' => ( $current_year - 1 ) . '-01-01 00:00:00',
+				'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',
+			);
+		}
+
+		return false;
+	}
 }

@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getHistory,
-	getNewPath,
-	updateQueryString,
-} from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -83,16 +79,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		trackClick();
 
 		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = task.actionUrl;
-			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
-			}
+			navigateTo( {
+				url: task.actionUrl,
+			} );
 			return;
 		}
 
-		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: task.id } );
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const onDismiss = useCallback( () => {

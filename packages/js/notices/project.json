@@ -1,6 +1,6 @@
 {
-     "root": "packages/js/internal-notices",
-     "sourceRoot": "packages/js/internal-notices/src",
+     "root": "packages/js/notices",
+     "sourceRoot": "packages/js/notices/src",
      "projectType": "library",
      "targets": {
          "build": {

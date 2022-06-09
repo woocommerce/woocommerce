@@ -149,7 +149,7 @@
 		"@woocommerce/explat": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
-		"@woocommerce/internal-notices": "workspace:*",
+		"@woocommerce/notices": "workspace:*",
 		"@woocommerce/number": "workspace:*",
 		"@woocommerce/onboarding": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",

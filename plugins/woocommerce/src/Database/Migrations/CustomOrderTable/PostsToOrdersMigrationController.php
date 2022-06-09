@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
@@ -71,9 +72,115 @@ class PostsToOrdersMigrationController {
 	public function migrate_orders( array $order_post_ids ): void {
 		$this->error_logger = WC()->call_function( 'wc_get_logger' );
 
-		foreach ( $this->all_migrators as $migrator ) {
-			$this->do_orders_migration_step( $migrator, $order_post_ids );
+		$using_transactions = $this->maybe_start_transaction();
+		if ( null === $using_transactions ) {
+			return;
 		}
+
+		$errors_were_logged = false;
+
+		foreach ( $this->all_migrators as $migrator ) {
+			$errors_were_logged = $this->do_orders_migration_step( $migrator, $order_post_ids );
+			if ( $errors_were_logged && $using_transactions ) {
+				$this->rollback_transaction();
+				break;
+			}
+		}
+
+		if ( ! $errors_were_logged && $using_transactions ) {
+			$this->commit_transaction();
+		}
+	}
+
+	/**
+	 * Start a database transaction if the configuration mandates so.
+	 *
+	 * @return bool|null True if transaction started, false if transactions won't be used, null if transaction failed to start.
+	 */
+	private function maybe_start_transaction(): ?bool {
+		if ( 'yes' !== get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION ) ) {
+			return false;
+		}
+
+		$transaction_isolation_level = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
+		$this->verify_transaction_isolation_level( $transaction_isolation_level );
+		$set_transaction_isolation_level_command = "SET TRANSACTION ISOLATION LEVEL $transaction_isolation_level";
+
+		if ( ! $this->db_query( $set_transaction_isolation_level_command ) ) {
+			return null;
+		}
+
+		return $this->db_query( 'START TRANSACTION' ) ? true : null;
+	}
+
+	/**
+	 * Verify that a given database transaction isolation level name is valid, and throw an exception if not.
+	 *
+	 * @param string $transaction_isolation_level Transaction isolation level name to check.
+	 * @return void
+	 * @throws \Exception Invalid transaction isolation level name.
+	 */
+	private function verify_transaction_isolation_level( string $transaction_isolation_level ): void {
+		if ( ! in_array( $transaction_isolation_level, CustomOrdersTableController::get_valid_transaction_isolation_levels(), true ) ) {
+			throw new \Exception( 'Invalid database transaction isolation level name ' . $transaction_isolation_level );
+		}
+	}
+
+	/**
+	 * Commit the current database transaction.
+	 *
+	 * @return bool True on success, false on error.
+	 */
+	private function commit_transaction(): bool {
+		return $this->db_query( 'COMMIT' );
+	}
+
+	/**
+	 * Rollback the current database transaction.
+	 *
+	 * @return bool True on success, false on error.
+	 */
+	private function rollback_transaction(): bool {
+		return $this->db_query( 'ROLLBACK' );
+	}
+
+	/**
+	 * Execute a database query and log any errors.
+	 *
+	 * @param string $query The SQL query to execute.
+	 * @return bool True if the query succeeded, false if there were errors.
+	 */
+	private function db_query( string $query ): bool {
+		$wpdb = WC()->get_global( 'wpdb' );
+
+		try {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( $query );
+		} catch ( \Exception $exception ) {
+			$exception_class = get_class( $exception );
+			$this->error_logger->error(
+				"PostsToOrdersMigrationController: when executing $query: ($exception_class) {$exception->getMessage()}, {$exception->getTraceAsString()}",
+				array(
+					'source'    => self::LOGS_SOURCE_NAME,
+					'exception' => $exception,
+				)
+			);
+			return false;
+		}
+
+		$error = $wpdb->last_error;
+		if ( '' !== $error ) {
+			$this->error_logger->error(
+				"PostsToOrdersMigrationController: when executing $query: $error",
+				array(
+					'source' => self::LOGS_SOURCE_NAME,
+					'error'  => $error,
+				)
+			);
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -82,15 +189,15 @@ class PostsToOrdersMigrationController {
 	 *
 	 * @param object $migration_class The migration class to use, must have a `process_migration_batch_for_ids(array of ids)` method.
 	 * @param array  $order_post_ids List of post IDs of the orders to migrate.
-	 * @return void
+	 * @return bool True if errors were logged, false otherwise.
 	 */
-	private function do_orders_migration_step( object $migration_class, array $order_post_ids ): void {
+	private function do_orders_migration_step( object $migration_class, array $order_post_ids ): bool {
 		$result = $migration_class->process_migration_batch_for_ids( $order_post_ids );
 
 		$errors    = array_unique( $result['errors'] );
 		$exception = $result['exception'];
 		if ( null === $exception && empty( $errors ) ) {
-			return;
+			return false;
 		}
 
 		$migration_class_name = ( new \ReflectionClass( $migration_class ) )->getShortName();
@@ -112,12 +219,14 @@ class PostsToOrdersMigrationController {
 			$this->error_logger->error(
 				"$migration_class_name: when processing ids $batch: $error",
 				array(
-					'source'    => self::LOGS_SOURCE_NAME,
-					'ids'       => $order_post_ids,
-					'error    ' => $error,
+					'source' => self::LOGS_SOURCE_NAME,
+					'ids'    => $order_post_ids,
+					'error'  => $error,
 				)
 			);
 		}
+
+		return true;
 	}
 
 	/**

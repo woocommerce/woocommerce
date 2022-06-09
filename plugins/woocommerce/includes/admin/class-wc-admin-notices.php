@@ -169,20 +169,30 @@ class WC_Admin_Notices {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			$notice_name = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
+
+			/**
+			 * Filter the capability required to dismiss a given notice.
+			 *
+			 * @since 6.7.0
+			 *
+			 * @param string $default_capability The default required capability.
+			 * @param string $notice_name The notice name.
+			 */
+			$required_capability = apply_filters( 'woocommerce_dismiss_admin_notice_capability', 'manage_woocommerce', $notice_name );
+
+			if ( ! current_user_can( $required_capability ) ) {
 				wp_die( esc_html__( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );
 			}
 
-			$hide_notice = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
-
-			self::hide_notice( $hide_notice );
+			self::hide_notice( $notice_name );
 		}
 	}
 
 	/**
 	 * Hide a single notice.
 	 *
-	 * @param $name Notice name.
+	 * @param string $name Notice name.
 	 */
 	private static function hide_notice( $name ) {
 		self::remove_notice( $name );
@@ -492,9 +502,9 @@ class WC_Admin_Notices {
 	 */
 	public static function download_directories_sync_complete() {
 		$notice_dismissed = apply_filters(
-				'woocommerce_hide_download_directories_sync_complete',
-				get_user_meta( get_current_user_id(), 'download_directories_sync_complete', true )
-			);
+			'woocommerce_hide_download_directories_sync_complete',
+			get_user_meta( get_current_user_id(), 'download_directories_sync_complete', true )
+		);
 
 		if ( $notice_dismissed ) {
 			self::remove_notice( 'download_directories_sync_complete' );

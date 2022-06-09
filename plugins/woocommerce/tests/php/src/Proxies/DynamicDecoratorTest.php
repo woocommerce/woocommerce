@@ -104,4 +104,26 @@ class DynamicDecoratorTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 'hello, foobar', $this->sut->some_property );
 	}
+
+	/**
+	 * @testdox 'call_original_method' can be used from within a method replacement to call a method on the decorated object.
+	 */
+	public function test_call_original_method() {
+		$replacement_invoked = false;
+
+		$this->sut->register_method_replacement(
+			'some_method',
+			function( ...$args ) use ( &$replacement_invoked ) {
+				$replacement_invoked = true;
+				$decorator           = $args[0];
+
+				return $decorator->call_original_method( 'some_method', $args );
+			}
+		);
+
+		$expected = '$some_method invoked with $a=1234, $b=foobar';
+		$actual   = $this->sut->some_method( 1234, 'foobar' );
+		$this->assertEquals( $expected, $actual );
+		$this->assertTrue( $replacement_invoked );
+	}
 }

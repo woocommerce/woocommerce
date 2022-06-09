@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Orders
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OptionSanitizerServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductDownloadsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
@@ -47,6 +48,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		OrdersDataStoreServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,
 		ProductDownloadsServiceProvider::class,
+		ProductReviewsServiceProvider::class,
 		ProxiesServiceProvider::class,
 		RestockRefundedItemsAdjusterServiceProvider::class,
 		UtilsClassesServiceProvider::class,

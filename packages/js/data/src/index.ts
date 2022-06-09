@@ -155,3 +155,4 @@ export interface WCDataSelector {
 
 // Other exports
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
+export { ActionDispatchers as ProductsStoreActions } from './products/actions';

@@ -6,6 +6,7 @@ import {
 	WooNavigationItem,
 	getNewPath,
 	pathIsExcluded,
+	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
@@ -17,7 +18,6 @@ import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
  */
 import getReports from '../analytics/report/get-reports';
 import { getPages } from './controller';
-import { isWCAdmin } from '../dashboard/utils';
 import Navigation from '~/navigation';
 import { WooHeaderNavigationItem } from '~/header/utils';
 
@@ -37,7 +37,7 @@ const NavigationPlugin = () => {
 	 * provided by Navigation because the router isn't present to
 	 * respond to <Link /> component's manipulation of the url.
 	 */
-	if ( ! isWCAdmin( window.location.href ) ) {
+	if ( ! isWCAdmin() ) {
 		return (
 			<WooHeaderNavigationItem order={ -100 }>
 				<Navigation />

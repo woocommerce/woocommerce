@@ -129,6 +129,12 @@ const completeOnboardingWizard = async () => {
 		expect( continueButtons ).toHaveLength( 1 );
 
 		await continueButtons[ 0 ].click();
+		await expect( page ).toMatchElement(
+			'.woocommerce-usage-modal__actions button.is-secondary.is-busy'
+		);
+		await expect( page ).not.toMatchElement(
+			'.woocommerce-usage-modal__actions button.is-primary:disabled'
+		);
 	}
 	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 

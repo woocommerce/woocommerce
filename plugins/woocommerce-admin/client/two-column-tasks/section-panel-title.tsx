@@ -39,7 +39,12 @@ export const SectionPanelTitle: React.FC< SectionPanelTitleProps > = ( {
 
 	return (
 		<>
-			<Text variant="title.small" size="20" lineHeight="28px">
+			<Text
+				className="woocommerce-task-header-collapsed"
+				variant="title.small"
+				size="20"
+				lineHeight="28px"
+			>
 				{ section.title }
 			</Text>
 			{ ! isComplete && <Badge count={ uncompletedTasksCount } /> }

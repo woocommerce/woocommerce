@@ -209,6 +209,9 @@ class WC_Install {
 		'6.5.1' => array(
 			'wc_update_651_approved_download_directories',
 		),
+		'6.7.0' => array(
+			'wc_update_670_purge_comments_count_cache',
+		),
 	);
 
 	/**

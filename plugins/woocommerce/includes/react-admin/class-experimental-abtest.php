@@ -20,6 +20,7 @@ namespace WooCommerce\Admin;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_client;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * This class provides an interface to the Explat A/B tests.
@@ -184,10 +185,12 @@ final class Experimental_Abtest {
 
 		// Make the request to the WP.com API.
 		$args = array(
-			'experiment_name'  => $test_name,
-			'anon_id'          => rawurlencode( $this->anon_id ),
-			'woo_country_code' => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
+			'experiment_name'               => $test_name,
+			'anon_id'                       => rawurlencode( $this->anon_id ),
+			'woo_country_code'              => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
+			'woo_wcadmin_install_timestamp' => rawurlencode( get_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION ) ),
 		);
+
 		/**
 		 * Get additional request args.
 		 *
