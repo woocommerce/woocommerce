@@ -75,7 +75,7 @@
 		"prettier": "npm:wp-prettier@2.0.5",
 		"stylelint": "^13.8.0",
 		"typescript": "3.9.7",
-		"webpack": "4.44.2",
+		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
 		"wp-textdomain": "1.0.1"
 	},
