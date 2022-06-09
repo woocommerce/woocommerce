@@ -19,10 +19,6 @@ export type ProductStatus =
 	| 'trash'
 	| 'future';
 
-export type DeleteProductType = {
-	force: boolean;
-};
-
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status'

@@ -10,7 +10,6 @@ import { DispatchFromMap } from '@automattic/data-stores';
 import TYPES from './action-types';
 import {
 	ReadOnlyProperties,
-	DeleteProductType,
 	PartialProduct,
 	Product,
 	ProductQuery,
@@ -173,12 +172,8 @@ export function deleteProductError( id: number, error: unknown ) {
 	};
 }
 
-export function* removeProduct(
-	id: number,
-	type: DeleteProductType = { force: false }
-) {
+export function* removeProduct( id: number, force = false ) {
 	try {
-		const { force } = type;
 		const url = force
 			? `${ WC_PRODUCT_NAMESPACE }/${ id }?force=true`
 			: `${ WC_PRODUCT_NAMESPACE }/${ id }`;
