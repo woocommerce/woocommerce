@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState } from '@wordpress/element';
+import { lazy, useState, useContext, useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -38,6 +38,7 @@ import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useActiveSetupTasklist } from '~/tasks';
+import { LayoutContext } from '~/layout';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -64,6 +65,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
+	const layoutContext = useContext( LayoutContext );
+	const updatedLayoutContext = useMemo(
+		() => layoutContext.getExtendedContext( 'activity-panel' ),
+		[ layoutContext ]
+	);
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -368,55 +374,57 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<div>
-			<H id={ headerId } className="screen-reader-text">
-				{ __( 'Store Activity', 'woocommerce' ) }
-			</H>
-			<Section
-				component="aside"
-				id="woocommerce-activity-panel"
-				className="woocommerce-layout__activity-panel"
-				aria-labelledby={ headerId }
-			>
-				<Tabs
-					tabs={ tabs }
-					tabOpen={ isPanelOpen }
-					selectedTab={ currentTab }
-					onTabClick={ ( tab, tabOpen ) => {
-						if ( tab.onClick ) {
-							tab.onClick();
-							return;
-						}
+		<LayoutContext.Provider value={ updatedLayoutContext }>
+			<div>
+				<H id={ headerId } className="screen-reader-text">
+					{ __( 'Store Activity', 'woocommerce' ) }
+				</H>
+				<Section
+					component="aside"
+					id="woocommerce-activity-panel"
+					className="woocommerce-layout__activity-panel"
+					aria-labelledby={ headerId }
+				>
+					<Tabs
+						tabs={ tabs }
+						tabOpen={ isPanelOpen }
+						selectedTab={ currentTab }
+						onTabClick={ ( tab, tabOpen ) => {
+							if ( tab.onClick ) {
+								tab.onClick();
+								return;
+							}
 
-						togglePanel( tab, tabOpen );
-					} }
-				/>
-				<Panel
-					currentTab
-					isPanelOpen={ isPanelOpen }
-					isPanelSwitching={ isPanelSwitching }
-					tab={ find( getTabs(), { name: currentTab } ) }
-					content={ getPanelContent( currentTab ) }
-					closePanel={ () => closePanel() }
-					clearPanel={ () => clearPanel() }
-				/>
-			</Section>
-			{ showHelpHighlightTooltip ? (
-				<HighlightTooltip
-					delay={ 1000 }
-					useAnchor={ true }
-					title={ __( "We're here for help", 'woocommerce' ) }
-					content={ __(
-						'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-						'woocommerce'
-					) }
-					closeButtonText={ __( 'Got it', 'woocommerce' ) }
-					id="activity-panel-tab-help"
-					onClose={ () => closedHelpPanelHighlight() }
-					onShow={ () => recordEvent( 'help_tooltip_view' ) }
-				/>
-			) : null }
-		</div>
+							togglePanel( tab, tabOpen );
+						} }
+					/>
+					<Panel
+						currentTab
+						isPanelOpen={ isPanelOpen }
+						isPanelSwitching={ isPanelSwitching }
+						tab={ find( getTabs(), { name: currentTab } ) }
+						content={ getPanelContent( currentTab ) }
+						closePanel={ () => closePanel() }
+						clearPanel={ () => clearPanel() }
+					/>
+				</Section>
+				{ showHelpHighlightTooltip ? (
+					<HighlightTooltip
+						delay={ 1000 }
+						useAnchor={ true }
+						title={ __( "We're here for help", 'woocommerce' ) }
+						content={ __(
+							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
+							'woocommerce'
+						) }
+						closeButtonText={ __( 'Got it', 'woocommerce' ) }
+						id="activity-panel-tab-help"
+						onClose={ () => closedHelpPanelHighlight() }
+						onShow={ () => recordEvent( 'help_tooltip_view' ) }
+					/>
+				) : null }
+			</div>
+		</LayoutContext.Provider>
 	);
 };
 

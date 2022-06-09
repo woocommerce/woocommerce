@@ -18,7 +18,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { TasksContext } from '~/tasks';
+import { LayoutContext } from '~/layout';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -39,7 +39,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		undoSnoozeTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 
-	const { context } = useContext( TasksContext );
+	const layoutContext = useContext( LayoutContext );
 
 	const slot = useSlot(
 		`woocommerce_onboarding_task_list_item_${ task.id }`
@@ -74,7 +74,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( `${ eventPrefix }click`, {
 			task_name: task.id,
-			context,
+			context: layoutContext.toString(),
 		} );
 
 		if ( ! task.isComplete ) {

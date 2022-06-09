@@ -17,7 +17,7 @@ import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import { TasksContext } from '~/tasks';
+import { LayoutContext } from '~/layout';
 import './task-list.scss';
 
 export type TaskListItemProps = {
@@ -36,7 +36,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { context } = useContext( TasksContext );
+	const layoutContext = useContext( LayoutContext );
 
 	const {
 		dismissTask,
@@ -119,7 +119,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( 'tasklist_click', {
 			task_name: id,
-			context,
+			context: layoutContext.toString(),
 		} );
 
 		if ( ! isComplete ) {

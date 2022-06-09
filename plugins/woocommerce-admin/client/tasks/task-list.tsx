@@ -21,7 +21,7 @@ import { TaskListItem } from './task-list-item';
 import { TaskListMenu } from './task-list-menu';
 import './task-list.scss';
 import { ProgressHeader } from '~/task-lists/progress-header';
-import { TasksContext } from '~/tasks';
+import { LayoutContext } from '~/layout';
 
 export type TaskListProps = TaskListType & {
 	query: {
@@ -52,7 +52,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} );
 	const prevQueryRef = useRef( query );
 	const visibleTasks = getVisibleTasks( tasks );
-	const { context } = useContext( TasksContext );
+	const layoutContext = useContext( LayoutContext );
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed
@@ -66,7 +66,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( eventPrefix + 'view', {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
-			context,
+			context: layoutContext.toString(),
 		} );
 	};
 

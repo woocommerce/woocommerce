@@ -4,12 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import {
-	Fragment,
-	useEffect,
-	createContext,
-	useState,
-} from '@wordpress/element';
+import { Fragment, useEffect, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
@@ -41,14 +36,6 @@ export type TasksProps = {
 	context?: string;
 };
 
-export type TasksContextProps = {
-	context: string;
-};
-
-export const TasksContext = createContext< TasksContextProps >( {
-	context: '',
-} );
-
 function getTaskListComponent( taskListId: string ) {
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
@@ -73,19 +60,13 @@ function getTaskListPlaceholderComponent(
 	}
 }
 
-export const Tasks: React.FC< TasksProps > = ( {
-	query,
-	context = 'homescreen',
-} ) => {
+export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
 		'woocommerce_tasklist_progression'
 	);
-	const [ tasksContext ] = useState( {
-		context,
-	} );
 
 	const { isResolving, taskLists } = useSelect(
 		( select: WCDataSelector ) => {
@@ -168,7 +149,7 @@ export const Tasks: React.FC< TasksProps > = ( {
 	}
 
 	return (
-		<TasksContext.Provider value={ tasksContext }>
+		<>
 			{ taskLists
 				.filter( ( { id }: TaskListType ) =>
 					experimentAssignment?.variationName === 'treatment'
@@ -219,6 +200,6 @@ export const Tasks: React.FC< TasksProps > = ( {
 						</Fragment>
 					);
 				} ) }
-		</TasksContext.Provider>
+		</>
 	);
 };
