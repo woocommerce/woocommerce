@@ -79,6 +79,17 @@ const MiniCartBlock = ( {
 	}, [] );
 
 	useEffect( () => {
+		const body = document.querySelector( 'body' );
+		if ( body ) {
+			if ( isOpen ) {
+				Object.assign( body.style, { overflow: 'hidden' } );
+			} else {
+				Object.assign( body.style, { overflow: '' } );
+			}
+		}
+	}, [ isOpen ] );
+
+	useEffect( () => {
 		if ( contentsNode instanceof Element ) {
 			const container = contentsNode.querySelector(
 				'.wp-block-woocommerce-mini-cart-contents'
