@@ -73,10 +73,12 @@ Value being checked. Must be a string.
 What value must contain. If this is not found within `value`, and error will be thrown.
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./packages/checkout/utils/README.md)
+
 <!-- /FEEDBACK -->
 

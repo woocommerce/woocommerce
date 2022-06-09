@@ -1,5 +1,6 @@
-This folder is used to hold any components/code that will get exported to the
-legacy build.
+# Legacy Build
+
+This folder is used to hold any components/code that will get exported to the legacy build.
 
 > Currently, builds in this folder target WP < 5.3
 
@@ -17,9 +18,8 @@ Note: you _must_ copy all files related to the entry point for that module accor
 
 Legacy builds will be identical to the main builds except:
 
-- files will have a `-legacy` suffix (so server can conditionally enqueue). It is expected that the server will load either the main or the legacy bundles, not both.
-- any imports not in the legacy folder will fallback to the main file.
-
+-   files will have a `-legacy` suffix (so server can conditionally enqueue). It is expected that the server will load either the main or the legacy bundles, not both.
+-   any imports not in the legacy folder will fallback to the main file.
 
 ## How does the legacy system work?
 
@@ -31,10 +31,10 @@ We use aliases for paths covering anything that might need a legacy version. The
 
 Current aliases are:
 
-- `@woocommerce/base-components` -> `assets/js/base/components/`
-- `@woocommerce/base-hocs` -> `assets/js/base/hocs/`
-- `@woocommerce/editor-components` -> `assets/js/editor-components`
-- `@woocommerce/block-hocs` -> `assets/js/block-hocs`
+-   `@woocommerce/base-components` -> `assets/js/base/components/`
+-   `@woocommerce/base-hocs` -> `assets/js/base/hocs/`
+-   `@woocommerce/editor-components` -> `assets/js/editor-components`
+-   `@woocommerce/block-hocs` -> `assets/js/block-hocs`
 
 When importing, if outside the module referenced by that path, import from the alias. That will ensure that at compile time the bundles can pull from the appropriate location.
 

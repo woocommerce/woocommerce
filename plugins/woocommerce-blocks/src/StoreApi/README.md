@@ -158,10 +158,12 @@ If any of the following statements are true, choose to _extend_ the Store API ra
 If the data is sensitive (for example, a core setting that should be private), or not related to the current user (for example, looking up an order by order ID), [choose to use the authenticated WC REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction).
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/README.md)
+
 <!-- /FEEDBACK -->
 

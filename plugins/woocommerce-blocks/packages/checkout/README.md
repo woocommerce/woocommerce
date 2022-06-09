@@ -45,19 +45,20 @@ module.exports = {
 
 This package contains the following directories. Navigate to a directory for more in depth documentation about each module.
 
-| Directory                                            | Contents                                                                                                                                                                                                                                                                                                               |
-| :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <nobr>[`blocks-registry/`](./blocks-registry)</nobr> | Used to **register new Inner Blocks** that can be inserted either automatically or optionally within the Checkout Block. _**Example use case:** Creating a newsletter subscription block on the Checkout._                                                                                                             |
-| [`components/`](./components)                        | Components available for use by Checkout Blocks.                                                                                                                                                                                                                                                                       |
-| <nobr>[`filter-registry/`](./filter-registry)</nobr> | Used to **manipulate content** where filters are available. _**Example use case:** Changing how prices are displayed._ ([Documentation](./filter-registry))                                                                                                                                                            |
-| [`slot/`](./slot)                                    | Slot and Fill are a pair of components which enable developers to render in a React element tree. In this context, they are used to **insert content within Blocks** where slot fills are available. _**Example use case:** Adding a custom component after the shipping options._ ([Documentation](./slot/README.md)) |
-| [`utils/`](./utils)                                  | Miscellaneous utility functions for dealing with checkout functionality.                                                                                                                                                                                                                                               |
+| Directory                               | Contents                                                                                                                                                                                                                                                                                                               |
+| :-------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`blocks-registry/`](./blocks-registry) | Used to **register new Inner Blocks** that can be inserted either automatically or optionally within the Checkout Block. _**Example use case:** Creating a newsletter subscription block on the Checkout._                                                                                                             |
+| [`components/`](./components)           | Components available for use by Checkout Blocks.                                                                                                                                                                                                                                                                       |
+| [`filter-registry/`](./filter-registry) | Used to **manipulate content** where filters are available. _**Example use case:** Changing how prices are displayed._ ([Documentation](./filter-registry))                                                                                                                                                            |
+| [`slot/`](./slot)                       | Slot and Fill are a pair of components which enable developers to render in a React element tree. In this context, they are used to **insert content within Blocks** where slot fills are available. _**Example use case:** Adding a custom component after the shipping options._ ([Documentation](./slot/README.md)) |
+| [`utils/`](./utils)                     | Miscellaneous utility functions for dealing with checkout functionality.                                                                                                                                                                                                                                               |
 
 <!-- FEEDBACK -->
+
 ---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./packages/checkout/README.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

@@ -2,7 +2,7 @@
 
 Our blocks are generally made up of up to 4 files:
 
-```
+```text
 |- block.js
 |- editor.scss
 |- index.js
@@ -13,7 +13,7 @@ The only required file is `index.js`, this sets up the block using [`registerBlo
 
 The scss files are split so that things in `style` are added to the editor _and_ frontend, while styles in `editor` are only added to the editor. Most of our blocks should use core components that won't need CSS though.
 
-### Editing
+## Editing
 
 A simple edit function can live in `index.js`, but most blocks are a little more complicated, so the edit function instead returns a Block component, which lives in `block.js`. By using a component, we can use React lifecycle methods to fetch data or save state.
 

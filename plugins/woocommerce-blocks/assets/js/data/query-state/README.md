@@ -1,4 +1,4 @@
-# Query State Store.
+# Query State Store
 
 To utilize this store you will import the `QUERY_STATE_STORE_KEY` in any module referencing it. Assuming `@woocommerce/block-data` is registered as an external pointing to `wc.wcBlocksData` you can import the key via:
 
