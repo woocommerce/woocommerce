@@ -837,21 +837,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Return an array of shipping method IDs within this order.
-	 *
-	 * @since 6.7.0
-	 * @return string[]
-	 */
-	public function get_shipping_method_ids() {
-		return array_map(
-			function ( $shipping_method ) {
-				return $shipping_method->get_method_id();
-			},
-			$this->get_shipping_methods()
-		);
-	}
-
-	/**
 	 * Gets formatted shipping method title.
 	 *
 	 * @return string
@@ -1581,8 +1566,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 */
 		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
 
+		$shipping_method_ids = ArrayUtil::select( $this->get_shipping_methods(), 'get_method_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+
 		// Set shop base address as a tax location if order has local pickup shipping method.
-		if ( $apply_base_tax && count( array_intersect( $this->get_shipping_method_ids(), $local_pickup_methods ) ) > 0 ) {
+		if ( $apply_base_tax && count( array_intersect( $shipping_method_ids, $local_pickup_methods ) ) > 0 ) {
 			$tax_based_on = 'base';
 		}
 
