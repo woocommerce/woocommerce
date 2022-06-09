@@ -70,9 +70,9 @@ class WC_Admin_Pointers {
 
 		if (
 			Features::is_enabled( 'experimental-product-tour' ) &&
-			self::is_experiment_product_tour() &&
 			isset( $_GET['spotlight'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			isset( $wp_post_types )
+			isset( $wp_post_types ) &&
+			self::is_experiment_product_tour()
 		) {
 			$labels          = $wp_post_types['product']->labels;
 			$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
