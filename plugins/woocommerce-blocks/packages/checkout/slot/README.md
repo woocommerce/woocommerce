@@ -1,25 +1,25 @@
-# Checkout - Slot and Fill <!-- omit in toc -->
+# Slot and Fill <!-- omit in toc -->
+
+## Table of Contents <!-- omit in toc -->
+
+- [`createSlotFill( slotName )`](#createslotfill-slotname-)
+    - [Usage](#usage)
+    - [Options](#options)
+        - [`slotName (string, required)`](#slotname-string-required)
+        - [`onError (Function)`](#onerror-function)
+    - [`Slot` Component](#slot-component)
+        - [Usage](#usage-1)
+        - [Options](#options-1)
+            - [`as (string|element)`](#as-stringelement)
+            - [`className (string)`](#classname-string)
+            - [`fillProps (object)`](#fillprops-object)
+        - [`Fill` Component](#fill-component)
+- [Extending Checkout via Slot Fills](#extending-checkout-via-slot-fills)
+- [Available Slot Fills](#available-slot-fills)
 
 Slot and Fill are a pair of components which enable developers to render elsewhere in a React element tree, a pattern often referred to as "portal" rendering. It is a pattern for component extensibility, where a single Slot may be occupied by an indeterminate number of Fills elsewhere in the application.
 
 This module is an abstraction on top of the Slot and Fill implementation in WordPress and is meant to be used internally, therefore the documentation only touches the abstraction part. You can read more about Slot and Fill in [@wordpress/components documentation](https://github.com/WordPress/gutenberg/tree/c53d26ea79bdcb1a3007a994078e1fc9e0195466/packages/components/src/slot-fill).
-
-## Table of Contents <!-- omit in toc -->
-
--   [`createSlotFill( slotName )`](#createslotfill-slotname-)
-    -   [Usage](#usage)
-    -   [Options](#options)
-        -   [`slotName (string, required)`](#slotname-string-required)
-        -   [`onError (Function)`](#onerror-function)
-    -   [`Slot` Component](#slot-component)
-        -   [Usage](#usage-1)
-        -   [Options](#options-1)
-            -   [`as (string|element)`](#as-stringelement)
-            -   [`className (string)`](#classname-string)
-            -   [`fillProps (object)`](#fillprops-object)
-        -   [`Fill` Component](#fill-component)
--   [Extending Checkout via Slot Fills](#extending-checkout-via-slot-fills)
--   [Available Slot Fills](#available-slot-fills)
 
 ## `createSlotFill( slotName )`
 
@@ -192,4 +192,3 @@ Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as s
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./packages/checkout/slot/README.md)
 
 <!-- /FEEDBACK -->
-

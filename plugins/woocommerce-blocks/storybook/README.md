@@ -1,4 +1,25 @@
-# Working with Storybook
+# Working with Storybook <!-- omit in toc -->
+
+## Table of Contents <!-- omit in toc -->
+
+- [Adding new stories](#adding-new-stories)
+    - [Scaffold tour](#scaffold-tour)
+        - [The `default` export](#the-default-export)
+        - [Defining controls](#defining-controls)
+        - [The Story template](#the-story-template)
+        - [Defining Stories](#defining-stories)
+    - [Snippets](#snippets)
+- [FAQ](#faq)
+    - [What should constitute a story?](#what-should-constitute-a-story)
+    - [Can I create stories with mixed components?](#can-i-create-stories-with-mixed-components)
+- [Tips](#tips)
+    - [One file per component](#one-file-per-component)
+    - [Custom controls](#custom-controls)
+- [Common gotchas and examples](#common-gotchas-and-examples)
+    - [Named exports](#named-exports)
+    - [Controlled components](#controlled-components)
+    - [Simulating interactions](#simulating-interactions)
+    - [Context providers](#context-providers)
 
 This document is meant to make contributing to our Storybook a bit easier by giving some tips, pointing out a few gotchas, making the editing experience smoother, and reducing the friction to adding a new story.
 
@@ -319,4 +340,14 @@ We expose the `INTERACTION_TIMEOUT` constant from `@woocommerce/storybook-contro
 
 ### Context providers
 
-See example: <assets/js/base/components/country-input/stories/index.tsx>
+See example: `assets/js/base/components/country-input/stories/index.tsx`
+
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/block-assets.md)
+
+<!-- /FEEDBACK -->

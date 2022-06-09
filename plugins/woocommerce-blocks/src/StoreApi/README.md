@@ -1,5 +1,15 @@
 # WooCommerce Store API <!-- omit in toc -->
 
+## Table of contents <!-- omit in toc -->
+
+- [Requirements and limitations](#requirements-and-limitations)
+- [Store API Namespace](#store-api-namespace)
+- [Resources and endpoints](#resources-and-endpoints)
+- [Pagination](#pagination)
+- [Status codes](#status-codes)
+- [Contributing](#contributing)
+- [Extensibility](#extensibility)
+
 **The Store API provides public Rest API endpoints for the development of customer-facing cart, checkout, and product functionality. It follows many of the patterns used in the [WordPress REST API](https://developer.wordpress.org/rest-api/key-concepts/).**
 
 Example of a valid API request using cURL:
@@ -14,18 +24,6 @@ Possible uses of the Store API include:
 2. Adding products to the cart and returning an updated cart object for display
 3. Obtaining shipping rates for a cart
 4. Converting a customer’s cart to an Order, collecting addresses, and then facilitating payment
-
----
-
-## Table of contents <!-- omit in toc -->
-
-- [Requirements and limitations](#requirements-and-limitations)
-- [Store API Namespace](#store-api-namespace)
-- [Resources and endpoints](#resources-and-endpoints)
-- [Pagination](#pagination)
-- [Status codes](#status-codes)
-- [Contributing](#contributing)
-- [Extensibility](#extensibility)
 
 ## Requirements and limitations
 
@@ -166,4 +164,3 @@ If the data is sensitive (for example, a core setting that should be private), o
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/README.md)
 
 <!-- /FEEDBACK -->
-

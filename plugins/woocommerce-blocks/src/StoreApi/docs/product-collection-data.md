@@ -66,4 +66,3 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/product-collection-data.md)
 
 <!-- /FEEDBACK -->
-

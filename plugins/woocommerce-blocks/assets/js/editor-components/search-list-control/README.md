@@ -1,4 +1,13 @@
-# SearchListControl
+# SearchListControl <!-- omit in toc -->
+
+## Table of contents <!-- omit in toc -->
+
+-   [Usage](#usage)
+    -   [Props](#props)
+    -   [`list` item structure:](#list-item-structure)
+    -   [`messages` object structure:](#messages-object-structure)
+-   [Usage](#usage)
+    -   [Props](#props)
 
 Component to display a searchable, selectable list of items.
 
@@ -67,3 +76,13 @@ Used implicitly by `SearchListControl` when the `renderItem` prop is omitted.
 | `isSingle`   | Boolean   | `null`  | Whether this should only display a single item (controls radio vs checkbox icon) |
 | `onSelect`   | Function  | `null`  | Callback for selecting the item                                                  |
 | `search`     | String    | `''`    | Search string, used to highlight the substring in the item name                  |
+
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
+
+<!-- /FEEDBACK -->

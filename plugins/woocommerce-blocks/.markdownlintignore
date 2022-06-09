@@ -1,4 +1,4 @@
 **/node_modules/**
 **/vendor/**
-docs/extensibility/actions.md
-docs/extensibility/filters.md
+**/extensibility/**/actions.md
+**/extensibility/**/filters.md

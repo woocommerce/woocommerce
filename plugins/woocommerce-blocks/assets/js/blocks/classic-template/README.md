@@ -1,4 +1,9 @@
-# Classic Template Block
+# Classic Template Block <!-- omit in toc -->
+
+## Table of Contents <!-- omit in toc -->
+
+-   [Usage](#usage)
+    -   [Props](#props)
 
 The Classic Template block is a placeholder block for specific WooCommerce block templates which are rendered on the server-side when a block theme is active.
 
@@ -21,3 +26,13 @@ This block does not have any customizable options available, so any style or cus
 ```
 
 ![Classic Template Block Single Product](./assets/doc-image-single-product-classic-block.png)
+
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
+
+<!-- /FEEDBACK -->
