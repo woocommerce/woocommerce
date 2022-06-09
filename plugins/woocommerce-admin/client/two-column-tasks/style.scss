@@ -151,7 +151,6 @@
 
 		.svg-background {
 			right: 6%;
-			width: 25%;
 		}
 	}
 
@@ -260,6 +259,10 @@
 		position: absolute;
 		z-index: 0;
 		right: 6%;
+		max-width: 25%;
+		max-height: 150px;
+		width: auto;
+		height: auto;
 
 		.admin-theme-color {
 			fill: var(--wp-admin-theme-color);

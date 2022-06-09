@@ -77,5 +77,11 @@ module.exports = ( storybookConfig ) => {
 		} )
 	);
 
+	storybookConfig.resolve.fallback = {
+		...storybookConfig.resolve.fallback,
+		// Ignore fs to fix resolve 'fs' error for @automattic/calypso-config
+		fs: false,
+	};
+
 	return storybookConfig;
 };

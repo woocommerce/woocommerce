@@ -123,18 +123,13 @@ abstract class TableMigrator {
 	/**
 	 * Check if the amount of processed database rows matches the amount of orders to process, and log an error if not.
 	 *
-	 * @param string   $operation Operation performed, 'insert' or 'update'.
-	 * @param array    $entity_ids Order ids that were supplied for migration.
-	 * @param int|bool $actual_processed_count Count of processed database rows or boolean false, as supplied by $wpdb->get_results.
+	 * @param string     $operation Operation performed, 'insert' or 'update'.
+	 * @param array|bool $received_rows_count Value returned by @wpdb after executing the query.
 	 * @return void
 	 */
-	protected function maybe_add_insert_or_update_mismatch_error( string $operation, array $entity_ids, $actual_processed_count ) {
-		$count = count( $entity_ids );
-
-		if ( false === $actual_processed_count ) {
+	protected function maybe_add_insert_or_update_error( string $operation, $received_rows_count ) {
+		if ( false === $received_rows_count ) {
 			$this->add_error( "$operation operation didn't complete, the database query failed" );
-		} elseif ( $actual_processed_count < $count ) {
-			$this->add_error( "$operation operation didn't complete for all entities. Initial batch size: $count, actual processed size: $actual_processed_count" );
 		}
 	}
 }

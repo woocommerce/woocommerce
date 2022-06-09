@@ -37,6 +37,7 @@ const reducer: Reducer< ProductState, Actions > = (
 ) => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
+			case TYPES.CREATE_PRODUCT_SUCCESS:
 			case TYPES.GET_PRODUCT_SUCCESS:
 				const productData = state.data || {};
 				return {
@@ -88,6 +89,7 @@ const reducer: Reducer< ProductState, Actions > = (
 			case TYPES.GET_PRODUCT_ERROR:
 			case TYPES.GET_PRODUCTS_ERROR:
 			case TYPES.GET_PRODUCTS_TOTAL_COUNT_ERROR:
+			case TYPES.CREATE_PRODUCT_ERROR:
 				return {
 					...state,
 					errors: {

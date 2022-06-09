@@ -12,13 +12,15 @@ jobs:
             - name: Install prerequisites
               run: |
                   npm install -g pnpm@^6.24.2
+                  npm -g i @wordpress/env
                   pnpm install
+                  pnpm nx build:feature-config woocommerce
             - name: Run analyzer
               id: run
               run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF" -o github
             - name: Print results
               id: results
-              run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}"
+              run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"
     comment:
         name: Add comment to hightlight changes
         needs: analyze
@@ -29,7 +31,7 @@ jobs:
               id: find-comment
               with:
                   issue-number: ${{ github.event.number }}
-                  comment-author: woocommercebot
+                  body-includes: New hook, template, or database changes in this PR
             - name: Add comment
               if: ${{ needs.analyze.outputs.results && (steps.find-comment.outputs.comment-id == '') }}
               uses: actions/github-script@v5
@@ -40,7 +42,7 @@ jobs:
                         issue_number: context.issue.number,
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                        body: '## New hook, template, or database changes in this PR${{ needs.analyze.outputs.results }}'
                       })
             - name: Update comment
               if: ${{ needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
@@ -52,15 +54,19 @@ jobs:
                         comment_id: ${{ steps.find-comment.outputs.comment-id }},
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        body: '## New hook or template changes in this PR${{ needs.analyze.outputs.results }}'
+                        body: '## New hook, template, or database changes in this PR${{ needs.analyze.outputs.results }}'
                       })
             - name: Delete comment
               if: ${{ !needs.analyze.outputs.results && steps.find-comment.outputs.comment-id }}
-              uses: izhangzhihao/delete-comment@master
+              uses: actions/github-script@v5
               with:
-                  github_token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
-                  delete_user_name: woocommercebot
-                  issue_number: ${{ github.event.number }}
+                  github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+                  script: |
+                      github.rest.issues.deleteComment({
+                        comment_id: ${{ steps.find-comment.outputs.comment-id }},
+                        owner: context.repo.owner,
+                        repo: context.repo.repo
+                      })
             - name: Add label
               if: ${{ needs.analyze.outputs.results }}
               uses: actions/github-script@v5

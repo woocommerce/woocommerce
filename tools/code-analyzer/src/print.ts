@@ -69,6 +69,7 @@ export const printHookResults = (
 		log( `::set-output name=wphooks::${ opt }` );
 	} else {
 		log( `\n## ${ title }:` );
+		log( '---------------------------------------------------' );
 		for ( const [ key, value ] of data ) {
 			if ( value.size ) {
 				log( 'FILE: ' + key );
@@ -93,22 +94,49 @@ export const printHookResults = (
 /**
  *  Print Schema change results.
  *
- * @param {string}   version Version change was introduced.
- * @param {string}   output  Output style.
- * @param {Function} log     Print method.
+ * @param {Object}   schemaDiff Schema diff object
+ * @param {string}   version    Version change was introduced.
+ * @param {string}   output     Output style.
+ * @param {Function} log        Print method.
  */
 export const printSchemaChange = (
+	schemaDiff: {
+		[ key: string ]: {
+			description: string;
+			base: string;
+			compare: string;
+			method: string;
+			areEqual: boolean;
+		};
+	} | void,
 	version: string,
 	output: string,
 	log: ( s: string ) => void
 ): void => {
+	if ( ! schemaDiff ) {
+		return;
+	}
 	if ( output === 'github' ) {
-		// Add Github output here.
+		let githubCommentContent = '\\n\\n### New schema changes:';
+		Object.keys( schemaDiff ).forEach( ( key ) => {
+			if ( ! schemaDiff[ key ].areEqual ) {
+				githubCommentContent += `\\n* **Schema:** ${ schemaDiff[ key ].method } introduced in ${ version }`;
+			}
+		} );
+
+		log( `::set-output name=schema::${ githubCommentContent }` );
 	} else {
 		log( '\n## SCHEMA CHANGES' );
 		log( '---------------------------------------------------' );
-		log( ` NOTICE | Schema changes detected in ${ version }` );
-		log( '---------------------------------------------------' );
+
+		Object.keys( schemaDiff ).forEach( ( key ) => {
+			if ( ! schemaDiff[ key ].areEqual ) {
+				log(
+					` NOTICE | Schema changes detected in ${ schemaDiff[ key ].method } as of ${ version }`
+				);
+				log( '---------------------------------------------------' );
+			}
+		} );
 	}
 };
 
@@ -129,7 +157,8 @@ export const printDatabaseUpdates = (
 	log: ( s: string ) => void
 ): void => {
 	if ( output === 'github' ) {
-		// Add Github output here.
+		const githubCommentContent = `\\n\\n### New database updates:\\n * **${ updateFunctionName }** introduced in ${ updateFunctionVersion }`;
+		log( `::set-output name=database::${ githubCommentContent }` );
 	} else {
 		log( '\n## DATABASE UPDATES' );
 		log( '---------------------------------------------------' );

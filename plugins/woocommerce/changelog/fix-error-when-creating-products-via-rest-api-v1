@@ -1,0 +1,5 @@
+Significance: patch
+Type: update
+Comment: Changelog already added (see fix-product_attributes_lookup_table_update), the intention is for this to ship in the same release.
+
+

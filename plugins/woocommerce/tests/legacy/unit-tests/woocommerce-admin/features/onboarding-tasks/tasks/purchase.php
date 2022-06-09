@@ -143,7 +143,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_complete function of Purchase task.
+	 * Test the task title for a single paid item.
 	 */
 	public function test_get_title_if_single_paid_item() {
 		update_option(
@@ -157,7 +157,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_complete function of Purchase task.
+	 * Test the task title if 2 paid items exist.
 	 */
 	public function test_get_title_if_multiple_paid_themes() {
 		update_option(
@@ -167,6 +167,20 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 				'theme'         => 'paid',
 			)
 		);
-		$this->assertEquals( 'Add paid extensions to my store', $this->task->get_title() );
+		$this->assertEquals( 'Add Memberships and 1 more product to my store', $this->task->get_title() );
+	}
+
+	/**
+	 * Test the task title if multiple additional paid items exist.
+	 */
+	public function test_get_title_if_multiple_paid_products() {
+		update_option(
+			OnboardingProfile::DATA_OPTION,
+			array(
+				'product_types' => array( 'memberships', 'bookings' ),
+				'theme'         => 'paid',
+			)
+		);
+		$this->assertEquals( 'Add Memberships and 2 more products to my store', $this->task->get_title() );
 	}
 }
