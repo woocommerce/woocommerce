@@ -260,32 +260,16 @@ const getMainConfig = ( options = {} ) => {
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
-						from: './assets/js/blocks/checkout/block.json',
-						to: './checkout/block.json',
-					},
-					{
-						from:
-							'./assets/js/blocks/featured-items/featured-category/block.json',
-						to: './featured-category/block.json',
-					},
-					{
-						from:
-							'./assets/js/blocks/featured-items/featured-product/block.json',
-						to: './featured-product/block.json',
-					},
-					{
-						from:
-							'./assets/js/blocks/handpicked-products/block.json',
-						to: './handpicked-products/block.json',
-					},
-					{
-						from: './assets/js/blocks/product-tag/block.json',
-						to: './product-tag/block.json',
-					},
-					{
-						from:
-							'./assets/js/blocks/products-by-attribute/block.json',
-						to: './products-by-attribute/block.json',
+						from: './assets/js/blocks/**/block.json',
+						to( { absoluteFilename } ) {
+							const blockName = absoluteFilename
+								.split( '/' )
+								.at( -2 );
+							return `./${ blockName }/block.json`;
+						},
+						globOptions: {
+							ignore: [ '**/inner-blocks/**' ],
+						},
 					},
 				],
 			} ),

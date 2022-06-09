@@ -5,14 +5,20 @@ import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, box } from '@wordpress/icons';
 import classNames from 'classnames';
+import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import edit from './edit.js';
+import metadata from './block.json';
 
-registerBlockType( 'woocommerce/stock-filter', {
+registerBlockType( metadata, {
 	title: __( 'Filter Products by Stock', 'woo-gutenberg-products-block' ),
+	description: __(
+		'Allow customers to filter the grid by products stock status. Works in combination with the All Products block.',
+		'woo-gutenberg-products-block'
+	),
 	icon: {
 		src: (
 			<Icon
@@ -21,47 +27,14 @@ registerBlockType( 'woocommerce/stock-filter', {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Allow customers to filter the grid by products stock status. Works in combination with the All Products block.',
-		'woo-gutenberg-products-block'
-	),
-	supports: {
-		html: false,
-		multiple: false,
-	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-	},
 	attributes: {
+		...metadata.attributes,
 		heading: {
 			type: 'string',
 			default: __(
 				'Filter by stock status',
 				'woo-gutenberg-products-block'
 			),
-		},
-		headingLevel: {
-			type: 'number',
-			default: 3,
-		},
-		showCounts: {
-			type: 'boolean',
-			default: true,
-		},
-		showFilterButton: {
-			type: 'boolean',
-			default: false,
-		},
-		/**
-		 * Are we previewing?
-		 */
-		isPreview: {
-			type: 'boolean',
-			default: false,
 		},
 	},
 	edit,
@@ -84,7 +57,9 @@ registerBlockType( 'woocommerce/stock-filter', {
 		}
 		return (
 			<div
-				className={ classNames( 'is-loading', className ) }
+				{ ...useBlockProps.save( {
+					className: classNames( 'is-loading', className ),
+				} ) }
 				{ ...data }
 			>
 				<span
