@@ -174,3 +174,16 @@ export const stopWPEnv = ( error: ( s: string ) => void ): boolean => {
 		return false;
 	}
 };
+
+export const isValidCommitHash = ( branch: string ): boolean => {
+	try {
+		// See if hash is valid and exists in the history.
+		execSync( `git show -s ${ branch }`, {
+			encoding: 'utf-8',
+		} );
+		return true;
+	} catch ( e ) {
+		// git show -s produces an error if the string is not a valid hash.
+		return false;
+	}
+};
