@@ -192,8 +192,6 @@ export function* removeProduct(
 			yield deleteProductSuccess( id, product, force );
 			return product;
 		}
-
-		throw new Error();
 	} catch ( error ) {
 		yield deleteProductError( id, error );
 		throw error;
