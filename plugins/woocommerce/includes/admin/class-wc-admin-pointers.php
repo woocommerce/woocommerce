@@ -43,6 +43,22 @@ class WC_Admin_Pointers {
 	}
 
 	/**
+	 * Check if product tour experiment is treatment.
+	 *
+	 * @return bool
+	 */
+	public static function is_experiment_product_tour() {
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking
+		);
+		return $abtest->get_variation( 'woocommerce_products_tour' ) === 'treatment';
+	}
+
+	/**
 	 * Pointers for creating a product.
 	 */
 	public function create_product_tutorial() {
@@ -55,7 +71,8 @@ class WC_Admin_Pointers {
 		if (
 			Features::is_enabled( 'experimental-product-tour' ) &&
 			isset( $_GET['spotlight'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			isset( $wp_post_types )
+			isset( $wp_post_types ) &&
+			self::is_experiment_product_tour()
 		) {
 			$labels          = $wp_post_types['product']->labels;
 			$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
