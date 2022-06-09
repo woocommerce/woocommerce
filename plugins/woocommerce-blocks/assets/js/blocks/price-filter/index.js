@@ -12,10 +12,14 @@ import { useBlockProps } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import edit from './edit.js';
+import metadata from './block.json';
 
-registerBlockType( 'woocommerce/price-filter', {
-	apiVersion: 2,
+registerBlockType( metadata, {
 	title: __( 'Filter Products by Price', 'woo-gutenberg-products-block' ),
+	description: __(
+		'Allow customers to filter the products by choosing a lower or upper price limit. Works in combination with the All Products block.',
+		'woo-gutenberg-products-block'
+	),
 	icon: {
 		src: (
 			<Icon
@@ -24,19 +28,8 @@ registerBlockType( 'woocommerce/price-filter', {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Allow customers to filter the products by choosing a lower or upper price limit. Works in combination with the All Products block.',
-		'woo-gutenberg-products-block'
-	),
 	supports: {
-		html: false,
-		multiple: false,
-		color: {
-			text: true,
-			background: false,
-		},
+		...metadata.supports,
 		...( isFeaturePluginBuild() && {
 			__experimentalBorder: {
 				radius: true,
@@ -45,23 +38,11 @@ registerBlockType( 'woocommerce/price-filter', {
 			},
 		} ),
 	},
-	example: {},
 	attributes: {
-		showInputFields: {
-			type: 'boolean',
-			default: true,
-		},
-		showFilterButton: {
-			type: 'boolean',
-			default: false,
-		},
+		...metadata.attributes,
 		heading: {
 			type: 'string',
 			default: __( 'Filter by price', 'woo-gutenberg-products-block' ),
-		},
-		headingLevel: {
-			type: 'number',
-			default: 3,
 		},
 	},
 	transforms: {
