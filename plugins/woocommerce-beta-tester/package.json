@@ -23,7 +23,8 @@
 		}
 	},
 	"scripts": {
-    	"postinstall": "composer install",
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"build": "pnpm run uglify",
 		"build:zip": "./bin/build-zip.sh",
 		"build:dev": "pnpm run lint:js && pnpm run uglify",

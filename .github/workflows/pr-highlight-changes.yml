@@ -14,7 +14,7 @@ jobs:
                   npm install -g pnpm@^6.24.2
                   npm -g i @wordpress/env
                   pnpm install
-                  pnpm nx build:feature-config woocommerce
+                  pnpm build:feature-config --filter=woocommerce
             - name: Run analyzer
               id: run
               run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF" -o github

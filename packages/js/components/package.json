@@ -115,6 +115,7 @@
 	},
 	"scripts": {
 		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"build": "pnpm run build:js && pnpm run build:css",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
@@ -123,9 +124,8 @@
 		"lint:fix": "eslint src --ext=js,ts,tsx --fix",
 		"prepack": "pnpm run clean && pnpm run build",
 		"start": "concurrently \"tsc --build ./tsconfig.json --watch\" \"webpack --watch\"",
-		"test": "pnpm run build && pnpm run test:nobuild",
-		"test:nobuild": "jest --config ./jest.config.json",
-		"test:update-snapshots": "pnpm run test:nobuild -- --updateSnapshot",
+		"test": "jest --config ./jest.config.json",
+		"test:update-snapshots": "pnpm run test -- --updateSnapshot",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"lint-staged": {

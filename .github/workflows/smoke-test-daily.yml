@@ -177,7 +177,7 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce
-              run: pnpm nx docker-up woocommerce
+              run: pnpm docker:up --filter=woocommerce
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce

@@ -36,9 +36,10 @@
 		"access": "public"
 	},
 	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"lint": "eslint ./rules ./configs",
-		"lint:fix": "eslint ./rules ./configs --fix",
-		"postinstall": "composer install"
+		"lint:fix": "eslint ./rules ./configs --fix"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
