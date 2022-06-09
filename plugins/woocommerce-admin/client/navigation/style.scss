@@ -23,8 +23,8 @@
 	}
 
 	.components-navigation__menu {
-		scrollbar-color: $gray-700;
-		scrollbar-width: 8px;
+		scrollbar-color: $gray-700 $gray-900;
+		scrollbar-width: thin;
 
 		&::-webkit-scrollbar-thumb {
 			border-radius: 10px;
