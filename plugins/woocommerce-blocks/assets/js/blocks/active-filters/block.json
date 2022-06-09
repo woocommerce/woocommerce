@@ -1,0 +1,29 @@
+{
+	"name": "woocommerce/active-filters",
+	"version": "1.0.0",
+	"title": "Active Product Filters",
+	"description": "Show the currently active product filters. Works in combination with the All Products and filters blocks.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"color": {
+			"text": true,
+			"background": false
+		}
+	},
+	"attributes": {
+		"displayStyle": {
+			"type": "string",
+			"default": "list"
+		},
+		"headingLevel": {
+			"type": "number",
+			"default": 3
+		}
+	},
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

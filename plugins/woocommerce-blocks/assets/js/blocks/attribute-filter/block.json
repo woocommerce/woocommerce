@@ -1,0 +1,53 @@
+{
+	"name": "woocommerce/attribute-filter",
+	"version": "1.0.0",
+	"title": "Filter Products by Attribute",
+	"description": "Allow customers to filter the grid by product attribute, such as color. Works in combination with the All Products block.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"html": false,
+		"color": {
+			"text": true,
+			"background": false
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
+	},
+	"attributes": {
+		"attributeId": {
+			"type": "number",
+			"default": 0
+		},
+		"showCounts": {
+			"type": "boolean",
+			"default": true
+		},
+		"queryType": {
+			"type": "string",
+			"default": "or"
+		},
+		"headingLevel": {
+			"type": "number",
+			"default": 3
+		},
+		"displayStyle": {
+			"type": "string",
+			"default": "list"
+		},
+		"showFilterButton": {
+			"type": "boolean",
+			"default": false
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

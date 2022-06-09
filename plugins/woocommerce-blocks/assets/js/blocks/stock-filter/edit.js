@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { InspectorControls } from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import {
 	Disabled,
 	PanelBody,
@@ -27,6 +27,10 @@ const Edit = ( { attributes, setAttributes } ) => {
 		showCounts,
 		showFilterButton,
 	} = attributes;
+
+	const blockProps = useBlockProps( {
+		className: classnames( 'wc-block-stock-filter', className ),
+	} );
 
 	const getInspectorControls = () => {
 		return (
@@ -111,12 +115,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 		<>
 			{ getInspectorControls() }
 			{
-				<div
-					className={ classnames(
-						'wc-block-stock-filter',
-						className
-					) }
-				>
+				<div { ...blockProps }>
 					<BlockTitle
 						className="wc-block-stock-filter__title"
 						headingLevel={ headingLevel }

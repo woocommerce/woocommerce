@@ -12,10 +12,14 @@ import { useBlockProps } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import edit from './edit.js';
+import metadata from './block.json';
 
-registerBlockType( 'woocommerce/active-filters', {
-	apiVersion: 2,
+registerBlockType( metadata, {
 	title: __( 'Active Product Filters', 'woo-gutenberg-products-block' ),
+	description: __(
+		'Show the currently active product filters. Works in combination with the All Products and filters blocks.',
+		'woo-gutenberg-products-block'
+	),
 	icon: {
 		src: (
 			<Icon
@@ -24,35 +28,11 @@ registerBlockType( 'woocommerce/active-filters', {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Show the currently active product filters. Works in combination with the All Products and filters blocks.',
-		'woo-gutenberg-products-block'
-	),
-	supports: {
-		html: false,
-		multiple: false,
-		color: {
-			text: true,
-			background: false,
-		},
-	},
-	example: {
-		attributes: {},
-	},
 	attributes: {
-		displayStyle: {
-			type: 'string',
-			default: 'list',
-		},
+		...metadata.attributes,
 		heading: {
 			type: 'string',
 			default: __( 'Active filters', 'woo-gutenberg-products-block' ),
-		},
-		headingLevel: {
-			type: 'number',
-			default: 3,
 		},
 	},
 	transforms: {
