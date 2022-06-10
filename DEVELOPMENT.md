@@ -34,14 +34,7 @@ The port # might be different depending on your `.wp-env.override.json` configur
 Once you have WP-ENV container up, we need to run a few commands to start developing.
 
 1. Run `pnpm install` to install npm modules.
-2. Run `pnpm nx build woocommerce` to build core.
-3. Run `pnpm nx composer-install woocommerce` to install PHP dependencies.
-
-If you don't have Composer available locally, run the following command. It runs the command in WP-ENV container.
-
-`wp-env run composer composer install`
-
-You might also want to run `pnpm start` to watch your CSS and JS changes if you are working on the frontend.
+2. Run `pnpm exec turbo run build --filter=woocommerce` to build core.
 
 You're now ready to develop!
 

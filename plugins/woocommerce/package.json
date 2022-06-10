@@ -15,6 +15,7 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"build": "WC_ADMIN_PHASE=core pnpm run build:feature-config",
 		"build:feature-config": "php bin/generate-feature-config.php",
 		"build:zip": "./bin/build-zip.sh",
@@ -29,9 +30,9 @@
 		"docker:up": "pnpm exec wc-e2e docker:up",
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
-		"test:e2e": "pnpm exec wc-e2e test:e2e",
-		"test:e2e-debug": "pnpm exec wc-e2e test:e2e-debug",
-		"test:e2e-dev": "pnpm exec wc-e2e test:e2e-dev",
+		"e2e": "pnpm exec wc-e2e test:e2e",
+		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
+		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
 		"test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"

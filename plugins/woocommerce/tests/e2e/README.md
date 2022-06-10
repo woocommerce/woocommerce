@@ -122,13 +122,11 @@ Run the following in a terminal/command line window
 
 - `pnpm install`
 
-- `pnpm nx composer-install woocommerce`
-
-- `pnpm nx build-assets woocommerce`
+- `pnpm exec turbo run build --filter=woocommerce`
 
 - `npm install jest --global` (this only needs to be done once)
 
-- `pnpm nx docker-up woocommerce` (this will build the test site using Docker)
+- `pnpm docker:up --filter=woocommerce` (this will build the test site using Docker)
 
 - Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
 
@@ -154,16 +152,16 @@ Username: admin
 PW: password
 ```
 
-- Run `pnpm nx docker-down woocommerce` when you are done with running e2e tests and before making any changes to test site configuration.
+- Run `pnpm docker:down --filter=woocommerce` when you are done with running e2e tests and before making any changes to test site configuration.
 
-Note that running `pnpm nx docker-down woocommerce` and then `pnpm nx docker-up woocommerce` re-initializes the test container.
+Note that running `pnpm docker:down --filter=woocommerce` and then `pnpm docker:up --filter=woocommerce` re-initializes the test container.
 
 ### How to run tests in headless mode
 
 To run e2e tests in headless mode use the following command:
 
 ```bash
-pnpm nx test-e2e woocommerce
+pnpm exec turbo run e2e --filter=woocommerce
 ```
 
 ### How to run tests in non-headless mode
@@ -171,7 +169,7 @@ pnpm nx test-e2e woocommerce
 Tests run in headless mode by default. However, sometimes it's useful to observe the browser while running or developing tests. To do so, you can run tests in a non-headless (dev) mode:
 
 ```bash
-pnpm nx test-e2e-dev woocommerce
+pnpm exec turbo run e2e:dev --filter=woocommerce
 ```
 
 The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations. This makes it easier to see what is happening in the browser.
@@ -179,7 +177,7 @@ The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operation
 By default, SlowMo mode adds a 50 millisecond delay between test steps. If you'd like to override the length of the delay and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below:
 
 ```
-PUPPETEER_SLOWMO=10 pnpm nx test-e2e-dev woocommerce
+PUPPETEER_SLOWMO=10 pnpm exec turbo run e2e:dev --filter=woocommerce
 ```
 
 The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
@@ -203,7 +201,7 @@ E2E_RETRY_TIMES=2 pnpm exec wc-e2e test:e2e
 Tests run in headless mode by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
             
 ```bash
-pnpm nx test-e2e-debug woocommerce
+pnpm exec turbo run e2e:debug --filter=woocommerce
 ```
 
 When all tests have been completed the debugger remains active. Control doesn't return to the command line until the debugger is closed. Otherwise, debug mode functions the same as non-headless mode.
@@ -274,7 +272,7 @@ The following variables can be used to specify the versions of WordPress, PHP an
 The full command to build the site will look as follows:
 
 ```
-TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 pnpm nx docker-up woocommerce
+TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 pnpm docker:up --filter=woocommerce
 ```
 
 ## Guide for writing e2e tests
@@ -382,6 +380,6 @@ The [WooCommerce E2E Tests Boilerplate repo](https://github.com/woocommerce/wooc
 
 ## Debugging tests
 
-The test sequencer (`pnpm nx test-e2e woocommerce`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
+The test sequencer (`pnpm exec turbo run e2e --filter=woocommerce`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).

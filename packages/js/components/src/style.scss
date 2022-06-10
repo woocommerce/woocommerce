@@ -1,4 +1,9 @@
 /**
+* External Dependencies
+*/
+@import '@automattic/tour-kit/dist/esm/styles.scss';
+
+/**
  * Internal Dependencies
  */
 @import 'abbreviated-card/style.scss';
@@ -38,3 +43,4 @@
 @import 'web-preview/style.scss';
 @import 'badge/style.scss';
 @import 'dynamic-form/style.scss';
+@import 'tour-kit/style.scss';

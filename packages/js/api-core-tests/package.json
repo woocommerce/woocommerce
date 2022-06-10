@@ -4,9 +4,9 @@
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"scripts": {
-		"test": "jest",
-		"test:api": "jest --group=api",
-		"test:hello": "jest --group=hello",
+		"e2e": "jest",
+		"e2e:api": "jest --group=api",
+		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
 		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",

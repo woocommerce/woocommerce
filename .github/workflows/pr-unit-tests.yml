@@ -60,7 +60,7 @@ jobs:
 
       - name: Build Admin feature config
         run: |
-          pnpm nx build:feature-config woocommerce
+          pnpm build:feature-config --filter=woocommerce
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -72,7 +72,7 @@ jobs:
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
              rm -rf ./vendor/phpunit/
-             pnpm nx composer-dump-autoload woocommerce
+             composer dump-autoload
            fi
 
       - name: Init DB and WP
@@ -80,4 +80,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm nx test-unit woocommerce
+        run: pnpm exec turbo run test --filter=woocommerce

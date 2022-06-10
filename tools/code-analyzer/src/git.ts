@@ -8,6 +8,11 @@ import { tmpdir } from 'os';
 import { readFileSync } from 'fs';
 
 /**
+ * Internal dependencies
+ */
+import { startWPEnv, stopWPEnv, isValidCommitHash } from './utils';
+
+/**
  * Fetch branches from origin.
  *
  * @param {string}   branch branch/commit hash.
@@ -30,13 +35,20 @@ export const fetchBranch = (
 		return true;
 	}
 
+	if ( isValidCommitHash( branch ) ) {
+		// The hash is valid and available in history. No need to fetch anything.
+		return true;
+	}
+
 	try {
 		// Fetch branch.
 		execSync( `git fetch origin ${ branch }` );
 		// Create branch.
 		execSync( `git branch ${ branch } origin/${ branch }` );
 	} catch ( e ) {
-		error( `Unable to fetch ${ branch }` );
+		error(
+			`Unable to fetch ${ branch }. Supply a valid branch name or commit hash.`
+		);
 		return false;
 	}
 
@@ -85,25 +97,45 @@ export const generatePatch = (
 	return content;
 };
 
+/**
+ * Get all schema strings found in WooCommerce.
+ *
+ * @param {string}   branch branch being compared.
+ * @param {Function} error  Error logging function.
+ * @return {Object}	Object of schema strings.
+ */
 export const getSchema = (
 	branch: string,
 	error: ( s: string ) => void
-): string | undefined => {
+): {
+	schema: string;
+	OrdersTableDataStore: string;
+} | void => {
+	// Save the current branch for later.
+	const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
+
 	try {
 		// Make sure the branch is available.
 		fetchBranch( branch, error );
 		// Start spinner.
 		CliUx.ux.action.start( `Gathering schema from ${ branch }` );
-		// Save the current branch for later.
-		const currentBranch = execSync( 'git rev-parse --abbrev-ref HEAD' );
+
 		// Checkout branch to compare
 		execSync( `git checkout ${ branch }` );
 
 		const getSchemaPath =
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
-		// Get the schema from wp cli
+		// Get the WooCommerce schema from wp cli
 		const schema = execSync(
 			`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
+			{
+				cwd: 'plugins/woocommerce',
+				encoding: 'utf-8',
+			}
+		);
+		// Get the OrdersTableDataStore schema.
+		const OrdersTableDataStore = execSync(
+			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
 			{
 				cwd: 'plugins/woocommerce',
 				encoding: 'utf-8',
@@ -113,8 +145,14 @@ export const getSchema = (
 		execSync( `git checkout ${ currentBranch }` );
 
 		CliUx.ux.action.stop();
-		return schema;
+		return {
+			schema,
+			OrdersTableDataStore,
+		};
 	} catch ( e ) {
+		// Return to the current branch.
+		execSync( `git checkout ${ currentBranch }` );
+
 		error( `Unable to get schema for branch ${ branch }. \n${ e }` );
 	}
 };
@@ -126,15 +164,50 @@ export const getSchema = (
  * @param {string}   compare Branch/commit hash to compare against the base.
  * @param {string}   base    Base branch/commit hash.
  * @param {Function} error   error print method.
- * @return {Array<string|undefined>} patch string.
+ * @return {Object|void}     diff object.
  */
-export const generateSchemaDiff = (
+export const generateSchemaDiff = async (
 	source: string,
 	compare: string,
 	base: string,
 	error: ( s: string ) => void
-): Array< string | undefined > => {
+): Promise< {
+	[ key: string ]: {
+		description: string;
+		base: string;
+		compare: string;
+		method: string;
+		areEqual: boolean;
+	};
+} | void > => {
+	// Be sure the wp-env engine is started.
+	await startWPEnv( error );
+
 	const baseSchema = getSchema( base, error );
 	const compareSchema = getSchema( compare, error );
-	return [ baseSchema, compareSchema ];
+
+	stopWPEnv( error );
+
+	if ( ! baseSchema || ! compareSchema ) {
+		return;
+	}
+	return {
+		schema: {
+			description: 'WooCommerce Base Schema',
+			base: baseSchema.schema,
+			compare: compareSchema.schema,
+			method: 'WC_Install->get_schema',
+			areEqual: baseSchema.schema === compareSchema.schema,
+		},
+		OrdersTableDataStore: {
+			description: 'OrdersTableDataStore Schema',
+			base: baseSchema.OrdersTableDataStore,
+			compare: compareSchema.OrdersTableDataStore,
+			method:
+				'Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore->get_database_schema',
+			areEqual:
+				baseSchema.OrdersTableDataStore ===
+				compareSchema.OrdersTableDataStore,
+		},
+	};
 };

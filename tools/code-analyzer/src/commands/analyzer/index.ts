@@ -20,6 +20,7 @@ import {
 	getFilename,
 	getPatches,
 	getHookName,
+	areSchemasEqual,
 } from '../../utils';
 import { generatePatch, generateSchemaDiff } from '../../git';
 
@@ -90,12 +91,9 @@ export default class Analyzer extends Command {
 		const pluginData = this.getPluginData( flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
-		// Avoid running this on CI for now, and only run schema diffs in the monorepo.
-		if (
-			flags.output === 'console' &&
-			flags.source === 'woocommerce/woocommerce'
-		) {
-			const schemaDiff = generateSchemaDiff(
+		// Run schema diffs only in the monorepo.
+		if ( flags.source === 'woocommerce/woocommerce' ) {
+			const schemaDiff = await generateSchemaDiff(
 				flags.source,
 				args.compare,
 				flags.base,
@@ -106,15 +104,10 @@ export default class Analyzer extends Command {
 				patchContent,
 				pluginData[ 0 ],
 				flags.output,
-				schemaDiff[ 0 ] === schemaDiff[ 1 ]
+				schemaDiff
 			);
 		} else {
-			this.scanChanges(
-				patchContent,
-				pluginData[ 0 ],
-				flags.output,
-				true
-			);
+			this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
 		}
 	}
 
@@ -201,7 +194,15 @@ export default class Analyzer extends Command {
 		content: string,
 		version: string,
 		output: string,
-		schemaEquality: boolean
+		schemaDiff: {
+			[ key: string ]: {
+				description: string;
+				base: string;
+				compare: string;
+				method: string;
+				areEqual: boolean;
+			};
+		} | void
 	): void {
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
@@ -226,9 +227,12 @@ export default class Analyzer extends Command {
 			this.log( 'No new hooks found' );
 		}
 
-		if ( ! schemaEquality ) {
-			printSchemaChange( version, output, ( s: string ): void =>
-				this.log( s )
+		if ( ! areSchemasEqual( schemaDiff ) ) {
+			printSchemaChange(
+				schemaDiff,
+				version,
+				output,
+				( s: string ): void => this.log( s )
 			);
 		} else {
 			this.log( 'No new schema changes found' );

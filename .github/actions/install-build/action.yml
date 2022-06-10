@@ -17,14 +17,9 @@ runs:
     - name: Install dependencies
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: pnpm install
-
-    - name: Install Composer dependencies
-      shell: bash
-      working-directory: ${{ inputs.working_directory }}
-      run: pnpm nx composer-install-no-dev woocommerce
+      run: COMPOSER_NO_DEV=1 pnpm install
 
     - name: Run build
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: pnpm nx build woocommerce
+      run: pnpm exec turbo run build --filter=woocommerce

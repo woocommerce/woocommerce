@@ -35,13 +35,7 @@ jobs:
         uses: ./.github/actions/install-build
 
       - name: Lint
-        run: |
-          pnpm nx build woocommerce-admin
-          pnpm nx lint woocommerce-admin
-          pnpm nx lint:js-packages woocommerce-admin
+        run: pnpm exec turbo run lint --filter='@woocommerce/admin-library...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
 
       - name: Test
-        run: |
-          pnpm nx build woocommerce-admin
-          pnpm nx test woocommerce-admin
-          pnpm nx test:packages woocommerce-admin
+        run: pnpm exec turbo run test --filter='@woocommerce/admin-library...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
