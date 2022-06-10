@@ -38,6 +38,7 @@
 	},
 	"scripts": {
 		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"build": "pnpm run build:admin && pnpm run uglify",
 		"build:admin": "wp-scripts build",
 		"build:zip": "./bin/build-zip.sh",
