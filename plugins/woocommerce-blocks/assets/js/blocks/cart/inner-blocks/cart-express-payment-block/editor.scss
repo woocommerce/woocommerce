@@ -18,8 +18,12 @@
 		pointer-events: all; // Overrides parent disabled component in editor context
 	}
 
+	.wp-block-woocommerce-cart-express-payment-block &,
+	.wp-block-woocommerce-checkout-express-payment-block-placeholder__description {
+		margin: 0 0 1em;
+	}
+
 	.wp-block-woocommerce-checkout-express-payment-block-placeholder__description {
 		display: block;
-		margin: 0 0 1em;
 	}
 }
