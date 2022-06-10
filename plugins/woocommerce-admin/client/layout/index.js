@@ -5,7 +5,15 @@ import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import { Component, lazy, Suspense } from '@wordpress/element';
-import { Router, Route, Switch } from 'react-router-dom';
+import {
+	unstable_HistoryRouter as HistoryRouter,
+	Route,
+	Routes,
+	useLocation,
+	useMatch,
+	useParams,
+} from 'react-router-dom';
+import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity } from 'lodash';
 import { parse } from 'qs';
@@ -62,6 +70,45 @@ export class PrimaryLayout extends Component {
 		);
 	}
 }
+
+/**
+ * Exists for the sole purpose of passing on react-router hooks into
+ * the class based Layout component. Feel free to refactor it by turning _Layout
+ * into a functional component and moving the hooks inside
+ *
+ * @param {Object} root0          root0 React component props
+ * @param {Object} root0.children Children componeents
+ */
+const WithReactRouterProps = ( { children } ) => {
+	const location = useLocation();
+	const match = useMatch( location.pathname );
+	const params = useParams();
+	const matchProp = { params, url: match.pathname };
+	return Children.toArray( children ).map( ( child ) => {
+		return cloneElement( child, {
+			...child.props,
+			location,
+			match: matchProp,
+		} );
+	} );
+};
+
+/**
+ * Wraps _Layout with WithReactRouterProps for non-embedded page renders
+ * We need this because the hooks fail for embedded page renders as there is no Router context above it.
+ *
+ * @param {Object} props React component props
+ */
+const LayoutSwitchWrapper = ( props ) => {
+	if ( props.isEmbedded ) {
+		return <_Layout { ...props } />;
+	}
+	return (
+		<WithReactRouterProps>
+			<_Layout { ...props } />
+		</WithReactRouterProps>
+	);
+};
 
 class _Layout extends Component {
 	componentDidMount() {
@@ -230,14 +277,18 @@ const Layout = compose(
 			installedPlugins: getInstalledPlugins(),
 		};
 	} )
-)( _Layout );
+)( LayoutSwitchWrapper );
 
 const _PageLayout = () => {
 	const { currentUserCan } = useUser();
 
+	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
+	const path = document.location.pathname;
+	const basename = path.substring( 0, path.lastIndexOf( '/' ) );
+
 	return (
-		<Router history={ getHistory() }>
-			<Switch>
+		<HistoryRouter history={ getHistory() }>
+			<Routes basename={ basename }>
 				{ getPages()
 					.filter(
 						( page ) =>
@@ -250,14 +301,12 @@ const _PageLayout = () => {
 								key={ page.path }
 								path={ page.path }
 								exact
-								render={ ( props ) => (
-									<Layout page={ page } { ...props } />
-								) }
+								element={ <Layout page={ page } /> }
 							/>
 						);
 					} ) }
-			</Switch>
-		</Router>
+			</Routes>
+		</HistoryRouter>
 	);
 };
 

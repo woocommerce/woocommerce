@@ -11,6 +11,7 @@ import { get, isArray } from 'lodash';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -19,9 +20,8 @@ import '../style.scss';
 import DismissModal from '../dismiss-modal';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
-import { getAdminSetting } from '~/utils/admin-settings';
 
-const wcAdminAssetUrl = getAdminSetting( 'wcAdminAssetUrl', '' );
+const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
 const wcsPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {
@@ -399,7 +399,7 @@ export class ShippingBanner extends Component {
 				<div className="wc-admin-shipping-banner-container">
 					<img
 						className="wc-admin-shipping-banner-illustration"
-						src={ wcAdminAssetUrl + '/shippingillustration.svg' }
+						src={ wcAssetUrl + 'images/shippingillustration.svg' }
 						alt={ __( 'Shipping ', 'woocommerce' ) }
 					/>
 					<div className="wc-admin-shipping-banner-blob">

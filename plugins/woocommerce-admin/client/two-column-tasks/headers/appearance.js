@@ -8,17 +8,24 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import TimerImage from './timer.svg';
-import PersonalizeMyStore from './illustrations/personalize-my-store.js';
+import { WC_ASSET_URL } from '../../utils/admin-settings';
 
 const AppearanceHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<PersonalizeMyStore className="svg-background" />
+			<img
+				alt={ __( 'Appearance illustration', 'woocommerce' ) }
+				src={
+					WC_ASSET_URL +
+					'images/task_list/expand-section-illustration.png'
+				}
+				className="svg-background"
+			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Personalize my store', 'woocommerce' ) }</h1>
+				<h1>{ __( 'Make your store stand out', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
-						'Add your logo, create a homepage, and start designing your store',
+						'Add your logo, create a homepage, and start designing your store.',
 						'woocommerce'
 					) }
 				</p>

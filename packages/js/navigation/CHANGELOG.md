@@ -1,7 +1,8 @@
 # Unreleased
 
 -   Update dependency `@wordpress/hooks` to ^3.5.0
-
+-   Added Typescript type declarations. #32615
+-   Update dependency `history` to ^5.3.0
 # 7.0.1
 
 -   Add missing dependencies. #8349

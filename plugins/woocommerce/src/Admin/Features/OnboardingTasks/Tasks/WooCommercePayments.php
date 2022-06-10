@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 
 /**
  * WooCommercePayments Task
@@ -86,7 +87,9 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return self::is_requested() &&
+		$has_task_list_previously_completed = ( new TaskList( array( 'id' => 'setup' ) ) )->has_previously_completed();
+
+		return ! $has_task_list_previously_completed && // Do not re-display the task if the task list has already been completed.
 			self::is_installed() &&
 			self::is_supported() &&
 			( $this->get_parent_id() !== 'setup_two_column' || ! self::is_connected() );

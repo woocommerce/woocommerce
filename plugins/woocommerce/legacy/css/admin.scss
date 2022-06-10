@@ -1971,7 +1971,7 @@ ul.wc_coupon_list_block {
 					display: block;
 					text-align: center;
 
-					&::before {
+					&:empty::before {
 
 						@include icon_dashicons("\f128");
 						width: 38px;
@@ -2594,6 +2594,7 @@ ul.wc_coupon_list_block {
 	}
 }
 
+.woocommerce_page_wc-orders,
 .post-type-shop_order {
 
 	.tablenav .one-page .displaying-num {
@@ -6514,9 +6515,11 @@ table.bar_chart {
 	}
 }
 
-.post-type-shop_order .woocommerce-BlankState-message::before {
-
-	@include icon("\e01d");
+.woocommerce_page_wc-orders,
+.post-type-shop_order {
+	.woocommerce-BlankState-message::before {
+		@include icon("\e01d");
+	}
 }
 
 .post-type-shop_coupon .woocommerce-BlankState-message::before {
@@ -6574,6 +6577,7 @@ table.bar_chart {
 	}
 }
 
+.woocommerce_page_wc-orders .woocommerce-BlankState,
 .post-type-product .woocommerce-BlankState,
 .post-type-shop_order .woocommerce-BlankState {
 	max-width: 764px;
@@ -7338,6 +7342,7 @@ table.bar_chart {
 	}
 }
 
+.woocommerce_page_wc-orders .tablenav,
 .post-type-product .tablenav,
 .post-type-shop_order .tablenav {
 
@@ -7869,6 +7874,32 @@ table.bar_chart {
 					display: none;
 				}
 			}
+		}
+	}
+}
+
+/**
+  * Product Reviews
+  */
+.wp-list-table.product-reviews {
+
+	th.column-type {
+		width: 10%;
+	}
+
+	@media screen and (max-width: 782px) {
+
+		th.column-type,
+		td.column-type,
+		th.column-author,
+		td.column-author,
+		th.column-rating,
+		td.column-rating {
+			display: none !important;
+		}
+
+		.toggle-row {
+			top: 10px;
 		}
 	}
 }

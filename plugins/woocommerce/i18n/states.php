@@ -4,7 +4,7 @@
  *
  * Returns an array of country states. This deprecates and replaces the /states/ directory found in older versions.
  * States should be defined in English and translated native through localisation files.
- * Country codes and states (or province) names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/country-names).
+ * Country codes and states (or province) names should follow the Unicode CLDR recommendation (https://cldr.unicode.org/translation/displaynames/countryregion-territory-names).
  * Countries defined with empty arrays have no states.
  *
  * @package WooCommerce\i18n

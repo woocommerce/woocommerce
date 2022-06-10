@@ -345,14 +345,16 @@ function wc_format_localized_price( $value ) {
 }
 
 /**
- * Format a decimal with PHP Locale settings.
+ * Format a decimal with the decimal separator for prices or PHP Locale settings.
  *
  * @param  string $value Decimal to localize.
  * @return string
  */
 function wc_format_localized_decimal( $value ) {
 	$locale = localeconv();
-	return apply_filters( 'woocommerce_format_localized_decimal', str_replace( '.', $locale['decimal_point'], strval( $value ) ), $value );
+	$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+	$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
+	return apply_filters( 'woocommerce_format_localized_decimal', str_replace( '.', $decimal, strval( $value ) ), $value );
 }
 
 /**
@@ -992,6 +994,11 @@ function wc_format_postcode( $postcode, $country ) {
 			break;
 		case 'NL':
 			$postcode = substr_replace( $postcode, ' ', 4, 0 );
+			break;
+		case 'LV':
+			if ( preg_match( '/(?:LV)?-?(\d+)/i', $postcode, $matches ) ) {
+				$postcode = count( $matches ) >= 2 ? "LV-$matches[1]" : $postcode;
+			}
 			break;
 	}
 

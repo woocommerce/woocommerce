@@ -6,19 +6,17 @@ import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import {
-	updateQueryString,
-	getHistory,
-	getNewPath,
-} from '@woocommerce/navigation';
-import {
-	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
 	useUserPreferences,
+	getVisibleTasks,
+	TaskListType,
+	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { List, TaskItem } from '@woocommerce/experimental';
+import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
 
 /**
@@ -28,30 +26,43 @@ import '../tasks/task-list.scss';
 import taskHeaders from './task-headers';
 import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
-import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
+import { TaskListItemTwoColumn } from './task-list-item-two-column';
+import { TaskListCompletedHeader } from './completed-header';
+
+export type TaskListProps = TaskListType & {
+	eventName?: string;
+	twoColumns?: boolean;
+	query: {
+		task?: string;
+	};
+	cesHeader?: boolean;
+};
 
 export const TaskList: React.FC< TaskListProps > = ( {
 	query,
 	id,
 	eventName,
+	eventPrefix,
 	tasks,
 	twoColumns,
 	keepCompletedTaskList,
 	isComplete,
 	displayProgressHeader,
+	cesHeader = true,
 } ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
-		OPTIONS_STORE_NAME
-	);
-	const { profileItems } = useSelect( ( select ) => {
+	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
+	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList, visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const {
+		hideTaskList,
+		visitedTask,
+		keepCompletedTaskList: keepCompletedTasks,
+	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;
@@ -63,19 +74,13 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	const prevQueryRef = useRef( query );
 
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
-
+	const visibleTasks = getVisibleTasks( tasks );
 	const recordTaskListView = () => {
 		if ( query.task ) {
 			return;
 		}
 
-		recordEvent( `${ eventName }_view`, {
+		recordEvent( `${ listEventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
@@ -99,34 +104,12 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		( task ) => ! task.isComplete && ! task.isDismissed
 	);
 
-	const onDismissTask = ( taskId: string, onDismiss?: () => void ) => {
-		dismissTask( taskId );
-		createNotice( 'success', __( 'Task dismissed' ), {
-			actions: [
-				{
-					label: __( 'Undo', 'woocommerce' ),
-					onClick: () => undoDismissTask( taskId ),
-				},
-			],
-		} );
-
-		if ( onDismiss ) {
-			onDismiss();
-		}
-	};
-
-	const hideTasks = ( event: string ) => {
+	const hideTasks = () => {
 		hideTaskList( id );
 	};
 
 	const keepTasks = () => {
-		const updateOptionsParams = {
-			woocommerce_task_list_keep_completed: 'yes',
-		};
-
-		updateOptions( {
-			...updateOptionsParams,
-		} );
+		keepCompletedTasks( id );
 	};
 
 	const renderMenu = () => {
@@ -147,7 +130,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 										setShowDismissModal( true );
 										onToggle();
 									} else {
-										hideTasks( 'remove_card' );
+										hideTasks();
 									}
 								} }
 							>
@@ -194,7 +177,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const trackClick = ( task: TaskType ) => {
-		recordEvent( `${ eventName }_click`, {
+		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
 		} );
 	};
@@ -204,15 +187,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		if ( ! task.isComplete ) {
 			updateTrackStartedCount( task.id );
 		}
+
 		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
-			} else {
-				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
-			}
+			navigateTo( {
+				url: task.actionUrl,
+			} );
 			return;
 		}
-		updateQueryString( { task: task.id } );
+
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
@@ -226,15 +209,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		}
 	};
 
-	const onTaskSelected = ( task: TaskType ) => {
-		if ( task.id === 'woocommerce-payments' ) {
-			// With WCPay, we have to show the header content for user to read t&c first.
-			showTaskHeader( task );
-		} else {
-			goToTask( task );
-		}
-	};
-
 	useEffect( () => {
 		if ( selectedHeaderCard ) {
 			showTaskHeader( selectedHeaderCard );
@@ -245,14 +219,22 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
-	if ( isComplete && ! keepCompletedTaskList ) {
+	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
 			<>
-				<TaskListCompleted
-					hideTasks={ hideTasks }
-					keepTasks={ keepTasks }
-					twoColumns={ false }
-				/>
+				{ cesHeader ? (
+					<TaskListCompletedHeader
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						customerEffortScore={ true }
+					/>
+				) : (
+					<TaskListCompleted
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						twoColumns={ false }
+					/>
+				) }
 			</>
 		);
 	}
@@ -291,31 +273,14 @@ export const TaskList: React.FC< TaskListProps > = ( {
 					</div>
 					<List animation="custom">
 						{ visibleTasks.map( ( task, index ) => {
-							++index;
-							const className = classnames(
-								'woocommerce-task-list__item index-' + index,
-								{
-									complete: task.isComplete,
-									'is-active': task.id === activeTaskId,
-								}
-							);
 							return (
-								<TaskItem
+								<TaskListItemTwoColumn
 									key={ task.id }
-									className={ className }
-									title={ task.title }
-									completed={ task.isComplete }
-									content={ task.content }
-									onClick={ () => {
-										onTaskSelected( task );
-									} }
-									onDismiss={
-										task.isDismissable
-											? () => onDismissTask( task.id )
-											: undefined
-									}
-									action={ () => {} }
-									actionLabel={ task.actionLabel }
+									taskIndex={ ++index }
+									activeTaskId={ activeTaskId }
+									task={ task }
+									goToTask={ () => goToTask( task ) }
+									trackClick={ () => trackClick( task ) }
 								/>
 							);
 						} ) }

@@ -1,6 +1,10 @@
 # Unreleased
 
+-   Add E2E tests to disabled welcome modal #32505
+
 -   Update test for payment task. #32467
+
+-   Increase timeout threshold for payment task. #32605
 
 # 1.0.0
 

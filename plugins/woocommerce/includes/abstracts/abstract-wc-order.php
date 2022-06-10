@@ -201,7 +201,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		} catch ( Exception $e ) {
 			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
-			$this->handle_exception( $e,
+			$this->handle_exception(
+				$e,
 				wp_kses_post(
 					sprintf(
 						/* translators: 1: Order ID or "(no ID)" if not known. */
@@ -551,15 +552,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
+		$status_exceptions = array( 'auto-draft', 'trash' );
+
 		// If setting the status, ensure it's set to a valid status.
 		if ( true === $this->object_read ) {
 			// Only allow valid new status.
-			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true ) && 'trash' !== $new_status && 'auto-draft' !== $new_status ) {
+			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true ) && ! in_array( $new_status, $status_exceptions, true ) ) {
 				$new_status = 'pending';
 			}
 
 			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses(), true ) && 'trash' !== $old_status ) {
+			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses(), true ) && ! in_array( $old_status, $status_exceptions, true ) ) {
 				$old_status = 'pending';
 			}
 		}
@@ -632,7 +635,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_total( $value ) {
-		$this->set_prop( 'discount_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'discount_total', wc_format_decimal( $value, false, true ) );
 	}
 
 	/**
@@ -642,7 +645,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->set_prop( 'discount_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'discount_tax', wc_format_decimal( $value, false, true ) );
 	}
 
 	/**
@@ -652,7 +655,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_total( $value ) {
-		$this->set_prop( 'shipping_total', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_total', wc_format_decimal( $value, false, true ) );
 	}
 
 	/**
@@ -662,7 +665,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->set_prop( 'shipping_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'shipping_tax', wc_format_decimal( $value, false, true ) );
 		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 
@@ -673,7 +676,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_cart_tax( $value ) {
-		$this->set_prop( 'cart_tax', wc_format_decimal( $value ) );
+		$this->set_prop( 'cart_tax', wc_format_decimal( $value, false, true ) );
 		$this->set_total_tax( (float) $this->get_cart_tax() + (float) $this->get_shipping_tax() );
 	}
 

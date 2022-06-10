@@ -20,7 +20,7 @@ class Init {
 	 */
 	public function __construct() {
 		add_action( 'change_locale', array( __CLASS__, 'delete_specs_transient' ) );
-		add_action( 'woocommerce_admin_updated', array( __CLASS__, 'delete_specs_transient' ) );
+		add_action( 'woocommerce_updated', array( __CLASS__, 'delete_specs_transient' ) );
 	}
 
 	/**

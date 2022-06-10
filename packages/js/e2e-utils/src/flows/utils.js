@@ -2,9 +2,9 @@
  * Take a string name and generate the slug for it.
  * Example: 'My plugin' => 'my-plugin'
  *
- * @param text string to convert to a slug
+ * @param  text string to convert to a slug
  *
- * Sourced from: https://gist.github.com/spyesx/561b1d65d4afb595f295
+ *              Sourced from: https://gist.github.com/spyesx/561b1d65d4afb595f295
  */
 export const getSlug = ( text ) => {
 	text = text.trim().toLowerCase();
@@ -39,7 +39,7 @@ export const itIf = ( condition ) => ( condition ? it : it.skip );
 /**
  * Wait for a timeout in milliseconds
  *
- * @param timeout delay time in milliseconds
+ * @param  timeout delay time in milliseconds
  * @return {Promise<void>}
  */
 export const waitForTimeout = async ( timeout ) => {

@@ -31,18 +31,17 @@ import InboxPanel from '../inbox-panel';
 import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
-import { TasksPlaceholder } from '../tasks';
+import { TasksPlaceholder, useActiveSetupTasklist } from '../tasks';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
-	WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 } from './constants';
 import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import { WelcomeModal } from './welcome-modal';
-import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-hook';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { ProgressTitle } from '../task-lists';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -70,8 +69,6 @@ export const Layout = ( {
 	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
 	updateOptions,
-	installTimestamp,
-	installTimestampHasResolved,
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
@@ -79,15 +76,19 @@ export const Layout = ( {
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task;
+	const activeSetupTaskList = useActiveSetupTasklist();
+
 	const {
 		isLoadingExperimentAssignment,
 		isLoadingTwoColExperimentAssignment,
 		experimentAssignment,
 		twoColExperimentAssignment,
-	} = useHeadercardExperimentHook(
-		installTimestampHasResolved,
-		installTimestamp
-	);
+	} = {
+		isLoadingExperimentAssignment: false,
+		isLoadingTwoColExperimentAssignment: false,
+		experimentAssignment: null,
+		twoColExperimentAssignment: null,
+	};
 
 	const isRunningTwoColumnExperiment =
 		twoColExperimentAssignment?.variationName === 'treatment';
@@ -200,6 +201,11 @@ export const Layout = ( {
 
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
+				{ activeSetupTaskList &&
+					isDashboardShown &&
+					[ 'setup_experiment_1', 'setup_experiment_2' ].includes(
+						activeSetupTaskList
+					) && <ProgressTitle taskListId={ activeSetupTaskList } /> }
 				<Tasks query={ query } />
 			</Suspense>
 		);
@@ -317,18 +323,9 @@ export default compose(
 		const welcomeModalDismissed =
 			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'no';
 
-		const installTimestamp = getOption(
-			WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
-		);
-
 		const welcomeModalDismissedHasResolved = hasFinishedResolution(
 			'getOption',
 			[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]
-		);
-
-		const installTimestampHasResolved = hasFinishedResolution(
-			'getOption',
-			[ WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ]
 		);
 
 		const shouldShowWelcomeModal =
@@ -353,8 +350,6 @@ export default compose(
 				( list ) => list.isVisible && list.displayProgressHeader
 			),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
-			installTimestamp,
-			installTimestampHasResolved,
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

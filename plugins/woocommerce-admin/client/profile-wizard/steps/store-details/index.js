@@ -231,6 +231,16 @@ export class StoreDetails extends Component {
 			errors.storeEmail = __( 'Invalid email address', 'woocommerce' );
 		}
 
+		if (
+			values.isAgreeMarketing &&
+			( ! values.storeEmail || ! values.storeEmail.trim().length )
+		) {
+			errors.storeEmail = __(
+				'Please enter your email address to subscribe',
+				'woocommerce'
+			);
+		}
+
 		return errors;
 	}
 
@@ -373,16 +383,6 @@ export class StoreDetails extends Component {
 									autoComplete="email"
 									{ ...getInputProps( 'storeEmail' ) }
 								/>
-								{ values.isAgreeMarketing &&
-									( ! values.storeEmail ||
-										! values.storeEmail.trim().length ) && (
-										<div className="woocommerce-profile-wizard__store-details-error">
-											{ __(
-												'Please enter your email address to subscribe',
-												'woocommerce'
-											) }
-										</div>
-									) }
 								<FlexItem>
 									<div className="woocommerce-profile-wizard__newsletter-signup">
 										<CheckboxControl

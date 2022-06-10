@@ -77,6 +77,28 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	);
 
 	/**
+	 * Getters for internal key in data stores.
+	 *
+	 * @var string[]
+	 */
+	protected $internal_data_store_key_getters = array(
+		'_download_permissions_granted' => 'download_permissions_granted',
+		'_recorded_sales'               => 'recorded_sales',
+		'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
+		'_order_stock_reduced'          => 'stock_reduced',
+		'_new_order_email_sent'         => 'email_sent',
+	);
+
+	/**
+	 * Return internal key getters name.
+	 *
+	 * @return string[]
+	 */
+	public function get_internal_data_store_key_getters() {
+		return $this->internal_data_store_key_getters;
+	}
+
+	/**
 	 * Method to create a new order in the database.
 	 *
 	 * @param WC_Order $order Order object.
@@ -295,6 +317,57 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
+	}
+
+	/**
+	 * Given an initialized order object, update the post/postmeta records.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return bool Whether the order was updated.
+	 */
+	public function update_order_from_object( $order ) {
+		if ( ! $order->get_id() ) {
+			return false;
+		}
+		$this->update_order_meta_from_object( $order );
+		return wp_update_post(
+			array(
+				'ID'            => $order->get_id(),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'post_status'   => $this->get_post_status( $order ),
+				'post_parent'   => $order->get_parent_id(),
+				'post_excerpt'  => $this->get_post_excerpt( $order ),
+				'post_type'     => 'shop_order',
+			)
+		);
+	}
+
+	/**
+	 * Helper method to update order metadata from intialized order object.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	private function update_order_meta_from_object( $order ) {
+		if ( is_null( $order->get_meta() ) ) {
+			return;
+		}
+
+		$existing_meta_data = get_post_meta( $order->get_id() );
+
+		foreach ( $order->get_meta_data() as $meta_data ) {
+			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
+				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
+					continue;
+				}
+				delete_post_meta( $order->get_id(), $meta_data->key );
+				unset( $existing_meta_data[ $meta_data->key ] );
+			}
+			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+		}
+
+		$this->update_post_meta( $order );
 	}
 
 	/**
@@ -628,6 +701,29 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function set_recorded_coupon_usage_counts( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_coupon_usage_counts', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Whether email have been sent for this order.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 *
+	 * @return bool               Whether email is sent.
+	 */
+	public function get_email_sent( $order ) {
+		$order_id = WC_Order_Factory::get_order_id( $order );
+		return wc_string_to_bool( get_post_meta( $order_id, '_new_order_email_sent', true ) );
+	}
+
+	/**
+	 * Stores information about whether email was sent.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
+	 */
+	public function set_email_sent( $order, $set ) {
+		$order_id = WC_Order_Factory::get_order_id( $order );
+		update_post_meta( $order_id, '_new_order_email_sent', wc_bool_to_string( $set ) );
 	}
 
 	/**

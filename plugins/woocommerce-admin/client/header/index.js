@@ -18,12 +18,13 @@ import {
 	WooHeaderItem,
 	WooHeaderPageTitle,
 } from './utils';
-import { TasksReminderBar } from '../tasks';
+import { TasksReminderBar, useActiveSetupTasklist } from '../tasks';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
+	const activeSetupList = useActiveSetupTasklist();
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const pageTitle = sections.slice( -1 )[ 0 ];
 	const isScrolled = useIsScrolled();
@@ -93,15 +94,12 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const tasksReminderFeature =
-		window.wcAdminFeatures[ 'tasklist-setup-experiment-1' ];
-
 	return (
 		<div className={ className } ref={ headerElement }>
-			{ tasksReminderFeature && (
+			{ activeSetupList && (
 				<TasksReminderBar
-					pageTitle={ pageTitle }
 					updateBodyMargin={ updateBodyMargin }
+					taskListId={ activeSetupList }
 				/>
 			) }
 			<div className="woocommerce-layout__header-wrapper">

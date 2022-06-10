@@ -70,7 +70,35 @@ class TaskLists {
 		self::init_default_lists();
 		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_tasks' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'menu_task_count' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'task_list_preloaded_settings' ), 20 );
+	}
+
+	/**
+	 * Check if an experiment is the treatment or control.
+	 *
+	 * @param string $name Name prefix of experiment.
+	 * @return bool
+	 */
+	public static function is_experiment_treatment( $name ) {
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking
+		);
+
+		$date = new \DateTime();
+		$date->setTimeZone( new \DateTimeZone( 'UTC' ) );
+
+		$experiment_name = sprintf(
+			'%s_%s_%s',
+			$name,
+			$date->format( 'Y' ),
+			$date->format( 'm' )
+		);
+		return $abtest->get_variation( $experiment_name ) === 'treatment';
 	}
 
 	/**
@@ -93,7 +121,8 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ),
+				'visible'      => ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' )
+					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ),
 			)
 		);
 
@@ -104,6 +133,7 @@ class TaskLists {
 				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'                   => array(
 					'StoreDetails',
+					'Purchase',
 					'Products',
 					'WooCommercePayments',
 					'Payments',
@@ -117,7 +147,66 @@ class TaskLists {
 				'options'                 => array(
 					'use_completed_title' => true,
 				),
-				'visible'                 => Features::is_enabled( 'tasklist-setup-experiment-1' ),
+				'visible'                 => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
+			)
+		);
+
+		self::add_list(
+			array(
+				'id'           => 'setup_experiment_2',
+				'hidden_id'    => 'setup',
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
+				'tasks'        => array(
+					'StoreCreation',
+					'StoreDetails',
+					'Purchase',
+					'Products',
+					'WooCommercePayments',
+					'Payments',
+					'Tax',
+					'Shipping',
+					'Marketing',
+					'Appearance',
+				),
+				'event_prefix' => 'tasklist_',
+				'visible'      => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' )
+					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
+				'options'      => array(
+					'use_completed_title' => true,
+				),
+				'display_progress_header' => true,
+				'sections'     => array(
+					array(
+						'id'          => 'basics',
+						'title'       => __( 'Cover the basics', 'woocommerce' ),
+						'description' => __( 'Make sure you’ve got everything you need to start selling—from business details to products.', 'woocommerce' ),
+						'image'       => plugins_url(
+							'/assets/images/task_list/basics-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'StoreCreation', 'StoreDetails', 'Purchase', 'Products', 'Payments', 'WooCommercePayments' ),
+					),
+					array(
+						'id'          => 'sales',
+						'title'       => __( 'Get ready to sell', 'woocommerce' ),
+						'description' => __( 'Easily set up the backbone of your store’s operations and get ready to accept first orders.', 'woocommerce' ),
+						'image'       => plugins_url(
+							'/assets/images/task_list/sales-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'Shipping', 'Tax' ),
+					),
+					array(
+						'id'          => 'expand',
+						'title'       => __( 'Customize & expand', 'woocommerce' ),
+						'description' => __( 'Personalize your store’s design and grow your business by enabling new sales channels.', 'woocommerce' ),
+						'image'       => plugins_url(
+							'/assets/images/task_list/expand-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'Appearance', 'Marketing' ),
+					),
+				),
 			)
 		);
 
@@ -373,6 +462,54 @@ class TaskLists {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Return number of setup tasks remaining
+	 *
+	 * @return number
+	 */
+	public static function setup_tasks_remaining() {
+
+		$active_list = self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ) ? 'setup_experiment_1' : ( self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ) ? 'setup_experiment_2' : 'setup' );
+
+		$setup_list = self::get_list( $active_list );
+
+		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->is_complete() ) {
+			return;
+		}
+
+		$remaining_tasks = array_values(
+			array_filter(
+				$setup_list->get_viewable_tasks(),
+				function( $task ) {
+					return ! $task->is_complete();
+				}
+			)
+		);
+
+		return count( $remaining_tasks );
+	}
+
+	/**
+	 * Add badge to homescreen menu item for remaining tasks
+	 */
+	public static function menu_task_count() {
+		global $submenu;
+
+		$tasks_count = self::setup_tasks_remaining();
+
+		if ( ! $tasks_count || ! isset( $submenu['woocommerce'] ) ) {
+			return;
+		}
+
+		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge count-' . esc_attr( $tasks_count ) . '">' . number_format_i18n( $tasks_count ) . '</span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				break;
+			}
+		}
+
 	}
 
 	/**

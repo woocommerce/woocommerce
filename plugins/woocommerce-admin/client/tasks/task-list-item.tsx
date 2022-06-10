@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getHistory,
-	getNewPath,
-	updateQueryString,
-} from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -27,7 +23,9 @@ export type TaskListItemProps = {
 	isExpandable: boolean;
 	isExpanded: boolean;
 	setExpandedTask: ( id: string ) => void;
-	task: TaskType;
+	task: TaskType & {
+		onClick?: () => void;
+	};
 };
 
 export const TaskListItem: React.FC< TaskListItemProps > = ( {
@@ -128,16 +126,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const onClickDefault = useCallback( () => {
 		if ( actionUrl ) {
-			if ( actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
-			} else {
-				getHistory().push( getNewPath( {}, actionUrl, {} ) );
-			}
+			navigateTo( {
+				url: actionUrl,
+			} );
 			return;
 		}
 
-		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: id } );
+		navigateTo( { url: getNewPath( { task: id }, '/', {} ) } );
 	}, [ id, isComplete, actionUrl ] );
 
 	const taskItemProps = {

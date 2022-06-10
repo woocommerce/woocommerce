@@ -16,7 +16,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
  * @return {string} Country string.
  */
 
-export function getCountryCode( countryState ) {
+export function getCountryCode( countryState = '' ) {
 	if ( ! countryState ) {
 		return null;
 	}
@@ -175,14 +175,4 @@ export function getProductList(
  */
 export function getPriceValue( string ) {
 	return Number( decodeEntities( string ).replace( /[^0-9.-]+/g, '' ) );
-}
-
-/**
- * Determines if a URL is a WC admin url.
- *
- * @param {*} url - the url to test
- * @return {boolean} true if the url is a wc-admin URL
- */
-export function isWCAdmin( url ) {
-	return /admin.php\?page=wc-admin/.test( url );
 }

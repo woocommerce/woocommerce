@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Internal\Admin\Install;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -64,8 +62,6 @@ class CategoryLookup {
 	public function regenerate() {
 		global $wpdb;
 
-		// Delete existing data and ensure schema is current.
-		Install::create_tables();
 		$wpdb->query( "TRUNCATE TABLE $wpdb->wc_category_lookup" );
 
 		$terms = get_terms(

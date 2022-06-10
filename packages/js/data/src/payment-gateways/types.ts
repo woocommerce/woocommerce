@@ -1,7 +1,6 @@
 /**
  * Internal dependencies
  */
-import { RestApiError } from '../types';
 
 export type SettingDefinition = {
 	default: string;
@@ -12,6 +11,7 @@ export type SettingDefinition = {
 	tip: string;
 	type: string;
 	value: string;
+	is_dismissed: string;
 };
 
 export type PaymentGateway = {
@@ -23,11 +23,12 @@ export type PaymentGateway = {
 	method_title: string;
 	method_description: string;
 	method_supports: string[];
-	settings: Record< string, SettingDefinition >;
+	settings: SettingDefinition;
+	settings_url: string;
 };
 
 export type PluginsState = {
 	paymentGateways: PaymentGateway[];
 	isUpdating: boolean;
-	errors: Record< string, RestApiError >;
+	errors: Record< string, unknown >;
 };

@@ -7,6 +7,7 @@ export type SettingProperties = {
 	priority?: number;
 	required?: boolean;
 	type?: string;
+	hidden?: boolean;
 };
 
 export type Locale = {
@@ -35,7 +36,7 @@ export type Locales = {
 
 export type CountriesState = {
 	errors: {
-		[ key: string ]: string;
+		[ key: string ]: unknown;
 	};
 	locales: Locales;
 	countries: Country[];

@@ -1,0 +1,71 @@
+{
+    "$schema": "https://turborepo.org/schema.json",
+    "baseBranch": "origin/trunk",
+    "pipeline": {
+        "lint": {
+            "cache": false
+        },
+        "lint:fix": {
+            "cache": false
+        },
+
+        "build": {
+            "dependsOn":  [ "^build" ],
+            "inputs": [
+                "src/**.js",
+                "src/**.jsx",
+                "src/**.ts",
+                "src/**.tsx",
+                "src/**.php",
+                "includes/**.php"
+            ],
+            "outputs": [
+                "dist/**",
+                "build/**",
+                "build-module/**",
+                "build-style/**",
+                "build-types/**"
+            ]
+        },
+        "woocommerce#build": {
+            "dependsOn":  [ 
+                "^build",
+                "@woocommerce/admin-library#build",
+                "woocommerce-legacy-assets#build" 
+            ],
+            "outputs": [],
+            "inputs": [
+                "src/**.php",
+                "includes/**.php",
+                "!legacy/**"
+            ]
+        },
+
+        "test": {
+            "dependsOn":  [ "build" ],
+            "inputs": [
+                "src/**.js",
+                "src/**.jsx",
+                "src/**.ts",
+                "src/**.tsx",
+                "src/**.php",
+                "includes/**.php"
+            ],
+            "outputs": []
+        },
+
+        "e2e": {
+            "dependsOn":  [ "build" ],
+            "cache": false
+        },
+        "e2e:debug": {
+            "dependsOn":  [ "build" ],
+            "cache": false
+        },
+        "e2e:dev": {
+            "dependsOn":  [ "build" ],
+            "cache": false
+        }
+    }
+}
+  

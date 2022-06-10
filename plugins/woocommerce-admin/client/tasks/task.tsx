@@ -1,13 +1,11 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-
 /**
  * Internal dependencies
  */
@@ -15,16 +13,40 @@ import { WooHeaderNavigationItem, WooHeaderPageTitle } from '~/header/utils';
 import { BackButton } from './back-button';
 
 export type TaskProps = {
-	query: { task: string };
-	task?: TaskType;
+	query: { task?: string };
+	task: TaskType;
 };
 
 export const Task: React.FC< TaskProps > = ( { query, task } ) => {
-	const id = query.task;
+	const id = query.task || '';
+	if ( ! id ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'No task id provided' );
+		// eslint-enable-next-line no-console
+	}
+
 	const {
 		invalidateResolutionForStoreSelector,
 		optimisticallyCompleteTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
+
+	const updateBadge = useCallback( () => {
+		const badgeElement: HTMLElement | null = document.querySelector(
+			'.toplevel_page_woocommerce .remaining-tasks-badge'
+		);
+
+		if ( ! badgeElement ) {
+			return;
+		}
+
+		const currentBadgeCount = Number( badgeElement.innerText );
+
+		if ( currentBadgeCount === 1 ) {
+			badgeElement.remove();
+		}
+
+		badgeElement.innerHTML = String( currentBadgeCount - 1 );
+	}, [] );
 
 	const onComplete = useCallback(
 		( options ) => {
@@ -35,6 +57,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 					: getNewPath( {}, '/', {} )
 			);
 			invalidateResolutionForStoreSelector( 'getTaskLists' );
+			updateBadge();
 		},
 		[ id ]
 	);

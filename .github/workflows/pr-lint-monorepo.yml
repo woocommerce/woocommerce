@@ -1,12 +1,15 @@
 name: Run lint checks potentially affecting projects across the monorepo
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - 'trunk'
 concurrency:
   group: changelogger-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   changelogger_used:
     name: Changelogger use
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3

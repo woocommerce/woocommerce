@@ -48,7 +48,7 @@ const testAdminPaymentSetupTask = () => {
 
 		it( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async () => {
 			await homeScreen.clickOnTaskList( 'Set up payments' );
-			await paymentsSetup.closeHelpModal();
+			await paymentsSetup.possiblyCloseHelpModal();
 			await paymentsSetup.isDisplayed();
 		} );
 
@@ -63,11 +63,10 @@ const testAdminPaymentSetupTask = () => {
 				iban: '12 3456 7890',
 				swiftCode: 'ABBA',
 			} );
-			await waitForTimeout( 1000 );
+			await waitForTimeout( 1500 );
 			expect( await settings.paymentMethodIsEnabled( 'bacs' ) ).toBe(
 				true
 			);
-			await homeScreen.navigate();
 		} );
 
 		it( 'Enabling cash on delivery enables the payment method', async () => {
@@ -76,10 +75,11 @@ const testAdminPaymentSetupTask = () => {
 			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
+			await paymentsSetup.possiblyCloseHelpModal();
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.showOtherPaymentMethods();
 			await paymentsSetup.enableCashOnDelivery();
-			await waitForTimeout( 1000 );
+			await waitForTimeout( 1500 );
 			expect( await settings.paymentMethodIsEnabled( 'cod' ) ).toBe(
 				true
 			);

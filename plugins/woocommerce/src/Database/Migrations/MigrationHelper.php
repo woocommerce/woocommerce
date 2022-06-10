@@ -6,8 +6,6 @@
 namespace Automattic\WooCommerce\Database\Migrations;
 
 /**
- * Class MigrationHelper.
- *
  * Helper class to assist with migration related operations.
  */
 class MigrationHelper {
@@ -27,39 +25,13 @@ class MigrationHelper {
 	);
 
 	/**
-	 * Get insert clause for appropriate switch.
-	 *
-	 * @param string $switch Name of the switch to use.
-	 *
-	 * @return string Insert clause.
-	 */
-	public static function get_insert_switch( $switch ) {
-		switch ( $switch ) {
-			case 'insert_ignore':
-				$insert_query = 'INSERT IGNORE';
-				break;
-			case 'replace': // delete and then insert.
-				$insert_query = 'REPLACE';
-				break;
-			case 'update':
-				$insert_query = 'UPDATE';
-				break;
-			case 'insert':
-			default:
-				$insert_query = 'INSERT';
-		}
-
-		return $insert_query;
-	}
-
-	/**
 	 * Helper method to escape backtick in various schema fields.
 	 *
 	 * @param array $schema_config Schema config.
 	 *
 	 * @return array Schema config escaped for backtick.
 	 */
-	public static function escape_schema_for_backtick( $schema_config ) {
+	public static function escape_schema_for_backtick( array $schema_config ): array {
 		array_walk( $schema_config['source']['entity'], array( self::class, 'escape_and_add_backtick' ) );
 		array_walk( $schema_config['source']['meta'], array( self::class, 'escape_and_add_backtick' ) );
 		array_walk( $schema_config['destination'], array( self::class, 'escape_and_add_backtick' ) );
@@ -85,8 +57,25 @@ class MigrationHelper {
 	 *
 	 * @return string $wpdb placeholder.
 	 */
-	public static function get_wpdb_placeholder_for_type( $type ) {
+	public static function get_wpdb_placeholder_for_type( string $type ): string {
 		return self::$wpdb_placeholder_for_type[ $type ];
+	}
+
+	/**
+	 * Generates ON DUPLICATE KEY UPDATE clause to be used in migration.
+	 *
+	 * @param array $columns List of column names.
+	 *
+	 * @return string SQL clause for INSERT...ON DUPLICATE KEY UPDATE
+	 */
+	public static function generate_on_duplicate_statement_clause( array $columns ): string {
+		$update_value_statements = array();
+		foreach ( $columns as $column ) {
+			$update_value_statements[] = "$column = VALUES( $column )";
+		}
+		$update_value_clause = implode( ', ', $update_value_statements );
+
+		return "ON DUPLICATE KEY UPDATE $update_value_clause";
 	}
 
 }

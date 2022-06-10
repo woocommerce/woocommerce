@@ -21,8 +21,13 @@ export class PaymentsSetup extends BasePage {
 		await waitForElementByText( 'h1', 'Set up payments' );
 	}
 
-	async closeHelpModal(): Promise< void > {
-		await this.clickButtonWithText( 'Got it' );
+	async possiblyCloseHelpModal(): Promise< void > {
+		try {
+			await waitForElementByText( 'div', "We're here for help", {
+				timeout: 2000,
+			} );
+			await this.clickButtonWithText( 'Got it' );
+		} catch ( e ) {}
 	}
 
 	async showOtherPaymentMethods(): Promise< void > {
@@ -32,6 +37,7 @@ export class PaymentsSetup extends BasePage {
 			`${ selector }[aria-expanded=false]`
 		);
 		await toggleButton?.click();
+		await waitForElementByText( 'h2', 'Offline payment methods' );
 	}
 
 	async goToPaymentMethodSetup(

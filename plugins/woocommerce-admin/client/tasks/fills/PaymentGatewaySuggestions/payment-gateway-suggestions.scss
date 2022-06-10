@@ -46,6 +46,10 @@
 	.components-card__divider:last-child {
 		display: none;
 	}
+
+	.woocommerce-task-payment-wcpay {
+		margin-bottom: 0;
+	}
 }
 
 // @todo This can be migrated into the PaymentMethod component once the payment-gateway-suggestions feature is enabled.

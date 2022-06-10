@@ -6,6 +6,7 @@ import { cart } from '../requests/shopper/cart.js';
 import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
+import { coupons } from '../requests/merchant/coupons.js';
 import { myAccount } from '../requests/shopper/my-account.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
 import { wpLogin } from '../requests/merchant/wp-login.js';
@@ -127,4 +128,5 @@ export function allMerchantFlow() {
     ordersSearch();
     products();
     addProduct();
+    coupons();
 }

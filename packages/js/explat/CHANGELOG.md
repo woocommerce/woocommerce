@@ -1,6 +1,8 @@
 # Unreleased
 
--   Update dependency `@wordpress/hooks` to ^3.5.0
+- Update dependency `@wordpress/hooks` to ^3.5.0
+- Added Typescript type declarations. #32615
+- Updated README with useExperiment example
 
 # 2.1.0
 

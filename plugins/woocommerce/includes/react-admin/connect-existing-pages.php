@@ -134,6 +134,16 @@ wc_admin_connect_page(
 	)
 );
 
+// WooCommerce > Orders (COT)
+wc_admin_connect_page(
+	array(
+		'id'        => 'woocommerce-custom-orders',
+		'screen_id' => 'woocommerce_page_wc-orders',
+		'title'     => __( 'Orders', 'woocommerce' ),
+		'path'      => 'admin.php?page=wc-orders',
+	)
+);
+
 // WooCommerce > Orders > Add New.
 wc_admin_connect_page(
 	array(

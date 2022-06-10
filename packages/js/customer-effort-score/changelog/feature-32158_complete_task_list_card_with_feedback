@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add new simple customer feedback component for inline CES feedback. #32538

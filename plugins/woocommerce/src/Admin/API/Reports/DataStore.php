@@ -38,6 +38,13 @@ class DataStore extends SqlQuery {
 	protected static $table_name = '';
 
 	/**
+	 * Date field name.
+	 *
+	 * @var string
+	 */
+	protected $date_column_name = 'date_created';
+
+	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
 	 * @var array
@@ -51,18 +58,21 @@ class DataStore extends SqlQuery {
 	 * @var string
 	 */
 	private $order_by = '';
+
 	/**
 	 * Order property, used in the cmp function.
 	 *
 	 * @var string
 	 */
 	private $order = '';
+
 	/**
 	 * Query limit parameters.
 	 *
 	 * @var array
 	 */
 	private $limit_parameters = array();
+
 	/**
 	 * Data store context used to pass to filters.
 	 *
@@ -499,8 +509,8 @@ class DataStore extends SqlQuery {
 			$adj_after                = $new_start_date->format( TimeInterval::$sql_datetime_format );
 			$adj_before               = $new_end_date->format( TimeInterval::$sql_datetime_format );
 			$this->interval_query->clear_sql_clause( array( 'where_time', 'limit' ) );
-			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$adj_before'" );
-			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$adj_after'" );
+			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` <= '$adj_before'" );
+			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` >= '$adj_after'" );
 			$this->clear_sql_clause( 'limit' );
 			$this->add_sql_clause( 'limit', 'LIMIT 0,' . $params['per_page'] );
 		} else {
@@ -577,7 +587,7 @@ class DataStore extends SqlQuery {
 	 */
 	protected static function get_excluded_report_order_statuses() {
 		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
 		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 	}
 
@@ -694,9 +704,9 @@ class DataStore extends SqlQuery {
 				$datetime_str = $query_args['before']->format( TimeInterval::$sql_datetime_format );
 			}
 			if ( isset( $this->subquery ) ) {
-				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$datetime_str'" );
+				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` <= '$datetime_str'" );
 			} else {
-				$this->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$datetime_str'" );
+				$this->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` <= '$datetime_str'" );
 			}
 		}
 
@@ -707,9 +717,9 @@ class DataStore extends SqlQuery {
 				$datetime_str = $query_args['after']->format( TimeInterval::$sql_datetime_format );
 			}
 			if ( isset( $this->subquery ) ) {
-				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$datetime_str'" );
+				$this->subquery->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` >= '$datetime_str'" );
 			} else {
-				$this->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$datetime_str'" );
+				$this->add_sql_clause( 'where_time', "AND {$table_name}.`{$this->date_column_name}` >= '$datetime_str'" );
 			}
 		}
 	}
@@ -840,7 +850,7 @@ class DataStore extends SqlQuery {
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval = $query_args['interval'];
 			$this->clear_sql_clause( 'select' );
-			$this->add_sql_clause( 'select', TimeInterval::db_datetime_format( $interval, $table_name ) );
+			$this->add_sql_clause( 'select', TimeInterval::db_datetime_format( $interval, $table_name, $this->date_column_name ) );
 		}
 	}
 

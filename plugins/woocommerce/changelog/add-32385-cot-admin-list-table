@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add a new admin list table implementation that works with the Custom Order Table.

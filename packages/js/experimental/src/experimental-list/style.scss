@@ -134,7 +134,7 @@ a.woocommerce-experimental-list__item {
 		fill: $chevron-color;
 	}
 
-	&.is-complete {
+	&.complete {
 		.woocommerce-task__icon {
 			background-color: var(--wp-admin-theme-color);
 		}

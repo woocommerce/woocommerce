@@ -78,8 +78,8 @@ global.it = ( () => {
 /**
  * Save a screenshot during a test if the test fails.
  *
- * @param testName
- * @param callback
+ * @param  testName
+ * @param  callback
  * @return {Promise<void>}
  */
 const screenshotTest = async ( testName, callback ) => {

@@ -6,7 +6,11 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { Card, CardHeader } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
-import { ONBOARDING_STORE_NAME, TaskListType } from '@woocommerce/data';
+import {
+	getVisibleTasks,
+	ONBOARDING_STORE_NAME,
+	TaskListType,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text, List, CollapsibleList } from '@woocommerce/experimental';
 
@@ -24,7 +28,8 @@ export type TaskListProps = TaskListType & {
 	};
 	eventName?: string;
 	twoColumns?: boolean;
-	keepCompletedTaskList?: boolean;
+	keepCompletedTaskList?: 'yes' | 'no';
+	cesHeader?: boolean;
 };
 
 export const TaskList: React.FC< TaskListProps > = ( {
@@ -45,12 +50,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		};
 	} );
 	const prevQueryRef = useRef( query );
-	const nowTimestamp = Date.now();
-	const visibleTasks = tasks.filter(
-		( task ) =>
-			! task.isDismissed &&
-			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-	);
+	const visibleTasks = getVisibleTasks( tasks );
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed
@@ -96,17 +96,16 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		visibleTasks.length - 2
 	);
 	const collapseLabel = __( 'Show less', 'woocommerce' );
-	const ListComp = isCollapsible ? CollapsibleList : List;
 
-	const listProps = isCollapsible
-		? {
-				collapseLabel,
-				expandLabel,
-				show: 2,
-				onCollapse: () => recordEvent( eventPrefix + 'collapse', {} ),
-				onExpand: () => recordEvent( eventPrefix + 'expand', {} ),
-		  }
-		: {};
+	const taskListItems = visibleTasks.map( ( task ) => (
+		<TaskListItem
+			key={ task.id }
+			isExpanded={ expandedTask === task.id }
+			isExpandable={ isExpandable }
+			task={ task }
+			setExpandedTask={ setExpandedTask }
+		/>
+	) );
 
 	return (
 		<>
@@ -136,17 +135,24 @@ export const TaskList: React.FC< TaskListProps > = ( {
 						</div>
 						<TaskListMenu id={ id } />
 					</CardHeader>
-					<ListComp animation="custom" { ...listProps }>
-						{ visibleTasks.map( ( task ) => (
-							<TaskListItem
-								key={ task.id }
-								isExpanded={ expandedTask === task.id }
-								isExpandable={ isExpandable }
-								task={ task }
-								setExpandedTask={ setExpandedTask }
-							/>
-						) ) }
-					</ListComp>
+					{ isCollapsible ? (
+						<CollapsibleList
+							animation="custom"
+							collapseLabel={ collapseLabel }
+							expandLabel={ expandLabel }
+							show={ 2 }
+							onCollapse={ () =>
+								recordEvent( eventPrefix + 'collapse', {} )
+							}
+							onExpand={ () =>
+								recordEvent( eventPrefix + 'expand', {} )
+							}
+						>
+							{ taskListItems }
+						</CollapsibleList>
+					) : (
+						<List animation="custom">{ taskListItems }</List>
+					) }
 				</Card>
 			</div>
 		</>

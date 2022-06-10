@@ -7,12 +7,14 @@ import { parse } from 'qs';
 import { pick } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { Slot, Fill } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { getHistory } from './history';
 import * as navUtils from './index';
+
 // For the above, import the module into itself. Functions consumed from this import can be mocked in tests.
 
 // Expose history so all uses get the same history object.
@@ -264,6 +266,51 @@ export const addHistoryListener = ( listener ) => {
 		window.removeEventListener( 'pushstate', listener );
 		window.removeEventListener( 'replacestate', listener );
 	};
+};
+
+/**
+ * Determines if a URL is a WC admin url.
+ *
+ * @param {*} url - the url to test
+ * @return {boolean} true if the url is a wc-admin URL
+ */
+export const isWCAdmin = ( url = window.location.href ) => {
+	return /admin.php\?page=wc-admin/.test( url );
+};
+
+/**
+ * Returns a parsed object for an absolute or relative admin URL.
+ *
+ * @param {*} url - the url to test.
+ * @return {Object} - the URL object of the given url.
+ */
+export const parseAdminUrl = ( url ) => {
+	if ( url.startsWith( 'http' ) ) {
+		return new URL( url );
+	}
+
+	return /^\/?[a-z0-9]+.php/i.test( url )
+		? new URL( `${ window.wcSettings.adminUrl }${ url }` )
+		: new URL( getAdminLink( getNewPath( {}, url, {} ) ) );
+};
+
+/**
+ * A utility function that navigates to a page, using a redirect
+ * or the router as appropriate.
+ *
+ * @param {Object} args     - All arguments.
+ * @param {string} args.url - Relative path or absolute url to navigate to
+ */
+export const navigateTo = ( { url } ) => {
+	const parsedUrl = parseAdminUrl( url );
+
+	if ( isWCAdmin() && isWCAdmin( String( parsedUrl ) ) ) {
+		window.document.documentElement.scrollTop = 0;
+		getHistory().push( `admin.php${ parsedUrl.search }` );
+		return;
+	}
+
+	window.location.href = String( parsedUrl );
 };
 
 /**

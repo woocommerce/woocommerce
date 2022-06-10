@@ -26,9 +26,9 @@ TESTRESULT=0
 # Function to generate report
 report() {
 
-	# Set the ALLURE_OUTPUT_DIR to $PWD if it wasn't set
-	ALLURE_RESULTS_DIR="${ALLURE_OUTPUT_DIR:-$PWD}/allure-results"
-	ALLURE_REPORT_DIR="${ALLURE_OUTPUT_DIR:-$PWD}/allure-report"
+	# Set the API_TEST_REPORT_DIR to $PWD if it wasn't set
+	ALLURE_RESULTS_DIR="${API_TEST_REPORT_DIR:-$PWD}/allure-results"
+	ALLURE_REPORT_DIR="${API_TEST_REPORT_DIR:-$PWD}/allure-report"
 
 	echo "Generating report..."
 	allure generate --clean "$ALLURE_RESULTS_DIR" --output "$ALLURE_REPORT_DIR"
@@ -38,7 +38,7 @@ report() {
 	if [[ $REPORT_EXIT_CODE -eq 0 && $GITHUB_ACTIONS != "true" ]]; then
 		echo "To view the report on your browser, run:"
 		echo ""
-		echo "pnpx allure open \"$ALLURE_REPORT_DIR\""
+		echo "pnpm dlx allure open \"$ALLURE_REPORT_DIR\""
 		echo ""
 	fi
 }
