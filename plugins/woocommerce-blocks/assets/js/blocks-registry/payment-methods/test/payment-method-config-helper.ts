@@ -36,7 +36,7 @@ const canMakePaymentArgument = {
 		currency_suffix: '',
 	},
 	cartNeedsShipping: true,
-	billingData: {
+	billingAddress: {
 		first_name: 'name',
 		last_name: 'Name',
 		company: '',
@@ -80,8 +80,8 @@ describe( 'payment-method-config-helper', () => {
 			{
 				// cod: one extension returns true, the other returns false.
 				cod: trueCallback,
-				// cheque: returns true only if arg.billingData.postcode is 12345.
-				cheque: ( arg ) => arg.billingData.postcode === '12345',
+				// cheque: returns true only if arg.billingAddress.postcode is 12345.
+				cheque: ( arg ) => arg.billingAddress.postcode === '12345',
 				// bacs: both extensions return false.
 				bacs: bacsCallback,
 				// woopay: both extensions return true.

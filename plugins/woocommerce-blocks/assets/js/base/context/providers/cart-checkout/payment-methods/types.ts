@@ -48,11 +48,11 @@ export interface PaymentStatusDispatchers {
 	failed: (
 		error?: string,
 		paymentMethodData?: ObjectType | EmptyObjectType,
-		billingData?: ObjectType | EmptyObjectType
+		billingAddress?: ObjectType | EmptyObjectType
 	) => void;
 	success: (
 		paymentMethodData?: ObjectType | EmptyObjectType,
-		billingData?: ObjectType | EmptyObjectType,
+		billingAddress?: ObjectType | EmptyObjectType,
 		shippingData?: ObjectType | EmptyObjectType
 	) => void;
 }

@@ -3,7 +3,7 @@
  */
 import type { CustomerDataType } from '../../../hooks/use-customer-data';
 
-export const defaultBillingData: CustomerDataType[ 'billingData' ] = {
+export const defaultBillingAddress: CustomerDataType[ 'billingAddress' ] = {
 	first_name: '',
 	last_name: '',
 	company: '',

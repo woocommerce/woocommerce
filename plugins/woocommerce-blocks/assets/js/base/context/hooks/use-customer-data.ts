@@ -7,9 +7,9 @@ import type { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 
 export interface CustomerDataType {
 	isInitialized: boolean;
-	billingData: BillingAddress;
+	billingAddress: BillingAddress;
 	shippingAddress: ShippingAddress;
-	setBillingData: ( data: Partial< BillingAddress > ) => void;
+	setBillingAddress: ( data: Partial< BillingAddress > ) => void;
 	setShippingAddress: ( data: Partial< ShippingAddress > ) => void;
 }
 
@@ -24,13 +24,13 @@ export const useCustomerData = (): CustomerDataType => {
 			isInitialized: store.hasFinishedResolution( 'getCartData' ),
 		};
 	} );
-	const { setShippingAddress, setBillingData } = useDispatch( storeKey );
+	const { setShippingAddress, setBillingAddress } = useDispatch( storeKey );
 
 	return {
 		isInitialized,
-		billingData: customerData.billingData,
+		billingAddress: customerData.billingAddress,
 		shippingAddress: customerData.shippingAddress,
-		setBillingData,
+		setBillingAddress,
 		setShippingAddress,
 	};
 };

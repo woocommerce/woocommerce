@@ -28,7 +28,7 @@ import './style.scss';
 
 const reloadPage = () => void window.location.reload( true );
 
-const Cart = ( { children, attributes } ) => {
+const Cart = ( { children, attributes = {} } ) => {
 	const { cartIsLoading } = useStoreCart();
 	const { hasDarkControls } = attributes;
 

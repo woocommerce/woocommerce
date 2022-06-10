@@ -6,7 +6,7 @@ import { createContext, useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { defaultBillingData, defaultShippingAddress } from './constants';
+import { defaultBillingAddress, defaultShippingAddress } from './constants';
 import {
 	useCustomerData,
 	CustomerDataType,
@@ -14,9 +14,9 @@ import {
 
 const CustomerDataContext = createContext< CustomerDataType >( {
 	isInitialized: false,
-	billingData: defaultBillingData,
+	billingAddress: defaultBillingAddress,
 	shippingAddress: defaultShippingAddress,
-	setBillingData: () => void 0,
+	setBillingAddress: () => void 0,
 	setShippingAddress: () => void 0,
 } );
 

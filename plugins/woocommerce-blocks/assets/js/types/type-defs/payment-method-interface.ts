@@ -36,9 +36,10 @@ export interface PreparedCartTotalItem {
 export interface BillingDataProps {
 	// All the coupons that were applied to the cart/order.
 	appliedCoupons: CartResponseCouponItem[];
-	//The address used for billing.
+	// The address used for billing.
 	billingData: CartBillingAddress;
-	//The total item for the cart.
+	billingAddress: CartBillingAddress;
+	// The total item for the cart.
 	cartTotal: PreparedCartTotalItem;
 	// The various subtotal amounts.
 	cartTotalItems: PreparedCartTotalItem[];
@@ -46,7 +47,7 @@ export interface BillingDataProps {
 	currency: Currency;
 	// The customer Id the order belongs to.
 	customerId: number;
-	//  True means that the site is configured to display prices including tax.
+	// True means that the site is configured to display prices including tax.
 	displayPricesIncludingTax: boolean;
 }
 
