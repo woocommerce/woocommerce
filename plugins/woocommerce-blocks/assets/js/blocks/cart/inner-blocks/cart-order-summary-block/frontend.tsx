@@ -14,7 +14,7 @@ const FrontendBlock = ( {
 	children,
 	className = '',
 }: {
-	children: JSX.Element | JSX.Element[];
+	children?: JSX.Element | JSX.Element[];
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();

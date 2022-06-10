@@ -21,7 +21,7 @@ import { BillingAddressShippingAddress } from '@woocommerce/type-defs/cart';
 import { STORE_KEY } from './constants';
 
 declare type CustomerData = {
-	billingData: CartResponseBillingAddress;
+	billingAddress: CartResponseBillingAddress;
 	shippingAddress: CartResponseShippingAddress;
 };
 
@@ -67,7 +67,7 @@ const isAddressDirty = <
  * Local cache of customerData used for comparisons.
  */
 let customerData = <CustomerData>{
-	billingData: {},
+	billingAddress: {},
 	shippingAddress: {},
 };
 // Tracks if customerData has been populated.
@@ -77,7 +77,7 @@ let customerDataIsInitialized = false;
  * Tracks which props have changed so the correct data gets pushed to the server.
  */
 const dirtyProps = {
-	billingData: false,
+	billingAddress: false,
 	shippingAddress: false,
 };
 
@@ -85,12 +85,12 @@ const dirtyProps = {
  * Function to dispatch an update to the server. This is debounced.
  */
 const updateCustomerData = debounce( (): void => {
-	const { billingData, shippingAddress } = customerData;
+	const { billingAddress, shippingAddress } = customerData;
 	const customerDataToUpdate = {} as Partial< BillingAddressShippingAddress >;
 
-	if ( dirtyProps.billingData ) {
-		customerDataToUpdate.billing_address = billingData;
-		dirtyProps.billingData = false;
+	if ( dirtyProps.billingAddress ) {
+		customerDataToUpdate.billing_address = billingAddress;
+		dirtyProps.billingAddress = false;
 	}
 
 	if ( dirtyProps.shippingAddress ) {
@@ -142,9 +142,12 @@ export const pushChanges = (): void => {
 
 	// An address is dirty and needs pushing to the server if the email, country, state, city, or postcode have changed.
 	if (
-		isAddressDirty( customerData.billingData, newCustomerData.billingData )
+		isAddressDirty(
+			customerData.billingAddress,
+			newCustomerData.billingAddress
+		)
 	) {
-		dirtyProps.billingData = true;
+		dirtyProps.billingAddress = true;
 	}
 
 	if (
@@ -158,7 +161,7 @@ export const pushChanges = (): void => {
 
 	customerData = newCustomerData;
 
-	if ( dirtyProps.billingData || dirtyProps.shippingAddress ) {
+	if ( dirtyProps.billingAddress || dirtyProps.shippingAddress ) {
 		updateCustomerData();
 	}
 };

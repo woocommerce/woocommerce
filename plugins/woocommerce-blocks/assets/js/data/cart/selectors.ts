@@ -30,11 +30,11 @@ export const getCustomerData = (
 	state: CartState
 ): {
 	shippingAddress: ShippingAddress;
-	billingData: BillingAddress;
+	billingAddress: BillingAddress;
 } => {
 	return {
 		shippingAddress: state.cartData.shippingAddress,
-		billingData: state.cartData.billingAddress,
+		billingAddress: state.cartData.billingAddress,
 	};
 };
 

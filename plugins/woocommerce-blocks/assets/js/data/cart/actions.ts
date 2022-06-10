@@ -490,10 +490,11 @@ export function* selectShippingRate(
 }
 
 /**
- * Sets billing data locally, as opposed to updateCustomerData which sends it to the server.
+ * Sets billing address locally, as opposed to updateCustomerData which sends it to the server.
  */
-export const setBillingData = ( billingData: Partial< BillingAddress > ) =>
-	( { type: types.SET_BILLING_DATA, billingData } as const );
+export const setBillingAddress = (
+	billingAddress: Partial< BillingAddress >
+) => ( { type: types.SET_BILLING_ADDRESS, billingAddress } as const );
 
 /**
  * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
@@ -543,7 +544,7 @@ export function* updateCustomerData(
 export type CartAction = ReturnOrGeneratorYieldUnion<
 	| typeof receiveCart
 	| typeof receiveCartContents
-	| typeof setBillingData
+	| typeof setBillingAddress
 	| typeof setShippingAddress
 	| typeof receiveError
 	| typeof receiveApplyingCoupon

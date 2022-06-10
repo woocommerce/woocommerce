@@ -65,7 +65,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		needsShipping,
 	} = useShippingData();
 	const {
-		billingData,
+		billingAddress,
 		shippingAddress,
 		setShippingAddress,
 	} = useCustomerDataContext();
@@ -111,7 +111,8 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		activePaymentMethod,
 		billing: {
 			appliedCoupons,
-			billingData,
+			billingAddress,
+			billingData: billingAddress,
 			cartTotal: currentCartTotal.current,
 			cartTotalItems: currentCartTotals.current,
 			currency: getCurrencyFromPriceResponse( cartTotals ),
