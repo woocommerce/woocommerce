@@ -1,9 +1,14 @@
 /**
+ * External dependencies
+ */
+import type { PaymentResult } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import { DEFAULT_STATE, STATUS } from './constants';
 import { ActionType, ACTION } from './actions';
-import type { CheckoutStateContextState, PaymentResultDataType } from './types';
+import type { CheckoutStateContextState } from './types';
 
 /**
  * Reducer for the checkout state
@@ -48,7 +53,7 @@ export const reducer = (
 		case ACTION.SET_PROCESSING_RESPONSE:
 			newState = {
 				...state,
-				processingResponse: data as PaymentResultDataType,
+				processingResponse: data as PaymentResult,
 			};
 			break;
 

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+
 import {
 	createContext,
 	useContext,
@@ -14,23 +15,14 @@ import { __ } from '@wordpress/i18n';
 import { usePrevious } from '@woocommerce/base-hooks';
 import deprecated from '@wordpress/deprecated';
 import { isObject, isString } from '@woocommerce/types';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
-import { actions } from './actions';
-import { reducer } from './reducer';
-import { getPaymentResultFromCheckoutResponse } from './utils';
-import {
-	DEFAULT_STATE,
-	STATUS,
-	DEFAULT_CHECKOUT_STATE_DATA,
-} from './constants';
-import type {
-	CheckoutStateDispatchActions,
-	CheckoutStateContextType,
-} from './types';
+import { STATUS, DEFAULT_CHECKOUT_STATE_DATA } from './constants';
+import type { CheckoutStateContextType } from './types';
 import {
 	EMIT_TYPES,
 	useEventEmitters,
@@ -43,10 +35,7 @@ import { useStoreEvents } from '../../../hooks/use-store-events';
 import { useCheckoutNotices } from '../../../hooks/use-checkout-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
 import { removeNoticesByStatus } from '../../../../../utils/notices';
-
-/**
- * @typedef {import('@woocommerce/type-defs/contexts').CheckoutDataContext} CheckoutDataContext
- */
+import { CheckoutState } from '../../../../../data/checkout/default-state';
 
 const CheckoutContext = createContext( DEFAULT_CHECKOUT_STATE_DATA );
 
@@ -58,29 +47,30 @@ export const useCheckoutContext = (): CheckoutStateContextType => {
  * Checkout state provider
  * This provides an API interface exposing checkout state for use with cart or checkout blocks.
  *
- * @param {Object}  props             Incoming props for the provider.
- * @param {Object}  props.children    The children being wrapped.
- * @param {string}  props.redirectUrl Initialize what the checkout will redirect to after successful submit.
- * @param {boolean} props.isCart      If context provider is being used in cart context.
+ * @param {Object} props             Incoming props for the provider.
+ * @param {Object} props.children    The children being wrapped.
+ * @param {string} props.redirectUrl Initialize what the checkout will redirect to after successful submit.
  */
 export const CheckoutStateProvider = ( {
 	children,
 	redirectUrl,
-	isCart = false,
 }: {
 	children: React.ReactChildren;
 	redirectUrl: string;
-	isCart: boolean;
 } ): JSX.Element => {
-	// note, this is done intentionally so that the default state now has
-	// the redirectUrl for when checkout is reset to PRISTINE state.
-	DEFAULT_STATE.redirectUrl = redirectUrl;
-	const [ checkoutState, dispatch ] = useReducer( reducer, DEFAULT_STATE );
+	const checkoutActions = useDispatch( CHECKOUT_STORE_KEY );
+	const checkoutState: CheckoutState = useSelect( ( select ) =>
+		select( CHECKOUT_STORE_KEY ).getCheckoutState()
+	);
+
+	if ( redirectUrl && redirectUrl !== checkoutState.redirectUrl ) {
+		checkoutActions.setRedirectUrl( redirectUrl );
+	}
+
 	const { setValidationErrors } = useValidationContext();
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const isCalculating = checkoutState.calculatingCount > 0;
 	const { isSuccessResponse, isErrorResponse, isFailResponse, shouldRetry } =
 		useEmitResponse();
 	const { checkoutNotices, paymentNotices, expressPaymentNotices } =
@@ -120,38 +110,6 @@ export const CheckoutStateProvider = ( {
 		};
 	}, [ onCheckoutValidationBeforeProcessing ] );
 
-	const dispatchActions = useMemo(
-		(): CheckoutStateDispatchActions => ( {
-			resetCheckout: () => void dispatch( actions.setPristine() ),
-			setRedirectUrl: ( url ) =>
-				void dispatch( actions.setRedirectUrl( url ) ),
-			setHasError: ( hasError ) =>
-				void dispatch( actions.setHasError( hasError ) ),
-			incrementCalculating: () =>
-				void dispatch( actions.incrementCalculating() ),
-			decrementCalculating: () =>
-				void dispatch( actions.decrementCalculating() ),
-			setCustomerId: ( id ) =>
-				void dispatch( actions.setCustomerId( id ) ),
-			setOrderId: ( orderId ) =>
-				void dispatch( actions.setOrderId( orderId ) ),
-			setOrderNotes: ( orderNotes ) =>
-				void dispatch( actions.setOrderNotes( orderNotes ) ),
-			setExtensionData: ( extensionData ) =>
-				void dispatch( actions.setExtensionData( extensionData ) ),
-			setAfterProcessing: ( response ) => {
-				const paymentResult =
-					getPaymentResultFromCheckoutResponse( response );
-				dispatch(
-					actions.setRedirectUrl( paymentResult?.redirectUrl || '' )
-				);
-				dispatch( actions.setProcessingResponse( paymentResult ) );
-				dispatch( actions.setAfterProcessing() );
-			},
-		} ),
-		[]
-	);
-
 	// emit events.
 	useEffect( () => {
 		const status = checkoutState.status;
@@ -173,10 +131,10 @@ export const CheckoutStateProvider = ( {
 							}
 						);
 					}
-					dispatch( actions.setIdle() );
-					dispatch( actions.setHasError() );
+					checkoutActions.setIdle();
+					checkoutActions.setHasError();
 				} else {
-					dispatch( actions.setProcessing() );
+					checkoutActions.setProcessing();
 				}
 			} );
 		}
@@ -184,7 +142,7 @@ export const CheckoutStateProvider = ( {
 		checkoutState.status,
 		setValidationErrors,
 		createErrorNotice,
-		dispatch,
+		checkoutActions,
 	] );
 
 	const previousStatus = usePrevious( checkoutState.status );
@@ -241,9 +199,9 @@ export const CheckoutStateProvider = ( {
 					if ( errorResponse !== null ) {
 						// irrecoverable error so set complete
 						if ( ! shouldRetry( errorResponse ) ) {
-							dispatch( actions.setComplete( errorResponse ) );
+							checkoutActions.setComplete( errorResponse );
 						} else {
-							dispatch( actions.setIdle() );
+							checkoutActions.setIdle();
 						}
 					} else {
 						const hasErrorNotices =
@@ -274,7 +232,7 @@ export const CheckoutStateProvider = ( {
 							} );
 						}
 
-						dispatch( actions.setIdle() );
+						checkoutActions.setIdle();
 					}
 				} );
 			} else {
@@ -307,7 +265,7 @@ export const CheckoutStateProvider = ( {
 					} );
 
 					if ( successResponse && ! errorResponse ) {
-						dispatch( actions.setComplete( successResponse ) );
+						checkoutActions.setComplete( successResponse );
 					} else if ( isObject( errorResponse ) ) {
 						if (
 							errorResponse.message &&
@@ -324,16 +282,16 @@ export const CheckoutStateProvider = ( {
 							);
 						}
 						if ( ! shouldRetry( errorResponse ) ) {
-							dispatch( actions.setComplete( errorResponse ) );
+							checkoutActions.setComplete( errorResponse );
 						} else {
 							// this will set an error which will end up
 							// triggering the onCheckoutAfterProcessingWithError emitter.
 							// and then setting checkout to IDLE state.
-							dispatch( actions.setHasError( true ) );
+							checkoutActions.setHasError( true );
 						}
 					} else {
 						// nothing hooked in had any response type so let's just consider successful.
-						dispatch( actions.setComplete() );
+						checkoutActions.setComplete();
 					}
 				} );
 			}
@@ -348,7 +306,6 @@ export const CheckoutStateProvider = ( {
 		checkoutState.processingResponse,
 		previousStatus,
 		previousHasError,
-		dispatchActions,
 		createErrorNotice,
 		isErrorResponse,
 		isFailResponse,
@@ -357,40 +314,20 @@ export const CheckoutStateProvider = ( {
 		checkoutNotices,
 		expressPaymentNotices,
 		paymentNotices,
+		checkoutActions,
 	] );
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
-		dispatch( actions.setBeforeProcessing() );
-	}, [ dispatchCheckoutEvent ] );
+		checkoutActions.setBeforeProcessing();
+	}, [ dispatchCheckoutEvent, checkoutActions ] );
 
 	const checkoutData: CheckoutStateContextType = {
 		onSubmit,
-		isComplete: checkoutState.status === STATUS.COMPLETE,
-		isIdle: checkoutState.status === STATUS.IDLE,
-		isCalculating,
-		isProcessing: checkoutState.status === STATUS.PROCESSING,
-		isBeforeProcessing: checkoutState.status === STATUS.BEFORE_PROCESSING,
-		isAfterProcessing: checkoutState.status === STATUS.AFTER_PROCESSING,
-		hasError: checkoutState.hasError,
-		redirectUrl: checkoutState.redirectUrl,
 		onCheckoutBeforeProcessing,
 		onCheckoutValidationBeforeProcessing,
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
-		dispatchActions,
-		isCart,
-		orderId: checkoutState.orderId,
-		hasOrder: !! checkoutState.orderId,
-		customerId: checkoutState.customerId,
-		orderNotes: checkoutState.orderNotes,
-		useShippingAsBilling: checkoutState.useShippingAsBilling,
-		setUseShippingAsBilling: ( value ) =>
-			dispatch( actions.setUseShippingAsBilling( value ) ),
-		shouldCreateAccount: checkoutState.shouldCreateAccount,
-		setShouldCreateAccount: ( value ) =>
-			dispatch( actions.setShouldCreateAccount( value ) ),
-		extensionData: checkoutState.extensionData,
 	};
 	return (
 		<CheckoutContext.Provider value={ checkoutData }>

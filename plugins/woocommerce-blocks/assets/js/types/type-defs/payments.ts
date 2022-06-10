@@ -118,3 +118,10 @@ export interface ExpressPaymentMethodConfigInstance {
 	canMakePaymentFromConfig: CanMakePaymentCallback;
 	canMakePayment: CanMakePaymentCallback;
 }
+
+export interface PaymentResult {
+	message: string;
+	paymentStatus: string;
+	paymentDetails: Record< string, string > | Record< string, never >;
+	redirectUrl: string;
+}

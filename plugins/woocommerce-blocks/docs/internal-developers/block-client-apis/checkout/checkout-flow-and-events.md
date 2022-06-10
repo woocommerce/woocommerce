@@ -50,17 +50,20 @@ To surface the flow state, the block uses statuses that are tracked in the vario
 
 The following statuses exist in the Checkout.
 
-### `CheckoutProvider` Exposed Statuses
+#### Checkout Data Store Exposed Statuses
 
-You can find all the checkout provider statuses defined [in this typedef](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/type-defs/checkout.js#L21-L38).
+There are various statuses that are exposed on the Checkout data store via selectors. All the selectors are detailed below and in the [Checkout API docs](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/block-client-apis/checkout/checkout-api.md).
 
-They are exposed to children components via the `useCheckoutContext` via various boolean flags. For instance you can access the `isComplete` flag by doing something like this in your component:
+You can use them in your component like so
 
 ```jsx
-import { useCheckoutContext } from '@woocommerce/base-contexts';
+import { useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/blocks-data';
 
 const MyComponent = ( props ) => {
-	const { isComplete } = useCheckoutContext();
+	const isComplete = useSelect( ( select ) =>
+		select( CHECKOUT_STORE_KEY ).isComplete()
+	);
 	// do something with isComplete
 };
 ```

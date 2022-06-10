@@ -16,7 +16,7 @@ import { CheckoutProvider } from '../checkout-provider';
  */
 export const CartProvider = ( { children, redirectUrl } ) => {
 	return (
-		<CheckoutProvider isCart={ true } redirectUrl={ redirectUrl }>
+		<CheckoutProvider redirectUrl={ redirectUrl }>
 			{ children }
 		</CheckoutProvider>
 	);

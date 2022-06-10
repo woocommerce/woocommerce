@@ -41,41 +41,11 @@ const checkoutData = {
 };
 
 export const DEFAULT_CHECKOUT_STATE_DATA: CheckoutStateContextType = {
-	dispatchActions: {
-		resetCheckout: () => void null,
-		setRedirectUrl: ( url ) => void url,
-		setHasError: ( hasError ) => void hasError,
-		setAfterProcessing: ( response ) => void response,
-		incrementCalculating: () => void null,
-		decrementCalculating: () => void null,
-		setCustomerId: ( id ) => void id,
-		setOrderId: ( id ) => void id,
-		setOrderNotes: ( orderNotes ) => void orderNotes,
-		setExtensionData: ( extensionData ) => void extensionData,
-	},
 	onSubmit: () => void null,
-	isComplete: false,
-	isIdle: false,
-	isCalculating: false,
-	isProcessing: false,
-	isBeforeProcessing: false,
-	isAfterProcessing: false,
-	hasError: false,
-	redirectUrl: '',
-	orderId: 0,
-	orderNotes: '',
-	customerId: 0,
 	onCheckoutAfterProcessingWithSuccess: () => () => void null,
 	onCheckoutAfterProcessingWithError: () => () => void null,
 	onCheckoutBeforeProcessing: () => () => void null, // deprecated for onCheckoutValidationBeforeProcessing
 	onCheckoutValidationBeforeProcessing: () => () => void null,
-	hasOrder: false,
-	isCart: false,
-	useShippingAsBilling: false,
-	setUseShippingAsBilling: ( value ) => void value,
-	shouldCreateAccount: false,
-	setShouldCreateAccount: ( value ) => void value,
-	extensionData: {},
 };
 
 export const DEFAULT_STATE: CheckoutStateContextState = {

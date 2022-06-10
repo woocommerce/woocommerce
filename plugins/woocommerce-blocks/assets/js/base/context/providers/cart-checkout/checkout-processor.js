@@ -14,7 +14,8 @@ import {
 	emptyHiddenAddressFields,
 	formatStoreApiErrorMessage,
 } from '@woocommerce/base-utils';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -33,10 +34,10 @@ import { useStoreNoticesContext } from '../store-notices';
  * Subscribes to checkout context and triggers processing via the API.
  */
 const CheckoutProcessor = () => {
+	const { onCheckoutValidationBeforeProcessing } = useCheckoutContext();
+
 	const {
 		hasError: checkoutHasError,
-		onCheckoutValidationBeforeProcessing,
-		dispatchActions,
 		redirectUrl,
 		isProcessing: checkoutIsProcessing,
 		isBeforeProcessing: checkoutIsBeforeProcessing,
@@ -44,7 +45,20 @@ const CheckoutProcessor = () => {
 		orderNotes,
 		shouldCreateAccount,
 		extensionData,
-	} = useCheckoutContext();
+	} = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			...store.getCheckoutState(),
+			isProcessing: store.isProcessing(),
+			isBeforeProcessing: store.isBeforeProcessing(),
+			isComplete: store.isComplete(),
+		};
+	} );
+
+	const { setCustomerId, setHasError, processCheckoutResponse } = useDispatch(
+		CHECKOUT_STORE_KEY
+	);
+
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingErrorStatus } = useShippingDataContext();
 	const { billingAddress, shippingAddress } = useCustomerDataContext();
@@ -93,7 +107,7 @@ const CheckoutProcessor = () => {
 			( checkoutIsProcessing || checkoutIsBeforeProcessing ) &&
 			! isExpressPaymentMethodActive
 		) {
-			dispatchActions.setHasError( checkoutWillHaveError );
+			setHasError( checkoutWillHaveError );
 		}
 	}, [
 		checkoutWillHaveError,
@@ -101,7 +115,7 @@ const CheckoutProcessor = () => {
 		checkoutIsProcessing,
 		checkoutIsBeforeProcessing,
 		isExpressPaymentMethodActive,
-		dispatchActions,
+		setHasError,
 	] );
 
 	useEffect( () => {
@@ -208,7 +222,7 @@ const CheckoutProcessor = () => {
 			.then( ( response ) => {
 				processCheckoutResponseHeaders(
 					response.headers,
-					dispatchActions
+					setCustomerId
 				);
 				if ( ! response.ok ) {
 					throw new Error( response );
@@ -216,7 +230,7 @@ const CheckoutProcessor = () => {
 				return response.json();
 			} )
 			.then( ( responseJson ) => {
-				dispatchActions.setAfterProcessing( responseJson );
+				processCheckoutResponse( responseJson );
 				setIsProcessingOrder( false );
 			} )
 			.catch( ( errorResponse ) => {
@@ -224,7 +238,7 @@ const CheckoutProcessor = () => {
 					if ( errorResponse?.headers ) {
 						processCheckoutResponseHeaders(
 							errorResponse.headers,
-							dispatchActions
+							setCustomerId
 						);
 					}
 					// This attempts to parse a JSON error response where the status code was 4xx/5xx.
@@ -250,7 +264,7 @@ const CheckoutProcessor = () => {
 								} );
 							}
 						);
-						dispatchActions.setAfterProcessing( response );
+						processCheckoutResponse( response );
 					} );
 				} catch {
 					createErrorNotice(
@@ -273,7 +287,7 @@ const CheckoutProcessor = () => {
 						}
 					);
 				}
-				dispatchActions.setHasError( true );
+				setHasError( true );
 				setIsProcessingOrder( false );
 			} );
 	}, [
@@ -288,9 +302,11 @@ const CheckoutProcessor = () => {
 		shouldCreateAccount,
 		extensionData,
 		cartNeedsShipping,
-		dispatchActions,
 		createErrorNotice,
 		receiveCart,
+		setHasError,
+		processCheckoutResponse,
+		setCustomerId,
 	] );
 
 	// process order if conditions are good.
