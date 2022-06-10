@@ -3,13 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
-import {
-	useCheckoutContext,
-	useCheckoutAddress,
-	useStoreEvents,
-} from '@woocommerce/base-context';
+import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import { getSetting } from '@woocommerce/settings';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -20,12 +18,15 @@ const Block = ( {
 }: {
 	allowCreateAccount: boolean;
 } ): JSX.Element => {
-	const { customerId, shouldCreateAccount, setShouldCreateAccount } =
-		useCheckoutContext();
+	const { customerId, shouldCreateAccount } = useSelect( ( select ) =>
+		select( CHECKOUT_STORE_KEY ).getCheckoutState()
+	);
+
+	const { setShouldCreateAccount } = useDispatch( CHECKOUT_STORE_KEY );
 	const { billingAddress, setEmail } = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
-	const onChangeEmail = ( value ) => {
+	const onChangeEmail = ( value: string ) => {
 		setEmail( value );
 		dispatchCheckoutEvent( 'set-email-address' );
 	};

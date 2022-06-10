@@ -9,6 +9,8 @@ import {
 	useMemo,
 	useRef,
 } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -22,7 +24,6 @@ import {
 	reducer as emitReducer,
 	emitEvent,
 } from './event-emit';
-import { useCheckoutContext } from '../checkout-state';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
 import { useSelectShippingRate } from '../../../hooks/shipping/use-select-shipping-rate';
 import { useShippingData } from '../../../hooks/shipping/use-shipping-data';
@@ -49,7 +50,9 @@ export const useShippingDataContext = () => {
  * @param {React.ReactElement} props.children
  */
 export const ShippingDataProvider = ( { children } ) => {
-	const { dispatchActions } = useCheckoutContext();
+	const { incrementCalculating, decrementCalculating } = useDispatch(
+		CHECKOUT_STORE_KEY
+	);
 	const { shippingRates, isLoadingRates, cartErrors } = useStoreCart();
 	const { isSelectingRate } = useSelectShippingRate();
 	const { selectedRates } = useShippingData();
@@ -80,20 +83,20 @@ export const ShippingDataProvider = ( { children } ) => {
 	// increment/decrement checkout calculating counts when shipping is loading.
 	useEffect( () => {
 		if ( isLoadingRates ) {
-			dispatchActions.incrementCalculating();
+			incrementCalculating();
 		} else {
-			dispatchActions.decrementCalculating();
+			decrementCalculating();
 		}
-	}, [ isLoadingRates, dispatchActions ] );
+	}, [ isLoadingRates, incrementCalculating, decrementCalculating ] );
 
 	// increment/decrement checkout calculating counts when shipping rates are being selected.
 	useEffect( () => {
 		if ( isSelectingRate ) {
-			dispatchActions.incrementCalculating();
+			incrementCalculating();
 		} else {
-			dispatchActions.decrementCalculating();
+			decrementCalculating();
 		}
-	}, [ isSelectingRate, dispatchActions ] );
+	}, [ incrementCalculating, decrementCalculating, isSelectingRate ] );
 
 	// set shipping error status if there are shipping error codes
 	useEffect( () => {

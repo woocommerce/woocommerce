@@ -1,7 +1,11 @@
 /**
+ * External dependencies
+ */
+import { PaymentResult } from '@woocommerce/types';
+/**
  * Internal dependencies
  */
-import type { PaymentResultDataType, CheckoutStateContextState } from './types';
+import type { CheckoutStateContextState } from './types';
 
 export enum ACTION {
 	SET_IDLE = 'set_idle',
@@ -26,10 +30,7 @@ export enum ACTION {
 
 export interface ActionType extends Partial< CheckoutStateContextState > {
 	type: ACTION;
-	data?:
-		| Record< string, unknown >
-		| Record< string, never >
-		| PaymentResultDataType;
+	data?: Record< string, unknown > | Record< string, never > | PaymentResult;
 }
 
 /**
@@ -53,7 +54,7 @@ export const actions = {
 			type: ACTION.SET_REDIRECT_URL,
 			redirectUrl,
 		} as const ),
-	setProcessingResponse: ( data: PaymentResultDataType ) =>
+	setProcessingResponse: ( data: PaymentResult ) =>
 		( {
 			type: ACTION.SET_PROCESSING_RESPONSE,
 			data,

@@ -11,7 +11,8 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { objectHasProp } from '@woocommerce/types';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -31,7 +32,6 @@ import {
 	useExpressPaymentMethods,
 } from './use-payment-method-registration';
 import { usePaymentMethodDataDispatchers } from './use-payment-method-dispatchers';
-import { useCheckoutContext } from '../checkout-state';
 import { useEditorContext } from '../../editor-context';
 import {
 	EMIT_TYPES,
@@ -67,7 +67,15 @@ export const PaymentMethodDataProvider = ( {
 		isIdle: checkoutIsIdle,
 		isCalculating: checkoutIsCalculating,
 		hasError: checkoutHasError,
-	} = useCheckoutContext();
+	} = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			isProcessing: store.isProcessing(),
+			isIdle: store.isIdle(),
+			hasError: store.hasError(),
+			isCalculating: store.isCalculating(),
+		};
+	} );
 	const { isEditor, getPreviewData } = useEditorContext();
 	const { setValidationErrors } = useValidationContext();
 	const { createErrorNotice: addErrorNotice, removeNotice } =
