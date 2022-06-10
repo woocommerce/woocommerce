@@ -39,7 +39,7 @@ const Block = ( {
 	const {
 		defaultAddressFields,
 		setShippingAddress,
-		setBillingData,
+		setBillingAddress,
 		shippingAddress,
 		setShippingPhone,
 		useShippingAsBilling,
@@ -82,7 +82,7 @@ const Block = ( {
 					onChange={ ( values: Partial< ShippingAddress > ) => {
 						setShippingAddress( values );
 						if ( useShippingAsBilling ) {
-							setBillingData( values );
+							setBillingAddress( values );
 						}
 						dispatchCheckoutEvent( 'set-shipping-address' );
 					} }
@@ -118,7 +118,7 @@ const Block = ( {
 				onChange={ ( checked: boolean ) => {
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
-						setBillingData( shippingAddress as BillingAddress );
+						setBillingAddress( shippingAddress as BillingAddress );
 					}
 				} }
 			/>

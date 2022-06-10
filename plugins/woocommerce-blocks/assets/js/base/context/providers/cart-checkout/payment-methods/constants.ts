@@ -45,8 +45,8 @@ export const DEFAULT_PAYMENT_METHOD_DATA: PaymentMethodDataContextType = {
 		error: ( errorMessage: string ) => void errorMessage,
 		failed: ( errorMessage, paymentMethodData ) =>
 			void [ errorMessage, paymentMethodData ],
-		success: ( paymentMethodData, billingData ) =>
-			void [ paymentMethodData, billingData ],
+		success: ( paymentMethodData, billingAddress ) =>
+			void [ paymentMethodData, billingAddress ],
 	} ),
 	currentStatus: {
 		isPristine: true,

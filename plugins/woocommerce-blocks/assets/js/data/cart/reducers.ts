@@ -87,14 +87,14 @@ const reducer: Reducer< CartState > = (
 				};
 			}
 			break;
-		case types.SET_BILLING_DATA:
+		case types.SET_BILLING_ADDRESS:
 			state = {
 				...state,
 				cartData: {
 					...state.cartData,
 					billingAddress: {
 						...state.cartData.billingAddress,
-						...action.billingData,
+						...action.billingAddress,
 					},
 				},
 			};

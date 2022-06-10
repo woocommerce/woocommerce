@@ -17,6 +17,7 @@ import type {
 } from '@woocommerce/type-defs/payments';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDispatch } from '@wordpress/data';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -49,7 +50,7 @@ const usePaymentMethodRegistration = (
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { isEditor } = useEditorContext();
 	const { selectedRates } = useShippingData();
-	const { billingData, shippingAddress } = useCustomerDataContext();
+	const { billingAddress, shippingAddress } = useCustomerDataContext();
 	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
 	const cart = useStoreCart();
@@ -63,7 +64,8 @@ const usePaymentMethodRegistration = (
 		cart,
 		cartTotals,
 		cartNeedsShipping,
-		billingData,
+		billingData: billingAddress,
+		billingAddress,
 		shippingAddress,
 		selectedShippingMethods,
 		paymentRequirements,
@@ -75,7 +77,20 @@ const usePaymentMethodRegistration = (
 			cart,
 			cartTotals,
 			cartNeedsShipping,
-			billingData,
+			get billingData() {
+				// prettier-ignore
+				deprecated(
+					'billingData',
+					{
+						alternative: 'billingAddress',
+						plugin: 'woocommerce-gutenberg-products-block',
+						link:
+							'https://github.com/woocommerce/woocommerce-blocks/pull/6369',
+					}
+				);
+				return this.billingAddress;
+			},
+			billingAddress,
 			shippingAddress,
 			selectedShippingMethods,
 			paymentRequirements,
@@ -84,7 +99,7 @@ const usePaymentMethodRegistration = (
 		cart,
 		cartTotals,
 		cartNeedsShipping,
-		billingData,
+		billingAddress,
 		shippingAddress,
 		selectedShippingMethods,
 		paymentRequirements,
@@ -184,7 +199,7 @@ const usePaymentMethodRegistration = (
 		debouncedRefreshCanMakePayments,
 		cart,
 		selectedShippingMethods,
-		billingData,
+		billingAddress,
 		cartIsLoading,
 	] );
 
