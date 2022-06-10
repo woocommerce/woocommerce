@@ -614,6 +614,11 @@ function wc_get_customer_available_downloads( $customer_id ) {
 
 			$download_file = $_product->get_file( $result->download_id );
 
+			// If the downloadable file has been disabled (it may be located in an untrusted location) then do not return it.
+			if ( ! $download_file->get_enabled() ) {
+				continue;
+			}
+
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
@@ -857,7 +862,7 @@ function wc_maybe_store_user_agent( $user_login, $user ) {
 	if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) && user_can( $user, 'manage_woocommerce' ) ) {
 		$admin_user_agents   = array_filter( (array) get_option( 'woocommerce_tracker_ua', array() ) );
 		$admin_user_agents[] = wc_get_user_agent();
-		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ) );
+		update_option( 'woocommerce_tracker_ua', array_unique( $admin_user_agents ), false );
 	}
 }
 add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );

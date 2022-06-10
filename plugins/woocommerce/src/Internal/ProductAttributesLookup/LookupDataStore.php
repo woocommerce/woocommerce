@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,10 +19,10 @@ class LookupDataStore {
 	 * Types of updates to perform depending on the current changest
 	 */
 
-	const ACTION_NONE         = 0;
-	const ACTION_INSERT       = 1;
-	const ACTION_UPDATE_STOCK = 2;
-	const ACTION_DELETE       = 3;
+	public const ACTION_NONE         = 0;
+	public const ACTION_INSERT       = 1;
+	public const ACTION_UPDATE_STOCK = 2;
+	public const ACTION_DELETE       = 3;
 
 	/**
 	 * The lookup table name.
@@ -64,6 +65,15 @@ class LookupDataStore {
 			},
 			100,
 			1
+		);
+
+		add_action(
+			'woocommerce_rest_insert_product',
+			function ( $product_post, $request ) {
+				$this->on_product_created_or_updated_via_rest_api( $product_post, $request );
+			},
+			100,
+			2
 		);
 
 		add_filter(
@@ -631,6 +641,20 @@ class LookupDataStore {
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Handler for the woocommerce_rest_insert_product hook.
+	 * Needed to update the lookup table when the REST API batch insert/update endpoints are used.
+	 *
+	 * @param \WP_Post         $product The post representing the created or updated product.
+	 * @param \WP_REST_Request $request The REST request that caused the hook to be fired.
+	 * @return void
+	 */
+	private function on_product_created_or_updated_via_rest_api( \WP_Post $product, \WP_REST_Request $request ): void {
+		if ( StringUtil::ends_with( $request->get_route(), '/batch' ) ) {
+			$this->on_product_changed( $product->ID );
+		}
 	}
 
 	/**

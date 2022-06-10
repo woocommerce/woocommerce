@@ -18,7 +18,7 @@ const {
  *
  * @param {string} buttonSelector
  * @param {string} resultSelector
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
 const clickAndWaitForSelector = async ( buttonSelector, resultSelector ) => {
 	await evalAndClick( buttonSelector );

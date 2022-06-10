@@ -14,6 +14,10 @@ jQuery( function( $ ) {
 		term_id_selector = '.check-column input';
 	}
 
+	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
+	window.wcTracks = window.wcTracks || {};
+	window.wcTracks.recordEvent = window.wcTracks.recordEvent  || function() { };
+
 	$( table_selector ).find( '.column-handle' ).show();
 
 	$.wc_add_missing_sort_handles = function() {
@@ -96,6 +100,13 @@ jQuery( function( $ ) {
 				$( table_selector ).sortable( 'cancel' );
 				return;
 			}
+
+			window.wcTracks.recordEvent( 'product_attributes_ordering_term', {
+				is_category:
+					woocommerce_term_ordering_params.taxonomy === 'product_cat'
+						? 'yes'
+						: 'no',
+			} );
 
 			// Show Spinner
 			ui.item.find( '.check-column input' ).hide();

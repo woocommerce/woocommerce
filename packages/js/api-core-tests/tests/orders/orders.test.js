@@ -341,39 +341,36 @@ describe( 'Orders API tests', () => {
 			};
 
 			const verifyOrderPrecision = ( order, dp ) => {
-				expectPrecisionToMatch( order[ 'discount_total' ], dp );
-				expectPrecisionToMatch( order[ 'discount_tax' ], dp );
-				expectPrecisionToMatch( order[ 'shipping_total' ], dp );
-				expectPrecisionToMatch( order[ 'shipping_tax' ], dp );
-				expectPrecisionToMatch( order[ 'cart_tax' ], dp );
-				expectPrecisionToMatch( order[ 'total' ], dp );
-				expectPrecisionToMatch( order[ 'total_tax' ], dp );
+				expectPrecisionToMatch( order.discount_total, dp );
+				expectPrecisionToMatch( order.discount_tax, dp );
+				expectPrecisionToMatch( order.shipping_total, dp );
+				expectPrecisionToMatch( order.shipping_tax, dp );
+				expectPrecisionToMatch( order.cart_tax, dp );
+				expectPrecisionToMatch( order.total, dp );
+				expectPrecisionToMatch( order.total_tax, dp );
 
-				order[ 'line_items' ].forEach( ( lineItem ) => {
-					expectPrecisionToMatch( lineItem[ 'total' ], dp );
-					expectPrecisionToMatch( lineItem[ 'total_tax' ], dp );
+				order.line_items.forEach( ( lineItem ) => {
+					expectPrecisionToMatch( lineItem.total, dp );
+					expectPrecisionToMatch( lineItem.total_tax, dp );
 				} );
 
-				order[ 'tax_lines' ].forEach( ( taxLine ) => {
-					expectPrecisionToMatch( taxLine[ 'tax_total' ], dp );
-					expectPrecisionToMatch(
-						taxLine[ 'shipping_tax_total' ],
-						dp
-					);
+				order.tax_lines.forEach( ( taxLine ) => {
+					expectPrecisionToMatch( taxLine.tax_total, dp );
+					expectPrecisionToMatch( taxLine.shipping_tax_total, dp );
 				} );
 
-				order[ 'shipping_lines' ].forEach( ( shippingLine ) => {
-					expectPrecisionToMatch( shippingLine[ 'total' ], dp );
-					expectPrecisionToMatch( shippingLine[ 'total_tax' ], dp );
+				order.shipping_lines.forEach( ( shippingLine ) => {
+					expectPrecisionToMatch( shippingLine.total, dp );
+					expectPrecisionToMatch( shippingLine.total_tax, dp );
 				} );
 
-				order[ 'fee_lines' ].forEach( ( feeLine ) => {
-					expectPrecisionToMatch( feeLine[ 'total' ], dp );
-					expectPrecisionToMatch( feeLine[ 'total_tax' ], dp );
+				order.fee_lines.forEach( ( feeLine ) => {
+					expectPrecisionToMatch( feeLine.total, dp );
+					expectPrecisionToMatch( feeLine.total_tax, dp );
 				} );
 
-				order[ 'refunds' ].forEach( ( refund ) => {
-					expectPrecisionToMatch( refund[ 'total' ], dp );
+				order.refunds.forEach( ( refund ) => {
+					expectPrecisionToMatch( refund.total, dp );
 				} );
 			};
 

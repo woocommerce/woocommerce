@@ -1,32 +1,60 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "preserve",
-    "target": "es6",
-    "module": "commonjs",
-    "incremental": true,
-    "declaration": true,
-    "declarationMap": true,
-    "composite": true,
-    "emitDeclarationOnly": false,
-    "isolatedModules": true,
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"allowSyntheticDefaultImports": true,
+		"jsx": "preserve",
+		"target": "es6",
+		"module": "commonjs",
+		"incremental": true,
+		"declaration": true,
+		"declarationMap": true,
+		"composite": true,
+		"emitDeclarationOnly": false,
+		"isolatedModules": true,
 
-    /* Strict Type-Checking Options */
-    "strict": true,
+		/* Strict Type-Checking Options */
+		"strict": true,
 
-    /* Additional Checks */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+		/* Additional Checks */
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
 
-    /* Module Resolution Options */
-    "moduleResolution": "node",
+		/* Module Resolution Options */
+		"moduleResolution": "node",
 
-    /* This needs to be false so our types are possible to consume without setting this */
-    "esModuleInterop": false,
-    "resolveJsonModule": true
-  }
+		/* This needs to be false so our types are possible to consume without setting this */
+		"esModuleInterop": false,
+		"resolveJsonModule": true
+	},
+
+	/* 
+		We set files: [] here so that running tsc against this config does not pick up anything, 
+		but only delegates the tsc command execution to the projects specified in references[]
+		More at: https://www.typescriptlang.org/docs/handbook/project-references.html
+	*/
+	"files": [],
+	
+	"references": [
+		{ "path": "./plugins/woocommerce/" },
+		{ "path": "./plugins/woocommerce-admin/" },
+		{ "path": "./packages/js/admin-e2e-tests" },
+		{ "path": "./packages/js/api" },
+		{ "path": "./packages/js/components" },
+		{ "path": "./packages/js/csv-export" },
+		{ "path": "./packages/js/currency" },
+		{ "path": "./packages/js/customer-effort-score" },
+		{ "path": "./packages/js/data" },
+		{ "path": "./packages/js/date" },
+		{ "path": "./packages/js/experimental" },
+		{ "path": "./packages/js/explat" },
+		{ "path": "./packages/js/internal-js-tests" },
+		{ "path": "./packages/js/navigation" },
+		{ "path": "./packages/js/notices" },
+		{ "path": "./packages/js/number" },
+		{ "path": "./packages/js/onboarding" },
+		{ "path": "./packages/js/tracks" }
+		]
 }

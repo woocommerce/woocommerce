@@ -45,10 +45,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'             => 'http://api.ipify.org/',
-		'ipecho'            => 'http://ipecho.net/plain',
-		'ident'             => 'http://ident.me',
-		'whatismyipaddress' => 'http://bot.whatismyipaddress.com',
+		'ipify'  => 'http://api.ipify.org/',
+		'ipecho' => 'http://ipecho.net/plain',
+		'ident'  => 'http://ident.me',
+		'tnedi'  => 'http://tnedi.me',
 	);
 
 	/**

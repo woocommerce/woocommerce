@@ -189,10 +189,26 @@ a.button {
 	margin-bottom: 5rem;
 	margin-left: 0;
 	background: #eee;
+	color: $body-color;
+	border-top: 3px solid var( --wc-green );
+
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
+	width: 100%;
+
+	a {
+		color: #fff;
+
+		&:hover {
+			color: #fff;
+		}
+
+		&.button {
+			background: #000000;
+		}
+	}
 }
 
 .woocommerce-message,
@@ -208,26 +224,12 @@ a.button {
 	}
 }
 
-.woocommerce-message {
-	background: #eee;
-	color: $body-color;
+.woocommerce-info {
+	border-color: var( --wc-blue );
 }
 
 .woocommerce-error {
-	color: #fff;
-	background: #b22222;
-
-	a {
-		color: #fff;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&.button {
-			background: #111;
-		}
-	}
+	border-color: $highlights-color;
 
 	> li {
 		margin: 0;
@@ -239,25 +241,6 @@ a.button {
 	.woocommerce-error,
 	.woocommerce-info {
 		font-family: $headings;
-	}
-}
-
-.woocommerce-info {
-	background: #eee;
-	color: #000;
-	border-top: 2px solid $highlights-color;
-
-	a {
-		color: #444;
-
-		&:hover {
-			color: #000;
-		}
-
-		&.button {
-			background: $highlights-color;
-			color: #f5efe0;
-		}
 	}
 }
 
@@ -564,10 +547,6 @@ dl.variation,
 		.button.disabled {
 			opacity: 0.2;
 		}
-	}
-
-	.woocommerce-message {
-		flex-direction: row-reverse;
 	}
 
 	.woocommerce-Tabs-panel--additional_information,
@@ -1663,6 +1642,7 @@ a.reset_variations {
 
 	form[name="checkout"] {
 		display: table;
+		width: 100%;
 	}
 
 	.blockUI.blockOverlay {
@@ -2547,10 +2527,6 @@ a.reset_variations {
 			max-width: 1600px;
 			padding: 4vw 6vw;
 			margin: 0 auto;
-
-			.site-main {
-
-			}
 		}
 
 		.onsale {

@@ -139,7 +139,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 		include_once ABSPATH . 'wp-admin/includes/image.php';
 	}
 
-	$image_meta = wp_read_image_metadata( $upload['file'] );
+	$image_meta = @wp_read_image_metadata( $upload['file'] );
 	if ( $image_meta ) {
 		if ( trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
 			$title = wc_clean( $image_meta['title'] );
@@ -159,7 +159,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 
 	$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
 	if ( ! is_wp_error( $attachment_id ) ) {
-		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+		@wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
 	}
 
 	return $attachment_id;
@@ -169,7 +169,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
  * Validate reports request arguments.
  *
  * @since 2.6.0
- * @param mixed           $value   Value to valdate.
+ * @param mixed           $value   Value to validate.
  * @param WP_REST_Request $request Request instance.
  * @param string          $param   Param to validate.
  * @return WP_Error|boolean

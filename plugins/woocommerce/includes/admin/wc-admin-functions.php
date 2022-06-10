@@ -20,6 +20,7 @@ function wc_get_screen_ids() {
 	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
+		$wc_screen_id . '_page_wc-orders',
 		$wc_screen_id . '_page_wc-reports',
 		$wc_screen_id . '_page_wc-shipping',
 		$wc_screen_id . '_page_wc-settings',
@@ -29,6 +30,7 @@ function wc_get_screen_ids() {
 		'product_page_product_attributes',
 		'product_page_product_exporter',
 		'product_page_product_importer',
+		'product_page_product-reviews',
 		'edit-product',
 		'product',
 		'edit-shop_coupon',

@@ -183,12 +183,32 @@ class WC_Shortcode_Checkout {
 					current( $available_gateways )->set_current();
 				}
 
+				/**
+				 * Allows the text of the submit button on the Pay for Order page to be changed.
+				 *
+				 * @param string $text The text of the button.
+				 *
+				 * @since 3.0.2
+				 */
+				$order_button_text = apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) );
+
+				/**
+				 * Triggered right before the Pay for Order form, after validation of the order and customer.
+				 *
+				 * @param WC_Order $order              The order that is being paid for.
+				 * @param string   $order_button_text  The text for the submit button.
+				 * @param array    $available_gateways All available gateways.
+				 *
+				 * @since 6.6
+				 */
+				do_action( 'before_woocommerce_pay_form', $order, $order_button_text, $available_gateways );
+
 				wc_get_template(
 					'checkout/form-pay.php',
 					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
-						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
+						'order_button_text'  => $order_button_text,
 					)
 				);
 

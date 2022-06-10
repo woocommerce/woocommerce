@@ -1,19 +1,20 @@
-import { PropertyType, PropertyTypeTransformation } from '../property-type-transformation';
+import {
+	PropertyType,
+	PropertyTypeTransformation,
+} from '../property-type-transformation';
 
 describe( 'PropertyTypeTransformation', () => {
 	let transformation: PropertyTypeTransformation;
 
 	beforeEach( () => {
-		transformation = new PropertyTypeTransformation(
-			{
-				string: PropertyType.String,
-				integer: PropertyType.Integer,
-				float: PropertyType.Float,
-				boolean: PropertyType.Boolean,
-				date: PropertyType.Date,
-				callback: ( value: string ) => 'Transformed-' + value,
-			},
-		);
+		transformation = new PropertyTypeTransformation( {
+			string: PropertyType.String,
+			integer: PropertyType.Integer,
+			float: PropertyType.Float,
+			boolean: PropertyType.Boolean,
+			date: PropertyType.Date,
+			callback: ( value: string ) => 'Transformed-' + value,
+		} );
 	} );
 
 	it( 'should convert strings', () => {
@@ -57,11 +58,17 @@ describe( 'PropertyTypeTransformation', () => {
 	} );
 
 	it( 'should convert dates', () => {
-		let transformed = transformation.toModel( { date: '2020-11-06T03:11:41.000Z' } );
+		let transformed = transformation.toModel( {
+			date: '2020-11-06T03:11:41.000Z',
+		} );
 
-		expect( transformed.date ).toStrictEqual( new Date( '2020-11-06T03:11:41.000Z' ) );
+		expect( transformed.date ).toStrictEqual(
+			new Date( '2020-11-06T03:11:41.000Z' )
+		);
 
-		transformed = transformation.fromModel( { date: new Date( '2020-11-06T03:11:41.000Z' ) } );
+		transformed = transformation.fromModel( {
+			date: new Date( '2020-11-06T03:11:41.000Z' ),
+		} );
 
 		expect( transformed.date ).toStrictEqual( '2020-11-06T03:11:41.000Z' );
 	} );
@@ -77,11 +84,15 @@ describe( 'PropertyTypeTransformation', () => {
 	} );
 
 	it( 'should convert arrays', () => {
-		let transformed = transformation.toModel( { integer: [ '100', '200', '300' ] } );
+		let transformed = transformation.toModel( {
+			integer: [ '100', '200', '300' ],
+		} );
 
 		expect( transformed.integer ).toStrictEqual( [ 100, 200, 300 ] );
 
-		transformed = transformation.fromModel( { integer: [ 100, 200, 300 ] } );
+		transformed = transformation.fromModel( {
+			integer: [ 100, 200, 300 ],
+		} );
 
 		expect( transformed.integer ).toStrictEqual( [ '100', '200', '300' ] );
 	} );

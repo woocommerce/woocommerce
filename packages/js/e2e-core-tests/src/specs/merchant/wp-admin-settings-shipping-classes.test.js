@@ -1,79 +1,76 @@
 /**
  * Internal dependencies
  */
-const { merchant, withRestApi } = require('@woocommerce/e2e-utils');
-
-/**
- * External dependencies
- */
-const { lorem, helpers } = require('faker');
+const { merchant, withRestApi } = require( '@woocommerce/e2e-utils' );
 
 const runAddShippingClassesTest = () => {
-	describe('Merchant can add shipping classes', () => {
-		beforeAll(async () => {
+	describe( 'Merchant can add shipping classes', () => {
+		beforeAll( async () => {
 			await merchant.login();
 
 			// Go to Shipping Classes page
-			await merchant.openSettings('shipping', 'classes');
-		});
+			await merchant.openSettings( 'shipping', 'classes' );
+		} );
 
-		afterAll(async () => {
+		afterAll( async () => {
 			await withRestApi.deleteAllShippingClasses( false );
-		});
+		} );
 
-		it('can add shipping classes', async () => {
+		it( 'can add shipping classes', async () => {
 			const shippingClassSlug = {
-				name: lorem.words(),
-				slug: lorem.slug(),
-				description: lorem.sentence()
+				name: 'Small Items',
+				slug: 'small-items',
+				description: "Small items that don't cost much to ship.",
 			};
 			const shippingClassNoSlug = {
-				name: lorem.words(3),
+				name: 'Poster Pack',
 				slug: '',
-				description: lorem.sentence()
+				description: '',
 			};
-			const shippingClasses = [shippingClassSlug, shippingClassNoSlug];
+			const shippingClasses = [ shippingClassSlug, shippingClassNoSlug ];
 
 			// Add shipping classes
-			for (const { name, slug, description } of shippingClasses) {
-				await expect(page).toClick('.wc-shipping-class-add');
-				await expect(page).toFill(
+			for ( const { name, slug, description } of shippingClasses ) {
+				await expect( page ).toClick( '.wc-shipping-class-add' );
+				await expect( page ).toFill(
 					'.editing:last-child [data-attribute="name"]',
 					name
 				);
-				await expect(page).toFill(
+				await expect( page ).toFill(
 					'.editing:last-child [data-attribute="slug"]',
 					slug
 				);
-				await expect(page).toFill(
+				await expect( page ).toFill(
 					'.editing:last-child [data-attribute="description"]',
 					description
 				);
 			}
-			await expect(page).toClick('.wc-shipping-class-save');
+			await expect( page ).toClick( '.wc-shipping-class-save' );
 
 			// Set the expected auto-generated slug
-			shippingClassNoSlug.slug = helpers.slugify(
-				shippingClassNoSlug.name
-			);
+			shippingClassNoSlug.slug = 'poster-pack';
 
 			// Verify that the specified shipping classes were saved
-			for (const { name, slug, description } of shippingClasses) {
-				const row = await expect(
-					page
-				).toMatchElement('.wc-shipping-class-rows tr', { text: slug, timeout: 50000 });
+			for ( const { name, slug, description } of shippingClasses ) {
+				const row = await expect( page ).toMatchElement(
+					'.wc-shipping-class-rows tr',
+					{
+						text: slug,
+						timeout: 50000,
+					}
+				);
 
-				await expect(row).toMatchElement(
+				await expect( row ).toMatchElement(
 					'.wc-shipping-class-name',
 					name
 				);
-				await expect(row).toMatchElement(
+				await expect( row ).toMatchElement(
 					'.wc-shipping-class-description',
 					description
 				);
 			}
-		});
-	});
+		} );
+	} );
 };
 
 module.exports = runAddShippingClassesTest;

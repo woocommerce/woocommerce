@@ -20,14 +20,14 @@ $release_day_of_month = (int) date( 'j', $release_time );
 // If 26 days from now isn't the second Tuesday, then it's not code freeze day.
 if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
 	echo 'Info: Today is not the Thursday of the code freeze.' . PHP_EOL;
-	return;
+	exit( 1 );
 }
 
 $latest_version_with_release = get_latest_version_with_release();
 
 if ( empty( $latest_version_with_release ) ) {
 	echo '*** Error: Unable to get latest version with release' . PHP_EOL;
-	return;
+	exit( 1 );
 }
 
 // Because we go from 5.9 to 6.0, we can get the next major_minor by adding 0.1 and formatting appropriately.
@@ -60,6 +60,8 @@ if ( create_github_branch_from_branch( 'trunk', $release_branch_to_create ) ) {
 } else if ( '422' === $github_api_response_code ) {
 	// The release branch already existed when GitHub returns a 422 status.
 	echo "Notice: Unable to create {$release_branch_to_create} branch. Maybe it already exists? Skipping..." . PHP_EOL;
+	exit( 1 );
 } else {
 	echo "*** Error: Unable to create {$release_branch_to_create}" . PHP_EOL;
+	exit( 1 );
 }

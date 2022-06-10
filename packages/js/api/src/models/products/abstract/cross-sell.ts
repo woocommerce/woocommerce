@@ -9,7 +9,7 @@ abstract class AbstractProductCrossSells extends Model {
 	 *
 	 * @type {ReadonlyArray.<number>}
 	 */
-	public readonly crossSellIds: Array<number> = [];
+	public readonly crossSellIds: Array< number > = [];
 }
 
 export interface IProductCrossSells extends AbstractProductCrossSells {}
