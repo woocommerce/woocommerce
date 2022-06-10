@@ -4,8 +4,9 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutContext } from '@woocommerce/base-context';
 import { useShippingData } from '@woocommerce/base-context/hooks';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -14,12 +15,16 @@ import CheckoutOrderNotes from '../../order-notes';
 
 const Block = ( { className }: { className?: string } ): JSX.Element => {
 	const { needsShipping } = useShippingData();
-	const {
-		isProcessing: checkoutIsProcessing,
-		orderNotes,
-		dispatchActions,
-	} = useCheckoutContext();
-	const { setOrderNotes } = dispatchActions;
+	const { isProcessing: checkoutIsProcessing, orderNotes } = useSelect(
+		( select ) => {
+			const store = select( CHECKOUT_STORE_KEY );
+			return {
+				isProcessing: store.isProcessing(),
+				orderNotes: store.getOrderNotes(),
+			};
+		}
+	);
+	const { setOrderNotes } = useDispatch( CHECKOUT_STORE_KEY );
 
 	return (
 		<FormStep

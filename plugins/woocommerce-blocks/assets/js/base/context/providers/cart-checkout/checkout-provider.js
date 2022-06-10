@@ -18,21 +18,16 @@ import CheckoutProcessor from './checkout-processor';
  * This wraps the checkout and provides an api interface for the checkout to
  * children via various hooks.
  *
- * @param {Object}  props               Incoming props for the provider.
- * @param {Object}  props.children      The children being wrapped.
- * @param {boolean} [props.isCart]      Whether it's rendered in the Cart
- *                                      component.
- * @param {string}  [props.redirectUrl] Initialize what the checkout will
- *                                      redirect to after successful
- *                                      submit.
+ * @param {Object} props               Incoming props for the provider.
+ * @param {Object} props.children      The children being wrapped.
+ *                                     component.
+ * @param {string} [props.redirectUrl] Initialize what the checkout will
+ *                                     redirect to after successful
+ *                                     submit.
  */
-export const CheckoutProvider = ( {
-	children,
-	isCart = false,
-	redirectUrl,
-} ) => {
+export const CheckoutProvider = ( { children, redirectUrl } ) => {
 	return (
-		<CheckoutStateProvider redirectUrl={ redirectUrl } isCart={ isCart }>
+		<CheckoutStateProvider redirectUrl={ redirectUrl }>
 			<CustomerDataProvider>
 				<ShippingDataProvider>
 					<PaymentMethodDataProvider>

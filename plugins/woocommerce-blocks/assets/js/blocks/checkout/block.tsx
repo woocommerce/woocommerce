@@ -6,7 +6,6 @@ import classnames from 'classnames';
 import { createInterpolateElement, useEffect } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {
-	useCheckoutContext,
 	useValidationContext,
 	ValidationContextProvider,
 	CheckoutProvider,
@@ -18,6 +17,8 @@ import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
+import { useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -55,7 +56,13 @@ const Checkout = ( {
 	attributes: Attributes;
 	children: React.ReactChildren;
 } ): JSX.Element => {
-	const { hasOrder, customerId } = useCheckoutContext();
+	const { hasOrder, customerId } = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			hasOrder: store.hasOrder(),
+			customerId: store.getCustomerId(),
+		};
+	} );
 	const { cartItems, cartIsLoading } = useStoreCart();
 
 	const {
@@ -104,10 +111,19 @@ const ScrollOnError = ( {
 }: {
 	scrollToTop: ( props: Record< string, unknown > ) => void;
 } ): null => {
-	const { hasError: checkoutHasError, isIdle: checkoutIsIdle } =
-		useCheckoutContext();
-	const { hasValidationErrors, showAllValidationErrors } =
-		useValidationContext();
+	const { hasError: checkoutHasError, isIdle: checkoutIsIdle } = useSelect(
+		( select ) => {
+			const store = select( CHECKOUT_STORE_KEY );
+			return {
+				isIdle: store.isIdle(),
+				hasError: store.hasError(),
+			};
+		}
+	);
+	const {
+		hasValidationErrors,
+		showAllValidationErrors,
+	} = useValidationContext();
 
 	const hasErrorsToDisplay =
 		checkoutIsIdle &&

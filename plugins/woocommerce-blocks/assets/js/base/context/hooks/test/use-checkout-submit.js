@@ -8,6 +8,10 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
  * Internal dependencies
  */
 import { useCheckoutSubmit } from '../use-checkout-submit';
+import {
+	CHECKOUT_STORE_KEY,
+	config as checkoutStoreConfig,
+} from '../../../../data/checkout';
 
 const mockUseCheckoutContext = {
 	onSubmit: jest.fn(),
@@ -42,7 +46,9 @@ describe( 'useCheckoutSubmit', () => {
 	};
 
 	beforeEach( () => {
-		registry = createRegistry();
+		registry = createRegistry( {
+			[ CHECKOUT_STORE_KEY ]: checkoutStoreConfig,
+		} );
 		renderer = null;
 	} );
 

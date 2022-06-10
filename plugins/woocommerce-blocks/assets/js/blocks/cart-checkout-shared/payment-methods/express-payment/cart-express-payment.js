@@ -8,10 +8,11 @@ import {
 } from '@woocommerce/base-context/hooks';
 import {
 	StoreNoticesContainer,
-	useCheckoutContext,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
+import { useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -29,7 +30,17 @@ const CartExpressPayment = () => {
 		isBeforeProcessing,
 		isComplete,
 		hasError,
-	} = useCheckoutContext();
+	} = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			isCalculating: store.isCalculating(),
+			isProcessing: store.isProcessing(),
+			isAfterProcessing: store.isAfterProcessing(),
+			isBeforeProcessing: store.isBeforeProcessing(),
+			isComplete: store.isComplete(),
+			hasError: store.hasError(),
+		};
+	} );
 	const { currentStatus: paymentStatus } = usePaymentMethodDataContext();
 
 	if (

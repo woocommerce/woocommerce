@@ -6,7 +6,7 @@ import triggerFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import type { CheckoutStateDispatchActions } from './checkout-state/types';
+import type { setCustomerId as setCheckoutCustomerId } from '../../../../data/checkout/actions';
 
 /**
  * Utility function for preparing payment data for the request.
@@ -36,7 +36,7 @@ export const preparePaymentData = (
  */
 export const processCheckoutResponseHeaders = (
 	headers: Headers,
-	dispatchActions: CheckoutStateDispatchActions
+	setCustomerId: typeof setCheckoutCustomerId
 ): void => {
 	if (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -56,8 +56,6 @@ export const processCheckoutResponseHeaders = (
 
 	// Update user using headers.
 	if ( headers?.get( 'User-ID' ) ) {
-		dispatchActions.setCustomerId(
-			parseInt( headers.get( 'User-ID' ) || '0', 10 )
-		);
+		setCustomerId( parseInt( headers.get( 'User-ID' ) || '0', 10 ) );
 	}
 };

@@ -10,6 +10,8 @@ import { getSetting } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import type { PaymentMethodInterface } from '@woocommerce/types';
+import { useSelect } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -30,17 +32,29 @@ import { useShippingData } from '../shipping/use-shipping-data';
  */
 export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 	const {
-		isCalculating,
-		isComplete,
-		isIdle,
-		isProcessing,
 		onCheckoutBeforeProcessing,
 		onCheckoutValidationBeforeProcessing,
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
 		onSubmit,
-		customerId,
 	} = useCheckoutContext();
+	const {
+		isCalculating,
+		isComplete,
+		isIdle,
+		isProcessing,
+		customerId,
+	} = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			isComplete: store.isComplete(),
+			isIdle: store.isIdle(),
+			isProcessing: store.isProcessing(),
+			customerId: store.getCustomerId(),
+			isCalculating: store.isCalculating(),
+		};
+	} );
+
 	const {
 		currentStatus,
 		activePaymentMethod,
