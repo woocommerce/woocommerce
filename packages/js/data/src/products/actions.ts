@@ -9,7 +9,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import TYPES from './action-types';
 import {
-	MutableProperties,
+	ReadOnlyProperties,
 	PartialProduct,
 	Product,
 	ProductQuery,
@@ -35,7 +35,7 @@ export function getProductError(
 	};
 }
 
-function createProductSuccess( id: number, product: PartialProduct ) {
+function createProductSuccess( id: number, product: Partial< Product > ) {
 	return {
 		type: TYPES.CREATE_PRODUCT_SUCCESS as const,
 		id,
@@ -50,6 +50,22 @@ export function createProductError(
 	return {
 		type: TYPES.CREATE_PRODUCT_ERROR as const,
 		query,
+		error,
+	};
+}
+
+function updateProductSuccess( id: number, product: Partial< Product > ) {
+	return {
+		type: TYPES.UPDATE_PRODUCT_SUCCESS as const,
+		id,
+		product,
+	};
+}
+
+export function updateProductError( id: number, error: unknown ) {
+	return {
+		type: TYPES.UPDATE_PRODUCT_ERROR as const,
+		id,
 		error,
 	};
 }
@@ -100,7 +116,7 @@ export function getProductsTotalCountError(
 	};
 }
 
-export function* createProduct( data: Pick< Product, MutableProperties > ) {
+export function* createProduct( data: Omit< Product, ReadOnlyProperties > ) {
 	try {
 		const product: Product = yield apiFetch( {
 			path: WC_PRODUCT_NAMESPACE,
@@ -116,6 +132,25 @@ export function* createProduct( data: Pick< Product, MutableProperties > ) {
 	}
 }
 
+export function* updateProduct(
+	id: number,
+	data: Omit< Product, ReadOnlyProperties >
+) {
+	try {
+		const product: Product = yield apiFetch( {
+			path: `${ WC_PRODUCT_NAMESPACE }/${ id }`,
+			method: 'PUT',
+			data,
+		} );
+
+		yield updateProductSuccess( product.id, product );
+		return product;
+	} catch ( error ) {
+		yield updateProductError( id, error );
+		throw error;
+	}
+}
+
 export type Actions = ReturnType<
 	| typeof createProductError
 	| typeof createProductSuccess
@@ -125,8 +160,11 @@ export type Actions = ReturnType<
 	| typeof getProductsError
 	| typeof getProductsTotalCountSuccess
 	| typeof getProductsTotalCountError
+	| typeof updateProductError
+	| typeof updateProductSuccess
 >;
 
 export type ActionDispatchers = DispatchFromMap< {
 	createProduct: typeof createProduct;
+	updateProduct: typeof updateProduct;
 } >;
