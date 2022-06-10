@@ -196,7 +196,7 @@ export function* removeProduct(
 		throw new Error();
 	} catch ( error ) {
 		yield deleteProductError( id, error );
-		throw new Error();
+		throw error;
 	}
 }
 
