@@ -87,7 +87,7 @@ if ( $verbose ) {
 $base_path = dirname( dirname( __DIR__ ) );
 
 $workspace_paths = array();
-$workspace_yaml = file_get_contents( 'pnpm-workspace.yaml' );
+$workspace_yaml = file_get_contents( $base_path . '/pnpm-workspace.yaml' );
 if ( preg_match( '/^packages:((\n\s+.+)+)/', $workspace_yaml, $matches ) ) {
         $packages_config = $matches[1];
         if ( preg_match_all( "/^\s+-\s?'([^']+)'/m", $packages_config, $matches ) ) {
