@@ -250,7 +250,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$this->prepare_downloads_for_export( $product, $row );
 		$this->prepare_attributes_for_export( $product, $row );
 		$this->prepare_meta_for_export( $product, $row );
-		return apply_filters( 'woocommerce_product_export_row_data', $row, $product );
+
+		return apply_filters( 'woocommerce_product_export_row_data', $row, $product, $this );
 	}
 
 	/**
