@@ -418,6 +418,7 @@ abstract class WC_Data {
 			array(
 				'key'   => $key,
 				'value' => $value,
+				'unique' => $unique,
 			)
 		);
 	}
