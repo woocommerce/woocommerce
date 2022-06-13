@@ -187,9 +187,10 @@ final class WooCommerce {
 	 */
 	public function on_plugins_loaded() {
 		/**
-		 * Action to signal that WooCommerce has finished loading.
+		 * Action to signal that WooCommerce has finished loading. Plus 
+		 * some other change.
 		 *
-		 * @since 3.6.0
+		 * @since 6.7.0
 		 */
 		do_action( 'woocommerce_loaded' );
 	}
