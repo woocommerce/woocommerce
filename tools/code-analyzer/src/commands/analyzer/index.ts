@@ -368,7 +368,7 @@ export default class Analyzer extends Command {
 		const matchPatches = /^a\/(.+).php/g;
 		const patches = getPatches( content, matchPatches );
 		const verRegEx = getVersionRegex( version );
-		const matchHooks = `@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
+		const matchHooks = `\/\\*\\*(.*?)@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp( matchHooks, 'gs' );
 
 		for ( const p in patches ) {
@@ -387,6 +387,19 @@ export default class Analyzer extends Command {
 			const filepath = getFilename( lines[ 0 ] );
 
 			for ( const raw of results ) {
+				// Extract hook description.
+				const rawDescription = raw.match( /\/\*\*([\s\S]*) @since/ );
+
+				if ( ! rawDescription ) {
+					continue;
+				}
+
+				const description = rawDescription[ 1 ]
+					.replace( /\*/g, '' )
+					.replace( /\+/g, '' )
+					.trim();
+
+				console.log( description );
 				// Extract hook name and type.
 				const hookName = raw.match(
 					/(.*)(do_action|apply_filters)\(\s+'(.*)'/
@@ -406,7 +419,12 @@ export default class Analyzer extends Command {
 				const title = `New ${ kind } found`;
 
 				if ( ! hookName[ 2 ].startsWith( '-' ) ) {
-					hooksList.set( name, [ 'NOTICE', title, message ] );
+					hooksList.set( name, [
+						'NOTICE',
+						title,
+						message,
+						description,
+					] );
 				}
 			}
 

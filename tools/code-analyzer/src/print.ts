@@ -75,7 +75,7 @@ export const printHookResults = (
 				log( 'FILE: ' + key );
 				log( '---------------------------------------------------' );
 				for ( const [ k, v ] of value ) {
-					log( 'HOOK: ' + k );
+					log( `HOOK: ${ k }: ${ v[ 3 ] }` );
 					log(
 						'---------------------------------------------------'
 					);
