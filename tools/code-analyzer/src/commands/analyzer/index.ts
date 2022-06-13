@@ -92,23 +92,23 @@ export default class Analyzer extends Command {
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
-		// if ( flags.source === 'woocommerce/woocommerce' ) {
-		// 	const schemaDiff = await generateSchemaDiff(
-		// 		flags.source,
-		// 		args.compare,
-		// 		flags.base,
-		// 		( e: string ): void => this.error( e )
-		// 	);
+		if ( flags.source === 'woocommerce/woocommerce' ) {
+			const schemaDiff = await generateSchemaDiff(
+				flags.source,
+				args.compare,
+				flags.base,
+				( e: string ): void => this.error( e )
+			);
 
-		// 	this.scanChanges(
-		// 		patchContent,
-		// 		pluginData[ 0 ],
-		// 		flags.output,
-		// 		schemaDiff
-		// 	);
-		// } else {
-		this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
-		// }
+			this.scanChanges(
+				patchContent,
+				pluginData[ 0 ],
+				flags.output,
+				schemaDiff
+			);
+		} else {
+			this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
+		}
 	}
 
 	/**
