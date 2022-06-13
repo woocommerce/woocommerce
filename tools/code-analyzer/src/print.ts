@@ -58,7 +58,9 @@ export const printHookResults = (
 			if ( value.size ) {
 				opt += `\\n* **file:** ${ key }`;
 				for ( const [ k, v ] of value ) {
-					opt += `\\n  * ${ v[ 0 ].toUpperCase() }: ${ v[ 2 ] }`;
+					opt += `\\n  * ${ v[ 0 ].toUpperCase() } - ${ v[ 2 ] }: ${
+						v[ 3 ]
+					}`;
 					log(
 						`::${ v[ 0 ] } file=${ key },line=1,title=${ v[ 1 ] } - ${ k }::${ v[ 2 ] }`
 					);
