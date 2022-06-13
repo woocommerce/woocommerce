@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4963534173a1e2e4d6141c09ff2aedf6",
+    "content-hash": "fc949667636de7d41846c18b5ef30dfd",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -681,16 +681,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v7.8.0",
+            "version": "v7.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "d71e972543ad21b4d54ffcb957fb9051dd851cb0"
+                "reference": "6ecb59695e1f00e9490b802f01e132dbe8bd7c92"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/d71e972543ad21b4d54ffcb957fb9051dd851cb0",
-                "reference": "d71e972543ad21b4d54ffcb957fb9051dd851cb0",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/6ecb59695e1f00e9490b802f01e132dbe8bd7c92",
+                "reference": "6ecb59695e1f00e9490b802f01e132dbe8bd7c92",
                 "shasum": ""
             },
             "require": {
@@ -734,9 +734,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v7.8.0"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v7.8.1"
             },
-            "time": "2022-06-07T13:03:34+00:00"
+            "time": "2022-06-13T13:39:11+00:00"
         }
     ],
     "packages-dev": [
@@ -2556,6 +2556,7 @@
                     "type": "tidelift"
                 }
             ],
+            "abandoned": "symfony/error-handler",
             "time": "2022-04-12T15:19:55+00:00"
         },
         {
@@ -2939,5 +2940,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.1.0"
 }
