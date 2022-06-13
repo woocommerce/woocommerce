@@ -12,6 +12,11 @@ import { dirname } from 'path';
 import kebabCase from 'lodash/kebabCase';
 
 /**
+ * Internal dependencies
+ */
+import { clickLink } from '.';
+
+/**
  * This will visit a GB page or post, and will hide the welcome guide.
  *
  * @param {string} link the page or post you want to visit.
@@ -103,8 +108,7 @@ export async function visitPostOfType( title, postType ) {
 	if ( await page.$( '#post-search-input' ) ) {
 		// search for the page.
 		await page.type( '#post-search-input', title );
-		await page.click( '#search-submit' );
-		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+		await clickLink( '#search-submit' );
 		const pageLink = await page.$x( `//a[contains(text(), '${ title }')]` );
 		if ( pageLink.length > 0 ) {
 			// clicking the link directly caused racing issues, so I used goto.

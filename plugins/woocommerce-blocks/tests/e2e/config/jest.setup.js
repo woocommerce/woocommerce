@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * External dependencies
  */
@@ -9,9 +10,14 @@ import {
 	switchUserToTest,
 	visitAdminPage,
 } from '@wordpress/e2e-test-utils';
-
+import { setDefaultOptions } from 'expect-puppeteer';
+/**
+ * Internal dependencies
+ */
+import { DEFAULT_TIMEOUT } from '../utils';
 // Set the default test timeout.
 jest.setTimeout( 120000 );
+setDefaultOptions( { timeout: DEFAULT_TIMEOUT } );
 
 /**
  * Array of page event tuples of [ eventName, handler ].
@@ -105,13 +111,11 @@ function observeConsoleLogging() {
 			return;
 		}
 		const text = message.text();
-
 		// Viewing posts on the front end can result in this error, which
 		// has nothing to do with Gutenberg.
 		if ( text.includes( 'net::ERR_UNKNOWN_URL_SCHEME' ) ) {
 			return;
 		}
-
 		// Network errors are ignored only if we are intentionally testing
 		// offline mode.
 		if (
@@ -120,9 +124,7 @@ function observeConsoleLogging() {
 		) {
 			return;
 		}
-
 		const logFunction = OBSERVED_CONSOLE_MESSAGE_TYPES[ type ];
-
 		// Disable reason: We intentionally bubble up console error messages
 		// for debugging reasons. If you need to test explicitly the logging,
 		// use  @wordpress/jest-console
