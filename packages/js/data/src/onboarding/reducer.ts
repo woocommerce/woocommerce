@@ -1,9 +1,17 @@
 /**
+ * External dependencies
+ */
+
+import type { Reducer } from 'redux';
+
+/**
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { Action } from './actions';
+import { OnboardingState, TaskListType, TaskType } from './types';
 
-export const defaultState = {
+export const defaultState: OnboardingState = {
 	errors: {},
 	freeExtensions: [],
 	profileItems: {
@@ -31,7 +39,10 @@ export const defaultState = {
 	taskLists: {},
 };
 
-const getUpdatedTaskLists = ( taskLists, args ) => {
+const getUpdatedTaskLists = (
+	taskLists: Record< string, TaskListType >,
+	args: Partial< TaskType >
+) => {
 	return Object.keys( taskLists ).reduce(
 		( lists, taskListId ) => {
 			return {
@@ -54,46 +65,29 @@ const getUpdatedTaskLists = ( taskLists, args ) => {
 	);
 };
 
-const onboarding = (
+const reducer: Reducer< OnboardingState, Action > = (
 	state = defaultState,
-	{
-		freeExtensions,
-		type,
-		profileItems,
-		emailPrefill,
-		paymentMethods,
-		productTypes,
-		replace,
-		error,
-		isRequesting,
-		selector,
-		task,
-		taskId,
-		taskListId,
-		taskList,
-		taskLists,
-		keepCompletedTaskList,
-	}
+	action
 ) => {
-	switch ( type ) {
+	switch ( action.type ) {
 		case TYPES.SET_PROFILE_ITEMS:
 			return {
 				...state,
-				profileItems: replace
-					? profileItems
-					: { ...state.profileItems, ...profileItems },
+				profileItems: action.replace
+					? action.profileItems
+					: { ...state.profileItems, ...action.profileItems },
 			};
 		case TYPES.SET_EMAIL_PREFILL:
 			return {
 				...state,
-				emailPrefill,
+				emailPrefill: action.emailPrefill,
 			};
 		case TYPES.SET_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					[ selector ]: error,
+					[ action.selector ]: action.error,
 				},
 			};
 		case TYPES.SET_IS_REQUESTING:
@@ -101,25 +95,25 @@ const onboarding = (
 				...state,
 				requesting: {
 					...state.requesting,
-					[ selector ]: isRequesting,
+					[ action.selector ]: action.isRequesting,
 				},
 			};
 		case TYPES.GET_PAYMENT_METHODS_SUCCESS:
 			return {
 				...state,
-				paymentMethods,
+				paymentMethods: action.paymentMethods,
 			};
 		case TYPES.GET_PRODUCT_TYPES_SUCCESS:
 			return {
 				...state,
-				productTypes,
+				productTypes: action.productTypes,
 			};
 		case TYPES.GET_PRODUCT_TYPES_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					productTypes: error,
+					productTypes: action.error,
 				},
 			};
 		case TYPES.GET_FREE_EXTENSIONS_ERROR:
@@ -127,26 +121,26 @@ const onboarding = (
 				...state,
 				errors: {
 					...state.errors,
-					getFreeExtensions: error,
+					getFreeExtensions: action.error,
 				},
 			};
 		case TYPES.GET_FREE_EXTENSIONS_SUCCESS:
 			return {
 				...state,
-				freeExtensions,
+				freeExtensions: action.freeExtensions,
 			};
 		case TYPES.GET_TASK_LISTS_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					getTaskLists: error,
+					getTaskLists: action.error,
 				},
 			};
 		case TYPES.GET_TASK_LISTS_SUCCESS:
 			return {
 				...state,
-				taskLists: taskLists.reduce( ( lists, list ) => {
+				taskLists: action.taskLists.reduce( ( lists, list ) => {
 					return {
 						...lists,
 						[ list.id ]: list,
@@ -158,10 +152,10 @@ const onboarding = (
 				...state,
 				errors: {
 					...state.errors,
-					dismissTask: error,
+					dismissTask: action.error,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isDismissed: false,
 				} ),
 			};
@@ -173,7 +167,7 @@ const onboarding = (
 					dismissTask: true,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isDismissed: true,
 				} ),
 			};
@@ -184,17 +178,17 @@ const onboarding = (
 					...state.requesting,
 					dismissTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
 			};
 		case TYPES.UNDO_DISMISS_TASK_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					undoDismissTask: error,
+					undoDismissTask: action.error,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isDismissed: true,
 				} ),
 			};
@@ -206,7 +200,7 @@ const onboarding = (
 					undoDismissTask: true,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isDismissed: false,
 				} ),
 			};
@@ -217,17 +211,17 @@ const onboarding = (
 					...state.requesting,
 					undoDismissTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
 			};
 		case TYPES.SNOOZE_TASK_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					snoozeTask: error,
+					snoozeTask: action.error,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isSnoozed: false,
 				} ),
 			};
@@ -239,7 +233,7 @@ const onboarding = (
 					snoozeTask: true,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isSnoozed: true,
 				} ),
 			};
@@ -250,17 +244,17 @@ const onboarding = (
 					...state.requesting,
 					snoozeTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
 			};
 		case TYPES.UNDO_SNOOZE_TASK_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					undoSnoozeTask: error,
+					undoSnoozeTask: action.error,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isSnoozed: true,
 				} ),
 			};
@@ -272,7 +266,7 @@ const onboarding = (
 					undoSnoozeTask: true,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isSnoozed: false,
 				} ),
 			};
@@ -283,19 +277,19 @@ const onboarding = (
 					...state.requesting,
 					undoSnoozeTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
 			};
 		case TYPES.HIDE_TASK_LIST_ERROR:
 			return {
 				...state,
 				errors: {
 					...state.errors,
-					hideTaskList: error,
+					hideTaskList: action.error,
 				},
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: {
-						...state.taskLists[ taskListId ],
+					[ action.taskListId ]: {
+						...state.taskLists[ action.taskListId ],
 						isHidden: false,
 						isVisible: true,
 					},
@@ -310,8 +304,8 @@ const onboarding = (
 				},
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: {
-						...state.taskLists[ taskListId ],
+					[ action.taskListId ]: {
+						...state.taskLists[ action.taskListId ],
 						isHidden: true,
 						isVisible: false,
 					},
@@ -326,7 +320,7 @@ const onboarding = (
 				},
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: taskList,
+					[ action.taskListId ]: action.taskList,
 				},
 			};
 		case TYPES.UNHIDE_TASK_LIST_ERROR:
@@ -334,12 +328,12 @@ const onboarding = (
 				...state,
 				errors: {
 					...state.errors,
-					unhideTaskList: error,
+					unhideTaskList: action.error,
 				},
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: {
-						...state.taskLists[ taskListId ],
+					[ action.taskListId ]: {
+						...state.taskLists[ action.taskListId ],
 						isHidden: true,
 						isVisible: false,
 					},
@@ -354,8 +348,8 @@ const onboarding = (
 				},
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: {
-						...state.taskLists[ taskListId ],
+					[ action.taskListId ]: {
+						...state.taskLists[ action.taskListId ],
 						isHidden: false,
 						isVisible: true,
 					},
@@ -370,7 +364,7 @@ const onboarding = (
 				},
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: taskList,
+					[ action.taskListId ]: action.taskList,
 				},
 			};
 		case TYPES.KEEP_COMPLETED_TASKS_SUCCESS:
@@ -378,9 +372,9 @@ const onboarding = (
 				...state,
 				taskLists: {
 					...state.taskLists,
-					[ taskListId ]: {
-						...state.taskLists[ taskListId ],
-						keepCompletedTaskList,
+					[ action.taskListId ]: {
+						...state.taskLists[ action.taskListId ],
+						keepCompletedTaskList: action.keepCompletedTaskList,
 					},
 				},
 			};
@@ -388,7 +382,7 @@ const onboarding = (
 			return {
 				...state,
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isComplete: true,
 				} ),
 			};
@@ -396,7 +390,7 @@ const onboarding = (
 			return {
 				...state,
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isVisited: true,
 				} ),
 			};
@@ -405,10 +399,10 @@ const onboarding = (
 				...state,
 				errors: {
 					...state.errors,
-					actionTask: error,
+					actionTask: action.error,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isActioned: false,
 				} ),
 			};
@@ -420,7 +414,7 @@ const onboarding = (
 					actionTask: true,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: taskId,
+					id: action.taskId,
 					isActioned: true,
 				} ),
 			};
@@ -431,11 +425,12 @@ const onboarding = (
 					...state.requesting,
 					actionTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
 			};
 		default:
 			return state;
 	}
 };
 
-export default onboarding;
+export type State = ReturnType< typeof reducer >;
+export default reducer;

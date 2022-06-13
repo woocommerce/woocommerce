@@ -22,13 +22,20 @@ import {
 	getProductTypesError,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
+import {
+	ExtensionList,
+	OnboardingProductType,
+	ProfileItems,
+	TaskListType,
+} from './types';
+import { Plugin } from '../plugins/types';
 
 const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 export function* getProfileItems() {
 	try {
-		const results = yield apiFetch( {
+		const results: ProfileItems = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/profile',
 			method: 'GET',
 		} );
@@ -41,7 +48,9 @@ export function* getProfileItems() {
 
 export function* getEmailPrefill() {
 	try {
-		const results = yield apiFetch( {
+		const results: {
+			email: string;
+		} = yield apiFetch( {
 			path:
 				WC_ADMIN_NAMESPACE +
 				'/onboarding/profile/experimental_get_email_prefill',
@@ -57,7 +66,7 @@ export function* getEmailPrefill() {
 export function* getTaskLists() {
 	const deprecatedTasks = new DeprecatedTasks();
 	try {
-		const results = yield apiFetch( {
+		const results: TaskListType[] = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/tasks',
 			method: deprecatedTasks.hasDeprecatedTasks() ? 'POST' : 'GET',
 			data: deprecatedTasks.getPostData(),
@@ -85,7 +94,7 @@ export function* getTask() {
 
 export function* getPaymentGatewaySuggestions() {
 	try {
-		const results = yield apiFetch( {
+		const results: Plugin[] = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions',
 			method: 'GET',
 		} );
@@ -98,7 +107,7 @@ export function* getPaymentGatewaySuggestions() {
 
 export function* getFreeExtensions() {
 	try {
-		const results = yield apiFetch( {
+		const results: ExtensionList[] = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/free-extensions',
 			method: 'GET',
 		} );
@@ -111,7 +120,7 @@ export function* getFreeExtensions() {
 
 export function* getProductTypes() {
 	try {
-		const results = yield apiFetch( {
+		const results: OnboardingProductType[] = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/product-types',
 			method: 'GET',
 		} );
