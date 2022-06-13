@@ -10,6 +10,7 @@ import {
 	publishPost,
 } from '@wordpress/e2e-test-utils';
 import { SHOP_PAGE } from '@woocommerce/e2e-utils';
+import { Frame, Page } from 'puppeteer';
 
 /**
  * Internal dependencies
@@ -18,9 +19,13 @@ import {
 	goToTemplateEditor,
 	useTheme,
 	saveTemplate,
-	clickLink,
+	waitForAllProductsBlockLoaded,
 } from '../../utils';
-import { shopper } from '../../../utils';
+import {
+	clickLink,
+	shopper,
+	SIMPLE_PHYSICAL_PRODUCT_NAME,
+} from '../../../utils';
 
 const block = {
 	name: 'Active Product Filters',
@@ -44,16 +49,20 @@ const block = {
 			classicProductsList: '.products.columns-3 > li',
 		},
 	},
-	foundProduct: '128GB USB Stick',
 };
+
+const FILTER_STOCK_STATUS_TITLE = 'Stock Status';
+const FILTER_STOCK_STATUS_PROPERTY = 'In stock';
+const FILTER_CAPACITY_TITLE = 'Capacity';
+const FILTER_CAPACITY_PROPERTY = '128gb';
 
 const { selectors } = block;
 
 const insertBlocks = async () => {
-	await insertBlock( block.name );
 	await insertBlock( 'Filter Products by Price' );
 	await insertBlock( 'Filter Products by Stock' );
 	await insertBlock( 'Filter Products by Attribute' );
+	await insertBlock( block.name );
 };
 
 const configurateFilterProductsByAttributeBlock = async (
@@ -103,48 +112,40 @@ describe( 'Shopper → Active Filters Block', () => {
 			await page.waitForSelector( selectors.frontend.stockFilterBlock );
 
 			await expect( page ).toClick( 'label', {
-				text: '128gb',
+				text: FILTER_CAPACITY_PROPERTY,
 			} );
 
 			await expect( page ).toMatchElement(
 				selectors.frontend.activeFilterType,
 				{
-					text: 'Capacity',
+					text: FILTER_CAPACITY_TITLE,
 				}
 			);
+
+			await waitForAllProductsBlockLoaded();
 
 			await expect( page ).toClick( 'label', {
-				text: 'In stock',
+				text: FILTER_STOCK_STATUS_PROPERTY,
 			} );
 
-			await page.waitForSelector( block.class );
-
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterType,
-				{
-					text: 'Stock Status',
-				}
-			);
+			await expect( page ).toMatch( FILTER_STOCK_STATUS_TITLE );
 
 			await expect( page ).toMatchElement(
 				selectors.frontend.activeFilterName,
 				{
-					text: 'In stock',
+					text: FILTER_STOCK_STATUS_PROPERTY,
 				}
 			);
 
-			await page.waitForSelector(
-				selectors.frontend.productsList + '.is-loading',
-				{ hidden: true }
-			);
+			await waitForAllProductsBlockLoaded();
 
 			const products = await page.$$( selectors.frontend.productsList );
 			expect( products ).toHaveLength( 1 );
 			expect( isRefreshed ).not.toHaveBeenCalled();
-			await expect( page ).toMatch( block.foundProduct );
+			await expect( page ).toMatch( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		} );
 
-		fit( 'When clicking the X on a filter it removes a filter', async () => {
+		it( 'When clicking the X on a filter it removes a filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			await page.waitForSelector( block.class );
 			await page.waitForSelector(
@@ -155,7 +156,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			);
 
 			await expect( page ).toClick( 'label', {
-				text: '128gb',
+				text: FILTER_CAPACITY_PROPERTY,
 			} );
 
 			await expect( page ).toClick(
@@ -164,10 +165,7 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			expect( page ).not.toMatch( 'Active Filters' );
 
-			await page.waitForSelector(
-				selectors.frontend.productsList + '.is-loading',
-				{ hidden: true }
-			);
+			await waitForAllProductsBlockLoaded();
 
 			const products = await page.$$( selectors.frontend.productsList );
 			expect( products ).toHaveLength( 5 );
@@ -184,11 +182,11 @@ describe( 'Shopper → Active Filters Block', () => {
 			await page.waitForSelector( selectors.frontend.stockFilterBlock );
 
 			await expect( page ).toClick( 'label', {
-				text: 'In stock',
+				text: FILTER_STOCK_STATUS_PROPERTY,
 			} );
 
 			await expect( page ).toClick( 'label', {
-				text: '128gb',
+				text: FILTER_CAPACITY_PROPERTY,
 			} );
 
 			await expect( page ).toMatchElement(
@@ -200,10 +198,7 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await page.click( selectors.frontend.removeAllFiltersButton );
 
-			await page.waitForSelector(
-				selectors.frontend.productsList + '.is-loading',
-				{ hidden: true }
-			);
+			await waitForAllProductsBlockLoaded();
 
 			const products = await page.$$( selectors.frontend.productsList );
 
@@ -250,7 +245,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			);
 
 			await expect( page ).toClick( 'label', {
-				text: '128gb',
+				text: FILTER_CAPACITY_PROPERTY,
 			} );
 
 			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
@@ -260,14 +255,14 @@ describe( 'Shopper → Active Filters Block', () => {
 			await expect( page ).toMatchElement(
 				selectors.frontend.activeFilterType,
 				{
-					text: 'Capacity',
+					text: FILTER_CAPACITY_TITLE,
 				}
 			);
 
 			await page.waitForSelector( selectors.frontend.stockFilterBlock );
 
 			await expect( page ).toClick( 'label', {
-				text: 'In stock',
+				text: FILTER_STOCK_STATUS_PROPERTY,
 			} );
 
 			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
@@ -284,7 +279,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			await expect( page ).toMatchElement(
 				selectors.frontend.activeFilterName,
 				{
-					text: 'In stock',
+					text: FILTER_STOCK_STATUS_PROPERTY,
 				}
 			);
 
@@ -294,7 +289,7 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			expect( isRefreshed ).toHaveBeenCalledTimes( 2 );
 			expect( products ).toHaveLength( 1 );
-			await expect( page ).toMatch( block.foundProduct );
+			await expect( page ).toMatch( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		} );
 
 		it( 'When clicking the X on a filter it removes a filter and triggers a page refresh', async () => {
@@ -304,7 +299,7 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			expect( isRefreshed ).not.toHaveBeenCalled();
 			await expect( page ).toClick( 'label', {
-				text: 'In stock',
+				text: FILTER_STOCK_STATUS_PROPERTY,
 			} );
 
 			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
@@ -312,7 +307,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			await page.waitForSelector( block.class );
 
 			await expect( page ).toClick( 'label', {
-				text: '128gb',
+				text: FILTER_CAPACITY_PROPERTY,
 			} );
 
 			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
@@ -322,7 +317,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			await expect( page ).toMatchElement(
 				selectors.frontend.activeFilterType,
 				{
-					text: 'Capacity',
+					text: FILTER_CAPACITY_TITLE,
 				}
 			);
 
@@ -333,10 +328,10 @@ describe( 'Shopper → Active Filters Block', () => {
 			);
 
 			expect( page.url() ).not.toMatch( 'instock' );
-			expect( page.url() ).toMatch( '128gb' );
+			expect( page.url() ).toMatch( FILTER_CAPACITY_PROPERTY );
 			expect( isRefreshed ).toHaveBeenCalledTimes( 3 );
 			expect( products ).toHaveLength( 1 );
-			await expect( page ).toMatch( block.foundProduct );
+			await expect( page ).toMatch( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		} );
 
 		it( 'Clicking "Clear All" button removes all active filter and the page redirects to the base URL', async () => {
@@ -345,7 +340,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			await page.waitForSelector( selectors.frontend.stockFilterBlock );
 
 			await expect( page ).toClick( 'label', {
-				text: 'In stock',
+				text: FILTER_STOCK_STATUS_PROPERTY,
 			} );
 
 			await page.waitForNavigation( { waitUntil: 'networkidle0' } );

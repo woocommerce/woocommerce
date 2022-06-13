@@ -20,6 +20,7 @@ import {
 	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
+	waitForAllProductsBlockLoaded,
 } from '../../utils';
 
 const block = {
@@ -48,11 +49,6 @@ const block = {
 };
 
 const { selectors } = block;
-
-const waitForAllProductsBlockLoaded = () =>
-	page.waitForSelector( selectors.frontend.productsList + '.is-loading', {
-		hidden: true,
-	} );
 
 const goToShopPage = () =>
 	page.goto( BASE_URL + '/shop', {

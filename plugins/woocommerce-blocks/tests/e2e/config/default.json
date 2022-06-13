@@ -42,7 +42,7 @@
 				"addressfirstline": "123 Main Road",
 				"addresssecondline": "Unit 23",
 				"city": "San Francisco",
-				"state": "CA",
+				"state": "California",
 				"postcode": "94107",
 				"phone": "123456789",
 				"email": "john.doe@example.com"
@@ -55,7 +55,7 @@
 				"addressfirstline": "123 Main Avenue",
 				"addresssecondline": "Unit 42",
 				"city": "Los Angeles",
-				"state": "CA",
+				"state": "California",
 				"postcode": "90010",
 				"phone": "987654321"
 			}

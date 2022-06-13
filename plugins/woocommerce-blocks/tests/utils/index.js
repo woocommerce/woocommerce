@@ -13,5 +13,6 @@ export { getLoadingDurations } from './performance';
 export { selectBlockByName } from './select-block-by-name';
 export { merchant } from './merchant';
 export { cli } from './run-cli-from-test';
+export * from './clickLink';
 export * from './taxes';
 export * from './constants';

@@ -15,7 +15,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { shopper, merchant } from '../../../../utils';
+import { shopper, merchant, clickLink } from '../../../../utils';
 import { SIMPLE_PHYSICAL_PRODUCT_NAME } from '.../../../../utils/constants';
 
 const block = {
@@ -42,8 +42,7 @@ describe( 'Shopper → Checkout → Account', () => {
 		);
 		//Enable guest checkout option.
 		await setCheckbox( '#woocommerce_enable_guest_checkout' );
-		await page.click( 'button[name="save"]' );
-		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+		await clickLink( 'button[name="save"]' );
 		await visitBlockPage( `${ block.name } Block` );
 		await openDocumentSettingsSidebar();
 		await selectBlockByName( block.slug );

@@ -15,12 +15,13 @@ import { selectBlockByName } from '@woocommerce/blocks-test-utils';
  */
 import {
 	BASE_URL,
-	clickLink,
 	goToTemplateEditor,
 	openBlockEditorSettings,
 	saveTemplate,
 	useTheme,
+	waitForAllProductsBlockLoaded,
 } from '../../utils';
+import { clickLink } from '../../../utils';
 
 const block = {
 	name: 'Filter Products by Price',
@@ -42,11 +43,6 @@ const block = {
 };
 
 const { selectors } = block;
-
-const waitForAllProductsBlockLoaded = () =>
-	page.waitForSelector( selectors.frontend.productsList + '.is-loading', {
-		hidden: true,
-	} );
 
 const goToShopPage = () =>
 	page.goto( BASE_URL + '/shop', {
@@ -97,10 +93,13 @@ describe( `${ block.name } Block`, () => {
 			await setMaxPrice();
 			await page.waitForNetworkIdle();
 			await waitForAllProductsBlockLoaded();
+
+			await page.waitForSelector( selectors.frontend.productsList );
 			const products = await page.$$( selectors.frontend.productsList );
 
 			expect( isRefreshed ).not.toBeCalled();
 			expect( products ).toHaveLength( 1 );
+
 			await expect( page ).toMatch( block.foundProduct );
 		} );
 	} );
@@ -153,6 +152,9 @@ describe( `${ block.name } Block`, () => {
 				} ),
 			] );
 
+			await page.waitForSelector(
+				selectors.frontend.classicProductsList
+			);
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
@@ -162,6 +164,7 @@ describe( `${ block.name } Block`, () => {
 
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
+
 			expect( parsedURL.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied
 			);
@@ -196,9 +199,14 @@ describe( `${ block.name } Block`, () => {
 
 			await clickLink( selectors.frontend.submitButton );
 
+			await page.waitForSelector(
+				selectors.frontend.classicProductsList
+			);
+
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
+
 			const pageURL = page.url();
 			const parsedURL = new URL( pageURL );
 
