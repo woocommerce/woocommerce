@@ -61,7 +61,6 @@ abstract class CustomMetaDataStore {
 
 		$db_info = $this->get_db_info();
 
-		// XXX: do we want to augment this with pre-COT metadata?
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$raw_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
