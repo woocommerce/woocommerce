@@ -86,26 +86,20 @@ if ( $verbose ) {
 
 $base_path = dirname( dirname( __DIR__ ) );
 
-// Read workspace.json file to find potential composer files.
-try {
-	$workspace = json_decode( file_get_contents( $base_path . '/workspace.json' ), true, 10, JSON_THROW_ON_ERROR );
-} catch ( Exception $e ) {
-	$workspace = false;
-}
-if ( ! $workspace || ! is_array( $workspace['projects'] ) ) {
-	debug( 'Unable to parse workspace file' );
-	exit( 1 );
+$workspace_paths = array();
+$workspace_yaml = file_get_contents( $base_path . '/pnpm-workspace.yaml' );
+if ( preg_match( '/^packages:((\n\s+.+)+)/', $workspace_yaml, $matches ) ) {
+        $packages_config = $matches[1];
+        if ( preg_match_all( "/^\s+-\s?'([^']+)'/m", $packages_config, $matches ) ) {
+                $workspace_paths = $matches[1];
+        }
 }
 
-$composer_projects = array();
-foreach( $workspace['projects'] as $project => $directory ) {
-	if ( $path && $directory !== $path ) {
-		continue;
-	}
-	if ( file_exists( $base_path . '/' . $directory . '/composer.json' ) ) {
-		$composer_projects[] = $directory;
-	}
-}
+$composer_files = array_map( function( $path ) {
+        return glob( $path . '/composer.json' );
+}, $workspace_paths );
+$composer_files = array_merge( ...$composer_files );
+$composer_projects = array_map( 'dirname', $composer_files );
 
 if ( $path && ! count( $composer_projects ) ) {
 	debug( sprintf( 'The provided project path, %s, did not contain a composer file.', $path ) );
