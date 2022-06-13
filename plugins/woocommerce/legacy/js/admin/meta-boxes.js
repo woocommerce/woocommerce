@@ -16,6 +16,16 @@ jQuery( function ( $ ) {
 
 	runTipTip();
 
+	function addPanelTitles() {
+		$( 'ul.wc-tabs a' ).each( function() {
+			const title = $( this ).text();
+			const panel = $( $( this ).attr( 'href' ) );
+			$( panel ).prepend( `<h2>${ title }</h2>` );
+		});
+	}
+
+	addPanelTitles();
+
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function() {
 		var metabox = $( this ).parent( '.wc-metabox' );
 
