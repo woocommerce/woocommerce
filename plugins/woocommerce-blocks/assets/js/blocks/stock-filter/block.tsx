@@ -10,13 +10,19 @@ import {
 	useCollectionData,
 } from '@woocommerce/base-context/hooks';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
-import { useCallback, useEffect, useState, useMemo } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useState,
+	useMemo,
+	useRef,
+} from '@wordpress/element';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
 import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
 import Label from '@woocommerce/base-components/filter-element-label';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { decodeEntities } from '@wordpress/html-entities';
-import { isBoolean } from '@woocommerce/types';
+import { isBoolean, objectHasProp } from '@woocommerce/types';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { PREFIX_QUERY_ARG_FILTER_TYPE } from '@woocommerce/utils';
 
@@ -26,6 +32,7 @@ import { PREFIX_QUERY_ARG_FILTER_TYPE } from '@woocommerce/utils';
 import { previewOptions } from './preview';
 import './style.scss';
 import { getActiveFilters } from './utils';
+import { Attributes, DisplayOption } from './types';
 
 export const QUERY_PARAM_KEY = PREFIX_QUERY_ARG_FILTER_TYPE + 'stock_status';
 
@@ -39,6 +46,9 @@ export const QUERY_PARAM_KEY = PREFIX_QUERY_ARG_FILTER_TYPE + 'stock_status';
 const StockStatusFilterBlock = ( {
 	attributes: blockAttributes,
 	isEditor = false,
+}: {
+	attributes: Attributes;
+	isEditor?: boolean;
 } ) => {
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'is_rendering_php_template',
@@ -50,27 +60,26 @@ const StockStatusFilterBlock = ( {
 		false
 	);
 
-	const [ hideOutOfStockItems ] = useState(
+	const { outofstock, ...otherStockStatusOptions } = getSetting(
+		'stockStatusOptions',
+		{}
+	);
+
+	const STOCK_STATUS_OPTIONS = useRef(
 		getSetting( 'hideOutOfStockItems', false )
-	);
-	const [ { outofstock, ...otherStockStatusOptions } ] = useState(
-		getSetting( 'stockStatusOptions', {} )
-	);
-	const [ STOCK_STATUS_OPTIONS ] = useState(
-		hideOutOfStockItems
 			? otherStockStatusOptions
 			: { outofstock, ...otherStockStatusOptions }
 	);
 
 	const [ checked, setChecked ] = useState(
-		getActiveFilters( STOCK_STATUS_OPTIONS, QUERY_PARAM_KEY )
+		getActiveFilters( STOCK_STATUS_OPTIONS.current, QUERY_PARAM_KEY )
 	);
 	const [ displayedOptions, setDisplayedOptions ] = useState(
 		blockAttributes.isPreview ? previewOptions : []
 	);
 	// Filter added to handle if there are slugs without a corresponding name defined.
 	const [ initialOptions ] = useState(
-		Object.entries( STOCK_STATUS_OPTIONS )
+		Object.entries( STOCK_STATUS_OPTIONS.current )
 			.map( ( [ slug, name ] ) => ( { slug, name } ) )
 			.filter( ( status ) => !! status.name )
 			.sort( ( a, b ) => a.slug.localeCompare( b.slug ) )
@@ -95,7 +104,10 @@ const StockStatusFilterBlock = ( {
 	 */
 	const getFilteredStock = useCallback(
 		( slug ) => {
-			if ( ! filteredCounts.stock_status_counts ) {
+			if (
+				! objectHasProp( filteredCounts, 'stock_status_counts' ) ||
+				! Array.isArray( filteredCounts.stock_status_counts )
+			) {
 				return null;
 			}
 			return filteredCounts.stock_status_counts.find(
@@ -115,12 +127,13 @@ const StockStatusFilterBlock = ( {
 		 *
 		 * @param {string} queryStatus The status slug to check.
 		 */
-		const isStockStatusInQueryState = ( queryStatus ) => {
+		const isStockStatusInQueryState = ( queryStatus: string ) => {
 			if ( ! queryState?.stock_status ) {
 				return false;
 			}
-			return queryState.stock_status.some( ( { status = [] } ) =>
-				status.includes( queryStatus )
+			return queryState.stock_status.some(
+				( { status = [] }: { status: string[] } ) =>
+					status.includes( queryStatus )
 			);
 		};
 
@@ -153,7 +166,7 @@ const StockStatusFilterBlock = ( {
 					),
 				};
 			} )
-			.filter( Boolean );
+			.filter( ( option ): option is DisplayOption => !! option );
 
 		setDisplayedOptions( newOptions );
 	}, [
@@ -171,7 +184,7 @@ const StockStatusFilterBlock = ( {
 	 *
 	 * @param {Array} checkedOptions Array of checked stock options.
 	 */
-	const redirectPageForPhpTemplate = ( checkedOptions ) => {
+	const redirectPageForPhpTemplate = ( checkedOptions: string[] ) => {
 		if ( checkedOptions.length === 0 ) {
 			const url = removeQueryArgs(
 				window.location.href,
@@ -252,12 +265,14 @@ const StockStatusFilterBlock = ( {
 	useEffect( () => {
 		if ( ! hasSetPhpFilterDefaults && filteringForPhpTemplate ) {
 			setProductStockStatusQuery(
-				getActiveFilters( STOCK_STATUS_OPTIONS, QUERY_PARAM_KEY )
+				getActiveFilters(
+					STOCK_STATUS_OPTIONS.current,
+					QUERY_PARAM_KEY
+				)
 			);
 			setHasSetPhpFilterDefaults( true );
 		}
 	}, [
-		STOCK_STATUS_OPTIONS,
 		filteringForPhpTemplate,
 		setProductStockStatusQuery,
 		hasSetPhpFilterDefaults,
@@ -269,15 +284,22 @@ const StockStatusFilterBlock = ( {
 	 */
 	const onChange = useCallback(
 		( checkedValue ) => {
-			const getFilterNameFromValue = ( filterValue ) => {
-				const { name } = displayedOptions.find(
+			const getFilterNameFromValue = ( filterValue: string ) => {
+				const filterOption = displayedOptions.find(
 					( option ) => option.value === filterValue
 				);
 
-				return name;
+				if ( ! filterOption ) {
+					return null;
+				}
+
+				return filterOption.name;
 			};
 
-			const announceFilterChange = ( { filterAdded, filterRemoved } ) => {
+			const announceFilterChange = ( {
+				filterAdded,
+				filterRemoved,
+			}: Record< string, string > ) => {
 				const filterAddedName = filterAdded
 					? getFilterNameFromValue( filterAdded )
 					: null;
@@ -332,8 +354,9 @@ const StockStatusFilterBlock = ( {
 		return null;
 	}
 
-	const TagName = `h${ blockAttributes.headingLevel }`;
-	const isLoading = ! blockAttributes.isPreview && ! STOCK_STATUS_OPTIONS;
+	const TagName = `h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
+	const isLoading =
+		! blockAttributes.isPreview && ! STOCK_STATUS_OPTIONS.current;
 	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
 
 	const hasFilterableProducts = getSettingWithCoercion(
