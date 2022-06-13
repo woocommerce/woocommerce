@@ -79,7 +79,7 @@ const getTourConfig = ( {
 			},
 			{
 				referenceElements: {
-					desktop: '#wp-content-wrap',
+					desktop: '#postdivrich',
 				},
 				focusElement: {
 					iframe: isContentEditorTmceActive
