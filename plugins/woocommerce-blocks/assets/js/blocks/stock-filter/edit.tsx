@@ -12,14 +12,19 @@ import {
 } from '@wordpress/components';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
+import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import Block from './block.js';
+import Block from './block';
 import './editor.scss';
+import { Attributes } from './types';
 
-const Edit = ( { attributes, setAttributes } ) => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< Attributes > ) => {
 	const {
 		className,
 		heading,
@@ -72,7 +77,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 						minLevel={ 2 }
 						maxLevel={ 7 }
 						selectedLevel={ headingLevel }
-						onChange={ ( newLevel ) =>
+						onChange={ ( newLevel: number ) =>
 							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
@@ -120,7 +125,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 						className="wc-block-stock-filter__title"
 						headingLevel={ headingLevel }
 						heading={ heading }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( { heading: value } )
 						}
 					/>
