@@ -380,7 +380,7 @@ class CLIRunner {
 			return WP_CLI::error(
 				sprintf(
 					/* Translators: %1$d is the number of migrated orders, %2$f is time taken, %3$d is number of errors and$4%s is formatted array of order ids. */
-					_n( '%1$d order was verified, in %2$f seconds. %3$f error(s) found: %4$s', '%1$d orders were verified in %2$f seconds Please review above errros. %3$d error(s) found %4$s. Please review above errors.', $processed, 'woocommerce' ),
+					_n( '%1$d order was verified, in %2$f seconds. %3$f error(s) found: %4$s', '%1$d orders were verified, in %2$f seconds. %3$d error(s) found: %4$s. Please review above errors.', $processed, 'woocommerce' ),
 					$processed,
 					$total_time,
 					count( $failed_ids ),
