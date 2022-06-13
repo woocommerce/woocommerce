@@ -141,7 +141,7 @@ Please review the [Store API Guiding principles](./docs/guiding-principles.md). 
 
 ## Extensibility
 
-The approach to extensibility within the Store API is to expose certain routes and schema to the ExtendSchema class. [Documentation for contributors on this can be found here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/extend-rest-api-new-endpoint.md).
+The approach to extensibility within the Store API is to expose certain routes and schema to the ExtendSchema class. [Documentation for contributors on this can be found here](../../docs/third-party-developers/extensibility/rest-api/extend-rest-api-new-endpoint.md).
 
 If a route includes the extensibility interface, 3rd party developers can use the shared `ExtendSchema::class` instance to register additional endpoint data and additional schema.
 
