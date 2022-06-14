@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
 test.describe( 'Edit order', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
@@ -110,7 +111,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 				download_limit: -1,
 				downloads: [
 					{
-						id: 'Single-file-download',
+						id: uuid.v4(),
 						name: 'Single',
 						file:
 							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
@@ -127,7 +128,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 				download_limit: -1,
 				downloads: [
 					{
-						id: 'Single-file-download',
+						id: uuid.v4(),
 						name: 'Single',
 						file:
 							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
