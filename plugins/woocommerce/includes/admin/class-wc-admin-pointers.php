@@ -282,10 +282,21 @@ class WC_Admin_Pointers {
 		wc_enqueue_js(
 			"jQuery( function( $ ) {
 				var wc_pointers = JSON.parse( decodeURIComponent( '{$pointers}' ) );
+				var current_pointer;
 				const recordEvent =
 					window.wc.tracks.recordEvent || window.wcTracks.recordEvent || function() {};
+				const publishButton = $( '#publish' );
 
 				setTimeout( init_wc_pointers, 800 );
+
+				// Records completion or dismiss if publish button is clicked.
+				function onPublish() {
+					if ( current_pointer && current_pointer.options.step_name === 'old-publish' ) {
+						recordEvent( 'walkthrough_product_completed' );
+					} else if ( current_pointer ) {
+						recordEvent( 'walkthrough_product_dismissed', { step_name: current_pointer.options.step_name } );
+					}
+				}
 
 				function init_wc_pointers() {
 					$.each( wc_pointers.pointers, function( i ) {
@@ -297,10 +308,13 @@ class WC_Admin_Pointers {
 						spotlight: 'no',
 						product_template: 'physical',
 					} );
+
+					publishButton.on( 'click', onPublish );
 				}
 
 				function show_wc_pointer( id ) {
 					var pointer = wc_pointers.pointers[ id ];
+					current_pointer = pointer;
 					var options = $.extend( pointer.options, {
 						pointerClass: 'wp-pointer wc-pointer',
 						close: function() {
@@ -318,6 +332,7 @@ class WC_Admin_Pointers {
 							button.on( 'click.pointer', function(e) {
 								e.preventDefault();
 								t.element.pointer('destroy');
+								publishButton.off( 'click', onPublish );
 								// Tracks completion if it's the last step, otherwise track as dismiss.
 								if ( pointer.next ) {
 									recordEvent( 'walkthrough_product_dismissed', { step_name: pointer.options.step_name } );
