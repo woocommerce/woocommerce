@@ -14,14 +14,20 @@ import PropTypes from 'prop-types';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
-import { isBoolean } from '@woocommerce/types';
+import {
+	CurrencyResponse,
+	isBoolean,
+	isString,
+	objectHasProp,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import usePriceConstraints from './use-price-constraints.js';
+import usePriceConstraints from './use-price-constraints';
 import { getUrlParameter } from '../../utils/filters';
 import './style.scss';
+import { Attributes } from './types';
 
 /**
  * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
@@ -31,8 +37,11 @@ import './style.scss';
  *
  * @return {string} New URL with query parameters in it.
  */
-function formatParams( url, params ) {
-	const paramObject = {};
+function formatParams(
+	url: string,
+	params: Record< string, string | number >
+) {
+	const paramObject: Record< string, string > = {};
 
 	for ( const [ key, value ] of Object.entries( params ) ) {
 		if ( value ) {
@@ -51,13 +60,13 @@ function formatParams( url, params ) {
 /**
  * Formats price values taking into account precision
  *
- * @param {string} value
- * @param {number} minorUnit
+ * @param {string|void} value
+ * @param {number}      minorUnit
  *
  * @return {number} Formatted price.
  */
 
-function formatPrice( value, minorUnit ) {
+function formatPrice( value: unknown, minorUnit: number ) {
 	return Number( value ) * 10 ** minorUnit;
 }
 
@@ -68,7 +77,13 @@ function formatPrice( value, minorUnit ) {
  * @param {Object}  props.attributes Incoming block attributes.
  * @param {boolean} props.isEditor   Whether in editor context or not.
  */
-const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
+const PriceFilterBlock = ( {
+	attributes,
+	isEditor = false,
+}: {
+	attributes: Attributes;
+	isEditor: boolean;
+} ) => {
 	const hasFilterableProducts = getSettingWithCoercion(
 		'has_filterable_products',
 		false,
@@ -97,7 +112,11 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 		queryState,
 	} );
 
-	const currency = getCurrencyFromPriceResponse( results.price_range );
+	const currency = getCurrencyFromPriceResponse(
+		objectHasProp( results, 'price_range' )
+			? ( results.price_range as CurrencyResponse )
+			: undefined
+	);
 
 	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(
 		'min_price',
@@ -116,12 +135,18 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	);
 
 	const { minConstraint, maxConstraint } = usePriceConstraints( {
-		minPrice: results.price_range
-			? results.price_range.min_price
-			: undefined,
-		maxPrice: results.price_range
-			? results.price_range.max_price
-			: undefined,
+		minPrice:
+			objectHasProp( results, 'price_range' ) &&
+			objectHasProp( results.price_range, 'min_price' ) &&
+			isString( results.price_range.min_price )
+				? results.price_range.min_price
+				: undefined,
+		maxPrice:
+			objectHasProp( results, 'price_range' ) &&
+			objectHasProp( results.price_range, 'max_price' ) &&
+			isString( results.price_range.max_price )
+				? results.price_range.max_price
+				: undefined,
 		minorUnit: currency.minorUnit,
 	} );
 
@@ -290,7 +315,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 		return null;
 	}
 
-	const TagName = `h${ attributes.headingLevel }`;
+	const TagName = `h${ attributes.headingLevel }` as keyof JSX.IntrinsicElements;
 
 	return (
 		<>
