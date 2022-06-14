@@ -5,6 +5,11 @@ import { applyFilters } from '@wordpress/hooks';
 import { parse } from 'qs';
 import deprecated from '@wordpress/deprecated';
 
+/**
+ * Internal dependencies
+ */
+import { TaskListType, TaskType, DeprecatedTaskType } from './types';
+
 function getQuery() {
 	const searchString = window.location && window.location.search;
 	if ( ! searchString ) {
@@ -19,6 +24,11 @@ function getQuery() {
  * A simple class to handle deprecated tasks using the woocommerce_admin_onboarding_task_list filter.
  */
 export class DeprecatedTasks {
+	filteredTasks: DeprecatedTaskType[];
+	tasks: {
+		[ key: string ]: DeprecatedTaskType[];
+	};
+
 	constructor() {
 		/**
 		 * **Deprecated** Filter Onboarding tasks.
@@ -32,7 +42,7 @@ export class DeprecatedTasks {
 			'woocommerce_admin_onboarding_task_list',
 			[],
 			getQuery()
-		);
+		) as DeprecatedTaskType[];
 		if ( this.filteredTasks && this.filteredTasks.length > 0 ) {
 			deprecated( 'woocommerce_admin_onboarding_task_list', {
 				version: '2.10.0',
@@ -72,7 +82,7 @@ export class DeprecatedTasks {
 			: null;
 	}
 
-	mergeDeprecatedCallbackFunctions( taskLists ) {
+	mergeDeprecatedCallbackFunctions( taskLists: TaskListType[] ) {
 		if ( this.filteredTasks.length > 0 ) {
 			for ( const taskList of taskLists ) {
 				// Merge any extended task list items, to keep the callback functions around.
@@ -99,10 +109,10 @@ export class DeprecatedTasks {
 	 * @param {Array}  keys to keep in the task object.
 	 * @return {Object} task with the keys specified.
 	 */
-	static possiblyPruneTaskData( task, keys ) {
+	static possiblyPruneTaskData( task: TaskType, keys: ( keyof TaskType )[] ) {
 		if ( ! task.time && ! task.title ) {
 			// client side task
-			return keys.reduce(
+			return keys.reduce< Partial< TaskType > >(
 				( simplifiedTask, key ) => {
 					return {
 						...simplifiedTask,

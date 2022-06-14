@@ -8,8 +8,40 @@
 import reducer, { defaultState } from '../reducer';
 import TYPES from '../action-types';
 
+const profileItems = {
+	business_extensions: [],
+	completed: false,
+	industry: null,
+	number_employees: null,
+	other_platform: null,
+	other_platform_name: '',
+	product_count: null,
+	product_types: null,
+	revenue: null,
+	selling_venues: null,
+	setup_client: false,
+	skipped: true,
+	theme: null,
+	wccom_connected: null,
+	is_agree_marketing: null,
+	store_email: null,
+};
+
+const paymentMethods = [
+	{
+		id: '',
+		content: '',
+		plugins: [],
+		title: '',
+		category_additional: [],
+		category_other: [],
+		image: '',
+	},
+];
+
 describe( 'plugins reducer', () => {
 	it( 'should return a default state', () => {
+		// @ts-expect-error - we're testing the default state
 		const state = reducer( undefined, {} );
 		expect( state ).toEqual( defaultState );
 	} );
@@ -17,52 +49,53 @@ describe( 'plugins reducer', () => {
 	it( 'should handle SET_PROFILE_ITEMS', () => {
 		const state = reducer(
 			{
-				profileItems: { previousItem: 'value' },
+				// @ts-expect-error - we're only testing profileItems
+				profileItems,
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,
-				profileItems: { propertyName: 'value' },
+				profileItems: { is_agree_marketing: true },
 			}
 		);
 
-		expect( state.profileItems ).toHaveProperty( 'previousItem' );
-		expect( state.profileItems ).toHaveProperty( 'propertyName' );
-		expect( state.profileItems.propertyName ).toBe( 'value' );
+		expect( state.profileItems.is_agree_marketing ).toBe( true );
 	} );
 
 	it( 'should handle SET_PROFILE_ITEMS with replace', () => {
 		const state = reducer(
 			{
-				profileItems: { previousItem: 'value' },
+				// @ts-expect-error - we're only testing profileItems
+				profileItems,
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,
-				profileItems: { propertyName: 'value' },
+				profileItems: { is_agree_marketing: true },
 				replace: true,
 			}
 		);
 
-		expect( state.profileItems ).not.toHaveProperty( 'previousItem' );
-		expect( state.profileItems ).toHaveProperty( 'propertyName' );
-		expect( state.profileItems.propertyName ).toBe( 'value' );
+		expect( state.profileItems ).not.toHaveProperty( 'store_email' );
+		expect( state.profileItems ).toHaveProperty( 'is_agree_marketing' );
+		expect( state.profileItems.is_agree_marketing ).toBe( true );
 	} );
 
 	it( 'should handle GET_PAYMENT_METHODS_SUCCESS', () => {
 		const state = reducer(
+			// @ts-expect-error - we're only testing paymentMethods
 			{
-				paymentMethods: [ { previousItem: 'value' } ],
+				paymentMethods,
 			},
 			{
 				type: TYPES.GET_PAYMENT_METHODS_SUCCESS,
-				paymentMethods: [ { newItem: 'changed' } ],
+				paymentMethods: [ { image_72x72: 'changed' } ],
 			}
 		);
 
 		expect( state.paymentMethods[ 0 ] ).not.toHaveProperty(
 			'previousItem'
 		);
-		expect( state.paymentMethods[ 0 ] ).toHaveProperty( 'newItem' );
-		expect( state.paymentMethods[ 0 ].newItem ).toBe( 'changed' );
+		expect( state.paymentMethods[ 0 ] ).toHaveProperty( 'image_72x72' );
+		expect( state.paymentMethods[ 0 ].image_72x72 ).toBe( 'changed' );
 	} );
 
 	it( 'should handle SET_ERROR', () => {
@@ -73,6 +106,7 @@ describe( 'plugins reducer', () => {
 		} );
 
 		/* eslint-disable dot-notation */
+		// @ts-expect-error we're asserting error properties
 		expect( state.errors[ 'getProfileItems' ].code ).toBe( 'error' );
 		/* eslint-enable dot-notation */
 	} );
