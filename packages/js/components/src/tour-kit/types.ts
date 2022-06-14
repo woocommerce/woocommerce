@@ -10,6 +10,8 @@ import {
 
 export interface WooStep extends Step {
 	meta: {
+		/** Unique name for step, mainly used for tracking. */
+		name: string | null;
 		heading: string | null;
 		descriptions: {
 			desktop: string | React.ReactElement | null;
@@ -40,3 +42,5 @@ export interface WooConfig extends Omit< Config, 'renderers' | 'isMinimized' > {
 export interface WooTourStepRendererProps extends TourStepRendererProps {
 	steps: WooStep[];
 }
+
+export { CloseHandler } from '@automattic/tour-kit';

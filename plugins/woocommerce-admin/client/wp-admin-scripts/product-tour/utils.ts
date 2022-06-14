@@ -31,3 +31,18 @@ export const bindEnableGuideModeClickEvent = (
 		enableGuideModeBtn.addEventListener( 'click', onClick );
 	}
 };
+
+// Add listener to product "Publish" button.
+export const bindPublishClickEvent = (
+	onClick: EventListenerOrEventListenerObject
+) => {
+	const publishButton = window.document.querySelector( '#publish' );
+
+	if ( publishButton ) {
+		publishButton.addEventListener( 'click', onClick );
+	}
+
+	return function unbind() {
+		publishButton?.removeEventListener( 'click', onClick );
+	};
+};

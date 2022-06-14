@@ -101,6 +101,7 @@ class WC_Admin_Pointers {
 						'event'  => 'input',
 					),
 					'options'      => array(
+						'step_name' => 'old-product-name',
 						'content'  => '<h3>' . esc_html__( 'Product name', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Give your new product a name here. This is a required field and will be what your customers will see in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -114,6 +115,7 @@ class WC_Admin_Pointers {
 					'next'         => 'product-type',
 					'next_trigger' => array(),
 					'options'      => array(
+						'step_name' => 'old-product-description',
 						'content'  => '<h3>' . esc_html__( 'Product description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'This is your products main body of content. Here you should describe your product in detail.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -130,6 +132,7 @@ class WC_Admin_Pointers {
 						'event'  => 'change blur click',
 					),
 					'options'      => array(
+						'step_name' => 'old-product-type',
 						'content'  => '<h3>' . esc_html__( 'Choose product type', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Choose a type for this product. Simple is suitable for most physical goods and services (we recommend setting up a simple product for now).', 'woocommerce' ) . '</p>' .
 										'<p>' . esc_html__( 'Variable is for more complex products such as t-shirts with multiple sizes.', 'woocommerce' ) . '</p>' .
@@ -149,6 +152,7 @@ class WC_Admin_Pointers {
 						'event'  => 'change',
 					),
 					'options'      => array(
+						'step_name' => 'old-virtual-product',
 						'content'  => '<h3>' . esc_html__( 'Virtual products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Check the "Virtual" box if this is a non-physical item, for example a service, which does not need shipping.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -165,6 +169,7 @@ class WC_Admin_Pointers {
 						'event'  => 'change',
 					),
 					'options'      => array(
+						'step_name' => 'old-downloadable-product',
 						'content'  => '<h3>' . esc_html__( 'Downloadable products', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'If purchasing this product gives a customer access to a downloadable file, e.g. software, check this box.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -181,6 +186,7 @@ class WC_Admin_Pointers {
 						'event'  => 'input',
 					),
 					'options'      => array(
+						'step_name' => 'old-product-price',
 						'content'  => '<h3>' . esc_html__( 'Prices', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Next you need to give your product a price.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -197,6 +203,7 @@ class WC_Admin_Pointers {
 						'event'  => 'input',
 					),
 					'options'      => array(
+						'step_name' => 'old-product-short-description',
 						'content'  => '<h3>' . esc_html__( 'Product short description', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Add a quick summary for your product here. This will appear on the product page under the product name.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -209,6 +216,7 @@ class WC_Admin_Pointers {
 					'target'  => '#postimagediv',
 					'next'    => 'product_tag',
 					'options' => array(
+						'step_name' => 'old-product-image',
 						'content'  => '<h3>' . esc_html__( 'Product images', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( "Upload or assign an image to your product here. This image will be shown in your store's catalog.", 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -221,6 +229,7 @@ class WC_Admin_Pointers {
 					'target'  => '#tagsdiv-product_tag',
 					'next'    => 'product_catdiv',
 					'options' => array(
+						'step_name' => 'old-product-tags',
 						'content'  => '<h3>' . esc_html__( 'Product tags', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'You can optionally "tag" your products here. Tags are a method of labeling your products to make them easier for customers to find.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -233,6 +242,7 @@ class WC_Admin_Pointers {
 					'target'  => '#product_catdiv',
 					'next'    => 'submitdiv',
 					'options' => array(
+						'step_name' => 'old-product-categories',
 						'content'  => '<h3>' . esc_html__( 'Product categories', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'Optionally assign categories to your products to make them easier to browse through and find in your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -245,6 +255,7 @@ class WC_Admin_Pointers {
 					'target'  => '#submitdiv',
 					'next'    => '',
 					'options' => array(
+						'step_name' => 'old-publish',
 						'content'  => '<h3>' . esc_html__( 'Publish your product!', 'woocommerce' ) . '</h3>' .
 										'<p>' . esc_html__( 'When you are finished editing your product, hit the "Publish" button to publish your product to your store.', 'woocommerce' ) . '</p>',
 						'position' => array(
@@ -271,18 +282,39 @@ class WC_Admin_Pointers {
 		wc_enqueue_js(
 			"jQuery( function( $ ) {
 				var wc_pointers = JSON.parse( decodeURIComponent( '{$pointers}' ) );
+				var current_pointer;
+				const recordEvent =
+					window.wc.tracks.recordEvent || window.wcTracks.recordEvent || function() {};
+				const publishButton = $( '#publish' );
 
 				setTimeout( init_wc_pointers, 800 );
+
+				// Records completion or dismiss if publish button is clicked.
+				function onPublish() {
+					if ( current_pointer && current_pointer.options.step_name === 'old-publish' ) {
+						recordEvent( 'walkthrough_product_completed' );
+					} else if ( current_pointer ) {
+						recordEvent( 'walkthrough_product_dismissed', { step_name: current_pointer.options.step_name } );
+					}
+				}
 
 				function init_wc_pointers() {
 					$.each( wc_pointers.pointers, function( i ) {
 						show_wc_pointer( i );
 						return false;
 					});
+
+					recordEvent( 'walkthrough_product_view', {
+						spotlight: 'no',
+						product_template: 'physical',
+					} );
+
+					publishButton.on( 'click', onPublish );
 				}
 
 				function show_wc_pointer( id ) {
 					var pointer = wc_pointers.pointers[ id ];
+					current_pointer = pointer;
 					var options = $.extend( pointer.options, {
 						pointerClass: 'wp-pointer wc-pointer',
 						close: function() {
@@ -300,11 +332,22 @@ class WC_Admin_Pointers {
 							button.on( 'click.pointer', function(e) {
 								e.preventDefault();
 								t.element.pointer('destroy');
+								publishButton.off( 'click', onPublish );
+								// Tracks completion if it's the last step, otherwise track as dismiss.
+								if ( pointer.next ) {
+									recordEvent( 'walkthrough_product_dismissed', { step_name: pointer.options.step_name } );
+								} else {
+									recordEvent( 'walkthrough_product_completed' );
+								}
 							});
 
 							button2.on( 'click.pointer', function(e) {
 								e.preventDefault();
 								t.element.pointer('close');
+
+								if ( !pointer.next ) {
+									recordEvent( 'walkthrough_product_completed' );
+								}
 							});
 
 							wrapper.append( button );

@@ -4,6 +4,7 @@
 import { render, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import qs from 'qs';
 
 /**
@@ -15,15 +16,22 @@ import {
 	bindEnableGuideModeClickEvent,
 	waitUntilElementTopNotChange,
 } from './utils';
+import {
+	ProductTourStepName,
+	useProductStepChange,
+} from './use-product-step-change';
+import { useTrackPublishButton } from './use-track-publish-button';
 
 const getTourConfig = ( {
 	isExcerptEditorTmceActive,
 	isContentEditorTmceActive,
 	closeHandler,
+	onNextStepHandler,
 }: {
 	isExcerptEditorTmceActive: boolean;
 	isContentEditorTmceActive: boolean;
-	closeHandler: () => void;
+	closeHandler: TourKitTypes.CloseHandler;
+	onNextStepHandler: ( currentStepIndex: number ) => void;
 } ): TourKitTypes.WooConfig => {
 	return {
 		placement: 'bottom-start',
@@ -58,6 +66,9 @@ const getTourConfig = ( {
 					},
 				},
 			],
+			callbacks: {
+				onNextStep: onNextStepHandler,
+			},
 		},
 		steps: [
 			{
@@ -68,6 +79,7 @@ const getTourConfig = ( {
 					desktop: '#title',
 				},
 				meta: {
+					name: 'product-name',
 					heading: __( 'Product name', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
@@ -90,6 +102,7 @@ const getTourConfig = ( {
 						: '#wp-content-editor-container > .wp-editor-area',
 				},
 				meta: {
+					name: 'product-description',
 					heading: __(
 						'Add your product description',
 						'woocommerce'
@@ -110,6 +123,7 @@ const getTourConfig = ( {
 					desktop: '#_regular_price',
 				},
 				meta: {
+					name: 'product-data',
 					heading: __( 'Add your product data', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
@@ -132,6 +146,7 @@ const getTourConfig = ( {
 						: '#wp-excerpt-editor-container > .wp-editor-area',
 				},
 				meta: {
+					name: 'product-short-description',
 					heading: __(
 						'Add your short product description',
 						'woocommerce'
@@ -152,6 +167,7 @@ const getTourConfig = ( {
 					desktop: '#set-post-thumbnail',
 				},
 				meta: {
+					name: 'product-image',
 					heading: __( 'Add your product image', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
@@ -169,6 +185,7 @@ const getTourConfig = ( {
 					desktop: '#new-tag-product_tag',
 				},
 				meta: {
+					name: 'product-tags',
 					heading: __( 'Add your product tags', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
@@ -183,6 +200,7 @@ const getTourConfig = ( {
 					desktop: '#product_catdiv',
 				},
 				meta: {
+					name: 'product-categories',
 					heading: __( 'Add your product categories', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
@@ -200,6 +218,7 @@ const getTourConfig = ( {
 					desktop: '#submitdiv',
 				},
 				meta: {
+					name: 'publish',
 					heading: __( 'Publish your product 🎉', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
@@ -219,6 +238,7 @@ const getTourConfig = ( {
 
 const ProductTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
+	const { setIsLoaded, hasUpdatedInfo } = useProductStepChange();
 
 	const { isTmce: isContentEditorTmceActive } = useActiveEditorType( {
 		editorWrapSelector: '#wp-content-wrap',
@@ -239,20 +259,48 @@ const ProductTour = () => {
 	const tourConfig = getTourConfig( {
 		isContentEditorTmceActive,
 		isExcerptEditorTmceActive,
-		closeHandler: () => setShowTour( false ),
+		closeHandler: ( steps, stepIndex ) => {
+			setShowTour( false );
+			if ( steps.length - 1 === stepIndex ) {
+				recordEvent( 'walkthrough_product_completed' );
+			} else {
+				recordEvent( 'walkthrough_product_dismissed', {
+					step_name: steps[ stepIndex ].meta.name,
+				} );
+			}
+		},
+		onNextStepHandler: ( stepIndex ) => {
+			const stepName = tourConfig.steps[ stepIndex ].meta.name;
+
+			// This records all "next" steps and ignores the final "publish" step.
+			recordEvent( 'walkthrough_product_step_completed', {
+				step_name: stepName,
+				added_info: hasUpdatedInfo( stepName as ProductTourStepName )
+					? 'yes'
+					: 'no',
+			} );
+		},
 	} );
 
 	useEffect( () => {
 		bindEnableGuideModeClickEvent( ( e ) => {
 			e.preventDefault();
 			setShowTour( true );
+			recordEvent( 'walkthrough_product_enable_button_click' );
 		} );
 
 		const query = qs.parse( window.location.search.slice( 1 ) );
 		if ( query && query.tutorial === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				tourConfig.steps[ 0 ].referenceElements?.desktop || '',
-				() => setShowTour( true ),
+				() => {
+					setShowTour( true );
+					recordEvent( 'walkthrough_product_view', {
+						spotlight: 'yes',
+						product_template: 'physical',
+					} );
+					setIsLoaded( true );
+				},
 				500
 			);
 			return () => clearInterval( intervalId );
@@ -260,6 +308,8 @@ const ProductTour = () => {
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	useTrackPublishButton( showTour );
 
 	if ( ! showTour ) {
 		return null;
