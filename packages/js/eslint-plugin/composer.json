@@ -26,7 +26,7 @@
 				"performance": "Address performance issues",
 				"enhancement": "Improve existing functionality"
 			},
-			"changelog": "NEXT_CHANGELOG.md"
+			"changelog": "CHANGELOG.md"
 		}
 	}
 }
