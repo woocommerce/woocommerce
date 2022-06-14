@@ -15,7 +15,7 @@ const customerBilling = {
 	state: 'CA',
 	postcode: '94107',
 	phone: '123456789',
-	email: 'john.doe@example.com',
+	email: 'john.doe.ordersearch@example.com',
 };
 const customerShipping = {
 	first_name: 'Tim',
@@ -28,7 +28,7 @@ const customerShipping = {
 	state: 'NY',
 	postcode: '14201',
 	phone: '123456789',
-	email: 'john.doe@example.com',
+	email: 'john.doe.ordersearch@example.com',
 };
 
 const queries = [
@@ -76,7 +76,7 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 		// update customer info
 		await api
 			.post( 'customers', {
-				email: 'john.doe@example.com',
+				email: 'john.doe.ordersearch@example.com',
 				first_name: 'John',
 				last_name: 'Doe',
 				username: 'john.doe',
@@ -134,8 +134,9 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 			await page.fill( '#post-search-input', queries[ i ][ 0 ] );
 			await page.click( '#search-submit' );
 
+			// always check the last item, in case of multiples
 			await expect(
-				page.locator( '.order_number > a.order-view' )
+				page.locator( '.order_number > a.order-view >> nth=-1' )
 			).toContainText( `#${ orderId } ${ searchString }` );
 		} );
 	}

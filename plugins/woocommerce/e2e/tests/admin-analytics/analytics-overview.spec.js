@@ -41,10 +41,12 @@ test.describe( 'Analytics pages', () => {
 		await expect( sections.length ).toEqual( 2 );
 
 		// clean up
-		await page.locator( '//button[@title="Add more sections"]' ).click();
+		await page
+			.locator( '//button[@title="Add more sections"]' )
+			.dispatchEvent( 'click' );
 		await page
 			.locator( '//button[@title="Add Performance section"]' )
-			.click();
+			.dispatchEvent( 'click' );
 		await page.waitForLoadState( 'networkidle' );
 	} );
 

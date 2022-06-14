@@ -16,7 +16,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect( page.locator( '#woocommerce_calc_taxes' ) ).toBeChecked();
@@ -53,7 +53,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -88,7 +88,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that the settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(
@@ -100,7 +100,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that the settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -178,7 +178,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(

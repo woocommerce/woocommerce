@@ -24,7 +24,7 @@ test.describe( 'Analytics pages', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2F${ urlTitle }`
 			);
 			const pageTitle = page.locator( 'h1' );
-			await expect( pageTitle ).toHaveText( aPages );
+			await expect( pageTitle ).toContainText( aPages );
 			await expect(
 				page.locator( '#woocommerce-layout__primary' )
 			).toBeVisible();

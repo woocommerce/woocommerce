@@ -294,15 +294,6 @@ test.describe( 'Store owner can go through setup Task List', () => {
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		// Close the welcome dialog if it's present
-		await page.waitForLoadState( 'networkidle' ); // explictly wait because the welcome dialog loads last
-		const welcomeDialog = await page.$( '.components-modal__header' );
-		if ( welcomeDialog !== null ) {
-			await page.click(
-				'div.components-modal__header >> button.components-button'
-			);
-		}
-		await expect( welcomeDialog ).not.toBeVisible();
 		await page
 			.locator( 'li[role="button"]:has-text("Set up shipping1 minute")' )
 			.click();

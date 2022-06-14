@@ -34,8 +34,6 @@ test.describe( 'Add New Variable Product Page', () => {
 				) {
 					api.delete( `products/${ product.id }`, {
 						force: true,
-					} ).then( () => {
-						// nothing to do here.
 					} );
 				}
 			}
