@@ -8,6 +8,7 @@ import { blocksConfig } from '@woocommerce/block-settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import { Icon, currencyDollar, external } from '@wordpress/icons';
+import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	Placeholder,
 	Disabled,
@@ -23,10 +24,14 @@ import {
 /**
  * Internal dependencies
  */
-import Block from './block.js';
+import Block from './block';
 import './editor.scss';
+import type { Attributes } from './types';
 
-export default function ( { attributes, setAttributes } ) {
+export default function ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< Attributes > ) {
 	const {
 		heading,
 		headingLevel,
@@ -51,7 +56,7 @@ export default function ( { attributes, setAttributes } ) {
 							'woo-gutenberg-products-block'
 						) }
 						value={ showInputFields ? 'editable' : 'text' }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( {
 								showInputFields: value === 'editable',
 							} )
@@ -106,7 +111,7 @@ export default function ( { attributes, setAttributes } ) {
 						minLevel={ 2 }
 						maxLevel={ 7 }
 						selectedLevel={ headingLevel }
-						onChange={ ( newLevel ) =>
+						onChange={ ( newLevel: number ) =>
 							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
@@ -164,7 +169,7 @@ export default function ( { attributes, setAttributes } ) {
 						className="wc-block-price-filter__title"
 						headingLevel={ headingLevel }
 						heading={ heading }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( { heading: value } )
 						}
 					/>
