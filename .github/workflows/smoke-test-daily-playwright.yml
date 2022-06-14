@@ -26,6 +26,7 @@ jobs:
         working-directory: package/woocommerce/plugins/woocommerce
         run: |
           npm install -g pnpm
+          pnpm i -g pnpm
           pnpm install
           pnpm nx composer-install-no-dev woocommerce
           pnpm nx build-assets woocommerce
