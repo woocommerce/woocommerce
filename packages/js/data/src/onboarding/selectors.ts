@@ -11,7 +11,7 @@ import {
 	TaskListType,
 	OnboardingState,
 	ExtensionList,
-	ProfileItemsState,
+	ProfileItems,
 	OnboardingProductType,
 } from './types';
 import { WPDataSelectors } from '../types';
@@ -25,7 +25,7 @@ export const getFreeExtensions = (
 
 export const getProfileItems = (
 	state: OnboardingState
-): ProfileItemsState | Record< string, never > => {
+): ProfileItems | Record< string, never > => {
 	return state.profileItems || {};
 };
 
