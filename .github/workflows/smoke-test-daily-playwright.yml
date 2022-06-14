@@ -25,8 +25,7 @@ jobs:
       - name: 💾 Install prerequisites.
         working-directory: package/woocommerce/plugins/woocommerce
         run: |
-          npm install -g pnpm
-          pnpm i -g pnpm
+          npm install -g pnpm@^6.24.2
           pnpm install
           pnpm nx composer-install-no-dev woocommerce
           pnpm nx build-assets woocommerce
