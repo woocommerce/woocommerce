@@ -84,6 +84,10 @@ test.describe( 'Cart Calculate Shipping', () => {
 		await api.post( `shipping/zones/${ shippingZoneFRId }/methods`, {
 			method_id: 'local_pickup',
 		} );
+		// confirm that we allow shipping to any country
+		api.put( 'settings/general/woocommerce_allowed_countries', {
+			value: 'all',
+		} );
 	} );
 
 	test.beforeEach( async ( { page, context } ) => {
