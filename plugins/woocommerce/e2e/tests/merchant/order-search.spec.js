@@ -1,11 +1,11 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const searchString = 'John Doe';
+const searchString = 'James Doe';
 const itemName = 'Wanted Product';
 
 const customerBilling = {
-	first_name: 'John',
+	first_name: 'James',
 	last_name: 'Doe',
 	company: 'Automattic',
 	country: 'US',
@@ -76,9 +76,9 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 		// update customer info
 		await api
 			.post( 'customers', {
-				email: 'john.doe.ordersearch@example.com',
-				first_name: 'John',
-				last_name: 'Doe',
+				email: customerBilling.email,
+				first_name: customerBilling.first_name,
+				last_name: customerBilling.last_name,
 				username: 'john.doe',
 				billing: customerBilling,
 				shipping: customerShipping,
