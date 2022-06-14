@@ -12,7 +12,7 @@ const country = 'US';
 const phone = '(555) 777-7777';
 
 test.describe( 'Shopper Checkout Login Account', () => {
-	let productId;
+	let productId, orderId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -24,7 +24,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		// add product
 		await api
 			.post( 'products', {
-				name: 'Checkout Create Account',
+				name: 'Checkout Login Account',
 				type: 'simple',
 				regular_price: '19.99',
 			} )
@@ -67,6 +67,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
+		await api.delete( `orders/${ orderId }`, { force: true } );
 		await api.put(
 			'settings/account/woocommerce_enable_checkout_login_reminder',
 			{
@@ -136,6 +137,18 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'Order received'
 		);
+
+		await page.waitForLoadState( 'networkidle' );
+		// get order ID from the page
+		const orderReceivedHtmlElement = await page.$(
+			'.woocommerce-order-overview__order.order'
+		);
+		const orderReceivedText = await page.evaluate(
+			( element ) => element.textContent,
+			orderReceivedHtmlElement
+		);
+		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+
 		await expect( page.locator( 'ul > li.email' ) ).toContainText(
 			'customer@woocommercecoree2etestsuite.com'
 		);
