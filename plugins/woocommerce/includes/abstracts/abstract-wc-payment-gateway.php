@@ -10,6 +10,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -304,7 +305,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_title() {
-		return apply_filters( 'woocommerce_gateway_title', $this->title, $this->id );
+		$title = wc_get_container()->get( HtmlSanitizer::class )->sanitize( $this->title, HtmlSanitizer::LOW_HTML_BALANCED_TAGS_NO_LINKS );
+		return apply_filters( 'woocommerce_gateway_title', $title, $this->id );
 	}
 
 	/**
