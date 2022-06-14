@@ -7,7 +7,6 @@ const config = {
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
 	retries: 1,
-	workers: 1,
 	reporter: [
 		[ 'list' ],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
