@@ -364,7 +364,7 @@ class CustomOrdersTableController {
 						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
 				}
 
-				if ( $updates_controller->is_batch_process_running( $this->data_synchronizer->get_id() ) ) {
+				if ( $updates_controller->is_batch_process_pending( get_class( $this->data_synchronizer ) ) ) {
 					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
 				} else {
 					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
