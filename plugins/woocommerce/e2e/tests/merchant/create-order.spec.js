@@ -34,13 +34,14 @@ const taxRates = [
 	},
 ];
 const taxClassSlugs = [];
-const taxTotals = [ '$10.00', '$20.00', '$240.00' ];
+const taxTotals = [ '10.00', '20.00', '240.00' ];
 let simpleProductId,
 	variableProductId,
 	externalProductId,
 	subProductAId,
 	subProductBId,
-	groupedProductId;
+	groupedProductId,
+	orderId;
 
 test.describe( 'WooCommerce Orders > Add new order', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
@@ -189,6 +190,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'no',
 		} );
+		await api.delete( `orders/${ orderId }`, { force: true } );
 	} );
 
 	test( 'can create new order', async ( { page } ) => {
@@ -196,6 +198,18 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await expect( page.locator( 'title' ) ).toContainText(
 			'Add new order'
 		);
+
+		await page.waitForLoadState( 'networkidle' );
+		// get order ID from the page
+		const orderHtmlElement = await page.$(
+			'h2.woocommerce-order-data__heading'
+		);
+		const orderText = await page.evaluate(
+			( element ) => element.textContent,
+			orderHtmlElement
+		);
+		orderId = orderText.match( /([0-9])\w+/ );
+		orderId = orderId[ 0 ].toString();
 
 		await page.selectOption( '#order_status', 'wc-processing' );
 		await page.fill( 'input[name=order_date]', '2018-12-13' );
