@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { ShopCheckoutHelper } = require( '../helpers/shop-checkout' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const guestEmail = 'checkout-guest@example.com';
@@ -33,14 +32,14 @@ test.describe( 'Checkout page', () => {
 		// add a shipping zone and method
 		await api
 			.post( 'shipping/zones', {
-				name: 'Free Shipping CA',
+				name: 'Free Shipping Oregon',
 			} )
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
 			} );
 		await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
 			{
-				code: 'US:CA',
+				code: 'US:OR',
 				type: 'state',
 			},
 		] );
@@ -182,7 +181,6 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows guest customer to place an order', async ( { page } ) => {
-		const shopCheckoutHelper = new ShopCheckoutHelper( page );
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
 			await page.waitForLoadState( 'networkidle' );
@@ -196,7 +194,14 @@ test.describe( 'Checkout page', () => {
 			twoProductPrice
 		);
 
-		shopCheckoutHelper.fillBillingInfo( guestEmail );
+		await page.fill( '#billing_first_name', 'Lisa' );
+		await page.fill( '#billing_last_name', 'Simpson' );
+		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
+		await page.fill( '#billing_city', 'Springfield' );
+		await page.selectOption( '#billing_state', 'OR' );
+		await page.fill( '#billing_postcode', '97403' );
+		await page.fill( '#billing_phone', '555 555-5555' );
+		await page.fill( '#billing_email', guestEmail );
 
 		await page.click( 'text=Cash on delivery' );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
@@ -215,55 +220,9 @@ test.describe( 'Checkout page', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		guestOrderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
-	} );
+		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
-	test( 'allows existing customer to place order', async ( { page } ) => {
-		const shopCheckoutHelper = new ShopCheckoutHelper( page );
-		await page.goto( 'wp-admin' );
-		await page.fill( 'input[name="log"]', 'customer' );
-		await page.fill( 'input[name="pwd"]', 'password' );
-		await page.click( 'text=Log In' );
-		await page.waitForLoadState( 'networkidle' );
-		for ( let i = 1; i < 3; i++ ) {
-			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
-		}
-
-		await page.goto( '/checkout/' );
-		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
-			'2'
-		);
-		await expect( page.locator( 'td.product-total' ) ).toContainText(
-			twoProductPrice
-		);
-
-		shopCheckoutHelper.fillBillingInfo( customerEmail );
-
-		await page.click( 'text=Cash on delivery' );
-		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
-
-		await page.click( 'text=Place order' );
-
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
-
-		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
-		customerOrderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
-	} );
-
-	test( 'merchant can confirm the orders were received', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin' );
+		await page.goto( 'wp-login.php' );
 		await page.fill( 'input[name="log"]', 'admin' );
 		await page.fill( 'input[name="pwd"]', 'password' );
 		await page.click( 'text=Log In' );
@@ -288,6 +247,63 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
 			twoProductPrice
 		);
+	} );
+
+	test( 'allows existing customer to place order', async ( { page } ) => {
+		await page.goto( 'wp-admin/' );
+		await page.fill( 'input[name="log"]', 'customer' );
+		await page.fill( 'input[name="pwd"]', 'password' );
+		await page.click( 'text=Log In' );
+		await page.waitForLoadState( 'networkidle' );
+		for ( let i = 1; i < 3; i++ ) {
+			await page.goto( `/shop/?add-to-cart=${ productId }` );
+			await page.waitForLoadState( 'networkidle' );
+		}
+
+		await page.goto( '/checkout/' );
+		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
+			'2'
+		);
+		await expect( page.locator( 'td.product-total' ) ).toContainText(
+			twoProductPrice
+		);
+
+		await page.fill( '#billing_first_name', 'Homer' );
+		await page.fill( '#billing_last_name', 'Simpson' );
+		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
+		await page.fill( '#billing_city', 'Springfield' );
+		await page.selectOption( '#billing_state', 'OR' );
+		await page.fill( '#billing_postcode', '97403' );
+		await page.fill( '#billing_phone', '555 555-5555' );
+		await page.fill( '#billing_email', customerEmail );
+
+		await page.click( 'text=Cash on delivery' );
+		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
+
+		await page.click( 'text=Place order' );
+
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'Order received'
+		);
+
+		// get order ID from the page
+		const orderReceivedHtmlElement = await page.$(
+			'.woocommerce-order-overview__order.order'
+		);
+		const orderReceivedText = await page.evaluate(
+			( element ) => element.textContent,
+			orderReceivedHtmlElement
+		);
+		customerOrderId = await orderReceivedText
+			.split( /(\s+)/ )[ 6 ]
+			.toString();
+
+		await page.goto( 'wp-login.php?loggedout=true' );
+		await page.waitForLoadState( 'networkidle' );
+
+		await page.fill( 'input[name="log"]', 'admin' );
+		await page.fill( 'input[name="pwd"]', 'password' );
+		await page.click( 'text=Log In' );
 
 		// load the order placed as a customer
 		await page.goto(
