@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use WC_Data_Store;
 
 /**
  * Shipping Task
@@ -95,7 +96,7 @@ class Shipping extends Task {
 	 * @return bool
 	 */
 	public static function has_shipping_zones() {
-		return count( \WC_Shipping_Zones::get_zones() ) > 0;
+		return count( WC_Data_Store::load( 'shipping-zone' )->get_zones() ) > 0;
 	}
 
 	/**
