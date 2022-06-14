@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
-use Automattic\WooCommerce\Internal\Updates\WCActionUpdateController;
+use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -228,7 +228,7 @@ final class WooCommerce {
 		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
 		wc_get_container()->get( CustomOrdersTableController::class );
 		wc_get_container()->get( OptionSanitizer::class );
-		wc_get_container()->get( WCActionUpdateController::class );
+		wc_get_container()->get( BatchProcessingController::class );
 	}
 
 	/**
