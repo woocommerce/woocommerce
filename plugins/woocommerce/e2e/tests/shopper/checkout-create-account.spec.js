@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const billingEmail = 'test-account@example.com';
+const billingEmail = 'marge-test-account@example.com';
 
 test.describe( 'Shopper Checkout Create Account', () => {
 	let productId, orderId, shippingZoneId;
@@ -98,7 +98,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 
 	test( 'can create an account during checkout', async ( { page } ) => {
 		await page.goto( 'checkout/' );
-		await page.fill( '#billing_first_name', 'Bart' );
+		await page.fill( '#billing_first_name', 'Marge' );
 		await page.fill( '#billing_last_name', 'Simpson' );
 		await page.fill( '#billing_address_1', '742 Evergreen Terrace' );
 		await page.fill( '#billing_address_2', 'c/o Maggie Simpson' );
