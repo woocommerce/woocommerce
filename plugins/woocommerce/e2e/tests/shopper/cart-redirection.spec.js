@@ -3,7 +3,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Cart > Redirect to cart from shop', () => {
 	let productId;
-	const productName = 'Redirect product test';
+	const productName = 'A redirect product test';
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
