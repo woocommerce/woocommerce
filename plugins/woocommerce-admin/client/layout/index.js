@@ -4,7 +4,7 @@
 import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { Component, lazy, Suspense } from '@wordpress/element';
+import { Component, lazy, Suspense, createContext } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
 	Route,
@@ -15,7 +15,7 @@ import {
 } from 'react-router-dom';
 import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
-import { get, isFunction, identity } from 'lodash';
+import { get, isFunction, identity, memoize } from 'lodash';
 import { parse } from 'qs';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import {
@@ -49,6 +49,20 @@ const WCPayUsageModal = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-usage-modal" */ '../tasks/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
 	)
+);
+
+const LayoutContextPrototype = {
+	getExtendedContext( newItem ) {
+		return { ...this, path: [ ...this.path, newItem ] };
+	},
+	toString() {
+		return this.path.join( '/' );
+	},
+	path: [],
+};
+
+export const LayoutContext = createContext(
+	LayoutContextPrototype.getExtendedContext( 'root' )
 );
 
 export class PrimaryLayout extends Component {
@@ -111,6 +125,13 @@ const LayoutSwitchWrapper = ( props ) => {
 };
 
 class _Layout extends Component {
+	memoizedLayoutContext = memoize( ( page ) =>
+		LayoutContextPrototype.getExtendedContext(
+			page?.breadcrumbs[ page.breadcrumbs.length - 1 ]?.toLowerCase() ||
+				'page'
+		)
+	);
+
 	componentDidMount() {
 		this.recordPageViewTrack();
 	}
@@ -195,38 +216,45 @@ class _Layout extends Component {
 		const query = this.getQuery( location && location.search );
 
 		return (
-			<SlotFillProvider>
-				<div className="woocommerce-layout">
-					<Header
-						sections={
-							isFunction( breadcrumbs )
-								? breadcrumbs( this.props )
-								: breadcrumbs
-						}
-						isEmbedded={ isEmbedded }
-						query={ query }
-					/>
-					<TransientNotices />
-					{ ! isEmbedded && (
-						<PrimaryLayout>
-							<div className="woocommerce-layout__main">
-								<Controller { ...restProps } query={ query } />
-							</div>
-						</PrimaryLayout>
-					) }
+			<LayoutContext.Provider
+				value={ this.memoizedLayoutContext( page ) }
+			>
+				<SlotFillProvider>
+					<div className="woocommerce-layout">
+						<Header
+							sections={
+								isFunction( breadcrumbs )
+									? breadcrumbs( this.props )
+									: breadcrumbs
+							}
+							isEmbedded={ isEmbedded }
+							query={ query }
+						/>
+						<TransientNotices />
+						{ ! isEmbedded && (
+							<PrimaryLayout>
+								<div className="woocommerce-layout__main">
+									<Controller
+										{ ...restProps }
+										query={ query }
+									/>
+								</div>
+							</PrimaryLayout>
+						) }
 
-					{ isEmbedded && this.isWCPaySettingsPage() && (
-						<Suspense fallback={ null }>
-							<WCPayUsageModal />
-						</Suspense>
+						{ isEmbedded && this.isWCPaySettingsPage() && (
+							<Suspense fallback={ null }>
+								<WCPayUsageModal />
+							</Suspense>
+						) }
+					</div>
+					<PluginArea scope="woocommerce-admin" />
+					{ window.wcAdminFeatures.navigation && (
+						<PluginArea scope="woocommerce-navigation" />
 					) }
-				</div>
-				<PluginArea scope="woocommerce-admin" />
-				{ window.wcAdminFeatures.navigation && (
-					<PluginArea scope="woocommerce-navigation" />
-				) }
-				<PluginArea scope="woocommerce-tasks" />
-			</SlotFillProvider>
+					<PluginArea scope="woocommerce-tasks" />
+				</SlotFillProvider>
+			</LayoutContext.Provider>
 		);
 	}
 }

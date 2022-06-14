@@ -10,13 +10,14 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
  */
+import { LayoutContext } from '~/layout';
 import './task-list.scss';
 
 export type TaskListItemProps = {
@@ -35,6 +36,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
+	const layoutContext = useContext( LayoutContext );
 
 	const {
 		dismissTask,
@@ -117,6 +119,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( 'tasklist_click', {
 			task_name: id,
+			context: layoutContext.toString(),
 		} );
 
 		if ( ! isComplete ) {

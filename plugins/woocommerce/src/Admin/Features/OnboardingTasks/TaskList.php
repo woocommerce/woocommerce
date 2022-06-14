@@ -171,7 +171,7 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_visible() {
-		if ( ! $this->visible ) {
+		if ( ! $this->visible || ! count( $this->get_viewable_tasks() ) > 0 ) {
 			return false;
 		}
 		return ! $this->is_hidden();

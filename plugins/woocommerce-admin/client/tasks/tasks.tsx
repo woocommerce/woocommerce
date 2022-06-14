@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect } from '@wordpress/element';
+import { Fragment, useEffect, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
@@ -33,6 +33,7 @@ import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-
 
 export type TasksProps = {
 	query: { task?: string };
+	context?: string;
 };
 
 function getTaskListComponent( taskListId: string ) {
@@ -155,12 +156,9 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 						? id.endsWith( 'two_column' )
 						: ! id.endsWith( 'two_column' )
 				)
+				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
-					const { id, isHidden, isVisible, isToggleable } = taskList;
-
-					if ( ! isVisible ) {
-						return null;
-					}
+					const { id, isHidden, isToggleable } = taskList;
 
 					const TaskListComponent = getTaskListComponent( id );
 					return (

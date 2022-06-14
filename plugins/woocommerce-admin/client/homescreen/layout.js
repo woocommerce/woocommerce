@@ -44,7 +44,9 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { ProgressTitle } from '../task-lists';
 
 const Tasks = lazy( () =>
-	import( /* webpackChunkName: "tasks" */ '../tasks' )
+	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
+		default: module.Tasks,
+	} ) )
 );
 
 const TwoColumnTasks = lazy( () =>
