@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add charset collation to COT tables.

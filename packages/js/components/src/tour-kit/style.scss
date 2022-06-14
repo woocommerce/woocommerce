@@ -1,0 +1,70 @@
+.woocommerce-tour-kit{
+	box-shadow: 0 0 8px rgba( 0, 0, 0, 0.15 );
+	position: absolute;
+	z-index: 9999;
+
+	.woocommerce-tour-kit-step {
+		width: 350px;
+		padding-bottom: 4px;
+	}
+
+	.woocommerce-tour-kit-step__body {
+		padding-top: 0;
+		padding-bottom: 8px;
+	}
+
+	.woocommerce-tour-kit-step__heading {
+		color: $studio-gray-100;
+		font-weight: 500;
+		font-size: 16px;
+		margin: 0;
+		letter-spacing: -0.1px;
+		line-height: 24px;
+	}
+
+	.woocommerce-tour-kit-step__description {
+		color: $studio-gray-80;
+		font-style: normal;
+		font-weight: 400;
+		font-size: 14px;
+		line-height: 20px;
+		letter-spacing: -0.24px;
+		margin: 4px 0 0;
+	}
+
+	.components-card-header {
+		padding-bottom: 0;
+	}
+
+	.woocommerce-tour-kit-step-controls__close-btn {
+		height: 16px;
+		min-width: 16px;
+		padding: 0;
+		svg {
+			fill: #1e1e1e;
+		}
+	}
+
+	.woocommerce-tour-kit-step-navigation {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+
+	.woocommerce-tour-kit-step-navigation__step {
+		color: $studio-gray-60;
+		font-style: normal;
+		font-weight: 400;
+		font-size: 12px;
+		line-height: 20px;
+	}
+
+	.tour-kit-frame__arrow, .tour-kit-frame__arrow::before {
+		z-index: 1;
+	}
+}

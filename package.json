@@ -23,15 +23,8 @@
 		"create-extension": "node ./tools/create-extension/index.js"
 	},
 	"devDependencies": {
-		"@automattic/nx-composer": "^0.1.0",
 		"@babel/preset-env": "^7.16.11",
 		"@babel/runtime": "^7.17.2",
-		"@nrwl/cli": "^13.3.4",
-		"@nrwl/devkit": "^13.1.4",
-		"@nrwl/linter": "^13.3.4",
-		"@nrwl/tao": "13.3.4",
-		"@nrwl/web": "^13.3.4",
-		"@nrwl/workspace": "^13.3.4",
 		"@storybook/addon-a11y": "^6.4.19",
 		"@storybook/addon-actions": "^6.4.19",
 		"@storybook/addon-console": "^1.2.3",
@@ -72,6 +65,7 @@
 		"request": "^2.88.2",
 		"sass": "^1.49.9",
 		"sass-loader": "^10.2.1",
+		"turbo": "^1.2.9",
 		"typescript": "4.2.4",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.70.0"

@@ -40,17 +40,27 @@ export type Product<
 	sale_price: string;
 };
 
-export type MutableProperties =
-	| 'name'
-	| 'slug'
-	| 'type'
-	| 'status'
-	| 'featured'
-	| 'description'
-	| 'short_description'
-	| 'sku'
-	| 'regular_price'
-	| 'sale_price';
+export type ReadOnlyProperties =
+	| 'id'
+	| 'permalink'
+	| 'date_created'
+	| 'date_created_gmt'
+	| 'date_modified'
+	| 'date_modified_gmt'
+	| 'price'
+	| 'price_html'
+	| 'on_sale'
+	| 'purchasable'
+	| 'total_sales'
+	| 'backorders_allowed'
+	| 'backordered'
+	| 'shipping_required'
+	| 'shipping_taxable'
+	| 'shipping_class_id'
+	| 'average_rating'
+	| 'rating_count'
+	| 'related_ids'
+	| 'variations';
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 

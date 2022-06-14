@@ -25,7 +25,7 @@ Closes # .
 -   [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 -   [ ] Have you written new tests for your changes, as applicable?
 -   [ ] Have you successfully run tests with your changes locally?
--   [ ] Have you created a changelog file for each project being changed, ie `pnpm nx changelog <project>`?
+-   [ ] Have you created a changelog file for each project being changed, ie `pnpm changelog add --filter=<project>`?
 
 <!-- Mark completed items with an [x] -->
 

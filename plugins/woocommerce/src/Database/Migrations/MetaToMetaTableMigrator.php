@@ -78,17 +78,15 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 		$to_update = $data[1];
 
 		if ( ! empty( $to_insert ) ) {
-			$insert_queries         = $this->generate_insert_sql_for_batch( $to_insert );
-			$actual_processed_count = $this->db_query( $insert_queries );
-			$this->db_query( 'COMMIT;' );
-			$this->maybe_add_insert_or_update_mismatch_error( 'insert', $to_insert, $actual_processed_count );
+			$insert_queries       = $this->generate_insert_sql_for_batch( $to_insert );
+			$processed_rows_count = $this->db_query( $insert_queries );
+			$this->maybe_add_insert_or_update_error( 'insert', $processed_rows_count );
 		}
 
 		if ( ! empty( $to_update ) ) {
-			$update_queries         = $this->generate_update_sql_for_batch( $to_update );
-			$actual_processed_count = $this->db_query( $update_queries );
-			$this->db_query( 'COMMIT;' );
-			$this->maybe_add_insert_or_update_mismatch_error( 'update', $to_insert, $actual_processed_count );
+			$update_queries       = $this->generate_update_sql_for_batch( $to_update );
+			$processed_rows_count = $this->db_query( $update_queries );
+			$this->maybe_add_insert_or_update_error( 'update', $processed_rows_count );
 		}
 	}
 
@@ -177,7 +175,7 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	 *
 	 * @return array[] Data, will of the form:
 	 * array(
-	 *   'id_1' => array( 'column1' => value1, 'column2' => value2, ...),
+	 *   'id_1' => array( 'column1' => array( value1_1, value1_2...), 'column2' => array(value2_1, value2_2...), ...),
 	 *   ...,
 	 * )
 	 */
@@ -290,7 +288,10 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 					}
 					$to_insert[ $entity_id ][ $meta_key ] = $meta_values;
 				} else {
-					if ( 1 === count( $to_migrate[ $entity_id ][ $meta_key ] ) && 1 === count( $already_migrated[ $entity_id ][ $meta_key ] ) ) {
+					if ( 1 === count( $meta_values ) && 1 === count( $already_migrated[ $entity_id ][ $meta_key ] ) ) {
+						if ( $meta_values[0] === $already_migrated[ $entity_id ][ $meta_key ][0]['meta_value'] ) {
+							continue;
+						}
 						if ( ! isset( $to_update[ $entity_id ] ) ) {
 							$to_update[ $entity_id ] = array();
 						}

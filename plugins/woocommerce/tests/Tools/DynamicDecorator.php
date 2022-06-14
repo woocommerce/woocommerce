@@ -120,6 +120,29 @@ class DynamicDecorator {
 	}
 
 	/**
+	 * Calls the original method in the decorated object.
+	 *
+	 * Example usage:
+	 *
+	 * $decorator->register_method_replacement(
+	 *   'some_method',
+	 *   function( ...$args ) {
+	 *     $decorator = $args[0];
+	 *     //Do something, e.g. log the args
+	 *     return $decorator->call_original_method('some_method', $args);
+	 *   }
+	 * );
+	 *
+	 * @param string $method_name The method to call.
+	 * @param array  $parameters The parameters as passed to the replacement callback (so the first one is the decorator itself).
+	 * @return mixed The return value from the original method.
+	 */
+	public function call_original_method( string $method_name, array $parameters ) {
+		array_shift( $parameters );
+		return call_user_func_array( array( $this->decorated_object, $method_name ), $parameters );
+	}
+
+	/**
 	 * Handle a method invocation, uses the registered replacement if available or redirects the call to the decorated object.
 	 *
 	 * @param string $name Method name.

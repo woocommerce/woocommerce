@@ -5,6 +5,10 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"main": "Gruntfile.js",
+	"scripts": {
+		"build": "grunt assets",
+		"lint": "grunt eslint stylelint --force"
+	},
 	"devDependencies": {
 		"@wordpress/stylelint-config": "19.1.0",
 		"autoprefixer": "9.8.6",
