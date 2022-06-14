@@ -5,8 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\DataBase\BatchProcessor;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
-use Automattic\WooCommerce\DataBase\WCActionUpdater;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * - Providing entry points for creating and deleting the required database tables.
  * - Synchronizing changes between the custom orders tables and the posts table whenever changes in orders happen.
  */
-class DataSynchronizer extends WCActionUpdater {
+class DataSynchronizer extends BatchProcessor {
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
@@ -266,15 +266,6 @@ WHERE
 	}
 
 	/**
-	 * A name for this update.
-	 *
-	 * @return string
-	 */
-	protected function get_update_name(): string {
-		return 'order_data_synchronizer';
-	}
-
-	/**
 	 * Process data for current batch.
 	 *
 	 * @param array $batch Batch details.
@@ -342,7 +333,25 @@ WHERE
 	/**
 	 * Mark update complete.
 	 */
-	public function mark_update_complete() {
+	public function mark_process_complete() {
 		$this->cleanup_synchronization_state();
+	}
+
+	/**
+	 * A user friendly name for this process.
+	 *
+	 * @return string Name of the process.
+	 */
+	protected function get_name(): string {
+		return 'Order synchronizer';
+	}
+
+	/**
+	 * A user friendly description for this process.
+	 *
+	 * @return string Description.
+	 */
+	protected function get_description(): string {
+		return 'Synchronizes orders between posts and custom order tables.';
 	}
 }

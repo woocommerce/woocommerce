@@ -32,7 +32,7 @@ class BatchProcessingController {
 	/**
 	 * Starts an update.
 	 *
-	 * @param string $updater_class_name Fully qualified class name of an updater, must be child class of `WCActionUpdater`.
+	 * @param string $updater_class_name Fully qualified class name of an updater, must be child class of `BatchProcessor`.
 	 */
 	public function enqueue_processor( string $updater_class_name ) {
 		$pending_updates = $this->get_pending();
@@ -74,7 +74,7 @@ class BatchProcessingController {
 	/**
 	 * Process update for a scheduled updater.
 	 *
-	 * @param string $update_name Fully qualified class name of the updater. Must be child class `WCActionUpdater`.
+	 * @param string $update_name Fully qualified class name of the updater. Must be child class `BatchProcessor`.
 	 */
 	public function process_single_update( string $update_name ) {
 		$updater = $this->get_processor_instance( $update_name );
@@ -178,14 +178,14 @@ class BatchProcessingController {
 	}
 
 	/**
-	 * Check if a particular update is in progress.
+	 * Check if a particular process is in progress.
 	 *
-	 * @param string $update_name Fully qualified class name of updator.
+	 * @param string $process_id Fully qualified class name of process.
 	 *
 	 * @return bool Whether the update is in progress.
 	 */
-	public function is_update_in_progress( string $update_name ) : bool {
-		return in_array( $update_name, $this->get_pending() );
+	public function is_batch_process_running( string $process_id ) : bool {
+		return in_array( $process_id, $this->get_pending() );
 	}
 
 }

@@ -5,8 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Internal\Updates\WCActionUpdateController;
-use Symfony\Component\VarDumper\Cloner\Data;
+use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -317,7 +316,7 @@ class CustomOrdersTableController {
 		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
 			return $settings;
 		}
-		$updates_controller = wc_get_container()->get( WCActionUpdateController::class );
+		$updates_controller = wc_get_container()->get( BatchProcessingController::class );
 
 		if ( $this->data_synchronizer->check_orders_table_exists() ) {
 			$settings[] = array(
@@ -365,7 +364,7 @@ class CustomOrdersTableController {
 						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
 				}
 
-				if ( $updates_controller->is_update_in_progress( get_class( $this->data_synchronizer ) ) ) {
+				if ( $updates_controller->is_batch_process_running( $this->data_synchronizer->get_id() ) ) {
 					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
 				} else {
 					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
@@ -526,8 +525,10 @@ class CustomOrdersTableController {
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
 		// settings even without modifying them.
-		$update_controller = wc_get_container()->get( WCActionUpdateController::class );
-		$update_controller->start_update( DataSynchronizer::class );
+		if ( $data_sync_is_enabled ) {
+			$update_controller = wc_get_container()->get( BatchProcessingController::class );
+			$update_controller->enqueue_processor( DataSynchronizer::class );
+		}
 	}
 
 	/**

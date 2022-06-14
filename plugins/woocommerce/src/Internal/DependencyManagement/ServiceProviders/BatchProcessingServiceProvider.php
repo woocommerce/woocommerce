@@ -9,11 +9,11 @@ use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider
 use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
 
 /**
- * Class WCUpdateServiceProvider
+ * Class BatchProcessingServiceProvider
  *
  * @package Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders
  */
-class WCUpdateServiceProvider extends AbstractServiceProvider {
+class BatchProcessingServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * Services provided by this provider.
