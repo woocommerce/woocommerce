@@ -74,6 +74,7 @@ class Formatter extends KeepAChangelogParser {
 	public function getReleaseLink( $version ) {
 		$path_map = array(
 			'packages/js/components' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
+			'packages/js/csv-export' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
 			'plugins/woocommerce'    => 'https://github.com/woocommerce/woocommerce/releases/tag/',
 		);
 
