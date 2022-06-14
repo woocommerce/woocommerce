@@ -17,7 +17,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Produc
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\WCUpdateServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -54,7 +54,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		RestockRefundedItemsAdjusterServiceProvider::class,
 		UtilsClassesServiceProvider::class,
 		COTMigrationServiceProvider::class,
-		WCUpdateServiceProvider::class,
+		BatchProcessingServiceProvider::class,
 	);
 
 	/**

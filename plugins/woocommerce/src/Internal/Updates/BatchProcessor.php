@@ -31,7 +31,7 @@ abstract class BatchProcessor {
 	 *
 	 * @return string ID (usually fully qualified class name).
 	 */
-	protected function get_id() : string {
+	public function get_id() : string {
 		// Length of wp_option.option_name is 191 chars, this leaves 180 for us after wc_batch_ prefix.
 		return substr( self::class, -182 );
 	}
