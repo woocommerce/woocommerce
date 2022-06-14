@@ -103,6 +103,7 @@
 * Fix - Add woo install timestamp to server experimental assignment requests.  [#33300](https://github.com/woocommerce/woocommerce/pull/33300)
 * Fix - Fix a warning caused by an attempt to iterate over a submenu that may not exist on WC Pay subscriptions page.  [#33339](https://github.com/woocommerce/woocommerce/pull/33339)
 * Fix - Fix the script version parameter for chunk URLs.  [#33332](https://github.com/woocommerce/woocommerce/pull/33332)
+* Fix - Sanitize payment gateway titles.
 * Performance - Fix system status API requests that only query some fields  [#32823](https://github.com/woocommerce/woocommerce/pull/32823)
 * Tweak - For Vietnam, the second street address line should be displayed but not required.  [#32610](https://github.com/woocommerce/woocommerce/pull/32610)
 * Tweak - Comment: We're adding extra protections to a newly introduced feature; a further changelog entry is not needed.  [#32771](https://github.com/woocommerce/woocommerce/pull/32771)
