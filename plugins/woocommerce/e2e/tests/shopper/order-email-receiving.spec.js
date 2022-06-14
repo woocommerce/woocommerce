@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { ShopCheckoutHelper } = require( '../helpers/shop-checkout' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 let productId, orderId;
@@ -64,21 +63,32 @@ test.describe( 'Shopper Order Email Receiving', () => {
 	test( 'should receive order email after purchasing an item', async ( {
 		page,
 	} ) => {
-		const shopCheckoutHelper = new ShopCheckoutHelper( page );
-
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await shopCheckoutHelper.fillBillingInfo( customerEmail );
+
+		await page.fill( '#billing_first_name', 'Homer' );
+		await page.fill( '#billing_last_name', 'Simpson' );
+		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
+		await page.fill( '#billing_city', 'Springfield' );
+		await page.selectOption( '#billing_state', 'OR' );
+		await page.fill( '#billing_postcode', '97403' );
+		await page.fill( '#billing_phone', '555 555-5555' );
+		await page.fill( '#billing_email', customerEmail );
+
 		await page.click( 'text=Place order' );
 
-		// Get order ID from the order received html element on the page
-		orderId = await page.$$eval(
-			'.woocommerce-order-overview__order strong',
-			( elements ) => elements.map( ( item ) => item.textContent )
-		);
 		await page.waitForLoadState( 'networkidle' );
+		// get order ID from the page
+		const orderReceivedHtmlElement = await page.$(
+			'.woocommerce-order-overview__order.order'
+		);
+		const orderReceivedText = await page.evaluate(
+			( element ) => element.textContent,
+			orderReceivedHtmlElement
+		);
+		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
 		await page.waitForLoadState( 'networkidle' );
