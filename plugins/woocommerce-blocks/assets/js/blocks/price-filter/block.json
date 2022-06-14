@@ -19,6 +19,10 @@
 		}
 	},
 	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
 		"showInputFields": {
 			"type": "boolean",
 			"default": true

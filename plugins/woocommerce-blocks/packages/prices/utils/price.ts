@@ -71,7 +71,7 @@ const siteCurrencySettings: Currency = {
  */
 export const getCurrencyFromPriceResponse = (
 	// Currency data object, for example an API response containing currency formatting data.
-	currencyData:
+	currencyData?:
 		| CurrencyResponse
 		| Record< string, never >
 		| CartShippingPackageShippingRate

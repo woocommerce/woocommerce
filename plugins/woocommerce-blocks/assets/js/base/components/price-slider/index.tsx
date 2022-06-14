@@ -33,19 +33,19 @@ export interface PriceSliderProps {
 	/**
 	 * Maximum constraint.
 	 */
-	maxConstraint: number;
+	maxConstraint: number | null | undefined;
 	/**
 	 * Maximum price for slider.
 	 */
-	maxPrice: number;
+	maxPrice: number | null;
 	/**
 	 * Minimum constraint.
 	 */
-	minConstraint: number;
+	minConstraint: number | null | undefined;
 	/**
 	 * Minimum price for slider.
 	 */
-	minPrice: number;
+	minPrice: number | null;
 	/**
 	 * Function to call on the change event.
 	 */
@@ -65,7 +65,7 @@ export interface PriceSliderProps {
 	/**
 	 * What step values the slider uses.
 	 */
-	step: number;
+	step?: number;
 }
 
 const PriceSlider = ( {
