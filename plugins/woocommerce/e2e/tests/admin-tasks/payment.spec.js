@@ -62,18 +62,13 @@ test.describe( 'Payment setup task', () => {
 			page.locator( 'div.components-snackbar__content' )
 		).toContainText( 'Direct bank transfer details added successfully' );
 
-		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
-			// other payment methods are already shown
-		} else {
-			// show other payment methods
-			await page.click( 'button.toggle-button' );
-		}
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 
 		await expect(
 			page.locator(
-				'div.woocommerce-task-payment-bacs > div.woocommerce-task-payment__footer > a'
+				'//tr[@data-gateway_id="bacs"]/td[@class="status"]/a'
 			)
-		).toContainText( 'Manage' );
+		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
 	} );
 
 	test( 'Enabling cash on delivery enables the payment method', async ( {
@@ -99,17 +94,10 @@ test.describe( 'Payment setup task', () => {
 		);
 		await page.waitForLoadState( 'networkidle' );
 
-		await expect( page.locator( 'h1' ) ).toContainText( 'Set up payments' );
-		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
-			// other payment methods are already shown
-		} else {
-			// show other payment methods
-			await page.click( 'button.toggle-button' );
-		}
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
+
 		await expect(
-			page.locator(
-				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > a'
-			)
-		).toContainText( 'Manage' );
+			page.locator( '//tr[@data-gateway_id="cod"]/td[@class="status"]/a' )
+		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
 	} );
 } );
