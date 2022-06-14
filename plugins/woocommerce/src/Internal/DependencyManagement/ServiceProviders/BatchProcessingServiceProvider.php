@@ -32,6 +32,6 @@ class BatchProcessingServiceProvider extends AbstractServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		$this->share( BatchProcessingController::class );
+		$this->share( BatchProcessingController::class, new BatchProcessingController() );
 	}
 }

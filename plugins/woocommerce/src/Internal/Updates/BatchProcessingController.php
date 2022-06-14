@@ -56,7 +56,7 @@ class BatchProcessingController {
 	}
 
 	/**
-	 * Schedules update for all updaters that may be stuck. This method is called in UPDATE_CRON_NAME action.
+	 * Schedules update for all updaters that may be stuck. This method is called in CONTROLLER_CRON_NAME action.
 	 */
 	public function schedule_processes() {
 		$pending_updates = $this->get_pending();
@@ -106,7 +106,7 @@ class BatchProcessingController {
 	 *
 	 * @return bool Whether it's already scheduled.
 	 */
-	private function already_scheduled( string $update_name ) {
+	public function already_scheduled( string $update_name ) {
 		return as_has_scheduled_action( self::SINGLE_PROCESS_MIGRATION_ACTION, array( $update_name ) );
 	}
 
@@ -178,14 +178,23 @@ class BatchProcessingController {
 	}
 
 	/**
-	 * Check if a particular process is in progress.
+	 * Check if a particular process is pending.
 	 *
 	 * @param string $process_id Fully qualified class name of process.
 	 *
 	 * @return bool Whether the update is in progress.
 	 */
-	public function is_batch_process_running( string $process_id ) : bool {
+	public function is_batch_process_pending( string $process_id ) : bool {
 		return in_array( $process_id, $this->get_pending() );
+	}
+
+	/**
+	 * Stops all pending updates, and clears current memory state.
+	 */
+	public function force_clear_all_processes() {
+		as_unschedule_all_actions( self::SINGLE_PROCESS_MIGRATION_ACTION );
+		as_unschedule_action( self::CONTROLLER_CRON_NAME );
+		update_option( self::PENDING_PROCESS_OPTION_NAME, array(), false );
 	}
 
 }
