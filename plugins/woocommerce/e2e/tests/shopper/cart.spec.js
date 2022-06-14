@@ -70,8 +70,9 @@ test.describe( 'Cart page', () => {
 		await page.goto( '/shop/' );
 		await page.click( `a:below(:text("${ productName }"))` );
 		// Once the view cart link is visible, item has been added
-		await page.waitForSelector( 'a.added_to_cart' );
-		// Click add to cart a second time
+		await page.waitForLoadState( 'networkidle' );
+		// Click add to cart a second time (load the shop in case redirection enabled)
+		await page.goto( '/shop/' );
 		await page.click( `a:below(:text("${ productName }"))` );
 		await page.waitForLoadState( 'networkidle' );
 
