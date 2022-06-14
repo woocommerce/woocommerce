@@ -72,12 +72,6 @@ class Formatter extends KeepAChangelogParser {
 	 * @return string Link to the version's release.
 	 */
 	public function getReleaseLink( $version ) {
-		$path_map = array(
-			'packages/js/components' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
-			'packages/js/csv-export' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
-			'plugins/woocommerce'    => 'https://github.com/woocommerce/woocommerce/releases/tag/',
-		);
-
 		// Catpure anything past /woocommerce in the current working directory.
 		preg_match( '/\/woocommerce\/(.+)/', getcwd(), $path );
 
@@ -85,9 +79,13 @@ class Formatter extends KeepAChangelogParser {
 			throw new \InvalidArgumentException( 'Invalid directory.' );
 		}
 
-		$release_url = $path_map[ $path[1] ];
+		$release_url = '';
 
-		if ( ! $release_url ) {
+		if ( 0 === stripos( $path[1], 'packages/js/' ) ) {
+			$release_url = 'https://www.npmjs.com/package/@woocommerce/components/v/';
+		} else if ( 'plugins/woocommerce' === $path[1] ) {
+			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
+		} else {
 			throw new \InvalidArgumentException( 'Release URL not found.' );
 		}
 
