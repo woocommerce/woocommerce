@@ -183,10 +183,8 @@ export function* removeProduct( id: number, force = false ) {
 			method: 'DELETE',
 		} );
 
-		if ( product ) {
-			yield deleteProductSuccess( id, product, force );
-			return product;
-		}
+		yield deleteProductSuccess( product.id, product, force );
+		return product;
 	} catch ( error ) {
 		yield deleteProductError( id, error );
 		throw error;
