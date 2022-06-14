@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'WooCommerce Tax Settings', () => {
+test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test( 'can enable tax calculation', async ( { page } ) => {
@@ -25,6 +26,33 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await expect(
 			page.locator( 'a.nav-tab:has-text("Tax")' )
 		).toBeVisible();
+	} );
+} );
+
+test.describe( 'WooCommerce Tax Settings', () => {
+	test.use( { storageState: 'e2e/storage/adminState.json' } );
+
+	test.beforeEach( async () => {
+		const api = new wcApi( {
+			url: 'http://localhost:8084',
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.put( 'settings/general/woocommerce_calc_taxes', {
+			value: 'yes',
+		} );
+	} );
+	test.afterEach( async () => {
+		const api = new wcApi( {
+			url: 'http://localhost:8084',
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.put( 'settings/general/woocommerce_calc_taxes', {
+			value: 'no',
+		} );
 	} );
 
 	test( 'can set tax options', async ( { page } ) => {
