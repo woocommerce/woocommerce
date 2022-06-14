@@ -20,6 +20,7 @@ import {
 	ProductTourStepName,
 	useProductStepChange,
 } from './use-product-step-change';
+import { useTrackPublishButton } from './use-track-publish-button';
 
 const getTourConfig = ( {
 	isExcerptEditorTmceActive,
@@ -307,6 +308,8 @@ const ProductTour = () => {
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	useTrackPublishButton( showTour );
 
 	if ( ! showTour ) {
 		return null;
