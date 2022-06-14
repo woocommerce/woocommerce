@@ -27,16 +27,6 @@ abstract class BatchProcessor {
 	abstract protected function get_description() : string;
 
 	/**
-	 * Returns ID for this processor. Based on class name by default, but can be overwritten.
-	 *
-	 * @return string ID (usually fully qualified class name).
-	 */
-	public function get_id() : string {
-		// Length of wp_option.option_name is 191 chars, this leaves 180 for us after wc_batch_ prefix.
-		return substr( self::class, -182 );
-	}
-
-	/**
 	 * Process data for current batch.
 	 *
 	 * @param array $batch Batch details.
@@ -147,8 +137,9 @@ abstract class BatchProcessor {
 	 *
 	 * @return string
 	 */
-	private function get_process_option_name() {
-		return "wc_batch_{$this->get_id()}";
+	protected function get_process_option_name() {
+		// Option name max length is 191 chars.
+		return 'wc_batch_' . substr( self::class, -182 );
 	}
 
 	/**
