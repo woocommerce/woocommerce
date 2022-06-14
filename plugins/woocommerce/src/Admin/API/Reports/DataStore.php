@@ -102,6 +102,27 @@ class DataStore extends SqlQuery {
 	protected $interval_query;
 
 	/**
+	 * Refresh the cache for the current query when true.
+	 *
+	 * @var bool
+	 */
+	protected $force_cache_refresh = false;
+
+	/**
+	 * Include debugging information in the returned data when true.
+	 *
+	 * @var bool
+	 */
+	protected $debug_cache = true;
+
+	/**
+	 * Debugging information to include in the returned data.
+	 *
+	 * @var array
+	 */
+	protected $debug_cache_data = array();
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -115,6 +136,13 @@ class DataStore extends SqlQuery {
 				$this->context,
 				self::get_db_table_name()
 			);
+		}
+
+		// Utilize enveloped responses to include debugging info.
+		// See https://querymonitor.com/blog/2021/05/debugging-wordpress-rest-api-requests/
+		if ( isset( $_GET['_envelope'] ) ) {
+			$this->debug_cache = true;
+			add_filter( 'rest_envelope_response', array( $this, 'add_debug_cache_to_envelope' ), 999, 2 );
 		}
 	}
 
@@ -160,6 +188,19 @@ class DataStore extends SqlQuery {
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
+		if ( isset( $params['force_cache_refresh'] ) ) {
+			if ( true === $params['force_cache_refresh'] ) {
+				$this->force_cache_refresh = true;
+			}
+
+			// We don't want this param in the key.
+			unset( $params['force_cache_refresh'] );
+		}
+
+		if ( true === $this->debug_cache ) {
+			$this->debug_cache_data['query_args'] = $params;
+		}
+
 		return implode(
 			'_',
 			array(
@@ -177,9 +218,25 @@ class DataStore extends SqlQuery {
 	 * @return mixed
 	 */
 	protected function get_cached_data( $cache_key ) {
-		if ( $this->should_use_cache() ) {
-			return Cache::get( $cache_key );
+		if ( true === $this->debug_cache ) {
+			$this->debug_cache_data['should_use_cache']    = $this->should_use_cache();
+			$this->debug_cache_data['force_cache_refresh'] = $this->force_cache_refresh;
+			$this->debug_cache_data['cache_hit']           = false;
 		}
+
+		if ( $this->should_use_cache() && false === $this->force_cache_refresh ) {
+			$cached_data = Cache::get( $cache_key );
+
+			$cache_hit = false !== $cached_data;
+			if ( true === $this->debug_cache ) {
+				$this->debug_cache_data['cache_hit'] = $cache_hit;
+			}
+
+			return $cached_data;
+		}
+
+		// Cached item has now functionally been refreshed. Reset the option.
+		$this->force_cache_refresh = false;
 
 		return false;
 	}
@@ -197,6 +254,26 @@ class DataStore extends SqlQuery {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Add cache debugging information to an enveloped API response.
+	 *
+	 * @param array             $envelope
+	 * @param \WP_REST_Response $response
+	 *
+	 * @return array
+	 */
+	public function add_debug_cache_to_envelope( $envelope, $response ) {
+		if ( 0 !== strncmp( '/wc-analytics', $response->get_matched_route(), 13 ) ) {
+			return $envelope;
+		}
+
+		if ( ! empty( $this->debug_cache_data ) ) {
+			$envelope['debug_cache'] = $this->debug_cache_data;
+		}
+
+		return $envelope;
 	}
 
 	/**
