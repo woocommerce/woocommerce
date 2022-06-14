@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
-use Automattic\WooCommerce\Internal\Updates\WCActionUpdateController;
+use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
 
 /**
  * Class WCUpdateServiceProvider
@@ -21,7 +21,7 @@ class WCUpdateServiceProvider extends AbstractServiceProvider {
 	 * @var string[]
 	 */
 	protected $provides = array(
-		WCActionUpdateController::class,
+		BatchProcessingController::class,
 	);
 
 	/**
@@ -32,6 +32,6 @@ class WCUpdateServiceProvider extends AbstractServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		$this->share( WCActionUpdateController::class );
+		$this->share( BatchProcessingController::class );
 	}
 }
