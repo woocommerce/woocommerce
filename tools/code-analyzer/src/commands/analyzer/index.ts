@@ -92,23 +92,23 @@ export default class Analyzer extends Command {
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
-		if ( flags.source === 'woocommerce/woocommerce' ) {
-			const schemaDiff = await generateSchemaDiff(
-				flags.source,
-				args.compare,
-				flags.base,
-				( e: string ): void => this.error( e )
-			);
+		// if ( flags.source === 'woocommerce/woocommerce' ) {
+		// 	const schemaDiff = await generateSchemaDiff(
+		// 		flags.source,
+		// 		args.compare,
+		// 		flags.base,
+		// 		( e: string ): void => this.error( e )
+		// 	);
 
-			this.scanChanges(
-				patchContent,
-				pluginData[ 0 ],
-				flags.output,
-				schemaDiff
-			);
-		} else {
-			this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
-		}
+		// 	this.scanChanges(
+		// 		patchContent,
+		// 		pluginData[ 0 ],
+		// 		flags.output,
+		// 		schemaDiff
+		// 	);
+		// } else {
+		this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
+		// }
 	}
 
 	/**
@@ -388,18 +388,20 @@ export default class Analyzer extends Command {
 
 			for ( const raw of results ) {
 				// Extract hook description.
-				const rawDescription = raw.match( /\/\*\*([\s\S]*) @since/ );
+				const rawDescription = raw.match(
+					/\/\*\*\n(-.*\n)*([\s\S]*) @since/
+				);
 
 				if ( ! rawDescription ) {
 					continue;
 				}
 
-				const description = rawDescription[ 1 ]
+				const description = rawDescription[ 2 ]
 					.replace( /\*/g, '' )
 					.replace( /\+/g, '' )
+					.replace( /-/g, '' )
 					.trim();
 
-				console.log( description );
 				// Extract hook name and type.
 				const hookName = raw.match(
 					/(.*)(do_action|apply_filters)\(\s+'(.*)'/
