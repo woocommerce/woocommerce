@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Trigger Photoswipe modal when clicking child elements of the trigger element
