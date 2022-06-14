@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  E2E_PLAYWRIGHT: ${{ false }}
+  E2E_PLAYWRIGHT: ${{ true }}
 
 jobs:
     e2e-tests-run:
@@ -73,9 +73,7 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
-                  path: |
-                      plugins/woocommerce/e2e/allure-results
-                      plugins/woocommerce/e2e/allure-report
+                  path: plugins/woocommerce/e2e/allure-report
                   if-no-files-found: ignore
                   retention-days: 5
 
@@ -167,12 +165,7 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: |
-            always() && 
-            (
-              contains( needs.*.result, 'success' ) ||
-              contains( needs.*.result, 'failure' )
-            )
+        if: ${{ false }}
         runs-on: ubuntu-20.04
         needs: [api-tests-run, e2e-tests-run, k6-tests-run]
         env:
