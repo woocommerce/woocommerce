@@ -1,25 +1,13 @@
 {
 	"root": true,
+	"extends": [ "plugin:@woocommerce/eslint-plugin/recommended" ],
 	"env": {
 		"browser": true,
 		"node": true
 	},
-	"globals": {
-		"wp": true,
-		"es6": true
-	},
 	"rules": {
 		"camelcase": 0,
-		"indent": 0,
-		"max-len": [
-			2,
-			{
-				"code": 140
-			}
-		],
-		"no-console": 1
-	},
-	"parserOptions": {
-		"ecmaVersion": 6
+		"react/react-in-jsx-scope": "off",
+		"no-alert": "off"
 	}
 }
