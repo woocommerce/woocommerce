@@ -101,7 +101,7 @@ test.describe( 'Import Products from a CSV file', () => {
 			version: 'wc/v3',
 		} );
 		// get a list of all products
-		await api.get( 'products?per_page=20' ).then( ( response ) => {
+		await api.get( 'products?per_page=50' ).then( ( response ) => {
 			for ( let i = 0; i < response.data.length; i++ ) {
 				// if the product is one we imported, add it to the array
 				for ( let j = 0; j < productNamesOverride.length; j++ ) {
@@ -175,7 +175,10 @@ test.describe( 'Import Products from a CSV file', () => {
 		await page.click( '#search-submit' );
 
 		// Compare imported products to what's expected
-		await page.waitForSelector( 'a.row-title' );
+		await page.waitForSelector( 'a.row-title', {
+			state: 'visible',
+			timeout: 120000, // import can take a while
+		} );
 		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
 			elements.map( ( item ) => item.innerHTML )
 		);
@@ -205,7 +208,7 @@ test.describe( 'Import Products from a CSV file', () => {
 		// Confirm that the import is done
 		await expect(
 			page.locator( '.woocommerce-importer-done' )
-		).toContainText( 'Import complete!', { timeout: 120000 } );
+		).toContainText( 'Import complete!', { timeout: 120000 } ); // import can take a while
 
 		// View the products
 		await page.click( 'text=View products' );
