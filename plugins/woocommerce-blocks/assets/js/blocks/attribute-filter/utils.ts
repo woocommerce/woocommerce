@@ -8,6 +8,7 @@ import {
 	PREFIX_QUERY_ARG_FILTER_TYPE,
 	PREFIX_QUERY_ARG_QUERY_TYPE,
 } from '@woocommerce/utils';
+import { AttributeObject } from '@woocommerce/types';
 
 interface Param {
 	attribute: string;
@@ -51,7 +52,7 @@ export const areAllFiltersRemoved = ( {
 
 export const getActiveFilters = (
 	isFilteringForPhpTemplateEnabled: boolean,
-	attributeObject: Record< string, string > | undefined
+	attributeObject: AttributeObject | undefined
 ) => {
 	if ( isFilteringForPhpTemplateEnabled && attributeObject ) {
 		const defaultAttributeParam = getUrlParameter(

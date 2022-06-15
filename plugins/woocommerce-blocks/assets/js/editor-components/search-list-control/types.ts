@@ -63,9 +63,9 @@ export interface SearchListControlProps {
 	// Whether it should be displayed in a compact way, so it occupies less space.
 	isCompact: boolean;
 	// Whether the list of items is hierarchical or not. If true, each list item is expected to have a parent property.
-	isHierarchical: boolean;
+	isHierarchical?: boolean;
 	// Whether the list of items is still loading.
-	isLoading: boolean;
+	isLoading?: boolean;
 	//Restrict selections to one item.
 	isSingle: boolean;
 	// A complete list of item objects, each with id, name properties. This is displayed as a clickable/keyboard-able list, and possibly filtered by the search term (searches name).
@@ -77,9 +77,9 @@ export interface SearchListControlProps {
 	// Callback fired when the search field is used.
 	onSearch?: ( search: string ) => void;
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
-	renderItem: ( args: renderItemArgs ) => JSX.Element;
+	renderItem?: ( args: renderItemArgs ) => JSX.Element;
 	// The list of currently selected items.
 	selected: SearchListItemsType;
 	// from withSpokenMessages
-	debouncedSpeak: ( message: string ) => void;
+	debouncedSpeak?: ( message: string ) => void;
 }
