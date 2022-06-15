@@ -389,12 +389,6 @@ export default class Analyzer extends Command {
 			const filepath = getFilename( lines[ 0 ] );
 
 			for ( const raw of results ) {
-				const description = getHookDescription( raw );
-
-				if ( ! description ) {
-					continue;
-				}
-
 				// Extract hook name and type.
 				const hookName = raw.match(
 					/(.*)(do_action|apply_filters)\(\s+'(.*)'/
@@ -404,7 +398,16 @@ export default class Analyzer extends Command {
 					continue;
 				}
 
+				const description = getHookDescription( raw );
+
 				const name = getHookName( hookName[ 3 ] );
+
+				if ( ! description ) {
+					this.error(
+						`Hook ${ name } has no description. Please add a description.`
+					);
+				}
+
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
 				const CLIMessage = `**${ name }** introduced in ${ version }`;
