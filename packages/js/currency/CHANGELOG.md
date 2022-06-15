@@ -1,4 +1,4 @@
-## [4.1.0](https://www.npmjs.com/package/@woocommerce/components/v/4.1.0) - 2022-06-14
+## [4.1.0](https://www.npmjs.com/package/@woocommerce/currency/v/4.1.0) - 2022-06-14
 
 -   Minor - Add Jetpack Changelogger
 -   Patch - Migrate @woocommerce/currency to TS

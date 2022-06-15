@@ -1,4 +1,4 @@
-## [3.1.0](https://www.npmjs.com/package/@woocommerce/components/v/3.1.0) - 2022-06-14
+## [3.1.0](https://www.npmjs.com/package/@woocommerce/experimental/v/3.1.0) - 2022-06-14
 
 -   Minor - Add Jetpack Changelogger
 -   Minor - Update TaskItem props type definition.

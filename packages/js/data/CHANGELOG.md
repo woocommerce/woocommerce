@@ -1,4 +1,4 @@
-## [4.0.0](https://www.npmjs.com/package/@woocommerce/components/v/4.0.0) - 2022-06-14
+## [4.0.0](https://www.npmjs.com/package/@woocommerce/data/v/4.0.0) - 2022-06-14
 
 -   Major - Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
 -   Minor - Add create product actions in products data store #33278

@@ -1,4 +1,4 @@
-## [2.1.0](https://www.npmjs.com/package/@woocommerce/components/v/2.1.0) - 2022-06-14
+## [2.1.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/2.1.0) - 2022-06-14
 
 -   Patch - Add '@woocommerce/extend-cart-checkout-block' to list of packages
 -   Minor - Add Jetpack Changelogger

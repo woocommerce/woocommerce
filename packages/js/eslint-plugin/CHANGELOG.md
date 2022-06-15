@@ -1,4 +1,4 @@
-## [2.1.0](https://www.npmjs.com/package/@woocommerce/components/v/2.1.0) - 2022-06-14
+## [2.1.0](https://www.npmjs.com/package/@woocommerce/eslint-plugin/v/2.1.0) - 2022-06-14
 
 -   Minor - Add Jetpack Changelogger
 -   Patch - Standardize lint scripts: add lint:fix
