@@ -153,11 +153,12 @@ describe( 'payment-method-config-helper', () => {
 	describe( 'canMakePaymentWithExtensions', () => {
 		it( "Returns false without executing the registered callbacks, if the payment method's canMakePayment callback returns false.", () => {
 			const canMakePayment = () => false;
-			const canMakePaymentWithExtensionsResult = helpers.canMakePaymentWithExtensions(
-				canMakePayment,
-				canMakePaymentExtensionsCallbacks,
-				'cod'
-			)( canMakePaymentArgument );
+			const canMakePaymentWithExtensionsResult =
+				helpers.canMakePaymentWithExtensions(
+					canMakePayment,
+					canMakePaymentExtensionsCallbacks,
+					'cod'
+				)( canMakePaymentArgument );
 			expect( canMakePaymentWithExtensionsResult ).toBe( false );
 			expect( trueCallback ).not.toHaveBeenCalled();
 		} );

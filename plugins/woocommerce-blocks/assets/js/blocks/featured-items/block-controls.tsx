@@ -136,39 +136,37 @@ export const BlockControls = ( {
 	);
 };
 
-export const withBlockControls = ( {
-	cropLabel,
-	editLabel,
-}: BlockControlsConfiguration ) => < T extends EditorBlock< T > >(
-	Component: ComponentType< T >
-) => ( props: WithBlockControlsProps< T > ) => {
-	const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
-	const { attributes, category, name, product, setAttributes } = props;
-	const { contentAlign, editMode, mediaId, mediaSrc } = attributes;
-	const item = category || product;
+export const withBlockControls =
+	( { cropLabel, editLabel }: BlockControlsConfiguration ) =>
+	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
+	( props: WithBlockControlsProps< T > ) => {
+		const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
+		const { attributes, category, name, product, setAttributes } = props;
+		const { contentAlign, editMode, mediaId, mediaSrc } = attributes;
+		const item = category || product;
 
-	const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
-		item,
-		mediaId,
-		mediaSrc,
-		blockName: name,
-	} );
+		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
+			item,
+			mediaId,
+			mediaSrc,
+			blockName: name,
+		} );
 
-	return (
-		<>
-			<BlockControls
-				backgroundImageId={ backgroundImageId }
-				backgroundImageSrc={ backgroundImageSrc }
-				contentAlign={ contentAlign }
-				cropLabel={ cropLabel }
-				editLabel={ editLabel }
-				editMode={ editMode }
-				isEditingImage={ isEditingImage }
-				mediaSrc={ mediaSrc }
-				setAttributes={ setAttributes }
-				setIsEditingImage={ setIsEditingImage }
-			/>
-			<Component { ...props } />
-		</>
-	);
-};
+		return (
+			<>
+				<BlockControls
+					backgroundImageId={ backgroundImageId }
+					backgroundImageSrc={ backgroundImageSrc }
+					contentAlign={ contentAlign }
+					cropLabel={ cropLabel }
+					editLabel={ editLabel }
+					editMode={ editMode }
+					isEditingImage={ isEditingImage }
+					mediaSrc={ mediaSrc }
+					setAttributes={ setAttributes }
+					setIsEditingImage={ setIsEditingImage }
+				/>
+				<Component { ...props } />
+			</>
+		);
+	};

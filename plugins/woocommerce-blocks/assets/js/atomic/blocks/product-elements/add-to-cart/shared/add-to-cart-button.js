@@ -45,10 +45,11 @@ const AddToCartButton = () => {
 			}
 			return true;
 		};
-		const unsubscribeProcessing = eventRegistration.onAddToCartAfterProcessingWithSuccess(
-			onSuccess,
-			0
-		);
+		const unsubscribeProcessing =
+			eventRegistration.onAddToCartAfterProcessingWithSuccess(
+				onSuccess,
+				0
+			);
 		return () => {
 			unsubscribeProcessing();
 		};

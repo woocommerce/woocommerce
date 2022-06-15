@@ -27,10 +27,8 @@ const Block = ( {
 } ): JSX.Element => {
 	const link = getSetting( 'page-' + checkoutPageId, false );
 	const { isCalculating } = useCheckoutContext();
-	const [
-		positionReferenceElement,
-		positionRelativeToViewport,
-	] = usePositionRelativeToViewport();
+	const [ positionReferenceElement, positionRelativeToViewport ] =
+		usePositionRelativeToViewport();
 	const [ showSpinner, setShowSpinner ] = useState( false );
 
 	useEffect( () => {

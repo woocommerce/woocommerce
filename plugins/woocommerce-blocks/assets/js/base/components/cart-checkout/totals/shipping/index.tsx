@@ -131,9 +131,8 @@ export const TotalsShipping = ( {
 	isCheckout = false,
 	className,
 }: TotalShippingProps ): ReactElement => {
-	const [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] = useState(
-		false
-	);
+	const [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] =
+		useState( false );
 	const {
 		shippingAddress,
 		cartHasCalculatedShipping,

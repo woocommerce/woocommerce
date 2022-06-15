@@ -78,20 +78,17 @@ interface AddressFormProps {
  */
 const AddressForm = ( {
 	id = '',
-	fields = ( Object.keys(
+	fields = Object.keys(
 		defaultAddressFields
-	) as unknown ) as ( keyof AddressFields )[],
+	) as unknown as ( keyof AddressFields )[],
 	fieldConfig = {} as Record< keyof AddressFields, Partial< AddressField > >,
 	instanceId,
 	onChange,
 	type = 'shipping',
 	values,
 }: AddressFormProps ): JSX.Element => {
-	const {
-		getValidationError,
-		setValidationErrors,
-		clearValidationError,
-	} = useValidationContext();
+	const { getValidationError, setValidationErrors, clearValidationError } =
+		useValidationContext();
 
 	const currentFields = useShallowEqual( fields );
 

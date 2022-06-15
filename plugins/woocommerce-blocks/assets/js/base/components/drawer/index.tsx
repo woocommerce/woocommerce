@@ -46,9 +46,12 @@ const Drawer = ( {
 			overlayClassName={ classNames(
 				'wc-block-components-drawer__screen-overlay',
 				{
-					'wc-block-components-drawer__screen-overlay--is-hidden': ! isOpen,
-					'wc-block-components-drawer__screen-overlay--with-slide-in': slideIn,
-					'wc-block-components-drawer__screen-overlay--with-slide-out': slideOut,
+					'wc-block-components-drawer__screen-overlay--is-hidden':
+						! isOpen,
+					'wc-block-components-drawer__screen-overlay--with-slide-in':
+						slideIn,
+					'wc-block-components-drawer__screen-overlay--with-slide-out':
+						slideOut,
 				}
 			) }
 			closeButtonLabel={ __(

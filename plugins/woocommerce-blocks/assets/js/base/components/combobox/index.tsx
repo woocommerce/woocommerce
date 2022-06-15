@@ -55,11 +55,8 @@ const Combobox = ( {
 	instanceId = '0',
 	autoComplete = 'off',
 }: ComboboxProps ): JSX.Element => {
-	const {
-		getValidationError,
-		setValidationErrors,
-		clearValidationError,
-	} = useValidationContext();
+	const { getValidationError, setValidationErrors, clearValidationError } =
+		useValidationContext();
 
 	const controlRef = useRef< HTMLDivElement >( null );
 	const controlId = id || 'control-' + instanceId;
@@ -126,7 +123,8 @@ const Combobox = ( {
 						}
 
 						// Try to match.
-						const normalizedFilterValue = filterValue.toLocaleUpperCase();
+						const normalizedFilterValue =
+							filterValue.toLocaleUpperCase();
 						const foundOption = options.find(
 							( option ) =>
 								option.label

@@ -63,7 +63,8 @@ export const Edit = ( {
 	const blockProps = useBlockProps( {
 		className: classnames(
 			{
-				'wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods': hasExpressPaymentMethods,
+				'wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods':
+					hasExpressPaymentMethods,
 			},
 			attributes?.className
 		),

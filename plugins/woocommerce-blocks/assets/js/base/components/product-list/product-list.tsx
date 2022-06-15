@@ -142,9 +142,8 @@ const ProductList = ( {
 			currentPage,
 		} )
 	);
-	const { products, totalProducts, productsLoading } = useStoreProducts(
-		queryState
-	);
+	const { products, totalProducts, productsLoading } =
+		useStoreProducts( queryState );
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
 	const { dispatchStoreEvent } = useStoreEvents();

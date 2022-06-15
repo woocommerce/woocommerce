@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-const WooCommerceRestApi = require( '@woocommerce/woocommerce-rest-api' )
-	.default;
+const WooCommerceRestApi =
+	require( '@woocommerce/woocommerce-rest-api' ).default;
 const glob = require( 'glob-promise' );
 const { dirname } = require( 'path' );
 const { readJson } = require( 'fs-extra' );

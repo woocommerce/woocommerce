@@ -32,12 +32,8 @@ export default function ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< Attributes > ) {
-	const {
-		heading,
-		headingLevel,
-		showInputFields,
-		showFilterButton,
-	} = attributes;
+	const { heading, headingLevel, showInputFields, showFilterButton } =
+		attributes;
 
 	const blockProps = useBlockProps();
 

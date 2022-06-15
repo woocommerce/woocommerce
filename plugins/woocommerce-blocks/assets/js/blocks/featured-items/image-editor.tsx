@@ -92,35 +92,37 @@ export const ImageEditor = ( {
 	);
 };
 
-export const withImageEditor = < T extends EditorBlock< T > >(
-	Component: ComponentType< T >
-) => ( props: WithImageEditorProps< T > ) => {
-	const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
+export const withImageEditor =
+	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
+	( props: WithImageEditorProps< T > ) => {
+		const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
 
-	const { attributes, backgroundImageSize, name, setAttributes } = props;
-	const { mediaId, mediaSrc } = attributes;
-	const item =
-		name === BLOCK_NAMES.featuredProduct ? props.product : props.category;
+		const { attributes, backgroundImageSize, name, setAttributes } = props;
+		const { mediaId, mediaSrc } = attributes;
+		const item =
+			name === BLOCK_NAMES.featuredProduct
+				? props.product
+				: props.category;
 
-	const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
-		item,
-		mediaId,
-		mediaSrc,
-		blockName: name,
-	} );
+		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
+			item,
+			mediaId,
+			mediaSrc,
+			blockName: name,
+		} );
 
-	if ( isEditingImage ) {
-		return (
-			<ImageEditor
-				backgroundImageId={ backgroundImageId }
-				backgroundImageSize={ backgroundImageSize }
-				backgroundImageSrc={ backgroundImageSrc }
-				isEditingImage={ isEditingImage }
-				setAttributes={ setAttributes }
-				setIsEditingImage={ setIsEditingImage }
-			/>
-		);
-	}
+		if ( isEditingImage ) {
+			return (
+				<ImageEditor
+					backgroundImageId={ backgroundImageId }
+					backgroundImageSize={ backgroundImageSize }
+					backgroundImageSrc={ backgroundImageSrc }
+					isEditingImage={ isEditingImage }
+					setAttributes={ setAttributes }
+					setIsEditingImage={ setIsEditingImage }
+				/>
+			);
+		}
 
-	return <Component { ...props } />;
-};
+		return <Component { ...props } />;
+	};

@@ -287,70 +287,72 @@ export const InspectorControls = ( {
 	);
 };
 
-export const withInspectorControls = < T extends EditorBlock< T > >(
-	Component: ComponentType< T >
-) => ( props: WithInspectorControlsProps< T > ) => {
-	const { attributes, name, setAttributes } = props;
-	const {
-		alt,
-		dimRatio,
-		focalPoint,
-		hasParallax,
-		isRepeated,
-		imageFit,
-		mediaId,
-		mediaSrc,
-		overlayColor,
-		overlayGradient,
-		showDesc,
-		showPrice,
-	} = attributes;
+export const withInspectorControls =
+	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
+	( props: WithInspectorControlsProps< T > ) => {
+		const { attributes, name, setAttributes } = props;
+		const {
+			alt,
+			dimRatio,
+			focalPoint,
+			hasParallax,
+			isRepeated,
+			imageFit,
+			mediaId,
+			mediaSrc,
+			overlayColor,
+			overlayGradient,
+			showDesc,
+			showPrice,
+		} = attributes;
 
-	const item =
-		name === BLOCK_NAMES.featuredProduct ? props.product : props.category;
+		const item =
+			name === BLOCK_NAMES.featuredProduct
+				? props.product
+				: props.category;
 
-	const { setGradient } = useGradient( {
-		gradientAttribute: 'overlayGradient',
-		customGradientAttribute: 'overlayGradient',
-	} );
-	const { backgroundImageSrc } = useBackgroundImage( {
-		item,
-		mediaId,
-		mediaSrc,
-		blockName: name,
-	} );
+		const { setGradient } = useGradient( {
+			gradientAttribute: 'overlayGradient',
+			customGradientAttribute: 'overlayGradient',
+		} );
+		const { backgroundImageSrc } = useBackgroundImage( {
+			item,
+			mediaId,
+			mediaSrc,
+			blockName: name,
+		} );
 
-	const contentPanel =
-		name === BLOCK_NAMES.featuredProduct ? (
-			<ToggleControl
-				label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
-				checked={ showPrice }
-				onChange={ () =>
-					setAttributes( {
-						showPrice: ! showPrice,
-					} )
-				}
-			/>
-		) : undefined;
+		const contentPanel =
+			name === BLOCK_NAMES.featuredProduct ? (
+				<ToggleControl
+					label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
+					checked={ showPrice }
+					onChange={ () =>
+						setAttributes( {
+							showPrice: ! showPrice,
+						} )
+					}
+				/>
+			) : undefined;
 
-	return (
-		<>
-			<InspectorControls
-				alt={ alt }
-				backgroundImageSrc={ backgroundImageSrc }
-				contentPanel={ contentPanel }
-				dimRatio={ dimRatio }
-				focalPoint={ focalPoint }
-				hasParallax={ hasParallax }
-				isRepeated={ isRepeated }
-				imageFit={ imageFit }
-				overlayColor={ overlayColor }
-				overlayGradient={ overlayGradient }
-				setAttributes={ setAttributes }
-				setGradient={ setGradient }
-				showDesc={ showDesc }
-			/>
-			<Component { ...props } />
-		</>
-	);
-};
+		return (
+			<>
+				<InspectorControls
+					alt={ alt }
+					backgroundImageSrc={ backgroundImageSrc }
+					contentPanel={ contentPanel }
+					dimRatio={ dimRatio }
+					focalPoint={ focalPoint }
+					hasParallax={ hasParallax }
+					isRepeated={ isRepeated }
+					imageFit={ imageFit }
+					overlayColor={ overlayColor }
+					overlayGradient={ overlayGradient }
+					setAttributes={ setAttributes }
+					setGradient={ setGradient }
+					showDesc={ showDesc }
+				/>
+				<Component { ...props } />
+			</>
+		);
+	};

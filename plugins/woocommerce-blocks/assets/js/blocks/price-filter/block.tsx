@@ -100,9 +100,8 @@ const PriceFilterBlock = ( {
 	 * Important: Only used on the PHP rendered Block pages to track
 	 * the price filter defaults coming from the URL
 	 */
-	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] = useState(
-		false
-	);
+	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] =
+		useState( false );
 
 	const minPriceParam = getUrlParameter( 'min_price' );
 	const maxPriceParam = getUrlParameter( 'max_price' );
@@ -315,7 +314,8 @@ const PriceFilterBlock = ( {
 		return null;
 	}
 
-	const TagName = `h${ attributes.headingLevel }` as keyof JSX.IntrinsicElements;
+	const TagName =
+		`h${ attributes.headingLevel }` as keyof JSX.IntrinsicElements;
 
 	return (
 		<>

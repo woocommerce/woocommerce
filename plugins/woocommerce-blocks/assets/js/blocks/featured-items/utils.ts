@@ -61,9 +61,8 @@ export function getBackgroundImageStyles( {
 			...( url && {
 				backgroundImage: `url(${ url })`,
 			} ),
-			backgroundPosition: calculatePercentPositionFromCoordinates(
-				focalPoint
-			),
+			backgroundPosition:
+				calculatePercentPositionFromCoordinates( focalPoint ),
 			...( ! isRepeated && {
 				backgroundRepeat: 'no-repeat',
 				backgroundSize: imageFit === 'cover' ? imageFit : 'auto',

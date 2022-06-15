@@ -1,1 +1,4 @@
-{"title":"Hand-picked Products Block","pageContent":"<!-- wp:woocommerce/handpicked-products /-->"}
+{
+	"title": "Hand-picked Products Block",
+	"pageContent": "<!-- wp:woocommerce/handpicked-products /-->"
+}

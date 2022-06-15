@@ -44,10 +44,8 @@ const Template: Story< CountryInputWithCountriesProps > = ( args ) => {
 	const [ selectedCountry, selectCountry ] = useState< CountryCode | '' >(
 		''
 	);
-	const {
-		clearValidationError,
-		showValidationError,
-	} = useValidationContext();
+	const { clearValidationError, showValidationError } =
+		useValidationContext();
 
 	useEffect( () => {
 		showValidationError( 'country' );

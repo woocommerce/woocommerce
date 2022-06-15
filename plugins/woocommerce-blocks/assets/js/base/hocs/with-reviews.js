@@ -92,13 +92,8 @@ const withReviews = ( OriginalComponent ) => {
 		}
 
 		getArgs( reviewsToSkip ) {
-			const {
-				categoryIds,
-				order,
-				orderby,
-				productId,
-				reviewsToDisplay,
-			} = this.props;
+			const { categoryIds, order, orderby, productId, reviewsToDisplay } =
+				this.props;
 			const args = {
 				order,
 				orderby,
@@ -214,9 +209,8 @@ const withReviews = ( OriginalComponent ) => {
 		}
 	}
 
-	const {
-		displayName = OriginalComponent.name || 'Component',
-	} = OriginalComponent;
+	const { displayName = OriginalComponent.name || 'Component' } =
+		OriginalComponent;
 	WrappedComponent.displayName = `WithReviews( ${ displayName } )`;
 
 	return WrappedComponent;

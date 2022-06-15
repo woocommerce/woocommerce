@@ -33,7 +33,8 @@ interface TagNameProps extends HTMLAttributes< HTMLOrSVGElement > {
 const TagName = ( {
 	children,
 	headingLevel,
-	elementType: ElementType = `h${ headingLevel }` as keyof JSX.IntrinsicElements,
+	elementType:
+		ElementType = `h${ headingLevel }` as keyof JSX.IntrinsicElements,
 	...props
 }: TagNameProps ): JSX.Element => {
 	return <ElementType { ...props }>{ children }</ElementType>;
@@ -77,7 +78,8 @@ export const Block = ( props: Props ): JSX.Element => {
 					colorProps.className,
 					'wc-block-components-product-title',
 					{
-						[ `${ parentClassName }__product-title` ]: parentClassName,
+						[ `${ parentClassName }__product-title` ]:
+							parentClassName,
 						[ `wc-block-components-product-title--align-${ align }` ]:
 							align && isFeaturePluginBuild(),
 					}

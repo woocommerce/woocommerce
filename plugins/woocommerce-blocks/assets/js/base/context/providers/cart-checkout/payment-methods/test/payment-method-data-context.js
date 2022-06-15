@@ -230,10 +230,8 @@ describe( 'Testing Payment Method Data Context Provider with saved cards turned 
 
 	it( 'resets saved payment method data after starting and closing an express payment method', async () => {
 		const TriggerActiveExpressPaymentMethod = () => {
-			const {
-				activePaymentMethod,
-				paymentMethodData,
-			} = usePaymentMethodDataContext();
+			const { activePaymentMethod, paymentMethodData } =
+				usePaymentMethodDataContext();
 			return (
 				<>
 					<CheckoutExpressPayment />

@@ -216,13 +216,14 @@ const usePaymentMethodRegistration = (
 export const usePaymentMethods = (
 	dispatcher: PaymentMethodsDispatcherType
 ): boolean => {
-	const standardMethods: PaymentMethods = getPaymentMethods() as PaymentMethods;
+	const standardMethods: PaymentMethods =
+		getPaymentMethods() as PaymentMethods;
 	const { noticeContexts } = useEmitResponse();
 	// Ensure all methods are present in order.
 	// Some payment methods may not be present in paymentGatewaySortOrder if they
 	// depend on state, e.g. COD can depend on shipping method.
 	const displayOrder = new Set( [
-		...( getSetting( 'paymentGatewaySortOrder', [] ) as [  ] ),
+		...( getSetting( 'paymentGatewaySortOrder', [] ) as [] ),
 		...Object.keys( standardMethods ),
 	] );
 	return usePaymentMethodRegistration(
@@ -243,7 +244,8 @@ export const usePaymentMethods = (
 export const useExpressPaymentMethods = (
 	dispatcher: PaymentMethodsDispatcherType
 ): boolean => {
-	const expressMethods: ExpressPaymentMethods = getExpressPaymentMethods() as ExpressPaymentMethods;
+	const expressMethods: ExpressPaymentMethods =
+		getExpressPaymentMethods() as ExpressPaymentMethods;
 	const { noticeContexts } = useEmitResponse();
 	return usePaymentMethodRegistration(
 		dispatcher,

@@ -25,15 +25,13 @@ export const currencies: Record< string, Currency > = {
 	},
 } as const;
 
-export const currenciesAPIShape: Record<
-	string,
-	CurrencyResponse
-> = Object.fromEntries(
-	Object.entries( currencies ).map( ( [ key, value ] ) => [
-		key,
-		snakecaseKeys( value ),
-	] )
-);
+export const currenciesAPIShape: Record< string, CurrencyResponse > =
+	Object.fromEntries(
+		Object.entries( currencies ).map( ( [ key, value ] ) => [
+			key,
+			snakecaseKeys( value ),
+		] )
+	);
 
 export const currencyControl = {
 	control: 'select',

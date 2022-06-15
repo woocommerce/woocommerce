@@ -711,10 +711,8 @@ const getStylingConfig = ( options = {} ) => {
 									includePaths: [ 'assets/css/abstracts' ],
 								},
 								additionalData: ( content, loaderContext ) => {
-									const {
-										resourcePath,
-										rootContext,
-									} = loaderContext;
+									const { resourcePath, rootContext } =
+										loaderContext;
 									const relativePath = path.relative(
 										rootContext,
 										resourcePath
