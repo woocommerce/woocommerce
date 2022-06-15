@@ -411,9 +411,6 @@ abstract class WC_Data {
 		}
 
 		$this->maybe_read_meta_data();
-		if ( $unique ) {
-			$this->delete_meta_data( $key );
-		}
 		$this->meta_data[] = new WC_Meta_Data(
 			array(
 				'key'   => $key,
