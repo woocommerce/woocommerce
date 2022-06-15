@@ -6,6 +6,7 @@
  *
  * @package  WooCommerce\Admin\Meta Boxes
  * @version  3.0.0
+ * @phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,17 +35,26 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
+	 * Output one tab
+	 *
+	 * @param String | Array $tab Either the path to the include file for the tab or an array with an 'include' parameter.
+	 */
+	private static function output_tab( $tab ) {
+		global $post, $thepostid, $product_object;
+		$tab_path = is_array( $tab ) ? $tab['include'] : $tab;
+
+		if ( ! empty( $tab_path ) && file_exists( $tab_path ) ) {
+			include $tab['include'];
+		}
+	}
+
+	/**
 	 * Show tab content/settings.
 	 */
 	private static function output_tabs() {
-		global $post, $thepostid, $product_object;
-
-		include __DIR__ . '/views/html-product-data-general.php';
-		include __DIR__ . '/views/html-product-data-inventory.php';
-		include __DIR__ . '/views/html-product-data-shipping.php';
-		include __DIR__ . '/views/html-product-data-linked-products.php';
-		include __DIR__ . '/views/html-product-data-attributes.php';
-		include __DIR__ . '/views/html-product-data-advanced.php';
+		foreach ( self::get_product_data_tabs() as $tab ) {
+			self::output_tab( $tab );
+		}
 	}
 
 	/**
@@ -88,30 +98,35 @@ class WC_Meta_Box_Product_Data {
 					'target'   => 'general_product_data',
 					'class'    => array( 'hide_if_grouped' ),
 					'priority' => 10,
+					'include' => __DIR__ . '/views/html-product-data-general.php',
 				),
 				'inventory'      => array(
 					'label'    => __( 'Inventory', 'woocommerce' ),
 					'target'   => 'inventory_product_data',
 					'class'    => array( 'show_if_simple', 'show_if_variable', 'show_if_grouped', 'show_if_external' ),
 					'priority' => 20,
+					'include' => __DIR__ . '/views/html-product-data-inventory.php',
 				),
 				'shipping'       => array(
 					'label'    => __( 'Shipping', 'woocommerce' ),
 					'target'   => 'shipping_product_data',
 					'class'    => array( 'hide_if_virtual', 'hide_if_grouped', 'hide_if_external' ),
 					'priority' => 30,
+					'include' => __DIR__ . '/views/html-product-data-shipping.php',
 				),
 				'linked_product' => array(
 					'label'    => __( 'Linked Products', 'woocommerce' ),
 					'target'   => 'linked_product_data',
 					'class'    => array(),
 					'priority' => 40,
+					'include' => __DIR__ . '/views/html-product-data-linked-products.php',
 				),
 				'attribute'      => array(
 					'label'    => __( 'Attributes', 'woocommerce' ),
 					'target'   => 'product_attributes',
 					'class'    => array(),
 					'priority' => 50,
+					'include' => __DIR__ . '/views/html-product-data-attributes.php',
 				),
 				'variations'     => array(
 					'label'    => __( 'Variations', 'woocommerce' ),
@@ -124,6 +139,7 @@ class WC_Meta_Box_Product_Data {
 					'target'   => 'advanced_product_data',
 					'class'    => array(),
 					'priority' => 70,
+					'include' => __DIR__ . '/views/html-product-data-advanced.php',
 				),
 			)
 		);
