@@ -89,11 +89,12 @@ export const fetchExperimentAssignment = async ( {
 		);
 	}
 
-	return await window.fetch(
+	const response = await window.fetch(
 		`https://public-api.wordpress.com/wpcom/v2/experiments/${ EXPLAT_VERSION }/assignments/woocommerce?${ stringify(
 			queryParams
 		) }`
 	);
+	return await response.json();
 };
 
 export const fetchExperimentAssignmentWithAuth = async ( {
