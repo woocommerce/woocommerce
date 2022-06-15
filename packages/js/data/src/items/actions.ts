@@ -9,8 +9,9 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import TYPES from './action-types';
 import { NAMESPACE, WC_ADMIN_NAMESPACE } from '../constants';
+import { ItemType, Item, ProductItem, Query, ItemID } from './types';
 
-export function setItem( itemType, id, item ) {
+export function setItem( itemType: ItemType, id: ItemID, item: Item ) {
 	return {
 		type: TYPES.SET_ITEM,
 		id,
@@ -19,7 +20,12 @@ export function setItem( itemType, id, item ) {
 	};
 }
 
-export function setItems( itemType, query, items, totalCount ) {
+export function setItems(
+	itemType: ItemType,
+	query: Query,
+	items: Item[],
+	totalCount?: number
+) {
 	return {
 		type: TYPES.SET_ITEMS,
 		items,
@@ -29,7 +35,11 @@ export function setItems( itemType, query, items, totalCount ) {
 	};
 }
 
-export function setItemsTotalCount( itemType, query, totalCount ) {
+export function setItemsTotalCount(
+	itemType: ItemType,
+	query: Query,
+	totalCount: number
+) {
 	return {
 		type: TYPES.SET_ITEMS_TOTAL_COUNT,
 		itemType,
@@ -38,7 +48,11 @@ export function setItemsTotalCount( itemType, query, totalCount ) {
 	};
 }
 
-export function setError( itemType, query, error ) {
+export function setError(
+	itemType: ItemType | 'createProductFromTemplate',
+	query: Record< string, unknown >,
+	error: unknown
+) {
 	return {
 		type: TYPES.SET_ERROR,
 		itemType,
@@ -47,7 +61,10 @@ export function setError( itemType, query, error ) {
 	};
 }
 
-export function* updateProductStock( product, quantity ) {
+export function* updateProductStock(
+	product: Partial< ProductItem > & { id: ProductItem[ 'id' ] },
+	quantity: number
+) {
 	const updatedProduct = { ...product, stock_quantity: quantity };
 	const { id, parent_id: parentId, type } = updatedProduct;
 
@@ -75,18 +92,24 @@ export function* updateProductStock( product, quantity ) {
 	} catch ( error ) {
 		// Update failed, return product back to original state.
 		yield setItem( 'products', id, product );
-		yield setError( 'products', id, error );
+		yield setError( 'products', { id }, error );
 		return false;
 	}
 }
 
-export function* createProductFromTemplate( itemFields, query ) {
+export function* createProductFromTemplate(
+	itemFields: {
+		template_name: string;
+		status: string;
+	},
+	query: Query
+) {
 	try {
 		const url = addQueryArgs(
 			`${ WC_ADMIN_NAMESPACE }/onboarding/tasks/create_product_from_template`,
 			query || {}
 		);
-		const newItem = yield apiFetch( {
+		const newItem: { id: ProductItem[ 'id' ] } = yield apiFetch( {
 			path: url,
 			method: 'POST',
 			data: itemFields,
@@ -98,3 +121,10 @@ export function* createProductFromTemplate( itemFields, query ) {
 		throw error;
 	}
 }
+
+export type Action = ReturnType<
+	| typeof setItem
+	| typeof setItems
+	| typeof setItemsTotalCount
+	| typeof setError
+>;
