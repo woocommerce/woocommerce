@@ -21,6 +21,7 @@ import {
 	getPatches,
 	getHookName,
 	areSchemasEqual,
+	getHookDescription,
 } from '../../utils';
 import { generatePatch, generateSchemaDiff } from '../../git';
 
@@ -387,26 +388,11 @@ export default class Analyzer extends Command {
 			const filepath = getFilename( lines[ 0 ] );
 
 			for ( const raw of results ) {
-				const rawWithoutDeletions = raw.replace( /-.*\n/g, '' );
-				// Extract hook description.
-				const rawDescription = rawWithoutDeletions.match(
-					/\/\*\*([\s\S]*) @since/
-				);
+				const description = getHookDescription( raw );
 
-				if ( ! rawDescription ) {
+				if ( ! description ) {
 					continue;
 				}
-
-				const description = rawDescription[ 1 ]
-					.replace( / \* /g, '' )
-					.replace( /\*/g, '' )
-					.replace( /\+/g, '' )
-					.replace( /-/g, '' )
-					.replace( /\t/g, '' )
-					.replace( /\n/g, '' )
-					.trim();
-
-				console.log( description );
 
 				// Extract hook name and type.
 				const hookName = raw.match(
