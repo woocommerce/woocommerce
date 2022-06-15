@@ -9,3 +9,7 @@
 -   Minor - Removed experimental product hook and instead poll the slot's fill for variant metadata. To be removed when experiment concludes! #33052
 -   Minor - Update TaskList types.
 -   Minor - Added Typescript type declarations. #32615
+
+---
+
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/onboarding/CHANGELOG.md).
