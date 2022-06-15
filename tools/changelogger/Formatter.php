@@ -72,6 +72,15 @@ class Formatter extends KeepAChangelogParser {
 	 * @return string Link to the version's release.
 	 */
 	public function getReleaseLink( $version ) {
+
+		$npm_packages = array('packages/js/components','packages/js/csv-export', 'packages/js/currency' );
+		$path_map = array(
+			'packages/js/components' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
+			'packages/js/csv-export' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
+			'packages/js/currency' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
+			'plugins/woocommerce'    => 'https://github.com/woocommerce/woocommerce/releases/tag/',
+		);
+
 		// Catpure anything past /woocommerce in the current working directory.
 		preg_match( '/\/woocommerce\/(.+)/', getcwd(), $path );
 
@@ -82,13 +91,16 @@ class Formatter extends KeepAChangelogParser {
 		$release_url = '';
 
 		if ( 0 === stripos( $path[1], 'packages/js/' ) ) {
-			$release_url = 'https://www.npmjs.com/package/@woocommerce/components/v/';
+			$package = substr( $path[1], 12 );
+			$release_url ='https://www.npmjs.com/package/@woocommerce/' . $package . '\/v\/';
 		} else if ( 'plugins/woocommerce' === $path[1] ) {
+			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
+		} else if ( 'plugins/woocommerce-beta-tester' === $path[1] ) {
 			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
 		} else {
 			throw new \InvalidArgumentException( 'Release URL not found.' );
 		}
-
+	
 		return $release_url . $version;
 	}
 
