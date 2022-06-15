@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new orders data store, for retrieving orders data. #33063

@@ -1,17 +1,9 @@
-# Unreleased
+## [1.2.0](https://www.npmjs.com/package/@woocommerce/tracks/v/1.2.0) - 2022-06-15
 
-# 1.1.1
+-   Minor - Add Jetpack Changelogger
+-   Minor - Convert package to Typescript.
+-   Patch - Standardize lint scripts: add lint:fix
 
--   Update all js packages with minor/patch version changes. #8392
-# 1.1.0
+---
 
--   Fix commonjs module build, allow package to be built in isolation. #7286
-
-# 1.0.1
-
--   Update dependencies.
--   Add TypeScript support.
-
-# 1.0.0
-
--   Released package
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/tracks/CHANGELOG.md).

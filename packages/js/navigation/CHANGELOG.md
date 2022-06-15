@@ -1,89 +1,19 @@
-# Unreleased
+## [8.0.0](https://www.npmjs.com/package/@woocommerce/navigation/v/8.0.0) - 2022-06-15
 
--   Update dependency `@wordpress/hooks` to ^3.5.0
--   Added Typescript type declarations. #32615
--   Update dependency `history` to ^5.3.0
-# 7.0.1
+-   Minor - Add Jetpack Changelogger
+-   Patch - Standardize lint scripts: add lint:fix
+-   Patch - Update dependency history to ^5.3.0
+-   Major [ **BREAKING CHANGE** ] - Upgraded react-router-dom to v6, which itself causes breaking changes. This upgrade will require consumers to also upgrade their react-router-dom to v6. #33156
+-   Minor - Update dependency `@wordpress/hooks` to ^3.5.0
+-   Minor - Added Typescript type declarations. #32615
+-   Minor - Update dependency `history` to ^5.3.0
 
--   Add missing dependencies. #8349
--   Update all js packages with minor/patch version changes. #8392
-# 7.0.0
+    BREAKING CHANGE:
 
-## Breaking changes
+    -   the returned object from getHistory() has methods changed: goBack() -> back() and goForward() -> forward()
+    -   the listen() method from the returned object of getHistory() now takes a listener with an object parameter, ({location, action}) instead of (location, action)
+    -   location.pathname is now validated and makes a warning if it is not a string
 
--   Update dependencies to support react 17. #8305
--   Drop support for IE11. #8305
+---
 
-## 6.1.0
-
--   Fix commonjs module build, allow package to be built in isolation. #7286
--   Add `getSetOfIdsFromQuery` util.
--   Fix `getIdsFromQuery` support for `0` as a valid id.
-# 6.0.1
-
--   Update dependencies.
-
-# 6.0.0
-
--   Moving `addHistoryListener()` to this package, which supports adding a listener that is executed for history changes.
--   Update dependencies.
--   Add management of persisted queries to navigation.
--   Add page parameter to getNewPath to override default page wc-admin #5821
-
-## Breaking changes
-
--   Move Lodash to a peer dependency.
-
-# 5.3.0
-
--   `getQueryExcludedScreens` Return a list of screens that should be excluded from persisted query logic.
--   `getScreenFromPath` Given a path (defaulting to current), return simple screen "name"
-
-# 5.2.0
-
--   Add slot/fill components WooNavigationItem, NavSlotFillProvider, and useNavSlot.
-
-# 5.1.1
-
--   Version bump to undeprecate the package.
-
-# 5.1.0
-
--   Support multiple advanced filter instances in getActiveFiltersFromQuery() and getQueryFromActiveFilters().
-
-# 5.0.0
-
--   `getPersistedQuery` Add a filter for extensions to add a persisted query, `woocommerce_admin_persisted_queries`.
-
-# 4.0.0
-
-## Breaking Changes
-
--   decouples `wcSettings` from the package (#3294)
--   `getAdminLink` is no longer available from this package. It is exported on the `wcSettings` global via the woo-blocks plugin (v2.5 or WC 3.9) when enqueued via the `wc-settings` handle.
-
-# 3.0.0
-
--   `getHistory` updated to reflect path parameters in url query.
--   `getNewPath` also updated to reflect path parameters in url query.
--   `stringifyQuery` method is no longer available, instead use `addQueryArgs` from `@wordpress/url` package.
--   Added a new `<Form />` component.
--   Stepper component: Add new `content` and `description` props.
--   Remove `getAdminLink()` and dependency on global settings object.
-
-# 2.1.1
-
--   Update license to GPL-3.0-or-later
-
-# 2.1.0
-
--   New method `getSearchWords` that extracts search words given a query object.
--   Bump dependency versions.
-
-# 2.0.0
-
--   Replace `history` export with `getHistory` (allows for lazy-create of history)
-
-# 1.1.0
-
--   Rename `getTimeRelatedQuery` to `getPersistedQuery`
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/navigation/CHANGELOG.md).

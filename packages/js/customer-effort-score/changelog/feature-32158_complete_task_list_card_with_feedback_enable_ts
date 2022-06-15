@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Add TypeScript type support as part of the build process. #32538
