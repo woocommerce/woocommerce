@@ -93,13 +93,8 @@ class ProductTagControl extends Component {
 
 	render() {
 		const { list, loading } = this.state;
-		const {
-			isCompact,
-			onChange,
-			onOperatorChange,
-			operator,
-			selected,
-		} = this.props;
+		const { isCompact, onChange, onOperatorChange, operator, selected } =
+			this.props;
 
 		const messages = {
 			clear: __(

@@ -104,14 +104,10 @@ const ScrollOnError = ( {
 }: {
 	scrollToTop: ( props: Record< string, unknown > ) => void;
 } ): null => {
-	const {
-		hasError: checkoutHasError,
-		isIdle: checkoutIsIdle,
-	} = useCheckoutContext();
-	const {
-		hasValidationErrors,
-		showAllValidationErrors,
-	} = useValidationContext();
+	const { hasError: checkoutHasError, isIdle: checkoutIsIdle } =
+		useCheckoutContext();
+	const { hasValidationErrors, showAllValidationErrors } =
+		useValidationContext();
 
 	const hasErrorsToDisplay =
 		checkoutIsIdle &&

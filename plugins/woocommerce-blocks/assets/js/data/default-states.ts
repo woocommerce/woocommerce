@@ -27,8 +27,8 @@ export interface CartState {
 	errors: Array< ResponseError >;
 }
 
-export const EMPTY_PENDING_QUANTITY: [  ] = [];
-export const EMPTY_PENDING_DELETE: [  ] = [];
+export const EMPTY_PENDING_QUANTITY: [] = [];
+export const EMPTY_PENDING_DELETE: [] = [];
 
 export const defaultCartState: CartState = {
 	cartItemsPendingQuantity: EMPTY_PENDING_QUANTITY,

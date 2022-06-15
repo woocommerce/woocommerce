@@ -19,12 +19,14 @@ addFilter(
 			return optionsGroup;
 		};
 
-		const actionableStatusesOptions = settings.woocommerce_actionable_order_statuses.options.map(
-			removeCheckoutDraft
-		);
-		const excludedStatusesOptions = settings.woocommerce_excluded_report_order_statuses.options.map(
-			removeCheckoutDraft
-		);
+		const actionableStatusesOptions =
+			settings.woocommerce_actionable_order_statuses.options.map(
+				removeCheckoutDraft
+			);
+		const excludedStatusesOptions =
+			settings.woocommerce_excluded_report_order_statuses.options.map(
+				removeCheckoutDraft
+			);
 
 		return {
 			...settings,

@@ -37,10 +37,8 @@ interface CheckoutAddress {
  */
 export const useCheckoutAddress = (): CheckoutAddress => {
 	const { needsShipping } = useShippingData();
-	const {
-		useShippingAsBilling,
-		setUseShippingAsBilling,
-	} = useCheckoutContext();
+	const { useShippingAsBilling, setUseShippingAsBilling } =
+		useCheckoutContext();
 	const {
 		billingAddress,
 		setBillingAddress,

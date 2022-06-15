@@ -52,8 +52,7 @@ describe( 'Shopper → Checkout → Account', () => {
 		//Enable shoppers to sign up at checkout option.
 		// eslint-disable-next-line jest/no-standalone-expect
 		await expect( page ).toClick( 'label', {
-			text:
-				'Allow shoppers to sign up for a user account during checkout',
+			text: 'Allow shoppers to sign up for a user account during checkout',
 		} );
 		await saveOrPublish();
 		await merchant.logout();

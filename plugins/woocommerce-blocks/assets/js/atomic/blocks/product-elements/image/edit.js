@@ -23,12 +23,8 @@ import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 
 const Edit = ( { attributes, setAttributes } ) => {
-	const {
-		showProductLink,
-		imageSizing,
-		showSaleBadge,
-		saleBadgeAlign,
-	} = attributes;
+	const { showProductLink, imageSizing, showSaleBadge, saleBadgeAlign } =
+		attributes;
 
 	const blockProps = useBlockProps();
 

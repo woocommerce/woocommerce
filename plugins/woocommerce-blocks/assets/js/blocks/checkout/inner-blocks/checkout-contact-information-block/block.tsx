@@ -20,11 +20,8 @@ const Block = ( {
 }: {
 	allowCreateAccount: boolean;
 } ): JSX.Element => {
-	const {
-		customerId,
-		shouldCreateAccount,
-		setShouldCreateAccount,
-	} = useCheckoutContext();
+	const { customerId, shouldCreateAccount, setShouldCreateAccount } =
+		useCheckoutContext();
 	const { billingAddress, setEmail } = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 

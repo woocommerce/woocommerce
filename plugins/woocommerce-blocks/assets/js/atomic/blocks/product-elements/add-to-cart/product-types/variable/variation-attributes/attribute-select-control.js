@@ -32,11 +32,8 @@ const AttributeSelectControl = ( {
 		'woo-gutenberg-products-block'
 	),
 } ) => {
-	const {
-		getValidationError,
-		setValidationErrors,
-		clearValidationError,
-	} = useValidationContext();
+	const { getValidationError, setValidationErrors, clearValidationError } =
+		useValidationContext();
 	const errorId = attributeName;
 	const error = getValidationError( errorId ) || {};
 
@@ -60,10 +57,10 @@ const AttributeSelectControl = ( {
 	] );
 
 	// Remove validation errors when unmounted.
-	useEffect( () => () => void clearValidationError( errorId ), [
-		errorId,
-		clearValidationError,
-	] );
+	useEffect(
+		() => () => void clearValidationError( errorId ),
+		[ errorId, clearValidationError ]
+	);
 
 	return (
 		<div className="wc-block-components-product-add-to-cart-attribute-picker__container">

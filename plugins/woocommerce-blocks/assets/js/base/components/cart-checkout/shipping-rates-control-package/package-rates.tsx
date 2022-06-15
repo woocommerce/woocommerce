@@ -62,12 +62,8 @@ const PackageRates = ( {
 		);
 	}
 
-	const {
-		label,
-		secondaryLabel,
-		description,
-		secondaryDescription,
-	} = renderOption( rates[ 0 ] );
+	const { label, secondaryLabel, description, secondaryDescription } =
+		renderOption( rates[ 0 ] );
 
 	return (
 		<RadioControlOptionLayout

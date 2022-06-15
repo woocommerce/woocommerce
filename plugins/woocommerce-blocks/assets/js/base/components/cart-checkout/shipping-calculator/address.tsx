@@ -25,10 +25,8 @@ const ShippingCalculatorAddress = ( {
 	addressFields,
 }: ShippingCalculatorAddressProps ): JSX.Element => {
 	const [ address, setAddress ] = useState( initialAddress );
-	const {
-		hasValidationErrors,
-		showAllValidationErrors,
-	} = useValidationContext();
+	const { hasValidationErrors, showAllValidationErrors } =
+		useValidationContext();
 
 	const validateSubmit = () => {
 		showAllValidationErrors();

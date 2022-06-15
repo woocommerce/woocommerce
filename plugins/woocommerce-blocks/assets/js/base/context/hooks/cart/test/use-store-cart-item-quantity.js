@@ -95,10 +95,8 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { setItemQuantity, quantity } = renderer.root.findByType(
-				'div'
-			).props;
+			const { setItemQuantity, quantity } =
+				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 			expect( quantity ).toBe( 1 );
 
@@ -106,10 +104,8 @@ describe( 'useStoreCartItemQuantity', () => {
 				setItemQuantity( 2 );
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { quantity: newQuantity } = renderer.root.findByType(
-				'div'
-			).props;
+			const { quantity: newQuantity } =
+				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 			expect( newQuantity ).toBe( 2 );
 		} );
@@ -126,8 +122,7 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { removeItem } = renderer.root.findByType( 'div' ).props;
+			const { removeItem } = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 			act( () => {
 				removeItem();
@@ -148,8 +143,7 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { setItemQuantity } = renderer.root.findByType( 'div' ).props;
+			const { setItemQuantity } = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 			act( () => {
 				setItemQuantity( 2 );
@@ -182,10 +176,8 @@ describe( 'useStoreCartItemQuantity', () => {
 			);
 		} );
 
-		//eslint-disable-next-line testing-library/await-async-query
-		const { cartItemQuantityErrors } = renderer.root.findByType(
-			'div'
-		).props;
+		const { cartItemQuantityErrors } =
+			renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 		expect( cartItemQuantityErrors ).toEqual( mockCartErrors );
 	} );
@@ -210,8 +202,7 @@ describe( 'useStoreCartItemQuantity', () => {
 			);
 		} );
 
-		//eslint-disable-next-line testing-library/await-async-query
-		const { isPendingDelete } = renderer.root.findByType( 'div' ).props;
+		const { isPendingDelete } = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 		expect( isPendingDelete ).toBe( true );
 	} );

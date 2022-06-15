@@ -43,10 +43,8 @@ const style = {
  * ```
  */
 export const usePositionRelativeToViewport = () => {
-	const [
-		positionRelativeToViewport,
-		setPositionRelativeToViewport,
-	] = useState( '' );
+	const [ positionRelativeToViewport, setPositionRelativeToViewport ] =
+		useState( '' );
 	const referenceElementRef = useRef( null );
 	const intersectionObserver = useRef(
 		new IntersectionObserver(

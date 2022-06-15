@@ -11,10 +11,8 @@ import { usePositionRelativeToViewport } from '../use-position-relative-to-viewp
 describe( 'usePositionRelativeToViewport', () => {
 	function setup() {
 		const TestComponent = () => {
-			const [
-				referenceElement,
-				positionRelativeToViewport,
-			] = usePositionRelativeToViewport();
+			const [ referenceElement, positionRelativeToViewport ] =
+				usePositionRelativeToViewport();
 
 			return (
 				<>

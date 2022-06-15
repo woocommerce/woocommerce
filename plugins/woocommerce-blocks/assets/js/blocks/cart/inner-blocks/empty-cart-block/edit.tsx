@@ -36,7 +36,7 @@ const browseStoreTemplate = SHOP_URL
 	  ]
 	: null;
 
-const defaultTemplate = ( [
+const defaultTemplate = [
 	[
 		'core/image',
 		{
@@ -79,7 +79,7 @@ const defaultTemplate = ( [
 			rows: 1,
 		},
 	],
-].filter( Boolean ) as unknown ) as TemplateArray;
+].filter( Boolean ) as unknown as TemplateArray;
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();

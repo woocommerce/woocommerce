@@ -101,25 +101,23 @@ export const AddToCartFormStateContextProvider = ( {
 	const currentObservers = useShallowEqual( observers );
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useValidationContext();
-	const {
-		isSuccessResponse,
-		isErrorResponse,
-		isFailResponse,
-	} = useEmitResponse();
+	const { isSuccessResponse, isErrorResponse, isFailResponse } =
+		useEmitResponse();
 
 	/**
 	 * @type {AddToCartFormEventRegistration}
 	 */
 	const eventRegistration = useMemo(
 		() => ( {
-			onAddToCartAfterProcessingWithSuccess: emitterObservers(
-				observerDispatch
-			).onAddToCartAfterProcessingWithSuccess,
-			onAddToCartAfterProcessingWithError: emitterObservers(
-				observerDispatch
-			).onAddToCartAfterProcessingWithError,
-			onAddToCartBeforeProcessing: emitterObservers( observerDispatch )
-				.onAddToCartBeforeProcessing,
+			onAddToCartAfterProcessingWithSuccess:
+				emitterObservers( observerDispatch )
+					.onAddToCartAfterProcessingWithSuccess,
+			onAddToCartAfterProcessingWithError:
+				emitterObservers( observerDispatch )
+					.onAddToCartAfterProcessingWithError,
+			onAddToCartBeforeProcessing:
+				emitterObservers( observerDispatch )
+					.onAddToCartBeforeProcessing,
 		} ),
 		[ observerDispatch ]
 	);

@@ -14,9 +14,9 @@ export const Edit = (): JSX.Element => {
 		className: 'wc-block-mini-cart__items',
 	} );
 
-	const defaultTemplate = ( [
+	const defaultTemplate = [
 		[ 'woocommerce/mini-cart-products-table-block', {} ],
-	].filter( Boolean ) as unknown ) as TemplateArray;
+	].filter( Boolean ) as unknown as TemplateArray;
 
 	return (
 		<div { ...blockProps }>

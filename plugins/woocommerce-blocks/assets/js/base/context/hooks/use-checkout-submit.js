@@ -25,10 +25,8 @@ export const useCheckoutSubmit = () => {
 		hasError,
 	} = useCheckoutContext();
 	const { paymentMethods = {} } = usePaymentMethods();
-	const {
-		activePaymentMethod,
-		currentStatus: paymentStatus,
-	} = usePaymentMethodDataContext();
+	const { activePaymentMethod, currentStatus: paymentStatus } =
+		usePaymentMethodDataContext();
 	const paymentMethod = paymentMethods[ activePaymentMethod ] || {};
 	const waitingForProcessing =
 		isProcessing || isAfterProcessing || isBeforeProcessing;

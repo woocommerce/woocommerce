@@ -81,17 +81,10 @@ export const CheckoutStateProvider = ( {
 
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const isCalculating = checkoutState.calculatingCount > 0;
-	const {
-		isSuccessResponse,
-		isErrorResponse,
-		isFailResponse,
-		shouldRetry,
-	} = useEmitResponse();
-	const {
-		checkoutNotices,
-		paymentNotices,
-		expressPaymentNotices,
-	} = useCheckoutNotices();
+	const { isSuccessResponse, isErrorResponse, isFailResponse, shouldRetry } =
+		useEmitResponse();
+	const { checkoutNotices, paymentNotices, expressPaymentNotices } =
+		useCheckoutNotices();
 
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
@@ -147,9 +140,8 @@ export const CheckoutStateProvider = ( {
 			setExtensionData: ( extensionData ) =>
 				void dispatch( actions.setExtensionData( extensionData ) ),
 			setAfterProcessing: ( response ) => {
-				const paymentResult = getPaymentResultFromCheckoutResponse(
-					response
-				);
+				const paymentResult =
+					getPaymentResultFromCheckoutResponse( response );
 				dispatch(
 					actions.setRedirectUrl( paymentResult?.redirectUrl || '' )
 				);
@@ -244,9 +236,8 @@ export const CheckoutStateProvider = ( {
 					EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
 					data
 				).then( ( observerResponses ) => {
-					const errorResponse = handleErrorResponse(
-						observerResponses
-					);
+					const errorResponse =
+						handleErrorResponse( observerResponses );
 					if ( errorResponse !== null ) {
 						// irrecoverable error so set complete
 						if ( ! shouldRetry( errorResponse ) ) {

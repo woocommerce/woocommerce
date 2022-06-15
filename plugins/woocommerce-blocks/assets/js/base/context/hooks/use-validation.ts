@@ -46,12 +46,12 @@ export const useValidation = (): ValidationData => {
 			( errorsObject: Record< string, ValidationContextError > ) =>
 				setValidationErrors(
 					Object.fromEntries(
-						Object.entries(
-							errorsObject
-						).map( ( [ validationErrorId, error ] ) => [
-							`${ prefix }-${ validationErrorId }`,
-							error,
-						] )
+						Object.entries( errorsObject ).map(
+							( [ validationErrorId, error ] ) => [
+								`${ prefix }-${ validationErrorId }`,
+								error,
+							]
+						)
 					)
 				),
 			[ setValidationErrors ]

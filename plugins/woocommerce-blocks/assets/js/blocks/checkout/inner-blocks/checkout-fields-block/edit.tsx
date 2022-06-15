@@ -34,11 +34,10 @@ export const Edit = ( {
 	} );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
-	const {
-		addressFieldControls: Controls,
-	} = useCheckoutBlockControlsContext();
+	const { addressFieldControls: Controls } =
+		useCheckoutBlockControlsContext();
 
-	const defaultTemplate = ( [
+	const defaultTemplate = [
 		[ 'woocommerce/checkout-express-payment-block', {}, [] ],
 		[ 'woocommerce/checkout-contact-information-block', {}, [] ],
 		[ 'woocommerce/checkout-shipping-address-block', {}, [] ],
@@ -48,7 +47,7 @@ export const Edit = ( {
 		[ 'woocommerce/checkout-order-note-block', {}, [] ],
 		[ 'woocommerce/checkout-terms-block', {}, [] ],
 		[ 'woocommerce/checkout-actions-block', {}, [] ],
-	].filter( Boolean ) as unknown ) as TemplateArray;
+	].filter( Boolean ) as unknown as TemplateArray;
 
 	useForcedLayout( {
 		clientId,

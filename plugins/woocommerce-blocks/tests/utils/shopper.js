@@ -69,9 +69,7 @@ export const shopper = {
 			await expect( page ).toMatchElement( 'span', {
 				text: productTitle,
 			} );
-			await expect(
-				page
-			).toMatchElement(
+			await expect( page ).toMatchElement(
 				'div.wc-block-components-order-summary-item__quantity',
 				{ text: quantity }
 			);

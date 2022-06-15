@@ -103,9 +103,8 @@ const storeNonceMiddleware = ( options, next ) => {
 
 		// Add nonce to sub-requests
 		if ( Array.isArray( options?.data?.requests ) ) {
-			options.data.requests = options.data.requests.map(
-				appendNonceHeader
-			);
+			options.data.requests =
+				options.data.requests.map( appendNonceHeader );
 		}
 	}
 	return next( options, next );

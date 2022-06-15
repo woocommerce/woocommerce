@@ -125,9 +125,8 @@ const ActiveFiltersBlock = ( {
 		} );
 	}, [ productAttributes, blockAttributes.displayStyle ] );
 
-	const [ productRatings, setProductRatings ] = useQueryStateByKey(
-		'ratings'
-	);
+	const [ productRatings, setProductRatings ] =
+		useQueryStateByKey( 'ratings' );
 
 	/**
 	 * Parse the filter URL to set the active rating fitlers.

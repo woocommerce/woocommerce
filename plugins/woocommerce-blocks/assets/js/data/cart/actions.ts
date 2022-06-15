@@ -33,9 +33,9 @@ import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
 export const receiveCart = (
 	response: CartResponse
 ): { type: string; response: Cart } => {
-	const cart = ( mapKeys( response, ( _, key ) =>
+	const cart = mapKeys( response, ( _, key ) =>
 		camelCase( key )
-	) as unknown ) as Cart;
+	) as unknown as Cart;
 	return {
 		type: types.RECEIVE_CART,
 		response: cart,
@@ -55,9 +55,9 @@ export const receiveCart = (
 export const receiveCartContents = (
 	response: CartResponse
 ): { type: string; response: Partial< Cart > } => {
-	const cart = ( mapKeys( response, ( _, key ) =>
+	const cart = mapKeys( response, ( _, key ) =>
 		camelCase( key )
-	) as unknown ) as Cart;
+	) as unknown as Cart;
 	const { shippingAddress, billingAddress, ...cartWithoutAddress } = cart;
 	return {
 		type: types.RECEIVE_CART,

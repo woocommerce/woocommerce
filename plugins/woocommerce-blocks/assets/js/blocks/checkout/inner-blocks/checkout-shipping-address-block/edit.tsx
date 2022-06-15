@@ -38,9 +38,8 @@ export const Edit = ( {
 		showPhoneField,
 		requirePhoneField,
 	} = useCheckoutBlockContext();
-	const {
-		addressFieldControls: Controls,
-	} = useCheckoutBlockControlsContext();
+	const { addressFieldControls: Controls } =
+		useCheckoutBlockControlsContext();
 	return (
 		<FormStepBlock
 			setAttributes={ setAttributes }

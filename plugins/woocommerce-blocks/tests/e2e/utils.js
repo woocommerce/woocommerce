@@ -44,8 +44,7 @@ export const DEFAULT_TIMEOUT = 30000;
 const SELECTORS = {
 	canvas: 'iframe[name="editor-canvas"]',
 	inserter: {
-		search:
-			'.components-search-control__input,.block-editor-inserter__search input,.block-editor-inserter__search-input,input.block-editor-inserter__search',
+		search: '.components-search-control__input,.block-editor-inserter__search input,.block-editor-inserter__search-input,input.block-editor-inserter__search',
 	},
 	templatesListTable: {
 		actionsContainer: '.edit-site-list-table__actions',

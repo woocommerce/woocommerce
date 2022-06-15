@@ -38,10 +38,8 @@ class TestErrorBoundary extends ReactComponent {
 describe( 'useCollection', () => {
 	let registry, mocks, renderer;
 	const getProps = ( testRenderer ) => {
-		//eslint-disable-next-line testing-library/await-async-query
-		const { results, isLoading } = testRenderer.root.findByType(
-			'div'
-		).props;
+		const { results, isLoading } =
+			testRenderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 		return {
 			results,
 			isLoading,
@@ -56,10 +54,12 @@ describe( 'useCollection', () => {
 		</RegistryProvider>
 	);
 
-	const getTestComponent = () => ( { options } ) => {
-		const items = useCollection( options );
-		return <div { ...items } />;
-	};
+	const getTestComponent =
+		() =>
+		( { options } ) => {
+			const items = useCollection( options );
+			return <div { ...items } />;
+		};
 
 	const setUpMocks = () => {
 		mocks = {

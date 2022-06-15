@@ -152,14 +152,12 @@ const Products = () => [
 		downloads: [
 			{
 				name: 'Woo Single',
-				file:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				file: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		images: [
 			{
-				src:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		categories: [ 'Music' ],
@@ -172,8 +170,7 @@ const Products = () => [
 		downloadable: false,
 		images: [
 			{
-				src:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		attributes: [
@@ -194,8 +191,7 @@ const Products = () => [
 		downloadable: false,
 		images: [
 			{
-				src:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		attributes: [
@@ -216,14 +212,12 @@ const Products = () => [
 		downloads: [
 			{
 				name: 'Woo Single 2',
-				file:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				file: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		images: [
 			{
-				src:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		categories: [ 'Music' ],
@@ -238,14 +232,12 @@ const Products = () => [
 		downloads: [
 			{
 				name: 'Woo Single 2',
-				file:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				file: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		images: [
 			{
-				src:
-					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+				src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
 			},
 		],
 		categories: [ 'Music' ],

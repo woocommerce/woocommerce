@@ -41,17 +41,17 @@ export const CheckoutBlockContext = createContext< CheckoutBlockContextProps >(
 	}
 );
 
-export const CheckoutBlockControlsContext = createContext<
-	CheckoutBlockControlsContextProps
->( {
-	addressFieldControls: () => null,
-	accountControls: () => null,
-} );
+export const CheckoutBlockControlsContext =
+	createContext< CheckoutBlockControlsContextProps >( {
+		addressFieldControls: () => null,
+		accountControls: () => null,
+	} );
 
 export const useCheckoutBlockContext = (): CheckoutBlockContextProps => {
 	return useContext( CheckoutBlockContext );
 };
 
-export const useCheckoutBlockControlsContext = (): CheckoutBlockControlsContextProps => {
-	return useContext( CheckoutBlockControlsContext );
-};
+export const useCheckoutBlockControlsContext =
+	(): CheckoutBlockControlsContextProps => {
+		return useContext( CheckoutBlockControlsContext );
+	};

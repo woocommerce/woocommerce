@@ -49,8 +49,7 @@ export const __experimentalRegisterCheckoutFilters = (
 		deprecated( 'snackbarNotices', {
 			alternative: 'snackbarNoticeVisibility',
 			plugin: 'WooCommerce Blocks',
-			link:
-				'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4417',
+			link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4417',
 		} );
 	}
 
@@ -63,8 +62,7 @@ export const __experimentalRegisterCheckoutFilters = (
 		deprecated( 'couponName', {
 			alternative: 'coupons',
 			plugin: 'WooCommerce Blocks',
-			link:
-				'https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/bb921d21f42e21f38df2b1c87b48e07aa4cb0538/docs/extensibility/available-filters.md#coupons',
+			link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/bb921d21f42e21f38df2b1c87b48e07aa4cb0538/docs/extensibility/available-filters.md#coupons',
 		} );
 	}
 

@@ -48,11 +48,16 @@ const Block = ( props ) => {
 				colorProps.className,
 				'wc-block-components-product-stock-indicator',
 				{
-					[ `${ parentClassName }__stock-indicator` ]: parentClassName,
-					'wc-block-components-product-stock-indicator--in-stock': inStock,
-					'wc-block-components-product-stock-indicator--out-of-stock': ! inStock,
-					'wc-block-components-product-stock-indicator--low-stock': !! lowStock,
-					'wc-block-components-product-stock-indicator--available-on-backorder': !! isBackordered,
+					[ `${ parentClassName }__stock-indicator` ]:
+						parentClassName,
+					'wc-block-components-product-stock-indicator--in-stock':
+						inStock,
+					'wc-block-components-product-stock-indicator--out-of-stock':
+						! inStock,
+					'wc-block-components-product-stock-indicator--low-stock':
+						!! lowStock,
+					'wc-block-components-product-stock-indicator--available-on-backorder':
+						!! isBackordered,
 				}
 			) }
 			style={ { ...colorProps.style, ...typographyProps.style } }

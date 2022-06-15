@@ -32,11 +32,8 @@ const FrontendBlock = ( {
 	const { isDisabled } = useCheckoutSubmit();
 
 	const validationErrorId = 'terms-and-conditions-' + instanceId;
-	const {
-		getValidationError,
-		setValidationErrors,
-		clearValidationError,
-	} = validation;
+	const { getValidationError, setValidationErrors, clearValidationError } =
+		validation;
 
 	const error = getValidationError( validationErrorId ) || {};
 	const hasError = error.message && ! error.hidden;

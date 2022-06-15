@@ -72,8 +72,8 @@ export async function getTaxesFromOrderSummaryPage(
 			)
 		)
 			.filter( ( node ) => {
-				const taxLabel = node.getElementsByTagName( 'th' )[ 0 ]
-					.innerHTML;
+				const taxLabel =
+					node.getElementsByTagName( 'th' )[ 0 ].innerHTML;
 				return taxRatesEval.some(
 					// We need to remove the ":" on the end of the string before we compare
 					( taxRate ) => taxRate.name === taxLabel.slice( 0, -1 )

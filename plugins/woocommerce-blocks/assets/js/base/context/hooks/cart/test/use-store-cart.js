@@ -189,14 +189,10 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { results, receiveCart } = renderer.root.findByType(
-				'div'
-			).props;
-			const {
-				receiveCart: defaultReceiveCart,
-				...remaining
-			} = defaultCartData;
+			const { results, receiveCart } =
+				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+			const { receiveCart: defaultReceiveCart, ...remaining } =
+				defaultCartData;
 			expect( results ).toEqual( remaining );
 			expect( receiveCart ).toEqual( defaultReceiveCart );
 		} );
@@ -212,10 +208,8 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { results, receiveCart } = renderer.root.findByType(
-				'div'
-			).props;
+			const { results, receiveCart } =
+				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 			expect( results ).toEqual( mockStoreCartData );
 			expect( receiveCart ).toBeUndefined();
@@ -244,10 +238,8 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			//eslint-disable-next-line testing-library/await-async-query
-			const { results, receiveCart } = renderer.root.findByType(
-				'div'
-			).props;
+			const { results, receiveCart } =
+				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 
 			expect( results ).toEqual( previewCartData );
 			expect( receiveCart ).toEqual( receiveCartMock );

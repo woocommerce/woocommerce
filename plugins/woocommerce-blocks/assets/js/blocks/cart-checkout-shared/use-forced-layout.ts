@@ -42,16 +42,14 @@ export const useForcedLayout = ( {
 	const currentRegisteredBlocks = useRef( registeredBlocks );
 	const currentDefaultTemplate = useRef( defaultTemplate );
 
-	const { insertBlock, replaceInnerBlocks } = useDispatch(
-		'core/block-editor'
-	);
+	const { insertBlock, replaceInnerBlocks } =
+		useDispatch( 'core/block-editor' );
 
 	const { innerBlocks, registeredBlockTypes } = useSelect(
 		( select ) => {
 			return {
-				innerBlocks: select( 'core/block-editor' ).getBlocks(
-					clientId
-				),
+				innerBlocks:
+					select( 'core/block-editor' ).getBlocks( clientId ),
 				registeredBlockTypes: currentRegisteredBlocks.current.map(
 					( blockName ) => getBlockType( blockName )
 				),
@@ -110,9 +108,10 @@ export const useForcedLayout = ( {
 			}
 
 			// Is the forced block part of the default template, find it's original position.
-			const defaultTemplatePosition = currentDefaultTemplate.current.findIndex(
-				( [ blockName ] ) => blockName === block.name
-			);
+			const defaultTemplatePosition =
+				currentDefaultTemplate.current.findIndex(
+					( [ blockName ] ) => blockName === block.name
+				);
 
 			switch ( defaultTemplatePosition ) {
 				case -1:

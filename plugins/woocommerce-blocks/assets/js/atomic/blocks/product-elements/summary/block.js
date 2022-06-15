@@ -43,7 +43,8 @@ const Block = ( props ) => {
 					className,
 					`wc-block-components-product-summary`,
 					{
-						[ `${ parentClassName }__product-summary` ]: parentClassName,
+						[ `${ parentClassName }__product-summary` ]:
+							parentClassName,
 					}
 				) }
 			/>
@@ -65,7 +66,8 @@ const Block = ( props ) => {
 				colorProps.className,
 				`wc-block-components-product-summary`,
 				{
-					[ `${ parentClassName }__product-summary` ]: parentClassName,
+					[ `${ parentClassName }__product-summary` ]:
+						parentClassName,
 				}
 			) }
 			source={ source }

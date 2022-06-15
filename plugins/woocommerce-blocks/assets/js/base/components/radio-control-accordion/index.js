@@ -54,7 +54,8 @@ const RadioControlAccordion = ( {
 									className={ classnames(
 										'wc-block-components-radio-control-accordion-content',
 										{
-											'wc-block-components-radio-control-accordion-content-hide': ! checked,
+											'wc-block-components-radio-control-accordion-content-hide':
+												! checked,
 										}
 									) }
 								>

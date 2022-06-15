@@ -34,9 +34,11 @@ const testState = deepFreeze( {
 } );
 
 describe( 'getRoute', () => {
-	const invokeTest = ( namespace, resourceName, ids = [] ) => () => {
-		return getRoute( testState, namespace, resourceName, ids );
-	};
+	const invokeTest =
+		( namespace, resourceName, ids = [] ) =>
+		() => {
+			return getRoute( testState, namespace, resourceName, ids );
+		};
 	describe( 'with throwing errors', () => {
 		beforeEach( () => mockHasFinishedResolution.mockReturnValue( true ) );
 		it( 'throws an error if there is no route for the given namespace', () => {
@@ -78,10 +80,11 @@ describe( 'getRoute', () => {
 		} );
 		test( 'when there is a route with placeholders', () => {
 			expect(
-				invokeTest( 'wc/blocks', 'products/attributes/terms', [
-					10,
-					20,
-				] )()
+				invokeTest(
+					'wc/blocks',
+					'products/attributes/terms',
+					[ 10, 20 ]
+				)()
 			).toBe( 'wc/blocks/products/attributes/10/terms/20' );
 		} );
 	} );

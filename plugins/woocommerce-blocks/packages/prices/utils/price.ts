@@ -178,13 +178,8 @@ export const formatPrice = (
 
 	const currency: Currency = getCurrency( currencyData );
 
-	const {
-		minorUnit,
-		prefix,
-		suffix,
-		decimalSeparator,
-		thousandSeparator,
-	} = currency;
+	const { minorUnit, prefix, suffix, decimalSeparator, thousandSeparator } =
+		currency;
 
 	const formattedPrice: number = priceInt / 10 ** minorUnit;
 

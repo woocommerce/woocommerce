@@ -179,9 +179,8 @@ export const useStoreCart = (
 			const cartData = store.getCartData();
 			const cartErrors = store.getCartErrors();
 			const cartTotals = store.getCartTotals();
-			const cartIsLoading = ! store.hasFinishedResolution(
-				'getCartData'
-			);
+			const cartIsLoading =
+				! store.hasFinishedResolution( 'getCartData' );
 
 			const isLoadingRates = store.isCustomerDataUpdating();
 			const { receiveCart } = dispatch( storeKey );

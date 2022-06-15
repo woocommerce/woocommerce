@@ -57,14 +57,10 @@ export const useCollectionData = ( {
 	context = `${ context }-collection-data`;
 
 	const [ collectionDataQueryState ] = useQueryStateByContext( context );
-	const [
-		calculateAttributesQueryState,
-		setCalculateAttributesQueryState,
-	] = useQueryStateByKey( 'calculate_attribute_counts', [], context );
-	const [
-		calculatePriceRangeQueryState,
-		setCalculatePriceRangeQueryState,
-	] = useQueryStateByKey( 'calculate_price_range', null, context );
+	const [ calculateAttributesQueryState, setCalculateAttributesQueryState ] =
+		useQueryStateByKey( 'calculate_attribute_counts', [], context );
+	const [ calculatePriceRangeQueryState, setCalculatePriceRangeQueryState ] =
+		useQueryStateByKey( 'calculate_price_range', null, context );
 	const [
 		calculateStockStatusQueryState,
 		setCalculateStockStatusQueryState,

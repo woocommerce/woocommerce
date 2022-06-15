@@ -52,7 +52,8 @@ export const Edit = ( {
 							checked={ isShippingCalculatorEnabled }
 							onChange={ () =>
 								setAttributes( {
-									isShippingCalculatorEnabled: ! isShippingCalculatorEnabled,
+									isShippingCalculatorEnabled:
+										! isShippingCalculatorEnabled,
 								} )
 							}
 						/>

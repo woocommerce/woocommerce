@@ -45,12 +45,10 @@ const state = {
 				images: [
 					{
 						id: 48,
-						src:
-							'http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg',
+						src: 'http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg',
 						thumbnail:
 							'http://local.wordpress.test/wp-content/uploads/2019/12/album-1-324x324.jpg',
-						srcset:
-							'http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg 800w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-324x324.jpg 324w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-100x100.jpg 100w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-416x416.jpg 416w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-768x768.jpg 768w',
+						srcset: 'http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg 800w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-324x324.jpg 324w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-100x100.jpg 100w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-416x416.jpg 416w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-768x768.jpg 768w',
 						sizes: '(max-width: 800px) 100vw, 800px',
 						name: 'album-1.jpg',
 						alt: '',
@@ -85,12 +83,10 @@ const state = {
 				images: [
 					{
 						id: 40,
-						src:
-							'http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg',
+						src: 'http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg',
 						thumbnail:
 							'http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-324x324.jpg',
-						srcset:
-							'http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-324x324.jpg 324w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-100x100.jpg 100w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-416x416.jpg 416w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-768x768.jpg 768w',
+						srcset: 'http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-324x324.jpg 324w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-100x100.jpg 100w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-416x416.jpg 416w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-768x768.jpg 768w',
 						sizes: '(max-width: 801px) 100vw, 801px',
 						name: 'beanie-2.jpg',
 						alt: '',

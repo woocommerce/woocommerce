@@ -43,9 +43,8 @@ export const useShippingData = (): ShippingData => {
 	// set selected rates on ref so it's always current.
 	const selectedRates = useRef< Record< string, unknown > >( {} );
 	useEffect( () => {
-		const derivedSelectedRates = deriveSelectedShippingRates(
-			shippingRates
-		);
+		const derivedSelectedRates =
+			deriveSelectedShippingRates( shippingRates );
 		if (
 			isObject( derivedSelectedRates ) &&
 			! isShallowEqual( selectedRates.current, derivedSelectedRates )

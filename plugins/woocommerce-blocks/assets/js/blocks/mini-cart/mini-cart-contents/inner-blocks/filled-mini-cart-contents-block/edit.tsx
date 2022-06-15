@@ -20,11 +20,11 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.FILLED_MINI_CART );
 	const { currentView } = useEditorContext();
 
-	const defaultTemplate = ( [
+	const defaultTemplate = [
 		[ 'woocommerce/mini-cart-title-block', {} ],
 		[ 'woocommerce/mini-cart-items-block', {} ],
 		[ 'woocommerce/mini-cart-footer-block', {} ],
-	].filter( Boolean ) as unknown ) as TemplateArray;
+	].filter( Boolean ) as unknown as TemplateArray;
 
 	useForcedLayout( {
 		clientId,

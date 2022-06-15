@@ -13,7 +13,7 @@ export type SearchListItemType = {
 	breadcrumbs: string[];
 };
 
-export type SearchListItemsType = SearchListItemType[] | [  ];
+export type SearchListItemsType = SearchListItemType[] | [];
 
 export interface SearchListMessages {
 	// A more detailed label for the "Clear all" button, read to screen reader users.

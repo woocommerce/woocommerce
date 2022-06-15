@@ -103,8 +103,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 						meta_data: [
 							{
 								key: 'Items',
-								value:
-									'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+								value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
 							},
 						],
 						selected: false,
@@ -128,8 +127,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 						meta_data: [
 							{
 								key: 'Items',
-								value:
-									'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+								value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
 							},
 						],
 						selected: false,
@@ -153,8 +151,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 						meta_data: [
 							{
 								key: 'Items',
-								value:
-									'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+								value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
 							},
 						],
 						selected: true,
@@ -476,8 +473,7 @@ describe( 'Checkout Order Summary', () => {
 							meta_data: [
 								{
 									key: 'Items',
-									value:
-										'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+									value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
 								},
 							],
 							selected: true,

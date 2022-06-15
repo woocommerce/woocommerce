@@ -60,9 +60,8 @@ const Block = (): JSX.Element | null => {
 		return null;
 	}
 
-	const shippingRatesPackageCount = getShippingRatesPackageCount(
-		shippingRates
-	);
+	const shippingRatesPackageCount =
+		getShippingRatesPackageCount( shippingRates );
 
 	if (
 		! isEditor &&

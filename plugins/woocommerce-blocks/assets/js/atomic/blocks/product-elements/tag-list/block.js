@@ -45,7 +45,8 @@ const Block = ( props ) => {
 				colorProps.className,
 				'wc-block-components-product-tag-list',
 				{
-					[ `${ parentClassName }__product-tag-list` ]: parentClassName,
+					[ `${ parentClassName }__product-tag-list` ]:
+						parentClassName,
 				}
 			) }
 			style={ { ...colorProps.style, ...typographyProps.style } }

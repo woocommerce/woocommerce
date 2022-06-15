@@ -32,8 +32,7 @@ const generate = ( hooks ) => {
 	const jsonDocs = [
 		{ html: '<!-- DO NOT UPDATE THIS DOC DIRECTLY -->' },
 		{
-			html:
-				'<!-- Use `npm run build:docs` to automatically build hook documentation -->',
+			html: '<!-- Use `npm run build:docs` to automatically build hook documentation -->',
 		},
 		{ h1: 'Filters' },
 		{ h2: 'Table of Contents' },

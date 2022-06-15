@@ -37,9 +37,8 @@ const Block = ( { className, showFormElements } ) => {
 		className,
 		'wc-block-components-product-add-to-cart',
 		{
-			'wc-block-components-product-add-to-cart--placeholder': isEmpty(
-				product
-			),
+			'wc-block-components-product-add-to-cart--placeholder':
+				isEmpty( product ),
 		}
 	);
 

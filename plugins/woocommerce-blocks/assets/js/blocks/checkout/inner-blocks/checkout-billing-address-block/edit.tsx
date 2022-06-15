@@ -39,9 +39,8 @@ export const Edit = ( {
 		showPhoneField,
 		requirePhoneField,
 	} = useCheckoutBlockContext();
-	const {
-		addressFieldControls: Controls,
-	} = useCheckoutBlockControlsContext();
+	const { addressFieldControls: Controls } =
+		useCheckoutBlockControlsContext();
 	const { showBillingFields } = useCheckoutAddress();
 
 	if ( ! showBillingFields ) {

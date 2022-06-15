@@ -11,9 +11,8 @@ import TotalsWrapper from '../totals-wrapper';
 
 const slotName = '__experimentalOrderMeta';
 
-const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } = createSlotFill(
-	slotName
-);
+const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } =
+	createSlotFill( slotName );
 
 const Slot = ( { className, extensions, cart, context } ) => {
 	const { fills } = useSlot( slotName );

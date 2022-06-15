@@ -18,11 +18,8 @@ jest.mock( '@woocommerce/block-data', () => ( {
 describe( 'useStoreProducts', () => {
 	let registry, mocks, renderer;
 	const getProps = ( testRenderer ) => {
-		const {
-			products,
-			totalProducts,
-			productsLoading,
-		} = testRenderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+		const { products, totalProducts, productsLoading } =
+			testRenderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 		return {
 			products,
 			totalProducts,
@@ -36,10 +33,12 @@ describe( 'useStoreProducts', () => {
 		</RegistryProvider>
 	);
 
-	const getTestComponent = () => ( { query } ) => {
-		const items = useStoreProducts( query );
-		return <div { ...items } />;
-	};
+	const getTestComponent =
+		() =>
+		( { query } ) => {
+			const items = useStoreProducts( query );
+			return <div { ...items } />;
+		};
 
 	const setUpMocks = () => {
 		mocks = {

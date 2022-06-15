@@ -56,7 +56,8 @@ export const Edit = ( {
 								checked={ showRateAfterTaxName }
 								onChange={ () =>
 									setAttributes( {
-										showRateAfterTaxName: ! showRateAfterTaxName,
+										showRateAfterTaxName:
+											! showRateAfterTaxName,
 									} )
 								}
 							/>

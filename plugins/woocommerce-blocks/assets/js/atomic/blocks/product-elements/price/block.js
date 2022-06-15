@@ -79,7 +79,8 @@ const Block = ( props ) => {
 			// This is the regular or original price when the `price` value is a sale price.
 			regularPrice={ prices.regular_price }
 			regularPriceClassName={ classnames( {
-				[ `${ parentClassName }__product-price__regular` ]: parentClassName,
+				[ `${ parentClassName }__product-price__regular` ]:
+					parentClassName,
 			} ) }
 		/>
 	);

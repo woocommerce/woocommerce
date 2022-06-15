@@ -70,9 +70,8 @@ export const PaymentMethodDataProvider = ( {
 	} = useCheckoutContext();
 	const { isEditor, getPreviewData } = useEditorContext();
 	const { setValidationErrors } = useValidationContext();
-	const { createErrorNotice: addErrorNotice, removeNotice } = useDispatch(
-		'core/notices'
-	);
+	const { createErrorNotice: addErrorNotice, removeNotice } =
+		useDispatch( 'core/notices' );
 	const {
 		isSuccessResponse,
 		isErrorResponse,
@@ -93,10 +92,8 @@ export const PaymentMethodDataProvider = ( {
 		DEFAULT_PAYMENT_DATA_CONTEXT_STATE
 	);
 
-	const {
-		dispatchActions,
-		setPaymentStatus,
-	} = usePaymentMethodDataDispatchers( dispatch );
+	const { dispatchActions, setPaymentStatus } =
+		usePaymentMethodDataDispatchers( dispatch );
 
 	const paymentMethodsInitialized = usePaymentMethods(
 		dispatchActions.setRegisteredPaymentMethods

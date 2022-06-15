@@ -64,7 +64,8 @@ export const CountryInput = ( {
 					autoComplete={ autoComplete }
 					value={ value }
 					onChange={ ( event ) => {
-						const textValue = event.target.value.toLocaleUpperCase();
+						const textValue =
+							event.target.value.toLocaleUpperCase();
 						const foundOption = options.find(
 							( option ) =>
 								( textValue.length !== 2 &&
