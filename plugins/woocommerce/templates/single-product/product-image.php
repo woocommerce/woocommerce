@@ -24,7 +24,16 @@ if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
 
 global $product;
 
+/**
+ * Controls the number of thumbnail per row displayed by flexslider.
+ *
+ * @since 2.7.0
+ *
+ * @param int $count The number of thumbnails displayed.
+ */
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
+/** This filter is documented in includes/class-wc-frontend-scripts.php */
+$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) );
 $post_thumbnail_id = $product->get_image_id();
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
@@ -32,11 +41,12 @@ $wrapper_classes   = apply_filters(
 		'woocommerce-product-gallery',
 		'woocommerce-product-gallery--' . ( $post_thumbnail_id ? 'with-images' : 'without-images' ),
 		'woocommerce-product-gallery--columns-' . absint( $columns ),
+		$flexslider_nav ? 'woocommerce-product-gallery--custom-nav' : 'woocommerce-product-gallery--nav',
 		'images',
 	)
 );
 ?>
-<div class="<?php echo esc_attr( implode( ' ', array_map( 'sanitize_html_class', $wrapper_classes ) ) ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>" style="opacity: 0; transition: opacity .25s ease-in-out;">
+<div class="<?php echo esc_attr( implode( ' ', array_map( 'sanitize_html_class', $wrapper_classes ) ) ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>">
 	<figure class="woocommerce-product-gallery__wrapper">
 		<?php
 		if ( $post_thumbnail_id ) {
@@ -52,4 +62,13 @@ $wrapper_classes   = apply_filters(
 		do_action( 'woocommerce_product_thumbnails' );
 		?>
 	</figure>
+	<?php
+	if ( $flexslider_nav && $post_thumbnail_id && $nav_thumbnails_ids = $product->get_gallery_image_ids() ) {
+		echo '<ol class="flex-control-nav flex-control-thumbs">';
+		foreach ( array_merge( array( $post_thumbnail_id ), $nav_thumbnails_ids ) as $count => $attachment_id ) {
+			echo apply_filters( 'woocommerce_single_product_image_nav_html', wc_get_gallery_image_html( $attachment_id, $count ), $attachment_id ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
+		}
+		echo '</ol>';
+	}
+	?>
 </div>

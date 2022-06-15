@@ -1571,35 +1571,56 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
  */
 function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
-	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
-	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
-	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
+	/** This filter is documented in includes/class-wc-frontend-scripts.php */
+	$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) );
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
-	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-	$image             = wp_get_attachment_image(
+	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $flexslider_nav || is_bool($main_image)  ? 'woocommerce_single' : $thumbnail_size );
+
+
+	// Gallery uses true false to indicate whether it is the main image.
+	if ( is_bool( $main_image ) ) {
+		$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+		$image_params = array(
+			'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			'data-src'                => esc_url( $full_src[0] ),
+			'data-large_image'        => esc_url( $full_src[0] ),
+			'data-large_image_width'  => esc_attr( $full_src[1] ),
+			'data-large_image_height' => esc_attr( $full_src[2] ),
+			'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
+			'loading'                 => esc_attr( $main_image ? 'eager' : 'lazy' ),
+		);
+	} else {
+		// Nav use int values in order to have different parameters.
+		$image_params = array(
+			'alt'     => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			/** This filter is documented in includes/wc-template-functions.php */
+			'loading' => ( $main_image <= apply_filters( 'woocommerce_product_thumbnails_columns', 4 ) ) ? null : 'lazy',
+			'class'   => 0 === $main_image ? 'flex-active' : '', // If is the first image set the flex-active class on init.
+		);
+	}
+
+	$image = wp_get_attachment_image(
 		$attachment_id,
 		$image_size,
 		false,
 		apply_filters(
 			'woocommerce_gallery_image_html_attachment_image_params',
-			array(
-				'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-				'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-				'data-src'                => esc_url( $full_src[0] ),
-				'data-large_image'        => esc_url( $full_src[0] ),
-				'data-large_image_width'  => esc_attr( $full_src[1] ),
-				'data-large_image_height' => esc_attr( $full_src[2] ),
-				'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
-			),
+			$image_params,
 			$attachment_id,
 			$image_size,
 			$main_image
 		)
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	if (is_bool($main_image))
+		return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	else
+		return '<li>' . $image . '</li>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {

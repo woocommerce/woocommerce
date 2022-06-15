@@ -93,12 +93,15 @@ jQuery( function( $ ) {
 
 		// No images? Abort.
 		if ( 0 === this.$images.length ) {
-			this.$target.css( 'opacity', 1 );
 			return;
 		}
 
 		// Make this object available.
 		$target.data( 'product_gallery', this );
+
+		if ( this.$target.css( 'opacity' ) ) {
+			this.$target.css( 'opacity', 1 )
+		}
 
 		// Pick functionality to initialize...
 		this.flexslider_enabled = 'function' === typeof $.fn.flexslider && wc_single_product_params.flexslider_enabled;
@@ -129,8 +132,6 @@ jQuery( function( $ ) {
 		if ( this.flexslider_enabled ) {
 			this.initFlexslider( args.flexslider );
 			$target.on( 'woocommerce_gallery_reset_slide_position', this.onResetSlidePosition );
-		} else {
-			this.$target.css( 'opacity', 1 );
 		}
 
 		if ( this.zoom_enabled ) {
@@ -152,9 +153,6 @@ jQuery( function( $ ) {
 
 		var options = $.extend( {
 			selector: '.woocommerce-product-gallery__wrapper > .woocommerce-product-gallery__image',
-			start: function() {
-				$target.css( 'opacity', 1 );
-			},
 			after: function( slider ) {
 				gallery.initZoomForTarget( gallery.$images.eq( slider.currentSlide ) );
 			}
