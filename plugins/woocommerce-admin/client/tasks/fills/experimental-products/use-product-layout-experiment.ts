@@ -8,8 +8,10 @@ type Layout = 'control' | 'card' | 'stacked';
 
 export const getProductLayoutExperiment = async (): Promise< Layout > => {
 	const [ cardAssignment, stackedAssignment ] = await Promise.all( [
-		loadExperimentAssignment( `woocommerce_products_task_layout_card` ),
-		loadExperimentAssignment( `woocommerce_products_task_layout_stacked` ),
+		loadExperimentAssignment( `woocommerce_products_task_layout_card_v2` ),
+		loadExperimentAssignment(
+			`woocommerce_products_task_layout_stacked_v2`
+		),
 	] );
 	// This logic may look flawed as in both looks like they can be assigned treatment at the same time,
 	// but in backend we segment the experiments by store country, so it will never be.
