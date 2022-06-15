@@ -30,6 +30,13 @@ class Analytics {
 	protected static $instance = null;
 
 	/**
+	 * Determines if the feature has been toggled on or off.
+	 *
+	 * @var boolean
+	 */
+	protected static $is_updated = false;
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -45,6 +52,7 @@ class Analytics {
 	public function __construct() {
 		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
+		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
 
 		if ( ! Features::is_enabled( 'analytics' ) ) {
 			return;
@@ -91,10 +99,19 @@ class Analytics {
 			return;
 		}
 
-		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-			wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-			exit();
+		self::$is_updated = true;
+	}
+
+	/**
+	 * Reload the page if the setting has been updated.
+	 */
+	public static function maybe_reload_page() {
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) || ! self::$is_updated ) {
+			return;
 		}
+
+		wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		exit();
 	}
 
 	/**
@@ -309,6 +326,11 @@ class Analytics {
 			),
 		);
 
+		/**
+		 * The analytics report items used in the menu.
+		 *
+		 * @since 6.4.0
+		 */
 		return apply_filters( 'woocommerce_analytics_report_menu_items', $report_pages );
 	}
 
