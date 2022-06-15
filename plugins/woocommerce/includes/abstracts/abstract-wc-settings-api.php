@@ -868,7 +868,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @return string
 	 */
-	public function validate_safe_text_field( string $key, $value ): string {
+	public function validate_safe_text_field( string $key, ?string $value ): string {
 		return wc_get_container()->get( HtmlSanitizer::class )->sanitize( (string) $value, HtmlSanitizer::LOW_HTML_BALANCED_TAGS_NO_LINKS );
 	}
 
