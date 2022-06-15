@@ -3,6 +3,7 @@
  * Product data meta box.
  *
  * @package WooCommerce\Admin
+ * @phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,21 +38,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 		<?php endforeach; ?>
 	</span>
+	
+	<?php if ( true ) : ?>
+		<dl class="product_data_cards wc-cards">
+			<?php foreach ( self::get_product_data_tabs() as $key => $tab_data ) : ?>
+				<dt class="clear <?php echo esc_attr( $key ); ?>_options_label <?php echo esc_attr( $key ); ?>_card_label <?php echo esc_attr( isset( $tab_data['class'] ) ? implode( ' ', (array) $tab_data['class'] ) : '' ); ?>">
+					<span><?php echo esc_html( $tab_data['label'] ); ?></span>
+				</dt>
+				<dd class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_card <?php echo esc_attr( isset( $tab_data['class'] ) ? implode( ' ', (array) $tab_data['class'] ) : '' ); ?>">
+					<?php self::output_tab( $tab_data ); ?>
+				</dd>
+			<?php endforeach; ?>
+		</dl>
+	<?php else : ?>
+		<ul class="product_data_tabs wc-tabs">
+			<?php foreach ( self::get_product_data_tabs() as $key => $tab_data ) : ?>
+				<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab_data['class'] ) ? implode( ' ', (array) $tab_data['class'] ) : '' ); ?>">
+					<a href="#<?php echo esc_attr( $tab_data['target'] ); ?>"><span><?php echo esc_html( $tab_data['label'] ); ?></span></a>
+				</li>
+			<?php endforeach; ?>
+			<?php do_action( 'woocommerce_product_write_panel_tabs' ); ?>
+		</ul>
 
-	<ul class="product_data_tabs wc-tabs">
-		<?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
-			<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>">
-				<a href="#<?php echo esc_attr( $tab['target'] ); ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>
-			</li>
-		<?php endforeach; ?>
-		<?php do_action( 'woocommerce_product_write_panel_tabs' ); ?>
-	</ul>
-
-	<?php
-		self::output_tabs();
-		self::output_variations();
-		do_action( 'woocommerce_product_data_panels' );
-		wc_do_deprecated_action( 'woocommerce_product_write_panels', array(), '2.6', 'Use woocommerce_product_data_panels action instead.' );
-	?>
+		<?php
+			self::output_tabs();
+			self::output_variations();
+			do_action( 'woocommerce_product_data_panels' );
+			wc_do_deprecated_action( 'woocommerce_product_write_panels', array(), '2.6', 'Use woocommerce_product_data_panels action instead.' );
+		?>
+	<?php endif; ?>
 	<div class="clear"></div>
 </div>
