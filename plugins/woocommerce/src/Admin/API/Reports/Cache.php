@@ -29,7 +29,7 @@ class Cache {
 	 * Get cache version number.
 	 *
 	 * This is based on WC_Cache_Helper::get_transient_version, but rounds the Unix timestamp to the nearest
-	 * increment to buffer the caching a bit.
+	 * increment to rate-limit cache invalidations.
 	 *
 	 * @param bool $refresh True to generate a new value.
 	 *
