@@ -13,3 +13,7 @@
     -   the returned object from getHistory() has methods changed: goBack() -> back() and goForward() -> forward()
     -   the listen() method from the returned object of getHistory() now takes a listener with an object parameter, ({location, action}) instead of (location, action)
     -   location.pathname is now validated and makes a warning if it is not a string
+
+---
+
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/navigation/CHANGELOG.md).
