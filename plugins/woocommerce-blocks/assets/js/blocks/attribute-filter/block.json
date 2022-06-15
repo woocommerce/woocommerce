@@ -18,6 +18,10 @@
 		}
 	},
 	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
 		"attributeId": {
 			"type": "number",
 			"default": 0

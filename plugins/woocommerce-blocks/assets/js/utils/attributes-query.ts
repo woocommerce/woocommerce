@@ -1,6 +1,11 @@
 /**
  * External dependencies
  */
+import {
+	AttributeObject,
+	AttributeQuery,
+	AttributeTerm,
+} from '@woocommerce/types';
 import { sortBy } from 'lodash';
 
 /**
@@ -12,9 +17,9 @@ import { sortBy } from 'lodash';
  * @param {string}   slug      Term slug to remove.
  */
 export const removeAttributeFilterBySlug = (
-	query = [],
-	setQuery = () => {},
-	attribute,
+	query: AttributeQuery[] = [],
+	setQuery: ( query: AttributeQuery[] ) => void,
+	attribute: AttributeObject,
 	slug = ''
 ) => {
 	// Get current filter for provided attribute.
@@ -61,12 +66,16 @@ export const removeAttributeFilterBySlug = (
  * @return {Object} An attribute object.
  */
 export const updateAttributeFilter = (
-	query = [],
-	setQuery = () => {},
-	attribute,
-	attributeTerms = [],
-	operator = 'in'
+	query: AttributeQuery[] = [],
+	setQuery: ( query: AttributeQuery[] ) => void,
+	attribute?: AttributeObject,
+	attributeTerms: AttributeTerm[] = [],
+	operator: 'in' | 'and' = 'in'
 ) => {
+	if ( ! attribute || ! attribute.taxonomy ) {
+		return [];
+	}
+
 	const returnQuery = query.filter(
 		( item ) => item.attribute !== attribute.taxonomy
 	);

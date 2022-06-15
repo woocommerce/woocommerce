@@ -10,11 +10,13 @@ import {
 } from '@wordpress/block-editor';
 import { Icon, category, external } from '@wordpress/icons';
 import { SearchListControl } from '@woocommerce/editor-components/search-list-control';
-import { mapValues, toArray, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import classnames from 'classnames';
+import { SearchListItemsType } from '@woocommerce/editor-components/search-list-control/types';
+import { AttributeSetting } from '@woocommerce/types';
 import {
 	Placeholder,
 	Disabled,
@@ -32,12 +34,13 @@ import {
 /**
  * Internal dependencies
  */
-import Block from './block.js';
+import Block from './block';
 import './editor.scss';
+import type { EditProps } from './types';
 
-const ATTRIBUTES = getSetting( 'attributes', [] );
+const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
-const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
+const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 	const {
 		attributeId,
 		className,
@@ -70,6 +73,91 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 					] }
 				/>
 			</BlockControls>
+		);
+	};
+
+	const onChange = ( selected: SearchListItemsType ) => {
+		if ( ! selected || ! selected.length ) {
+			return;
+		}
+
+		const selectedId = selected[ 0 ].id;
+		const productAttribute = ATTRIBUTES.find(
+			( attribute ) => attribute.attribute_id === selectedId.toString()
+		);
+
+		if ( ! productAttribute || attributeId === selectedId ) {
+			return;
+		}
+
+		const attributeName = productAttribute.attribute_label;
+
+		setAttributes( {
+			attributeId: selectedId as number,
+			heading: sprintf(
+				/* translators: %s attribute name. */
+				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
+				attributeName
+			),
+		} );
+	};
+
+	const renderAttributeControl = ( {
+		isCompact,
+	}: {
+		isCompact: boolean;
+	} ) => {
+		const messages = {
+			clear: __(
+				'Clear selected attribute',
+				'woo-gutenberg-products-block'
+			),
+			list: __( 'Product Attributes', 'woo-gutenberg-products-block' ),
+			noItems: __(
+				"Your store doesn't have any product attributes.",
+				'woo-gutenberg-products-block'
+			),
+			search: __(
+				'Search for a product attribute:',
+				'woo-gutenberg-products-block'
+			),
+			selected: ( n: number ) =>
+				sprintf(
+					/* translators: %d is the number of attributes selected. */
+					_n(
+						'%d attribute selected',
+						'%d attributes selected',
+						n,
+						'woo-gutenberg-products-block'
+					),
+					n
+				),
+			updated: __(
+				'Product attribute search results updated.',
+				'woo-gutenberg-products-block'
+			),
+		};
+
+		const list = sortBy(
+			ATTRIBUTES.map( ( item ) => {
+				return {
+					id: parseInt( item.attribute_id, 10 ),
+					name: item.attribute_label,
+				};
+			} ),
+			'name'
+		);
+
+		return (
+			<SearchListControl
+				className="woocommerce-product-attributes"
+				list={ list }
+				selected={ list.filter( ( { id } ) => id === attributeId ) }
+				onChange={ onChange }
+				messages={ messages }
+				isSingle
+				isCompact={ isCompact }
+			/>
 		);
 	};
 
@@ -113,7 +201,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 						minLevel={ 2 }
 						maxLevel={ 7 }
 						selectedLevel={ headingLevel }
-						onChange={ ( newLevel ) =>
+						onChange={ ( newLevel: number ) =>
 							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
@@ -141,7 +229,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 								  )
 						}
 						value={ queryType }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( {
 								queryType: value,
 							} )
@@ -165,7 +253,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 							'woo-gutenberg-products-block'
 						) }
 						value={ displayStyle }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( {
 								displayStyle: value,
 							} )
@@ -273,89 +361,6 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		);
 	};
 
-	const onChange = ( selected ) => {
-		if ( ! selected || ! selected.length ) {
-			return;
-		}
-
-		const selectedId = selected[ 0 ].id;
-		const productAttribute = ATTRIBUTES.find(
-			( attribute ) => attribute.attribute_id === selectedId.toString()
-		);
-
-		if ( ! productAttribute || attributeId === selectedId ) {
-			return;
-		}
-
-		const attributeName = productAttribute.attribute_label;
-
-		setAttributes( {
-			attributeId: selectedId,
-			heading: sprintf(
-				/* translators: %s attribute name. */
-				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
-				attributeName
-			),
-		} );
-	};
-
-	const renderAttributeControl = ( { isCompact } ) => {
-		const messages = {
-			clear: __(
-				'Clear selected attribute',
-				'woo-gutenberg-products-block'
-			),
-			list: __( 'Product Attributes', 'woo-gutenberg-products-block' ),
-			noItems: __(
-				"Your store doesn't have any product attributes.",
-				'woo-gutenberg-products-block'
-			),
-			search: __(
-				'Search for a product attribute:',
-				'woo-gutenberg-products-block'
-			),
-			selected: ( n ) =>
-				sprintf(
-					/* translators: %d is the number of attributes selected. */
-					_n(
-						'%d attribute selected',
-						'%d attributes selected',
-						n,
-						'woo-gutenberg-products-block'
-					),
-					n
-				),
-			updated: __(
-				'Product attribute search results updated.',
-				'woo-gutenberg-products-block'
-			),
-		};
-
-		const list = sortBy(
-			toArray(
-				mapValues( ATTRIBUTES, ( item ) => {
-					return {
-						id: parseInt( item.attribute_id, 10 ),
-						name: item.attribute_label,
-					};
-				} )
-			),
-			'name'
-		);
-
-		return (
-			<SearchListControl
-				className="woocommerce-product-attributes"
-				list={ list }
-				selected={ list.filter( ( { id } ) => id === attributeId ) }
-				onChange={ onChange }
-				messages={ messages }
-				isSingle
-				isCompact={ isCompact }
-			/>
-		);
-	};
-
 	const renderEditMode = () => {
 		return (
 			<Placeholder
@@ -399,7 +404,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 						className="wc-block-attribute-filter__title"
 						headingLevel={ headingLevel }
 						heading={ heading }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( { heading: value } )
 						}
 					/>

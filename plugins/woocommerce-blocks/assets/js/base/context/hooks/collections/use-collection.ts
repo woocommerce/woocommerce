@@ -44,7 +44,7 @@ export interface useCollectionOptions {
 	namespace: string;
 	resourceName: string;
 	resourceValues?: number[];
-	query: Record< string, unknown >;
+	query?: Record< string, unknown >;
 	shouldSelect?: boolean;
 }
 

@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useDebounce } from 'use-debounce';
 import { sortBy } from 'lodash';
 import { useShallowEqual } from '@woocommerce/base-hooks';
+import { objectHasProp } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -78,6 +79,7 @@ export const useCollectionData = ( {
 			const foundAttribute = calculateAttributesQueryState.find(
 				( attribute ) => {
 					return (
+						objectHasProp( currentQueryAttribute, 'taxonomy' ) &&
 						attribute.taxonomy === currentQueryAttribute.taxonomy
 					);
 				}

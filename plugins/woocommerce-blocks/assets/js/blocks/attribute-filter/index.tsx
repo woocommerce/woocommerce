@@ -11,7 +11,9 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import edit from './edit.js';
+import edit from './edit';
+import type { BlockAttributes } from './types';
+import { blockAttributes } from './attributes';
 import metadata from './block.json';
 
 registerBlockType( metadata, {
@@ -40,13 +42,7 @@ registerBlockType( metadata, {
 	},
 	attributes: {
 		...metadata.attributes,
-		heading: {
-			type: 'string',
-			default: __(
-				'Filter by attribute',
-				'woo-gutenberg-products-block'
-			),
-		},
+		...blockAttributes,
 	},
 	transforms: {
 		from: [
@@ -77,7 +73,7 @@ registerBlockType( metadata, {
 	},
 	edit,
 	// Save the props to post content.
-	save( { attributes } ) {
+	save( { attributes }: { attributes: BlockAttributes } ) {
 		const {
 			className,
 			showCounts,
@@ -88,7 +84,7 @@ registerBlockType( metadata, {
 			displayStyle,
 			showFilterButton,
 		} = attributes;
-		const data = {
+		const data: Record< string, unknown > = {
 			'data-attribute-id': attributeId,
 			'data-show-counts': showCounts,
 			'data-query-type': queryType,

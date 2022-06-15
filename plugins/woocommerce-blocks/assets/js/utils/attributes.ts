@@ -2,15 +2,16 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
+import { AttributeObject, AttributeSetting } from '@woocommerce/types';
 
-const ATTRIBUTES = getSetting( 'attributes', [] );
+const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 /**
  * Format an attribute from the settings into an object with standardized keys.
  *
  * @param {Object} attribute The attribute object.
  */
-const attributeSettingToObject = ( attribute ) => {
+const attributeSettingToObject = ( attribute: AttributeSetting ) => {
 	if ( ! attribute || ! attribute.attribute_name ) {
 		return null;
 	}
@@ -25,15 +26,18 @@ const attributeSettingToObject = ( attribute ) => {
 /**
  * Format all attribute settings into objects.
  */
-const attributeObjects = ATTRIBUTES.reduce( ( acc, current ) => {
-	const attributeObject = attributeSettingToObject( current );
+const attributeObjects = ATTRIBUTES.reduce(
+	( acc: AttributeObject[], current ) => {
+		const attributeObject = attributeSettingToObject( current );
 
-	if ( attributeObject.id ) {
-		acc.push( attributeObject );
-	}
+		if ( attributeObject && attributeObject.id ) {
+			acc.push( attributeObject );
+		}
 
-	return acc;
-}, [] );
+		return acc;
+	},
+	[]
+);
 
 /**
  * Get attribute data by taxonomy.
@@ -41,7 +45,7 @@ const attributeObjects = ATTRIBUTES.reduce( ( acc, current ) => {
  * @param {number} attributeId The attribute ID.
  * @return {Object|undefined} The attribute object if it exists.
  */
-export const getAttributeFromID = ( attributeId ) => {
+export const getAttributeFromID = ( attributeId: number ) => {
 	if ( ! attributeId ) {
 		return;
 	}
@@ -56,7 +60,7 @@ export const getAttributeFromID = ( attributeId ) => {
  * @param {string} taxonomy The attribute taxonomy name e.g. pa_color.
  * @return {Object|undefined} The attribute object if it exists.
  */
-export const getAttributeFromTaxonomy = ( taxonomy ) => {
+export const getAttributeFromTaxonomy = ( taxonomy: string ) => {
 	if ( ! taxonomy ) {
 		return;
 	}
@@ -71,7 +75,7 @@ export const getAttributeFromTaxonomy = ( taxonomy ) => {
  * @param {number} attributeId The attribute ID.
  * @return {string} The taxonomy name.
  */
-export const getTaxonomyFromAttributeId = ( attributeId ) => {
+export const getTaxonomyFromAttributeId = ( attributeId: number ) => {
 	if ( ! attributeId ) {
 		return null;
 	}
