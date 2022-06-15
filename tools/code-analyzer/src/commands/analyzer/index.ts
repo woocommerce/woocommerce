@@ -376,12 +376,19 @@ export default class Analyzer extends Command {
 		for ( const p in patches ) {
 			const patch = patches[ p ];
 			const results = patch.match( newRegEx );
+			const hasHookRegex = /apply_filters|do_action/g;
+			const hasHook = patch.match( hasHookRegex );
 			const hooksList: Map< string, string[] > = new Map<
 				string,
 				string[]
 			>();
 
 			if ( ! results ) {
+				if ( hasHook ) {
+					this.error(
+						'A hook has been introduced or updated without a docBlock. Please add a docBlock.'
+					);
+				}
 				continue;
 			}
 
