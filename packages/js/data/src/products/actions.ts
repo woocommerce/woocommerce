@@ -151,6 +151,46 @@ export function* updateProduct(
 	}
 }
 
+export function deleteProductSuccess(
+	id: number,
+	product: PartialProduct,
+	force: boolean
+) {
+	return {
+		type: TYPES.DELETE_PRODUCT_SUCCESS as const,
+		id,
+		product,
+		force,
+	};
+}
+
+export function deleteProductError( id: number, error: unknown ) {
+	return {
+		type: TYPES.DELETE_PRODUCT_ERROR as const,
+		id,
+		error,
+	};
+}
+
+export function* removeProduct( id: number, force = false ) {
+	try {
+		const url = force
+			? `${ WC_PRODUCT_NAMESPACE }/${ id }?force=true`
+			: `${ WC_PRODUCT_NAMESPACE }/${ id }`;
+
+		const product: Product = yield apiFetch( {
+			path: url,
+			method: 'DELETE',
+		} );
+
+		yield deleteProductSuccess( product.id, product, force );
+		return product;
+	} catch ( error ) {
+		yield deleteProductError( id, error );
+		throw error;
+	}
+}
+
 export type Actions = ReturnType<
 	| typeof createProductError
 	| typeof createProductSuccess
@@ -162,6 +202,8 @@ export type Actions = ReturnType<
 	| typeof getProductsTotalCountError
 	| typeof updateProductError
 	| typeof updateProductSuccess
+	| typeof deleteProductSuccess
+	| typeof deleteProductError
 >;
 
 export type ActionDispatchers = DispatchFromMap< {
