@@ -971,7 +971,7 @@ final class WooCommerce {
 			return;
 		}
 
-		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm exec turbo run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm -- turbo run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
 		$message_two = sprintf(
 			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
 			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),
