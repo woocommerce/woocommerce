@@ -32,14 +32,16 @@ jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
 
 jest.mock(
 	'@woocommerce/base-components/radio-control-accordion',
-	() => ( { onChange } ) => (
-		<>
-			<span>Payment method options</span>
-			<button onClick={ () => onChange( 'credit-card' ) }>
-				Select new payment
-			</button>
-		</>
-	)
+	() =>
+		( { onChange } ) =>
+			(
+				<>
+					<span>Payment method options</span>
+					<button onClick={ () => onChange( 'credit-card' ) }>
+						Select new payment
+					</button>
+				</>
+			)
 );
 
 const registerMockPaymentMethods = () => {
@@ -103,10 +105,8 @@ describe( 'PaymentMethods', () => {
 
 	test( 'selecting new payment method', async () => {
 		const ShowActivePaymentMethod = () => {
-			const {
-				activePaymentMethod,
-				activeSavedToken,
-			} = usePaymentMethodDataContext();
+			const { activePaymentMethod, activeSavedToken } =
+				usePaymentMethodDataContext();
 			return (
 				<>
 					<div>

@@ -43,13 +43,8 @@ const EmptyPlaceholder = () => (
  */
 const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 	const getInspectorControls = () => {
-		const {
-			hasCount,
-			hasImage,
-			hasEmpty,
-			isDropdown,
-			isHierarchical,
-		} = attributes;
+		const { hasCount, hasImage, hasEmpty, isDropdown, isHierarchical } =
+			attributes;
 
 		return (
 			<InspectorControls key="inspector">

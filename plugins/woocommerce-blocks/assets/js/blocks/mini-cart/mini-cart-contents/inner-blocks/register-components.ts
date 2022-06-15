@@ -21,63 +21,70 @@ __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
 registerCheckoutBlock( {
 	metadata: filledMiniCartMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/filled-cart" */ './filled-mini-cart-contents-block/frontend'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/filled-cart" */ './filled-mini-cart-contents-block/frontend'
+			)
 	),
 } );
 
 registerCheckoutBlock( {
 	metadata: emptyMiniCartContentsMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/empty-cart" */ './empty-mini-cart-contents-block/frontend'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/empty-cart" */ './empty-mini-cart-contents-block/frontend'
+			)
 	),
 } );
 
 registerCheckoutBlock( {
 	metadata: miniCartTitleMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/title" */ './mini-cart-title-block/block'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/title" */ './mini-cart-title-block/block'
+			)
 	),
 } );
 
 registerCheckoutBlock( {
 	metadata: miniCartItemsMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/items" */ './mini-cart-items-block/frontend'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/items" */ './mini-cart-items-block/frontend'
+			)
 	),
 } );
 
 registerCheckoutBlock( {
 	metadata: miniCartProductsTableMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/products-table" */ './mini-cart-products-table-block/block'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/products-table" */ './mini-cart-products-table-block/block'
+			)
 	),
 } );
 
 registerCheckoutBlock( {
 	metadata: miniCartFooterMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/footer" */ './mini-cart-footer-block/block'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/footer" */ './mini-cart-footer-block/block'
+			)
 	),
 } );
 
 registerCheckoutBlock( {
 	metadata: miniCartShoppingButtonMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "mini-cart-contents-block/shopping-button" */ './mini-cart-shopping-button-block/block'
-		)
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/shopping-button" */ './mini-cart-shopping-button-block/block'
+			)
 	),
 } );

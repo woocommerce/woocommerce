@@ -25,13 +25,8 @@ const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
-	const {
-		className,
-		heading,
-		headingLevel,
-		showCounts,
-		showFilterButton,
-	} = attributes;
+	const { className, heading, headingLevel, showCounts, showFilterButton } =
+		attributes;
 
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-stock-filter', className ),

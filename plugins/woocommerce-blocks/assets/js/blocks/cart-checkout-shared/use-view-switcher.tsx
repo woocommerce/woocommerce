@@ -29,11 +29,8 @@ export const useViewSwitcher = (
 	const initialView = views[ 0 ];
 	const [ currentView, setCurrentView ] = useState( initialView );
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const {
-		getBlock,
-		getSelectedBlockClientId,
-		getBlockParentsByBlockName,
-	} = select( blockEditorStore );
+	const { getBlock, getSelectedBlockClientId, getBlockParentsByBlockName } =
+		select( blockEditorStore );
 	const selectedBlockClientId = getSelectedBlockClientId();
 
 	useEffect( () => {

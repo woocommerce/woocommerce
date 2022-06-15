@@ -55,10 +55,8 @@ describe( 'Classic Template blocks', () => {
 			await page.waitForSelector( productArchivePage.productsList );
 			await page.waitForSelector( productArchivePage.resultsCount );
 
-			const {
-				displayedCount,
-				shouldHavePaginationUI,
-			} = await extractPaginationData();
+			const { displayedCount, shouldHavePaginationUI } =
+				await extractPaginationData();
 
 			if ( shouldHavePaginationUI ) {
 				await expect( page ).toMatchElement(
@@ -93,10 +91,8 @@ describe( 'Classic Template blocks', () => {
 			await page.waitForSelector( productArchivePage.productsList );
 			await page.waitForSelector( productArchivePage.resultsCount );
 
-			const {
-				displayedCount,
-				shouldHavePaginationUI,
-			} = await extractPaginationData();
+			const { displayedCount, shouldHavePaginationUI } =
+				await extractPaginationData();
 
 			if ( shouldHavePaginationUI ) {
 				await expect( page ).toMatchElement(
@@ -131,10 +127,8 @@ describe( 'Classic Template blocks', () => {
 			await page.waitForSelector( productArchivePage.productsList );
 			await page.waitForSelector( productArchivePage.resultsCount );
 
-			const {
-				displayedCount,
-				shouldHavePaginationUI,
-			} = await extractPaginationData();
+			const { displayedCount, shouldHavePaginationUI } =
+				await extractPaginationData();
 
 			if ( shouldHavePaginationUI ) {
 				await expect( page ).toMatchElement(

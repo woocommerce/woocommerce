@@ -8,7 +8,7 @@
 		"../../settings/blocks/index.ts",
 		"../../base/hooks/index.js",
 		"../../base/utils/",
-	  	"../../utils",
+		"../../utils",
 		"../../data/",
 		"../../types/",
 		"../components",

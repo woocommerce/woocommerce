@@ -67,9 +67,8 @@ const MiniCartBlock = ( {
 	const [ isOpen, setIsOpen ] = useState< boolean >( isInitiallyOpen );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
 	// slide in animation.
-	const [ skipSlideIn, setSkipSlideIn ] = useState< boolean >(
-		isInitiallyOpen
-	);
+	const [ skipSlideIn, setSkipSlideIn ] =
+		useState< boolean >( isInitiallyOpen );
 	const [ contentsNode, setContentsNode ] = useState< HTMLDivElement | null >(
 		null
 	);
@@ -154,11 +153,12 @@ const MiniCartBlock = ( {
 		isBoolean
 	);
 
-	const preFetchedCartTotals = getSettingWithCoercion< CartResponseTotals | null >(
-		'cartTotals',
-		null,
-		isCartResponseTotals
-	);
+	const preFetchedCartTotals =
+		getSettingWithCoercion< CartResponseTotals | null >(
+			'cartTotals',
+			null,
+			isCartResponseTotals
+		);
 
 	const preFetchedCartItemsCount = getSettingWithCoercion< number >(
 		'cartItemsCount',

@@ -13,9 +13,8 @@ const Block = ( {
 } ): JSX.Element | null => {
 	const couponsEnabled = getSetting( 'couponsEnabled', true );
 
-	const { applyCoupon, isApplyingCoupon } = useStoreCartCoupons(
-		'wc/checkout'
-	);
+	const { applyCoupon, isApplyingCoupon } =
+		useStoreCartCoupons( 'wc/checkout' );
 
 	if ( ! couponsEnabled ) {
 		return null;

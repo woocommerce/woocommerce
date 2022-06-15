@@ -49,7 +49,8 @@ const Block = ( props: Props ): JSX.Element | null => {
 				'wc-block-components-product-category-list',
 				colorProps.className,
 				{
-					[ `${ parentClassName }__product-category-list` ]: parentClassName,
+					[ `${ parentClassName }__product-category-list` ]:
+						parentClassName,
 				}
 			) }
 			style={ { ...colorProps.style, ...typographyProps.style } }

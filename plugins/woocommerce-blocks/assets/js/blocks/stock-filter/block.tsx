@@ -56,9 +56,8 @@ const StockStatusFilterBlock = ( {
 		isBoolean
 	);
 
-	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] = useState(
-		false
-	);
+	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] =
+		useState( false );
 
 	const { outofstock, ...otherStockStatusOptions } = getSetting(
 		'stockStatusOptions',
@@ -86,18 +85,14 @@ const StockStatusFilterBlock = ( {
 	);
 
 	const [ queryState ] = useQueryStateByContext();
-	const [
-		productStockStatusQuery,
-		setProductStockStatusQuery,
-	] = useQueryStateByKey( 'stock_status', [] );
+	const [ productStockStatusQuery, setProductStockStatusQuery ] =
+		useQueryStateByKey( 'stock_status', [] );
 
-	const {
-		results: filteredCounts,
-		isLoading: filteredCountsLoading,
-	} = useCollectionData( {
-		queryStock: true,
-		queryState,
-	} );
+	const { results: filteredCounts, isLoading: filteredCountsLoading } =
+		useCollectionData( {
+			queryStock: true,
+			queryState,
+		} );
 
 	/**
 	 * Get count data about a given status by slug.
@@ -354,7 +349,8 @@ const StockStatusFilterBlock = ( {
 		return null;
 	}
 
-	const TagName = `h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
+	const TagName =
+		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
 	const isLoading =
 		! blockAttributes.isPreview && ! STOCK_STATUS_OPTIONS.current;
 	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;

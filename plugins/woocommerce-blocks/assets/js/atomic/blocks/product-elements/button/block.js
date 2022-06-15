@@ -52,7 +52,8 @@ const Block = ( props ) => {
 				'wp-block-button',
 				'wc-block-components-product-button',
 				{
-					[ `${ parentClassName }__product-add-to-cart` ]: parentClassName,
+					[ `${ parentClassName }__product-add-to-cart` ]:
+						parentClassName,
 				}
 			) }
 		>

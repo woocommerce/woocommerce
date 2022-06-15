@@ -34,10 +34,8 @@ const PaymentMethodOptions = () => {
 		customerPaymentMethods,
 	} = usePaymentMethodDataContext();
 	const { paymentMethods } = usePaymentMethods();
-	const {
-		activePaymentMethod,
-		...paymentMethodInterface
-	} = usePaymentMethodInterface();
+	const { activePaymentMethod, ...paymentMethodInterface } =
+		usePaymentMethodInterface();
 	const { noticeContexts } = useEmitResponse();
 	const { removeNotice } = useDispatch( 'core/notices' );
 	const { dispatchCheckoutEvent } = useStoreEvents();

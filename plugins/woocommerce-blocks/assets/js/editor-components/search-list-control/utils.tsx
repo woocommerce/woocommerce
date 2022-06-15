@@ -41,7 +41,7 @@ export const defaultMessages = {
 export const buildTermsTree = (
 	filteredList: SearchListItemsType,
 	list = filteredList
-): SearchListItemType[] | [  ] => {
+): SearchListItemType[] | [] => {
 	const termsByParent = groupBy( filteredList, 'parent' );
 	const listById = keyBy( list, 'id' );
 	const builtParents = [ '0' ];
@@ -90,7 +90,7 @@ export const getFilteredList = (
 	list: SearchListItemsType,
 	search: string,
 	isHierarchical: boolean
-): SearchListItemType[] | [  ] => {
+): SearchListItemType[] | [] => {
 	if ( ! search ) {
 		return isHierarchical ? buildTermsTree( list ) : list;
 	}

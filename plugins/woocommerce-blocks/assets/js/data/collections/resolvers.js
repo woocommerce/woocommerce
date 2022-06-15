@@ -54,10 +54,8 @@ export function* getCollection( namespace, resourceName, query, ids ) {
 	}
 
 	try {
-		const {
-			response = DEFAULT_EMPTY_ARRAY,
-			headers,
-		} = yield apiFetchWithHeaders( { path: route + queryString } );
+		const { response = DEFAULT_EMPTY_ARRAY, headers } =
+			yield apiFetchWithHeaders( { path: route + queryString } );
 
 		if ( headers && headers.get && headers.has( 'last-modified' ) ) {
 			// Do any invalidation before the collection is received to prevent

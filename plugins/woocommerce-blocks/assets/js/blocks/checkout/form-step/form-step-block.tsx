@@ -34,7 +34,8 @@ export const FormStepBlock = ( {
 	const { title = '', description = '', showStepNumber = true } = attributes;
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-components-checkout-step', className, {
-			'wc-block-components-checkout-step--with-step-number': showStepNumber,
+			'wc-block-components-checkout-step--with-step-number':
+				showStepNumber,
 		} ),
 	} );
 	return (

@@ -34,9 +34,9 @@ declare module '@wordpress/data' {
 	function dispatch(
 		key: typeof CART_STORE_KEY
 	): DispatchFromMap< typeof actions >;
-	function select(
-		key: typeof CART_STORE_KEY
-	): SelectFromMap< typeof selectors > & {
+	function select( key: typeof CART_STORE_KEY ): SelectFromMap<
+		typeof selectors
+	> & {
 		hasFinishedResolution: ( selector: string ) => boolean;
 	};
 }

@@ -61,13 +61,13 @@ export const ShippingDataProvider = ( { children } ) => {
 	const currentObservers = useRef( observers );
 	const eventObservers = useMemo(
 		() => ( {
-			onShippingRateSuccess: emitterObservers( observerDispatch )
-				.onSuccess,
+			onShippingRateSuccess:
+				emitterObservers( observerDispatch ).onSuccess,
 			onShippingRateFail: emitterObservers( observerDispatch ).onFail,
-			onShippingRateSelectSuccess: emitterObservers( observerDispatch )
-				.onSelectSuccess,
-			onShippingRateSelectFail: emitterObservers( observerDispatch )
-				.onSelectFail,
+			onShippingRateSelectSuccess:
+				emitterObservers( observerDispatch ).onSelectSuccess,
+			onShippingRateSelectFail:
+				emitterObservers( observerDispatch ).onSelectFail,
 		} ),
 		[ observerDispatch ]
 	);

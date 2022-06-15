@@ -23,11 +23,11 @@ export const useSelectShippingRate = (): SelectShippingRateType => {
 	const throwError = useThrowError();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
-	const { selectShippingRate: dispatchSelectShippingRate } = ( useDispatch(
+	const { selectShippingRate: dispatchSelectShippingRate } = useDispatch(
 		storeKey
 	) as {
 		selectShippingRate: unknown;
-	} ) as {
+	} as {
 		selectShippingRate: (
 			newShippingRateId: string,
 			packageId: string | number

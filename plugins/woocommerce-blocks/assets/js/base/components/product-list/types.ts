@@ -37,9 +37,7 @@ export type TotalQuery = Pick< Query, 'catalog_visibility' >;
 
 export type GenerateQuery = ( props: GenerateQueryProps ) => Query;
 
-export type GetSortArgs = (
-	orderName: string
-) =>
+export type GetSortArgs = ( orderName: string ) =>
 	| {
 			orderby: string;
 			order: string;

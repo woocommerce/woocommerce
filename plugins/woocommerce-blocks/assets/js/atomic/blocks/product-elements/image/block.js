@@ -60,7 +60,8 @@ export const Block = ( props ) => {
 					className,
 					'wc-block-components-product-image',
 					{
-						[ `${ parentClassName }__product-image` ]: parentClassName,
+						[ `${ parentClassName }__product-image` ]:
+							parentClassName,
 					},
 					borderProps.className
 				) }

@@ -91,8 +91,7 @@ describe( 'Edit', () => {
 		const { container } = render(
 			<Edit
 				attributes={ {
-					text:
-						'I agree to the <a href="/terms">terms</a> and <a href="/privacy">privacy</a>',
+					text: 'I agree to the <a href="/terms">terms</a> and <a href="/privacy">privacy</a>',
 					checkbox: true,
 				} }
 				setAttributes={ () => void 0 }

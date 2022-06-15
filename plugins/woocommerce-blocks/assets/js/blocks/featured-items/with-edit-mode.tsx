@@ -40,94 +40,90 @@ interface EditModeRequiredProps< T > {
 type EditModeProps< T extends EditorBlock< T > > = T &
 	EditModeRequiredProps< T >;
 
-export const withEditMode = ( {
-	description,
-	editLabel,
-	icon,
-	label,
-}: EditModeConfiguration ) => < T extends EditorBlock< T > >(
-	Component: ComponentType< T >
-) => ( props: EditModeProps< T > ) => {
-	const {
-		attributes,
-		debouncedSpeak,
-		name,
-		setAttributes,
-		triggerUrlUpdate = () => void null,
-	} = props;
+export const withEditMode =
+	( { description, editLabel, icon, label }: EditModeConfiguration ) =>
+	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
+	( props: EditModeProps< T > ) => {
+		const {
+			attributes,
+			debouncedSpeak,
+			name,
+			setAttributes,
+			triggerUrlUpdate = () => void null,
+		} = props;
 
-	const className = getClassPrefixFromName( name );
+		const className = getClassPrefixFromName( name );
 
-	const onDone = () => {
-		setAttributes( { editMode: false } );
-		debouncedSpeak( editLabel );
-	};
+		const onDone = () => {
+			setAttributes( { editMode: false } );
+			debouncedSpeak( editLabel );
+		};
 
-	if ( attributes.editMode ) {
-		return (
-			<Placeholder
-				icon={ <Icon icon={ icon } /> }
-				label={ label }
-				className={ className }
-			>
-				{ description }
-				<div className={ `${ className }__selection` }>
-					{ name === BLOCK_NAMES.featuredCategory && (
-						// Ignoring this TS error for now as it seems that `ProductCategoryControl`
-						// types might be too strict.
-						// @todo Convert `ProductCategoryControl` to TypeScript
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore
-						<ProductCategoryControl
-							selected={ [ attributes.categoryId ] }
-							onChange={ (
-								value: WP_REST_API_Category[] = []
-							) => {
-								const id = value[ 0 ] ? value[ 0 ].id : 0;
-								setAttributes( {
-									categoryId: id,
-									mediaId: 0,
-									mediaSrc: '',
-								} );
-								triggerUrlUpdate();
-							} }
-							isSingle
-						/>
-					) }
-					{ name === BLOCK_NAMES.featuredProduct && (
-						<ProductControl
-							selected={
-								attributes.productId
-									? [ attributes.productId ]
-									: []
-							}
-							// `ProductControl` is not yet a TypeScript file and the types
-							// are incorrectly generated for the wrapped HOC, so `showVariation`
-							// doesn't appear in the allowed props
-							// @todo Convert `ProductControl` to TypeScript
+		if ( attributes.editMode ) {
+			return (
+				<Placeholder
+					icon={ <Icon icon={ icon } /> }
+					label={ label }
+					className={ className }
+				>
+					{ description }
+					<div className={ `${ className }__selection` }>
+						{ name === BLOCK_NAMES.featuredCategory && (
+							// Ignoring this TS error for now as it seems that `ProductCategoryControl`
+							// types might be too strict.
+							// @todo Convert `ProductCategoryControl` to TypeScript
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore
-							showVariations
-							onChange={ (
-								value: ProductResponseItem[] = []
-							) => {
-								const id = value[ 0 ] ? value[ 0 ].id : 0;
-								setAttributes( {
-									productId: id,
-									mediaId: 0,
-									mediaSrc: '',
-								} );
-								triggerUrlUpdate();
-							} }
-						/>
-					) }
-					<Button isPrimary onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
-					</Button>
-				</div>
-			</Placeholder>
-		);
-	}
+							<ProductCategoryControl
+								selected={ [ attributes.categoryId ] }
+								onChange={ (
+									value: WP_REST_API_Category[] = []
+								) => {
+									const id = value[ 0 ] ? value[ 0 ].id : 0;
+									setAttributes( {
+										categoryId: id,
+										mediaId: 0,
+										mediaSrc: '',
+									} );
+									triggerUrlUpdate();
+								} }
+								isSingle
+							/>
+						) }
+						{ name === BLOCK_NAMES.featuredProduct && (
+							<ProductControl
+								selected={
+									attributes.productId
+										? [ attributes.productId ]
+										: []
+								}
+								// `ProductControl` is not yet a TypeScript file and the types
+								// are incorrectly generated for the wrapped HOC, so `showVariation`
+								// doesn't appear in the allowed props
+								// @todo Convert `ProductControl` to TypeScript
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore
+								showVariations
+								onChange={ (
+									value: ProductResponseItem[] = []
+								) => {
+									const id = value[ 0 ] ? value[ 0 ].id : 0;
+									setAttributes( {
+										productId: id,
+										mediaId: 0,
+										mediaSrc: '',
+									} );
+									triggerUrlUpdate();
+								} }
+							/>
+						) }
+						<Button isPrimary onClick={ onDone }>
+							{ __( 'Done', 'woo-gutenberg-products-block' ) }
+						</Button>
+					</div>
+				</Placeholder>
+			);
+		}
 
-	return <Component { ...props } />;
-};
+		return <Component { ...props } />;
+	};

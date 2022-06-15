@@ -23,8 +23,8 @@ export const previewReviews = [
 			'woo-gutenberg-products-block'
 		) }</p>\n`,
 		reviewer_avatar_urls: {
-			'48': blocksConfig.defaultAvatar,
-			'96': blocksConfig.defaultAvatar,
+			48: blocksConfig.defaultAvatar,
+			96: blocksConfig.defaultAvatar,
 		},
 		rating: 5,
 		verified: true,
@@ -47,8 +47,8 @@ export const previewReviews = [
 			'woo-gutenberg-products-block'
 		) }</p>\n`,
 		reviewer_avatar_urls: {
-			'48': blocksConfig.defaultAvatar,
-			'96': blocksConfig.defaultAvatar,
+			48: blocksConfig.defaultAvatar,
+			96: blocksConfig.defaultAvatar,
 		},
 		rating: null,
 		verified: false,

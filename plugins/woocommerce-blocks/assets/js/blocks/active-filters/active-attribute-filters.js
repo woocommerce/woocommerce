@@ -101,7 +101,8 @@ const ActiveAttributeFilters = ( {
 
 								// Remove only the slug from the URL.
 								return removeArgsFromFilterUrl( {
-									[ `filter_${ attributeObject.name }` ]: slug,
+									[ `filter_${ attributeObject.name }` ]:
+										slug,
 								} );
 							}
 							removeAttributeFilterBySlug(

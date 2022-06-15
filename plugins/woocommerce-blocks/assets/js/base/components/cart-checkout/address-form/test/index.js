@@ -81,11 +81,8 @@ const inputAddress = async ( {
 
 describe( 'AddressForm Component', () => {
 	const WrappedAddressForm = ( { type } ) => {
-		const {
-			defaultAddressFields,
-			setShippingAddress,
-			shippingAddress,
-		} = useCheckoutAddress();
+		const { defaultAddressFields, setShippingAddress, shippingAddress } =
+			useCheckoutAddress();
 
 		return (
 			<AddressForm

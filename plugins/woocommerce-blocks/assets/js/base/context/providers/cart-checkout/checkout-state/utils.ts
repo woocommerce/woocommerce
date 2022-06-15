@@ -33,9 +33,8 @@ export const getPaymentResultFromCheckoutResponse = (
 		) {
 			response.payment_result.payment_details.forEach(
 				( { key, value }: { key: string; value: string } ) => {
-					paymentResult.paymentDetails[ key ] = decodeEntities(
-						value
-					);
+					paymentResult.paymentDetails[ key ] =
+						decodeEntities( value );
 				}
 			);
 		}

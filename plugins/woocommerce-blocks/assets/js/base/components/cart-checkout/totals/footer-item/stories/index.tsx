@@ -21,8 +21,7 @@ const NZD: Currency = {
 };
 
 export default {
-	title:
-		'WooCommerce Blocks/@base-components/cart-checkout/totals/FooterItem',
+	title: 'WooCommerce Blocks/@base-components/cart-checkout/totals/FooterItem',
 	component: FooterItem,
 	args: {
 		currency: NZD,

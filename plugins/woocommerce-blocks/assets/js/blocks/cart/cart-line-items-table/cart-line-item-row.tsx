@@ -114,12 +114,8 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 			extensions,
 		} = lineItem;
 
-		const {
-			quantity,
-			setItemQuantity,
-			removeItem,
-			isPendingDelete,
-		} = useStoreCartItemQuantity( lineItem );
+		const { quantity, setItemQuantity, removeItem, isPendingDelete } =
+			useStoreCartItemQuantity( lineItem );
 		const { dispatchStoreEvent } = useStoreEvents();
 
 		// Prepare props to pass to the __experimentalApplyCheckoutFilter filter.
@@ -150,9 +146,8 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 			amount: parseInt( prices.raw_prices.price, 10 ),
 			precision: prices.raw_prices.precision,
 		} );
-		const saleAmountSingle = regularAmountSingle.subtract(
-			purchaseAmountSingle
-		);
+		const saleAmountSingle =
+			regularAmountSingle.subtract( purchaseAmountSingle );
 		const saleAmount = saleAmountSingle.multiply( quantity );
 		const totalsCurrency = getCurrencyFromPriceResponse( totals );
 		let lineSubtotal = parseInt( totals.line_subtotal, 10 );
