@@ -22,6 +22,7 @@ import {
 	getHookName,
 	areSchemasEqual,
 	getHookDescription,
+	getHookChangeType,
 } from '../../utils';
 import { generatePatch, generateSchemaDiff } from '../../git';
 
@@ -410,7 +411,8 @@ export default class Analyzer extends Command {
 				const GithubMessage = `\\'${ name }\\' introduced in ${ version }`;
 				const message =
 					output === 'github' ? GithubMessage : CLIMessage;
-				const title = `New ${ kind } found`;
+				const hookChangeType = getHookChangeType( raw );
+				const title = `${ hookChangeType } ${ kind } found`;
 
 				if ( ! hookName[ 2 ].startsWith( '-' ) ) {
 					hooksList.set( name, [
