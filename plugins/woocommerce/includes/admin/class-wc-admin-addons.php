@@ -27,7 +27,6 @@ class WC_Admin_Addons {
 	 */
 	public static function get_featured() {
 		/**
-		* Test hook that does a bunch of stuff. Here is another sentence.
 		*
 		* @since 6.7.0
 		*/
