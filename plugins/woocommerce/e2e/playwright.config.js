@@ -8,13 +8,17 @@ const config = {
 	testDir: 'tests',
 	retries: 1,
 	workers: 4,
-	reporter: [ [ 'list' ], [ 'html', { outputFolder: 'e2e/output' } ] ],
+	reporter: [
+		[ 'list' ],
+		[ 'html', { outputFolder: 'output' } ],
+		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
+	],
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL: 'http://localhost:8084',
+		baseURL: 'http://localhost:8086',
 	},
 	projects: [
 		{
