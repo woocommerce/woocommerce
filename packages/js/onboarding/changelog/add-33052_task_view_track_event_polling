@@ -1,4 +1,0 @@
-Significance: minor
-Type: Add
-
-Removed experimental product hook and instead poll the slot's fill for variant metadata. To be removed when experiment concludes! #33052
