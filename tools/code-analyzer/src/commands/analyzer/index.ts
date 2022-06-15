@@ -387,20 +387,26 @@ export default class Analyzer extends Command {
 			const filepath = getFilename( lines[ 0 ] );
 
 			for ( const raw of results ) {
+				const rawWithoutDeletions = raw.replace( /-.*\n/g, '' );
 				// Extract hook description.
-				const rawDescription = raw.match(
-					/\/\*\*\n(-.*\n)*([\s\S]*) @since/
+				const rawDescription = rawWithoutDeletions.match(
+					/\/\*\*([\s\S]*) @since/
 				);
 
 				if ( ! rawDescription ) {
 					continue;
 				}
 
-				const description = rawDescription[ 2 ]
+				const description = rawDescription[ 1 ]
+					.replace( / \* /g, '' )
 					.replace( /\*/g, '' )
 					.replace( /\+/g, '' )
 					.replace( /-/g, '' )
+					.replace( /\t/g, '' )
+					.replace( /\n/g, '' )
 					.trim();
+
+				console.log( description );
 
 				// Extract hook name and type.
 				const hookName = raw.match(
