@@ -9,9 +9,9 @@ const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
-			url: 'http://localhost:8084',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
@@ -174,10 +174,10 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 	// note: tests are being run in an unauthenticated state (not as admin)
 	let productId, shippingFreeId, shippingFlatId, shippingLocalId;
 
-	test.beforeAll( async () => {
+	test.beforeAll( async ( { baseURL } ) => {
 		// need to add a product to the store so that we can order it and check shipping options
 		const api = new wcApi( {
-			url: 'http://localhost:8084',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
@@ -254,9 +254,9 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
-	test.afterAll( async () => {
+	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
-			url: 'http://localhost:8084',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
@@ -331,7 +331,10 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Flat rate: $10.00' );
+		).toContainText( 'Flat rate:' );
+		await expect(
+			page.locator( '.shipping ul#shipping_method > li > label' )
+		).toContainText( '10.00' );
 		await expect(
 			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
 		).toContainText( '35.99' );
