@@ -6,8 +6,8 @@
  * Version: 2.0.5
  * Author: WooCommerce
  * Author URI: http://woocommerce.com/
- * Requires at least: 4.4
- * Tested up to: 5.8
+ * Requires at least: 5.8
+ * Tested up to: 6.0
  * WC requires at least: 3.6.0
  * WC tested up to: 5.7.0
  * Text Domain: woocommerce-beta-tester
@@ -62,7 +62,7 @@ function _wc_beta_tester_bootstrap() {
 		add_action( 'admin_init', array( 'WC_Beta_Tester', 'instance' ) );
 	}
 
-	// Load admin
+	// Load admin.
 	require( 'plugin.php' );
 }
 
@@ -76,7 +76,10 @@ function add_extension_register_script() {
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
 		? require( $script_asset_path )
-		: array( 'dependencies' => array(), 'version' => filemtime( $script_path ) );
+		: array(
+			'dependencies' => array(),
+			'version'      => filemtime( $script_path ),
+		);
 	$script_url = plugins_url( $script_path, __FILE__ );
 
 	wp_register_script(
@@ -102,7 +105,7 @@ function add_extension_register_script() {
 		plugins_url( '/build/index.css', __FILE__ ),
 		// Add any dependencies styles may have, such as wp-components.
 		array(
-			'wp-components'
+			'wp-components',
 		),
 		$css_file_version
 	);
