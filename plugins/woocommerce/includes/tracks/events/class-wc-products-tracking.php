@@ -137,52 +137,72 @@ class WC_Products_Tracking {
 				var hasRecordedEvent = false;
 				var isBlockEditor = false;
 
-				function sendTracks() {
-					if ( hasRecordedEvent ) {
-						return;
-					}
-
-					if ( $( '.block-editor' ).length !== 0 && $( '.block-editor' )[0] ) {
-						 isBlockEditor = true;
-					}
-
-					var tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
-					var currentStockValue = $( '#_stock' ).val();
-					var description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
-					var properties = {
-						attributes:				$( '.woocommerce_attribute' ).length,
-						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
-						'cross_sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
-						description:			description_value.length ? 'Yes' : 'No',
-						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
-						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
-						is_block_editor:		isBlockEditor,
-						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
-						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
-						menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
-						product_gallery:		$( '#product_images_container .product_images > li' ).length,
-						product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
-						product_type:			$( '#product-type' ).val(),
-						purchase_note:			$( '#_purchase_note' ).val().length ? 'yes' : 'no',
-						sale_price:				$( '#_sale_price' ).val() ? 'yes' : 'no',
-						short_description:		$( '#excerpt' ).val().length ? 'yes' : 'no',
-						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
-						tags:					tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
-						upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
-						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
-					};
-
-					window.wcTracks.recordEvent( 'product_update', properties );
-					hasRecordedEvent = true;
-				};
-
-				if ( $( '#publish' ).length !== 0 ) {
-					$( '#publish' ).on( 'click', sendTracks);
-					return;
+				if ( $( '.block-editor' ).length !== 0 && $( '.block-editor' )[0] ) {
+	    			isBlockEditor = true;
 				}
 
-				$( '.editor-post-publish-button' ).on( 'click', sendTracks);
+				if ( ! isBlockEditor & hasRecordedEvent) {
+                	return;
+            	}
 
+       			var description_value  = '';
+     			var tagsText = '';
+     			var currentStockValue = $( '#_stock' ).val();
+
+           		if ( ! isBlockEditor ) {
+              		tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
+             		description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
+             	}
+
+				var properties = {
+					attributes:				$( '.woocommerce_attribute' ).length,
+					categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
+					'cross_sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
+					description:			description_value.length ? 'Yes' : 'No',
+					enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
+					is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
+					is_block_editor:		isBlockEditor,
+					is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
+					manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
+					menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
+					product_gallery:		$( '#product_images_container .product_images > li' ).length,
+					product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
+					product_type:			$( '#product-type' ).val(),
+					purchase_note:			$( '#_purchase_note' ).val().length ? 'yes' : 'no',
+					sale_price:				$( '#_sale_price' ).val() ? 'yes' : 'no',
+					short_description:		$( '#excerpt' ).val().length ? 'yes' : 'no',
+					stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
+					tags:					tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+					upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
+					weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
+				};
+
+				function waitUntilElementExists( element, callback, limit ) {
+          			if ( $( element ).length > 0 ) {
+          				callback();
+          				return;
+          				}
+          			if ( limit < 1 ) {
+          				return;
+          			}
+          			setTimeout( function() {
+          				limit = limit || 10;
+          				waitUntilElementExists( element, callback, --limit );
+          				}, 500 );
+          		};
+
+          		if ( ! isBlockEditor ) {
+          			$( '#publish' ).on( 'click', function() {
+          				window.wcTracks.recordEvent( 'product_update', properties );
+          				});
+          			hasRecordedEvent = true;
+          		} else {
+					waitUntilElementExists( '.editor-post-publish-button', function() {
+          			$( '.editor-post-publish-button' ).on( 'click', function() {
+          				window.wcTracks.recordEvent( 'product_update', properties );
+          				}););
+          			});
+          		}
 			}
 			"
 		);
