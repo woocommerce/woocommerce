@@ -49,16 +49,6 @@ const Tasks = lazy( () =>
 	} ) )
 );
 
-const TwoColumnTasks = lazy( () =>
-	import( /* webpackChunkName: "two-column-tasks" */ '../two-column-tasks' )
-);
-
-const TwoColumnTasksExtended = lazy( () =>
-	import(
-		/* webpackChunkName: "two-column-tasks-extended" */ '../two-column-tasks/extended-task'
-	)
-);
-
 export const Layout = ( {
 	defaultHomescreenLayout,
 	isBatchUpdating,
@@ -80,44 +70,8 @@ export const Layout = ( {
 	const isDashboardShown = ! query.task;
 	const activeSetupTaskList = useActiveSetupTasklist();
 
-	const {
-		isLoadingExperimentAssignment,
-		isLoadingTwoColExperimentAssignment,
-		experimentAssignment,
-		twoColExperimentAssignment,
-	} = {
-		isLoadingExperimentAssignment: false,
-		isLoadingTwoColExperimentAssignment: false,
-		experimentAssignment: null,
-		twoColExperimentAssignment: null,
-	};
-
-	const isRunningTwoColumnExperiment =
-		twoColExperimentAssignment?.variationName === 'treatment';
-
-	// New TaskList UI is enabled when either experiment is treatment.
-	const isRunningTaskListExperiment =
-		experimentAssignment?.variationName === 'treatment' ||
-		isRunningTwoColumnExperiment;
-
-	// Override defaultHomescreenLayout if store is in the experiment.
-	const defaultHomescreenLayoutOverride = () => {
-		if (
-			isLoadingExperimentAssignment ||
-			isLoadingTwoColExperimentAssignment
-		) {
-			return defaultHomescreenLayout; // Experiments are still loading, don't override.
-		}
-
-		if ( ! isRunningTaskListExperiment ) {
-			return defaultHomescreenLayout; // Not in the experiment, don't override.
-		}
-
-		return isRunningTwoColumnExperiment ? 'two_columns' : 'single_column';
-	};
-
 	const twoColumns =
-		( userPrefs.homepage_layout || defaultHomescreenLayoutOverride() ) ===
+		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
 			'two_columns' && hasTwoColumnContent;
 
 	if ( isBatchUpdating && ! showInbox ) {
@@ -144,23 +98,16 @@ export const Layout = ( {
 		return (
 			<>
 				<Column shouldStick={ shouldStickColumns }>
-					{ ! isLoadingExperimentAssignment &&
-						! isLoadingTwoColExperimentAssignment &&
-						! isRunningTaskListExperiment &&
-						! isLoadingTaskLists &&
-						! showingProgressHeader && (
-							<ActivityHeader
-								className="your-store-today"
-								title={ __(
-									'Your store today',
-									'woocommerce'
-								) }
-								subtitle={ __(
-									"To do's, tips, and insights for your business",
-									'woocommerce'
-								) }
-							/>
-						) }
+					{ ! isLoadingTaskLists && ! showingProgressHeader && (
+						<ActivityHeader
+							className="your-store-today"
+							title={ __( 'Your store today', 'woocommerce' ) }
+							subtitle={ __(
+								"To do's, tips, and insights for your business",
+								'woocommerce'
+							) }
+						/>
+					) }
 					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
@@ -174,33 +121,6 @@ export const Layout = ( {
 	};
 
 	const renderTaskList = () => {
-		if ( twoColumns && isRunningTaskListExperiment ) {
-			return (
-				// When running the two-column experiment, we still need to render
-				// the component in the left column for the extended task list.
-				<Suspense fallback={ null }>
-					<TwoColumnTasksExtended query={ query } />
-				</Suspense>
-			);
-		} else if (
-			! twoColumns &&
-			isRunningTaskListExperiment &&
-			! isLoadingExperimentAssignment
-		) {
-			return (
-				<Suspense fallback={ null }>
-					<>
-						<TwoColumnTasks
-							query={ query }
-							userPreferences={ userPrefs }
-							twoColumns={ twoColumns }
-						/>
-						<TwoColumnTasksExtended query={ query } />
-					</>
-				</Suspense>
-			);
-		}
-
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
 				{ activeSetupTaskList &&
@@ -215,15 +135,6 @@ export const Layout = ( {
 
 	return (
 		<>
-			{ twoColumns && isRunningTaskListExperiment && (
-				<Suspense fallback={ null }>
-					<TwoColumnTasks
-						query={ query }
-						userPreferences={ userPrefs }
-						twoColumns={ twoColumns }
-					/>
-				</Suspense>
-			) }
 			<div
 				className={ classnames( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,
