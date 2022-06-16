@@ -15,7 +15,7 @@ You can build the files using one of these commands:
 - `pnpm -- turbo run build --filter=@woocommerce/admin-library`: Build a production version
 - `pnpm dev --filter=@woocommerce/admin-library` : Build a development version
 - `pnpm start --filter=@woocommerce/admin-library` : Build a development version, watch files for changes
-
+To view the site after running these commands, please also make sure that you have started Wordpress [using wp-env](../../DEVELOPMENT.md)
 ### Helper scripts
 
 There are a number of helper scripts exposed via our package.json (below list is not exhaustive, you can view the package.json file directly to see all):
