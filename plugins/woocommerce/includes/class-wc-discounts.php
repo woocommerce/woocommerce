@@ -741,7 +741,7 @@ class WC_Discounts {
 			$valid = false;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) {
+				if ( $item->product && ( in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) ) {
 					$valid = true;
 					break;
 				}
