@@ -3,7 +3,7 @@ Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley,
 Tags: woocommerce, woo commerce, beta, beta tester, bleeding edge, testing
 Requires at least: 4.7
 Tested up to: 5.6
-Stable tag: 2.0.5
+Stable tag: 2.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -52,6 +52,14 @@ Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/).
 See our [contributing guidelines here](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md).
 
 == Changelog ==
+
+= 2.1.0 - 2022-06-16 =
+
+* Dev: Minor - Add WooCommerce Admin Helper Tester functionality to Beta Tester
+* Dev: Minor - Standardize build scripts and create a build:zip script
+* Dev: Patch - Standardize lint scripts: Add lint:fix
+* Dev: Patch - This is only updating monorepo infrastructure.
+* Dev: Minor - Updates the WC sniffs version to latest.
 
 = 2.0.5 - 2021-12-17 =
 * Fix: make WC version comparison case insensitive
