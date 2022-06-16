@@ -1,12 +1,12 @@
 const { devices } = require( '@playwright/test' );
 
 const config = {
-	timeout: 30000,
+	timeout: 20000,
 	outputDir: './report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: 1,
+	retries: 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
