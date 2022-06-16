@@ -16,7 +16,7 @@ You can build the files using one of these commands:
 - `pnpm dev --filter=@woocommerce/admin-library` : Build a development version
 - `pnpm start --filter=@woocommerce/admin-library` : Build a development version, watch files for changes
 
-To view the site after running these commands, please also make sure that you have started Wordpress [using wp-env](../../DEVELOPMENT.md).
+To view the site after running these commands, please also make sure that you have started Wordpress [using wp-env](../../DEVELOPMENT.md#plugin-development-environments).
 
 ### Helper scripts
 
