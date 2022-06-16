@@ -30,7 +30,7 @@
         "woocommerce#build": {
             "dependsOn":  [ 
                 "^build",
-                "@woocommerce/admin-library#build",
+                "woocommerce/client/admin#build",
                 "woocommerce-legacy-assets#build" 
             ],
             "outputs": [],

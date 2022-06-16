@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/admin-library",
+	"name": "woocommerce/client/admin",
 	"version": "3.3.0",
 	"license": "GPL-3.0-or-later",
 	"author": "Automattic",
