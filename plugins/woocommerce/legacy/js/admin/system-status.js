@@ -48,19 +48,6 @@ jQuery( function ( $ ) {
 
 						// Format value
 						var the_value   = $value_html.text().trim();
-						var value_array = the_value.split( ', ' );
-
-						if ( value_array.length > 1 ) {
-							// If value have a list of plugins ','.
-							// Split to add new line.
-							var temp_line ='';
-							$.each( value_array, function( key, line ) {
-								temp_line = temp_line + line + '\n';
-							});
-
-							the_value = temp_line;
-						}
-
 						report = report + '' + the_name + ': ' + the_value + '\n';
 					});
 				}
