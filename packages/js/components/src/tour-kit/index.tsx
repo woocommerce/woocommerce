@@ -3,7 +3,7 @@
  */
 
 import { createElement } from '@wordpress/element';
-import TourKit, { TourStepRenderer } from '@automattic/tour-kit';
+import TourKit, { TourStepRenderer, Options } from '@automattic/tour-kit';
 
 /**
  * Internal dependencies
@@ -15,8 +15,18 @@ interface Props {
 	config: WooConfig;
 }
 
-const defaultOptions = {
-	effects: { spotlight: {}, arrowIndicator: true },
+const defaultOptions: Options = {
+	effects: {
+		spotlight: {
+			interactivity: { enabled: true, rootElementSelector: '#wpwrap' },
+		},
+		arrowIndicator: true,
+		liveResize: {
+			mutation: true,
+			resize: true,
+			rootElementSelector: '#wpwrap',
+		},
+	},
 };
 
 const WooTourKit: React.FunctionComponent< Props > = ( { config } ) => {

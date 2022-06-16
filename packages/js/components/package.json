@@ -28,7 +28,7 @@
 	"dependencies": {
 		"@automattic/calypso-color-schemes": "^2.1.1",
 		"@automattic/interpolate-components": "^1.2.0",
-		"@automattic/tour-kit": "^1.0.0",
+		"@automattic/tour-kit": "^1.1.1",
 		"@woocommerce/csv-export": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
 		"@woocommerce/data": "workspace:*",
