@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce-legacy-assets",
+	"name": "woocommerce/client/legacy",
 	"version": "1.0.0",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
