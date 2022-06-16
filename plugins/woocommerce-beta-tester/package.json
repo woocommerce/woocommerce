@@ -15,6 +15,7 @@
 	"devDependencies": {
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/env": "^4.8.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "5.16.0",
 		"uglify-js": "^3.5.3"

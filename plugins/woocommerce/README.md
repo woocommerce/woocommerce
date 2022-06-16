@@ -13,6 +13,21 @@ This is the WooCommerce Core plugin. Here you can browse the source and keep tra
 
 If you are not a developer, please use the [WooCommerce plugin page](https://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
+## Getting Started
+
+Please make sure you follow the [repository's getting started guide](../../README.md#getting-started) first!
+
+```bash
+# Make sure that WooCommerce Core and all of its dependencies are built
+pnpm -- turbo run build --filter=woocommerce
+# Make sure you're in the WooCommerce Core directory
+cd plugins/woocommerce
+# Start the development environment
+pnpm -- wp-env start
+```
+
+You should now be able to visit http://docker.local:8888/ and access WooCommerce environment.
+
 ## Documentation
 * [WooCommerce Documentation](https://docs.woocommerce.com/)
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
