@@ -53,7 +53,7 @@ export const printHookResults = (
 	log: ( s: string ) => void
 ): void => {
 	if ( output === 'github' ) {
-		let opt = '\\n\\n### New hooks:';
+		let opt = '\\n\\n### New or updated hooks:';
 		for ( const [ key, value ] of data ) {
 			if ( value.size ) {
 				opt += `\\n* **file:** ${ key }`;
