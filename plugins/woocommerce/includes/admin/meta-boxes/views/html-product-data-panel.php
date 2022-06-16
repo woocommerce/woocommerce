@@ -45,11 +45,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<dt class="clear <?php echo esc_attr( $key ); ?>_options_label <?php echo esc_attr( $key ); ?>_card_label <?php echo esc_attr( isset( $tab_data['class'] ) ? implode( ' ', (array) $tab_data['class'] ) : '' ); ?>">
 					<span><?php echo esc_html( $tab_data['label'] ); ?></span>
 				</dt>
-				<dd class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_card <?php echo esc_attr( isset( $tab_data['class'] ) ? implode( ' ', (array) $tab_data['class'] ) : '' ); ?>">
+				<dd class="card <?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_card <?php echo esc_attr( isset( $tab_data['class'] ) ? implode( ' ', (array) $tab_data['class'] ) : '' ); ?>">
 					<?php self::output_tab( $tab_data ); ?>
 				</dd>
 			<?php endforeach; ?>
 		</dl>
+		<script type="text/javascript">
+			for (let hiddenCard of document.querySelectorAll( '.product_data_cards .card > .hidden' ) ) {
+				hiddenCard.classList.remove( 'hidden' );
+			}
+		</script>
 	<?php else : ?>
 		<ul class="product_data_tabs wc-tabs">
 			<?php foreach ( self::get_product_data_tabs() as $key => $tab_data ) : ?>
