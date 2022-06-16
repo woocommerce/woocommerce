@@ -588,7 +588,7 @@ function wc_create_refund( $args = array() ) {
 		/**
 		 * Action hook to adjust refund before save.
 		 *
-		 * @since 6.7.0
+		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_create_refund', $refund, $args );
 
