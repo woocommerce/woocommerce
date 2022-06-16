@@ -190,7 +190,11 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'no',
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
+
+		// if we're only running the second test, there's no orderId created
+		if ( orderId ) {
+			await api.delete( `orders/${ orderId }`, { force: true } );
+		}
 	} );
 
 	test( 'can create new order', async ( { page } ) => {

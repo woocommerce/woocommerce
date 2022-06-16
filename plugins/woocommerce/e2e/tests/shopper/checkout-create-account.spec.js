@@ -60,9 +60,11 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
-		await api.delete( `orders/${ orderId }`, {
-			force: true,
-		} );
+		if ( orderId ) {
+			await api.delete( `orders/${ orderId }`, {
+				force: true,
+			} );
+		}
 		await api.put(
 			'settings/account/woocommerce_enable_signup_and_login_from_checkout',
 			{

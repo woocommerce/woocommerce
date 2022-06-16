@@ -52,9 +52,11 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
-		await api.delete( `orders/${ orderId }`, {
-			force: true,
-		} );
+		if ( orderId ) {
+			await api.delete( `orders/${ orderId }`, {
+				force: true,
+			} );
+		}
 		await api.put( 'payment_gateways/cod', {
 			enabled: false,
 		} );
@@ -68,7 +70,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.goto( '/checkout/' );
 
-		await page.fill( '#billing_first_name', 'Homer' );
+		await page.fill( '#billing_first_name', 'Maggie' );
 		await page.fill( '#billing_last_name', 'Simpson' );
 		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
 		await page.fill( '#billing_city', 'Springfield' );

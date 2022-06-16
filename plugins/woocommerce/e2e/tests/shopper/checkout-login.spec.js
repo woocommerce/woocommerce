@@ -67,7 +67,9 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
+		if ( orderId ) {
+			await api.delete( `orders/${ orderId }`, { force: true } );
+		}
 		await api.put(
 			'settings/account/woocommerce_enable_checkout_login_reminder',
 			{

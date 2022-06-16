@@ -75,8 +75,12 @@ test.describe( 'Checkout page', () => {
 			enabled: false,
 		} );
 		// delete the orders we created
-		await api.delete( `orders/${ guestOrderId }`, { force: true } );
-		await api.delete( `orders/${ customerOrderId }`, { force: true } );
+		if ( guestOrderId ) {
+			await api.delete( `orders/${ guestOrderId }`, { force: true } );
+		}
+		if ( customerOrderId ) {
+			await api.delete( `orders/${ customerOrderId }`, { force: true } );
+		}
 	} );
 
 	test.beforeEach( async ( { context } ) => {
