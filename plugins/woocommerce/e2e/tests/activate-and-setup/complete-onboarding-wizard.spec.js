@@ -297,13 +297,14 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 		await page.click( 'text="Set up shipping"' );
 
-		const shippingPage = await page.textContent( 'h1' );
-		if ( shippingPage === 'Shipping' ) {
+		// check if this is the first time (or if the test is being retried)
+		const currPage = page.url();
+		if ( currPage.indexOf( 'page=wc-settings&tab=shipping' ) > 0 ) {
 			// click the Add shipping zone button on the shipping settings page
 			await page.locator( '.page-title-action' ).click();
-			await expect( page.locator( 'h2' ) ).toContainText(
-				'Shipping zones'
-			);
+			await expect(
+				page.locator( 'div.woocommerce > form > h2' )
+			).toContainText( 'Shipping zones' );
 		} else {
 			await page.locator( 'button.components-button.is-primary' ).click();
 		}
