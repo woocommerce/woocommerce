@@ -421,7 +421,9 @@ export default class Analyzer extends Command {
 				const CLIMessage = `\'${ name }\' ${
 					hookChangeType === 'New' ? 'introduced' : 'updated'
 				} in ${ version }`;
-				const GithubMessage = `**${ name }** introduced in ${ version }`;
+				const GithubMessage = `**${ name }** ${
+					hookChangeType === 'New' ? 'introduced' : 'updated'
+				} in ${ version }`;
 				const message =
 					output === 'github' ? GithubMessage : CLIMessage;
 				const title = `${ hookChangeType } ${ kind } found`;
