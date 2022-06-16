@@ -25,6 +25,10 @@ There are a number of helper scripts exposed via our package.json (below list is
 - `pnpm ts:check --filter=@woocommerce/admin-library`: Run a type check over the TypeScript files
 - `pnpm test:watch --filter=@woocommerce/admin-library`: Watch the JS test suite
 
+### Add Changelog
+
+Run `pnpm changelog add --filter=woocommerce` to create a changelog file.
+
 ## End-to-end tests
 
 Please refer to the [WooCommerce End to End Tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md)

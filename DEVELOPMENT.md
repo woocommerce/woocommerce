@@ -80,6 +80,10 @@ Please check out [the official documentation](https://developer.wordpress.org/bl
 
 ## React Admin Development
 
-Contribute to WooCommerce React-based interface?
+WooCommerce Admin is a JavaScript-driven React-based interface for managing your store. It mainly builds the following pages:
 
-please refer to [Woocommerce Admin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin)
+- WooCommerce > Home
+- WooCommerce > Analytics
+- WooCommerce > Marketing
+
+If you want to contribute code to it, please refer to [Woocommerce Admin](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/README.md).
