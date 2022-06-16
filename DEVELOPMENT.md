@@ -64,6 +64,8 @@ pnpm build:zip --filter=woocommerce
 The plugins in our repository make use of [the `@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/). This supplies convenient commands for creating, destroying, cleaning, and testing WordPress environments.
 
 ```bash
+# Make sure you are in the working directory of the plugin you are interested in setting up the environment for
+cd plugins/woocommerce
 # Start will create the environment if necessary or start an existing one
 pnpm -- wp-env start
 # Stop will, well, stop the environment
