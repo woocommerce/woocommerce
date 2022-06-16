@@ -6,11 +6,11 @@ module.exports = function ( grunt ) {
 		// Setting folder templates.
 		dirs: {
 			css: 'css',
-			cssDest: '../assets/css',
+			cssDest: '../../assets/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
 			js: 'js',
-			jsDest: '../assets/js',
+			jsDest: '../../assets/js',
 			php: 'includes',
 		},
 
