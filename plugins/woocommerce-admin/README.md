@@ -21,9 +21,10 @@ To view the site after running these commands, please also make sure that you ha
 There are a number of helper scripts exposed via our package.json (below list is not exhaustive, you can view the package.json file directly to see all):
 
 - `pnpm -- turbo run lint --filter=@woocommerce/admin-library`: Run eslint over the JavaScript files
+- `pnpm -- turbo run lint:js --filter=@woocommerce/admin-library`: Run eslint and automatically fix problems over the JavaScript files
 - `pnpm -- turbo run test --filter=@woocommerce/admin-library`: Run the JS test suite
-- `pnpm ts:check --filter=@woocommerce/admin-library`: Run a type check over the TypeScript files
 - `pnpm test:watch --filter=@woocommerce/admin-library`: Watch the JS test suite
+- `pnpm ts:check --filter=@woocommerce/admin-library`: Run a type check over the TypeScript files
 
 ### Add Changelog
 
