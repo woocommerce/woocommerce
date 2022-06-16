@@ -417,11 +417,13 @@ export default class Analyzer extends Command {
 
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
-				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
+				const hookChangeType = getHookChangeType( raw );
+				const CLIMessage = `\'${ name }\' ${
+					hookChangeType === 'New' ? 'introduced' : 'updated'
+				} in ${ version }`;
 				const GithubMessage = `**${ name }** introduced in ${ version }`;
 				const message =
 					output === 'github' ? GithubMessage : CLIMessage;
-				const hookChangeType = getHookChangeType( raw );
 				const title = `${ hookChangeType } ${ kind } found`;
 
 				if ( ! hookName[ 2 ].startsWith( '-' ) ) {
