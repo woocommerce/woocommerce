@@ -417,8 +417,8 @@ export default class Analyzer extends Command {
 
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
-				const CLIMessage = `**${ name }** introduced in ${ version }`;
-				const GithubMessage = `\\'${ name }\\' introduced in ${ version }`;
+				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
+				const GithubMessage = `**${ name }** introduced in ${ version }`;
 				const message =
 					output === 'github' ? GithubMessage : CLIMessage;
 				const hookChangeType = getHookChangeType( raw );
