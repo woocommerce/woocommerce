@@ -177,7 +177,7 @@ test.describe( 'Import Products from a CSV file', () => {
 		// Compare imported products to what's expected
 		await page.waitForSelector( 'a.row-title', {
 			state: 'visible',
-			timeout: 120000, // import can take a while
+			timeout: 120000, // search can take a while
 		} );
 		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
 			elements.map( ( item ) => item.innerHTML )
