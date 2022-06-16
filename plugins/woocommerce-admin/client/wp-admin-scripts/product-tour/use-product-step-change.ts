@@ -22,14 +22,15 @@ const getInputValue = ( id: string ) => {
 };
 
 const getTinyMceValue = ( id: string ) => {
-	const iframe = document.querySelector( id ) as HTMLIFrameElement;
-	return ( iframe?.contentWindow?.document.querySelector(
+	const iframe = document.querySelector< HTMLIFrameElement >( id );
+	const tinymce = iframe?.contentWindow?.document.querySelector< HTMLElement >(
 		'#tinymce'
-	) as HTMLElement ).innerHTML;
+	);
+	return tinymce?.innerHTML || '';
 };
 
 const getTextareaValue = ( id: string ) => {
-	return ( document.querySelector( id ) as HTMLTextAreaElement ).value;
+	return document.querySelector< HTMLTextAreaElement >( id )?.value || '';
 };
 
 const getProductDescriptionValue = ( isContentEditorTmceActive: boolean ) => {
@@ -48,29 +49,28 @@ const getProductShortDescriptionValue = (
 
 const getProductImageValue = () => {
 	return (
-		( document.querySelector(
-			'#set-post-thumbnail img'
-		) as HTMLImageElement )?.src || ''
+		document.querySelector< HTMLImageElement >( '#set-post-thumbnail img' )
+			?.src || ''
 	);
 };
 
 // Parses categories into a string of true/false. Should be enough to catch any change.
 const getProductCategoriesValue = () => {
 	return Array.from(
-		document.querySelectorAll(
+		document.querySelectorAll< HTMLInputElement >(
 			'#product_cat-all #product_catchecklist input'
 		)
 	)
-		.map( ( x ) => ( x as HTMLInputElement ).checked )
+		.map( ( x ) => x.checked )
 		.join( ',' );
 };
 
 // Parses all tags as string of tags separated by comma.
 const getProductTagsValue = () => {
-	return Array.from( document.querySelectorAll( '#product_tag li' ) )
-		.map(
-			( x ) => ( ( x as HTMLLIElement ).lastChild as Text ).textContent
-		)
+	return Array.from(
+		document.querySelectorAll< HTMLLIElement >( '#product_tag li' )
+	)
+		.map( ( x ) => ( x.lastChild as Text ).textContent )
 		.join( ',' );
 };
 
@@ -87,7 +87,6 @@ export const useProductStepChange = () => {
 	const { isTmce: isExcerptEditorTmceActive } = useActiveEditorType( {
 		editorWrapSelector: '#wp-excerpt-wrap',
 	} );
-
 	const [ initialValues, setInitialValues ] = useState<
 		Partial< Record< ProductTourStepName, string > >
 	>( {} );
