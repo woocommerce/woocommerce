@@ -726,4 +726,22 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		return $wpdb_mock;
 	}
+
+	/**
+	 * Test that orders are migrated and verified without errors.
+	 */
+	public function test_verify_migrated_orders() {
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$this->clear_all_orders();
+
+		// Additional test to assert null values are converted properly.
+		delete_post_meta( $order->get_id(), '_cart_discount_tax' );
+
+		$this->assertEquals( '', get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+
+		$this->sut->migrate_order( $order->get_id() );
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+
+		$this->assertEmpty( $errors );
+	}
 }
