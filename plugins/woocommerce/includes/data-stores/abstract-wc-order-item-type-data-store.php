@@ -40,7 +40,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @since 3.0.0
 	 * @param WC_Order_Item $item Order item object.
 	 */
-	public function create( &$item ) {
+	final public function create( &$item ) {
 		global $wpdb;
 
 		$wpdb->insert(
@@ -66,7 +66,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @since 3.0.0
 	 * @param WC_Order_Item $item Order item object.
 	 */
-	public function update( &$item ) {
+	final public function update( &$item ) {
 		global $wpdb;
 
 		$changes = $item->get_changes();
@@ -98,7 +98,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @param WC_Order_Item $item Order item object.
 	 * @param array         $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$item, $args = array() ) {
+	final public function delete( &$item, $args = array() ) {
 		if ( $item->get_id() ) {
 			global $wpdb;
 			do_action( 'woocommerce_before_delete_order_item', $item->get_id() );
@@ -118,7 +118,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 *
 	 * @throws Exception If invalid order item.
 	 */
-	public function read( &$item ) {
+	final public function read( &$item ) {
 		global $wpdb;
 
 		$item->set_defaults();
@@ -151,14 +151,14 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @since 3.0.0
 	 * @param WC_Order_Item $item Order item object.
 	 */
-	public function save_item_data( &$item ) {}
+	final public function save_item_data( &$item ) {}
 
 	/**
 	 * Clear meta cache.
 	 *
 	 * @param WC_Order_Item $item Order item object.
 	 */
-	public function clear_cache( &$item ) {
+	final public function clear_cache( &$item ) {
 		wp_cache_delete( 'item-' . $item->get_id(), 'order-items' );
 		wp_cache_delete( 'order-items-' . $item->get_order_id(), 'orders' );
 		wp_cache_delete( $item->get_id(), $this->meta_type . '_meta' );

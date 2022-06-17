@@ -40,7 +40,7 @@ abstract class WC_Object_Query {
 	 *
 	 * @return array
 	 */
-	public function get_query_vars() {
+	final public function get_query_vars() {
 		return $this->query_vars;
 	}
 
@@ -51,7 +51,7 @@ abstract class WC_Object_Query {
 	 * @param mixed  $default Default value if query variable is not set.
 	 * @return mixed Query variable value if set, otherwise default.
 	 */
-	public function get( $query_var, $default = '' ) {
+	final public function get( $query_var, $default = '' ) {
 		if ( isset( $this->query_vars[ $query_var ] ) ) {
 			return $this->query_vars[ $query_var ];
 		}
@@ -64,7 +64,7 @@ abstract class WC_Object_Query {
 	 * @param string $query_var Query variable to set.
 	 * @param mixed  $value Value to set for query variable.
 	 */
-	public function set( $query_var, $value ) {
+	final public function set( $query_var, $value ) {
 		$this->query_vars[ $query_var ] = $value;
 	}
 

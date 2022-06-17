@@ -22,7 +22,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 *
 	 * @param string Payment Token Type (CC, eCheck)
 	 */
-	public function set_type( $type ) {
+	final public function set_type( $type ) {
 		wc_deprecated_function( 'WC_Payment_Token::set_type', '3.0.0', 'Type cannot be overwritten.' );
 	}
 
@@ -32,7 +32,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 *
 	 * @param int $token_id
 	 */
-	public function read( $token_id ) {
+	final public function read( $token_id ) {
 		wc_deprecated_function( 'WC_Payment_Token::read', '3.0.0', 'a new token class initialized with an ID.' );
 		$this->set_id( $token_id );
 		$data_store = WC_Data_Store::load( 'payment-token' );
@@ -43,7 +43,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 * Update a token.
 	 * @deprecated 3.0.0 - Use ::save instead.
 	 */
-	public function update() {
+	final public function update() {
 		wc_deprecated_function( 'WC_Payment_Token::update', '3.0.0', 'WC_Payment_Token::save instead.' );
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		try {
@@ -57,7 +57,7 @@ abstract class WC_Legacy_Payment_Token extends WC_Data {
 	 * Create a token.
 	 * @deprecated 3.0.0 - Use ::save instead.
 	 */
-	public function create() {
+	final public function create() {
 		wc_deprecated_function( 'WC_Payment_Token::create', '3.0.0', 'WC_Payment_Token::save instead.' );
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		try {

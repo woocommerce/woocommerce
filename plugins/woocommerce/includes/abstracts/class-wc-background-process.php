@@ -158,7 +158,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	 * @param array $schedules Schedules.
 	 * @return array
 	 */
-	public function schedule_cron_healthcheck( $schedules ) {
+	final public function schedule_cron_healthcheck( $schedules ) {
 		$interval = apply_filters( $this->identifier . '_cron_interval', 5 );
 
 		if ( property_exists( $this, 'cron_interval' ) ) {
@@ -180,7 +180,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	 *
 	 * @return WC_Background_Process
 	 */
-	public function delete_all_batches() {
+	final public function delete_all_batches() {
 		global $wpdb;
 
 		$table  = $wpdb->options;
@@ -203,7 +203,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 	 *
 	 * Stop processing queue items, clear cronjob and delete all batches.
 	 */
-	public function kill_process() {
+	final public function kill_process() {
 		if ( ! $this->is_queue_empty() ) {
 			$this->delete_all_batches();
 			wp_clear_scheduled_hook( $this->cron_hook_identifier );

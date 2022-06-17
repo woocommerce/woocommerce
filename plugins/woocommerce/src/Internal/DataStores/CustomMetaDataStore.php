@@ -56,7 +56,7 @@ abstract class CustomMetaDataStore {
 	 * @param  WC_Data $object WC_Data object.
 	 * @return array
 	 */
-	public function read_meta( &$object ) {
+	final public function read_meta( &$object ) {
 		global $wpdb;
 
 		$db_info = $this->get_db_info();
@@ -79,7 +79,7 @@ abstract class CustomMetaDataStore {
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
 	 */
-	public function delete_meta( &$object, $meta ) {
+	final public function delete_meta( &$object, $meta ) {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) ) {
@@ -99,7 +99,7 @@ abstract class CustomMetaDataStore {
 	 * @param  stdClass $meta (containing ->key and ->value).
 	 * @return int meta ID
 	 */
-	public function add_meta( &$object, $meta ) {
+	final public function add_meta( &$object, $meta ) {
 		global $wpdb;
 
 		if ( ! is_a( $meta, 'WC_Meta_Data' ) ) {
@@ -132,7 +132,7 @@ abstract class CustomMetaDataStore {
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
 	 */
-	public function update_meta( &$object, $meta ) {
+	final public function update_meta( &$object, $meta ) {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) || empty( $meta->key ) ) {
@@ -165,7 +165,7 @@ abstract class CustomMetaDataStore {
 	 * @param int $meta_id Meta ID.
 	 * @return object|bool Metadata object or FALSE if not found.
 	 */
-	public function get_metadata_by_id( $meta_id ) {
+	final public function get_metadata_by_id( $meta_id ) {
 		global $wpdb;
 
 		if ( ! is_numeric( $meta_id ) || floor( $meta_id ) != $meta_id ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison

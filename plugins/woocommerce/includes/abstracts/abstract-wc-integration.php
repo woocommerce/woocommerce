@@ -52,7 +52,7 @@ abstract class WC_Integration extends WC_Settings_API {
 	 *
 	 * @return string
 	 */
-	public function get_method_title() {
+	final public function get_method_title() {
 		return apply_filters( 'woocommerce_integration_title', $this->method_title, $this );
 	}
 
@@ -61,14 +61,14 @@ abstract class WC_Integration extends WC_Settings_API {
 	 *
 	 * @return string
 	 */
-	public function get_method_description() {
+	final public function get_method_description() {
 		return apply_filters( 'woocommerce_integration_description', $this->method_description, $this );
 	}
 
 	/**
 	 * Output the gateway settings screen.
 	 */
-	public function admin_options() {
+	final public function admin_options() {
 		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		echo '<div><input type="hidden" name="section" value="' . esc_attr( $this->id ) . '" /></div>';
@@ -78,7 +78,7 @@ abstract class WC_Integration extends WC_Settings_API {
 	/**
 	 * Init settings for gateways.
 	 */
-	public function init_settings() {
+	final public function init_settings() {
 		parent::init_settings();
 		$this->enabled = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
 	}

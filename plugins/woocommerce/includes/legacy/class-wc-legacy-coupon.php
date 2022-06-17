@@ -141,7 +141,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 * @param  string|array $array
 	 * @return array
 	 */
-	public function format_array( $array ) {
+	final public function format_array( $array ) {
 		wc_deprecated_function( 'WC_Coupon::format_array', '3.0' );
 		if ( ! is_array( $array ) ) {
 			if ( is_serialized( $array ) ) {
@@ -159,7 +159,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 *
 	 * @return bool
 	 */
-	public function apply_before_tax() {
+	final public function apply_before_tax() {
 		wc_deprecated_function( 'WC_Coupon::apply_before_tax', '3.0' );
 		return true;
 	}
@@ -169,7 +169,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 *
 	 * @return bool
 	 */
-	public function enable_free_shipping() {
+	final public function enable_free_shipping() {
 		wc_deprecated_function( 'WC_Coupon::enable_free_shipping', '3.0', 'WC_Coupon::get_free_shipping' );
 		return $this->get_free_shipping();
 	}
@@ -179,7 +179,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 *
 	 * @return bool
 	 */
-	public function exclude_sale_items() {
+	final public function exclude_sale_items() {
 		wc_deprecated_function( 'WC_Coupon::exclude_sale_items', '3.0', 'WC_Coupon::get_exclude_sale_items' );
 		return $this->get_exclude_sale_items();
 	}
@@ -189,7 +189,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 *
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function inc_usage_count( $used_by = '' ) {
+	final public function inc_usage_count( $used_by = '' ) {
 		$this->increase_usage_count( $used_by );
 	}
 
@@ -198,7 +198,7 @@ abstract class WC_Legacy_Coupon extends WC_Data {
 	 *
 	 * @param string $used_by Either user ID or billing email
 	 */
-	public function dcr_usage_count( $used_by = '' ) {
+	final public function dcr_usage_count( $used_by = '' ) {
 		$this->decrease_usage_count( $used_by );
 	}
 }

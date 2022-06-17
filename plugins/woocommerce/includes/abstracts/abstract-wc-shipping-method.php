@@ -151,7 +151,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param string $feature The name of a feature to test support for.
 	 * @return bool True if the shipping method supports the feature, false otherwise.
 	 */
-	public function supports( $feature ) {
+	final public function supports( $feature ) {
 		return apply_filters( 'woocommerce_shipping_method_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
@@ -160,14 +160,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @param array $package Package array.
 	 */
-	public function calculate_shipping( $package = array() ) {}
+	final public function calculate_shipping( $package = array() ) {}
 
 	/**
 	 * Whether or not we need to calculate tax on top of the shipping rate.
 	 *
 	 * @return boolean
 	 */
-	public function is_taxable() {
+	final public function is_taxable() {
 		return wc_tax_enabled() && 'taxable' === $this->tax_status && ( WC()->customer && ! WC()->customer->get_is_vat_exempt() );
 	}
 
@@ -177,7 +177,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return boolean
 	 */
-	public function is_enabled() {
+	final public function is_enabled() {
 		return 'yes' === $this->enabled;
 	}
 
@@ -187,7 +187,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return int
 	 */
-	public function get_instance_id() {
+	final public function get_instance_id() {
 		return $this->instance_id;
 	}
 
@@ -197,7 +197,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return string
 	 */
-	public function get_method_title() {
+	final public function get_method_title() {
 		return apply_filters( 'woocommerce_shipping_method_title', $this->method_title, $this );
 	}
 
@@ -207,7 +207,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return string
 	 */
-	public function get_method_description() {
+	final public function get_method_description() {
 		return apply_filters( 'woocommerce_shipping_method_description', $this->method_description, $this );
 	}
 
@@ -216,7 +216,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @return string
 	 */
-	public function get_title() {
+	final public function get_title() {
 		return apply_filters( 'woocommerce_shipping_method_title', $this->title, $this->id );
 	}
 
@@ -227,7 +227,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $package Package array.
 	 * @return array
 	 */
-	public function get_rates_for_package( $package ) {
+	final public function get_rates_for_package( $package ) {
 		$this->rates = array();
 		if ( $this->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $this->id, $package['ship_via'] ) ) ) {
 			$this->calculate_shipping( $package );
@@ -243,7 +243,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param string $suffix Suffix.
 	 * @return string
 	 */
-	public function get_rate_id( $suffix = '' ) {
+	final public function get_rate_id( $suffix = '' ) {
 		$rate_id = array( $this->id );
 
 		if ( $this->instance_id ) {
@@ -262,7 +262,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @param array $args Arguments (default: array()).
 	 */
-	public function add_rate( $args = array() ) {
+	final public function add_rate( $args = array() ) {
 		$args = apply_filters(
 			'woocommerce_shipping_method_add_rate_args',
 			wp_parse_args(
@@ -374,7 +374,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param array $package Package.
 	 * @return bool
 	 */
-	public function is_available( $package ) {
+	final public function is_available( $package ) {
 		$available = $this->is_enabled();
 
 		// Country availability (legacy, for non-zone based methods).
@@ -405,7 +405,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param float        $total Total.
 	 * @return float
 	 */
-	public function get_fee( $fee, $total ) {
+	final public function get_fee( $fee, $total ) {
 		if ( strstr( $fee, '%' ) ) {
 			$fee = ( $total / 100 ) * str_replace( '%', '', $fee );
 		}
@@ -420,7 +420,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @return bool
 	 */
-	public function has_settings() {
+	final public function has_settings() {
 		return $this->instance_id ? $this->supports( 'instance-settings' ) : $this->supports( 'settings' );
 	}
 
@@ -429,7 +429,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @return string
 	 */
-	public function get_admin_options_html() {
+	final public function get_admin_options_html() {
 		if ( $this->instance_id ) {
 			$settings_html = $this->generate_settings_html( $this->get_instance_form_fields(), false );
 		} else {
@@ -442,7 +442,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	/**
 	 * Output the shipping settings screen.
 	 */
-	public function admin_options() {
+	final public function admin_options() {
 		if ( ! $this->instance_id ) {
 			echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		}
@@ -459,7 +459,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param  mixed  $empty_value Empty value.
 	 * @return mixed  The value specified for the option or a default value for the option.
 	 */
-	public function get_option( $key, $empty_value = null ) {
+	final public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options.
 		if ( $this->instance_id && array_key_exists( $key, $this->get_instance_form_fields() ) ) {
 			return $this->get_instance_option( $key, $empty_value );
@@ -477,7 +477,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @param  mixed  $empty_value Empty value.
 	 * @return mixed  The value specified for the option or a default value for the option.
 	 */
-	public function get_instance_option( $key, $empty_value = null ) {
+	final public function get_instance_option( $key, $empty_value = null ) {
 		if ( empty( $this->instance_settings ) ) {
 			$this->init_instance_settings();
 		}
@@ -503,7 +503,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return array
 	 */
-	public function get_instance_form_fields() {
+	final public function get_instance_form_fields() {
 		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->instance_form_fields ) );
 	}
 
@@ -513,7 +513,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return string
 	 */
-	public function get_instance_option_key() {
+	final public function get_instance_option_key() {
 		return $this->instance_id ? $this->plugin_id . $this->id . '_' . $this->instance_id . '_settings' : '';
 	}
 
@@ -522,7 +522,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 *
 	 * @since 2.6.0
 	 */
-	public function init_instance_settings() {
+	final public function init_instance_settings() {
 		$this->instance_settings = get_option( $this->get_instance_option_key(), null );
 
 		// If there are no settings defined, use defaults.
@@ -540,7 +540,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @since 2.6.0
 	 * @return bool was anything saved?
 	 */
-	public function process_admin_options() {
+	final public function process_admin_options() {
 		if ( ! $this->instance_id ) {
 			return parent::process_admin_options();
 		}

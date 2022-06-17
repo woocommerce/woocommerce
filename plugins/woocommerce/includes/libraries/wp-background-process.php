@@ -68,7 +68,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @access public
 	 * @return void
 	 */
-	public function dispatch() {
+	final public function dispatch() {
 		// Schedule the cron healthcheck.
 		$this->schedule_event();
 
@@ -83,7 +83,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 *
 	 * @return $this
 	 */
-	public function push_to_queue( $data ) {
+	final public function push_to_queue( $data ) {
 		$this->data[] = $data;
 
 		return $this;
@@ -94,7 +94,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 *
 	 * @return $this
 	 */
-	public function save() {
+	final public function save() {
 		$key = $this->generate_key();
 
 		if ( ! empty( $this->data ) ) {
@@ -112,7 +112,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 *
 	 * @return $this
 	 */
-	public function update( $key, $data ) {
+	final public function update( $key, $data ) {
 		if ( ! empty( $data ) ) {
 			update_site_option( $key, $data );
 		}
@@ -127,7 +127,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 *
 	 * @return $this
 	 */
-	public function delete( $key ) {
+	final public function delete( $key ) {
 		delete_site_option( $key );
 
 		return $this;
@@ -156,7 +156,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * Checks whether data exists within the queue and that
 	 * the process is not already running.
 	 */
-	public function maybe_handle() {
+	final public function maybe_handle() {
 		// Don't lock up other requests while processing
 		session_write_close();
 
@@ -410,7 +410,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * @param mixed $schedules Schedules.
 	 * @return mixed
 	 */
-	public function schedule_cron_healthcheck( $schedules ) {
+	final public function schedule_cron_healthcheck( $schedules ) {
 		$interval = apply_filters( $this->identifier . '_cron_interval', 5 );
 
 		if ( property_exists( $this, 'cron_interval' ) ) {
@@ -432,7 +432,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * Restart the background process if not already running
 	 * and data exists in the queue.
 	 */
-	public function handle_cron_healthcheck() {
+	final public function handle_cron_healthcheck() {
 		if ( $this->is_process_running() ) {
 			// Background process already running.
 			exit;
@@ -475,7 +475,7 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 * Stop processing queue items, clear cronjob and delete batch.
 	 *
 	 */
-	public function cancel_process() {
+	final public function cancel_process() {
 		if ( ! $this->is_queue_empty() ) {
 			$batch = $this->get_batch();
 

@@ -49,7 +49,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
+	final public function get_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
@@ -65,7 +65,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function update_item_permissions_check( $request ) {
+	final public function update_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
@@ -81,7 +81,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
-	public function delete_item_permissions_check( $request ) {
+	final public function delete_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
@@ -133,7 +133,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_item( $request ) {
+	final public function get_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
@@ -182,7 +182,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function create_item( $request ) {
+	final public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
@@ -228,7 +228,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_item( $request ) {
+	final public function update_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
@@ -375,7 +375,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_items( $request ) {
+	final public function get_items( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
 		if ( is_wp_error( current( $query_args ) ) ) {
 			return current( $query_args );
@@ -438,7 +438,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function delete_item( $request ) {
+	final public function delete_item( $request ) {
 		$force  = (bool) $request['force'];
 		$object = $this->get_object( (int) $request['id'] );
 		$result = false;
@@ -515,7 +515,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @param array  $fields  List of fields to fetch.
 	 * @return array Data fetched from getters.
 	 */
-	public function fetch_fields_using_getters( $object, $context, $fields ) {
+	final public function fetch_fields_using_getters( $object, $context, $fields ) {
 		$data = array();
 		foreach ( $fields as $field ) {
 			if ( method_exists( $this, "api_get_$field" ) ) {
@@ -550,7 +550,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_collection_params() {
+	final public function get_collection_params() {
 		$params                       = array();
 		$params['context']            = $this->get_context_param();
 		$params['context']['default'] = 'view';

@@ -21,7 +21,7 @@ abstract class AbstractServiceProvider implements ServiceProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function provides(string $alias) : bool
+    final public function provides(string $alias) : bool
     {
         return in_array($alias, $this->provides, true);
     }
@@ -29,7 +29,7 @@ abstract class AbstractServiceProvider implements ServiceProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function setIdentifier(string $id) : ServiceProviderInterface
+    final public function setIdentifier(string $id) : ServiceProviderInterface
     {
         $this->identifier = $id;
 
@@ -39,7 +39,7 @@ abstract class AbstractServiceProvider implements ServiceProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function getIdentifier() : string
+    final public function getIdentifier() : string
     {
         return $this->identifier ?? get_class($this);
     }

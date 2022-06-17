@@ -97,7 +97,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * @param string $postcode (default: '')
 	 * @param string $city (default: '')
 	 */
-	public function set_location( $country, $state, $postcode = '', $city = '' ) {
+	final public function set_location( $country, $state, $postcode = '', $city = '' ) {
 		$this->set_billing_location( $country, $state, $postcode, $city );
 		$this->set_shipping_location( $country, $state, $postcode, $city );
 	}
@@ -106,7 +106,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Get default country for a customer.
 	 * @return string
 	 */
-	public function get_default_country() {
+	final public function get_default_country() {
 		wc_deprecated_function( 'WC_Customer::get_default_country', '3.0', 'wc_get_customer_default_location' );
 		$default = wc_get_customer_default_location();
 		return $default['country'];
@@ -116,7 +116,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Get default state for a customer.
 	 * @return string
 	 */
-	public function get_default_state() {
+	final public function get_default_state() {
 		wc_deprecated_function( 'WC_Customer::get_default_state', '3.0', 'wc_get_customer_default_location' );
 		$default = wc_get_customer_default_location();
 		return $default['state'];
@@ -125,7 +125,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Set customer address to match shop base address.
 	 */
-	public function set_to_base() {
+	final public function set_to_base() {
 		wc_deprecated_function( 'WC_Customer::set_to_base', '3.0', 'WC_Customer::set_billing_address_to_base' );
 		$this->set_billing_address_to_base();
 	}
@@ -133,7 +133,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Set customer shipping address to base address.
 	 */
-	public function set_shipping_to_base() {
+	final public function set_shipping_to_base() {
 		wc_deprecated_function( 'WC_Customer::set_shipping_to_base', '3.0', 'WC_Customer::set_shipping_address_to_base' );
 		$this->set_shipping_address_to_base();
 	}
@@ -142,7 +142,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 * Calculated shipping.
 	 * @param boolean $calculated
 	 */
-	public function calculated_shipping( $calculated = true ) {
+	final public function calculated_shipping( $calculated = true ) {
 		wc_deprecated_function( 'WC_Customer::calculated_shipping', '3.0', 'WC_Customer::set_calculated_shipping' );
 		$this->set_calculated_shipping( $calculated );
 	}
@@ -150,14 +150,14 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Set default data for a customer.
 	 */
-	public function set_default_data() {
+	final public function set_default_data() {
 		wc_deprecated_function( 'WC_Customer::set_default_data', '3.0' );
 	}
 
 	/**
 	 * Save data function.
 	 */
-	public function save_data() {
+	final public function save_data() {
 		$this->save();
 	}
 

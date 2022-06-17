@@ -47,7 +47,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @since 3.0.0
 		 * @return string
 		 */
-		public function get_id() {
+		final public function get_id() {
 			return $this->id;
 		}
 
@@ -57,7 +57,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @since 3.0.0
 		 * @return string
 		 */
-		public function get_label() {
+		final public function get_label() {
 			return $this->label;
 		}
 
@@ -68,7 +68,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 *
 		 * @return mixed
 		 */
-		public function add_settings_page( $pages ) {
+		final public function add_settings_page( $pages ) {
 			$pages[ $this->id ] = $this->label;
 
 			return $pages;
@@ -93,7 +93,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 *
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
-		public function get_settings() {
+		final public function get_settings() {
 			$section_id = 0 === func_num_args() ? '' : func_get_arg( 0 );
 			return $this->get_settings_for_section( $section_id );
 		}
@@ -151,7 +151,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 *
 		 * @return array
 		 */
-		public function get_sections() {
+		final public function get_sections() {
 			$sections = $this->get_own_sections();
 			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 		}
@@ -176,7 +176,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Output sections.
 		 */
-		public function output_sections() {
+		final public function output_sections() {
 			global $current_section;
 
 			$sections = $this->get_sections();
@@ -203,7 +203,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Output the HTML for the settings.
 		 */
-		public function output() {
+		final public function output() {
 			global $current_section;
 
 			// We can't use "get_settings_for_section" here
@@ -216,7 +216,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Save settings and trigger the 'woocommerce_update_options_'.id action.
 		 */
-		public function save() {
+		final public function save() {
 			$this->save_settings_for_current_section();
 			$this->do_update_options_action();
 		}

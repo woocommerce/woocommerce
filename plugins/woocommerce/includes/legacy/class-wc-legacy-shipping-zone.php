@@ -18,7 +18,7 @@ abstract class WC_Legacy_Shipping_Zone extends WC_Data {
 	 * @return int|null Null if the zone does not exist. 0 is the default zone.
 	 * @deprecated 3.0
 	 */
-	public function get_zone_id() {
+	final public function get_zone_id() {
 		wc_deprecated_function( 'WC_Shipping_Zone::get_zone_id', '3.0', 'WC_Shipping_Zone::get_id' );
 		return $this->get_id();
 	}
@@ -29,7 +29,7 @@ abstract class WC_Legacy_Shipping_Zone extends WC_Data {
 	 *
 	 * @param int $zone_id
 	 */
-	public function read( $zone_id ) {
+	final public function read( $zone_id ) {
 		wc_deprecated_function( 'WC_Shipping_Zone::read', '3.0', 'a shipping zone initialized with an ID.' );
 		$this->set_id( $zone_id );
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
@@ -40,7 +40,7 @@ abstract class WC_Legacy_Shipping_Zone extends WC_Data {
 	 * Update a zone.
 	 * @deprecated 3.0.0 - Use ::save instead.
 	 */
-	public function update() {
+	final public function update() {
 		wc_deprecated_function( 'WC_Shipping_Zone::update', '3.0', 'WC_Shipping_Zone::save instead.' );
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		try {
@@ -54,7 +54,7 @@ abstract class WC_Legacy_Shipping_Zone extends WC_Data {
 	 * Create a zone.
 	 * @deprecated 3.0.0 - Use ::save instead.
 	 */
-	public function create() {
+	final public function create() {
 		wc_deprecated_function( 'WC_Shipping_Zone::create', '3.0', 'WC_Shipping_Zone::save instead.' );
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		try {

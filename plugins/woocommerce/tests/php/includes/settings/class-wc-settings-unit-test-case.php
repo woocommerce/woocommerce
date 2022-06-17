@@ -18,7 +18,7 @@ abstract class WC_Settings_Unit_Test_Case extends WC_Unit_Test_Case {
 	 *
 	 * @return array|null The setting, or null if no setting exists in the supplied array with the supplied identifier.
 	 */
-	public function setting_by_id( $settings, $id ) {
+	final public function setting_by_id( $settings, $id ) {
 		foreach ( $settings as $setting ) {
 			if ( $id === $setting['id'] ) {
 				return $setting;
@@ -36,7 +36,7 @@ abstract class WC_Settings_Unit_Test_Case extends WC_Unit_Test_Case {
 	 *
 	 * @return array The transformed settings.
 	 */
-	public function get_ids_and_types( $settings ) {
+	final public function get_ids_and_types( $settings ) {
 		$settings_ids_and_types = array();
 		foreach ( $settings as $setting ) {
 			$id   = array_key_exists( 'id', $setting ) ? $setting['id'] : null;

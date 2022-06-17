@@ -58,7 +58,7 @@ abstract class WC_Admin_List_Table {
 	 *
 	 * @param string $which String which tablenav is being shown.
 	 */
-	public function maybe_render_blank_state( $which ) {
+	final public function maybe_render_blank_state( $which ) {
 		global $post_type;
 
 		if ( $post_type === $this->list_table_type && 'bottom' === $which ) {
@@ -89,7 +89,7 @@ abstract class WC_Admin_List_Table {
 	 * @param  array $post_types Array of post types supporting view mode.
 	 * @return array             Array of post types supporting view mode, without this type.
 	 */
-	public function disable_view_mode( $post_types ) {
+	final public function disable_view_mode( $post_types ) {
 		unset( $post_types[ $this->list_table_type ] );
 		return $post_types;
 	}
@@ -97,7 +97,7 @@ abstract class WC_Admin_List_Table {
 	/**
 	 * See if we should render search filters or not.
 	 */
-	public function restrict_manage_posts() {
+	final public function restrict_manage_posts() {
 		global $typenow;
 
 		if ( $this->list_table_type === $typenow ) {
@@ -111,7 +111,7 @@ abstract class WC_Admin_List_Table {
 	 * @param array $query_vars Query vars.
 	 * @return array
 	 */
-	public function request_query( $query_vars ) {
+	final public function request_query( $query_vars ) {
 		global $typenow;
 
 		if ( $this->list_table_type === $typenow ) {
@@ -143,7 +143,7 @@ abstract class WC_Admin_List_Table {
 	 * @param WP_Post $post Current post object.
 	 * @return array
 	 */
-	public function row_actions( $actions, $post ) {
+	final public function row_actions( $actions, $post ) {
 		if ( $this->list_table_type === $post->post_type ) {
 			return $this->get_row_actions( $actions, $post );
 		}
@@ -168,7 +168,7 @@ abstract class WC_Admin_List_Table {
 	 * @param object $screen Current screen.
 	 * @return array
 	 */
-	public function default_hidden_columns( $hidden, $screen ) {
+	final public function default_hidden_columns( $hidden, $screen ) {
 		if ( isset( $screen->id ) && 'edit-' . $this->list_table_type === $screen->id ) {
 			$hidden = array_merge( $hidden, $this->define_hidden_columns() );
 		}
@@ -182,7 +182,7 @@ abstract class WC_Admin_List_Table {
 	 * @param  string $screen_id Current screen ID.
 	 * @return string
 	 */
-	public function list_table_primary_column( $default, $screen_id ) {
+	final public function list_table_primary_column( $default, $screen_id ) {
 		if ( 'edit-' . $this->list_table_type === $screen_id && $this->get_primary_column() ) {
 			return $this->get_primary_column();
 		}
@@ -213,7 +213,7 @@ abstract class WC_Admin_List_Table {
 	 * @param array $columns Existing columns.
 	 * @return array
 	 */
-	public function define_sortable_columns( $columns ) {
+	final public function define_sortable_columns( $columns ) {
 		return $columns;
 	}
 
@@ -223,7 +223,7 @@ abstract class WC_Admin_List_Table {
 	 * @param array $columns Existing columns.
 	 * @return array
 	 */
-	public function define_columns( $columns ) {
+	final public function define_columns( $columns ) {
 		return $columns;
 	}
 
@@ -233,7 +233,7 @@ abstract class WC_Admin_List_Table {
 	 * @param array $actions Existing actions.
 	 * @return array
 	 */
-	public function define_bulk_actions( $actions ) {
+	final public function define_bulk_actions( $actions ) {
 		return $actions;
 	}
 
@@ -250,7 +250,7 @@ abstract class WC_Admin_List_Table {
 	 * @param string $column Column ID to render.
 	 * @param int    $post_id Post ID being shown.
 	 */
-	public function render_columns( $column, $post_id ) {
+	final public function render_columns( $column, $post_id ) {
 		$this->prepare_row_data( $post_id );
 
 		if ( ! $this->object ) {
@@ -270,7 +270,7 @@ abstract class WC_Admin_List_Table {
 	 * @param  array  $ids         List of ids.
 	 * @return string
 	 */
-	public function handle_bulk_actions( $redirect_to, $action, $ids ) {
+	final public function handle_bulk_actions( $redirect_to, $action, $ids ) {
 		return esc_url_raw( $redirect_to );
 	}
 }

@@ -56,7 +56,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_items_permissions_check( $request ) {
+	final public function get_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -74,7 +74,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function create_item_permissions_check( $request ) {
+	final public function create_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -92,7 +92,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function update_items_permissions_check( $request ) {
+	final public function update_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -110,7 +110,7 @@ abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function delete_items_permissions_check( $request ) {
+	final public function delete_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}

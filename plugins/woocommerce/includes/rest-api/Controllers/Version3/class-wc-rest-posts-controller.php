@@ -52,7 +52,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_items_permissions_check( $request ) {
+	final public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
@@ -66,7 +66,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function create_item_permissions_check( $request ) {
+	final public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
@@ -80,7 +80,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
+	final public function get_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'read', $post->ID ) ) {
@@ -96,7 +96,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function update_item_permissions_check( $request ) {
+	final public function update_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $post->ID ) ) {
@@ -112,7 +112,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
-	public function delete_item_permissions_check( $request ) {
+	final public function delete_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
@@ -129,7 +129,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 *
 	 * @return boolean|WP_Error
 	 */
-	public function batch_items_permissions_check( $request ) {
+	final public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
@@ -143,7 +143,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_item( $request ) {
+	final public function get_item( $request ) {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
@@ -169,7 +169,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function create_item( $request ) {
+	final public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
@@ -250,7 +250,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_item( $request ) {
+	final public function update_item( $request ) {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
@@ -304,7 +304,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_items( $request ) {
+	final public function get_items( $request ) {
 		$args                         = array();
 		$args['offset']               = $request['offset'];
 		$args['order']                = $request['order'];
@@ -412,7 +412,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function delete_item( $request ) {
+	final public function delete_item( $request ) {
 		$id    = (int) $request['id'];
 		$force = (bool) $request['force'];
 		$post  = get_post( $id );
@@ -615,7 +615,7 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_collection_params() {
+	final public function get_collection_params() {
 		$params = parent::get_collection_params();
 
 		$params['context']['default'] = 'view';

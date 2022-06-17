@@ -99,7 +99,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return array Endpoint arguments.
 	 */
-	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+	final public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
 
 		$endpoint_args = parent::get_endpoint_args_for_item_schema( $method );
 
@@ -206,7 +206,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
-	public function batch_items( $request ) {
+	final public function batch_items( $request ) {
 		/**
 		 * REST Server
 		 *
@@ -326,7 +326,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array  $setting Setting.
 	 * @return string
 	 */
-	public function validate_setting_text_field( $value, $setting ) {
+	final public function validate_setting_text_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
 		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
@@ -339,7 +339,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array  $setting Setting.
 	 * @return string|WP_Error
 	 */
-	public function validate_setting_select_field( $value, $setting ) {
+	final public function validate_setting_select_field( $value, $setting ) {
 		if ( array_key_exists( $value, $setting['options'] ) ) {
 			return $value;
 		} else {
@@ -355,7 +355,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array $setting Setting.
 	 * @return array|WP_Error
 	 */
-	public function validate_setting_multiselect_field( $values, $setting ) {
+	final public function validate_setting_multiselect_field( $values, $setting ) {
 		if ( empty( $values ) ) {
 			return array();
 		}
@@ -382,7 +382,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array $setting Setting.
 	 * @return string|WP_Error
 	 */
-	public function validate_setting_image_width_field( $values, $setting ) {
+	final public function validate_setting_image_width_field( $values, $setting ) {
 		if ( ! is_array( $values ) ) {
 			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
@@ -408,7 +408,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array  $setting Setting.
 	 * @return string|WP_Error
 	 */
-	public function validate_setting_radio_field( $value, $setting ) {
+	final public function validate_setting_radio_field( $value, $setting ) {
 		return $this->validate_setting_select_field( $value, $setting );
 	}
 
@@ -420,7 +420,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array  $setting Setting.
 	 * @return string|WP_Error
 	 */
-	public function validate_setting_checkbox_field( $value, $setting ) {
+	final public function validate_setting_checkbox_field( $value, $setting ) {
 		if ( in_array( $value, array( 'yes', 'no' ) ) ) {
 			return $value;
 		} elseif ( empty( $value ) ) {
@@ -439,7 +439,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param array  $setting Setting.
 	 * @return string
 	 */
-	public function validate_setting_textarea_field( $value, $setting ) {
+	final public function validate_setting_textarea_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
 		return wp_kses(
 			trim( stripslashes( $value ) ),
@@ -480,7 +480,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_public_batch_schema() {
+	final public function get_public_batch_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'batch',
@@ -526,7 +526,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Fields to be included in the response.
 	 */
-	public function get_fields_for_response( $request ) {
+	final public function get_fields_for_response( $request ) {
 		// From xdebug profiling, this method could take upto 25% of request time in index calls.
 		// Cache it and make sure _fields was cached on current request object!
 		// TODO: Submit this caching behavior in core.

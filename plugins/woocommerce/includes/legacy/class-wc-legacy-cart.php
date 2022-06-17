@@ -105,7 +105,7 @@ abstract class WC_Legacy_Cart {
 	 * @param string $name Property name.
 	 * @return mixed
 	 */
-	public function &__get( $name ) {
+	final public function &__get( $name ) {
 		$value = '';
 
 		switch ( $name ) {
@@ -271,19 +271,19 @@ abstract class WC_Legacy_Cart {
 	/**
 	 * Methods moved to session class in 3.2.0.
 	 */
-	public function get_cart_from_session() { $this->session->get_cart_from_session(); }
-	public function maybe_set_cart_cookies() { $this->session->maybe_set_cart_cookies(); }
-	public function set_session() { $this->session->set_session(); }
-	public function get_cart_for_session() { return $this->session->get_cart_for_session(); }
-	public function persistent_cart_update() { $this->session->persistent_cart_update(); }
-	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
+	final public function get_cart_from_session() { $this->session->get_cart_from_session(); }
+	final public function maybe_set_cart_cookies() { $this->session->maybe_set_cart_cookies(); }
+	final public function set_session() { $this->session->set_session(); }
+	final public function get_cart_for_session() { return $this->session->get_cart_for_session(); }
+	final public function persistent_cart_update() { $this->session->persistent_cart_update(); }
+	final public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
 
 	/**
 	 * Get the total of all cart discounts.
 	 *
 	 * @return float
 	 */
-	public function get_cart_discount_total() {
+	final public function get_cart_discount_total() {
 		return $this->get_discount_total();
 	}
 
@@ -292,7 +292,7 @@ abstract class WC_Legacy_Cart {
 	 *
 	 * @return float
 	 */
-	public function get_cart_discount_tax_total() {
+	final public function get_cart_discount_tax_total() {
 		return $this->get_discount_tax();
 	}
 
@@ -302,7 +302,7 @@ abstract class WC_Legacy_Cart {
 	 * @param string $coupon_code
 	 * @return bool	True if the coupon is applied, false if it does not exist or cannot be applied.
 	 */
-	public function add_discount( $coupon_code ) {
+	final public function add_discount( $coupon_code ) {
 		return $this->apply_coupon( $coupon_code );
 	}
 	/**
@@ -310,7 +310,7 @@ abstract class WC_Legacy_Cart {
 	 *
 	 * @deprecated 3.2.0 Taxes are never calculated if customer is tax except making this function unused.
 	 */
-	public function remove_taxes() {
+	final public function remove_taxes() {
 		wc_deprecated_function( 'WC_Cart::remove_taxes', '3.2', '' );
 	}
 	/**
@@ -318,7 +318,7 @@ abstract class WC_Legacy_Cart {
 	 *
 	 * @deprecated 3.2.0 Session is loaded via hooks rather than directly.
 	 */
-	public function init() {
+	final public function init() {
 		wc_deprecated_function( 'WC_Cart::init', '3.2', '' );
 		$this->get_cart_from_session();
 	}
@@ -332,7 +332,7 @@ abstract class WC_Legacy_Cart {
 	 * @param bool  $add_totals Legacy.
 	 * @return float price
 	 */
-	public function get_discounted_price( $values, $price, $add_totals = false ) {
+	final public function get_discounted_price( $values, $price, $add_totals = false ) {
 		wc_deprecated_function( 'WC_Cart::get_discounted_price', '3.2', '' );
 
 		$cart_item_key = $values['key'];
@@ -347,7 +347,7 @@ abstract class WC_Legacy_Cart {
 	 * @deprecated 2.5.0 in favor to wc_get_cart_url()
 	 * @return string url to page
 	 */
-	public function get_cart_url() {
+	final public function get_cart_url() {
 		wc_deprecated_function( 'WC_Cart::get_cart_url', '2.5', 'wc_get_cart_url' );
 		return wc_get_cart_url();
 	}
@@ -358,7 +358,7 @@ abstract class WC_Legacy_Cart {
 	 * @deprecated 2.5.0 in favor to wc_get_checkout_url()
 	 * @return string url to page
 	 */
-	public function get_checkout_url() {
+	final public function get_checkout_url() {
 		wc_deprecated_function( 'WC_Cart::get_checkout_url', '2.5', 'wc_get_checkout_url' );
 		return wc_get_checkout_url();
 	}
@@ -369,7 +369,7 @@ abstract class WC_Legacy_Cart {
 	 * @deprecated 2.5.0 in favor to wc_ship_to_billing_address_only()
 	 * @return bool
 	 */
-	public function ship_to_billing_address_only() {
+	final public function ship_to_billing_address_only() {
 		wc_deprecated_function( 'WC_Cart::ship_to_billing_address_only', '2.5', 'wc_ship_to_billing_address_only' );
 		return wc_ship_to_billing_address_only();
 	}
@@ -380,7 +380,7 @@ abstract class WC_Legacy_Cart {
 	 * @deprecated 2.5.0
 	 * @return bool
 	 */
-	public function coupons_enabled() {
+	final public function coupons_enabled() {
 		wc_deprecated_function( 'WC_Legacy_Cart::coupons_enabled', '2.5.0', 'wc_coupons_enabled' );
 		return wc_coupons_enabled();
 	}
@@ -391,7 +391,7 @@ abstract class WC_Legacy_Cart {
 	 * @deprecated 2.3.0 Order discounts (after tax) removed in 2.3 so multiple methods for discounts are no longer required.
 	 * @return mixed formatted price or false if there are none.
 	 */
-	public function get_discounts_before_tax() {
+	final public function get_discounts_before_tax() {
 		wc_deprecated_function( 'get_discounts_before_tax', '2.3', 'get_total_discount' );
 		if ( $this->get_cart_discount_total() ) {
 			$discounts_before_tax = wc_price( $this->get_cart_discount_total() );
@@ -407,7 +407,7 @@ abstract class WC_Legacy_Cart {
 	 * @deprecated 2.3.0 Order discounts (after tax) removed in 2.3.
 	 * @return int
 	 */
-	public function get_order_discount_total() {
+	final public function get_order_discount_total() {
 		wc_deprecated_function( 'get_order_discount_total', '2.3' );
 		return 0;
 	}
@@ -419,7 +419,7 @@ abstract class WC_Legacy_Cart {
 	 * @param $values
 	 * @param $price
 	 */
-	public function apply_cart_discounts_after_tax( $values, $price ) {
+	final public function apply_cart_discounts_after_tax( $values, $price ) {
 		wc_deprecated_function( 'apply_cart_discounts_after_tax', '2.3' );
 	}
 
@@ -431,7 +431,7 @@ abstract class WC_Legacy_Cart {
 	 * @param $values
 	 * @param $price
 	 */
-	public function apply_product_discounts_after_tax( $values, $price ) {
+	final public function apply_product_discounts_after_tax( $values, $price ) {
 		wc_deprecated_function( 'apply_product_discounts_after_tax', '2.3' );
 	}
 
@@ -440,7 +440,7 @@ abstract class WC_Legacy_Cart {
 	 *
 	 * @deprecated 2.3.0 Coupons can not be applied after tax.
 	 */
-	public function get_discounts_after_tax() {
+	final public function get_discounts_after_tax() {
 		wc_deprecated_function( 'get_discounts_after_tax', '2.3' );
 	}
 }

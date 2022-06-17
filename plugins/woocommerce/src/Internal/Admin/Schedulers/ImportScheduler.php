@@ -32,7 +32,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @internal
 	 * @return bool
 	 */
-	public static function is_importing() {
+	final public static function is_importing() {
 		$pending_jobs = self::queue()->search(
 			array(
 				'status'   => 'pending',
@@ -62,7 +62,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @internal
 	 * @retun array
 	 */
-	public static function get_batch_sizes() {
+	final public static function get_batch_sizes() {
 		return array_merge(
 			self::get_scheduler_batch_sizes(),
 			array(
@@ -81,7 +81,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @internal
 	 * @return array
 	 */
-	public static function get_scheduler_actions() {
+	final public static function get_scheduler_actions() {
 		return array(
 			'import_batch_init' => 'wc-admin_import_batch_init_' . static::$name,
 			'import_batch'      => 'wc-admin_import_batch_' . static::$name,
@@ -98,7 +98,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @param integer|boolean $days Number of days to import.
 	 * @param boolean         $skip_existing Skip exisiting records.
 	 */
-	public static function import_batch_init( $days, $skip_existing ) {
+	final public static function import_batch_init( $days, $skip_existing ) {
 		$batch_size = static::get_batch_size( 'import' );
 		$items      = static::get_items( 1, 1, $days, $skip_existing );
 
@@ -120,7 +120,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @param bool     $skip_existing Skip exisiting records.
 	 * @return void
 	 */
-	public static function import_batch( $batch_number, $days, $skip_existing ) {
+	final public static function import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size = static::get_batch_size( 'import' );
 
 		$properties = array(
@@ -154,7 +154,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 *
 	 * @internal
 	 */
-	public static function delete_batch_init() {
+	final public static function delete_batch_init() {
 		global $wpdb;
 		$batch_size = static::get_batch_size( 'delete' );
 		$count      = static::get_total_imported();
@@ -174,7 +174,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @internal
 	 * @return void
 	 */
-	public static function delete_batch() {
+	final public static function delete_batch() {
 		wc_admin_record_tracks_event( 'delete_import_data_job_start', array( 'type' => static::$name ) );
 
 		$batch_size = static::get_batch_size( 'delete' );

@@ -55,7 +55,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Order $order Order object.
 	 */
-	public function create( &$order ) {
+	final public function create( &$order ) {
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 		if ( ! $order->get_date_created( 'edit' ) ) {
@@ -97,7 +97,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @throws Exception If passed order is invalid.
 	 */
-	public function read( &$order ) {
+	final public function read( &$order ) {
 		$order->set_defaults();
 		$post_object = get_post( $order->get_id() );
 		if ( ! $order->get_id() || ! $post_object || ! in_array( $post_object->post_type, wc_get_order_types(), true ) ) {
@@ -132,7 +132,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @param WC_Order $order Order object.
 	 */
-	public function update( &$order ) {
+	final public function update( &$order ) {
 		$order->save_meta_data();
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 
@@ -183,7 +183,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 *
 	 * @return void
 	 */
-	public function delete( &$order, $args = array() ) {
+	final public function delete( &$order, $args = array() ) {
 		$id   = $order->get_id();
 		$args = wp_parse_args(
 			$args,
@@ -368,7 +368,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param  string   $type Order item type.
 	 * @return array
 	 */
-	public function read_items( $order, $type ) {
+	final public function read_items( $order, $type ) {
 		global $wpdb;
 
 		// Get from cache if available.
@@ -403,7 +403,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order Order object.
 	 * @param string   $type Order item type. Default null.
 	 */
-	public function delete_items( $order, $type = null ) {
+	final public function delete_items( $order, $type = null ) {
 		global $wpdb;
 		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM itemmeta USING {$wpdb->prefix}woocommerce_order_itemmeta itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $order->get_id(), $type ) );
@@ -421,7 +421,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
-	public function get_payment_token_ids( $order ) {
+	final public function get_payment_token_ids( $order ) {
 		$token_ids = array_filter( (array) get_post_meta( $order->get_id(), '_payment_tokens', true ) );
 		return $token_ids;
 	}
@@ -432,7 +432,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Order $order Order object.
 	 * @param array    $token_ids Payment token ids.
 	 */
-	public function update_payment_token_ids( $order, $token_ids ) {
+	final public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
 	}
 }

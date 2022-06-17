@@ -41,7 +41,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	/**
 	 * Register the routes for terms.
 	 */
-	public function register_routes() {
+	final public function register_routes() {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -132,7 +132,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_items_permissions_check( $request ) {
+	final public function get_items_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'read' );
 		if ( is_wp_error( $permissions ) ) {
 			return $permissions;
@@ -151,7 +151,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function create_item_permissions_check( $request ) {
+	final public function create_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'create' );
 		if ( is_wp_error( $permissions ) ) {
 			return $permissions;
@@ -170,7 +170,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
+	final public function get_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'read' );
 		if ( is_wp_error( $permissions ) ) {
 			return $permissions;
@@ -189,7 +189,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function update_item_permissions_check( $request ) {
+	final public function update_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'edit' );
 		if ( is_wp_error( $permissions ) ) {
 			return $permissions;
@@ -208,7 +208,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function delete_item_permissions_check( $request ) {
+	final public function delete_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'delete' );
 		if ( is_wp_error( $permissions ) ) {
 			return $permissions;
@@ -227,7 +227,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return boolean|WP_Error
 	 */
-	public function batch_items_permissions_check( $request ) {
+	final public function batch_items_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'batch' );
 		if ( is_wp_error( $permissions ) ) {
 			return $permissions;
@@ -275,7 +275,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_items( $request ) {
+	final public function get_items( $request ) {
 		$taxonomy      = $this->get_taxonomy( $request );
 		$prepared_args = array(
 			'exclude'    => $request['exclude'],
@@ -385,7 +385,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
 	 */
-	public function create_item( $request ) {
+	final public function create_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
 		$name     = $request['name'];
 		$args     = array();
@@ -460,7 +460,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
 	 */
-	public function get_item( $request ) {
+	final public function get_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
 		$term     = get_term( (int) $request['id'], $taxonomy );
 
@@ -479,7 +479,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Request|WP_Error
 	 */
-	public function update_item( $request ) {
+	final public function update_item( $request ) {
 		$taxonomy      = $this->get_taxonomy( $request );
 		$term          = get_term( (int) $request['id'], $taxonomy );
 		$schema        = $this->get_item_schema();
@@ -539,7 +539,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function delete_item( $request ) {
+	final public function delete_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
 		$force    = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
@@ -700,7 +700,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_collection_params() {
+	final public function get_collection_params() {
 		$params = parent::get_collection_params();
 
 		$params['context']['default'] = 'view';

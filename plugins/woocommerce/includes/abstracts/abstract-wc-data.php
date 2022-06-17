@@ -163,7 +163,7 @@ abstract class WC_Data {
 	 * @since  3.0.0
 	 * @return object
 	 */
-	public function get_data_store() {
+	final public function get_data_store() {
 		return $this->data_store;
 	}
 
@@ -173,7 +173,7 @@ abstract class WC_Data {
 	 * @since  2.6.0
 	 * @return int
 	 */
-	public function get_id() {
+	final public function get_id() {
 		return $this->id;
 	}
 
@@ -184,7 +184,7 @@ abstract class WC_Data {
 	 * @param  bool $force_delete Should the date be deleted permanently.
 	 * @return bool result
 	 */
-	public function delete( $force_delete = false ) {
+	final public function delete( $force_delete = false ) {
 		if ( $this->data_store ) {
 			$this->data_store->delete( $this, array( 'force_delete' => $force_delete ) );
 			$this->set_id( 0 );
@@ -199,7 +199,7 @@ abstract class WC_Data {
 	 * @since  2.6.0
 	 * @return int
 	 */
-	public function save() {
+	final public function save() {
 		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
@@ -245,7 +245,7 @@ abstract class WC_Data {
 	 * @since  2.6.0
 	 * @return array
 	 */
-	public function get_data() {
+	final public function get_data() {
 		return array_merge( array( 'id' => $this->get_id() ), $this->data, array( 'meta_data' => $this->get_meta_data() ) );
 	}
 
@@ -255,7 +255,7 @@ abstract class WC_Data {
 	 * @since   3.0.0
 	 * @return array
 	 */
-	public function get_data_keys() {
+	final public function get_data_keys() {
 		return array_keys( $this->data );
 	}
 
@@ -265,7 +265,7 @@ abstract class WC_Data {
 	 * @since  3.0.0
 	 * @return array
 	 */
-	public function get_extra_data_keys() {
+	final public function get_extra_data_keys() {
 		return array_keys( $this->extra_data );
 	}
 
@@ -286,7 +286,7 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 * @return array of objects.
 	 */
-	public function get_meta_data() {
+	final public function get_meta_data() {
 		$this->maybe_read_meta_data();
 		return array_values( array_filter( $this->meta_data, array( $this, 'filter_null_meta' ) ) );
 	}
@@ -325,7 +325,7 @@ abstract class WC_Data {
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return mixed
 	 */
-	public function get_meta( $key = '', $single = true, $context = 'view' ) {
+	final public function get_meta( $key = '', $single = true, $context = 'view' ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'get_' . ltrim( $key, '_' );
 
@@ -362,7 +362,7 @@ abstract class WC_Data {
 	 * @param  string $key Meta Key.
 	 * @return boolean
 	 */
-	public function meta_exists( $key = '' ) {
+	final public function meta_exists( $key = '' ) {
 		$this->maybe_read_meta_data();
 		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
 		return in_array( $key, $array_keys, true );
@@ -374,7 +374,7 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 * @param array $data Key/Value pairs.
 	 */
-	public function set_meta_data( $data ) {
+	final public function set_meta_data( $data ) {
 		if ( ! empty( $data ) && is_array( $data ) ) {
 			$this->maybe_read_meta_data();
 			foreach ( $data as $meta ) {
@@ -401,7 +401,7 @@ abstract class WC_Data {
 	 * @param string|array $value Meta value.
 	 * @param bool         $unique Should this be a unique key?.
 	 */
-	public function add_meta_data( $key, $value, $unique = false ) {
+	final public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'set_' . ltrim( $key, '_' );
 
@@ -431,7 +431,7 @@ abstract class WC_Data {
 	 * @param  string|array $value Meta value.
 	 * @param  int          $meta_id Meta ID.
 	 */
-	public function update_meta_data( $key, $value, $meta_id = 0 ) {
+	final public function update_meta_data( $key, $value, $meta_id = 0 ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
 			$function = 'set_' . ltrim( $key, '_' );
 
@@ -480,7 +480,7 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 * @param string $key Meta key.
 	 */
-	public function delete_meta_data( $key ) {
+	final public function delete_meta_data( $key ) {
 		$this->maybe_read_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key, true );
 
@@ -497,7 +497,7 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 * @param int $mid Meta ID.
 	 */
-	public function delete_meta_data_by_mid( $mid ) {
+	final public function delete_meta_data_by_mid( $mid ) {
 		$this->maybe_read_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), (int) $mid, true );
 
@@ -526,7 +526,7 @@ abstract class WC_Data {
 	 *
 	 * @return string
 	 */
-	public function get_meta_cache_key() {
+	final public function get_meta_cache_key() {
 		if ( ! $this->get_id() ) {
 			wc_doing_it_wrong( 'get_meta_cache_key', 'ID needs to be set before fetching a cache key.', '4.7.0' );
 			return false;
@@ -544,7 +544,7 @@ abstract class WC_Data {
 	 *
 	 * @return string Meta cache key.
 	 */
-	public static function generate_meta_cache_key( $id, $cache_group ) {
+	final public static function generate_meta_cache_key( $id, $cache_group ) {
 		return WC_Cache_Helper::get_cache_prefix( $cache_group ) . WC_Cache_Helper::get_cache_prefix( 'object_' . $id ) . 'object_meta_' . $id;
 	}
 
@@ -556,7 +556,7 @@ abstract class WC_Data {
 	 * @param array  $raw_meta_data_collection Array of objects of { object_id => array( meta_row_1, meta_row_2, ... }.
 	 * @param string $cache_group              Name of cache group.
 	 */
-	public static function prime_raw_meta_data_cache( $raw_meta_data_collection, $cache_group ) {
+	final public static function prime_raw_meta_data_cache( $raw_meta_data_collection, $cache_group ) {
 		foreach ( $raw_meta_data_collection as $object_id => $raw_meta_data_array ) {
 			$cache_key = self::generate_meta_cache_key( $object_id, $cache_group );
 			wp_cache_set( $cache_key, $raw_meta_data_array, $cache_group );
@@ -570,7 +570,7 @@ abstract class WC_Data {
 	 * @since 2.6.0
 	 * @param bool $force_read True to force a new DB read (and update cache).
 	 */
-	public function read_meta_data( $force_read = false ) {
+	final public function read_meta_data( $force_read = false ) {
 		$this->meta_data = array();
 		$cache_loaded    = false;
 
@@ -619,7 +619,7 @@ abstract class WC_Data {
 	 *
 	 * @since 2.6.0
 	 */
-	public function save_meta_data() {
+	final public function save_meta_data() {
 		if ( ! $this->data_store || is_null( $this->meta_data ) ) {
 			return;
 		}
@@ -651,7 +651,7 @@ abstract class WC_Data {
 	 * @since 3.0.0
 	 * @param int $id ID.
 	 */
-	public function set_id( $id ) {
+	final public function set_id( $id ) {
 		$this->id = absint( $id );
 	}
 
@@ -660,7 +660,7 @@ abstract class WC_Data {
 	 *
 	 * @since 3.0.0
 	 */
-	public function set_defaults() {
+	final public function set_defaults() {
 		$this->data    = $this->default_data;
 		$this->changes = array();
 		$this->set_object_read( false );
@@ -672,7 +672,7 @@ abstract class WC_Data {
 	 * @since 3.0.0
 	 * @param boolean $read Should read?.
 	 */
-	public function set_object_read( $read = true ) {
+	final public function set_object_read( $read = true ) {
 		$this->object_read = (bool) $read;
 	}
 
@@ -682,7 +682,7 @@ abstract class WC_Data {
 	 * @since  3.0.0
 	 * @return boolean
 	 */
-	public function get_object_read() {
+	final public function get_object_read() {
 		return (bool) $this->object_read;
 	}
 
@@ -697,7 +697,7 @@ abstract class WC_Data {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function set_props( $props, $context = 'set' ) {
+	final public function set_props( $props, $context = 'set' ) {
 		$errors = false;
 
 		foreach ( $props as $prop => $value ) {
@@ -752,7 +752,7 @@ abstract class WC_Data {
 	 * @since 3.0.0
 	 * @return array
 	 */
-	public function get_changes() {
+	final public function get_changes() {
 		return $this->changes;
 	}
 
@@ -761,7 +761,7 @@ abstract class WC_Data {
 	 *
 	 * @since 3.0.0
 	 */
-	public function apply_changes() {
+	final public function apply_changes() {
 		$this->data    = array_replace_recursive( $this->data, $this->changes ); // @codingStandardsIgnoreLine
 		$this->changes = array();
 	}

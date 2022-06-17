@@ -61,7 +61,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return string
 	 */
-	public function get_headers_row_file() {
+	final public function get_headers_row_file() {
 
 		$file = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
@@ -78,7 +78,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return string
 	 */
-	public function get_file() {
+	final public function get_file() {
 		$file = '';
 		if ( @file_exists( $this->get_file_path() ) ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 			$file = @file_get_contents( $this->get_file_path() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
@@ -94,7 +94,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 */
-	public function export() {
+	final public function export() {
 		$this->send_headers();
 		$this->send_content( $this->get_headers_row_file() . $this->get_file() );
 		@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged
@@ -107,7 +107,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 */
-	public function generate_file() {
+	final public function generate_file() {
 		if ( 1 === $this->get_page() ) {
 			@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged,
 
@@ -153,7 +153,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return int
 	 */
-	public function get_page() {
+	final public function get_page() {
 		return $this->page;
 	}
 
@@ -163,7 +163,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param int $page Page Nr.
 	 */
-	public function set_page( $page ) {
+	final public function set_page( $page ) {
 		$this->page = absint( $page );
 	}
 
@@ -173,7 +173,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return int
 	 */
-	public function get_total_exported() {
+	final public function get_total_exported() {
 		return ( ( $this->get_page() - 1 ) * $this->get_limit() ) + $this->exported_row_count;
 	}
 
@@ -183,7 +183,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return int
 	 */
-	public function get_percent_complete() {
+	final public function get_percent_complete() {
 		return $this->total_rows ? (int) floor( ( $this->get_total_exported() / $this->total_rows ) * 100 ) : 100;
 	}
 }

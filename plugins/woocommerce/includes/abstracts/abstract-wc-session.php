@@ -42,12 +42,12 @@ abstract class WC_Session {
 	 *
 	 * @since 3.3.0
 	 */
-	public function init() {}
+	final public function init() {}
 
 	/**
 	 * Cleanup session data. Extended by child classes.
 	 */
-	public function cleanup_sessions() {}
+	final public function cleanup_sessions() {}
 
 	/**
 	 * Magic get method.
@@ -98,7 +98,7 @@ abstract class WC_Session {
 	 * @param mixed  $default used if the session variable isn't set.
 	 * @return array|string value of session variable
 	 */
-	public function get( $key, $default = null ) {
+	final public function get( $key, $default = null ) {
 		$key = sanitize_key( $key );
 		return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
 	}
@@ -109,7 +109,7 @@ abstract class WC_Session {
 	 * @param string $key Key to set.
 	 * @param mixed  $value Value to set.
 	 */
-	public function set( $key, $value ) {
+	final public function set( $key, $value ) {
 		if ( $value !== $this->get( $key ) ) {
 			$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
 			$this->_dirty                        = true;
@@ -121,7 +121,7 @@ abstract class WC_Session {
 	 *
 	 * @return int
 	 */
-	public function get_customer_id() {
+	final public function get_customer_id() {
 		return $this->_customer_id;
 	}
 }

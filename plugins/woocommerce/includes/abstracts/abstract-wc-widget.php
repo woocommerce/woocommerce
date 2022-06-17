@@ -80,7 +80,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @param  array $args Arguments.
 	 * @return bool true if the widget is cached otherwise false
 	 */
-	public function get_cached_widget( $args ) {
+	final public function get_cached_widget( $args ) {
 		// Don't get cache if widget_id doesn't exists.
 		if ( empty( $args['widget_id'] ) ) {
 			return false;
@@ -107,7 +107,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @param  string $content Content.
 	 * @return string the content that was cached
 	 */
-	public function cache_widget( $args, $content ) {
+	final public function cache_widget( $args, $content ) {
 		// Don't set any cache if widget_id doesn't exist.
 		if ( empty( $args['widget_id'] ) ) {
 			return $content;
@@ -129,7 +129,7 @@ abstract class WC_Widget extends WP_Widget {
 	/**
 	 * Flush the cache.
 	 */
-	public function flush_widget_cache() {
+	final public function flush_widget_cache() {
 		foreach ( array( 'https', 'http' ) as $scheme ) {
 			wp_cache_delete( $this->get_widget_id_for_cache( $this->widget_id, $scheme ), 'widget' );
 		}
@@ -159,7 +159,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @param array $args Arguments.
 	 * @param array $instance Instance.
 	 */
-	public function widget_start( $args, $instance ) {
+	final public function widget_start( $args, $instance ) {
 		echo $args['before_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 		$title = apply_filters( 'widget_title', $this->get_instance_title( $instance ), $instance, $this->id_base );
@@ -174,7 +174,7 @@ abstract class WC_Widget extends WP_Widget {
 	 *
 	 * @param  array $args Arguments.
 	 */
-	public function widget_end( $args ) {
+	final public function widget_end( $args ) {
 		echo $args['after_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 	}
 
@@ -186,7 +186,7 @@ abstract class WC_Widget extends WP_Widget {
 	 * @param  array $old_instance Old instance.
 	 * @return array
 	 */
-	public function update( $new_instance, $old_instance ) {
+	final public function update( $new_instance, $old_instance ) {
 
 		$instance = $old_instance;
 
@@ -242,7 +242,7 @@ abstract class WC_Widget extends WP_Widget {
 	 *
 	 * @param array $instance Instance.
 	 */
-	public function form( $instance ) {
+	final public function form( $instance ) {
 
 		if ( empty( $this->settings ) ) {
 			return;

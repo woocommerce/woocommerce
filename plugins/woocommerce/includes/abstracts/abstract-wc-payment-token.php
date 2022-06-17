@@ -93,7 +93,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @param  string $context Context in which to call this.
 	 * @return string Raw token
 	 */
-	public function get_token( $context = 'view' ) {
+	final public function get_token( $context = 'view' ) {
 		return $this->get_prop( 'token', $context );
 	}
 
@@ -105,7 +105,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @param  string $deprecated Deprecated since WooCommerce 3.0.
 	 * @return string Payment Token Type (CC, eCheck)
 	 */
-	public function get_type( $deprecated = '' ) {
+	final public function get_type( $deprecated = '' ) {
 		return $this->type;
 	}
 
@@ -117,7 +117,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @param  string $deprecated Deprecated since WooCommerce 3.0.
 	 * @return string
 	 */
-	public function get_display_name( $deprecated = '' ) {
+	final public function get_display_name( $deprecated = '' ) {
 		return $this->get_type();
 	}
 
@@ -128,7 +128,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @param  string $context In what context to execute this.
 	 * @return int User ID if this token is associated with a user or 0 if no user is associated
 	 */
-	public function get_user_id( $context = 'view' ) {
+	final public function get_user_id( $context = 'view' ) {
 		return $this->get_prop( 'user_id', $context );
 	}
 
@@ -139,7 +139,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @param  string $context In what context to execute this.
 	 * @return string Gateway ID
 	 */
-	public function get_gateway_id( $context = 'view' ) {
+	final public function get_gateway_id( $context = 'view' ) {
 		return $this->get_prop( 'gateway_id', $context );
 	}
 
@@ -150,7 +150,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @param  string $context In what context to execute this.
 	 * @return string Gateway ID
 	 */
-	public function get_is_default( $context = 'view' ) {
+	final public function get_is_default( $context = 'view' ) {
 		return $this->get_prop( 'is_default', $context );
 	}
 
@@ -166,7 +166,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @since 2.6.0
 	 * @param string $token Payment token.
 	 */
-	public function set_token( $token ) {
+	final public function set_token( $token ) {
 		$this->set_prop( 'token', $token );
 	}
 
@@ -176,7 +176,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @since 2.6.0
 	 * @param int $user_id User ID.
 	 */
-	public function set_user_id( $user_id ) {
+	final public function set_user_id( $user_id ) {
 		$this->set_prop( 'user_id', absint( $user_id ) );
 	}
 
@@ -186,7 +186,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @since 2.6.0
 	 * @param string $gateway_id Gateway ID.
 	 */
-	public function set_gateway_id( $gateway_id ) {
+	final public function set_gateway_id( $gateway_id ) {
 		$this->set_prop( 'gateway_id', $gateway_id );
 	}
 
@@ -196,7 +196,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @since 2.6.0
 	 * @param boolean $is_default True or false.
 	 */
-	public function set_default( $is_default ) {
+	final public function set_default( $is_default ) {
 		$this->set_prop( 'is_default', (bool) $is_default );
 	}
 
@@ -212,7 +212,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @since 2.6.0
 	 * @return boolean True if the token is default
 	 */
-	public function is_default() {
+	final public function is_default() {
 		return (bool) $this->get_prop( 'is_default', 'view' );
 	}
 
@@ -222,7 +222,7 @@ abstract class WC_Payment_Token extends WC_Legacy_Payment_Token {
 	 * @since 2.6.0
 	 * @return boolean True if the passed data is valid
 	 */
-	public function validate() {
+	final public function validate() {
 		$token = $this->get_prop( 'token', 'edit' );
 		if ( empty( $token ) ) {
 			return false;

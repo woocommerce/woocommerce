@@ -59,7 +59,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @param object $factory Factory object.
 	 */
-	public static function wpSetUpBeforeClass( $factory ) {
+	final public static function wpSetUpBeforeClass( $factory ) {
 		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -70,7 +70,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup test class.
 	 */
-	public function setUp(): void {
+	final public function setUp(): void {
 		parent::setUp();
 		wp_set_current_user( self::$user );
 	}
@@ -78,7 +78,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test route registration.
 	 */
-	public function test_register_routes() {
+	final public function test_register_routes() {
 		$actual_routes   = $this->server->get_routes();
 		$expected_routes = $this->routes;
 
@@ -92,7 +92,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_schema_properties() {
+	final public function test_schema_properties() {
 		$request    = new \WP_REST_Request( 'OPTIONS', $this->routes[0] );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

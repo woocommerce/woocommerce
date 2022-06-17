@@ -103,7 +103,7 @@ abstract class DataSourcePoller {
 	 *
 	 * @return array list of specs.
 	 */
-	public function get_specs_from_data_sources() {
+	final public function get_specs_from_data_sources() {
 		$specs = get_transient( $this->args['transient_name'] );
 
 		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
@@ -119,7 +119,7 @@ abstract class DataSourcePoller {
 	 *
 	 * @return bool Whether any specs were read.
 	 */
-	public function read_specs_from_data_sources() {
+	final public function read_specs_from_data_sources() {
 		$specs        = array();
 		$data_sources = apply_filters( self::FILTER_NAME, $this->data_sources, $this->id );
 
@@ -145,7 +145,7 @@ abstract class DataSourcePoller {
 	 *
 	 * @return bool success of failure of transient deletion.
 	 */
-	public function delete_specs_transient() {
+	final public function delete_specs_transient() {
 		return delete_transient( $this->args['transient_name'] );
 	}
 

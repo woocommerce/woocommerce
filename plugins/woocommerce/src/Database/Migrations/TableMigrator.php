@@ -95,7 +95,7 @@ abstract class TableMigrator {
 	 * @param array $entity_ids Order ids to migrate.
 	 * @return array An array containing the keys 'errors' (array of strings) and 'exception' (exception object or null).
 	 */
-	public function process_migration_batch_for_ids( array $entity_ids ): array {
+	final public function process_migration_batch_for_ids( array $entity_ids ): array {
 		$this->clear_errors();
 		$exception = null;
 

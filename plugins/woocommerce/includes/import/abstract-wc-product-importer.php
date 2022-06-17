@@ -94,7 +94,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return array
 	 */
-	public function get_raw_keys() {
+	final public function get_raw_keys() {
 		return $this->raw_keys;
 	}
 
@@ -103,7 +103,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return array
 	 */
-	public function get_mapped_keys() {
+	final public function get_mapped_keys() {
 		return ! empty( $this->mapped_keys ) ? $this->mapped_keys : $this->raw_keys;
 	}
 
@@ -112,7 +112,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return array
 	 */
-	public function get_raw_data() {
+	final public function get_raw_data() {
 		return $this->raw_data;
 	}
 
@@ -121,7 +121,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return array
 	 */
-	public function get_parsed_data() {
+	final public function get_parsed_data() {
 		/**
 		 * Filter product importer parsed data.
 		 *
@@ -136,7 +136,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return array
 	 */
-	public function get_params() {
+	final public function get_params() {
 		return $this->params;
 	}
 
@@ -145,7 +145,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return int
 	 */
-	public function get_file_position() {
+	final public function get_file_position() {
 		return $this->file_position;
 	}
 
@@ -154,7 +154,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @return int
 	 */
-	public function get_percent_complete() {
+	final public function get_percent_complete() {
 		$size = filesize( $this->file );
 		if ( ! $size ) {
 			return 0;
@@ -554,7 +554,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return int
 	 * @throws Exception If attachment cannot be loaded.
 	 */
-	public function get_attachment_id_from_url( $url, $product_id ) {
+	final public function get_attachment_id_from_url( $url, $product_id ) {
 		if ( empty( $url ) ) {
 			return 0;
 		}
@@ -646,7 +646,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return int
 	 * @throws Exception If taxonomy cannot be loaded.
 	 */
-	public function get_attribute_taxonomy_id( $raw_name ) {
+	final public function get_attribute_taxonomy_id( $raw_name ) {
 		global $wpdb, $wc_product_attributes;
 
 		// These are exported as labels, so convert the label to a name if possible first.

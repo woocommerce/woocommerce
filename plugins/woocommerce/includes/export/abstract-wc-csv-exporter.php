@@ -89,7 +89,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return array
 	 */
-	public function get_column_names() {
+	final public function get_column_names() {
 		return apply_filters( "woocommerce_{$this->export_type}_export_column_names", $this->column_names, $this );
 	}
 
@@ -99,7 +99,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param array $column_names Column names array.
 	 */
-	public function set_column_names( $column_names ) {
+	final public function set_column_names( $column_names ) {
 		$this->column_names = array();
 
 		foreach ( $column_names as $column_id => $column_name ) {
@@ -113,7 +113,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return array
 	 */
-	public function get_columns_to_export() {
+	final public function get_columns_to_export() {
 		return $this->columns_to_export;
 	}
 
@@ -123,7 +123,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.9.0
 	 * @return string
 	 */
-	public function get_delimiter() {
+	final public function get_delimiter() {
 		return apply_filters( "woocommerce_{$this->export_type}_export_delimiter", $this->delimiter );
 	}
 
@@ -133,7 +133,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param array $columns Columns array.
 	 */
-	public function set_columns_to_export( $columns ) {
+	final public function set_columns_to_export( $columns ) {
 		$this->columns_to_export = array_map( 'wc_clean', $columns );
 	}
 
@@ -144,7 +144,7 @@ abstract class WC_CSV_Exporter {
 	 * @param  string $column_id ID of the column being exported.
 	 * @return boolean
 	 */
-	public function is_column_exporting( $column_id ) {
+	final public function is_column_exporting( $column_id ) {
 		$column_id         = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
 		$columns_to_export = $this->get_columns_to_export();
 
@@ -165,7 +165,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return array
 	 */
-	public function get_default_column_names() {
+	final public function get_default_column_names() {
 		return array();
 	}
 
@@ -174,7 +174,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 */
-	public function export() {
+	final public function export() {
 		$this->prepare_data_to_export();
 		$this->send_headers();
 		$this->send_content( chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers() . $this->get_csv_data() );
@@ -186,7 +186,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 */
-	public function send_headers() {
+	final public function send_headers() {
 		if ( function_exists( 'gc_enable' ) ) {
 			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
@@ -210,7 +210,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @param  string $filename Filename to export to.
 	 */
-	public function set_filename( $filename ) {
+	final public function set_filename( $filename ) {
 		$this->filename = sanitize_file_name( str_replace( '.csv', '', $filename ) . '.csv' );
 	}
 
@@ -219,7 +219,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @return string
 	 */
-	public function get_filename() {
+	final public function get_filename() {
 		return sanitize_file_name( apply_filters( "woocommerce_{$this->export_type}_export_get_filename", $this->filename ) );
 	}
 
@@ -229,7 +229,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param string $csv_data All CSV content.
 	 */
-	public function send_content( $csv_data ) {
+	final public function send_content( $csv_data ) {
 		echo $csv_data; // @codingStandardsIgnoreLine
 	}
 
@@ -327,7 +327,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return int
 	 */
-	public function get_limit() {
+	final public function get_limit() {
 		return apply_filters( "woocommerce_{$this->export_type}_export_batch_limit", $this->limit, $this );
 	}
 
@@ -337,7 +337,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param int $limit Limit to export.
 	 */
-	public function set_limit( $limit ) {
+	final public function set_limit( $limit ) {
 		$this->limit = absint( $limit );
 	}
 
@@ -347,7 +347,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @return int
 	 */
-	public function get_total_exported() {
+	final public function get_total_exported() {
 		return $this->exported_row_count;
 	}
 
@@ -367,7 +367,7 @@ abstract class WC_CSV_Exporter {
 	 * @param string $data CSV field to escape.
 	 * @return string
 	 */
-	public function escape_data( $data ) {
+	final public function escape_data( $data ) {
 		$active_content_triggers = array( '=', '+', '-', '@' );
 
 		if ( in_array( mb_substr( $data, 0, 1 ), $active_content_triggers, true ) ) {
@@ -384,7 +384,7 @@ abstract class WC_CSV_Exporter {
 	 * @param  string $data Data to format.
 	 * @return string
 	 */
-	public function format_data( $data ) {
+	final public function format_data( $data ) {
 		if ( ! is_scalar( $data ) ) {
 			if ( is_a( $data, 'WC_Datetime' ) ) {
 				$data = $data->date( 'Y-m-d G:i:s' );
@@ -413,7 +413,7 @@ abstract class WC_CSV_Exporter {
 	 * @param  string $taxonomy Taxonomy name.
 	 * @return string
 	 */
-	public function format_term_ids( $term_ids, $taxonomy ) {
+	final public function format_term_ids( $term_ids, $taxonomy ) {
 		$term_ids = wp_parse_id_list( $term_ids );
 
 		if ( ! count( $term_ids ) ) {

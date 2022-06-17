@@ -107,7 +107,7 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 	 * @since      2.2
 	 * @return     null|WP_Post
 	 */
-	public function get_post_data() {
+	final public function get_post_data() {
 		wc_deprecated_function( 'WC_Webhook::get_post_data', '3.2' );
 
 		return null;
@@ -120,7 +120,7 @@ abstract class WC_Legacy_Webhook extends WC_Data {
 	 * @since      2.2.0
 	 * @param      string $status Status to set.
 	 */
-	public function update_status( $status ) {
+	final public function update_status( $status ) {
 		wc_deprecated_function( 'WC_Webhook::update_status', '3.2', 'WC_Webhook::set_status' );
 
 		$this->set_status( $status );

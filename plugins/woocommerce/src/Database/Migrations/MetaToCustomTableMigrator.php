@@ -605,7 +605,7 @@ WHERE
 	 *
 	 * @return array List of IDs along with columns that failed to migrate.
 	 */
-	public function verify_migrated_data( array $source_ids ) : array {
+	final public function verify_migrated_data( array $source_ids ) : array {
 		global $wpdb;
 		$query = $this->build_verification_query( $source_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query should already be prepared.

@@ -67,7 +67,7 @@ abstract class WP_Async_Request {
 	 *
 	 * @return $this
 	 */
-	public function data( $data ) {
+	final public function data( $data ) {
 		$this->data = $data;
 
 		return $this;
@@ -78,7 +78,7 @@ abstract class WP_Async_Request {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function dispatch() {
+	final public function dispatch() {
 		$url  = add_query_arg( $this->get_query_args(), $this->get_query_url() );
 		$args = $this->get_post_args();
 
@@ -138,7 +138,7 @@ abstract class WP_Async_Request {
 	 *
 	 * Check for correct nonce and pass to handler.
 	 */
-	public function maybe_handle() {
+	final public function maybe_handle() {
 		// Don't lock up other requests while processing
 		session_write_close();
 

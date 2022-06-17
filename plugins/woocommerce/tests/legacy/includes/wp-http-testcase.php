@@ -134,7 +134,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	/**
 	 * @since 1.3.0
 	 */
-	public static function setUpBeforeClass(): void {
+	final public static function setUpBeforeClass(): void {
 
 		if ( ! self::$did_init ) {
 			self::init();
@@ -146,7 +146,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	/**
 	 * @since 1.3.1
 	 */
-	public static function tearDownAfterClass(): void {
+	final public static function tearDownAfterClass(): void {
 
 		self::save_cache();
 
@@ -158,7 +158,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @since 1.0.0
 	 */
-	public function setUp(): void {
+	final public function setUp(): void {
 
 		parent::setUp();
 
@@ -176,7 +176,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @since 1.0.0
 	 */
-	public function tearDown(): void {
+	final public function tearDown(): void {
 
 		parent::tearDown();
 
@@ -202,7 +202,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @return mixed A response, or false.
 	 */
-	public function http_request_listner( $preempt, $request, $url ) {
+	final public function http_request_listner( $preempt, $request, $url ) {
 
 		$this->http_requests[] = array(
 			'url'     => $url,
@@ -329,7 +329,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @since 1.1.0
 	 */
-	public static function init() {
+	final public static function init() {
 
 		self::load_env( 'HOST' );
 		self::load_env( 'USE_CACHING', true );
@@ -422,7 +422,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @since 1.1.0
 	 */
-	public static function save_cache() {
+	final public static function save_cache() {
 
 		if ( ! self::$cache_changed ) {
 			return;

@@ -80,7 +80,7 @@ abstract class WC_Abstract_Privacy {
 	/**
 	 * Adds the privacy message on WC privacy page.
 	 */
-	public function add_privacy_message() {
+	final public function add_privacy_message() {
 		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
 			$content = $this->get_privacy_message();
 
@@ -96,7 +96,7 @@ abstract class WC_Abstract_Privacy {
 	 *
 	 * @return string
 	 */
-	public function get_privacy_message() {
+	final public function get_privacy_message() {
 		return '';
 	}
 
@@ -106,7 +106,7 @@ abstract class WC_Abstract_Privacy {
 	 * @param array $exporters List of exporter callbacks.
 	 * @return array
 	 */
-	public function register_exporters( $exporters = array() ) {
+	final public function register_exporters( $exporters = array() ) {
 		foreach ( $this->exporters as $id => $exporter ) {
 			$exporters[ $id ] = $exporter;
 		}
@@ -119,7 +119,7 @@ abstract class WC_Abstract_Privacy {
 	 * @param array $erasers List of eraser callbacks.
 	 * @return array
 	 */
-	public function register_erasers( $erasers = array() ) {
+	final public function register_erasers( $erasers = array() ) {
 		foreach ( $this->erasers as $id => $eraser ) {
 			$erasers[ $id ] = $eraser;
 		}
@@ -135,7 +135,7 @@ abstract class WC_Abstract_Privacy {
 	 *
 	 * @return array
 	 */
-	public function add_exporter( $id, $name, $callback ) {
+	final public function add_exporter( $id, $name, $callback ) {
 		$this->exporters[ $id ] = array(
 			'exporter_friendly_name' => $name,
 			'callback'               => $callback,
@@ -152,7 +152,7 @@ abstract class WC_Abstract_Privacy {
 	 *
 	 * @return array
 	 */
-	public function add_eraser( $id, $name, $callback ) {
+	final public function add_eraser( $id, $name, $callback ) {
 		$this->erasers[ $id ] = array(
 			'eraser_friendly_name' => $name,
 			'callback'             => $callback,
