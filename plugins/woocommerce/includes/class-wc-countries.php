@@ -116,7 +116,7 @@ class WC_Countries {
 			wp_cache_set( 'calling-codes', $codes, 'countries' );
 		}
 
-		$calling_code = isset( $codes[ $cc ] ) ? $codes[ $cc ] : '';
+		$calling_code = $codes[ $cc ] ?? '';
 
 		if ( is_array( $calling_code ) ) {
 			$calling_code = $calling_code[0];
@@ -170,7 +170,7 @@ class WC_Countries {
 		}
 
 		if ( ! is_null( $cc ) ) {
-			return isset( $this->states[ $cc ] ) ? $this->states[ $cc ] : false;
+			return $this->states[ $cc ] ?? false;
 		} else {
 			return $this->states;
 		}

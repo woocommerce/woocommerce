@@ -56,7 +56,7 @@ abstract class WC_Deprecated_Hooks {
 	 * @return array
 	 */
 	public function get_old_hooks( $new_hook ) {
-		$old_hooks = isset( $this->deprecated_hooks[ $new_hook ] ) ? $this->deprecated_hooks[ $new_hook ] : array();
+		$old_hooks = $this->deprecated_hooks[ $new_hook ] ?? array();
 		$old_hooks = is_array( $old_hooks ) ? $old_hooks : array( $old_hooks );
 
 		return $old_hooks;

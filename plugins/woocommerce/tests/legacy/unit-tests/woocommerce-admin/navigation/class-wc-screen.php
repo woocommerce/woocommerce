@@ -37,9 +37,9 @@ class WC_Admin_Tests_Navigation_Screen extends WC_Unit_Test_Case {
 		$this->_current_screen = $current_screen;
 		$this->_pagenow        = $pagenow;
 		/* phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash */
-		$this->_post      = isset( $_GET['post'] ) ? $_GET['post'] : null;
-		$this->_post_type = isset( $_GET['post_type'] ) ? $_GET['post_type'] : null;
-		$this->_taxonomy  = isset( $_GET['taxonomy'] ) ? $_GET['taxonomy'] : null;
+		$this->_post      = $_GET['post'] ?? null;
+		$this->_post_type = $_GET['post_type'] ?? null;
+		$this->_taxonomy  = $_GET['taxonomy'] ?? null;
 		/* phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash */
 
 		// Register a post type.

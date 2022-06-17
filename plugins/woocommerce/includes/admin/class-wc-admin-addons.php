@@ -1226,7 +1226,7 @@ class WC_Admin_Addons {
 						'name'    => $action->name,
 						'label'   => $action_locale->label,
 						'url'     => $url,
-						'primary' => isset( $action->is_primary ) ? $action->is_primary : false,
+						'primary' => $action->is_primary ?? false,
 					);
 				}
 			}

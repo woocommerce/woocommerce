@@ -420,7 +420,7 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				break;
 			case 'pay_for_order':
 				$user_id  = intval( $args[1] );
-				$order_id = isset( $args[2] ) ? $args[2] : null;
+				$order_id = $args[2] ?? null;
 
 				// When no order ID, we assume it's a new order
 				// and thus, customer can pay for it.

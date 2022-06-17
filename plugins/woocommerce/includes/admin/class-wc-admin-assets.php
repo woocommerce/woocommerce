@@ -181,7 +181,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 
 				$locale  = localeconv();
-				$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
+				$decimal_point = $locale['decimal_point'] ?? '.';
 				$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 
 				$params = array(
@@ -241,7 +241,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'wc-admin-variation-meta-boxes' );
 
 				$params = array(
-					'post_id'                             => isset( $post->ID ) ? $post->ID : '',
+					'post_id'                             => $post->ID ?? '',
 					'plugin_url'                          => WC()->plugin_url(),
 					'ajax_url'                            => admin_url( 'admin-ajax.php' ),
 					'woocommerce_placeholder_img_src'     => wc_placeholder_img_src(),
@@ -284,8 +284,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					array(
 						'countries'              => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 						'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
-						'default_country'        => isset( $default_location['country'] ) ? $default_location['country'] : '',
-						'default_state'          => isset( $default_location['state'] ) ? $default_location['state'] : '',
+						'default_country'        => $default_location['country'] ?? '',
+						'default_state'          => $default_location['state'] ?? '',
 						'placeholder_name'       => esc_attr__( 'Name (required)', 'woocommerce' ),
 						'placeholder_value'      => esc_attr__( 'Value (required)', 'woocommerce' ),
 					)
@@ -306,7 +306,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 			}
 			if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
-				$post_id                = isset( $post->ID ) ? $post->ID : '';
+				$post_id                = $post->ID ?? '';
 				$currency               = '';
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
@@ -363,7 +363,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 					'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
-					'post_id'                       => isset( $post->ID ) ? $post->ID : '',
+					'post_id'                       => $post->ID ?? '',
 					'base_country'                  => WC()->countries->get_base_country(),
 					'currency_format_num_decimals'  => wc_get_price_decimals(),
 					'currency_format_symbol'        => get_woocommerce_currency_symbol( $currency ),

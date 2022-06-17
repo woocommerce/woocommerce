@@ -1016,7 +1016,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		$topic_hooks = apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $this );
 
-		return isset( $topic_hooks[ $topic ] ) ? $topic_hooks[ $topic ] : array();
+		return $topic_hooks[ $topic ] ?? array();
 	}
 
 	/**
@@ -1056,7 +1056,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function get_event() {
 		$topic = explode( '.', $this->get_topic() );
 
-		return apply_filters( 'woocommerce_webhook_event', isset( $topic[1] ) ? $topic[1] : '', $this->get_id() );
+		return apply_filters( 'woocommerce_webhook_event', $topic[1] ?? '', $this->get_id() );
 	}
 
 	/**
@@ -1068,6 +1068,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$status   = $this->get_status();
 		$statuses = wc_get_webhook_statuses();
 
-		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
+		return $statuses[ $status ] ?? $status;
 	}
 }

@@ -97,12 +97,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 	public function widget( $args, $instance ) {
 		global $wp_query, $post;
 
-		$count              = isset( $instance['count'] ) ? $instance['count'] : $this->settings['count']['std'];
-		$hierarchical       = isset( $instance['hierarchical'] ) ? $instance['hierarchical'] : $this->settings['hierarchical']['std'];
-		$show_children_only = isset( $instance['show_children_only'] ) ? $instance['show_children_only'] : $this->settings['show_children_only']['std'];
-		$dropdown           = isset( $instance['dropdown'] ) ? $instance['dropdown'] : $this->settings['dropdown']['std'];
-		$orderby            = isset( $instance['orderby'] ) ? $instance['orderby'] : $this->settings['orderby']['std'];
-		$hide_empty         = isset( $instance['hide_empty'] ) ? $instance['hide_empty'] : $this->settings['hide_empty']['std'];
+		$count              = $instance['count'] ?? $this->settings['count']['std'];
+		$hierarchical       = $instance['hierarchical'] ?? $this->settings['hierarchical']['std'];
+		$show_children_only = $instance['show_children_only'] ?? $this->settings['show_children_only']['std'];
+		$dropdown           = $instance['dropdown'] ?? $this->settings['dropdown']['std'];
+		$orderby            = $instance['orderby'] ?? $this->settings['orderby']['std'];
+		$hide_empty         = $instance['hide_empty'] ?? $this->settings['hide_empty']['std'];
 		$dropdown_args      = array(
 			'hide_empty' => $hide_empty,
 		);
@@ -112,7 +112,7 @@ class WC_Widget_Product_Categories extends WC_Widget {
 			'taxonomy'     => 'product_cat',
 			'hide_empty'   => $hide_empty,
 		);
-		$max_depth          = absint( isset( $instance['max_depth'] ) ? $instance['max_depth'] : $this->settings['max_depth']['std'] );
+		$max_depth          = absint( $instance['max_depth'] ?? $this->settings['max_depth']['std'] );
 
 		$list_args['menu_order'] = false;
 		$dropdown_args['depth']  = $max_depth;

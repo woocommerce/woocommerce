@@ -69,7 +69,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<ul class="chart-legend">
 							<?php foreach ( $legends as $legend ) : ?>
 								<?php // @codingStandardsIgnoreStart ?>
-								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series ' . ( isset( $legend['placeholder'] ) ? 'tips' : '' ) . '" data-series="' . esc_attr( $legend['highlight_series'] ) . '"'; ?> data-tip="<?php echo isset( $legend['placeholder'] ) ? $legend['placeholder'] : ''; ?>">
+								<li style="border-color: <?php echo $legend['color']; ?>" <?php if ( isset( $legend['highlight_series'] ) ) echo 'class="highlight_series ' . ( isset( $legend['placeholder'] ) ? 'tips' : '' ) . '" data-series="' . esc_attr( $legend['highlight_series'] ) . '"'; ?> data-tip="<?php echo $legend['placeholder'] ?? ''; ?>">
 									<?php echo $legend['title']; ?>
 								</li>
 								<?php // @codingStandardsIgnoreEnd ?>

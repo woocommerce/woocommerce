@@ -628,7 +628,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					continue;
 				}
 				// Capture the first industry for use in our minimum images logic.
-				$first_industry       = isset( $first_industry ) ? $first_industry : $industry_slug;
+				$first_industry       = $first_industry ?? $industry_slug;
 				$images_to_sideload[] = ! empty( $available_images[ $industry_slug ] ) ? $available_images[ $industry_slug ] : $available_images['other'];
 			}
 		}
@@ -637,7 +637,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( count( $images_to_sideload ) < $number_of_images ) {
 			for ( $i = count( $images_to_sideload ); $i < $number_of_images; $i++ ) {
 				// Fill up missing image slots with the first selected industry, or other.
-				$industry             = isset( $first_industry ) ? $first_industry : 'other';
+				$industry             = $first_industry ?? 'other';
 				$images_to_sideload[] = empty( $available_images[ $industry ] ) ? $available_images['other'] : $available_images[ $industry ];
 			}
 		}
@@ -867,7 +867,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$task->snooze( isset( $duration ) ? $duration : 'day' );
+		$task->snooze( $duration ?? 'day' );
 		return rest_ensure_response( $task->get_json() );
 	}
 

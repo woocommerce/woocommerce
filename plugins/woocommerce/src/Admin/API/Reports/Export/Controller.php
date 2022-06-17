@@ -159,7 +159,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	public function export_items( $request ) {
 		$report_type = $request['type'];
 		$report_args = empty( $request['report_args'] ) ? array() : $request['report_args'];
-		$send_email  = isset( $request['email'] ) ? $request['email'] : false;
+		$send_email  = $request['email'] ?? false;
 
 		$default_export_id = str_replace( '.', '', microtime( true ) );
 		$export_id         = apply_filters( 'woocommerce_admin_export_id', $default_export_id );

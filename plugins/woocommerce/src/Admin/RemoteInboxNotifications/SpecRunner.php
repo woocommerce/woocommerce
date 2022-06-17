@@ -59,7 +59,7 @@ class SpecRunner {
 		// Set up the note.
 		$note->set_title( $locale->title );
 		$note->set_content( $locale->content );
-		$note->set_content_data( isset( $spec->content_data ) ? $spec->content_data : (object) array() );
+		$note->set_content_data( $spec->content_data ?? (object) array() );
 		$note->set_status( $status );
 		$note->set_type( $spec->type );
 		$note->set_name( $spec->slug );
@@ -69,7 +69,7 @@ class SpecRunner {
 
 		// Clear then create actions.
 		$note->clear_actions();
-		$actions = isset( $spec->actions ) ? $spec->actions : array();
+		$actions = $spec->actions ?? array();
 		foreach ( $actions as $action ) {
 			$action_locale = self::get_action_locale( $action->locales );
 

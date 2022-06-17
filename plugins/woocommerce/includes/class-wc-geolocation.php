@@ -282,11 +282,11 @@ class WC_Geolocation {
 					switch ( $service_name ) {
 						case 'ipinfo.io':
 							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->country ) ? $data->country : '';
+							$country_code = $data->country ?? '';
 							break;
 						case 'ip-api.com':
 							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
+							$country_code = $data->countryCode ?? ''; // @codingStandardsIgnoreLine
 							break;
 						default:
 							$country_code = apply_filters( 'woocommerce_geolocation_geoip_response_' . $service_name, '', $response['body'] );

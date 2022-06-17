@@ -74,7 +74,7 @@ class WC_WCCOM_Site_Installer {
 	public static function get_state( $key = '' ) {
 		$state = WC_Helper_Options::get( 'product_install', self::$default_state );
 		if ( ! empty( $key ) ) {
-			return isset( $state[ $key ] ) ? $state[ $key ] : null;
+			return $state[ $key ] ?? null;
 		}
 
 		return $state;

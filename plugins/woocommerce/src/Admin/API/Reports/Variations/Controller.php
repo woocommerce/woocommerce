@@ -417,7 +417,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	protected function get_stock_status( $status ) {
 		$statuses = wc_get_product_stock_status_options();
 
-		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : '';
+		return $statuses[ $status ] ?? '';
 	}
 
 	/**

@@ -258,9 +258,9 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$args['orderby']    = $request['orderby'];
 		$args['per_page']   = $request['per_page'];
 		$args['page']       = $request['page'];
-		$args['type']       = isset( $request['type'] ) ? $request['type'] : array();
-		$args['status']     = isset( $request['status'] ) ? $request['status'] : array();
-		$args['source']     = isset( $request['source'] ) ? $request['source'] : array();
+		$args['type']       = $request['type'] ?? array();
+		$args['status']     = $request['status'] ?? array();
+		$args['source']     = $request['source'] ?? array();
 		$args['is_deleted'] = 0;
 
 		if ( 'date' === $args['orderby'] ) {

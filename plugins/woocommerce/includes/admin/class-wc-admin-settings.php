@@ -221,7 +221,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['field_name'] = $value['id'];
 				}
 				if ( ! isset( $value['title'] ) ) {
-					$value['title'] = isset( $value['name'] ) ? $value['name'] : '';
+					$value['title'] = $value['name'] ?? '';
 				}
 				if ( ! isset( $value['class'] ) ) {
 					$value['class'] = '';
@@ -513,7 +513,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									name="<?php echo esc_attr( $value['field_name'] ); ?>"
 									id="<?php echo esc_attr( $value['id'] ); ?>"
 									type="checkbox"
-									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
+									class="<?php echo esc_attr( $value['class'] ?? '' ); ?>"
 									value="1"
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
@@ -538,9 +538,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'image_width':
 						$image_size       = str_replace( '_image_size', '', $value['id'] );
 						$size             = wc_get_image_size( $image_size );
-						$width            = isset( $size['width'] ) ? $size['width'] : $value['default']['width'];
-						$height           = isset( $size['height'] ) ? $size['height'] : $value['default']['height'];
-						$crop             = isset( $size['crop'] ) ? $size['crop'] : $value['default']['crop'];
+						$width            = $size['width'] ?? $value['default']['width'];
+						$height           = $size['height'] ?? $value['default']['height'];
+						$crop             = $size['crop'] ?? $value['default']['crop'];
 						$disabled_attr    = '';
 						$disabled_message = '';
 

@@ -43,7 +43,7 @@ if ( $max_value && $min_value === $max_value ) {
 			size="4"
 			placeholder="<?php echo esc_attr( $placeholder ); ?>"
 			inputmode="<?php echo esc_attr( $inputmode ); ?>"
-			autocomplete="<?php echo esc_attr( isset( $autocomplete ) ? $autocomplete : 'on' ); ?>"
+			autocomplete="<?php echo esc_attr( $autocomplete ?? 'on' ); ?>"
 		/>
 		<?php do_action( 'woocommerce_after_quantity_input_field' ); ?>
 	</div>

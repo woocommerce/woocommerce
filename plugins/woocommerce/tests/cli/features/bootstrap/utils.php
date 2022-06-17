@@ -325,7 +325,7 @@ function pick_fields( $item, $fields ) {
 	$values = array();
 
 	foreach ( $fields as $field ) {
-		$values[ $field ] = isset( $item->$field ) ? $item->$field : null;
+		$values[ $field ] = $item->$field ?? null;
 	}
 
 	return $values;
@@ -683,7 +683,7 @@ function get_named_sem_ver( $new_version, $original_version ) {
  * @return mixed
  */
 function get_flag_value( $assoc_args, $flag, $default = null ) {
-	return isset( $assoc_args[ $flag ] ) ? $assoc_args[ $flag ] : $default;
+	return $assoc_args[ $flag ] ?? $default;
 }
 
 /**
@@ -746,11 +746,11 @@ function parse_ssh_url( $url, $component = -1 ) {
 	}
 	switch ( $component ) {
 		case PHP_URL_HOST:
-			return isset( $bits['host'] ) ? $bits['host'] : null;
+			return $bits['host'] ?? null;
 		case PHP_URL_PATH:
-			return isset( $bits['path'] ) ? $bits['path'] : null;
+			return $bits['path'] ?? null;
 		case PHP_URL_PORT:
-			return isset( $bits['port'] ) ? $bits['port'] : null;
+			return $bits['port'] ?? null;
 		default:
 			return $bits;
 	}

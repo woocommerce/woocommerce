@@ -844,7 +844,7 @@ class WC_Query {
 	 */
 	public static function get_main_meta_query() {
 		$args       = self::$product_query->query_vars;
-		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+		$meta_query = $args['meta_query'] ?? array();
 
 		return $meta_query;
 	}
@@ -856,7 +856,7 @@ class WC_Query {
 		global $wpdb;
 
 		$args         = self::$product_query->query_vars;
-		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
+		$search_terms = $args['search_terms'] ?? array();
 		$sql          = array();
 
 		foreach ( $search_terms as $term ) {

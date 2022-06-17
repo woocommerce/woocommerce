@@ -15,7 +15,7 @@ global $wpdb;
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
-$post_type_counts   = isset( $report['post_type_counts'] ) ? $report['post_type_counts'] : array();
+$post_type_counts   = $report['post_type_counts'] ?? array();
 $active_plugins     = $report['active_plugins'];
 $inactive_plugins   = $report['inactive_plugins'];
 $dropins_mu_plugins = $report['dropins_mu_plugins'];
@@ -439,7 +439,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			?>
 			<tr>
 				<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
-				<td class="help"><?php echo esc_html( isset( $row['help'] ) ? $row['help'] : '' ); ?></td>
+				<td class="help"><?php echo esc_html( $row['help'] ?? '' ); ?></td>
 				<td>
 					<mark class="<?php echo esc_attr( $css_class ); ?>">
 						<?php echo wp_kses_post( $icon ); ?> <?php echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' ); ?>

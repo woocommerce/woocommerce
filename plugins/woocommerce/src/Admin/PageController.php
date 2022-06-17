@@ -191,7 +191,7 @@ class PageController {
 					}
 
 					array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );
-					$parent_id = isset( $parent['parent'] ) ? $parent['parent'] : false;
+					$parent_id = $parent['parent'] ?? false;
 				} else {
 					$parent_id = false;
 				}

@@ -640,7 +640,7 @@ WHERE
 		$destination_select_clauses = array();
 
 		foreach ( $this->core_column_mapping as $column_name => $schema ) {
-			$source_select_column         = isset( $schema['select_clause'] ) ? $schema['select_clause'] : "$source_table.$column_name";
+			$source_select_column         = $schema['select_clause'] ?? "$source_table.$column_name";
 			$source_select_clauses[]      = "$source_select_column as {$source_table}_{$column_name}";
 			$destination_select_clauses[] = "$destination_table.{$schema['destination']} as {$destination_table}_{$schema['destination']}";
 		}

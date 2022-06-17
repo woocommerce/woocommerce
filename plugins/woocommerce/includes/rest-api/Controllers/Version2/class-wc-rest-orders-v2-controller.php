@@ -245,7 +245,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				$taxes[] = array(
 					'id'       => $tax_rate_id,
 					'total'    => $tax,
-					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '',
+					'subtotal' => $data['taxes']['subtotal'][ $tax_rate_id ] ?? '',
 				);
 			}
 			$data['taxes'] = $taxes;
@@ -670,7 +670,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'meta_data':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+								$order->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? '' );
 							}
 						}
 						break;
@@ -835,8 +835,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
 			foreach ( $posted['meta_data'] as $meta ) {
 				if ( isset( $meta['key'] ) ) {
-					$value = isset( $meta['value'] ) ? $meta['value'] : null;
-					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
+					$value = $meta['value'] ?? null;
+					$item->update_meta_data( $meta['key'], $value, $meta['id'] ?? '' );
 				}
 			}
 		}
@@ -859,7 +859,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
-				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
+				$quantity = $posted['quantity'] ?? 1;
 				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$item->set_total( $total );
 				$item->set_subtotal( $total );

@@ -452,7 +452,7 @@ class WC_Customer extends WC_Legacy_Customer {
 		$value = null;
 
 		if ( array_key_exists( $prop, $this->data[ $address ] ) ) {
-			$value = isset( $this->changes[ $address ][ $prop ] ) ? $this->changes[ $address ][ $prop ] : $this->data[ $address ][ $prop ];
+			$value = $this->changes[ $address ][ $prop ] ?? $this->data[ $address ][ $prop ];
 
 			if ( 'view' === $context ) {
 				$value = apply_filters( $this->get_hook_prefix() . $address . '_' . $prop, $value, $this );

@@ -1874,8 +1874,8 @@ class WC_AJAX {
 		}
 
 		$sorting_id  = absint( $_POST['id'] );
-		$previd      = absint( isset( $_POST['previd'] ) ? $_POST['previd'] : 0 );
-		$nextid      = absint( isset( $_POST['nextid'] ) ? $_POST['nextid'] : 0 );
+		$previd      = absint( $_POST['previd'] ?? 0 );
+		$nextid      = absint( $_POST['nextid'] ?? 0 );
 		$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
 		$index       = 0;
 

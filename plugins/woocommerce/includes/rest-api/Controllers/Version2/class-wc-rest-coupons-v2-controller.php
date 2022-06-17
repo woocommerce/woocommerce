@@ -292,7 +292,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'meta_data':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
-								$coupon->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+								$coupon->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? '' );
 							}
 						}
 						break;

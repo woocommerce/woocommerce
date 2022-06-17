@@ -161,8 +161,8 @@ class WC_Admin_Report {
 		$joins = array();
 
 		foreach ( ( $data + $where ) as $raw_key => $value ) {
-			$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
-			$type      = isset( $value['type'] ) ? $value['type'] : false;
+			$join_type = $value['join_type'] ?? 'INNER';
+			$type      = $value['type'] ?? false;
 			$key       = sanitize_key( $raw_key );
 
 			switch ( $type ) {
@@ -194,8 +194,8 @@ class WC_Admin_Report {
 				if ( ! is_array( $value ) ) {
 					continue;
 				}
-				$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
-				$type      = isset( $value['type'] ) ? $value['type'] : false;
+				$join_type = $value['join_type'] ?? 'INNER';
+				$type      = $value['type'] ?? false;
 				$key       = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
 
 				if ( 'order_item_meta' === $type ) {
@@ -243,7 +243,7 @@ class WC_Admin_Report {
 
 		if ( ! empty( $where_meta ) ) {
 
-			$relation = isset( $where_meta['relation'] ) ? $where_meta['relation'] : 'AND';
+			$relation = $where_meta['relation'] ?? 'AND';
 
 			$query['where'] .= ' AND (';
 

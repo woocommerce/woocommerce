@@ -46,7 +46,7 @@ $list = isset( $options['l'] ) || isset( $options['list'] );
 $verbose = isset( $options['v'] ) || isset( $options['debug'] );
 $path = false;
 if ( isset( $options['p'] ) || isset( $options['path'] ) ) {
-	$path = isset( $options['path'] ) ? $options['path'] : $options['p'];
+	$path = $options['path'] ?? $options['p'];
 }
 
 if ( $arg_count > 2 ) {
@@ -120,7 +120,7 @@ foreach ( $composer_projects as $project_path ) {
 	} catch ( Exception $e ) {
 		continue;
 	}
-	$data  = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
+	$data  = $data['extra']['changelogger'] ?? array();
 	$data += array(
 		'changelog'   => $project_path . '/CHANGELOG.md',
 		'changes-dir' => $project_path . '/changelog',

@@ -95,7 +95,7 @@ trait SchedulerTraits {
 	 */
 	public static function get_action( $action_name ) {
 		$actions = static::get_actions();
-		return isset( $actions[ $action_name ] ) ? $actions[ $action_name ] : null;
+		return $actions[ $action_name ] ?? null;
 	}
 
 	/**
@@ -115,7 +115,7 @@ trait SchedulerTraits {
 	 */
 	public static function get_dependency( $action_name ) {
 		$dependencies = static::get_dependencies();
-		return isset( $dependencies[ $action_name ] ) ? $dependencies[ $action_name ] : null;
+		return $dependencies[ $action_name ] ?? null;
 	}
 
 	/**
@@ -135,7 +135,7 @@ trait SchedulerTraits {
 	 */
 	public static function get_batch_size( $action ) {
 		$batch_sizes = static::get_batch_sizes();
-		$batch_size  = isset( $batch_sizes[ $action ] ) ? $batch_sizes[ $action ] : 25;
+		$batch_size  = $batch_sizes[ $action ] ?? 25;
 
 		/**
 		 * Filter the batch size for regenerating a report table.

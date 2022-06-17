@@ -137,7 +137,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$mapping = $this->params['mapping'];
 
 		foreach ( $this->raw_keys as $key ) {
-			$this->mapped_keys[] = isset( $mapping[ $key ] ) ? $mapping[ $key ] : $key;
+			$this->mapped_keys[] = $mapping[ $key ] ?? $key;
 		}
 	}
 
@@ -246,7 +246,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( ! $this->params['update_existing'] ) {
 			$mapped_keys      = $this->get_mapped_keys();
 			$sku_column_index = absint( array_search( 'sku', $mapped_keys, true ) );
-			$row_sku          = isset( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ) ? $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] : '';
+			$row_sku          = $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ?? '';
 			$id_from_sku      = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : '';
 
 			// If row has a SKU, make sure placeholder was not made already.
@@ -824,7 +824,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				0  => 'private',
 				1  => 'publish',
 			);
-			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : 'draft';
+			$data['status'] = $statuses[ $data['published'] ] ?? 'draft';
 
 			// Fix draft status of variations.
 			if ( isset( $data['type'] ) && 'variation' === $data['type'] && -1 === $data['published'] ) {
@@ -837,7 +837,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( isset( $data['stock_quantity'] ) ) {
 			if ( '' === $data['stock_quantity'] ) {
 				$data['manage_stock'] = false;
-				$data['stock_status'] = isset( $data['stock_status'] ) ? $data['stock_status'] : true;
+				$data['stock_status'] = $data['stock_status'] ?? true;
 			} else {
 				$data['manage_stock'] = true;
 			}
@@ -941,7 +941,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 
 				$data['downloads'][] = array(
-					'download_id' => isset( $file['id'] ) ? $file['id'] : null,
+					'download_id' => $file['id'] ?? null,
 					'name'        => $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['url'] ),
 					'file'        => $file['url'],
 				);
@@ -1059,7 +1059,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-			$sku        = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
+			$sku        = $parsed_data['sku'] ?? '';
 			$id_exists  = false;
 			$sku_exists = false;
 

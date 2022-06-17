@@ -1891,7 +1891,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 				$installed_plugins = array();
 			}
 			$plugin_slug = $plugin_to_install['repo-slug'];
-			$plugin_file = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
+			$plugin_file = $plugin_to_install['file'] ?? $plugin_slug . '.php';
 			$installed   = false;
 			$activate    = false;
 

@@ -123,15 +123,12 @@ class Settings {
 			$settings['stockStatuses'] = self::get_order_statuses( wc_get_product_stock_status_options() );
 			$settings['currency']      = self::get_currency_settings();
 			$settings['locale']        = array(
-				'siteLocale'    => isset( $settings['siteLocale'] )
-					? $settings['siteLocale']
-					: get_locale(),
-				'userLocale'    => isset( $settings['l10n']['userLocale'] )
-					? $settings['l10n']['userLocale']
-					: get_user_locale(),
-				'weekdaysShort' => isset( $settings['l10n']['weekdaysShort'] )
-					? $settings['l10n']['weekdaysShort']
-					: array_values( $wp_locale->weekday_abbrev ),
+				'siteLocale'    => $settings['siteLocale']
+					?? get_locale(),
+				'userLocale'    => $settings['l10n']['userLocale']
+					?? get_user_locale(),
+				'weekdaysShort' => $settings['l10n']['weekdaysShort']
+					?? array_values( $wp_locale->weekday_abbrev ),
 			);
 		}
 
@@ -213,9 +210,8 @@ class Settings {
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
-			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
-				? $settings['dataEndpoints']
-				: array();
+			$settings['dataEndpoints'] = $settings['dataEndpoints']
+				?? array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {

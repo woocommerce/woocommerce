@@ -115,7 +115,7 @@ class PaymentGatewaysController {
 		// phpcs:enable WordPress.Security.NonceVerification
 
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
-		$payment_gateway  = isset( $payment_gateways[ $gateway_id ] ) ? $payment_gateways[ $gateway_id ] : null;
+		$payment_gateway  = $payment_gateways[ $gateway_id ] ?? null;
 
 		if ( ! $payment_gateway ) {
 			return;

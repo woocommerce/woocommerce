@@ -17,7 +17,7 @@
 function payment_gateway_suggestions_mock_install_activate_response( $response, $handler, $request ) {
 	$plugins          = array( 'my-slot-filled-gateway-wporg-slug', 'my-simple-gateway-wporg-slug' );
 	$params           = $request->get_params();
-	$requested_plugin = isset( $params['plugins'] ) ? $params['plugins'] : null;
+	$requested_plugin = $params['plugins'] ?? null;
 
 	if ( '/wc-admin/plugins/install' === $request->get_route() && in_array( $requested_plugin, $plugins, true ) ) {
 		$response['data']    = array(

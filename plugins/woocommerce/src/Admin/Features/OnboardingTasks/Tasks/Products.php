@@ -130,7 +130,7 @@ class Products extends Task {
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_import_return_notice_script( $hook ) {
-		$step = isset( $_GET['step'] ) ? $_GET['step'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$step = $_GET['step'] ?? ''; // phpcs:ignore csrf ok, sanitization ok.
 
 		if ( 'product_page_product_importer' !== $hook || 'done' !== $step ) {
 			return;

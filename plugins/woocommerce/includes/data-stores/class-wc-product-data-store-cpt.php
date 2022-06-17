@@ -361,7 +361,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : null;
+			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 

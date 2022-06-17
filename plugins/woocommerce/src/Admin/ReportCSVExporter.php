@@ -291,7 +291,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		}
 
 		foreach ( $columns as $column_id => $column_name ) {
-			$value = isset( $item[ $column_name ] ) ? $item[ $column_name ] : null;
+			$value = $item[ $column_name ] ?? null;
 
 			if ( has_filter( "woocommerce_export_{$this->export_type}_column_{$column_name}" ) ) {
 				// Filter for 3rd parties.

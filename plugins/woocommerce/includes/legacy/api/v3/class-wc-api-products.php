@@ -2620,9 +2620,9 @@ class WC_API_Products extends WC_API_Resource {
 				return $attribute;
 			}
 
-			$attribute_name     = isset( $data['name'] ) ? $data['name'] : $attribute['product_attribute']['name'];
-			$attribute_type     = isset( $data['type'] ) ? $data['type'] : $attribute['product_attribute']['type'];
-			$attribute_order_by = isset( $data['order_by'] ) ? $data['order_by'] : $attribute['product_attribute']['order_by'];
+			$attribute_name     = $data['name'] ?? $attribute['product_attribute']['name'];
+			$attribute_type     = $data['type'] ?? $attribute['product_attribute']['type'];
+			$attribute_order_by = $data['order_by'] ?? $attribute['product_attribute']['order_by'];
 
 			if ( isset( $data['slug'] ) ) {
 				$attribute_slug = wc_sanitize_taxonomy_name( stripslashes( $data['slug'] ) );

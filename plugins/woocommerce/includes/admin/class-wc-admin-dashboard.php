@@ -199,8 +199,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			foreach ( wc_get_order_types( 'order-count' ) as $type ) {
 				$counts            = (array) wp_count_posts( $type );
-				$on_hold_count    += isset( $counts['wc-on-hold'] ) ? $counts['wc-on-hold'] : 0;
-				$processing_count += isset( $counts['wc-processing'] ) ? $counts['wc-processing'] : 0;
+				$on_hold_count    += $counts['wc-on-hold'] ?? 0;
+				$processing_count += $counts['wc-processing'] ?? 0;
 			}
 			?>
 			<li class="processing-orders">
@@ -487,7 +487,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$performance_data = new stdClass();
 			foreach ( $response->get_data() as $indicator ) {
 				if ( isset( $indicator['chart'] ) && isset( $indicator['value'] ) ) {
-					$key                    = isset( $report_keys[ $indicator['chart'] ] ) ? $report_keys[ $indicator['chart'] ] : $indicator['chart'];
+					$key                    = $report_keys[ $indicator['chart'] ] ?? $indicator['chart'];
 					$performance_data->$key = $indicator['value'];
 				}
 			}

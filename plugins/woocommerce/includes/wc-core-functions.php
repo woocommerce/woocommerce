@@ -849,7 +849,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 
 	$symbols = get_woocommerce_currency_symbols();
 
-	$currency_symbol = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : '';
+	$currency_symbol = $symbols[ $currency ] ?? '';
 
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
 }
@@ -1675,12 +1675,12 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 			}
 
 			if ( $compare >= $min && $compare <= $max ) {
-				$matches[ $object_id ]   = isset( $matches[ $object_id ] ) ? $matches[ $object_id ] : array();
+				$matches[ $object_id ]   = $matches[ $object_id ] ?? array();
 				$matches[ $object_id ][] = $compare_against;
 			}
 		} elseif ( in_array( $compare_against, $wildcard_postcodes, true ) ) {
 			// Wildcard and standard comparison.
-			$matches[ $object_id ]   = isset( $matches[ $object_id ] ) ? $matches[ $object_id ] : array();
+			$matches[ $object_id ]   = $matches[ $object_id ] ?? array();
 			$matches[ $object_id ][] = $compare_against;
 		}
 	}
@@ -2263,7 +2263,7 @@ function wc_get_post_data_by_key( $key, $default = '' ) {
  * @return mixed
  */
 function wc_get_var( &$var, $default = null ) {
-	return isset( $var ) ? $var : $default;
+	return $var ?? $default;
 }
 
 /**

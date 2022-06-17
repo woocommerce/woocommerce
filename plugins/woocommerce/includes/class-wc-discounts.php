@@ -165,7 +165,7 @@ class WC_Discounts {
 	 */
 	public function get_discount( $key, $in_cents = false ) {
 		$item_discount_totals = $this->get_discounts_by_item( $in_cents );
-		return isset( $item_discount_totals[ $key ] ) ? $item_discount_totals[ $key ] : 0;
+		return $item_discount_totals[ $key ] ?? 0;
 	}
 
 	/**

@@ -73,7 +73,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			),
 		);
 
-		$selected_level = isset( $_REQUEST['level'] ) ? $_REQUEST['level'] : '';
+		$selected_level = $_REQUEST['level'] ?? '';
 		?>
 			<label for="filter-by-level" class="screen-reader-text"><?php esc_html_e( 'Filter by level', 'woocommerce' ); ?></label>
 			<select name="level" id="filter-by-level">
@@ -235,7 +235,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		);
 
 		if ( ! empty( $sources ) ) {
-			$selected_source = isset( $_REQUEST['source'] ) ? $_REQUEST['source'] : '';
+			$selected_source = $_REQUEST['source'] ?? '';
 			?>
 				<label for="filter-by-source" class="screen-reader-text"><?php esc_html_e( 'Filter by source', 'woocommerce' ); ?></label>
 				<select name="source" id="filter-by-source">

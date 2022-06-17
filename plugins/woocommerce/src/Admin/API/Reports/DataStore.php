@@ -151,7 +151,7 @@ class DataStore extends SqlQuery {
 	 */
 	public static function get_db_table_name() {
 		global $wpdb;
-		return isset( $wpdb->{static::$table_name} ) ? $wpdb->{static::$table_name} : $wpdb->prefix . static::$table_name;
+		return $wpdb->{static::$table_name} ?? $wpdb->prefix . static::$table_name;
 	}
 
 	/**
@@ -407,7 +407,7 @@ class DataStore extends SqlQuery {
 				// In case timezone is in other timezone, convert to local timezone.
 				$query_args[ $query_arg_key ]->setTimezone( $local_tz );
 			} else {
-				$query_args[ $query_arg_key ] = isset( $defaults[ $query_arg_key ] ) ? $defaults[ $query_arg_key ] : null;
+				$query_args[ $query_arg_key ] = $defaults[ $query_arg_key ] ?? null;
 			}
 		}
 	}
@@ -1011,7 +1011,7 @@ class DataStore extends SqlQuery {
 			return '';
 		}
 
-		$lookup_name = isset( $wpdb->$filter_table ) ? $wpdb->$filter_table : $wpdb->prefix . $filter_table;
+		$lookup_name = $wpdb->$filter_table ?? $wpdb->prefix . $filter_table;
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return " {$select_table}.{$select_field} {$compare} (
 			SELECT

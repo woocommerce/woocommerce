@@ -250,8 +250,8 @@ abstract class WC_Widget extends WP_Widget {
 
 		foreach ( $this->settings as $key => $setting ) {
 
-			$class = isset( $setting['class'] ) ? $setting['class'] : '';
-			$value = isset( $instance[ $key ] ) ? $instance[ $key ] : $setting['std'];
+			$class = $setting['class'] ?? '';
+			$value = $instance[ $key ] ?? $setting['std'];
 
 			switch ( $setting['type'] ) {
 

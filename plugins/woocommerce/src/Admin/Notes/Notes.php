@@ -411,7 +411,7 @@ class Notes {
 	private static function record_tracks_event_without_cookies( $event_name, $params ) {
 		// We save the cookie to set it back after the event recording.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$anon_id = isset( $_COOKIE['tk_ai'] ) ? $_COOKIE['tk_ai'] : null;
+		$anon_id = $_COOKIE['tk_ai'] ?? null;
 
 		unset( $_COOKIE['tk_ai'] );
 		wc_admin_record_tracks_event( $event_name, $params );
@@ -432,9 +432,9 @@ class Notes {
 			parse_str( wp_parse_url( $_SERVER['HTTP_REFERER'], PHP_URL_QUERY ), $queries ); // phpcs:ignore sanitization ok.
 		}
 		if ( isset( $queries ) ) {
-			$page      = isset( $queries['page'] ) ? $queries['page'] : null;
-			$path      = isset( $queries['path'] ) ? $queries['path'] : null;
-			$post_type = isset( $queries['post_type'] ) ? $queries['post_type'] : null;
+			$page      = $queries['page'] ?? null;
+			$path      = $queries['path'] ?? null;
+			$post_type = $queries['post_type'] ?? null;
 			$post      = isset( $queries['post'] ) ? get_post_type( $queries['post'] ) : null;
 		}
 

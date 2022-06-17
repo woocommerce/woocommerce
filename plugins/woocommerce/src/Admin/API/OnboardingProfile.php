@@ -121,7 +121,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 		$item_schema                 = $this->get_item_schema();
 		$items                       = array();
 		foreach ( $item_schema['properties'] as $key => $property_schema ) {
-			$items[ $key ] = isset( $onboarding_data[ $key ] ) ? $onboarding_data[ $key ] : null;
+			$items[ $key ] = $onboarding_data[ $key ] ?? null;
 		}
 
 		$wccom_auth               = \WC_Helper_Options::get( 'auth' );

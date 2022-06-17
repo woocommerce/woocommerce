@@ -648,7 +648,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$first_order       = $oldest_orders[0];
-		$second_order      = isset( $oldest_orders[1] ) ? $oldest_orders[1] : false;
+		$second_order      = $oldest_orders[1] ?? false;
 		$excluded_statuses = self::get_excluded_report_order_statuses();
 
 		// Order is older than previous first order.

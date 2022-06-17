@@ -248,10 +248,10 @@ function wc_update_200_line_items() {
 				$order_item['line_subtotal']     = $order_item['line_total'];
 			}
 
-			$order_item['line_tax']          = isset( $order_item['line_tax'] ) ? $order_item['line_tax'] : 0;
-			$order_item['line_total']        = isset( $order_item['line_total'] ) ? $order_item['line_total'] : 0;
-			$order_item['line_subtotal_tax'] = isset( $order_item['line_subtotal_tax'] ) ? $order_item['line_subtotal_tax'] : 0;
-			$order_item['line_subtotal']     = isset( $order_item['line_subtotal'] ) ? $order_item['line_subtotal'] : 0;
+			$order_item['line_tax']          = $order_item['line_tax'] ?? 0;
+			$order_item['line_total']        = $order_item['line_total'] ?? 0;
+			$order_item['line_subtotal_tax'] = $order_item['line_subtotal_tax'] ?? 0;
+			$order_item['line_subtotal']     = $order_item['line_subtotal'] ?? 0;
 
 			$item_id = wc_add_order_item(
 				$order_item_row->post_id,
@@ -341,7 +341,7 @@ function wc_update_200_line_items() {
 
 				// Add line item meta.
 				if ( $item_id ) {
-					wc_add_order_item_meta( $item_id, 'compound', absint( isset( $order_tax['compound'] ) ? $order_tax['compound'] : 0 ) );
+					wc_add_order_item_meta( $item_id, 'compound', absint( $order_tax['compound'] ?? 0 ) );
 					wc_add_order_item_meta( $item_id, 'tax_amount', wc_clean( $order_tax['cart_tax'] ) );
 					wc_add_order_item_meta( $item_id, 'shipping_tax_amount', wc_clean( $order_tax['shipping_tax'] ) );
 				}
@@ -1560,7 +1560,7 @@ function wc_update_330_webhooks() {
 	foreach ( $posts as $post ) {
 		$webhook = new WC_Webhook();
 		$webhook->set_name( $post->post_title );
-		$webhook->set_status( isset( $statuses[ $post->post_status ] ) ? $statuses[ $post->post_status ] : 'disabled' );
+		$webhook->set_status( $statuses[ $post->post_status ] ?? 'disabled' );
 		$webhook->set_delivery_url( get_post_meta( $post->ID, '_delivery_url', true ) );
 		$webhook->set_secret( get_post_meta( $post->ID, '_secret', true ) );
 		$webhook->set_topic( get_post_meta( $post->ID, '_topic', true ) );

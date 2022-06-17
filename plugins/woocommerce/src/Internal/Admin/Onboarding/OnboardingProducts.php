@@ -140,7 +140,7 @@ class OnboardingProducts {
 	public static function get_relevant_products() {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$installed     = PluginsHelper::get_installed_plugin_slugs();
-		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
+		$product_types = $profiler_data['product_types'] ?? array();
 		$product_data  = self::get_product_types_with_data();
 		$purchaseable  = array();
 		$remaining     = array();

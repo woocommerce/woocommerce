@@ -254,7 +254,7 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 			'id'                 => $gateway->id,
 			'title'              => $gateway->title,
 			'description'        => $gateway->description,
-			'order'              => isset( $order[ $gateway->id ] ) ? $order[ $gateway->id ] : '',
+			'order'              => $order[ $gateway->id ] ?? '',
 			'enabled'            => ( 'yes' === $gateway->enabled ),
 			'method_title'       => $gateway->get_method_title(),
 			'method_description' => $gateway->get_method_description(),

@@ -376,8 +376,8 @@ class WC_Checkout {
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
-			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
-			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
+			$order->set_customer_note( $data['order_comments'] ?? '' );
+			$order->set_payment_method( $available_gateways[ $data['payment_method'] ] ?? $data['payment_method'] );
 			$this->set_data_from_cart( $order );
 
 			/**
@@ -690,7 +690,7 @@ class WC_Checkout {
 			}
 
 			foreach ( $fieldset as $key => $field ) {
-				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
+				$type = sanitize_title( $field['type'] ?? 'text' );
 
 				if ( isset( $_POST[ $key ] ) && '' !== $_POST[ $key ] ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
 					$value = wp_unslash( $_POST[ $key ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -755,7 +755,7 @@ class WC_Checkout {
 				}
 				$required    = ! empty( $field['required'] );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
-				$field_label = isset( $field['label'] ) ? $field['label'] : '';
+				$field_label = $field['label'] ?? '';
 
 				if ( $validate_fieldset &&
 					( isset( $field['type'] ) && 'country' === $field['type'] && '' !== $data[ $key ] ) &&
@@ -776,7 +776,7 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'postcode', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country      = $data[ $fieldset_key . '_country' ] ?? WC()->customer->{"get_{$fieldset_key}_country"}();
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
@@ -812,7 +812,7 @@ class WC_Checkout {
 				}
 
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country      = $data[ $fieldset_key . '_country' ] ?? WC()->customer->{"get_{$fieldset_key}_country"}();
 					$valid_states = WC()->countries->get_states( $country );
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && count( $valid_states ) > 0 ) {
@@ -856,7 +856,7 @@ class WC_Checkout {
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
-			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
+			$shipping_country = $data['shipping_country'] ?? WC()->customer->get_shipping_country();
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
@@ -1116,7 +1116,7 @@ class WC_Checkout {
 
 			$response = array(
 				'result'   => 'failure',
-				'messages' => isset( $messages ) ? $messages : '',
+				'messages' => $messages ?? '',
 				'refresh'  => isset( WC()->session->refresh_totals ),
 				'reload'   => isset( WC()->session->reload_checkout ),
 			);
@@ -1223,9 +1223,9 @@ class WC_Checkout {
 	 */
 	public function get_posted_address_data( $key, $type = 'billing' ) {
 		if ( 'billing' === $type || false === $this->legacy_posted_data['ship_to_different_address'] ) {
-			$return = isset( $this->legacy_posted_data[ 'billing_' . $key ] ) ? $this->legacy_posted_data[ 'billing_' . $key ] : '';
+			$return = $this->legacy_posted_data[ 'billing_' . $key ] ?? '';
 		} else {
-			$return = isset( $this->legacy_posted_data[ 'shipping_' . $key ] ) ? $this->legacy_posted_data[ 'shipping_' . $key ] : '';
+			$return = $this->legacy_posted_data[ 'shipping_' . $key ] ?? '';
 		}
 		return $return;
 	}

@@ -294,8 +294,8 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$atts['skus']  = isset( $atts['sku'] ) ? $atts['sku'] : '';
-		$atts['ids']   = isset( $atts['id'] ) ? $atts['id'] : '';
+		$atts['skus']  = $atts['sku'] ?? '';
+		$atts['ids']   = $atts['id'] ?? '';
 		$atts['limit'] = '1';
 		$shortcode     = new WC_Shortcode_Products( (array) $atts, 'product' );
 

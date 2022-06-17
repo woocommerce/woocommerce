@@ -106,7 +106,7 @@ class Shipping extends Task {
 	 */
 	public static function has_physical_products() {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
-		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
+		$product_types = $profiler_data['product_types'] ?? array();
 
 		return in_array( 'physical', $product_types, true ) ||
 			count(

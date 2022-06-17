@@ -256,7 +256,7 @@ class WC_Product_Variable extends WC_Product {
 		$defaults       = $this->get_default_attributes();
 		$attribute_name = sanitize_title( $attribute_name );
 
-		return isset( $defaults[ $attribute_name ] ) ? $defaults[ $attribute_name ] : '';
+		return $defaults[ $attribute_name ] ?? '';
 	}
 
 	/**

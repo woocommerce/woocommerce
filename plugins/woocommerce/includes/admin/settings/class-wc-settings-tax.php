@@ -315,7 +315,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// get the order position of the first tax rate id.
 		$tax_rate_order = absint( $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_order FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $first_tax_rate_id ) ) );
 
-		$index = isset( $tax_rate_order ) ? $tax_rate_order : 0;
+		$index = $tax_rate_order ?? 0;
 
 		// Loop posted fields.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing

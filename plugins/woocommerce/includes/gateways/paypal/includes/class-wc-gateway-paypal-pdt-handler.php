@@ -84,7 +84,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		foreach ( $transaction_result as $line ) {
 			$line                            = explode( '=', $line );
-			$transaction_results[ $line[0] ] = isset( $line[1] ) ? $line[1] : '';
+			$transaction_results[ $line[0] ] = $line[1] ?? '';
 		}
 
 		if ( ! empty( $transaction_results['charset'] ) && function_exists( 'iconv' ) ) {
@@ -132,7 +132,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 		if ( $transaction_result ) {
 			$status = strtolower( $transaction_result['payment_status'] );
-			$amount = isset( $transaction_result['mc_gross'] ) ? $transaction_result['mc_gross'] : 0;
+			$amount = $transaction_result['mc_gross'] ?? 0;
 			$order  = $this->get_paypal_order( $transaction_result['custom'] );
 
 			if ( ! $order ) {

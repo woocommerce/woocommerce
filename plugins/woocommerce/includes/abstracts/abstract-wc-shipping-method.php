@@ -350,7 +350,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 				// Sum the item taxes.
 				foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
-					$taxes[ $key ] = ( isset( $item_taxes[ $key ] ) ? $item_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+					$taxes[ $key ] = ( $item_taxes[ $key ] ?? 0 ) + ( $taxes[ $key ] ?? 0 );
 				}
 			}
 
@@ -360,7 +360,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 				// Sum the item taxes.
 				foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
-					$taxes[ $key ] = ( isset( $item_taxes[ $key ] ) ? $item_taxes[ $key ] : 0 ) + ( isset( $taxes[ $key ] ) ? $taxes[ $key ] : 0 );
+					$taxes[ $key ] = ( $item_taxes[ $key ] ?? 0 ) + ( $taxes[ $key ] ?? 0 );
 				}
 			}
 		}

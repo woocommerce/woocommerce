@@ -197,7 +197,7 @@ class WC_REST_Legacy_Orders_Controller extends WC_REST_CRUD_Controller {
 					case 'meta_data' :
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+								$order->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? '' );
 							}
 						}
 						break;

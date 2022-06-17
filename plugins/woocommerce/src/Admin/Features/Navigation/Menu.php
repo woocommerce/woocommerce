@@ -547,7 +547,7 @@ class Menu {
 
 		// Determine if migrated items are a taxonomy or post_type. If they are, register them.
 		$parsed_url   = wp_parse_url( $menu_item[2] );
-		$query_string = isset( $parsed_url['query'] ) ? $parsed_url['query'] : false;
+		$query_string = $parsed_url['query'] ?? false;
 
 		if ( $query_string ) {
 			$query = array();
@@ -574,8 +574,8 @@ class Menu {
 			return $menu;
 		}
 
-		$main_items    = isset( $submenu['woocommerce'] ) ? $submenu['woocommerce'] : array();
-		$product_items = isset( $submenu['edit.php?post_type=product'] ) ? $submenu['edit.php?post_type=product'] : array();
+		$main_items    = $submenu['woocommerce'] ?? array();
+		$product_items = $submenu['edit.php?post_type=product'] ?? array();
 
 		foreach ( $main_items as $key => $menu_item ) {
 			self::add_item_and_taxonomy( $menu_item );

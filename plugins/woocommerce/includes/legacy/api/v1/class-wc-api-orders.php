@@ -280,7 +280,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 		if ( ! empty( $data['status'] ) ) {
 
-			$order->update_status( $data['status'], isset( $data['note'] ) ? $data['note'] : '' );
+			$order->update_status( $data['status'], $data['note'] ?? '' );
 		}
 
 		return $this->get_order( $id );

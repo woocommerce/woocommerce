@@ -20,14 +20,14 @@ function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post;
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
-	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
-	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
-	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
-	$field['type']          = isset( $field['type'] ) ? $field['type'] : 'text';
-	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
+	$field['placeholder']   = $field['placeholder'] ?? '';
+	$field['class']         = $field['class'] ?? 'short';
+	$field['style']         = $field['style'] ?? '';
+	$field['wrapper_class'] = $field['wrapper_class'] ?? '';
+	$field['value']         = $field['value'] ?? get_post_meta( $thepostid, $field['id'], true );
+	$field['name']          = $field['name'] ?? $field['id'];
+	$field['type']          = $field['type'] ?? 'text';
+	$field['desc_tip']      = $field['desc_tip'] ?? false;
 	$data_type              = empty( $field['data_type'] ) ? '' : $field['data_type'];
 
 	switch ( $data_type ) {
@@ -87,8 +87,8 @@ function woocommerce_wp_hidden_input( $field ) {
 	global $thepostid, $post;
 
 	$thepostid      = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
+	$field['value'] = $field['value'] ?? get_post_meta( $thepostid, $field['id'], true );
+	$field['class'] = $field['class'] ?? '';
 
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
 }
@@ -102,15 +102,15 @@ function woocommerce_wp_textarea_input( $field ) {
 	global $thepostid, $post;
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
-	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
-	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
-	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
-	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
-	$field['rows']          = isset( $field['rows'] ) ? $field['rows'] : 2;
-	$field['cols']          = isset( $field['cols'] ) ? $field['cols'] : 20;
+	$field['placeholder']   = $field['placeholder'] ?? '';
+	$field['class']         = $field['class'] ?? 'short';
+	$field['style']         = $field['style'] ?? '';
+	$field['wrapper_class'] = $field['wrapper_class'] ?? '';
+	$field['value']         = $field['value'] ?? get_post_meta( $thepostid, $field['id'], true );
+	$field['desc_tip']      = $field['desc_tip'] ?? false;
+	$field['name']          = $field['name'] ?? $field['id'];
+	$field['rows']          = $field['rows'] ?? 2;
+	$field['cols']          = $field['cols'] ?? 20;
 
 	// Custom attribute handling
 	$custom_attributes = array();
@@ -147,13 +147,13 @@ function woocommerce_wp_checkbox( $field ) {
 	global $thepostid, $post;
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
-	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
-	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
-	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
-	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
+	$field['class']         = $field['class'] ?? 'checkbox';
+	$field['style']         = $field['style'] ?? '';
+	$field['wrapper_class'] = $field['wrapper_class'] ?? '';
+	$field['value']         = $field['value'] ?? get_post_meta( $thepostid, $field['id'], true );
+	$field['cbvalue']       = $field['cbvalue'] ?? 'yes';
+	$field['name']          = $field['name'] ?? $field['id'];
+	$field['desc_tip']      = $field['desc_tip'] ?? false;
 
 	// Custom attribute handling
 	$custom_attributes = array();
@@ -247,12 +247,12 @@ function woocommerce_wp_radio( $field ) {
 	global $thepostid, $post;
 
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
-	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
-	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
-	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
-	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
+	$field['class']         = $field['class'] ?? 'select short';
+	$field['style']         = $field['style'] ?? '';
+	$field['wrapper_class'] = $field['wrapper_class'] ?? '';
+	$field['value']         = $field['value'] ?? get_post_meta( $thepostid, $field['id'], true );
+	$field['name']          = $field['name'] ?? $field['id'];
+	$field['desc_tip']      = $field['desc_tip'] ?? false;
 
 	echo '<fieldset class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '"><legend>' . wp_kses_post( $field['label'] ) . '</legend>';
 

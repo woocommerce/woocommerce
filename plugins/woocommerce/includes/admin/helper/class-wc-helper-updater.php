@@ -78,7 +78,7 @@ class WC_Helper_Updater {
 		}
 
 		$translations = self::get_translations_update_data();
-		$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
+		$transient->translations = array_merge( $transient->translations ?? array(), $translations );
 
 		return $transient;
 	}

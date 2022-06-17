@@ -218,7 +218,7 @@ class WC_Post_Types {
 				$name = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 				if ( $name ) {
-					$tax->attribute_public          = absint( isset( $tax->attribute_public ) ? $tax->attribute_public : 1 );
+					$tax->attribute_public          = absint( $tax->attribute_public ?? 1 );
 					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
 					$wc_product_attributes[ $name ] = $tax;
 					$taxonomy_data                  = array(

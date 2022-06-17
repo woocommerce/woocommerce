@@ -276,7 +276,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			$status = $product->get_status( 'edit' );
 		}
 
-		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : -1;
+		return $statuses[ $status ] ?? -1;
 	}
 
 	/**

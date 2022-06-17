@@ -49,7 +49,7 @@ class MockPluginsProvider implements PluginsProviderInterface {
 		$plugin_path = $this->get_plugin_path_from_slug( $plugin );
 		$plugins     = $this->get_plugins_data;
 
-		return isset( $plugins[ $plugin_path ] ) ? $plugins[ $plugin_path ] : false;
+		return $plugins[ $plugin_path ] ?? false;
 	}
 
 	/**

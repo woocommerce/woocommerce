@@ -196,7 +196,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return mixed
 	 */
 	protected function get_totals_var( $key ) {
-		return isset( $this->totals[ $key ] ) ? $this->totals[ $key ] : $this->default_totals[ $key ];
+		return $this->totals[ $key ] ?? $this->default_totals[ $key ];
 	}
 
 	/**
@@ -611,7 +611,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array Item data
 	 */
 	public function get_cart_item( $item_key ) {
-		return isset( $this->cart_contents[ $item_key ] ) ? $this->cart_contents[ $item_key ] : array();
+		return $this->cart_contents[ $item_key ] ?? array();
 	}
 
 	/**
@@ -1088,7 +1088,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 					// Get valid value from variation data.
 					$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-					$valid_value   = isset( $variation_data[ $attribute_key ] ) ? $variation_data[ $attribute_key ] : '';
+					$valid_value   = $variation_data[ $attribute_key ] ?? '';
 
 					/**
 					 * If the attribute value was posted, check if it's valid.
@@ -1620,7 +1620,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Get user and posted emails to compare.
 				$current_user  = wp_get_current_user();
-				$billing_email = isset( $posted['billing_email'] ) ? $posted['billing_email'] : '';
+				$billing_email = $posted['billing_email'] ?? '';
 				$check_emails  = array_unique(
 					array_filter(
 						array_map(
@@ -1823,7 +1823,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
 		$totals          = $this->get_coupon_discount_totals();
-		$discount_amount = isset( $totals[ $code ] ) ? $totals[ $code ] : 0;
+		$discount_amount = $totals[ $code ] ?? 0;
 
 		if ( ! $ex_tax ) {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
@@ -1840,7 +1840,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
 		$totals = $this->get_coupon_discount_tax_totals();
-		return wc_cart_round_discount( isset( $totals[ $code ] ) ? $totals[ $code ] : 0, wc_get_price_decimals() );
+		return wc_cart_round_discount( $totals[ $code ] ?? 0, wc_get_price_decimals() );
 	}
 
 	/**
@@ -2055,7 +2055,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
 		$taxes = wc_array_merge_recursive_numeric( $this->get_cart_contents_taxes(), $this->get_fee_taxes() );
-		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
+		return $taxes[ $tax_rate_id ] ?? 0;
 	}
 
 	/**
@@ -2066,7 +2066,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_shipping_tax_amount( $tax_rate_id ) {
 		$taxes = $this->get_shipping_taxes();
-		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
+		return $taxes[ $tax_rate_id ] ?? 0;
 	}
 
 	/**

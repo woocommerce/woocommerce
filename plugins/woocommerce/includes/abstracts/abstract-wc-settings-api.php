@@ -138,7 +138,7 @@ abstract class WC_Settings_API {
 		$type      = $this->get_field_type( $field );
 		$field_key = $this->get_field_key( $key );
 		$post_data = empty( $post_data ) ? $_POST : $post_data; // WPCS: CSRF ok, input var ok.
-		$value     = isset( $post_data[ $field_key ] ) ? $post_data[ $field_key ] : null;
+		$value     = $post_data[ $field_key ] ?? null;
 
 		if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
 			return call_user_func( $field['sanitize_callback'], $value );

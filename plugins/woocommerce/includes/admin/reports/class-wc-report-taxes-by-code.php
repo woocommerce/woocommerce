@@ -161,7 +161,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
 			$key                                    = $tax_row->rate_id;
-			$tax_rows[ $key ]                       = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
+			$tax_rows[ $key ]                       = $tax_rows[ $key ] ?? (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,
@@ -174,7 +174,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		foreach ( $tax_rows_full_refunds as $tax_row ) {
 			$key                                    = $tax_row->rate_id;
-			$tax_rows[ $key ]                       = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
+			$tax_rows[ $key ]                       = $tax_rows[ $key ] ?? (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,

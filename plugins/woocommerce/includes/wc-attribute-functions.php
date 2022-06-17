@@ -173,7 +173,7 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
 	$name         = wc_attribute_taxonomy_slug( $name );
 	$taxonomy_ids = wc_get_attribute_taxonomy_ids();
 
-	return isset( $taxonomy_ids[ $name ] ) ? $taxonomy_ids[ $name ] : 0;
+	return $taxonomy_ids[ $name ] ?? 0;
 }
 
 /**
@@ -187,7 +187,7 @@ function wc_attribute_label( $name, $product = '' ) {
 	if ( taxonomy_is_product_attribute( $name ) ) {
 		$slug       = wc_attribute_taxonomy_slug( $name );
 		$all_labels = wc_get_attribute_taxonomy_labels();
-		$label      = isset( $all_labels[ $slug ] ) ? $all_labels[ $slug ] : $slug;
+		$label      = $all_labels[ $slug ] ?? $slug;
 	} elseif ( $product ) {
 		if ( $product->is_type( 'variation' ) ) {
 			$product = wc_get_product( $product->get_parent_id() );
@@ -278,7 +278,7 @@ function wc_has_custom_attribute_types() {
 function wc_get_attribute_type_label( $type ) {
 	$types = wc_get_attribute_types();
 
-	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Select', 'woocommerce' );
+	return $types[ $type ] ?? __( 'Select', 'woocommerce' );
 }
 
 /**

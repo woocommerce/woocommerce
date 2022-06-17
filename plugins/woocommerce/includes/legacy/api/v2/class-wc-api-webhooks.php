@@ -364,11 +364,11 @@ class WC_API_Webhooks extends WC_API_Resource {
 		if ( ! empty( $args['date_query'] ) ) {
 			foreach ( $args['date_query'] as $date_query ) {
 				if ( 'post_date_gmt' === $date_query['column'] ) {
-					$args['after']  = isset( $date_query['after'] ) ? $date_query['after'] : null;
-					$args['before'] = isset( $date_query['before'] ) ? $date_query['before'] : null;
+					$args['after']  = $date_query['after'] ?? null;
+					$args['before'] = $date_query['before'] ?? null;
 				} elseif ( 'post_modified_gmt' === $date_query['column'] ) {
-					$args['modified_after']  = isset( $date_query['after'] ) ? $date_query['after'] : null;
-					$args['modified_before'] = isset( $date_query['before'] ) ? $date_query['before'] : null;
+					$args['modified_after']  = $date_query['after'] ?? null;
+					$args['modified_before'] = $date_query['before'] ?? null;
 				}
 			}
 

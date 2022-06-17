@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if ( metadata_exists( 'post', $post->ID, '_' . $key ) ) {
 				$selected_value = is_callable( array( $product_object, "is_$key" ) ) ? $product_object->{"is_$key"}() : 'yes' === get_post_meta( $post->ID, '_' . $key, true );
 			} else {
-				$selected_value = 'yes' === ( isset( $option['default'] ) ? $option['default'] : 'no' );
+				$selected_value = 'yes' === ( $option['default'] ?? 'no' );
 			}
 			?>
 			<label for="<?php echo esc_attr( $option['id'] ); ?>" class="<?php echo esc_attr( $option['wrapper_class'] ); ?> tips" data-tip="<?php echo esc_attr( $option['description'] ); ?>">

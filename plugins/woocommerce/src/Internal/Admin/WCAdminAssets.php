@@ -280,7 +280,7 @@ class WCAdminAssets {
 		);
 
 		foreach ( $scripts as $script ) {
-			$script_path_name = isset( $scripts_map[ $script ] ) ? $scripts_map[ $script ] : str_replace( 'wc-', '', $script );
+			$script_path_name = $scripts_map[ $script ] ?? str_replace( 'wc-', '', $script );
 
 			try {
 				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );

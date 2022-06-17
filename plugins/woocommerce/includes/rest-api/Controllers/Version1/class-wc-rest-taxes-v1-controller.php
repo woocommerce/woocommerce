@@ -329,7 +329,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 	 * @return object
 	 */
 	protected function create_or_update_tax( $request, $current = null ) {
-		$id     = absint( isset( $request['id'] ) ? $request['id'] : 0 );
+		$id     = absint( $request['id'] ?? 0 );
 		$data   = array();
 		$fields = array(
 			'tax_rate_country',

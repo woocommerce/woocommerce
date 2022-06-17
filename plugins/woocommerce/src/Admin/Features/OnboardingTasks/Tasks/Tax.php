@@ -27,8 +27,8 @@ class Tax extends Task {
 	 * Adds a return to task list notice when completing the task.
 	 */
 	public function possibly_add_return_notice_script() {
-		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
-		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$page = $_GET['page'] ?? ''; // phpcs:ignore csrf ok, sanitization ok.
+		$tab  = $_GET['tab'] ?? ''; // phpcs:ignore csrf ok, sanitization ok.
 
 		if ( 'wc-settings' !== $page || 'tax' !== $tab ) {
 			return;

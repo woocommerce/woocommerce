@@ -58,7 +58,7 @@ function wc_has_notice( $message, $notice_type = 'success' ) {
 	}
 
 	$notices = WC()->session->get( 'wc_notices', array() );
-	$notices = isset( $notices[ $notice_type ] ) ? $notices[ $notice_type ] : array();
+	$notices = $notices[ $notice_type ] ?? array();
 	return array_search( $message, wp_list_pluck( $notices, 'notice' ), true ) !== false;
 }
 
@@ -148,7 +148,7 @@ function wc_print_notices( $return = false ) {
 			$messages = array();
 
 			foreach ( $all_notices[ $notice_type ] as $notice ) {
-				$messages[] = isset( $notice['notice'] ) ? $notice['notice'] : $notice;
+				$messages[] = $notice['notice'] ?? $notice;
 			}
 
 			wc_get_template(

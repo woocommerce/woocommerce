@@ -324,7 +324,7 @@ class WC_API_Server {
 		foreach ( $this->get_routes() as $route => $handlers ) {
 			foreach ( $handlers as $handler ) {
 				$callback = $handler[0];
-				$supported = isset( $handler[1] ) ? $handler[1] : self::METHOD_GET;
+				$supported = $handler[1] ?? self::METHOD_GET;
 
 				if ( ! ( $supported & $method ) ) {
 					continue;

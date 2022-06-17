@@ -256,7 +256,7 @@ class WC_REST_Report_Sales_V1_Controller extends WC_REST_Controller {
 
 				// Overwrite _GET to make use of WC_Admin_Report::calculate_current_range() for custom date ranges.
 				$_GET['start_date'] = $filter['date_min'];
-				$_GET['end_date'] = isset( $filter['date_max'] ) ? $filter['date_max'] : null;
+				$_GET['end_date'] = $filter['date_max'] ?? null;
 
 			} else {
 

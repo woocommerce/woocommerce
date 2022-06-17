@@ -514,7 +514,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 		foreach ( $normalized_source_data as $order_id => $meta ) {
 			foreach ( $meta as $meta_key => $values ) {
-				$migrated_meta_values = isset( $normalized_migrated_meta_data[ $order_id ][ $meta_key ] ) ? $normalized_migrated_meta_data[ $order_id ][ $meta_key ] : array();
+				$migrated_meta_values = $normalized_migrated_meta_data[ $order_id ][ $meta_key ] ?? array();
 				$diff = array_diff( $values, $migrated_meta_values );
 
 				if ( count( $diff ) ) {

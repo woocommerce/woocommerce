@@ -134,7 +134,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return string
 	 */
 	protected function get_instance_query_type( $instance ) {
-		return isset( $instance['query_type'] ) ? $instance['query_type'] : 'and';
+		return $instance['query_type'] ?? 'and';
 	}
 
 	/**
@@ -144,7 +144,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	 * @return string
 	 */
 	protected function get_instance_display_type( $instance ) {
-		return isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
+		return $instance['display_type'] ?? 'list';
 	}
 
 	/**
@@ -249,7 +249,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			/* translators: %s: taxonomy name */
 			$any_label      = apply_filters( 'woocommerce_layered_nav_any_label', sprintf( __( 'Any %s', 'woocommerce' ), $taxonomy_label ), $taxonomy_label, $taxonomy );
 			$multiple       = 'or' === $query_type;
-			$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
+			$current_values = $_chosen_attributes[ $taxonomy ]['terms'] ?? array();
 
 			if ( '' === get_option( 'permalink_structure' ) ) {
 				$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
@@ -270,7 +270,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 				// Get count based on current view.
 				$option_is_set = in_array( $term->slug, $current_values, true );
-				$count         = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
+				$count         = $term_counts[ $term->term_id ] ?? 0;
 
 				// Only show options with count > 0.
 				if ( 0 < $count ) {
@@ -395,9 +395,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$base_link          = $this->get_current_page_url();
 
 		foreach ( $terms as $term ) {
-			$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
+			$current_values = $_chosen_attributes[ $taxonomy ]['terms'] ?? array();
 			$option_is_set  = in_array( $term->slug, $current_values, true );
-			$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
+			$count          = $term_counts[ $term->term_id ] ?? 0;
 
 			// Skip the term for the current archive.
 			if ( $this->get_current_term_id() === $term->term_id ) {

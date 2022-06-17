@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$formatted_destination    = isset( $formatted_destination ) ? $formatted_destination : WC()->countries->get_formatted_address( $package['destination'], ', ' );
+$formatted_destination    = $formatted_destination ?? WC()->countries->get_formatted_address( $package['destination'], ', ' );
 $has_calculated_shipping  = ! empty( $has_calculated_shipping );
 $show_shipping_calculator = ! empty( $show_shipping_calculator );
 $calculator_text          = '';

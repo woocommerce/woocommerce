@@ -22,7 +22,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	public function process( $rule, $stored_state ) {
 		$is_contains   = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
 		$default_value = $is_contains ? array() : false;
-		$default       = isset( $rule->default ) ? $rule->default : $default_value;
+		$default       = $rule->default ?? $default_value;
 		$option_value  = get_option( $rule->option_name, $default );
 
 		if ( $is_contains && ! is_array( $option_value ) ) {

@@ -79,7 +79,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				$value = $this->get_type();
 				break;
 			case 'product_attributes' :
-				$value = isset( $this->data['attributes'] ) ? $this->data['attributes'] : '';
+				$value = $this->data['attributes'] ?? '';
 				break;
 			case 'visibility' :
 				$value = $this->get_catalog_visibility();

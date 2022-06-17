@@ -171,13 +171,13 @@ class CoreMenu {
 				continue;
 			}
 
-			$path = isset( $page['path'] ) ? $page['path'] : null;
+			$path = $page['path'] ?? null;
 			$item = array_merge(
 				array(
 					'id'         => $page['id'],
 					'url'        => $path,
 					'title'      => $page['title'][0],
-					'capability' => isset( $page['capability'] ) ? $page['capability'] : 'manage_woocommerce',
+					'capability' => $page['capability'] ?? 'manage_woocommerce',
 				),
 				$page['nav_args']
 			);
@@ -413,7 +413,7 @@ class CoreMenu {
 						$submenu['woocommerce'][] = array(
 							$item['title'],
 							$first_item['capability'],
-							isset( $first_item['url'] ) ? $first_item['url'] : null,
+							$first_item['url'] ?? null,
 							$item['title'],
 						);
 					}
@@ -425,7 +425,7 @@ class CoreMenu {
 				$submenu['woocommerce'][] = array(
 					$item['title'],
 					$item['capability'],
-					isset( $item['url'] ) ? $item['url'] : null,
+					$item['url'] ?? null,
 					$item['title'],
 				);
 			}

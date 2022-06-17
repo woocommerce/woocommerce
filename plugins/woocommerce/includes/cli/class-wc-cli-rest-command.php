@@ -145,7 +145,7 @@ class WC_CLI_REST_Command {
 	 */
 	public function delete_item( $args, $assoc_args ) {
 		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
-		$object_id = isset( $body['id'] ) ? $body['id'] : '';
+		$object_id = $body['id'] ?? '';
 		if ( ! $object_id && isset( $body['slug'] ) ) {
 			$object_id = $body['slug'];
 		}

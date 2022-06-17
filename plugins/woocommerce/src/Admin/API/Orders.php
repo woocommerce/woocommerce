@@ -252,7 +252,7 @@ class Orders extends \WC_REST_Orders_Controller {
 				'shipping_tax'         => $data['shipping_tax'],
 				'cart_tax'             => $data['cart_tax'],
 				'total'                => $data['total'],
-				'total_formatted'      => isset( $data['total_formatted'] ) ? $data['total_formatted'] : $data['total'],
+				'total_formatted'      => $data['total_formatted'] ?? $data['total'],
 				'total_tax'            => $data['total_tax'],
 				'prices_include_tax'   => $data['prices_include_tax'],
 				'customer_id'          => $data['customer_id'],

@@ -376,8 +376,8 @@ class WC_API_Orders extends WC_API_Resource {
 
 			// default order args, note that status is checked for validity in wc_create_order()
 			$default_order_args = array(
-				'status'        => isset( $data['status'] ) ? $data['status'] : '',
-				'customer_note' => isset( $data['note'] ) ? $data['note'] : null,
+				'status'        => $data['status'] ?? '',
+				'customer_note' => $data['note'] ?? null,
 			);
 
 			// if creating order for existing customer
@@ -437,7 +437,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// mark as paid if set
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
-					$order->payment_complete( isset( $data['payment_details']['transaction_id'] ) ? $data['payment_details']['transaction_id'] : '' );
+					$order->payment_complete( $data['payment_details']['transaction_id'] ?? '' );
 				}
 			}
 
@@ -590,7 +590,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// Mark as paid if set.
 				if ( $order->needs_payment() && isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
-					$order->payment_complete( isset( $data['payment_details']['transaction_id'] ) ? $data['payment_details']['transaction_id'] : '' );
+					$order->payment_complete( $data['payment_details']['transaction_id'] ?? '' );
 				}
 			}
 
@@ -620,7 +620,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( ! empty( $data['status'] ) ) {
 				// Refresh the order instance.
 				$order = wc_get_order( $order->get_id() );
-				$order->update_status( $data['status'], isset( $data['status_note'] ) ? $data['status_note'] : '', true );
+				$order->update_status( $data['status'], $data['status_note'] ?? '', true );
 			}
 
 			wc_delete_shop_order_transients( $order );
@@ -1036,7 +1036,7 @@ class WC_API_Orders extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
 			}
 
-			$rate = new WC_Shipping_Rate( $shipping['method_id'], isset( $shipping['method_title'] ) ? $shipping['method_title'] : '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
+			$rate = new WC_Shipping_Rate( $shipping['method_id'], $shipping['method_title'] ?? '', isset( $shipping['total'] ) ? floatval( $shipping['total'] ) : 0, array(), $shipping['method_id'] );
 			$item = new WC_Order_Item_Shipping();
 			$item->set_order_id( $order->get_id() );
 			$item->set_shipping_rate( $rate );

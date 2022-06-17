@@ -54,7 +54,7 @@ class WC_Meta_Box_Order_Downloads {
 
 						// Show file title instead of count if set.
 						$file       = $product->get_file( $download->get_download_id() );
-						$file_count = isset( $file['name'] ) ? $file['name'] : sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
+						$file_count = $file['name'] ?? sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 
 						include __DIR__ . '/views/html-order-download-permission.php';
 

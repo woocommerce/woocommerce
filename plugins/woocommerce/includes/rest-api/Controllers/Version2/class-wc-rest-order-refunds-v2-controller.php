@@ -305,7 +305,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 
 		if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
 			foreach ( $request['meta_data'] as $meta ) {
-				$refund->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				$refund->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? '' );
 			}
 			$refund->save_meta_data();
 		}

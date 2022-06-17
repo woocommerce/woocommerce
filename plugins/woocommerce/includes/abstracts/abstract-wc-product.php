@@ -148,7 +148,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_type() {
-		return isset( $this->product_type ) ? $this->product_type : 'simple';
+		return $this->product_type ?? 'simple';
 	}
 
 	/**
@@ -1281,7 +1281,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$download_object->set_id( $download_data['download_id'] );
 			$download_object->set_name( $download_data['name'] );
 			$download_object->set_file( $download_data['file'] );
-			$download_object->set_enabled( isset( $download_data['enabled'] ) ? $download_data['enabled'] : true );
+			$download_object->set_enabled( $download_data['enabled'] ?? true );
 
 			$downloads_map[ $download_object->get_id() ] = $download_object;
 		}

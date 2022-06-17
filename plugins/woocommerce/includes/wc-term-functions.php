@@ -230,7 +230,7 @@ function wc_product_dropdown_categories( $args = array() ) {
 			'hide_empty'         => 1,
 			'show_uncategorized' => 1,
 			'orderby'            => 'name',
-			'selected'           => isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat'] : '',
+			'selected'           => $wp_query->query_vars['product_cat'] ?? '',
 			'show_option_none'   => __( 'Select a category', 'woocommerce' ),
 			'option_none_value'  => '',
 			'value_field'        => 'slug',
@@ -533,7 +533,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 
 	foreach ( $terms as &$term ) {
 		if ( is_object( $term ) ) {
-			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
+			$term_counts[ $term->term_id ] = $term_counts[ $term->term_id ] ?? get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
 
 			if ( '' !== $term_counts[ $term->term_id ] ) {
 				$term->count = absint( $term_counts[ $term->term_id ] );

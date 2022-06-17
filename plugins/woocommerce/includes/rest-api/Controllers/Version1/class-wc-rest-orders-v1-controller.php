@@ -242,7 +242,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				'id'                 => $key,
 				'rate_code'          => $tax['name'],
 				'rate_id'            => $tax['rate_id'],
-				'label'              => isset( $tax['label'] ) ? $tax['label'] : $tax['name'],
+				'label'              => $tax['label'] ?? $tax['name'],
 				'compound'           => (bool) $tax['compound'],
 				'tax_total'          => wc_format_decimal( $tax['tax_amount'], $dp ),
 				'shipping_tax_total' => wc_format_decimal( $tax['shipping_tax_amount'], $dp ),
@@ -666,7 +666,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
-				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
+				$quantity = $posted['quantity'] ?? 1;
 				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
 				$item->set_total( $total );
 				$item->set_subtotal( $total );

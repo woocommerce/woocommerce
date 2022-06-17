@@ -1245,7 +1245,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// Allow set meta_data.
 		if ( is_array( $request['meta_data'] ) ) {
 			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				$product->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? '' );
 			}
 		}
 
@@ -1299,7 +1299,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
-				$gallery_positions[ $attachment_id ] = absint( isset( $image['position'] ) ? $image['position'] : $index );
+				$gallery_positions[ $attachment_id ] = absint( $image['position'] ?? $index );
 
 				// Set the image alt if present.
 				if ( ! empty( $image['alt'] ) ) {

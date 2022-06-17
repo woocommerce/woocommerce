@@ -111,7 +111,7 @@ class ReportsSync {
 		}
 
 		// Update imported from date if older than previous.
-		$previous_import_date = isset( $import_stats['imported_from'] ) ? $import_stats['imported_from'] : null;
+		$previous_import_date = $import_stats['imported_from'] ?? null;
 		$current_import_date  = $days ? gmdate( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) ) : -1;
 
 		if ( ! $previous_import_date || -1 === $current_import_date || new \DateTime( $previous_import_date ) > new \DateTime( $current_import_date ) ) {

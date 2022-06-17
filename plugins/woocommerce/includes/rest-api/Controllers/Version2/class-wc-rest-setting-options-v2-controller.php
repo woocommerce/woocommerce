@@ -169,11 +169,11 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		foreach ( $settings as $setting ) {
 			$option_key = $setting['option_key'];
 			$setting    = $this->filter_setting( $setting );
-			$default    = isset( $setting['default'] ) ? $setting['default'] : '';
+			$default    = $setting['default'] ?? '';
 			// Get the option value.
 			if ( is_array( $option_key ) ) {
 				$option           = get_option( $option_key[0] );
-				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
+				$setting['value'] = $option[ $option_key[1] ] ?? $default;
 			} else {
 				$admin_setting_value = WC_Admin_Settings::get_option( $option_key, $default );
 				$setting['value']    = $admin_setting_value;

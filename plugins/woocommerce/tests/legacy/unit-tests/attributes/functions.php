@@ -125,7 +125,7 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 			'is_variation' => 0,
 			'is_taxonomy'  => 1,
 		);
-		$local_before                   = isset( $product_meta_before_update['Test Local Attribute'] ) ? $product_meta_before_update['Test Local Attribute'] : $product_meta_before_update['test-local-attribute'];
+		$local_before                   = $product_meta_before_update['Test Local Attribute'] ?? $product_meta_before_update['test-local-attribute'];
 		$this->assertEquals( $expected_local_attribute_data, $local_before );
 		$this->assertEquals( $expected_global_attribute_data, $product_meta_before_update['pa_test'] );
 
@@ -153,7 +153,7 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 			'is_variation' => 0,
 			'is_taxonomy'  => 1,
 		);
-		$this->assertEquals( $local_before, isset( $product_meta_after_update['Test Local Attribute'] ) ? $product_meta_after_update['Test Local Attribute'] : $product_meta_after_update['test-local-attribute'] );
+		$this->assertEquals( $local_before, $product_meta_after_update['Test Local Attribute'] ?? $product_meta_after_update['test-local-attribute'] );
 		$this->assertEquals( $expected_global_attribute_data, $product_meta_after_update['pa_testupdate'] );
 		$this->assertArrayNotHasKey( 'pa_test', $product_meta_after_update );
 	}

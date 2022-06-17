@@ -754,7 +754,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				'coupon'    => 'coupon_lines',
 			)
 		);
-		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
+		return $type_to_group[ $type ] ?? '';
 	}
 
 	/**
@@ -1330,7 +1330,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
-				$item_id = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
+				$item_id = $coupon_code_to_id[ $coupon_code ] ?? 0;
 
 				if ( ! $item_id ) {
 					$coupon_item = new WC_Order_Item_Coupon();
@@ -1684,7 +1684,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $new_rate_ids as $tax_rate_id ) {
 			$item = new WC_Order_Item_Tax();
 			$item->set_rate( $tax_rate_id );
-			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
+			$item->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$item->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 			$this->add_item( $item );
 		}

@@ -730,7 +730,7 @@ class WC_Admin_Setup_Wizard {
 			return;
 		}
 
-		$plugin_file = isset( $plugin_info['file'] ) ? $plugin_info['file'] : $plugin_info['repo-slug'] . '.php';
+		$plugin_file = $plugin_info['file'] ?? $plugin_info['repo-slug'] . '.php';
 		if ( is_plugin_active( $plugin_info['repo-slug'] . '/' . $plugin_file ) ) {
 			return;
 		}
@@ -1702,11 +1702,11 @@ class WC_Admin_Setup_Wizard {
 									id="<?php echo esc_attr( $input_id ); ?>"
 									class="<?php echo esc_attr( 'payment-' . $setting['type'] . '-input' ); ?>"
 									name="<?php echo esc_attr( $input_id ); ?>"
-									value="<?php echo esc_attr( isset( $value ) ? $value : $setting['value'] ); ?>"
+									value="<?php echo esc_attr( $value ?? $setting['value'] ); ?>"
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
-									data-plugins="<?php echo wc_esc_json( wp_json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
+									data-plugins="<?php echo wc_esc_json( wp_json_encode( $setting['plugins'] ?? null ) ); ?>"
 								/>
 								<?php if ( ! empty( $setting['description'] ) ) : ?>
 									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
@@ -1846,7 +1846,7 @@ class WC_Admin_Setup_Wizard {
 				name="<?php echo esc_attr( 'setup_' . $type ); ?>"
 				value="yes"
 				checked
-				data-plugins="<?php echo wc_esc_json( wp_json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+				data-plugins="<?php echo wc_esc_json( wp_json_encode( $item_info['plugins'] ?? null ) ); ?>"
 			/>
 			<label for="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>">
 				<img

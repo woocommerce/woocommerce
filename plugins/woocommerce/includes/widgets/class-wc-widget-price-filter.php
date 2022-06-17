@@ -147,8 +147,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		global $wpdb;
 
 		$args       = WC()->query->get_main_query()->query_vars;
-		$tax_query  = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
-		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
+		$tax_query  = $args['tax_query'] ?? array();
+		$meta_query = $args['meta_query'] ?? array();
 
 		if ( ! is_post_type_archive( 'product' ) && ! empty( $args['taxonomy'] ) && ! empty( $args['term'] ) ) {
 			$tax_query[] = WC()->query->get_main_tax_query();

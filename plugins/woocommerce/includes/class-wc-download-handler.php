@@ -466,8 +466,8 @@ class WC_Download_Handler {
 
 		self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
 
-		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
-		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
+		$start  = $download_range['start'] ?? 0;
+		$length = $download_range['length'] ?? 0;
 		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
 			if ( $parsed_file_path['remote_file'] && 'yes' === get_option( 'woocommerce_downloads_redirect_fallback_allowed' ) ) {
 				wc_get_logger()->warning(

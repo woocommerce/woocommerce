@@ -136,7 +136,7 @@ class PluginsHelper {
 		$plugin_path = self::get_plugin_path_from_slug( $plugin );
 		$plugins     = get_plugins();
 
-		return isset( $plugins[ $plugin_path ] ) ? $plugins[ $plugin_path ] : false;
+		return $plugins[ $plugin_path ] ?? false;
 	}
 
 	/**
@@ -301,7 +301,7 @@ class PluginsHelper {
 
 		foreach ( $plugins as $plugin ) {
 			$slug = $plugin;
-			$path = isset( $plugin_paths[ $slug ] ) ? $plugin_paths[ $slug ] : false;
+			$path = $plugin_paths[ $slug ] ?? false;
 
 			if ( ! $path ) {
 				$errors->add(

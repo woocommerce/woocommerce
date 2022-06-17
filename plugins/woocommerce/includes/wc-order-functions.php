@@ -144,7 +144,7 @@ function wc_get_is_pending_statuses() {
 function wc_get_order_status_name( $status ) {
 	$statuses = wc_get_order_statuses();
 	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
-	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
+	$status   = $statuses[ 'wc-' . $status ] ?? $status;
 	return $status;
 }
 
@@ -542,7 +542,7 @@ function wc_create_refund( $args = array() ) {
 					continue;
 				}
 
-				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
+				$qty          = $args['line_items'][ $item_id ]['qty'] ?? 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
 				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
 
@@ -665,7 +665,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 		$gateway_controller = WC_Payment_Gateways::instance();
 		$all_gateways       = $gateway_controller->payment_gateways();
 		$payment_method     = $order->get_payment_method();
-		$gateway            = isset( $all_gateways[ $payment_method ] ) ? $all_gateways[ $payment_method ] : false;
+		$gateway            = $all_gateways[ $payment_method ] ?? false;
 
 		if ( ! $gateway ) {
 			throw new Exception( __( 'The payment gateway for this order does not exist.', 'woocommerce' ) );

@@ -172,7 +172,7 @@ class Controller extends \WC_REST_Reports_Controller {
 					$this->allowed_stats[]  = $stat;
 					$stat_label             = empty( $schema_info['title'] ) ? $schema_info['description'] : $schema_info['title'];
 					$this->labels[ $stat ]  = trim( $stat_label, '.' );
-					$this->formats[ $stat ] = isset( $schema_info['format'] ) ? $schema_info['format'] : 'number';
+					$this->formats[ $stat ] = $schema_info['format'] ?? 'number';
 				}
 
 				$this->endpoints[ $prefix ] = $endpoint['path'];
@@ -506,7 +506,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$pieces   = $this->get_stats_parts( $object->stat );
 		$endpoint = $pieces[0];
 		$stat     = $pieces[1];
-		$url      = isset( $this->urls[ $endpoint ] ) ? $this->urls[ $endpoint ] : '';
+		$url      = $this->urls[ $endpoint ] ?? '';
 
 		$links = array(
 			'api'    => array(
@@ -558,8 +558,8 @@ class Controller extends \WC_REST_Reports_Controller {
 			// Note that this is currently limited to 30 days via the Jetpack API
 			// but the WordPress.com endpoint allows up to 90 days.
 			$total  = 0;
-			$before = gmdate( 'Y-m-d', strtotime( isset( $query_args['before'] ) ? $query_args['before'] : TimeInterval::default_before() ) );
-			$after  = gmdate( 'Y-m-d', strtotime( isset( $query_args['after'] ) ? $query_args['after'] : TimeInterval::default_after() ) );
+			$before = gmdate( 'Y-m-d', strtotime( $query_args['before'] ?? TimeInterval::default_before() ) );
+			$after  = gmdate( 'Y-m-d', strtotime( $query_args['after'] ?? TimeInterval::default_after() ) );
 			foreach ( $data['general']->visits->data as $datum ) {
 				if ( $datum[0] >= $after && $datum[0] <= $before ) {
 					$total += $datum[ $index ];

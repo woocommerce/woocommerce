@@ -69,7 +69,7 @@ class LegacyCoreFormatter extends Formatter implements FormatterPlugin {
 			foreach ( $entry->getChangesBySubheading() as $heading => $changes ) {
 				foreach ( $changes as $change ) {
 					$text = trim( $change->getContent() );
-					$type = isset( $subheading_map[ $heading ] ) ? $subheading_map[ $heading ] : 'update';
+					$type = $subheading_map[ $heading ] ?? 'update';
 					if ( '' !== $text ) {
 						$preamble = $bullet . ucfirst( $type ) . ' - ';
 						$ret     .= $preamble . str_replace( "\n", "\n$indent", $text ) . "\n";

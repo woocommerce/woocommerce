@@ -424,7 +424,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( in_array( $value, array( 'yes', 'no' ) ) ) {
 			return $value;
 		} elseif ( empty( $value ) ) {
-			$value = isset( $setting['default'] ) ? $setting['default'] : 'no';
+			$value = $setting['default'] ?? 'no';
 			return $value;
 		} else {
 			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -536,7 +536,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		$this->_request = $request;
 
 		$schema     = $this->get_item_schema();
-		$properties = isset( $schema['properties'] ) ? $schema['properties'] : array();
+		$properties = $schema['properties'] ?? array();
 
 		$additional_fields = $this->get_additional_fields();
 

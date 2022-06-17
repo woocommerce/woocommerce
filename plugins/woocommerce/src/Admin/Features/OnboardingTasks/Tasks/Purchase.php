@@ -61,7 +61,7 @@ class Purchase extends Task {
 			return null;
 		}
 
-		$product_label    = isset( $first_product['label'] ) ? $first_product['label'] : $first_product['title'];
+		$product_label    = $first_product['label'] ?? $first_product['title'];
 		$additional_count = count( $products['purchaseable'] ) - 1;
 
 		if ( $this->get_parent_option( 'use_completed_title' ) && $this->is_complete() ) {
@@ -118,7 +118,7 @@ class Purchase extends Task {
 		$products = $this->get_paid_products_and_themes();
 
 		if ( count( $products['remaining'] ) === 1 ) {
-			return isset( $products['purchaseable'][0]['description'] ) ? $products['purchaseable'][0]['description'] : $products['purchaseable'][0]['excerpt'];
+			return $products['purchaseable'][0]['description'] ?? $products['purchaseable'][0]['excerpt'];
 		}
 		return sprintf(
 		/* translators: %1$s: list of product names comma separated, %2%s the last product name */
@@ -188,7 +188,7 @@ class Purchase extends Task {
 		$relevant_products = OnboardingProducts::get_relevant_products();
 
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
-		$theme         = isset( $profiler_data['theme'] ) ? $profiler_data['theme'] : null;
+		$theme         = $profiler_data['theme'] ?? null;
 		$paid_theme    = $theme ? OnboardingThemes::get_paid_theme_by_slug( $theme ) : null;
 		if ( $paid_theme ) {
 

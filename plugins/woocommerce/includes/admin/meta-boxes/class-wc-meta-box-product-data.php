@@ -234,8 +234,8 @@ class WC_Meta_Box_Product_Data {
 		if ( isset( $data['attribute_names'], $data['attribute_values'] ) ) {
 			$attribute_names         = $data['attribute_names'];
 			$attribute_values        = $data['attribute_values'];
-			$attribute_visibility    = isset( $data['attribute_visibility'] ) ? $data['attribute_visibility'] : array();
-			$attribute_variation     = isset( $data['attribute_variation'] ) ? $data['attribute_variation'] : array();
+			$attribute_visibility    = $data['attribute_visibility'] ?? array();
+			$attribute_variation     = $data['attribute_variation'] ?? array();
 			$attribute_position      = $data['attribute_position'];
 			$attribute_names_max_key = max( array_keys( $attribute_names ) );
 
@@ -250,7 +250,7 @@ class WC_Meta_Box_Product_Data {
 					$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
 				}
 
-				$options = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
+				$options = $attribute_values[ $i ] ?? '';
 
 				if ( is_array( $options ) ) {
 					// Term ids sent as array.

@@ -2076,11 +2076,11 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			)
 		);
 		wc_set_loop_prop( 'name', 'up-sells' );
-		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns ) );
+		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_upsells_columns', $args['columns'] ?? $columns ) );
 
-		$orderby = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
-		$order   = apply_filters( 'woocommerce_upsells_order', isset( $args['order'] ) ? $args['order'] : $order );
-		$limit   = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
+		$orderby = apply_filters( 'woocommerce_upsells_orderby', $args['orderby'] ?? $orderby );
+		$order   = apply_filters( 'woocommerce_upsells_order', $args['order'] ?? $order );
+		$limit   = apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit );
 
 		// Get visible upsells then sort them at random, then limit result set.
 		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
@@ -2844,7 +2844,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			case 'state':
 				/* Get country this state field is representing */
-				$for_country = isset( $args['country'] ) ? $args['country'] : WC()->checkout->get_value( 'billing_state' === $key ? 'billing_country' : 'shipping_country' );
+				$for_country = $args['country'] ?? WC()->checkout->get_value( 'billing_state' === $key ? 'billing_country' : 'shipping_country' );
 				$states      = WC()->countries->get_states( $for_country );
 
 				if ( is_array( $states ) && empty( $states ) ) {
