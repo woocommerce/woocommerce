@@ -39,7 +39,7 @@ export default class PackageRelease extends Command {
 		// todo: Need to validate filepath.
 		const filepath =
 			'packages/js' + args.package.replace( '@woocommerce', '' );
-		// execSync( './vendor/bin/changelogger write --use-version=2.1.0', {
+
 		const nextVersion = execSync(
 			'./vendor/bin/changelogger version next',
 			{
@@ -48,7 +48,17 @@ export default class PackageRelease extends Command {
 			}
 		);
 
-		console.log( nextVersion );
+		const validation = execSync( './vendor/bin/changelogger validate', {
+			cwd: filepath,
+			encoding: 'utf-8',
+		} );
+
+		const write = execSync( './vendor/bin/changelogger write', {
+			cwd: filepath,
+			encoding: 'utf-8',
+		} );
+
+		console.log( write );
 
 		CliUx.ux.action.stop();
 	}
