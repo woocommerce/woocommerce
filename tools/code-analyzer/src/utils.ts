@@ -193,3 +193,42 @@ export const isValidCommitHash = ( branch: string ): boolean => {
 		return false;
 	}
 };
+
+/**
+ * Extrace hook description from a raw diff.
+ *
+ * @param {string} diff raw diff.
+ * @return {string|false} hook description or false if none exists.
+ */
+export const getHookDescription = ( diff: string ): string | false => {
+	const diffWithoutDeletions = diff.replace( /-.*\n/g, '' );
+
+	// Extract hook description.
+	const description = diffWithoutDeletions.match( /\/\*\*([\s\S]*) @since/ );
+
+	if ( ! description ) {
+		return false;
+	}
+
+	return description[ 1 ]
+		.replace( / \* /g, '' )
+		.replace( /\*/g, '' )
+		.replace( /\+/g, '' )
+		.replace( /-/g, '' )
+		.replace( /\t/g, '' )
+		.replace( /\n/g, '' )
+		.trim();
+};
+
+/**
+ * Determine hook change type: New or Updated.
+ *
+ * @param {string} diff raw diff.
+ * @return {'Updated' | 'New'} change type.
+ */
+export const getHookChangeType = ( diff: string ): 'Updated' | 'New' => {
+	const sincesRegex = /@since/g;
+	const sinces = diff.match( sincesRegex ) || [];
+	// If there is more than one 'since' in the diff, it means that line was updated meaning the hook already exists.
+	return sinces.length > 1 ? 'Updated' : 'New';
+};
