@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Settings: fix Tracks event when enabling/disabling advanced features settings. #33305
