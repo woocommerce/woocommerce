@@ -556,6 +556,10 @@ class WC_REST_Authentication {
 	private function check_permissions( $method ) {
 		$permissions = $this->user->permissions;
 
+		if( $this->is_graphql_request() ) {
+			return 'POST' === $method;
+		}
+
 		switch ( $method ) {
 			case 'HEAD':
 			case 'GET':
@@ -579,6 +583,16 @@ class WC_REST_Authentication {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Is the current request a GraphQL API request?
+	 *
+	 * @return bool True if the current request is a GraphQL API request.
+	 */
+	private function is_graphql_request()
+	{
+		return StringUtil::ends_with( $_SERVER['PHP_SELF'], '/wc/v4/graphql' );
 	}
 
 	/**

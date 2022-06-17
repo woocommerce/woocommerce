@@ -26,6 +26,21 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	protected $namespace = 'wc/v3';
 
 	/**
+	 * Retrieve an order by id, and display the execution time.
+	 *
+	 * @param int $id Id of the order to retrieve.
+	 * @return WP_Error|WP_REST_Response The retrieved order, or an error.
+	 */
+	public function get_order( int $id ) {
+		$start   = hrtime( true );
+		$result  = $this->get_item( array( 'id' => $id, 'context' => null, 'dp' => null ) );
+		$end     = hrtime( true );
+		$elapsed = ( $end - $start ) / 1e6;
+		echo "Time: $elapsed ms\n";
+		return $result;
+	}
+
+	/**
 	 * Calculate coupons.
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.

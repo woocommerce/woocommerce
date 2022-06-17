@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\GraphQL\GraphQLController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
@@ -227,6 +228,7 @@ final class WooCommerce {
 		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
 		wc_get_container()->get( CustomOrdersTableController::class );
 		wc_get_container()->get( OptionSanitizer::class );
+		wc_get_container()->get( GraphQLController::class )->initialize();
 	}
 
 	/**
