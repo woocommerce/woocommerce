@@ -366,7 +366,7 @@ class BlockTemplateUtils {
 	 */
 	public static function supports_block_templates() {
 		if (
-			( ! function_exists( 'wp_is_block_theme' ) || ! wp_is_block_theme() ) &&
+			! wc_current_theme_is_fse_theme() &&
 			( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() )
 		) {
 			return false;
