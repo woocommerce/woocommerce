@@ -161,7 +161,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	/**
 	 * Tests uniqueness constraint for metadata.
 	 */
-	function test_metadata_uniqueness() {
+	public function test_metadata_uniqueness() {
 		$object    = new WC_Order();
 		$object_id = $object->save();
 
