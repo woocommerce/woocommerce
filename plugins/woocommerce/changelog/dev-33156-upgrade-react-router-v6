@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Upgraded react-router-dom to v6, it should not cause any visible changes to the end user #33156

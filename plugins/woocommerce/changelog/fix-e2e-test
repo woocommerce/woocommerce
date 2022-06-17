@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update webpack.config.js to ensure we use styles from build-style
