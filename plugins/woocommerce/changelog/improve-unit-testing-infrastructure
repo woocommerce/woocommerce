@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Add a mechanism to mock globals and a DynamicDecorator class.
