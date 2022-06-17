@@ -57,6 +57,21 @@ pnpm -- turbo run lint --filter=woocommerce/client/admin
 pnpm -- turbo run test --filter=woocommerce/client/admin
 ```
 
+#### Helper Scripts
+
+Here is a collection of scripts that can help when developing the React-based admin interface.
+
+```bash
+# Create a develoment build of the React-based admin client.
+pnpm dev --filter=woocommerce/client/admin
+# Create and watch a development build of the React-based admin client.
+pnpm start --filter=woocommerce/client/admin
+# Watch the tests of the React-based admin client.
+pnpm test:watch --filter=woocommerce/client/admin
+# Run a type check over the React-based admin client's TypeScript files.
+pnpm ts:check --filter=woocommerce/client/admin
+```
+
 ## Documentation
 * [WooCommerce Documentation](https://docs.woocommerce.com/)
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
