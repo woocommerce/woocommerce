@@ -322,7 +322,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	protected function capture_output_from( $callable, ...$params ) {
 		ob_start();
-		call_user_func( $callable, ...$params );
+		$callable( ...$params );
 		$output = ob_get_contents();
 		ob_end_clean();
 		return $output;

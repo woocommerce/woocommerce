@@ -459,7 +459,7 @@ final class CodeHacker {
 	 */
 	private function native( $func ) {
 		stream_wrapper_restore( self::PROTOCOL );
-		$res = call_user_func_array( $func, array_slice( func_get_args(), 1 ) );
+		$res = $func( ...array_slice( func_get_args(), 1 ) );
 		stream_wrapper_unregister( self::PROTOCOL );
 		stream_wrapper_register( self::PROTOCOL, __CLASS__ );
 		return $res;
@@ -476,7 +476,7 @@ final class CodeHacker {
 	private static function hack( $code, $path ) {
 		foreach ( self::$hacks as $hack ) {
 			if ( is_callable( $hack ) ) {
-				$code = call_user_func( $hack, $code, $path );
+				$code = $hack( $code, $path );
 			} else {
 				$code = $hack->hack( $code, $path );
 			}

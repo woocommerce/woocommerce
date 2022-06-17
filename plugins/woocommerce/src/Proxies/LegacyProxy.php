@@ -80,7 +80,7 @@ class LegacyProxy {
 	 * @return mixed The result from the function.
 	 */
 	public function call_function( $function_name, ...$parameters ) {
-		return call_user_func_array( $function_name, $parameters );
+		return $function_name( ...$parameters );
 	}
 
 	/**

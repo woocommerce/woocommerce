@@ -113,11 +113,11 @@ class Inflector implements ArgumentResolverInterface, InflectorInterface
 
             /** @var callable $callable */
             $callable = [$object, $method];
-            call_user_func_array($callable, $args);
+            $callable(...$args);
         }
 
         if ($this->callback !== null) {
-            call_user_func($this->callback, $object);
+            ($this->callback)($object);
         }
     }
 }

@@ -152,7 +152,7 @@ class DynamicDecorator {
 	public function __call( $name, $arguments ) {
 		if ( array_key_exists( $name, $this->method_replacements ) ) {
 			array_unshift( $arguments, $this );
-			return call_user_func_array( $this->method_replacements[ $name ], $arguments );
+			return ($this->method_replacements[ $name ])( ...$arguments );
 		} else {
 			return call_user_func_array( array( $this->decorated_object, $name ), $arguments );
 		}

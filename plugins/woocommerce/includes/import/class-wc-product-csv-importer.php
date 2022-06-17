@@ -994,7 +994,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$value = wp_check_invalid_utf8( $value, true );
 				}
 
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
+				$data[ $mapped_keys[ $id ] ] = $parse_functions[ $id ]( $value );
 			}
 
 			/**

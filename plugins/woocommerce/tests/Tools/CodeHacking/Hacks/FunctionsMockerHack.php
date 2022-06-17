@@ -165,7 +165,7 @@ final class FunctionsMockerHack extends CodeHack {
 		if ( array_key_exists( $name, self::$instance->function_mocks ) ) {
 			return call_user_func_array( self::$instance->function_mocks[ $name ], $arguments );
 		} else {
-			return call_user_func_array( $name, $arguments );
+			return $name( ...$arguments );
 		}
 	}
 

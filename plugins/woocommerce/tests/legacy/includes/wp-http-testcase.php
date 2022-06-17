@@ -210,7 +210,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 		);
 
 		if ( $this->http_responder ) {
-			$preempt = call_user_func( $this->http_responder, $request, $url );
+			$preempt = ($this->http_responder)( $request, $url );
 		}
 
 		return $preempt;

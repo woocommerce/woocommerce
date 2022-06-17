@@ -74,7 +74,7 @@ class WC_Breadcrumb {
 
 		if ( ( ! is_front_page() && ! ( is_post_type_archive() && intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
 			foreach ( $conditionals as $conditional ) {
-				if ( call_user_func( $conditional ) ) {
+				if ( $conditional ( ) ) {
 					call_user_func( array( $this, 'add_crumbs_' . substr( $conditional, 3 ) ) );
 					break;
 				}

@@ -69,7 +69,7 @@ class WcPayWelcomePage {
 				56,
 			);
 
-			call_user_func_array( 'add_menu_page', $menu_with_nav_data );
+			add_menu_page( ...$menu_with_nav_data );
 		}
 
 		// Add badge.

@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php if ( $widget['title'] ) : ?>
 									<h4><?php echo esc_html( $widget['title'] ); ?></h4>
 								<?php endif; ?>
-								<?php call_user_func( $widget['callback'] ); ?>
+								<?php $widget['callback'] ( ); ?>
 							</li>
 						<?php endforeach; ?>
 					</ul>

@@ -232,7 +232,7 @@ class Definition implements ArgumentResolverInterface, DefinitionInterface
     {
         $resolved = $this->resolveArguments($this->arguments);
 
-        return call_user_func_array($concrete, $resolved);
+        return $concrete(...$resolved);
     }
 
     /**
@@ -266,7 +266,7 @@ class Definition implements ArgumentResolverInterface, DefinitionInterface
 
             /** @var callable $callable */
             $callable = [$instance, $method['method']];
-            call_user_func_array($callable, $args);
+            $callable(...$args);
         }
 
         return $instance;

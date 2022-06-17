@@ -578,7 +578,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				if ( isset( $tools[ $tool ]['callback'] ) ) {
 					$callback = $tools[ $tool ]['callback'];
 					try {
-						$return = call_user_func( $callback );
+						$return = $callback ( );
 					} catch ( Exception $exception ) {
 						$return = $exception;
 					}

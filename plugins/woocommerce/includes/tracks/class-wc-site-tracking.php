@@ -189,7 +189,7 @@ class WC_Site_Tracking {
 			$tracker_init_method = array( $tracker_instance, 'init' );
 
 			if ( is_callable( $tracker_init_method ) ) {
-				call_user_func( $tracker_init_method );
+				$tracker_init_method ( );
 			}
 		}
 	}

@@ -154,7 +154,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	 */
 	public function call_function( $function_name, ...$parameters ) {
 		if ( array_key_exists( $function_name, $this->mocked_functions ) ) {
-			return call_user_func_array( $this->mocked_functions[ $function_name ], $parameters );
+			return ($this->mocked_functions[ $function_name ])( ...$parameters );
 		}
 
 		return parent::call_function( $function_name, ...$parameters );
@@ -178,7 +178,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 			$class_mocks = $this->mocked_statics[ $class_name ];
 			if ( array_key_exists( $method_name, $class_mocks ) ) {
 				$method_mock = $class_mocks[ $method_name ];
-				return call_user_func_array( $method_mock, $parameters );
+				return $method_mock( ...$parameters );
 			}
 		}
 
@@ -201,7 +201,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	public function get_instance_of( string $class_name, ...$args ) {
 		if ( array_key_exists( $class_name, $this->mocked_classes ) ) {
 			$mock = $this->mocked_classes[ $class_name ];
-			return is_callable( $mock ) ? call_user_func_array( $mock, $args ) : $mock;
+			return is_callable( $mock ) ? $mock( ...$args ) : $mock;
 		}
 
 		return parent::get_instance_of( $class_name, ...$args );

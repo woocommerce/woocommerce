@@ -368,7 +368,7 @@ class WC_API_Server {
 					return $params;
 				}
 
-				return call_user_func_array( $callback, $params );
+				return $callback( ...$params );
 			}
 		}
 

@@ -69,7 +69,7 @@ class WC_Shortcodes {
 
 		// @codingStandardsIgnoreStart
 		echo empty( $wrapper['before'] ) ? '<div class="' . esc_attr( $wrapper['class'] ) . '">' : $wrapper['before'];
-		call_user_func( $function, $atts );
+		$function( $atts );
 		echo empty( $wrapper['after'] ) ? '</div>' : $wrapper['after'];
 		// @codingStandardsIgnoreEnd
 

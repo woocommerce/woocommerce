@@ -309,7 +309,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		ob_start();
 		foreach ( $filters as $filter_callback ) {
-			call_user_func( $filter_callback );
+			$filter_callback ( );
 		}
 		$output = ob_get_clean();
 

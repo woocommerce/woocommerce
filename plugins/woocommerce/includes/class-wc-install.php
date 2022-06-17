@@ -308,7 +308,7 @@ class WC_Install {
 
 		if ( is_callable( $update_callback ) ) {
 			self::run_update_callback_start( $update_callback );
-			$result = (bool) call_user_func( $update_callback );
+			$result = (bool) $update_callback ( );
 			self::run_update_callback_end( $update_callback, $result );
 		}
 	}

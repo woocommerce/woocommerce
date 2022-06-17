@@ -78,7 +78,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		if ( $report['callback'] && ( is_callable( $report['callback'] ) ) ) {
-			call_user_func( $report['callback'], $current_report );
+			$report['callback']( $current_report );
 		}
 	}
 	?>
