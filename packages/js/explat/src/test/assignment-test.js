@@ -65,6 +65,26 @@ describe( 'fetchExperimentAssignment', () => {
 		} );
 		await expect( fetchPromise ).rejects.toThrowError();
 	} );
+
+	it( 'should return .json response', async () => {
+		const data = {
+			variations: { woocommerce_test: null },
+			ttl: 60,
+			debug: { backend_aa_result: 'request not sampled' },
+		};
+		window.fetch.mockImplementation( () =>
+			Promise.resolve( {
+				json: () => Promise.resolve( data ),
+				status: 200,
+			} )
+		);
+
+		const assignment = await fetchExperimentAssignment( {
+			experimentName: 'woocommerce_test',
+			anonId: '1234',
+		} );
+		await expect( assignment ).toEqual( data );
+	} );
 } );
 
 describe( 'fetchExperimentAssignmentWithAuth', () => {

@@ -22,7 +22,7 @@
 		"pelago/emogrifier": "^6.0",
 		"psr/container": "1.0.0",
 		"woocommerce/action-scheduler": "3.4.2",
-		"woocommerce/woocommerce-blocks": "7.6.0"
+		"woocommerce/woocommerce-blocks": "7.8.1"
 	},
 	"require-dev": {
 		"bamarni/composer-bin-plugin": "^1.4",
@@ -126,7 +126,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"filename": "../../tools/changelogger/PluginFormatter.php"
+				"filename": "../../tools/changelogger/LegacyCoreFormatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",

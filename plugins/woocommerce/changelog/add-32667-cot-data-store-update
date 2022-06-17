@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Implements update/saving logic for orders in the COT datastore.

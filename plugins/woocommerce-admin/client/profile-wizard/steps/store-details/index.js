@@ -523,10 +523,12 @@ export default compose(
 			city: settings.woocommerce_store_city || '',
 			countryState,
 			postCode: settings.woocommerce_store_postcode || '',
+
+			// By default, the marketing checkbox should be unticked by default to comply with WordPress.org plugin review guidelines.
 			isAgreeMarketing:
 				typeof profileItems.is_agree_marketing === 'boolean'
 					? profileItems.is_agree_marketing
-					: true,
+					: false,
 			storeEmail:
 				typeof profileItems.store_email === 'string'
 					? profileItems.store_email

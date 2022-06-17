@@ -368,8 +368,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			'woocommerce',
 			$allow_tracking
 		);
-		return $abtest->get_variation( 'woocommerce_products_task_layout_stacked' ) === 'treatment' ||
-			$abtest->get_variation( 'woocommerce_products_task_layout_card' ) === 'treatment';
+		return $abtest->get_variation( 'woocommerce_products_task_layout_stacked_v2' ) === 'treatment' ||
+			$abtest->get_variation( 'woocommerce_products_task_layout_card_v2' ) === 'treatment';
 	}
 
 	/**

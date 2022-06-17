@@ -39,6 +39,7 @@ const reducer: Reducer< ProductState, Actions > = (
 		switch ( payload.type ) {
 			case TYPES.CREATE_PRODUCT_SUCCESS:
 			case TYPES.GET_PRODUCT_SUCCESS:
+			case TYPES.UPDATE_PRODUCT_SUCCESS:
 				const productData = state.data || {};
 				return {
 					...state,
@@ -97,6 +98,35 @@ const reducer: Reducer< ProductState, Actions > = (
 						[ getProductResourceName(
 							payload.query
 						) ]: payload.error,
+					},
+				};
+			case TYPES.UPDATE_PRODUCT_ERROR:
+				return {
+					...state,
+					errors: {
+						...state.errors,
+						[ `update/${ payload.id }` ]: payload.error,
+					},
+				};
+			case TYPES.DELETE_PRODUCT_ERROR:
+				return {
+					...state,
+					errors: {
+						...state.errors,
+						[ `delete/${ payload.id }` ]: payload.error,
+					},
+				};
+			case TYPES.DELETE_PRODUCT_SUCCESS:
+				const prData = state.data || {};
+				return {
+					...state,
+					data: {
+						...prData,
+						[ payload.id ]: {
+							...( prData[ payload.id ] || {} ),
+							...payload.product,
+							status: payload.force ? 'deleted' : 'trash',
+						},
 					},
 				};
 			default:

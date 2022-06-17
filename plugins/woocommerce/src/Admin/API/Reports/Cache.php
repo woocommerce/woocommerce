@@ -22,18 +22,32 @@ class Cache {
 	 * Invalidate cache.
 	 */
 	public static function invalidate() {
-		\WC_Cache_Helper::get_transient_version( self::VERSION_OPTION, true );
+		self::get_version( true );
 	}
 
 	/**
 	 * Get cache version number.
 	 *
+	 * This is based on WC_Cache_Helper::get_transient_version, but rounds the Unix timestamp to the nearest
+	 * increment to rate-limit cache invalidations.
+	 *
+	 * @param bool $refresh True to generate a new value.
+	 *
 	 * @return string
 	 */
-	public static function get_version() {
-		$version = \WC_Cache_Helper::get_transient_version( self::VERSION_OPTION );
+	public static function get_version( $refresh = false ) {
+		$transient_name  = self::VERSION_OPTION . '-transient-version';
+		$transient_value = get_transient( $transient_name );
 
-		return $version;
+		if ( false === $transient_value || true === $refresh ) {
+			// Round to the nearest $minutes increment.
+			$minutes = 10;
+			$transient_value = (string) round( time() / ( MINUTE_IN_SECONDS * $minutes ) ) * ( MINUTE_IN_SECONDS * $minutes );
+
+			set_transient( $transient_name, $transient_value );
+		}
+
+		return $transient_value;
 	}
 
 	/**
@@ -70,7 +84,7 @@ class Cache {
 			'value'   => $value,
 		);
 
-		$result = set_transient( $key, $transient_value, WEEK_IN_SECONDS );
+		$result = set_transient( $key, $transient_value, HOUR_IN_SECONDS );
 
 		return $result;
 	}

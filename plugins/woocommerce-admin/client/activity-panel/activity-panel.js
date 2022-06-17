@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState } from '@wordpress/element';
+import { lazy, useState, useContext, useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -12,6 +12,7 @@ import {
 	OPTIONS_STORE_NAME,
 	useUser,
 	useUserPreferences,
+	getVisibleTasks,
 } from '@woocommerce/data';
 import { getHistory } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -36,6 +37,8 @@ import {
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useActiveSetupTasklist } from '~/tasks';
+import { LayoutContext } from '~/layout';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -61,6 +64,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
+	const activeSetupList = useActiveSetupTasklist();
+	const layoutContext = useContext( LayoutContext );
+	const updatedLayoutContext = useMemo(
+		() => layoutContext.getExtendedContext( 'activity-panel' ),
+		[ layoutContext ]
+	);
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -137,6 +146,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
+		setupTasksCompleteCount,
+		setupTasksCount,
 		previewSiteBtnTrackData,
 	} = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -144,7 +155,10 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			ONBOARDING_STORE_NAME
 		);
 
-		const isSetupTaskListHidden = getTaskList( 'setup' )?.isHidden;
+		const setupList = getTaskList( activeSetupList );
+
+		const isSetupTaskListHidden = setupList?.isHidden;
+		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
@@ -160,8 +174,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			requestingTaskListOptions: ! hasFinishedResolution(
 				'getTaskLists'
 			),
-			setupTaskListComplete: getTaskList( 'setup' )?.isComplete,
+			setupTaskListComplete: setupList?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
+			setupTasksCount: setupVisibleTasks.length,
+			setupTasksCompleteCount: setupVisibleTasks.filter(
+				( task ) => task.isComplete
+			).length,
 			isCompletedTask: Boolean(
 				query.task && getTask( query.task )?.isComplete
 			),
@@ -230,7 +248,14 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const setup = {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
-			icon: <SetupProgress />,
+			icon: (
+				<SetupProgress
+					setupTasksComplete={ setupTasksCompleteCount }
+					setupCompletePercent={ Math.ceil(
+						( setupTasksCompleteCount / setupTasksCount ) * 100
+					) }
+				/>
+			),
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
@@ -349,55 +374,57 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<div>
-			<H id={ headerId } className="screen-reader-text">
-				{ __( 'Store Activity', 'woocommerce' ) }
-			</H>
-			<Section
-				component="aside"
-				id="woocommerce-activity-panel"
-				className="woocommerce-layout__activity-panel"
-				aria-labelledby={ headerId }
-			>
-				<Tabs
-					tabs={ tabs }
-					tabOpen={ isPanelOpen }
-					selectedTab={ currentTab }
-					onTabClick={ ( tab, tabOpen ) => {
-						if ( tab.onClick ) {
-							tab.onClick();
-							return;
-						}
+		<LayoutContext.Provider value={ updatedLayoutContext }>
+			<div>
+				<H id={ headerId } className="screen-reader-text">
+					{ __( 'Store Activity', 'woocommerce' ) }
+				</H>
+				<Section
+					component="aside"
+					id="woocommerce-activity-panel"
+					className="woocommerce-layout__activity-panel"
+					aria-labelledby={ headerId }
+				>
+					<Tabs
+						tabs={ tabs }
+						tabOpen={ isPanelOpen }
+						selectedTab={ currentTab }
+						onTabClick={ ( tab, tabOpen ) => {
+							if ( tab.onClick ) {
+								tab.onClick();
+								return;
+							}
 
-						togglePanel( tab, tabOpen );
-					} }
-				/>
-				<Panel
-					currentTab
-					isPanelOpen={ isPanelOpen }
-					isPanelSwitching={ isPanelSwitching }
-					tab={ find( getTabs(), { name: currentTab } ) }
-					content={ getPanelContent( currentTab ) }
-					closePanel={ () => closePanel() }
-					clearPanel={ () => clearPanel() }
-				/>
-			</Section>
-			{ showHelpHighlightTooltip ? (
-				<HighlightTooltip
-					delay={ 1000 }
-					useAnchor={ true }
-					title={ __( "We're here for help", 'woocommerce' ) }
-					content={ __(
-						'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-						'woocommerce'
-					) }
-					closeButtonText={ __( 'Got it', 'woocommerce' ) }
-					id="activity-panel-tab-help"
-					onClose={ () => closedHelpPanelHighlight() }
-					onShow={ () => recordEvent( 'help_tooltip_view' ) }
-				/>
-			) : null }
-		</div>
+							togglePanel( tab, tabOpen );
+						} }
+					/>
+					<Panel
+						currentTab
+						isPanelOpen={ isPanelOpen }
+						isPanelSwitching={ isPanelSwitching }
+						tab={ find( getTabs(), { name: currentTab } ) }
+						content={ getPanelContent( currentTab ) }
+						closePanel={ () => closePanel() }
+						clearPanel={ () => clearPanel() }
+					/>
+				</Section>
+				{ showHelpHighlightTooltip ? (
+					<HighlightTooltip
+						delay={ 1000 }
+						useAnchor={ true }
+						title={ __( "We're here for help", 'woocommerce' ) }
+						content={ __(
+							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
+							'woocommerce'
+						) }
+						closeButtonText={ __( 'Got it', 'woocommerce' ) }
+						id="activity-panel-tab-help"
+						onClose={ () => closedHelpPanelHighlight() }
+						onShow={ () => recordEvent( 'help_tooltip_view' ) }
+					/>
+				) : null }
+			</div>
+		</LayoutContext.Provider>
 	);
 };
 

@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/components",
-	"version": "10.0.0",
+	"version": "10.1.0",
 	"description": "UI components for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -28,7 +28,7 @@
 	"dependencies": {
 		"@automattic/calypso-color-schemes": "^2.1.1",
 		"@automattic/interpolate-components": "^1.2.0",
-		"@automattic/tour-kit": "^1.0.0",
+		"@automattic/tour-kit": "^1.1.1",
 		"@woocommerce/csv-export": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
 		"@woocommerce/data": "workspace:*",

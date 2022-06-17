@@ -79,8 +79,8 @@ export class StoreDetailsSection extends BasePage {
 				config.get( 'addresses.admin.store.email' )
 		);
 
-		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
-		await this.checkMarketingCheckbox( true );
+		// Verify that the marketing checkbox is opt-in by default (WordPress.org Plugin Review Team requirement).
+		await this.checkMarketingCheckbox( false );
 	}
 
 	async fillAddress( address: string ): Promise< void > {

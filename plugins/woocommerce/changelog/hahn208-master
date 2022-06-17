@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Allow strings to be passed as 'class' arg to '`woocommerce_form_field()`
