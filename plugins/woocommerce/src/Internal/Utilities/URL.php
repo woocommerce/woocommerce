@@ -139,9 +139,9 @@ class URL {
 	 * without touching the filesystem.
 	 */
 	private function process_path() {
-		$segments                    = explode( '/', $this->components['path'] );
-		$this->is_absolute           = substr( $this->components['path'], 0, 1 ) === '/' || ! empty( $this->components['host'] );
-		$this->is_non_root_directory = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
+		$segments                    = explode( '/', $this->components['path'] ?? '' );
+		$this->is_absolute           = substr( $this->components['path'] ?? '', 0, 1 ) === '/' || ! empty( $this->components['host'] );
+		$this->is_non_root_directory = substr( $this->components['path'] ?? '', -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
 		$resolve_traversals          = 'file' !== $this->components['scheme'] || $this->is_absolute;
 		$retain_traversals           = false;
 

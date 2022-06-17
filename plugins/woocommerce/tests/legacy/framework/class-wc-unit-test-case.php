@@ -136,7 +136,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @param int    $code    Optional. The exception code. Default is empty.
 	 * @throws Exception Containing the given message and code.
 	 */
-	public function throwAnException( $message = null, $code = null ) {
+	public function throwAnException( $message = '', $code = 0 ) {
 		$message = $message ? $message : "We're all doomed!";
 		throw new Exception( $message, $code );
 	}
