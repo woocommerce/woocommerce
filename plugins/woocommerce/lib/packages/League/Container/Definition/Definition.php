@@ -57,7 +57,7 @@ class Definition implements ArgumentResolverInterface, DefinitionInterface
      */
     public function __construct(string $id, $concrete = null)
     {
-        $concrete = $concrete ?? $id;
+        $concrete ??= $id;
 
         $this->alias    = $id;
         $this->concrete = $concrete;
