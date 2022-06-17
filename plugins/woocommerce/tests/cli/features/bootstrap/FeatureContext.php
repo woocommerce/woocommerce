@@ -12,13 +12,13 @@ use \WP_CLI\Utils;
 if ( file_exists( __DIR__ . '/utils.php' ) ) {
 	require_once __DIR__ . '/utils.php';
 	require_once __DIR__ . '/Process.php';
-	$project_composer = dirname( dirname( dirname( __FILE__ ) ) ) . '/composer.json';
+	$project_composer = dirname( __FILE__ , 3) . '/composer.json';
 	if ( file_exists( $project_composer ) ) {
 		$composer = json_decode( file_get_contents( $project_composer ) );
 		if ( ! empty( $composer->autoload->files ) ) {
 			$contents = 'require:' . PHP_EOL;
 			foreach( $composer->autoload->files as $file ) {
-				$contents .= '  - ' . dirname( dirname( dirname( __FILE__ ) ) ) . '/' . $file;
+				$contents .= '  - ' . dirname( __FILE__ , 3) . '/' . $file;
 			}
 			@mkdir( sys_get_temp_dir() . '/wp-cli-package-test/' );
 			$project_config = sys_get_temp_dir() . '/wp-cli-package-test/config.yml';
@@ -298,7 +298,7 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 		// disable emailing
 		mkdir( $dest_dir . '/wp-content/mu-plugins' );
 		copy( __DIR__ . '/../extra/no-mail.php', $dest_dir . '/wp-content/mu-plugins/no-mail.php' );
-		symlink( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ),  $dest_dir . '/wp-content/plugins/woocommerce' );
+		symlink( dirname( __FILE__ , 5),  $dest_dir . '/wp-content/plugins/woocommerce' );
 	}
 
 	public function create_config( $subdir = '' ) {

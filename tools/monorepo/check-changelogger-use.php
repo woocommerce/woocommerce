@@ -84,7 +84,7 @@ if ( $verbose ) {
 	}
 }
 
-$base_path = dirname( dirname( __DIR__ ) );
+$base_path = dirname( __DIR__ , 2);
 
 $workspace_paths = array();
 $workspace_yaml = file_get_contents( $base_path . '/pnpm-workspace.yaml' );

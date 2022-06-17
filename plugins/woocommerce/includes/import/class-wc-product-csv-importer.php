@@ -61,7 +61,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// Import mappings for CSV data.
-		include_once dirname( dirname( __FILE__ ) ) . '/admin/importers/mappings/mappings.php';
+		include_once dirname( __FILE__ , 2) . '/admin/importers/mappings/mappings.php';
 
 		$this->read_file();
 	}

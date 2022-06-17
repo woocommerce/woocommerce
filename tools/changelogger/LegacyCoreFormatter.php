@@ -39,7 +39,7 @@ class LegacyCoreFormatter extends Formatter implements FormatterPlugin {
 	 * @return array
 	 */
 	private function getSubheadingTypeMapping() {
-		$woocommerce_path = dirname( dirname( __DIR__ ) ) . '/plugins/woocommerce';
+		$woocommerce_path = dirname( __DIR__ , 2) . '/plugins/woocommerce';
 		$composer_file    = $woocommerce_path . '/composer.json';
 		$composer_config  = json_decode( file_get_contents( $composer_file ), true );
 		return array_flip( $composer_config['extra']['changelogger']['types'] );

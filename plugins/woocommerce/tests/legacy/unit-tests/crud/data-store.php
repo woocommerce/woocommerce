@@ -94,7 +94,7 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	private function load_dummy_store() {
-		include_once dirname( dirname( dirname( __FILE__ ) ) ) . '/framework/class-wc-dummy-data-store.php';
+		include_once dirname( __FILE__ , 3) . '/framework/class-wc-dummy-data-store.php';
 		add_filter( 'woocommerce_data_stores', array( $this, 'add_dummy_data_store' ) );
 	}
 

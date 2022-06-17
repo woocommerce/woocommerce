@@ -105,7 +105,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
+		include dirname( __FILE__ , 5) . '/uninstall.php';
 
 		WC_Install::create_roles();
 

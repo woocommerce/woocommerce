@@ -38,7 +38,7 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function __construct() {
 		$this->tests_dir  = dirname( __FILE__ );
-		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
+		$this->plugin_dir = dirname( $this->tests_dir , 2);
 
 		$this->register_autoloader_for_testing_tools();
 
@@ -97,7 +97,7 @@ class WC_Unit_Tests_Bootstrap {
 		return spl_autoload_register(
 			function ( $class ) {
 				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
-				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$base_dir = dirname( __FILE__ , 2) . '/Tools/';
 				$len      = strlen( $prefix );
 				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
 					// no, move to the next registered autoloader.
