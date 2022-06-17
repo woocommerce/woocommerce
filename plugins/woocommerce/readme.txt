@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.6.0
+Stable tag: 6.6.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,17 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+
+= 6.6.1 2022-06-21 =
+
+**WooCommerce**
+
+* Fix - Make sure payment gateway title is a string before sanitizing.  [#33434](https://github.com/woocommerce/woocommerce/pull/33434)
+
+**WooCommerce Blocks 7.6.1**
+
+* Fix - Fix error Uncaught Error: Call to undefined function Automattic\WooCommerce\Blocks\Templates\wp_is_block_theme() in WP 5.8.  [#6590](https://github.com/woocommerce/woocommerce-blocks/pull/6590)
+* Fix - Fix PHP notice in Mini Cart when prices included taxes.  [#6537](https://github.com/woocommerce/woocommerce-blocks/pull/6537)
 
 = 6.6.0 2022-06-14 =
 
