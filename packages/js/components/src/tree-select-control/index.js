@@ -310,11 +310,7 @@ const TreeSelectControl = ( {
 				.filter( ( el ) => el.type === 'checkbox' );
 			const currentIndex = elements.indexOf( event.target );
 			const index = Math.max( currentIndex + step, -1 ) % elements.length;
-			if ( index < 0 ) {
-				elements[ elements.length - index ].focus();
-			} else {
-				elements[ index ].focus();
-			}
+			elements.at( index ).focus();
 			event.preventDefault();
 		}
 	};
