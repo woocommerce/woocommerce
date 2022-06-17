@@ -157,4 +157,30 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		// clean
 		$object->delete();
 	}
+
+	/**
+	 * Tests uniqueness constraint for metadata.
+	 */
+	function test_metadata_uniqueness() {
+		$object    = new WC_Order();
+		$object_id = $object->save();
+
+		// Create another reference to the same order to simulate concurrent updates.
+		$order_dup = wc_get_order( $object_id );
+
+		// Simulate two "concurrent" processes adding metadata.
+		$object->add_meta_data( 'unique_meta_key', 'a_value', true );
+		$order_dup->add_meta_data( 'unique_meta_key', 'other_value', true );
+
+		$object->save_meta_data();
+		$order_dup->save_meta_data();
+
+		// Refresh metadata.
+		$object->read_meta_data( true );
+
+		$this->assertCount( 1, $object->get_meta( 'unique_meta_key', false ) );
+
+		$object->delete( true );
+	}
+
 }
