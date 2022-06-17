@@ -36,14 +36,19 @@ export default class PackageRelease extends Command {
 		const { args } = await this.parse( PackageRelease );
 		CliUx.ux.action.start( `Prepare ` + args.package );
 
+		// todo: Need to validate filepath.
 		const filepath =
 			'packages/js' + args.package.replace( '@woocommerce', '' );
 		// execSync( './vendor/bin/changelogger write --use-version=2.1.0', {
-		const pwd = execSync( 'pwd', {
-			cwd: filepath,
-			encoding: 'utf-8',
-		} );
-		console.log( pwd );
+		const nextVersion = execSync(
+			'./vendor/bin/changelogger version next',
+			{
+				cwd: filepath,
+				encoding: 'utf-8',
+			}
+		);
+
+		console.log( nextVersion );
 
 		CliUx.ux.action.stop();
 	}
