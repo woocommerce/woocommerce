@@ -28,6 +28,50 @@ pnpm -- wp-env start
 
 You should now be able to visit http://docker.local:8888/ and access WooCommerce environment.
 
+## Building Components
+
+There are two major client-side components included in WooCommerce Core that can be built, linted, and tested independently. We've organized these components
+in this way to take advantage of caching to prevent unnecessarily performing expensive rebuilds when only working in one of them.
+
+### `plugins/woocommerce/client/legacy`
+
+This directory contains the CSS and jQuery code for WooCommerce.
+
+```bash
+# Build the assets.
+pnpm -- turbo run build --filter=woocommerce/client/legacy
+# Lint the assets.
+pnpm -- turbo run lint --filter=woocommerce/client/legacy
+```
+
+### `plugins/woocommerce-admin`
+
+This directory contains the React-based admin interface.
+
+```bash
+# Build the React-based admin client.
+pnpm -- turbo run build --filter=woocommerce/client/admin
+# Lint the React-based admin client.
+pnpm -- turbo run lint --filter=woocommerce/client/admin
+# Test the React-based admin client.
+pnpm -- turbo run test --filter=woocommerce/client/admin
+```
+
+#### Helper Scripts
+
+Here is a collection of scripts that can help when developing the React-based admin interface.
+
+```bash
+# Create a develoment build of the React-based admin client.
+pnpm dev --filter=woocommerce/client/admin
+# Create and watch a development build of the React-based admin client.
+pnpm start --filter=woocommerce/client/admin
+# Watch the tests of the React-based admin client.
+pnpm test:watch --filter=woocommerce/client/admin
+# Run a type check over the React-based admin client's TypeScript files.
+pnpm ts:check --filter=woocommerce/client/admin
+```
+
 ## Documentation
 * [WooCommerce Documentation](https://docs.woocommerce.com/)
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
