@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make sure payment gateway title is a string before sanitizing

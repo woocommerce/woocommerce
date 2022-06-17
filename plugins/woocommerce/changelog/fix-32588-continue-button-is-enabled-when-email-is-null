@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix continue button is enabled even when email is null in setup wizard
