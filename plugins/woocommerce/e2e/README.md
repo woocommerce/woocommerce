@@ -240,7 +240,7 @@ Once you identify the structure of the test, you can move on to writing it.
 
 ### Writing the test
 
-The structure of the test serves as a skeleton for the test itself. You can turn it into a test by using `describe()` and `it()` methods of Jest:
+The structure of the test serves as a skeleton for the test itself. You can turn it into a test by using `describe()` and `it()` methods of Playwright:
 
 - [`test.describe()`](https://playwright.dev/docs/api/class-test#test-describe) - creates a block that groups together several related tests;
 - [`test()`](https://playwright.dev/docs/api/class-test#test-call) - actual method that runs the test. 
