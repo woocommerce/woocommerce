@@ -69,7 +69,7 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$params = explode( ',', $request['options'] );
+		$params = explode( ',', $request['options'] ?? '' );
 
 		if ( ! isset( $request['options'] ) || ! is_array( $params ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'You must supply an array of options.', 'woocommerce' ), 500 );
@@ -201,7 +201,7 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return array Options object with option values.
 	 */
 	public function get_options( $request ) {
-		$params  = explode( ',', $request['options'] );
+		$params  = explode( ',', $request['options'] ?? '' );
 		$options = array();
 
 		if ( ! is_array( $params ) ) {

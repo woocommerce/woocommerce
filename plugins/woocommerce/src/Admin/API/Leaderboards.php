@@ -388,7 +388,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$persisted_query = json_decode( $request['persisted_query'], true );
+		$persisted_query = json_decode( $request['persisted_query'] ?? '', true );
 
 		switch ( $request['leaderboard'] ) {
 			case 'customers':
