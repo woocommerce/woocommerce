@@ -722,6 +722,11 @@ final class WooCommerce {
 		$single            = wc_get_image_size( 'single' );
 		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
 
+		// check if string (like `thumbnail`) wasn't passed with `woocommerce_get_image_size_gallery_thumbnail` filter
+		if( !is_array( $gallery_thumbnail ) && is_string( $gallery_thumbnail ) ) {
+			$gallery_thumbnail = wc_get_image_size( $gallery_thumbnail );
+		}
+		
 		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
