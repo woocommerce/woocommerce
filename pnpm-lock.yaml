@@ -1753,6 +1753,33 @@ importers:
       tslib: 2.3.1
       typescript: 4.4.4
 
+  tools/package-release:
+    specifiers:
+      '@oclif/core': ^1
+      '@oclif/plugin-help': ^5
+      '@oclif/plugin-plugins': ^2.0.1
+      '@types/node': ^16.9.4
+      '@woocommerce/eslint-plugin': workspace:*
+      globby: ^11
+      oclif: ^2
+      shx: ^0.3.3
+      ts-node: ^10.2.1
+      tslib: ^2.3.1
+      typescript: ^4.4.3
+    dependencies:
+      '@oclif/core': 1.3.4
+      '@oclif/plugin-help': 5.1.11
+      '@oclif/plugin-plugins': 2.1.0
+    devDependencies:
+      '@types/node': 16.10.3
+      '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
+      globby: 11.1.0
+      oclif: 2.4.5
+      shx: 0.3.4
+      ts-node: 10.5.0_506ca6ef959d35afcce359030b1bc9ff
+      tslib: 2.3.1
+      typescript: 4.6.2
+
 packages:
 
   /@ampproject/remapping/2.1.2:
