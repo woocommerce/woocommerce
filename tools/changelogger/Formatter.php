@@ -195,7 +195,7 @@ class Formatter extends KeepAChangelogParser {
 						$changes,
 						array(
 							'subheading' => $is_subentry ? '' : trim( $row_segments[0] ),
-							'content'    => $is_subentry ? trim( $row ) : trim( $row_segments[1] ),
+							'content'    => $is_subentry ? trim( $row ) : trim( isset($row_segments[1]) ? $row_segments[1] : '' ),
 						)
 					);
 				}
