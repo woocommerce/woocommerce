@@ -20,7 +20,7 @@ class ArrayKeys implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = null ) {
+	public function transform( $value, ?stdClass $arguments = null, $default = null ) {
 		return array_keys( $value );
 	}
 
@@ -31,7 +31,7 @@ class ArrayKeys implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function validate( stdClass $arguments = null ) {
+	public function validate( ?stdClass $arguments = null ) {
 		return true;
 	}
 }

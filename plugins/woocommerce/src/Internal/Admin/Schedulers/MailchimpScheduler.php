@@ -31,7 +31,7 @@ class MailchimpScheduler {
 	 * @internal
 	 * @param \WC_Logger_Interface|null $logger Logger instance.
 	 */
-	public function __construct( \WC_Logger_Interface $logger = null ) {
+	public function __construct( ?\WC_Logger_Interface $logger = null ) {
 		if ( null === $logger ) {
 			$logger = wc_get_logger();
 		}

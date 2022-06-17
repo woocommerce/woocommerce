@@ -15,7 +15,7 @@ interface InflectorAggregateInterface extends ContainerAwareInterface, IteratorA
      *
      * @return Inflector
      */
-    public function add(string $type, callable $callback = null) : Inflector;
+    public function add(string $type, ?callable $callback = null) : Inflector;
 
     /**
      * Applies all inflectors to an object.

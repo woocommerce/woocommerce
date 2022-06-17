@@ -356,7 +356,7 @@ class URL {
 	 *
 	 * @return string
 	 */
-	public function get_path( string $path_override = null ): string {
+	public function get_path( ?string $path_override = null ): string {
 		return ( $this->components['drive'] ? $this->components['drive'] . ':' : '' ) . ( $path_override ?? $this->components['path'] );
 	}
 

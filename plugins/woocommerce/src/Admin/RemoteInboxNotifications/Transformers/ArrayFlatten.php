@@ -20,7 +20,7 @@ class ArrayFlatten implements TransformerInterface {
 	 *
 	 * @return mixed|null
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = null ) {
+	public function transform( $value, ?stdClass $arguments = null, $default = null ) {
 		$return = array();
 		array_walk_recursive(
 			$value,
@@ -39,7 +39,7 @@ class ArrayFlatten implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function validate( stdClass $arguments = null ) {
+	public function validate( ?stdClass $arguments = null ) {
 		return true;
 	}
 }
