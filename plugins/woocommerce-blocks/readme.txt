@@ -111,7 +111,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Add support for `Font size` and `Font family` for the `Mini Cart` block. ([6396](https://github.com/woocommerce/woocommerce-blocks/pull/6396))
 
-
 = 7.7.0 - 2022-05-24 =
 
 #### Enhancements
@@ -123,6 +122,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Remove bold styles from All Products block. ([6436](https://github.com/woocommerce/woocommerce-blocks/pull/6436))
 - Fix an issue where the Cart & Checkout could have some of the locked inner blocks removed. ([6419](https://github.com/woocommerce/woocommerce-blocks/pull/6419))
 - Fix broken translation in Cart/Checkout blocks. ([6420](https://github.com/woocommerce/woocommerce-blocks/pull/6420))
+
+= 7.6.1 - 2022-06-17 =
+
+#### Bug Fixes
+
+- Fix error Uncaught Error: Call to undefined function Automattic\WooCommerce\Blocks\Templates\wp_is_block_theme() in WP 5.8. ([6590](https://github.com/woocommerce/woocommerce-blocks/pull/6590))
+- Fix PHP notice in Mini Cart when prices included taxes. ([6537](https://github.com/woocommerce/woocommerce-blocks/pull/6537))
 
 = 7.6.0 - 2022-05-09 =
 
