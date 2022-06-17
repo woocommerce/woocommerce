@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { CliUx, Command } from '@oclif/core';
+import { execSync } from 'child_process';
 
 /**
  * PackageRelease class
@@ -32,9 +33,18 @@ export default class PackageRelease extends Command {
 	 * This method is called to execute the command
 	 */
 	async run(): Promise< void > {
-		const { args, flags } = await this.parse( PackageRelease );
-		CliUx.ux.action.start( `Starting process` );
-		console.log( 'im going to prepare ' + args.package );
+		const { args } = await this.parse( PackageRelease );
+		CliUx.ux.action.start( `Prepare ` + args.package );
+
+		const filepath =
+			'packages/js' + args.package.replace( '@woocommerce', '' );
+		// execSync( './vendor/bin/changelogger write --use-version=2.1.0', {
+		const pwd = execSync( 'pwd', {
+			cwd: filepath,
+			encoding: 'utf-8',
+		} );
+		console.log( pwd );
+
 		CliUx.ux.action.stop();
 	}
 }
