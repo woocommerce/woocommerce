@@ -13,8 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * stores the specs in to the database as an option.
  */
 class DataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
-	const ID           = 'remote_inbox_notifications';
-	const DATA_SOURCES = array(
+	public const ID           = 'remote_inbox_notifications';
+	public const DATA_SOURCES = array(
 		'https://woocommerce.com/wp-json/wccom/inbox-notifications/1.0/notifications.json',
 	);
 	/**

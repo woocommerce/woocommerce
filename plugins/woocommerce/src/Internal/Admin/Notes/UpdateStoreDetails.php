@@ -22,7 +22,7 @@ class UpdateStoreDetails {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-update-store-details';
+	public const NOTE_NAME = 'wc-admin-update-store-details';
 
 	/**
 	 * Get the note.

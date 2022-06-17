@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayme
  */
 class WcPayWelcomePage {
 
-	const EXPERIMENT_NAME_BASE = 'woocommerce_payments_menu_promo_nz_ie_:yyyy_:mm';
+	public const EXPERIMENT_NAME_BASE = 'woocommerce_payments_menu_promo_nz_ie_:yyyy_:mm';
 
 	/**
 	 * Registers the WooCommerce Payments welcome page.

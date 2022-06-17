@@ -25,7 +25,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
  */
 class Query extends ReportsQuery {
 
-	const REPORT_NAME = 'report-categories';
+	public const REPORT_NAME = 'report-categories';
 
 	/**
 	 * Valid fields for Categories report.

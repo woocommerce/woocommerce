@@ -9,7 +9,7 @@ use WP_Comment_Query;
  */
 class ReviewsCommentsOverrides {
 
-	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
+	public const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
 
 	/**
 	 * Constructor.

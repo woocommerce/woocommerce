@@ -22,14 +22,14 @@ class WC_Plugin_Updates {
 	 *
 	 * @var string
 	 */
-	const VERSION_REQUIRED_HEADER = 'WC requires at least';
+	public const VERSION_REQUIRED_HEADER = 'WC requires at least';
 
 	/**
 	 * This is the header used by extensions to show testing.
 	 *
 	 * @var string
 	 */
-	const VERSION_TESTED_HEADER = 'WC tested up to';
+	public const VERSION_TESTED_HEADER = 'WC tested up to';
 
 	/**
 	 * The version for the update to WooCommerce.

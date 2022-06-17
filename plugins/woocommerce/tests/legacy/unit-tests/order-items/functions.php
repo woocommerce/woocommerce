@@ -16,7 +16,7 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_wc_order_item_meta_functions() {
+	public function test_wc_order_item_meta_functions() {
 		$meta_value  = 'cat';
 		$meta_value2 = 'dog';
 

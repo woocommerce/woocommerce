@@ -21,35 +21,35 @@ abstract class Task {
 	 *
 	 * @var string
 	 */
-	const DISMISSED_OPTION = 'woocommerce_task_list_dismissed_tasks';
+	public const DISMISSED_OPTION = 'woocommerce_task_list_dismissed_tasks';
 
 	/**
 	 * Name of the snooze option.
 	 *
 	 * @var string
 	 */
-	const SNOOZED_OPTION = 'woocommerce_task_list_remind_me_later_tasks';
+	public const SNOOZED_OPTION = 'woocommerce_task_list_remind_me_later_tasks';
 
 	/**
 	 * Name of the actioned option.
 	 *
 	 * @var string
 	 */
-	const ACTIONED_OPTION = 'woocommerce_task_list_tracked_completed_actions';
+	public const ACTIONED_OPTION = 'woocommerce_task_list_tracked_completed_actions';
 
 	/**
 	 * Option name of completed tasks.
 	 *
 	 * @var string
 	 */
-	const COMPLETED_OPTION = 'woocommerce_task_list_tracked_completed_tasks';
+	public const COMPLETED_OPTION = 'woocommerce_task_list_tracked_completed_tasks';
 
 	/**
 	 * Name of the active task transient.
 	 *
 	 * @var string
 	 */
-	const ACTIVE_TASK_TRANSIENT = 'wc_onboarding_active_task';
+	public const ACTIVE_TASK_TRANSIENT = 'wc_onboarding_active_task';
 
 	/**
 	 * Parent task list.

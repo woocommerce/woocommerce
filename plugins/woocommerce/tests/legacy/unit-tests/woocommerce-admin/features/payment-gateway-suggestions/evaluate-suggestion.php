@@ -14,7 +14,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 	/**
 	 * Mock gateway option.
 	 */
-	const MOCK_OPTION = 'woocommerce_admin_mock_gateway_option';
+	public const MOCK_OPTION = 'woocommerce_admin_mock_gateway_option';
 
 	/**
 	 * Tear down.

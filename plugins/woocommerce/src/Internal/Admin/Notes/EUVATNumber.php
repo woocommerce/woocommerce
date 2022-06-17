@@ -24,7 +24,7 @@ class EUVATNumber {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-eu-vat-number';
+	public const NOTE_NAME = 'wc-admin-eu-vat-number';
 
 	/**
 	 * Get the note.

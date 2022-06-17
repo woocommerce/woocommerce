@@ -11,7 +11,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_get_product_type() {
+	public function test_get_product_type() {
 		$simple   = WC_Helper_Product::create_simple_product();
 		$external = WC_Helper_Product::create_external_product();
 		$grouped  = WC_Helper_Product::create_grouped_product();
@@ -36,7 +36,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_get_classname_from_product_type() {
+	public function test_get_classname_from_product_type() {
 		$this->assertEquals( 'WC_Product_Grouped', WC()->product_factory->get_classname_from_product_type( 'grouped' ) );
 		$this->assertEquals( 'WC_Product_Simple', WC()->product_factory->get_classname_from_product_type( 'simple' ) );
 		$this->assertEquals( 'WC_Product_Variable', WC()->product_factory->get_classname_from_product_type( 'variable' ) );
@@ -49,7 +49,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_get_product() {
+	public function test_get_product() {
 		$test_product = WC_Helper_Product::create_simple_product();
 		$get_product  = WC()->product_factory->get_product( $test_product->get_id() );
 		$this->assertEquals( $test_product->get_data(), $get_product->get_data() );
@@ -60,7 +60,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_get_invalid_product_returns_false() {
+	public function test_get_invalid_product_returns_false() {
 		$product = WC()->product_factory->get_product( 50000 );
 		$this->assertFalse( $product );
 	}

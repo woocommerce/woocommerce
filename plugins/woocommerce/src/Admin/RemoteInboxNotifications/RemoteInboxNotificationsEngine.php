@@ -16,8 +16,8 @@ use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
  * specs that are able to be triggered.
  */
 class RemoteInboxNotificationsEngine {
-	const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
-	const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
+	public const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
+	public const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
 
 	/**
 	 * Initialize the engine.

@@ -25,7 +25,7 @@ class OnlineClothingStore {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-online-clothing-store';
+	public const NOTE_NAME = 'wc-admin-online-clothing-store';
 
 	/**
 	 * Returns whether the industries includes fashion-apparel-accessories.

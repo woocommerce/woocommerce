@@ -20,40 +20,40 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Geo_IP {
 
-	const GEOIP_COUNTRY_BEGIN            = 16776960;
-	const GEOIP_STATE_BEGIN_REV0         = 16700000;
-	const GEOIP_STATE_BEGIN_REV1         = 16000000;
-	const GEOIP_MEMORY_CACHE             = 1;
-	const GEOIP_SHARED_MEMORY            = 2;
-	const STRUCTURE_INFO_MAX_SIZE        = 20;
-	const GEOIP_COUNTRY_EDITION          = 1;
-	const GEOIP_PROXY_EDITION            = 8;
-	const GEOIP_ASNUM_EDITION            = 9;
-	const GEOIP_NETSPEED_EDITION         = 10;
-	const GEOIP_REGION_EDITION_REV0      = 7;
-	const GEOIP_REGION_EDITION_REV1      = 3;
-	const GEOIP_CITY_EDITION_REV0        = 6;
-	const GEOIP_CITY_EDITION_REV1        = 2;
-	const GEOIP_ORG_EDITION              = 5;
-	const GEOIP_ISP_EDITION              = 4;
-	const SEGMENT_RECORD_LENGTH          = 3;
-	const STANDARD_RECORD_LENGTH         = 3;
-	const ORG_RECORD_LENGTH              = 4;
-	const GEOIP_SHM_KEY                  = 0x4f415401;
-	const GEOIP_DOMAIN_EDITION           = 11;
-	const GEOIP_COUNTRY_EDITION_V6       = 12;
-	const GEOIP_LOCATIONA_EDITION        = 13;
-	const GEOIP_ACCURACYRADIUS_EDITION   = 14;
-	const GEOIP_CITY_EDITION_REV1_V6     = 30;
-	const GEOIP_CITY_EDITION_REV0_V6     = 31;
-	const GEOIP_NETSPEED_EDITION_REV1    = 32;
-	const GEOIP_NETSPEED_EDITION_REV1_V6 = 33;
-	const GEOIP_USERTYPE_EDITION         = 28;
-	const GEOIP_USERTYPE_EDITION_V6      = 29;
-	const GEOIP_ASNUM_EDITION_V6         = 21;
-	const GEOIP_ISP_EDITION_V6           = 22;
-	const GEOIP_ORG_EDITION_V6           = 23;
-	const GEOIP_DOMAIN_EDITION_V6        = 24;
+	public const GEOIP_COUNTRY_BEGIN            = 16776960;
+	public const GEOIP_STATE_BEGIN_REV0         = 16700000;
+	public const GEOIP_STATE_BEGIN_REV1         = 16000000;
+	public const GEOIP_MEMORY_CACHE             = 1;
+	public const GEOIP_SHARED_MEMORY            = 2;
+	public const STRUCTURE_INFO_MAX_SIZE        = 20;
+	public const GEOIP_COUNTRY_EDITION          = 1;
+	public const GEOIP_PROXY_EDITION            = 8;
+	public const GEOIP_ASNUM_EDITION            = 9;
+	public const GEOIP_NETSPEED_EDITION         = 10;
+	public const GEOIP_REGION_EDITION_REV0      = 7;
+	public const GEOIP_REGION_EDITION_REV1      = 3;
+	public const GEOIP_CITY_EDITION_REV0        = 6;
+	public const GEOIP_CITY_EDITION_REV1        = 2;
+	public const GEOIP_ORG_EDITION              = 5;
+	public const GEOIP_ISP_EDITION              = 4;
+	public const SEGMENT_RECORD_LENGTH          = 3;
+	public const STANDARD_RECORD_LENGTH         = 3;
+	public const ORG_RECORD_LENGTH              = 4;
+	public const GEOIP_SHM_KEY                  = 0x4f415401;
+	public const GEOIP_DOMAIN_EDITION           = 11;
+	public const GEOIP_COUNTRY_EDITION_V6       = 12;
+	public const GEOIP_LOCATIONA_EDITION        = 13;
+	public const GEOIP_ACCURACYRADIUS_EDITION   = 14;
+	public const GEOIP_CITY_EDITION_REV1_V6     = 30;
+	public const GEOIP_CITY_EDITION_REV0_V6     = 31;
+	public const GEOIP_NETSPEED_EDITION_REV1    = 32;
+	public const GEOIP_NETSPEED_EDITION_REV1_V6 = 33;
+	public const GEOIP_USERTYPE_EDITION         = 28;
+	public const GEOIP_USERTYPE_EDITION_V6      = 29;
+	public const GEOIP_ASNUM_EDITION_V6         = 21;
+	public const GEOIP_ISP_EDITION_V6           = 22;
+	public const GEOIP_ORG_EDITION_V6           = 23;
+	public const GEOIP_DOMAIN_EDITION_V6        = 24;
 
 	/**
 	 * Flags.

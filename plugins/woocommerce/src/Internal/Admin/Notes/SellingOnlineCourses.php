@@ -25,7 +25,7 @@ class SellingOnlineCourses {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-selling-online-courses';
+	public const NOTE_NAME = 'wc-admin-selling-online-courses';
 
 	/**
 	 * Attach hooks.

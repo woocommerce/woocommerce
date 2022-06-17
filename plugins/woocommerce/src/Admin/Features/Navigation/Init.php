@@ -21,7 +21,7 @@ class Init {
 	/**
 	 * Option name used to toggle this feature.
 	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_navigation_enabled';
+	public const TOGGLE_OPTION_NAME = 'woocommerce_navigation_enabled';
 
 	/**
 	 * Determines if the feature has been toggled on or off.

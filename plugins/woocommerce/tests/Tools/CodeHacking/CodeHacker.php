@@ -32,8 +32,8 @@ use \ReflectionException;
  */
 final class CodeHacker {
 
-	const PROTOCOL                     = 'file';
-	const HACK_CALLBACK_ARGUMENT_COUNT = 2;
+	public const PROTOCOL                     = 'file';
+	public const HACK_CALLBACK_ARGUMENT_COUNT = 2;
 
 	/**
 	 * Value of "context" parameter to be passed to the native PHP filesystem related functions.

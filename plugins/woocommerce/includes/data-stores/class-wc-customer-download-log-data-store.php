@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Data_Store_Interface {
 
 	// Table name for download logs.
-	const WC_DOWNLOAD_LOG_TABLE = 'wc_download_log';
+	public const WC_DOWNLOAD_LOG_TABLE = 'wc_download_log';
 
 	/**
 	 * Get the table name for download logs.

@@ -13,7 +13,7 @@ class ClassWithDependencies {
 	/**
 	 * Default value for $some_number argument.
 	 */
-	const SOME_NUMBER = 34;
+	public const SOME_NUMBER = 34;
 
 	/**
 	 * Count of instances of the class created so far.

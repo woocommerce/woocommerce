@@ -38,7 +38,7 @@ class WcPaySubscriptionsPage {
 	 *
 	 * @var string
 	 */
-	const SUBSCRIPTION_MENU_ITEM_SLUG = 'wc-admin&path=/subscriptions';
+	public const SUBSCRIPTION_MENU_ITEM_SLUG = 'wc-admin&path=/subscriptions';
 
 	/**
 	 * Hook into WooCommerce.

@@ -15,7 +15,7 @@ class Notes {
 	/**
 	 * Hook used for recurring "unsnooze" action.
 	 */
-	const UNSNOOZE_HOOK = 'wc_admin_unsnooze_admin_notes';
+	public const UNSNOOZE_HOOK = 'wc_admin_unsnooze_admin_notes';
 
 	/**
 	 * Hook appropriate actions.

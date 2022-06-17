@@ -21,17 +21,17 @@ class TaskList {
 	/**
 	 * Option name hidden task lists.
 	 */
-	const HIDDEN_OPTION = 'woocommerce_task_list_hidden_lists';
+	public const HIDDEN_OPTION = 'woocommerce_task_list_hidden_lists';
 
 	/**
 	 * Option name of completed task lists.
 	 */
-	const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
+	public const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
 
 	/**
 	 * Option name of hidden reminder bar.
 	 */
-	const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
+	public const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
 
 	/**
 	 * ID.

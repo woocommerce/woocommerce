@@ -18,17 +18,17 @@ class WC_Tracks_Client {
 	/**
 	 * Pixel URL.
 	 */
-	const PIXEL = 'https://pixel.wp.com/t.gif';
+	public const PIXEL = 'https://pixel.wp.com/t.gif';
 
 	/**
 	 * Browser type.
 	 */
-	const BROWSER_TYPE = 'php-agent';
+	public const BROWSER_TYPE = 'php-agent';
 
 	/**
 	 * User agent.
 	 */
-	const USER_AGENT_SLUG = 'tracks-client';
+	public const USER_AGENT_SLUG = 'tracks-client';
 
 	/**
 	 * Initialize tracks client class

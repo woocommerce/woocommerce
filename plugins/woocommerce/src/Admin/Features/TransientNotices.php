@@ -16,7 +16,7 @@ class TransientNotices {
 	/**
 	 * Option name for the queue.
 	 */
-	const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
+	public const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
 
 	/**
 	 * Constructor

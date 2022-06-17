@@ -22,7 +22,7 @@ class SimpleInboxNote {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'simple-inbox-note';
+	public const NOTE_NAME = 'simple-inbox-note';
 
 	/**
 	 * Check to run to find out if we should display our note.

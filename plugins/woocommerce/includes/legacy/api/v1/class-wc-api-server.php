@@ -22,30 +22,30 @@ require_once ABSPATH . 'wp-admin/includes/admin.php';
 
 class WC_API_Server {
 
-	const METHOD_GET    = 1;
-	const METHOD_POST   = 2;
-	const METHOD_PUT    = 4;
-	const METHOD_PATCH  = 8;
-	const METHOD_DELETE = 16;
+	public const METHOD_GET    = 1;
+	public const METHOD_POST   = 2;
+	public const METHOD_PUT    = 4;
+	public const METHOD_PATCH  = 8;
+	public const METHOD_DELETE = 16;
 
-	const READABLE   = 1;  // GET
-	const CREATABLE  = 2;  // POST
-	const EDITABLE   = 14; // POST | PUT | PATCH
-	const DELETABLE  = 16; // DELETE
-	const ALLMETHODS = 31; // GET | POST | PUT | PATCH | DELETE
+	public const READABLE   = 1;  // GET
+	public const CREATABLE  = 2;  // POST
+	public const EDITABLE   = 14; // POST | PUT | PATCH
+	public const DELETABLE  = 16; // DELETE
+	public const ALLMETHODS = 31; // GET | POST | PUT | PATCH | DELETE
 
 	/**
 	 * Does the endpoint accept a raw request body?
 	 */
-	const ACCEPT_RAW_DATA = 64;
+	public const ACCEPT_RAW_DATA = 64;
 
 	/** Does the endpoint accept a request body? (either JSON or XML) */
-	const ACCEPT_DATA = 128;
+	public const ACCEPT_DATA = 128;
 
 	/**
 	 * Should we hide this endpoint from the index?
 	 */
-	const HIDDEN_ENDPOINT = 256;
+	public const HIDDEN_ENDPOINT = 256;
 
 	/**
 	 * Map of HTTP verbs to constants

@@ -23,7 +23,7 @@ class CouponPageMoved {
 
 	use NoteTraits, CouponsMovedTrait;
 
-	const NOTE_NAME = 'wc-admin-coupon-page-moved';
+	public const NOTE_NAME = 'wc-admin-coupon-page-moved';
 
 	/**
 	 * Initialize our hooks.

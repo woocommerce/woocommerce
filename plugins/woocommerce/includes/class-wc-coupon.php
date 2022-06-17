@@ -53,25 +53,25 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	);
 
 	// Coupon message codes.
-	const E_WC_COUPON_INVALID_FILTERED               = 100;
-	const E_WC_COUPON_INVALID_REMOVED                = 101;
-	const E_WC_COUPON_NOT_YOURS_REMOVED              = 102;
-	const E_WC_COUPON_ALREADY_APPLIED                = 103;
-	const E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY = 104;
-	const E_WC_COUPON_NOT_EXIST                      = 105;
-	const E_WC_COUPON_USAGE_LIMIT_REACHED            = 106;
-	const E_WC_COUPON_EXPIRED                        = 107;
-	const E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET        = 108;
-	const E_WC_COUPON_NOT_APPLICABLE                 = 109;
-	const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
-	const E_WC_COUPON_PLEASE_ENTER                   = 111;
-	const E_WC_COUPON_MAX_SPEND_LIMIT_MET            = 112;
-	const E_WC_COUPON_EXCLUDED_PRODUCTS              = 113;
-	const E_WC_COUPON_EXCLUDED_CATEGORIES            = 114;
-	const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK       = 115;
-	const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST = 116;
-	const WC_COUPON_SUCCESS                          = 200;
-	const WC_COUPON_REMOVED                          = 201;
+	public const E_WC_COUPON_INVALID_FILTERED               = 100;
+	public const E_WC_COUPON_INVALID_REMOVED                = 101;
+	public const E_WC_COUPON_NOT_YOURS_REMOVED              = 102;
+	public const E_WC_COUPON_ALREADY_APPLIED                = 103;
+	public const E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY = 104;
+	public const E_WC_COUPON_NOT_EXIST                      = 105;
+	public const E_WC_COUPON_USAGE_LIMIT_REACHED            = 106;
+	public const E_WC_COUPON_EXPIRED                        = 107;
+	public const E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET        = 108;
+	public const E_WC_COUPON_NOT_APPLICABLE                 = 109;
+	public const E_WC_COUPON_NOT_VALID_SALE_ITEMS           = 110;
+	public const E_WC_COUPON_PLEASE_ENTER                   = 111;
+	public const E_WC_COUPON_MAX_SPEND_LIMIT_MET            = 112;
+	public const E_WC_COUPON_EXCLUDED_PRODUCTS              = 113;
+	public const E_WC_COUPON_EXCLUDED_CATEGORIES            = 114;
+	public const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK       = 115;
+	public const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST = 116;
+	public const WC_COUPON_SUCCESS                          = 200;
+	public const WC_COUPON_REMOVED                          = 201;
 
 	/**
 	 * Cache group.

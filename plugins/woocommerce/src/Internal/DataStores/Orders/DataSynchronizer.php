@@ -34,7 +34,7 @@ class DataSynchronizer {
 	public const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
 
 	// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
-	const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
+	public const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
 
 	/**
 	 * The data store object to use.

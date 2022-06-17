@@ -34,7 +34,7 @@ class WC_Rate_Limiter {
 	/**
 	 * Cache group.
 	 */
-	const CACHE_GROUP = 'wc_rate_limit';
+	public const CACHE_GROUP = 'wc_rate_limit';
 
 	/**
 	 * Hook in methods.

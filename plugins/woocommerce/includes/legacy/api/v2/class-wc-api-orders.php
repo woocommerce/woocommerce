@@ -965,7 +965,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @return int returns an ID if a valid variation was found for this product
 	 */
-	function get_variation_id( $product, $variations = array() ) {
+	public function get_variation_id( $product, $variations = array() ) {
 		$variation_id = null;
 		$variations_normalized = array();
 

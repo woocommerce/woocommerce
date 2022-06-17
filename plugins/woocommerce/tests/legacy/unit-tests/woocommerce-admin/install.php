@@ -10,7 +10,7 @@
  */
 class WC_Admin_Tests_Install extends WP_UnitTestCase {
 
-	const VERSION_OPTION = 'woocommerce_admin_version';
+	public const VERSION_OPTION = 'woocommerce_admin_version';
 
 	/**
 	 * Integration test for database table creation.

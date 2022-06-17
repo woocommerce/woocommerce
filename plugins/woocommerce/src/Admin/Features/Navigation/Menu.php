@@ -27,33 +27,33 @@ class Menu {
 	 *
 	 * @var int
 	 */
-	const CAPABILITY = 1;
+	public const CAPABILITY = 1;
 
 	/**
 	 * Array index of menu callback.
 	 *
 	 * @var int
 	 */
-	const CALLBACK = 2;
+	public const CALLBACK = 2;
 
 	/**
 	 * Array index of menu callback.
 	 *
 	 * @var int
 	 */
-	const SLUG = 3;
+	public const SLUG = 3;
 
 	/**
 	 * Array index of menu CSS class string.
 	 *
 	 * @var int
 	 */
-	const CSS_CLASSES = 4;
+	public const CSS_CLASSES = 4;
 
 	/**
 	 * Array of usable menu IDs.
 	 */
-	const MENU_IDS = array(
+	public const MENU_IDS = array(
 		'primary',
 		'favorites',
 		'plugins',

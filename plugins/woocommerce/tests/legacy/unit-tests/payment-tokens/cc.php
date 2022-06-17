@@ -10,7 +10,7 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 	 * Test validation for empty/unset values.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_token_cc_validate_empty() {
+	public function test_wc_payment_token_cc_validate_empty() {
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( time() . ' ' . __FUNCTION__ );
 		$this->assertFalse( $token->validate() );
@@ -25,7 +25,7 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 	 * Test validation for expiry length.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_token_cc_validate_expiry_length() {
+	public function test_wc_payment_token_cc_validate_expiry_length() {
 		$token = new WC_Payment_Token_CC();
 		$token->set_token( time() . ' ' . __FUNCTION__ );
 		$this->assertFalse( $token->validate() );

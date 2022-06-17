@@ -24,7 +24,7 @@ class TrackingOptIn {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-usage-tracking-opt-in';
+	public const NOTE_NAME = 'wc-admin-usage-tracking-opt-in';
 
 	/**
 	 * Attach hooks.

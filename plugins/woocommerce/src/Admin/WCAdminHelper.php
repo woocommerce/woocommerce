@@ -16,9 +16,9 @@ class WCAdminHelper {
 	/**
 	 * WC Admin timestamp option name.
 	 */
-	const WC_ADMIN_TIMESTAMP_OPTION = 'woocommerce_admin_install_timestamp';
+	public const WC_ADMIN_TIMESTAMP_OPTION = 'woocommerce_admin_install_timestamp';
 
-	const WC_ADMIN_STORE_AGE_RANGES = array(
+	public const WC_ADMIN_STORE_AGE_RANGES = array(
 		'week-1'    => array(
 			'start' => 0,
 			'end'   => WEEK_IN_SECONDS,

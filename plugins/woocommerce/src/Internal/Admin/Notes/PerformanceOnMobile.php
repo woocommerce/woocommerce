@@ -24,7 +24,7 @@ class PerformanceOnMobile {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-performance-on-mobile';
+	public const NOTE_NAME = 'wc-admin-performance-on-mobile';
 
 	/**
 	 * Get the note.

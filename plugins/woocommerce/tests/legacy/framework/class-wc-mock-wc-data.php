@@ -19,7 +19,7 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 	 * Set meta type (user or post).
 	 * @param string $meta_type
 	 */
-	function set_meta_type( $meta_type ) {
+	public function set_meta_type( $meta_type ) {
 		$this->meta_type = $meta_type;
 	}
 
@@ -27,7 +27,7 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 	 * Set object ID field dynamically for testing.
 	 * @param string $object_id_field
 	 */
-	function set_object_id_field( $object_id_field ) {
+	public function set_object_id_field( $object_id_field ) {
 		$this->object_id_field_for_meta = $object_id_field;
 	}
 

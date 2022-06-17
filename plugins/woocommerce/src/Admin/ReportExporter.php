@@ -32,12 +32,12 @@ class ReportExporter {
 	/**
 	 * Export status option name.
 	 */
-	const EXPORT_STATUS_OPTION = 'woocommerce_admin_report_export_status';
+	public const EXPORT_STATUS_OPTION = 'woocommerce_admin_report_export_status';
 
 	/**
 	 * Export file download action.
 	 */
-	const DOWNLOAD_EXPORT_ACTION = 'woocommerce_admin_download_report_csv';
+	public const DOWNLOAD_EXPORT_ACTION = 'woocommerce_admin_download_report_csv';
 
 	/**
 	 * Get all available scheduling actions.

@@ -24,7 +24,7 @@ class WC_Legacy_API {
 	 * @deprecated 2.6.0
 	 * @var string
 	 */
-	const VERSION = '3.1.0';
+	public const VERSION = '3.1.0';
 
 	/**
 	 * The REST API server.

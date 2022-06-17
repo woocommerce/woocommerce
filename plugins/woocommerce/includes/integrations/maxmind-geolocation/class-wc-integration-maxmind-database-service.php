@@ -18,12 +18,12 @@ class WC_Integration_MaxMind_Database_Service {
 	/**
 	 * The name of the MaxMind database to utilize.
 	 */
-	const DATABASE = 'GeoLite2-Country';
+	public const DATABASE = 'GeoLite2-Country';
 
 	/**
 	 * The extension for the MaxMind database.
 	 */
-	const DATABASE_EXTENSION = '.mmdb';
+	public const DATABASE_EXTENSION = '.mmdb';
 
 	/**
 	 * A prefix for the MaxMind database filename.

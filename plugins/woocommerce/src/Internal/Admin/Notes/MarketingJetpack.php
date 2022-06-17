@@ -29,12 +29,12 @@ class MarketingJetpack {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-marketing-jetpack-backup';
+	public const NOTE_NAME = 'wc-admin-marketing-jetpack-backup';
 
 	/**
 	 * Product IDs that include Backup.
 	 */
-	const BACKUP_IDS = [
+	public const BACKUP_IDS = [
 		2010,
 		2011,
 		2012,

@@ -25,17 +25,17 @@ class NewSalesRecord {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-new-sales-record';
+	public const NOTE_NAME = 'wc-admin-new-sales-record';
 
 	/**
 	 * Option name for the sales record date in ISO 8601 (YYYY-MM-DD) date.
 	 */
-	const RECORD_DATE_OPTION_KEY = 'woocommerce_sales_record_date';
+	public const RECORD_DATE_OPTION_KEY = 'woocommerce_sales_record_date';
 
 	/**
 	 * Option name for the sales record amount.
 	 */
-	const RECORD_AMOUNT_OPTION_KEY = 'woocommerce_sales_record_amount';
+	public const RECORD_AMOUNT_OPTION_KEY = 'woocommerce_sales_record_amount';
 
 	/**
 	 * Returns the total of yesterday's sales.

@@ -22,14 +22,14 @@ class WC_Geolocation {
 	 *
 	 * @deprecated 3.4.0
 	 */
-	const GEOLITE_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
+	public const GEOLITE_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz';
 
 	/**
 	 * GeoLite IPv6 DB.
 	 *
 	 * @deprecated 3.4.0
 	 */
-	const GEOLITE_IPV6_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoIPv6.dat.gz';
+	public const GEOLITE_IPV6_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoIPv6.dat.gz';
 
 	/**
 	 * GeoLite2 DB.
@@ -37,7 +37,7 @@ class WC_Geolocation {
 	 * @since 3.4.0
 	 * @deprecated 3.9.0
 	 */
-	const GEOLITE2_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz';
+	public const GEOLITE2_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz';
 
 	/**
 	 * API endpoints for looking up user IP address.

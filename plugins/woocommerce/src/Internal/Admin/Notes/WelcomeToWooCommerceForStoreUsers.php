@@ -22,7 +22,7 @@ class WelcomeToWooCommerceForStoreUsers {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-welcome-to-woocommerce-for-store-users';
+	public const NOTE_NAME = 'wc-admin-welcome-to-woocommerce-for-store-users';
 
 	/**
 	 * Attach hooks.

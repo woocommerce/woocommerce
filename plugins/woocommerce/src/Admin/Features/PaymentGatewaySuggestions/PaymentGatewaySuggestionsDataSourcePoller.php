@@ -12,12 +12,12 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 	/**
 	 * Data Source Poller ID.
 	 */
-	const ID = 'payment_gateway_suggestions';
+	public const ID = 'payment_gateway_suggestions';
 
 	/**
 	 * Default data sources array.
 	 */
-	const DATA_SOURCES = array(
+	public const DATA_SOURCES = array(
 		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json',
 	);
 

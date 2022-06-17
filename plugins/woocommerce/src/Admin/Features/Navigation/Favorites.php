@@ -19,7 +19,7 @@ class Favorites {
 	 *
 	 * @var int
 	 */
-	const META_NAME = 'navigation_favorites';
+	public const META_NAME = 'navigation_favorites';
 
 	/**
 	 * Get class instance.

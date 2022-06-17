@@ -28,7 +28,7 @@ class InstallJPAndWCSPlugins {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-install-jp-and-wcs-plugins';
+	public const NOTE_NAME = 'wc-admin-install-jp-and-wcs-plugins';
 
 	/**
 	 * Constructor.

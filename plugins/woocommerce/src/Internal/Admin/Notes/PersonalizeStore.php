@@ -24,7 +24,7 @@ class PersonalizeStore {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-personalize-store';
+	public const NOTE_NAME = 'wc-admin-personalize-store';
 
 	/**
 	 * Get the note.

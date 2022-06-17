@@ -23,7 +23,7 @@ class UnsecuredReportFiles {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-remove-unsecured-report-files';
+	public const NOTE_NAME = 'wc-admin-remove-unsecured-report-files';
 
 	/**
 	 * Get the note.

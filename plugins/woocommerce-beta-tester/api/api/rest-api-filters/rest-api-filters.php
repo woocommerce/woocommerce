@@ -54,7 +54,7 @@ register_woocommerce_admin_test_helper_rest_route(
 
 
 class WCA_Test_Helper_Rest_Api_Filters {
-    const WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION = 'wc-admin-test-helper-rest-api-filters';
+    public const WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION = 'wc-admin-test-helper-rest-api-filters';
 
     public static function create( $request ) {
         $endpoint = $request->get_param('endpoint');

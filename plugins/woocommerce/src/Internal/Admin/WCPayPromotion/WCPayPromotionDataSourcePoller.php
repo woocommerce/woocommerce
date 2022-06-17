@@ -8,12 +8,12 @@ use Automattic\WooCommerce\Admin\DataSourcePoller;
  */
 class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 
-	const ID = 'payment_method_promotion';
+	public const ID = 'payment_method_promotion';
 
 	/**
 	 * Default data sources array.
 	 */
-	const DATA_SOURCES = array(
+	public const DATA_SOURCES = array(
 		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/payment-method/promotions.json',
 	);
 

@@ -16,7 +16,7 @@ class Cache {
 	/**
 	 * Cache version. Used to invalidate all cached values.
 	 */
-	const VERSION_OPTION = 'woocommerce_reports';
+	public const VERSION_OPTION = 'woocommerce_reports';
 
 	/**
 	 * Invalidate cache.

@@ -7,9 +7,9 @@ namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
  */
 class RemoteFreeExtensionsDataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
 
-	const ID = 'remote_free_extensions';
+	public const ID = 'remote_free_extensions';
 
-	const DATA_SOURCES = array(
+	public const DATA_SOURCES = array(
 		'https://woocommerce.com/wp-json/wccom/obw-free-extensions/3.0/extensions.json',
 	);
 

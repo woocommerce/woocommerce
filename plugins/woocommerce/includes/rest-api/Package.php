@@ -24,7 +24,7 @@ class Package {
 	 * @deprecated since 4.5.0. This tracks WooCommerce version now.
 	 * @var string
 	 */
-	const VERSION = WC_VERSION;
+	public const VERSION = WC_VERSION;
 
 	/**
 	 * Init the package - load the REST API Server class.

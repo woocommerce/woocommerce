@@ -24,7 +24,7 @@ class ManageOrdersOnTheGo {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-manage-orders-on-the-go';
+	public const NOTE_NAME = 'wc-admin-manage-orders-on-the-go';
 
 	/**
 	 * Get the note.

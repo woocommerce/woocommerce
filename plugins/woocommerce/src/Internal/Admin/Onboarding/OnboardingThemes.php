@@ -22,7 +22,7 @@ class OnboardingThemes {
 	 *
 	 * @var string
 	 */
-	const THEMES_TRANSIENT = 'wc_onboarding_themes';
+	public const THEMES_TRANSIENT = 'wc_onboarding_themes';
 
 	/**
 	 * Init.

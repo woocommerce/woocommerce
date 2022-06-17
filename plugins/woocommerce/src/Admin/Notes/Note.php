@@ -15,20 +15,20 @@ defined( 'ABSPATH' ) || exit;
 class Note extends \WC_Data {
 
 	// Note types.
-	const E_WC_ADMIN_NOTE_ERROR         = 'error';     // used for presenting error conditions.
-	const E_WC_ADMIN_NOTE_WARNING       = 'warning';   // used for presenting warning conditions.
-	const E_WC_ADMIN_NOTE_UPDATE        = 'update';    // i.e. used when a new version is available.
-	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';      // used for presenting informational messages.
-	const E_WC_ADMIN_NOTE_MARKETING     = 'marketing'; // used for adding marketing messages.
-	const E_WC_ADMIN_NOTE_SURVEY        = 'survey';    // used for adding survey messages.
-	const E_WC_ADMIN_NOTE_EMAIL         = 'email';     // used for adding notes that will be sent by email.
+	public const E_WC_ADMIN_NOTE_ERROR         = 'error';     // used for presenting error conditions.
+	public const E_WC_ADMIN_NOTE_WARNING       = 'warning';   // used for presenting warning conditions.
+	public const E_WC_ADMIN_NOTE_UPDATE        = 'update';    // i.e. used when a new version is available.
+	public const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';      // used for presenting informational messages.
+	public const E_WC_ADMIN_NOTE_MARKETING     = 'marketing'; // used for adding marketing messages.
+	public const E_WC_ADMIN_NOTE_SURVEY        = 'survey';    // used for adding survey messages.
+	public const E_WC_ADMIN_NOTE_EMAIL         = 'email';     // used for adding notes that will be sent by email.
 
 	// Note status codes.
-	const E_WC_ADMIN_NOTE_PENDING    = 'pending';    // the note is pending - hidden but not actioned.
-	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
-	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';   // the note has had its action completed by a user.
-	const E_WC_ADMIN_NOTE_SNOOZED    = 'snoozed';    // the note has been snoozed by a user.
-	const E_WC_ADMIN_NOTE_SENT       = 'sent';    // the note has been sent by email to the user.
+	public const E_WC_ADMIN_NOTE_PENDING    = 'pending';    // the note is pending - hidden but not actioned.
+	public const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
+	public const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';   // the note has had its action completed by a user.
+	public const E_WC_ADMIN_NOTE_SNOOZED    = 'snoozed';    // the note has been snoozed by a user.
+	public const E_WC_ADMIN_NOTE_SENT       = 'sent';    // the note has been sent by email to the user.
 
 	/**
 	 * This is the name of this object type.

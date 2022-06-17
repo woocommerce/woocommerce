@@ -24,7 +24,7 @@ class ChoosingTheme {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-choosing-a-theme';
+	public const NOTE_NAME = 'wc-admin-choosing-a-theme';
 
 	/**
 	 * Get the note.

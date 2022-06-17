@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  * WC Pay Promotion engine.
  */
 class Init {
-	const EXPLAT_VARIATION_PREFIX = 'woocommerce_wc_pay_promotion_payment_methods_table_';
+	public const EXPLAT_VARIATION_PREFIX = 'woocommerce_wc_pay_promotion_payment_methods_table_';
 
 	/**
 	 * Constructor.

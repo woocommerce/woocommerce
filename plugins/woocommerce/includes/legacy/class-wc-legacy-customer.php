@@ -168,7 +168,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @return bool
 	 */
-	function is_paying_customer( $user_id = '' ) {
+	public function is_paying_customer( $user_id = '' ) {
 		wc_deprecated_function( 'WC_Customer::is_paying_customer', '3.0', 'WC_Customer::get_is_paying_customer' );
 		if ( ! empty( $user_id ) ) {
 			$user_id = get_current_user_id();
@@ -179,7 +179,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Legacy get address.
 	 */
-	function get_address() {
+	public function get_address() {
 		wc_deprecated_function( 'WC_Customer::get_address', '3.0', 'WC_Customer::get_billing_address_1' );
 		return $this->get_billing_address_1();
 	}
@@ -187,7 +187,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Legacy get address 2.
 	 */
-	function get_address_2() {
+	public function get_address_2() {
 		wc_deprecated_function( 'WC_Customer::get_address_2', '3.0', 'WC_Customer::get_billing_address_2' );
 		return $this->get_billing_address_2();
 	}
@@ -195,7 +195,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Legacy get country.
 	 */
-	function get_country() {
+	public function get_country() {
 		wc_deprecated_function( 'WC_Customer::get_country', '3.0', 'WC_Customer::get_billing_country' );
 		return $this->get_billing_country();
 	}
@@ -203,7 +203,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Legacy get state.
 	 */
-	function get_state() {
+	public function get_state() {
 		wc_deprecated_function( 'WC_Customer::get_state', '3.0', 'WC_Customer::get_billing_state' );
 		return $this->get_billing_state();
 	}
@@ -211,7 +211,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Legacy get postcode.
 	 */
-	function get_postcode() {
+	public function get_postcode() {
 		wc_deprecated_function( 'WC_Customer::get_postcode', '3.0', 'WC_Customer::get_billing_postcode' );
 		return $this->get_billing_postcode();
 	}
@@ -219,7 +219,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	/**
 	 * Legacy get city.
 	 */
-	function get_city() {
+	public function get_city() {
 		wc_deprecated_function( 'WC_Customer::get_city', '3.0', 'WC_Customer::get_billing_city' );
 		return $this->get_billing_city();
 	}
@@ -229,7 +229,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @param string $country
 	 */
-	function set_country( $country ) {
+	public function set_country( $country ) {
 		wc_deprecated_function( 'WC_Customer::set_country', '3.0', 'WC_Customer::set_billing_country' );
 		$this->set_billing_country( $country );
 	}
@@ -239,7 +239,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @param string $state
 	 */
-	function set_state( $state ) {
+	public function set_state( $state ) {
 		wc_deprecated_function( 'WC_Customer::set_state', '3.0', 'WC_Customer::set_billing_state' );
 		$this->set_billing_state( $state );
 	}
@@ -249,7 +249,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @param string $postcode
 	 */
-	function set_postcode( $postcode ) {
+	public function set_postcode( $postcode ) {
 		wc_deprecated_function( 'WC_Customer::set_postcode', '3.0', 'WC_Customer::set_billing_postcode' );
 		$this->set_billing_postcode( $postcode );
 	}
@@ -259,7 +259,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @param string $city
 	 */
-	function set_city( $city ) {
+	public function set_city( $city ) {
 		wc_deprecated_function( 'WC_Customer::set_city', '3.0', 'WC_Customer::set_billing_city' );
 		$this->set_billing_city( $city );
 	}
@@ -269,7 +269,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @param string $address
 	 */
-	function set_address( $address ) {
+	public function set_address( $address ) {
 		wc_deprecated_function( 'WC_Customer::set_address', '3.0', 'WC_Customer::set_billing_address' );
 		$this->set_billing_address( $address );
 	}
@@ -279,7 +279,7 @@ abstract class WC_Legacy_Customer extends WC_Data {
 	 *
 	 * @param string $address
 	 */
-	function set_address_2( $address ) {
+	public function set_address_2( $address ) {
 		wc_deprecated_function( 'WC_Customer::set_address_2', '3.0', 'WC_Customer::set_billing_address_2' );
 		$this->set_billing_address_2( $address );
 	}

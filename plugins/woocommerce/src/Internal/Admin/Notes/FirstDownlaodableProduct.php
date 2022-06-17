@@ -24,7 +24,7 @@ class FirstDownlaodableProduct {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-first-downloadable-product';
+	public const NOTE_NAME = 'wc-admin-first-downloadable-product';
 
 	/**
 	 * Get the note.

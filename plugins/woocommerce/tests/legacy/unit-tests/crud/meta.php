@@ -14,7 +14,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 * eg_disappearing_item_meta() that saves additional meta data on the
 	 * object via by pre-CRUD and CRUD methods.
 	 */
-	function add_different_object_meta( $object_id ) {
+	public function add_different_object_meta( $object_id ) {
 
 		// Get a new instance of the item or order object
 		$object = ( $this->item_id == $object_id ) ? WC_Order_Factory::get_order_item( $object_id ) : wc_get_order( $object_id );
@@ -34,7 +34,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 * item's ID to callbacks. Afterwards, save the existing item without that other meta here and log the result to
 	 * show that data has been removed.
 	 */
-	function test_disappearing_item_meta() {
+	public function test_disappearing_item_meta() {
 		// Setup for testing by making an item.
 		$item          = new WC_Order_Item_Product();
 		$this->item_id = $item->save();
@@ -76,7 +76,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 * callbacks. Afterwards, save the existing order without that other meta here and log the result to show that data
 	 * has been removed.
 	 */
-	function test_disappearing_order_meta() {
+	public function test_disappearing_order_meta() {
 		// Setup for testing by making an item.
 		$order          = new WC_Order();
 		$this->order_id = $order->save();
@@ -117,7 +117,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 * Tests that the meta data cache gets flushed when update_post_meta updates the object's meta.
 	 * @see https://github.com/woocommerce/woocommerce/issues/15274
 	 */
-	function test_get_meta_data_after_update_post_meta() {
+	public function test_get_meta_data_after_update_post_meta() {
 		// Create an object.
 		$object = new WC_Product();
 		$object->save();
@@ -136,7 +136,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	/**
 	 * Tests setting objects and strings in meta to ensure slashing/unslashing works.
 	 */
-	function test_strings_in_meta() {
+	public function test_strings_in_meta() {
 		// Create objects.
 		$object                 = new WC_Product();
 		$object_to_store        = new stdClass();

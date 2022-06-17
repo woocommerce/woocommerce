@@ -26,7 +26,7 @@ class InsightFirstProductAndPayment {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-insight-first-product-and-payment';
+	public const NOTE_NAME = 'wc-admin-insight-first-product-and-payment';
 
 	/**
 	 * Get the note.

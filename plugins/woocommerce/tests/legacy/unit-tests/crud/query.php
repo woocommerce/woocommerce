@@ -12,7 +12,7 @@ class WC_Tests_WC_Object_Query extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1.0
 	 */
-	function test_default_query() {
+	public function test_default_query() {
 		$query = new WC_Mock_WC_Object_Query();
 
 		$this->assertNotEmpty( $query->get_query_vars() );
@@ -25,7 +25,7 @@ class WC_Tests_WC_Object_Query extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.1.0
 	 */
-	function test_query_with_args() {
+	public function test_query_with_args() {
 		$args  = array(
 			'limit' => 15,
 		);

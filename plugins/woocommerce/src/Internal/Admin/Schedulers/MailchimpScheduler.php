@@ -9,14 +9,14 @@ namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
  */
 class MailchimpScheduler {
 
-	const SUBSCRIBE_ENDPOINT     = 'https://woocommerce.com/wp-json/wccom/v1/subscribe';
-	const SUBSCRIBE_ENDPOINT_DEV = 'http://woocommerce.test/wp-json/wccom/v1/subscribe';
+	public const SUBSCRIBE_ENDPOINT     = 'https://woocommerce.com/wp-json/wccom/v1/subscribe';
+	public const SUBSCRIBE_ENDPOINT_DEV = 'http://woocommerce.test/wp-json/wccom/v1/subscribe';
 
-	const SUBSCRIBED_OPTION_NAME             = 'woocommerce_onboarding_subscribed_to_mailchimp';
-	const SUBSCRIBED_ERROR_COUNT_OPTION_NAME = 'woocommerce_onboarding_subscribed_to_mailchimp_error_count';
-	const MAX_ERROR_THRESHOLD                = 3;
+	public const SUBSCRIBED_OPTION_NAME             = 'woocommerce_onboarding_subscribed_to_mailchimp';
+	public const SUBSCRIBED_ERROR_COUNT_OPTION_NAME = 'woocommerce_onboarding_subscribed_to_mailchimp_error_count';
+	public const MAX_ERROR_THRESHOLD                = 3;
 
-	const LOGGER_CONTEXT = 'mailchimp_scheduler';
+	public const LOGGER_CONTEXT = 'mailchimp_scheduler';
 
 	/**
 	 * The logger instance.

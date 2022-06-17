@@ -29,7 +29,7 @@ class AddingAndManangingProducts {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-adding-and-managing-products';
+	public const NOTE_NAME = 'wc-admin-adding-and-managing-products';
 
 	/**
 	 * Get the note.

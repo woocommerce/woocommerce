@@ -22,7 +22,7 @@ class ManageStoreActivityFromHomeScreen {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-manage-store-activity-from-home-screen';
+	public const NOTE_NAME = 'wc-admin-manage-store-activity-from-home-screen';
 
 	/**
 	 * Attach hooks.

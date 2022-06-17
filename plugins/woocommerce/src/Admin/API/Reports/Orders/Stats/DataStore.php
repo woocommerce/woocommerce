@@ -29,7 +29,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cron event name.
 	 */
-	const CRON_EVENT = 'wc_order_stats_update';
+	public const CRON_EVENT = 'wc_order_stats_update';
 
 	/**
 	 * Cache identifier.

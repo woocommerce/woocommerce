@@ -25,17 +25,17 @@ class WooCommercePayments {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-woocommerce-payments';
+	public const NOTE_NAME = 'wc-admin-woocommerce-payments';
 
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const PLUGIN_SLUG = 'woocommerce-payments';
+	public const PLUGIN_SLUG = 'woocommerce-payments';
 
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const PLUGIN_FILE = 'woocommerce-payments/woocommerce-payments.php';
+	public const PLUGIN_FILE = 'woocommerce-payments/woocommerce-payments.php';
 
 	/**
 	 * Attach hooks.

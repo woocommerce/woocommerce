@@ -17,7 +17,7 @@ abstract class ImportScheduler implements ImportInterface {
 	/**
 	 * Import stats option name.
 	 */
-	const IMPORT_STATS_OPTION = 'woocommerce_admin_import_stats';
+	public const IMPORT_STATS_OPTION = 'woocommerce_admin_import_stats';
 
 	/**
 	 * Scheduler traits.

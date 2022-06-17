@@ -24,7 +24,7 @@ class AddFirstProduct {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-add-first-product-note';
+	public const NOTE_NAME = 'wc-admin-add-first-product-note';
 
 	/**
 	 * Get the note.

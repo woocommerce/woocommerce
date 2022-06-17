@@ -24,7 +24,7 @@ class EditProductsOnTheMove {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-edit-products-on-the-move';
+	public const NOTE_NAME = 'wc-admin-edit-products-on-the-move';
 
 	/**
 	 * Get the note.

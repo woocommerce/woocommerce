@@ -17,7 +17,7 @@ class Reviews {
 	/**
 	 * Admin page identifier.
 	 */
-	const MENU_SLUG = 'product-reviews';
+	public const MENU_SLUG = 'product-reviews';
 
 	/**
 	 * Reviews page hook name.

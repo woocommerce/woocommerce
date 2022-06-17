@@ -23,7 +23,7 @@ class PaymentsRemindMeLater {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-payments-remind-me-later';
+	public const NOTE_NAME = 'wc-admin-payments-remind-me-later';
 
 	/**
 	 * Should this note exist?

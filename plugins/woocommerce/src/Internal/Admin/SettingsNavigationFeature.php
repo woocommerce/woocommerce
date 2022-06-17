@@ -15,7 +15,7 @@ class SettingsNavigationFeature {
 	/**
 	 * Option name used to toggle this feature.
 	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_settings_enabled';
+	public const TOGGLE_OPTION_NAME = 'woocommerce_settings_enabled';
 
 	/**
 	 * Class instance.

@@ -19,17 +19,17 @@ class OrderMilestones {
 	/**
 	 * Name of the "other milestones" note.
 	 */
-	const NOTE_NAME = 'wc-admin-orders-milestone';
+	public const NOTE_NAME = 'wc-admin-orders-milestone';
 
 	/**
 	 * Option key name to store last order milestone.
 	 */
-	const LAST_ORDER_MILESTONE_OPTION_KEY = 'woocommerce_admin_last_orders_milestone';
+	public const LAST_ORDER_MILESTONE_OPTION_KEY = 'woocommerce_admin_last_orders_milestone';
 
 	/**
 	 * Hook to process order milestones.
 	 */
-	const PROCESS_ORDERS_MILESTONE_HOOK = 'wc_admin_process_orders_milestone';
+	public const PROCESS_ORDERS_MILESTONE_HOOK = 'wc_admin_process_orders_milestone';
 
 	/**
 	 * Allowed order statuses for calculating milestones.

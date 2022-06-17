@@ -21,7 +21,7 @@ class OnboardingProducts {
 	 *
 	 * @var string
 	 */
-	const PRODUCT_DATA_TRANSIENT = 'wc_onboarding_product_data';
+	public const PRODUCT_DATA_TRANSIENT = 'wc_onboarding_product_data';
 
 	/**
 	 * Get a list of allowed product types for the onboarding wizard.

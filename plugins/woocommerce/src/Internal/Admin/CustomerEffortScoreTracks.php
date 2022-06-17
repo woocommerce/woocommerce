@@ -16,63 +16,63 @@ class CustomerEffortScoreTracks {
 	/**
 	 * Option name for the CES Tracks queue.
 	 */
-	const CES_TRACKS_QUEUE_OPTION_NAME = 'woocommerce_ces_tracks_queue';
+	public const CES_TRACKS_QUEUE_OPTION_NAME = 'woocommerce_ces_tracks_queue';
 
 	/**
 	 * Option name for the clear CES Tracks queue for page.
 	 */
-	const CLEAR_CES_TRACKS_QUEUE_FOR_PAGE_OPTION_NAME =
+	public const CLEAR_CES_TRACKS_QUEUE_FOR_PAGE_OPTION_NAME =
 		'woocommerce_clear_ces_tracks_queue_for_page';
 
 	/**
 	 * Option name for the set of actions that have been shown.
 	 */
-	const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
+	public const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 
 	/**
 	 * Action name for product add/publish.
 	 */
-	const PRODUCT_ADD_PUBLISH_ACTION_NAME = 'product_add_publish';
+	public const PRODUCT_ADD_PUBLISH_ACTION_NAME = 'product_add_publish';
 
 	/**
 	 * Action name for product update.
 	 */
-	const PRODUCT_UPDATE_ACTION_NAME = 'product_update';
+	public const PRODUCT_UPDATE_ACTION_NAME = 'product_update';
 
 	/**
 	 * Action name for shop order update.
 	 */
-	const SHOP_ORDER_UPDATE_ACTION_NAME = 'shop_order_update';
+	public const SHOP_ORDER_UPDATE_ACTION_NAME = 'shop_order_update';
 
 	/**
 	 * Action name for settings change.
 	 */
-	const SETTINGS_CHANGE_ACTION_NAME = 'settings_change';
+	public const SETTINGS_CHANGE_ACTION_NAME = 'settings_change';
 
 	/**
 	 * Action name for add product categories.
 	 */
-	const ADD_PRODUCT_CATEGORIES_ACTION_NAME = 'add_product_categories';
+	public const ADD_PRODUCT_CATEGORIES_ACTION_NAME = 'add_product_categories';
 
 	/**
 	 * Action name for add product tags.
 	 */
-	const ADD_PRODUCT_TAGS_ACTION_NAME = 'add_product_tags';
+	public const ADD_PRODUCT_TAGS_ACTION_NAME = 'add_product_tags';
 
 	/*
 	 * Action name for add product attributes.
 	 */
-	const ADD_PRODUCT_ATTRIBUTES_ACTION_NAME = 'add_product_attributes';
+	public const ADD_PRODUCT_ATTRIBUTES_ACTION_NAME = 'add_product_attributes';
 
 	/**
 	 * Action name for import products.
 	 */
-	const IMPORT_PRODUCTS_ACTION_NAME = 'import_products';
+	public const IMPORT_PRODUCTS_ACTION_NAME = 'import_products';
 
 	/**
 	 * Action name for search.
 	 */
-	const SEARCH_ACTION_NAME = 'ces_search';
+	public const SEARCH_ACTION_NAME = 'ces_search';
 
 	/**
 	 * Label for the snackbar that appears when a user submits the survey.

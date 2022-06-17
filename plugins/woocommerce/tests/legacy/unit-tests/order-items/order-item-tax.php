@@ -12,7 +12,7 @@ class WC_Tests_Order_Item_Tax extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_set_get_tax_totals() {
+	public function test_set_get_tax_totals() {
 
 		$item = new WC_Order_Item_Tax();
 		$this->assertEquals( 0, $item->get_tax_total() );
@@ -32,7 +32,7 @@ class WC_Tests_Order_Item_Tax extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.0.0
 	 */
-	function test_set_get_shipping_tax_totals() {
+	public function test_set_get_shipping_tax_totals() {
 
 		$item = new WC_Order_Item_Tax();
 		$this->assertEquals( 0, $item->get_shipping_tax_total() );

@@ -25,7 +25,7 @@ class WooCommerceSubscriptions {
 	/**
 	 * Name of the note for use in the database.
 	 */
-	const NOTE_NAME = 'wc-admin-woocommerce-subscriptions';
+	public const NOTE_NAME = 'wc-admin-woocommerce-subscriptions';
 
 	/**
 	 * Get the note.

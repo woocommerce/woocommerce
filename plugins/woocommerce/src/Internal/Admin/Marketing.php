@@ -23,14 +23,14 @@ class Marketing {
 	 *
 	 * @var string
 	 */
-	const RECOMMENDED_PLUGINS_TRANSIENT = 'wc_marketing_recommended_plugins';
+	public const RECOMMENDED_PLUGINS_TRANSIENT = 'wc_marketing_recommended_plugins';
 
 	/**
 	 * Name of knowledge base post transient.
 	 *
 	 * @var string
 	 */
-	const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
+	public const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
 
 	/**
 	 * Class instance.

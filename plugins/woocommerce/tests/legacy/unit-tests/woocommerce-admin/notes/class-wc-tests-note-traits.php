@@ -20,7 +20,7 @@ class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 	/**
 	 * Constant required to use NoteTraits.
 	 */
-	const NOTE_NAME = 'Test note';
+	public const NOTE_NAME = 'Test note';
 
 	/**
 	 * @doesNotPerformAssertions
