@@ -23,9 +23,10 @@ const getInputValue = ( id: string ) => {
 
 const getTinyMceValue = ( id: string ) => {
 	const iframe = document.querySelector< HTMLIFrameElement >( id );
-	const tinymce = iframe?.contentWindow?.document.querySelector< HTMLElement >(
-		'#tinymce'
-	);
+	const tinymce =
+		iframe?.contentWindow?.document.querySelector< HTMLElement >(
+			'#tinymce'
+		);
 	return tinymce?.innerHTML || '';
 };
 
@@ -91,24 +92,23 @@ export const useProductStepChange = () => {
 		Partial< Record< ProductTourStepName, string > >
 	>( {} );
 	const [ isLoaded, setIsLoaded ] = useState( false );
-	const getValues: () => Partial<
-		Record< ProductTourStepName, string >
-	> = useCallback( () => {
-		return {
-			'product-name': getInputValue( '#title' ),
-			'product-description': getProductDescriptionValue(
-				isContentEditorTmceActive
-			),
-			// For product data, we're just going to detect change if price is changed.
-			'product-data': getInputValue( '#_regular_price' ),
-			'product-short-description': getProductShortDescriptionValue(
-				isExcerptEditorTmceActive
-			),
-			'product-image': getProductImageValue(),
-			'product-tags': getProductTagsValue(),
-			'product-categories': getProductCategoriesValue(),
-		};
-	}, [ isContentEditorTmceActive, isExcerptEditorTmceActive ] );
+	const getValues: () => Partial< Record< ProductTourStepName, string > > =
+		useCallback( () => {
+			return {
+				'product-name': getInputValue( '#title' ),
+				'product-description': getProductDescriptionValue(
+					isContentEditorTmceActive
+				),
+				// For product data, we're just going to detect change if price is changed.
+				'product-data': getInputValue( '#_regular_price' ),
+				'product-short-description': getProductShortDescriptionValue(
+					isExcerptEditorTmceActive
+				),
+				'product-image': getProductImageValue(),
+				'product-tags': getProductTagsValue(),
+				'product-categories': getProductCategoriesValue(),
+			};
+		}, [ isContentEditorTmceActive, isExcerptEditorTmceActive ] );
 
 	// If value has changed and isn't empty, returns as changed.
 	const hasUpdatedInfo: ( key: ProductTourStepName ) => boolean = useCallback(

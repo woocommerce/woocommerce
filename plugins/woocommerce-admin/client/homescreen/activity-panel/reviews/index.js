@@ -49,12 +49,8 @@ class ReviewsPanel extends Component {
 	}
 
 	deleteReview( reviewId ) {
-		const {
-			deleteReview,
-			createNotice,
-			updateReview,
-			clearReviewsCache,
-		} = this.props;
+		const { deleteReview, createNotice, updateReview, clearReviewsCache } =
+			this.props;
 		if ( reviewId ) {
 			deleteReview( reviewId )
 				.then( () => {
@@ -370,9 +366,8 @@ export { ReviewsPanel };
 export default compose( [
 	withSelect( ( select, props ) => {
 		const { hasUnapprovedReviews } = props;
-		const { getReviews, getReviewsError, isResolving } = select(
-			REVIEWS_STORE_NAME
-		);
+		const { getReviews, getReviewsError, isResolving } =
+			select( REVIEWS_STORE_NAME );
 		let reviews = [];
 		let isError = false;
 		let isRequesting = false;
@@ -389,9 +384,8 @@ export default compose( [
 		};
 	} ),
 	withDispatch( ( dispatch, props ) => {
-		const { deleteReview, updateReview, invalidateResolution } = dispatch(
-			REVIEWS_STORE_NAME
-		);
+		const { deleteReview, updateReview, invalidateResolution } =
+			dispatch( REVIEWS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		const clearReviewsCache = () => {

@@ -57,9 +57,8 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
 	const { gatewayIsActive, paymentGateway } = useSelect( ( select ) => {
 		const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
-		const activePlugins: string[] = select(
-			PLUGINS_STORE_NAME
-		).getActivePlugins();
+		const activePlugins: string[] =
+			select( PLUGINS_STORE_NAME ).getActivePlugins();
 		const isActive = activePlugins && activePlugins.includes( pluginSlug );
 		let paymentGatewayData;
 		if ( isActive ) {

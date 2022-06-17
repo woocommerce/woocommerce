@@ -358,9 +358,9 @@ window.wpNavMenuUrlUpdate = function ( query ) {
 	const nextQuery = getPersistedQuery( query );
 	const excludedScreens = getQueryExcludedScreens();
 
-	Array.from(
-		document.querySelectorAll( '#adminmenu a' )
-	).forEach( ( item ) => updateLinkHref( item, nextQuery, excludedScreens ) );
+	Array.from( document.querySelectorAll( '#adminmenu a' ) ).forEach(
+		( item ) => updateLinkHref( item, nextQuery, excludedScreens )
+	);
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link

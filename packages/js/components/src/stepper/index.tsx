@@ -68,13 +68,8 @@ export const Stepper: React.FC< StepperProps > = ( {
 		<div className={ stepperClassName }>
 			<div className="woocommerce-stepper__steps">
 				{ steps.map( ( step, i ) => {
-					const {
-						key,
-						label,
-						description,
-						isComplete,
-						onClick,
-					} = step;
+					const { key, label, description, isComplete, onClick } =
+						step;
 					const isCurrentStep = key === currentStep;
 					const stepClassName = classnames(
 						'woocommerce-stepper__step',

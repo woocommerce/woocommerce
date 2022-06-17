@@ -36,8 +36,7 @@ const advancedFilters = {
 				add: 'Order Status',
 				remove: 'Remove order status filter',
 				rule: 'Select an order status filter match',
-				title:
-					'{{title}}Order Status{{/title}} {{rule /}} {{filter /}}',
+				title: '{{title}}Order Status{{/title}} {{rule /}} {{filter /}}',
 				filter: 'Select an order status',
 			},
 			rules: [
@@ -105,8 +104,7 @@ const advancedFilters = {
 				add: 'Item Quantity',
 				remove: 'Remove item quantity filter',
 				rule: 'Select an item quantity filter match',
-				title:
-					'{{title}}Item Quantity is{{/title}} {{rule /}} {{filter /}}',
+				title: '{{title}}Item Quantity is{{/title}} {{rule /}} {{filter /}}',
 			},
 			rules: [
 				{

@@ -47,9 +47,8 @@ export abstract class BasePage {
 
 	getDropdownTypeahead( selector: string ): DropdownTypeaheadField {
 		if ( ! this.dropDownTypeAheadElements[ selector ] ) {
-			this.dropDownTypeAheadElements[
-				selector
-			] = new DropdownTypeaheadField( page, selector );
+			this.dropDownTypeAheadElements[ selector ] =
+				new DropdownTypeaheadField( page, selector );
 		}
 
 		return this.dropDownTypeAheadElements[ selector ];

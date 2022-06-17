@@ -76,14 +76,8 @@ class DatePicker extends Component {
 	}
 
 	render() {
-		const {
-			date,
-			disabled,
-			text,
-			dateFormat,
-			error,
-			isInvalidDate,
-		} = this.props;
+		const { date, disabled, text, dateFormat, error, isInvalidDate } =
+			this.props;
 
 		return (
 			<Dropdown
