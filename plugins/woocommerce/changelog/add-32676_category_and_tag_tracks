@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add wpAdmin scripts for tracking actions in the category, tags, and attribute pages. #33118

@@ -9,6 +9,27 @@ namespace Automattic\WooCommerce\Utilities;
  * A class of utilities for dealing with arrays.
  */
 class ArrayUtil {
+
+	/**
+	 * Automatic selector type for the 'select' method.
+	 */
+	public const SELECT_BY_AUTO = 0;
+
+	/**
+	 * Object method selector type for the 'select' method.
+	 */
+	public const SELECT_BY_OBJECT_METHOD = 1;
+
+	/**
+	 * Object property selector type for the 'select' method.
+	 */
+	public const SELECT_BY_OBJECT_PROPERTY = 2;
+
+	/**
+	 * Array key selector type for the 'select' method.
+	 */
+	public const SELECT_BY_ARRAY_KEY = 3;
+
 	/**
 	 * Get a value from an nested array by specifying the entire key hierarchy with '::' as separator.
 	 *
@@ -109,6 +130,43 @@ class ArrayUtil {
 		}
 
 		return $str;
+	}
+
+	/**
+	 * Select one single value from all the items in an array of either arrays or objects based on a selector.
+	 * For arrays, the selector is a key name; for objects, the selector can be either a method name or a property name.
+	 *
+	 * @param array  $items Items to apply the selection to.
+	 * @param string $selector_name Key, method or property name to use as a selector.
+	 * @param int    $selector_type Selector type, one of the SELECT_BY_* constants.
+	 * @return array The selected values.
+	 */
+	public static function select( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ) {
+		if ( self::SELECT_BY_OBJECT_METHOD === $selector_type ) {
+			$callback = function( $item ) use ( $selector_name ) {
+				return $item->$selector_name();
+			};
+		} elseif ( self::SELECT_BY_OBJECT_PROPERTY === $selector_type ) {
+			$callback = function( $item ) use ( $selector_name ) {
+				return $item->$selector_name;
+			};
+		} elseif ( self::SELECT_BY_ARRAY_KEY === $selector_type ) {
+			$callback = function( $item ) use ( $selector_name ) {
+				return $item[ $selector_name ];
+			};
+		} else {
+			$callback = function( $item ) use ( $selector_name ) {
+				if ( is_array( $item ) ) {
+					return $item[ $selector_name ];
+				} elseif ( method_exists( $item, $selector_name ) ) {
+					return $item->$selector_name();
+				} else {
+					return $item->$selector_name;
+				}
+			};
+		}
+
+		return array_map( $callback, $items );
 	}
 }
 

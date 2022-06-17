@@ -3,9 +3,19 @@ $progress-complete-color: #007cba;
 .woocommerce-task-progress-header {
 	position: relative;
 
+	@at-root .woocommerce-setup-panel & h1 {
+		font-size: 16px;
+		font-weight: 600;
+	}
+
 	h1 {
 		font-size: 24px;
 	}
+
+	@at-root .woocommerce-setup-panel & p {
+		font-size: 16px;
+	}
+
 	p {
 		color: $gray-700;
 		font-size: 16px;

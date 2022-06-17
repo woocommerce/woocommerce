@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+New filter `woocommerce_taxonomy_archive_description_raw` added to provide a further way to modify product archive descriptions.

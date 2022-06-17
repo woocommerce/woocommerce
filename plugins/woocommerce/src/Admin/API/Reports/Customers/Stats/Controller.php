@@ -64,6 +64,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$args['last_order_after']    = $request['last_order_after'];
 		$args['customers']           = $request['customers'];
 		$args['fields']              = $request['fields'];
+		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -384,6 +385,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			'items'             => array(
 				'type' => 'string',
 			),
+		);
+		$params['force_cache_refresh'] = array(
+			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

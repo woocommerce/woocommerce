@@ -612,13 +612,29 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 					'year'    => 4,
 				),
 			),
+			// Test change of DST times.
+			array(
+				'start'      => '2021-10-01T00:00:00',
+				'end'        => '2021-10-31T23:59:59',
+				'week_start' => 1,
+				'timezone'   => 'EST',
+				'intervals'  => array(
+					'hour'    => 31 * 24,
+					'day'     => 31,
+					'week'    => 5,
+					'month'   => 1,
+					'quarter' => 1,
+					'year'    => 1,
+				),
+			),
 		);
 
 		foreach ( $test_settings as $setting ) {
 			update_option( 'start_of_week', $setting['week_start'] );
 			foreach ( $setting['intervals'] as $interval => $exp_value ) {
-				$start_datetime = new DateTime( $setting['start'], self::$local_tz );
-				$end_datetime   = new DateTime( $setting['end'], self::$local_tz );
+				$timezone       = isset( $setting['timezone'] ) ? new DateTimeZone( $setting['timezone'] ) : self::$local_tz;
+				$start_datetime = new DateTime( $setting['start'], $timezone );
+				$end_datetime   = new DateTime( $setting['end'], $timezone );
 				$this->assertEquals( $exp_value, TimeInterval::intervals_between( $start_datetime, $end_datetime, $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
 			}
 		}
@@ -750,6 +766,45 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
+	}
+
+	/**
+	 * Tests for the exact datetime returned by next_week_start to make sure it
+	 * returns the exact time and timezone with shifting timezones
+	 * between PHP settings and WordPress config.
+	 */
+	public function test_next_week_start_correct_timezone_calculation() {
+		$original_timezone = date_default_timezone_get();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'UTC' );
+		$start_datetime = new \DateTime( '2022-05-02T00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$next_week_datetime = TimeInterval::next_week_start( $start_datetime, false );
+		date_default_timezone_set( $original_timezone );
+		// @codingStandardsIgnoreEnd
+		$this->assertEquals( '2022-05-09T00:00:00', $next_week_datetime->format( TimeInterval::$iso_datetime_format ) );
+		$this->assertEquals( 'Europe/Berlin', $next_week_datetime->getTimezone()->getName() );
+	}
+
+	/**
+	 * Tests when users manually set timezone by date_default_timezone_set in wp-settings.php.
+	 * Since we're using get_weekstartend, next_week_start should preemptively set
+	 * the date object with the default timezone.
+	 */
+	public function test_next_week_start_timezone_loop() {
+		$original_timezone = date_default_timezone_get();
+		// @codingStandardsIgnoreStart
+		date_default_timezone_set( 'Europe/Berlin' );
+		$start_datetime = new \DateTime( '01-05-2022T00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$end_datetime = new \DateTime( '26-05-2022T00:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
+		$week_count = 0;
+		do {
+			$start_datetime = TimeInterval::next_week_start( $start_datetime, false );
+			$week_count++;
+		} while ( $start_datetime <= $end_datetime && $week_count < 10 );
+		date_default_timezone_set( $original_timezone );
+		// @codingStandardsIgnoreEnd
+		// Value more than 5 should mean that loop never terminated.
+		$this->assertEquals( 5, $week_count );
 	}
 
 	/**
@@ -957,5 +1012,108 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$this->assertTrue(
 			TimeInterval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00', '2019-01-15T00:00:00' ), null, 'param' )
 		);
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_week" timeframes.
+	 */
+	public function test_timeframes_last_week() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_week', $datetime );
+
+		$this->assertEquals( '2022-05-16 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-05-22 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-05-16' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_week', $datetime );
+
+		$this->assertEquals( '2022-05-09 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-05-15 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-01-02' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_week', $datetime );
+
+		$this->assertEquals( '2021-12-20 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-26 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_month" timeframes.
+	 */
+	public function test_timeframes_last_month() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_month', $datetime );
+
+		$this->assertEquals( '2022-04-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-04-30 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2021-01-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_month', $datetime );
+
+		$this->assertEquals( '2020-12-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2020-12-31 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_quarter" timeframes.
+	 */
+	public function test_timeframes_last_quarter() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2022-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-03-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-01-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2021-10-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-07-18' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2022-04-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-06-30 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2022-11-07' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
+
+		$this->assertEquals( '2022-07-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2022-09-31 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_6_months" timeframes.
+	 */
+	public function test_timeframes_last_6_months() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_6_months', $datetime );
+
+		$this->assertEquals( '2021-07-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2021-09-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_6_months', $datetime );
+
+		$this->assertEquals( '2021-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-06-30 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * Test that we get the correct start and end times for "last_year" timeframes.
+	 */
+	public function test_timeframes_last_year() {
+		$datetime = new DateTime( '2022-05-26' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_year', $datetime );
+
+		$this->assertEquals( '2021-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2021-12-31 23:59:59', $dates['end'] );
+
+		$datetime = new DateTime( '2021-09-12' );
+		$dates    = TimeInterval::get_timeframe_dates( 'last_year', $datetime );
+
+		$this->assertEquals( '2020-01-01 00:00:00', $dates['start'] );
+		$this->assertEquals( '2020-12-31 23:59:59', $dates['end'] );
 	}
 }

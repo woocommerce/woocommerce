@@ -18,7 +18,7 @@
 		.woocommerce-list__item {
 			width: 217px;
 			height: 200px;
-			padding: 40px 24px;
+			align-items: stretch;
 		}
 
 		.woocommerce-list__item-after {
@@ -26,7 +26,7 @@
 		}
 
 		.woocommerce-list__item-inner {
-			padding: 0;
+			padding: 40px 24px;
 		}
 	}
 

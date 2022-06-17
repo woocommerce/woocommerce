@@ -92,3 +92,6 @@ allure-results
 /plugins/woocommerce/e2e/output
 /plugins/woocommerce/e2e/report
 /plugins/woocommerce/e2e/storage
+
+# Turborepo
+.turbo

@@ -31,7 +31,7 @@ import InboxPanel from '../inbox-panel';
 import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
-import { TasksPlaceholder } from '../tasks';
+import { TasksPlaceholder, useActiveSetupTasklist } from '../tasks';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
@@ -41,19 +41,12 @@ import { WelcomeModal } from './welcome-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { ProgressTitle } from '../task-lists';
 
 const Tasks = lazy( () =>
-	import( /* webpackChunkName: "tasks" */ '../tasks' )
-);
-
-const TwoColumnTasks = lazy( () =>
-	import( /* webpackChunkName: "two-column-tasks" */ '../two-column-tasks' )
-);
-
-const TwoColumnTasksExtended = lazy( () =>
-	import(
-		/* webpackChunkName: "two-column-tasks-extended" */ '../two-column-tasks/extended-task'
-	)
+	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
+		default: module.Tasks,
+	} ) )
 );
 
 export const Layout = ( {
@@ -75,45 +68,10 @@ export const Layout = ( {
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task;
-
-	const {
-		isLoadingExperimentAssignment,
-		isLoadingTwoColExperimentAssignment,
-		experimentAssignment,
-		twoColExperimentAssignment,
-	} = {
-		isLoadingExperimentAssignment: false,
-		isLoadingTwoColExperimentAssignment: false,
-		experimentAssignment: null,
-		twoColExperimentAssignment: null,
-	};
-
-	const isRunningTwoColumnExperiment =
-		twoColExperimentAssignment?.variationName === 'treatment';
-
-	// New TaskList UI is enabled when either experiment is treatment.
-	const isRunningTaskListExperiment =
-		experimentAssignment?.variationName === 'treatment' ||
-		isRunningTwoColumnExperiment;
-
-	// Override defaultHomescreenLayout if store is in the experiment.
-	const defaultHomescreenLayoutOverride = () => {
-		if (
-			isLoadingExperimentAssignment ||
-			isLoadingTwoColExperimentAssignment
-		) {
-			return defaultHomescreenLayout; // Experiments are still loading, don't override.
-		}
-
-		if ( ! isRunningTaskListExperiment ) {
-			return defaultHomescreenLayout; // Not in the experiment, don't override.
-		}
-
-		return isRunningTwoColumnExperiment ? 'two_columns' : 'single_column';
-	};
+	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
-		( userPrefs.homepage_layout || defaultHomescreenLayoutOverride() ) ===
+		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
 			'two_columns' && hasTwoColumnContent;
 
 	if ( isBatchUpdating && ! showInbox ) {
@@ -140,23 +98,16 @@ export const Layout = ( {
 		return (
 			<>
 				<Column shouldStick={ shouldStickColumns }>
-					{ ! isLoadingExperimentAssignment &&
-						! isLoadingTwoColExperimentAssignment &&
-						! isRunningTaskListExperiment &&
-						! isLoadingTaskLists &&
-						! showingProgressHeader && (
-							<ActivityHeader
-								className="your-store-today"
-								title={ __(
-									'Your store today',
-									'woocommerce'
-								) }
-								subtitle={ __(
-									"To do's, tips, and insights for your business",
-									'woocommerce'
-								) }
-							/>
-						) }
+					{ ! isLoadingTaskLists && ! showingProgressHeader && (
+						<ActivityHeader
+							className="your-store-today"
+							title={ __( 'Your store today', 'woocommerce' ) }
+							subtitle={ __(
+								"To do's, tips, and insights for your business",
+								'woocommerce'
+							) }
+						/>
+					) }
 					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
@@ -170,35 +121,13 @@ export const Layout = ( {
 	};
 
 	const renderTaskList = () => {
-		if ( twoColumns && isRunningTaskListExperiment ) {
-			return (
-				// When running the two-column experiment, we still need to render
-				// the component in the left column for the extended task list.
-				<Suspense fallback={ null }>
-					<TwoColumnTasksExtended query={ query } />
-				</Suspense>
-			);
-		} else if (
-			! twoColumns &&
-			isRunningTaskListExperiment &&
-			! isLoadingExperimentAssignment
-		) {
-			return (
-				<Suspense fallback={ null }>
-					<>
-						<TwoColumnTasks
-							query={ query }
-							userPreferences={ userPrefs }
-							twoColumns={ twoColumns }
-						/>
-						<TwoColumnTasksExtended query={ query } />
-					</>
-				</Suspense>
-			);
-		}
-
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
+				{ activeSetupTaskList &&
+					isDashboardShown &&
+					[ 'setup_experiment_1', 'setup_experiment_2' ].includes(
+						activeSetupTaskList
+					) && <ProgressTitle taskListId={ activeSetupTaskList } /> }
 				<Tasks query={ query } />
 			</Suspense>
 		);
@@ -206,15 +135,6 @@ export const Layout = ( {
 
 	return (
 		<>
-			{ twoColumns && isRunningTaskListExperiment && (
-				<Suspense fallback={ null }>
-					<TwoColumnTasks
-						query={ query }
-						userPreferences={ userPrefs }
-						twoColumns={ twoColumns }
-					/>
-				</Suspense>
-			) }
 			<div
 				className={ classnames( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,

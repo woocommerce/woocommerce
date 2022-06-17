@@ -231,6 +231,16 @@ export class StoreDetails extends Component {
 			errors.storeEmail = __( 'Invalid email address', 'woocommerce' );
 		}
 
+		if (
+			values.isAgreeMarketing &&
+			( ! values.storeEmail || ! values.storeEmail.trim().length )
+		) {
+			errors.storeEmail = __(
+				'Please enter your email address to subscribe',
+				'woocommerce'
+			);
+		}
+
 		return errors;
 	}
 
@@ -373,16 +383,6 @@ export class StoreDetails extends Component {
 									autoComplete="email"
 									{ ...getInputProps( 'storeEmail' ) }
 								/>
-								{ values.isAgreeMarketing &&
-									( ! values.storeEmail ||
-										! values.storeEmail.trim().length ) && (
-										<div className="woocommerce-profile-wizard__store-details-error">
-											{ __(
-												'Please enter your email address to subscribe',
-												'woocommerce'
-											) }
-										</div>
-									) }
 								<FlexItem>
 									<div className="woocommerce-profile-wizard__newsletter-signup">
 										<CheckboxControl
@@ -523,10 +523,12 @@ export default compose(
 			city: settings.woocommerce_store_city || '',
 			countryState,
 			postCode: settings.woocommerce_store_postcode || '',
+
+			// By default, the marketing checkbox should be unticked by default to comply with WordPress.org plugin review guidelines.
 			isAgreeMarketing:
 				typeof profileItems.is_agree_marketing === 'boolean'
 					? profileItems.is_agree_marketing
-					: true,
+					: false,
 			storeEmail:
 				typeof profileItems.store_email === 'string'
 					? profileItems.store_email

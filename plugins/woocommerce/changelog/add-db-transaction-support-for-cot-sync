@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add optional usage of database transaction when synchronizing data between posts table and the orders table

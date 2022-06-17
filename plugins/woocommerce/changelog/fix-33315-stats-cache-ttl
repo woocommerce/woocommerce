@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Change invalidation and TTL of the analytics cache for better cache resilience

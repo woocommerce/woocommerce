@@ -13,13 +13,11 @@ import { getAdminLink } from '@woocommerce/settings';
  */
 import './woocommerce-services-item.scss';
 import WooIcon from './woo-icon.svg';
-import { getAdminSetting } from '../utils/admin-settings';
 
 const WooCommerceServicesItem: React.FC< {
 	pluginsBeingSetup: Array< string >;
 	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
 } > = ( { onSetupClick, pluginsBeingSetup } ) => {
-	const wcAdminAssetUrl = getAdminSetting( 'wcAdminAssetUrl', '' );
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const isSiteConnectedToJetpack = useSelect( ( select ) =>

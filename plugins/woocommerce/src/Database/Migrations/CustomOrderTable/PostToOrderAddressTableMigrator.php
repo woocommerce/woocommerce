@@ -148,48 +148,13 @@ class PostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	}
 
 	/**
-	 * We overwrite this method to add a subclause to only fetch address of current type.
+	 * Additional WHERE clause to only fetch the addresses of the current type.
 	 *
-	 * @param array $entity_ids List of entity IDs to verify.
-	 *
-	 * @return array Already migrated entities, would be of the form
-	 * array(
-	 *      '$source_id1' => array(
-	 *          'source_id' => $source_id1,
-	 *          'destination_id' => $destination_id1,
-	 *      ),
-	 *      ...
-	 * )
+	 * @param array $entity_ids The ids of the entities being inserted or updated.
+	 * @return string The additional string for the WHERE clause.
 	 */
-	protected function get_already_migrated_records( array $entity_ids ): array {
-		global $wpdb;
-		$source_table                   = $this->schema_config['source']['entity']['table_name'];
-		$source_destination_join_column = $this->schema_config['source']['entity']['destination_rel_column'];
-		$source_primary_key_column      = $this->schema_config['source']['entity']['primary_key'];
-
-		$destination_table              = $this->schema_config['destination']['table_name'];
-		$destination_source_join_column = $this->schema_config['destination']['source_rel_column'];
-		$destination_primary_key_column = $this->schema_config['destination']['primary_key'];
-
-		$address_type = $this->type;
-
-		$entity_id_placeholder = implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) );
-
-		$already_migrated_entity_ids = $wpdb->get_results(
-			$wpdb->prepare(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
-				"
-SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
-FROM `$destination_table` destination
-JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
-WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) AND destination.`address_type` = '$address_type'
-				",
-				$entity_ids
-			)
-		// phpcs:enable
-		);
-
-		return array_column( $already_migrated_entity_ids, null, 'source_id' );
+	protected function get_additional_where_clause_for_get_data_to_insert_or_update( array $entity_ids ): string {
+		return "AND destination.`address_type` = '{$this->type}'";
 	}
 
 	/**

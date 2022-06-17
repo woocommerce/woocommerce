@@ -9,6 +9,8 @@ import {
 	getSearchWords,
 	getNewPath,
 	addHistoryListener,
+	isWCAdmin,
+	navigateTo,
 } from '../index';
 
 global.window = Object.create( window );
@@ -258,5 +260,136 @@ describe( 'getSetOfIdsFromQuery', () => {
 				new Set( [ 77, 8, 9 ] )
 			);
 		} );
+	} );
+} );
+
+describe( 'isWCAdmin', () => {
+	it( 'correctly identifies WC admin urls', () => {
+		[
+			'https://example.com/wp-admin/admin.php?page=wc-admin',
+			'https://example.com/wp-admin/admin.php?page=wc-admin&foo=bar',
+			'/admin.php?page=wc-admin',
+			'/admin.php?page=wc-admin&foo=bar',
+		].forEach( ( url ) => {
+			expect( isWCAdmin( url ) ).toBe( true );
+		} );
+	} );
+
+	it( 'rejects URLs that are not WC admin urls', () => {
+		[
+			'https://example.com/wp-admin/edit.php?page=wc-admin',
+			'https://example.com/wp-admin/admin.php?page=other',
+			'/edit.php?page=wc-admin',
+			'/admin.php?page=other',
+		].forEach( ( url ) => {
+			expect( isWCAdmin( url ) ).toBe( false );
+		} );
+	} );
+} );
+
+describe( 'navigateTo', () => {
+	let oldLocation;
+
+	beforeAll( () => {
+		oldLocation = window.location;
+	} );
+
+	beforeEach( () => {
+		window.location = oldLocation;
+		jest.spyOn( getHistory(), 'push' );
+	} );
+
+	afterEach( () => {
+		getHistory().push.mockRestore();
+	} );
+
+	it( 'correctly redirects for absolute urls', () => {
+		delete window.location;
+		window.location = new URL( 'https://www.example.com' );
+
+		navigateTo( { url: 'http://www.google.com/' } );
+		expect( window.location.href ).toBe( 'http://www.google.com/' );
+	} );
+
+	it( 'correctly uses router when on wcadmin page', () => {
+		delete window.location;
+		window.location = new URL(
+			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		);
+
+		navigateTo( {
+			url: getNewPath( {}, '/setup-wizard', {} ),
+		} );
+
+		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
+		expect( getHistory().push.mock.lastCall[ 0 ] ).toBe(
+			'admin.php?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
+
+	it( 'correctly redirects when not on wcadmin page', () => {
+		delete window.location;
+		window.location = new URL( 'http://localhost/wp-admin/order.php' );
+
+		navigateTo( {
+			url: getNewPath( {}, '/setup-wizard', {} ),
+		} );
+
+		const resultUrl = new URL( window.location.href );
+
+		expect( getHistory().push ).not.toBeCalled();
+		expect( resultUrl.search ).toBe(
+			'?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
+
+	it( 'correctly redirects when navigating to non-wcadmin page', () => {
+		delete window.location;
+		window.location = new URL(
+			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		);
+
+		navigateTo( {
+			url: 'orders.php',
+		} );
+
+		const resultUrl = new URL( window.location.href );
+
+		expect( getHistory().push ).not.toBeCalled();
+		expect( resultUrl.toString() ).toBe(
+			'https://vagrant.local/wp/wp-admin/orders.php'
+		);
+	} );
+
+	it( 'correctly parses url and uses router for non-root relative path', () => {
+		delete window.location;
+		window.location = new URL(
+			'http://localhost/wp-admin/admin.php?page=wc-admin'
+		);
+
+		navigateTo( {
+			url: '/setup-wizard',
+		} );
+
+		expect( getHistory().push.mock.calls ).toHaveLength( 1 );
+		expect( getHistory().push.mock.lastCall[ 0 ] ).toBe(
+			'admin.php?page=wc-admin&path=%2Fsetup-wizard'
+		);
+	} );
+
+	it( 'correctly redirects when navigating to non-root relative path', () => {
+		delete window.location;
+		window.location = new URL( 'http://localhost/wp-admin/orders.php' );
+
+		navigateTo( {
+			url: '/setup-wizard',
+		} );
+
+		const resultUrl = new URL( window.location.href );
+
+		expect( getHistory().push ).not.toBeCalled();
+		expect( resultUrl.toString() ).toBe(
+			'https://vagrant.local/wp/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
+		);
 	} );
 } );

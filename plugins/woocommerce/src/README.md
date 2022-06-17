@@ -23,6 +23,8 @@
   * [Defining new actions and filters](#defining-new-actions-and-filters)
   * [Writing unit tests](#writing-unit-tests)
     + [Mocking dependencies](#mocking-dependencies)
+    + [Additional tools for writing unit tests](#additional-tools-for-writing-unit-tests)
+
 
 This directory is home to new WooCommerce class files under the `Automattic\WooCommerce` namespace using [PSR-4](https://www.php-fig.org/psr/psr-4/) file naming. This is to take full advantage of autoloading.
 
@@ -292,10 +294,11 @@ But we want the WooCommerce code base (and especially the code in `src`) to be w
 * `get_instance_of`: Retrieves an instance of a legacy (non-`src`) class.
 * `call_function`: Calls a standalone function.
 * `call_static`: Calls a static method in a class.
+* `get_global`: Gets the value of a global variable by name.
 
-Whenever a `src` class needs to get an instance of a legacy class, or call a function, or call a static method from another class, and that would make the code difficult to test, it should use the `LegacyProxy` methods instead.
+Whenever a `src` class needs to get an instance of a legacy class, or call a function, or call a static method from another class, or use a global variable, and that would make the code difficult to test, it should use the `LegacyProxy` methods instead.
 
-But how does using `LegacyProxy` help in making the code testable? The trick is that when tests run what is registered instead of `LegacyProxy` is an instance of `MockableLegacyProxy`, a class with the same public surface but with additional methods that allow to easily mock legacy classes, functions and static methods.
+But how does using `LegacyProxy` help in making the code testable? The trick is that when tests run what is registered instead of `LegacyProxy` is an instance of `MockableLegacyProxy`, a class with the same public surface but with additional methods that allow to easily mock legacy classes, functions, static methods and global variables.
 
 ### Using the legacy proxy
 
@@ -336,8 +339,9 @@ When unit tests run the container will return an instance of `MockableLegacyProx
 * `register_class_mocks`: defines mocks for classes that are retrieved via `get_instance_of`.
 * `register_function_mocks`: defines mocks for functions that are invoked via `call_function`.
 * `register_static_mocks`: defines mocks for functions that are invoked via `call_static`.
+* `register_global_mocks`: defines mocks for global variables that are retrieved via `get_global`.
 
-These methods could be accessed via `wc_get_container()->get( LegacyProxy::class )->register...` directly from the tests, but the preferred way is to use the equivalent helper methods offered by the `WC_Unit_Test_Case` class,: `register_legacy_proxy_class_mocks`, `register_legacy_proxy_function_mocks` and `register_legacy_proxy_static_mocks`.
+These methods could be accessed via `wc_get_container()->get( LegacyProxy::class )->register...` directly from the tests, but the preferred way is to use the equivalent helper methods offered by the `WC_Unit_Test_Case` class,: `register_legacy_proxy_class_mocks`, `register_legacy_proxy_function_mocks`, `register_legacy_proxy_static_mocks` and `register_global_mock`.
 
 Here's an example of how function mocks are defined:
 
@@ -434,3 +438,10 @@ $this->assertEquals( $result, 'the expected result' );
 ```
 
 Note: of course all of this applies to dependencies from the `src` directory, for mocking legacy dependencies [the `MockableLegacyProxy`](#using-the-mockable-proxy-in-tests) should be used instead.
+
+### Additional tools for writing unit tests
+
+[The `tests/Tools` directory](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/Tools) contains additional tools that can help in the task of writing unit tests, notably:
+
+* [The code hacker](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/Tools/CodeHacking#readme), which allows modifying the code before it's tested in order to mock functions, static methods and `final` classes. This is a last resort mechanism when using other mechanisms like [the `LegacyProxy` class](#the-legacyproxy-class) is not an option.
+* [The DynamicDecorator class](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/Tools/DynamicDecorator.php), which wraps an arbitrary object and allows to define replacements its for methods and properties; the decorator is then used in lieu of the original object. This can be useful when extending the class of the original object isn't possible or is too complicated. See [the unis tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/php/src/Proxies/DynamicDecoratorTest.php) for examples of how it's used.

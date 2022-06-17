@@ -294,7 +294,7 @@ class ReviewsPanel extends Component {
 				{ renderedReviews }
 				<Link
 					href={ getAdminLink(
-						'edit-comments.php?comment_type=review'
+						'edit.php?post_type=product&page=product-reviews'
 					) }
 					onClick={ () => this.recordReviewEvent( 'reviews_manage' ) }
 					className="woocommerce-layout__activity-panel-outbound-link woocommerce-layout__activity-panel-empty"

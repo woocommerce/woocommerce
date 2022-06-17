@@ -1,17 +1,11 @@
-# Unreleased
+## [2.1.0](https://www.npmjs.com/package/@woocommerce/customer-effort-score/v/2.1.0) - 2022-06-14
 
-# 2.0.1
+-   Minor - Add new simple customer feedback component for inline CES feedback. #32538
+-   Minor - Add Jetpack Changelogger
+-   Minor - Add TypeScript type support as part of the build process. #32538
+-   Patch - Migrate @woocommerce/customer-effort-score to TS
+-   Patch - Standardize lint scripts: add lint:fix
 
--   Update all js packages with minor/patch version changes. #8392
+---
 
-# 2.0.0
-
-- Update dependencies to support react 17 #8305
-
-# 1.1.0
-
--   Fix commonjs module build, allow package to be built in isolation. #7286
-
-# 1.0.0
-
--   Initial release.
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/customer-effort-score/CHANGELOG.md).

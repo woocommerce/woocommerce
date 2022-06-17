@@ -168,4 +168,87 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 		$actual = ArrayUtil::to_ranges_string( $input_array );
 		$this->assertEquals( $expected_string, $actual );
 	}
+
+	/**
+	 * @testdox `select` can be used to select a value from an array of arrays based on array key.
+	 */
+	public function test_select_for_arrays() {
+		$items = array(
+			array(
+				'foo' => 1,
+				'bar' => 2,
+			),
+			array(
+				'foo' => 3,
+				'bar' => 4,
+			),
+		);
+
+		$actual = ArrayUtil::select( $items, 'foo' );
+		$this->assertEquals( array( 1, 3 ), $actual, ArrayUtil::SELECT_BY_ARRAY_KEY );
+	}
+
+	/**
+	 * @testdox `select` can be used to select a value from an array of objects based on a method of the objects.
+	 */
+	public function test_select_for_object_methods() {
+		// phpcs:disable Squiz.Commenting
+		$items = array(
+			new class() {
+				public function get_id() {
+					return 1;
+				}
+			},
+			new class() {
+				public function get_id() {
+					return 2;
+				}
+			},
+		);
+		// phpcs:enable Squiz.Commenting
+
+		$actual = ArrayUtil::select( $items, 'get_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$this->assertEquals( array( 1, 2 ), $actual );
+	}
+
+	/**
+	 * @testdox `select` can be used to select a value from an array of objects based on a property of the objects.
+	 */
+	public function test_select_for_object_properties() {
+		// phpcs:disable Squiz.Commenting
+		$items = array(
+			new class() {
+				public $id = 1;
+			},
+			new class() {
+				public $id = 2;
+			},
+		);
+		// phpcs:enable Squiz.Commenting
+
+		$actual = ArrayUtil::select( $items, 'id', ArrayUtil::SELECT_BY_OBJECT_PROPERTY );
+		$this->assertEquals( array( 1, 2 ), $actual );
+	}
+
+	/**
+	 * @testdox `select` can be used to select a value from an array of objects with automatic selection of array key or object method/property.
+	 */
+	public function test_select_for_mixed() {
+		// phpcs:disable Squiz.Commenting
+		$items = array(
+			array( 'the_id' => 1 ),
+			new class() {
+				public $the_id = 2;
+			},
+			new class() {
+				public function the_id() {
+					return 3;
+				}
+			},
+		);
+		// phpcs:enable Squiz.Commenting
+
+		$actual = ArrayUtil::select( $items, 'the_id', ArrayUtil::SELECT_BY_AUTO );
+		$this->assertEquals( array( 1, 2, 3 ), $actual );
+	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove placeholder product icon if a featured product image is available (avoids issues with transparent images).

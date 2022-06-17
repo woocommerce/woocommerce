@@ -101,7 +101,10 @@ class SpecRunner {
 		}
 
 		if ( isset( $action->url_is_admin_query ) && $action->url_is_admin_query ) {
-			return wc_admin_url( $action->url );
+			if ( strpos( $action->url, '&path' ) === 0 ) {
+				return wc_admin_url( $action->url );
+			}
+			return admin_url( $action->url );
 		}
 
 		return $action->url;

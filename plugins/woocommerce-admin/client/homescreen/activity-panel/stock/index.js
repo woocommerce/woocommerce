@@ -56,7 +56,7 @@ export class StockPanel extends Component {
 			] );
 			if ( products.length < 2 ) {
 				invalidateResolution( 'getItemsTotalCount', [
-					'products',
+					'products/low-in-stock',
 					getLowStockCountQuery,
 					null,
 				] );

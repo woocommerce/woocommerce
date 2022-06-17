@@ -10,17 +10,19 @@ import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
 export type ProductStatus =
+	| 'deleted'
 	| 'draft'
 	| 'pending'
 	| 'private'
 	| 'publish'
 	| 'any'
+	| 'trash'
 	| 'future';
 
-export type Product<
-	Status = ProductStatus,
-	Type = ProductType
-> = Schema.Post & {
+export type Product< Status = ProductStatus, Type = ProductType > = Omit<
+	Schema.Post,
+	'status'
+> & {
 	id: number;
 	name: string;
 	slug: string;
@@ -39,6 +41,28 @@ export type Product<
 	regular_price: string;
 	sale_price: string;
 };
+
+export type ReadOnlyProperties =
+	| 'id'
+	| 'permalink'
+	| 'date_created'
+	| 'date_created_gmt'
+	| 'date_modified'
+	| 'date_modified_gmt'
+	| 'price'
+	| 'price_html'
+	| 'on_sale'
+	| 'purchasable'
+	| 'total_sales'
+	| 'backorders_allowed'
+	| 'backordered'
+	| 'shipping_required'
+	| 'shipping_taxable'
+	| 'shipping_class_id'
+	| 'average_rating'
+	| 'rating_count'
+	| 'related_ids'
+	| 'variations';
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 

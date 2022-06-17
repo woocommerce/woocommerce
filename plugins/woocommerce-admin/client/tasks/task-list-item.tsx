@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getHistory,
-	getNewPath,
-	updateQueryString,
-} from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -14,14 +10,14 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import { History } from 'history';
 
 /**
  * Internal dependencies
  */
+import { LayoutContext } from '~/layout';
 import './task-list.scss';
 
 export type TaskListItemProps = {
@@ -40,6 +36,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
+	const layoutContext = useContext( LayoutContext );
 
 	const {
 		dismissTask,
@@ -122,6 +119,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( 'tasklist_click', {
 			task_name: id,
+			context: layoutContext.toString(),
 		} );
 
 		if ( ! isComplete ) {
@@ -131,18 +129,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const onClickDefault = useCallback( () => {
 		if ( actionUrl ) {
-			if ( actionUrl.startsWith( 'http' ) ) {
-				window.location.href = actionUrl;
-			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, actionUrl, {} )
-				);
-			}
+			navigateTo( {
+				url: actionUrl,
+			} );
 			return;
 		}
 
-		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: id } );
+		navigateTo( { url: getNewPath( { task: id }, '/', {} ) } );
 	}, [ id, isComplete, actionUrl ] );
 
 	const taskItemProps = {

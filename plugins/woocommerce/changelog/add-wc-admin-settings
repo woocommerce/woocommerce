@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Make it possible to specify input field names separately from the ID.

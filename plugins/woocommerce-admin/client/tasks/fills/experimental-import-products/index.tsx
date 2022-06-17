@@ -95,9 +95,12 @@ export const Products = () => {
 			) : (
 				isConfirmingLoadSampleProducts && (
 					<LoadSampleProductConfirmModal
-						onCancel={ () =>
-							setIsConfirmingLoadSampleProducts( false )
-						}
+						onCancel={ () => {
+							setIsConfirmingLoadSampleProducts( false );
+							recordEvent(
+								'tasklist_cancel_load_sample_products_click'
+							);
+						} }
 						onImport={ () => {
 							setIsConfirmingLoadSampleProducts( false );
 							loadSampleProduct();

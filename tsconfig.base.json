@@ -50,7 +50,7 @@
 		{ "path": "./packages/js/date" },
 		{ "path": "./packages/js/experimental" },
 		{ "path": "./packages/js/explat" },
-		{ "path": "./packages/js/js-tests" },
+		{ "path": "./packages/js/internal-js-tests" },
 		{ "path": "./packages/js/navigation" },
 		{ "path": "./packages/js/notices" },
 		{ "path": "./packages/js/number" },

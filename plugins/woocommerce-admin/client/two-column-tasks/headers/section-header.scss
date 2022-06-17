@@ -14,8 +14,18 @@
 		}
 	}
 
+	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents p {
+		font-size: 13px;
+	}
+
+
 	.woocommerce-task-header__contents p {
 		font-size: 16px;
+	}
+
+	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents h1 {
+		font-size: 14px;
+		font-weight: 600;
 	}
 
 	.woocommerce-task-header__contents h1 {

@@ -647,11 +647,11 @@ class LookupDataStore {
 	 * Handler for the woocommerce_rest_insert_product hook.
 	 * Needed to update the lookup table when the REST API batch insert/update endpoints are used.
 	 *
-	 * @param WP_Post          $product The post representing the created or updated product.
+	 * @param \WP_Post         $product The post representing the created or updated product.
 	 * @param \WP_REST_Request $request The REST request that caused the hook to be fired.
 	 * @return void
 	 */
-	private function on_product_created_or_updated_via_rest_api( WP_Post $product, \WP_REST_Request $request ): void {
+	private function on_product_created_or_updated_via_rest_api( \WP_Post $product, \WP_REST_Request $request ): void {
 		if ( StringUtil::ends_with( $request->get_route(), '/batch' ) ) {
 			$this->on_product_changed( $product->ID );
 		}

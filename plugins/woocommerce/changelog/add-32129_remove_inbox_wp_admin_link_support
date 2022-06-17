@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add support to remote inbox notification actions to link to other wp-admin pages. #33237

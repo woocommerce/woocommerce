@@ -1,6 +1,20 @@
 require( 'dotenv' ).config();
-const { BASE_URL, VERBOSE, USE_INDEX_PERMALINKS } = process.env;
+const {
+	BASE_URL,
+	VERBOSE,
+	USE_INDEX_PERMALINKS,
+	DEFAULT_TIMEOUT_OVERRIDE,
+} = process.env;
 const verboseOutput = VERBOSE === 'true';
+const { defaults } = require( 'jest-config' );
+
+/**
+ * Override the default timeout, if specified.
+ * Useful when running API tests against an externally hosted test site.
+ */
+const testTimeoutOverride = DEFAULT_TIMEOUT_OVERRIDE
+	? Number( DEFAULT_TIMEOUT_OVERRIDE )
+	: defaults.testTimeout;
 
 // Update the API path if the `USE_INDEX_PERMALINKS` flag is set
 const useIndexPermalinks = USE_INDEX_PERMALINKS === 'true';
@@ -38,4 +52,6 @@ module.exports = {
 	 * @see https://github.com/zaqqaz/jest-allure#uses-jest-circus-or-jest--v-27-
 	 */
 	testRunner: 'jasmine2',
+
+	testTimeout: testTimeoutOverride,
 };

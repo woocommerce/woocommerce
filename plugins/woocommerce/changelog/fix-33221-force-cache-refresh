@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a new collection parameter, force_cache_refresh, to Reports API endpoints which will cause the current request to bypass the cache, re-run the queries for the requested data, and overwrite the previous cache entry with the new results.

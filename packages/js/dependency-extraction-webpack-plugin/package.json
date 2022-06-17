@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/dependency-extraction-webpack-plugin",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "WooCommerce Dependency Extraction Webpack Plugin",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -36,9 +36,10 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"lint": "eslint src",
-		"lint:fix": "eslint src --fix",
-		"postinstall": "composer install"
+		"lint:fix": "eslint src --fix"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

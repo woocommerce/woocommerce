@@ -96,4 +96,14 @@ class LegacyProxy {
 	public function call_static( $class_name, $method_name, ...$parameters ) {
 		return call_user_func_array( "$class_name::$method_name", $parameters );
 	}
+
+	/**
+	 * Get the value of a global.
+	 *
+	 * @param string $global_name The name of the global to get the value for.
+	 * @return mixed The value of the global.
+	 */
+	public function get_global( string $global_name ) {
+		return $GLOBALS[ $global_name ];
+	}
 }

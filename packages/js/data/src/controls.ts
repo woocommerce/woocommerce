@@ -35,7 +35,12 @@ const controls = {
 				headers,
 				status,
 				data,
-			} ) );
+			} ) )
+			.catch( ( response ) => {
+				return response.json().then( ( data: unknown ) => {
+					throw data;
+				} );
+			} );
 	},
 };
 

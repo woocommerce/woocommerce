@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Change attribute slug length requirement and add wc_create_attribute tests

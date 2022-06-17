@@ -165,5 +165,8 @@ describe( 'Products', () => {
 
 		userEvent.click( getByRole( 'button', { name: 'Cancel' } ) );
 		expect( queryByText( confirmModalText ) ).not.toBeInTheDocument();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'tasklist_cancel_load_sample_products_click'
+		);
 	} );
 } );

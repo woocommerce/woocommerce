@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -16,7 +16,7 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ORDERS_STORE_NAME, ITEMS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -27,6 +27,8 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getCountryCode } from '~/dashboard/utils';
+import { CurrencyContext } from '~/lib/currency-context';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -64,35 +66,37 @@ const renderEmptyCard = () => {
 	);
 };
 
-function renderOrders( orders ) {
+function renderOrders( orders, customers, getFormattedOrderTotal ) {
 	if ( orders.length === 0 ) {
 		return renderEmptyCard();
 	}
 
-	const getCustomerString = ( order ) => {
-		const { first_name: firstName, last_name: lastName } =
-			order.customer || {};
+	const getCustomerString = ( customer ) => {
+		const { name } = customer || {};
 
-		if ( ! firstName && ! lastName ) {
+		if ( ! name ) {
 			return '';
 		}
 
-		const name = [ firstName, lastName ].join( ' ' );
 		return `{{customerLink}}${ name }{{/customerLink}}`;
 	};
 
 	const orderCardTitle = ( order ) => {
-		const { id: orderId, number: orderNumber, customer } = order;
+		const {
+			id: orderId,
+			number: orderNumber,
+			customer_id: customerId,
+		} = order;
+		const customer =
+			customers.find( ( c ) => c.user_id === customerId ) || {};
 		let customerUrl = null;
-		if ( customer && customer.customer_id ) {
+		if ( customer && customer.id ) {
 			customerUrl = window.wcAdminFeatures.analytics
 				? getNewPath( {}, '/analytics/customers', {
 						filter: 'single_customer',
-						customers: customer.customer_id,
+						customers: customer.id,
 				  } )
-				: getAdminLink(
-						'user-edit.php?user_id=' + customer.customer_id
-				  );
+				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
 		return (
@@ -105,7 +109,7 @@ function renderOrders( orders ) {
 						),
 						{
 							orderNumber,
-							customerString: getCustomerString( order ),
+							customerString: getCustomerString( customer ),
 						}
 					),
 					components: {
@@ -148,10 +152,10 @@ function renderOrders( orders ) {
 	orders.forEach( ( order ) => {
 		const {
 			date_created_gmt: dateCreatedGmt,
-			products,
+			line_items: lineItems,
 			id: orderId,
 		} = order;
-		const productsCount = products ? products.length : 0;
+		const productsCount = lineItems ? lineItems.length : 0;
 
 		cards.push(
 			<ActivityCard
@@ -180,7 +184,12 @@ function renderOrders( orders ) {
 								productsCount
 							) }
 						</span>
-						<span>{ order.total_formatted }</span>
+						<span>
+							{ getFormattedOrderTotal(
+								order.total,
+								order.currency
+							) }
+						</span>
 					</div>
 				}
 			>
@@ -215,58 +224,86 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			_fields: [
 				'id',
 				'number',
+				'currency',
 				'status',
-				'total_formatted',
+				'total',
 				'customer',
-				'products',
+				'line_items',
 				'customer_id',
 				'date_created_gmt',
 			],
 		} ),
 		[ orderStatuses ]
 	);
-	const { orders = [], isRequesting, isError } = useSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } = select(
-			ITEMS_STORE_NAME
-		);
 
-		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
-			return { isRequesting: false };
+	const currencyContext = useContext( CurrencyContext );
+
+	const getFormattedOrderTotal = ( total, countryState ) => {
+		if ( ! countryState ) {
+			return null;
 		}
 
-		/* eslint-disable @wordpress/no-unused-vars-before-return */
-		const orderItems = getItems( 'orders', actionableOrdersQuery, null );
+		const country = getCountryCode( countryState );
+		const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
+			'onboarding',
+			{}
+		);
+		const currency = currencyContext.getDataForCountry(
+			country,
+			localeInfo,
+			currencySymbols
+		);
+		currencyContext.setCurrency( currency );
+		return currencyContext.formatAmount( total );
+	};
 
-		const isRequestingActionable = isResolving( 'getItems', [
-			'orders',
-			actionableOrdersQuery,
-		] );
+	const { orders = [], isRequesting, isError, customerItems } = useSelect(
+		( select ) => {
+			const { getOrders, hasFinishedResolution, getOrdersError } = select(
+				ORDERS_STORE_NAME
+			);
+			// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+			const { getItems } = select( ITEMS_STORE_NAME );
 
-		if (
-			isRequestingActionable ||
-			unreadOrdersCount === null ||
-			orderItems === null
-		) {
+			if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
+				return { isRequesting: false };
+			}
+
+			/* eslint-disable @wordpress/no-unused-vars-before-return */
+			const actionableOrders = getOrders( actionableOrdersQuery, null );
+
+			const isRequestingActionable = hasFinishedResolution( 'getOrders', [
+				actionableOrdersQuery,
+			] );
+
+			if (
+				isRequestingActionable ||
+				unreadOrdersCount === null ||
+				actionableOrders === null
+			) {
+				return {
+					isError: Boolean( getOrdersError( actionableOrdersQuery ) ),
+					isRequesting: true,
+					orderStatuses,
+				};
+			}
+
+			const customers = getItems( 'customers', {
+				users: actionableOrders
+					.map( ( order ) => order.customer_id )
+					.filter( ( id ) => id !== 0 ),
+				_fields: [ 'id', 'name', 'country', 'user_id' ],
+			} );
+
 			return {
-				isError: Boolean(
-					getItemsError( 'orders', actionableOrdersQuery )
-				),
-				isRequesting: true,
+				orders: actionableOrders,
+				isError: Boolean( getOrdersError( actionableOrders ) ),
+				isRequesting: isRequestingActionable,
 				orderStatuses,
+				customerItems: customers,
 			};
 		}
-
-		const actionableOrders = orderItems
-			? Array.from( orderItems.values() )
-			: orderItems;
-
-		return {
-			orders: actionableOrders,
-			isError: Boolean( getItemsError( 'orders', actionableOrders ) ),
-			isRequesting: isRequestingActionable,
-			orderStatuses,
-		};
-	} );
+	);
 
 	if ( isError ) {
 		if ( ! orderStatuses.length && window.wcAdminFeatures.analytics ) {
@@ -306,6 +343,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			</>
 		);
 	}
+	const customerList = customerItems
+		? Array.from( customerItems, ( [ , value ] ) => value )
+		: [];
 
 	return (
 		<>
@@ -318,7 +358,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 						lines={ 1 }
 					/>
 				) : (
-					renderOrders( orders )
+					renderOrders( orders, customerList, getFormattedOrderTotal )
 				) }
 			</Section>
 		</>

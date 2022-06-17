@@ -145,6 +145,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * Fires when a customer is updated.
 		 *
 		 * @param int $customer_id Customer ID.
+		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_update_customer', $customer_id );
 
@@ -301,6 +302,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( ! empty( $query_args['customers'] ) ) {
 			$included_customers = $this->get_filtered_ids( $query_args, 'customers' );
 			$where_clauses[]    = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
+		}
+
+		// Allow a list of user IDs to be specified.
+		if ( ! empty( $query_args['users'] ) ) {
+			$included_users  = $this->get_filtered_ids( $query_args, 'users' );
+			$where_clauses[] = "{$customer_lookup_table}.user_id IN ({$included_users})";
 		}
 
 		$numeric_params = array(
@@ -518,6 +525,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * Fires when a new report customer is created.
 		 *
 		 * @param int $customer_id Customer ID.
+		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_new_customer', $customer_id );
 
@@ -757,6 +765,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * Fires when customser's reports are updated.
 		 *
 		 * @param int $customer_id Customer ID.
+		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_update_customer', $customer_id );
 
@@ -778,6 +787,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return false;
 		}
 
+		/**
+		 * Filter the customer roles, used to check if the user is a customer.
+		 *
+		 * @param array List of customer roles.
+		 * @since 4.0.0
+		 */
 		$customer_roles = (array) apply_filters( 'woocommerce_analytics_customer_roles', array( 'customer' ) );
 
 		if ( empty( $user->roles ) || empty( array_intersect( $user->roles, $customer_roles ) ) ) {
@@ -803,6 +818,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 * Fires when a customer is deleted.
 			 *
 			 * @param int $order_id Order ID.
+			 * @since 4.0.0
 			 */
 			do_action( 'woocommerce_analytics_delete_customer', $customer_id );
 

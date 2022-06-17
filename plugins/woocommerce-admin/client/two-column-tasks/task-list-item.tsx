@@ -2,24 +2,23 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getHistory,
-	getNewPath,
-	updateQueryString,
-} from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
 	TaskType,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useContext } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import classnames from 'classnames';
-import { History } from 'history';
+
+/**
+ * Internal dependencies
+ */
+import { LayoutContext } from '~/layout';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -39,6 +38,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		snoozeTask,
 		undoSnoozeTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
+
+	const layoutContext = useContext( LayoutContext );
 
 	const slot = useSlot(
 		`woocommerce_onboarding_task_list_item_${ task.id }`
@@ -73,6 +74,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( `${ eventPrefix }click`, {
 			task_name: task.id,
+			context: layoutContext.toString(),
 		} );
 
 		if ( ! task.isComplete ) {
@@ -84,18 +86,13 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		trackClick();
 
 		if ( task.actionUrl ) {
-			if ( task.actionUrl.startsWith( 'http' ) ) {
-				window.location.href = task.actionUrl;
-			} else {
-				( getHistory() as History ).push(
-					getNewPath( {}, task.actionUrl, {} )
-				);
-			}
+			navigateTo( {
+				url: task.actionUrl,
+			} );
 			return;
 		}
 
-		window.document.documentElement.scrollTop = 0;
-		updateQueryString( { task: task.id } );
+		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
 	};
 
 	const onDismiss = useCallback( () => {

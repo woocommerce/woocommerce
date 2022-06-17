@@ -8,8 +8,10 @@
 
 - `createSimpleDownloadableProduct` component which creates a simple downloadable product, containing four parameters for title, price, download name and download limit.
 - `orderPageSaveChanges()` to save changes in the order page.
+- `productPageSaveChanges()` to save changes in the product page.
 - `getSelectorAttribute( selector, attribute )` to retrieve the desired HTML attribute from an element.
 - `verifyValueOfElementAttribute( selector, attribute, expectedValue )` to check that a specific HTML attribute from an element matches the expected value.
+- `click( selector )` to click an element asserting previously that the element is enabled and can be clicked.
 - `withRestApi.deleteProduct()` that deletes a single product.
 - `withRestApi.deleteOrder()` that deletes a single order.
 - `merchant.addDownloadableProductPermission()` to add a downloadable product permission to an order.
@@ -18,6 +20,8 @@
 - `merchant.verifyDownloadableProductPermission()` to check that the attributes of an existing downloadable product permission are correct.
 - `merchant.openDownloadLink()` to open the url of a download in a new tab.
 - `merchant.verifyCannotDownloadFromBecause()` to check that a download cannot happen for a specific reason.
+- `merchant.updateVariationDetails( variationDetails )` to update the variation details of a product.
+- `merchant.verifyVariationDetails( expectedVariationDetails )` to check that the variation details of a product were updated successfully.
 
 ## Changed
 - Removed `faker` dependency

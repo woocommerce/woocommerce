@@ -54,6 +54,12 @@ module.exports = ( storybookConfig ) => {
 					to: 'wordpress/css/[name][ext]',
 				},
 				{
+					from: require.resolve(
+						'@wordpress/components/build-style/style.css'
+					),
+					to: 'wordpress/css/components.css',
+				},
+				{
 					from: path.resolve(
 						__dirname,
 						`../../packages/js/components/build-style/*.css`
@@ -70,6 +76,12 @@ module.exports = ( storybookConfig ) => {
 			],
 		} )
 	);
+
+	storybookConfig.resolve.fallback = {
+		...storybookConfig.resolve.fallback,
+		// Ignore fs to fix resolve 'fs' error for @automattic/calypso-config
+		fs: false,
+	};
 
 	return storybookConfig;
 };

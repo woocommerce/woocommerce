@@ -43,40 +43,8 @@ class Translations {
 		// Handler for WooCommerce and WooCommerce Admin plugin activation.
 		add_action( 'woocommerce_activated_plugin', array( $this, 'potentially_generate_translation_strings' ) );
 		add_action( 'activated_plugin', array( $this, 'potentially_generate_translation_strings' ) );
-
-		// Adding this filter to adjust the path after woocommerce-admin was merged into woocommerce core.
-		// Remove after the translations strings have been updated to the new path (probably woocommerce 6.6).
-		add_filter( 'load_script_textdomain_relative_path', array( $this, 'adjust_script_path' ), 10, 2 );
 	}
 
-	/**
-	 * This filter is temporarily used to produce the correct i18n paths as they were moved in WC 6.5.
-	 *
-	 * @param string $relative Relative path to the script.
-	 * @param string $src      The script's source URL.
-	 */
-	public function adjust_script_path( $relative, $src ) {
-		// only rewrite the path if the translation file is from the old woocommerce-admin dist folder.
-		if ( false === strpos( $relative, 'assets/client/admin' ) ) {
-			return $relative;
-		}
-
-		// translation filenames are always based on the unminified path.
-		if ( substr( $relative, -7 ) === '.min.js' ) {
-			$relative = substr( $relative, 0, -7 ) . '.js';
-		}
-
-		$file_base = 'woocommerce-' . determine_locale(); // e.g woocommerce-fr_FR.
-		$md5_filename = $file_base . '-' . md5( $relative ) . '.json';
-
-		$languages_path = WP_LANG_DIR . '/plugins/'; // get path to translations folder.
-
-		if ( ! is_readable( $languages_path . $md5_filename ) ) {
-			return str_replace( 'assets/client/admin', 'packages/woocommerce-admin/dist', $relative );
-		} else {
-			return $relative;
-		}
-	}
 	/**
 	 * Generate a filename to cache translations from JS chunks.
 	 *
@@ -133,13 +101,8 @@ class Translations {
 
 			// Only combine "app" files (not scripts registered with WP).
 			if (
-				// paths for woocommerce < 6.5. can be removed from 6.6 onwards or when i18n json file names are updated.
-				false === strpos( $reference_file, 'dist/chunks/' ) &&
-				false === strpos( $reference_file, 'dist/app/index.js' ) &&
-
-				// paths for woocommerce >= 6.5 (post-merge of woocommerce-admin).
-				false === strpos( $reference_file, 'assets/admin/app/index.js' ) &&
-				false === strpos( $reference_file, 'assets/admin/chunks/' )
+				false === strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'app/index.js' ) &&
+				false === strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'chunks/' )
 			) {
 				continue;
 			}

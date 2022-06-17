@@ -58,6 +58,8 @@ class GetRuleProcessor {
 				return new OptionRuleProcessor();
 			case 'wca_updated':
 				return new WooCommerceAdminUpdatedRuleProcessor();
+			case 'total_payments_value':
+				return new TotalPaymentsVolumeProcessor();
 		}
 
 		return new FailRuleProcessor();

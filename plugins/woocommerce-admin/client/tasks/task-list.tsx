@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState, useContext } from '@wordpress/element';
 import { Card, CardHeader } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
@@ -21,6 +21,7 @@ import { TaskListItem } from './task-list-item';
 import { TaskListMenu } from './task-list-menu';
 import './task-list.scss';
 import { ProgressHeader } from '~/task-lists/progress-header';
+import { LayoutContext } from '~/layout';
 
 export type TaskListProps = TaskListType & {
 	query: {
@@ -51,6 +52,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} );
 	const prevQueryRef = useRef( query );
 	const visibleTasks = getVisibleTasks( tasks );
+	const layoutContext = useContext( LayoutContext );
 
 	const incompleteTasks = tasks.filter(
 		( task ) => ! task.isComplete && ! task.isDismissed
@@ -64,6 +66,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( eventPrefix + 'view', {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context: layoutContext.toString(),
 		} );
 	};
 

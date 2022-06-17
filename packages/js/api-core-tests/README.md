@@ -22,7 +22,7 @@ For local setup, create a `.env` file in this folder with the three required val
 Alternatively, these values can be passed in via the command line. For example:
 
 ```shell
-BASE_URL=http://localhost:8084 USER_KEY=admin USER_SECRET=password npm run test:api
+BASE_URL=http://localhost:8084 USER_KEY=admin USER_SECRET=password npm run e2e:api
 ```
 
 When using a username and password combination instead of a consumer secret and consumer key, make sure to have the [JSON Basic Authentication plugin](https://github.com/WP-API/Basic-Auth) installed and activated on the test site.
@@ -43,7 +43,7 @@ The following optional variables can be set in your local `.env` file:
 To verify that everything is configured correctly, the following test script is available:
 
 ```shell
-npm run test:hello
+npm run e2e:hello
 ```
 
 This tests connectivity to the API by validating connection to the following:
@@ -56,7 +56,7 @@ This tests connectivity to the API by validating connection to the following:
 To run all of the API tests, you can use the following command:
 
 ```shell
-npm run test:api
+npm run e2e:api
 ```
 
 ### Running groups of tests
@@ -66,7 +66,7 @@ To run a specific group of tests, you can use the `npm test -- --group=` command
 For example, if you wanted to only run the orders API tests, you can use the following:
 
 ```shell
-npm test -- --group=orders
+npm e2e -- --group=orders
 ```
 
 Alternatively, you can use `jest` to run test groups:

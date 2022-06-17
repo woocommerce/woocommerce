@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Remove orderCount and publishedProductCount from preloaded settings and moved to using orders/products data stores. #33064

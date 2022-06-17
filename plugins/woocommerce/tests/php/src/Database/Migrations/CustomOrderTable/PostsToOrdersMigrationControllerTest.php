@@ -4,11 +4,12 @@
  */
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ShippingHelper;
+use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
+use Automattic\WooCommerce\Testing\Tools\ReplacementObject;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Class PostsToOrdersMigrationControllerTest.
@@ -16,19 +17,19 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ShippingHelper;
 class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @var DataSynchronizer
-	 */
-	private $synchronizer;
-
-	/**
 	 * @var PostsToOrdersMigrationController
 	 */
 	private $sut;
 
 	/**
-	 * @var OrdersTableDataStore;
+	 * @var OrdersTableDataStore
 	 */
 	private $data_store;
+
+	/**
+	 * @var array
+	 */
+	private $executed_transaction_statements;
 
 	/**
 	 * Setup data_store and sut.
@@ -41,12 +42,18 @@ class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+	}
+
+	/**
 	 * Test that migration for a normal order happens as expected.
 	 */
 	public function test_migration_for_normal_order() {
-		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
-		$this->clear_all_orders();
-		$this->sut->migrate_order( $order->get_id() );
+		$order = $this->create_and_migrate_order();
 
 		$this->assert_core_data_is_migrated( $order );
 		$this->assert_order_addresses_are_migrated( $order );
@@ -362,5 +369,361 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( "TRUNCATE table $table;" );
 		}
+	}
+
+	/**
+	 * @testdox Database errors appearing during migrations are properly logged.
+	 */
+	public function test_database_errors_during_migrations_are_logged() {
+		global $wpdb;
+
+		$fake_logger = $this->use_fake_logger();
+
+		$wpdb_mock = new DynamicDecorator( $wpdb );
+		$this->register_legacy_proxy_global_mocks( array( 'wpdb' => $wpdb_mock ) );
+
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) {
+				$wpdb_mock = $args[0];
+				$query     = $args[1];
+
+				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
+					$wpdb_mock->state = 'Something failed!';
+				}
+			}
+		);
+
+		$wpdb_mock->register_property_get_replacement(
+			'last_error',
+			function( $replacement_object ) {
+				if ( $replacement_object->state ) {
+					return $replacement_object->state;
+				} else {
+					return $replacement_object->original_object->last_error;
+				}
+			}
+		);
+
+		$this->sut->migrate_orders( array( 1, 2, 3 ) );
+
+		$actual_errors = $fake_logger->errors;
+		usort(
+			$actual_errors,
+			function( $a, $b ) {
+				return strcmp( $a['message'], $b['message'] );
+			}
+		);
+
+		$this->assertEquals( 'PostMetaToOrderMetaMigrator: when processing ids 1-3: Something failed!', $actual_errors[0]['message'] );
+		$this->assertEquals( array( 1, 2, 3 ), $actual_errors[0]['data']['ids'] );
+		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
+	}
+
+	/**
+	 * @testdox Exceptions thrown during migrations are properly logged.
+	 */
+	public function test_exceptions_during_migrations_are_logged() {
+		global $wpdb;
+
+		$exception = new \Exception( 'Something failed!' );
+
+		$fake_logger = $this->use_fake_logger();
+
+		$wpdb_mock = new DynamicDecorator( $wpdb );
+		$this->register_legacy_proxy_global_mocks( array( 'wpdb' => $wpdb_mock ) );
+
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) use ( $exception ) {
+				$query = $args[1];
+
+				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
+					throw $exception;
+				}
+			}
+		);
+
+		$this->sut->migrate_orders( array( 1, 2, 3 ) );
+
+		$actual_errors = $fake_logger->errors;
+		usort(
+			$actual_errors,
+			function( $a, $b ) {
+				return strcmp( $a['message'], $b['message'] );
+			}
+		);
+
+		$this->assertTrue( StringUtil::starts_with( $actual_errors[0]['message'], 'PostMetaToOrderMetaMigrator: when processing ids 1-3: (Exception) Something failed!' ) );
+		$this->assertEquals( $exception, $actual_errors[0]['data']['exception'] );
+		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
+	}
+
+	/**
+	 * Register a fake logger to be returned by wc_get_logger, and return it.
+	 *
+	 * @return object The fake logger registered.
+	 */
+	private function use_fake_logger() {
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $errors = array();
+
+			public function error( $message, $data ) {
+				$this->errors[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
+		return $fake_logger;
+	}
+
+	/**
+	 * @testdox Database transactions aren't used on successful migrations if the corresponding setting isn't set.
+	 */
+	public function test_no_db_transactions_used_if_not_configured_on_success() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+
+		$this->use_wpdb_mock();
+
+		$this->create_and_migrate_order();
+
+		$this->assertEmpty( $this->executed_transaction_statements );
+	}
+
+	/**
+	 * @testdox Database transactions aren't used on migrations with database error if the corresponding setting isn't set.
+	 */
+	public function test_no_db_transactions_used_if_not_configured_on_db_error() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+
+		$wpdb_mock = $this->use_wpdb_mock();
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) {
+				$wpdb_decorator                              = $args[0];
+				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				return false;
+			}
+		);
+
+		$this->create_and_migrate_order();
+
+		$this->assertEmpty( $this->executed_transaction_statements );
+	}
+
+	/**
+	 * @testdox Database transactions aren't used on migrations throwing exceptions if the corresponding setting isn't set.
+	 */
+	public function test_no_db_transactions_used_if_not_configured_on_exception() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+
+		$wpdb_mock = $this->use_wpdb_mock();
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) {
+				throw new \Exception( 'Something failed!' );
+			}
+		);
+
+		$this->create_and_migrate_order();
+
+		$this->assertEmpty( $this->executed_transaction_statements );
+	}
+
+	/**
+	 * @testdox Database transactions are used and complete on successful migrations.
+	 */
+	public function test_db_transaction_completes_if_configured_and_no_errors() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+
+		$this->use_wpdb_mock();
+
+		$this->create_and_migrate_order();
+
+		$expected = array(
+			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
+			'START TRANSACTION',
+			'COMMIT',
+		);
+
+		$this->assertEquals( $expected, $this->executed_transaction_statements );
+	}
+
+
+	/**
+	 * @testdox An exception is thrown if an invalid transaction isolation level is configured.
+	 */
+	public function test_exception_is_thrown_on_invalid_transaction_isolation_level() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'INVALID_LEVEL' );
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid database transaction isolation level name INVALID_LEVEL' );
+
+		$this->use_wpdb_mock();
+
+		$this->create_and_migrate_order();
+	}
+
+	/**
+	 * @testdox Database transactions are used and rolled back on migrations with database error.
+	 */
+	public function test_db_transaction_is_rolled_back_on_db_error() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+
+		$wpdb_mock = $this->use_wpdb_mock();
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) {
+				$wpdb_decorator                              = $args[0];
+				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				return false;
+			}
+		);
+
+		$this->create_and_migrate_order();
+
+		$expected = array(
+			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
+			'START TRANSACTION',
+			'ROLLBACK',
+		);
+
+		$this->assertEquals( $expected, $this->executed_transaction_statements );
+	}
+
+	/**
+	 * @testdox Database transactions are used and rolled back on migrations that throw exceptions.
+	 */
+	public function test_db_transaction_is_rolled_back_on_exception() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+
+		$wpdb_mock = $this->use_wpdb_mock();
+		$wpdb_mock->register_method_replacement(
+			'get_results',
+			function( ...$args ) {
+				throw new \Exception( 'Something failed!' );
+			}
+		);
+
+		$this->create_and_migrate_order();
+
+		$expected = array(
+			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
+			'START TRANSACTION',
+			'ROLLBACK',
+		);
+
+		$this->assertEquals( $expected, $this->executed_transaction_statements );
+	}
+
+	/**
+	 * @testdox Database errors on transaction related queries are logged.
+	 */
+	public function test_db_transaction_related_errors_are_logged() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+
+		$fake_logger = $this->use_fake_logger();
+		$this->use_wpdb_mock( 'error' );
+
+		$this->create_and_migrate_order();
+
+		$actual_error = $fake_logger->errors[0];
+
+		$this->assertEquals( 'PostsToOrdersMigrationController: when executing SET TRANSACTION ISOLATION LEVEL SERIALIZABLE: Something failed!', $actual_error['message'] );
+		$this->assertEquals( 'Something failed!', $actual_error['data']['error'] );
+		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_error['data']['source'] );
+	}
+
+	/**
+	 * @testdox Database errors on transaction related exceptions are logged.
+	 */
+	public function test_transaction_related_exceptions_are_logged() {
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+
+		$fake_logger = $this->use_fake_logger();
+		$exception   = new \Exception( 'Something failed!' );
+		$this->use_wpdb_mock( $exception );
+
+		$this->create_and_migrate_order();
+
+		$actual_error = $fake_logger->errors[0];
+
+		$this->assertTrue( StringUtil::starts_with( $actual_error['message'], 'PostsToOrdersMigrationController: when executing SET TRANSACTION ISOLATION LEVEL SERIALIZABLE: (Exception) Something failed!' ) );
+		$this->assertEquals( $exception, $actual_error['data']['exception'] );
+		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_error['data']['source'] );
+	}
+
+	/**
+	 * Auxiliary method to create an order.
+	 *
+	 * @return WC_Order The created order.
+	 */
+	private function create_and_migrate_order() {
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$this->clear_all_orders();
+		$this->sut->migrate_order( $order->get_id() );
+		return $order;
+	}
+
+	/**
+	 * Configure a dynamic decorator for $wpdb that logs (and optionally errors) any db related transaction query.
+	 *
+	 * @param string|\Exception\bool $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
+	 * @return DynamicDecorator
+	 */
+	private function use_wpdb_mock( $transaction_fails = false ) {
+		global $wpdb;
+
+		$this->executed_transaction_statements = array();
+
+		$wpdb_mock = new DynamicDecorator( $wpdb );
+		$this->register_legacy_proxy_global_mocks( array( 'wpdb' => $wpdb_mock ) );
+
+		$wpdb_mock->register_method_replacement(
+			'query',
+			function( ...$args ) use ( $transaction_fails ) {
+				$wpdb_decorator = $args[0];
+				$query          = $args[1];
+
+				$is_transaction_related_query =
+					StringUtil::contains( $query, 'TRANSACTION' ) ||
+					StringUtil::contains( $query, 'COMMIT' ) ||
+					StringUtil::contains( $query, 'ROLLBACK' );
+
+				if ( $is_transaction_related_query ) {
+					if ( $transaction_fails instanceof \Exception ) {
+						throw $transaction_fails;
+					} elseif ( $transaction_fails ) {
+						$wpdb_decorator->decorated_object->last_error = 'Something failed!';
+						return false;
+					} else {
+						$this->executed_transaction_statements[] = $query;
+						return true;
+					}
+				} else {
+					return $wpdb_decorator->call_original_method( 'query', $args );
+				}
+			}
+		);
+
+		return $wpdb_mock;
 	}
 }

@@ -483,7 +483,7 @@ function wc_create_attribute( $args ) {
 	}
 
 	// Validate slug.
-	if ( strlen( $slug ) >= 28 ) {
+	if ( strlen( $slug ) > 28 ) {
 		/* translators: %s: attribute slug */
 		return new WP_Error( 'invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {

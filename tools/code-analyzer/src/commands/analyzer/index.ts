@@ -9,14 +9,22 @@ import { readFileSync } from 'fs';
  * Internal dependencies
  */
 import { MONOREPO_ROOT } from '../../const';
-import { printTemplateResults, printHookResults } from '../../print';
+import {
+	printTemplateResults,
+	printHookResults,
+	printSchemaChange,
+	printDatabaseUpdates,
+} from '../../print';
 import {
 	getVersionRegex,
 	getFilename,
 	getPatches,
 	getHookName,
+	areSchemasEqual,
+	getHookDescription,
+	getHookChangeType,
 } from '../../utils';
-import { generatePatch } from '../../git';
+import { generatePatch, generateSchemaDiff } from '../../git';
 
 /**
  * Analyzer class
@@ -85,7 +93,24 @@ export default class Analyzer extends Command {
 		const pluginData = this.getPluginData( flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
-		this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
+		// Run schema diffs only in the monorepo.
+		if ( flags.source === 'woocommerce/woocommerce' ) {
+			const schemaDiff = await generateSchemaDiff(
+				flags.source,
+				args.compare,
+				flags.base,
+				( e: string ): void => this.error( e )
+			);
+
+			this.scanChanges(
+				patchContent,
+				pluginData[ 0 ],
+				flags.output,
+				schemaDiff
+			);
+		} else {
+			this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
+		}
 	}
 
 	/**
@@ -162,17 +187,28 @@ export default class Analyzer extends Command {
 	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
-	 * @param {string} content Patch content.
-	 * @param {string} version Current product version.
-	 * @param {string} output  Output style.
+	 * @param {string}  content        Patch content.
+	 * @param {string}  version        Current product version.
+	 * @param {string}  output         Output style.
+	 * @param {boolean} schemaEquality if schemas are equal between branches.
 	 */
 	private scanChanges(
 		content: string,
 		version: string,
-		output: string
+		output: string,
+		schemaDiff: {
+			[ key: string ]: {
+				description: string;
+				base: string;
+				compare: string;
+				method: string;
+				areEqual: boolean;
+			};
+		} | void
 	): void {
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
+		const databaseUpdates = this.scanDatabases( content );
 
 		if ( templates.size ) {
 			printTemplateResults(
@@ -192,6 +228,62 @@ export default class Analyzer extends Command {
 		} else {
 			this.log( 'No new hooks found' );
 		}
+
+		if ( ! areSchemasEqual( schemaDiff ) ) {
+			printSchemaChange(
+				schemaDiff,
+				version,
+				output,
+				( s: string ): void => this.log( s )
+			);
+		} else {
+			this.log( 'No new schema changes found' );
+		}
+
+		if ( databaseUpdates ) {
+			printDatabaseUpdates(
+				databaseUpdates,
+				output,
+				( s: string ): void => this.log( s )
+			);
+		} else {
+			this.log( 'No database updates found' );
+		}
+	}
+	/**
+	 * Scan patches for changes in the database
+	 *
+	 * @param {string} content Patch content.
+	 * @param {string} version Current product version.
+	 * @param {string} output  Output style.
+	 * @return {object|null}
+	 */
+	private scanDatabases(
+		content: string
+	): { updateFunctionName: string; updateFunctionVersion: string } | null {
+		CliUx.ux.action.start( 'Scanning database changes' );
+		const matchPatches = /^a\/(.+).php/g;
+		const patches = getPatches( content, matchPatches );
+		const databaseUpdatePatch = patches.find( ( patch ) => {
+			const lines = patch.split( '\n' );
+			const filepath = getFilename( lines[ 0 ] );
+			return filepath.includes( 'class-wc-install.php' );
+		} );
+
+		if ( ! databaseUpdatePatch ) {
+			return null;
+		}
+
+		const updateFunctionRegex = /\+{1,2}\s*'(\d.\d.\d)' => array\(\n\+{1,2}\s*'(.*)',\n\+{1,2}\s*\),/m;
+		const match = databaseUpdatePatch.match( updateFunctionRegex );
+
+		if ( ! match ) {
+			return null;
+		}
+		const updateFunctionVersion = match[ 1 ];
+		const updateFunctionName = match[ 2 ];
+		CliUx.ux.action.stop();
+		return { updateFunctionName, updateFunctionVersion };
 	}
 
 	/**
@@ -278,18 +370,25 @@ export default class Analyzer extends Command {
 		const matchPatches = /^a\/(.+).php/g;
 		const patches = getPatches( content, matchPatches );
 		const verRegEx = getVersionRegex( version );
-		const matchHooks = `@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
+		const matchHooks = `\/\\*\\*(.*?)@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp( matchHooks, 'gs' );
 
 		for ( const p in patches ) {
 			const patch = patches[ p ];
 			const results = patch.match( newRegEx );
+			const hasHookRegex = /apply_filters|do_action/g;
+			const hasHook = patch.match( hasHookRegex );
 			const hooksList: Map< string, string[] > = new Map<
 				string,
 				string[]
 			>();
 
 			if ( ! results ) {
+				if ( hasHook ) {
+					this.error(
+						'A hook has been introduced or updated without a docBlock. Please add a docBlock.'
+					);
+				}
 				continue;
 			}
 
@@ -306,17 +405,32 @@ export default class Analyzer extends Command {
 					continue;
 				}
 
+				const description = getHookDescription( raw );
+
 				const name = getHookName( hookName[ 3 ] );
+
+				if ( ! description ) {
+					this.error(
+						`Hook ${ name } has no description. Please add a description.`
+					);
+				}
+
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
-				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
+				const CLIMessage = `**${ name }** introduced in ${ version }`;
 				const GithubMessage = `\\'${ name }\\' introduced in ${ version }`;
 				const message =
 					output === 'github' ? GithubMessage : CLIMessage;
-				const title = `New ${ kind } found`;
+				const hookChangeType = getHookChangeType( raw );
+				const title = `${ hookChangeType } ${ kind } found`;
 
 				if ( ! hookName[ 2 ].startsWith( '-' ) ) {
-					hooksList.set( name, [ 'NOTICE', title, message ] );
+					hooksList.set( name, [
+						'NOTICE',
+						title,
+						message,
+						description,
+					] );
 				}
 			}
 
