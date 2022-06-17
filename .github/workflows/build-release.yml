@@ -62,7 +62,7 @@ jobs:
           ref: refs/heads/trunk
           inputs: '{ "release_id": "${{ github.event.release.id }}" }'
   send-release-notification:
-    if: github.event.release.prerelease == true && github.event.release.draft == false && github.event.release.tag_name == 'nightly' && 
+    if: github.event.release.prerelease == true && github.event.release.draft == false && github.event.release.tag_name != 'nightly' 
     name: Send Release Notification
     needs: build
     runs-on: ubuntu-20.04
