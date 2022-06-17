@@ -78,7 +78,7 @@ class OnboardingThemes {
 	public static function sort_woocommerce_themes( $themes ) {
 		usort(
 			$themes,
-			function ( $product_1, $product_2 ) {
+			static function ( $product_1, $product_2 ) {
 				if ( ! property_exists( $product_1, 'id' ) || ! property_exists( $product_1, 'slug' ) ) {
 					return 1;
 				}

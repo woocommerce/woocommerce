@@ -25,7 +25,7 @@ function extract_from_phar( $path ) {
 
 	copy( $path, $tmp_path );
 
-	register_shutdown_function( function() use ( $tmp_path ) {
+	register_shutdown_function( static function() use ( $tmp_path ) {
 		@unlink( $tmp_path );
 	} );
 
@@ -454,7 +454,7 @@ function mustache_render( $template_name, $data = array() ) {
 	$template = file_get_contents( $template_name );
 
 	$m = new \Mustache_Engine( array(
-		'escape' => function ( $val ) { return $val; }
+		'escape' => static function ( $val ) { return $val; }
 	) );
 
 	return $m->render( $template, $data );
@@ -697,7 +697,7 @@ function get_flag_value( $assoc_args, $flag, $default = null ) {
 function get_temp_dir() {
 	static $temp = '';
 
-	$trailingslashit = function( $path ) {
+	$trailingslashit = static function( $path ) {
 		return rtrim( $path ) . '/';
 	};
 

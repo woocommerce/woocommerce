@@ -189,7 +189,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_get_columns_filtered() : void {
-		$filter_callback = function( $columns ) {
+		$filter_callback = static function( $columns ) {
 			return [
 				'custom_column' => 'Custom column',
 			];
@@ -1466,7 +1466,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get();
-		$callback = function( $review ) {
+		$callback = static function( $review ) {
 			echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
 		};
 
@@ -1495,7 +1495,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get();
-		$callback = function( $content, $review ) {
+		$callback = static function( $content, $review ) {
 			return 'Additional content to "' . $content . '" for test column belonging to review with ID: ' . esc_html( $review->comment_ID );
 		};
 

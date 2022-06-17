@@ -45,7 +45,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
-			function( $coupon ) {
+			static function( $coupon ) {
 				return $coupon->get_code();
 			},
 			$current_order_coupons

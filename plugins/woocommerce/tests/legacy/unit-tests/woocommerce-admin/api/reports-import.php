@@ -201,7 +201,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		// Verify there are actions to cancel.
 		$pending_actions = WC_Helper_Queue::get_all_pending();
 		$pending_hooks   = array_map(
-			function ( $action ) {
+			static function ( $action ) {
 				return $action->get_hook();
 			},
 			$pending_actions
@@ -220,7 +220,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		// Verify there are no pending actions.
 		$pending_actions = WC_Helper_Queue::get_all_pending();
 		$pending_hooks   = array_map(
-			function ( $action ) {
+			static function ( $action ) {
 				return $action->get_hook();
 			},
 			$pending_actions

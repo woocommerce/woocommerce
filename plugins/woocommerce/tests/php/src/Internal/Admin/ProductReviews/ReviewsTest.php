@@ -53,7 +53,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'moderate_comments', Reviews::get_capability( 'view' ) );
 		$this->assertEquals( 'edit_products', Reviews::get_capability( 'moderate' ) );
 
-		$callback = function() {
+		$callback = static function() {
 			return 'manage_woocommerce';
 		};
 
@@ -627,7 +627,7 @@ test2</p></div>',
 		);
 		$this->assertTrue( $method->invoke( $reviews, $review_reply ) );
 
-		$callback = function() {
+		$callback = static function() {
 			return true;
 		};
 

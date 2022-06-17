@@ -145,7 +145,7 @@ class WooCommercePayments extends Task {
 		$suggestion_plugins       = array_merge(
 			...array_filter(
 				array_column( $suggestions, 'plugins' ),
-				function( $plugins ) {
+				static function( $plugins ) {
 					return is_array( $plugins );
 				}
 			)

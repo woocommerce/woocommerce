@@ -146,7 +146,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		public function get_completed_tasks_count() {
 			$completed_tasks = array_filter(
 				$this->get_tasks(),
-				function( $task ) {
+				static function( $task ) {
 					return $task->is_complete();
 				}
 			);

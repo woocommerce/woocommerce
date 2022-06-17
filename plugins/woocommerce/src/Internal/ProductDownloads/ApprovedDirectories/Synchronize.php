@@ -175,7 +175,7 @@ class Synchronize {
 	 * @return array
 	 */
 	private function get_next_set_of_downloadable_products(): array {
-		$query_filter = function ( array $query ): array {
+		$query_filter = static function ( array $query ): array {
 			$query['meta_query'][] = array(
 				'key'     => '_downloadable_files',
 				'compare' => 'EXISTS',

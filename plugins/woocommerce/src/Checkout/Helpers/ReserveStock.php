@@ -73,7 +73,7 @@ final class ReserveStock {
 		try {
 			$items = array_filter(
 				$order->get_items(),
-				function( $item ) {
+				static function( $item ) {
 					return $item->is_type( 'line_item' ) && $item->get_product() instanceof \WC_Product && $item->get_quantity() > 0;
 				}
 			);

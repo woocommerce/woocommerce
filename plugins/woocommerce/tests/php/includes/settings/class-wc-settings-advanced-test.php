@@ -50,7 +50,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			$filter_name,
-			function ( $settings ) use ( &$actual_settings_via_filter ) {
+			static function ( $settings ) use ( &$actual_settings_via_filter ) {
 				$actual_settings_via_filter = $settings;
 
 				return $settings;
@@ -124,7 +124,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_cart_shortcode_tag',
-			function ( $id ) use ( &$original_id ) {
+			static function ( $id ) use ( &$original_id ) {
 				$original_id = $id;
 				return 'foobar';
 			},
@@ -137,7 +137,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		$setting             = current(
 			array_filter(
 				$settings,
-				function( $value ) {
+				static function( $value ) {
 					return 'woocommerce_cart_page_id' === $value['id'];
 				}
 			)
@@ -202,17 +202,17 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Webhooks' => array(
-					'page_output' => function() use ( &$actual_invoked_class ) {
+					'page_output' => static function() use ( &$actual_invoked_class ) {
 						$actual_invoked_class = 'WC_Admin_Webhooks';
 					},
 				),
 				'WC_Admin_API_Keys' => array(
-					'page_output' => function() use ( &$actual_invoked_class ) {
+					'page_output' => static function() use ( &$actual_invoked_class ) {
 						$actual_invoked_class = 'WC_Admin_API_Keys';
 					},
 				),
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$actual_invoked_class ) {
+					'output_fields' => static function( $settings ) use ( &$actual_invoked_class ) {
 						$actual_invoked_class = 'WC_Admin_Settings';
 					},
 				),
@@ -244,12 +244,12 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Webhooks' => array(
-					'notices' => function() use ( &$actual_invoked_class ) {
+					'notices' => static function() use ( &$actual_invoked_class ) {
 						$actual_invoked_class = 'WC_Admin_Webhooks';
 					},
 				),
 				'WC_Admin_API_Keys' => array(
-					'notices' => function() use ( &$actual_invoked_class ) {
+					'notices' => static function() use ( &$actual_invoked_class ) {
 						$actual_invoked_class = 'WC_Admin_API_Keys';
 					},
 				),
@@ -280,7 +280,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_rest_api_valid_to_save',
-			function ( $value ) use ( &$actual_filter_supplied_value ) {
+			static function ( $value ) use ( &$actual_filter_supplied_value ) {
 				$actual_filter_supplied_value = $value;
 
 				return false;
@@ -312,7 +312,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_rest_api_valid_to_save',
-			function ( $value ) use ( &$is_valid_to_save ) {
+			static function ( $value ) use ( &$is_valid_to_save ) {
 				return $is_valid_to_save;
 			},
 			10,
@@ -322,7 +322,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'save_fields' => function( $settings ) use ( &$settings_were_saved ) {
+					'save_fields' => static function( $settings ) use ( &$settings_were_saved ) {
 						$settings_were_saved = true;
 					},
 				),
@@ -353,7 +353,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_rest_api_valid_to_save',
-			function ( $value ) use ( &$is_valid_to_save ) {
+			static function ( $value ) use ( &$is_valid_to_save ) {
 				return $is_valid_to_save;
 			},
 			10,

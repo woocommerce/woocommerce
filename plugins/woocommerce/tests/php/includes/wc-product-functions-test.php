@@ -46,14 +46,14 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			array(
 				'WC_Tax' =>
 				array(
-					'get_rates'          => function( $tax_class, $customer ) use ( &$customer_passed_to_get_rates ) {
+					'get_rates'          => static function( $tax_class, $customer ) use ( &$customer_passed_to_get_rates ) {
 						$customer_passed_to_get_rates = $customer;
 					},
-					'get_base_tax_rates' => function( $tax_class ) use ( &$get_base_rates_invoked ) {
+					'get_base_tax_rates' => static function( $tax_class ) use ( &$get_base_rates_invoked ) {
 						$get_base_rates_invoked = true;
 						return 0;
 					},
-					'calc_tax'           => function( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
+					'calc_tax'           => static function( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
 						return array( 0 );
 					},
 				),
@@ -79,7 +79,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$customer = new stdClass();
 		$this->register_legacy_proxy_class_mocks(
 			array(
-				'WC_Customer' => function( $customer_id ) use ( &$customer_id_passed_to_wc_customer_constructor, $customer ) {
+				'WC_Customer' => static function( $customer_id ) use ( &$customer_id_passed_to_wc_customer_constructor, $customer ) {
 					$customer_id_passed_to_wc_customer_constructor = $customer_id;
 					return $customer;
 				},

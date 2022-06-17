@@ -173,7 +173,7 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_admin_onboarding_homepage_template',
-			function ( $template ) {
+			static function ( $template ) {
 				return 'Custom post content';
 			}
 		);

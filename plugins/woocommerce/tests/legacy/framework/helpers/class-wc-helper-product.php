@@ -232,7 +232,7 @@ class WC_Helper_Product {
 		}
 
 		$variation_ids = array_map(
-			function( $variation ) {
+			static function( $variation ) {
 				return $variation->get_id();
 			},
 			$variations

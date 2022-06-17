@@ -730,7 +730,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$params['extended_tasks'] = array(
 			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce' ),
 			'type'              => 'array',
-			'validate_callback' => function( $param, $request, $key ) {
+			'validate_callback' => static function( $param, $request, $key ) {
 				$has_valid_keys = true;
 				foreach ( $param as $task ) {
 					if ( $has_valid_keys ) {
@@ -758,7 +758,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
 		$json = array_map(
-			function( $list ) {
+			static function( $list ) {
 				return $list->sort_tasks()->get_json();
 			},
 			$lists

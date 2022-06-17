@@ -86,37 +86,37 @@ class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 	public function methods_causing_exception_if_data_store_cannot_be_loaded_provider() {
 		return array(
 			array(
-				function () {
+				static function () {
 					self::note_exists();
 				},
 			),
 			array(
-				function () {
+				static function () {
 					self::can_be_added();
 				},
 			),
 			array(
-				function () {
+				static function () {
 					self::possibly_add_note();
 				},
 			),
 			array(
-				function () {
+				static function () {
 					self::add_note();
 				},
 			),
 			array(
-				function () {
+				static function () {
 					self::possibly_delete_note();
 				},
 			),
 			array(
-				function () {
+				static function () {
 					self::possibly_update_note();
 				},
 			),
 			array(
-				function () {
+				static function () {
 					self::has_note_been_actioned();
 				},
 			),
@@ -296,7 +296,7 @@ class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 	public function methods_never_causing_exception_provider() {
 		return array(
 			array(
-				function () {
+				static function () {
 					self::wc_admin_active_for( 123 );
 				},
 			),

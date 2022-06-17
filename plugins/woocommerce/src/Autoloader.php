@@ -53,7 +53,7 @@ class Autoloader {
 		}
 		add_action(
 			'admin_notices',
-			function() {
+			static function() {
 				?>
 				<div class="notice notice-error">
 					<p>

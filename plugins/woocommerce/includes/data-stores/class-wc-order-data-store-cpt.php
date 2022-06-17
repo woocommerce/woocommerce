@@ -1057,7 +1057,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		$order_refunds = array_reduce(
 			$refunds,
-			function ( $order_refunds_array, WC_Order_Refund $refund ) {
+			static function ( $order_refunds_array, WC_Order_Refund $refund ) {
 				if ( ! isset( $order_refunds_array[ $refund->get_parent_id() ] ) ) {
 					$order_refunds_array[ $refund->get_parent_id() ] = array();
 				}
@@ -1099,7 +1099,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 		$cache_keys     = array_map(
-			function ( $order_id ) {
+			static function ( $order_id ) {
 				return 'order-items-' . $order_id;
 			},
 			$order_ids
@@ -1127,7 +1127,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$order_items_for_all_orders = array_reduce(
 			$order_items,
-			function ( $order_items_collection, $order_item ) {
+			static function ( $order_items_collection, $order_item ) {
 				if ( ! isset( $order_items_collection[ $order_item->order_id ] ) ) {
 					$order_items_collection[ $order_item->order_id ] = array();
 				}
@@ -1186,7 +1186,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		$raw_meta_data_collection = array_reduce(
 			$raw_meta_data_array,
-			function ( $collection, $raw_meta_data ) {
+			static function ( $collection, $raw_meta_data ) {
 				if ( ! isset( $collection[ $raw_meta_data->object_id ] ) ) {
 					$collection[ $raw_meta_data->object_id ] = array();
 				}

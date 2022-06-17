@@ -25,7 +25,7 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 	public function test_get_taxonomy_returns_the_proper_values_for_different_requests() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_attribute_taxonomy_name_by_id' => function( $attribute_id ) {
+				'wc_attribute_taxonomy_name_by_id' => static function( $attribute_id ) {
 					return 'taxonomy_' . $attribute_id;
 				},
 			)

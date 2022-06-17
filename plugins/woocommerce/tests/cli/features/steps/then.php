@@ -4,7 +4,7 @@ use Behat\Gherkin\Node\PyStringNode,
     Behat\Gherkin\Node\TableNode;
 
 $steps->Then( '/^the return code should be (\d+)$/',
-	function ( $world, $return_code ) {
+	static function ( $world, $return_code ) {
 		if ( $return_code != $world->result->return_code ) {
 			throw new RuntimeException( $world->result );
 		}
@@ -12,7 +12,7 @@ $steps->Then( '/^the return code should be (\d+)$/',
 );
 
 $steps->Then( '/^(STDOUT|STDERR) should (be|contain|not contain):$/',
-	function ( $world, $stream, $action, PyStringNode $expected ) {
+	static function ( $world, $stream, $action, PyStringNode $expected ) {
 
 		$stream = strtolower( $stream );
 
@@ -23,7 +23,7 @@ $steps->Then( '/^(STDOUT|STDERR) should (be|contain|not contain):$/',
 );
 
 $steps->Then( '/^(STDOUT|STDERR) should be a number$/',
-	function ( $world, $stream ) {
+	static function ( $world, $stream ) {
 
 		$stream = strtolower( $stream );
 
@@ -32,7 +32,7 @@ $steps->Then( '/^(STDOUT|STDERR) should be a number$/',
 );
 
 $steps->Then( '/^(STDOUT|STDERR) should not be a number$/',
-	function ( $world, $stream ) {
+	static function ( $world, $stream ) {
 
 		$stream = strtolower( $stream );
 
@@ -41,7 +41,7 @@ $steps->Then( '/^(STDOUT|STDERR) should not be a number$/',
 );
 
 $steps->Then( '/^STDOUT should be a table containing rows:$/',
-	function ( $world, TableNode $expected ) {
+	static function ( $world, TableNode $expected ) {
 		$output      = $world->result->stdout;
 		$actual_rows = explode( "\n", rtrim( $output, "\n" ) );
 
@@ -55,7 +55,7 @@ $steps->Then( '/^STDOUT should be a table containing rows:$/',
 );
 
 $steps->Then( '/^STDOUT should end with a table containing rows:$/',
-	function ( $world, TableNode $expected ) {
+	static function ( $world, TableNode $expected ) {
 		$output      = $world->result->stdout;
 		$actual_rows = explode( "\n", rtrim( $output, "\n" ) );
 
@@ -74,7 +74,7 @@ $steps->Then( '/^STDOUT should end with a table containing rows:$/',
 );
 
 $steps->Then( '/^STDOUT should be JSON containing:$/',
-	function ( $world, PyStringNode $expected ) {
+	static function ( $world, PyStringNode $expected ) {
 		$output = $world->result->stdout;
 		$expected = $world->replace_variables( (string) $expected );
 
@@ -84,7 +84,7 @@ $steps->Then( '/^STDOUT should be JSON containing:$/',
 });
 
 $steps->Then( '/^STDOUT should be a JSON array containing:$/',
-	function ( $world, PyStringNode $expected ) {
+	static function ( $world, PyStringNode $expected ) {
 		$output = $world->result->stdout;
 		$expected = $world->replace_variables( (string) $expected );
 
@@ -98,7 +98,7 @@ $steps->Then( '/^STDOUT should be a JSON array containing:$/',
 });
 
 $steps->Then( '/^STDOUT should be CSV containing:$/',
-	function ( $world, TableNode $expected ) {
+	static function ( $world, TableNode $expected ) {
 		$output = $world->result->stdout;
 
 		$expected_rows = $expected->getRows();
@@ -114,7 +114,7 @@ $steps->Then( '/^STDOUT should be CSV containing:$/',
 );
 
 $steps->Then( '/^STDOUT should be YAML containing:$/',
-	function ( $world, PyStringNode $expected ) {
+	static function ( $world, PyStringNode $expected ) {
 		$output = $world->result->stdout;
 		$expected = $world->replace_variables( (string) $expected );
 
@@ -124,7 +124,7 @@ $steps->Then( '/^STDOUT should be YAML containing:$/',
 });
 
 $steps->Then( '/^(STDOUT|STDERR) should be empty$/',
-	function ( $world, $stream ) {
+	static function ( $world, $stream ) {
 
 		$stream = strtolower( $stream );
 
@@ -135,7 +135,7 @@ $steps->Then( '/^(STDOUT|STDERR) should be empty$/',
 );
 
 $steps->Then( '/^(STDOUT|STDERR) should not be empty$/',
-	function ( $world, $stream ) {
+	static function ( $world, $stream ) {
 
 		$stream = strtolower( $stream );
 
@@ -146,7 +146,7 @@ $steps->Then( '/^(STDOUT|STDERR) should not be empty$/',
 );
 
 $steps->Then( '/^the (.+) (file|directory) should (exist|not exist|be:|contain:|not contain:)$/',
-	function ( $world, $path, $type, $action, $expected = null ) {
+	static function ( $world, $path, $type, $action, $expected = null ) {
 		$path = $world->replace_variables( $path );
 
 		// If it's a relative path, make it relative to the current test dir

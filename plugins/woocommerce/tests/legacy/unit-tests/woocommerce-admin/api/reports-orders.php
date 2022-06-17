@@ -453,7 +453,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		// Replace keys with "order_id".
 		$response_orders = array_reduce(
 			$response_orders,
-			function ( array $result, $item ) {
+			static function ( array $result, $item ) {
 				$result[ $item['order_id'] ] = $item;
 				return $result;
 			},

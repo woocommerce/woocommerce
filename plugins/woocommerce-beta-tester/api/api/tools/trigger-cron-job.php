@@ -66,7 +66,7 @@ function trigger_selected_cron( $request ) {
 				return $scheduled;
 			}
 
-			add_filter( 'cron_request', function( array $cron_request ) {
+			add_filter( 'cron_request', static function( array $cron_request ) {
 				$cron_request['url'] = add_query_arg( 'run-cron', 1, $cron_request['url'] );
 				return $cron_request;
 			} );

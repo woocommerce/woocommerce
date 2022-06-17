@@ -168,7 +168,7 @@ class WC_Admin_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_leaderboards',
-			function( $leaderboards, $per_page, $after, $before, $persisted_query ) {
+			static function( $leaderboards, $per_page, $after, $before, $persisted_query ) {
 				$leaderboards[] = array(
 					'id'      => 'top_widgets',
 					'label'   => 'Top Widgets',

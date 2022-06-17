@@ -329,7 +329,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$where_clauses = implode(
 			' or ',
 			array_map(
-				function( $ids ) {
+				static function( $ids ) {
 					return "(
 						product_lookup.product_id = {$ids['product_id']}
 						and

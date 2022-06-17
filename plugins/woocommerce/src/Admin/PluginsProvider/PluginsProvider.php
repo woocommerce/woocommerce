@@ -31,7 +31,7 @@ class PluginsProvider implements PluginsProviderInterface {
 	public function get_active_plugin_slugs() {
 		return array_filter(
 			PluginsHelper::get_active_plugin_slugs(),
-			function( $p ) {
+			static function( $p ) {
 				return $p !== self::$deactivated_plugin_slug;
 			}
 		);

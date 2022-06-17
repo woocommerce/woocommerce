@@ -16,7 +16,7 @@ class BlocksUtil {
 	public static function flatten_blocks( $blocks ) {
 		return array_reduce(
 			$blocks,
-			function( $carry, $block ) {
+			static function( $carry, $block ) {
 				array_push( $carry, array_diff_key( $block, array_flip( array( 'innerBlocks' ) ) ) );
 				if ( isset( $block['innerBlocks'] ) ) {
 					$inner_blocks = self::flatten_blocks( $block['innerBlocks'] );
@@ -38,7 +38,7 @@ class BlocksUtil {
 	public static function get_blocks_from_widget_area( $block_name ) {
 		return array_reduce(
 			get_option( 'widget_block' ),
-			function ( $acc, $block ) use ( $block_name ) {
+			static function ( $acc, $block ) use ( $block_name ) {
 				$parsed_blocks = ! empty( $block ) && is_array( $block ) ? parse_blocks( $block['content'] ) : array();
 				if ( ! empty( $parsed_blocks ) && $block_name === $parsed_blocks[0]['blockName'] ) {
 					array_push( $acc, $parsed_blocks[0] );
@@ -66,7 +66,7 @@ class BlocksUtil {
 		return array_values(
 			array_filter(
 				$flatten_blocks,
-				function ( $block ) use ( $block_name ) {
+				static function ( $block ) use ( $block_name ) {
 					return ( $block_name === $block['blockName'] );
 				}
 			)

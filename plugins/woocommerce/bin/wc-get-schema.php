@@ -10,7 +10,7 @@
  * Get database schema.
  */
 function wc_get_schema() {
-	$schema = function () {
+	$schema = static function () {
 		return static::get_schema();
 	};
 

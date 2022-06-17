@@ -62,7 +62,7 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 		$expected_queue_item = array_filter(
 			$queue_items,
-			function ( $item ) use ( $ces ) {
+			static function ( $item ) use ( $ces ) {
 				return $ces::SETTINGS_CHANGE_ACTION_NAME === $item['action'];
 			}
 		);
@@ -86,7 +86,7 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 		$expected_queue_item = array_filter(
 			$queue_items,
-			function ( $item ) use ( $ces ) {
+			static function ( $item ) use ( $ces ) {
 				return $ces::SETTINGS_CHANGE_ACTION_NAME === $item['action'];
 			}
 		);
@@ -125,7 +125,7 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 		$expected_queue_item = array_filter(
 			$queue_items,
-			function ( $item ) use ( $ces ) {
+			static function ( $item ) use ( $ces ) {
 				return $ces::SETTINGS_CHANGE_ACTION_NAME === $item['action'];
 			}
 		);

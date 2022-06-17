@@ -95,7 +95,7 @@ if ( preg_match( '/^packages:((\n\s+.+)+)/', $workspace_yaml, $matches ) ) {
         }
 }
 
-$composer_files = array_map( function( $path ) {
+$composer_files = array_map( static function( $path ) {
         return glob( $path . '/composer.json' );
 }, $workspace_paths );
 $composer_files = array_merge( ...$composer_files );

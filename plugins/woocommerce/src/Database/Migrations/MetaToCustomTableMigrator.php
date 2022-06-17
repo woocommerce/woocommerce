@@ -241,7 +241,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 		$existing_records = array_filter(
 			$existing_records,
-			function( $record_data ) {
+			static function( $record_data ) {
 				return '1' === $record_data->modified;
 			}
 		);
@@ -358,7 +358,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 		$modified_selector   = array();
 		$core_column_mapping = array_filter(
 			$this->core_column_mapping,
-			function( $mapping ) {
+			static function( $mapping ) {
 				return ! isset( $mapping['select_clause'] );
 			}
 		);

@@ -22,7 +22,7 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_account_settings',
-			function( $settings ) use ( &$actual_settings_via_filter ) {
+			static function( $settings ) use ( &$actual_settings_via_filter ) {
 				$actual_settings_via_filter = $settings;
 				return $settings;
 			},
@@ -113,12 +113,12 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 	public function test_linked_text_for_erasure_request_settings( $current_user_can_manage_privacy_options, $blog_version, $expected_order_erasure_text, $expected_downloads_erasure_text ) {
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'current_user_can' => function( $capability, ...$args ) use ( $current_user_can_manage_privacy_options ) {
+				'current_user_can' => static function( $capability, ...$args ) use ( $current_user_can_manage_privacy_options ) {
 					return 'manage_privacy_options' === $capability ?
 						$current_user_can_manage_privacy_options :
 						current_user_can( $capability, ...$args );
 				},
-				'get_bloginfo'     => function( $show = '', $filter = 'raw' ) use ( $blog_version ) {
+				'get_bloginfo'     => static function( $show = '', $filter = 'raw' ) use ( $blog_version ) {
 					return 'version' === $show ?
 						$blog_version :
 						get_bloginfo( $show, $filter );

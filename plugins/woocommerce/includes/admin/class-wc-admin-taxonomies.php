@@ -53,7 +53,7 @@ class WC_Admin_Taxonomies {
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
 		add_action(
 			'delete_product_cat',
-			function() {
+			static function() {
 				wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
 			}
 		);

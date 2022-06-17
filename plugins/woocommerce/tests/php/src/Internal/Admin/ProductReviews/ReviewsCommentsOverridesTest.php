@@ -148,14 +148,14 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	public function test_should_display_reviews_moved_notice( bool $user_has_capability, bool $user_has_dismissed_notice, bool $expected ) : void {
 		$this->register_legacy_proxy_function_mocks(
 			[
-				'current_user_can' => function( $capability, ...$args ) use ( $user_has_capability ) {
+				'current_user_can' => static function( $capability, ...$args ) use ( $user_has_capability ) {
 					if ( 'moderate_comments' === $capability ) {
 						return $user_has_capability;
 					} else {
 						return current_user_can( $capability, $args );
 					}
 				},
-				'get_user_meta' => function ( int $user_id, string $key = '', bool $single = false ) use ( $user_has_dismissed_notice ) {
+				'get_user_meta' => static function ( int $user_id, string $key = '', bool $single = false ) use ( $user_has_dismissed_notice ) {
 					if ( 'dismissed_product_reviews_moved_notice' === $key ) {
 						return $user_has_dismissed_notice;
 					} else {

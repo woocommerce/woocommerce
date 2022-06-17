@@ -308,7 +308,7 @@ class WC_CLI_REST_Command {
 			}
 			usort(
 				$performed_queries,
-				function( $a, $b ) {
+				static function( $a, $b ) {
 					if ( $a[1] === $b[1] ) {
 						return 0;
 					}

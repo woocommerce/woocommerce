@@ -161,7 +161,7 @@ final class CodeHacker {
 			throw new \Exception( 'CodeHacker::initialize - $paths must be a non-empty array with the directories containing the files to be hacked.' );
 		}
 		self::$paths_with_files_to_hack = array_map(
-			function( $path ) {
+			static function( $path ) {
 				return realpath( $path );
 			},
 			$paths

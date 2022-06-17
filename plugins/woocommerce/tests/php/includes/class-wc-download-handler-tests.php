@@ -59,7 +59,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		self::remove_download_handlers();
 		$downloads_served = 0;
 
-		$download_counter = function () use ( &$downloads_served ) {
+		$download_counter = static function () use ( &$downloads_served ) {
 			$downloads_served++;
 		};
 

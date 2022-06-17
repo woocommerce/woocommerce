@@ -21,7 +21,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$rename_table_query  = 'RENAME TABLE %s to %s;';
 
 		// Workaround to call a private function.
-		$schema = function () {
+		$schema = static function () {
 			return static::get_schema();
 		};
 
@@ -62,7 +62,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$rename_table_query  = 'RENAME TABLE %s to %s;';
 
 		// Workaround to call a private function.
-		$schema = function () {
+		$schema = static function () {
 			return static::get_schema();
 		};
 

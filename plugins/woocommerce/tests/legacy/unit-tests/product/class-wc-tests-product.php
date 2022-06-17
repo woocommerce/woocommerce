@@ -39,7 +39,7 @@ class WC_Tests_Product extends WC_Unit_Test_Case {
 	public function test_deferred_sync_on_save_and_delete( $operation ) {
 		$defer_sync_invoked = false;
 
-		$defer_product_callback = function () use ( &$defer_sync_invoked ) {
+		$defer_product_callback = static function () use ( &$defer_sync_invoked ) {
 			$defer_sync_invoked = true;
 		};
 

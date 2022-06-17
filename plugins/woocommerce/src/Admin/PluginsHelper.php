@@ -60,7 +60,7 @@ class PluginsHelper {
 	 */
 	public static function get_installed_plugin_slugs() {
 		return array_map(
-			function( $plugin_path ) {
+			static function( $plugin_path ) {
 				$path_parts = explode( '/', $plugin_path );
 				return $path_parts[0];
 			},
@@ -93,7 +93,7 @@ class PluginsHelper {
 	 */
 	public static function get_active_plugin_slugs() {
 		return array_map(
-			function( $plugin_path ) {
+			static function( $plugin_path ) {
 				$path_parts = explode( '/', $plugin_path );
 				return $path_parts[0];
 			},

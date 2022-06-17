@@ -791,7 +791,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function get_values_for_total( $field ) {
 		$items = array_map(
-			function ( $item ) use ( $field ) {
+			static function ( $item ) use ( $field ) {
 				return wc_add_number_precision( $item[ $field ], false );
 			},
 			array_values( $this->get_items() )
@@ -1627,7 +1627,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_total_fees() {
 		return array_reduce(
 			$this->get_fees(),
-			function( $carry, $item ) {
+			static function( $carry, $item ) {
 				return $carry + $item->get_total();
 			}
 		);

@@ -52,7 +52,7 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	public function test_function_mocks_can_be_used_via_injected_legacy_proxy_and_woocommerce_object( $method_to_use ) {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'hexdec' => function( $hex_string ) {
+				'hexdec' => static function( $hex_string ) {
 					return "Mocked hexdec for $hex_string";
 				},
 			)
@@ -85,7 +85,7 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_static_mocks(
 			array(
 				DependencyClass::class => array(
-					'concat' => function( ...$parts ) {
+					'concat' => static function( ...$parts ) {
 						return "I'm returning concat of these parts: " . join( ' ', $parts );
 					},
 				),

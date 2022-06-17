@@ -54,7 +54,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 		foreach ( $filter_names as $filter_name ) {
 			add_filter(
 				$filter_name,
-				function ( $settings ) use ( $filter_name, &$actual_settings_via_filter ) {
+				static function ( $settings ) use ( $filter_name, &$actual_settings_via_filter ) {
 					$actual_settings_via_filter[ $filter_name ] = $settings;
 
 					return $settings;
@@ -160,7 +160,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_recount_all_terms' => function() use ( &$wc_recount_all_terms_called ) {
+				'wc_recount_all_terms' => static function() use ( &$wc_recount_all_terms_called ) {
 					$wc_recount_all_terms_called = true;
 				},
 			)

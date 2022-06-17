@@ -70,7 +70,7 @@ trait ArgumentResolverTrait
      */
     public function reflectArguments(ReflectionFunctionAbstract $method, array $args = []) : array
     {
-        $arguments = array_map(function (ReflectionParameter $param) use ($method, $args) {
+        $arguments = array_map(static function (ReflectionParameter $param) use ($method, $args) {
             $name = $param->getName();
             $type = $param->getType();
 

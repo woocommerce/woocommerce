@@ -43,7 +43,7 @@ class WC_Admin_Tests_NewSalesRecord_Note extends WC_Unit_Test_Case {
 	public function test_it_uses_fjS_date_format_for_english_speaking_countries() {
 		add_filter(
 			'locale',
-			function() {
+			static function() {
 				return 'en_US';
 			}
 		);
@@ -60,7 +60,7 @@ class WC_Admin_Tests_NewSalesRecord_Note extends WC_Unit_Test_Case {
 	public function test_it_uses_system_date_format_for_non_english_speaking_countries() {
 		add_filter(
 			'locale',
-			function() {
+			static function() {
 				return 'es_MX';
 			}
 		);

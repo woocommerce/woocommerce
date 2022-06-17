@@ -5,19 +5,19 @@ use Behat\Gherkin\Node\PyStringNode,
     WP_CLI\Process;
 
 $steps->Given( '/^an empty directory$/',
-	function ( $world ) {
+	static function ( $world ) {
 		$world->create_run_dir();
 	}
 );
 
 $steps->Given( '/^an empty cache/',
-	function ( $world ) {
+	static function ( $world ) {
 		$world->variables['SUITE_CACHE_DIR'] = FeatureContext::create_cache_dir();
 	}
 );
 
 $steps->Given( '/^an? ([^\s]+) file:$/',
-	function ( $world, $path, PyStringNode $content ) {
+	static function ( $world, $path, PyStringNode $content ) {
 		$content = (string) $content . "\n";
 		$full_path = $world->variables['RUN_DIR'] . "/$path";
 		Process::create( \WP_CLI\utils\esc_cmd( 'mkdir -p %s', dirname( $full_path ) ) )->run_check();
@@ -26,37 +26,37 @@ $steps->Given( '/^an? ([^\s]+) file:$/',
 );
 
 $steps->Given( '/^WP files$/',
-	function ( $world ) {
+	static function ( $world ) {
 		$world->download_wp();
 	}
 );
 
 $steps->Given( '/^wp-config\.php$/',
-	function ( $world ) {
+	static function ( $world ) {
 		$world->create_config();
 	}
 );
 
 $steps->Given( '/^a database$/',
-	function ( $world ) {
+	static function ( $world ) {
 		$world->create_db();
 	}
 );
 
 $steps->Given( '/^a WP install$/',
-	function ( $world ) {
+	static function ( $world ) {
 		$world->install_wp();
 	}
 );
 
 $steps->Given( "/^a WP install in '([^\s]+)'$/",
-	function ( $world, $subdir ) {
+	static function ( $world, $subdir ) {
 		$world->install_wp( $subdir );
 	}
 );
 
 $steps->Given( '/^a WP multisite (subdirectory|subdomain)?\s?install$/',
-	function ( $world, $type = 'subdirectory' ) {
+	static function ( $world, $type = 'subdirectory' ) {
 		$world->install_wp();
 		$subdomains = ! empty( $type ) && 'subdomain' === $type ? 1 : 0;
 		$world->proc( 'wp core install-network', array( 'title' => 'WP CLI Network', 'subdomains' => $subdomains ) )->run_check();
@@ -64,14 +64,14 @@ $steps->Given( '/^a WP multisite (subdirectory|subdomain)?\s?install$/',
 );
 
 $steps->Given( '/^these installed and active plugins:$/',
-	function( $world, $stream ) {
+	static function( $world, $stream ) {
 		$plugins = implode( ' ', array_map( 'trim', explode( PHP_EOL, (string)$stream ) ) );
 		$world->proc( "wp plugin install $plugins --activate" )->run_check();
 	}
 );
 
 $steps->Given( '/^a custom wp-content directory$/',
-	function ( $world ) {
+	static function ( $world ) {
 		$wp_config_path = $world->variables['RUN_DIR'] . "/wp-config.php";
 
 		$wp_config_code = file_get_contents( $wp_config_path );
@@ -89,7 +89,7 @@ $steps->Given( '/^a custom wp-content directory$/',
 );
 
 $steps->Given( '/^download:$/',
-	function ( $world, TableNode $table ) {
+	static function ( $world, TableNode $table ) {
 		foreach ( $table->getHash() as $row ) {
 			$path = $world->replace_variables( $row['path'] );
 			if ( file_exists( $path ) ) {
@@ -103,7 +103,7 @@ $steps->Given( '/^download:$/',
 );
 
 $steps->Given( '/^save (STDOUT|STDERR) ([\'].+[^\'])?as \{(\w+)\}$/',
-	function ( $world, $stream, $output_filter, $key ) {
+	static function ( $world, $stream, $output_filter, $key ) {
 
 		$stream = strtolower( $stream );
 
@@ -121,13 +121,13 @@ $steps->Given( '/^save (STDOUT|STDERR) ([\'].+[^\'])?as \{(\w+)\}$/',
 );
 
 $steps->Given( '/^a new Phar(?: with version "([^"]+)")$/',
-	function ( $world, $version ) {
+	static function ( $world, $version ) {
 		$world->build_phar( $version );
 	}
 );
 
 $steps->Given( '/^save the (.+) file ([\'].+[^\'])?as \{(\w+)\}$/',
-	function ( $world, $filepath, $output_filter, $key ) {
+	static function ( $world, $filepath, $output_filter, $key ) {
 		$full_file = file_get_contents( $world->replace_variables( $filepath ) );
 
 		if ( $output_filter ) {
@@ -144,7 +144,7 @@ $steps->Given( '/^save the (.+) file ([\'].+[^\'])?as \{(\w+)\}$/',
 );
 
 $steps->Given('/^a misconfigured WP_CONTENT_DIR constant directory$/',
-	function($world) {
+	static function($world) {
 		$wp_config_path = $world->variables['RUN_DIR'] . "/wp-config.php";
 
 		$wp_config_code = file_get_contents( $wp_config_path );

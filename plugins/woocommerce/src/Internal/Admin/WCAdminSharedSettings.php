@@ -57,7 +57,7 @@ class WCAdminSharedSettings {
 		if ( class_exists( '\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry' ) ) {
 			\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )->add(
 				$this->settings_prefix,
-				function() {
+				static function() {
 					return apply_filters( 'woocommerce_admin_shared_settings', array() );
 				},
 				true

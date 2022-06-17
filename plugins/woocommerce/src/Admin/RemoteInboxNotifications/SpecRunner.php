@@ -123,7 +123,7 @@ class SpecRunner {
 		$matching_wp_locales = array_values(
 			array_filter(
 				$locales,
-				function( $l ) use ( $wp_locale ) {
+				static function( $l ) use ( $wp_locale ) {
 					return $wp_locale === $l->locale;
 				}
 			)
@@ -137,7 +137,7 @@ class SpecRunner {
 		$en_us_locales = array_values(
 			array_filter(
 				$locales,
-				function( $l ) {
+				static function( $l ) {
 					return 'en_US' === $l->locale;
 				}
 			)
@@ -163,7 +163,7 @@ class SpecRunner {
 		$matching_wp_locales = array_values(
 			array_filter(
 				$action_locales,
-				function ( $l ) use ( $wp_locale ) {
+				static function ( $l ) use ( $wp_locale ) {
 					return $wp_locale === $l->locale;
 				}
 			)
@@ -177,7 +177,7 @@ class SpecRunner {
 		$en_us_locales = array_values(
 			array_filter(
 				$action_locales,
-				function( $l ) {
+				static function( $l ) {
 					return 'en_US' === $l->locale;
 				}
 			)

@@ -55,7 +55,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_cart_needs_shipping_address',
-			function() {
+			static function() {
 				return true;
 			}
 		);
@@ -131,28 +131,28 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_validate_checkout_adds_we_dont_ship_error_only_if_country_exists( $country, $expect_we_dont_ship_error ) {
 		add_filter(
 			'woocommerce_countries_allowed_countries',
-			function() {
+			static function() {
 				return array( 'ES' );
 			}
 		);
 
 		add_filter(
 			'woocommerce_cart_needs_shipping',
-			function() {
+			static function() {
 				return true;
 			}
 		);
 
 		add_filter(
 			'wc_shipping_enabled',
-			function() {
+			static function() {
 				return true;
 			}
 		);
 
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'wc_get_shipping_method_count' => function( $include_legacy = false, $enabled_only = false ) {
+				'wc_get_shipping_method_count' => static function( $include_legacy = false, $enabled_only = false ) {
 					return 1;
 				},
 			)

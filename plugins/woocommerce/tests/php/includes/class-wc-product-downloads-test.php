@@ -98,7 +98,7 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 
 		add_shortcode(
 			'dynamic-download',
-			function () {
+			static function () {
 				return 'https://fast.reliable.external.fileserver.com/bucket-123/textbook.pdf';
 			}
 		);

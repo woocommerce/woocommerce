@@ -42,7 +42,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			$filter_name,
-			function ( $settings ) use ( &$actual_settings_via_filter ) {
+			static function ( $settings ) use ( &$actual_settings_via_filter ) {
 				$actual_settings_via_filter = $settings;
 
 				return $settings;
@@ -106,7 +106,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'run_email_admin_options' )
 			->will(
 				$this->returnCallback(
-					function( $email ) use ( &$admin_options_invoked, &$actual_email ) {
+					static function( $email ) use ( &$admin_options_invoked, &$actual_email ) {
 						$admin_options_invoked = true;
 						$actual_email          = $email;
 					}
@@ -146,7 +146,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Emails' => array(
-					'instance' => function() use ( $emails ) {
+					'instance' => static function() use ( $emails ) {
 						return $emails;
 					},
 				),
@@ -160,7 +160,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'save_settings_for_current_section' )
 						->will(
 							$this->returnCallback(
-								function() use ( &$save_settings_for_current_section_invoked ) {
+								static function() use ( &$save_settings_for_current_section_invoked ) {
 									$save_settings_for_current_section_invoked = true;
 								}
 							)

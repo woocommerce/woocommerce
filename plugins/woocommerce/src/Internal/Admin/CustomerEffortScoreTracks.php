@@ -240,7 +240,7 @@ class CustomerEffortScoreTracks {
 
 		$has_duplicate = array_filter(
 			$queue,
-			function ( $queue_item ) use ( $item ) {
+			static function ( $queue_item ) use ( $item ) {
 				return $queue_item['action'] === $item['action'];
 			}
 		);
@@ -423,7 +423,7 @@ class CustomerEffortScoreTracks {
 		);
 		$remaining_items = array_filter(
 			$queue,
-			function ( $item ) use ( $clear_ces_tracks_queue_for_page ) {
+			static function ( $item ) use ( $clear_ces_tracks_queue_for_page ) {
 				return $clear_ces_tracks_queue_for_page['pagenow'] !== $item['pagenow']
 				|| $clear_ces_tracks_queue_for_page['adminpage'] !== $item['adminpage'];
 			}

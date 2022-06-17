@@ -148,7 +148,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'wc_get_price_excluding_tax' => function( $product, $args = array() ) use ( &$product_passed_to_get_price, &$args_passed_to_get_price ) {
+				'wc_get_price_excluding_tax' => static function( $product, $args = array() ) use ( &$product_passed_to_get_price, &$args_passed_to_get_price ) {
 						$product_passed_to_get_price = $product;
 						$args_passed_to_get_price    = $args;
 

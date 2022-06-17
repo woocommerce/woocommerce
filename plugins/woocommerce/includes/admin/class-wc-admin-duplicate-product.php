@@ -140,7 +140,7 @@ class WC_Admin_Duplicate_Product {
 				'woocommerce_duplicate_product_exclude_meta',
 				array(),
 				array_map(
-					function ( $datum ) {
+					static function ( $datum ) {
 						return $datum->key;
 					},
 					$product->get_meta_data()

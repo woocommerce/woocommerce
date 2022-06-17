@@ -50,7 +50,7 @@ class DynamicDecoratorTest extends \WC_Unit_Test_Case {
 	public function test_method_replacement() {
 		$this->sut->register_method_replacement(
 			'some_method',
-			function( $decorator, $a, $b ) {
+			static function( $decorator, $a, $b ) {
 				return "Replacement method invoked with \$a=$a, \$b=$b, " . $decorator->decorated_object->some_other_property;
 			}
 		);
@@ -79,7 +79,7 @@ class DynamicDecoratorTest extends \WC_Unit_Test_Case {
 	public function test_property_get_replacement_with_callback() {
 		$this->sut->register_property_get_replacement(
 			'some_property',
-			function( $decorator ) {
+			static function( $decorator ) {
 				return 'replacement value, ' . $decorator->decorated_object->some_other_property;
 			}
 		);
@@ -95,7 +95,7 @@ class DynamicDecoratorTest extends \WC_Unit_Test_Case {
 	public function test_property_set_replacement() {
 		$this->sut->register_property_set_replacement(
 			'some_property',
-			function( $decorator, $value ) {
+			static function( $decorator, $value ) {
 				$decorator->decorated_object->some_property = $decorator->decorated_object->some_other_property . ', ' . $value;
 			}
 		);
@@ -113,7 +113,7 @@ class DynamicDecoratorTest extends \WC_Unit_Test_Case {
 
 		$this->sut->register_method_replacement(
 			'some_method',
-			function( ...$args ) use ( &$replacement_invoked ) {
+			static function( ...$args ) use ( &$replacement_invoked ) {
 				$replacement_invoked = true;
 				$decorator           = $args[0];
 

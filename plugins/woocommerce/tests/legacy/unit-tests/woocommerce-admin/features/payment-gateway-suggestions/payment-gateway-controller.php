@@ -33,7 +33,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends
 
 		add_filter(
 			'woocommerce_payment_gateways',
-			function( $gateways ) {
+			static function( $gateways ) {
 				$gateways[] = 'WC_Mock_Payment_Gateway';
 				$gateways[] = 'WC_Mock_Enhanced_Payment_Gateway';
 

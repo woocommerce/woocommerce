@@ -206,7 +206,7 @@ class AbstractServiceProviderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_add_with_auto_arguments_works_as_expected_when_concrete_is_a_closure() {
 		$this->container->share( DependencyClass::class );
-		$callable = function( DependencyClass $dependency ) {
+		$callable = static function( DependencyClass $dependency ) {
 			return new ClassWithDependencies( $dependency );
 		};
 

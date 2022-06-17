@@ -412,13 +412,13 @@ class LookupDataStore {
 		$product_attributes_data       = $this->get_attribute_taxonomies( $product );
 		$variation_attributes_data     = array_filter(
 			$product_attributes_data,
-			function( $item ) {
+			static function( $item ) {
 				return $item['used_for_variations'];
 			}
 		);
 		$non_variation_attributes_data = array_filter(
 			$product_attributes_data,
-			function( $item ) {
+			static function( $item ) {
 				return ! $item['used_for_variations'];
 			}
 		);
@@ -454,7 +454,7 @@ class LookupDataStore {
 		$product_attributes_data   = $this->get_attribute_taxonomies( $main_product );
 		$variation_attributes_data = array_filter(
 			$product_attributes_data,
-			function( $item ) {
+			static function( $item ) {
 				return $item['used_for_variations'];
 			}
 		);
@@ -547,7 +547,7 @@ class LookupDataStore {
 	private function get_variations_of( \WC_Product_Variable $product ) {
 		$variation_ids = $product->get_children();
 		return array_map(
-			function( $id ) {
+			static function( $id ) {
 				return WC()->call_function( 'wc_get_product', $id );
 			},
 			$variation_ids

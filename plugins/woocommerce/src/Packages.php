@@ -107,7 +107,7 @@ class Packages {
 		}
 		add_action(
 			'admin_notices',
-			function() use ( $package ) {
+			static function() use ( $package ) {
 				?>
 				<div class="notice notice-error">
 					<p>

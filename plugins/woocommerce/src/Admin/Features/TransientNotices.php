@@ -46,7 +46,7 @@ class TransientNotices {
 
 		return array_filter(
 			$notices,
-			function( $notice ) use ( $user_id ) {
+			static function( $notice ) use ( $user_id ) {
 				return ! isset( $notice['user_id'] ) ||
 					null === $notice['user_id'] ||
 					$user_id === $notice['user_id'];

@@ -128,14 +128,14 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'get_shipping_methods' )->willReturn( array() );
 		$sut->method( 'output_zones_screen' )->will(
 			$this->returnCallback(
-				function() use ( &$method_invoked ) {
+				static function() use ( &$method_invoked ) {
 					$method_invoked = 'output_zones_screen';
 				}
 			)
 		);
 		$sut->method( 'output_shipping_class_screen' )->will(
 			$this->returnCallback(
-				function() use ( &$method_invoked ) {
+				static function() use ( &$method_invoked ) {
 					$method_invoked = 'output_shipping_class_screen';
 				}
 			)
@@ -203,7 +203,7 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$output_fields_in_admin_settings_invoked ) {
+					'output_fields' => static function( $settings ) use ( &$output_fields_in_admin_settings_invoked ) {
 						$output_fields_in_admin_settings_invoked = true;
 					},
 				),
@@ -268,7 +268,7 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'get_shipping_methods' )->willReturn( array() );
 		$sut->method( 'save_settings_for_current_section' )->will(
 			$this->returnCallback(
-				function() use ( &$save_settings_for_current_section_invoked ) {
+				static function() use ( &$save_settings_for_current_section_invoked ) {
 					$save_settings_for_current_section_invoked = true;
 				}
 			)

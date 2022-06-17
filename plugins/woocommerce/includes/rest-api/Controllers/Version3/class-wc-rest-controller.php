@@ -578,7 +578,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		// Return the list of all requested fields which appear in the schema.
 		$this->_fields = array_reduce(
 			$requested_fields,
-			function( $response_fields, $field ) use ( $fields ) {
+			static function( $response_fields, $field ) use ( $fields ) {
 				if ( in_array( $field, $fields, true ) ) {
 					$response_fields[] = $field;
 					return $response_fields;

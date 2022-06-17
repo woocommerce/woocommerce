@@ -117,7 +117,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_get_settings_example',
-			function( $settings, $section ) use ( &$actual_settings, &$actual_section ) {
+			static function( $settings, $section ) use ( &$actual_settings, &$actual_section ) {
 				$actual_settings = $settings;
 				$actual_section  = $section;
 			},
@@ -158,7 +158,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_get_sections_example',
-			function( $sections ) use ( &$actual_sections ) {
+			static function( $sections ) use ( &$actual_sections ) {
 				$actual_sections = $sections;
 			},
 			10,
@@ -206,7 +206,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$actual ) {
+					'output_fields' => static function( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -233,7 +233,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$actual ) {
+					'output_fields' => static function( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -260,7 +260,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'save_fields' => function( $settings ) use ( &$actual ) {
+					'save_fields' => static function( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),
@@ -287,7 +287,7 @@ HTML;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'save_fields' => function( $settings ) use ( &$actual ) {
+					'save_fields' => static function( $settings ) use ( &$actual ) {
 						$actual = $settings;
 					},
 				),

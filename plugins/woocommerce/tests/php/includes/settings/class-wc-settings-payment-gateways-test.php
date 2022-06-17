@@ -44,7 +44,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			$filter_name,
-			function ( $settings ) use ( &$actual_settings_via_filter ) {
+			static function ( $settings ) use ( &$actual_settings_via_filter ) {
 				$actual_settings_via_filter = $settings;
 
 				return $settings;
@@ -100,7 +100,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'run_gateway_admin_options' )
 			->will(
 				$this->returnCallback(
-					function( $gateway ) use ( &$admin_options_invoked, &$actual_gateway ) {
+					static function( $gateway ) use ( &$admin_options_invoked, &$actual_gateway ) {
 						$admin_options_invoked = true;
 						$actual_gateway        = $gateway;
 					}
@@ -139,7 +139,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$payment_gateways->method( 'process_admin_options' )
 						->will(
 							$this->returnCallback(
-								function() use ( &$process_admin_options_invoked ) {
+								static function() use ( &$process_admin_options_invoked ) {
 									$process_admin_options_invoked = true;
 								}
 							)
@@ -148,7 +148,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$payment_gateways->method( 'init' )
 						->will(
 							$this->returnCallback(
-								function() use ( &$init_invoked ) {
+								static function() use ( &$init_invoked ) {
 									$init_invoked = true;
 								}
 							)
@@ -160,7 +160,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Payment_Gateways' => array(
-					'instance' => function() use ( $payment_gateways ) {
+					'instance' => static function() use ( $payment_gateways ) {
 						return $payment_gateways;
 					},
 				),

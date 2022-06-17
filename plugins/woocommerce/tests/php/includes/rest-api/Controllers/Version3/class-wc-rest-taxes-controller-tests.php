@@ -225,7 +225,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = array_values( $response->get_data() );
 		$ids  = array_map(
-			function( $item ) {
+			static function( $item ) {
 				return $item['id'];
 			},
 			$data
@@ -277,7 +277,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = array_values( $response->get_data() );
 		$ids  = array_map(
-			function( $item ) {
+			static function( $item ) {
 				return $item['id'];
 			},
 			$data

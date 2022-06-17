@@ -143,19 +143,19 @@ class ArrayUtil {
 	 */
 	public static function select( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ) {
 		if ( self::SELECT_BY_OBJECT_METHOD === $selector_type ) {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = static function( $item ) use ( $selector_name ) {
 				return $item->$selector_name();
 			};
 		} elseif ( self::SELECT_BY_OBJECT_PROPERTY === $selector_type ) {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = static function( $item ) use ( $selector_name ) {
 				return $item->$selector_name;
 			};
 		} elseif ( self::SELECT_BY_ARRAY_KEY === $selector_type ) {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = static function( $item ) use ( $selector_name ) {
 				return $item[ $selector_name ];
 			};
 		} else {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = static function( $item ) use ( $selector_name ) {
 				if ( is_array( $item ) ) {
 					return $item[ $selector_name ];
 				} elseif ( method_exists( $item, $selector_name ) ) {

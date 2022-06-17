@@ -22,7 +22,7 @@ class DefinitionAggregate implements DefinitionAggregateInterface
      */
     public function __construct(array $definitions = [])
     {
-        $this->definitions = array_filter($definitions, function ($definition) {
+        $this->definitions = array_filter($definitions, static function ($definition) {
             return ($definition instanceof DefinitionInterface);
         });
     }

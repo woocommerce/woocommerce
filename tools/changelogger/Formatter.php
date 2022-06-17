@@ -112,7 +112,7 @@ class Formatter extends KeepAChangelogParser {
 		while ( strpos( $changelog, "\t" ) !== false ) {
 			$changelog = preg_replace_callback(
 				'/^([^\t\n]*)\t/m',
-				function ( $m ) {
+				static function ( $m ) {
 					return $m[1] . str_repeat( ' ', 4 - ( mb_strlen( $m[1] ) % 4 ) );
 				},
 				$changelog

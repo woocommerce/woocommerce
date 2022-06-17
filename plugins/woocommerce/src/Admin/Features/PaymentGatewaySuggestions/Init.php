@@ -44,7 +44,7 @@ class Init {
 		return array_values(
 			array_filter(
 				$suggestions,
-				function( $suggestion ) {
+				static function( $suggestion ) {
 					return ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible;
 				}
 			)

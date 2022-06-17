@@ -41,7 +41,7 @@ class WCAdminUser {
 			'user',
 			'is_super_admin',
 			array(
-				'get_callback' => function() {
+				'get_callback' => static function() {
 					return is_super_admin();
 				},
 				'schema'       => null,

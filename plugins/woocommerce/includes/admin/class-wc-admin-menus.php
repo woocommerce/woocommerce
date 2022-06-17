@@ -323,7 +323,7 @@ class WC_Admin_Menus {
 			// need an extra step to remove the menu entry for the menu post type.
 			add_action(
 				'admin_init',
-				function () {
+				static function () {
 					remove_submenu_page( 'woocommerce', 'edit.php?post_type=shop_order' );
 				}
 			);

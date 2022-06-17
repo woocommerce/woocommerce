@@ -38,7 +38,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_explat_request_args',
-			function( $args ) {
+			static function( $args ) {
 				$args['test'] = 'test';
 				return $args;
 			},
@@ -68,7 +68,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		delete_transient( 'abtest_variation_control' );
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $parsed_args, $url ) {
+			static function( $preempt, $parsed_args, $url ) {
 				return array(
 					'response'    => 200,
 					'status_code' => 200,

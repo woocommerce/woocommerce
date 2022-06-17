@@ -120,7 +120,7 @@ class Init {
 		$wc_pay_promotion_spec = array_values(
 			array_filter(
 				$promotions,
-				function( $promotion ) {
+				static function( $promotion ) {
 					return isset( $promotion->plugins ) && in_array( 'woocommerce-payments', $promotion->plugins, true );
 				}
 			)
@@ -144,7 +144,7 @@ class Init {
 		return array_values(
 			array_filter(
 				$suggestions,
-				function( $suggestion ) {
+				static function( $suggestion ) {
 					return ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible;
 				}
 			)

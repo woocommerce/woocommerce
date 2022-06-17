@@ -72,7 +72,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// Force the "payments" task to be considered incomplete.
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function() {
+			static function() {
 				return array();
 			}
 		);
@@ -146,7 +146,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// Force the "payments" task to be considered incomplete.
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function() {
+			static function() {
 				return array();
 			}
 		);
@@ -172,7 +172,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// by faking a valid payment gateway.
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function() {
+			static function() {
 				return array(
 					new class() extends WC_Payment_Gateway {
 					},

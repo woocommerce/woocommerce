@@ -157,7 +157,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_install_get_tables',
-			function ( $tables ) {
+			static function ( $tables ) {
 				$tables[] = 'some_table_name';
 
 				return $tables;

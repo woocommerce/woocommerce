@@ -94,7 +94,7 @@ class Marketing extends Task {
 
 		return array_reduce(
 			$bundles,
-			function( $plugins, $bundle ) {
+			static function( $plugins, $bundle ) {
 				$visible = array();
 				foreach ( $bundle['plugins'] as $plugin ) {
 					if ( $plugin->is_visible ) {

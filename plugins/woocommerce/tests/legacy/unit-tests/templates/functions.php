@@ -157,7 +157,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// Include a payment gateway that supports "pay button".
 		add_filter(
 			'woocommerce_payment_gateways',
-			function( $gateways ) {
+			static function( $gateways ) {
 				$gateways[] = 'WC_Mock_Payment_Gateway';
 
 				return $gateways;

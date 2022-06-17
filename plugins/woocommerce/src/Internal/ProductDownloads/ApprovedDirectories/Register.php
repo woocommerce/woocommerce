@@ -39,7 +39,7 @@ class Register {
 	final public function init() {
 		add_action(
 			'admin_init',
-			function () {
+			static function () {
 				wc_get_container()->get( SyncUI::class )->init_hooks();
 				wc_get_container()->get( UI::class )->init_hooks();
 			}
@@ -47,7 +47,7 @@ class Register {
 
 		add_action(
 			'before_woocommerce_init',
-			function() {
+			static function() {
 				if ( get_option( Synchronize::SYNC_TASK_PAGE ) > 0 ) {
 					wc_get_container()->get( Synchronize::class )->init_hooks();
 				}

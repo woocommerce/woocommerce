@@ -62,7 +62,7 @@ class WCA_Test_Helper_Rest_Api_Filters {
         $replacement = $request->get_param('replacement');
 
         self::update(
-            function ( $filters ) use (
+            static function ( $filters ) use (
                 $endpoint,
                 $dot_notation,
                 $replacement
@@ -87,7 +87,7 @@ class WCA_Test_Helper_Rest_Api_Filters {
 
     public static function delete( $request ) {
         self::update(
-            function ( $filters ) use ( $request ) {
+            static function ( $filters ) use ( $request ) {
                 array_splice($filters, $request->get_param('index'), 1);
                 return $filters;
             }
@@ -98,7 +98,7 @@ class WCA_Test_Helper_Rest_Api_Filters {
 
     public static function toggle( $request ) {
         self::update(
-            function ( $filters ) use ( $request ) {
+            static function ( $filters ) use ( $request ) {
                 $index = $request->get_param('index');
                 $filters[$index]['enabled'] = !$filters[$index]['enabled'];
                 return $filters;

@@ -62,7 +62,7 @@ class WC_WCCOM_Site {
 		} else {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				static function() {
 					return new WP_Error(
 						WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_CODE,
 						WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_MESSAGE,
@@ -80,7 +80,7 @@ class WC_WCCOM_Site {
 		} else {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				static function() {
 					return new WP_Error(
 						WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_CODE,
 						WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_MESSAGE,
@@ -97,7 +97,7 @@ class WC_WCCOM_Site {
 		if ( empty( $site_auth['access_token'] ) ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				static function() {
 					return new WP_Error(
 						WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_CODE,
 						WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_MESSAGE,
@@ -111,7 +111,7 @@ class WC_WCCOM_Site {
 		if ( ! hash_equals( $access_token, $site_auth['access_token'] ) ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				static function() {
 					return new WP_Error(
 						WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_CODE,
 						WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_MESSAGE,
@@ -127,7 +127,7 @@ class WC_WCCOM_Site {
 		if ( ! self::verify_wccom_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				static function() {
 					return new WP_Error(
 						WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_CODE,
 						WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_MESSAGE,
@@ -142,7 +142,7 @@ class WC_WCCOM_Site {
 		if ( ! $user ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				static function() {
 					return new WP_Error(
 						WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_CODE,
 						WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_MESSAGE,

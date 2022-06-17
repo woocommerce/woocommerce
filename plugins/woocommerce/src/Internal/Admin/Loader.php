@@ -104,7 +104,7 @@ class Loader {
 			$notice_action = is_network_admin() ? 'network_admin_notices' : 'admin_notices';
 			add_action(
 				$notice_action,
-				function() {
+				static function() {
 					echo '<div class="error"><p>';
 					printf(
 						/* translators: %s: is referring to the plugin's name. */

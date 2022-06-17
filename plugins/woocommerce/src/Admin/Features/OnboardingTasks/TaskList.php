@@ -190,7 +190,7 @@ class TaskList {
 		$viewable_tasks  = $this->get_viewable_tasks();
 		$completed_count = array_reduce(
 			$viewable_tasks,
-			function( $total, $task ) {
+			static function( $total, $task ) {
 				return $task->is_complete() ? $total + 1 : $total;
 			},
 			0
@@ -231,7 +231,7 @@ class TaskList {
 
 		return array_reduce(
 			$viewable_tasks,
-			function( $is_complete, $task ) {
+			static function( $is_complete, $task ) {
 				return ! $task->is_complete() ? false : $is_complete;
 			},
 			true
@@ -279,7 +279,7 @@ class TaskList {
 		return current(
 			array_filter(
 				$this->tasks,
-				function( $task ) use ( $task_id ) {
+				static function( $task ) use ( $task_id ) {
 					return $task->get_id() === $task_id;
 				}
 			)
@@ -295,7 +295,7 @@ class TaskList {
 		return array_values(
 			array_filter(
 				$this->tasks,
-				function( $task ) {
+				static function( $task ) {
 					return $task->can_view();
 				}
 			)
@@ -340,7 +340,7 @@ class TaskList {
 		if ( 0 !== count( $sort_by ) ) {
 			usort(
 				$this->tasks,
-				function( $a, $b ) use ( $sort_by ) {
+				static function( $a, $b ) use ( $sort_by ) {
 					return Task::sort( $a, $b, $sort_by );
 				}
 			);
@@ -410,7 +410,7 @@ class TaskList {
 			'displayProgressHeader' => $this->display_progress_header,
 			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 			'sections'              => array_map(
-				function( $section ) {
+				static function( $section ) {
 					return $section->get_json();
 				},
 				$this->sections

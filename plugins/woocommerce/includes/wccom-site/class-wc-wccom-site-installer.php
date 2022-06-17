@@ -557,7 +557,7 @@ class WC_WCCOM_Site_Installer {
 
 		$related_plugins = array_filter(
 			$plugins,
-			function( $key ) use ( $plugin_folder ) {
+			static function( $key ) use ( $plugin_folder ) {
 				return strpos( $key, $plugin_folder . '/' ) === 0;
 			},
 			ARRAY_FILTER_USE_KEY

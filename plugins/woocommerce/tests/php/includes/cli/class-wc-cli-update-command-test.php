@@ -48,8 +48,8 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 		// Overwrite with some alternative update callbacks.
 		$this->db_updates_property->setValue(
 			array(
-				'5.0.0' => function () {},
-				'6.0.0' => function () {},
+				'5.0.0' => static function () {},
+				'6.0.0' => static function () {},
 			)
 		);
 
@@ -93,15 +93,15 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 		$this->register_legacy_proxy_static_mocks(
 			array(
 				WP_CLI::class => array(
-					'log'     => function () {},
-					'success' => function () {},
+					'log'     => static function () {},
+					'success' => static function () {},
 				),
 			)
 		);
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'WP_CLI\Utils\make_progress_bar' => function () {
+				'WP_CLI\Utils\make_progress_bar' => static function () {
 					return new class() {
 						/**
 						 * Stub, implemented so that calls to WP CLI methods do not break the tests.

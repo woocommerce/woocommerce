@@ -1,11 +1,11 @@
 <?php
 function register_woocommerce_admin_test_helper_rest_route( $route, $callback, $additional_options = array() ) {
-    add_action( 'rest_api_init', function() use ( $route, $callback, $additional_options ) {
+    add_action( 'rest_api_init', static function() use ( $route, $callback, $additional_options ) {
 
     	$default_options = array(
 		    'methods'  => 'POST',
 		    'callback' => $callback,
-		    'permission_callback' => function( $request ) {
+		    'permission_callback' => static function( $request ) {
 			    if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
 				    return new \WP_Error(
 					    'woocommerce_rest_cannot_edit',

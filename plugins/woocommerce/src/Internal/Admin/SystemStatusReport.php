@@ -77,7 +77,7 @@ class SystemStatusReport {
 		$enabled_features  = array_filter( $features );
 		$disabled_features = array_filter(
 			$features,
-			function( $feature ) {
+			static function( $feature ) {
 				return empty( $feature );
 			}
 		);

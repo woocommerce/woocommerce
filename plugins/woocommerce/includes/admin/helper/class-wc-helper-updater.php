@@ -209,7 +209,7 @@ class WC_Helper_Updater {
 		*/
 		$active_for_translations = array_filter(
 			$active_woo_plugins,
-			function( $plugin ) use ( $plugins ) {
+			static function( $plugin ) use ( $plugins ) {
 				return apply_filters( 'woocommerce_translations_updates_for_' . $plugins[ $plugin ]['slug'], false );
 			}
 		);

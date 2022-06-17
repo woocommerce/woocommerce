@@ -2123,7 +2123,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = current(
 			array_filter(
 				$variations,
-				function( $variation ) {
+				static function( $variation ) {
 					return 'DUMMY SKU VARIABLE HUGE RED 2' === $variation['sku'];
 				}
 			)

@@ -23,13 +23,13 @@ function array_dot_set( &$array, $key, $value ) {
 
 add_filter(
     'rest_request_after_callbacks',
-    function ( $response, array $handler, \WP_REST_Request $request ) use ( $filters ) {
+    static function ( $response, array $handler, \WP_REST_Request $request ) use ( $filters ) {
         if (! $response instanceof  \WP_REST_Response ) {
             return $response;
         }
         $route = $request->get_route();
         $filters = array_filter(
-            $filters, function ( $filter ) use ( $request, $route ) {
+            $filters, static function ( $filter ) use ( $request, $route ) {
                 if ($filter['enabled'] && $filter['endpoint'] == $route ) {
                     return true;
                 }

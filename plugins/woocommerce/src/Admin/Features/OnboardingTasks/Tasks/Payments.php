@@ -89,7 +89,7 @@ class Payments extends Task {
 		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
 		$enabled_gateways = array_filter(
 			$gateways,
-			function( $gateway ) {
+			static function( $gateway ) {
 				return 'yes' === $gateway->enabled && 'woocommerce_payments' !== $gateway->id;
 			}
 		);

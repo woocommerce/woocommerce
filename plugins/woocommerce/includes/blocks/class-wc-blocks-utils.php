@@ -52,7 +52,7 @@ class WC_Blocks_Utils {
 		return array_values(
 			array_filter(
 				$page_blocks,
-				function ( $block ) use ( $block_name ) {
+				static function ( $block ) use ( $block_name ) {
 					return ( $block_name === $block['blockName'] );
 				}
 			)

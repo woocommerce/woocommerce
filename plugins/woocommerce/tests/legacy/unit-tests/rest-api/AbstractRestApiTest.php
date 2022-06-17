@@ -206,7 +206,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	protected function get_properties( $context = 'edit' ) {
-		return array_keys( array_filter( $this->properties, function( $contexts ) use( $context ) {
+		return array_keys( array_filter( $this->properties, static function( $contexts ) use( $context ) {
 			return in_array( $context, $contexts );
 		} ) );
 	}

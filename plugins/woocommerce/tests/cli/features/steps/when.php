@@ -15,27 +15,27 @@ function invoke_proc( $proc, $mode ) {
 }
 
 $steps->When( '/^I launch in the background `([^`]+)`$/',
-	function ( $world, $cmd ) {
+	static function ( $world, $cmd ) {
 		$world->background_proc( $cmd );
 	}
 );
 
 $steps->When( '/^I (run|try) `([^`]+)`$/',
-	function ( $world, $mode, $cmd ) {
+	static function ( $world, $mode, $cmd ) {
 		$cmd = $world->replace_variables( $cmd );
 		$world->result = invoke_proc( $world->proc( $cmd ), $mode );
 	}
 );
 
 $steps->When( "/^I (run|try) `([^`]+)` from '([^\s]+)'$/",
-	function ( $world, $mode, $cmd, $subdir ) {
+	static function ( $world, $mode, $cmd, $subdir ) {
 		$cmd = $world->replace_variables( $cmd );
 		$world->result = invoke_proc( $world->proc( $cmd, array(), $subdir ), $mode );
 	}
 );
 
 $steps->When( '/^I (run|try) the previous command again$/',
-	function ( $world, $mode ) {
+	static function ( $world, $mode ) {
 		if ( !isset( $world->result ) )
 			throw new \Exception( 'No previous command.' );
 

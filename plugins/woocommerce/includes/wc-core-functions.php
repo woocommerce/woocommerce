@@ -163,7 +163,7 @@ function wc_tokenize_path( $path, $path_tokens ) {
 	// Order most to least specific so that the token can encompass as much of the path as possible.
 	uasort(
 		$path_tokens,
-		function ( $a, $b ) {
+		static function ( $a, $b ) {
 			$a = strlen( $a );
 			$b = strlen( $b );
 
@@ -1871,7 +1871,7 @@ function wc_asort_by_locale( &$data, $locale = '' ) {
 
 	array_walk(
 		$data,
-		function ( &$value ) {
+		static function ( &$value ) {
 			$value = remove_accents( html_entity_decode( $value ) );
 		}
 	);

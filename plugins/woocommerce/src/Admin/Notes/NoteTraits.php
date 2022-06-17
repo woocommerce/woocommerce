@@ -228,7 +228,7 @@ trait NoteTraits {
 			$diff        = array_udiff(
 				$note1_field_value,
 				$note2_field_value,
-				function( $action1, $action2 ) {
+				static function( $action1, $action2 ) {
 					if ( $action1->name === $action2->name &&
 						$action1->label === $action2->label &&
 						$action1->query === $action2->query ) {

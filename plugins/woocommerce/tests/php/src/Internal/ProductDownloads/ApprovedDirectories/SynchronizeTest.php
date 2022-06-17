@@ -60,7 +60,7 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	public function test_sync_process() {
 		$logged_messages = array();
 
-		$log_watcher = function ( string $logged_message ) use ( &$logged_messages ) {
+		$log_watcher = static function ( string $logged_message ) use ( &$logged_messages ) {
 			$logged_messages[] = $logged_message;
 		};
 

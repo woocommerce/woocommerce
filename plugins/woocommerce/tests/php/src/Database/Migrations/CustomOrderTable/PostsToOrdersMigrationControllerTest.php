@@ -335,7 +335,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$unique_row = array_filter(
 			$meta_data,
-			function ( $meta_row ) {
+			static function ( $meta_row ) {
 				return 'unique_key_1' === $meta_row->meta_key;
 			}
 		);
@@ -345,7 +345,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$non_unique_rows = array_filter(
 			$meta_data,
-			function ( $meta_row ) {
+			static function ( $meta_row ) {
 				return 'non_unique_key_1' === $meta_row->meta_key;
 			}
 		);
@@ -384,7 +384,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			static function( ...$args ) {
 				$wpdb_mock = $args[0];
 				$query     = $args[1];
 
@@ -396,7 +396,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock->register_property_get_replacement(
 			'last_error',
-			function( $replacement_object ) {
+			static function( $replacement_object ) {
 				if ( $replacement_object->state ) {
 					return $replacement_object->state;
 				} else {
@@ -410,7 +410,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$actual_errors = $fake_logger->errors;
 		usort(
 			$actual_errors,
-			function( $a, $b ) {
+			static function( $a, $b ) {
 				return strcmp( $a['message'], $b['message'] );
 			}
 		);
@@ -435,7 +435,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) use ( $exception ) {
+			static function( ...$args ) use ( $exception ) {
 				$query = $args[1];
 
 				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
@@ -449,7 +449,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$actual_errors = $fake_logger->errors;
 		usort(
 			$actual_errors,
-			function( $a, $b ) {
+			static function( $a, $b ) {
 				return strcmp( $a['message'], $b['message'] );
 			}
 		);
@@ -480,7 +480,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_logger' => function() use ( $fake_logger ) {
+				'wc_get_logger' => static function() use ( $fake_logger ) {
 					return $fake_logger;
 				},
 			)
@@ -511,7 +511,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			static function( ...$args ) {
 				$wpdb_decorator                              = $args[0];
 				$wpdb_decorator->original_object->last_error = 'Something failed!';
 				return false;
@@ -532,7 +532,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			static function( ...$args ) {
 				throw new \Exception( 'Something failed!' );
 			}
 		);
@@ -588,7 +588,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			static function( ...$args ) {
 				$wpdb_decorator                              = $args[0];
 				$wpdb_decorator->original_object->last_error = 'Something failed!';
 				return false;
@@ -616,7 +616,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			static function( ...$args ) {
 				throw new \Exception( 'Something failed!' );
 			}
 		);

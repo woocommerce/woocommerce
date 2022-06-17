@@ -85,7 +85,7 @@ class CategoryLookup {
 		$insert_string = implode(
 			'),(',
 			array_map(
-				function( $item ) {
+				static function( $item ) {
 					return implode( ',', $item );
 				},
 				$inserts

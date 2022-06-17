@@ -381,7 +381,7 @@ class TaskLists {
 	public static function get_lists_by_ids( $ids ) {
 		return array_filter(
 			self::$lists,
-			function( $list ) use ( $ids ) {
+			static function( $list ) use ( $ids ) {
 				return in_array( $list->get_list_id(), $ids, true );
 			}
 		);
@@ -410,7 +410,7 @@ class TaskLists {
 	public static function get_visible() {
 		return array_filter(
 			self::get_lists(),
-			function ( $task_list ) {
+			static function ( $task_list ) {
 				return $task_list->is_visible();
 			}
 		);
@@ -449,7 +449,7 @@ class TaskLists {
 
 		$tasks_to_search = $task_list ? $task_list->tasks : array_reduce(
 			self::get_lists(),
-			function ( $all, $curr ) {
+			static function ( $all, $curr ) {
 				return array_merge( $all, $curr->tasks );
 			},
 			array()
@@ -482,7 +482,7 @@ class TaskLists {
 		$remaining_tasks = array_values(
 			array_filter(
 				$setup_list->get_viewable_tasks(),
-				function( $task ) {
+				static function( $task ) {
 					return ! $task->is_complete();
 				}
 			)

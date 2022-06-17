@@ -270,7 +270,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$order_item_name   = $data['name'];
 			$data['meta_data'] = array_filter(
 				$data['meta_data'],
-				function( $meta ) use ( $product, $order_item_name ) {
+				static function( $meta ) use ( $product, $order_item_name ) {
 					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
 
 					// Skip items with values already in the product details area of the product name.

@@ -18,14 +18,14 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Test the case for woocommerce_admin_disabled filter returning true.
 		add_filter(
 			'woocommerce_admin_disabled',
-			function( $default ) {
+			static function( $default ) {
 				return true;
 			}
 		);
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $args, $url ) use ( &$posted_data ) {
+			static function( $pre, $args, $url ) use ( &$posted_data ) {
 				$posted_data = $args;
 				return true;
 			},
@@ -50,7 +50,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $args, $url ) use ( &$posted_data ) {
+			static function( $pre, $args, $url ) use ( &$posted_data ) {
 				$posted_data = $args;
 				return true;
 			},

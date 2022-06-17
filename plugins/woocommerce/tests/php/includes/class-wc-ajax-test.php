@@ -28,7 +28,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			),
 		);
 		// Call private method `maybe_add_order_item`.
-		$maybe_add_order_item_func = function () use ( $order, $data ) {
+		$maybe_add_order_item_func = static function () use ( $order, $data ) {
 			return static::maybe_add_order_item( $order->get_id(), '', $data );
 		};
 		$maybe_add_order_item_func->call( new WC_AJAX() );
@@ -66,7 +66,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			),
 		);
 		// Call private method `maybe_add_order_item`.
-		$maybe_add_order_item_func = function () use ( $order, $data ) {
+		$maybe_add_order_item_func = static function () use ( $order, $data ) {
 			return static::maybe_add_order_item( $order->get_id(), '', $data );
 		};
 		$maybe_add_order_item_func->call( new WC_AJAX() );
