@@ -232,9 +232,8 @@ function getRequestQuery( options ) {
  */
 export function getSummaryNumbers( options ) {
 	const { endpoint, select } = options;
-	const { getReportStats, getReportStatsError, isResolving } = select(
-		STORE_NAME
-	);
+	const { getReportStats, getReportStatsError, isResolving } =
+		select( STORE_NAME );
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -355,16 +354,12 @@ export function getReportChartData( options ) {
 	if ( options.select && ! options.selector ) {
 		deprecated( 'option.select', {
 			version: '1.7.0',
-			hint:
-				'You can pass the report selectors through option.selector now.',
+			hint: 'You can pass the report selectors through option.selector now.',
 		} );
 		reportSelectors = options.select( STORE_NAME );
 	}
-	const {
-		getReportStats,
-		getReportStatsError,
-		isResolving,
-	} = reportSelectors;
+	const { getReportStats, getReportStatsError, isResolving } =
+		reportSelectors;
 
 	const requestQuery = getRequestQuery( options );
 	// Disable eslint rule requiring `stats` to be defined below because the next two if statements
@@ -514,16 +509,12 @@ export function getReportTableData( options ) {
 	if ( options.select && ! options.selector ) {
 		deprecated( 'option.select', {
 			version: '1.7.0',
-			hint:
-				'You can pass the report selectors through option.selector now.',
+			hint: 'You can pass the report selectors through option.selector now.',
 		} );
 		reportSelectors = options.select( STORE_NAME );
 	}
-	const {
-		getReportItems,
-		getReportItemsError,
-		hasFinishedResolution,
-	} = reportSelectors;
+	const { getReportItems, getReportItemsError, hasFinishedResolution } =
+		reportSelectors;
 
 	const tableQuery = reportsUtils.getReportTableQuery( options );
 	const response = {

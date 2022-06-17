@@ -126,7 +126,7 @@ export type RevenueTypeSlug =
 	| 'more-than-250000';
 
 export type ProfileItems = {
-	business_extensions: [  ] | null;
+	business_extensions: [] | null;
 	completed: boolean | null;
 	industry: Industry[] | null;
 	number_employees: string | null;
