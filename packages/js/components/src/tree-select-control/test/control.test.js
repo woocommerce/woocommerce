@@ -12,10 +12,16 @@ import Control from '../control';
 
 describe( 'TreeSelectControl - Control Component', () => {
 	const onTagsChange = jest.fn().mockName( 'onTagsChange' );
+	const ref = {
+		current: {
+			focus: jest.fn(),
+		},
+	};
 
 	it( 'Renders the tags and calls onTagsChange when they change', () => {
 		const { queryByText, queryByLabelText, rerender } = render(
 			<Control
+				ref={ ref }
 				tags={ [ { id: 'es', label: 'Spain' } ] }
 				onTagsChange={ onTagsChange }
 			/>
@@ -28,6 +34,7 @@ describe( 'TreeSelectControl - Control Component', () => {
 
 		rerender(
 			<Control
+				ref={ ref }
 				tags={ [ { id: 'es', label: 'Spain' } ] }
 				disabled={ true }
 				onTagsChange={ onTagsChange }
@@ -45,7 +52,7 @@ describe( 'TreeSelectControl - Control Component', () => {
 			.mockName( 'onInputChange' )
 			.mockImplementation( ( e ) => e.target.value );
 		const { queryByRole } = render(
-			<Control onInputChange={ onInputChange } />
+			<Control ref={ ref } onInputChange={ onInputChange } />
 		);
 
 		const input = queryByRole( 'combobox' );
@@ -74,7 +81,9 @@ describe( 'TreeSelectControl - Control Component', () => {
 
 	it( 'Calls onFocus callback when it is focused', () => {
 		const onFocus = jest.fn().mockName( 'onFocus' );
-		const { queryByRole } = render( <Control onFocus={ onFocus } /> );
+		const { queryByRole } = render(
+			<Control ref={ ref } onFocus={ onFocus } />
+		);
 		userEvent.click( queryByRole( 'combobox' ) );
 		expect( onFocus ).toHaveBeenCalled();
 	} );

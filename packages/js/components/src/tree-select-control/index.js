@@ -27,31 +27,6 @@ import './index.scss';
 import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
 
 /**
- * Example of Options data structure:
- *   [
-  {
-  value: 'EU',
-  label: 'Europe',
-  children: [
-  { value: 'ES', label: 'Spain' },
-  { value: 'FR', label: 'France', children: [] }, // defining children as [] is equivalent to don't have children
-  ],
-  },
-  {
-  value: 'NA',
-  label: 'North America',
-  children: [
-  { value: 'US', label: 'United States', children: [
-  { value: 'TX', label: 'Texas' },
-  { value: 'NY', label: 'New York' },
-  ] },
-  { value: 'CA', label: 'Canada' },
-  ],
-  }
-  ],
- */
-
-/**
  * @typedef {Object} CommonOption
  * @property {string} value The value for the option
  * @property {string} [key] Optional unique key for the Option. It will fallback to the value property if not defined
@@ -74,7 +49,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @property {boolean}                 checked        Whether this option is checked.
  * @property {boolean}                 partialChecked Whether this option is partially checked.
  * @property {boolean}                 expanded       Whether this option is expanded.
- *
+ * @property {boolean}                 parent         The parent of the current option
  * @typedef {CommonOption & BaseInnerOption} InnerOption
  */
 
@@ -117,6 +92,7 @@ const TreeSelectControl = ( {
 	const [ nodesExpanded, setNodesExpanded ] = useState( [] );
 	const [ inputControlValue, setInputControlValue ] = useState( '' );
 
+	const controlRef = useRef();
 	const dropdownRef = useRef();
 	const onDropdownVisibilityChangeRef = useRef();
 	onDropdownVisibilityChangeRef.current = onDropdownVisibilityChange;
@@ -155,8 +131,13 @@ const TreeSelectControl = ( {
 		// Clear cache if options change
 		cacheRef.current.filteredOptionsMap.clear();
 
-		function loadOption( option ) {
-			option.children?.forEach( loadOption );
+		function loadOption( option, parentId ) {
+			option.parent = parentId;
+
+			option.children?.forEach( ( el ) =>
+				loadOption( el, option.value )
+			);
+
 			repository[ option.key ?? option.value ] = option;
 		}
 
@@ -329,7 +310,11 @@ const TreeSelectControl = ( {
 				.filter( ( el ) => el.type === 'checkbox' );
 			const currentIndex = elements.indexOf( event.target );
 			const index = Math.max( currentIndex + step, -1 ) % elements.length;
-			elements.at( index ).focus();
+			if ( index < 0 ) {
+				elements[ elements.length - index ].focus();
+			} else {
+				elements[ index ].focus();
+			}
 			event.preventDefault();
 		}
 	};
@@ -357,7 +342,7 @@ const TreeSelectControl = ( {
 	const handleExpanderClick = ( e ) => {
 		const elements = focus.focusable.find( dropdownRef.current );
 		const index = elements.indexOf( e.currentTarget ) + 1;
-		elements.at( index ).focus();
+		elements[ index ].focus();
 	};
 
 	/**
@@ -388,6 +373,9 @@ const TreeSelectControl = ( {
 		}
 
 		setInputControlValue( '' );
+		if ( ! nodesExpanded.includes( option.parent ) ) {
+			controlRef.current.focus();
+		}
 	};
 
 	/**
@@ -467,6 +455,7 @@ const TreeSelectControl = ( {
 			) }
 
 			<Control
+				ref={ controlRef }
 				disabled={ disabled }
 				tags={ getTags() }
 				isExpanded={ showTree }

@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { noop } from 'lodash';
-import { useRef, createElement } from '@wordpress/element';
+import { forwardRef, createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,80 +29,84 @@ import { BACKSPACE } from './constants';
  * @param {Function} [props.onControlClick] Callback when clicking on the control.
  * @return {JSX.Element} The rendered component
  */
-const Control = ( {
-	tags = [],
-	instanceId,
-	placeholder,
-	isExpanded,
-	disabled,
-	maxVisibleTags,
-	value = '',
-	onFocus = () => {},
-	onTagsChange = () => {},
-	onInputChange = () => {},
-	onControlClick = noop,
-} ) => {
-	const hasTags = tags.length > 0;
-	const showPlaceholder = ! hasTags && ! isExpanded;
-	const inputRef = useRef();
+const Control = forwardRef(
+	(
+		{
+			tags = [],
+			instanceId,
+			placeholder,
+			isExpanded,
+			disabled,
+			maxVisibleTags,
+			value = '',
+			onFocus = () => {},
+			onTagsChange = () => {},
+			onInputChange = () => {},
+			onControlClick = noop,
+		},
+		ref
+	) => {
+		const hasTags = tags.length > 0;
+		const showPlaceholder = ! hasTags && ! isExpanded;
 
-	const handleKeydown = ( event ) => {
-		if ( BACKSPACE === event.key ) {
-			if ( value ) return;
-			onTagsChange( tags.slice( 0, -1 ) );
-			event.preventDefault();
-		}
-	};
+		const handleKeydown = ( event ) => {
+			if ( BACKSPACE === event.key ) {
+				if ( value ) return;
+				onTagsChange( tags.slice( 0, -1 ) );
+				event.preventDefault();
+			}
+		};
 
-	return (
-		/**
-		 * ESLint Disable reason
-		 * https://github.com/woocommerce/woocommerce-admin/blob/main/packages/components/src/select-control/control.js#L200
-		 */
-		/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
-		<div
-			className={ classnames(
-				'components-base-control',
-				'woocommerce-tree-select-control__control',
-				{
-					'is-disabled': disabled,
-					'has-tags': hasTags,
-				}
-			) }
-			onClick={ ( e ) => {
-				inputRef.current.focus();
-				onControlClick( e );
-			} }
-		>
-			{ hasTags && (
-				<Tags
-					disabled={ disabled }
-					tags={ tags }
-					maxVisibleTags={ maxVisibleTags }
-					onChange={ onTagsChange }
-				/>
-			) }
+		return (
+			/**
+			 * ESLint Disable reason
+			 * https://github.com/woocommerce/woocommerce-admin/blob/main/packages/components/src/select-control/control.js#L200
+			 */
+			/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
+			<div
+				className={ classnames(
+					'components-base-control',
+					'woocommerce-tree-select-control__control',
+					{
+						'is-disabled': disabled,
+						'has-tags': hasTags,
+					}
+				) }
+				onClick={ ( e ) => {
+					ref.current.focus();
+					onControlClick( e );
+				} }
+			>
+				{ hasTags && (
+					<Tags
+						disabled={ disabled }
+						tags={ tags }
+						maxVisibleTags={ maxVisibleTags }
+						onChange={ onTagsChange }
+					/>
+				) }
 
-			<div className="components-base-control__field">
-				<input
-					ref={ inputRef }
-					id={ `woocommerce-tree-select-control-${ instanceId }__control-input` }
-					type="search"
-					placeholder={ showPlaceholder ? placeholder : '' }
-					autoComplete="off"
-					className="woocommerce-tree-select-control__control-input"
-					role="combobox"
-					aria-autocomplete="list"
-					value={ value }
-					aria-expanded={ isExpanded }
-					disabled={ disabled }
-					onFocus={ onFocus }
-					onChange={ onInputChange }
-					onKeyDown={ handleKeydown }
-				/>
+				<div className="components-base-control__field">
+					<input
+						ref={ ref }
+						id={ `woocommerce-tree-select-control-${ instanceId }__control-input` }
+						type="search"
+						placeholder={ showPlaceholder ? placeholder : '' }
+						autoComplete="off"
+						className="woocommerce-tree-select-control__control-input"
+						role="combobox"
+						aria-autocomplete="list"
+						value={ value }
+						aria-expanded={ isExpanded }
+						disabled={ disabled }
+						onFocus={ onFocus }
+						onChange={ onInputChange }
+						onKeyDown={ handleKeydown }
+					/>
+				</div>
 			</div>
-		</div>
-	);
-};
+		);
+	}
+);
 
 export default Control;
