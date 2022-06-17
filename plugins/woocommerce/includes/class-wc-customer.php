@@ -154,7 +154,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return bool
 	 */
 	public function is_customer_outside_base() {
-		list( $country, $state ) = $this->get_taxable_address();
+		[ $country, $state ] = $this->get_taxable_address();
 		if ( $country ) {
 			$default = wc_get_base_location();
 			if ( $default['country'] !== $country ) {

@@ -316,7 +316,7 @@ class WC_Regenerate_Images {
 	 * @return array|false An array of the filename, thumbnail width, and thumbnail height, or false on failure to resize such as the thumbnail being larger than the fullsize image.
 	 */
 	private static function get_image( $fullsizepath, $thumbnail_width, $thumbnail_height, $crop ) {
-		list( $fullsize_width, $fullsize_height ) = getimagesize( $fullsizepath );
+		[ $fullsize_width, $fullsize_height ] = getimagesize( $fullsizepath );
 
 		$dimensions = image_resize_dimensions( $fullsize_width, $fullsize_height, $thumbnail_width, $thumbnail_height, $crop );
 		$editor     = wp_get_image_editor( $fullsizepath );
@@ -329,7 +329,7 @@ class WC_Regenerate_Images {
 			return false;
 		}
 
-		list( , , , , $dst_w, $dst_h ) = $dimensions;
+		[ , , , , $dst_w, $dst_h ] = $dimensions;
 		$suffix                        = "{$dst_w}x{$dst_h}";
 		$file_ext                      = strtolower( pathinfo( $fullsizepath, PATHINFO_EXTENSION ) );
 

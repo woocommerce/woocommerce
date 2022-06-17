@@ -127,7 +127,7 @@ class WC_CLI_REST_Command {
 	 */
 	public function create_item( $args, $assoc_args ) {
 		$assoc_args            = self::decode_json( $assoc_args );
-		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
+		[ $status, $body ] = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $body['id'] );
 		} else {
@@ -144,7 +144,7 @@ class WC_CLI_REST_Command {
 	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function delete_item( $args, $assoc_args ) {
-		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
+		[ $status, $body ] = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
 		$object_id = isset( $body['id'] ) ? $body['id'] : '';
 		if ( ! $object_id && isset( $body['slug'] ) ) {
 			$object_id = $body['slug'];
@@ -171,7 +171,7 @@ class WC_CLI_REST_Command {
 	 */
 	public function get_item( $args, $assoc_args ) {
 		$route                           = $this->get_filled_route( $args );
-		list( $status, $body, $headers ) = $this->do_request( 'GET', $route, $assoc_args );
+		[ $status, $body, $headers ] = $this->do_request( 'GET', $route, $assoc_args );
 
 		if ( ! empty( $assoc_args['fields'] ) ) {
 			$body = self::limit_item_to_fields( $body, $assoc_args['fields'] );
@@ -218,7 +218,7 @@ class WC_CLI_REST_Command {
 			$assoc_args['per_page'] = '100';
 		}
 
-		list( $status, $body, $headers ) = $this->do_request( $method, $this->get_filled_route( $args ), $assoc_args );
+		[ $status, $body, $headers ] = $this->do_request( $method, $this->get_filled_route( $args ), $assoc_args );
 		if ( ! empty( $assoc_args['format'] ) && 'ids' === $assoc_args['format'] ) {
 			$items = array_column( $body, 'id' );
 		} else {
@@ -266,7 +266,7 @@ class WC_CLI_REST_Command {
 	 */
 	public function update_item( $args, $assoc_args ) {
 		$assoc_args            = self::decode_json( $assoc_args );
-		list( $status, $body ) = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
+		[ $status, $body ] = $this->do_request( 'POST', $this->get_filled_route( $args ), $assoc_args );
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $body['id'] );
 		} else {

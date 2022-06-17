@@ -759,13 +759,13 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			$date_data = rest_get_date_with_gmt( $request['date_created'] );
 
 			if ( ! empty( $date_data ) ) {
-				list( $prepared_review['comment_date'], $prepared_review['comment_date_gmt'] ) = $date_data;
+				[ $prepared_review['comment_date'], $prepared_review['comment_date_gmt'] ] = $date_data;
 			}
 		} elseif ( ! empty( $request['date_created_gmt'] ) ) {
 			$date_data = rest_get_date_with_gmt( $request['date_created_gmt'], true );
 
 			if ( ! empty( $date_data ) ) {
-				list( $prepared_review['comment_date'], $prepared_review['comment_date_gmt'] ) = $date_data;
+				[ $prepared_review['comment_date'], $prepared_review['comment_date_gmt'] ] = $date_data;
 			}
 		}
 

@@ -119,7 +119,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	private function generate_insert_sql_for_batch( array $batch ): string {
 		$table = $this->schema_config['destination']['table_name'];
 
-		list( $value_sql, $column_sql ) = $this->generate_column_clauses( array_merge( $this->core_column_mapping, $this->meta_column_mapping ), $batch );
+		[ $value_sql, $column_sql ] = $this->generate_column_clauses( array_merge( $this->core_column_mapping, $this->meta_column_mapping ), $batch );
 
 		return "INSERT IGNORE INTO $table (`$column_sql`) VALUES $value_sql;"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, -- $insert_query is hardcoded, $value_sql is already escaped.
 	}
@@ -149,7 +149,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			$batch[ $entity_id ][ $destination_primary_id_schema['destination_primary_key']['destination'] ] = $entity_row_mapping[ $entity_id ]->destination_id;
 		}
 
-		list( $value_sql, $column_sql, $columns ) = $this->generate_column_clauses(
+		[ $value_sql, $column_sql, $columns ] = $this->generate_column_clauses(
 			array_merge( $destination_primary_id_schema, $this->core_column_mapping, $this->meta_column_mapping ),
 			$batch
 		);

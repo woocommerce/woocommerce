@@ -498,7 +498,7 @@ class WC_Tax {
 		$matched_tax_rates = array();
 
 		if ( count( $location ) === 4 ) {
-			list( $country, $state, $postcode, $city ) = $location;
+			[ $country, $state, $postcode, $city ] = $location;
 
 			$matched_tax_rates = self::find_rates(
 				array(
@@ -566,7 +566,7 @@ class WC_Tax {
 		$matched_tax_rates = array();
 
 		if ( 4 === count( $location ) ) {
-			list( $country, $state, $postcode, $city ) = $location;
+			[ $country, $state, $postcode, $city ] = $location;
 
 			if ( ! is_null( $tax_class ) ) {
 				// This will be per item shipping.

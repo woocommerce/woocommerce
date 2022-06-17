@@ -215,7 +215,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	 * @throws Exception When unable to create order.
 	 */
 	public function test_create_order_when_out_of_stock() {
-		list( $product, $order ) = $this->create_order_for_managed_inventory_product();
+		[ $product, $order ] = $this->create_order_for_managed_inventory_product();
 
 		$this->assertEquals( 9, $order->get_item_count() );
 		$this->assertEquals( 'pending', $order->get_status() );
@@ -233,7 +233,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	 * @throws Exception When unable to create order.
 	 */
 	public function test_pending_is_cleared_when_order_is_cancelled() {
-		list( $product, $order ) = $this->create_order_for_managed_inventory_product();
+		[ $product, $order ] = $this->create_order_for_managed_inventory_product();
 
 		$this->assertEquals( 9, wc_get_held_stock_quantity( $product ) );
 		$order->set_status( 'cancelled' );
@@ -250,7 +250,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	 * @throws Exception When unable to create order.
 	 */
 	public function test_pending_is_cleared_when_order_processed() {
-		list( $product, $order ) = $this->create_order_for_managed_inventory_product();
+		[ $product, $order ] = $this->create_order_for_managed_inventory_product();
 
 		$this->assertEquals( 9, wc_get_held_stock_quantity( $product ) );
 		$order->set_status( 'processing' );

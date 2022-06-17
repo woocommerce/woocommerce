@@ -400,7 +400,7 @@ function mysql_host_to_cli_args( $raw_host ) {
 
 	$host_parts = explode( ':',  $raw_host );
 	if ( count( $host_parts ) == 2 ) {
-		list( $assoc_args['host'], $extra ) = $host_parts;
+		[ $assoc_args['host'], $extra ] = $host_parts;
 		$extra = trim( $extra );
 		if ( is_numeric( $extra ) ) {
 			$assoc_args['port'] = intval( $extra );
@@ -656,7 +656,7 @@ function get_named_sem_ver( $new_version, $original_version ) {
 	}
 
 	$parts = explode( '-', $original_version );
-	list( $major, $minor, $patch ) = explode( '.', $parts[0] );
+	[ $major, $minor, $patch ] = explode( '.', $parts[0] );
 
 	if ( Semver::satisfies( $new_version, "{$major}.{$minor}.x" ) ) {
 		return 'patch';

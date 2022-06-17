@@ -210,7 +210,7 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 			if ( false === $image_sizes ) {
 				continue;
 			}
-			list( $orig_w, $orig_h ) = $image_sizes;
+			[ $orig_w, $orig_h ] = $image_sizes;
 
 			$dimensions = image_resize_dimensions( $orig_w, $orig_h, $size_data['width'], $size_data['height'], $size_data['crop'] );
 

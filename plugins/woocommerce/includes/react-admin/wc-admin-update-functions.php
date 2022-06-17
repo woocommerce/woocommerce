@@ -122,7 +122,7 @@ function wc_admin_update_270_delete_report_downloads() {
 
 	// Delete all export files based on the status option values.
 	foreach ( $exports_status as $key => $progress ) {
-		list( $report_type, $export_id ) = explode( ':', $key );
+		[ $report_type, $export_id ] = explode( ':', $key );
 
 		if ( ! $export_id ) {
 			continue;

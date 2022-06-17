@@ -1223,7 +1223,7 @@ class WC_Helper {
 				continue;
 			}
 
-			list( $product_id, $file_id ) = explode( ':', $data['Woo'] );
+			[ $product_id, $file_id ] = explode( ':', $data['Woo'] );
 			if ( empty( $product_id ) || empty( $file_id ) ) {
 				continue;
 			}
@@ -1265,7 +1265,7 @@ class WC_Helper {
 				continue;
 			}
 
-			list( $product_id, $file_id ) = explode( ':', $header );
+			[ $product_id, $file_id ] = explode( ':', $header );
 			if ( empty( $product_id ) || empty( $file_id ) ) {
 				continue;
 			}

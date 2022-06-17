@@ -105,7 +105,7 @@ class WC_Admin_Webhooks {
 					break;
 
 				default:
-					list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
+					[ $resource, $event ] = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) ); // WPCS: input var okay, CSRF ok.
 					break;
 			}
 
@@ -318,7 +318,7 @@ class WC_Admin_Webhooks {
 		$resource = '';
 
 		if ( $topic ) {
-			list( $resource, $event ) = explode( '.', $topic );
+			[ $resource, $event ] = explode( '.', $topic );
 
 			if ( 'action' === $resource ) {
 				$topic = 'action';

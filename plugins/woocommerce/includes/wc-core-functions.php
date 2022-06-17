@@ -1307,7 +1307,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  */
 function wc_format_country_state_string( $country_string ) {
 	if ( strstr( $country_string, ':' ) ) {
-		list( $country, $state ) = explode( ':', $country_string );
+		[ $country, $state ] = explode( ':', $country_string );
 	} else {
 		$country = $country_string;
 		$state   = '';
@@ -1663,7 +1663,7 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 				continue;
 			}
 
-			list( $min, $max ) = $range;
+			[ $min, $max ] = $range;
 
 			// If the postcode is non-numeric, make it numeric.
 			if ( ! is_numeric( $min ) || ! is_numeric( $max ) ) {

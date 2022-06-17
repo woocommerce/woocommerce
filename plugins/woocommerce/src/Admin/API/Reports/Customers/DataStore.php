@@ -137,7 +137,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		list($data, $format) = self::get_customer_order_data_and_format( $order );
+		[$data, $format] = self::get_customer_order_data_and_format( $order );
 
 		$result = $wpdb->update( self::get_db_table_name(), $data, array( 'customer_id' => $customer_id ), $format );
 
@@ -516,7 +516,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return $returning_customer_id;
 		}
 
-		list($data, $format) = self::get_customer_order_data_and_format( $order );
+		[$data, $format] = self::get_customer_order_data_and_format( $order );
 
 		$result      = $wpdb->insert( self::get_db_table_name(), $data, $format );
 		$customer_id = $wpdb->insert_id;

@@ -256,7 +256,7 @@ class WC_API_Resource {
 
 			if ( false !== strpos( $field, '.' ) ) {
 
-				list( $name, $value ) = explode( '.', $field );
+				[ $name, $value ] = explode( '.', $field );
 
 				$sub_fields[ $name ] = $value;
 			}

@@ -900,7 +900,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		);
 
 		foreach ( $test_cases as $test_case ) {
-			list( $value, $options, $result ) = $test_case;
+			[ $value, $options, $result ] = $test_case;
 			$actual_result                    = $result ? " selected='selected'" : '';
 			$this->assertEquals( wc_selected( $value, $options ), $actual_result );
 		}

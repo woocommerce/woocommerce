@@ -414,7 +414,7 @@ class WC_Download_Handler {
 			$c_start = $start;
 			$c_end   = $end;
 			// Extract the range string.
-			list( , $range ) = explode( '=', $http_range, 2 );
+			[ , $range ] = explode( '=', $http_range, 2 );
 			// Make sure the client hasn't sent us a multibyte range.
 			if ( strpos( $range, ',' ) !== false ) {
 				return $download_range;

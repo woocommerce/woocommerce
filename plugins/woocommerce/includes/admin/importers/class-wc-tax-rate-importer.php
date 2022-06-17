@@ -154,7 +154,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 
 				while ( false !== $row ) {
 
-					list( $country, $state, $postcode, $city, $rate, $name, $priority, $compound, $shipping, $class ) = $row;
+					[ $country, $state, $postcode, $city, $rate, $name, $priority, $compound, $shipping, $class ] = $row;
 
 					$tax_rate = array(
 						'tax_rate_country'  => $country,

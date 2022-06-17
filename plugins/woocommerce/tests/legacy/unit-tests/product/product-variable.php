@@ -103,7 +103,7 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_variable_product_stock_status_sync() {
-		list($product, $child1, $child2) = $this->get_variable_product_with_children();
+		[$product, $child1, $child2] = $this->get_variable_product_with_children();
 
 		// Product should be in stock if a child is in stock.
 		$child1->set_stock_status( 'instock' );
@@ -159,7 +159,7 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 	 * @param string $expected_stock_status The expected stock status of the product after being saved.
 	 */
 	public function test_stock_status_on_save_when_managing_stock( $stock_quantity, $notify_no_stock_amount, $accepts_backorders, $expected_stock_status ) {
-		list( $product, $child1, $child2 ) = $this->get_variable_product_with_children();
+		[ $product, $child1, $child2 ] = $this->get_variable_product_with_children();
 
 		update_option( 'woocommerce_notify_no_stock_amount', $notify_no_stock_amount );
 
