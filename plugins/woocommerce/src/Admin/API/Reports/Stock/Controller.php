@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
@@ -17,7 +18,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+class Controller extends ReportsController implements ExportableInterface {
 
 	/**
 	 * Endpoint namespace.
@@ -41,49 +42,24 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	protected $status_options;
 
 	/**
+	 * Mapping between external parameter name and name used in query class.
+	 *
+	 * @var array
+	 */
+	protected $param_mapping = array(
+		'page'           => 'paged',
+		'per_page'       => 'posts_per_page',
+		'include'        => 'post__in',
+		'exclude'        => 'post__not_in',
+		'parent'         => 'post_parent__in',
+		'parent_exclude' => 'post_parent__not_in',
+	);
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->status_options = wc_get_product_stock_status_options();
-	}
-
-	/**
-	 * Maps query arguments from the REST request.
-	 *
-	 * @param  WP_REST_Request $request Request array.
-	 * @return array
-	 */
-	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['offset']              = $request['offset'];
-		$args['order']               = $request['order'];
-		$args['orderby']             = $request['orderby'];
-		$args['paged']               = $request['page'];
-		$args['post__in']            = $request['include'];
-		$args['post__not_in']        = $request['exclude'];
-		$args['posts_per_page']      = $request['per_page'];
-		$args['post_parent__in']     = $request['parent'];
-		$args['post_parent__not_in'] = $request['parent_exclude'];
-
-		if ( 'date' === $args['orderby'] ) {
-			$args['orderby'] = 'date ID';
-		} elseif ( 'include' === $args['orderby'] ) {
-			$args['orderby'] = 'post__in';
-		} elseif ( 'id' === $args['orderby'] ) {
-			$args['orderby'] = 'ID'; // ID must be capitalized.
-		}
-
-		$args['post_type'] = array( 'product', 'product_variation' );
-
-		if ( 'lowstock' === $request['type'] ) {
-			$args['low_in_stock'] = true;
-		} elseif ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
-			$args['stock_status'] = $request['type'];
-		}
-
-		$args['ignore_sticky_posts'] = true;
-
-		return $args;
 	}
 
 	/**
@@ -123,8 +99,39 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
 		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10, 2 );
 		add_filter( 'posts_clauses', array( __CLASS__, 'add_wp_query_orderby' ), 10, 2 );
-		$query_args    = $this->prepare_reports_query( $request );
+
+		$query_args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+
+		if ( 'date' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'date ID';
+		} elseif ( 'include' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'post__in';
+		} elseif ( 'id' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'ID'; // ID must be capitalized.
+		}
+
+		$query_args['post_type'] = array( 'product', 'product_variation' );
+
+		if ( 'lowstock' === $request['type'] ) {
+			$query_args['low_in_stock'] = true;
+		} elseif ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
+			$query_args['stock_status'] = $request['type'];
+		}
+
+		$query_args['ignore_sticky_posts'] = true;
+
 		$query_results = $this->get_products( $query_args );
+
 		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
 		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
 		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );

@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use \Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
@@ -20,7 +21,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+class Controller extends ReportsController implements ExportableInterface {
 	/**
 	 * Exportable traits.
 	 */
@@ -41,35 +42,24 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	protected $rest_base = 'reports/revenue/stats';
 
 	/**
-	 * Maps query arguments from the REST request.
-	 *
-	 * @param array $request Request array.
-	 * @return array
-	 */
-	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['before']              = $request['before'];
-		$args['after']               = $request['after'];
-		$args['interval']            = $request['interval'];
-		$args['page']                = $request['page'];
-		$args['per_page']            = $request['per_page'];
-		$args['orderby']             = $request['orderby'];
-		$args['order']               = $request['order'];
-		$args['segmentby']           = $request['segmentby'];
-		$args['fields']              = $request['fields'];
-		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-
-		return $args;
-	}
-
-	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args      = $this->prepare_reports_query( $request );
+		$query_args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+
 		$reports_revenue = new RevenueQuery( $query_args );
 		try {
 			$report_data = $reports_revenue->get_data();

@@ -9,13 +9,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+
 /**
  * REST API Reports downloads stats controller class.
  *
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends ReportsController {
 
 	/**
 	 * Endpoint namespace.
@@ -32,43 +34,24 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $rest_base = 'reports/downloads/stats';
 
 	/**
-	 * Maps query arguments from the REST request.
-	 *
-	 * @param array $request Request array.
-	 * @return array
-	 */
-	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['before']              = $request['before'];
-		$args['after']               = $request['after'];
-		$args['interval']            = $request['interval'];
-		$args['page']                = $request['page'];
-		$args['per_page']            = $request['per_page'];
-		$args['orderby']             = $request['orderby'];
-		$args['order']               = $request['order'];
-		$args['match']               = $request['match'];
-		$args['product_includes']    = (array) $request['product_includes'];
-		$args['product_excludes']    = (array) $request['product_excludes'];
-		$args['customer_includes']   = (array) $request['customer_includes'];
-		$args['customer_excludes']   = (array) $request['customer_excludes'];
-		$args['order_includes']      = (array) $request['order_includes'];
-		$args['order_excludes']      = (array) $request['order_excludes'];
-		$args['ip_address_includes'] = (array) $request['ip_address_includes'];
-		$args['ip_address_excludes'] = (array) $request['ip_address_excludes'];
-		$args['fields']              = $request['fields'];
-		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-
-		return $args;
-	}
-
-	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args      = $this->prepare_reports_query( $request );
+		$query_args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+
 		$downloads_query = new Query( $query_args );
 		$report_data     = $downloads_query->get_data();
 

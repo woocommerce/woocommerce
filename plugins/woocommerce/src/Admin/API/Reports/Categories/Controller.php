@@ -35,28 +35,13 @@ class Controller extends ReportsController implements ExportableInterface {
 	protected $rest_base = 'reports/categories';
 
 	/**
-	 * Maps query arguments from the REST request.
+	 * Mapping between external parameter name and name used in query class.
 	 *
-	 * @param array $request Request array.
-	 * @return array
+	 * @var array
 	 */
-	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['before']              = $request['before'];
-		$args['after']               = $request['after'];
-		$args['interval']            = $request['interval'];
-		$args['page']                = $request['page'];
-		$args['per_page']            = $request['per_page'];
-		$args['orderby']             = $request['orderby'];
-		$args['order']               = $request['order'];
-		$args['extended_info']       = $request['extended_info'];
-		$args['category_includes']   = (array) $request['categories'];
-		$args['status_is']           = (array) $request['status_is'];
-		$args['status_is_not']       = (array) $request['status_is_not'];
-		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-
-		return $args;
-	}
+	protected $param_mapping = array(
+		'categories' => 'category_includes',
+	);
 
 	/**
 	 * Get all reports.
@@ -65,7 +50,18 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args       = $this->prepare_reports_query( $request );
+		$query_args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+
 		$categories_query = new Query( $query_args );
 		$report_data      = $categories_query->get_data();
 

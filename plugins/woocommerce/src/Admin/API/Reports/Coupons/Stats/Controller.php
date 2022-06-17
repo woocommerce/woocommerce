@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 
 /**
@@ -17,7 +18,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends ReportsController {
 
 	/**
 	 * Endpoint namespace.
@@ -33,30 +34,6 @@ class Controller extends \WC_REST_Reports_Controller {
 	 */
 	protected $rest_base = 'reports/coupons/stats';
 
-
-	/**
-	 * Maps query arguments from the REST request.
-	 *
-	 * @param array $request Request array.
-	 * @return array
-	 */
-	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['before']              = $request['before'];
-		$args['after']               = $request['after'];
-		$args['interval']            = $request['interval'];
-		$args['page']                = $request['page'];
-		$args['per_page']            = $request['per_page'];
-		$args['orderby']             = $request['orderby'];
-		$args['order']               = $request['order'];
-		$args['coupons']             = (array) $request['coupons'];
-		$args['segmentby']           = $request['segmentby'];
-		$args['fields']              = $request['fields'];
-		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-
-		return $args;
-	}
-
 	/**
 	 * Get all reports.
 	 *
@@ -64,7 +41,18 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args    = $this->prepare_reports_query( $request );
+		$query_args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+
 		$coupons_query = new Query( $query_args );
 		try {
 			$report_data = $coupons_query->get_data();

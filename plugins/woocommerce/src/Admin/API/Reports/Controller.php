@@ -32,6 +32,13 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $rest_base = 'reports';
 
 	/**
+	 * Mapping between external parameter name and name used in query class.
+	 *
+	 * @var array
+	 */
+	protected $param_mapping = array();
+
+	/**
 	 * Register the routes for reports.
 	 */
 	public function register_routes() {

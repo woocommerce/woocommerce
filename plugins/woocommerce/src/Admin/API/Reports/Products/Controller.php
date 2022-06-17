@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
@@ -17,7 +18,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+class Controller extends ReportsController implements ExportableInterface {
 
 	/**
 	 * Endpoint namespace.

@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends ReportsController {
 
 	/**
 	 * Endpoint namespace.
@@ -113,20 +114,6 @@ class Controller extends \WC_REST_Reports_Controller {
 				'schema' => array( $this, 'get_public_allowed_item_schema' ),
 			)
 		);
-	}
-
-	/**
-	 * Maps query arguments from the REST request.
-	 *
-	 * @param array $request Request array.
-	 * @return array
-	 */
-	protected function prepare_reports_query( $request ) {
-		$args           = array();
-		$args['before'] = $request['before'];
-		$args['after']  = $request['after'];
-		$args['stats']  = $request['stats'];
-		return $args;
 	}
 
 	/**
@@ -403,7 +390,17 @@ class Controller extends \WC_REST_Reports_Controller {
 			return $indicator_data;
 		}
 
-		$query_args = $this->prepare_reports_query( $request );
+		$query_args = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
 		if ( empty( $query_args['stats'] ) ) {
 			return new \WP_Error( 'woocommerce_analytics_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce' ), 400 );
 		}

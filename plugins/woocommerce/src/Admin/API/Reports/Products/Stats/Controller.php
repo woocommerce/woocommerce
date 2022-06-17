@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 
 /**
@@ -17,7 +18,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends ReportsController {
 
 	/**
 	 * Endpoint namespace.

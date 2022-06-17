@@ -9,13 +9,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+
 /**
  * REST API Reports stock stats controller class.
  *
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends ReportsController {
 
 	/**
 	 * Endpoint namespace.
