@@ -2012,7 +2012,7 @@ function wc_get_logger() {
 			sprintf(
 				/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
 				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
-				'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
+				'<code>' . esc_html( is_object( $class ) ? $class::class   : $class ) . '</code>',
 				'<code>woocommerce_logging_class</code>',
 				'<code>WC_Logger_Interface</code>'
 			),

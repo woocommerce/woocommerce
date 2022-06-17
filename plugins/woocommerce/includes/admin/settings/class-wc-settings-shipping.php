@@ -182,7 +182,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		} else {
 			$is_shipping_method = false;
 			foreach ( $shipping_methods as $method ) {
-				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) && $method->has_settings() ) {
+				if ( in_array( $current_section, array( $method->id, sanitize_title( $method::class   ) ), true ) && $method->has_settings() ) {
 					$is_shipping_method = true;
 					$method->admin_options();
 				}
@@ -213,7 +213,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				$is_shipping_method = false;
 
 				foreach ( $this->get_shipping_methods() as $method_id => $method ) {
-					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) ) {
+					if ( in_array( $current_section, array( $method->id, sanitize_title( $method::class   ) ), true ) ) {
 						$is_shipping_method = true;
 						$this->do_update_options_action( $method->id );
 					}

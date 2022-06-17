@@ -77,7 +77,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		if ( $current_section ) {
 			foreach ( $payment_gateways as $gateway ) {
-				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( $gateway::class   ) ), true ) ) {
 					if ( isset( $_GET['toggle_enabled'] ) ) {
 						$enabled = $gateway->get_option( 'enabled' );
 
@@ -265,7 +265,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		} else {
 			// There is a section - this may be a gateway or custom section.
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
-				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( $gateway::class   ) ), true ) ) {
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
 					$wc_payment_gateways->init();
 				}

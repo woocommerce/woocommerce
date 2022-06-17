@@ -3090,7 +3090,7 @@ class WC_AJAX {
 			$gateway_id = wc_clean( wp_unslash( $_POST['gateway_id'] ) );
 
 			foreach ( $payment_gateways as $gateway ) {
-				if ( ! in_array( $gateway_id, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
+				if ( ! in_array( $gateway_id, array( $gateway->id, sanitize_title( $gateway::class   ) ), true ) ) {
 					continue;
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );

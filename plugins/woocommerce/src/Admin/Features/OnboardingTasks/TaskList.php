@@ -264,7 +264,7 @@ class TaskList {
 			return;
 		}
 
-		$task_class_name                             = substr( get_class( $task ), strrpos( get_class( $task ), '\\' ) + 1 );
+		$task_class_name                             = substr( $task::class  , strrpos( $task::class  , '\\' ) + 1 );
 		$this->task_class_id_map[ $task_class_name ] = $task->get_id();
 		$this->tasks[]                               = $task;
 	}

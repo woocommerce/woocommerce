@@ -117,7 +117,7 @@ final class CodeHacker {
 	 */
 	public static function add_hack( $hack ) {
 		if ( ! self::is_valid_hack_object( $hack ) ) {
-			$class = get_class( $hack );
+			$class = $hack::class  ;
 			throw new \Exception( "CodeHacker::add_hack for instance of $class: Hacks must be objects having a 'process(\$text, \$path)' method and a 'reset()' method." );
 		}
 

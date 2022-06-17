@@ -54,7 +54,7 @@ class WC_Logger implements WC_Logger_Interface {
 						sprintf(
 							/* translators: 1: class name 2: WC_Log_Handler_Interface */
 							__( 'The provided handler %1$s does not implement %2$s.', 'woocommerce' ),
-							'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
+							'<code>' . esc_html( is_object( $handler ) ? $handler::class   : $handler ) . '</code>',
 							'<code>WC_Log_Handler_Interface</code>'
 						),
 						'3.0'

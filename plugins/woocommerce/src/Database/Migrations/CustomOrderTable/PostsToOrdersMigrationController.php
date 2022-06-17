@@ -157,7 +157,7 @@ class PostsToOrdersMigrationController {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$wpdb->query( $query );
 		} catch ( \Exception $exception ) {
-			$exception_class = get_class( $exception );
+			$exception_class = $exception::class  ;
 			$this->error_logger->error(
 				"PostsToOrdersMigrationController: when executing $query: ($exception_class) {$exception->getMessage()}, {$exception->getTraceAsString()}",
 				array(
@@ -204,7 +204,7 @@ class PostsToOrdersMigrationController {
 		$batch                = ArrayUtil::to_ranges_string( $order_post_ids );
 
 		if ( null !== $exception ) {
-			$exception_class = get_class( $exception );
+			$exception_class = $exception::class  ;
 			$this->error_logger->error(
 				"$migration_class_name: when processing ids $batch: ($exception_class) {$exception->getMessage()}, {$exception->getTraceAsString()}",
 				array(

@@ -550,7 +550,7 @@ function wc_create_refund( $args = array() ) {
 					continue;
 				}
 
-				$class         = get_class( $item );
+				$class         = $item::class  ;
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );

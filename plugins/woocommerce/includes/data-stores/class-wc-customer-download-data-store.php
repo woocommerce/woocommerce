@@ -127,7 +127,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 * @throws Exception The passed value can't be converted to a date.
 	 */
 	private function adjust_date_for_db( $date ) {
-		if ( 'WC_DateTime' === get_class( $date ) ) {
+		if ( 'WC_DateTime' === $date::class   ) {
 			$date = $date->getTimestamp();
 		}
 
@@ -137,7 +137,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			return $adjusted_date;
 		}
 
-		$msg = sprintf( __( "I don't know how to get a date from a %s", 'woocommerce' ), is_object( $date ) ? get_class( $date ) : gettype( $date ) );
+		$msg = sprintf( __( "I don't know how to get a date from a %s", 'woocommerce' ), is_object( $date ) ? $date::class   : gettype( $date ) );
 		throw new Exception( $msg );
 	}
 

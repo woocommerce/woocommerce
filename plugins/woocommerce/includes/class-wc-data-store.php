@@ -94,7 +94,7 @@ class WC_Data_Store {
 				if ( ! $store instanceof WC_Object_Data_Store_Interface ) {
 					throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 				}
-				$this->current_class_name = get_class( $store );
+				$this->current_class_name = $store::class  ;
 				$this->instance           = $store;
 			} else {
 				if ( ! class_exists( $store ) ) {

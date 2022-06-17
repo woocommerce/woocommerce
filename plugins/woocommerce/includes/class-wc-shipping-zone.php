@@ -175,7 +175,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 				// as classes. If the "class" is an instance, just use it. If not,
 				// create an instance.
 				if ( is_object( $class_name ) ) {
-					$class_name_of_instance  = get_class( $class_name );
+					$class_name_of_instance  = $class_name::class  ;
 					$methods[ $instance_id ] = new $class_name_of_instance( $instance_id );
 				} else {
 					// If the class is not an object, it should be a string. It's better

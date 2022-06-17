@@ -250,7 +250,7 @@ class WC_API_Resource {
 			}
 
 			// define the top-level property name for the meta
-			switch ( get_class( $resource ) ) {
+			switch ( $resource::class   ) {
 
 				case 'WC_Order':
 					$meta_name = 'order_meta';

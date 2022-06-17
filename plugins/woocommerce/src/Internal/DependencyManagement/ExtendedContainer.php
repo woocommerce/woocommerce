@@ -129,7 +129,7 @@ class ExtendedContainer extends BaseContainer {
 				return $this->get_class_from_concrete( $concrete->getConcrete() );
 			}
 
-			return get_class( $concrete );
+			return $concrete::class  ;
 		}
 
 		if ( is_string( $concrete ) && class_exists( $concrete ) ) {
