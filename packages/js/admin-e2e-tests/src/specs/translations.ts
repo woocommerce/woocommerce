@@ -26,10 +26,9 @@ const testAdminTranslations = () => {
 		} );
 		afterAll( async () => {} );
 
-		it( 'translates PHP class, client, and component', async () => {
+		it( 'tests translations in PHP class, client, and component', async () => {
 			await homeScreen.isDisplayed();
 			await homeScreen.possiblyDismissWelcomeModal();
-			// Tests menu translation (PHP code) and homescreen translation (react client)
 			await homeScreen.navigate();
 			await homeScreen.isDisplayed();
 			const matchMenu = async ( expected: string ) => {
@@ -46,6 +45,15 @@ const testAdminTranslations = () => {
 				} );
 			};
 
+			const matchDatePickerContentButton = async ( expected: string ) => {
+				await expect( page ).toMatchElement(
+					'.woocommerce-filters-date__button-group button',
+					{
+						text: expected,
+					}
+				);
+			};
+
 			matchMenu( 'Home' );
 			matchH1( 'Home' );
 
@@ -60,13 +68,16 @@ const testAdminTranslations = () => {
 			await analyticsPage.navigate();
 			await analyticsPage.isDisplayed();
 			await analyticsPage.click( '.woocommerce-filters-filter button' );
+			await matchDatePickerContentButton( 'Update' );
 
-			await expect( page ).toMatchElement(
-				'.woocommerce-filters-date__tabs .components-tab-panel__tabs button:first-child',
-				{
-					text: 'Presets',
-				}
-			);
+			await switchLanguage( 'es_ES' );
+			await page.reload();
+			await analyticsPage.isDisplayed();
+			await analyticsPage.click( '.woocommerce-filters-filter button' );
+			await matchDatePickerContentButton( 'Actualizar' );
+
+			// Rendimiento
+			await switchLanguage( 'en_US' );
 		} );
 	} );
 };
