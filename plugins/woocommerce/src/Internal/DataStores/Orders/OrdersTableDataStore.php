@@ -318,7 +318,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		),
 		'order_stock_reduced'         => array(
 			'type' => 'bool',
-			'name' => 'stock_reduced',
+			'name' => 'order_stock_reduced',
 		),
 		'date_paid_gmt'               => array(
 			'type' => 'date',
@@ -539,7 +539,28 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function set_stock_reduced( $order, $set, $save = true ) {
 		// XXX implement $save = true.
 		$order = is_numeric( $order ) ? wc_get_order( $order ) : $order;
-		return $order->update_meta_data( '_order_stock_reduced', wc_string_to_bool( $set ) );
+		return $order->update_meta_data( '_order_stock_reduced', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Helper getter for `order_stock_reduced`.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool Whether stock was reduced.
+	 */
+	private function get_order_stock_reduced( $order ) {
+		return $this->get_stock_reduced( $order );
+	}
+
+	/**
+	 * Helper setter for `order_stock_reduced`.
+	 *
+	 * @param \WC_Order $order Order ID or order object.
+	 * @param bool      $set Whether stock was reduced.
+	 * @param bool      $save Whether to persist changes to db immediately or not.
+	 */
+	private function set_order_stock_reduced( $order, $set, $save = true ) {
+		return $this->set_stock_reduced( $order, $set, $save );
 	}
 
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
