@@ -802,25 +802,31 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 *
 	 * @param \WC_Order $order        The order.
 	 * @param boolean   $only_changes Whether to persist all order data or just changes in the object.
-	 * @return void
+	 * @return int      Order ID.
+	 * @throws \Exception If order data is not valid.
 	 */
 	protected function persist_order_to_db( $order, $only_changes = true ) {
 		global $wpdb;
 
-		// XXX implement case $only_changes = false.
-		$changes = $only_changes ? $order->get_changes() : array();
+		$changes       = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
+		$order_id      = absint( $order->get_id() );
+		$is_new_record = ( 0 === $order_id );
 
 		// Figure out what needs to be updated in the database.
 		$db_updates = array();
 
 		// wc_orders.
 		$row = $this->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
+		if ( $is_new_record && ! $row ) {
+			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
+		}
+
 		if ( $row ) {
 			$db_updates[] = array_merge(
 				array(
 					'table'        => self::get_orders_table_name(),
-					'where'        => array( 'id' => $order->get_id() ),
-					'where_format' => '%d',
+					'where'        => $is_new_record ? null : array( 'id' => $order_id ),
+					'where_format' => $is_new_record ? null : '%d',
 				),
 				$row
 			);
@@ -845,8 +851,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 			$db_updates[] = array_merge(
 				array(
 					'table'        => self::get_operational_data_table_name(),
-					'where'        => array( 'order_id' => $order->get_id() ),
-					'where_format' => '%d',
+					'where'        => $is_new_record ? null : array( 'order_id' => $order_id ),
+					'where_format' => $is_new_record ? null : '%d',
 				),
 				$row
 			);
@@ -855,16 +861,18 @@ LEFT JOIN {$operational_data_clauses['join']}
 		// wc_order_addresses.
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			$row = $this->get_db_row_from_order_changes( $changes, $this->{$address_type . '_address_column_mapping'} );
+			$row['row']['address_type']    = $address_type;
+			$row['format']['address_type'] = '%s';
 
 			if ( $row ) {
 				$db_updates[] = array_merge(
 					array(
 						'table'        => self::get_addresses_table_name(),
-						'where'        => array(
+						'where'        => $is_new_record ? null : array(
 							'order_id'     => $order->get_id(),
 							'address_type' => $address_type,
 						),
-						'where_format' => array( '%d', '%s' ),
+						'where_format' => $is_new_record ? null : array( '%d', '%s' ),
 					),
 					$row
 				);
@@ -873,14 +881,35 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		// Persist changes.
 		foreach ( $db_updates as $update ) {
-			$wpdb->update(
-				$update['table'],
-				$update['row'],
-				$update['where'],
-				array_values( $update['format'] ),
-				$update['where_format']
-			);
+			$is_orders_table = ( self::get_orders_table_name() === $update['table'] );
+
+			if ( ! $is_orders_table ) {
+				$update['row']['order_id'] = $order_id;
+				$update['format']['order_id'] = '%d';
+			}
+
+			if ( $is_new_record ) {
+				$wpdb->insert(
+					$update['table'],
+					$update['row'],
+					array_values( $update['format'] )
+				);
+
+				if ( $is_orders_table ) {
+					$order_id = absint( $wpdb->insert_id );
+				}
+			} else {
+				$wpdb->update(
+					$update['table'],
+					$update['row'],
+					$update['where'],
+					array_values( $update['format'] ),
+					$update['where_format']
+				);
+			}
 		}
+
+		return $order_id;
 	}
 
 	/**
@@ -922,7 +951,36 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param \WC_Order $order
 	 */
 	public function create( &$order ) {
-		throw new \Exception( 'Unimplemented' );
+		if ( '' === $order->get_order_key() ) {
+			$order->set_order_key( wc_generate_order_key() );
+		}
+
+		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
+		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
+
+		if ( ! $order->get_date_created( 'edit' ) ) {
+			$order->set_date_created( time() );
+		}
+
+		// TODO: do we want to add some backwards compat for 'woocommerce_new_order_data'?
+		$order_id = $this->persist_order_to_db( $order, false );
+		if ( $order_id ) {
+			$order->set_id( $order_id );
+
+			// TODO: $this->update_post_meta( $order );
+
+			$order->save_meta_data();
+			$order->apply_changes();
+			$this->clear_caches( $order );
+		}
+
+		/**
+		 * Fires when a new order is created.
+		 * @param int       Order ID.
+		 * @param \WC_Order Order object.
+		 * @since 2.7.0
+		 */
+		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
 	/**
