@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Added checks to correct types passed to functions to remove PHP 8.1 notices in core.
