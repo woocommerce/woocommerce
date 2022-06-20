@@ -82,15 +82,10 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.click( 'text=Place order' );
 
 		await page.waitForLoadState( 'networkidle' );
-		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		// get order ID from the url
+		const orderUrl = await page.url();
+		const matchedId = orderUrl.match( /\/(\d+)\// );
+		orderId = matchedId[ 1 ];
 
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
 		await page.waitForLoadState( 'networkidle' );
