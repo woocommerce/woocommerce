@@ -519,7 +519,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	protected function get_image_html( $product ) {
-		if ( empty( $this->attributes['contentVisibility']['image'] ) ) {
+		if ( array_key_exists( 'image', $this->attributes['contentVisibility'] ) && false === $this->attributes['contentVisibility']['image'] ) {
 			return '';
 		}
 
