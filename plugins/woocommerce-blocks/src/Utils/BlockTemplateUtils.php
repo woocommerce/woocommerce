@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
@@ -197,7 +198,8 @@ class BlockTemplateUtils {
 		$template->source         = $template_file->source ? $template_file->source : 'plugin';
 		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
-		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::convert_slug_to_title( $template_file->slug );
+		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::get_block_template_title( $template_file->slug );
+		$template->description    = ! empty( $template_file->description ) ? $template_file->description : self::get_block_template_description( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
 		$template->origin         = $template_file->source;
@@ -228,8 +230,8 @@ class BlockTemplateUtils {
 			'theme'       => $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG,
 			// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 			'source'      => $template_is_from_theme ? 'theme' : 'plugin',
-			'title'       => self::convert_slug_to_title( $template_slug ),
-			'description' => '',
+			'title'       => self::get_block_template_title( $template_slug ),
+			'description' => self::get_block_template_description( $template_slug ),
 			'post_types'  => array(), // Don't appear in any Edit Post template selector dropdown.
 		);
 
@@ -255,25 +257,65 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Converts template slugs into readable titles.
+	 * Returns template titles.
 	 *
 	 * @param string $template_slug The templates slug (e.g. single-product).
-	 * @return string Human friendly title converted from the slug.
+	 * @return string Human friendly title.
 	 */
-	public static function convert_slug_to_title( $template_slug ) {
-		switch ( $template_slug ) {
-			case 'single-product':
-				return __( 'Single Product', 'woo-gutenberg-products-block' );
-			case 'archive-product':
-				return __( 'Product Catalog', 'woo-gutenberg-products-block' );
-			case 'taxonomy-product_cat':
-				return __( 'Products by Category', 'woo-gutenberg-products-block' );
-			case 'taxonomy-product_tag':
-				return __( 'Products by Tag', 'woo-gutenberg-products-block' );
-			default:
-				// Replace all hyphens and underscores with spaces.
-				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
+	public static function get_block_template_title( $template_slug ) {
+		$plugin_template_types = self::get_plugin_block_template_types();
+		if ( isset( $plugin_template_types[ $template_slug ] ) ) {
+			return $plugin_template_types[ $template_slug ]['title'];
+		} else {
+			// Human friendly title converted from the slug.
+			return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
 		}
+	}
+
+	/**
+	 * Returns template descriptions.
+	 *
+	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @return string Template description.
+	 */
+	public static function get_block_template_description( $template_slug ) {
+		$plugin_template_types = self::get_plugin_block_template_types();
+		if ( isset( $plugin_template_types[ $template_slug ] ) ) {
+			return $plugin_template_types[ $template_slug ]['description'];
+		}
+	}
+
+	/**
+	 * Returns a filtered list of plugin template types, containing their
+	 * localized titles and descriptions.
+	 *
+	 * @return array The plugin template types.
+	 */
+	public static function get_plugin_block_template_types() {
+		$plugin_template_types = array(
+			'single-product'                   => array(
+				'title'       => _x( 'Single Product', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display the single product.', 'woo-gutenberg-products-block' ),
+			),
+			'archive-product'                  => array(
+				'title'       => _x( 'Product Catalog', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display products.', 'woo-gutenberg-products-block' ),
+			),
+			'taxonomy-product_cat'             => array(
+				'title'       => _x( 'Products by Category', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display products by category.', 'woo-gutenberg-products-block' ),
+			),
+			'taxonomy-product_tag'             => array(
+				'title'       => _x( 'Products by Tag', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display products by tag.', 'woo-gutenberg-products-block' ),
+			),
+			ProductSearchResultsTemplate::SLUG => array(
+				'title'       => _x( 'Product Search Results', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display search results for products.', 'woo-gutenberg-products-block' ),
+			),
+		);
+
+		return $plugin_template_types;
 	}
 
 	/**
