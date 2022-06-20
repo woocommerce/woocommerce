@@ -6,7 +6,12 @@ import { CliUx, Command, Flags } from '@oclif/core';
 /**
  * Internal dependencies
  */
-import { getFilepaths } from '../../validate';
+import { getAllPackges, validatePackage } from '../../validate';
+import {
+	getNextVersion,
+	validateChangelogEntries,
+	writeChangelog,
+} from '../../changelogger';
 
 /**
  * PackageRelease class
@@ -45,35 +50,49 @@ export default class PackageRelease extends Command {
 			this.error( 'no package supplied.' );
 		}
 
-		CliUx.ux.action.start( `Prepare ` + args.packages );
+		if ( flags.all ) {
+			this.preparePackages( getAllPackges() );
+			return;
+		}
 
-		const filepaths = getFilepaths( args, flags, ( e: string ): void =>
-			this.error( e )
+		const packages = args.packages.split( ',' );
+
+		packages.forEach( ( name: string ) =>
+			validatePackage( name, ( e: string ): void => this.error( e ) )
 		);
 
-		// const filepath =
-		// 	'packages/js' + args.packages.replace( '@woocommerce', '' );
+		this.preparePackages( packages );
+	}
 
-		// const nextVersion = execSync(
-		// 	'./vendor/bin/changelogger version next',
-		// 	{
-		// 		cwd: filepath,
-		// 		encoding: 'utf-8',
-		// 	}
-		// );
+	private preparePackages( packages: Array< string > ) {
+		packages.forEach( ( name ) => {
+			CliUx.ux.action.start( `Preparing ${ name }` );
 
-		// const validation = execSync( './vendor/bin/changelogger validate', {
-		// 	cwd: filepath,
-		// 	encoding: 'utf-8',
-		// } );
+			let nextVersion = null;
+			let isValid = '';
 
-		// const write = execSync( './vendor/bin/changelogger write', {
-		// 	cwd: filepath,
-		// 	encoding: 'utf-8',
-		// } );
+			try {
+				nextVersion = getNextVersion( name );
+			} catch ( e ) {
+				this.error( 'Cannot get next version.' );
+			}
 
-		console.log( filepaths );
+			try {
+				isValid = validateChangelogEntries( name );
+			} catch ( e ) {
+				this.error( 'Changelogger validation fails.' );
+			}
 
-		CliUx.ux.action.stop();
+			try {
+				// @todo investigate what is returned on isValid
+				if ( isValid.length && nextVersion ) {
+					writeChangelog( name );
+				}
+			} catch ( e ) {
+				this.error( 'Changelogger validation fails.' );
+			}
+
+			CliUx.ux.action.stop();
+		} );
 	}
 }

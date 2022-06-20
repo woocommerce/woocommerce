@@ -7,7 +7,7 @@ import { join } from 'path';
 /**
  * Internal dependencies
  */
-import { MONOREPO_ROOT } from './const';
+import { MONOREPO_ROOT, excludedPackages } from './const';
 
 /**
  *	Get filepath for a given package name.
@@ -15,7 +15,7 @@ import { MONOREPO_ROOT } from './const';
  * @param {string} name package name.
  * @return {string} Absolute package path.
  */
-export const getFilepathFromPackage = ( name: string ): string =>
+export const getFilepathFromPackageName = ( name: string ): string =>
 	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
 /**
@@ -25,7 +25,7 @@ export const getFilepathFromPackage = ( name: string ): string =>
  * @return {boolean} true if the package is private.
  */
 export const isValidPackage = ( name: string ): boolean => {
-	const filepath = getFilepathFromPackage( name );
+	const filepath = getFilepathFromPackageName( name );
 	const packageJsonFilepath = `${ filepath }/package.json`;
 	const packageJsonExists = existsSync( packageJsonFilepath );
 	if ( ! packageJsonExists ) {
@@ -58,7 +58,7 @@ export const validatePackageName = (
 	name: string,
 	error: ( s: string ) => void
 ) => {
-	const filepath = getFilepathFromPackage( name );
+	const filepath = getFilepathFromPackageName( name );
 
 	try {
 		const exists = existsSync( filepath );
@@ -70,17 +70,7 @@ export const validatePackageName = (
 	}
 };
 
-export const getAllPackgeFilepaths = (): Array< string > => {
-	// Package that are not meant to be released by monorepo team for whatever reason.
-	const excludedPackages = [
-		'@woocommerce/admin-e2e-tests',
-		'@woocommerce/api',
-		'@woocommerce/api-core-tests',
-		'@woocommerce/e2e-core-tests',
-		'@woocommerce/e2e-environment',
-		'@woocommerce/e2e-utils',
-	];
-
+export const getAllPackges = (): Array< string > => {
 	const jsPackageFolders = readdirSync(
 		join( MONOREPO_ROOT, 'packages/js' ),
 		{
@@ -95,36 +85,18 @@ export const getAllPackgeFilepaths = (): Array< string > => {
 				return false;
 			}
 			return isValidPackage( name );
-		} )
-		.map( getFilepathFromPackage );
+		} );
 };
 
-/**
- * Get filepaths for packages to update from CLI arguments.
- *
- * @param {Object}   args
- * @param {string}   args.packages package names separated by commas.
- * @param {Object}   flags
- * @param {boolean}  flags.all     if all packages need to be released.
- * @param {Function} error         Error logging function.
- * @return {Array<string>} Array of filepath strings.
- */
-export const getFilepaths = (
-	{ packages }: { [ name: string ]: string },
-	{ all }: { all: boolean } & { json: boolean | undefined },
+export const validatePackage = (
+	name: string,
 	error: ( s: string ) => void
-): Array< string > => {
-	if ( all ) {
-		return getAllPackgeFilepaths();
-	}
-	return packages.split( ',' ).map( ( p ) => {
-		validatePackageName( p, error );
+) => {
+	validatePackageName( name, error );
 
-		if ( ! isValidPackage( p ) ) {
-			error(
-				`${ p } is not a valid package. It may be private or incorrectly configured.`
-			);
-		}
-		return getFilepathFromPackage( p );
-	} );
+	if ( ! isValidPackage( name ) ) {
+		error(
+			`${ name } is not a valid package. It may be private or incorrectly configured.`
+		);
+	}
 };
