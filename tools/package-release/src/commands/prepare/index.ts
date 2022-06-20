@@ -11,6 +11,7 @@ import {
 	getNextVersion,
 	validateChangelogEntries,
 	writeChangelog,
+	hasChangelogs,
 } from '../../changelogger';
 
 /**
@@ -69,10 +70,14 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
 			try {
-				validateChangelogEntries( name );
-				const nextVersion = getNextVersion( name );
-				writeChangelog( name );
-				console.log( nextVersion );
+				if ( hasChangelogs( name ) ) {
+					validateChangelogEntries( name );
+					// const nextVersion = getNextVersion( name );
+					writeChangelog( name );
+					// console.log( nextVersion );
+				} else {
+					this.log( `Skipping ${ name }, no changelogs available.` );
+				}
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );

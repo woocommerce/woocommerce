@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { execSync } from 'child_process';
+import { readdirSync } from 'fs';
+import { join } from 'path';
 
 /**
  * Internal dependencies
@@ -54,6 +56,29 @@ export const writeChangelog = ( name: string ) => {
 			throw new Error(
 				message + ' - Package may not have changelog entries.'
 			);
+		}
+	}
+};
+
+export const hasChangelogs = ( name: string ): boolean | void => {
+	try {
+		const changelogDir = join(
+			getFilepathFromPackageName( name ),
+			'changelog'
+		);
+		const changelogDirContents = readdirSync( changelogDir, {
+			encoding: 'utf-8',
+		} );
+
+		return (
+			changelogDirContents.filter( ( entry ) => entry !== '.gitkeep' )
+				.length > 0
+		);
+	} catch ( e ) {
+		let message = '';
+		if ( e instanceof Error ) {
+			message = e.message;
+			throw new Error( message );
 		}
 	}
 };
