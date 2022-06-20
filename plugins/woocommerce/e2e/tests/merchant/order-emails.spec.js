@@ -67,9 +67,11 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				newOrderId = response.data.id;
 			} );
 		// search to narrow it down to just the messages we want
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
-		await page.fill( '#s-search-input', customerBilling.email );
-		await page.click( '#search-submit' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		await expect(
 			page.locator( 'td.column-receiver >> nth=1' )
 		).toContainText( adminEmail );
@@ -88,12 +90,12 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.click( 'button.wc-reload' );
 		await page.waitForLoadState( 'networkidle' );
 
-		// confirm the message was delivered in the logs
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
 		// search to narrow it down to just the messages we want
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
-		await page.fill( '#s-search-input', customerBilling.email );
-		await page.click( '#search-submit' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			adminEmail
 		);
@@ -110,11 +112,11 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		// confirm the message was delivered in the logs
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
-		// search to narrow it down to just the messages we want
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
-		await page.fill( '#s-search-input', customerBilling.email );
-		await page.click( '#search-submit' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			customerBilling.email
 		);

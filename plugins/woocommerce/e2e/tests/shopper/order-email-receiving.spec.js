@@ -6,7 +6,7 @@ const productName = 'Order email product';
 const customerEmail = 'order-email-test@example.com';
 const storeName = 'WooCommerce Core E2E Test Suite';
 
-test.describe( 'Shopper Order Email Receiving', () => {
+test.describe.only( 'Shopper Order Email Receiving', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -91,12 +91,13 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			console.log( orderId );
 		}
 
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
-		await page.waitForLoadState( 'networkidle' );
 		// search to narrow it down to just the messages we want
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
-		await page.fill( '#s-search-input', customerEmail );
-		await page.click( '#search-submit' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerEmail
+			) }`
+		);
+		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( 'td.column-receiver >> nth=0' )
 		).toContainText( customerEmail );
