@@ -1,5 +1,7 @@
 # Releases
+
 Every release includes specific testing instructions for new features and bug fixes (if applicable). This is a list of the available release testing instruction docs:
+
 -   [2.6.0](./260.md)
     -   [2.6.1](./261.md)
 -   [2.7.0](./270.md)
@@ -71,11 +73,13 @@ Every release includes specific testing instructions for new features and bug fi
     -   [7.4.2](./742.md)
 -   [7.5.0](./750.md)
 -   [7.6.0](./760.md)
-	-   [7.6.1](./761.md)
-	-   [7.6.2](./762.md)
+    -   [7.6.1](./761.md)
+    -   [7.6.2](./762.md)
 -   [7.7.0](./770.md)
 -   [7.8.0](./780.md)
-	-   [7.8.1](./781.md)
+    -   [7.8.1](./781.md)
+    -   [7.8.2](./782.md)
+    -   [7.8.3](./783.md)
 
 
 <!-- FEEDBACK -->
