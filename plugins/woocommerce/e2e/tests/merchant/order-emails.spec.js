@@ -29,7 +29,11 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	} );
 
 	test.beforeEach( async ( { page } ) => {
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		// clear out the email logs before each test
 		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
 			await page.click( '#cb-select-all-1' );

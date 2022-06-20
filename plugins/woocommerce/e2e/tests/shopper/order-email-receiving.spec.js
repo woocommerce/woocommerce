@@ -33,7 +33,11 @@ test.describe( 'Shopper Order Email Receiving', () => {
 	} );
 
 	test.beforeEach( async ( { page } ) => {
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerEmail
+			) }`
+		);
 		// clear out the email logs before each test
 		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
 			await page.click( '#cb-select-all-1' );
