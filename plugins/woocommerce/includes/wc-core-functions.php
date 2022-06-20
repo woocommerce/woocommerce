@@ -703,7 +703,7 @@ function get_woocommerce_currency_symbols() {
 			'CVE' => '&#36;',
 			'CZK' => '&#75;&#269;',
 			'DJF' => 'Fr',
-			'DKK' => 'DKK',
+			'DKK' => 'kr.',
 			'DOP' => 'RD&#36;',
 			'DZD' => '&#x62f;.&#x62c;',
 			'EGP' => 'EGP',
