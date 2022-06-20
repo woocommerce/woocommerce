@@ -27,7 +27,10 @@ export const validatePackage = (
 	const filepath = getFilepathFromPackage( name );
 
 	try {
-		existsSync( filepath );
+		const exists = existsSync( filepath );
+		if ( ! exists ) {
+			throw new Error();
+		}
 	} catch ( e ) {
 		error( `${ name } does not exist as a package.` );
 	}

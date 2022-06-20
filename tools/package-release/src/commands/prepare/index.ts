@@ -41,6 +41,11 @@ export default class PackageRelease extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( PackageRelease );
+
+		if ( ! args.packages ) {
+			this.error( 'no package supplied.' );
+		}
+
 		CliUx.ux.action.start( `Prepare ` + args.packages );
 
 		const filepaths = getFilepaths( args, flags, ( e: string ): void =>
