@@ -22,12 +22,12 @@
 		"pelago/emogrifier": "^6.0",
 		"psr/container": "1.0.0",
 		"woocommerce/action-scheduler": "3.4.0",
-		"woocommerce/woocommerce-blocks": "7.6.1"
+		"woocommerce/woocommerce-blocks": "7.6.2"
 	},
 	"require-dev": {
 		"bamarni/composer-bin-plugin": "^1.4",
 		"yoast/phpunit-polyfills": "^1.0",
-	    "phpunit/phpunit": "7.5.20",
+		"phpunit/phpunit": "7.5.20",
 		"automattic/jetpack-changelogger": "3.0.2"
 	},
 	"config": {
