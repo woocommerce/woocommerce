@@ -975,15 +975,15 @@ LEFT JOIN {$operational_data_clauses['join']}
 			$order->set_date_created( time() );
 		}
 
+		$this->update_post_meta( $order );
+
 		// TODO: do we want to add some backwards compat for 'woocommerce_new_order_data'?
 		$order_id = $this->persist_order_to_db( $order, false );
 		if ( $order_id ) {
 			$order->set_id( $order_id );
-
-			// TODO: $this->update_post_meta( $order );
-
 			$order->save_meta_data();
 			$order->apply_changes();
+
 			$this->clear_caches( $order );
 		}
 
@@ -1022,16 +1022,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 		// Fetch changes.
 		$changes = $order->get_changes();
 
-		// If address changed, store concatenated version to make searches faster.
-		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			if ( isset( $changes[ $address_type ] ) ) {
-				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
-			}
-		}
-
 		if ( ! isset( $changes['date_modified'] ) ) {
 			$order->set_date_modified( gmdate( 'Y-m-d H:i:s' ) );
 		}
+
+		$this->update_post_meta( $order );
 
 		// Update with latest changes.
 		$changes = $order->get_changes();
@@ -1054,6 +1049,29 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$this->clear_caches( $order );
 
 		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+	}
+
+	/**
+	 * Helper method that updates post meta based on an order object.
+	 * Mostly used for backwards compatibility purposes in this datastore.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @since 3.0.0
+	 */
+	protected function update_post_meta( &$order ) {
+		$changes = $order->get_changes();
+
+		// If address changed, store concatenated version to make searches faster.
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			if ( isset( $changes[ $address_type ] ) ) {
+				$order->update_meta_data( "_{$address_type}_address_index", implode( ' ', $order->get_address( $address_type ) ) );
+			}
+		}
+
+		// Sync some COT fields to meta keys for backwards compatibility.
+		foreach ( $this->get_internal_data_store_keys() as $key ) {
+			$this->{"set_$key"}( $order, $this->{"get_$key"}( $order ), false );
+		}
 	}
 
 	public function get_coupon_held_keys( $order, $coupon_id = null ) {
@@ -1276,6 +1294,7 @@ CREATE TABLE $meta_table (
 
 	/**
 	 * Returns keys currently handled by this datastore manually (not available through order properties).
+	 *
 	 * @return array List of keys.
 	 */
 	private static function get_internal_data_store_keys() {
