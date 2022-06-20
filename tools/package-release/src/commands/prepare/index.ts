@@ -68,26 +68,17 @@ export default class PackageRelease extends Command {
 		packages.forEach( ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
-			let nextVersion = null;
-
 			try {
 				validateChangelogEntries( name );
-			} catch ( e ) {
-				this.error( 'Changelogger validation fails.' );
-			}
-
-			try {
-				nextVersion = getNextVersion( name );
-			} catch ( e ) {
-				this.error( 'Cannot get next version.' );
-			}
-
-			console.log( nextVersion );
-
-			try {
+				const nextVersion = getNextVersion( name );
 				writeChangelog( name );
+				console.log( nextVersion );
 			} catch ( e ) {
-				this.error( 'Changelogger validation fails.' );
+				if ( e instanceof Error ) {
+					this.error( e.message );
+				}
+
+				this.error( 'Changelogger write has failed.' );
 			}
 
 			CliUx.ux.action.stop();
