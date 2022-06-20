@@ -33,7 +33,7 @@ class ProductSearchResultsTemplate {
 	 * @param array $templates Templates that match the search hierarchy.
 	 */
 	public function update_search_template_hierarchy( $templates ) {
-		if ( ( is_search() && is_post_type_archive( 'product' ) ) && wp_is_block_theme() ) {
+		if ( ( is_search() && is_post_type_archive( 'product' ) ) && wc_current_theme_is_fse_theme() ) {
 			return [ self::SLUG ];
 		}
 		return $templates;
