@@ -848,77 +848,65 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		if ( $row ) {
-			$db_updates[] = array_merge(
-				array(
-					'table'        => self::get_orders_table_name(),
-					'where'        => $is_new_record ? null : array( 'id' => $order_id ),
-					'where_format' => $is_new_record ? null : '%d',
-				),
-				$row
+			$db_updates[] = array(
+				'table'          => self::get_orders_table_name(),
+				'pk_table'       => true,
+				'data'           => $row['data'],
+				'format'         => $row['format'],
+				'where'          => $is_new_record ? null : array( 'id' => $order_id ),
+				'where_format'   => $is_new_record ? null : '%d',
 			);
 		}
 
 		// wc_order_operational_data.
 		$row = $this->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping );
 		if ( $row ) {
-			$db_updates[] = array_merge(
-				array(
-					'table'        => self::get_operational_data_table_name(),
-					'where'        => $is_new_record ? null : array( 'order_id' => $order_id ),
-					'where_format' => $is_new_record ? null : '%d',
-				),
-				$row
+			$db_updates[] = array(
+				'table'        => self::get_operational_data_table_name(),
+				'data'         => $row['data'],
+				'format'       => $row['format'],
+				'where'        => $is_new_record ? null : array( 'order_id' => $order_id ),
+				'where_format' => $is_new_record ? null : '%d',
 			);
 		}
 
 		// wc_order_addresses.
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			$row = $this->get_db_row_from_order_changes( $changes, $this->{$address_type . '_address_column_mapping'} );
-			$row['row']['address_type']    = $address_type;
-			$row['format']['address_type'] = '%s';
+
+			$row['data']['address_type'] = $address_type;
+			$row['format'][]             = '%s';
 
 			if ( $row ) {
-				$db_updates[] = array_merge(
-					array(
-						'table'        => self::get_addresses_table_name(),
-						'where'        => $is_new_record ? null : array(
-							'order_id'     => $order->get_id(),
-							'address_type' => $address_type,
-						),
-						'where_format' => $is_new_record ? null : array( '%d', '%s' ),
-					),
-					$row
+				$db_updates[] = array(
+					'table'        => self::get_addresses_table_name(),
+					'data'         => $row['data'],
+					'format'       => $row['format'],
+					'where'        => $is_new_record ? null : array( 'order_id' => $order_id, 'address_type' => $address_type ),
+					'where_format' => $is_new_record ? null : array( '%d', '%s' )
 				);
 			}
 		}
 
 		// Persist changes.
 		foreach ( $db_updates as $update ) {
-			$is_orders_table = ( self::get_orders_table_name() === $update['table'] );
+			$is_pk_table = ! empty( $update['pk_table'] );
 
-			if ( ! $is_orders_table ) {
-				$update['row']['order_id'] = $order_id;
-				$update['format']['order_id'] = '%d';
+			// Secondary tables need an 'order_id'.
+			if ( ! $is_pk_table && empty( $update['data']['order_id'] ) ) {
+				$update['data']['order_id'] = $order_id;
+				$update['format'][]         = '%d';
 			}
 
-			if ( $is_new_record ) {
-				$wpdb->insert(
-					$update['table'],
-					$update['row'],
-					array_values( $update['format'] )
-				);
-
-				if ( $is_orders_table ) {
-					$order_id = absint( $wpdb->insert_id );
-				}
+			if ( empty( $update['where'] ) ) {
+				$result   = $wpdb->insert( $update['table'], $update['data'], $update['format'] );
+				$order_id = ( $is_pk_table && ! $order_id ) ? absint( $wpdb->insert_id ) : $order_id;
 			} else {
-				$wpdb->update(
-					$update['table'],
-					$update['row'],
-					$update['where'],
-					array_values( $update['format'] ),
-					$update['where_format']
-				);
+				$result = $wpdb->update( $update['table'], $update['data'], $update['where'], $update['format'], $update['where_format'] );
+			}
+
+			if ( false === $result ) {
+				throw new \Exception( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) );
 			}
 		}
 
@@ -952,7 +940,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		return array(
-			'row'    => $row,
+			'data'   => $row,
 			'format' => $row_format,
 		);
 	}
