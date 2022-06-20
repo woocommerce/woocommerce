@@ -82,10 +82,14 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.click( 'text=Place order' );
 
 		await page.waitForLoadState( 'networkidle' );
+
 		// get order ID from the url
 		const orderUrl = await page.url();
 		const matchedId = orderUrl.match( /\/(\d+)\// );
-		orderId = matchedId[ 1 ];
+		if ( matchedId ) {
+			orderId = matchedId[ 1 ];
+			console.log( orderId );
+		}
 
 		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
 		await page.waitForLoadState( 'networkidle' );
