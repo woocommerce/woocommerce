@@ -6,7 +6,7 @@ const productName = 'Order email product';
 const customerEmail = 'order-email-test@example.com';
 const storeName = 'WooCommerce Core E2E Test Suite';
 
-test.describe.only( 'Shopper Order Email Receiving', () => {
+test.describe( 'Shopper Order Email Receiving', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.beforeAll( async ( { baseURL } ) => {
