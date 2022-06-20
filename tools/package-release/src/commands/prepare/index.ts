@@ -69,7 +69,12 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
 			let nextVersion = null;
-			let isValid = '';
+
+			try {
+				validateChangelogEntries( name );
+			} catch ( e ) {
+				this.error( 'Changelogger validation fails.' );
+			}
 
 			try {
 				nextVersion = getNextVersion( name );
@@ -77,17 +82,10 @@ export default class PackageRelease extends Command {
 				this.error( 'Cannot get next version.' );
 			}
 
-			try {
-				isValid = validateChangelogEntries( name );
-			} catch ( e ) {
-				this.error( 'Changelogger validation fails.' );
-			}
+			console.log( nextVersion );
 
 			try {
-				// @todo investigate what is returned on isValid
-				if ( isValid.length && nextVersion ) {
-					writeChangelog( name );
-				}
+				writeChangelog( name );
 			} catch ( e ) {
 				this.error( 'Changelogger validation fails.' );
 			}
