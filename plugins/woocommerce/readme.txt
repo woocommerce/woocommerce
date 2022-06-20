@@ -166,10 +166,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Fix - Make sure payment gateway title is a string before sanitizing.  [#33434](https://github.com/woocommerce/woocommerce/pull/33434)
 
-**WooCommerce Blocks 7.6.1**
+**WooCommerce Blocks 7.6.1 & 7.6.2**
 
 * Fix - Fix error Uncaught Error: Call to undefined function Automattic\WooCommerce\Blocks\Templates\wp_is_block_theme() in WP 5.8.  [#6590](https://github.com/woocommerce/woocommerce-blocks/pull/6590)
 * Fix - Fix PHP notice in Mini Cart when prices included taxes.  [#6537](https://github.com/woocommerce/woocommerce-blocks/pull/6537)
+* Fix - Fix images hidden by default in Product grid blocks after WC 6.6 update.  [#6599](https://github.com/woocommerce/woocommerce-blocks/pull/6599)
 
 = 6.6.0 2022-06-14 =
 
