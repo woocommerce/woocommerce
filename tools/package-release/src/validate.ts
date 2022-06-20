@@ -1,10 +1,24 @@
 /**
  * External dependencies
  */
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 export const getFilepathFromPackage = ( name: string ): string =>
+	// @todo: return full file path, not relative.
 	'packages/js' + name.replace( '@woocommerce', '' );
+
+export const isPrivatePackage = ( name: string ): boolean => {
+	const filepath = getFilepathFromPackage( name );
+	const packageJsonFilepath = `./${ filepath }/package.json`;
+	const exists = existsSync( packageJsonFilepath );
+	if ( ! exists ) {
+		return false;
+	}
+	const packageJson = JSON.parse(
+		readFileSync( packageJsonFilepath, 'utf8' )
+	);
+	return !! packageJson.private;
+};
 
 export const validatePackage = (
 	name: string,
@@ -39,6 +53,10 @@ export const getFilepaths = (
 	}
 	return packages.split( ',' ).map( ( p ) => {
 		validatePackage( p, error );
+
+		if ( isPrivatePackage( p ) ) {
+			error( `${ p } is a private package, it should not be released.` );
+		}
 		return getFilepathFromPackage( p );
 	} );
 };
