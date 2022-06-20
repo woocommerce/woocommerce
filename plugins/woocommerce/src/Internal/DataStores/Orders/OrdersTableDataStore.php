@@ -833,6 +833,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$order_id      = absint( $order->get_id() );
 		$is_new_record = ( 0 === $order_id );
 
+		// XXX: manually persist some of the properties until the datastore/property design is finalized.
+		foreach ( $this->get_internal_data_store_keys() as $key ) {
+			$changes[ $key ] = $this->{"get_$key"}( $order );
+		}
+
 		// Figure out what needs to be updated in the database.
 		$db_updates = array();
 
@@ -854,20 +859,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		// wc_order_operational_data.
-		$row = $this->get_db_row_from_order_changes(
-			array_merge(
-				$changes,
-				// XXX: manually persist some of the properties until the datastore/property design is finalized.
-				array(
-					'stock_reduced'                => $this->get_stock_reduced( $order ),
-					'download_permissions_granted' => $this->get_download_permissions_granted( $order ),
-					'new_order_email_sent'         => $this->get_email_sent( $order ),
-					'recorded_sales'               => $this->get_recorded_sales( $order ),
-					'recorded_coupon_usage_counts' => $this->get_recorded_coupon_usage_counts( $order ),
-				)
-			),
-			$this->operational_data_column_mapping
-		);
+		$row = $this->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping );
 		if ( $row ) {
 			$db_updates[] = array_merge(
 				array(
@@ -1279,6 +1271,21 @@ CREATE TABLE $meta_table (
 			'_recorded_coupon_usage_counts',
 			'_download_permissions_granted',
 			'_order_stock_reduced',
+		);
+	}
+
+	/**
+	 * Returns keys currently handled by this datastore manually (not available through order properties).
+	 * @return array List of keys.
+	 */
+	private static function get_internal_data_store_keys() {
+		// XXX: Finalize design -- will these be turned into props?
+		return array(
+			'order_stock_reduced',
+			'download_permissions_granted',
+			'new_order_email_sent',
+			'recorded_sales',
+			'recorded_coupon_usage_counts',
 		);
 	}
 
