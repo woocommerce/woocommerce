@@ -16,7 +16,7 @@ export const getNextVersion = ( name: string ) => {
 		return execSync( './vendor/bin/changelogger version next', {
 			cwd,
 			encoding: 'utf-8',
-		} );
+		} ).trim();
 	} catch ( e ) {
 		let message = '';
 		if ( e instanceof Error ) {

@@ -2,11 +2,16 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
+import { readFileSync, writeFileSync } from 'fs';
 
 /**
  * Internal dependencies
  */
-import { getAllPackges, validatePackage } from '../../validate';
+import {
+	getAllPackges,
+	validatePackage,
+	getFilepathFromPackageName,
+} from '../../validate';
 import {
 	getNextVersion,
 	validateChangelogEntries,
@@ -48,7 +53,7 @@ export default class PackageRelease extends Command {
 		const { args, flags } = await this.parse( PackageRelease );
 
 		if ( ! args.packages && ! flags.all ) {
-			this.error( 'no package supplied.' );
+			this.error( 'no packages supplied.' );
 		}
 
 		if ( flags.all ) {
@@ -72,9 +77,11 @@ export default class PackageRelease extends Command {
 			try {
 				if ( hasChangelogs( name ) ) {
 					validateChangelogEntries( name );
-					// const nextVersion = getNextVersion( name );
+					const nextVersion = getNextVersion( name );
 					writeChangelog( name );
-					// console.log( nextVersion );
+					if ( nextVersion ) {
+						this.bumpPackageVersion( name, nextVersion );
+					}
 				} else {
 					this.log( `Skipping ${ name }, no changelogs available.` );
 				}
@@ -86,5 +93,22 @@ export default class PackageRelease extends Command {
 
 			CliUx.ux.action.stop();
 		} );
+	}
+
+	private bumpPackageVersion( name: string, version: string ) {
+		const filepath = getFilepathFromPackageName( name );
+		const packageJsonFilepath = `${ filepath }/package.json`;
+		try {
+			const packageJson = JSON.parse(
+				readFileSync( packageJsonFilepath, 'utf8' )
+			);
+			packageJson.version = version;
+			writeFileSync(
+				packageJsonFilepath,
+				JSON.stringify( packageJson, null, '\t' ) + '\n'
+			);
+		} catch ( e ) {
+			this.error( `Can't bump version for ${ name }.` );
+		}
 	}
 }
