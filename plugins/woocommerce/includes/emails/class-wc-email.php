@@ -322,7 +322,7 @@ class WC_Email extends WC_Settings_API {
 		/**
 		 * Filter the ability to switch email locale.
 		 *
-		 * @since 6.7.0
+		 * @since 6.8.0
 		 *
 		 * @param bool $default_value The default returned value.
 		 * @param WC_Email $this The WC_Email object.
@@ -342,7 +342,7 @@ class WC_Email extends WC_Settings_API {
 		/**
 		 * Filter the ability to restore email locale.
 		 *
-		 * @since 6.7.0
+		 * @since 6.8.0
 		 *
 		 * @param bool $default_value The default returned value.
 		 * @param WC_Email $this The WC_Email object.
