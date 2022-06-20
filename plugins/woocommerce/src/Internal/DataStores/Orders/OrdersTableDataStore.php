@@ -849,12 +849,12 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		if ( $row ) {
 			$db_updates[] = array(
-				'table'          => self::get_orders_table_name(),
-				'pk_table'       => true,
-				'data'           => $row['data'],
-				'format'         => $row['format'],
-				'where'          => $is_new_record ? null : array( 'id' => $order_id ),
-				'where_format'   => $is_new_record ? null : '%d',
+				'table'        => self::get_orders_table_name(),
+				'pk_table'     => true,
+				'data'         => $row['data'],
+				'format'       => $row['format'],
+				'where'        => $is_new_record ? null : array( 'id' => $order_id ),
+				'where_format' => $is_new_record ? null : '%d',
 			);
 		}
 
@@ -882,8 +882,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 					'table'        => self::get_addresses_table_name(),
 					'data'         => $row['data'],
 					'format'       => $row['format'],
-					'where'        => $is_new_record ? null : array( 'order_id' => $order_id, 'address_type' => $address_type ),
-					'where_format' => $is_new_record ? null : array( '%d', '%s' )
+					'where'        => $is_new_record ? null : array(
+						'order_id'     => $order_id,
+						'address_type' => $address_type,
+					),
+					'where_format' => $is_new_record ? null : array( '%d', '%s' ),
 				);
 			}
 		}
@@ -906,6 +909,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 			}
 
 			if ( false === $result ) {
+				// translators: %s is a table name.
 				throw new \Exception( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) );
 			}
 		}
