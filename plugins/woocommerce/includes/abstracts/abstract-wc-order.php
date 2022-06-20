@@ -1553,7 +1553,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		/**
 		 * Filters whether apply base tax for local pickup shipping method or not.
 		 *
-		 * @since 6.7.0
+		 * @since 6.8.0
 		 * @param boolean apply_base_tax Whether apply base tax for local pickup. Default true.
 		 */
 		$apply_base_tax = true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
@@ -1561,7 +1561,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		/**
 		 * Filters local pickup shipping methods.
 		 *
-		 * @since 6.7.0
+		 * @since 6.8.0
 		 * @param string[] $local_pickup_methods Local pickup shipping method IDs.
 		 */
 		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
