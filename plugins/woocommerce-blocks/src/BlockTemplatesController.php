@@ -160,8 +160,9 @@ class BlockTemplatesController {
 			if ( 'custom' !== $template_file->source ) {
 				$template = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 			} else {
-				$template_file->title = BlockTemplateUtils::convert_slug_to_title( $template_file->slug );
-				$query_result[]       = $template_file;
+				$template_file->title       = BlockTemplateUtils::get_block_template_title( $template_file->slug );
+				$template_file->description = BlockTemplateUtils::get_block_template_description( $template_file->slug );
+				$query_result[]             = $template_file;
 				continue;
 			}
 
@@ -386,5 +387,4 @@ class BlockTemplatesController {
 
 		return $is_support;
 	}
-
 }

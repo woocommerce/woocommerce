@@ -8,9 +8,7 @@ namespace Automattic\WooCommerce\Blocks\Templates;
  */
 class ProductSearchResultsTemplate {
 
-	const SLUG        = 'product-search-results';
-	const TITLE       = 'Product Search Results';
-	const DESCRIPTION = 'Template used to display search results for products.';
+	const SLUG = 'product-search-results';
 
 	/**
 	 * Constructor.
@@ -24,7 +22,6 @@ class ProductSearchResultsTemplate {
 	 */
 	protected function init() {
 		add_filter( 'search_template_hierarchy', array( $this, 'update_search_template_hierarchy' ), 10, 3 );
-		add_filter( 'get_block_templates', array( $this, 'set_template_info' ) );
 	}
 
 	/**
@@ -34,29 +31,8 @@ class ProductSearchResultsTemplate {
 	 */
 	public function update_search_template_hierarchy( $templates ) {
 		if ( ( is_search() && is_post_type_archive( 'product' ) ) && wc_current_theme_is_fse_theme() ) {
-			return [ self::SLUG ];
+			array_unshift( $templates, self::SLUG );
 		}
 		return $templates;
-	}
-
-	/**
-	 * Update Product Search Template info.
-	 *
-	 * @param array $templates List of templates.
-	 */
-	public function set_template_info( $templates ) {
-		return array_map(
-			function ( $template ) {
-				if ( self::SLUG !== $template->slug ) {
-					return $template;
-				}
-
-				$template->title       = self::TITLE;
-				$template->description = self::DESCRIPTION;
-
-				return $template;
-			},
-			$templates
-		);
 	}
 }
