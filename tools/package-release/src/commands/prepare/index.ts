@@ -77,8 +77,6 @@ export default class PackageRelease extends Command {
 				if ( e instanceof Error ) {
 					this.error( e.message );
 				}
-
-				this.error( 'Changelogger write has failed.' );
 			}
 
 			CliUx.ux.action.stop();

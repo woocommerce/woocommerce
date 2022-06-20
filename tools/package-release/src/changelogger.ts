@@ -51,7 +51,9 @@ export const writeChangelog = ( name: string ) => {
 		let message = '';
 		if ( e instanceof Error ) {
 			message = e.message;
-			throw new Error( message );
+			throw new Error(
+				message + ' - Package may not have changelog entries.'
+			);
 		}
 	}
 };
