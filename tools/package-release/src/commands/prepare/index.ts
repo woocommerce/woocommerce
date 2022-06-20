@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
-import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
@@ -42,7 +41,7 @@ export default class PackageRelease extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( PackageRelease );
 
-		if ( ! args.packages ) {
+		if ( ! args.packages && ! flags.all ) {
 			this.error( 'no package supplied.' );
 		}
 
