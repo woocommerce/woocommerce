@@ -2,11 +2,22 @@
  * External dependencies
  */
 import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+
+/**
+ * Internal dependencies
+ */
+import { MONOREPO_ROOT } from './const';
 
 export const getFilepathFromPackage = ( name: string ): string =>
-	// @todo: return full file path, not relative.
-	'packages/js' + name.replace( '@woocommerce', '' );
+	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
+/**
+ * Check if package is private as we don't want to release private packages.
+ *
+ * @param {string} name package name.
+ * @return {boolean} true if the package is private.
+ */
 export const isPrivatePackage = ( name: string ): boolean => {
 	const filepath = getFilepathFromPackage( name );
 	const packageJsonFilepath = `./${ filepath }/package.json`;
@@ -20,6 +31,12 @@ export const isPrivatePackage = ( name: string ): boolean => {
 	return !! packageJson.private;
 };
 
+/**
+ * Validate package.
+ *
+ * @param {string}   name  package name.
+ * @param {Function} error Error logging function.
+ */
 export const validatePackage = (
 	name: string,
 	error: ( s: string ) => void
