@@ -1,8 +1,13 @@
 /**
  * External dependencies
  */
-import { CliUx, Command } from '@oclif/core';
+import { CliUx, Command, Flags } from '@oclif/core';
 import { execSync } from 'child_process';
+
+/**
+ * Internal dependencies
+ */
+import { getFilepaths } from '../../validate';
 
 /**
  * PackageRelease class
@@ -18,47 +23,52 @@ export default class PackageRelease extends Command {
 	 */
 	static args = [
 		{
-			name: 'package',
+			name: 'packages',
 			description: 'Package to release',
-			required: true,
+			required: false,
 		},
 	];
 
 	/**
 	 * CLI flags.
 	 */
-	static flags = {};
+	static flags = {
+		all: Flags.boolean( { char: 'a', default: false } ),
+	};
 
 	/**
 	 * This method is called to execute the command
 	 */
 	async run(): Promise< void > {
-		const { args } = await this.parse( PackageRelease );
+		const { args, flags } = await this.parse( PackageRelease );
 		CliUx.ux.action.start( `Prepare ` + args.package );
 
-		// todo: Need to validate filepath.
-		const filepath =
-			'packages/js' + args.package.replace( '@woocommerce', '' );
-
-		const nextVersion = execSync(
-			'./vendor/bin/changelogger version next',
-			{
-				cwd: filepath,
-				encoding: 'utf-8',
-			}
+		const filepaths = getFilepaths( args, flags, ( e: string ): void =>
+			this.error( e )
 		);
 
-		const validation = execSync( './vendor/bin/changelogger validate', {
-			cwd: filepath,
-			encoding: 'utf-8',
-		} );
+		// const filepath =
+		// 	'packages/js' + args.packages.replace( '@woocommerce', '' );
 
-		const write = execSync( './vendor/bin/changelogger write', {
-			cwd: filepath,
-			encoding: 'utf-8',
-		} );
+		// const nextVersion = execSync(
+		// 	'./vendor/bin/changelogger version next',
+		// 	{
+		// 		cwd: filepath,
+		// 		encoding: 'utf-8',
+		// 	}
+		// );
 
-		console.log( write );
+		// const validation = execSync( './vendor/bin/changelogger validate', {
+		// 	cwd: filepath,
+		// 	encoding: 'utf-8',
+		// } );
+
+		// const write = execSync( './vendor/bin/changelogger write', {
+		// 	cwd: filepath,
+		// 	encoding: 'utf-8',
+		// } );
+
+		console.log( filepaths );
 
 		CliUx.ux.action.stop();
 	}
