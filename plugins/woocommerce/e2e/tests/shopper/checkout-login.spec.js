@@ -5,14 +5,14 @@ const first_name = 'Jane';
 const last_name = 'Smith';
 const address_1 = '123 Anywhere St.';
 const address_2 = 'Apartment 42';
-const city = 'San Francisco';
-const state = 'CA';
-const postcode = '94103';
+const city = 'New York';
+const state = 'NY';
+const postcode = '10010';
 const country = 'US';
 const phone = '(555) 777-7777';
 
 test.describe( 'Shopper Checkout Login Account', () => {
-	let productId, orderId;
+	let productId, orderId, shippingZoneId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -37,6 +37,23 @@ test.describe( 'Shopper Checkout Login Account', () => {
 				value: 'yes',
 			}
 		);
+		// add a shipping zone and method
+		await api
+			.post( 'shipping/zones', {
+				name: 'Free Shipping New York',
+			} )
+			.then( ( response ) => {
+				shippingZoneId = response.data.id;
+			} );
+		await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+			{
+				code: 'US:NY',
+				type: 'state',
+			},
+		] );
+		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+			method_id: 'free_shipping',
+		} );
 		// update customer billing details.
 		await api.put( 'customers/2', {
 			billing: {
@@ -91,6 +108,10 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		// disable payment method
 		await api.put( 'payment_gateways/cod', {
 			enabled: false,
+		} );
+		// delete shipping
+		await api.delete( `shipping/zones/${ shippingZoneId }`, {
+			force: true,
 		} );
 	} );
 
