@@ -64,6 +64,14 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
         -   [Coupons](internal-developers/testing/cart-checkout/coupons.md)
         -   [Compatibility](internal-developers/testing/cart-checkout/compatibility.md)
     -   [Releases](internal-developers/testing/releases/README.md)
+- [Translations](internal-developers/translations/README.md)
+    -   [Translation basics](internal-developers/translations/translation-basics.md)
+    -   [Translations in PHP files](internal-developers/translations/translations-in-PHP-files.md)
+    -   [Translations in JS/TS files](internal-developers/translations/translations-in-JS-TS-files.md)
+    -   [Translations in FSE templates](internal-developers/translations/translations-in-FSE-templates.md)
+    -   [Translations for lazy-loaded components](internal-developers/translations/translations-for-lazy-loaded-components.md)
+    -   [Translation loading](internal-developers/translations/translation-loading.md)
+    -   [Translation management](internal-developers/translations/translation-management.md)
 
 ## Third-party developers
 
