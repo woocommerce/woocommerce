@@ -949,15 +949,6 @@ function wc_get_image_size( $image_size ) {
 	} else {
 		$image_size = str_replace( 'woocommerce_', '', $image_size );
 
-		// Legacy size mapping.
-		if ( 'shop_single' === $image_size ) {
-			$image_size = 'single';
-		} elseif ( 'shop_catalog' === $image_size ) {
-			$image_size = 'thumbnail';
-		} elseif ( 'shop_thumbnail' === $image_size ) {
-			$image_size = 'gallery_thumbnail';
-		}
-
 		if ( 'single' === $image_size ) {
 			$size['width']  = absint( wc_get_theme_support( 'single_image_width', get_option( 'woocommerce_single_image_width', 600 ) ) );
 			$size['height'] = '';
