@@ -69,7 +69,7 @@ class ReviewShippingOptions extends Task {
 			return false;
 		}
 
-		if ( ! self::has_shipping_zones() ) {
+		if ( ! Shipping::has_shipping_zones() ) {
 			return false;
 		}
 
@@ -82,9 +82,8 @@ class ReviewShippingOptions extends Task {
 		$is_jetpack_installed = PluginsHelper::is_plugin_installed( 'jetpack' );
 		$is_jetpack_connected = class_exists( 'Jetpack_Connection_Manager' ) && ( new Jetpack_Connection_Manager() )->is_connected();
 
-		$is_wcs_installed = $is_jetpack_connected && PluginsHelper::is_plugin_installed( 'woocommerce-services' );
-		// Is it installed and WooCommerce Shipping & Tax Terms of Service accepted?
-		$is_wcs_connected = $is_wcs_installed && class_exists( '\WC_Connect_Options' ) && \WC_Connect_Options::get_option( 'tos_accepted' );
+		$is_wcs_installed = PluginsHelper::is_plugin_installed( 'woocommerce-services' );
+		$is_wcs_connected = class_exists( '\WC_Connect_Options' ) && \WC_Connect_Options::get_option( 'tos_accepted' );
 
 		return 'US' === $store_country && (
 			$is_jetpack_connected && $is_wcs_connected || $is_jetpack_installed && ! $is_wcs_installed ) ||
@@ -97,17 +96,6 @@ class ReviewShippingOptions extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return self::has_shipping_zones()
-			? admin_url( 'admin.php?page=wc-settings&tab=shipping' )
-			: null;
-	}
-
-	/**
-	 * Check if the store has any shipping zones.
-	 *
-	 * @return bool
-	 */
-	public static function has_shipping_zones() {
-		return count( WC_Data_Store::load( 'shipping-zone' )->get_zones() ) > 0;
+		return admin_url( 'admin.php?page=wc-settings&tab=shipping' );
 	}
 }
