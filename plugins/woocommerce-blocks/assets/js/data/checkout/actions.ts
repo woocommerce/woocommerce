@@ -1,13 +1,16 @@
 /**
  * External dependencies
  */
-import { CheckoutResponse, PaymentResult } from '@woocommerce/types';
+import { PaymentResult } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import { getPaymentResultFromCheckoutResponse } from '../../base/context/providers/cart-checkout/checkout-state/utils';
 import { ACTION_TYPES as types } from './action-types';
+import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
+
+// `Thunks are functions that can be dispatched, similar to actions creators
+export * from './thunks';
 
 export const setPristine = () => ( {
 	type: types.SET_PRISTINE,
@@ -43,15 +46,6 @@ export const setBeforeProcessing = () => ( {
 export const setAfterProcessing = () => ( {
 	type: types.SET_AFTER_PROCESSING,
 } );
-
-export const processCheckoutResponse = ( response: CheckoutResponse ) => {
-	return async ( { dispatch }: { dispatch: React.Dispatch< Action > } ) => {
-		const paymentResult = getPaymentResultFromCheckoutResponse( response );
-		dispatch( setRedirectUrl( paymentResult?.redirectUrl || '' ) );
-		dispatch( setProcessingResponse( paymentResult ) );
-		dispatch( setAfterProcessing() );
-	};
-};
 
 export const setHasError = ( hasError = true ) => ( {
 	type: types.SET_HAS_ERROR,
@@ -98,7 +92,7 @@ export const setExtensionData = (
 	extensionData,
 } );
 
-type Action = ReturnType<
+export type CheckoutAction = ReturnOrGeneratorYieldUnion<
 	| typeof setPristine
 	| typeof setIdle
 	| typeof setComplete

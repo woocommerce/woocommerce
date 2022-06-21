@@ -12,6 +12,7 @@ import {
 	CartResponseShippingAddress,
 } from './cart-response';
 import type { EmptyObjectType } from './objects';
+import type { CheckoutResponseSuccess } from './checkout';
 
 export interface SupportsConfiguration {
 	showSavedCards?: boolean;
@@ -121,7 +122,9 @@ export interface ExpressPaymentMethodConfigInstance {
 
 export interface PaymentResult {
 	message: string;
-	paymentStatus: string;
+	paymentStatus:
+		| CheckoutResponseSuccess[ 'payment_result' ][ 'payment_status' ]
+		| 'not set';
 	paymentDetails: Record< string, string > | Record< string, never >;
 	redirectUrl: string;
 }

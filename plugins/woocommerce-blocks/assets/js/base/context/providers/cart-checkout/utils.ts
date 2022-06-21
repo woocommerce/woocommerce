@@ -2,11 +2,8 @@
  * External dependencies
  */
 import triggerFetch from '@wordpress/api-fetch';
-
-/**
- * Internal dependencies
- */
-import type { setCustomerId as setCheckoutCustomerId } from '../../../../data/checkout/actions';
+import { dispatch } from '@wordpress/data';
+import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Utility function for preparing payment data for the request.
@@ -34,10 +31,8 @@ export const preparePaymentData = (
 /**
  * Process headers from an API response an dispatch updates.
  */
-export const processCheckoutResponseHeaders = (
-	headers: Headers,
-	setCustomerId: typeof setCheckoutCustomerId
-): void => {
+export const processCheckoutResponseHeaders = ( headers: Headers ): void => {
+	const { setCustomerId } = dispatch( CHECKOUT_STORE_KEY );
 	if (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in

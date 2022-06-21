@@ -10,8 +10,9 @@ import { PaymentResult } from '@woocommerce/types';
 import { ACTION_TYPES as types } from './action-types';
 import { STATUS } from './constants';
 import { defaultState } from './default-state';
+import { CheckoutAction } from './actions';
 
-const reducer: Reducer = ( state = defaultState, action ) => {
+const reducer: Reducer = ( state = defaultState, action: CheckoutAction ) => {
 	let newState = state;
 	switch ( action.type ) {
 		case types.SET_PRISTINE:

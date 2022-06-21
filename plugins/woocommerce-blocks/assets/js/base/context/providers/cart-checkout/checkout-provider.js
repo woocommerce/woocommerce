@@ -10,7 +10,7 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
 import { PaymentMethodDataProvider } from './payment-methods';
 import { ShippingDataProvider } from './shipping';
 import { CustomerDataProvider } from './customer';
-import { CheckoutStateProvider } from './checkout-state';
+import { CheckoutEventsProvider } from './checkout-events';
 import CheckoutProcessor from './checkout-processor';
 
 /**
@@ -27,7 +27,7 @@ import CheckoutProcessor from './checkout-processor';
  */
 export const CheckoutProvider = ( { children, redirectUrl } ) => {
 	return (
-		<CheckoutStateProvider redirectUrl={ redirectUrl }>
+		<CheckoutEventsProvider redirectUrl={ redirectUrl }>
 			<CustomerDataProvider>
 				<ShippingDataProvider>
 					<PaymentMethodDataProvider>
@@ -45,6 +45,6 @@ export const CheckoutProvider = ( { children, redirectUrl } ) => {
 					</PaymentMethodDataProvider>
 				</ShippingDataProvider>
 			</CustomerDataProvider>
-		</CheckoutStateProvider>
+		</CheckoutEventsProvider>
 	);
 };

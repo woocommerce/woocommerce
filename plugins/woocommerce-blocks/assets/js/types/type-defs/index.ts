@@ -1,3 +1,4 @@
+export * from './addresses';
 export * from './blocks';
 export * from './cart';
 export * from './cart-response';
