@@ -195,7 +195,7 @@ class Formatter extends KeepAChangelogParser {
 						$changes,
 						array(
 							'subheading' => $is_subentry ? '' : trim( $row_segments[0] ),
-							'content'    => $is_subentry ? trim( $row ) : trim( $row_segments[1] ),
+							'content'    => $is_subentry ? trim( $row ) : trim( isset($row_segments[1]) ? $row_segments[1] : '' ),
 						)
 					);
 				}
@@ -262,7 +262,14 @@ class Formatter extends KeepAChangelogParser {
 					$breaking_change = 'major' === $significance ? ' [ **BREAKING CHANGE** ]' : '';
 					$text            = trim( $change->getContent() );
 					if ( '' !== $text ) {
-						$preamble = $is_subentry ? '' : $bullet . ucfirst( $significance ) . $breaking_change . ' - ';
+						$preamble;
+						if ( $is_subentry ) {
+							$preamble = '';
+						} else if ( ! $significance ) {
+							$preamble = $bullet;
+						} else {
+							$preamble = $bullet . ucfirst( $significance ) . $breaking_change . ' - ';
+						}
 						$ret     .= $preamble . str_replace( "\n", "\n$indent", $text ) . "\n";
 					}
 				}
