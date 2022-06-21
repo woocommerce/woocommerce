@@ -2,43 +2,43 @@
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { Resource } from './types';
+import { Item } from './types';
 
-export function getResourcesSuccess( query: unknown, resources: Resource[] ) {
+export function getItemsSuccess( query: unknown, items: Item[] ) {
 	return {
-		type: TYPES.GET_RESOURCES_SUCCESS as const,
-		resources,
+		type: TYPES.GET_ITEMS_SUCCESS as const,
+		items,
 		query,
 	};
 }
 
-export function getResourcesError( query: unknown, error: unknown ) {
+export function getItemsError( query: unknown, error: unknown ) {
 	return {
-		type: TYPES.GET_RESOURCES_ERROR as const,
+		type: TYPES.GET_ITEMS_ERROR as const,
 		query,
 		error,
 	};
 }
 
-export function getResourceSuccess( id: number, resource: Resource ) {
+export function getItemSuccess( id: number, item: Item ) {
 	return {
-		type: TYPES.GET_RESOURCE_SUCCESS as const,
+		type: TYPES.GET_ITEM_SUCCESS as const,
 		id,
-		resource,
+		item,
 	};
 }
 
-export function getResourceError( id: unknown, error: unknown ) {
+export function getItemError( id: unknown, error: unknown ) {
 	return {
-		type: TYPES.GET_RESOURCE_ERROR as const,
+		type: TYPES.GET_ITEM_ERROR as const,
 		id,
 		error,
 	};
 }
 
 export type Actions = ReturnType<
-	| typeof getResourcesSuccess
-	| typeof getResourcesError
-	| typeof getResourceSuccess
-	| typeof getResourceError
+	| typeof getItemsSuccess
+	| typeof getItemsError
+	| typeof getItemSuccess
+	| typeof getItemError
 >;

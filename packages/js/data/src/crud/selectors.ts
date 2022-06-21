@@ -7,7 +7,7 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { Resource, ResourceQuery } from './types';
+import { Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
 
@@ -15,12 +15,12 @@ export const createSelectors = (
 	resourceName: string,
 	pluralResourceName: string
 ) => {
-	const getResources = createSelector(
-		( state: ResourceState, query: ResourceQuery ) => {
-			const resourceQuery = getResourceName( resourceName, query );
+	const getItems = createSelector(
+		( state: ResourceState, query: ItemQuery ) => {
+			const itemQuery = getResourceName( resourceName, query );
 
-			const ids = state.resources[ resourceQuery ]
-				? state.resources[ resourceQuery ].data
+			const ids = state.items[ itemQuery ]
+				? state.items[ itemQuery ].data
 				: undefined;
 
 			if ( ! ids ) {
@@ -30,13 +30,13 @@ export const createSelectors = (
 			if ( query._fields ) {
 				return ids.map( ( id: number ) => {
 					return query._fields.reduce(
-						( resource: Partial< Resource >, field: string ) => {
+						( item: Partial< Item >, field: string ) => {
 							return {
-								...resource,
+								...item,
 								[ field ]: state.data[ id ][ field ],
 							};
 						},
-						{} as Partial< Resource >
+						{} as Partial< Item >
 					);
 				} );
 			}
@@ -46,12 +46,12 @@ export const createSelectors = (
 			} );
 		},
 		( state, query ) => {
-			const resourceQuery = getResourceName( resourceName, query );
-			const ids = state.resources[ resourceQuery ]
-				? state.resources[ resourceQuery ].data
+			const itemQuery = getResourceName( resourceName, query );
+			const ids = state.items[ itemQuery ]
+				? state.items[ itemQuery ].data
 				: undefined;
 			return [
-				state.resources[ resourceQuery ],
+				state.items[ itemQuery ],
 				...( ids || [] ).map( ( id: number ) => {
 					return state.data[ id ];
 				} ),
@@ -59,27 +59,24 @@ export const createSelectors = (
 		}
 	);
 
-	const getResourcesError = (
-		state: ResourceState,
-		query: ResourceQuery
-	) => {
-		const resourceQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
-		return state.errors[ resourceQuery ];
+	const getItemsError = ( state: ResourceState, query: ItemQuery ) => {
+		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+		return state.errors[ itemQuery ];
 	};
 
-	const getResource = ( state: ResourceState, id: number ) => {
+	const getItem = ( state: ResourceState, id: number ) => {
 		return state.data[ id ];
 	};
 
-	const getResourceError = ( state: ResourceState, id: number ) => {
-		const resourceQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
-		return state.errors[ resourceQuery ];
+	const getItemError = ( state: ResourceState, id: number ) => {
+		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
+		return state.errors[ itemQuery ];
 	};
 
 	return {
-		[ `get${ resourceName }` ]: getResource,
-		[ `get${ pluralResourceName }` ]: getResources,
-		[ `get${ resourceName }Error` ]: getResourceError,
-		[ `get${ pluralResourceName }Error` ]: getResourcesError,
+		[ `get${ resourceName }` ]: getItem,
+		[ `get${ pluralResourceName }` ]: getItems,
+		[ `get${ resourceName }Error` ]: getItemError,
+		[ `get${ pluralResourceName }Error` ]: getItemsError,
 	};
 };

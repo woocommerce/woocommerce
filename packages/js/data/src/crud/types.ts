@@ -3,11 +3,11 @@
  */
 import { BaseQueryParams } from '../types';
 
-export type Resource = {
+export type Item = {
 	id: number;
 	[ key: string ]: unknown;
 };
 
-export type ResourceQuery = BaseQueryParams & {
+export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
 };

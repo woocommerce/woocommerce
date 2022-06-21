@@ -9,24 +9,24 @@ import { Reducer } from 'redux';
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
 import { getResourceName } from '../utils';
-import { Resource, ResourceQuery } from './types';
+import { Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
 export type ResourceState = {
-	resources: Record<
+	items: Record<
 		string,
 		{
 			data: number[];
 		}
 	>;
 	errors: Record< string, unknown >;
-	data: Record< number, Resource >;
+	data: Record< number, Item >;
 };
 
 export const createReducer = ( resourceName: string ) => {
 	const reducer: Reducer< ResourceState, Actions > = (
 		state = {
-			resources: {},
+			items: {},
 			errors: {},
 			data: {},
 		},
@@ -34,30 +34,30 @@ export const createReducer = ( resourceName: string ) => {
 	) => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
-				case TYPES.GET_RESOURCES_SUCCESS:
+				case TYPES.GET_ITEMS_SUCCESS:
 					const ids: number[] = [];
 
-					const nextResources = payload.resources.reduce<
-						Record< number, Resource >
-					>( ( result, resource ) => {
-						ids.push( resource.id );
-						result[ resource.id ] = {
-							...( state.data[ resource.id ] || {} ),
-							...resource,
+					const nextResources = payload.items.reduce<
+						Record< number, Item >
+					>( ( result, item ) => {
+						ids.push( item.id );
+						result[ item.id ] = {
+							...( state.data[ item.id ] || {} ),
+							...item,
 						};
 						return result;
 					}, {} );
 
-					const resourceQuery = getResourceName(
+					const itemQuery = getResourceName(
 						resourceName,
-						payload.query as ResourceQuery
+						payload.query as ItemQuery
 					);
 
 					return {
 						...state,
-						resources: {
-							...state.resources,
-							[ resourceQuery ]: { data: ids },
+						items: {
+							...state.items,
+							[ itemQuery ]: { data: ids },
 						},
 						data: {
 							...state.data,
@@ -65,32 +65,32 @@ export const createReducer = ( resourceName: string ) => {
 						},
 					};
 
-				case TYPES.GET_RESOURCES_ERROR:
+				case TYPES.GET_ITEMS_ERROR:
 					return {
 						...state,
 						errors: {
 							...state.errors,
 							[ getResourceName(
 								CRUD_ACTIONS.GET_ITEMS,
-								payload.query as ResourceQuery
+								payload.query as ItemQuery
 							) ]: payload.error,
 						},
 					};
 
-				case TYPES.GET_RESOURCE_SUCCESS:
-					const resourceData = state.data || {};
+				case TYPES.GET_ITEM_SUCCESS:
+					const itemData = state.data || {};
 					return {
 						...state,
 						data: {
-							...resourceData,
+							...itemData,
 							[ payload.id ]: {
-								...( resourceData[ payload.id ] || {} ),
-								...payload.resource,
+								...( itemData[ payload.id ] || {} ),
+								...payload.item,
 							},
 						},
 					};
 
-				case TYPES.GET_RESOURCE_ERROR:
+				case TYPES.GET_ITEM_ERROR:
 					return {
 						...state,
 						errors: {

@@ -7,20 +7,20 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import {
-	getResourceSuccess,
-	getResourceError,
-	getResourcesError,
-	getResourcesSuccess,
+	getItemSuccess,
+	getItemError,
+	getItemsError,
+	getItemsSuccess,
 } from './actions';
 import { request } from '../utils';
-import { Resource, ResourceQuery } from './types';
+import { Item, ItemQuery } from './types';
 
 export const createResolvers = (
 	resourceName: string,
 	pluralResourceName: string,
 	namespace: string
 ) => {
-	const getResources = function* ( query: Partial< ResourceQuery > ) {
+	const getItems = function* ( query: Partial< ItemQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
 		const resourceQuery = { ...query };
 
@@ -33,36 +33,36 @@ export const createResolvers = (
 		}
 
 		try {
-			const { items }: { items: Resource[] } = yield request<
-				ResourceQuery,
-				Resource
+			const { items }: { items: Item[] } = yield request<
+				ItemQuery,
+				Item
 			>( namespace, resourceQuery );
 
-			yield getResourcesSuccess( query, items );
+			yield getItemsSuccess( query, items );
 			return items;
 		} catch ( error ) {
-			yield getResourcesError( query, error );
+			yield getItemsError( query, error );
 			throw error;
 		}
 	};
 
-	const getResource = function* ( id: number ) {
+	const getItem = function* ( id: number ) {
 		try {
-			const item: Resource = yield apiFetch( {
+			const item: Item = yield apiFetch( {
 				path: `${ namespace }/${ id }`,
 				method: 'GET',
 			} );
 
-			yield getResourceSuccess( item.id, item );
+			yield getItemSuccess( item.id, item );
 			return item;
 		} catch ( error ) {
-			yield getResourceError( id, error );
+			yield getItemError( id, error );
 			throw error;
 		}
 	};
 
 	return {
-		[ `get${ pluralResourceName }` ]: getResources,
-		[ `get${ resourceName }` ]: getResource,
+		[ `get${ pluralResourceName }` ]: getItems,
+		[ `get${ resourceName }` ]: getItem,
 	};
 };
