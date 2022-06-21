@@ -33,7 +33,7 @@ If you want to see what we're working on for future versions, or want to help ou
 -   [Blocks](./assets/js/blocks) - Documentation for specific Blocks.
 -   [Editor Components](assets/js/editor-components) - Shared components used in WooCommerce blocks for the editor (Gutenberg) UI.
 -   [WooCommerce Blocks Handbook](./docs) - Documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
--   [WooCommerce Blocks Storybook](https://woocommerce.github.io/woocommerce-gutenberg-products-block/) - Contains a list and demo of components used in the plugin.
+-   [WooCommerce Blocks Storybook](https://woocommerce.github.io/woocommerce-blocks/) - Contains a list and demo of components used in the plugin.
 
 ## Installing the plugin version
 
