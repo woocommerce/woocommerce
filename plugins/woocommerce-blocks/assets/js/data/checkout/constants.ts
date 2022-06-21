@@ -12,12 +12,12 @@ export enum STATUS {
 	PRISTINE = 'pristine',
 	// When checkout state has changed but there is no activity happening.
 	IDLE = 'idle',
-	// After BEFORE_PROCESSING status emitters have finished successfully. Payment processing is started on this checkout status.
-	PROCESSING = 'processing',
 	// After the AFTER_PROCESSING event emitters have completed. This status triggers the checkout redirect.
 	COMPLETE = 'complete',
 	// This is the state before checkout processing begins after the checkout button has been pressed/submitted.
 	BEFORE_PROCESSING = 'before_processing',
+	// After BEFORE_PROCESSING status emitters have finished successfully. Payment processing is started on this checkout status.
+	PROCESSING = 'processing',
 	// After server side checkout processing is completed this status is set
 	AFTER_PROCESSING = 'after_processing',
 }

@@ -13,7 +13,7 @@ import {
 	config as checkoutStoreConfig,
 } from '../../../../data/checkout';
 
-const mockUseCheckoutContext = {
+const mockUseCheckoutEventsContext = {
 	onSubmit: jest.fn(),
 };
 const mockUsePaymentMethodDataContext = {
@@ -23,8 +23,8 @@ const mockUsePaymentMethodDataContext = {
 	},
 };
 
-jest.mock( '../../providers/cart-checkout/checkout-state', () => ( {
-	useCheckoutContext: () => mockUseCheckoutContext,
+jest.mock( '../../providers/cart-checkout/checkout-events', () => ( {
+	useCheckoutEventsContext: () => mockUseCheckoutEventsContext,
 } ) );
 
 jest.mock( '../../providers/cart-checkout/payment-methods', () => ( {
@@ -66,6 +66,8 @@ describe( 'useCheckoutSubmit', () => {
 
 		onSubmit();
 
-		expect( mockUseCheckoutContext.onSubmit ).toHaveBeenCalledTimes( 1 );
+		expect( mockUseCheckoutEventsContext.onSubmit ).toHaveBeenCalledTimes(
+			1
+		);
 	} );
 } );
