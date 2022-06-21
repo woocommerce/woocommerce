@@ -20,7 +20,7 @@ import { ValidationInputError } from '../../providers/validation';
 import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
 import { useEmitResponse } from '../use-emit-response';
-import { useCheckoutContext } from '../../providers/cart-checkout/checkout-state';
+import { useCheckoutEventsContext } from '../../providers/cart-checkout/checkout-events';
 import { usePaymentMethodDataContext } from '../../providers/cart-checkout/payment-methods';
 import { useShippingDataContext } from '../../providers/cart-checkout/shipping';
 import { useCustomerDataContext } from '../../providers/cart-checkout/customer';
@@ -37,7 +37,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
 		onSubmit,
-	} = useCheckoutContext();
+	} = useCheckoutEventsContext();
 	const {
 		isCalculating,
 		isComplete,

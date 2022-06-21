@@ -7,6 +7,9 @@
 		"../mapped-types.ts",
 		"../settings/shared/index.js",
 		"../settings/blocks/index.js",
+		"../utils/notices.ts",
+		"../base/context/providers/cart-checkout/checkout-events/**.ts",
+		"../base/context/event-emit",
 		"../base/context/providers/cart-checkout/checkout-state/utils.ts"
 	],
 	"exclude": [ "**/test/**" ]

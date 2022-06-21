@@ -21,7 +21,7 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { preparePaymentData, processCheckoutResponseHeaders } from './utils';
-import { useCheckoutContext } from './checkout-state';
+import { useCheckoutEventsContext } from './checkout-events';
 import { useShippingDataContext } from './shipping';
 import { useCustomerDataContext } from './customer';
 import { usePaymentMethodDataContext } from './payment-methods';
@@ -34,7 +34,7 @@ import { useStoreNoticesContext } from '../store-notices';
  * Subscribes to checkout context and triggers processing via the API.
  */
 const CheckoutProcessor = () => {
-	const { onCheckoutValidationBeforeProcessing } = useCheckoutContext();
+	const { onCheckoutValidationBeforeProcessing } = useCheckoutEventsContext();
 
 	const {
 		hasError: checkoutHasError,
@@ -55,9 +55,8 @@ const CheckoutProcessor = () => {
 		};
 	} );
 
-	const { setCustomerId, setHasError, processCheckoutResponse } = useDispatch(
-		CHECKOUT_STORE_KEY
-	);
+	const { setHasError, processCheckoutResponse } =
+		useDispatch( CHECKOUT_STORE_KEY );
 
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingErrorStatus } = useShippingDataContext();
@@ -80,7 +79,10 @@ const CheckoutProcessor = () => {
 	const [ isProcessingOrder, setIsProcessingOrder ] = useState( false );
 
 	const paymentMethodId = useMemo( () => {
-		const merged = { ...expressPaymentMethods, ...paymentMethods };
+		const merged = {
+			...expressPaymentMethods,
+			...paymentMethods,
+		};
 		return merged?.[ activePaymentMethod ]?.paymentMethodId;
 	}, [ activePaymentMethod, expressPaymentMethods, paymentMethods ] );
 
@@ -118,6 +120,7 @@ const CheckoutProcessor = () => {
 		setHasError,
 	] );
 
+	// Keep the billing, shipping and redirectUrl current
 	useEffect( () => {
 		currentBillingAddress.current = billingAddress;
 		currentShippingAddress.current = shippingAddress;
@@ -152,6 +155,7 @@ const CheckoutProcessor = () => {
 		shippingErrorStatus.hasError,
 	] );
 
+	// Validate the checkout using the CHECKOUT_VALIDATION_BEFORE_PROCESSING event
 	useEffect( () => {
 		let unsubscribeProcessing;
 		if ( ! isExpressPaymentMethodActive ) {
@@ -171,13 +175,14 @@ const CheckoutProcessor = () => {
 		isExpressPaymentMethodActive,
 	] );
 
-	// redirect when checkout is complete and there is a redirect url.
+	// Redirect when checkout is complete and there is a redirect url.
 	useEffect( () => {
 		if ( currentRedirectUrl.current ) {
 			window.location.href = currentRedirectUrl.current;
 		}
 	}, [ checkoutIsComplete ] );
 
+	// POST to the Store API and process and display any errors, or set order complete
 	const processOrder = useCallback( async () => {
 		if ( isProcessingOrder ) {
 			return;
@@ -220,10 +225,7 @@ const CheckoutProcessor = () => {
 			parse: false,
 		} )
 			.then( ( response ) => {
-				processCheckoutResponseHeaders(
-					response.headers,
-					setCustomerId
-				);
+				processCheckoutResponseHeaders( response.headers );
 				if ( ! response.ok ) {
 					throw new Error( response );
 				}
@@ -236,10 +238,7 @@ const CheckoutProcessor = () => {
 			.catch( ( errorResponse ) => {
 				try {
 					if ( errorResponse?.headers ) {
-						processCheckoutResponseHeaders(
-							errorResponse.headers,
-							setCustomerId
-						);
+						processCheckoutResponseHeaders( errorResponse.headers );
 					}
 					// This attempts to parse a JSON error response where the status code was 4xx/5xx.
 					errorResponse.json().then( ( response ) => {
@@ -306,10 +305,9 @@ const CheckoutProcessor = () => {
 		receiveCart,
 		setHasError,
 		processCheckoutResponse,
-		setCustomerId,
 	] );
 
-	// process order if conditions are good.
+	// Process order if conditions are good.
 	useEffect( () => {
 		if ( paidAndWithoutErrors && ! isProcessingOrder ) {
 			processOrder();
