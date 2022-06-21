@@ -6,7 +6,10 @@
 -   [Internal developers](#internal-developers)
 -   [Third-party developers](#third-party-developers)
 -   [Designers](#designers)
--   [Developer Resources](#developer-resources) - [Tools](#tools) - [Articles](#articles) - [Tutorials](#tutorials)
+-   [Developer Resources](#developer-resources)
+    - [Tools](#tools)
+    - [Articles](#articles)
+    - [Tutorials](#tutorials)
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
