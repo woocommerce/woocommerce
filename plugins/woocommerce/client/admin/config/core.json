@@ -8,6 +8,8 @@
 		"experimental-import-products-task": true,
 		"experimental-fashion-sample-products": true,
 		"experimental-product-tour": true,
+		"shipping-smart-defaults ": false,
+		"shipping-setting-tour": false,
 		"homescreen": true,
 		"marketing": true,
 		"minified-js": false,
