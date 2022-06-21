@@ -7,6 +7,7 @@ import { Reducer } from 'redux';
  * Internal dependencies
  */
 import { Actions } from './actions';
+import CRUD_ACTIONS from './crud-actions';
 import { getResourceName } from '../utils';
 import { Resource, ResourceQuery } from './types';
 import { TYPES } from './action-types';
@@ -70,9 +71,33 @@ export const createReducer = ( resourceName: string ) => {
 						errors: {
 							...state.errors,
 							[ getResourceName(
-								resourceName,
+								CRUD_ACTIONS.GET_ITEMS,
 								payload.query as ResourceQuery
 							) ]: payload.error,
+						},
+					};
+
+				case TYPES.GET_RESOURCE_SUCCESS:
+					const resourceData = state.data || {};
+					return {
+						...state,
+						data: {
+							...resourceData,
+							[ payload.id ]: {
+								...( resourceData[ payload.id ] || {} ),
+								...payload.resource,
+							},
+						},
+					};
+
+				case TYPES.GET_RESOURCE_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getResourceName( CRUD_ACTIONS.GET_ITEM, {
+								id: payload.id,
+							} ) ]: payload.error,
 						},
 					};
 

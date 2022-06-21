@@ -6,7 +6,8 @@ import { createCrudDataStore } from '../crud';
 
 createCrudDataStore( {
 	storeName: STORE_NAME,
-	resourceName: 'ProductAttributes',
+	resourceName: 'ProductAttribute',
+	pluralResourceName: 'ProductAttributes',
 	namespace: WC_PRODUCT_ATTRIBUTES_NAMESPACE,
 } );
 

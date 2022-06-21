@@ -9,8 +9,12 @@ import createSelector from 'rememo';
 import { getResourceName } from '../utils';
 import { Resource, ResourceQuery } from './types';
 import { ResourceState } from './reducer';
+import CRUD_ACTIONS from './crud-actions';
 
-export const createSelectors = ( resourceName: string ) => {
+export const createSelectors = (
+	resourceName: string,
+	pluralResourceName: string
+) => {
 	const getResources = createSelector(
 		( state: ResourceState, query: ResourceQuery ) => {
 			const resourceQuery = getResourceName( resourceName, query );
@@ -59,12 +63,23 @@ export const createSelectors = ( resourceName: string ) => {
 		state: ResourceState,
 		query: ResourceQuery
 	) => {
-		const resourceQuery = getResourceName( resourceName, query );
+		const resourceQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+		return state.errors[ resourceQuery ];
+	};
+
+	const getResource = ( state: ResourceState, id: number ) => {
+		return state.data[ id ];
+	};
+
+	const getResourceError = ( state: ResourceState, id: number ) => {
+		const resourceQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
 		return state.errors[ resourceQuery ];
 	};
 
 	return {
-		[ `get${ resourceName }` ]: getResources,
-		[ `get${ resourceName }Error` ]: getResourcesError,
+		[ `get${ resourceName }` ]: getResource,
+		[ `get${ pluralResourceName }` ]: getResources,
+		[ `get${ resourceName }Error` ]: getResourceError,
+		[ `get${ pluralResourceName }Error` ]: getResourcesError,
 	};
 };

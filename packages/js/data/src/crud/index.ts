@@ -16,14 +16,19 @@ import { createReducer, ResourceState } from './reducer';
 type CrudDataStore = {
 	storeName: string;
 	resourceName: string;
+	pluralResourceName: string;
 	namespace: string;
 };
 
 export const createCrudDataStore = ( args: CrudDataStore ) => {
-	const { storeName, resourceName, namespace } = args;
+	const { storeName, resourceName, namespace, pluralResourceName } = args;
 	const reducer = createReducer( resourceName );
-	const resolvers = createResolvers( resourceName, namespace );
-	const selectors = createSelectors( resourceName );
+	const resolvers = createResolvers(
+		resourceName,
+		pluralResourceName,
+		namespace
+	);
+	const selectors = createSelectors( resourceName, pluralResourceName );
 
 	registerStore( storeName, {
 		reducer: reducer as Reducer< ResourceState >,
