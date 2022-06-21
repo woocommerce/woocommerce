@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version  3.0.0
  */
-abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface, WC_Abstract_Order_Data_Store_Interface {
+abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP implements WC_Abstract_Order_Data_Store_Interface, WC_Object_Data_Store_Interface {
 
 	/**
 	 * Internal meta type used to store order data.
