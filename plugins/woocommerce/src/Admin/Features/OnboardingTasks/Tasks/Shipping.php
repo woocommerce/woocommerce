@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\Features;
+use \Automattic\WooCommerce\Admin\PluginsHelper;
 use WC_Data_Store;
 
 /**
@@ -76,6 +78,17 @@ class Shipping extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			if ( self::sell_only_digital_type() ) {
+				return false;
+			}
+
+			$store_country = wc_format_country_state_string( get_option( 'woocommerce_default_country', '' ) )['country'];
+
+			return in_array( $store_country, array( 'CA', 'AU', 'UK' ), true ) ||
+				( self::sell_unknown_product_type() || '' === $store_country ) && ! PluginsHelper::is_plugin_installed( 'jetpack' );
+		}
+
 		return self::has_physical_products();
 	}
 
@@ -117,5 +130,29 @@ class Shipping extends Task {
 					)
 				)
 			) > 0;
+	}
+
+		/**
+		 * Check if the store sells digital products only.
+		 *
+		 * @return bool
+		 */
+	public static function sell_unknown_product_type() {
+		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
+		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
+
+		return empty( $product_types );
+	}
+
+	/**
+	 * Check if the store sells digital products only.
+	 *
+	 * @return bool
+	 */
+	public static function sell_only_digital_type() {
+		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
+		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
+
+		return [ 'downloads' ] === $product_types;
 	}
 }
