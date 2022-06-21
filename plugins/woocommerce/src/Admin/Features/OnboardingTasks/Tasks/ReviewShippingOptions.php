@@ -64,7 +64,7 @@ class ReviewShippingOptions extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		// TODO: Just check automated shipping options have been set up when #33366 is completed.
+		// TODO: Update when #33366 is completed.
 		if ( Shipping::sell_only_digital_type() || Shipping::sell_unknown_product_type() ) {
 			return false;
 		}

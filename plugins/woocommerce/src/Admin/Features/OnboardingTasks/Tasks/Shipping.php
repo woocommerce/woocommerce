@@ -132,11 +132,11 @@ class Shipping extends Task {
 			) > 0;
 	}
 
-		/**
-		 * Check if the store sells digital products only.
-		 *
-		 * @return bool
-		 */
+	/**
+	 * Check if the store sells digital products only.
+	 *
+	 * @return bool
+	 */
 	public static function sell_unknown_product_type() {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
