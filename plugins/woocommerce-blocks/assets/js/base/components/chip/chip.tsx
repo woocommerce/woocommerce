@@ -12,7 +12,7 @@ export interface ChipProps {
 	/**
 	 * Text for chip content.
 	 */
-	text: string;
+	text: string | JSX.Element;
 	/**
 	 * Screenreader text for the content.
 	 */

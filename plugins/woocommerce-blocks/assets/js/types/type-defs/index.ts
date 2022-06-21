@@ -10,3 +10,4 @@ export * from './blocks';
 export * from './utils';
 export * from './taxes';
 export * from './attributes';
+export * from './stock-status';

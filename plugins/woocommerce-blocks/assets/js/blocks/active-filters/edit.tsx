@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
+import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	Disabled,
 	PanelBody,
@@ -18,9 +19,13 @@ import {
 /**
  * Internal dependencies
  */
-import Block from './block.js';
+import Block from './block';
+import type { Attributes } from './types';
 
-const Edit = ( { attributes, setAttributes } ) => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< Attributes > ) => {
 	const { className, displayStyle, heading, headingLevel } = attributes;
 
 	const blockProps = useBlockProps( {
@@ -42,7 +47,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 							'woo-gutenberg-products-block'
 						) }
 						value={ displayStyle }
-						onChange={ ( value ) =>
+						onChange={ ( value: Attributes[ 'displayStyle' ] ) =>
 							setAttributes( {
 								displayStyle: value,
 							} )
@@ -74,7 +79,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 						minLevel={ 2 }
 						maxLevel={ 7 }
 						selectedLevel={ headingLevel }
-						onChange={ ( newLevel ) =>
+						onChange={ ( newLevel: Attributes[ 'headingLevel' ] ) =>
 							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
@@ -90,7 +95,9 @@ const Edit = ( { attributes, setAttributes } ) => {
 				className="wc-block-active-filters__title"
 				headingLevel={ headingLevel }
 				heading={ heading }
-				onChange={ ( value ) => setAttributes( { heading: value } ) }
+				onChange={ ( value: Attributes[ 'heading' ] ) =>
+					setAttributes( { heading: value } )
+				}
 			/>
 			<Disabled>
 				<Block attributes={ attributes } isEditor={ true } />

@@ -13,7 +13,7 @@ import { getQueryArgs, addQueryArgs, removeQueryArgs } from '@wordpress/url';
  * @param {number} minPrice The min price, if set.
  * @param {number} maxPrice The max price, if set.
  */
-export const formatPriceRange = ( minPrice, maxPrice ) => {
+export const formatPriceRange = ( minPrice: number, maxPrice: number ) => {
 	if ( Number.isFinite( minPrice ) && Number.isFinite( maxPrice ) ) {
 		return sprintf(
 			/* translators: %1$s min price, %2$s max price */
@@ -38,6 +38,15 @@ export const formatPriceRange = ( minPrice, maxPrice ) => {
 	);
 };
 
+interface RemovableListItemProps {
+	type: string;
+	name: string;
+	prefix?: string | JSX.Element;
+	showLabel?: boolean;
+	displayStyle: string;
+	removeCallback?: () => void;
+}
+
 /**
  * Render a removable item in the active filters block list.
  *
@@ -54,10 +63,10 @@ export const renderRemovableListItem = ( {
 	type,
 	name,
 	prefix = '',
-	removeCallback = () => {},
+	removeCallback = () => null,
 	showLabel = true,
 	displayStyle,
-} ) => {
+}: RemovableListItemProps ) => {
 	const prefixedName = prefix ? (
 		<>
 			{ prefix }
@@ -146,7 +155,9 @@ export const renderRemovableListItem = ( {
  *
  * @param {Array<string|Record<string, string>>} args Args to remove
  */
-export const removeArgsFromFilterUrl = ( ...args ) => {
+export const removeArgsFromFilterUrl = (
+	...args: ( string | Record< string, string > )[]
+) => {
 	const url = window.location.href;
 	const currentQuery = getQueryArgs( url );
 	const cleanUrl = removeQueryArgs( url, ...Object.keys( currentQuery ) );
@@ -157,7 +168,9 @@ export const removeArgsFromFilterUrl = ( ...args ) => {
 		}
 		if ( typeof item === 'object' ) {
 			const key = Object.keys( item )[ 0 ];
-			const currentQueryValue = currentQuery[ key ].split( ',' );
+			const currentQueryValue = currentQuery[ key ]
+				.toString()
+				.split( ',' );
 			currentQuery[ key ] = currentQueryValue
 				.filter( ( value ) => value !== item[ key ] )
 				.join( ',' );

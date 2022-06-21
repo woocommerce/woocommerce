@@ -8,7 +8,13 @@ import { useMemo, useEffect } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import Label from '@woocommerce/base-components/label';
-import { isBoolean } from '@woocommerce/types';
+import {
+	isAttributeQueryCollection,
+	isBoolean,
+	isRatingQueryCollection,
+	isStockStatusQueryCollection,
+	isStockStatusOptions,
+} from '@woocommerce/types';
 import { getUrlParameter } from '@woocommerce/utils';
 
 /**
@@ -23,6 +29,7 @@ import {
 	cleanFilterUrl,
 } from './utils';
 import ActiveAttributeFilters from './active-attribute-filters';
+import { Attributes } from './types';
 
 /**
  * Component displaying active filters.
@@ -34,6 +41,9 @@ import ActiveAttributeFilters from './active-attribute-filters';
 const ActiveFiltersBlock = ( {
 	attributes: blockAttributes,
 	isEditor = false,
+}: {
+	attributes: Attributes;
+	isEditor?: boolean;
 } ) => {
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'is_rendering_php_template',
@@ -53,28 +63,34 @@ const ActiveFiltersBlock = ( {
 
 	const STOCK_STATUS_OPTIONS = getSetting( 'stockStatusOptions', [] );
 	const activeStockStatusFilters = useMemo( () => {
-		if ( productStockStatus.length > 0 ) {
-			return productStockStatus.map( ( slug ) => {
-				return renderRemovableListItem( {
-					type: __( 'Stock Status', 'woo-gutenberg-products-block' ),
-					name: STOCK_STATUS_OPTIONS[ slug ],
-					removeCallback: () => {
-						if ( filteringForPhpTemplate ) {
-							return removeArgsFromFilterUrl( {
-								filter_stock_status: slug,
-							} );
-						}
-						const newStatuses = productStockStatus.filter(
-							( status ) => {
-								return status !== slug;
-							}
-						);
-						setProductStockStatus( newStatuses );
-					},
-					displayStyle: blockAttributes.displayStyle,
-				} );
-			} );
+		if (
+			productStockStatus.length === 0 ||
+			! isStockStatusQueryCollection( productStockStatus ) ||
+			! isStockStatusOptions( STOCK_STATUS_OPTIONS )
+		) {
+			return null;
 		}
+
+		return productStockStatus.map( ( slug ) => {
+			return renderRemovableListItem( {
+				type: __( 'Stock Status', 'woo-gutenberg-products-block' ),
+				name: STOCK_STATUS_OPTIONS[ slug ],
+				removeCallback: () => {
+					if ( filteringForPhpTemplate ) {
+						return removeArgsFromFilterUrl( {
+							filter_stock_status: slug,
+						} );
+					}
+					const newStatuses = productStockStatus.filter(
+						( status ) => {
+							return status !== slug;
+						}
+					);
+					setProductStockStatus( newStatuses );
+				},
+				displayStyle: blockAttributes.displayStyle,
+			} );
+		} );
 	}, [
 		STOCK_STATUS_OPTIONS,
 		productStockStatus,
@@ -109,10 +125,19 @@ const ActiveFiltersBlock = ( {
 	] );
 
 	const activeAttributeFilters = useMemo( () => {
+		if ( ! isAttributeQueryCollection( productAttributes ) ) {
+			return null;
+		}
+
 		return productAttributes.map( ( attribute ) => {
 			const attributeObject = getAttributeFromTaxonomy(
 				attribute.attribute
 			);
+
+			if ( ! attributeObject ) {
+				return null;
+			}
+
 			return (
 				<ActiveAttributeFilters
 					attributeObject={ attributeObject }
@@ -151,35 +176,35 @@ const ActiveFiltersBlock = ( {
 	}, [ filteringForPhpTemplate, productRatings, setProductRatings ] );
 
 	const activeRatingFilters = useMemo( () => {
-		if ( productRatings.length > 0 ) {
-			return productRatings.map( ( slug ) => {
-				return renderRemovableListItem( {
-					type: __( 'Rating', 'woo-gutenberg-products-block' ),
-					name: sprintf(
-						/* translators: %s is referring to the average rating value */
-						__(
-							'Rated %s out of 5',
-							'woo-gutenberg-products-block'
-						),
-						slug
-					),
-					removeCallback: () => {
-						if ( filteringForPhpTemplate ) {
-							return removeArgsFromFilterUrl( {
-								rating_filter: slug,
-							} );
-						}
-						const newRatings = productRatings.filter(
-							( rating ) => {
-								return rating !== slug;
-							}
-						);
-						setProductRatings( newRatings );
-					},
-					displayStyle: blockAttributes.displayStyle,
-				} );
-			} );
+		if (
+			productRatings.length === 0 ||
+			! isRatingQueryCollection( productRatings )
+		) {
+			return null;
 		}
+
+		return productRatings.map( ( slug ) => {
+			return renderRemovableListItem( {
+				type: __( 'Rating', 'woo-gutenberg-products-block' ),
+				name: sprintf(
+					/* translators: %s is referring to the average rating value */
+					__( 'Rated %s out of 5', 'woo-gutenberg-products-block' ),
+					slug
+				),
+				removeCallback: () => {
+					if ( filteringForPhpTemplate ) {
+						return removeArgsFromFilterUrl( {
+							rating_filter: slug,
+						} );
+					}
+					const newRatings = productRatings.filter( ( rating ) => {
+						return rating !== slug;
+					} );
+					setProductRatings( newRatings );
+				},
+				displayStyle: blockAttributes.displayStyle,
+			} );
+		} );
 	}, [
 		productRatings,
 		setProductRatings,
@@ -201,7 +226,8 @@ const ActiveFiltersBlock = ( {
 		return null;
 	}
 
-	const TagName = `h${ blockAttributes.headingLevel }`;
+	const TagName =
+		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
 	const hasFilterableProducts = getSettingWithCoercion(
 		'has_filterable_products',
 		false,
