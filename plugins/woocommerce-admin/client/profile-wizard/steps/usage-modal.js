@@ -22,13 +22,8 @@ class UsageModal extends Component {
 	}
 
 	async componentDidUpdate( prevProps, prevState ) {
-		const {
-			hasErrors,
-			isRequesting,
-			onClose,
-			onContinue,
-			createNotice,
-		} = this.props;
+		const { hasErrors, isRequesting, onClose, onContinue, createNotice } =
+			this.props;
 		const { isLoadingScripts, isRequestStarted } = this.state;
 
 		// We can't rely on isRequesting props only because option update might be triggered by other component.

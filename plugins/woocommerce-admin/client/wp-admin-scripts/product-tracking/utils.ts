@@ -1,9 +1,9 @@
 /**
  * Recursive function that waits up to 3 seconds until an element is found, then calls the callback.
  *
- * @param {string} query query of the element.
- * @param {Function} func callback called when element is found.
- * @param {number} tries used internally to limit the number of tries.
+ * @param {string}   query query of the element.
+ * @param {Function} func  callback called when element is found.
+ * @param {number}   tries used internally to limit the number of tries.
  */
 export function waitUntilElementIsPresent(
 	query: string,

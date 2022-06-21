@@ -35,14 +35,8 @@ class ChartBlock extends Component {
 	}
 
 	render() {
-		const {
-			charts,
-			endpoint,
-			path,
-			query,
-			selectedChart,
-			filters,
-		} = this.props;
+		const { charts, endpoint, path, query, selectedChart, filters } =
+			this.props;
 
 		if ( ! selectedChart ) {
 			return null;

@@ -157,23 +157,20 @@ const DefaultPaymentMethodsHeaderText = () => (
 );
 
 export const PaymentsBannerWrapper = () => {
-	const {
-		installedPaymentGateways,
-		paymentGatewaySuggestions,
-		isResolving,
-	} = useSelect( ( select: WCDataSelector ) => {
-		return {
-			installedPaymentGateways: select(
-				PAYMENT_GATEWAYS_STORE_NAME
-			).getPaymentGateways(),
-			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getPaymentGatewaySuggestions'
-			),
-			paymentGatewaySuggestions: select(
-				ONBOARDING_STORE_NAME
-			).getPaymentGatewaySuggestions(),
-		};
-	} );
+	const { installedPaymentGateways, paymentGatewaySuggestions, isResolving } =
+		useSelect( ( select: WCDataSelector ) => {
+			return {
+				installedPaymentGateways: select(
+					PAYMENT_GATEWAYS_STORE_NAME
+				).getPaymentGateways(),
+				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
+					'getPaymentGatewaySuggestions'
+				),
+				paymentGatewaySuggestions: select(
+					ONBOARDING_STORE_NAME
+				).getPaymentGatewaySuggestions(),
+			};
+		} );
 
 	const isWcPayInstalled = installedPaymentGateways.some(
 		( gateway: PaymentGateway ) => {

@@ -15,11 +15,8 @@ import { STORE_NAME } from './constants';
  */
 export const useUser = () => {
 	const userData = useSelect( ( select ) => {
-		const {
-			getCurrentUser,
-			hasStartedResolution,
-			hasFinishedResolution,
-		} = select( STORE_NAME );
+		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
+			select( STORE_NAME );
 
 		return {
 			isRequesting:

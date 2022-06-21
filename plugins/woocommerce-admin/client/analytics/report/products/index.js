@@ -22,11 +22,8 @@ import ReportFilters from '../../components/report-filters';
 
 class ProductsReport extends Component {
 	getChartMeta() {
-		const {
-			query,
-			isSingleProductView,
-			isSingleProductVariable,
-		} = this.props;
+		const { query, isSingleProductView, isSingleProductVariable } =
+			this.props;
 		const isCompareView =
 			query.filter === 'compare-products' &&
 			query.products &&
@@ -54,13 +51,8 @@ class ProductsReport extends Component {
 
 	render() {
 		const { compareObject, itemsLabel, mode } = this.getChartMeta();
-		const {
-			path,
-			query,
-			isError,
-			isRequesting,
-			isSingleProductVariable,
-		} = this.props;
+		const { path, query, isError, isRequesting, isSingleProductVariable } =
+			this.props;
 
 		if ( isError ) {
 			return <ReportError />;
@@ -143,9 +135,8 @@ export default compose(
 			query.products &&
 			query.products.split( ',' ).length === 1;
 
-		const { getItems, isResolving, getItemsError } = select(
-			ITEMS_STORE_NAME
-		);
+		const { getItems, isResolving, getItemsError } =
+			select( ITEMS_STORE_NAME );
 
 		if ( isRequesting ) {
 			return {

@@ -65,8 +65,7 @@ const Tour = ( {
 					descriptions: {
 						desktop:
 							'You can change the content and add any relevant links.',
-						mobile:
-							'You can change the content and add any relevant links.',
+						mobile: 'You can change the content and add any relevant links.',
 					},
 				},
 			},
@@ -83,8 +82,7 @@ const Tour = ( {
 					descriptions: {
 						desktop:
 							'We added a few shipping zones for you based on your location, but you can manage them at any time.',
-						mobile:
-							'A shipping zone is a geographic area where a certain set of shipping methods are offered.',
+						mobile: 'A shipping zone is a geographic area where a certain set of shipping methods are offered.',
 					},
 				},
 			},
@@ -98,8 +96,7 @@ const Tour = ( {
 					descriptions: {
 						desktop:
 							'We defaulted to some recommended shipping methods based on your store location, but you can manage them at any time within each shipping zone settings.   ',
-						mobile:
-							'We defaulted to some recommended shipping methods based on your store location, but you can manage them at any time within each shipping zone settings.   ',
+						mobile: 'We defaulted to some recommended shipping methods based on your store location, but you can manage them at any time within each shipping zone settings.   ',
 					},
 				},
 			},

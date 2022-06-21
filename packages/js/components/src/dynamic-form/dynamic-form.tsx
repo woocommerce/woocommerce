@@ -61,9 +61,10 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	const fields =
 		baseFields instanceof Array ? baseFields : Object.values( baseFields );
 
-	const initialValues = useMemo( () => getInitialConfigValues( fields ), [
-		fields,
-	] );
+	const initialValues = useMemo(
+		() => getInitialConfigValues( fields ),
+		[ fields ]
+	);
 
 	return (
 		<Form

@@ -26,9 +26,8 @@ export const withCurrentUserHydration = ( currentUser ) =>
 					return;
 				}
 
-				const { isResolving, hasFinishedResolution } = select(
-					STORE_NAME
-				);
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
 				const {
 					startResolution,
 					finishResolution,

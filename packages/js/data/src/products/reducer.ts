@@ -95,9 +95,8 @@ const reducer: Reducer< ProductState, Actions > = (
 					...state,
 					errors: {
 						...state.errors,
-						[ getProductResourceName(
-							payload.query
-						) ]: payload.error,
+						[ getProductResourceName( payload.query ) ]:
+							payload.error,
 					},
 				};
 			case TYPES.UPDATE_PRODUCT_ERROR:
