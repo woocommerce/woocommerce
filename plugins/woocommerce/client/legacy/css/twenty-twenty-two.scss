@@ -95,6 +95,10 @@ $tt2-gray: #f7f7f7;
 		display: none;
 	}
 
+	.woocommerce-breadcrumb {
+		margin-bottom: 1rem;
+	}
+
 	.woocommerce-message,
 	.woocommerce-error,
 	.woocommerce-info {
@@ -253,7 +257,12 @@ $tt2-gray: #f7f7f7;
 
 	div.product {
 		position: relative;
-		overflow: auto;
+
+		&::after {
+			content: "";
+			display: block;
+			clear: both;
+		}
 
 		> span.onsale {
 			position: absolute;
@@ -747,7 +756,7 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 	}
-	
+
 	table.shop_table,
 	table.shop_table_responsive {
 		tbody {
