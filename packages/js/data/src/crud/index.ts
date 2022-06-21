@@ -9,6 +9,7 @@ import { Reducer } from 'redux';
  */
 import { createSelectors } from './selectors';
 import * as actions from './actions';
+import controls from '../controls';
 import { createResolvers } from './resolvers';
 import { createReducer, ResourceState } from './reducer';
 
@@ -29,5 +30,6 @@ export const createCrudDataStore = ( args: CrudDataStore ) => {
 		actions,
 		selectors,
 		resolvers,
+		controls,
 	} );
 };

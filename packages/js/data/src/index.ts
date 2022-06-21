@@ -18,6 +18,7 @@ export { ITEMS_STORE_NAME } from './items';
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 export { PRODUCTS_STORE_NAME } from './products';
 export { ORDERS_STORE_NAME } from './orders';
+export { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
@@ -89,6 +90,7 @@ import type { COUNTRIES_STORE_NAME } from './countries';
 import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 import type { PRODUCTS_STORE_NAME } from './products';
 import type { ORDERS_STORE_NAME } from './orders';
+import type { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -104,7 +106,8 @@ export type WCDataStoreName =
 	| typeof COUNTRIES_STORE_NAME
 	| typeof PAYMENT_GATEWAYS_STORE_NAME
 	| typeof PRODUCTS_STORE_NAME
-	| typeof ORDERS_STORE_NAME;
+	| typeof ORDERS_STORE_NAME
+	| typeof PRODUCT_ATTRIBUTES_STORE_NAME;
 
 /**
  * Internal dependencies
