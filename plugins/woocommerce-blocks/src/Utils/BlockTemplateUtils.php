@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
 
 /**
  * Utility methods used for serving block templates from WooCommerce Blocks.
@@ -283,6 +284,7 @@ class BlockTemplateUtils {
 		if ( isset( $plugin_template_types[ $template_slug ] ) ) {
 			return $plugin_template_types[ $template_slug ]['description'];
 		}
+		return '';
 	}
 
 	/**
@@ -312,6 +314,10 @@ class BlockTemplateUtils {
 			ProductSearchResultsTemplate::SLUG => array(
 				'title'       => _x( 'Product Search Results', 'Template name', 'woo-gutenberg-products-block' ),
 				'description' => __( 'Template used to display search results for products.', 'woo-gutenberg-products-block' ),
+			),
+			MiniCartTemplate::SLUG             => array(
+				'title'       => _x( 'Mini Cart', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display the Mini Cart drawer.', 'woo-gutenberg-products-block' ),
 			),
 		);
 
