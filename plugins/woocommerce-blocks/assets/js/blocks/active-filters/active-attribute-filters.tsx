@@ -8,13 +8,25 @@ import {
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { getSettingWithCoercion } from '@woocommerce/settings';
-import { isBoolean } from '@woocommerce/types';
+import {
+	AttributeObject,
+	isAttributeQueryCollection,
+	isAttributeTermCollection,
+	isBoolean,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { renderRemovableListItem, removeArgsFromFilterUrl } from './utils';
 import { removeAttributeFilterBySlug } from '../../utils/attributes-query';
+
+interface ActiveAttributeFiltersProps {
+	displayStyle: string;
+	operator: 'and' | 'in';
+	slugs: string[];
+	attributeObject: AttributeObject;
+}
 
 /**
  * Component that renders active attribute (terms) filters.
@@ -26,11 +38,11 @@ import { removeAttributeFilterBySlug } from '../../utils/attributes-query';
  * @param {string} props.displayStyle    The style used for displaying the filters.
  */
 const ActiveAttributeFilters = ( {
-	attributeObject = {},
+	attributeObject,
 	slugs = [],
 	operator = 'in',
 	displayStyle,
-} ) => {
+}: ActiveAttributeFiltersProps ) => {
 	const { results, isLoading } = useCollection( {
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
@@ -42,7 +54,12 @@ const ActiveAttributeFilters = ( {
 		[]
 	);
 
-	if ( isLoading ) {
+	if (
+		isLoading ||
+		! Array.isArray( results ) ||
+		! isAttributeTermCollection( results ) ||
+		! isAttributeQueryCollection( productAttributes )
+	) {
 		return null;
 	}
 
@@ -69,7 +86,7 @@ const ActiveAttributeFilters = ( {
 						return null;
 					}
 
-					let prefix = '';
+					let prefix: string | JSX.Element = '';
 
 					if ( index > 0 && operator === 'and' ) {
 						prefix = (
@@ -92,7 +109,7 @@ const ActiveAttributeFilters = ( {
 								);
 
 								// If only one attribute was selected, we remove both filter and query type from the URL.
-								if ( currentAttribute.slug.length === 1 ) {
+								if ( currentAttribute?.slug.length === 1 ) {
 									return removeArgsFromFilterUrl(
 										`query_type_${ attributeObject.name }`,
 										`filter_${ attributeObject.name }`
