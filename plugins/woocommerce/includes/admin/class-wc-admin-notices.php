@@ -646,9 +646,16 @@ class WC_Admin_Notices {
 		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
 		$response_content = wp_remote_retrieve_body( $response );
 
-		// Check if returns 200 with empty content in case can open an index.html file,
-		// and check for non-200 codes in case the directory is protected.
-		$is_protected = ( 200 === $response_code && empty( $response_content ) ) || ( 200 !== $response_code );
+		// Check that the request either...
+		// 1. Returns a non-200 status code
+		// 2. Has empty or null contents (protected by empty index files; avoids regex test when possible)
+		// 3. Does not look like an Index page (i.e., it has "Index of <...>" in title and contains a <table> element)
+		$is_protected = (
+			200 !== $response_code
+			|| empty( $response_content )
+			|| 1 !== preg_match( '/<title[^>]*>\\s*index\\s+of\\s+[\\s\\S]*<table/i', $response_content )
+		);
+
 		set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', 1 * DAY_IN_SECONDS );
 
 		return $is_protected;
