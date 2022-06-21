@@ -2,12 +2,11 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Contributors](#contributors)
-- [Internal developers](#internal-developers)
-- [Third-party developers](#third-party-developers)
-- [Designers](#designers)
-- [Developer Resources](#developer-resources)
-- [Tutorials](#tutorials)
+-   [Contributors](#contributors)
+-   [Internal developers](#internal-developers)
+-   [Third-party developers](#third-party-developers)
+-   [Designers](#designers)
+-   [Developer Resources](#developer-resources) - [Tools](#tools) - [Articles](#articles) - [Tutorials](#tutorials)
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
@@ -91,7 +90,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
         -   [Checkout Flow and Events](third-party-developers/extensibility/checkout-payment-methods/checkout-flow-and-events.md)
         -   [Payment Method Integration](third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
         -   [Filtering Payment Methods](third-party-developers/extensibility/checkout-payment-methods/filtering-payment-methods.md)
-    -   Checkout Block
+    -   Checkout Blocks
         -   [IntegrationInterface](third-party-developers/extensibility/checkout-block/integration-interface.md)
         -   [Available Filters](third-party-developers/extensibility/checkout-block/available-filters.md)
         -   [Slots and Fills](third-party-developers/extensibility/checkout-block/slot-fills.md)
@@ -118,14 +117,21 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 ## Developer Resources
 
-The following posts from <https://developer.woocommerce.com/category/developer-resources/>, provide deeper insights into the WooCommerce Blocks development.
+### Tools
+
+-   [@woocommerce/extend-cart-checkout-block](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block) This is a template to be used with @wordpress/create-block to create a WooCommerce Blocks extension starting point.
+-   [How to integrate with inner blocks in the WooCommerce Blocks Checkout](https://github.com/woocommerce/newsletter-test) A repository with some example code showing how an extension can register an inner block for use in the Checkout Block.
+
+### Articles
+
+The following posts from [developer.woocommerce.com](https://developer.woocommerce.com/category/developer-resources/) provide deeper insights into the WooCommerce Blocks development.
 
 -   [Store API is now considered stable](https://developer.woocommerce.com/2022/03/25/store-api-is-now-considered-stable/)
 -   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woocommerce.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
 
-## Tutorials
+### Tutorials
 
-The following tutorials from <https://developer.woocommerce.com/category/tutorials/>, help you extending the WooCommerce Blocks plugin.
+The following tutorials from [developer.woocommerce.com](https://developer.woocommerce.com/category/tutorials/) help you with extending the WooCommerce Blocks plugin.
 
 -   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
 -   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
