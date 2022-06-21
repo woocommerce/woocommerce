@@ -79,15 +79,7 @@ class ReviewShippingOptions extends Task {
 			return false;
 		}
 
-		$is_jetpack_installed = PluginsHelper::is_plugin_installed( 'jetpack' );
-		$is_jetpack_connected = class_exists( 'Jetpack_Connection_Manager' ) && ( new Jetpack_Connection_Manager() )->is_connected();
-
-		$is_wcs_installed = PluginsHelper::is_plugin_installed( 'woocommerce-services' );
-		$is_wcs_connected = class_exists( '\WC_Connect_Options' ) && \WC_Connect_Options::get_option( 'tos_accepted' );
-
-		return 'US' === $store_country && (
-			$is_jetpack_connected && $is_wcs_connected || $is_jetpack_installed && ! $is_wcs_installed ) ||
-			! in_array( $store_country, array( 'US', 'CA', 'AU', 'UK' ), true );
+		return 'US' === $store_country || ! in_array( $store_country, array( 'US', 'CA', 'AU', 'UK' ), true );
 	}
 
 	/**
