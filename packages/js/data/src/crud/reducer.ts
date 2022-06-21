@@ -23,11 +23,7 @@ export type ResourceState = {
 	data: Record< number, Item >;
 };
 
-type ReducerOptions = {
-	resourceName: string;
-};
-
-export const createReducer = ( { resourceName }: ReducerOptions ) => {
+export const createReducer = () => {
 	const reducer: Reducer< ResourceState, Actions > = (
 		state = {
 			items: {},
@@ -53,7 +49,7 @@ export const createReducer = ( { resourceName }: ReducerOptions ) => {
 					}, {} );
 
 					const itemQuery = getResourceName(
-						resourceName,
+						CRUD_ACTIONS.GET_ITEMS,
 						payload.query as ItemQuery
 					);
 

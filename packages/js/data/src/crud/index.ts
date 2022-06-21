@@ -26,7 +26,7 @@ export const createCrudDataStore = ( {
 	namespace,
 	pluralResourceName,
 }: CrudDataStore ) => {
-	const reducer = createReducer( { resourceName } );
+	const reducer = createReducer();
 	const resolvers = createResolvers( {
 		resourceName,
 		pluralResourceName,
