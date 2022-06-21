@@ -10,6 +10,7 @@
 		"neilbrayfield.php-docblocker",
 		"valeryanm.vscode-phpsab",
 		"editorconfig.editorconfig",
-		"stylelint.vscode-stylelint"
+		"stylelint.vscode-stylelint",
+		"DavidAnson.vscode-markdownlint"
 	]
 }
