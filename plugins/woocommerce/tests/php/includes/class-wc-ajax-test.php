@@ -89,12 +89,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
+		$this->skip_on_php_8_1();
+
 		$this->_setRole( 'administrator' );
 
 		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
 		$description .= $description;
 
-		$_POST['security'] = wp_create_nonce( 'update-api-key' );
+		$_POST['security']    = wp_create_nonce( 'update-api-key' );
 		$_POST['key_id']      = 0;
 		$_POST['user']        = 1;
 		$_POST['permissions'] = 'read';
@@ -111,5 +113,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$this->assertFalse( $response['success'] );
 		$this->assertEquals( $response['data']['message'], 'There was an error generating your API Key.' );
+	}
+
+	/**
+	 * Skip the current test on PHP 8.1 and higher.
+	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 */
+	protected function skip_on_php_8_1() {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+		}
 	}
 }

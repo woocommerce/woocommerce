@@ -261,7 +261,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_post_title() {
 		// @codingStandardsIgnoreStart
 		/* translators: %s: Order date */
-		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Order date parsed by strftime', 'woocommerce' ) ) );
+		return sprintf( __( 'Order &ndash; %s', 'woocommerce' ), (new DateTime('now'))->format( _x( 'M d, Y @ h:i A', 'Order date parsed by DateTime::format', 'woocommerce' ) ) );
 		// @codingStandardsIgnoreEnd
 	}
 
