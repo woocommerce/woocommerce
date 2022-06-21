@@ -20,15 +20,19 @@ type CrudDataStore = {
 	namespace: string;
 };
 
-export const createCrudDataStore = ( args: CrudDataStore ) => {
-	const { storeName, resourceName, namespace, pluralResourceName } = args;
-	const reducer = createReducer( resourceName );
-	const resolvers = createResolvers(
+export const createCrudDataStore = ( {
+	storeName,
+	resourceName,
+	namespace,
+	pluralResourceName,
+}: CrudDataStore ) => {
+	const reducer = createReducer( { resourceName } );
+	const resolvers = createResolvers( {
 		resourceName,
 		pluralResourceName,
-		namespace
-	);
-	const selectors = createSelectors( resourceName, pluralResourceName );
+		namespace,
+	} );
+	const selectors = createSelectors( { resourceName, pluralResourceName } );
 
 	registerStore( storeName, {
 		reducer: reducer as Reducer< ResourceState >,

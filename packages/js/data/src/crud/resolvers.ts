@@ -15,11 +15,17 @@ import {
 import { request } from '../utils';
 import { Item, ItemQuery } from './types';
 
-export const createResolvers = (
-	resourceName: string,
-	pluralResourceName: string,
-	namespace: string
-) => {
+type ResolverOptions = {
+	resourceName: string;
+	pluralResourceName: string;
+	namespace: string;
+};
+
+export const createResolvers = ( {
+	resourceName,
+	pluralResourceName,
+	namespace,
+}: ResolverOptions ) => {
 	const getItems = function* ( query: Partial< ItemQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
 		const resourceQuery = { ...query };

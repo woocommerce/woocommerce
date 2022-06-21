@@ -23,7 +23,11 @@ export type ResourceState = {
 	data: Record< number, Item >;
 };
 
-export const createReducer = ( resourceName: string ) => {
+type ReducerOptions = {
+	resourceName: string;
+};
+
+export const createReducer = ( { resourceName }: ReducerOptions ) => {
 	const reducer: Reducer< ResourceState, Actions > = (
 		state = {
 			items: {},

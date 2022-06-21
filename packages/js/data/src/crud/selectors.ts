@@ -11,10 +11,15 @@ import { Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
 
-export const createSelectors = (
-	resourceName: string,
-	pluralResourceName: string
-) => {
+type SelectorOptions = {
+	resourceName: string;
+	pluralResourceName: string;
+};
+
+export const createSelectors = ( {
+	resourceName,
+	pluralResourceName,
+}: SelectorOptions ) => {
 	const getItems = createSelector(
 		( state: ResourceState, query: ItemQuery ) => {
 			const itemQuery = getResourceName( resourceName, query );
