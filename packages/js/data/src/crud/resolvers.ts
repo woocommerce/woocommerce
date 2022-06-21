@@ -18,7 +18,7 @@ import { Resource, ResourceQuery } from './types';
 export const createResolvers = (
 	resourceName: string,
 	pluralResourceName: string,
-	endpoint: string
+	namespace: string
 ) => {
 	const getResources = function* ( query: Partial< ResourceQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
@@ -36,7 +36,7 @@ export const createResolvers = (
 			const { items }: { items: Resource[] } = yield request<
 				ResourceQuery,
 				Resource
-			>( endpoint, resourceQuery );
+			>( namespace, resourceQuery );
 
 			yield getResourcesSuccess( query, items );
 			return items;
@@ -49,7 +49,7 @@ export const createResolvers = (
 	const getResource = function* ( id: number ) {
 		try {
 			const item: Resource = yield apiFetch( {
-				path: `${ endpoint }/${ id }`,
+				path: `${ namespace }/${ id }`,
 				method: 'GET',
 			} );
 
