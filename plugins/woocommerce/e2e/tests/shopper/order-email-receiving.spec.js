@@ -85,15 +85,12 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.click( 'text=Place order' );
 
-		await page.waitForLoadState( 'networkidle' );
-
-		// get order ID from the url
-		const orderUrl = await page.url();
-		const matchedId = orderUrl.match( /\/(\d+)\// );
-		if ( matchedId ) {
-			orderId = matchedId[ 1 ];
-			console.log( orderId );
-		}
+		await page.waitForSelector(
+			'li.woocommerce-order-overview__order > strong'
+		);
+		orderId = await page.textContent(
+			'li.woocommerce-order-overview__order > strong'
+		);
 
 		// search to narrow it down to just the messages we want
 		await page.goto(
