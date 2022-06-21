@@ -13,13 +13,13 @@ import { MONOREPO_ROOT, excludedPackages } from './const';
  *	Get filepath for a given package name.
  *
  * @param {string} name package name.
- * @return {string} Absolute package path.
+ * @return {string} Absolute path for the package.
  */
 export const getFilepathFromPackageName = ( name: string ): string =>
 	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
 /**
- * Check if package is valid and can be deployed to npm.
+ * Check if package is valid and can be deployed to NPM.
  *
  * @param {string} name package name.
  * @return {boolean} true if the package is private.
@@ -49,7 +49,7 @@ export const isValidPackage = ( name: string ): boolean => {
 };
 
 /**
- * Validate package.
+ * Validate package name.
  *
  * @param {string}   name  package name.
  * @param {Function} error Error logging function.
@@ -70,6 +70,11 @@ export const validatePackageName = (
 	}
 };
 
+/**
+ * Get all releaseable package names.
+ *
+ * @return {Array<string>} Package names.
+ */
 export const getAllPackges = (): Array< string > => {
 	const jsPackageFolders = readdirSync(
 		join( MONOREPO_ROOT, 'packages/js' ),
@@ -88,6 +93,12 @@ export const getAllPackges = (): Array< string > => {
 		} );
 };
 
+/**
+ * Validate a package.
+ *
+ * @param {string}   name  package name.
+ * @param {Function} error Error logging function.
+ */
 export const validatePackage = (
 	name: string,
 	error: ( s: string ) => void

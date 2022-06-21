@@ -70,6 +70,11 @@ export default class PackageRelease extends Command {
 		this.preparePackages( packages );
 	}
 
+	/**
+	 * Prepare packages for release by creating the changelog and bumping version.
+	 *
+	 * @param {Array<string>} packages Packages to prepare.
+	 */
 	private preparePackages( packages: Array< string > ) {
 		packages.forEach( ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
@@ -95,6 +100,12 @@ export default class PackageRelease extends Command {
 		} );
 	}
 
+	/**
+	 * Update the version number in package.json.
+	 *
+	 * @param {string} name    Package name.
+	 * @param {string} version Next version.
+	 */
 	private bumpPackageVersion( name: string, version: string ) {
 		const filepath = getFilepathFromPackageName( name );
 		const packageJsonFilepath = `${ filepath }/package.json`;

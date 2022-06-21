@@ -10,6 +10,12 @@ import { join } from 'path';
  */
 import { getFilepathFromPackageName } from './validate';
 
+/**
+ * Call changelogger's next version function to get the version for the next release.
+ *
+ * @param {string} name Package name.
+ * @return {string} Next release version.
+ */
 export const getNextVersion = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
@@ -26,6 +32,12 @@ export const getNextVersion = ( name: string ) => {
 	}
 };
 
+/**
+ * Call Changelogger's validate function on changelog entries.
+ *
+ * @param {string} name
+ * @return {Error|void} Output of changelogger exec.
+ */
 export const validateChangelogEntries = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
@@ -42,6 +54,11 @@ export const validateChangelogEntries = ( name: string ) => {
 	}
 };
 
+/**
+ * Write the changelog.
+ *
+ * @param {string} name Package name.
+ */
 export const writeChangelog = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
@@ -60,6 +77,12 @@ export const writeChangelog = ( name: string ) => {
 	}
 };
 
+/**
+ * Determine if a package has changelogs to release.
+ *
+ * @param {string} name Package name.
+ * @return {boolean} If there are changelogs.
+ */
 export const hasChangelogs = ( name: string ): boolean | void => {
 	try {
 		const changelogDir = join(
