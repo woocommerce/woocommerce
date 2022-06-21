@@ -10,7 +10,7 @@ import { join } from 'path';
 import { MONOREPO_ROOT, excludedPackages } from './const';
 
 /**
- *	Get filepath for a given package name.
+ * Get filepath for a given package name.
  *
  * @param {string} name package name.
  * @return {string} Absolute path for the package.

@@ -1,6 +1,6 @@
 {
 	"name": "package-release",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "A tool to Monorepo JS packages.",
 	"author": "Automattic",
 	"bin": {

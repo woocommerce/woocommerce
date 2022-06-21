@@ -34,7 +34,8 @@ export default class PackageRelease extends Command {
 	static args = [
 		{
 			name: 'packages',
-			description: 'Package to release',
+			description:
+				'Package to release, or packages to release separated by commas.',
 			required: false,
 		},
 	];
@@ -43,7 +44,11 @@ export default class PackageRelease extends Command {
 	 * CLI flags.
 	 */
 	static flags = {
-		all: Flags.boolean( { char: 'a', default: false } ),
+		all: Flags.boolean( {
+			char: 'a',
+			default: false,
+			description: 'Perform prepare function on all packages.',
+		} ),
 	};
 
 	/**
@@ -53,7 +58,7 @@ export default class PackageRelease extends Command {
 		const { args, flags } = await this.parse( PackageRelease );
 
 		if ( ! args.packages && ! flags.all ) {
-			this.error( 'no packages supplied.' );
+			this.error( 'No packages supplied.' );
 		}
 
 		if ( flags.all ) {
