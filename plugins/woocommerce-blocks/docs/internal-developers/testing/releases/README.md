@@ -80,6 +80,7 @@ Every release includes specific testing instructions for new features and bug fi
     -   [7.8.1](./781.md)
     -   [7.8.2](./782.md)
     -   [7.8.3](./783.md)
+ -   [7.9.0](./790.md)
 
 <!-- FEEDBACK -->
 
