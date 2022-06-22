@@ -129,10 +129,6 @@ export function searchItemsByString< T extends ItemType >(
  * @return {string} Resource name for item totals.
  */
 export function getTotalCountResourceName( itemType: string, query: Query ) {
-	// Disable eslint rule because we're using this spread to omit properties
-	// that don't affect item totals count results.
-	// eslint-disable-next-line no-unused-vars, camelcase
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { _fields, page, per_page, ...totalsQuery } = query;
 
 	return getResourceName( 'total-' + itemType, { ...totalsQuery } );

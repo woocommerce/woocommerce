@@ -35,10 +35,11 @@ module.exports = {
 				],
 			},
 		],
-		'no-unused-vars': [
+		'@typescript-eslint/no-unused-vars': [
 			'error',
 			{
 				varsIgnorePattern: 'createElement',
+				ignoreRestSiblings: true,
 			},
 		],
 		'react/react-in-jsx-scope': 'error',
