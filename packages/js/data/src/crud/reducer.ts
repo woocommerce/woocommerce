@@ -19,21 +19,57 @@ export type ResourceState = {
 			data: number[];
 		}
 	>;
-	errors: Record< string, unknown >;
 	data: Record< number, Item >;
+	errors: Record< string, unknown >;
 };
 
 export const createReducer = () => {
 	const reducer: Reducer< ResourceState, Actions > = (
 		state = {
 			items: {},
-			errors: {},
 			data: {},
+			errors: {},
 		},
 		payload
 	) => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
+				case TYPES.GET_ITEM_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getResourceName( CRUD_ACTIONS.GET_ITEM, {
+								id: payload.id,
+							} ) ]: payload.error,
+						},
+					};
+
+				case TYPES.GET_ITEM_SUCCESS:
+					const itemData = state.data || {};
+					return {
+						...state,
+						data: {
+							...itemData,
+							[ payload.id ]: {
+								...( itemData[ payload.id ] || {} ),
+								...payload.item,
+							},
+						},
+					};
+
+				case TYPES.GET_ITEMS_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getResourceName(
+								CRUD_ACTIONS.GET_ITEMS,
+								payload.query as ItemQuery
+							) ]: payload.error,
+						},
+					};
+
 				case TYPES.GET_ITEMS_SUCCESS:
 					const ids: number[] = [];
 
@@ -62,42 +98,6 @@ export const createReducer = () => {
 						data: {
 							...state.data,
 							...nextResources,
-						},
-					};
-
-				case TYPES.GET_ITEMS_ERROR:
-					return {
-						...state,
-						errors: {
-							...state.errors,
-							[ getResourceName(
-								CRUD_ACTIONS.GET_ITEMS,
-								payload.query as ItemQuery
-							) ]: payload.error,
-						},
-					};
-
-				case TYPES.GET_ITEM_SUCCESS:
-					const itemData = state.data || {};
-					return {
-						...state,
-						data: {
-							...itemData,
-							[ payload.id ]: {
-								...( itemData[ payload.id ] || {} ),
-								...payload.item,
-							},
-						},
-					};
-
-				case TYPES.GET_ITEM_ERROR:
-					return {
-						...state,
-						errors: {
-							...state.errors,
-							[ getResourceName( CRUD_ACTIONS.GET_ITEM, {
-								id: payload.id,
-							} ) ]: payload.error,
 						},
 					};
 
