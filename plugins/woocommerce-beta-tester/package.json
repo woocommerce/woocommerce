@@ -18,6 +18,7 @@
 		"@wordpress/env": "^4.8.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "5.16.0",
+		"require-turbo": "workspace:*",
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
@@ -40,7 +41,7 @@
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm run build:admin && pnpm run uglify",
+		"build": "node ./node_modules/require-turbo && pnpm run build:admin && pnpm run uglify",
 		"build:admin": "wp-scripts build",
 		"build:zip": "./bin/build-zip.sh",
 		"build:dev": "pnpm run lint:js && pnpm run build",

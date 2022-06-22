@@ -124,6 +124,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       jest-mock-extended: ^1.0.18
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -142,6 +143,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       jest-mock-extended: 1.0.18_jest@27.5.1+typescript@4.6.2
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_23bc83dd0471d6d2a42908007c85fd69
       typescript: 4.6.2
@@ -159,6 +161,7 @@ importers:
       eslint: ^8.2.0
       jest: ^25
       oauth-1.0a: 2.2.6
+      require-turbo: workspace:*
       ts-jest: ^25
       typescript: ^4.4.4
     dependencies:
@@ -174,6 +177,7 @@ importers:
       axios-mock-adapter: 1.20.0_axios@0.24.0
       eslint: 8.2.0
       jest: 25.5.4
+      require-turbo: link:../../../tools/require-turbo
       ts-jest: 25.5.1_jest@25.5.4+typescript@4.4.4
       typescript: 4.4.4
 
@@ -187,6 +191,7 @@ importers:
       jest-allure: ^0.1.3
       jest-runner-groups: ^2.1.0
       postman-collection: ^4.1.0
+      require-turbo: workspace:*
       supertest: ^6.1.4
     dependencies:
       allure-commandline: 2.17.2
@@ -199,6 +204,7 @@ importers:
     devDependencies:
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       eslint: 8.12.0
+      require-turbo: link:../../../tools/require-turbo
 
   packages/js/components:
     specifiers:
@@ -271,6 +277,7 @@ importers:
       prop-types: ^15.8.1
       react-dates: ^21.8.0
       react-transition-group: ^4.4.2
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -348,6 +355,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -364,6 +372,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       moment: ^2.29.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -376,6 +385,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -392,6 +402,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -407,6 +418,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -436,6 +448,7 @@ importers:
       postcss-loader: ^3.0.0
       prop-types: ^15.8.1
       react-transition-group: ^4.4.2
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -467,6 +480,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -507,6 +521,7 @@ importers:
       qs: ^6.10.3
       redux: ^4.1.0
       rememo: ^4.0.0
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -543,6 +558,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       redux: 4.1.2
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -561,6 +577,7 @@ importers:
       moment: ^2.29.1
       moment-timezone: ^0.5.34
       qs: ^6.10.3
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -578,6 +595,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -590,6 +608,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -603,6 +622,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -776,6 +796,7 @@ importers:
       eslint-plugin-testing-library: ^5.1.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       requireindex: ^1.2.0
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
@@ -791,6 +812,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -828,6 +850,7 @@ importers:
       postcss-loader: ^3.0.0
       react-transition-group: ^4.4.2
       react-visibility-sensor: ^5.1.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -867,6 +890,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -890,6 +914,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       qs: ^6.10.3
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -909,6 +934,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -925,6 +951,7 @@ importers:
       glob: ^7.2.0
       lodash: ^4.17.21
       mkdirp: ^1.0.4
+      require-turbo: workspace:*
     devDependencies:
       '@babel/core': 7.12.9
       '@woocommerce/eslint-plugin': link:../eslint-plugin
@@ -933,6 +960,7 @@ importers:
       glob: 7.2.0
       lodash: 4.17.21
       mkdirp: 1.0.4
+      require-turbo: link:../../../tools/require-turbo
 
   packages/js/internal-js-tests:
     specifiers:
@@ -947,6 +975,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       regenerator-runtime: ^0.13.9
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -963,6 +992,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -980,6 +1010,7 @@ importers:
       jest-cli: ^27.5.1
       mini-css-extract-plugin: ^2.6.0
       postcss-loader: ^3.0.0
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -1003,6 +1034,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1025,6 +1057,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       qs: ^6.10.3
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1045,6 +1078,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1061,6 +1095,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       redux: ^4.2.0
+      require-turbo: workspace*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1076,6 +1111,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       redux: 4.2.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1089,6 +1125,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       locutus: ^2.0.16
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1101,6 +1138,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1127,6 +1165,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       postcss-loader: ^3.0.0
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -1155,6 +1194,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -1171,6 +1211,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1183,6 +1224,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1225,6 +1267,7 @@ importers:
       jest: ^25.1.0
       mocha: 7.2.0
       prettier: npm:wp-prettier@2.0.5
+      require-turbo: workspace:*
       stylelint: ^13.8.0
       typescript: 3.9.7
       webpack: 5.70.0
@@ -1267,6 +1310,7 @@ importers:
       jest: 25.5.4
       mocha: 7.2.0
       prettier: /wp-prettier/2.0.5
+      require-turbo: link:../../tools/require-turbo
       stylelint: 13.13.1
       typescript: 3.9.7
       webpack: 5.70.0_webpack-cli@3.3.12
@@ -1423,6 +1467,7 @@ importers:
       readline-sync: ^1.4.10
       redux: ^4.1.2
       replace: ^1.2.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       rtlcss: ^2.6.2
       sass: ^1.49.9
@@ -1588,6 +1633,7 @@ importers:
       raw-loader: 4.0.2_webpack@5.70.0
       readline-sync: 1.4.10
       replace: 1.2.1
+      require-turbo: link:../../tools/require-turbo
       rimraf: 3.0.2
       rtlcss: 2.6.2
       sass: 1.49.9
@@ -1620,6 +1666,7 @@ importers:
       '@wordpress/hooks': ^2.11.1
       '@wordpress/scripts': ^19.2.4
       eslint: 5.16.0
+      require-turbo: workspace:*
       uglify-js: ^3.5.3
     dependencies:
       '@types/prop-types': 15.7.4
@@ -1637,6 +1684,7 @@ importers:
       '@wordpress/env': 4.8.0
       '@wordpress/scripts': 19.2.4_ee910045e4cc2812de8b965e303c7169
       eslint: 5.16.0
+      require-turbo: link:../../tools/require-turbo
       uglify-js: 3.14.5
 
   plugins/woocommerce/client/legacy:
@@ -1660,6 +1708,7 @@ importers:
       grunt-sass: 3.1.0
       grunt-stylelint: 0.16.0
       gruntify-eslint: 5.0.0
+      require-turbo: workspace:*
       sass: ^1.45.0
       stylelint: 13.8.0
     devDependencies:
@@ -1682,6 +1731,7 @@ importers:
       grunt-sass: 3.1.0_grunt@1.3.0
       grunt-stylelint: 0.16.0_stylelint@13.8.0
       gruntify-eslint: 5.0.0_grunt@1.3.0
+      require-turbo: link:../../../../tools/require-turbo
       sass: 1.49.9
       stylelint: 13.8.0
 
@@ -1779,6 +1829,9 @@ importers:
       ts-node: 10.5.0_506ca6ef959d35afcce359030b1bc9ff
       tslib: 2.3.1
       typescript: 4.6.2
+
+  tools/require-turbo:
+    specifiers: {}
 
 packages:
 
@@ -12749,7 +12802,6 @@ packages:
       re-resizable: 4.11.0
     transitivePeerDependencies:
       - react
-      - react-dom
     dev: true
 
   /@types/wordpress__compose/4.0.1:
@@ -16811,7 +16863,7 @@ packages:
     dev: true
 
   /ansicolors/0.3.2:
-    resolution: {integrity: sha1-ZlWX3oap/+Oqm/vmyuXG6kJrSXk=}
+    resolution: {integrity: sha512-QXu7BPrP29VllRxH8GwB7x5iX5qWKAAMLqKQGWTeLWVlNHNOpVMJ91dsxQAIWXpjuW5wqvxu3Jd/nRjrJ+0pqg==}
 
   /ansis/1.3.4:
     resolution: {integrity: sha512-BDXljGSG4gZXmWK64bQzXkI509i5fe8aAa9+eL29e3swaWUqxvxk/XlONjw9AUrNCpQWNdy++0GX7HAhWeR9BQ==}
@@ -17092,7 +17144,7 @@ packages:
     resolution: {integrity: sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==}
 
   /async/0.9.2:
-    resolution: {integrity: sha1-rqdNXmHB+JlhO/ZL2mbUx48v0X0=}
+    resolution: {integrity: sha512-l6ToIJIotphWahxxHyzK9bnLR6kM4jJIIgLShZeqLY7iboHoGkdgFl7W2/Ivi4SkMJYGKqW8vSuk0uKUj6qsSw==}
 
   /async/1.5.2:
     resolution: {integrity: sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==}
@@ -18726,7 +18778,7 @@ packages:
     dev: true
 
   /cardinal/2.1.1:
-    resolution: {integrity: sha1-fMEFXYItISlU0HsIXeolHMe8VQU=}
+    resolution: {integrity: sha512-JSr5eOgoEymtYHBjNWyjrMqet9Am2miJhlfKNdqLp6zoeAh0KN5dRAcxlecj5mAJrmQomgiOBj35xHLrFjqBpw==}
     hasBin: true
     dependencies:
       ansicolors: 0.3.2
@@ -31631,7 +31683,7 @@ packages:
     dev: true
 
   /path-key/2.0.1:
-    resolution: {integrity: sha1-QRyttXTFoUDTpLGRDUDYDMn0C0A=}
+    resolution: {integrity: sha512-fEHGKCSmUSDPv4uoj8AlD+joPlq3peND+HRYyxFz4KPw4z926S/b8rIuFs2FYJg3BwsxJf6A9/3eIdLaYC+9Dw==}
     engines: {node: '>=4'}
 
   /path-key/3.1.1:
@@ -34280,7 +34332,7 @@ packages:
       strip-indent: 3.0.0
 
   /redeyed/2.1.1:
-    resolution: {integrity: sha1-iYS1gV2ZyyIEacme7v/jiRPmzAs=}
+    resolution: {integrity: sha512-FNpGGo1DycYAdnrKFxCMmKYgo/mILAqtRYbkdQD8Ep/Hk2PQ5+aEAEx+IU713RTDmuBaH0c8P5ZozurNu5ObRQ==}
     dependencies:
       esprima: 4.0.1
 
@@ -35239,7 +35291,7 @@ packages:
     dev: true
 
   /shebang-command/1.2.0:
-    resolution: {integrity: sha1-RKrGW2lbAzmJaMOfNj/uXer98eo=}
+    resolution: {integrity: sha512-EV3L1+UQWGor21OmnvojK36mhg+TyIKDh3iFBKBohr5xeXIhNBcx8oWdgkTEEQ+BEFFYdLRuqMfd5L84N1V5Vg==}
     engines: {node: '>=0.10.0'}
     dependencies:
       shebang-regex: 1.0.0
@@ -35251,7 +35303,7 @@ packages:
       shebang-regex: 3.0.0
 
   /shebang-regex/1.0.0:
-    resolution: {integrity: sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=}
+    resolution: {integrity: sha512-wpoSFAxys6b2a2wHZ1XpDSgD7N9iVjg29Ph9uV/uaP9Ex/KXlkTZTeddxDPSYQpgvzKLGJke2UU0AzoGCjNIvQ==}
     engines: {node: '>=0.10.0'}
 
   /shebang-regex/3.0.0:
