@@ -6,7 +6,7 @@ import { useSelect } from '@wordpress/data';
 
 const useInterval = (
 	callback: ( ...args: unknown[] ) => void,
-	interval: number | undefined
+	interval: Parameters< typeof setInterval >[ 1 ]
 ) => {
 	const savedCallback = useRef< ( ...args: unknown[] ) => void >();
 	useEffect( () => {
