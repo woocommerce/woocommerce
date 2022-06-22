@@ -3,10 +3,6 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use \Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
-use \Automattic\WooCommerce\Admin\PluginsHelper;
-use WC_Data_Store;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 
 /**
  * Review Shipping Options Task
@@ -54,8 +50,7 @@ class ReviewShippingOptions extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		// TODO: Implement is_complete() method.
-		return false;
+		return 'yes' === get_option( 'woocommerce_admin_reviewed_default_shipping_zones' );
 	}
 
 	/**
@@ -64,22 +59,7 @@ class ReviewShippingOptions extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		// TODO: Update when #33366 is completed.
-		if ( Shipping::sell_only_digital_type() || Shipping::sell_unknown_product_type() ) {
-			return false;
-		}
-
-		if ( ! Shipping::has_shipping_zones() ) {
-			return false;
-		}
-
-		$store_country = wc_format_country_state_string( get_option( 'woocommerce_default_country', '' ) )['country'];
-
-		if ( ! $store_country ) {
-			return false;
-		}
-
-		return 'US' === $store_country || ! in_array( $store_country, array( 'US', 'CA', 'AU', 'UK' ), true );
+		return 'yes' === get_option( 'woocommerce_admin_created_default_shipping_zones' );
 	}
 
 	/**

@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\Features;
-use \Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use WC_Data_Store;
 
 /**
@@ -83,10 +83,19 @@ class Shipping extends Task {
 				return false;
 			}
 
-			$store_country = wc_format_country_state_string( get_option( 'woocommerce_default_country', '' ) )['country'];
+			$default_store_country = wc_format_country_state_string( get_option( 'woocommerce_default_country', '' ) )['country'];
 
-			return in_array( $store_country, array( 'CA', 'AU', 'UK' ), true ) ||
-				( self::sell_unknown_product_type() || '' === $store_country ) && ! PluginsHelper::is_plugin_installed( 'jetpack' );
+			// Check if a store address is set so that we don't default to WooCommerce's default country US.
+			$store_country = '';
+			if ( ! empty( get_option( 'woocommerce_store_address', '' ) ) || 'US' !== $default_store_country ) {
+				$store_country = $default_store_country;
+			}
+
+			if ( empty( $store_country ) ) {
+				return true;
+			}
+
+			return in_array( $store_country, array( 'AU', 'CA', 'UK' ), true );
 		}
 
 		return self::has_physical_products();
@@ -137,19 +146,7 @@ class Shipping extends Task {
 	 *
 	 * @return bool
 	 */
-	public static function sell_unknown_product_type() {
-		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
-		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
-
-		return empty( $product_types );
-	}
-
-	/**
-	 * Check if the store sells digital products only.
-	 *
-	 * @return bool
-	 */
-	public static function sell_only_digital_type() {
+	private static function sell_only_digital_type() {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
