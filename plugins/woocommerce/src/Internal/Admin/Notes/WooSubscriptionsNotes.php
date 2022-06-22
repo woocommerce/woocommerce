@@ -301,9 +301,10 @@ class WooSubscriptionsNotes {
 
 				foreach ( (array) $bump_thresholds as $bump_threshold ) {
 					if ( ( $note_days_until_expiration > $bump_threshold ) && ( $days_until_expiration <= $bump_threshold ) ) {
-						$note->delete();
-						$note = false;
-						continue;
+						if ( $note ) {
+							$note->delete();
+							$note = false;
+						}
 					}
 				}
 			}
