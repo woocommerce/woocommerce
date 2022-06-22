@@ -22,7 +22,7 @@ class ProductTag extends AbstractProductGrid {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_tag',
 				'terms'    => array_map( 'absint', $this->attributes['tags'] ),
-				'field'    => 'id',
+				'field'    => 'term_id',
 				'operator' => isset( $this->attributes['tagOperator'] ) && 'any' === $this->attributes['tagOperator'] ? 'IN' : 'AND',
 			);
 		}
