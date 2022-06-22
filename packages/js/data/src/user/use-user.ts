@@ -25,6 +25,7 @@ export const useUser = () => {
 			isRequesting:
 				hasStartedResolution( 'getCurrentUser' ) &&
 				! hasFinishedResolution( 'getCurrentUser' ),
+			// We register additional user data in backend so we need to use a type assertion here for WC user.
 			user: getCurrentUser() as WCUser< 'capabilities' >,
 			getCurrentUser,
 		};
