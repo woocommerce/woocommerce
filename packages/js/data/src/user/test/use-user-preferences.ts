@@ -140,7 +140,7 @@ describe( 'useUserPreferences() hook', () => {
 			'function'
 		);
 
-		// Passing an array, not an object.
+		// Passing an empty object.
 		const updateResult = await result.current.updateUserPreferences( {} );
 
 		expect( updateResult ).toMatchObject( {
