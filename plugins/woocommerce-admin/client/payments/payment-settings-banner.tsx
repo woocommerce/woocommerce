@@ -4,16 +4,7 @@
 import { Card, CardFooter, CardBody, Button } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
-import {
-	ONBOARDING_STORE_NAME,
-	PAYMENT_GATEWAYS_STORE_NAME,
-	PaymentGateway,
-	WCDataSelector,
-} from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
-import { useExperiment } from '@woocommerce/explat';
 import { getAdminLink } from '@woocommerce/settings';
-import moment from 'moment';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 
@@ -36,8 +27,8 @@ import {
 } from '../payments-welcome/cards';
 import WCPayBannerImage from './wcpay-banner-image';
 import './payment-recommendations.scss';
-import { isWcPaySupported } from './utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { usePaymentExperiment } from './use-payments-experiment';
 
 export const PaymentMethodsIcons = () => (
 	<div className="woocommerce-recommended-payments-banner__footer_icon_container">
@@ -157,52 +148,14 @@ const DefaultPaymentMethodsHeaderText = () => (
 );
 
 export const PaymentsBannerWrapper = () => {
-	const { installedPaymentGateways, paymentGatewaySuggestions, isResolving } =
-		useSelect( ( select: WCDataSelector ) => {
-			return {
-				installedPaymentGateways: select(
-					PAYMENT_GATEWAYS_STORE_NAME
-				).getPaymentGateways(),
-				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-					'getPaymentGatewaySuggestions'
-				),
-				paymentGatewaySuggestions: select(
-					ONBOARDING_STORE_NAME
-				).getPaymentGatewaySuggestions(),
-			};
-		} );
+	const { isLoadingExperiment, experimentAssignment } =
+		usePaymentExperiment();
 
-	const isWcPayInstalled = installedPaymentGateways.some(
-		( gateway: PaymentGateway ) => {
-			return gateway.id === 'woocommerce_payments';
-		}
-	);
-
-	const isWcPayDisabled = installedPaymentGateways.find(
-		( gateway: PaymentGateway ) => {
-			return (
-				gateway.id === 'woocommerce_payments' &&
-				gateway.enabled === false
-			);
-		}
-	);
-
-	const momentDate = moment().utc();
-	const year = momentDate.format( 'YYYY' );
-	const month = momentDate.format( 'MM' );
-	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
-		`woocommerce_payments_settings_banner_${ year }_${ month }`
-	);
-	if ( ! isResolving && ! isLoadingExperiment ) {
-		if (
-			isWcPaySupported( paymentGatewaySuggestions ) &&
-			isWcPayInstalled &&
-			isWcPayDisabled &&
-			experimentAssignment?.variationName === 'treatment'
-		) {
-			return <WcPayBanner />;
-		}
-		return <DefaultPaymentMethodsHeaderText />;
+	if (
+		! isLoadingExperiment &&
+		experimentAssignment?.variationName === 'treatment'
+	) {
+		return <WcPayBanner />;
 	}
 	return <DefaultPaymentMethodsHeaderText />;
 };
