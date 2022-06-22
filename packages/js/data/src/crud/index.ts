@@ -8,7 +8,7 @@ import { Reducer } from 'redux';
  * Internal dependencies
  */
 import { createSelectors } from './selectors';
-import * as actions from './actions';
+import { createDispatchActions } from './actions';
 import controls from '../controls';
 import { createResolvers } from './resolvers';
 import { createReducer, ResourceState } from './reducer';
@@ -27,6 +27,10 @@ export const createCrudDataStore = ( {
 	pluralResourceName,
 }: CrudDataStore ) => {
 	const reducer = createReducer();
+	const actions = createDispatchActions( {
+		resourceName,
+		namespace,
+	} );
 	const resolvers = createResolvers( {
 		resourceName,
 		pluralResourceName,
