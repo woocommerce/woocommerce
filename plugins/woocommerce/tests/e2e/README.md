@@ -31,10 +31,6 @@ Automated end-to-end tests for WooCommerce.
 
 ## Pre-requisites
 
-### Install Nx
-
-Follow [instructions on nx.dev site](https://nx.dev/l/r/getting-started/nx-setup) to install Nx.
-
 ### Install pnpm
 
 Follow [instructions on pnpm.io site](https://pnpm.io/installation) to install pnpm.
@@ -133,7 +129,7 @@ Run the following in a terminal/command line window
 ```
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
 c380e1964506        env_wordpress-cli   "entrypoint.sh"          7 seconds ago       Up 5 seconds                               woocommerce_e2e_wordpress-cli
-2ab8e8439e9f        wordpress:5.5.1     "docker-entrypoint.s…"   8 seconds ago       Up 7 seconds        0.0.0.0:8084->80/tcp   woocommerce_e2e_wordpress-www
+2ab8e8439e9f        wordpress:5.5.1     "docker-entrypoint.s…"   8 seconds ago       Up 7 seconds        0.0.0.0:8086->80/tcp   woocommerce_e2e_wordpress-www
 4c1e3f2a49db        mariadb:10.5.5      "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds        3306/tcp               woocommerce_e2e_db
 ```
 
@@ -141,9 +137,9 @@ Note that by default, Docker will download the latest images available for WordP
 
 See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.  
 
-- Navigate to `http://localhost:8084/`
+- Navigate to `http://localhost:8086/`
 
-If everything went well, you should be able to access the site. If you changed the port to something other than `8084` as per [Test Variables](#test-variables) section, use the appropriate port to access your site. 
+If everything went well, you should be able to access the site. If you changed the port to something other than `8086` as per [Test Variables](#test-variables) section, use the appropriate port to access your site. 
 
 As noted in [Test Variables](#test-variables) section, use the following Admin user details to login:
 
