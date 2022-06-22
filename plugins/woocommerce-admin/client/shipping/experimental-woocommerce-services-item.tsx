@@ -14,7 +14,9 @@ import WooIcon from './woo-icon.svg';
 const WooCommerceServicesItem: React.FC< {
 	isWCSInstalled: boolean | undefined;
 } > = ( { isWCSInstalled } ) => {
-	const handleSetupClick = async () => {};
+	const handleSetupClick = () => {
+		// TODO: Go to new WCS flow #33367
+	};
 
 	return (
 		<div className="woocommerce-list__item-inner woocommerce-services-item">
