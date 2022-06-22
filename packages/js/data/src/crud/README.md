@@ -8,7 +8,7 @@ The CRUD data store methods can be used in one of a couple ways.
 
 ### Default data store
 
-If the default CRUD actions work well for your use case, you can use the more opinionated setup.
+If the default CRUD actions work well for your use case, you can use the quicker, more opinionated setup.
 
 ```js
 import { createCrudDataStore } from '../crud';
@@ -30,12 +30,23 @@ This will register a data store named `my/custom/store` with the following defau
 | `getMyThings( query = {} )` | Get all items, optionally by a specific query. |
 | `getMyThingsError( query = {} )` | Get the error for a set of items by query. |
 
-The following resolvers will also be added:
+Example usage: `wp.data.select('my/custom/store').getMyThing( 3 );`
+
+The following resolvers will be added:
 
 | Resolver | Method | Endpoint |
 | --- | --- | --- |
 | `getMyThing( id )` | GET | `<namespace>/<id>` |
 | `getMyThings( query = {} )` | GET | `<namespace>` |
+
+The following actions are available for dispatch on the created data store:
+
+| Resolver | Method | Endpoint |
+| --- | --- | --- |
+| `createMyThing( query )` | POST | `<namespace>` |
+| `updatetMyThings( id, query )` | PUT | `<namespace>/<id>` |
+
+Example usage: `wp.data.dispatch('my/custom/store').updateMyThing( 3, { name: 'New name' } );`
 
 ### Customized data store
 
@@ -44,7 +55,7 @@ If the default settings are not adequate for your needs, you can always create y
 ```js
 import { createSelectors } from '../crud/selectors';
 import { createResolvers } from '../crud/selectors';
-import * as crudActions from '../crud/actions';
+import { createActions } from '../crud/actions';
 import { registerStore, combineReducers } from '@wordpress/data';
 
 const dataStoreArgs = {
@@ -52,6 +63,7 @@ const dataStoreArgs = {
     pluralResourceName: 'MyThings',
 }
 
+const crudActions = createActions( dataStoreArgs )
 const crudSelectors = createSelectors( dataStoreArgs )
 const crudResolvers = createResolvers( { ...dataStoreArgs, namespace: 'my/rest/namespace' } )
 
