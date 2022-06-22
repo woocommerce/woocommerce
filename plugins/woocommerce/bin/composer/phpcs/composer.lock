@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "946e6c83f19f248141a02f528f17457b",
+    "content-hash": "5bbb004ad3d56d8e970d0e96eccb8eb3",
     "packages": [],
     "packages-dev": [
         {
@@ -256,25 +256,25 @@
         },
         {
             "name": "sirbrillig/phpcs-changed",
-            "version": "v1.0",
+            "version": "v2.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-changed.git",
-                "reference": "bb7e513c7fcad503623064f240c8c76ce4891f3a"
+                "reference": "ba049e6f7da40d64056f7b6c4078e87f0f292d6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/bb7e513c7fcad503623064f240c8c76ce4891f3a",
-                "reference": "bb7e513c7fcad503623064f240c8c76ce4891f3a",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/ba049e6f7da40d64056f7b6c4078e87f0f292d6b",
+                "reference": "ba049e6f7da40d64056f7b6c4078e87f0f292d6b",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.0"
+                "php": "^7.1 || ^8.0"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
-                "limedeck/phpunit-detailed-printer": "^3.1",
-                "phpunit/phpunit": "^6.4",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+                "phpstan/phpstan": "^0.12.33",
+                "phpunit/phpunit": "^6.4 || ^9.5",
                 "sirbrillig/phpcs-import-detection": "^1.1.1",
                 "sirbrillig/phpcs-variable-analysis": "^2.1.3",
                 "squizlabs/php_codesniffer": "^3.2.1"
@@ -284,6 +284,12 @@
             ],
             "type": "library",
             "autoload": {
+                "files": [
+                    "PhpcsChanged/Cli.php",
+                    "PhpcsChanged/SvnWorkflow.php",
+                    "PhpcsChanged/GitWorkflow.php",
+                    "PhpcsChanged/functions.php"
+                ],
                 "psr-4": {
                     "PhpcsChanged\\": "PhpcsChanged/"
                 }
@@ -301,9 +307,9 @@
             "description": "Run phpcs on files, but only report warnings/errors from lines which were changed.",
             "support": {
                 "issues": "https://github.com/sirbrillig/phpcs-changed/issues",
-                "source": "https://github.com/sirbrillig/phpcs-changed/tree/master"
+                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v2.10.0"
             },
-            "time": "2018-11-19T21:11:44+00:00"
+            "time": "2022-03-09T18:16:50+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -465,7 +471,7 @@
     "platform": [],
     "platform-dev": [],
     "platform-overrides": {
-        "php": "7.0"
+        "php": "7.4"
     },
     "plugin-api-version": "2.3.0"
 }
