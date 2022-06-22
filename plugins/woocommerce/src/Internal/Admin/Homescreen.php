@@ -50,6 +50,72 @@ class Homescreen {
 			add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
 		}
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'maybe_set_default_shipping_options_on_home' ), 9999 );
+	}
+
+	/**
+	 * Set free shipping in the same country as the store default
+	 * Flag rate in all other countries when any of the following conditions are ture
+	 *
+	 * - The store sells physical products, has JP and WCS installed and connected, and is located in the US.
+	 * - The store sells physical products, and is not located in US/Canada/Australia/UK (irrelevant if JP is installed or not).
+	 * - The store sells physical products and is located in US, but JP and WCS are not installed.
+	 *
+	 * @param array $settings shared admin settings.
+	 * @return array
+	 */
+	public function maybe_set_default_shipping_options_on_home( $settings ) {
+		$current_screen = get_current_screen();
+
+		// Abort if it's not the homescreen.
+		if ( ! isset( $current_screen->id ) || 'woocommerce_page_wc-admin' !== $current_screen->id ) {
+			return $settings;
+		}
+
+		// Abort if we already created the shipping options.
+		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
+		if ( 'yes' === $already_created ) {
+			return $settings;
+		}
+
+		if ( false === in_array( 'physical', $settings['onboarding']['profile']['product_types'] ?? array(), true ) ) {
+			return $settings;
+		}
+
+		$country_code = explode( ':', $settings['preloadSettings']['general']['woocommerce_default_country'] ?? '' )[0];
+		$country_name = WC()->countries->get_countries()[ $country_code ] ?? null;
+
+		if ( '' === $country_code || null === $country_name ) {
+			return $settings;
+		}
+
+		$is_jetpack_installed = in_array( 'jetpack', $settings['plugins']['installedPlugins'] ?? array(), true );
+		$is_jetpack_onnected  = $settings['dataEndpoints']['jetpackStatus']['isUserConnected'] ?? false;
+		$is_wcs_installed     = in_array( 'woocommerce-services', $settings['plugins']['installedPlugins'] ?? array(), true );
+
+		if (
+			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_onnected )
+			||
+			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'UK' ), true ) )
+			||
+			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
+		) {
+			$zone = new \WC_Shipping_Zone();
+			$zone->set_zone_name( $country_name );
+			$zone->add_location( $country_code, 'country' );
+			$zone->add_shipping_method( 'free_shipping' );
+			$zone->save();
+
+			$other_countries_zone = new \WC_Shipping_Zone( 0 );
+			if ( ! $other_countries_zone->meta_exists( 'flat_rate' ) ) {
+				$other_countries_zone->add_shipping_method( 'flat_rate' );
+				$other_countries_zone->save();
+			}
+
+			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+		}
+
+		return $settings;
 	}
 
 	/**
