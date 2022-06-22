@@ -62,7 +62,6 @@ describe( 'crud reducer', () => {
 			{ id: 1, name: 'Yum!' },
 			{ id: 2, name: 'Dynamite!' },
 		];
-		const totalCount = 45;
 		const query: Partial< ItemQuery > = { status: 'draft' };
 		const state = reducer( defaultState, {
 			type: TYPES.GET_ITEMS_SUCCESS,
@@ -98,7 +97,6 @@ describe( 'crud reducer', () => {
 			{ id: 1, name: 'Yum! Updated' },
 			{ id: 2, name: 'Dynamite!' },
 		];
-		const totalCount = 45;
 		const query: Partial< ItemQuery > = { status: 'draft' };
 		const state = reducer( initialState, {
 			type: TYPES.GET_ITEMS_SUCCESS,
