@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 
-import { PLUGINS_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -15,29 +18,39 @@ import { ShippingRecommendationsList } from './shipping-recommendations';
 import './shipping-recommendations.scss';
 
 const ShippingRecommendations: React.FC = () => {
-	const { activePlugins, installedPlugins, countryCode, isJetpackConnected } =
-		useSelect( ( select ) => {
-			const settings = select( SETTINGS_STORE_NAME ).getSettings< {
-				general?: {
-					woocommerce_default_country: string;
-				};
-			} >( 'general' );
-
-			const {
-				getActivePlugins,
-				getInstalledPlugins,
-				isJetpackConnected: _isJetpackConnected,
-			} = select( PLUGINS_STORE_NAME );
-
-			return {
-				activePlugins: getActivePlugins(),
-				installedPlugins: getInstalledPlugins(),
-				countryCode: getCountryCode(
-					settings.general?.woocommerce_default_country
-				),
-				isJetpackConnected: _isJetpackConnected(),
+	const {
+		activePlugins,
+		installedPlugins,
+		countryCode,
+		isJetpackConnected,
+		isSellingDigitalProductsOnly,
+	} = useSelect( ( select ) => {
+		const settings = select( SETTINGS_STORE_NAME ).getSettings< {
+			general?: {
+				woocommerce_default_country: string;
 			};
-		} );
+		} >( 'general' );
+
+		const {
+			getActivePlugins,
+			getInstalledPlugins,
+			isJetpackConnected: _isJetpackConnected,
+		} = select( PLUGINS_STORE_NAME );
+
+		const profileItems = select( ONBOARDING_STORE_NAME ).getProfileItems()
+			.product_types;
+
+		return {
+			activePlugins: getActivePlugins(),
+			installedPlugins: getInstalledPlugins(),
+			countryCode: getCountryCode(
+				settings.general?.woocommerce_default_country
+			),
+			isJetpackConnected: _isJetpackConnected(),
+			isSellingDigitalProductsOnly:
+				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
+		};
+	} );
 
 	if (
 		activePlugins.includes( 'woocommerce-services' ) &&
@@ -46,7 +59,7 @@ const ShippingRecommendations: React.FC = () => {
 		return null;
 	}
 
-	if ( countryCode !== 'US' ) {
+	if ( countryCode !== 'US' || isSellingDigitalProductsOnly ) {
 		return null;
 	}
 

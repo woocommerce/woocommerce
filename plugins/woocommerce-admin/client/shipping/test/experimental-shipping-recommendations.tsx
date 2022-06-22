@@ -27,6 +27,7 @@ const defaultSelectReturn = {
 			woocommerce_default_country: 'US',
 		},
 	} ),
+	getProfileItems: () => ( {} ),
 };
 
 describe( 'ShippingRecommendations', () => {
@@ -59,6 +60,22 @@ describe( 'ShippingRecommendations', () => {
 					general: {
 						woocommerce_default_country: 'JP',
 					},
+				} ),
+			} ) )
+		);
+		render( <ShippingRecommendations /> );
+
+		expect(
+			screen.queryByText( 'Woocommerce Shipping' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'should not render when store sells digital products only', () => {
+		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+			fn( () => ( {
+				...defaultSelectReturn,
+				getProfileItems: () => ( {
+					product_types: [ 'downloads' ],
 				} ),
 			} ) )
 		);
