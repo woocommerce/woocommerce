@@ -1,9 +1,32 @@
-//! These tests are very sensitive to positioning.
-//! There isn't an easy way to reset this either, so the order matters.
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Analytics pages', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
+
+	test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async ( {
+		page,
+	} ) => {
+		// Create an array of the sections we're expecting to find.
+		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+		);
+
+		await page.waitForLoadState( 'networkidle' );
+
+		// Grab all of the section headings
+		const sections = await page.$$(
+			'h2.woocommerce-section-header__title'
+		);
+		// Create an array with the section headings
+		const arrFoundSections = new Array();
+		for await ( const section of sections ) {
+			arrFoundSections.push( await section.innerText() );
+		}
+		await expect( arrFoundSections.sort() ).toEqual(
+			arrExpectedSections.sort()
+		);
+	} );
 
 	test.describe( 'moving sections', () => {
 		test.use( { storageState: 'e2e/storage/adminState.json' } );
@@ -84,28 +107,6 @@ test.describe( 'Analytics pages', () => {
 		} );
 	} );
 
-	test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async ( {
-		page,
-	} ) => {
-		// Create an array of the sections we're expecting to find.
-		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-		);
-		// Grab all of the section headings
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		// Create an array with the section headings
-		const arrFoundSections = new Array();
-		for await ( const section of sections ) {
-			arrFoundSections.push( await section.innerText() );
-		}
-		await expect( arrFoundSections.sort() ).toEqual(
-			arrExpectedSections.sort()
-		);
-	} );
-
 	test( 'should allow a user to remove a section', async ( { page } ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
@@ -120,13 +121,11 @@ test.describe( 'Analytics pages', () => {
 		await expect( sections.length ).toEqual( 2 );
 
 		// clean up
-		await page
-			.locator( '//button[@title="Add more sections"]' )
-			.dispatchEvent( 'click' );
-		await page
-			.locator( '//button[@title="Add Performance section"]' )
-			.dispatchEvent( 'click' );
-		await page.waitForLoadState( 'networkidle' );
+		await page.click( '//button[@title="Add more sections"]' );
+		await page.click( '//button[@title="Add Performance section"]' );
+		await page.waitForSelector( 'h2.woocommerce-section-header__title', {
+			hasText: 'Performance',
+		} );
 	} );
 
 	test( 'should allow a user to add a section back in', async ( {
