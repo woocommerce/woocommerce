@@ -26,6 +26,21 @@ export const createResolvers = ( {
 	pluralResourceName,
 	namespace,
 }: ResolverOptions ) => {
+	const getItem = function* ( id: number ) {
+		try {
+			const item: Item = yield apiFetch( {
+				path: `${ namespace }/${ id }`,
+				method: 'GET',
+			} );
+
+			yield getItemSuccess( item.id, item );
+			return item;
+		} catch ( error ) {
+			yield getItemError( id, error );
+			throw error;
+		}
+	};
+
 	const getItems = function* ( query: Partial< ItemQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
 		const resourceQuery = { ...query };
@@ -52,23 +67,8 @@ export const createResolvers = ( {
 		}
 	};
 
-	const getItem = function* ( id: number ) {
-		try {
-			const item: Item = yield apiFetch( {
-				path: `${ namespace }/${ id }`,
-				method: 'GET',
-			} );
-
-			yield getItemSuccess( item.id, item );
-			return item;
-		} catch ( error ) {
-			yield getItemError( id, error );
-			throw error;
-		}
-	};
-
 	return {
-		[ `get${ pluralResourceName }` ]: getItems,
 		[ `get${ resourceName }` ]: getItem,
+		[ `get${ pluralResourceName }` ]: getItems,
 	};
 };

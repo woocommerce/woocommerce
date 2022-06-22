@@ -20,6 +20,15 @@ export const createSelectors = ( {
 	resourceName,
 	pluralResourceName,
 }: SelectorOptions ) => {
+	const getItem = ( state: ResourceState, id: number ) => {
+		return state.data[ id ];
+	};
+
+	const getItemError = ( state: ResourceState, id: number ) => {
+		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
+		return state.errors[ itemQuery ];
+	};
+
 	const getItems = createSelector(
 		( state: ResourceState, query: ItemQuery ) => {
 			const itemQuery = getResourceName( resourceName, query );
@@ -69,19 +78,10 @@ export const createSelectors = ( {
 		return state.errors[ itemQuery ];
 	};
 
-	const getItem = ( state: ResourceState, id: number ) => {
-		return state.data[ id ];
-	};
-
-	const getItemError = ( state: ResourceState, id: number ) => {
-		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
-		return state.errors[ itemQuery ];
-	};
-
 	return {
 		[ `get${ resourceName }` ]: getItem,
-		[ `get${ pluralResourceName }` ]: getItems,
 		[ `get${ resourceName }Error` ]: getItemError,
+		[ `get${ pluralResourceName }` ]: getItems,
 		[ `get${ pluralResourceName }Error` ]: getItemsError,
 	};
 };
