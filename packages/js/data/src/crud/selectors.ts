@@ -31,7 +31,7 @@ export const createSelectors = ( {
 
 	const getItems = createSelector(
 		( state: ResourceState, query: ItemQuery ) => {
-			const itemQuery = getResourceName( resourceName, query );
+			const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
 
 			const ids = state.items[ itemQuery ]
 				? state.items[ itemQuery ].data
