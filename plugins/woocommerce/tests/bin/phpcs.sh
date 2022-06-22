@@ -7,7 +7,7 @@ IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
 if [ "$CHANGED_FILES" != "" ]; then
 	echo "Changed files: $CHANGED_FILES"
 	echo "Running Code Sniffer."
-
+ls ./vendor/bin/
 	./vendor/bin/phpcs-changed --git --ignore=$IGNORE --encoding=utf-8 -s -n -p --report-full --report-checkstyle=./phpcs-report.xml ${CHANGED_FILES}
 else
 	echo "No changes found. Skipping PHPCS run."
