@@ -225,9 +225,8 @@ export default compose(
 			return {};
 		}
 
-		const { getItems, getItemsError, isResolving } = select(
-			ITEMS_STORE_NAME
-		);
+		const { getItems, getItemsError, isResolving } =
+			select( ITEMS_STORE_NAME );
 		const tableQuery = {
 			per_page: -1,
 		};

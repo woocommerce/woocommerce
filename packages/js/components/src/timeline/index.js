@@ -14,14 +14,8 @@ import TimelineGroup from './timeline-group';
 import { sortByDateUsing, groupItemsUsing } from './util';
 
 const Timeline = ( props ) => {
-	const {
-		className,
-		items,
-		groupBy,
-		orderBy,
-		dateFormat,
-		clockFormat,
-	} = props;
+	const { className, items, groupBy, orderBy, dateFormat, clockFormat } =
+		props;
 	const timelineClassName = classnames( 'woocommerce-timeline', className );
 
 	// Early return in case no data was passed to the component.

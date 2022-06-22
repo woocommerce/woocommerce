@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix for broken table layout when reordering products on the sorting screen.

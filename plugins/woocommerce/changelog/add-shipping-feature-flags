@@ -1,0 +1,5 @@
+Significance: patch
+Type: add
+Comment: Add shipping-smart-defaults and shipping-setting-tour feature flags, but not implemented yet
+
+

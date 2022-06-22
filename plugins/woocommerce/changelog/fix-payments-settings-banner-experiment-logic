@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix payments experiment banner logic to be executed before experiment is called

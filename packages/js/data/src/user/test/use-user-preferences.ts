@@ -140,8 +140,8 @@ describe( 'useUserPreferences() hook', () => {
 			'function'
 		);
 
-		// Passing an array, not an object.
-		const updateResult = await result.current.updateUserPreferences( [] );
+		// Passing an empty object.
+		const updateResult = await result.current.updateUserPreferences( {} );
 
 		expect( updateResult ).toMatchObject( {
 			error: new Error( 'Invalid woocommerce_meta data for update.' ),
@@ -292,7 +292,9 @@ describe( 'useUserPreferences() hook', () => {
 				},
 			} );
 
-			await result.current.updateUserPreferences( {
+			await result.current.updateUserPreferences< {
+				revenue_report_columns: string[];
+			} >( {
 				revenue_report_columns: [ 'shipping', 'taxes' ],
 			} );
 

@@ -56,9 +56,8 @@ export const DismissableList: React.FC< {
 	className?: string;
 } > = ( { children, className, dismissOptionName } ) => {
 	const isVisible = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		);
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
 		const hasFinishedResolving = hasFinishedResolution( 'getOption', [
 			dismissOptionName,

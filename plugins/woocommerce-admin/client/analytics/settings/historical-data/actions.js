@@ -191,10 +191,8 @@ export default compose( [
 	withSelect( ( select ) => {
 		const { getFormSettings } = select( IMPORT_STORE_NAME );
 
-		const {
-			period: selectedPeriod,
-			skipPrevious: skipChecked,
-		} = getFormSettings();
+		const { period: selectedPeriod, skipPrevious: skipChecked } =
+			getFormSettings();
 
 		return {
 			selectedPeriod,
@@ -202,9 +200,8 @@ export default compose( [
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateImportation, setImportStarted } = dispatch(
-			IMPORT_STORE_NAME
-		);
+		const { updateImportation, setImportStarted } =
+			dispatch( IMPORT_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 		return {
 			createNotice,

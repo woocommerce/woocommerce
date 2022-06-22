@@ -371,9 +371,8 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query, isRequesting } = props;
 
-		const { getItems, getItemsError, isResolving } = select(
-			ITEMS_STORE_NAME
-		);
+		const { getItems, getItemsError, isResolving } =
+			select( ITEMS_STORE_NAME );
 
 		if (
 			isRequesting ||

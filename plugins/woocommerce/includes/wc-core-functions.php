@@ -2089,7 +2089,7 @@ function wc_print_r( $expression, $return = false ) {
  */
 function wc_register_default_log_handler( $handlers ) {
 	$handler_class = Constants::get_constant( 'WC_LOG_HANDLER' );
-	if ( ! class_exists( $handler_class ) ) {
+	if ( is_null( $handler_class ) || ! class_exists( $handler_class ) ) {
 		$handler_class = WC_Log_Handler_File::class;
 	}
 

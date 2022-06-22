@@ -2,12 +2,24 @@
  * External dependencies
  */
 import { appendTimestamp, getCurrentDates } from '@woocommerce/date';
-
+import { select as wpSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
 import { getResourceName } from '../utils';
+import { ItemInfer, ItemType, Query } from './types';
+import { ItemsSelector } from './';
+
+type Options = {
+	id: number;
+	per_page: number;
+	persisted_query: Query;
+	filterQuery: Query;
+	query: { [ key: string ]: string | undefined };
+	select: typeof wpSelect;
+	defaultDateRange: string;
+};
 
 /**
  * Returns leaderboard data to render a leaderboard table.
@@ -17,11 +29,12 @@ import { getResourceName } from '../utils';
  * @param {number} options.per_page         Per page limit
  * @param {Object} options.persisted_query  Persisted query passed to endpoint
  * @param {Object} options.query            Query parameters in the url
+ * @param {Object} options.filterQuery      Query parameters to filter the leaderboard
  * @param {Object} options.select           Instance of @wordpress/select
  * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} Object containing leaderboard responses.
  */
-export function getLeaderboard( options ) {
+export function getLeaderboard( options: Options ) {
 	const endpoint = 'leaderboards';
 	const {
 		per_page: perPage,
@@ -30,6 +43,7 @@ export function getLeaderboard( options ) {
 		select,
 		filterQuery,
 	} = options;
+
 	const { getItems, getItemsError, isResolving } = select( STORE_NAME );
 	const response = {
 		isRequesting: false,
@@ -49,7 +63,10 @@ export function getLeaderboard( options ) {
 	// Disable eslint rule requiring `getItems` to be defined below because the next two statements
 	// depend on `getItems` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const leaderboards = getItems( endpoint, leaderboardQuery );
+	const leaderboards = getItems< 'leaderboards' >(
+		endpoint,
+		leaderboardQuery
+	);
 
 	if ( isResolving( 'getItems', [ endpoint, leaderboardQuery ] ) ) {
 		return { ...response, isRequesting: true };
@@ -69,15 +86,15 @@ export function getLeaderboard( options ) {
  * @param {Object}   options  Query options.
  * @return {Object}   Object containing API request information and the matching items.
  */
-export function searchItemsByString(
-	selector,
-	endpoint,
-	search,
-	options = {}
+export function searchItemsByString< T extends ItemType >(
+	selector: ItemsSelector,
+	endpoint: T,
+	search: string[],
+	options: Query = {}
 ) {
 	const { getItems, getItemsError, isResolving } = selector;
 
-	const items = {};
+	const items: Record< number, ItemInfer< T > | undefined > = {};
 	let isRequesting = false;
 	let isError = false;
 	search.forEach( ( searchWord ) => {
@@ -86,7 +103,7 @@ export function searchItemsByString(
 			per_page: 10,
 			...options,
 		};
-		const newItems = getItems( endpoint, query );
+		const newItems = getItems< T >( endpoint, query );
 		newItems.forEach( ( item, id ) => {
 			items[ id ] = item;
 		} );
@@ -111,11 +128,12 @@ export function searchItemsByString(
  * @param {Object} query    Query for item totals count.
  * @return {string} Resource name for item totals.
  */
-export function getTotalCountResourceName( itemType, query ) {
+export function getTotalCountResourceName( itemType: string, query: Query ) {
 	// Disable eslint rule because we're using this spread to omit properties
 	// that don't affect item totals count results.
 	// eslint-disable-next-line no-unused-vars, camelcase
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { _fields, page, per_page, ...totalsQuery } = query;
 
-	return getResourceName( 'total-' + itemType, totalsQuery );
+	return getResourceName( 'total-' + itemType, { ...totalsQuery } );
 }

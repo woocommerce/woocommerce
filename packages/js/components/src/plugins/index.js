@@ -36,11 +36,8 @@ export class Plugins extends Component {
 			event.preventDefault();
 		}
 
-		const {
-			installAndActivatePlugins,
-			isRequesting,
-			pluginSlugs,
-		} = this.props;
+		const { installAndActivatePlugins, isRequesting, pluginSlugs } =
+			this.props;
 
 		// Avoid double activating.
 		if ( isRequesting ) {
@@ -184,11 +181,8 @@ Plugins.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getActivePlugins,
-			getInstalledPlugins,
-			isPluginsRequesting,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, getInstalledPlugins, isPluginsRequesting } =
+			select( PLUGINS_STORE_NAME );
 
 		const isRequesting =
 			isPluginsRequesting( 'activatePlugins' ) ||

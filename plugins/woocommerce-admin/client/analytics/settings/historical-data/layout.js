@@ -104,9 +104,8 @@ class HistoricalDataLayout extends Component {
 }
 
 export default withSelect( ( select, props ) => {
-	const { getImportError, getImportStatus, getImportTotals } = select(
-		IMPORT_STORE_NAME
-	);
+	const { getImportError, getImportStatus, getImportTotals } =
+		select( IMPORT_STORE_NAME );
 	const {
 		activeImport,
 		cacheNeedsClearing,
@@ -120,9 +119,8 @@ export default withSelect( ( select, props ) => {
 	} = props;
 
 	const params = formatParams( dateFormat, period, skipChecked );
-	const { customers, orders, lastImportStartTimestamp } = getImportTotals(
-		params
-	);
+	const { customers, orders, lastImportStartTimestamp } =
+		getImportTotals( params );
 
 	const {
 		customers: customersStatus,

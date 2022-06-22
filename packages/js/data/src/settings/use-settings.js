@@ -10,28 +10,29 @@ import { useCallback } from '@wordpress/element';
 import { STORE_NAME } from './constants';
 
 export const useSettings = ( group, settingsKeys = [] ) => {
-	const {
-		requestedSettings,
-		settingsError,
-		isRequesting,
-		isDirty,
-	} = useSelect(
-		( select ) => {
-			const {
-				getLastSettingsErrorForGroup,
-				getSettingsForGroup,
-				getIsDirty,
-				isUpdateSettingsRequesting,
-			} = select( STORE_NAME );
-			return {
-				requestedSettings: getSettingsForGroup( group, settingsKeys ),
-				settingsError: Boolean( getLastSettingsErrorForGroup( group ) ),
-				isRequesting: isUpdateSettingsRequesting( group ),
-				isDirty: getIsDirty( group, settingsKeys ),
-			};
-		},
-		[ group, ...settingsKeys.sort() ]
-	);
+	const { requestedSettings, settingsError, isRequesting, isDirty } =
+		useSelect(
+			( select ) => {
+				const {
+					getLastSettingsErrorForGroup,
+					getSettingsForGroup,
+					getIsDirty,
+					isUpdateSettingsRequesting,
+				} = select( STORE_NAME );
+				return {
+					requestedSettings: getSettingsForGroup(
+						group,
+						settingsKeys
+					),
+					settingsError: Boolean(
+						getLastSettingsErrorForGroup( group )
+					),
+					isRequesting: isUpdateSettingsRequesting( group ),
+					isDirty: getIsDirty( group, settingsKeys ),
+				};
+			},
+			[ group, ...settingsKeys.sort() ]
+		);
 	const {
 		persistSettingsForGroup,
 		updateAndPersistSettingsForGroup,

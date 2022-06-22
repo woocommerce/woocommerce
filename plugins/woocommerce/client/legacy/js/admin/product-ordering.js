@@ -66,6 +66,15 @@ jQuery( function( $ ) {
 					$( this ).removeClass( 'alternate' );
 				}
 			});
-		}
+		},
+		sort: function (e, ui) {
+			ui.placeholder.find( 'td' ).each( function( key, value ) {
+				if ( ui.helper.find( 'td' ).eq( key ).is( ':visible' ) ) {
+					$( this ).show();
+				} else {
+					$( this ).hide();
+				}
+			});
+        }
 	});
 });

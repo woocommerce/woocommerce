@@ -59,10 +59,8 @@ export const Products = () => {
 		isConfirmingLoadSampleProducts,
 		setIsConfirmingLoadSampleProducts,
 	] = useState( false );
-	const {
-		isLoading: isLoadingExperiment,
-		experimentLayout,
-	} = useProductTaskExperiment();
+	const { isLoading: isLoadingExperiment, experimentLayout } =
+		useProductTaskExperiment();
 
 	const { isStoreInUS } = useSelect( ( select ) => {
 		const { getSettings } = select( SETTINGS_STORE_NAME );
@@ -105,14 +103,12 @@ export const Products = () => {
 		[ recordCompletionTime, productTypes ]
 	);
 
-	const {
-		loadSampleProduct,
-		isLoadingSampleProducts,
-	} = useLoadSampleProducts( {
-		redirectUrlAfterSuccess: getAdminLink(
-			'edit.php?post_type=product&wc_onboarding_active_task=products'
-		),
-	} );
+	const { loadSampleProduct, isLoadingSampleProducts } =
+		useLoadSampleProducts( {
+			redirectUrlAfterSuccess: getAdminLink(
+				'edit.php?post_type=product&wc_onboarding_active_task=products'
+			),
+		} );
 
 	const visibleProductTypes = useMemo( () => {
 		const surfacedProductTypes = productTypesWithTimeRecord.filter(

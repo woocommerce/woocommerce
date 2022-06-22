@@ -214,9 +214,7 @@ describe( 'getIdsFromQuery', () => {
 		} );
 		it( 'should ignore non numbers entries in the coma-separated list', () => {
 			expect( getIdsFromQuery( '77,,8,foo,null,9' ) ).toEqual( [
-				77,
-				8,
-				9,
+				77, 8, 9,
 			] );
 		} );
 	} );

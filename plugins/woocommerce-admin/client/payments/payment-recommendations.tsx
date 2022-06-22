@@ -38,10 +38,8 @@ const PaymentRecommendations: React.FC = () => {
 	);
 	const [ isDismissed, setIsDismissed ] = useState< boolean >( false );
 	const [ isInstalled, setIsInstalled ] = useState< boolean >( false );
-	const {
-		installAndActivatePlugins,
-		dismissRecommendedPlugins,
-	} = useDispatch( PLUGINS_STORE_NAME );
+	const { installAndActivatePlugins, dismissRecommendedPlugins } =
+		useDispatch( PLUGINS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const {

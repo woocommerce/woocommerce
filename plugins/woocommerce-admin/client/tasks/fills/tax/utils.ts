@@ -43,18 +43,14 @@ export const redirectToTaxSettings = (): void => {
  * Types for settings selectors.
  */
 export type SettingsSelector = WPDataSelectors & {
-	getSettings: (
-		type: string
-	) => {
+	getSettings: ( type: string ) => {
 		general: {
 			woocommerce_default_country?: string;
 			woocommerce_calc_taxes?: string;
 		};
 		tax: { [ key: string ]: string };
 	};
-	getOption: (
-		type: string
-	) => {
+	getOption: ( type: string ) => {
 		tos_accepted?: boolean;
 	};
 };
