@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Added the no-only-plugin and config for eslint to ensure no focussed tests are committed.
