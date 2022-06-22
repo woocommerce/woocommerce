@@ -34,18 +34,19 @@ export const createReducer = () => {
 	) => {
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
-				case TYPES.GET_ITEM_ERROR:
+				case TYPES.CREATE_ITEM_ERROR:
+				case TYPES.GET_ITEMS_ERROR:
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName( CRUD_ACTIONS.GET_ITEM, {
-								id: payload.id,
-							} ) ]: payload.error,
+							[ getResourceName( payload.errorType, payload.query as ItemQuery ) ]: payload.error,
 						},
 					};
 
+				case TYPES.CREATE_ITEM_SUCCESS:
 				case TYPES.GET_ITEM_SUCCESS:
+                case TYPES.UPDATE_ITEM_SUCCESS:
 					const itemData = state.data || {};
 					return {
 						...state,
@@ -58,17 +59,16 @@ export const createReducer = () => {
 						},
 					};
 
-				case TYPES.GET_ITEMS_ERROR:
-					return {
-						...state,
-						errors: {
-							...state.errors,
-							[ getResourceName(
-								CRUD_ACTIONS.GET_ITEMS,
-								payload.query as ItemQuery
-							) ]: payload.error,
-						},
-					};
+                case TYPES.GET_ITEM_ERROR:
+                    return {
+                        ...state,
+                        errors: {
+                            ...state.errors,
+                            [ getResourceName( payload.errorType, {
+                                id: payload.id,
+                            } ) ]: payload.error,
+                        },
+                    };
 
 				case TYPES.GET_ITEMS_SUCCESS:
 					const ids: number[] = [];
