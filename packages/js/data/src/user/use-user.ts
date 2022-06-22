@@ -7,6 +7,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
+import { WCUser } from './types';
 
 /**
  * Custom react hook for shortcut methods around user.
@@ -15,6 +16,8 @@ import { STORE_NAME } from './constants';
  */
 export const useUser = () => {
 	const userData = useSelect( ( select ) => {
+		// TODO: Update @types/wordpress__core-data to include the 'hasStartedResolution', 'hasFinishedResolution' method.
+		// @ts-expect-errors Property 'hasStartedResolution', 'hasFinishedResolution' does not exist on type @types/wordpress__core-data
 		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
 			select( STORE_NAME );
 
@@ -22,12 +25,13 @@ export const useUser = () => {
 			isRequesting:
 				hasStartedResolution( 'getCurrentUser' ) &&
 				! hasFinishedResolution( 'getCurrentUser' ),
-			user: getCurrentUser(),
+			// We register additional user data in backend so we need to use a type assertion here for WC user.
+			user: getCurrentUser() as WCUser< 'capabilities' >,
 			getCurrentUser,
 		};
 	} );
 
-	const currentUserCan = ( capability ) => {
+	const currentUserCan = ( capability: string ) => {
 		if ( userData.user && userData.user.is_super_admin ) {
 			return true;
 		}
