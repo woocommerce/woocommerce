@@ -1221,6 +1221,7 @@ importers:
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0
       eslint-plugin-jest: 23.20.0
+      eslint-plugin-no-only-tests: ^2.6.0
       istanbul: 1.0.0-alpha.2
       jest: ^25.1.0
       mocha: 7.2.0
@@ -1263,6 +1264,7 @@ importers:
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0_eslint@6.8.0
       eslint-plugin-jest: 23.20.0_eslint@6.8.0+typescript@3.9.7
+      eslint-plugin-no-only-tests: 2.6.0
       istanbul: 1.0.0-alpha.2
       jest: 25.5.4
       mocha: 7.2.0
@@ -17414,7 +17416,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -17444,7 +17446,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /babel-messages/6.23.0:
@@ -19877,7 +19879,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -21835,6 +21837,11 @@ packages:
       mdast-util-from-markdown: 0.8.5
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /eslint-plugin-no-only-tests/2.6.0:
+    resolution: {integrity: sha512-T9SmE/g6UV1uZo1oHAqOvL86XWl7Pl2EpRpnLI8g/bkJu+h7XBCB+1LnubRZ2CUQXj805vh4/CYZdnqtVaEo2Q==}
+    engines: {node: '>=4.0.0'}
     dev: true
 
   /eslint-plugin-prettier/3.4.1_02bd6de317b229dedbb6aa1a3ed0da5e:
@@ -36595,7 +36602,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true

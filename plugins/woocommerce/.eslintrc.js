@@ -12,10 +12,14 @@ module.exports = {
 		wcSettings: true,
 		es6: true,
 	},
+	plugins: [
+		'no-only-tests'
+	],
 	rules: {
 		camelcase: 0,
 		indent: 0,
 		'no-console': 1,
+		'no-only-tests/no-only-tests': 'error'
 	},
 	parser: 'babel-eslint',
 	parserOptions: {
@@ -28,12 +32,12 @@ module.exports = {
 	},
 	overrides: [
 		{
-			files: ["e2e/tests/**/*.spec.js", "e2e/*.js"],
+			files: [ 'e2e/tests/**/*.spec.js', 'e2e/*.js' ],
 			rules: {
-				"jest/no-test-callback": "off",
-				"@wordpress/no-unsafe-wp-apis": "off",
-				"import/no-extraneous-dependencies": "off",
-				"import/no-unresolved": "off"
+				'jest/no-test-callback': 'off',
+				'@wordpress/no-unsafe-wp-apis': 'off',
+				'import/no-extraneous-dependencies': 'off',
+				'import/no-unresolved': 'off'
 			}
 		}
 	]
