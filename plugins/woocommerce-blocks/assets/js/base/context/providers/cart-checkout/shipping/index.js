@@ -50,9 +50,8 @@ export const useShippingDataContext = () => {
  * @param {React.ReactElement} props.children
  */
 export const ShippingDataProvider = ( { children } ) => {
-	const { incrementCalculating, decrementCalculating } = useDispatch(
-		CHECKOUT_STORE_KEY
-	);
+	const { incrementCalculating, decrementCalculating } =
+		useDispatch( CHECKOUT_STORE_KEY );
 	const { shippingRates, isLoadingRates, cartErrors } = useStoreCart();
 	const { isSelectingRate } = useSelectShippingRate();
 	const { selectedRates } = useShippingData();
