@@ -79,7 +79,15 @@ class Shipping extends Task {
 	 */
 	public function can_view() {
 		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			if ( self::sell_only_digital_type() ) {
+			/**
+			 * Do not display the task when:
+			 * - The store sells digital products only
+			 * Display the task when:
+			 * - We don't know where the store's located
+			 * - The store is located in the UK, Australia or Canada
+			*/
+
+			if ( self::is_selling_digital_type_only() ) {
 				return false;
 			}
 
@@ -91,6 +99,7 @@ class Shipping extends Task {
 				$store_country = $default_store_country;
 			}
 
+			// Unknown country.
 			if ( empty( $store_country ) ) {
 				return true;
 			}
@@ -146,7 +155,7 @@ class Shipping extends Task {
 	 *
 	 * @return bool
 	 */
-	private static function sell_only_digital_type() {
+	private static function is_selling_digital_type_only() {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
