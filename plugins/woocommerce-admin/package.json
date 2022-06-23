@@ -26,10 +26,10 @@
 		"lint:fix": "pnpm lint:js-fix && pnpm lint:css-fix",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
-		"lint:js": "wp-scripts lint-js ./client --ext=js,ts,tsx",
+		"lint:js": "eslint ./client --ext=js,ts,tsx",
 		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
-		"lint:js-packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
-		"lint:js-pre-commit": "wp-scripts lint-js --ext=js,ts,tsx",
+		"lint:js-packages": "eslint ../../packages/js --ext=js,ts,tsx",
+		"lint:js-pre-commit": "eslint --ext=js,ts,tsx",
 		"prepack": "pnpm install && pnpm run lint && pnpm run test && cross-env WC_ADMIN_PHASE=core pnpm run build",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"packages:watch": "cross-env WC_ADMIN_PHASE=development pnpm run:packages -- start --parallel",
@@ -228,8 +228,7 @@
 			"pnpm lint:css-fix"
 		],
 		"client/**/*.(t|j)s?(x)": [
-			"pnpm reformat-files",
-			"pnpm wp-scripts lint-js",
+			"pnpm lint:js-pre-commit",
 			"pnpm test-staged"
 		]
 	},
