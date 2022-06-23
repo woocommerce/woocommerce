@@ -37,7 +37,7 @@ describe( 'ShippingRecommendations', () => {
 		);
 	} );
 
-	it( 'should not render when WCS is already installed and Jetpack is conneclted', () => {
+	it( 'should not render when WCS is already installed and Jetpack is connected', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				...defaultSelectReturn,
