@@ -62,10 +62,13 @@ export const validateChangelogEntries = ( name: string ) => {
 export const writeChangelog = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
-		execSync( './vendor/bin/changelogger write', {
+		console.log( 'cwd is:' );
+		console.log( cwd );
+		const err = execSync( './vendor/bin/changelogger write', {
 			cwd,
 			encoding: 'utf-8',
 		} );
+		console.log( err );
 	} catch ( e ) {
 		let message = '';
 		if ( e instanceof Error ) {
@@ -92,6 +95,8 @@ export const hasChangelogs = ( name: string ): boolean | void => {
 		const changelogDirContents = readdirSync( changelogDir, {
 			encoding: 'utf-8',
 		} );
+
+		console.log( changelogDirContents );
 
 		return (
 			changelogDirContents.filter( ( entry ) => entry !== '.gitkeep' )

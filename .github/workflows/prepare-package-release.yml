@@ -3,12 +3,12 @@ on:
     workflow_dispatch:
         inputs:
             packages:
-                description: 'Enter a specific package to release, or releases separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input blank will prepare to release all eligible packages.'
+                description: 'Enter a specific package to release, or releases separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages.'
                 required: false
                 default: '-a'
 jobs:
     prepare:
-        name: Run the prepare script
+        name: Run prepare script
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
 
               run: pnpm install
 
-            - name: Run all
+            - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
 
             - name: Check
