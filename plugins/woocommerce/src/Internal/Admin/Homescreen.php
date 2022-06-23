@@ -7,6 +7,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use WC_Shipping_Flat_Rate;
 
 /**
  * Contains backend logic for the homescreen feature.
@@ -90,11 +91,11 @@ class Homescreen {
 		}
 
 		$is_jetpack_installed = in_array( 'jetpack', $settings['plugins']['installedPlugins'] ?? array(), true );
-		$is_jetpack_onnected  = $settings['dataEndpoints']['jetpackStatus']['isUserConnected'] ?? false;
+		$is_jetpack_connected = $settings['dataEndpoints']['jetpackStatus']['isUserConnected'] ?? false;
 		$is_wcs_installed     = in_array( 'woocommerce-services', $settings['plugins']['installedPlugins'] ?? array(), true );
 
 		if (
-			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_onnected )
+			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_connected )
 			||
 			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'UK' ), true ) )
 			||
@@ -104,12 +105,22 @@ class Homescreen {
 			$zone->set_zone_name( $country_name );
 			$zone->add_location( $country_code, 'country' );
 			$zone->add_shipping_method( 'free_shipping' );
-			$zone->save();
 
 			$other_countries_zone = new \WC_Shipping_Zone( 0 );
 			if ( ! $other_countries_zone->meta_exists( 'flat_rate' ) ) {
-				$other_countries_zone->add_shipping_method( 'flat_rate' );
+				$instance_id = $other_countries_zone->add_shipping_method( 'flat_rate' );
 				$other_countries_zone->save();
+
+				$shipping_methods = $other_countries_zone->get_shipping_methods( true );
+				foreach ( $shipping_methods as $shipping_method ) {
+					if ( $shipping_method->get_instance_id() === $instance_id ) {
+						$option_id        = 'woocommerce_flat_rate_' . $instance_id . '_settings';
+						$settings         = get_option( $option_id );
+						$settings['cost'] = 15;
+						update_option( $option_id, $settings );
+						break;
+					}
+				}
 			}
 
 			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
