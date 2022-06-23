@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test:
-    name: Code sniff (PHP 7.4, WP Latest)
+    name: Code sniff (PHP 7.4)
     timeout-minutes: 15
     runs-on: ubuntu-20.04
     steps:
@@ -37,10 +37,5 @@ jobs:
         uses: ./.github/actions/install-build
 
       - name: Run code sniff
-        continue-on-error: false
         working-directory: plugins/woocommerce
         run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
-      
-      - name: Show PHPCS results in PR
-        working-directory: plugins/woocommerce
-        run: cs2pr ./phpcs-report.xml
