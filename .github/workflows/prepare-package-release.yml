@@ -1,0 +1,32 @@
+name: Prepare package release
+on:
+    workflow_dispatch:
+        inputs:
+            packages:
+                description: 'Enter a specific package to release, or releases separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input blank will prepare to release all eligible packages.'
+                required: false
+                default: '-a'
+jobs:
+    prepare:
+        name: Run the prepare script
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.4'
+
+            - name: Install dependencies
+
+              run: pnpm install
+
+            - name: Run all
+              run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
+
+            - name: Check
+              run: git status
