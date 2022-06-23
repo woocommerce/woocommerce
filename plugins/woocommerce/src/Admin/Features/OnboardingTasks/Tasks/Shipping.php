@@ -94,6 +94,7 @@ class Shipping extends Task {
 			$default_store_country = wc_format_country_state_string( get_option( 'woocommerce_default_country', '' ) )['country'];
 
 			// Check if a store address is set so that we don't default to WooCommerce's default country US.
+			// Similar logic: https://github.com/woocommerce/woocommerce/blob/059d542394b48468587f252dcb6941c6425cd8d3/plugins/woocommerce-admin/client/profile-wizard/steps/store-details/index.js#L511-L516.
 			$store_country = '';
 			if ( ! empty( get_option( 'woocommerce_store_address', '' ) ) || 'US' !== $default_store_country ) {
 				$store_country = $default_store_country;
