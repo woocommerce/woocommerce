@@ -144,6 +144,7 @@ class WC_Products_Tracking {
 				if ( ! isBlockEditor & hasRecordedEvent) {
                 	return;
             	}
+          		console.log(isBlockEditor);
 
        			var description_value  = '';
      			var tagsText = '';
@@ -177,32 +178,16 @@ class WC_Products_Tracking {
 					weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
 				};
 
-				function waitUntilElementExists( element, callback, limit ) {
-          			if ( $( element ).length > 0 ) {
-          				callback();
-          				return;
-          				}
-          			if ( limit < 1 ) {
-          				return;
-          			}
-          			setTimeout( function() {
-          				limit = limit || 10;
-          				waitUntilElementExists( element, callback, --limit );
-          				}, 500 );
-          		};
-
           		if ( ! isBlockEditor ) {
           			$( '#publish' ).on( 'click', function() {
-          				window.wcTracks.recordEvent( 'product_update', properties );
-          				});
+          			   window.wcTracks.recordEvent( 'product_update', properties );
+					});
           			hasRecordedEvent = true;
           		} else {
-					waitUntilElementExists( '.editor-post-publish-button', function() {
-          			$( '.editor-post-publish-button' ).on( 'click', function() {
-          				window.wcTracks.recordEvent( 'product_update', properties );
-          				}););
-          			});
-          		}
+					$( '#wpwrap' ).on( 'click', '.editor-post-publish-button', function() {
+          			   window.wcTracks.recordEvent( 'product_update', properties );
+					});
+          		};
 			}
 			"
 		);
