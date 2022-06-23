@@ -10,7 +10,7 @@ if [ "$CHANGED_FILES" != "" ]; then
 	echo "Changed files: $CHANGED_FILES"
 	echo "Running Code Sniffer."
 
-	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git --report=full -s --git-base ${DEFAULT_BRANCH_REF} ${CHANGED_FILES}
+	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git --report=full -s --git-base 49b07dd9a8b96c5178ff7fac10878fc5c6c2a44a ${CHANGED_FILES}
 else
 	echo "No changes found. Skipping PHPCS run."
 fi
