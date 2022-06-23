@@ -459,7 +459,7 @@ class WC_AJAX {
 	public static function checkout() {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 		WC()->checkout()->process_checkout();
-		wp_die( 0 );do_action( 'hooksss' );
+		wp_die( 0 );do_action( 'hookssss' );
 	}
 
 	/**
