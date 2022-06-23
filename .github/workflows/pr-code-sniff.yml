@@ -39,7 +39,7 @@ jobs:
       - name: Run code sniff
         continue-on-error: false
         working-directory: plugins/woocommerce
-        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
+        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}" && sleep 250s
       
       - name: Show PHPCS results in PR
         working-directory: plugins/woocommerce
