@@ -83,7 +83,7 @@ class Homescreen {
 			return $settings;
 		}
 
-		$country_code = explode( ':', $settings['preloadSettings']['general']['woocommerce_default_country'] ?? '' )[0];
+		$country_code = wc_format_country_state_string( $settings['preloadSettings']['general']['woocommerce_default_country'] )['country'];
 		$country_name = WC()->countries->get_countries()[ $country_code ] ?? null;
 
 		if ( '' === $country_code || null === $country_name ) {
