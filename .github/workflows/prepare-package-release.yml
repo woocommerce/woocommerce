@@ -11,5 +11,22 @@ jobs:
         name: Run the prepare script
         runs-on: ubuntu-20.04
         steps:
-            - name: Run
-              run: echo "hello world"
+            - uses: actions/checkout@v3
+
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.4'
+
+            - name: Install dependencies
+
+              run: pnpm install
+
+            - name: Run all
+              run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
+
+            - name: Check
+              run: git status
