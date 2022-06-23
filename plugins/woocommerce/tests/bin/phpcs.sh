@@ -8,7 +8,7 @@ if [ "$CHANGED_FILES" != "" ]; then
 	echo "Changed files: $CHANGED_FILES"
 	echo "Running Code Sniffer."
 
-	./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p --report-full --report-checkstyle=./phpcs-report.xml ${CHANGED_FILES}
+	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git -s --git-base --report=xml ${1} ${CHANGED_FILES} >> ./phpcs-report.xml
 else
 	echo "No changes found. Skipping PHPCS run."
 fi
