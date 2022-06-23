@@ -4,13 +4,13 @@ COMMIT_RANGE="${1} ${2}"
 CHANGED_FILES=`git diff --name-only --diff-filter=ACMR $COMMIT_RANGE | grep '\.php' | grep 'plugins/woocommerce/' | sed -e 's/^plugins\/woocommerce\///' | awk '{print}' ORS=' '`
 IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
 DEFAULT_BRANCH=`git remote show origin | awk '/HEAD branch/ {print $NF}'`
-DEFAULT_BRANCH_REF="refs/heads/${DEFAULT_BRANCH}"
 
 if [ "$CHANGED_FILES" != "" ]; then
 	echo "Changed files: $CHANGED_FILES"
 	echo "Running Code Sniffer."
-	git log -n 20
-	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git --report=full -s --git-base 49b07dd9a8b96c5178ff7fac10878fc5c6c2a44a ${CHANGED_FILES}
+	echo "Default branch: $DEFAULT_BRANCH"
+
+	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git --report=full -s --ignore=${IGNORE} --git-base ${DEFAULT_BRANCH} ${CHANGED_FILES}
 else
 	echo "No changes found. Skipping PHPCS run."
 fi
