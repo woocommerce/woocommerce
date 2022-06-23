@@ -18,12 +18,8 @@ import {
 import { DispatchFromMap } from '../mapped-types';
 import * as actions from './actions';
 
-const {
-	isErrorResponse,
-	isFailResponse,
-	isSuccessResponse,
-	shouldRetry,
-} = useEmitResponse(); // eslint-disable-line react-hooks/rules-of-hooks
+const { isErrorResponse, isFailResponse, isSuccessResponse, shouldRetry } =
+	useEmitResponse(); // eslint-disable-line react-hooks/rules-of-hooks
 
 // TODO: `useEmitResponse` is not a react hook, it just exposes some functions as
 // properties of an object. Refactor this to not be a hook, we could simply import
@@ -199,9 +195,8 @@ export const getPaymentResultFromCheckoutResponse = (
 		) {
 			response.payment_result.payment_details.forEach(
 				( { key, value }: { key: string; value: string } ) => {
-					paymentResult.paymentDetails[ key ] = decodeEntities(
-						value
-					);
+					paymentResult.paymentDetails[ key ] =
+						decodeEntities( value );
 				}
 			);
 		}

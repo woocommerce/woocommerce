@@ -68,17 +68,10 @@ export const CheckoutEventsProvider = ( {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const {
-		isSuccessResponse,
-		isErrorResponse,
-		isFailResponse,
-		shouldRetry,
-	} = useEmitResponse();
-	const {
-		checkoutNotices,
-		paymentNotices,
-		expressPaymentNotices,
-	} = useCheckoutNotices();
+	const { isSuccessResponse, isErrorResponse, isFailResponse, shouldRetry } =
+		useEmitResponse();
+	const { checkoutNotices, paymentNotices, expressPaymentNotices } =
+		useCheckoutNotices();
 
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
