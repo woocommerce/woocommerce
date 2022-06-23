@@ -24,10 +24,8 @@ export const getNextVersion = ( name: string ) => {
 			encoding: 'utf-8',
 		} ).trim();
 	} catch ( e ) {
-		let message = '';
 		if ( e instanceof Error ) {
-			message = e.message;
-			throw new Error( message );
+			throw e;
 		}
 	}
 };
@@ -46,10 +44,8 @@ export const validateChangelogEntries = ( name: string ) => {
 			encoding: 'utf-8',
 		} );
 	} catch ( e ) {
-		let message = '';
 		if ( e instanceof Error ) {
-			message = e.message;
-			throw new Error( message );
+			throw e;
 		}
 	}
 };
@@ -70,13 +66,8 @@ export const writeChangelog = ( name: string ) => {
 		} );
 		console.log( err );
 	} catch ( e ) {
-		let message = '';
 		if ( e instanceof Error ) {
-			console.log( e );
-			message = e.message;
-			throw new Error(
-				message + ' - Package may not have changelog entries.'
-			);
+			throw e;
 		}
 	}
 };
@@ -104,10 +95,8 @@ export const hasChangelogs = ( name: string ): boolean | void => {
 				.length > 0
 		);
 	} catch ( e ) {
-		let message = '';
 		if ( e instanceof Error ) {
-			message = e.message;
-			throw new Error( message );
+			throw e;
 		}
 	}
 };
