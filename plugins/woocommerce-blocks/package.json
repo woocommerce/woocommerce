@@ -40,7 +40,6 @@
 		"changelog": "node ./bin/changelog",
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"deploy": "npm run build:deploy && sh ./bin/github-deploy.sh",
-		"postdeploy": "npm run storybook:deploy",
 		"dev": "rimraf build/* && cross-env BABEL_ENV=default webpack",
 		"labels:dry": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels --dry-run woocommerce/woocommerce-gutenberg-products-block",
 		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-gutenberg-products-block",
