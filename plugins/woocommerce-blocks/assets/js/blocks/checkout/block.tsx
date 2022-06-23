@@ -120,10 +120,8 @@ const ScrollOnError = ( {
 			};
 		}
 	);
-	const {
-		hasValidationErrors,
-		showAllValidationErrors,
-	} = useValidationContext();
+	const { hasValidationErrors, showAllValidationErrors } =
+		useValidationContext();
 
 	const hasErrorsToDisplay =
 		checkoutIsIdle &&

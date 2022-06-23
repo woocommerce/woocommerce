@@ -38,22 +38,17 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		onCheckoutAfterProcessingWithError,
 		onSubmit,
 	} = useCheckoutEventsContext();
-	const {
-		isCalculating,
-		isComplete,
-		isIdle,
-		isProcessing,
-		customerId,
-	} = useSelect( ( select ) => {
-		const store = select( CHECKOUT_STORE_KEY );
-		return {
-			isComplete: store.isComplete(),
-			isIdle: store.isIdle(),
-			isProcessing: store.isProcessing(),
-			customerId: store.getCustomerId(),
-			isCalculating: store.isCalculating(),
-		};
-	} );
+	const { isCalculating, isComplete, isIdle, isProcessing, customerId } =
+		useSelect( ( select ) => {
+			const store = select( CHECKOUT_STORE_KEY );
+			return {
+				isComplete: store.isComplete(),
+				isIdle: store.isIdle(),
+				isProcessing: store.isProcessing(),
+				customerId: store.getCustomerId(),
+				isCalculating: store.isCalculating(),
+			};
+		} );
 
 	const {
 		currentStatus,

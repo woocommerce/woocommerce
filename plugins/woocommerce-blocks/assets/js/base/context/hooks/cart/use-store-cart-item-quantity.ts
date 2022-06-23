@@ -53,17 +53,15 @@ export const useStoreCartItemQuantity = (
 	const { key: cartItemKey = '', quantity: cartItemQuantity = 1 } =
 		verifiedCartItem;
 	const { cartErrors } = useStoreCart();
-	const { incrementCalculating, decrementCalculating } = useDispatch(
-		CHECKOUT_STORE_KEY
-	);
+	const { incrementCalculating, decrementCalculating } =
+		useDispatch( CHECKOUT_STORE_KEY );
 
 	// Store quantity in hook state. This is used to keep the UI updated while server request is updated.
 	const [ quantity, setQuantity ] = useState< number >( cartItemQuantity );
 	const [ debouncedQuantity ] = useDebounce< number >( quantity, 400 );
 	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
-	const { removeItemFromCart, changeCartItemQuantity } = useDispatch(
-		CART_STORE_KEY
-	);
+	const { removeItemFromCart, changeCartItemQuantity } =
+		useDispatch( CART_STORE_KEY );
 
 	// Update local state when server updates.
 	useEffect( () => setQuantity( cartItemQuantity ), [ cartItemQuantity ] );

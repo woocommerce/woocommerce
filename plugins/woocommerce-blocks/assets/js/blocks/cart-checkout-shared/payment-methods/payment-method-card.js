@@ -28,10 +28,8 @@ import PaymentMethodErrorBoundary from './payment-method-error-boundary';
  */
 const PaymentMethodCard = ( { children, showSaveOption } ) => {
 	const { isEditor } = useEditorContext();
-	const {
-		shouldSavePayment,
-		setShouldSavePayment,
-	} = usePaymentMethodDataContext();
+	const { shouldSavePayment, setShouldSavePayment } =
+		usePaymentMethodDataContext();
 	const customerId = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).getCustomerId()
 	);

@@ -30,10 +30,8 @@ const Block = ( {
 	const isCalculating = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isCalculating()
 	);
-	const [
-		positionReferenceElement,
-		positionRelativeToViewport,
-	] = usePositionRelativeToViewport();
+	const [ positionReferenceElement, positionRelativeToViewport ] =
+		usePositionRelativeToViewport();
 	const [ showSpinner, setShowSpinner ] = useState( false );
 
 	useEffect( () => {
