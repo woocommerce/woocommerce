@@ -25,6 +25,7 @@ export const getNextVersion = ( name: string ) => {
 		} ).trim();
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			console.log( e );
 			throw e;
 		}
 	}
@@ -45,6 +46,7 @@ export const validateChangelogEntries = ( name: string ) => {
 		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			console.log( e );
 			throw e;
 		}
 	}
@@ -58,15 +60,13 @@ export const validateChangelogEntries = ( name: string ) => {
 export const writeChangelog = ( name: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
-		console.log( 'cwd is:' );
-		console.log( cwd );
-		const err = execSync( './vendor/bin/changelogger write', {
+		execSync( './vendor/bin/changelogger write', {
 			cwd,
 			encoding: 'utf-8',
 		} );
-		console.log( err );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			console.log( e );
 			throw e;
 		}
 	}
@@ -88,14 +88,13 @@ export const hasChangelogs = ( name: string ): boolean | void => {
 			encoding: 'utf-8',
 		} );
 
-		console.log( changelogDirContents );
-
 		return (
 			changelogDirContents.filter( ( entry ) => entry !== '.gitkeep' )
 				.length > 0
 		);
 	} catch ( e ) {
 		if ( e instanceof Error ) {
+			console.log( e );
 			throw e;
 		}
 	}

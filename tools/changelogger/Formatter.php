@@ -81,8 +81,7 @@ class Formatter extends KeepAChangelogParser {
 		}
 
 		$release_url = '';
-
-		if ( 0 === stripos( $path[1], 'packages/js/' ) ) {
+		if ( str_contains( $path[1], 'packages/js/' ) ) {
 			$package = substr( $path[1], 12 );
 			$release_url ='https://www.npmjs.com/package/@woocommerce/' . $package . '/v/';
 		} else if ( 'plugins/woocommerce' === $path[1] ) {
