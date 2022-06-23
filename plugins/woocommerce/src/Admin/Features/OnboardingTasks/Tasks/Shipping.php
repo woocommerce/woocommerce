@@ -79,6 +79,11 @@ class Shipping extends Task {
 	 */
 	public function can_view() {
 		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			if ( 'yes' === get_option( 'woocommerce_admin_created_default_shipping_zones' ) ) {
+				// If the user has already created a default shipping zone, we don't need to show the task.
+				return false;
+			}
+
 			/**
 			 * Do not display the task when:
 			 * - The store sells digital products only
