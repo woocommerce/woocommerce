@@ -22,9 +22,10 @@ export enum STATUS {
 	AFTER_PROCESSING = 'after_processing',
 }
 
-const preloadedCheckoutData = getSetting( 'checkoutData', {} ) as Partial<
-	CheckoutResponseSuccess
->;
+const preloadedCheckoutData = getSetting(
+	'checkoutData',
+	{}
+) as Partial< CheckoutResponseSuccess >;
 
 export const checkoutData = {
 	order_id: 0,
