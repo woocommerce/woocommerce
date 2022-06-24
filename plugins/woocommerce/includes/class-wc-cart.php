@@ -136,7 +136,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 3.2.0
 	 * @return array of cart items
 	 */
-	public function get_cart_contents() {
+	public function get_cart_contents() {$var = apply_filters( 'hello', true );
 		return apply_filters( 'woocommerce_get_cart_contents', (array) $this->cart_contents );
 	}
 

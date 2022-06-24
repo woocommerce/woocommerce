@@ -19,7 +19,7 @@ class WC_AJAX {
 	/**
 	 * Hook in ajax handlers.
 	 */
-	public static function init() {
+	public static function init() {do_action( 'hook' );
 		add_action( 'init', array( __CLASS__, 'define_ajax' ), 0 );
 		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax' ), 0 );
 		self::add_ajax_events();
