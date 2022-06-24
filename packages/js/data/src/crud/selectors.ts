@@ -7,7 +7,7 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { Item, ItemQuery } from './types';
+import { IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
 
@@ -52,7 +52,7 @@ export const createSelectors = ( {
 			}
 
 			if ( query._fields ) {
-				return ids.map( ( id: string ) => {
+				return ids.map( ( id: IdType ) => {
 					return query._fields.reduce(
 						( item: Partial< Item >, field: string ) => {
 							return {
@@ -65,7 +65,7 @@ export const createSelectors = ( {
 				} );
 			}
 
-			return ids.map( ( id: string ) => {
+			return ids.map( ( id: IdType ) => {
 				return state.data[ id ];
 			} );
 		},

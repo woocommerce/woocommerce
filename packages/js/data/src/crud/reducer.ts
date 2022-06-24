@@ -9,15 +9,15 @@ import { Reducer } from 'redux';
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
 import { getResourceName } from '../utils';
-import { Item, ItemQuery } from './types';
+import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
-export type Data = Record< string, Item >;
+export type Data = Record< IdType, Item >;
 export type ResourceState = {
 	items: Record<
 		string,
 		{
-			data: string[];
+			data: IdType[];
 		}
 	>;
 	data: Data;
@@ -98,7 +98,7 @@ export const createReducer = () => {
 					};
 
 				case TYPES.GET_ITEMS_SUCCESS:
-					const ids: string[] = [];
+					const ids: IdType[] = [];
 
 					const nextResources = payload.items.reduce<
 						Record< string, Item >

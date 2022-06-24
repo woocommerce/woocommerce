@@ -9,7 +9,7 @@ import { apiFetch } from '@wordpress/data-controls';
  */
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
-import { Item, ItemQuery } from './types';
+import { IdType, Item, ItemQuery } from './types';
 
 type ResolverOptions = {
 	resourceName: string;
@@ -25,7 +25,7 @@ export function createItemError( query: Partial< ItemQuery >, error: unknown ) {
 	};
 }
 
-export function createItemSuccess( id: string, item: Item ) {
+export function createItemSuccess( id: IdType, item: Item ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
 		id,
@@ -33,7 +33,7 @@ export function createItemSuccess( id: string, item: Item ) {
 	};
 }
 
-export function deleteItemError( id: string, error: unknown ) {
+export function deleteItemError( id: IdType, error: unknown ) {
 	return {
 		type: TYPES.DELETE_ITEM_ERROR as const,
 		id,
@@ -42,7 +42,7 @@ export function deleteItemError( id: string, error: unknown ) {
 	};
 }
 
-export function deleteItemSuccess( id: string, force: boolean, item: Item ) {
+export function deleteItemSuccess( id: IdType, force: boolean, item: Item ) {
 	return {
 		type: TYPES.DELETE_ITEM_SUCCESS as const,
 		id,
@@ -60,7 +60,7 @@ export function getItemError( id: unknown, error: unknown ) {
 	};
 }
 
-export function getItemSuccess( id: string, item: Item ) {
+export function getItemSuccess( id: IdType, item: Item ) {
 	return {
 		type: TYPES.GET_ITEM_SUCCESS as const,
 		id,
@@ -94,7 +94,7 @@ export function updateItemError( id: unknown, error: unknown ) {
 	};
 }
 
-export function updateItemSuccess( id: string, item: Item ) {
+export function updateItemSuccess( id: IdType, item: Item ) {
 	return {
 		type: TYPES.UPDATE_ITEM_SUCCESS as const,
 		id,
@@ -121,7 +121,7 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	const deleteItem = function* ( id: string, force = true ) {
+	const deleteItem = function* ( id: IdType, force = true ) {
 		try {
 			const item: Item = yield apiFetch( {
 				path: addQueryArgs( `${ namespace }/${ id }`, { force } ),
@@ -136,7 +136,7 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	const updateItem = function* ( id: string, query: Partial< ItemQuery > ) {
+	const updateItem = function* ( id: IdType, query: Partial< ItemQuery > ) {
 		try {
 			const item: Item = yield apiFetch( {
 				path: addQueryArgs( `${ namespace }/${ id }`, query ),

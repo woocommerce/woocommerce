@@ -3,8 +3,10 @@
  */
 import { BaseQueryParams } from '../types';
 
+export type IdType = number | string;
+
 export type Item = {
-	id: string;
+	id: IdType;
 	[ key: string ]: unknown;
 };
 
