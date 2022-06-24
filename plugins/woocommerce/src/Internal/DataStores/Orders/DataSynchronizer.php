@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\DataBase\BatchProcessor;
+use Automattic\WooCommerce\Internal\Utilities\BatchProcessor;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
@@ -270,7 +270,7 @@ WHERE
 	 *
 	 * @param array $batch Batch details.
 	 */
-	protected function process_for_batch( array $batch ) {
+	public function process_for_batch( array $batch ) {
 		$this->posts_to_cot_migrator->migrate_orders( $batch );
 	}
 
@@ -291,7 +291,7 @@ WHERE
 	 *
 	 * @return array Batch of records.
 	 */
-	protected function get_batch_data( int $size, $last_processed ): array {
+	public function get_batch_data( int $size, $last_processed ): array {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $size );
 		} else {
@@ -310,7 +310,7 @@ WHERE
 	 *
 	 * @return int Default batch size.
 	 */
-	protected function get_default_batch_size(): int {
+	public function get_default_batch_size(): int {
 		/**
 		 * Filter to customize the count of orders that will be synchronized in each step of the custom orders table to/from posts table synchronization process.
 		 *
@@ -319,15 +319,6 @@ WHERE
 		 * @param int Default value for the count.
 		 */
 		return apply_filters( 'woocommerce_orders_cot_and_posts_sync_step_size', self::ORDERS_SYNC_BATCH_SIZE );
-	}
-
-	/**
-	 * Log an error if happens during migration processing.
-	 *
-	 * @param \Exception $error Exception object.
-	 */
-	protected function log_error( \Exception $error ): void {
-		// TODO: Implement log_error() method.
 	}
 
 	/**

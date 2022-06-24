@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Utilities\BatchProcessingController;
 
 defined( 'ABSPATH' ) || exit;
 

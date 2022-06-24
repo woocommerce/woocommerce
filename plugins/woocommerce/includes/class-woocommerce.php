@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
-use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Utilities\BatchProcessingController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**

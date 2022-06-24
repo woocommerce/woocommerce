@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
-use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Utilities\BatchProcessingController;
 
 /**
  * Class BatchProcessingServiceProvider
