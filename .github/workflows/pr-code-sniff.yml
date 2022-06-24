@@ -15,8 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: woocommerce/woocommerce
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -28,14 +27,6 @@ jobs:
         run: |
           php --version
           composer --version
-
-      - uses: ./.github/actions/cache-deps
-        with:
-          workflow_name: pr-code-sniff
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Install and Build
-        uses: ./.github/actions/install-build
 
       - name: Run code sniff
         continue-on-error: false
