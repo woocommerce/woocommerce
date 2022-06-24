@@ -115,8 +115,6 @@ class WC_Geolocation {
 				$service_endpoint = $ip_lookup_services[ $service_name ];
 				$response         = wp_safe_remote_get( $service_endpoint, array( 'timeout' => 2, 'user-agent' => 'WooCommerce/' . wc()->version ) );
 
-				// 'user-agent'          => apply_filters( 'http_headers_useragent', 'WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ), $url ),
-
 				if ( ! is_wp_error( $response ) && rest_is_ip_address( $response['body'] ) ) {
 					$external_ip_address = apply_filters( 'woocommerce_geolocation_ip_lookup_api_response', wc_clean( $response['body'] ), $service_name );
 					break;
