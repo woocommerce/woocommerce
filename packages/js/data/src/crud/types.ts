@@ -14,6 +14,8 @@ import {
 
 export type IdType = number | string;
 
+export type IdType = number | string;
+
 export type Item = {
 	id: IdType;
 	[ key: string ]: unknown;
