@@ -67,3 +67,68 @@
 		}
 	}
 }
+
+.woocommerce-task-shipping-shipping-label-printing {
+	border: 1px solid #ddd;
+	width: 100%;
+	margin-bottom: 16px;
+
+	.content {
+		width: 380px;
+	}
+	.banner {
+		margin-top: 15px;
+	}
+
+	.shipping-label-printing-row {
+		height: 190px;
+		width: 586px;
+		padding: 18px;
+	}
+
+	.shipping-label-printing-row::after {
+		content: '';
+		display: table;
+		clear: both;
+	}
+
+	.shipping-label-printing-col {
+		float: left;
+	}
+
+	.row {
+		display: flex;
+	}
+	.col {
+		display: flex;
+		flex-direction: column;
+		flex-basis: auto;
+		justify-content: left;
+		div:first-child {
+			font-weight: 600;
+			margin-bottom: 6px;
+		}
+		margin-bottom: 14px;
+	}
+	.col-left {
+		margin-right: 12px;
+		div {
+			padding: 6px;
+			background: #f6f7f7;
+			border-radius: 4px;
+			width: 28px;
+			height: 28px;
+			margin-top: 7px;
+		}
+		flex: 0 0 26px;
+		svg {
+			width: 16px;
+			height: 16px;
+			fill: #8c8f94;
+		}
+		.icon-percentage {
+			color: #8c8f94;
+			text-align: center;
+		}
+	}
+}

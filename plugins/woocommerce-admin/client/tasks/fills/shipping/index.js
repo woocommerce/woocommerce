@@ -29,6 +29,7 @@ import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
+import { ShippingLabelPrinting } from './ShippingLabelPrinting/ShippingLabelPrinting';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
 
@@ -46,6 +47,10 @@ export class Shipping extends Component {
 		this.activePlugins = props.activePlugins;
 		this.state = this.initialState;
 		this.completeStep = this.completeStep.bind( this );
+
+		this.shippingSmartDefaultsEnabled =
+			window.wcAdminFeatures &&
+			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
 	}
 
 	componentDidMount() {
@@ -210,6 +215,7 @@ export class Shipping extends Component {
 							updateAndPersistSettingsForGroup
 						}
 						settings={ settings }
+						buttonText={ __( 'Continue', 'woocommerce' ) }
 						onComplete={ ( values ) => {
 							const country = getCountryCode(
 								values.countryState
@@ -328,12 +334,116 @@ export class Shipping extends Component {
 			},
 		];
 
+		// Override the step fields for the smart shipping defaults.
+		if ( this.shippingSmartDefaultsEnabled ) {
+			const shippingSmartDefaultsSteps = {
+				rates: {
+					label: __( 'Review your shipping options', 'woocommerce' ),
+					description: __(
+						'We recommend the following shipping options based on your location. You can manage your shipping options again at any time in WooCommerce Shipping settings.',
+						'woocommerce'
+					),
+					content: (
+						<ShippingRates
+							buttonText={ __(
+								'Save shipping options',
+								'woocommerce'
+							) }
+							shippingZones={ this.state.shippingZones }
+							onComplete={ () => {
+								const { id } = task;
+								optimisticallyCompleteTask( id );
+								invalidateResolutionForStoreSelector();
+								this.completeStep();
+							} }
+							createNotice={ createNotice }
+						/>
+					),
+				},
+				label_printing: {
+					label: __(
+						'Enable shipping label printing and discounted rates',
+						'woocommerce'
+					),
+					description: __(
+						'Save time and fulfill your orders with WooCommerce Shipping. You can manage it at any time in WooCommerce Shipping Settings.',
+						'woocommerce'
+					),
+					content: (
+						<>
+							<ShippingLabelPrinting />
+							<Plugins
+								onComplete={ ( plugins, response ) => {
+									createNoticesFromResponse( response );
+									recordEvent(
+										'tasklist_shipping_label_printing',
+										{
+											install: true,
+											plugins_to_activate:
+												pluginsToActivate,
+										}
+									);
+									this.completeStep();
+								} }
+								onError={ ( errors, response ) =>
+									createNoticesFromResponse( response )
+								}
+								onSkip={ () => {
+									recordEvent(
+										'tasklist_shipping_label_printing',
+										{
+											install: false,
+											plugins_to_activate:
+												pluginsToActivate,
+										}
+									);
+									getHistory().push(
+										getNewPath( {}, '/', {} )
+									);
+									onComplete();
+								} }
+								pluginSlugs={ pluginsToActivate }
+							/>
+						</>
+					),
+				},
+				store_location: {
+					label: __( 'Set your store location', 'woocommerce' ),
+					description: __(
+						'Add your store location to help us calculate shipping rates and the best shipping options for you. You can manage your store location again at any time in WooCommerce Settings General.',
+						'woocommerce'
+					),
+					buttonText: __( 'Save store location', 'woocommerce' ),
+				},
+			};
+
+			for ( const i in shippingSmartDefaultsSteps ) {
+				for ( const j in steps ) {
+					if ( steps[ j ].key === i ) {
+						steps[ j ] = {
+							...steps[ j ],
+							...shippingSmartDefaultsSteps[ i ],
+						};
+					}
+				}
+			}
+		}
+
 		return filter( steps, ( step ) => step.visible );
 	}
 
 	render() {
 		const { isPending, step } = this.state;
 		const { isUpdateSettingsRequesting } = this.props;
+		const steps = this.getSteps();
+		// Empty description field if it's not the current step.
+		if ( this.shippingSmartDefaultsEnabled ) {
+			for ( const i in steps ) {
+				if ( steps[ i ].key !== step ) {
+					steps[ i ].description = '';
+				}
+			}
+		}
 
 		return (
 			<div className="woocommerce-task-shipping">
@@ -345,7 +455,7 @@ export class Shipping extends Component {
 							}
 							isVertical
 							currentStep={ step }
-							steps={ this.getSteps() }
+							steps={ steps }
 						/>
 					</CardBody>
 				</Card>
