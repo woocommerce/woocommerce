@@ -9,7 +9,7 @@ if [ "$CHANGED_FILES" != "" ]; then
 	echo "Running Code Sniffer."
 	echo "Default branch: $DEFAULT_BRANCH"
 
-	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git --report=full -s --ignore=${IGNORE} --git-base ${1} ${CHANGED_FILES}
+	PHPCS="./vendor/bin/phpcs" ./vendor/bin/phpcs-changed --git --report=full -s --ignore=${IGNORE} --git-base trunk ${CHANGED_FILES}
 else
 	echo "No changes found. Skipping PHPCS run."
 fi
