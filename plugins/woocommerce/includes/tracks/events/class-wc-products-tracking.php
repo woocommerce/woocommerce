@@ -144,7 +144,6 @@ class WC_Products_Tracking {
 				if ( ! isBlockEditor & hasRecordedEvent) {
                 	return;
             	}
-          		console.log(isBlockEditor);
 
        			var description_value  = '';
      			var tagsText = '';
