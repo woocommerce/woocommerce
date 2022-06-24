@@ -17,12 +17,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install PHP_CodeSniffer
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: composer
+
+      - name: Tool versions
         run: |
-          curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-          php phpcs.phar --version
+          php --version
+          composer --version
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: pr-code-sniff
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+      - name: Install and Build
+        uses: ./.github/actions/install-build
 
       - uses: thenabeel/action-phpcs@v8
         with:
           files: "**.php" # you may customize glob as needed
-          phpcs_path: php phpcs.phar
+          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
+          standard: phpcs.xml
