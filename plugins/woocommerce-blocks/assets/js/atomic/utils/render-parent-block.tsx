@@ -93,6 +93,7 @@ const renderForcedBlocks = (
 						: getBlockComponentFromMap( blockName, blockMap );
 					return ForcedComponent ? (
 						<BlockErrorBoundary
+							key={ `${ blockName }_blockerror` }
 							text={ `Unexpected error in: ${ blockName }` }
 							showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
 						>
