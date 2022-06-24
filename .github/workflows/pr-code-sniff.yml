@@ -9,19 +9,19 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test:
-    name: Code sniff (PHP 7.4)
+    name: Code sniff (PHP 7.4, WP Latest)
     timeout-minutes: 15
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
-          tools: composer, cs2pr
+          tools: composer
 
       - name: Tool versions
         run: |
@@ -36,6 +36,8 @@ jobs:
       - name: Install and Build
         uses: ./.github/actions/install-build
 
-      - name: Run code sniff
-        working-directory: plugins/woocommerce
-        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
+      - uses: thenabeel/action-phpcs@v8
+        with:
+          files: "**.php"
+          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
+          standard: phpcs.xml
