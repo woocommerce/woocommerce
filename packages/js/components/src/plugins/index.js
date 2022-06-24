@@ -18,7 +18,6 @@ export class Plugins extends Component {
 		};
 
 		this.installAndActivate = this.installAndActivate.bind( this );
-		this.skipInstaller = this.skipInstaller.bind( this );
 		this.handleErrors = this.handleErrors.bind( this );
 		this.handleSuccess = this.handleSuccess.bind( this );
 	}
@@ -66,7 +65,9 @@ export class Plugins extends Component {
 	}
 
 	skipInstaller() {
-		this.props.onSkip();
+		if ( this.props.onSkip ) {
+			this.props.onSkip();
+		}
 	}
 
 	render() {
@@ -75,6 +76,7 @@ export class Plugins extends Component {
 			skipText,
 			autoInstall,
 			pluginSlugs,
+			onSkip,
 			onAbort,
 			abortText,
 		} = this.props;
@@ -90,9 +92,14 @@ export class Plugins extends Component {
 					>
 						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
-					<Button onClick={ this.skipInstaller }>
-						{ __( 'Continue without installing', 'woocommerce' ) }
-					</Button>
+					{ onSkip && (
+						<Button onClick={ this.skipInstaller }>
+							{ __(
+								'Continue without installing',
+								'woocommerce'
+							) }
+						</Button>
+					) }
 				</Fragment>
 			);
 		}
@@ -124,9 +131,11 @@ export class Plugins extends Component {
 				>
 					{ __( 'Install & enable', 'woocommerce' ) }
 				</Button>
-				<Button isTertiary onClick={ this.skipInstaller }>
-					{ skipText || __( 'No thanks', 'woocommerce' ) }
-				</Button>
+				{ onSkip && (
+					<Button isTertiary onClick={ this.skipInstaller }>
+						{ skipText || __( 'No thanks', 'woocommerce' ) }
+					</Button>
+				) }
 				{ onAbort && (
 					<Button isTertiary onClick={ onAbort }>
 						{ abortText || __( 'Abort', 'woocommerce' ) }
@@ -175,7 +184,6 @@ Plugins.propTypes = {
 Plugins.defaultProps = {
 	autoInstall: false,
 	onError: () => {},
-	onSkip: () => {},
 	pluginSlugs: [ 'jetpack', 'woocommerce-services' ],
 };
 
