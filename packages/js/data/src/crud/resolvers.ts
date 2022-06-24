@@ -26,7 +26,7 @@ export const createResolvers = ( {
 	pluralResourceName,
 	namespace,
 }: ResolverOptions ) => {
-    const getItem = function* ( id: number ) {
+	const getItem = function* ( id: number ) {
 		try {
 			const item: Item = yield apiFetch( {
 				path: `${ namespace }/${ id }`,
