@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
+do_action( 'hook' );
+
 /**
  * WC_Ajax class.
  */
