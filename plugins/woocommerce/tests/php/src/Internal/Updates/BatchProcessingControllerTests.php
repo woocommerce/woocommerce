@@ -4,7 +4,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\Updates\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Utilities\BatchProcessingController;
 
 /**
  * Class BatchProcessingControllerTests.
@@ -28,7 +28,7 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 */
 	public function setUp() : void {
 		parent::setUp();
-		$this->sut = wc_get_container()->get( BatchProcessingController::class );
+		$this->sut          = wc_get_container()->get( BatchProcessingController::class );
 		$this->test_process = wc_get_container()->get( DataSynchronizer::class );
 		$this->sut->force_clear_all_processes();
 	}
@@ -62,7 +62,9 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 */
 	public function test_process_single_update_unfinished() {
 		$test_process_mock = $this->getMockBuilder( get_class( $this->test_process ) )->getMock();
-		$test_process_mock->expects( $this->once() )->method( 'process_batch' )->willReturn( true );
+		$test_process_mock->expects( $this->once() )->method( 'process_for_batch' )->willReturn( true );
+		$test_process_mock->expects( $this->once() )->method( 'get_total_pending_count' )->willReturn( 10 );
+		$test_process_mock->expects( $this->once() )->method( 'get_batch_data' )->willReturn( array( 'dummy_id' ) );
 
 		add_filter(
 			'woocommerce_get_batch_processor',
@@ -71,7 +73,7 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 			}
 		);
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
-		do_action( $this->sut::SINGLE_PROCESS_MIGRATION_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::SINGLE_BATCH_PROCESS_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertTrue( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
 		$this->assertTrue( $this->sut->is_batch_process_pending( get_class( $this->test_process ) ) );
@@ -82,8 +84,9 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 */
 	public function test_process_single_update_finished() {
 		$test_process_mock = $this->getMockBuilder( get_class( $this->test_process ) )->getMock();
-		$test_process_mock->expects( $this->once() )->method( 'process_batch' )->willReturn( false );
-		$test_process_mock->expects( $this->once() )->method( 'mark_process_complete' );
+		$test_process_mock->expects( $this->once() )->method( 'process_for_batch' )->willReturn( true );
+		$test_process_mock->expects( $this->once() )->method( 'get_total_pending_count' )->willReturn( 0 );
+		$test_process_mock->expects( $this->once() )->method( 'get_batch_data' )->willReturn( array( 'dummy_id' ) );
 
 		add_filter(
 			'woocommerce_get_batch_processor',
@@ -92,7 +95,7 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 			}
 		);
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
-		do_action( $this->sut::SINGLE_PROCESS_MIGRATION_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::SINGLE_BATCH_PROCESS_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertFalse( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
 		$this->assertFalse( $this->sut->is_batch_process_pending( get_class( $this->test_process ) ) );
