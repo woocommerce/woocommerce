@@ -67,7 +67,7 @@ export const createReducer = () => {
 					const itemIds = Object.keys( state.data );
 					const nextData = itemIds.reduce< Data >(
 						( items: Data, id: string ) => {
-							if ( id !== payload.id ) {
+							if ( id !== payload.id.toString() ) {
 								items[ id ] = state.data[ id ];
 								return items;
 							}
@@ -85,6 +85,7 @@ export const createReducer = () => {
 						data: nextData,
 					};
 
+				case TYPES.DELETE_ITEM_ERROR:
 				case TYPES.GET_ITEM_ERROR:
 				case TYPES.UPDATE_ITEM_ERROR:
 					return {

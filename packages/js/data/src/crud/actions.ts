@@ -38,7 +38,7 @@ export function deleteItemError( id: IdType, error: unknown ) {
 		type: TYPES.DELETE_ITEM_ERROR as const,
 		id,
 		error,
-		errorType: CRUD_ACTIONS.CREATE_ITEM,
+		errorType: CRUD_ACTIONS.DELETE_ITEM,
 	};
 }
 
