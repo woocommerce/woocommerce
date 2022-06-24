@@ -16,7 +16,9 @@ const WooCommerceServicesItem: React.FC< {
 	isWCSInstalled: boolean | undefined;
 } > = ( { isWCSInstalled } ) => {
 	const handleSetupClick = () => {
-		navigateTo( { url: getNewPath( { task: 'wcs-shipping' }, '/', {} ) } );
+		navigateTo( {
+			url: getNewPath( { task: 'shipping-recommendation' }, '/', {} ),
+		} );
 	};
 
 	return (

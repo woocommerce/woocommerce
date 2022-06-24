@@ -282,6 +282,20 @@ class TaskLists {
 					self::get_list( 'extended_two_column' )
 				)
 			);
+
+			// Tasklist that will never be shown in homescreen,
+			// used for having tasks that are accessed by other means.
+			self::add_list(
+				array(
+					'id'           => 'secret_tasklist',
+					'hidden_id'    => 'secret',
+					'tasks'        => array(
+						'ExperimentalShippingRecommendation',
+					),
+					'event_prefix' => 'secret_tasklist_',
+					'visible' => false,
+				)
+			);
 		}
 	}
 
