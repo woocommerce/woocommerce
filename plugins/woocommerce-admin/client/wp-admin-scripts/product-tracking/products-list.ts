@@ -9,9 +9,8 @@ const initTracks = () => {
 		'#bulk-action-selector-top'
 	) as HTMLInputElement;
 	const bulkActionsButton = document.querySelector( '#doaction' );
-	const bulkActionsCancelButton = document.querySelector(
-		'#bulk-edit .cancel'
-	);
+	const bulkActionsCancelButton =
+		document.querySelector( '#bulk-edit .cancel' );
 	const bulkActionsUpdateButton = document.querySelector( '#bulk_edit' );
 	const featuredButtons = document.querySelectorAll(
 		'#the-list .featured a'
@@ -60,8 +59,8 @@ const initTracks = () => {
 
 	bulkActionsUpdateButton?.addEventListener( 'click', function () {
 		recordEvent( 'products_list_bulk_edit_update', {
-			product_number: document.querySelector( '#bulk-titles' )?.children
-				.length,
+			product_number:
+				document.querySelector( '#bulk-titles' )?.children.length,
 			product_categories:
 				document.querySelectorAll(
 					'[name="tax_input[product_cat][]"]:checked'
@@ -119,9 +118,9 @@ const initTracks = () => {
 
 	featuredButtons.forEach( ( button ) => {
 		button.addEventListener( 'click', function ( event ) {
-			const willFeature = ( event.target as HTMLElement ).classList.contains(
-				'not-featured'
-			);
+			const willFeature = (
+				event.target as HTMLElement
+			 ).classList.contains( 'not-featured' );
 
 			recordEvent( 'products_list_featured_click', {
 				featured: willFeature ? 'yes' : 'no',

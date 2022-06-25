@@ -126,10 +126,8 @@ class ReportFilters extends Component {
 			query,
 			defaultDateRange
 		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query, defaultDateRange );
+		const { primary: primaryDate, secondary: secondaryDate } =
+			getCurrentDates( query, defaultDateRange );
 		const dateQuery = {
 			period,
 			compare,

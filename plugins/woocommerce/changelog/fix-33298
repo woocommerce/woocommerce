@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a warning caused by an attempt to iterate over a submenu that may not exist on WC Pay subscriptions page.

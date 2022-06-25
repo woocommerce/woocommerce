@@ -45,24 +45,22 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 		PAYMENT_GATEWAYS_STORE_NAME
 	);
 
-	const {
-		isOptionUpdating,
-		isPaymentGatewayResolving,
-		needsPluginInstall,
-	} = useSelect( ( select ) => {
-		const { isOptionsUpdating } = select( OPTIONS_STORE_NAME );
-		const { isResolving } = select( PAYMENT_GATEWAYS_STORE_NAME );
-		const activePlugins = select( PLUGINS_STORE_NAME ).getActivePlugins();
-		const pluginsToInstall = plugins.filter(
-			( m ) => ! activePlugins.includes( m )
-		);
+	const { isOptionUpdating, isPaymentGatewayResolving, needsPluginInstall } =
+		useSelect( ( select ) => {
+			const { isOptionsUpdating } = select( OPTIONS_STORE_NAME );
+			const { isResolving } = select( PAYMENT_GATEWAYS_STORE_NAME );
+			const activePlugins =
+				select( PLUGINS_STORE_NAME ).getActivePlugins();
+			const pluginsToInstall = plugins.filter(
+				( m ) => ! activePlugins.includes( m )
+			);
 
-		return {
-			isOptionUpdating: isOptionsUpdating(),
-			isPaymentGatewayResolving: isResolving( 'getPaymentGateways' ),
-			needsPluginInstall: !! pluginsToInstall.length,
-		};
-	} );
+			return {
+				isOptionUpdating: isOptionsUpdating(),
+				isPaymentGatewayResolving: isResolving( 'getPaymentGateways' ),
+				needsPluginInstall: !! pluginsToInstall.length,
+			};
+		} );
 
 	useEffect( () => {
 		if ( needsPluginInstall ) {

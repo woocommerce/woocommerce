@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add type hints in the signature of wc_add_number_precision to prevent invalid inputs.

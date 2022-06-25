@@ -44,8 +44,7 @@ describe( 'Products', () => {
 
 		userEvent.click(
 			getByRole( 'menuitem', {
-				name:
-					'FROM A CSV FILE Import all products at once by uploading a CSV file.',
+				name: 'FROM A CSV FILE Import all products at once by uploading a CSV file.',
 			} )
 		);
 		await waitFor( () =>
@@ -63,8 +62,7 @@ describe( 'Products', () => {
 
 		userEvent.click(
 			getByRole( 'menuitem', {
-				name:
-					'FROM CART2CART Migrate all store data like products, customers, and orders in no time with this 3rd party plugin. Learn more (opens in a new tab)',
+				name: 'FROM CART2CART Migrate all store data like products, customers, and orders in no time with this 3rd party plugin. Learn more (opens in a new tab)',
 			} )
 		);
 		await waitFor( () =>
@@ -92,8 +90,7 @@ describe( 'Products', () => {
 
 		userEvent.click(
 			getByRole( 'menuitem', {
-				name:
-					'FROM A CSV FILE Import all products at once by uploading a CSV file.',
+				name: 'FROM A CSV FILE Import all products at once by uploading a CSV file.',
 			} )
 		);
 		await waitFor( () => {

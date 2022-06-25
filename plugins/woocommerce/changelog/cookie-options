@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Introduce new hook `woocommerce_set_cookie_options` to exercise more control over cookie options.

@@ -26,9 +26,8 @@ function CustomersReportTable( {
 } ) {
 	const context = useContext( CurrencyContext );
 	const { countries, loadingCountries } = useSelect( ( select ) => {
-		const { getCountries, hasFinishedResolution } = select(
-			COUNTRIES_STORE_NAME
-		);
+		const { getCountries, hasFinishedResolution } =
+			select( COUNTRIES_STORE_NAME );
 		return {
 			countries: getCountries(),
 			loadingCountries: ! hasFinishedResolution( 'getCountries' ),

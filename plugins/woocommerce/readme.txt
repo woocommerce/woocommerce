@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.6.0
+Stable tag: 6.6.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,6 +160,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 6.7.0 2022-XX-XX =
+= 6.8.0 2022-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

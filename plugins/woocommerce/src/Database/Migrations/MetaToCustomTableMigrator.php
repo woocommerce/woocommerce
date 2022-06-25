@@ -563,7 +563,7 @@ WHERE
 	private function validate_data( $value, string $type ) {
 		switch ( $type ) {
 			case 'decimal':
-				$value = (float) $value;
+				$value = wc_format_decimal( $value, false, true );
 				break;
 			case 'int':
 				$value = (int) $value;
@@ -778,6 +778,9 @@ WHERE $where_clause
 	 */
 	private function pre_process_row( $row, $schema, $alias, $destination_alias ) {
 		if ( in_array( $schema['type'], array( 'int', 'decimal' ), true ) ) {
+			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
+				$row[ $alias ] = 0; // $wpdb->prepare forces empty values to 0.
+			}
 			$row[ $alias ]             = wc_format_decimal( $row[ $alias ], false, true );
 			$row[ $destination_alias ] = wc_format_decimal( $row[ $destination_alias ], false, true );
 		}

@@ -18,9 +18,8 @@ export const StoreLocation: React.FC< {
 	nextStep: () => void;
 } > = ( { nextStep } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } = useDispatch(
-		SETTINGS_STORE_NAME
-	);
+	const { updateAndPersistSettingsForGroup } =
+		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving } = useSelect( ( select ) => {
 		const { getSettings, hasFinishedResolution } = select(
 			SETTINGS_STORE_NAME

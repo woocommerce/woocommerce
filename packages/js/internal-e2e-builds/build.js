@@ -126,8 +126,10 @@ function buildPackage( packagePath ) {
 
 	let packageName;
 	try {
-		packageName = require( path.resolve( PACKAGE_DIR, 'package.json' ) )
-			.name;
+		packageName = require( path.resolve(
+			PACKAGE_DIR,
+			'package.json'
+		) ).name;
 	} catch ( e ) {
 		packageName = PACKAGE_DIR.split( path.sep ).pop();
 	}

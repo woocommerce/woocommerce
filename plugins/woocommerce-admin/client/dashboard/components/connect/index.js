@@ -21,13 +21,8 @@ export class Connect extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const {
-			createNotice,
-			error,
-			isRequesting,
-			onError,
-			setIsPending,
-		} = this.props;
+		const { createNotice, error, isRequesting, onError, setIsPending } =
+			this.props;
 
 		if ( prevProps.isRequesting && ! isRequesting ) {
 			setIsPending( false );
@@ -162,11 +157,8 @@ Connect.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const {
-			getJetpackConnectUrl,
-			isPluginsRequesting,
-			getPluginsError,
-		} = select( PLUGINS_STORE_NAME );
+		const { getJetpackConnectUrl, isPluginsRequesting, getPluginsError } =
+			select( PLUGINS_STORE_NAME );
 
 		const queryArgs = {
 			redirect_url: props.redirectUrl || window.location.href,

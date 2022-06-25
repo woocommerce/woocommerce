@@ -100,7 +100,7 @@ export type ProductCount = '0' | '1-10' | '11-100' | '101 - 1000' | '1000+';
 export type ProductTypeSlug =
 	| 'physical'
 	| 'bookings'
-	| 'download'
+	| 'downloads'
 	| 'memberships'
 	| 'product-add-ons'
 	| 'product-bundles'
@@ -126,7 +126,7 @@ export type RevenueTypeSlug =
 	| 'more-than-250000';
 
 export type ProfileItems = {
-	business_extensions: [  ] | null;
+	business_extensions: [] | null;
 	completed: boolean | null;
 	industry: Industry[] | null;
 	number_employees: string | null;

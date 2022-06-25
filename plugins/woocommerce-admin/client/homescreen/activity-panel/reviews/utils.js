@@ -13,9 +13,8 @@ export const unapprovedReviewsQuery = {
 	_fields: [ 'id' ],
 };
 export function getUnapprovedReviews( select ) {
-	const { getReviewsTotalCount, getReviewsError, isResolving } = select(
-		REVIEWS_STORE_NAME
-	);
+	const { getReviewsTotalCount, getReviewsError, isResolving } =
+		select( REVIEWS_STORE_NAME );
 
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const totalReviews = getReviewsTotalCount( unapprovedReviewsQuery );

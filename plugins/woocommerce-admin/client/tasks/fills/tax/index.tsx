@@ -55,9 +55,8 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } = useDispatch(
-		SETTINGS_STORE_NAME
-	);
+	const { updateAndPersistSettingsForGroup } =
+		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } = select(

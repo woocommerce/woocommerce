@@ -392,8 +392,7 @@ const testSubscriptionsInclusion = () => {
 			await profileWizard.productTypes.isDisplayed( 7 );
 			await profileWizard.productTypes.selectProduct( 'Subscriptions' );
 			await expect( page ).not.toMatchElement( 'p', {
-				text:
-					'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
+				text: 'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
 			} );
 
 			await profileWizard.continue();
@@ -472,8 +471,7 @@ const testSubscriptionsInclusion = () => {
 			await profileWizard.productTypes.isDisplayed( 7 );
 			await profileWizard.productTypes.selectProduct( 'Subscriptions' );
 			await expect( page ).toMatchElement( 'p', {
-				text:
-					'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
+				text: 'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.',
 			} );
 
 			await profileWizard.continue();

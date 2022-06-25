@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Make the option 'woocommerce_tracker_ua' load on demand.

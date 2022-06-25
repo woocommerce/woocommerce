@@ -90,13 +90,10 @@ class ReportFilters extends Component {
 	}
 
 	getDateQuery( query ) {
-		const { period, compare, before, after } = getDateParamsFromQuery(
-			query
-		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query );
+		const { period, compare, before, after } =
+			getDateParamsFromQuery( query );
+		const { primary: primaryDate, secondary: secondaryDate } =
+			getCurrentDates( query );
 		return {
 			period,
 			compare,
