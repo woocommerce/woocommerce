@@ -30,7 +30,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '6.7.0';
+	public $version = '6.8.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -722,18 +722,14 @@ final class WooCommerce {
 		$single            = wc_get_image_size( 'single' );
 		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
 
+		// check if string (like `thumbnail`) wasn't passed with `woocommerce_get_image_size_gallery_thumbnail` filter
+		if( !is_array( $gallery_thumbnail ) && is_string( $gallery_thumbnail ) ) {
+			$gallery_thumbnail = wc_get_image_size( $gallery_thumbnail );
+		}
+		
 		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
-
-		/**
-		 * Legacy image sizes.
-		 *
-		 * @deprecated 3.3.0 These sizes will be removed in 4.6.0.
-		 */
-		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
-		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
-		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 	}
 
 	/**

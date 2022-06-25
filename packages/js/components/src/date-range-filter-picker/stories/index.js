@@ -22,9 +22,8 @@ const storeGetDateParamsFromQuery = partialRight(
 );
 const storeGetCurrentDates = partialRight( getCurrentDates, defaultDateRange );
 const { period, compare, before, after } = storeGetDateParamsFromQuery( query );
-const { primary: primaryDate, secondary: secondaryDate } = storeGetCurrentDates(
-	query
-);
+const { primary: primaryDate, secondary: secondaryDate } =
+	storeGetCurrentDates( query );
 const dateQuery = {
 	period,
 	compare,

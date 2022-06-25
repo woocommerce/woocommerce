@@ -29,9 +29,11 @@ export function getUrlParams( locationSearch ) {
  */
 export function getScreenName() {
 	let screenName = '';
-	const { page, path, post_type: postType } = getUrlParams(
-		window.location.search
-	);
+	const {
+		page,
+		path,
+		post_type: postType,
+	} = getUrlParams( window.location.search );
 	if ( page ) {
 		const currentPage = page === 'wc-admin' ? 'home_screen' : page;
 		screenName = path

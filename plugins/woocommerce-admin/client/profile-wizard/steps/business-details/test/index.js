@@ -60,9 +60,8 @@ describe( 'BusinessDetails', () => {
 				install_wcpay: true,
 			};
 
-			const installedExtensions = prepareExtensionTrackingData(
-				extensions
-			);
+			const installedExtensions =
+				prepareExtensionTrackingData( extensions );
 
 			expect( installedExtensions ).toEqual( expectedExtensions );
 		} );
@@ -192,12 +191,10 @@ describe( 'BusinessDetails', () => {
 			expect( notSellingElsewhere ).toBeFalsy();
 		} );
 		test( 'isSellingOtherPlatformInPerson', () => {
-			const sellingAnotherPlatformAndInPerson = isSellingOtherPlatformInPerson(
-				'brick-mortar-other'
-			);
-			const notSellingAnotherPlatformAndInPerson = isSellingOtherPlatformInPerson(
-				'no'
-			);
+			const sellingAnotherPlatformAndInPerson =
+				isSellingOtherPlatformInPerson( 'brick-mortar-other' );
+			const notSellingAnotherPlatformAndInPerson =
+				isSellingOtherPlatformInPerson( 'no' );
 
 			expect( sellingAnotherPlatformAndInPerson ).toBeTruthy();
 			expect( notSellingAnotherPlatformAndInPerson ).toBeFalsy();

@@ -353,9 +353,8 @@ export default compose(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 		const datesFromQuery = getCurrentDates( query, defaultDateRange );
-		const { getReportStats, getReportStatsError, isResolving } = select(
-			REPORTS_STORE_NAME
-		);
+		const { getReportStats, getReportStatsError, isResolving } =
+			select( REPORTS_STORE_NAME );
 
 		const tableQuery = formatTableQuery(
 			query.order || 'desc',

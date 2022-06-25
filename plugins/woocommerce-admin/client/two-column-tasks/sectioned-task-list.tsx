@@ -26,7 +26,8 @@ type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
 	onToggle?: ( isOpen: boolean ) => void;
 };
-const PanelBodyWithUpdatedType = PanelBody as React.ComponentType< PanelBodyProps >;
+const PanelBodyWithUpdatedType =
+	PanelBody as React.ComponentType< PanelBodyProps >;
 
 export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	query,
@@ -45,10 +46,8 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const {
-		hideTaskList,
-		keepCompletedTaskList: keepCompletedTasks,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	const { hideTaskList, keepCompletedTaskList: keepCompletedTasks } =
+		useDispatch( ONBOARDING_STORE_NAME );
 	const [ openPanel, setOpenPanel ] = useState< string | null >(
 		sections?.find( ( section ) => ! section.isComplete )?.id || null
 	);

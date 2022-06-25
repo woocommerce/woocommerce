@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Update Danish currency symbol to match CLDR R41 spec.

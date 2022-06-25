@@ -11,14 +11,8 @@ import { partial, uniqueId } from 'lodash';
  */
 class SegmentedSelection extends Component {
 	render() {
-		const {
-			className,
-			options,
-			selected,
-			onSelect,
-			name,
-			legend,
-		} = this.props;
+		const { className, options, selected, onSelect, name, legend } =
+			this.props;
 
 		return (
 			<fieldset className="woocommerce-segmented-selection">

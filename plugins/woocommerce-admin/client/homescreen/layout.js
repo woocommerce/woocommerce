@@ -206,9 +206,8 @@ Layout.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isNotesRequesting } = select( NOTES_STORE_NAME );
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		);
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 		const {
 			getTaskList,
 			getTaskLists,
@@ -224,9 +223,8 @@ export default compose(
 			'getOption',
 			[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]
 		);
-		const fromCalypsoUrlArgIsPresent = !! window.location.search.match(
-			'from-calypso'
-		);
+		const fromCalypsoUrlArgIsPresent =
+			!! window.location.search.match( 'from-calypso' );
 
 		const shouldShowWelcomeFromCalypsoModal =
 			welcomeFromCalypsoModalDismissedResolved &&

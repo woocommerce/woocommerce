@@ -25,14 +25,10 @@ export const withNavigationHydration = ( data ) =>
 					return;
 				}
 
-				const { isResolving, hasFinishedResolution } = select(
-					STORE_NAME
-				);
-				const {
-					startResolution,
-					finishResolution,
-					setMenuItems,
-				} = registry.dispatch( STORE_NAME );
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
+				const { startResolution, finishResolution, setMenuItems } =
+					registry.dispatch( STORE_NAME );
 
 				if (
 					! isResolving( 'getMenuItems' ) &&

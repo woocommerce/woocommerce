@@ -1,0 +1,15 @@
+name: Prepare package release
+on:
+    workflow_dispatch:
+        inputs:
+            packages:
+                description: 'Enter a specific package to release, or releases separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input blank will prepare to release all eligible packages.'
+                required: false
+                default: '-a'
+jobs:
+    prepare:
+        name: Run the prepare script
+        runs-on: ubuntu-20.04
+        steps:
+            - name: Run
+              run: echo "hello world"

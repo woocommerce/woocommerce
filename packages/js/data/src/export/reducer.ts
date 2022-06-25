@@ -29,9 +29,8 @@ const reducer: Reducer< ExportState, Action > = (
 					...state.requesting,
 					[ action.selector ]: {
 						...state.requesting[ action.selector ],
-						[ hashExportArgs(
-							action.selectorArgs
-						) ]: action.isRequesting,
+						[ hashExportArgs( action.selectorArgs ) ]:
+							action.isRequesting,
 					},
 				},
 			};

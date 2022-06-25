@@ -66,13 +66,8 @@ class SelectFilter extends Component {
 	}
 
 	render() {
-		const {
-			className,
-			config,
-			filter,
-			onFilterChange,
-			isEnglish,
-		} = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } =
+			this.props;
 		const { options } = this.state;
 		const { rule, value } = filter;
 		const { labels, rules } = config;

@@ -47,12 +47,11 @@ export function* request< Query extends BaseQueryParams, DataType >(
 	const url: string = addQueryArgs( namespace, query );
 	const isUnboundedRequest = query.per_page === -1;
 	const fetch = isUnboundedRequest ? apiFetch : fetchWithHeaders;
-	const response:
-		| DataType[]
-		| ( { data: DataType[] } & Response ) = yield fetch( {
-		path: url,
-		method: 'GET',
-	} );
+	const response: DataType[] | ( { data: DataType[] } & Response ) =
+		yield fetch( {
+			path: url,
+			method: 'GET',
+		} );
 
 	if ( isUnboundedRequest && ! ( 'data' in response ) ) {
 		return { items: response, totalCount: response.length };

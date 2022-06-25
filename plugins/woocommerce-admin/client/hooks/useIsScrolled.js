@@ -12,9 +12,8 @@ export default function useIsScrolled() {
 		};
 
 		const scrollListener = () => {
-			rafHandle.current = window.requestAnimationFrame(
-				updateIsScrolled
-			);
+			rafHandle.current =
+				window.requestAnimationFrame( updateIsScrolled );
 		};
 
 		window.addEventListener( 'scroll', scrollListener );

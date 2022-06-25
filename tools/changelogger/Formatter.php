@@ -190,12 +190,14 @@ class Formatter extends KeepAChangelogParser {
 					$row          = trim( $row );
 					$row          = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
 					$row_segments = explode( ' - ', $row );
-
+					$significance = trim( strtolower( $row_segments[0] ) );
+					
 					array_push(
 						$changes,
 						array(
-							'subheading' => $is_subentry ? '' : trim( $row_segments[0] ),
-							'content'    => $is_subentry ? trim( $row ) : trim( $row_segments[1] ),
+							'subheading'   => $is_subentry ? '' : trim( $row_segments[0] ),
+							'content'      => $is_subentry ? trim( $row ) : trim( isset($row_segments[1]) ? $row_segments[1] : '' ),
+							'significance' => in_array( $significance, array( 'patch', 'minor', 'major' ) ) ? $significance : null,
 						)
 					);
 				}
@@ -204,9 +206,10 @@ class Formatter extends KeepAChangelogParser {
 					$entry->appendChange(
 						$this->newChangeEntry(
 							array(
-								'subheading' => $change['subheading'],
-								'content'    => $change['content'],
-								'timestamp'  => $entry_timestamp,
+								'subheading'   => $change['subheading'],
+								'content'      => $change['content'],
+								'significance' => $change['significance'],
+								'timestamp'    => $entry_timestamp,
 							)
 						)
 					);

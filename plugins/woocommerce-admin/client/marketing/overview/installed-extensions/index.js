@@ -73,9 +73,8 @@ InstalledExtensions.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getInstalledPlugins, getActivatingPlugins } = select(
-			STORE_KEY
-		);
+		const { getInstalledPlugins, getActivatingPlugins } =
+			select( STORE_KEY );
 
 		return {
 			plugins: getInstalledPlugins(),

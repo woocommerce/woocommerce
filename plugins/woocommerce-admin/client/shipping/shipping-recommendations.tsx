@@ -52,7 +52,7 @@ const useInstallPlugin = () => {
 	return [ pluginsBeingSetup, handleSetup ] as const;
 };
 
-const ShippingRecommendationsList: React.FC = ( { children } ) => (
+export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 	<DismissableList
 		className="woocommerce-recommended-shipping-extensions"
 		dismissOptionName="woocommerce_settings_shipping_recommendations_hidden"

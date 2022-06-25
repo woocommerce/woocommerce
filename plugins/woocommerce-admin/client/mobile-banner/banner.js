@@ -23,9 +23,8 @@ export const Banner = ( { onInstall, onDismiss } ) => {
 	const isVisible = platform() === ANDROID_PLATFORM && ! isActioned;
 
 	useEffect( () => {
-		const layout = document.getElementsByClassName(
-			'woocommerce-layout'
-		)[ 0 ];
+		const layout =
+			document.getElementsByClassName( 'woocommerce-layout' )[ 0 ];
 
 		if ( isVisible && layout ) {
 			// This is a hack to allow the mobile banner to work in the context of the header which is

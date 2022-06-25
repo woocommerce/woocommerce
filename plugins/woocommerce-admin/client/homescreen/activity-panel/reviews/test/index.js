@@ -37,8 +37,7 @@ const REVIEW = {
 						date_created_gmt: '2020-11-20T17:28:47',
 						date_modified: '2020-11-20T17:28:47',
 						date_modified_gmt: '2020-11-20T17:28:47',
-						src:
-							'https://one.wordpress.test/wp-content/uploads/2020/11/cap-2-1.jpg',
+						src: 'https://one.wordpress.test/wp-content/uploads/2020/11/cap-2-1.jpg',
 						name: 'cap-2-1.jpg',
 						alt: '',
 					},

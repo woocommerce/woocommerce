@@ -239,9 +239,8 @@ export { KnowledgeBase };
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getBlogPosts, getBlogPostsError, isResolving } = select(
-			STORE_KEY
-		);
+		const { getBlogPosts, getBlogPostsError, isResolving } =
+			select( STORE_KEY );
 
 		return {
 			posts: getBlogPosts( props.category ),

@@ -63,10 +63,8 @@ class FilterPicker extends Component {
 				/* eslint-disable react/no-did-update-set-state */
 				this.setState( { nav: selectedFilter.path || [] } );
 				/* eslint-enable react/no-did-update-set-state */
-				const {
-					param: filterParam,
-					getLabels,
-				} = selectedFilter.settings;
+				const { param: filterParam, getLabels } =
+					selectedFilter.settings;
 				getLabels( nextQuery[ filterParam ], nextQuery ).then(
 					this.updateSelectedTag
 				);
@@ -149,13 +147,8 @@ class FilterPicker extends Component {
 	}
 
 	update( value, additionalQueries = {} ) {
-		const {
-			path,
-			query,
-			config,
-			onFilterSelect,
-			advancedFilters,
-		} = this.props;
+		const { path, query, config, onFilterSelect, advancedFilters } =
+			this.props;
 		let update = {
 			[ config.param ]:
 				( config.defaultValue || DEFAULT_FILTER ) === value

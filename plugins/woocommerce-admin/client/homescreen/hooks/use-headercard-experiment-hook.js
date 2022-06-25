@@ -10,19 +10,15 @@ export const useHeadercardExperimentHook = (
 	installTimestampHasResolved,
 	installTimestamp
 ) => {
-	const [
-		isLoadingExperimentAssignment,
-		setIsLoadingExperimentAssignment,
-	] = useState( true );
+	const [ isLoadingExperimentAssignment, setIsLoadingExperimentAssignment ] =
+		useState( true );
 	const [
 		isLoadingTwoColExperimentAssignment,
 		setIsLoadingTwoColExperimentAssignment,
 	] = useState( true );
 	const [ experimentAssignment, setExperimentAssignment ] = useState( null );
-	const [
-		twoColExperimentAssignment,
-		setTwoColExperimentAssignment,
-	] = useState( null );
+	const [ twoColExperimentAssignment, setTwoColExperimentAssignment ] =
+		useState( null );
 
 	useEffect( () => {
 		if ( installTimestampHasResolved && installTimestamp ) {

@@ -7,7 +7,7 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.0.5",
+	"version": "2.1.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"config": {
 		"build_step": "pnpm run build:zip"
@@ -71,7 +71,7 @@
 	"lint-staged": {
 		"*.php": [
 			"php -d display_errors=1 -l",
-			"composer --working-dir=./plugins/woocommerce-beta-tester run-script phpcs-pre-commit"
+			"composer run-script phpcs-pre-commit"
 		],
 		"*.(t|j)s?(x)": [
 			"npm run lint:js:fix"

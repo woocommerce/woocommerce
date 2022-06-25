@@ -76,9 +76,8 @@ export const InstallJetpackCTA = () => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 	const { canUserInstallPlugins, jetpackInstallState, isBusy } = useSelect(
 		( select ) => {
-			const { getPluginInstallState, isPluginsRequesting } = select(
-				PLUGINS_STORE_NAME
-			);
+			const { getPluginInstallState, isPluginsRequesting } =
+				select( PLUGINS_STORE_NAME );
 			const installState = getPluginInstallState( 'jetpack' );
 			const busyState =
 				isPluginsRequesting( 'getJetpackConnectUrl' ) ||

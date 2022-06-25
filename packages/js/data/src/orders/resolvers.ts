@@ -24,13 +24,11 @@ export function* getOrders( query: Partial< OrdersQuery > ) {
 		ordersQuery._fields = [ 'id', ...ordersQuery._fields ];
 	}
 	try {
-		const {
-			items,
-			totalCount,
-		}: { items: Order[]; totalCount: number } = yield request<
-			OrdersQuery,
-			Order
-		>( WC_ORDERS_NAMESPACE, ordersQuery );
+		const { items, totalCount }: { items: Order[]; totalCount: number } =
+			yield request< OrdersQuery, Order >(
+				WC_ORDERS_NAMESPACE,
+				ordersQuery
+			);
 		yield getOrdersTotalCountSuccess( query, totalCount );
 		yield getOrdersSuccess( query, items, totalCount );
 		return items;

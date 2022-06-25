@@ -56,7 +56,7 @@ function getHistory(): WooBrowserHistory {
 					console.warn(
 						`Query path parameter should be a string but instead was: ${ query.path }, undefined behaviour may occur.`
 					);
-					pathname = ( query.path as unknown ) as string; // ts override only, no coercion going on
+					pathname = query.path as unknown as string; // ts override only, no coercion going on
 				} else {
 					pathname = '/';
 				}

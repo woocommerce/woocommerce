@@ -287,8 +287,7 @@ export function getCurrencyData() {
 		version: '3.1.0',
 		alternative: 'CurrencyFactory.getDataForCountry',
 		plugin: 'WooCommerce Admin',
-		hint:
-			'Pass in the country, locale data, and symbol info to use getDataForCountry',
+		hint: 'Pass in the country, locale data, and symbol info to use getDataForCountry',
 	} );
 
 	// See https://github.com/woocommerce/woocommerce-admin/issues/3101.

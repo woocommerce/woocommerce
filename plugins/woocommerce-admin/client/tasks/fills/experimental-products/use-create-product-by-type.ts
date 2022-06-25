@@ -27,7 +27,7 @@ export const useCreateProductByType = () => {
 		setIsRequesting( true );
 		try {
 			const data: {
-				id?: string;
+				id?: number;
 			} = await createProductFromTemplate(
 				{
 					template_name: type,
