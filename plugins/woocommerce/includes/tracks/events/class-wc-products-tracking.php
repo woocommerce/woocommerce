@@ -134,7 +134,6 @@ class WC_Products_Tracking {
 			"
 			if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
 				var initialStockValue = $( '#_stock' ).val();
-				var hasRecordedEvent = false;
 				var isBlockEditor = false;
 				var child_element = '#publish';
 
@@ -147,10 +146,6 @@ class WC_Products_Tracking {
 				}
 
 				$( '#wpwrap' ).on( 'click', child_element, function() {
-					if ( ! isBlockEditor && hasRecordedEvent) {
-						return;
-					}
-
 					var description_value  = '';
 					var tagsText = '';
 					var currentStockValue = $( '#_stock' ).val();
@@ -166,7 +161,7 @@ class WC_Products_Tracking {
 						attributes:				$( '.woocommerce_attribute' ).length,
 						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
 						'cross_sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
-						description:			description_value.length ? 'Yes' : 'No',
+						description:			description_value.trim() !== '' ? 'Yes' : 'No',
 						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_block_editor:		isBlockEditor,
@@ -184,9 +179,7 @@ class WC_Products_Tracking {
 						upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
 						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
 					};
-
 					window.wcTracks.recordEvent( 'product_update', properties );
-					hasRecordedEvent = true;
 				} );
 			}
 			"
