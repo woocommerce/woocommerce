@@ -30,12 +30,12 @@ class BatchProcessingController {
 	/**
 	 * Starts an update.
 	 *
-	 * @param string $updater_class_name Fully qualified class name of an updater, must be child class of `BatchProcessor`.
+	 * @param string $processor_class_name Fully qualified class name of the processor, must be child class of `BatchProcessor`.
 	 */
-	public function enqueue_processor( string $updater_class_name ) {
+	public function enqueue_processor( string $processor_class_name ) {
 		$pending_updates = $this->get_pending();
-		if ( ! in_array( $updater_class_name, array_keys( $pending_updates ) ) ) {
-			$pending_updates[] = $updater_class_name;
+		if ( ! in_array( $processor_class_name, array_keys( $pending_updates ) ) ) {
+			$pending_updates[] = $processor_class_name;
 			$this->set_pending_processes( $pending_updates );
 		}
 		$this->schedule_init_cron();
@@ -60,13 +60,13 @@ class BatchProcessingController {
 	 * Schedules update for all updaters that may be stuck. This method is called in CONTROLLER_CRON_NAME action.
 	 */
 	public function schedule_processes() {
-		$pending_updates = $this->get_pending();
-		if ( empty( $pending_updates ) ) {
+		$pending_processes = $this->get_pending();
+		if ( empty( $pending_processes ) ) {
 			return;
 		}
-		foreach ( $pending_updates as $update_name ) {
-			if ( ! $this->already_scheduled( $update_name ) ) {
-				$this->schedule_next_batch( $update_name );
+		foreach ( $pending_processes as $process_name ) {
+			if ( ! $this->already_scheduled( $process_name ) ) {
+				$this->schedule_next_batch( $process_name );
 			}
 		}
 		$this->schedule_init_cron( true );
