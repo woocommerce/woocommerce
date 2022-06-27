@@ -37,10 +37,10 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 * Test that processed are registered correctly.
 	 */
 	public function test_enqueue_processor() {
-		$this->assertFalse( $this->sut->is_batch_process_pending( get_class( $this->test_process ) ) );
+		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
-		$this->assertTrue( $this->sut->is_batch_process_pending( get_class( $this->test_process ) ) );
+		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 	}
 
 	/**
@@ -76,7 +76,7 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 		do_action( $this->sut::SINGLE_BATCH_PROCESS_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertTrue( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
-		$this->assertTrue( $this->sut->is_batch_process_pending( get_class( $this->test_process ) ) );
+		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 	}
 
 	/**
@@ -98,6 +98,6 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 		do_action( $this->sut::SINGLE_BATCH_PROCESS_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertFalse( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
-		$this->assertFalse( $this->sut->is_batch_process_pending( get_class( $this->test_process ) ) );
+		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 	}
 }

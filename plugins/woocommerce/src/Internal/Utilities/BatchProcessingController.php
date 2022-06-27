@@ -257,12 +257,12 @@ class BatchProcessingController {
 	/**
 	 * Check if a particular process is pending.
 	 *
-	 * @param string $process_id Fully qualified class name of process.
+	 * @param string $processor_name Fully qualified class name of process.
 	 *
 	 * @return bool Whether the process is in progress.
 	 */
-	public function is_batch_process_pending( string $process_id ) : bool {
-		return in_array( $process_id, $this->get_pending() );
+	public function is_enqueued( string $processor_name ) : bool {
+		return in_array( $processor_name, $this->get_pending() );
 	}
 
 	/**
