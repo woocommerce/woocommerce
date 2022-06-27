@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate @woocommerce/data user and use-select-with-refresh to TS
