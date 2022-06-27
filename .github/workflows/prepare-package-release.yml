@@ -36,30 +36,20 @@ jobs:
               run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
             - name: Set all package string
+              id: all_description
               if: ${{ github.event.inputs.packages == '-a'}}
               run: echo "::set-output name=str::all packages"
 
             - name: Set Specific packages string
+              id: specific_description
               if: ${{ github.event.inputs.packages != '-a'}}
               run: echo "::set-output name=str::${{ github.event.inputs.packages }}"
-
-            # - name: Set description string
-            #   id: description
-            #   run: |
-            #       if [["${{ github.event.inputs.packages }}" == "-a"]]
-            #       then
-            #           echo "Equal"
-            #           echo "::set-output name=str::all packages"
-            #       else
-            #           echo "NOT Equal"
-            #           echo "::set-output name=str::${{ github.event.inputs.packages }}"
-            #       fi
 
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v4
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  commit-message: 'Automated change: Prep ${{ steps.description.outputs.str }} for release.'
+                  commit-message: 'Automated change: Prep ${{ steps.all_description.outputs.str || steps.specific_description.outputs.str }} for release.'
                   # branch: release/packages-${{ steps.date.outputs.date }}
                   branch: release/packages-2022-06-23
                   delete-branch: true
