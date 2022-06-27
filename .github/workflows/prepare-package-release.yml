@@ -38,7 +38,7 @@ jobs:
             - name: Set description string
               id: description
               run: |
-                  if ["${{ github.event.inputs.packages }}" == "-a"]
+                  if [["${{ github.event.inputs.packages }}" == "-a"]]
                   then
                       echo "Equal"
                       echo "::set-output name=str::all packages"
