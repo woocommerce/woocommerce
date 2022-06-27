@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
-use Automattic\WooCommerce\Internal\Utilities\BatchProcessor;
-
 /**
  * Class BatchProcessingController
  *
@@ -45,10 +43,13 @@ class BatchProcessingController {
 
 	/**
 	 * Helper method to start update cron.
+	 *
+	 * @param bool $with_delay Whether to delay the cron start. Send true when rescheduling, false when starting.
 	 */
-	private function schedule_init_cron() {
+	private function schedule_init_cron( bool $with_delay = false ) {
+		$time = $with_delay ? time() + HOUR_IN_SECONDS : time();
 		as_schedule_single_action(
-			$this->get_start_timestamp_for_init_action(),
+			$time,
 			self::CONTROLLER_CRON_NAME,
 			$this->get_args_for_init_cron(),
 			self::ACTION_GROUP
@@ -68,7 +69,7 @@ class BatchProcessingController {
 				$this->schedule_next_batch( $update_name );
 			}
 		}
-		$this->schedule_init_cron();
+		$this->schedule_init_cron( true );
 	}
 
 	/**
@@ -242,15 +243,6 @@ class BatchProcessingController {
 	 */
 	private function set_pending_processes( array $processes ) {
 		update_option( self::PENDING_PROCESSES_OPTION_NAME, $processes, false );
-	}
-
-	/**
-	 * Start timestamp for first recurring action.
-	 *
-	 * @return int time internval.
-	 */
-	private function get_start_timestamp_for_init_action() {
-		return time() + MINUTE_IN_SECONDS;
 	}
 
 	/**
