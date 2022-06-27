@@ -38,8 +38,8 @@ class WC_Tracks {
 			return false;
 		}
 		$prefixed_event_name = self::PREFIX . $event_name;
-		$event_properties    = self::get_properties( $event_name, $properties );
-		$event_obj           = new WC_Tracks_Event( $event_properties );
+		$properties          = self::get_properties( $prefixed_event_name, $event_properties );
+		$event_obj           = new WC_Tracks_Event( $properties );
 
 		if ( is_wp_error( $event_obj->error ) ) {
 			return $event_obj->error;
