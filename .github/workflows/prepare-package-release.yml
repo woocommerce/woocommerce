@@ -50,8 +50,7 @@ jobs:
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: 'Automated change: Prep ${{ steps.all_description.outputs.str || steps.specific_description.outputs.str }} for release.'
-                  # branch: release/packages-${{ steps.date.outputs.date }}
-                  branch: release/packages-2022-06-23
+                  branch: release/packages-${{ steps.date.outputs.date }}
                   delete-branch: true
                   title: Prepare Packages for Release
                   reviewers: ${{ github.actor }}
