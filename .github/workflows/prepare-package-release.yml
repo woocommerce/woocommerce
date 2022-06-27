@@ -22,8 +22,8 @@ jobs:
               with:
                   php-version: '7.4'
 
-            - name: Install and Build
-              uses: ./.github/actions/install-build
+            - name: Install dependencies
+              run: pnpm install
 
             - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
