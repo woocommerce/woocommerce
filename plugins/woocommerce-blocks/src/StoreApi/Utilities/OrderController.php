@@ -44,6 +44,9 @@ class OrderController {
 	 * @param \WC_Order $order The order object to update.
 	 */
 	public function update_order_from_cart( \WC_Order $order ) {
+		// Ensures Local pickups are accounted for.
+		add_filter( 'woocommerce_order_get_tax_location', array( $this, 'handle_local_pickup_taxes' ) );
+
 		// Ensure cart is current.
 		wc()->cart->calculate_shipping();
 		wc()->cart->calculate_totals();
@@ -434,6 +437,23 @@ class OrderController {
 		return 'checkout-draft';
 	}
 
+	/**
+	 * Passes the correct base for local pick orders
+	 *
+	 * @todo: Remove custom local pickup handling once WooCommerce 6.8.0 is the minimum version.
+	 *
+	 * @param array $location Taxes location.
+	 * @return array updated location that accounts for local pickup.
+	 */
+	public function handle_local_pickup_taxes( $location ) {
+		$customer = wc()->customer;
+
+		if ( ! empty( $customer ) ) {
+			return $customer->get_taxable_address();
+		}
+
+		return $location;
+	}
 	/**
 	 * Create order line items.
 	 *
