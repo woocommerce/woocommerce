@@ -88,7 +88,7 @@
 			"phpcs -s -p"
 		],
 		"phpcs-pre-commit": [
-			"phpcs -s -p -n"
+			"phpcs-changed --git -s"
 		],
 		"phpcbf": [
 			"phpcbf -p"
