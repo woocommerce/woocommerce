@@ -35,17 +35,25 @@ jobs:
               id: date
               run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-            - name: Set description string
-              id: description
-              run: |
-                  if [["${{ github.event.inputs.packages }}" == "-a"]]
-                  then
-                      echo "Equal"
-                      echo "::set-output name=str::all packages"
-                  else
-                      echo "NOT Equal"
-                      echo "::set-output name=str::${{ github.event.inputs.packages }}"
-                  fi
+            - name: Set all package string
+              if: ${{ github.event.inputs.packages == '-a'}}
+              run: echo "::set-output name=str::all packages"
+
+            - name: Set Specific packages string
+              if: ${{ github.event.inputs.packages != '-a'}}
+              run: echo "::set-output name=str::${{ github.event.inputs.packages }}"
+
+            # - name: Set description string
+            #   id: description
+            #   run: |
+            #       if [["${{ github.event.inputs.packages }}" == "-a"]]
+            #       then
+            #           echo "Equal"
+            #           echo "::set-output name=str::all packages"
+            #       else
+            #           echo "NOT Equal"
+            #           echo "::set-output name=str::${{ github.event.inputs.packages }}"
+            #       fi
 
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v4
