@@ -20,6 +20,11 @@ export const createSelectors = ( {
 	resourceName,
 	pluralResourceName,
 }: SelectorOptions ) => {
+	const getCreateItemError = ( state: ResourceState, query: ItemQuery ) => {
+		const itemQuery = getResourceName( CRUD_ACTIONS.CREATE_ITEM, query );
+		return state.errors[ itemQuery ];
+	};
+
 	const getItem = ( state: ResourceState, id: number ) => {
 		return state.data[ id ];
 	};
@@ -78,10 +83,17 @@ export const createSelectors = ( {
 		return state.errors[ itemQuery ];
 	};
 
+	const getUpdateItemError = ( state: ResourceState, id: number ) => {
+		const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, { id } );
+		return state.errors[ itemQuery ];
+	};
+
 	return {
 		[ `get${ resourceName }` ]: getItem,
 		[ `get${ resourceName }Error` ]: getItemError,
 		[ `get${ pluralResourceName }` ]: getItems,
 		[ `get${ pluralResourceName }Error` ]: getItemsError,
+		[ `getCreate${ resourceName }Error` ]: getCreateItemError,
+		[ `getUpdate${ resourceName }Error` ]: getUpdateItemError,
 	};
 };

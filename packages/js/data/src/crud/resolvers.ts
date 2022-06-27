@@ -7,8 +7,8 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import {
-	getItemSuccess,
 	getItemError,
+	getItemSuccess,
 	getItemsError,
 	getItemsSuccess,
 } from './actions';
