@@ -38,10 +38,12 @@ jobs:
             - name: Set description string
               id: description
               run: |
-                  if ['${{ github.event.inputs.packages }}' == '-a']
+                  if ["${{ github.event.inputs.packages }}" == "-a"]
                   then
+                      echo "Equal"
                       echo "::set-output name=str::all packages"
                   else
+                      echo "NOT Equal"
                       echo "::set-output name=str::${{ github.event.inputs.packages }}"
                   fi
 
@@ -50,7 +52,8 @@ jobs:
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   commit-message: 'Automated change: Prep ${{ steps.description.outputs.str }} for release.'
-                  branch: release/packages-${{ steps.date.outputs.date }}
+                  # branch: release/packages-${{ steps.date.outputs.date }}
+                  branch: release/packages-2022-06-23
                   delete-branch: true
                   title: Prepare Packages for Release
                   body: >
