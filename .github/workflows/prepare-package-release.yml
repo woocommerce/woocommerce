@@ -22,6 +22,9 @@ jobs:
               with:
                   php-version: '7.4'
 
+            - name: Install PNPM
+              run: npm install -g pnpm@^6.24.2
+
             - name: Install dependencies
               run: pnpm install
 
