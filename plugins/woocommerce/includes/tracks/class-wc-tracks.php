@@ -39,14 +39,19 @@ class WC_Tracks {
 		}
 		$prefixed_event_name = self::PREFIX . $event_name;
 
-		// Allow event props to be filtered to enable adding site-wide props.
+		/**
+		 * Allow event props to be filtered to enable adding site-wide props.
+		 *
+		 * @since 4.1.0
+		 */
 		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $properties, $prefixed_event_name );
+		$identity            = WC_Tracks_Client::get_identity( $user->ID );
 
 		// Delete _ui and _ut protected properties.
 		unset( $filtered_properties['_ui'] );
 		unset( $filtered_properties['_ut'] );
 
-		$event_obj = new WC_Tracks_Event( $filtered_properties );
+		$event_obj = new WC_Tracks_Event( array_merge( $filtered_properties, $identity ) );
 
 		if ( is_wp_error( $event_obj->error ) ) {
 			return $event_obj->error;
