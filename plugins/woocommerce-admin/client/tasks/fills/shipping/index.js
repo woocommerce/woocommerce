@@ -201,7 +201,7 @@ export class Shipping extends Component {
 		const requiresJetpackConnection =
 			! isJetpackConnected && countryCode === 'US';
 
-		const steps = [
+		let steps = [
 			{
 				key: 'store_location',
 				label: __( 'Set store location', 'woocommerce' ),
@@ -454,18 +454,25 @@ export class Shipping extends Component {
 				},
 			};
 
-			for ( const i in shippingSmartDefaultsSteps ) {
-				for ( const j in steps ) {
-					if ( steps[ j ].key === i ) {
-						steps[ j ] = {
-							...steps[ j ],
-							...shippingSmartDefaultsSteps[ i ],
-						};
+			steps = steps.map( ( step ) =>
+				shippingSmartDefaultsSteps.hasOwnProperty( step.key )
+					? {
+							...step,
+							...shippingSmartDefaultsSteps[ step.key ],
+					  }
+					: step
+			);
+
+			const { step } = this.state;
+			// Empty description field if it's not the current step.
+			if ( this.shippingSmartDefaultsEnabled ) {
+				for ( const i in steps ) {
+					if ( steps[ i ].key !== step ) {
+						steps[ i ].description = '';
 					}
 				}
 			}
 		}
-
 		return filter( steps, ( step ) => step.visible );
 	}
 
@@ -473,14 +480,6 @@ export class Shipping extends Component {
 		const { isPending, step } = this.state;
 		const { isUpdateSettingsRequesting } = this.props;
 		const steps = this.getSteps();
-		// Empty description field if it's not the current step.
-		if ( this.shippingSmartDefaultsEnabled ) {
-			for ( const i in steps ) {
-				if ( steps[ i ].key !== step ) {
-					steps[ i ].description = '';
-				}
-			}
-		}
 
 		return (
 			<div className="woocommerce-task-shipping">
