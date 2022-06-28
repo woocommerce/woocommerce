@@ -121,7 +121,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 		return array(
 			array( 'AU' ),
 			array( 'CA' ),
-			array( 'UK' ),
+			array( 'GB' ),
 		);
 	}
 }
