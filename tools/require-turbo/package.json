@@ -6,6 +6,6 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-only",
 	"engines": {
-		"node": ">=12.0.0"
+		"node": "^16.13.1"
 	}
 }
