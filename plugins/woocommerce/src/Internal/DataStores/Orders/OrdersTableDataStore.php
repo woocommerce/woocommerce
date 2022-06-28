@@ -839,7 +839,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 				)
 			);
 
-			if ( ! $post_id || is_wp_error( $post_id ) ) {
+			if ( ! $post_id ) {
 				throw new \Exception( __( 'Could not create order in posts table.', 'woocommerce' ) );
 			}
 
