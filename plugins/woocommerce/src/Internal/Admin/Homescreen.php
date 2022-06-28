@@ -103,7 +103,10 @@ class Homescreen {
 		$country_code = wc_format_country_state_string( $settings['preloadSettings']['general']['woocommerce_default_country'] )['country'];
 		$country_name = WC()->countries->get_countries()[ $country_code ] ?? null;
 
-		if ( '' === $country_code || null === $country_name ) {
+		// we also need to make sure woocommerce_store_address is not empty
+		// to make sure store country is set by an actual user
+		// since woocommerce_store_address is set to US:CA by default.
+		if ( '' === $country_code || null === $country_name || '' === $store_address ) {
 			return $settings;
 		}
 
