@@ -84,7 +84,7 @@ class ExperimentalShippingRecommendation extends Task {
 	}
 
 	/**
-	 * Check if the store has physical products.
+	 * Check if the Jetpack is connected.
 	 *
 	 * @return bool
 	 */
