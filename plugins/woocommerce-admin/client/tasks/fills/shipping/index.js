@@ -29,7 +29,7 @@ import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
-import { ShippingLabelPrinting } from './ShippingLabelPrinting/ShippingLabelPrinting';
+import { WCSBanner } from '../experimental-shipping-recommendation/components/wcs-banner';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
 
@@ -371,7 +371,7 @@ export class Shipping extends Component {
 					),
 					content: (
 						<>
-							<ShippingLabelPrinting />
+							<WCSBanner />
 							<Plugins
 								onComplete={ ( plugins, response ) => {
 									createNoticesFromResponse( response );
