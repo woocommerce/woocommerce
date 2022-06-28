@@ -21,6 +21,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
@@ -215,7 +216,6 @@ export class Shipping extends Component {
 							updateAndPersistSettingsForGroup
 						}
 						settings={ settings }
-						buttonText={ __( 'Continue', 'woocommerce' ) }
 						onComplete={ ( values ) => {
 							const country = getCountryCode(
 								values.countryState
@@ -336,6 +336,17 @@ export class Shipping extends Component {
 
 		// Override the step fields for the smart shipping defaults.
 		if ( this.shippingSmartDefaultsEnabled ) {
+			const agreementText = pluginsToActivate.includes(
+				'woocommerce-services'
+			)
+				? __(
+						'By installing Jetpack and WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
+						'woocommerce'
+				  )
+				: __(
+						'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
+						'woocommerce'
+				  );
 			const shippingSmartDefaultsSteps = {
 				rates: {
 					label: __( 'Review your shipping options', 'woocommerce' ),
@@ -404,6 +415,32 @@ export class Shipping extends Component {
 								} }
 								pluginSlugs={ pluginsToActivate }
 							/>
+							{ ! isJetpackConnected && (
+								<Text
+									variant="caption"
+									className="woocommerce-task__caption"
+									size="12"
+									lineHeight="16px"
+									style={ { display: 'block' } }
+								>
+									{ interpolateComponents( {
+										mixedString: agreementText,
+										components: {
+											link: (
+												<Link
+													href={
+														'https://wordpress.com/tos/'
+													}
+													target="_blank"
+													type="external"
+												>
+													<></>
+												</Link>
+											),
+										},
+									} ) }
+								</Text>
+							) }
 						</>
 					),
 				},
