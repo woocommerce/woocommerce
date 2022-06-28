@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, ExternalLink } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -15,7 +16,9 @@ const WooCommerceServicesItem: React.FC< {
 	isWCSInstalled: boolean | undefined;
 } > = ( { isWCSInstalled } ) => {
 	const handleSetupClick = () => {
-		// TODO: Go to new WCS flow #33367
+		navigateTo( {
+			url: getNewPath( { task: 'shipping-recommendation' }, '/', {} ),
+		} );
 	};
 
 	return (
