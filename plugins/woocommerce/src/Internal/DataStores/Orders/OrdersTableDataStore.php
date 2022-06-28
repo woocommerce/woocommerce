@@ -950,12 +950,12 @@ LEFT JOIN {$operational_data_clauses['join']}
 		/**
 		 * Allow third parties to include rows that need to be inserted/updated in custom tables when persisting an order.
 		 *
-		 * @param array Array of rows to be inserted/updated when persisting an order. Each entry should be an array with
-		 *              keys 'table', 'data' (the row), 'format' (row format), 'where' and 'where_format'.
-		 * @param \WC_Order The order object.
-		 * @param string The context of the operation: 'create' or 'update'.
-		 *
 		 * @since 6.8.0
+		 *
+		 * @param array      Array of rows to be inserted/updated when persisting an order. Each entry should be an array with
+		 *                   keys 'table', 'data' (the row), 'format' (row format), 'where' and 'where_format'.
+		 * @param \WC_Order  The order object.
+		 * @param string     The context of the operation: 'create' or 'update'.
 		 */
 		$ext_rows = apply_filters( 'woocommerce_orders_table_datastore_extra_db_rows_for_order', array(), $order, $context );
 
@@ -1035,9 +1035,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		/**
 		 * Fires when a new order is created.
+		 *
+		 * @since 2.7.0
+		 *
 		 * @param int       Order ID.
 		 * @param \WC_Order Order object.
-		 * @since 2.7.0
 		 */
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
