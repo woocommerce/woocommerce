@@ -110,7 +110,7 @@ class Shipping extends Task {
 				return true;
 			}
 
-			return in_array( $store_country, array( 'AU', 'CA', 'UK' ), true );
+			return in_array( $store_country, array( 'AU', 'CA', 'GB' ), true );
 		}
 
 		return self::has_physical_products();
