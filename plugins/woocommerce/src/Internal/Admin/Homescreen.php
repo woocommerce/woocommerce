@@ -125,24 +125,6 @@ class Homescreen {
 			$zone->set_zone_name( $country_name );
 			$zone->add_location( $country_code, 'country' );
 			$zone->add_shipping_method( 'free_shipping' );
-
-			$other_countries_zone = new \WC_Shipping_Zone( 0 );
-			if ( ! $other_countries_zone->meta_exists( 'flat_rate' ) ) {
-				$instance_id = $other_countries_zone->add_shipping_method( 'flat_rate' );
-				$other_countries_zone->save();
-
-				$shipping_methods = $other_countries_zone->get_shipping_methods( true );
-				foreach ( $shipping_methods as $shipping_method ) {
-					if ( $shipping_method->get_instance_id() === $instance_id ) {
-						$option_id        = 'woocommerce_flat_rate_' . $instance_id . '_settings';
-						$settings         = get_option( $option_id );
-						$settings['cost'] = 15;
-						update_option( $option_id, $settings );
-						break;
-					}
-				}
-			}
-
 			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
 		}
 
