@@ -15,8 +15,8 @@ describe( 'crud selectors', () => {
 		expect( selectors ).toHaveProperty( 'getProducts' );
 		expect( selectors ).toHaveProperty( 'getProductError' );
 		expect( selectors ).toHaveProperty( 'getProductsError' );
-		expect( selectors ).toHaveProperty( 'getCreateProductError' );
-		expect( selectors ).toHaveProperty( 'getDeleteProductError' );
-		expect( selectors ).toHaveProperty( 'getUpdateProductError' );
+		expect( selectors ).toHaveProperty( 'getProductCreateError' );
+		expect( selectors ).toHaveProperty( 'getProductDeleteError' );
+		expect( selectors ).toHaveProperty( 'getProductUpdateError' );
 	} );
 } );
