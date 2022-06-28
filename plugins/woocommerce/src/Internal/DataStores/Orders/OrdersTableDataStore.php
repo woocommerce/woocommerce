@@ -994,8 +994,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param \WC_Order $order
 	 */
 	public function update( &$order ) {
-		global $wpdb;
-
 		// Before updating, ensure date paid is set if missing.
 		if (
 			! $order->get_date_paid( 'edit' )
