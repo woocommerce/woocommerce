@@ -63,6 +63,10 @@ class Formatter extends KeepAChangelogParser {
 	 */
 	public $subentry_pattern = '/^###(.+)\n/m';
 
+	public function getEpilogue() {
+		return $this->epilogue;
+	}
+
 	/**
 	 * Get Release link given a version number.
 	 *
@@ -220,7 +224,7 @@ class Formatter extends KeepAChangelogParser {
 
 		$ret->setEntries( $entries );
 		$ret->setPrologue( $this->prologue );
-		$ret->setEpilogue( $this->epilogue );
+		$ret->setEpilogue( $this->getEpilogue() );
 		return $ret;
 	}
 
