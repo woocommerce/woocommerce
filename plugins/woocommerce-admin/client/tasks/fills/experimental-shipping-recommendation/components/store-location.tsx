@@ -47,7 +47,7 @@ export const StoreLocation: React.FC< {
 		<StoreLocationForm
 			onComplete={ ( values: { [ key: string ]: string } ) => {
 				const country = getCountryCode( values.countryState );
-				recordEvent( 'tasklist_tax_set_location', {
+				recordEvent( 'tasklist_shipping_recommendation_set_location', {
 					country,
 				} );
 				nextStep();

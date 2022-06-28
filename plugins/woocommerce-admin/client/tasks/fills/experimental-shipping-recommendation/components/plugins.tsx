@@ -81,9 +81,12 @@ export const Plugins: React.FC< Props > = ( {
 					response: InstallPluginsResponse
 				) => {
 					createNoticesFromResponse( response );
-					recordEvent( 'tasklist_tax_install_extensions', {
-						install_extensions: true,
-					} );
+					recordEvent(
+						'tasklist_shipping_recommendation_install_extensions',
+						{
+							install_extensions: true,
+						}
+					);
 					updateOptions( {
 						woocommerce_setup_jetpack_opted_in: true,
 					} );
