@@ -163,40 +163,44 @@ export const normalizeState = ( state: string ): string => {
  * @param {string} normalizedAutofillState The value of the autofillState field.
  * @return {Function} filter function.
  */
-export const getStateFilter = (
-	isStateAbbreviation: boolean,
-	normalizedAutofillState: string
-): ( ( option: Option ) => boolean ) => ( option: Option ) => {
-	const countryStateArray = isStateAbbreviation
-		? option.key.split( ':' )
-		: option.label.split( '—' );
+export const getStateFilter =
+	(
+		isStateAbbreviation: boolean,
+		normalizedAutofillState: string
+	): ( ( option: Option ) => boolean ) =>
+	( option: Option ) => {
+		const countryStateArray = isStateAbbreviation
+			? option.key.split( ':' )
+			: option.label.split( '—' );
 
-	// No region options in the country
-	if ( countryStateArray.length <= 1 ) {
-		return false;
-	}
+		// No region options in the country
+		if ( countryStateArray.length <= 1 ) {
+			return false;
+		}
 
-	const state = countryStateArray[ 1 ];
-	// Handle special case, for example: China — Beijing / 北京
-	if ( state.includes( '/' ) ) {
-		const stateStrList = state.split( '/' );
-		return (
-			normalizeState( stateStrList[ 0 ] ) === normalizedAutofillState ||
-			normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
-		);
-	}
+		const state = countryStateArray[ 1 ];
+		// Handle special case, for example: China — Beijing / 北京
+		if ( state.includes( '/' ) ) {
+			const stateStrList = state.split( '/' );
+			return (
+				normalizeState( stateStrList[ 0 ] ) ===
+					normalizedAutofillState ||
+				normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+			);
+		}
 
-	// Handle special case, for example: Iran — Alborz (البرز)
-	if ( state.includes( '(' ) && state.includes( ')' ) ) {
-		const stateStrList = state.replace( ')', '' ).split( '(' );
-		return (
-			normalizeState( stateStrList[ 0 ] ) === normalizedAutofillState ||
-			normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
-		);
-	}
+		// Handle special case, for example: Iran — Alborz (البرز)
+		if ( state.includes( '(' ) && state.includes( ')' ) ) {
+			const stateStrList = state.replace( ')', '' ).split( '(' );
+			return (
+				normalizeState( stateStrList[ 0 ] ) ===
+					normalizedAutofillState ||
+				normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+			);
+		}
 
-	return normalizeState( state ) === normalizedAutofillState;
-};
+		return normalizeState( state ) === normalizedAutofillState;
+	};
 
 /**
  * Get the autofill countryState fields and set value from filtered options.
@@ -348,24 +352,22 @@ export function StoreAddress( {
 	setValue,
 }: StoreAddressProps ): JSX.Element {
 	const countryState = getInputProps( 'countryState' ).value;
-	const {
-		locale,
-		hasFinishedResolution,
-		countries,
-		loadingCountries,
-	} = useSelect( ( select ) => {
-		const {
-			getLocale,
-			getCountries,
-			hasFinishedResolution: hasFinishedCountryResolution,
-		} = select( COUNTRIES_STORE_NAME );
-		return {
-			locale: getLocale( countryState ),
-			countries: getCountries(),
-			loadingCountries: ! hasFinishedCountryResolution( 'getCountries' ),
-			hasFinishedResolution: hasFinishedCountryResolution( 'getLocales' ),
-		};
-	} );
+	const { locale, hasFinishedResolution, countries, loadingCountries } =
+		useSelect( ( select ) => {
+			const {
+				getLocale,
+				getCountries,
+				hasFinishedResolution: hasFinishedCountryResolution,
+			} = select( COUNTRIES_STORE_NAME );
+			return {
+				locale: getLocale( countryState ),
+				countries: getCountries(),
+				loadingCountries:
+					! hasFinishedCountryResolution( 'getCountries' ),
+				hasFinishedResolution:
+					hasFinishedCountryResolution( 'getLocales' ),
+			};
+		} );
 	const countryStateOptions = useMemo(
 		() => getCountryStateOptions( countries ),
 		[ countries ]

@@ -233,13 +233,8 @@ class NumberFilter extends Component {
 	}
 
 	render() {
-		const {
-			className,
-			config,
-			filter,
-			onFilterChange,
-			isEnglish,
-		} = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } =
+			this.props;
 		const { rule } = filter;
 		const { labels, rules } = config;
 

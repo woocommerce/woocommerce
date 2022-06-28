@@ -560,7 +560,11 @@ jQuery( function( $ ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
-						wc_checkout_form.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+						wc_checkout_form.submit_error(
+							'<div class="woocommerce-error">' +
+							( errorThrown || wc_checkout_params.i18n_checkout_error ) +
+							'</div>'
+						);
 					}
 				});
 			}

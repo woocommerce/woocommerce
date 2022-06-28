@@ -40,11 +40,8 @@ export class StockPanel extends Component {
 	}
 
 	async updateStock( product, quantity ) {
-		const {
-			invalidateResolution,
-			updateProductStock,
-			products,
-		} = this.props;
+		const { invalidateResolution, updateProductStock, products } =
+			this.props;
 
 		const success = await updateProductStock( product, quantity );
 
@@ -80,12 +77,8 @@ export class StockPanel extends Component {
 	}
 
 	render() {
-		const {
-			lowStockProductsCount,
-			isError,
-			isRequesting,
-			products,
-		} = this.props;
+		const { lowStockProductsCount, isError, isRequesting, products } =
+			this.props;
 
 		if ( isError ) {
 			const title = __(
@@ -111,16 +104,16 @@ export class StockPanel extends Component {
 		// Show placeholders only for the first products fetch.
 		if ( isRequesting || ! products.length ) {
 			const numPlaceholders = Math.min( 5, lowStockProductsCount ?? 1 );
-			const placeholders = Array.from(
-				new Array( numPlaceholders )
-			).map( ( v, idx ) => (
-				<ActivityCardPlaceholder
-					key={ idx }
-					className="woocommerce-stock-activity-card"
-					hasAction
-					lines={ 1 }
-				/>
-			) );
+			const placeholders = Array.from( new Array( numPlaceholders ) ).map(
+				( v, idx ) => (
+					<ActivityCardPlaceholder
+						key={ idx }
+						className="woocommerce-stock-activity-card"
+						hasAction
+						lines={ 1 }
+					/>
+				)
+			);
 
 			return <Section>{ placeholders }</Section>;
 		}
@@ -144,9 +137,8 @@ StockPanel.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } = select(
-			ITEMS_STORE_NAME
-		);
+		const { getItems, getItemsError, isResolving } =
+			select( ITEMS_STORE_NAME );
 
 		const products = Array.from(
 			getItems( 'products/low-in-stock', productsQuery ).values()
@@ -162,9 +154,8 @@ export default compose(
 		return { products, isError, isRequesting };
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { invalidateResolution, updateProductStock } = dispatch(
-			ITEMS_STORE_NAME
-		);
+		const { invalidateResolution, updateProductStock } =
+			dispatch( ITEMS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

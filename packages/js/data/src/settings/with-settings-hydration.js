@@ -20,9 +20,8 @@ export const withSettingsHydration = ( group, settings ) =>
 					return;
 				}
 
-				const { isResolving, hasFinishedResolution } = select(
-					STORE_NAME
-				);
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
 				const {
 					startResolution,
 					finishResolution,

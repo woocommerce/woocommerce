@@ -1550,6 +1550,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			)
 		);
 
+		/**
+		 * Filters whether apply base tax for local pickup shipping method or not.
+		 *
+		 * @since 6.8.0
+		 * @param boolean apply_base_tax Whether apply base tax for local pickup. Default true.
+		 */
+		$apply_base_tax = true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
+
+		/**
+		 * Filters local pickup shipping methods.
+		 *
+		 * @since 6.8.0
+		 * @param string[] $local_pickup_methods Local pickup shipping method IDs.
+		 */
+		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+
+		$shipping_method_ids = ArrayUtil::select( $this->get_shipping_methods(), 'get_method_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+
+		// Set shop base address as a tax location if order has local pickup shipping method.
+		if ( $apply_base_tax && count( array_intersect( $shipping_method_ids, $local_pickup_methods ) ) > 0 ) {
+			$tax_based_on = 'base';
+		}
+
 		// Default to base.
 		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
 			$args['country']  = WC()->countries->get_base_country();

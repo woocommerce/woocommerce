@@ -15,13 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
-          tools: composer, cs2pr
+          tools: composer
 
       - name: Tool versions
         run: |
@@ -36,11 +36,9 @@ jobs:
       - name: Install and Build
         uses: ./.github/actions/install-build
 
-      - name: Run code sniff
-        continue-on-error: true
-        working-directory: plugins/woocommerce
-        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
-      
-      - name: Show PHPCS results in PR
-        working-directory: plugins/woocommerce
-        run: cs2pr ./phpcs-report.xml
+      - name: Run code sniffer
+        uses: thenabeel/action-phpcs@v8
+        with:
+          files: "**.php"
+          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
+          standard: phpcs.xml

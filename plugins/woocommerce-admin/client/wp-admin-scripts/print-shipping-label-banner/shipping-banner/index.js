@@ -481,11 +481,8 @@ ShippingBanner.propTypes = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			isPluginsRequesting,
-			isJetpackConnected,
-			getActivePlugins,
-		} = select( PLUGINS_STORE_NAME );
+		const { isPluginsRequesting, isJetpackConnected, getActivePlugins } =
+			select( PLUGINS_STORE_NAME );
 
 		const isRequesting =
 			isPluginsRequesting( 'activatePlugins' ) ||
@@ -498,9 +495,8 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { activatePlugins, installPlugins } = dispatch(
-			PLUGINS_STORE_NAME
-		);
+		const { activatePlugins, installPlugins } =
+			dispatch( PLUGINS_STORE_NAME );
 
 		return {
 			activatePlugins,

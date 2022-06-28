@@ -21,11 +21,8 @@ export const useOptionsHydration = ( data: Options ) => {
 		}
 
 		const { isResolving, hasFinishedResolution } = select( STORE_NAME );
-		const {
-			startResolution,
-			finishResolution,
-			receiveOptions,
-		} = registry.dispatch( STORE_NAME );
+		const { startResolution, finishResolution, receiveOptions } =
+			registry.dispatch( STORE_NAME );
 		const names = Object.keys( dataRef.current );
 
 		names.forEach( ( name ) => {

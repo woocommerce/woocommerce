@@ -17,18 +17,18 @@ const getProductData = () => {
 	return {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
-		product_type: ( document.querySelector(
-			'#product-type'
-		) as HTMLInputElement )?.value,
-		is_downloadable: ( document.querySelector(
-			'#_downloadable'
-		) as HTMLInputElement )?.value,
-		is_virtual: ( document.querySelector(
-			'#_virtual'
-		) as HTMLInputElement )?.value,
-		manage_stock: ( document.querySelector(
-			'#_manage_stock'
-		) as HTMLInputElement )?.value,
+		product_type: (
+			document.querySelector( '#product-type' ) as HTMLInputElement
+		 )?.value,
+		is_downloadable: (
+			document.querySelector( '#_downloadable' ) as HTMLInputElement
+		 )?.value,
+		is_virtual: (
+			document.querySelector( '#_virtual' ) as HTMLInputElement
+		 )?.value,
+		manage_stock: (
+			document.querySelector( '#_manage_stock' ) as HTMLInputElement
+		 )?.value,
 	};
 };
 
@@ -39,21 +39,21 @@ const getProductData = () => {
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
-	const month = ( document.querySelector(
-		`#${ prefix }mm`
-	) as HTMLInputElement )?.value;
-	const day = ( document.querySelector(
-		`#${ prefix }jj`
-	) as HTMLInputElement )?.value;
-	const year = ( document.querySelector(
-		`#${ prefix }aa`
-	) as HTMLInputElement )?.value;
-	const hours = ( document.querySelector(
-		`#${ prefix }hh`
-	) as HTMLInputElement )?.value;
-	const seconds = ( document.querySelector(
-		`#${ prefix }mn`
-	) as HTMLInputElement )?.value;
+	const month = (
+		document.querySelector( `#${ prefix }mm` ) as HTMLInputElement
+	 )?.value;
+	const day = (
+		document.querySelector( `#${ prefix }jj` ) as HTMLInputElement
+	 )?.value;
+	const year = (
+		document.querySelector( `#${ prefix }aa` ) as HTMLInputElement
+	 )?.value;
+	const hours = (
+		document.querySelector( `#${ prefix }hh` ) as HTMLInputElement
+	 )?.value;
+	const seconds = (
+		document.querySelector( `#${ prefix }mn` ) as HTMLInputElement
+	 )?.value;
 
 	return `${ month }-${ day }-${ year } ${ hours }:${ seconds }`;
 };
@@ -67,13 +67,17 @@ const getPublishingWidgetData = () => {
 	return {
 		status: ( document.querySelector( '#post_status' ) as HTMLInputElement )
 			?.value,
-		visibility: ( document.querySelector(
-			'input[name="visibility"]:checked'
-		) as HTMLInputElement )?.value,
+		visibility: (
+			document.querySelector(
+				'input[name="visibility"]:checked'
+			) as HTMLInputElement
+		 )?.value,
 		date: getPublishDate() !== getPublishDate( 'hidden_' ) ? 'yes' : 'no',
-		catalog_visibility: ( document.querySelector(
-			'input[name="_visibility"]:checked'
-		) as HTMLInputElement )?.value,
+		catalog_visibility: (
+			document.querySelector(
+				'input[name="_visibility"]:checked'
+			) as HTMLInputElement
+		 )?.value,
 		featured: ( document.querySelector( '#_featured' ) as HTMLInputElement )
 			?.checked,
 	};

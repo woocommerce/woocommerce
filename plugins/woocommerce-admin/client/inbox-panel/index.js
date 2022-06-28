@@ -173,18 +173,13 @@ const INBOX_QUERY = {
 
 const InboxPanel = ( { showHeader = true } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { removeNote, updateNote, triggerNoteAction } = useDispatch(
-		NOTES_STORE_NAME
-	);
+	const { removeNote, updateNote, triggerNoteAction } =
+		useDispatch( NOTES_STORE_NAME );
 
 	const { isError, isResolvingNotes, isBatchUpdating, notes } = useSelect(
 		( select ) => {
-			const {
-				getNotes,
-				getNotesError,
-				isResolving,
-				isNotesRequesting,
-			} = select( NOTES_STORE_NAME );
+			const { getNotes, getNotesError, isResolving, isNotesRequesting } =
+				select( NOTES_STORE_NAME );
 			const WC_VERSION_61_RELEASE_DATE = moment(
 				'2022-01-11',
 				'YYYY-MM-DD'

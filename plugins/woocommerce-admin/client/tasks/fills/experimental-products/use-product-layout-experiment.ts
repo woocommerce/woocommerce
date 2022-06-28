@@ -23,15 +23,15 @@ export const getProductLayoutExperiment = async (): Promise< Layout > => {
 	return 'control';
 };
 
-export const isProductTaskExperimentTreatment = async (): Promise< boolean > => {
-	return ( await getProductLayoutExperiment() ) !== 'control';
-};
+export const isProductTaskExperimentTreatment =
+	async (): Promise< boolean > => {
+		return ( await getProductLayoutExperiment() ) !== 'control';
+	};
 
 export const useProductTaskExperiment = () => {
 	const [ isLoading, setIsLoading ] = useState< boolean >( true );
-	const [ experimentLayout, setExperimentLayout ] = useState< Layout >(
-		'control'
-	);
+	const [ experimentLayout, setExperimentLayout ] =
+		useState< Layout >( 'control' );
 
 	useEffect( () => {
 		getProductLayoutExperiment().then( ( layout ) => {

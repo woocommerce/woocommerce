@@ -154,13 +154,8 @@ class List extends Component {
 	}
 
 	render() {
-		const {
-			instanceId,
-			listboxId,
-			options,
-			selectedIndex,
-			staticList,
-		} = this.props;
+		const { instanceId, listboxId, options, selectedIndex, staticList } =
+			this.props;
 		const listboxClasses = classnames(
 			'woocommerce-select-control__listbox',
 			{

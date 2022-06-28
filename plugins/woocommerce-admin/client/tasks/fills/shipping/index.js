@@ -356,12 +356,10 @@ export class Shipping extends Component {
 
 const ShippingWrapper = compose(
 	withSelect( ( select ) => {
-		const { getSettings, isUpdateSettingsRequesting } = select(
-			SETTINGS_STORE_NAME
-		);
-		const { getActivePlugins, isJetpackConnected } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getSettings, isUpdateSettingsRequesting } =
+			select( SETTINGS_STORE_NAME );
+		const { getActivePlugins, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 		const { getCountry } = select( COUNTRIES_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
@@ -384,9 +382,8 @@ const ShippingWrapper = compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateAndPersistSettingsForGroup } = dispatch(
-			SETTINGS_STORE_NAME
-		);
+		const { updateAndPersistSettingsForGroup } =
+			dispatch( SETTINGS_STORE_NAME );
 		const {
 			invalidateResolutionForStoreSelector,
 			optimisticallyCompleteTask,

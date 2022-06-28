@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Internal\Admin\Settings;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Contains backend logic for the homescreen feature.
@@ -49,7 +49,86 @@ class Homescreen {
 			// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 			add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
 		}
+
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
+
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			add_filter(
+				'woocommerce_admin_shared_settings',
+				array( $this, 'maybe_set_default_shipping_options_on_home' ),
+				9999
+			);
+		}
+	}
+
+	/**
+	 * Set free shipping in the same country as the store default
+	 * Flag rate in all other countries when any of the following conditions are ture
+	 *
+	 * - The store sells physical products, has JP and WCS installed and connected, and is located in the US.
+	 * - The store sells physical products, and is not located in US/Canada/Australia/UK (irrelevant if JP is installed or not).
+	 * - The store sells physical products and is located in US, but JP and WCS are not installed.
+	 *
+	 * @param array $settings shared admin settings.
+	 * @return array
+	 */
+	public function maybe_set_default_shipping_options_on_home( $settings ) {
+		$current_screen = get_current_screen();
+
+		// Abort if it's not the homescreen.
+		if ( ! isset( $current_screen->id ) || 'woocommerce_page_wc-admin' !== $current_screen->id ) {
+			return $settings;
+		}
+
+		// Abort if we already created the shipping options.
+		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
+		if ( 'yes' === $already_created ) {
+			return $settings;
+		}
+
+		$user_skipped_obw = $settings['onboarding']['profile']['skipped'] ?? false;
+		$store_address = $settings['preloadSettings']['general']['woocommerce_store_address'] ?? '';
+		$product_types = $settings['onboarding']['profile']['product_types'] ?? array();
+
+		// If user skipped the obw or has not completed the store_details
+		// then we assume the user is going to sell physical products.
+		if ( $user_skipped_obw || '' === $store_address ) {
+			$product_types[] = 'physical';
+		}
+
+		if ( false === in_array( 'physical', $product_types, true ) ) {
+			return $settings;
+		}
+
+		$country_code = wc_format_country_state_string( $settings['preloadSettings']['general']['woocommerce_default_country'] )['country'];
+		$country_name = WC()->countries->get_countries()[ $country_code ] ?? null;
+
+		// we also need to make sure woocommerce_store_address is not empty
+		// to make sure store country is set by an actual user
+		// since woocommerce_store_address is set to US:CA by default.
+		if ( '' === $country_code || null === $country_name || '' === $store_address ) {
+			return $settings;
+		}
+
+		$is_jetpack_installed = in_array( 'jetpack', $settings['plugins']['installedPlugins'] ?? array(), true );
+		$is_jetpack_connected = $settings['dataEndpoints']['jetpackStatus']['isUserConnected'] ?? false;
+		$is_wcs_installed     = in_array( 'woocommerce-services', $settings['plugins']['installedPlugins'] ?? array(), true );
+
+		if (
+			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_connected )
+			||
+			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
+			||
+			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
+		) {
+			$zone = new \WC_Shipping_Zone();
+			$zone->set_zone_name( $country_name );
+			$zone->add_location( $country_code, 'country' );
+			$zone->add_shipping_method( 'free_shipping' );
+			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+		}
+
+		return $settings;
 	}
 
 	/**
