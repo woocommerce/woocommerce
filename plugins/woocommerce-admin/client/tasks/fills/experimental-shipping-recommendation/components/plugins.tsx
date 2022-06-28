@@ -95,6 +95,7 @@ export const Plugins: React.FC< Props > = ( {
 				onError={ ( errors: unknown, response: unknown ) =>
 					createNoticesFromResponse( response )
 				}
+				pluginSlugs={ pluginsToActivate }
 			/>
 			{ ! tosAccepted && (
 				<Text
