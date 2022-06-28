@@ -822,91 +822,42 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * Persists order changes to the database.
 	 *
 	 * @param \WC_Order $order        The order.
-	 * @param boolean   $only_changes Whether to persist all order data or just changes in the object.
-	 * @return int      Order ID.
 	 * @throws \Exception If order data is not valid.
 	 */
-	protected function persist_order_to_db( $order, $only_changes = true ) {
+	protected function persist_order_to_db( &$order ) {
 		global $wpdb;
 
-		$changes       = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
-		$order_id      = absint( $order->get_id() );
-		$is_new_record = ( 0 === $order_id );
+		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
-		// XXX: manually persist some of the properties until the datastore/property design is finalized.
-		foreach ( $this->get_internal_data_store_keys() as $key ) {
-			$changes[ $key ] = $this->{"get_$key"}( $order );
+		if ( 'create' === $context ) {
+			// XXX: do we want to add some backwards compat for 'woocommerce_new_order_data'?
+			$post_id = wp_insert_post(
+				array(
+					'post_type'   => $data_sync->data_sync_is_enabled() ? 'shop_order' : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+					'post_status' => 'draft',
+				)
+			);
+
+			if ( ! $post_id || is_wp_error( $post_id ) ) {
+				throw new \Exception( __( 'Could not create order in posts table.', 'woocommerce' ) );
+			}
+
+			$order->set_id( $post_id );
 		}
 
 		// Figure out what needs to be updated in the database.
-		$db_updates = array();
-
-		// wc_orders.
-		$row = $this->get_db_row_from_order_changes( $changes, $this->order_column_mapping );
-		if ( $is_new_record && ! $row ) {
-			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
-		}
-
-		if ( $row ) {
-			$db_updates[] = array(
-				'table'        => self::get_orders_table_name(),
-				'pk_table'     => true,
-				'data'         => $row['data'],
-				'format'       => $row['format'],
-				'where'        => $is_new_record ? null : array( 'id' => $order_id ),
-				'where_format' => $is_new_record ? null : '%d',
-			);
-		}
-
-		// wc_order_operational_data.
-		$row = $this->get_db_row_from_order_changes( $changes, $this->operational_data_column_mapping );
-		if ( $row ) {
-			$db_updates[] = array(
-				'table'        => self::get_operational_data_table_name(),
-				'data'         => $row['data'],
-				'format'       => $row['format'],
-				'where'        => $is_new_record ? null : array( 'order_id' => $order_id ),
-				'where_format' => $is_new_record ? null : '%d',
-			);
-		}
-
-		// wc_order_addresses.
-		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			$row = $this->get_db_row_from_order_changes( $changes, $this->{$address_type . '_address_column_mapping'} );
-
-			$row['data']['address_type'] = $address_type;
-			$row['format'][]             = '%s';
-
-			if ( $row ) {
-				$db_updates[] = array(
-					'table'        => self::get_addresses_table_name(),
-					'data'         => $row['data'],
-					'format'       => $row['format'],
-					'where'        => $is_new_record ? null : array(
-						'order_id'     => $order_id,
-						'address_type' => $address_type,
-					),
-					'where_format' => $is_new_record ? null : array( '%d', '%s' ),
-				);
-			}
-		}
+		$db_updates = $this->get_db_rows_for_order( $order, $context, ( 'update' === $context ) );
 
 		// Persist changes.
 		foreach ( $db_updates as $update ) {
-			$is_pk_table = ! empty( $update['pk_table'] );
+			// Make sure 'data' and 'format' entries match before passing to $wpdb.
+			ksort( $update['data'] );
+			ksort( $update['format'] );
 
-			// Secondary tables need an 'order_id'.
-			if ( ! $is_pk_table && empty( $update['data']['order_id'] ) ) {
-				$update['data']['order_id'] = $order_id;
-				$update['format'][]         = '%d';
-			}
-
-			if ( empty( $update['where'] ) ) {
-				$result   = $wpdb->insert( $update['table'], $update['data'], $update['format'] );
-				$order_id = ( $is_pk_table && ! $order_id ) ? absint( $wpdb->insert_id ) : $order_id;
-			} else {
-				$result = $wpdb->update( $update['table'], $update['data'], $update['where'], $update['format'], $update['where_format'] );
-			}
+			$result = empty( $update['where'] )
+					? $wpdb->insert( $update['table'], $update['data'], array_values( $update['format'] ) )
+					: $wpdb->update( $update['table'], $update['data'], $update['where'], array_values( $update['format'] ), $update['where_format'] );
 
 			if ( false === $result ) {
 				// translators: %s is a table name.
@@ -914,7 +865,97 @@ LEFT JOIN {$operational_data_clauses['join']}
 			}
 		}
 
-		return $order_id;
+		// Backfill post record.
+		if ( $data_sync->data_sync_is_enabled() ) {
+			$this->backfill_post_record( $order );
+		}
+	}
+
+	/**
+	 * Generates an array of rows with all the details required to insert or update an order in the database.
+	 *
+	 * @param \WC_Order $order        The order.
+	 * @param string    $context      The context: 'create' or 'update'.
+	 * @param boolean   $only_changes Whether to consider only changes in the order for generating the rows.
+	 * @return array
+	 * @throws \Exception When invalid data is found for the given context.
+	 */
+	private function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
+		$result = array();
+
+		// wc_orders.
+		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
+		if ( 'create' === $context && ! $row ) {
+			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
+		}
+
+		if ( $row ) {
+			$result[] = array(
+				'table'        => self::get_orders_table_name(),
+				'data'         => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
+				'format'       => array_merge( $row['format'], array( 'id' => '%d' ) ),
+				'where'        => 'update' === $context ? array( 'id' => $order->get_id() ) : null,
+				'where_format' => 'update' === $context ? '%d' : null,
+			);
+		}
+
+		// wc_order_operational_data.
+		$row = $this->get_db_row_from_order( $order, $this->operational_data_column_mapping, $only_changes );
+		if ( $row ) {
+			$result[] = array(
+				'table'        => self::get_operational_data_table_name(),
+				'data'         => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
+				'format'       => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
+				'where'        => 'update' === $context ? array( 'order_id' => $order->get_id() ) : null,
+				'where_format' => 'update' === $context ? '%d' : null,
+			);
+		}
+
+		// wc_order_addresses.
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			$row = $this->get_db_row_from_order( $order, $this->{$address_type . '_address_column_mapping'}, $only_changes );
+
+			if ( $row ) {
+				$result[] = array(
+					'table'        => self::get_addresses_table_name(),
+					'data'         => array_merge(
+						$row['data'],
+						array(
+							'order_id'     => $order->get_id(),
+							'address_type' => $address_type,
+						)
+					),
+					'format'       => array_merge(
+						$row['format'],
+						array(
+							'order_id'     => '%d',
+							'address_type' => '%s',
+						)
+					),
+					'where'        => 'update' === $context
+									? array(
+										'order_id'     => $order->get_id(),
+										'address_type' => $address_type,
+									)
+									: null,
+					'where_format' => 'update' === $context ? array( '%d', '%s' ) : null,
+				);
+			}
+		}
+
+		/**
+		 * Allow third parties to include rows that need to be inserted/updated in custom tables when persisting an order.
+		 *
+		 * @param array Array of rows to be inserted/updated when persisting an order. Each entry should be an array with
+		 *              keys 'table', 'data' (the row), 'format' (row format), 'where' and 'where_format'.
+		 * @param \WC_Order The order object.
+		 * @param string The context of the operation: 'create' or 'update'.
+		 *
+		 * @since x.y.z
+		 */
+		$ext_rows = apply_filters( 'woocommerce_orders_table_datastore_extra_db_rows_for_order', array(), $order, $context );
+
+		return array_merge( $result, $ext_rows );
 	}
 
 	/**
@@ -922,11 +963,19 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * `$format` parameters. Values are taken from the order changes array and properly formatted for inclusion in the
 	 * database.
 	 *
-	 * @param array $changes        Order changes array.
-	 * @param array $column_mapping Table column mapping.
+	 * @param \WC_Order $order          Order.
+	 * @param array     $column_mapping Table column mapping.
+	 * @param bool      $only_changes   Whether to consider only changes in the order object or all fields.
 	 * @return array
 	 */
-	private function get_db_row_from_order_changes( $changes, $column_mapping ) {
+	private function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
+		$changes = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
+
+		// XXX: manually persist some of the properties until the datastore/property design is finalized.
+		foreach ( $this->get_internal_data_store_keys() as $key ) {
+			$changes[ $key ] = $this->{"get_$key"}( $order );
+		}
+
 		$row        = array();
 		$row_format = array();
 
@@ -969,15 +1018,12 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		$this->update_post_meta( $order );
 
-		// TODO: do we want to add some backwards compat for 'woocommerce_new_order_data'?
-		$order_id = $this->persist_order_to_db( $order, false );
-		if ( $order_id ) {
-			$order->set_id( $order_id );
-			$order->save_meta_data();
-			$order->apply_changes();
+		$this->persist_order_to_db( $order );
 
-			$this->clear_caches( $order );
-		}
+		$order->save_meta_data();
+		$order->apply_changes();
+
+		$this->clear_caches( $order );
 
 		/**
 		 * Fires when a new order is created.
@@ -1021,7 +1067,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		// Update with latest changes.
 		$changes = $order->get_changes();
 
-		$this->persist_order_to_db( $order, true );
+		$this->persist_order_to_db( $order );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
