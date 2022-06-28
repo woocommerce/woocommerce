@@ -69,7 +69,10 @@ class WC_Site_Tracking {
 		 *
 		 * @since 6.5.0
 		 */
-		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', array(), false );
+		$tracks_event_properties = apply_filters( 'woocommerce_tracks_event_properties', array(), false );
+		$user                    = wp_get_current_user();
+		$identity                = WC_Tracks_Client::get_identity( $user->ID );
+		$filtered_properties     = array_merge( $tracks_event_properties, $identity );
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
@@ -83,11 +86,6 @@ class WC_Site_Tracking {
 				const eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
 				let eventProperties = properties || {};
 				eventProperties = { ...eventProperties, ...<?php echo json_encode( $filtered_properties ); ?> };
-				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
-					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
-					delete( eventProperties._ui );
-					delete( eventProperties._ut );
-				}
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
