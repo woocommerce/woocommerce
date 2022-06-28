@@ -86,7 +86,17 @@ class Homescreen {
 			return $settings;
 		}
 
-		if ( false === in_array( 'physical', $settings['onboarding']['profile']['product_types'] ?? array(), true ) ) {
+		$user_skipped_obw = $settings['onboarding']['profile']['skipped'] ?? false;
+		$store_address = $settings['preloadSettings']['general']['store_address'] ?? '';
+		$product_types = $settings['onboarding']['profile']['product_types'] ?? array();
+
+		// If user skipped the obw or has not completed the store_details
+		// then we assume the user is going to sell physical products.
+		if ( $user_skipped_obw || '' === $store_address ) {
+			$product_types[] = 'physical';
+		}
+
+		if ( false === in_array( 'physical', $product_types, true ) ) {
 			return $settings;
 		}
 
