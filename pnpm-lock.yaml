@@ -759,14 +759,14 @@ importers:
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/browserslist-config': ^4.1.0
       '@wordpress/deprecated': ^3.2.3
-      '@wordpress/e2e-test-utils': ^4.16.1
+      '@wordpress/e2e-test-utils': wp-5.8
       config: 3.3.3
       eslint: ^8.1.0
       fishery: ^1.2.0
     dependencies:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 3.2.3
-      '@wordpress/e2e-test-utils': 4.16.1_jest@27.3.1
+      '@wordpress/e2e-test-utils': 5.3.2_jest@27.3.1
       config: 3.3.3
       fishery: 1.4.0
     devDependencies:
@@ -15128,21 +15128,21 @@ packages:
       - react-native
     dev: false
 
-  /@wordpress/e2e-test-utils/4.16.1_jest@27.3.1:
-    resolution: {integrity: sha512-Dpsq5m0VSvjIhro2MjACSzkOkOf1jGEryzgEMW1ikbT6YI+motspHfGtisKXgYhZJOnjV4PwuEg+9lPVnd971g==}
-    engines: {node: '>=8'}
+  /@wordpress/e2e-test-utils/5.3.2_jest@27.3.1:
+    resolution: {integrity: sha512-K44fl1Fgh2kk2RV14BDFSr2QVa5F2aeZ3IOyvLYo1OqaTD2pxXbdQDL1U4wvbkXxAoub4fsF0ugAYYyvxyLIvw==}
+    engines: {node: '>=12'}
     peerDependencies:
-      jest: '>=24'
+      jest: '>=26'
       puppeteer: '>=1.19.0'
     dependencies:
-      '@babel/runtime': 7.15.4
-      '@wordpress/keycodes': 2.19.3
-      '@wordpress/url': 2.22.2
+      '@babel/runtime': 7.17.7
+      '@wordpress/keycodes': 3.10.0
+      '@wordpress/url': 3.11.0
       jest: 27.3.1
       lodash: 4.17.21
-      node-fetch: 2.6.5
+      node-fetch: 2.6.7
     transitivePeerDependencies:
-      - react-native
+      - encoding
     dev: false
 
   /@wordpress/element/2.20.3:
@@ -17493,7 +17493,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /babel-loader/8.2.3_d3f6fe5812216e437b67a6bf164a056c:
@@ -17523,7 +17523,7 @@ packages:
       loader-utils: 1.4.0
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.70.0_webpack-cli@4.9.2
+      webpack: 5.70.0
     dev: true
 
   /babel-messages/6.23.0:
@@ -19956,7 +19956,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
     dev: true
 
   /css-loader/3.6.0_webpack@5.70.0:
@@ -33086,10 +33086,11 @@ packages:
   /puppeteer/2.1.1:
     resolution: {integrity: sha512-LWzaDVQkk1EPiuYeTOj+CZRIjda4k2s5w4MK4xoH2+kgWV/SDlkYHmxatDdtYrciHUKSXTsGgPgPP8ILVdBsxg==}
     engines: {node: '>=8.16.0'}
+    deprecated: Version no longer supported. Upgrade to @latest
     requiresBuild: true
     dependencies:
       '@types/mime-types': 2.1.1
-      debug: 4.3.2
+      debug: 4.3.4
       extract-zip: 1.7.0
       https-proxy-agent: 4.0.0
       mime: 2.5.2
@@ -34733,7 +34734,7 @@ packages:
     dev: true
 
   /resolve-cwd/2.0.0:
-    resolution: {integrity: sha1-AKn3OHVW4nA46uIyyqNypqWbZlo=}
+    resolution: {integrity: sha512-ccu8zQTrzVr954472aUVPLEcB3YpKSYR3cg/3lo1okzobPBM+1INXBbBZlDbnI/hbEocnf8j0QVo43hQKrbchg==}
     engines: {node: '>=4'}
     dependencies:
       resolve-from: 3.0.0
@@ -35719,7 +35720,7 @@ packages:
     dev: true
 
   /stealthy-require/1.1.1:
-    resolution: {integrity: sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=}
+    resolution: {integrity: sha512-ZnWpYnYugiOVEY5GkcuJK1io5V8QmNYChG62gSit9pQVGErXtrKuPC55ITaVSukmMta5qpMU7vqLt2Lnni4f/g==}
     engines: {node: '>=0.10.0'}
 
   /store2/2.13.2:
@@ -36674,7 +36675,7 @@ packages:
       serialize-javascript: 4.0.0
       source-map: 0.6.1
       terser: 4.8.0
-      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack: 4.46.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
     dev: true
@@ -36785,7 +36786,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
     dev: true
@@ -39135,7 +39136,7 @@ packages:
     dev: true
 
   /which-module/2.0.0:
-    resolution: {integrity: sha1-2e8H3Od7mQK4o6j6SzHD4/fm6Ho=}
+    resolution: {integrity: sha512-B+enWhmw6cjfVC7kS8Pj9pCrKSc5txArRyaYGe088shv/FGWH+0Rjx/xPgtsWfsUtS27FkP697E4DDhgrgoc0Q==}
 
   /which-pm/2.0.0:
     resolution: {integrity: sha512-Lhs9Pmyph0p5n5Z3mVnN0yWcbQYUAD7rbQUiMsQxOJ3T57k7RFe35SUwWMf7dsbDZks1uOmw4AecB/JMDj3v/w==}
