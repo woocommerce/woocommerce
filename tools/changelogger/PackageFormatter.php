@@ -23,6 +23,9 @@ class PackageFormatter extends Formatter implements FormatterPlugin {
 	 */
 	public $prologue = "# Changelog \n\nThis project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).";
 
+	/**
+	 * Return the epilogue string based on the package being released.
+	 */
 	public function getEpilogue() {
 		$cwd = getcwd();
 		$pos = stripos( $cwd, 'packages/js/' );

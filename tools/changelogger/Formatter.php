@@ -63,6 +63,9 @@ class Formatter extends KeepAChangelogParser {
 	 */
 	public $subentry_pattern = '/^###(.+)\n/m';
 
+	/**
+	 * Return the epiologue.
+	 */
 	public function getEpilogue() {
 		return $this->epilogue;
 	}
