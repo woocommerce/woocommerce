@@ -465,11 +465,9 @@ export class Shipping extends Component {
 
 			const { step } = this.state;
 			// Empty description field if it's not the current step.
-			if ( this.shippingSmartDefaultsEnabled ) {
-				for ( const i in steps ) {
-					if ( steps[ i ].key !== step ) {
-						steps[ i ].description = '';
-					}
+			for ( const i in steps ) {
+				if ( steps[ i ].key !== step ) {
+					steps[ i ].description = '';
 				}
 			}
 		}
