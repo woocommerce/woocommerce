@@ -18,6 +18,7 @@ export class Plugins extends Component {
 		};
 
 		this.installAndActivate = this.installAndActivate.bind( this );
+		this.skipInstaller = this.skipInstaller.bind( this );
 		this.handleErrors = this.handleErrors.bind( this );
 		this.handleSuccess = this.handleSuccess.bind( this );
 	}
