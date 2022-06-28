@@ -454,22 +454,19 @@ export class Shipping extends Component {
 				},
 			};
 
-			steps = steps.map( ( step ) =>
-				shippingSmartDefaultsSteps.hasOwnProperty( step.key )
-					? {
-							...step,
-							...shippingSmartDefaultsSteps[ step.key ],
-					  }
-					: step
-			);
-
-			const { step } = this.state;
-			// Empty description field if it's not the current step.
-			for ( const i in steps ) {
-				if ( steps[ i ].key !== step ) {
-					steps[ i ].description = '';
+			steps = steps.map( ( step ) => {
+				if ( shippingSmartDefaultsSteps.hasOwnProperty( step.key ) ) {
+					step = {
+						...step,
+						...shippingSmartDefaultsSteps[ step.key ],
+					};
 				}
-			}
+				// Empty description field if it's not the current step.
+				if ( step.key !== this.state.step ) {
+					step.description = '';
+				}
+				return step;
+			} );
 		}
 		return filter( steps, ( step ) => step.visible );
 	}
