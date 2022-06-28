@@ -229,6 +229,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Updates the stable tag and changelog from 6.6.0 release.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Fix - Remove placeholder product icon if a featured product image is available (avoids issues with transparent images).  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Fix - Update CLI messages in COT migration to be more clear.
+* Fix - Fix payments experiment banner logic to be executed before experiment is called. [#33549](https://github.com/woocommerce/woocommerce/pull/33549)
+* Fix - Move tracks _ui and _ut properties out of filtered tracks properties. [#33621](https://github.com/woocommerce/woocommerce/pull/33621)
 * Performance - Remove orderCount and publishedProductCount from preloaded settings and moved to using orders/products data stores.  [#33064](https://github.com/woocommerce/woocommerce/pull/33064)
 * Tweak - Add type hints in the signature of wc_add_number_precision to prevent invalid inputs.  [#26965](https://github.com/woocommerce/woocommerce/pull/26965)
 * Tweak - Introduce new hook `woocommerce_set_cookie_options` to exercise more control over cookie options.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
@@ -250,6 +252,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update the tax task title to "Set up tax rates"  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Update - Turn on experimental-product-tour feature flag [#33413](https://github.com/woocommerce/woocommerce/pull/33413)
 * Update - Woo Blocks 7.7.0, 7.8.0 and 7.8.1  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
+* Update - WooCommerce Blocks to 7.8.3  [#33514](https://github.com/woocommerce/woocommerce/pull/33514)
 
 **WooCommerce Blocks 7.7.0 & 7.8.0 & 7.8.1**
 
