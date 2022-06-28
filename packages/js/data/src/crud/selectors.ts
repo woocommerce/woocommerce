@@ -25,16 +25,16 @@ export const createSelectors = ( {
 		return state.errors[ itemQuery ];
 	};
 
-	const getDeleteItemError = ( state: ResourceState, id: number ) => {
+	const getDeleteItemError = ( state: ResourceState, id: IdType ) => {
 		const itemQuery = getResourceName( CRUD_ACTIONS.DELETE_ITEM, { id } );
 		return state.errors[ itemQuery ];
 	};
 
-	const getItem = ( state: ResourceState, id: number ) => {
+	const getItem = ( state: ResourceState, id: IdType ) => {
 		return state.data[ id ];
 	};
 
-	const getItemError = ( state: ResourceState, id: number ) => {
+	const getItemError = ( state: ResourceState, id: IdType ) => {
 		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
 		return state.errors[ itemQuery ];
 	};
@@ -88,7 +88,7 @@ export const createSelectors = ( {
 		return state.errors[ itemQuery ];
 	};
 
-	const getUpdateItemError = ( state: ResourceState, id: number ) => {
+	const getUpdateItemError = ( state: ResourceState, id: IdType ) => {
 		const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, { id } );
 		return state.errors[ itemQuery ];
 	};
