@@ -4,7 +4,7 @@
 import { BaseQueryParams } from '../types';
 
 export type Item = {
-	id: number;
+	id: string;
 	[ key: string ]: unknown;
 };
 
