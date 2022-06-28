@@ -339,6 +339,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'post_status'   => $this->get_post_status( $order ),
 				'post_parent'   => $order->get_parent_id(),
 				'post_excerpt'  => $this->get_post_excerpt( $order ),
+				'post_type'     => 'shop_order',
 			)
 		);
 	}
