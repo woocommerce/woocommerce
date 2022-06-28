@@ -823,6 +823,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 *
 	 * @param \WC_Order $order        The order.
 	 * @throws \Exception If order data is not valid.
+	 *
+	 * @since 6.8.0
 	 */
 	protected function persist_order_to_db( &$order ) {
 		global $wpdb;
@@ -879,8 +881,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param boolean   $only_changes Whether to consider only changes in the order for generating the rows.
 	 * @return array
 	 * @throws \Exception When invalid data is found for the given context.
+	 *
+	 * @since 6.8.0
 	 */
-	private function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
+	protected function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
 		$result = array();
 
 		// wc_orders.
@@ -951,7 +955,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		 * @param \WC_Order The order object.
 		 * @param string The context of the operation: 'create' or 'update'.
 		 *
-		 * @since x.y.z
+		 * @since 6.8.0
 		 */
 		$ext_rows = apply_filters( 'woocommerce_orders_table_datastore_extra_db_rows_for_order', array(), $order, $context );
 
@@ -967,8 +971,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param array     $column_mapping Table column mapping.
 	 * @param bool      $only_changes   Whether to consider only changes in the order object or all fields.
 	 * @return array
+	 *
+	 * @since 6.8.0
 	 */
-	private function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
+	protected function get_db_row_from_order( $order, $column_mapping, $only_changes = false ) {
 		$changes = $only_changes ? $order->get_changes() : array_merge( $order->get_data(), $order->get_changes() );
 
 		// XXX: manually persist some of the properties until the datastore/property design is finalized.
@@ -1002,6 +1008,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	/**
+	 * Method to create an order in the database.
+	 *
 	 * @param \WC_Order $order
 	 */
 	public function create( &$order ) {
@@ -1333,7 +1341,7 @@ CREATE TABLE $meta_table (
 	 *
 	 * @return array List of keys.
 	 */
-	private static function get_internal_data_store_keys() {
+	protected function get_internal_data_store_keys() {
 		// XXX: Finalize design -- will these be turned into props?
 		return array(
 			'order_stock_reduced',
