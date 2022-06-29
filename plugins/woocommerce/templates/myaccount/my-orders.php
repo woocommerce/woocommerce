@@ -58,24 +58,24 @@ if ( $customer_orders ) : ?>
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
 								<?php do_action( 'woocommerce_my_account_my_orders_column_' . $column_id, $order ); ?>
 
-							<?php elseif ( 'order-number' === $column_id ) : ?>
+							<?php elseif ( $column_id === 'order-number' ) : ?>
 								<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>">
 									<?php echo _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</a>
 
-							<?php elseif ( 'order-date' === $column_id ) : ?>
+							<?php elseif ( $column_id === 'order-date' ) : ?>
 								<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
 
-							<?php elseif ( 'order-status' === $column_id ) : ?>
+							<?php elseif ( $column_id === 'order-status' ) : ?>
 								<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>
 
-							<?php elseif ( 'order-total' === $column_id ) : ?>
+							<?php elseif ( $column_id === 'order-total' ) : ?>
 								<?php
 								/* translators: 1: formatted order total 2: total order items */
 								printf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								?>
 
-							<?php elseif ( 'order-actions' === $column_id ) : ?>
+							<?php elseif ( $column_id === 'order-actions' ) : ?>
 								<?php
 								$actions = wc_get_account_orders_actions( $order );
 

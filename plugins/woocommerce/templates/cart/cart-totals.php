@@ -46,7 +46,7 @@ defined( 'ABSPATH' ) || exit;
 
 			<?php do_action( 'woocommerce_cart_totals_after_shipping' ); ?>
 
-		<?php elseif ( WC()->cart->needs_shipping() && 'yes' === get_option( 'woocommerce_enable_shipping_calc' ) ) : ?>
+		<?php elseif ( WC()->cart->needs_shipping() && get_option( 'woocommerce_enable_shipping_calc' ) === 'yes' ) : ?>
 
 			<tr class="shipping">
 				<th><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></th>
@@ -72,7 +72,7 @@ defined( 'ABSPATH' ) || exit;
 				$estimated_text = sprintf( ' <small>' . esc_html__( '(estimated for %s)', 'woocommerce' ) . '</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] );
 			}
 
-			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
+			if ( get_option( 'woocommerce_tax_total_display' ) === 'itemized' ) {
 				foreach ( WC()->cart->get_tax_totals() as $code => $tax ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					?>
 					<tr class="tax-rate tax-rate-<?php echo esc_attr( sanitize_title( $code ) ); ?>">

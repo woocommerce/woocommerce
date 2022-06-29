@@ -24,9 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p class="woocommerce-result-count">
 	<?php
 	// phpcs:disable WordPress.Security
-	if ( 1 === intval( $total ) ) {
+	if ( intval( $total ) === 1 ) {
 		_e( 'Showing the single result', 'woocommerce' );
-	} elseif ( $total <= $per_page || -1 === $per_page ) {
+	} elseif ( $total <= $per_page || $per_page === -1 ) {
 		/* translators: %d: total results */
 		printf( _n( 'Showing all %d result', 'Showing all %d results', $total, 'woocommerce' ), $total );
 	} else {

@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 global $comment;
 $verified = wc_review_is_from_verified_owner( $comment->comment_ID );
 
-if ( '0' === $comment->comment_approved ) { ?>
+if ( $comment->comment_approved === '0' ) { ?>
 
 	<p class="meta">
 		<em class="woocommerce-review__awaiting-approval">
@@ -33,7 +33,7 @@ if ( '0' === $comment->comment_approved ) { ?>
 	<p class="meta">
 		<strong class="woocommerce-review__author"><?php comment_author(); ?> </strong>
 		<?php
-		if ( 'yes' === get_option( 'woocommerce_review_rating_verification_label' ) && $verified ) {
+		if ( get_option( 'woocommerce_review_rating_verification_label' ) === 'yes' && $verified ) {
 			echo '<em class="woocommerce-review__verified verified">(' . esc_attr__( 'verified owner', 'woocommerce' ) . ')</em> ';
 		}
 

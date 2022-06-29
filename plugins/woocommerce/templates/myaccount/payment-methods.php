@@ -43,16 +43,16 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 							<?php
 							if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
 								do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
-							} elseif ( 'method' === $column_id ) {
+							} elseif ( $column_id === 'method' ) {
 								if ( ! empty( $method['method']['last4'] ) ) {
 									/* translators: 1: credit card type 2: last 4 digits */
 									echo sprintf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
 								} else {
 									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
 								}
-							} elseif ( 'expires' === $column_id ) {
+							} elseif ( $column_id === 'expires' ) {
 								echo esc_html( $method['expires'] );
-							} elseif ( 'actions' === $column_id ) {
+							} elseif ( $column_id === 'actions' ) {
 								foreach ( $method['actions'] as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 									echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>&nbsp;';
 								}
