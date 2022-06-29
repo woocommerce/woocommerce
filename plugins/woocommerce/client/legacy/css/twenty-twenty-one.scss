@@ -1845,13 +1845,15 @@ a.reset_variations {
 				content: "";
 				display: inline-block;
 				width: 14px !important;
-				height: 14px;
+				height: 14px !important;
 				border: var(--form--border-width) solid var(--form--border-color);
 				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
 				transform: translateY(2px);
+				box-sizing: border-box;
+    			padding: 0;
 			}
 		}
 
@@ -1991,13 +1993,23 @@ a.reset_variations {
 
 		input[type=checkbox] {
 			width: 25px !important;
+			height: 25px !important;
 		}
 
 		input[type=radio] {
 
 			& + label::before {
-				background: #fff !important;
+				display: inline-block;
+				width: 14px !important;
+				height: 14px !important;
 				border: var(--form--border-width) solid #000 !important;
+				background: var(--global--color-white);
+				margin-left: 4px;
+				margin-right: 1.2rem;
+				border-radius: 100%;
+				transform: translateY(2px);
+				box-sizing: border-box;
+    			padding: 0;				
 			}
 
 			&:checked + label::before {
@@ -2028,16 +2040,17 @@ a.reset_variations {
 			font-family: $headings;
 
 			&::before {
-				content: "";
 				display: inline-block;
-				width: 14px;
-				height: 14px;
+				width: 14px !important;
+				height: 14px !important;
 				border: var(--form--border-width) solid var(--form--border-color);
 				background: var(--global--color-white);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
 				transform: translateY(2px);
+				box-sizing: border-box;
+    			padding: 0;		
 			}
 
 		}

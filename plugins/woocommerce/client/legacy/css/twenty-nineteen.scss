@@ -1203,8 +1203,8 @@ table.variations {
 			&:before {
 				content: "";
 				display: inline-block;
-				width: 16px;
-				height: 16px;
+				width: 16px !important;
+				height: 16px !important;
 				border: 2px solid white;
 				box-shadow: 0 0 0 2px black;
 				background: white;
@@ -1212,6 +1212,8 @@ table.variations {
 				margin-right: 0.5rem;
 				border-radius: 100%;
 				transform: translateY(2px);
+				box-sizing: border-box;
+    			padding: 0;
 			}
 		}
 
