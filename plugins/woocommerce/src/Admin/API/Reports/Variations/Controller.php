@@ -434,7 +434,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'orders_count' => __( 'Orders', 'woocommerce' ),
 		);
 
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+		if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
 			$export_columns['stock_status'] = __( 'Status', 'woocommerce' );
 			$export_columns['stock']        = __( 'Stock', 'woocommerce' );
 		}
@@ -457,7 +457,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'orders_count' => $item['orders_count'],
 		);
 
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+		if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
 			$export_item['stock_status'] = $this->get_stock_status( $item['extended_info']['stock_status'] );
 			$export_item['stock']        = $item['extended_info']['stock_quantity'];
 		}

@@ -117,7 +117,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		if ( $query_args['customer_type'] ) {
-			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
+			$returning_customer = $query_args['customer_type'] === 'returning' ? 1 : 0;
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = ${returning_customer}";
 		}
 
@@ -241,7 +241,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -262,7 +262,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 			/* phpcs:enable */
 
-			if ( 0 === $params['per_page'] ) {
+			if ( $params['per_page'] === 0 ) {
 				$total_pages = 0;
 			} else {
 				$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
@@ -288,7 +288,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 			/* phpcs:enable */
 
-			if ( null === $orders_data ) {
+			if ( $orders_data === null ) {
 				return $data;
 			}
 
@@ -316,7 +316,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return 'date_created';
 		}
 
@@ -344,7 +344,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$mapped_data[ $product['order_id'] ]['products'] = array();
 			}
 
-			$is_variation = '0' !== $product['variation_id'];
+			$is_variation = $product['variation_id'] !== '0';
 			$product_data = array(
 				'id'       => $is_variation ? $product['variation_id'] : $product['product_id'],
 				'name'     => $product['product_name'],
@@ -360,7 +360,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				 */
 				$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $variation );
 
-				if ( false === strpos( $product_data['name'], $separator ) ) {
+				if ( strpos( $product_data['name'], $separator ) === false ) {
 					$attributes            = wc_get_formatted_variation( $variation, true, false );
 					$product_data['name'] .= $separator . $attributes;
 				}
@@ -407,7 +407,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function get_orders_with_parent_id( $orders ) {
 		$related_orders = array();
 		foreach ( $orders as $order ) {
-			if ( '0' !== $order['parent_id'] ) {
+			if ( $order['parent_id'] !== '0' ) {
 				$related_orders[ $order['parent_id'] ] = $order;
 			}
 		}
@@ -537,7 +537,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = 'orders-all-statuses';
 		$statuses  = Cache::get( $cache_key );
 
-		if ( false === $statuses ) {
+		if ( $statuses === false ) {
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$table_name = self::get_db_table_name();
 			$statuses   = $wpdb->get_col(

@@ -65,17 +65,17 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$args['post_parent__in']     = $request['parent'];
 		$args['post_parent__not_in'] = $request['parent_exclude'];
 
-		if ( 'date' === $args['orderby'] ) {
+		if ( $args['orderby'] === 'date' ) {
 			$args['orderby'] = 'date ID';
-		} elseif ( 'include' === $args['orderby'] ) {
+		} elseif ( $args['orderby'] === 'include' ) {
 			$args['orderby'] = 'post__in';
-		} elseif ( 'id' === $args['orderby'] ) {
+		} elseif ( $args['orderby'] === 'id' ) {
 			$args['orderby'] = 'ID'; // ID must be capitalized.
 		}
 
 		$args['post_type'] = array( 'product', 'product_variation' );
 
-		if ( 'lowstock' === $request['type'] ) {
+		if ( $request['type'] === 'lowstock' ) {
 			$args['low_in_stock'] = true;
 		} elseif ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
 			$args['stock_status'] = $request['type'];
@@ -315,7 +315,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'low_stock_amount' => $product->get_low_stock_amount(),
 		);
 
-		if ( '' === $data['low_stock_amount'] ) {
+		if ( $data['low_stock_amount'] === '' ) {
 			$data['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 		}
 

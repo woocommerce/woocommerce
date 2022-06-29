@@ -90,7 +90,7 @@ class Taxes extends \WC_REST_Taxes_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $prepared_args['class'] ) ) {
-			$class  = 'standard' !== $prepared_args['class'] ? sanitize_title( $prepared_args['class'] ) : '';
+			$class  = $prepared_args['class'] !== 'standard' ? sanitize_title( $prepared_args['class'] ) : '';
 			$query .= " AND tax_rate_class = '$class'";
 		}
 

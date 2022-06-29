@@ -274,7 +274,7 @@ class Menu {
 
 		if ( isset( $item['parent'] ) && isset( self::$menu_items[ $item['parent'] ] ) ) {
 			$menu_id = self::$menu_items[ $item['parent'] ]['menuId'];
-			return 'favorites' === $menu_id
+			return $menu_id === 'favorites'
 				? 'plugins'
 				: $menu_id;
 		}
@@ -345,7 +345,7 @@ class Menu {
 
 		$menu_id = self::get_item_menu_id( $item_args );
 
-		if ( 'plugins' !== $menu_id ) {
+		if ( $menu_id !== 'plugins' ) {
 			return;
 		}
 

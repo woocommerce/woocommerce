@@ -131,7 +131,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				break;
 		}
 		if ( $join ) {
-			if ( 'inner' === $arg_name ) {
+			if ( $arg_name === 'inner' ) {
 				$this->subquery->add_sql_clause( $type, $join );
 			} else {
 				$this->add_sql_clause( $type, $join );
@@ -179,13 +179,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return self::get_db_table_name() . '.date_created';
 		}
-		if ( 'product_name' === $order_by ) {
+		if ( $order_by === 'product_name' ) {
 			return 'post_title';
 		}
-		if ( 'sku' === $order_by ) {
+		if ( $order_by === 'sku' ) {
 			return 'meta_value';
 		}
 		return $order_by;
@@ -230,7 +230,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
 				foreach ( $extended_attributes as $extended_attribute ) {
-					if ( 'variations' === $extended_attribute ) {
+					if ( $extended_attribute === 'variations' ) {
 						if ( ! $product->is_type( 'variable' ) ) {
 							continue;
 						}
@@ -244,7 +244,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					}
 				}
 				// If there is no set low_stock_amount, use the one in user settings.
-				if ( '' === $extended_info['low_stock_amount'] ) {
+				if ( $extended_info['low_stock_amount'] === '' ) {
 					$extended_info['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 				}
 				$extended_info = $this->cast_numbers( $extended_info );
@@ -287,7 +287,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -307,7 +307,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$total_results     = count( $filtered_products );
 				$total_pages       = (int) ceil( $total_results / $params['per_page'] );
 
-				if ( 'date' === $query_args['orderby'] ) {
+				if ( $query_args['orderby'] === 'date' ) {
 					$selections .= ", {$table_name}.date_created";
 				}
 
@@ -356,7 +356,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			);
 
-			if ( null === $product_data ) {
+			if ( $product_data === null ) {
 				return $data;
 			}
 
@@ -403,7 +403,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_items    = $order->get_items();
 		$num_updated    = 0;
 		$decimals       = wc_get_price_decimals();
-		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
+		$round_tax      = get_option( 'woocommerce_tax_round_at_subtotal' ) === 'no';
 
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
@@ -477,7 +477,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			do_action( 'woocommerce_analytics_update_product', $order_item_id, $order->get_id() );
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
-			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+			$num_updated += intval( $result ) === 2 ? 1 : intval( $result );
 		}
 
 		if ( ! empty( $existing_items ) ) {

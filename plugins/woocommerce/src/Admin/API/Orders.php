@@ -156,7 +156,7 @@ class Orders extends \WC_REST_Orders_Controller {
 		if ( ! empty( $this->request['_fields'] ) ) {
 			$fields = wp_parse_list( $this->request['_fields'] );
 
-			if ( 0 === count( $fields ) ) {
+			if ( count( $fields ) === 0 ) {
 				$fields = false;
 			} else {
 				$fields = array_map( 'trim', $fields );
@@ -171,7 +171,7 @@ class Orders extends \WC_REST_Orders_Controller {
 			$data = $object->get_data();
 		}
 
-		$extra_fields      = false === $fields ? array() : array_intersect( $extra_fields, $fields );
+		$extra_fields      = $fields === false ? array() : array_intersect( $extra_fields, $fields );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
@@ -206,13 +206,13 @@ class Orders extends \WC_REST_Orders_Controller {
 		}
 
 		// Format the order status.
-		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
+		$data['status'] = substr( $data['status'], 0, 3 ) === 'wc-' ? substr( $data['status'], 3 ) : $data['status'];
 
 		// Format requested line items.
 		$formatted_line_items = array();
 
 		foreach ( $format_line_items as $key ) {
-			if ( false === $fields || in_array( $key, $fields, true ) ) {
+			if ( $fields === false || in_array( $key, $fields, true ) ) {
 				if ( $using_order_class_override ) {
 					$line_item_data = $object->get_line_item_data( $key );
 				} else {

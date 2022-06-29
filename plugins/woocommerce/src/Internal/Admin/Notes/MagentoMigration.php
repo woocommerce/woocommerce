@@ -47,7 +47,7 @@ class MagentoMigration {
 
 		if (
 			! isset( $onboarding_profile['other_platform'] ) ||
-			'magento' !== $onboarding_profile['other_platform']
+			$onboarding_profile['other_platform'] !== 'magento'
 		) {
 			return;
 		}

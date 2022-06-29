@@ -90,7 +90,7 @@ class WCAdminHelper {
 		$wc_admin_active_for = self::get_wcadmin_active_for_in_seconds();
 
 		$range_data = self::WC_ADMIN_STORE_AGE_RANGES[ $range ];
-		$start      = null !== $custom_start ? $custom_start : $range_data['start'];
+		$start      = $custom_start !== null ? $custom_start : $range_data['start'];
 		if ( $range_data && $wc_admin_active_for >= $start ) {
 			return isset( $range_data['end'] ) ? $wc_admin_active_for < $range_data['end'] : true;
 		}

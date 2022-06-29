@@ -73,12 +73,12 @@ class MarketingJetpack {
 
 			$note_id = array_pop( $note_ids );
 			$note    = Notes::get_note( $note_id );
-			if ( false === $note ) {
+			if ( $note === false ) {
 				return;
 			}
 
 			// If Jetpack Backups was purchased after the note was created, mark this note as actioned.
-			if ( self::has_backups() && Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {
+			if ( self::has_backups() && $note->get_status() !== Note::E_WC_ADMIN_NOTE_ACTIONED ) {
 				$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
 				$note->save();
 			}

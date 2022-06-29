@@ -183,7 +183,7 @@ class CoreMenu {
 			);
 
 			// Don't allow top-level items to be added to the primary menu.
-			if ( ! isset( $item['parent'] ) || 'woocommerce' === $item['parent'] ) {
+			if ( ! isset( $item['parent'] ) || $item['parent'] === 'woocommerce' ) {
 				$item['menuId'] = 'plugins';
 			}
 

@@ -99,14 +99,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function sync_on_order_delete( $order_id, $customer_id ) {
 		$customer_id = absint( $customer_id );
 
-		if ( 0 === $customer_id ) {
+		if ( $customer_id === 0 ) {
 			return;
 		}
 
 		// Calculate the amount of orders remaining for this customer.
 		$order_count = self::get_order_count( $customer_id );
 
-		if ( 0 === $order_count ) {
+		if ( $order_count === 0 ) {
 			self::delete_customer( $customer_id );
 		}
 	}
@@ -122,13 +122,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function sync_order_customer( $post_id ) {
 		global $wpdb;
 
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
+		if ( get_post_type( $post_id ) !== 'shop_order' && get_post_type( $post_id ) !== 'shop_order_refund' ) {
 			return -1;
 		}
 
 		$order       = wc_get_order( $post_id );
 		$customer_id = self::get_existing_customer_id_from_order( $order );
-		if ( false === $customer_id ) {
+		if ( $customer_id === false ) {
 			return -1;
 		}
 		$last_order = self::get_last_order( $customer_id );
@@ -149,7 +149,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 */
 		do_action( 'woocommerce_analytics_update_customer', $customer_id );
 
-		return 1 === $result;
+		return $result === 1;
 	}
 
 	/**
@@ -159,7 +159,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'name' === $order_by ) {
+		if ( $order_by === 'name' ) {
 			return "CONCAT_WS( ' ', first_name, last_name )";
 		}
 
@@ -216,11 +216,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$subclauses[] = "{$column_name} >= '$datetime_str'";
 			}
 
-			if ( $subclauses && ( 'where' === $param_info['clause'] ) ) {
+			if ( $subclauses && ( $param_info['clause'] === 'where' ) ) {
 				$where_time_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
 			}
 
-			if ( $subclauses && ( 'having' === $param_info['clause'] ) ) {
+			if ( $subclauses && ( $param_info['clause'] === 'having' ) ) {
 				$having_time_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
 			}
 		}
@@ -266,7 +266,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
 				$included                      = implode( "','", $exact_match_arguments_escaped );
 				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
-				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
+				$table_column    = $exact_match_param === 'country' ? $exact_match_param : 'customer_id';
 				$where_clauses[] = "{$customer_lookup_table}.{$table_column} IN ('{$included}')";
 			}
 
@@ -275,7 +275,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
 				$excluded                      = implode( "','", $exact_match_arguments_escaped );
 				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
-				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
+				$table_column    = $exact_match_param === 'country' ? $exact_match_param : 'customer_id';
 				$where_clauses[] = "{$customer_lookup_table}.{$table_column} NOT IN ('{$excluded}')";
 			}
 		}
@@ -289,7 +289,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( ! empty( $query_args['search'] ) ) {
 			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
 
-			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params, true ) ) {
+			if ( empty( $query_args['searchby'] ) || $query_args['searchby'] === 'name' || ! in_array( $query_args['searchby'], $search_params, true ) ) {
 				$searchby = "CONCAT_WS( ' ', first_name, last_name )";
 			} else {
 				$searchby = $query_args['searchby'];
@@ -400,7 +400,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -436,7 +436,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			);
 
-			if ( null === $customer_data ) {
+			if ( $customer_data === null ) {
 				return $data;
 			}
 
@@ -469,7 +469,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$user_id = $order->get_customer_id();
 
-		if ( 0 === $user_id ) {
+		if ( $user_id === 0 ) {
 			$customer_id = $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
@@ -562,7 +562,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		// Add registered customer data.
-		if ( 0 !== $order->get_user_id() ) {
+		if ( $order->get_user_id() !== 0 ) {
 			$user_id = $order->get_user_id();
 			if ( is_null( $customer_user ) ) {
 				$customer_user = new \WC_Customer( $user_id );
@@ -680,7 +680,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$customer_id = absint( $customer_id );
 
-		if ( 0 === $customer_id ) {
+		if ( $customer_id === 0 ) {
 			return null;
 		}
 

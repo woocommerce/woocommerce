@@ -17,7 +17,7 @@ class OrderCountRuleProcessor implements RuleProcessorInterface {
 	 * @param object $orders_provider The orders provider.
 	 */
 	public function __construct( $orders_provider = null ) {
-		$this->orders_provider = null === $orders_provider
+		$this->orders_provider = $orders_provider === null
 			? new OrdersProvider()
 			: $orders_provider;
 	}

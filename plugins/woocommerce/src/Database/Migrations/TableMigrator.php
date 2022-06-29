@@ -62,7 +62,7 @@ abstract class TableMigrator {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->query( $query );
 
-		if ( '' !== $wpdb->last_error ) {
+		if ( $wpdb->last_error !== '' ) {
 			$this->add_error( $wpdb->last_error );
 		}
 
@@ -82,7 +82,7 @@ abstract class TableMigrator {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->get_results( $query, $output );
 
-		if ( '' !== $wpdb->last_error ) {
+		if ( $wpdb->last_error !== '' ) {
 			$this->add_error( $wpdb->last_error );
 		}
 
@@ -128,7 +128,7 @@ abstract class TableMigrator {
 	 * @return void
 	 */
 	protected function maybe_add_insert_or_update_error( string $operation, $received_rows_count ) {
-		if ( false === $received_rows_count ) {
+		if ( $received_rows_count === false ) {
 			$this->add_error( "$operation operation didn't complete, the database query failed" );
 		}
 	}

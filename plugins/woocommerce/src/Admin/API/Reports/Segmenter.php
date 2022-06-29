@@ -326,7 +326,7 @@ class Segmenter {
 	protected function set_all_segments() {
 		global $wpdb;
 
-		if ( ! isset( $this->query_args['segmentby'] ) || '' === $this->query_args['segmentby'] ) {
+		if ( ! isset( $this->query_args['segmentby'] ) || $this->query_args['segmentby'] === '' ) {
 			$this->all_segment_ids = array();
 			return;
 		}
@@ -334,7 +334,7 @@ class Segmenter {
 		$segments       = array();
 		$segment_labels = array();
 
-		if ( 'product' === $this->query_args['segmentby'] ) {
+		if ( $this->query_args['segmentby'] === 'product' ) {
 			$args = array(
 				'return' => 'objects',
 				'limit'  => -1,
@@ -359,7 +359,7 @@ class Segmenter {
 				$segments[]            = $id;
 				$segment_labels[ $id ] = $segment->get_name();
 			}
-		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'variation' ) {
 			$args = array(
 				'return' => 'objects',
 				'limit'  => -1,
@@ -397,7 +397,7 @@ class Segmenter {
 				$segments[]        = 0;
 				$segment_labels[0] = $parent_object->get_name();
 			}
-		} elseif ( 'category' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'category' ) {
 			$args = array(
 				'taxonomy' => 'product_cat',
 			);
@@ -412,7 +412,7 @@ class Segmenter {
 			$segments       = wp_list_pluck( $categories, 'cat_ID' );
 			$segment_labels = wp_list_pluck( $categories, 'name', 'cat_ID' );
 
-		} elseif ( 'coupon' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'coupon' ) {
 			$args = array();
 			if ( isset( $this->query_args['coupons'] ) ) {
 				$args['include'] = $this->query_args['coupons'];
@@ -422,11 +422,11 @@ class Segmenter {
 			$segments       = wp_list_pluck( $coupons, 'ID' );
 			$segment_labels = wp_list_pluck( $coupons, 'post_title', 'ID' );
 			$segment_labels = array_map( 'wc_format_coupon_code', $segment_labels );
-		} elseif ( 'customer_type' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'customer_type' ) {
 			// 0 -- new customer
 			// 1 -- returning customer
 			$segments = array( 0, 1 );
-		} elseif ( 'tax_rate_id' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'tax_rate_id' ) {
 			$args = array();
 			if ( isset( $this->query_args['taxes'] ) ) {
 				$args['include'] = $this->query_args['taxes'];
@@ -558,9 +558,9 @@ class Segmenter {
 	 * @return array
 	 */
 	protected function get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table ) {
-		if ( 'totals' === $type ) {
+		if ( $type === 'totals' ) {
 			return $this->get_product_related_totals_segments( $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
-		} elseif ( 'intervals' === $type ) {
+		} elseif ( $type === 'intervals' ) {
 			return $this->get_product_related_intervals_segments( $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
 		}
 	}
@@ -579,9 +579,9 @@ class Segmenter {
 	 * @return array
 	 */
 	protected function get_order_related_segments( $type, $segmenting_select, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params ) {
-		if ( 'totals' === $type ) {
+		if ( $type === 'totals' ) {
 			return $this->get_order_related_totals_segments( $segmenting_select, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params );
-		} elseif ( 'intervals' === $type ) {
+		} elseif ( $type === 'intervals' ) {
 			return $this->get_order_related_intervals_segments( $segmenting_select, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params );
 		}
 	}

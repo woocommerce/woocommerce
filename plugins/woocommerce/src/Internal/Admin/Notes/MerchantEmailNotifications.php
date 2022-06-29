@@ -29,7 +29,7 @@ class MerchantEmailNotifications {
 		/* phpcs:disable WordPress.Security.NonceVerification */
 		if (
 			! isset( $_GET['external_redirect'] ) ||
-			1 !== intval( $_GET['external_redirect'] ) ||
+			intval( $_GET['external_redirect'] ) !== 1 ||
 			! isset( $_GET['user'] ) ||
 			! isset( $_GET['note'] ) ||
 			! isset( $_GET['action'] )
@@ -43,7 +43,7 @@ class MerchantEmailNotifications {
 
 		$note = Notes::get_note( $note_id );
 
-		if ( ! $note || Note::E_WC_ADMIN_NOTE_EMAIL !== $note->get_type() ) {
+		if ( ! $note || $note->get_type() !== Note::E_WC_ADMIN_NOTE_EMAIL ) {
 			return;
 		}
 

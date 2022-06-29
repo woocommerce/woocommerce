@@ -101,7 +101,7 @@ class InstallJPAndWCSPlugins {
 	 * @param Note $note The note being actioned.
 	 */
 	public function install_jp_and_wcs_plugins( $note ) {
-		if ( self::NOTE_NAME !== $note->get_name() ) {
+		if ( $note->get_name() !== self::NOTE_NAME ) {
 			return;
 		}
 
@@ -136,7 +136,7 @@ class InstallJPAndWCSPlugins {
 	 */
 	public function on_install_error( $slug ) {
 		// Exit early if we're not installing the Jetpack or the WooCommerce Shipping & Tax plugins.
-		if ( 'jetpack' !== $slug && 'woocommerce-services' !== $slug ) {
+		if ( $slug !== 'jetpack' && $slug !== 'woocommerce-services' ) {
 			return;
 		}
 

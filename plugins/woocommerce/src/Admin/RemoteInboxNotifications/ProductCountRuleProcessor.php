@@ -19,7 +19,7 @@ class ProductCountRuleProcessor implements RuleProcessorInterface {
 	 * @param object $product_query The product query.
 	 */
 	public function __construct( $product_query = null ) {
-		$this->product_query = null === $product_query
+		$this->product_query = $product_query === null
 			? new \WC_Product_Query(
 				array(
 					'limit'    => 1,

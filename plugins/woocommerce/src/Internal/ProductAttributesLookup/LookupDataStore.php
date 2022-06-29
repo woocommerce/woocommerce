@@ -79,7 +79,7 @@ class LookupDataStore {
 		add_filter(
 			'woocommerce_get_settings_products',
 			function ( $settings, $section_id ) {
-				if ( 'advanced' === $section_id && $this->check_lookup_table_exists() ) {
+				if ( $section_id === 'advanced' && $this->check_lookup_table_exists() ) {
 					$title_item = array(
 						'title' => __( 'Product attributes lookup table', 'woocommerce' ),
 						'type'  => 'title',
@@ -172,7 +172,7 @@ class LookupDataStore {
 		}
 
 		$action = $this->get_update_action( $changeset );
-		if ( self::ACTION_NONE !== $action ) {
+		if ( $action !== self::ACTION_NONE ) {
 			$this->maybe_schedule_update( $product->get_id(), $action );
 		}
 	}
@@ -188,7 +188,7 @@ class LookupDataStore {
 	 * @param int $action The action to perform, one of the ACTION_ constants.
 	 */
 	private function maybe_schedule_update( int $product_id, int $action ) {
-		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_direct_updates' ) ) {
+		if ( get_option( 'woocommerce_attribute_lookup_direct_updates' ) === 'yes' ) {
 			$this->run_update_callback( $product_id, $action );
 			return;
 		}
@@ -268,7 +268,7 @@ class LookupDataStore {
 
 		if ( in_array( 'catalog_visibility', $keys, true ) ) {
 			$new_visibility = $changeset['catalog_visibility'];
-			if ( 'visible' === $new_visibility || 'catalog' === $new_visibility ) {
+			if ( $new_visibility === 'visible' || $new_visibility === 'catalog' ) {
 				return self::ACTION_INSERT;
 			} else {
 				return self::ACTION_DELETE;
@@ -663,7 +663,7 @@ class LookupDataStore {
 	 * @return bool True if a lookup table regeneration is already in progress.
 	 */
 	public function regeneration_is_in_progress() {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null );
+		return get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null ) === 'yes';
 	}
 
 	/**
@@ -701,7 +701,7 @@ class LookupDataStore {
 	 * @return bool True if the last lookup table regeneration process was aborted.
 	 */
 	public function regeneration_was_aborted(): bool {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
+		return get_option( 'woocommerce_attribute_lookup_regeneration_aborted' ) === 'yes';
 	}
 
 	/**

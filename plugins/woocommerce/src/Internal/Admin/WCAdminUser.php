@@ -27,7 +27,7 @@ class WCAdminUser {
 	 * @return object Instance.
 	 */
 	public static function get_instance() {
-		if ( null === self::$instance ) {
+		if ( self::$instance === null ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
@@ -81,7 +81,7 @@ class WCAdminUser {
 	 * @param string  $field_id The field id for the user meta.
 	 */
 	public function update_user_data_values( $values, $user, $field_id ) {
-		if ( empty( $values ) || ! is_array( $values ) || 'woocommerce_meta' !== $field_id ) {
+		if ( empty( $values ) || ! is_array( $values ) || $field_id !== 'woocommerce_meta' ) {
 			return;
 		}
 		$fields  = $this->get_user_data_fields();
@@ -130,10 +130,10 @@ class WCAdminUser {
 		$meta_value = get_user_meta( $user_id, 'woocommerce_admin_' . $field, true );
 
 		// Migrate old meta values (prefix changed from `wc_admin_` to `woocommerce_admin_`).
-		if ( '' === $meta_value ) {
+		if ( $meta_value === '' ) {
 			$old_meta_value = get_user_meta( $user_id, 'wc_admin_' . $field, true );
 
-			if ( '' !== $old_meta_value ) {
+			if ( $old_meta_value !== '' ) {
 				self::update_user_data_field( $user_id, $field, $old_meta_value );
 				delete_user_meta( $user_id, 'wc_admin_' . $field );
 

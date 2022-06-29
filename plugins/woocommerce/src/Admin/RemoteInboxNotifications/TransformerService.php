@@ -52,13 +52,13 @@ class TransformerService {
 			}
 
 			$transformer = self::create_transformer( $transformer_config->use );
-			if ( null === $transformer ) {
+			if ( $transformer === null ) {
 				throw new InvalidArgumentException( "Unable to find a transformer by name: {$transformer_config->use}" );
 			}
 
 			$transformed_value = $transformer->transform( $target_value, $transformer_config->arguments, $default );
 			// if the transformer returns null, then return the previously transformed value.
-			if ( null === $transformed_value ) {
+			if ( $transformed_value === null ) {
 				return $target_value;
 			}
 

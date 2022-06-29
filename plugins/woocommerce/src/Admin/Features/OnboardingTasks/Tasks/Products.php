@@ -40,7 +40,7 @@ class Products extends Task {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
 			return __( 'Create or upload your first products', 'woocommerce' );
 		}
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added products', 'woocommerce' );
 			}
@@ -101,7 +101,7 @@ class Products extends Task {
 	 */
 	public function possibly_add_manual_return_notice_script( $hook ) {
 		global $post;
-		if ( 'post.php' !== $hook || 'product' !== $post->post_type ) {
+		if ( $hook !== 'post.php' || $post->post_type !== 'product' ) {
 			return;
 		}
 
@@ -132,7 +132,7 @@ class Products extends Task {
 	public function possibly_add_import_return_notice_script( $hook ) {
 		$step = isset( $_GET['step'] ) ? $_GET['step'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
-		if ( 'product_page_product_importer' !== $hook || 'done' !== $step ) {
+		if ( $hook !== 'product_page_product_importer' || $step !== 'done' ) {
 			return;
 		}
 
@@ -158,12 +158,12 @@ class Products extends Task {
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_load_sample_return_notice_script( $hook ) {
-		if ( 'edit.php' !== $hook || 'product' !== get_query_var( 'post_type' ) ) {
+		if ( $hook !== 'edit.php' || get_query_var( 'post_type' ) !== 'product' ) {
 			return;
 		}
 
 		$referer = wp_get_referer();
-		if ( ! $referer || 0 !== strpos( $referer, wc_admin_url() ) ) {
+		if ( ! $referer || strpos( $referer, wc_admin_url() ) !== 0 ) {
 			return;
 		}
 
@@ -203,6 +203,6 @@ class Products extends Task {
 		);
 		$products      = $product_query->get_products();
 
-		return 0 !== count( $products );
+		return count( $products ) !== 0;
 	}
 }

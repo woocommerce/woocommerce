@@ -26,7 +26,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_expire             = DAY_IN_SECONDS * 30;
 		$low_stock_transient_name = 'wc_admin_stock_count_lowstock';
 		$low_stock_count          = get_transient( $low_stock_transient_name );
-		if ( false === $low_stock_count ) {
+		if ( $low_stock_count === false ) {
 			$low_stock_count = $this->get_low_stock_count();
 			set_transient( $low_stock_transient_name, $low_stock_count, $cache_expire );
 		} else {
@@ -38,7 +38,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		foreach ( $status_options as $status => $label ) {
 			$transient_name = 'wc_admin_stock_count_' . $status;
 			$count          = get_transient( $transient_name );
-			if ( false === $count ) {
+			if ( $count === false ) {
 				$count = $this->get_count( $status );
 				set_transient( $transient_name, $count, $cache_expire );
 			} else {
@@ -49,7 +49,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$product_count_transient_name = 'wc_admin_product_count';
 		$product_count                = get_transient( $product_count_transient_name );
-		if ( false === $product_count ) {
+		if ( $product_count === false ) {
 			$product_count = $this->get_product_count();
 			set_transient( $product_count_transient_name, $product_count, $cache_expire );
 		} else {

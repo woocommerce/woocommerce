@@ -40,7 +40,7 @@ class EvaluateAndGetStatus {
 
 		// Pending notes should be the spec status if the spec passes,
 		// left alone otherwise.
-		if ( Note::E_WC_ADMIN_NOTE_PENDING === $current_status ) {
+		if ( $current_status === Note::E_WC_ADMIN_NOTE_PENDING ) {
 			return $evaluated_result
 				? $spec->status
 				: Note::E_WC_ADMIN_NOTE_PENDING;

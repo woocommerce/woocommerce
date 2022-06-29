@@ -21,7 +21,7 @@ class PluginVersionRuleProcessor implements RuleProcessorInterface {
 	 * @param PluginsProviderInterface $plugins_provider The plugins provider.
 	 */
 	public function __construct( $plugins_provider = null ) {
-		$this->plugins_provider = null === $plugins_provider
+		$this->plugins_provider = $plugins_provider === null
 			? new PluginsProvider()
 			: $plugins_provider;
 	}

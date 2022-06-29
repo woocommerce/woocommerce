@@ -85,7 +85,7 @@ class TaskListSection {
 	private function is_complete() {
 		$complete = true;
 		foreach ( $this->task_names as $task_name ) {
-			if ( null !== $this->task_list && isset( $this->task_list->task_class_id_map[ $task_name ] ) ) {
+			if ( $this->task_list !== null && isset( $this->task_list->task_class_id_map[ $task_name ] ) ) {
 				$task = $this->task_list->get_task( $this->task_list->task_class_id_map[ $task_name ] );
 				if ( $task->can_view() && ! $task->is_complete() ) {
 					$complete = false;
@@ -109,7 +109,7 @@ class TaskListSection {
 			'image'       => $this->image,
 			'tasks'       => array_map(
 				function( $task_name ) {
-					if ( null !== $this->task_list && isset( $this->task_list->task_class_id_map[ $task_name ] ) ) {
+					if ( $this->task_list !== null && isset( $this->task_list->task_class_id_map[ $task_name ] ) ) {
 						return $this->task_list->task_class_id_map[ $task_name ];
 					}
 					return '';

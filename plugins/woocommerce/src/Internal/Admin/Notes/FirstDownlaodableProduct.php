@@ -44,7 +44,7 @@ class FirstDownlaodableProduct {
 		$products = $query->get_products();
 
 		// There must be at least 1 downloadable product.
-		if ( 0 === $products->total ) {
+		if ( $products->total === 0 ) {
 			return;
 		}
 

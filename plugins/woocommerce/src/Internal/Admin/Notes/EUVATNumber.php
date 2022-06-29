@@ -32,7 +32,7 @@ class EUVATNumber {
 	 * @return Note
 	 */
 	public static function get_note() {
-		if ( 'yes' !== get_option( 'wc_connect_taxes_enabled', 'no' ) ) {
+		if ( get_option( 'wc_connect_taxes_enabled', 'no' ) !== 'yes' ) {
 			return;
 		}
 

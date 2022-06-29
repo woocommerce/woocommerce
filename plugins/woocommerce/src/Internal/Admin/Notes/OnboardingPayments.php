@@ -42,7 +42,7 @@ class OnboardingPayments {
 		$enabled_gateways = array_filter(
 			$gateways,
 			function( $gateway ) {
-				return 'yes' === $gateway->enabled;
+				return $gateway->enabled === 'yes';
 			}
 		);
 		if ( ! empty( $enabled_gateways ) ) {

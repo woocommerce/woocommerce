@@ -80,7 +80,7 @@ class RestApiUtil {
 
 		if ( ! isset( $request['amount'] ) ) {
 			$amount = self::calculate_refund_amount_from_line_items( $request );
-			if ( null !== $amount ) {
+			if ( $amount !== null ) {
 				$request['amount'] = strval( $amount );
 			}
 		}

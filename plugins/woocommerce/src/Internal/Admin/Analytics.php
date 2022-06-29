@@ -298,7 +298,7 @@ class Analytics {
 					'parent' => 'woocommerce-analytics',
 				),
 			),
-			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
+			get_option( 'woocommerce_manage_stock' ) === 'yes' ? array(
 				'id'       => 'woocommerce-analytics-stock',
 				'title'    => __( 'Stock', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',

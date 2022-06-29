@@ -286,7 +286,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->add_sql_clause( 'order_by', $order_by );
 		}
 
-		if ( false !== strpos( $order_by, '_products' ) ) {
+		if ( strpos( $order_by, '_products' ) !== false ) {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->posts} AS _products ON product_permissions.product_id = _products.ID" );
 		}
 
@@ -324,7 +324,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -361,7 +361,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			);
 
-			if ( null === $download_data ) {
+			if ( $download_data === null ) {
 				return $data;
 			}
 
@@ -388,11 +388,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function normalize_order_by( $order_by ) {
 		global $wpdb;
 
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return $wpdb->prefix . 'wc_download_log.timestamp';
 		}
 
-		if ( 'product' === $order_by ) {
+		if ( $order_by === 'product' ) {
 			return '_products.post_title';
 		}
 

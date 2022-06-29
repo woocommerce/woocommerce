@@ -189,7 +189,7 @@ class DataStore extends SqlQuery {
 	 */
 	protected function get_cache_key( $params ) {
 		if ( isset( $params['force_cache_refresh'] ) ) {
-			if ( true === $params['force_cache_refresh'] ) {
+			if ( $params['force_cache_refresh'] === true ) {
 				$this->force_cache_refresh = true;
 			}
 
@@ -197,7 +197,7 @@ class DataStore extends SqlQuery {
 			unset( $params['force_cache_refresh'] );
 		}
 
-		if ( true === $this->debug_cache ) {
+		if ( $this->debug_cache === true ) {
 			$this->debug_cache_data['query_args'] = $params;
 		}
 
@@ -218,18 +218,18 @@ class DataStore extends SqlQuery {
 	 * @return mixed
 	 */
 	protected function get_cached_data( $cache_key ) {
-		if ( true === $this->debug_cache ) {
+		if ( $this->debug_cache === true ) {
 			$this->debug_cache_data['should_use_cache']    = $this->should_use_cache();
 			$this->debug_cache_data['force_cache_refresh'] = $this->force_cache_refresh;
 			$this->debug_cache_data['cache_version']       = Cache::get_version();
 			$this->debug_cache_data['cache_hit']           = false;
 		}
 
-		if ( $this->should_use_cache() && false === $this->force_cache_refresh ) {
+		if ( $this->should_use_cache() && $this->force_cache_refresh === false ) {
 			$cached_data = Cache::get( $cache_key );
 
-			$cache_hit = false !== $cached_data;
-			if ( true === $this->debug_cache ) {
+			$cache_hit = $cached_data !== false;
+			if ( $this->debug_cache === true ) {
 				$this->debug_cache_data['cache_hit'] = $cache_hit;
 			}
 
@@ -266,7 +266,7 @@ class DataStore extends SqlQuery {
 	 * @return array
 	 */
 	public function add_debug_cache_to_envelope( $envelope, $response ) {
-		if ( 0 !== strncmp( '/wc-analytics', $response->get_matched_route(), 13 ) ) {
+		if ( strncmp( '/wc-analytics', $response->get_matched_route(), 13 ) !== 0 ) {
 			return $envelope;
 		}
 
@@ -285,7 +285,7 @@ class DataStore extends SqlQuery {
 	 * @return string
 	 */
 	private function interval_cmp( $a, $b ) {
-		if ( '' === $this->order_by || '' === $this->order ) {
+		if ( $this->order_by === '' || $this->order === '' ) {
 			return 0;
 			// @todo Should return WP_Error here perhaps?
 		}
@@ -424,10 +424,10 @@ class DataStore extends SqlQuery {
 	 * @param string   $order ASC or DESC.
 	 */
 	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by, $order ) {
-		if ( 'date' === strtolower( $order_by ) ) {
+		if ( strtolower( $order_by ) === 'date' ) {
 			$offset = 0;
 		} else {
-			if ( 'asc' === strtolower( $order ) ) {
+			if ( strtolower( $order ) === 'asc' ) {
 				$offset = ( $page_no - 1 ) * $items_per_page;
 			} else {
 				$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
@@ -480,14 +480,14 @@ class DataStore extends SqlQuery {
 		if ( $expected_interval_count <= $db_records ) {
 			return false;
 		}
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
 			return $intervals_count < $expected_intervals_on_page;
 		}
-		if ( 'desc' === $order ) {
+		if ( $order === 'desc' ) {
 			return $page_no > floor( $db_records / $items_per_page );
 		}
-		if ( 'asc' === $order ) {
+		if ( $order === 'asc' ) {
 			return $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page );
 		}
 		// Invalid ordering.
@@ -512,12 +512,12 @@ class DataStore extends SqlQuery {
 
 		$params   = $this->get_limit_params( $query_args );
 		$local_tz = new \DateTimeZone( wc_timezone_string() );
-		if ( 'date' === strtolower( $query_args['orderby'] ) ) {
+		if ( strtolower( $query_args['orderby'] ) === 'date' ) {
 			// page X in request translates to slightly different dates in the db, in case some
 			// records are missing from the db.
 			$start_iteration = 0;
 			$end_iteration   = 0;
-			if ( 'asc' === strtolower( $query_args['order'] ) ) {
+			if ( strtolower( $query_args['order'] ) === 'asc' ) {
 				// ORDER BY date ASC.
 				$new_start_date    = $query_args['after'];
 				$intervals_to_skip = ( $query_args['page'] - 1 ) * $params['per_page'];
@@ -592,7 +592,7 @@ class DataStore extends SqlQuery {
 			$this->clear_sql_clause( 'limit' );
 			$this->add_sql_clause( 'limit', 'LIMIT 0,' . $params['per_page'] );
 		} else {
-			if ( 'asc' === $query_args['order'] ) {
+			if ( $query_args['order'] === 'asc' ) {
 				$offset = ( ( $query_args['page'] - 1 ) * $params['per_page'] ) - ( $expected_interval_count - $db_interval_count );
 				$offset = $offset < 0 ? 0 : $offset;
 				$count  = $query_args['page'] * $params['per_page'] - ( $expected_interval_count - $db_interval_count );
@@ -687,7 +687,7 @@ class DataStore extends SqlQuery {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return 'time_interval';
 		}
 
@@ -775,7 +775,7 @@ class DataStore extends SqlQuery {
 			$this->subquery->clear_sql_clause( 'where_time' );
 		}
 
-		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
+		if ( isset( $query_args['before'] ) && $query_args['before'] !== '' ) {
 			if ( is_a( $query_args['before'], 'WC_DateTime' ) ) {
 				$datetime_str = $query_args['before']->date( TimeInterval::$sql_datetime_format );
 			} else {
@@ -788,7 +788,7 @@ class DataStore extends SqlQuery {
 			}
 		}
 
-		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
+		if ( isset( $query_args['after'] ) && $query_args['after'] !== '' ) {
 			if ( is_a( $query_args['after'], 'WC_DateTime' ) ) {
 				$datetime_str = $query_args['after']->date( TimeInterval::$sql_datetime_format );
 			} else {
@@ -925,7 +925,7 @@ class DataStore extends SqlQuery {
 
 		$this->add_time_period_sql_params( $query_args, $table_name );
 
-		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
+		if ( isset( $query_args['interval'] ) && $query_args['interval'] !== '' ) {
 			$interval = $query_args['interval'];
 			$this->clear_sql_clause( 'select' );
 			$this->add_sql_clause( 'select', TimeInterval::db_datetime_format( $interval, $table_name, $this->date_column_name ) );
@@ -950,16 +950,16 @@ class DataStore extends SqlQuery {
 			return $sql_query;
 		}
 
-		if ( 'all' === $query_args['refunds'] ) {
+		if ( $query_args['refunds'] === 'all' ) {
 			$sql_query['where_clause'] .= 'parent_id != 0';
 		}
 
-		if ( 'none' === $query_args['refunds'] ) {
+		if ( $query_args['refunds'] === 'none' ) {
 			$sql_query['where_clause'] .= 'parent_id = 0';
 		}
 
-		if ( 'full' === $query_args['refunds'] || 'partial' === $query_args['refunds'] ) {
-			$operator                   = 'full' === $query_args['refunds'] ? '=' : '!=';
+		if ( $query_args['refunds'] === 'full' || $query_args['refunds'] === 'partial' ) {
+			$operator                   = $query_args['refunds'] === 'full' ? '=' : '!=';
 			$sql_query['from_clause']  .= " JOIN {$table_name} parent_order_stats ON {$table_name}.parent_id = parent_order_stats.order_id";
 			$sql_query['where_clause'] .= "parent_order_stats.status {$operator} '{$this->normalize_order_status( 'refunded' )}'";
 		}
@@ -1046,10 +1046,10 @@ class DataStore extends SqlQuery {
 
 		if ( isset( $query_args['product_includes'] ) && is_array( $query_args['product_includes'] ) && count( $query_args['product_includes'] ) > 0 ) {
 			if ( count( $included_products ) > 0 ) {
-				if ( 'AND' === $operator ) {
+				if ( $operator === 'AND' ) {
 					// AND results in an intersection between products from selected categories and manually included products.
 					$included_products = array_intersect( $included_products, $query_args['product_includes'] );
-				} elseif ( 'OR' === $operator ) {
+				} elseif ( $operator === 'OR' ) {
 					// OR results in a union of products from selected categories and manually included products.
 					$included_products = array_merge( $included_products, $query_args['product_includes'] );
 				}
@@ -1292,9 +1292,9 @@ class DataStore extends SqlQuery {
 
 		$customer_filter = '';
 		if ( isset( $query_args['customer_type'] ) ) {
-			if ( 'new' === strtolower( $query_args['customer_type'] ) ) {
+			if ( strtolower( $query_args['customer_type'] ) === 'new' ) {
 				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
-			} elseif ( 'returning' === strtolower( $query_args['customer_type'] ) ) {
+			} elseif ( strtolower( $query_args['customer_type'] ) === 'returning' ) {
 				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 1";
 			}
 		}
@@ -1329,7 +1329,7 @@ class DataStore extends SqlQuery {
 			}
 			foreach ( $query_args[ $arg ] as $attribute_term ) {
 				// We expect tuples.
-				if ( ! is_array( $attribute_term ) || 2 !== count( $attribute_term ) ) {
+				if ( ! is_array( $attribute_term ) || count( $attribute_term ) !== 2 ) {
 					continue;
 				}
 
@@ -1339,7 +1339,7 @@ class DataStore extends SqlQuery {
 					$term_id      = intval( $attribute_term[1] );
 
 					// Invalid IDs.
-					if ( 0 === $attribute_id || 0 === $term_id ) {
+					if ( $attribute_id === 0 || $term_id === 0 ) {
 						continue;
 					}
 
@@ -1352,7 +1352,7 @@ class DataStore extends SqlQuery {
 
 					$attr_term = get_term_by( 'id', $term_id, $attr_taxonomy );
 					// Invalid term ID.
-					if ( false === $attr_term ) {
+					if ( $attr_term === false ) {
 						continue;
 					}
 
@@ -1373,7 +1373,7 @@ class DataStore extends SqlQuery {
 
 				// If we're matching all filters (AND), we'll need multiple JOINs on postmeta.
 				// If not, just one.
-				if ( 'AND' === $match_operator || 1 === count( $sql_clauses['join'] ) ) {
+				if ( $match_operator === 'AND' || count( $sql_clauses['join'] ) === 1 ) {
 					$join_idx              = count( $sql_clauses['join'] );
 					$join_alias            = 'orderitemmeta' . $join_idx;
 					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = orderitems.order_item_id";
@@ -1409,9 +1409,9 @@ class DataStore extends SqlQuery {
 			return $operator;
 		}
 
-		if ( 'all' === strtolower( $query_args['match'] ) ) {
+		if ( strtolower( $query_args['match'] ) === 'all' ) {
 			$operator = 'AND';
-		} elseif ( 'any' === strtolower( $query_args['match'] ) ) {
+		} elseif ( strtolower( $query_args['match'] ) === 'any' ) {
 			$operator = 'OR';
 		}
 		return $operator;

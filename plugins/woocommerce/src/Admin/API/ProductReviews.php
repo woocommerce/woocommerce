@@ -38,13 +38,13 @@ class ProductReviews extends \WC_REST_Product_Reviews_Controller {
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
-		if ( 0 !== (int) $review->comment_post_ID ) {
+		if ( (int) $review->comment_post_ID !== 0 ) {
 			$links['up'] = array(
 				'href'       => rest_url( sprintf( '/%s/products/%d', $this->namespace, $review->comment_post_ID ) ),
 				'embeddable' => true,
 			);
 		}
-		if ( 0 !== (int) $review->user_id ) {
+		if ( (int) $review->user_id !== 0 ) {
 			$links['reviewer'] = array(
 				'href'       => rest_url( 'wp/v2/users/' . $review->user_id ),
 				'embeddable' => true,

@@ -48,7 +48,7 @@ class TransientNotices {
 			$notices,
 			function( $notice ) use ( $user_id ) {
 				return ! isset( $notice['user_id'] ) ||
-					null === $notice['user_id'] ||
+					$notice['user_id'] === null ||
 					$user_id === $notice['user_id'];
 			}
 		);

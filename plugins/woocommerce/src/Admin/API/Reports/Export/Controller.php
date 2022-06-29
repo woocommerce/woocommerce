@@ -167,7 +167,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 		$total_rows = ReportExporter::queue_report_export( $export_id, $report_type, $report_args, $send_email );
 
-		if ( 0 === $total_rows ) {
+		if ( $total_rows === 0 ) {
 			return rest_ensure_response(
 				array(
 					'message' => __( 'There is no data to export for the given request.', 'woocommerce' ),
@@ -209,7 +209,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$export_id   = $request['export_id'];
 		$percentage  = ReportExporter::get_export_percentage_complete( $report_type, $export_id );
 
-		if ( false === $percentage ) {
+		if ( $percentage === false ) {
 			return new \WP_Error(
 				'woocommerce_admin_reports_export_invalid_id',
 				__( 'Sorry, there is no export with that ID.', 'woocommerce' ),
@@ -222,7 +222,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		);
 
 		// @todo - add thing in the links below instead?
-		if ( 100 === $percentage ) {
+		if ( $percentage === 100 ) {
 			$query_args = array(
 				'action'   => ReportExporter::DOWNLOAD_EXPORT_ACTION,
 				'filename' => "wc-{$report_type}-report-export-{$export_id}",

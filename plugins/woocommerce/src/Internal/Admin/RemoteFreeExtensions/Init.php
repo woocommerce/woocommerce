@@ -67,13 +67,13 @@ class Init {
 	 * Get specs or fetch remotely if they don't exist.
 	 */
 	public static function get_specs() {
-		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return DefaultFreeExtensions::get_all();
 		}
 		$specs = RemoteFreeExtensionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		// Fetch specs if they don't yet exist.
-		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+		if ( $specs === false || ! is_array( $specs ) || count( $specs ) === 0 ) {
 			return DefaultFreeExtensions::get_all();
 		}
 

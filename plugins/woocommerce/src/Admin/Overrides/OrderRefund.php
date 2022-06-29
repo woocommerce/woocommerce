@@ -45,7 +45,7 @@ class OrderRefund extends \WC_Order_Refund {
 	 */
 	public static function order_class_name( $classname, $order_type, $order_id ) {
 		// @todo - Only substitute class when necessary (during sync).
-		if ( 'WC_Order_Refund' === $classname ) {
+		if ( $classname === 'WC_Order_Refund' ) {
 			return '\Automattic\WooCommerce\Admin\Overrides\OrderRefund';
 		} else {
 			return $classname;

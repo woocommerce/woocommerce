@@ -28,7 +28,7 @@ class Payments extends Task {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
 			return __( 'Add a way to get paid', 'woocommerce' );
 		}
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You set up payments', 'woocommerce' );
 			}
@@ -90,7 +90,7 @@ class Payments extends Task {
 		$enabled_gateways = array_filter(
 			$gateways,
 			function( $gateway ) {
-				return 'yes' === $gateway->enabled && 'woocommerce_payments' !== $gateway->id;
+				return $gateway->enabled === 'yes' && $gateway->id !== 'woocommerce_payments';
 			}
 		);
 

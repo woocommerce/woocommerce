@@ -77,7 +77,7 @@ class Translations {
 		$json_i18n_filenames       = glob( $lang_dir . $domain . '-' . $locale . '-*.json' );
 		$combined_translation_data = array();
 
-		if ( false === $json_i18n_filenames ) {
+		if ( $json_i18n_filenames === false ) {
 			return $combined_translation_data;
 		}
 
@@ -101,8 +101,8 @@ class Translations {
 
 			// Only combine "app" files (not scripts registered with WP).
 			if (
-				false === strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'app/index.js' ) &&
-				false === strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'chunks/' )
+				strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'app/index.js' ) === false &&
+				strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'chunks/' ) === false
 			) {
 				continue;
 			}
@@ -163,7 +163,7 @@ class Translations {
 		$lang_dir      = WP_LANG_DIR . '/plugins/';
 
 		// Bail early if not localized.
-		if ( 'en_US' === $locale ) {
+		if ( $locale === 'en_US' ) {
 			return;
 		}
 
@@ -172,7 +172,7 @@ class Translations {
 		}
 
 		$access_type = get_filesystem_method();
-		if ( 'direct' === $access_type ) {
+		if ( $access_type === 'direct' ) {
 			\WP_Filesystem();
 			$this->build_and_save_translations( $lang_dir, $plugin_domain, $locale );
 		} else {
@@ -205,7 +205,7 @@ class Translations {
 	 */
 	public function load_script_translation_file( $file, $handle, $domain ) {
 		// Make sure the main app script is being loaded.
-		if ( WC_ADMIN_APP !== $handle ) {
+		if ( $handle !== WC_ADMIN_APP ) {
 			return $file;
 		}
 
@@ -264,7 +264,7 @@ class Translations {
 		// Gather the locales that were updated in this operation.
 		foreach ( $hook_extra['translations'] as $translation ) {
 			if (
-				'plugin' === $translation['type'] &&
+				$translation['type'] === 'plugin' &&
 				$plugin_domain === $translation['slug']
 			) {
 				$locales[] = $translation['language'];

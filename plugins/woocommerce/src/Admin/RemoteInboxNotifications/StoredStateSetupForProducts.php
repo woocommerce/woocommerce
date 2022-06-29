@@ -84,7 +84,7 @@ class StoredStateSetupForProducts {
 		if ( ! isset( $_REQUEST['step'] ) ) {
 			return;
 		}
-		if ( 'done' !== $_REQUEST['step'] ) {
+		if ( $_REQUEST['step'] !== 'done' ) {
 			return;
 		}
 		// phpcs:enable
@@ -102,8 +102,8 @@ class StoredStateSetupForProducts {
 	 */
 	public static function run_on_transition_post_status( $new_status, $old_status, $post ) {
 		if (
-			'product' !== $post->post_type ||
-			'publish' !== $new_status
+			$post->post_type !== 'product' ||
+			$new_status !== 'publish'
 		) {
 			return;
 		}
@@ -118,7 +118,7 @@ class StoredStateSetupForProducts {
 	private static function update_stored_state_and_possibly_run_remote_notifications() {
 		$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
 		// If the stored_state is the same, we don't need to run remote notifications to avoid unnecessary action scheduling.
-		if ( true === $stored_state->there_are_now_products ) {
+		if ( $stored_state->there_are_now_products === true ) {
 			return;
 		}
 

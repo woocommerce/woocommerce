@@ -725,7 +725,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	private function join_address_table_order_query( $address_type, $order_table_alias, $address_table_alias ) {
 		global $wpdb;
 		$address_table    = $this::get_addresses_table_name();
-		$column_props_map = 'billing' === $address_type ? $this->billing_address_column_mapping : $this->shipping_address_column_mapping;
+		$column_props_map = $address_type === 'billing' ? $this->billing_address_column_mapping : $this->shipping_address_column_mapping;
 		$clauses          = $this->generate_select_and_join_clauses( $order_table_alias, $address_table, $address_table_alias, $column_props_map );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $clauses['join'] and $address_table_alias are hardcoded.
 		$clauses['join'] = $wpdb->prepare(
@@ -942,7 +942,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
 
-		if ( null === $order->get_date_created( 'edit' ) ) {
+		if ( $order->get_date_created( 'edit' ) === null ) {
 			$order->set_date_created( time() );
 		}
 

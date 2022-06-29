@@ -87,7 +87,7 @@ class Segmenter extends ReportsSegmenter {
 		global $wpdb;
 		$segmenting_limit = '';
 		$limit_parts      = explode( ',', $intervals_query['limit'] );
-		if ( 2 === count( $limit_parts ) ) {
+		if ( count( $limit_parts ) === 2 ) {
 			$orig_rowcount    = intval( $limit_parts[1] );
 			$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
 		}
@@ -129,7 +129,7 @@ class Segmenter extends ReportsSegmenter {
 	 * @throws \Automattic\WooCommerce\Admin\API\Reports\ParameterException In case of segmenting by variations, when no parent product is specified.
 	 */
 	protected function get_segments( $type, $query_params, $table_name ) {
-		if ( ! isset( $this->query_args['segmentby'] ) || '' === $this->query_args['segmentby'] ) {
+		if ( ! isset( $this->query_args['segmentby'] ) || $this->query_args['segmentby'] === '' ) {
 			return array();
 		}
 
@@ -137,7 +137,7 @@ class Segmenter extends ReportsSegmenter {
 		$segmenting_from  = '';
 		$segments         = array();
 
-		if ( 'tax_rate_id' === $this->query_args['segmentby'] ) {
+		if ( $this->query_args['segmentby'] === 'tax_rate_id' ) {
 			$tax_rate_level_columns = $this->get_segment_selections_order_level( $table_name );
 			$segmenting_select      = $this->prepare_selections( $tax_rate_level_columns );
 			$this->report_columns   = $tax_rate_level_columns;

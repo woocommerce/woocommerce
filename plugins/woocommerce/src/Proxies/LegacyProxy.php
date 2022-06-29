@@ -34,7 +34,7 @@ class LegacyProxy {
 	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
-		if ( false !== strpos( $class_name, '\\' ) ) {
+		if ( strpos( $class_name, '\\' ) !== false ) {
 			throw new \Exception(
 				'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use ' .
 				Definition::INJECTION_METHOD . ' method injection or the instance of ' . ContainerInterface::class . ' for that.'

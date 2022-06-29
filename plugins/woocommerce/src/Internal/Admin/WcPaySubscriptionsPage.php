@@ -58,11 +58,11 @@ class WcPaySubscriptionsPage {
 	public function register_subscriptions_page() {
 		global $submenu;
 
-		if ( 'yes' === get_option( $this->user_dismissed_option, 'no' ) ) {
+		if ( get_option( $this->user_dismissed_option, 'no' ) === 'yes' ) {
 			return;
 		}
 
-		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+		if ( get_option( 'woocommerce_allow_tracking', 'no' ) !== 'yes' ) {
 			return;
 		}
 
@@ -80,7 +80,7 @@ class WcPaySubscriptionsPage {
 
 		wc_admin_register_page( $menu_data );
 
-		if ( ! isset( $submenu['woocommerce'] ) || 'yes' === get_option( $this->user_viewed_option, 'no' ) ) {
+		if ( ! isset( $submenu['woocommerce'] ) || get_option( $this->user_viewed_option, 'no' ) === 'yes' ) {
 			return;
 		}
 
@@ -89,7 +89,7 @@ class WcPaySubscriptionsPage {
 
 		// Add the "new" badge.
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-			if ( self::SUBSCRIPTION_MENU_ITEM_SLUG === $menu_item[2] ) {
+			if ( $menu_item[2] === self::SUBSCRIPTION_MENU_ITEM_SLUG ) {
 				$submenu['woocommerce'][ $key ][0] .= sprintf( ' <span class="wcpay-subscriptions-menu-badge awaiting-mod count-1"><span class="plugin-count">%s</span></span>', esc_html( $new_badge_text ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
@@ -122,7 +122,7 @@ class WcPaySubscriptionsPage {
 
 		// Ineligible if store address is not compatible with WCPay Subscriptions (US).
 		$store_base_location = wc_get_base_location();
-		if ( empty( $store_base_location['country'] ) || 'US' !== $store_base_location['country'] ) {
+		if ( empty( $store_base_location['country'] ) || $store_base_location['country'] !== 'US' ) {
 			return false;
 		}
 
@@ -151,7 +151,7 @@ class WcPaySubscriptionsPage {
 		$is_eligible_cached = get_transient( $transient_key );
 
 		// Valid cache found.
-		if ( false !== $is_eligible_cached ) {
+		if ( $is_eligible_cached !== false ) {
 			return wc_string_to_bool( $is_eligible_cached );
 		}
 
@@ -238,12 +238,12 @@ class WcPaySubscriptionsPage {
 			$wc_admin_menu[ $key ] = $menu_item;
 
 			// Add a placeholder element for the Subscriptions item after the Orders element. We'll replace it later.
-			if ( 'edit.php?post_type=shop_order' === $menu_item[2] ) {
+			if ( $menu_item[2] === 'edit.php?post_type=shop_order' ) {
 				$wc_admin_menu['wcpay-subscriptions'] = 'wcpay-subscriptions';
 			}
 
 			// Keep a record of the subscriptions item and remove it from its current place in the menu.
-			if ( self::SUBSCRIPTION_MENU_ITEM_SLUG === $menu_item[2] ) {
+			if ( $menu_item[2] === self::SUBSCRIPTION_MENU_ITEM_SLUG ) {
 				$subscriptions_menu_item = $menu_item;
 				unset( $wc_admin_menu[ $key ] );
 			}
@@ -263,7 +263,7 @@ class WcPaySubscriptionsPage {
 	 */
 	private function get_user_experiment_assignment() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new Experimental_Abtest(
 			$anon_id,
 			'woocommerce',

@@ -440,7 +440,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		);
 
 		$code = wp_remote_retrieve_response_code( $request );
-		if ( 200 !== $code ) {
+		if ( $code !== 200 ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
@@ -502,7 +502,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		);
 
 		$code = wp_remote_retrieve_response_code( $request );
-		if ( 200 !== $code ) {
+		if ( $code !== 200 ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
@@ -548,7 +548,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce' ), 500 );
 		}
 
-		if ( 'US' === WC()->countries->get_base_country() ) {
+		if ( WC()->countries->get_base_country() === 'US' ) {
 			$profile = get_option( OnboardingProfile::DATA_OPTION, array() );
 			if ( ! empty( $profile['industry'] ) ) {
 				$has_cbd_industry = in_array( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ), true );

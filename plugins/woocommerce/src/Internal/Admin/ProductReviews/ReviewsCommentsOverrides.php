@@ -46,7 +46,7 @@ class ReviewsCommentsOverrides {
 	protected function display_notices() : void {
 		$screen = get_current_screen();
 
-		if ( empty( $screen ) || 'edit-comments' !== $screen->base ) {
+		if ( empty( $screen ) || $screen->base !== 'edit-comments' ) {
 			return;
 		}
 
@@ -123,7 +123,7 @@ class ReviewsCommentsOverrides {
 	 * @return string
 	 */
 	protected function get_dismiss_capability( $default_capability, $notice_name ) {
-		return self::REVIEWS_MOVED_NOTICE_ID === $notice_name ? Reviews::get_capability() : $default_capability;
+		return $notice_name === self::REVIEWS_MOVED_NOTICE_ID ? Reviews::get_capability() : $default_capability;
 	}
 
 	/**
@@ -134,7 +134,7 @@ class ReviewsCommentsOverrides {
 	 */
 	protected function exclude_reviews_from_comments( $args ) : array {
 
-		if ( ! empty( $args['post_type'] ) && 'any' !== $args['post_type'] ) {
+		if ( ! empty( $args['post_type'] ) && $args['post_type'] !== 'any' ) {
 			$post_types = (array) $args['post_type'];
 		} else {
 			$post_types = get_post_types();
@@ -142,7 +142,7 @@ class ReviewsCommentsOverrides {
 
 		$index = array_search( 'product', $post_types );
 
-		if ( false !== $index ) {
+		if ( $index !== false ) {
 			unset( $post_types[ $index ] );
 		}
 

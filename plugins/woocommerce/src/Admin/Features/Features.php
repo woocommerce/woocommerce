@@ -171,11 +171,11 @@ class Features {
 				// Check if the feature is currently being enabled, if it is continue.
 				/* phpcs:disable WordPress.Security.NonceVerification */
 				$feature_option = $feature_class::TOGGLE_OPTION_NAME;
-				if ( isset( $_POST[ $feature_option ] ) && '1' === $_POST[ $feature_option ] ) {
+				if ( isset( $_POST[ $feature_option ] ) && $_POST[ $feature_option ] === '1' ) {
 					continue;
 				}
 
-				if ( 'yes' !== get_option( $feature_class::TOGGLE_OPTION_NAME, $default ) ) {
+				if ( get_option( $feature_class::TOGGLE_OPTION_NAME, $default ) !== 'yes' ) {
 					$optional_features_unavailable[] = $optional_feature_key;
 				}
 			}
@@ -236,7 +236,7 @@ class Features {
 	 * @param string $value New value.
 	 */
 	public static function maybe_disable_features( $old_value, $value ) {
-		if ( 'yes' === $value ) {
+		if ( $value === 'yes' ) {
 			return;
 		}
 
@@ -273,7 +273,7 @@ class Features {
 	 * @return array
 	 */
 	public static function add_features_settings( $settings, $current_section ) {
-		if ( 'features' !== $current_section ) {
+		if ( $current_section !== 'features' ) {
 			return $settings;
 		}
 
@@ -321,9 +321,9 @@ class Features {
 	 */
 	public static function maybe_load_beta_features_modal( $hook ) {
 		if (
-			'woocommerce_page_wc-settings' !== $hook ||
-			! isset( $_GET['tab'] ) || 'advanced' !== $_GET['tab'] || // phpcs:ignore CSRF ok.
-			! isset( $_GET['section'] ) || 'features' !== $_GET['section'] // phpcs:ignore CSRF ok.
+			$hook !== 'woocommerce_page_wc-settings' ||
+			! isset( $_GET['tab'] ) || $_GET['tab'] !== 'advanced' || // phpcs:ignore CSRF ok.
+			! isset( $_GET['section'] ) || $_GET['section'] !== 'features' // phpcs:ignore CSRF ok.
 		) {
 			return;
 		}
@@ -333,7 +333,7 @@ class Features {
 			return;
 		}
 
-		if ( 'yes' === $tracking_enabled ) {
+		if ( $tracking_enabled === 'yes' ) {
 			return;
 		}
 

@@ -151,7 +151,7 @@ class Marketing {
 
 		foreach ( $submenu['woocommerce-marketing'] as &$item ) {
 			// The "slug" (aka the path) is the third item in the array.
-			if ( 0 === strpos( $item[2], 'wc-admin' ) ) {
+			if ( strpos( $item[2], 'wc-admin' ) === 0 ) {
 				$item[2] = 'admin.php?page=' . $item[2];
 			}
 		}
@@ -194,11 +194,11 @@ class Marketing {
 	public function get_recommended_plugins() {
 		$plugins = get_transient( self::RECOMMENDED_PLUGINS_TRANSIENT );
 
-		if ( false === $plugins ) {
+		if ( $plugins === false ) {
 			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.1/recommendations.json' );
 			$plugins = [];
 
-			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
+			if ( ! is_wp_error( $request ) && $request['response']['code'] === 200 ) {
 				$plugins = json_decode( $request['body'], true );
 			}
 
@@ -239,7 +239,7 @@ class Marketing {
 
 		$posts = get_transient( $kb_transient );
 
-		if ( false === $posts ) {
+		if ( $posts === false ) {
 			$request_url = add_query_arg(
 				array(
 					'categories' => $category_id,
@@ -253,7 +253,7 @@ class Marketing {
 			$request = wp_remote_get( $request_url );
 			$posts   = [];
 
-			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
+			if ( ! is_wp_error( $request ) && $request['response']['code'] === 200 ) {
 				$raw_posts = json_decode( $request['body'], true );
 
 				foreach ( $raw_posts as $raw_post ) {

@@ -65,7 +65,7 @@ class OnboardingSetupWizard {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return isset( $_REQUEST['action'] ) && 'as_async_request_queue_runner' === $_REQUEST['action'];
+		return isset( $_REQUEST['action'] ) && $_REQUEST['action'] === 'as_async_request_queue_runner';
 	}
 
 	/**
@@ -84,7 +84,7 @@ class OnboardingSetupWizard {
 		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
 			$do_redirect        = true;
 			$current_page       = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
-			$is_onboarding_path = ! isset( $_GET['path'] ) || '/setup-wizard' === wc_clean( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$is_onboarding_path = ! isset( $_GET['path'] ) || wc_clean( wp_unslash( $_GET['page'] ) ) === '/setup-wizard'; // phpcs:ignore WordPress.Security.NonceVerification
 
 			// On these pages, or during these events, postpone the redirect.
 			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
@@ -93,7 +93,7 @@ class OnboardingSetupWizard {
 
 			// On these pages, or during these events, disable the redirect.
 			if (
-				( 'wc-admin' === $current_page && $is_onboarding_path ) ||
+				( $current_page === 'wc-admin' && $is_onboarding_path ) ||
 				apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ||
 				isset( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification
 			) {
@@ -166,9 +166,9 @@ class OnboardingSetupWizard {
 	private function is_setup_wizard() {
 		/* phpcs:disable WordPress.Security.NonceVerification */
 		return isset( $_GET['page'] ) &&
-			'wc-admin' === $_GET['page'] &&
+			$_GET['page'] === 'wc-admin' &&
 			isset( $_GET['path'] ) &&
-			'/setup-wizard' === $_GET['path'];
+			$_GET['path'] === '/setup-wizard';
 		/* phpcs: enable */
 	}
 
@@ -180,7 +180,7 @@ class OnboardingSetupWizard {
 	private function is_homepage() {
 		/* phpcs:disable WordPress.Security.NonceVerification */
 		return isset( $_GET['page'] ) &&
-			'wc-admin' === $_GET['page'] &&
+			$_GET['page'] === 'wc-admin' &&
 			! isset( $_GET['path'] );
 		/* phpcs: enable */
 	}
@@ -196,7 +196,7 @@ class OnboardingSetupWizard {
 			return false;
 		}
 
-		return 0 === strpos( $current_page['path'], 'wc-admin' );
+		return strpos( $current_page['path'], 'wc-admin' ) === 0;
 	}
 
 	/**
@@ -271,7 +271,7 @@ class OnboardingSetupWizard {
 	 * @return bool
 	 */
 	public function remove_old_install_notice( $show, $notice ) {
-		if ( 'install' === $notice ) {
+		if ( $notice === 'install' ) {
 			return false;
 		}
 

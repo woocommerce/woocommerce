@@ -47,7 +47,7 @@ class RestockRefundedItemsAdjuster {
 		}
 
 		// If there are no refund lines, then this migration isn't necessary because restock related meta's wouldn't be set.
-		if ( 0 === count( $order->get_refunds() ) ) {
+		if ( count( $order->get_refunds() ) === 0 ) {
 			return;
 		}
 
@@ -59,12 +59,12 @@ class RestockRefundedItemsAdjuster {
 					continue;
 				}
 
-				if ( 'line_item' !== $item->get_type() ) {
+				if ( $item->get_type() !== 'line_item' ) {
 					continue;
 				}
 
 				// There could be code paths in custom code which don't update version number but still update the items.
-				if ( '' !== $item->get_meta( '_restock_refunded_items', true ) ) {
+				if ( $item->get_meta( '_restock_refunded_items', true ) !== '' ) {
 					continue;
 				}
 

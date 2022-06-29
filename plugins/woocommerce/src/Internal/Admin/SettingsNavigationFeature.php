@@ -44,7 +44,7 @@ class SettingsNavigationFeature {
 
 		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 
-		if ( 'yes' !== get_option( 'woocommerce_settings_enabled', 'no' ) ) {
+		if ( get_option( 'woocommerce_settings_enabled', 'no' ) !== 'yes' ) {
 			return;
 		}
 
@@ -124,7 +124,7 @@ class SettingsNavigationFeature {
 			);
 
 			// Replace the old menu with the first settings item.
-			if ( 10 === $order ) {
+			if ( $order === 10 ) {
 				$this->replace_settings_page( $settings_page );
 			}
 
@@ -147,7 +147,7 @@ class SettingsNavigationFeature {
 
 		foreach ( $submenu['woocommerce'] as &$item ) {
 			// The "slug" (aka the path) is the third item in the array.
-			if ( 0 === strpos( $item[2], 'wc-settings' ) ) {
+			if ( strpos( $item[2], 'wc-settings' ) === 0 ) {
 				$item[2] = wc_admin_url( "&path={$page['path']}" );
 			}
 		}
@@ -158,7 +158,7 @@ class SettingsNavigationFeature {
 	 */
 	public function redirect_core_settings_pages() {
 		/* phpcs:disable WordPress.Security.NonceVerification */
-		if ( ! isset( $_GET['page'] ) || 'wc-settings' !== $_GET['page'] ) {
+		if ( ! isset( $_GET['page'] ) || $_GET['page'] !== 'wc-settings' ) {
 			return;
 		}
 

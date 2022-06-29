@@ -125,14 +125,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$join            = "JOIN {$wpdb->posts} AS _coupons ON {$id_cell_identifier} = _coupons.ID";
 		$this->add_orderby_order_clause( $query_args, $this );
 
-		if ( 'inner' === $from_arg ) {
+		if ( $from_arg === 'inner' ) {
 			$this->subquery->clear_sql_clause( 'join' );
-			if ( false !== strpos( $order_by_clause, '_coupons' ) ) {
+			if ( strpos( $order_by_clause, '_coupons' ) !== false ) {
 				$this->subquery->add_sql_clause( 'join', $join );
 			}
 		} else {
 			$this->clear_sql_clause( 'join' );
-			if ( false !== strpos( $order_by_clause, '_coupons' ) ) {
+			if ( strpos( $order_by_clause, '_coupons' ) !== false ) {
 				$this->add_sql_clause( 'join', $join );
 			}
 		}
@@ -145,10 +145,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return 'time_interval';
 		}
-		if ( 'code' === $order_by ) {
+		if ( $order_by === 'code' ) {
 			return '_coupons.post_title';
 		}
 		return $order_by;
@@ -167,7 +167,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$coupon_id = $coupon_datum['coupon_id'];
 				$coupon    = new \WC_Coupon( $coupon_id );
 
-				if ( 0 === $coupon->get_id() ) {
+				if ( $coupon->get_id() === 0 ) {
 					// Deleted or otherwise invalid coupon.
 					$extended_info = array(
 						'code'             => __( '(Deleted)', 'woocommerce' ),
@@ -249,7 +249,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -309,7 +309,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$coupons_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				ARRAY_A
 			);
-			if ( null === $coupon_data ) {
+			if ( $coupon_data === null ) {
 				return $data;
 			}
 
@@ -368,7 +368,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		// Refunds don't affect coupon stats so return successfully if one is called here.
-		if ( 'shop_order_refund' === $order->get_type() ) {
+		if ( $order->get_type() === 'shop_order_refund' ) {
 			return true;
 		}
 
@@ -421,7 +421,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			do_action( 'woocommerce_analytics_update_coupon', $coupon_id, $order_id );
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
-			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+			$num_updated += intval( $result ) === 2 ? 1 : intval( $result );
 		}
 
 		if ( ! empty( $existing_items ) ) {

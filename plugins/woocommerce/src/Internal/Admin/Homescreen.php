@@ -127,7 +127,7 @@ class Homescreen {
 		}
 
 		foreach ( $menu as $key => $menu_item ) {
-			if ( self::MENU_SLUG !== $menu_item[2] || 'read' !== $menu_item[1] ) {
+			if ( $menu_item[2] !== self::MENU_SLUG || $menu_item[1] !== 'read' ) {
 				continue;
 			}
 
@@ -148,7 +148,7 @@ class Homescreen {
 
 		$wc_admin_key = null;
 		foreach ( $submenu['woocommerce'] as $submenu_key => $submenu_item ) {
-			if ( self::MENU_SLUG === $submenu_item[2] ) {
+			if ( $submenu_item[2] === self::MENU_SLUG ) {
 				$wc_admin_key = $submenu_key;
 				break;
 			}

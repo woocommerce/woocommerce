@@ -30,7 +30,7 @@ class Init {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( null === static::$instance ) {
+		if ( static::$instance === null ) {
 			static::$instance = new static();
 		}
 		return static::$instance;

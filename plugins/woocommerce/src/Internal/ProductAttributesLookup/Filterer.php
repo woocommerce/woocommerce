@@ -44,7 +44,7 @@ class Filterer {
 	 * @return bool
 	 */
 	public function filtering_via_lookup_table_is_active() {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+		return get_option( 'woocommerce_attribute_lookup_enabled' ) === 'yes';
 	}
 
 	/**
@@ -66,7 +66,7 @@ class Filterer {
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 		// (causes the filtering subquery to be executed only once).
 		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes' ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
 			$in_stock_clause = '';
@@ -80,11 +80,11 @@ class Filterer {
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );
 			$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
-			$is_and_query               = 'and' === $data['query_type'];
+			$is_and_query               = $data['query_type'] === 'and';
 
 			$count = count( $term_ids_to_filter_by );
 
-			if ( 0 !== $count ) {
+			if ( $count !== 0 ) {
 				if ( $is_and_query && $count > 1 ) {
 					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
 				} else {
@@ -148,7 +148,7 @@ class Filterer {
 
 		$tax_query  = \WC_Query::get_main_tax_query();
 		$meta_query = \WC_Query::get_main_meta_query();
-		if ( 'or' === $query_type ) {
+		if ( $query_type === 'or' ) {
 			foreach ( $tax_query as $key => $query ) {
 				if ( is_array( $query ) && $taxonomy === $query['taxonomy'] ) {
 					unset( $tax_query[ $key ] );
@@ -172,7 +172,7 @@ class Filterer {
 		$query_hash = md5( $query_sql );
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
-		if ( true === $cache ) {
+		if ( $cache === true ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {
 			$cached_counts = array();
@@ -182,7 +182,7 @@ class Filterer {
 			$results                      = $wpdb->get_results( $query_sql, ARRAY_A );
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
-			if ( true === $cache ) {
+			if ( $cache === true ) {
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}
 		}
@@ -203,7 +203,7 @@ class Filterer {
 
 		$meta_query_sql    = $meta_query->get_sql( 'post', $this->lookup_table_name, 'product_or_parent_id' );
 		$tax_query_sql     = $tax_query->get_sql( $this->lookup_table_name, 'product_or_parent_id' );
-		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$hide_out_of_stock = get_option( 'woocommerce_hide_out_of_stock_items' ) === 'yes';
 		$in_stock_clause   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
 
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
@@ -228,7 +228,7 @@ class Filterer {
 				$and_term_ids = array();
 
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
-					if ( 'and' !== $data['query_type'] ) {
+					if ( $data['query_type'] !== 'and' ) {
 						continue;
 					}
 					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );

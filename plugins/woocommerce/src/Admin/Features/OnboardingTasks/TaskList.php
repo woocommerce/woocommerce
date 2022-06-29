@@ -337,7 +337,7 @@ class TaskList {
 	 */
 	public function sort_tasks( $sort_by = array() ) {
 		$sort_by = count( $sort_by ) > 0 ? $sort_by : $this->sort_by;
-		if ( 0 !== count( $sort_by ) ) {
+		if ( count( $sort_by ) !== 0 ) {
 			usort(
 				$this->tasks,
 				function( $a, $b ) use ( $sort_by ) {
@@ -355,7 +355,7 @@ class TaskList {
 	 * @return string
 	 */
 	public function prefix_event( $event_name ) {
-		if ( null !== $this->event_prefix ) {
+		if ( $this->event_prefix !== null ) {
 			return $this->event_prefix . $event_name;
 		}
 		return $this->get_list_id() . '_tasklist_' . $event_name;
@@ -377,7 +377,7 @@ class TaskList {
 		$bar_hidden            = get_option( self::REMINDER_BAR_HIDDEN_OPTION, 'no' );
 		$active_for_four_weeks = WCAdminHelper::is_wc_admin_active_for( WEEK_IN_SECONDS * 4 );
 
-		if ( 'yes' === $bar_hidden || ! $active_for_four_weeks ) {
+		if ( $bar_hidden === 'yes' || ! $active_for_four_weeks ) {
 			return;
 		}
 

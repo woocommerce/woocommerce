@@ -32,7 +32,7 @@ class MailchimpScheduler {
 	 * @param \WC_Logger_Interface|null $logger Logger instance.
 	 */
 	public function __construct( \WC_Logger_Interface $logger = null ) {
-		if ( null === $logger ) {
+		if ( $logger === null ) {
 			$logger = wc_get_logger();
 		}
 		$this->logger = $logger;
@@ -45,12 +45,12 @@ class MailchimpScheduler {
 	 */
 	public function run() {
 		// Abort if we've already subscribed to MailChimp.
-		if ( 'yes' === get_option( self::SUBSCRIBED_OPTION_NAME ) ) {
+		if ( get_option( self::SUBSCRIBED_OPTION_NAME ) === 'yes' ) {
 			return false;
 		}
 
 		$profile_data = get_option( 'woocommerce_onboarding_profile' );
-		if ( ! isset( $profile_data['is_agree_marketing'] ) || false === $profile_data['is_agree_marketing'] ) {
+		if ( ! isset( $profile_data['is_agree_marketing'] ) || $profile_data['is_agree_marketing'] === false ) {
 			return false;
 		}
 
@@ -71,7 +71,7 @@ class MailchimpScheduler {
 		}
 
 		$body = json_decode( $response['body'] );
-		if ( isset( $body->success ) && true === $body->success ) {
+		if ( isset( $body->success ) && $body->success === true ) {
 			update_option( self::SUBSCRIBED_OPTION_NAME, 'yes' );
 			return true;
 		}
@@ -89,7 +89,7 @@ class MailchimpScheduler {
 	 * @return mixed
 	 */
 	public function make_request( $store_email ) {
-		if ( true === defined( 'WP_ENVIRONMENT_TYPE' ) && 'development' === constant( 'WP_ENVIRONMENT_TYPE' ) ) {
+		if ( defined( 'WP_ENVIRONMENT_TYPE' ) === true && constant( 'WP_ENVIRONMENT_TYPE' ) === 'development' ) {
 			$subscribe_endpoint = self::SUBSCRIBE_ENDPOINT_DEV;
 		} else {
 			$subscribe_endpoint = self::SUBSCRIBE_ENDPOINT;

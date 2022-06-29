@@ -111,7 +111,7 @@ class ArrayUtil {
 		$str   = '';
 
 		foreach ( $items as $i ) {
-			if ( null === $point ) {
+			if ( $point === null ) {
 				$str .= $i;
 			} elseif ( ( $point + 1 ) === $i ) {
 				$range = true;
@@ -142,15 +142,15 @@ class ArrayUtil {
 	 * @return array The selected values.
 	 */
 	public static function select( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ) {
-		if ( self::SELECT_BY_OBJECT_METHOD === $selector_type ) {
+		if ( $selector_type === self::SELECT_BY_OBJECT_METHOD ) {
 			$callback = function( $item ) use ( $selector_name ) {
 				return $item->$selector_name();
 			};
-		} elseif ( self::SELECT_BY_OBJECT_PROPERTY === $selector_type ) {
+		} elseif ( $selector_type === self::SELECT_BY_OBJECT_PROPERTY ) {
 			$callback = function( $item ) use ( $selector_name ) {
 				return $item->$selector_name;
 			};
-		} elseif ( self::SELECT_BY_ARRAY_KEY === $selector_type ) {
+		} elseif ( $selector_type === self::SELECT_BY_ARRAY_KEY ) {
 			$callback = function( $item ) use ( $selector_name ) {
 				return $item[ $selector_name ];
 			};

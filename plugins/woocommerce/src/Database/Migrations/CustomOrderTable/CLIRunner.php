@@ -375,7 +375,7 @@ class CLIRunner {
 		$progress->finish();
 		WP_CLI::log( __( 'Verification completed.', 'woocommerce' ) );
 
-		if ( 0 === count( $failed_ids ) ) {
+		if ( count( $failed_ids ) === 0 ) {
 			return WP_CLI::success(
 				sprintf(
 					/* Translators: %1$d is the number of migrated orders and %2$d is time taken. */

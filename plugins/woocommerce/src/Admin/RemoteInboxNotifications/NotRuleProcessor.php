@@ -17,7 +17,7 @@ class NotRuleProcessor implements RuleProcessorInterface {
 	 * @param RuleEvaluator $rule_evaluator The rule evaluator to use.
 	 */
 	public function __construct( $rule_evaluator = null ) {
-		$this->rule_evaluator = null === $rule_evaluator
+		$this->rule_evaluator = $rule_evaluator === null
 			? new RuleEvaluator()
 			: $rule_evaluator;
 	}

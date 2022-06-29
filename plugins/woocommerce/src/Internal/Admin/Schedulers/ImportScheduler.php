@@ -102,7 +102,7 @@ abstract class ImportScheduler implements ImportInterface {
 		$batch_size = static::get_batch_size( 'import' );
 		$items      = static::get_items( 1, 1, $days, $skip_existing );
 
-		if ( 0 === $items->total ) {
+		if ( $items->total === 0 ) {
 			return;
 		}
 
@@ -159,7 +159,7 @@ abstract class ImportScheduler implements ImportInterface {
 		$batch_size = static::get_batch_size( 'delete' );
 		$count      = static::get_total_imported();
 
-		if ( 0 === $count ) {
+		if ( $count === 0 ) {
 			return;
 		}
 

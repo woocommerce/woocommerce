@@ -106,12 +106,12 @@ abstract class DataSourcePoller {
 	public function get_specs_from_data_sources() {
 		$specs = get_transient( $this->args['transient_name'] );
 
-		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+		if ( $specs === false || ! is_array( $specs ) || count( $specs ) === 0 ) {
 			$this->read_specs_from_data_sources();
 			$specs = get_transient( $this->args['transient_name'] );
 		}
 		$specs = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
-		return false !== $specs ? $specs : array();
+		return $specs !== false ? $specs : array();
 	}
 
 	/**
@@ -137,7 +137,7 @@ abstract class DataSourcePoller {
 			$this->args['transient_expiry']
 		);
 
-		return 0 !== count( $specs );
+		return count( $specs ) !== 0;
 	}
 
 	/**
@@ -181,7 +181,7 @@ abstract class DataSourcePoller {
 		$body  = $response['body'];
 		$specs = json_decode( $body );
 
-		if ( null === $specs ) {
+		if ( $specs === null ) {
 			$logger->error(
 				'Empty response in data feed',
 				$logger_context

@@ -36,7 +36,7 @@ class OnlineClothingStore {
 	 */
 	private static function is_in_fashion_industry( $industries ) {
 		foreach ( $industries as $industry ) {
-			if ( 'fashion-apparel-accessories' === $industry['slug'] ) {
+			if ( $industry['slug'] === 'fashion-apparel-accessories' ) {
 				return true;
 			}
 		}

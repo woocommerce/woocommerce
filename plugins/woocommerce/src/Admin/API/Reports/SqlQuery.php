@@ -92,7 +92,7 @@ class SqlQuery {
 		 * Default to bypassing filters for clause retrieval internal to data stores.
 		 * The filters are applied when the full SQL statement is retrieved.
 		 */
-		if ( 'unfiltered' === $handling ) {
+		if ( $handling === 'unfiltered' ) {
 			return implode( ' ', $this->sql_clauses[ $type ] );
 		}
 

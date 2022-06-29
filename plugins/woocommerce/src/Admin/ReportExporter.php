@@ -179,7 +179,7 @@ class ReportExporter {
 		if (
 			isset( $_GET['action'] ) &&
 			! empty( $_GET['filename'] ) &&
-			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // WPCS: input var ok, sanitization ok.
+			wp_unslash( $_GET['action'] ) === self::DOWNLOAD_EXPORT_ACTION && // WPCS: input var ok, sanitization ok.
 			current_user_can( 'view_woocommerce_reports' )
 		) {
 			$exporter = new ReportCSVExporter();
@@ -199,7 +199,7 @@ class ReportExporter {
 	public static function email_report_download_link( $user_id, $export_id, $report_type ) {
 		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
 
-		if ( 100 === $percent_complete ) {
+		if ( $percent_complete === 100 ) {
 			$query_args   = array(
 				'action'   => self::DOWNLOAD_EXPORT_ACTION,
 				'filename' => "wc-{$report_type}-report-export-{$export_id}",

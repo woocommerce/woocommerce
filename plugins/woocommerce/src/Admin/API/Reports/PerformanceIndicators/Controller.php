@@ -140,14 +140,14 @@ class Controller extends \WC_REST_Reports_Controller {
 			return $response;
 		}
 
-		if ( 200 !== $response->get_status() ) {
+		if ( $response->get_status() !== 200 ) {
 			return new \WP_Error( 'woocommerce_analytics_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce' ) );
 		}
 
 		$endpoints = $response->get_data();
 
 		foreach ( $endpoints as $endpoint ) {
-			if ( '/stats' === substr( $endpoint['slug'], -6 ) ) {
+			if ( substr( $endpoint['slug'], -6 ) === '/stats' ) {
 				$request  = new \WP_REST_Request( 'OPTIONS', $endpoint['path'] );
 				$response = rest_do_request( $request );
 
@@ -353,11 +353,11 @@ class Controller extends \WC_REST_Reports_Controller {
 		$a = array_search( $a->stat, $stat_order, true );
 		$b = array_search( $b->stat, $stat_order, true );
 
-		if ( false === $a && false === $b ) {
+		if ( $a === false && $b === false ) {
 			return 0;
-		} elseif ( false === $a ) {
+		} elseif ( $a === false ) {
 			return 1;
-		} elseif ( false === $b ) {
+		} elseif ( $b === false ) {
 			return -1;
 		} else {
 			return $a - $b;
@@ -430,7 +430,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			$format = $this->formats[ $stat ];
 			$label  = $this->labels[ $stat ];
 
-			if ( 200 !== $response->get_status() ) {
+			if ( $response->get_status() !== 200 ) {
 				$stats[] = (object) array(
 					'stat'   => $stat,
 					'chart'  => $chart,
@@ -547,7 +547,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return mixed
 	 */
 	public function format_data_value( $data, $stat, $report, $chart, $query_args ) {
-		if ( 'jetpack/stats' === $report ) {
+		if ( $report === 'jetpack/stats' ) {
 			// Get the index of the field to tally.
 			$index = array_search( $chart, $data['general']->visits->fields, true );
 			if ( ! $index ) {

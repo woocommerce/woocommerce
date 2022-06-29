@@ -123,7 +123,7 @@ class Register {
 			'enabled' => (int) $enabled,
 		);
 
-		if ( false !== $wpdb->insert( $this->get_table(), $insert_fields ) ) {
+		if ( $wpdb->insert( $this->get_table(), $insert_fields ) !== false ) {
 			return $wpdb->insert_id;
 		}
 
@@ -159,7 +159,7 @@ class Register {
 			'enabled' => (int) $enabled,
 		);
 
-		if ( false === $wpdb->update( $this->get_table(), $fields, array( 'url_id' => $id ) ) ) {
+		if ( $wpdb->update( $this->get_table(), $fields, array( 'url_id' => $id ) ) === false ) {
 			throw new ApprovedDirectoriesException( __( 'URL could not be updated (probable database error).', 'woocommerce' ), ApprovedDirectoriesException::DB_ERROR );
 		}
 

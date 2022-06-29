@@ -53,7 +53,7 @@ class Table extends WP_List_Table {
 	 * @return mixed
 	 */
 	public function set_items_per_page( $default, string $option, int $value ) {
-		return 'edit_approved_directories_per_page' === $option ? absint( $value ) : $default;
+		return $option === 'edit_approved_directories_per_page' ? absint( $value ) : $default;
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Table extends WP_List_Table {
 		$selected_view = isset( $_REQUEST['view'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['view'] ) ) : 'all';
 
 		$all_url   = esc_url( add_query_arg( 'view', 'all', $this->get_base_url() ) );
-		$all_class = 'all' === $selected_view ? 'class="current"' : '';
+		$all_class = $selected_view === 'all' ? 'class="current"' : '';
 		$all_text  = sprintf(
 			/* translators: %s is the count of approved directory list entries. */
 			_nx(
@@ -90,7 +90,7 @@ class Table extends WP_List_Table {
 		);
 
 		$enabled_url   = esc_url( add_query_arg( 'view', 'enabled', $this->get_base_url() ) );
-		$enabled_class = 'enabled' === $selected_view ? 'class="current"' : '';
+		$enabled_class = $selected_view === 'enabled' ? 'class="current"' : '';
 		$enabled_text  = sprintf(
 			/* translators: %s is the count of enabled approved directory list entries. */
 			_nx(
@@ -104,7 +104,7 @@ class Table extends WP_List_Table {
 		);
 
 		$disabled_url   = esc_url( add_query_arg( 'view', 'disabled', $this->get_base_url() ) );
-		$disabled_class = 'disabled' === $selected_view ? 'class="current"' : '';
+		$disabled_class = $selected_view === 'disabled' ? 'class="current"' : '';
 		$disabled_text  = sprintf(
 			/* translators: %s is the count of disabled directory list entries. */
 			_nx(

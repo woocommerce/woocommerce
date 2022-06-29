@@ -288,7 +288,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 					}
 					$to_insert[ $entity_id ][ $meta_key ] = $meta_values;
 				} else {
-					if ( 1 === count( $meta_values ) && 1 === count( $already_migrated[ $entity_id ][ $meta_key ] ) ) {
+					if ( count( $meta_values ) === 1 && count( $already_migrated[ $entity_id ][ $meta_key ] ) === 1 ) {
 						if ( $meta_values[0] === $already_migrated[ $entity_id ][ $meta_key ][0]['meta_value'] ) {
 							continue;
 						}
@@ -305,7 +305,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 
 					// There are multiple meta entries, let's find the unique entries and insert.
 					$unique_meta_values = array_diff( $meta_values, array_column( $already_migrated[ $entity_id ][ $meta_key ], 'meta_value' ) );
-					if ( 0 === count( $unique_meta_values ) ) {
+					if ( count( $unique_meta_values ) === 0 ) {
 						continue;
 					}
 					if ( ! isset( $to_insert[ $entity_id ] ) ) {

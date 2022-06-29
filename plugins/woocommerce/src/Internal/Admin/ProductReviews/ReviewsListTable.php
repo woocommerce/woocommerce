@@ -162,7 +162,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		$review_type = sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ?? 'all' ) );
 
-		if ( 'all' !== $review_type && ! empty( $review_type ) ) {
+		if ( $review_type !== 'all' && ! empty( $review_type ) ) {
 			$comment_type = $review_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
@@ -183,7 +183,7 @@ class ReviewsListTable extends WP_List_Table {
 		}
 
 		// If ordering by "rating", then we need to adjust to sort by meta value.
-		if ( 'rating' === $orderby ) {
+		if ( $orderby === 'rating' ) {
 			$orderby          = 'meta_value_num';
 			$args['meta_key'] = 'rating';
 		}
@@ -211,7 +211,7 @@ class ReviewsListTable extends WP_List_Table {
 		$args      = [];
 		$item_type = isset( $_REQUEST['review_type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['review_type'] ) ) : 'all';
 
-		if ( 'all' === $item_type ) {
+		if ( $item_type === 'all' ) {
 			return $args;
 		}
 
@@ -271,7 +271,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		global $comment_status;
 
-		if ( ! empty( $comment_status ) && 'all' !== $comment_status && array_key_exists( $comment_status, $this->get_status_filters() ) ) {
+		if ( ! empty( $comment_status ) && $comment_status !== 'all' && array_key_exists( $comment_status, $this->get_status_filters() ) ) {
 			$args['status'] = $this->convert_status_to_query_value( $comment_status );
 		}
 
@@ -438,8 +438,8 @@ class ReviewsListTable extends WP_List_Table {
 			'delete'    => '',
 		];
 
-		if ( $comment_status && 'all' !== $comment_status ) {
-			if ( 'approved' === $review_status ) {
+		if ( $comment_status && $comment_status !== 'all' ) {
+			if ( $review_status === 'approved' ) {
 				$actions['unapprove'] = sprintf(
 					'<a href="%s" data-wp-lists="%s" class="vim-u vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 					esc_url( $unapprove_url ),
@@ -447,7 +447,7 @@ class ReviewsListTable extends WP_List_Table {
 					esc_attr__( 'Unapprove this review', 'woocommerce' ),
 					esc_html__( 'Unapprove', 'woocommerce' )
 				);
-			} elseif ( 'unapproved' === $review_status ) {
+			} elseif ( $review_status === 'unapproved' ) {
 				$actions['approve'] = sprintf(
 					'<a href="%s" data-wp-lists="%s" class="vim-a vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 					esc_url( $approve_url ),
@@ -474,7 +474,7 @@ class ReviewsListTable extends WP_List_Table {
 			);
 		}
 
-		if ( 'spam' !== $review_status ) {
+		if ( $review_status !== 'spam' ) {
 			$actions['spam'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-s vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $spam_url ),
@@ -493,7 +493,7 @@ class ReviewsListTable extends WP_List_Table {
 			);
 		}
 
-		if ( 'trash' === $review_status ) {
+		if ( $review_status === 'trash' ) {
 			$actions['untrash'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="vim-z vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $untrash_url ),
@@ -503,7 +503,7 @@ class ReviewsListTable extends WP_List_Table {
 			);
 		}
 
-		if ( 'spam' === $review_status || 'trash' === $review_status || ! EMPTY_TRASH_DAYS ) {
+		if ( $review_status === 'spam' || $review_status === 'trash' || ! EMPTY_TRASH_DAYS ) {
 			$actions['delete'] = sprintf(
 				'<a href="%s" data-wp-lists="%s" class="delete vim-d vim-destructive aria-button-if-js" aria-label="%s">%s</a>',
 				esc_url( $delete_url ),
@@ -521,7 +521,7 @@ class ReviewsListTable extends WP_List_Table {
 			);
 		}
 
-		if ( 'spam' !== $review_status && 'trash' !== $review_status ) {
+		if ( $review_status !== 'spam' && $review_status !== 'trash' ) {
 			$actions['edit'] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
 				esc_url(
@@ -560,7 +560,7 @@ class ReviewsListTable extends WP_List_Table {
 			);
 		}
 
-		$always_visible = 'excerpt' === get_user_setting( 'posts_list_mode', 'list' );
+		$always_visible = get_user_setting( 'posts_list_mode', 'list' ) === 'excerpt';
 
 		$output = '<div class="' . ( $always_visible ? 'row-actions visible' : 'row-actions' ) . '">';
 
@@ -569,16 +569,16 @@ class ReviewsListTable extends WP_List_Table {
 		foreach ( array_filter( $actions ) as $action => $link ) {
 			++$i;
 
-			if ( ( ( 'approve' === $action || 'unapprove' === $action ) && 2 === $i ) || 1 === $i ) {
+			if ( ( ( $action === 'approve' || $action === 'unapprove' ) && $i === 2 ) || $i === 1 ) {
 				$sep = '';
 			} else {
 				$sep = ' | ';
 			}
 
-			if ( ( 'reply' === $action || 'quickedit' === $action ) && ! wp_doing_ajax() ) {
+			if ( ( $action === 'reply' || $action === 'quickedit' ) && ! wp_doing_ajax() ) {
 				$action .= ' hide-if-no-js';
-			} elseif ( ( 'untrash' === $action && 'trash' === $review_status ) || ( 'unspam' === $action && 'spam' === $review_status ) ) {
-				if ( '1' === get_comment_meta( $item->comment_ID, '_wp_trash_meta_status', true ) ) {
+			} elseif ( ( $action === 'untrash' && $review_status === 'trash' ) || ( $action === 'unspam' && $review_status === 'spam' ) ) {
+				if ( get_comment_meta( $item->comment_ID, '_wp_trash_meta_status', true ) === '1' ) {
 					$action .= ' approve';
 				} else {
 					$action .= ' unapprove';
@@ -671,9 +671,9 @@ class ReviewsListTable extends WP_List_Table {
 			$actions['spam'] = _x( 'Mark as spam', 'review', 'woocommerce' );
 		}
 
-		if ( 'trash' === $comment_status ) {
+		if ( $comment_status === 'trash' ) {
 			$actions['untrash'] = __( 'Restore', 'woocommerce' );
-		} elseif ( 'spam' === $comment_status ) {
+		} elseif ( $comment_status === 'spam' ) {
 			$actions['unspam'] = _x( 'Not spam', 'review', 'woocommerce' );
 		}
 
@@ -815,7 +815,7 @@ class ReviewsListTable extends WP_List_Table {
 
 			$count_html = sprintf(
 				'<span class="%s-count">%s</span>',
-				( 'moderated' === $status ) ? 'pending' : $status,
+				( $status === 'moderated' ) ? 'pending' : $status,
 				number_format_i18n( $number_reviews_for_status )
 			);
 
@@ -835,7 +835,7 @@ class ReviewsListTable extends WP_List_Table {
 	protected function get_view_url( string $comment_type, int $post_id ) : string {
 		$link = Reviews::get_reviews_page_url();
 
-		if ( ! empty( $comment_type ) && 'all' !== $comment_type ) {
+		if ( ! empty( $comment_type ) && $comment_type !== 'all' ) {
 			$link = add_query_arg( 'comment_type', urlencode( $comment_type ), $link );
 		}
 		if ( ! empty( $post_id ) ) {
@@ -898,7 +898,7 @@ class ReviewsListTable extends WP_List_Table {
 	public function no_items() : void {
 		global $comment_status;
 
-		if ( 'moderated' === $comment_status ) {
+		if ( $comment_status === 'moderated' ) {
 			esc_html_e( 'No reviews awaiting moderation.', 'woocommerce' );
 		} else {
 			esc_html_e( 'No reviews found.', 'woocommerce' );
@@ -1048,7 +1048,7 @@ class ReviewsListTable extends WP_List_Table {
 				'admin.php'
 			);
 
-			if ( 'spam' === $comment_status ) :
+			if ( $comment_status === 'spam' ) :
 				$link = add_query_arg( [ 'comment_status' => 'spam' ], $link );
 			endif;
 
@@ -1120,7 +1120,7 @@ class ReviewsListTable extends WP_List_Table {
 		<div class="submitted-on">
 			<?php
 
-			if ( 'approved' === wp_get_comment_status( $item ) && ! empty( $item->comment_post_ID ) ) :
+			if ( wp_get_comment_status( $item ) === 'approved' && ! empty( $item->comment_post_ID ) ) :
 				printf(
 					'<a href="%1$s">%2$s</a>',
 					esc_url( get_comment_link( $item ) ),
@@ -1190,7 +1190,7 @@ class ReviewsListTable extends WP_List_Table {
 	 */
 	protected function column_type( $item ) : void {
 
-		$type = 'review' === $item->comment_type
+		$type = $item->comment_type === 'review'
 			? '&#9734;&nbsp;' . __( 'Review', 'woocommerce' )
 			: __( 'Reply', 'woocommerce' );
 
@@ -1288,7 +1288,7 @@ class ReviewsListTable extends WP_List_Table {
 
 		echo '<div class="alignleft actions">';
 
-		if ( 'top' === $which ) {
+		if ( $which === 'top' ) {
 
 			ob_start();
 
@@ -1303,11 +1303,11 @@ class ReviewsListTable extends WP_List_Table {
 			submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, [ 'id' => 'post-query-submit' ] );
 		}
 
-		if ( ( 'spam' === $comment_status || 'trash' === $comment_status ) && $this->has_items() && $this->current_user_can_moderate_reviews ) {
+		if ( ( $comment_status === 'spam' || $comment_status === 'trash' ) && $this->has_items() && $this->current_user_can_moderate_reviews ) {
 
 			wp_nonce_field( 'bulk-destroy', '_destroy_nonce' );
 
-			$title = 'spam' === $comment_status
+			$title = $comment_status === 'spam'
 				? esc_attr__( 'Empty Spam', 'woocommerce' )
 				: esc_attr__( 'Empty Trash', 'woocommerce' );
 
@@ -1366,7 +1366,7 @@ class ReviewsListTable extends WP_List_Table {
 			<?php foreach ( $rating_options as $rating => $label ) : ?>
 				<?php
 
-				$title = 0 === (int) $rating
+				$title = (int) $rating === 0
 					? $label
 					: sprintf(
 						/* translators: %s: Star rating (1-5). */
@@ -1445,7 +1445,7 @@ class ReviewsListTable extends WP_List_Table {
 				'<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">%s</span>',
 				esc_html__( 'No reviews', 'woocommerce' )
 			);
-		} elseif ( $approved_review_count && 'trash' === get_post_status( $post_id ) ) {
+		} elseif ( $approved_review_count && get_post_status( $post_id ) === 'trash' ) {
 			// Don't link the comment bubble for a trashed product.
 			printf(
 				'<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',

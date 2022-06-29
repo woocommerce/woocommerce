@@ -540,13 +540,13 @@ abstract class Task {
 			$key   = $data['key'];
 			$a_val = $a->$key ?? false;
 			$b_val = $b->$key ?? false;
-			if ( 'asc' === $data['order'] ) {
+			if ( $data['order'] === 'asc' ) {
 				$result = $a_val <=> $b_val;
 			} else {
 				$result = $b_val <=> $a_val;
 			}
 
-			if ( 0 !== $result ) {
+			if ( $result !== 0 ) {
 				break;
 			}
 		}

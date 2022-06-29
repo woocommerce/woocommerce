@@ -70,7 +70,7 @@ class Notes {
 	 * @return Note|bool
 	 */
 	public static function get_note( $note_id ) {
-		if ( false !== $note_id ) {
+		if ( $note_id !== false ) {
 			try {
 				return new Note( $note_id );
 			} catch ( \Exception $e ) {
@@ -232,7 +232,7 @@ class Notes {
 
 		foreach ( $raw_notes as $raw_note ) {
 			$note = self::get_note( $raw_note->note_id );
-			if ( false === $note ) {
+			if ( $note === false ) {
 				continue;
 			}
 
@@ -269,7 +269,7 @@ class Notes {
 	 * @param string $value New value.
 	 */
 	public static function possibly_delete_marketing_notes( $old_value, $value ) {
-		if ( 'no' !== $value ) {
+		if ( $value !== 'no' ) {
 			return;
 		}
 
@@ -439,7 +439,7 @@ class Notes {
 		}
 
 		if ( isset( $page ) ) {
-			$current_page = 'wc-admin' === $page ? 'home_screen' : $page;
+			$current_page = $page === 'wc-admin' ? 'home_screen' : $page;
 			$screen_name  = isset( $path ) ? substr( str_replace( '/', '_', $path ), 1 ) : $current_page;
 		} elseif ( isset( $post_type ) ) {
 			$screen_name = $post_type;

@@ -119,7 +119,7 @@ class Init {
 			return;
 		}
 
-		if ( 'yes' !== $value ) {
+		if ( $value !== 'yes' ) {
 			update_option( 'woocommerce_navigation_show_opt_out', 'yes' );
 		}
 
@@ -142,7 +142,7 @@ class Init {
 	 * Enqueue the opt out scripts.
 	 */
 	public function maybe_enqueue_opt_out_scripts() {
-		if ( 'yes' !== get_option( 'woocommerce_navigation_show_opt_out', 'no' ) ) {
+		if ( get_option( 'woocommerce_navigation_show_opt_out', 'no' ) !== 'yes' ) {
 			return;
 		}
 

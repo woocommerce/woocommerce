@@ -59,13 +59,13 @@ class OnboardingProducts {
 		);
 		$base_location    = wc_get_base_location();
 		$has_cbd_industry = false;
-		if ( 'US' === $base_location['country'] ) {
+		if ( $base_location['country'] === 'US' ) {
 			$profile = get_option( OnboardingProfile::DATA_OPTION, array() );
 			if ( ! empty( $profile['industry'] ) ) {
 				$has_cbd_industry = in_array( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ), true );
 			}
 		}
-		if ( ! Features::is_enabled( 'subscriptions' ) || 'US' !== $base_location['country'] || $has_cbd_industry ) {
+		if ( ! Features::is_enabled( 'subscriptions' ) || $base_location['country'] !== 'US' || $has_cbd_industry ) {
 			$products['subscriptions']['product'] = 27147;
 		}
 
@@ -80,7 +80,7 @@ class OnboardingProducts {
 	 */
 	public static function get_product_data( $product_types ) {
 		$woocommerce_products = get_transient( self::PRODUCT_DATA_TRANSIENT );
-		if ( false === $woocommerce_products ) {
+		if ( $woocommerce_products === false ) {
 			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' );
 			if ( is_wp_error( $woocommerce_products ) ) {
 				return $product_types;

@@ -47,7 +47,7 @@ class CustomizingProductCatalog {
 		$products = $query->get_products();
 
 		// we need at least 1 product.
-		if ( 0 === $products->total ) {
+		if ( $products->total === 0 ) {
 			return;
 		}
 

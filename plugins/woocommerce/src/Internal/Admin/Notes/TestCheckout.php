@@ -79,7 +79,7 @@ class TestCheckout {
 		);
 
 		$products = $query->get_products();
-		if ( 0 === count( $products ) ) {
+		if ( count( $products ) === 0 ) {
 			return;
 		}
 

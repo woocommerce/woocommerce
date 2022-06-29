@@ -145,7 +145,7 @@ class Segmenter extends ReportsSegmenter {
 	 */
 	protected function get_segments( $type, $query_params, $table_name ) {
 		global $wpdb;
-		if ( ! isset( $this->query_args['segmentby'] ) || '' === $this->query_args['segmentby'] ) {
+		if ( ! isset( $this->query_args['segmentby'] ) || $this->query_args['segmentby'] === '' ) {
 			return array();
 		}
 
@@ -156,7 +156,7 @@ class Segmenter extends ReportsSegmenter {
 		// Product, variation, and category are bound to product, so here product segmenting table is required,
 		// while coupon and customer are bound to order, so we don't need the extra JOIN for those.
 		// This also means that segment selections need to be calculated differently.
-		if ( 'variation' === $this->query_args['segmentby'] ) {
+		if ( $this->query_args['segmentby'] === 'variation' ) {
 			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$segmenting_selections     = array(
 				'product_level' => $this->prepare_selections( $product_level_columns ),

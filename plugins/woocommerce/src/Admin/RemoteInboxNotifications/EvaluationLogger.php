@@ -45,7 +45,7 @@ class EvaluationLogger {
 	 */
 	public function __construct( $slug, $source = null, \WC_Logger_Interface $logger = null ) {
 		$this->slug = $slug;
-		if ( null === $logger ) {
+		if ( $logger === null ) {
 			$logger = wc_get_logger();
 		}
 
@@ -76,7 +76,7 @@ class EvaluationLogger {
 	 * Log the results.
 	 */
 	public function log() {
-		if ( false === defined( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' ) || true !== constant( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' ) ) {
+		if ( defined( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' ) === false || constant( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' ) !== true ) {
 			return;
 		}
 

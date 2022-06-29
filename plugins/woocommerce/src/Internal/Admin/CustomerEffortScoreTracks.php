@@ -103,7 +103,7 @@ class CustomerEffortScoreTracks {
 		}
 
 		// Only enqueue a survey if tracking is allowed.
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking', 'no' ) === 'yes';
 		if ( ! $allow_tracking ) {
 			return;
 		}
@@ -118,7 +118,7 @@ class CustomerEffortScoreTracks {
 		// Only hook up the transition_post_status action handler
 		// if on the edit page.
 		global $pagenow;
-		if ( 'post.php' === $pagenow ) {
+		if ( $pagenow === 'post.php' ) {
 			add_action(
 				'transition_post_status',
 				array(
@@ -298,9 +298,9 @@ class CustomerEffortScoreTracks {
 		$old_status,
 		$post
 	) {
-		if ( 'product' === $post->post_type ) {
+		if ( $post->post_type === 'product' ) {
 			$this->maybe_enqueue_ces_survey_for_product( $new_status, $old_status );
-		} elseif ( 'shop_order' === $post->post_type ) {
+		} elseif ( $post->post_type === 'shop_order' ) {
 			$this->enqueue_ces_survey_for_edited_shop_order();
 		}
 	}
@@ -315,11 +315,11 @@ class CustomerEffortScoreTracks {
 		$new_status,
 		$old_status
 	) {
-		if ( 'publish' !== $new_status ) {
+		if ( $new_status !== 'publish' ) {
 			return;
 		}
 
-		if ( 'publish' !== $old_status ) {
+		if ( $old_status !== 'publish' ) {
 			$this->enqueue_ces_survey_for_new_product();
 		} else {
 			$this->enqueue_ces_survey_for_edited_product();
@@ -473,7 +473,7 @@ class CustomerEffortScoreTracks {
 	 */
 	public function run_on_product_import() {
 		// We're only interested in when the importer completes.
-		if ( empty( $_GET['step'] ) || 'done' !== $_GET['step'] ) { // phpcs:ignore CSRF ok.
+		if ( empty( $_GET['step'] ) || $_GET['step'] !== 'done' ) { // phpcs:ignore CSRF ok.
 			return;
 		}
 

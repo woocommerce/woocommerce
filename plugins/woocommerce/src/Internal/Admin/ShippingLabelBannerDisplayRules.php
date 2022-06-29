@@ -124,7 +124,7 @@ class ShippingLabelBannerDisplayRules {
 		$dismissed_timestamp    = intval( round( $dismissed_timestamp_ms / 1000 ) );
 		$expired_timestamp      = $dismissed_timestamp + 24 * 60 * 60; // 24 hours from click time
 
-		$dismissed_for_good = -1 === $dismissed_timestamp_ms;
+		$dismissed_for_good = $dismissed_timestamp_ms === -1;
 		$dismissed_24h      = time() < $expired_timestamp;
 
 		return ! $dismissed_for_good && ! $dismissed_24h;

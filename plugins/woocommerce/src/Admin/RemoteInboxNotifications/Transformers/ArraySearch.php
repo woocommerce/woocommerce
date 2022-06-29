@@ -25,7 +25,7 @@ class ArraySearch implements TransformerInterface {
 	 */
 	public function transform( $value, stdClass $arguments = null, $default = null ) {
 		$key = array_search( $arguments->value, $value, true );
-		if ( false !== $key ) {
+		if ( $key !== false ) {
 			return $value[ $key ];
 		}
 

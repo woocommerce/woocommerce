@@ -220,7 +220,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 */
 	private function is_tasklist_experiment_assigned_treatment() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',
@@ -263,7 +263,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$args['source']     = isset( $request['source'] ) ? $request['source'] : array();
 		$args['is_deleted'] = 0;
 
-		if ( 'date' === $args['orderby'] ) {
+		if ( $args['orderby'] === 'date' ) {
 			$args['orderby'] = 'date_created';
 		}
 
@@ -515,13 +515,13 @@ class Notes extends \WC_REST_CRUD_Controller {
 		if ( empty( $query ) ) {
 			return $query;
 		}
-		if ( 'https://' === substr( $query, 0, 8 ) ) {
+		if ( substr( $query, 0, 8 ) === 'https://' ) {
 			return $query;
 		}
-		if ( 'http://' === substr( $query, 0, 7 ) ) {
+		if ( substr( $query, 0, 7 ) === 'http://' ) {
 			return $query;
 		}
-		if ( '?' === substr( $query, 0, 1 ) ) {
+		if ( substr( $query, 0, 1 ) === '?' ) {
 			return admin_url( 'admin.php' . $query );
 		}
 

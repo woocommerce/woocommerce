@@ -64,7 +64,7 @@ class FirstProduct {
 		);
 		$products = $query->get_products();
 		$count    = $products->total;
-		if ( 0 !== $count ) {
+		if ( $count !== 0 ) {
 			return;
 		}
 

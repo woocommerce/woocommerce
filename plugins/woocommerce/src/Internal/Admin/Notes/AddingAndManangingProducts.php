@@ -53,7 +53,7 @@ class AddingAndManangingProducts {
 		);
 
 		$products = $query->get_products();
-		if ( 0 !== $products->total ) {
+		if ( $products->total !== 0 ) {
 			return;
 		}
 

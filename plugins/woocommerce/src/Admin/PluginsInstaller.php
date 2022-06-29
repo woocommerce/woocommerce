@@ -102,7 +102,7 @@ class PluginsInstaller {
 	 */
 	public static function redirect_to_referer() {
 		$referer = wp_get_referer();
-		if ( $referer && 0 !== strpos( $referer, wp_login_url() ) ) {
+		if ( $referer && strpos( $referer, wp_login_url() ) !== 0 ) {
 			wp_safe_redirect( $referer );
 			exit();
 		}

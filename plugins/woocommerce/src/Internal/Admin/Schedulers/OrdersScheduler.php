@@ -129,7 +129,7 @@ class OrdersScheduler extends ImportScheduler {
 	 * @param int $post_id Post ID.
 	 */
 	public static function possibly_schedule_import( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'woocommerce_refund_created' !== current_filter() ) {
+		if ( get_post_type( $post_id ) !== 'shop_order' && current_filter() !== 'woocommerce_refund_created' ) {
 			return;
 		}
 
@@ -155,7 +155,7 @@ class OrdersScheduler extends ImportScheduler {
 		$type = $order->get_type();
 
 		// If the order isn't the right type, skip sync.
-		if ( 'shop_order' !== $type && 'shop_order_refund' !== $type ) {
+		if ( $type !== 'shop_order' && $type !== 'shop_order_refund' ) {
 			return;
 		}
 
@@ -172,7 +172,7 @@ class OrdersScheduler extends ImportScheduler {
 			CustomersDataStore::sync_order_customer( $order_id ),
 		);
 
-		if ( 'shop_order' === $type ) {
+		if ( $type === 'shop_order' ) {
 			$order_refunds = $order->get_refunds();
 
 			foreach ( $order_refunds as $refund ) {

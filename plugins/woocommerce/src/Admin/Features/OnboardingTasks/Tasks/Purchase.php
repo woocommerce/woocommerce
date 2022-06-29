@@ -194,7 +194,7 @@ class Purchase extends Task {
 
 			$relevant_products['purchaseable'][] = $paid_theme;
 
-			if ( isset( $paid_theme['is_installed'] ) && false === $paid_theme['is_installed'] ) {
+			if ( isset( $paid_theme['is_installed'] ) && $paid_theme['is_installed'] === false ) {
 				$relevant_products['remaining'][] = $paid_theme['title'];
 			}
 		}

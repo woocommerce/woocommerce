@@ -59,7 +59,7 @@ trait CustomAttributeTraits {
 
 		$mode = $args['name'] ? 'name' : 'slug';
 
-		if ( 'name' === $mode ) {
+		if ( $mode === 'name' ) {
 			$name = $args['name'];
 			// Get as close as we can to matching the name property of custom attributes using SQL.
 			$like = '%"name";s:%:"%' . $wpdb->esc_like( $name ) . '%"%';
@@ -108,11 +108,11 @@ trait CustomAttributeTraits {
 
 				// Skip custom attributes that didn't match the query.
 				// (There can be any number of attributes in the meta value).
-				if ( ( 'name' === $mode ) && ( false === stripos( $meta_value['name'], $name ) ) ) {
+				if ( ( $mode === 'name' ) && ( stripos( $meta_value['name'], $name ) === false ) ) {
 					continue;
 				}
 
-				if ( ( 'slug' === $mode ) && ( $meta_attribute_key !== $slug ) ) {
+				if ( ( $mode === 'slug' ) && ( $meta_attribute_key !== $slug ) ) {
 					continue;
 				}
 

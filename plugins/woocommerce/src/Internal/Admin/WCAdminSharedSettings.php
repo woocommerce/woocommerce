@@ -42,7 +42,7 @@ class WCAdminSharedSettings {
 	 * @return object Instance.
 	 */
 	public static function get_instance() {
-		if ( null === self::$instance ) {
+		if ( self::$instance === null ) {
 			self::$instance = new self();
 		}
 		return self::$instance;

@@ -24,7 +24,7 @@ class StoreDetails extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added store details', 'woocommerce' );
 			}
@@ -70,6 +70,6 @@ class StoreDetails extends Task {
 	 */
 	public function is_complete() {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
-		return isset( $profiler_data['completed'] ) && true === $profiler_data['completed'];
+		return isset( $profiler_data['completed'] ) && $profiler_data['completed'] === true;
 	}
 }

@@ -93,7 +93,7 @@ class Order extends \WC_Order {
 	 */
 	public static function order_class_name( $classname, $order_type, $order_id ) {
 		// @todo - Only substitute class when necessary (during sync).
-		if ( 'WC_Order' === $classname ) {
+		if ( $classname === 'WC_Order' ) {
 			return '\Automattic\WooCommerce\Admin\Overrides\Order';
 		} else {
 			return $classname;
@@ -130,7 +130,7 @@ class Order extends \WC_Order {
 			return get_user_meta( $this->get_user_id(), 'first_name', true );
 		}
 
-		if ( '' !== $this->get_billing_first_name( 'edit' ) ) {
+		if ( $this->get_billing_first_name( 'edit' ) !== '' ) {
 			return $this->get_billing_first_name( 'edit' );
 		} else {
 			return $this->get_shipping_first_name( 'edit' );
@@ -145,7 +145,7 @@ class Order extends \WC_Order {
 			return get_user_meta( $this->get_user_id(), 'last_name', true );
 		}
 
-		if ( '' !== $this->get_billing_last_name( 'edit' ) ) {
+		if ( $this->get_billing_last_name( 'edit' ) !== '' ) {
 			return $this->get_billing_last_name( 'edit' );
 		} else {
 			return $this->get_shipping_last_name( 'edit' );

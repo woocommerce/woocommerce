@@ -105,7 +105,7 @@ class WooCommercePayments extends Task {
 		$product_types       = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 		$business_extensions = isset( $profiler_data['business_extensions'] ) ? $profiler_data['business_extensions'] : array();
 
-		$subscriptions_and_us = in_array( 'subscriptions', $product_types, true ) && 'US' === WC()->countries->get_base_country();
+		$subscriptions_and_us = in_array( 'subscriptions', $product_types, true ) && WC()->countries->get_base_country() === 'US';
 		return in_array( 'woocommerce-payments', $business_extensions, true ) || $subscriptions_and_us;
 	}
 
@@ -151,7 +151,7 @@ class WooCommercePayments extends Task {
 			)
 		);
 		$woocommerce_payments_ids = array_search( 'woocommerce-payments', $suggestion_plugins, true );
-		if ( false !== $woocommerce_payments_ids ) {
+		if ( $woocommerce_payments_ids !== false ) {
 			return true;
 		}
 		return false;

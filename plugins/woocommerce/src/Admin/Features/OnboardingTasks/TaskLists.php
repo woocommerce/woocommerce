@@ -82,7 +82,7 @@ class TaskLists {
 	 */
 	public static function is_experiment_treatment( $name ) {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',
@@ -292,7 +292,7 @@ class TaskLists {
 			return;
 		}
 		$referer = wp_get_referer();
-		if ( ! $referer || 0 !== strpos( $referer, wc_admin_url() ) ) {
+		if ( ! $referer || strpos( $referer, wc_admin_url() ) !== 0 ) {
 			return;
 		}
 
@@ -352,7 +352,7 @@ class TaskLists {
 		$tasks = $extended_tasks ?? array();
 
 		foreach ( self::$lists as $task_list ) {
-			if ( 'extended' !== substr( $task_list->id, 0, 8 ) ) {
+			if ( substr( $task_list->id, 0, 8 ) !== 'extended' ) {
 				continue;
 			}
 			foreach ( $tasks as $args ) {
@@ -504,7 +504,7 @@ class TaskLists {
 		}
 
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
+			if ( strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) === 0 ) {
 				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge count-' . esc_attr( $tasks_count ) . '">' . number_format_i18n( $tasks_count ) . '</span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}

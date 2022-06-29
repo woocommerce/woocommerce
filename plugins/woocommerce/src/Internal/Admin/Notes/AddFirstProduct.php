@@ -45,7 +45,7 @@ class AddFirstProduct {
 			)
 		);
 		$products = $query->get_products();
-		if ( 0 !== count( $products ) ) {
+		if ( count( $products ) !== 0 ) {
 			return;
 		}
 
@@ -55,7 +55,7 @@ class AddFirstProduct {
 			'return' => 'ids',
 		);
 		$orders = wc_get_orders( $args );
-		if ( 0 !== count( $orders ) ) {
+		if ( count( $orders ) !== 0 ) {
 			return;
 		}
 

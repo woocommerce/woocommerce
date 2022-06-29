@@ -65,8 +65,8 @@ trait NoteTraits {
 		}
 
 		if (
-			'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) &&
-			Note::E_WC_ADMIN_NOTE_MARKETING === $note->get_type()
+			get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' &&
+			$note->get_type() === Note::E_WC_ADMIN_NOTE_MARKETING
 		) {
 			return false;
 		}
@@ -116,7 +116,7 @@ trait NoteTraits {
 			if ( ! empty( $note_ids ) ) {
 				$note = Notes::get_note( $note_ids[0] );
 
-				if ( ! $note->get_is_deleted() && ( Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) ) {
+				if ( ! $note->get_is_deleted() && ( $note->get_status() !== Note::E_WC_ADMIN_NOTE_ACTIONED ) ) {
 					return self::possibly_delete_note();
 				}
 			}
@@ -197,7 +197,7 @@ trait NoteTraits {
 		if ( ! empty( $note_ids ) ) {
 			$note = Notes::get_note( $note_ids[0] );
 
-			if ( Note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
+			if ( $note->get_status() === Note::E_WC_ADMIN_NOTE_ACTIONED ) {
 				return true;
 			}
 		}
@@ -222,7 +222,7 @@ trait NoteTraits {
 			call_user_func( array( $note2, 'get_' . $field_name ) )
 		);
 
-		if ( 'actions' === $field_name ) {
+		if ( $field_name === 'actions' ) {
 			// We need to individually compare the action fields because action object from db is different from action object of note.
 			// For example, action object from db has "id".
 			$diff        = array_udiff(

@@ -401,7 +401,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'variations'   => __( 'Variations', 'woocommerce' ),
 		);
 
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+		if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
 			$export_columns['stock_status'] = __( 'Status', 'woocommerce' );
 			$export_columns['stock']        = __( 'Stock', 'woocommerce' );
 		}
@@ -435,7 +435,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'variations'   => isset( $item['extended_info']['variations'] ) ? count( $item['extended_info']['variations'] ) : 0,
 		);
 
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+		if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
 			if ( $item['extended_info']['manage_stock'] ) {
 				$export_item['stock_status'] = $this->get_stock_status( $item['extended_info']['stock_status'] );
 				$export_item['stock']        = $item['extended_info']['stock_quantity'];

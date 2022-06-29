@@ -73,7 +73,7 @@ class PostsToOrdersMigrationController {
 		$this->error_logger = WC()->call_function( 'wc_get_logger' );
 
 		$using_transactions = $this->maybe_start_transaction();
-		if ( null === $using_transactions ) {
+		if ( $using_transactions === null ) {
 			return;
 		}
 
@@ -98,7 +98,7 @@ class PostsToOrdersMigrationController {
 	 * @return bool|null True if transaction started, false if transactions won't be used, null if transaction failed to start.
 	 */
 	private function maybe_start_transaction(): ?bool {
-		if ( 'yes' !== get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION ) ) {
+		if ( get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION ) !== 'yes' ) {
 			return false;
 		}
 
@@ -169,7 +169,7 @@ class PostsToOrdersMigrationController {
 		}
 
 		$error = $wpdb->last_error;
-		if ( '' !== $error ) {
+		if ( $error !== '' ) {
 			$this->error_logger->error(
 				"PostsToOrdersMigrationController: when executing $query: $error",
 				array(
@@ -196,14 +196,14 @@ class PostsToOrdersMigrationController {
 
 		$errors    = array_unique( $result['errors'] );
 		$exception = $result['exception'];
-		if ( null === $exception && empty( $errors ) ) {
+		if ( $exception === null && empty( $errors ) ) {
 			return false;
 		}
 
 		$migration_class_name = ( new \ReflectionClass( $migration_class ) )->getShortName();
 		$batch                = ArrayUtil::to_ranges_string( $order_post_ids );
 
-		if ( null !== $exception ) {
+		if ( $exception !== null ) {
 			$exception_class = get_class( $exception );
 			$this->error_logger->error(
 				"$migration_class_name: when processing ids $batch: ($exception_class) {$exception->getMessage()}, {$exception->getTraceAsString()}",

@@ -65,6 +65,6 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 	 */
 	public static function is_dismissed() {
 		$settings = get_option( 'woocommerce_' . self::GATEWAY_ID . '_settings', array() );
-		return isset( $settings['is_dismissed'] ) && 'yes' === $settings['is_dismissed'];
+		return isset( $settings['is_dismissed'] ) && $settings['is_dismissed'] === 'yes';
 	}
 }

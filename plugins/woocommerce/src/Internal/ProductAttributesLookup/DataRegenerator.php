@@ -446,7 +446,7 @@ class DataRegenerator {
 	 */
 	private function verify_tool_execution_nonce() {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) === false ) {
 			throw new \Exception( 'Invalid nonce' );
 		}
 	}

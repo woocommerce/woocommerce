@@ -39,7 +39,7 @@ class CategoryLookup {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( null === static::$instance ) {
+		if ( static::$instance === null ) {
 			static::$instance = new static();
 		}
 		return static::$instance;
@@ -137,7 +137,7 @@ class CategoryLookup {
 	 */
 	public function on_create( $category_id ) {
 		// If WooCommerce is being installed on a multisite, lookup tables haven't been created yet.
-		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+		if ( get_transient( 'wc_installing' ) === 'yes' ) {
 			return;
 		}
 

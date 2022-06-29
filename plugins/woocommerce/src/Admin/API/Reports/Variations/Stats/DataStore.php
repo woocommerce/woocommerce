@@ -168,7 +168,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$selections = $this->selected_columns( $query_args );
@@ -220,14 +220,14 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 			$segmenter             = new Segmenter( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
-			if ( null === $totals ) {
+			if ( $totals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$this->interval_query->add_sql_clause( 'select', ", MAX(${table_name}.date_created) AS datetime_anchor" );
-			if ( '' !== $selections ) {
+			if ( $selections !== '' ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
 
@@ -238,7 +238,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 			);
 			/* phpcs:enable */
 
-			if ( null === $intervals ) {
+			if ( $intervals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
@@ -275,7 +275,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return 'time_interval';
 		}
 

@@ -125,7 +125,7 @@ class DataSynchronizer {
 	 * @return bool
 	 */
 	public function data_sync_is_enabled(): bool {
-		return 'yes' === get_option( self::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		return get_option( self::ORDERS_DATA_SYNC_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**
@@ -134,7 +134,7 @@ class DataSynchronizer {
 	 * @return bool
 	 */
 	public function pending_data_sync_is_in_progress(): bool {
-		return 'yes' === get_option( self::PENDING_SYNC_IS_IN_PROGRESS_OPTION );
+		return get_option( self::PENDING_SYNC_IS_IN_PROGRESS_OPTION ) === 'yes';
 	}
 
 	/**
@@ -168,7 +168,7 @@ class DataSynchronizer {
 
 		// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
 		$count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
-		if ( false !== $count ) {
+		if ( $count !== false ) {
 			return (int) $count;
 		}
 
@@ -212,7 +212,7 @@ SELECT(
 	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
 	 */
 	public function custom_orders_table_is_authoritative(): bool {
-		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		return get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**
@@ -287,7 +287,7 @@ WHERE
 		}
 
 		$initial_pending_count = $this->get_current_orders_pending_sync_count();
-		if ( 0 === $initial_pending_count ) {
+		if ( $initial_pending_count === 0 ) {
 			return;
 		}
 
@@ -323,13 +323,13 @@ WHERE
 
 		// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
 		$fake_count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
-		if ( false !== $fake_count ) {
+		if ( $fake_count !== false ) {
 			update_option( 'woocommerce_fake_orders_pending_sync_count', (int) $fake_count - 1 );
 		} else {
 			$this->sync_next_batch();
 		}
 
-		if ( 0 === $this->get_current_orders_pending_sync_count() ) {
+		if ( $this->get_current_orders_pending_sync_count() === 0 ) {
 			$this->cleanup_synchronization_state();
 
 			/**
@@ -369,12 +369,12 @@ WHERE
 		}
 
 		$batch_size -= count( $order_ids );
-		if ( 0 === $batch_size ) {
+		if ( $batch_size === 0 ) {
 			return;
 		}
 
 		$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_DIFFERENT_UPDATE_DATE, $batch_size );
-		if ( 0 === count( $order_ids ) ) {
+		if ( count( $order_ids ) === 0 ) {
 			return;
 		}
 

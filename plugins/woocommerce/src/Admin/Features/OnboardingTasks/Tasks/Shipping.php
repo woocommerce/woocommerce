@@ -28,7 +28,7 @@ class Shipping extends Task {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
 			return __( 'Select how to ship your products', 'woocommerce' );
 		}
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added shipping costs', 'woocommerce' );
 			}

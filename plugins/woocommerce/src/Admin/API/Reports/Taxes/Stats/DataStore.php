@@ -155,7 +155,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -191,7 +191,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $totals ) {
+			if ( $totals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
@@ -212,7 +212,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
 
-			if ( '' !== $selections ) {
+			if ( $selections !== '' ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
 
@@ -225,7 +225,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $intervals ) {
+			if ( $intervals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'woocommerce' ) );
 			}
 

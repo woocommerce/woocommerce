@@ -85,7 +85,7 @@ class TimeInterval {
 	public static function db_datetime_format( $time_interval, $table_name, $date_column_name = 'date_created' ) {
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
-		if ( 1 === $first_day_of_week ) {
+		if ( $first_day_of_week === 1 ) {
 			// Week begins on Monday, ISO 8601.
 			$week_format = "DATE_FORMAT({$table_name}.`{$date_column_name}`, '%x-%v')";
 		} else {
@@ -166,7 +166,7 @@ class TimeInterval {
 	 * @return int
 	 */
 	public static function week_number( $datetime, $first_day_of_week ) {
-		if ( 1 === $first_day_of_week ) {
+		if ( $first_day_of_week === 1 ) {
 			$week_number = (int) $datetime->format( 'W' );
 		} else {
 			$week_number = self::simple_week_number( $datetime, $first_day_of_week );
@@ -195,7 +195,7 @@ class TimeInterval {
 		// If the week does not begin on Monday.
 		$first_day_of_week = absint( get_option( 'start_of_week' ) );
 
-		if ( 'week' === $time_interval && 1 !== $first_day_of_week ) {
+		if ( $time_interval === 'week' && $first_day_of_week !== 1 ) {
 			$week_no = self::simple_week_number( $datetime, $first_day_of_week );
 			$week_no = str_pad( $week_no, 2, '0', STR_PAD_LEFT );
 			$year_no = $datetime->format( 'Y' );
@@ -512,14 +512,14 @@ class TimeInterval {
 		if ( $expected_interval_count <= $db_records ) {
 			return false;
 		}
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			$expected_intervals_on_page = self::expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
 			return $intervals_count < $expected_intervals_on_page;
 		}
-		if ( 'desc' === $order ) {
+		if ( $order === 'desc' ) {
 			return $page_no > floor( $db_records / $items_per_page );
 		}
-		if ( 'asc' === $order ) {
+		if ( $order === 'asc' ) {
 			return $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page );
 		}
 		// Invalid ordering.
@@ -549,7 +549,7 @@ class TimeInterval {
 
 			$range = $request[ $param_name . '_between' ];
 
-			if ( 2 !== count( $range ) ) {
+			if ( count( $range ) !== 2 ) {
 				continue;
 			}
 
@@ -586,7 +586,7 @@ class TimeInterval {
 		}
 
 		if (
-			2 !== count( $value ) ||
+			count( $value ) !== 2 ||
 			! is_numeric( $value[0] ) ||
 			! is_numeric( $value[1] )
 		) {
@@ -618,7 +618,7 @@ class TimeInterval {
 		}
 
 		if (
-			2 !== count( $value ) ||
+			count( $value ) !== 2 ||
 			! rest_parse_date( $value[0] ) ||
 			! rest_parse_date( $value[1] )
 		) {
@@ -646,21 +646,21 @@ class TimeInterval {
 		$current_year  = $current_date->format( 'Y' );
 		$current_month = $current_date->format( 'm' );
 
-		if ( 'last_week' === $timeframe ) {
+		if ( $timeframe === 'last_week' ) {
 			return array(
 				'start' => $current_date->modify( 'last week monday' )->format( 'Y-m-d 00:00:00' ),
 				'end'   => $current_date->modify( 'this sunday' )->format( 'Y-m-d 23:59:59' ),
 			);
 		}
 
-		if ( 'last_month' === $timeframe ) {
+		if ( $timeframe === 'last_month' ) {
 			return array(
 				'start' => $current_date->modify( 'first day of previous month' )->format( 'Y-m-d 00:00:00' ),
 				'end'   => $current_date->modify( 'last day of this month' )->format( 'Y-m-d 23:59:59' ),
 			);
 		}
 
-		if ( 'last_quarter' === $timeframe ) {
+		if ( $timeframe === 'last_quarter' ) {
 			switch ( $current_month ) {
 				case $current_month >= 1 && $current_month <= 3:
 					return array(
@@ -685,7 +685,7 @@ class TimeInterval {
 			}
 		}
 
-		if ( 'last_6_months' === $timeframe ) {
+		if ( $timeframe === 'last_6_months' ) {
 			if ( $current_month >= 1 && $current_month <= 6 ) {
 				return array(
 					'start' => ( $current_year - 1 ) . '-07-01 00:00:00',
@@ -698,7 +698,7 @@ class TimeInterval {
 			);
 		}
 
-		if ( 'last_year' === $timeframe ) {
+		if ( $timeframe === 'last_year' ) {
 			return array(
 				'start' => ( $current_year - 1 ) . '-01-01 00:00:00',
 				'end'   => ( $current_year - 1 ) . '-12-31 23:59:59',

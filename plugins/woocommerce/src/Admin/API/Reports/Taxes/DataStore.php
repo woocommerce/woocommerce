@@ -162,7 +162,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -225,7 +225,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $tax_data ) {
+			if ( $tax_data === null ) {
 				return $data;
 			}
 
@@ -252,9 +252,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function normalize_order_by( $order_by ) {
 		global $wpdb;
 
-		if ( 'tax_code' === $order_by ) {
+		if ( $order_by === 'tax_code' ) {
 			return 'CONCAT_WS( "-", NULLIF(tax_rate_country, ""), NULLIF(tax_rate_state, ""), NULLIF(tax_rate_name, ""), NULLIF(tax_rate_priority, "") )';
-		} elseif ( 'rate' === $order_by ) {
+		} elseif ( $order_by === 'rate' ) {
 			return "CAST({$wpdb->prefix}woocommerce_tax_rates.tax_rate as DECIMAL(7,4))";
 		}
 
@@ -308,7 +308,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
-			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+			$num_updated += intval( $result ) === 2 ? 1 : intval( $result );
 		}
 
 		return ( count( $tax_items ) === $num_updated );

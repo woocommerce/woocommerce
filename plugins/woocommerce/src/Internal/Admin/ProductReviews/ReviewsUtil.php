@@ -16,7 +16,7 @@ class ReviewsUtil {
 	public static function comments_clauses_without_product_reviews( $clauses ) {
 		global $wpdb, $current_screen;
 
-		if ( isset( $current_screen->base ) && 'edit-comments' === $current_screen->base ) {
+		if ( isset( $current_screen->base ) && $current_screen->base === 'edit-comments' ) {
 			$clauses['join']  .= " LEFT JOIN {$wpdb->posts} AS wp_posts_to_exclude_reviews ON comment_post_ID = wp_posts_to_exclude_reviews.ID ";
 			$clauses['where'] .= ( $clauses['where'] ? ' AND ' : '' ) . " wp_posts_to_exclude_reviews.post_type NOT IN ('product') ";
 		}

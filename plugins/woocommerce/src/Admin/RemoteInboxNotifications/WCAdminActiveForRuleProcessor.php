@@ -19,7 +19,7 @@ class WCAdminActiveForRuleProcessor implements RuleProcessorInterface {
 	 * @param object $wcadmin_active_for_provider Provides the amount of time wcadmin has been active for.
 	 */
 	public function __construct( $wcadmin_active_for_provider = null ) {
-		$this->wcadmin_active_for_provider = null === $wcadmin_active_for_provider
+		$this->wcadmin_active_for_provider = $wcadmin_active_for_provider === null
 			? new WCAdminActiveForProvider()
 			: $wcadmin_active_for_provider;
 	}

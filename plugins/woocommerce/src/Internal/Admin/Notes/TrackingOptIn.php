@@ -40,7 +40,7 @@ class TrackingOptIn {
 	 */
 	public static function get_note() {
 		// Only show this note to stores that are opted out.
-		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+		if ( get_option( 'woocommerce_allow_tracking', 'no' ) === 'yes' ) {
 			return;
 		}
 
@@ -79,7 +79,7 @@ class TrackingOptIn {
 	 * @param Note $note Note being acted upon.
 	 */
 	public function opt_in_to_tracking( $note ) {
-		if ( self::NOTE_NAME === $note->get_name() ) {
+		if ( $note->get_name() === self::NOTE_NAME ) {
 			// Opt in to tracking and schedule the first data update.
 			// Same mechanism as in WC_Admin_Setup_Wizard::wc_setup_store_setup_save().
 			update_option( 'woocommerce_allow_tracking', 'yes' );

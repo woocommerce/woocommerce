@@ -135,7 +135,7 @@ class Screen {
 			return true;
 		}
 
-		if ( 'pa_' === substr( $taxonomy, 0, 3 ) ) {
+		if ( substr( $taxonomy, 0, 3 ) === 'pa_' ) {
 			return true;
 		}
 

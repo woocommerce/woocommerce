@@ -81,7 +81,7 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -114,7 +114,7 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 				ARRAY_A
 			);
 
-			if ( null === $report_data ) {
+			if ( $report_data === null ) {
 				return $data;
 			}
 

@@ -28,7 +28,7 @@ class WcPayWelcomePage {
 			return;
 		}
 
-		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+		if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
 			return;
 		}
 
@@ -58,7 +58,7 @@ class WcPayWelcomePage {
 		// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
 		// We need to register this menu via add_menu_page so that it doesn't become a child of
 		// WooCommerce menu.
-		if ( 'yes' === get_option( 'woocommerce_navigation_enabled', 'no' ) ) {
+		if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
 			$menu_with_nav_data = array(
 				__( 'Payments', 'woocommerce' ),
 				__( 'Payments', 'woocommerce' ),
@@ -74,8 +74,8 @@ class WcPayWelcomePage {
 
 		// Add badge.
 		foreach ( $menu as $index => $menu_item ) {
-			if ( 'wc-admin&path=/wc-pay-welcome-page' === $menu_item[2]
-					|| 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' === $menu_item[2] ) {
+			if ( $menu_item[2] === 'wc-admin&path=/wc-pay-welcome-page'
+					|| $menu_item[2] === 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) {
 				//phpcs:ignore
 				$menu[ $index ][0] .= ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			}
@@ -89,7 +89,7 @@ class WcPayWelcomePage {
 	 */
 	private function should_add_the_menu() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',

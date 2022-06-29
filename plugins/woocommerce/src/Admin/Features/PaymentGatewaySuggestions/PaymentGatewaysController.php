@@ -87,9 +87,9 @@ class PaymentGatewaysController {
 	public static function possibly_do_connection_return_action() {
 		if (
 			! isset( $_GET['page'] ) ||
-			'wc-admin' !== $_GET['page'] ||
+			$_GET['page'] !== 'wc-admin' ||
 			! isset( $_GET['task'] ) ||
-			'payments' !== $_GET['task'] ||
+			$_GET['task'] !== 'payments' ||
 			! isset( $_GET['connection-return'] ) ||
 			! isset( $_GET['_wpnonce'] ) ||
 			! wp_verify_nonce( wc_clean( wp_unslash( $_GET['_wpnonce'] ) ), 'connection-return' )
@@ -109,7 +109,7 @@ class PaymentGatewaysController {
 	 */
 	public static function handle_successfull_connection( $gateway_id ) {
 		// phpcs:disable WordPress.Security.NonceVerification
-		if ( ! isset( $_GET['success'] ) || 1 !== intval( $_GET['success'] ) ) {
+		if ( ! isset( $_GET['success'] ) || intval( $_GET['success'] ) !== 1 ) {
 			return;
 		}
 		// phpcs:enable WordPress.Security.NonceVerification

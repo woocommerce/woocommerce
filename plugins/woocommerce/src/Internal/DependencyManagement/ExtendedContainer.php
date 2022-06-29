@@ -109,7 +109,7 @@ class ExtendedContainer extends BaseContainer {
 	 * @throws ContainerException Attempt to get an instance of a non-namespaced class.
 	 */
 	public function get( $id, bool $new = false ) {
-		if ( false === strpos( $id, '\\' ) ) {
+		if ( strpos( $id, '\\' ) === false ) {
 			throw new ContainerException( "Attempt to get an instance of the non-namespaced class '$id' from the container, did you forget to add a namespace import?" );
 		}
 

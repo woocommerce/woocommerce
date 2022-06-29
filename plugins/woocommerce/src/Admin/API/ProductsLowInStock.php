@@ -91,7 +91,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 */
 	protected function set_last_order_date( $results = array() ) {
 		global $wpdb;
-		if ( 0 === count( $results ) ) {
+		if ( count( $results ) === 0 ) {
 			return $results;
 		}
 
@@ -179,7 +179,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	protected function is_using_sitewide_stock_threshold_only() {
 		global $wpdb;
 		$count = $wpdb->get_var( "select count(*) as total from {$wpdb->postmeta} where meta_key='_low_stock_amount'" );
-		return 0 === (int) $count;
+		return (int) $count === 0;
 	}
 
 	/**
@@ -208,7 +208,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'name'             => $query_result->post_title,
 			'parent_id'        => (int) $query_result->post_parent,
 			'stock_quantity'   => (int) $query_result->stock_quantity,
-			'type'             => 'product_variation' === $query_result->post_type ? 'variation' : 'simple',
+			'type'             => $query_result->post_type === 'product_variation' ? 'variation' : 'simple',
 		);
 	}
 

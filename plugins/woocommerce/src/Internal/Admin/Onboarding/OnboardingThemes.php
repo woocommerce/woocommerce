@@ -59,7 +59,7 @@ class OnboardingThemes {
 	public static function get_paid_theme_by_slug( $slug ) {
 		$themes    = self::get_themes();
 		$theme_key = array_search( $slug, array_column( $themes, 'slug' ), true );
-		$theme     = false !== $theme_key ? $themes[ $theme_key ] : null;
+		$theme     = $theme_key !== false ? $themes[ $theme_key ] : null;
 		if ( $theme && isset( $theme['id'] ) && isset( $theme['price'] ) ) {
 			$price = self::get_price_from_string( $theme['price'] );
 			if ( $price && $price > 0 ) {
@@ -86,7 +86,7 @@ class OnboardingThemes {
 					return 1;
 				}
 				if ( in_array( 'Storefront', array( $product_1->slug, $product_2->slug ), true ) ) {
-					return 'Storefront' === $product_1->slug ? -1 : 1;
+					return $product_1->slug === 'Storefront' ? -1 : 1;
 				}
 				return $product_1->id < $product_2->id ? 1 : -1;
 			}
@@ -101,7 +101,7 @@ class OnboardingThemes {
 	 */
 	public static function get_themes() {
 		$themes = get_transient( self::THEMES_TRANSIENT );
-		if ( false === $themes ) {
+		if ( $themes === false ) {
 			$theme_data = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes' );
 			$themes     = array();
 
@@ -212,7 +212,7 @@ class OnboardingThemes {
 		foreach ( $themes as $theme ) {
 			$price = preg_replace( '/&#?[a-z0-9]+;/i', '', $theme['price'] );
 
-			if ( $theme['is_installed'] || '0.00' === $price ) {
+			if ( $theme['is_installed'] || $price === '0.00' ) {
 				$allowed_themes[] = $theme['slug'];
 			}
 		}

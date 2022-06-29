@@ -68,7 +68,7 @@ class Events {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( null === static::$instance ) {
+		if ( static::$instance === null ) {
 			static::$instance = new static();
 		}
 		return static::$instance;
@@ -196,7 +196,7 @@ class Events {
 		}
 
 		// Check if the site has opted out of marketplace suggestions.
-		if ( 'yes' !== get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) !== 'yes' ) {
 			return false;
 		}
 
@@ -211,7 +211,7 @@ class Events {
 	 */
 	protected function is_merchant_email_notifications_enabled() {
 		// Check if the feature flag is disabled.
-		if ( 'yes' !== get_option( 'woocommerce_merchant_email_notifications', 'no' ) ) {
+		if ( get_option( 'woocommerce_merchant_email_notifications', 'no' ) !== 'yes' ) {
 			return false;
 		}
 

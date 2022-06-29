@@ -81,12 +81,12 @@ class UI {
 	 * Renders the UI.
 	 */
 	public function render() {
-		if ( null === $this->table || ! $this->is_download_urls_screen() ) {
+		if ( $this->table === null || ! $this->is_download_urls_screen() ) {
 			return;
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_REQUEST['action'] ) && 'edit' === $_REQUEST['action'] && isset( $_REQUEST['url'] ) ) {
+		if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] === 'edit' && isset( $_REQUEST['url'] ) ) {
 			$this->edit_screen( (int) $_REQUEST['url'] );
 			return;
 		}
@@ -109,9 +109,9 @@ class UI {
 	private function is_download_urls_screen(): bool {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		return isset( $_GET['tab'] )
-			&& 'products' === $_GET['tab']
+			&& $_GET['tab'] === 'products'
 			&& isset( $_GET['section'] )
-			&& 'download_urls' === $_GET['section'];
+			&& $_GET['section'] === 'download_urls';
 		// phpcs:enable
 	}
 
@@ -202,7 +202,7 @@ class UI {
 		$redirect_url = add_query_arg( 'id', $url_id, $this->table->get_action_url( 'edit', $url_id ) );
 
 		try {
-			$upserted = 0 === $url_id
+			$upserted = $url_id === 0
 				? $this->register->add_approved_directory( $url, $enabled )
 				: $this->register->update_approved_directory( $url_id, $url, $enabled );
 
@@ -210,7 +210,7 @@ class UI {
 				$redirect_url = add_query_arg( 'url', $upserted, $redirect_url );
 			}
 
-			$redirect_url = add_query_arg( 'edit-status', 0 === $url_id ? 'added' : 'updated', $redirect_url );
+			$redirect_url = add_query_arg( 'edit-status', $url_id === 0 ? 'added' : 'updated', $redirect_url );
 		} catch ( Exception $e ) {
 			$redirect_url = add_query_arg(
 				array(
@@ -240,11 +240,11 @@ class UI {
 		$register = wc_get_container()->get( Register::class );
 
 		foreach ( $ids as $id ) {
-			if ( 'delete' === $action && $register->delete_by_id( $id ) ) {
+			if ( $action === 'delete' && $register->delete_by_id( $id ) ) {
 				$deletes++;
-			} elseif ( 'enable' === $action && $register->enable_by_id( $id ) ) {
+			} elseif ( $action === 'enable' && $register->enable_by_id( $id ) ) {
 				$enabled++;
-			} elseif ( 'disable' === $action && $register->disable_by_id( $id ) ) {
+			} elseif ( $action === 'disable' && $register->disable_by_id( $id ) ) {
 				$disabled ++;
 			}
 		}
@@ -335,7 +335,7 @@ class UI {
 		$this->security_check();
 		$existing = $this->register->get_by_id( $url_id );
 
-		if ( 0 !== $url_id && ! $existing ) {
+		if ( $url_id !== 0 && ! $existing ) {
 			WC_Admin_Settings::add_error( _x( 'The provided ID was invalid.', 'Approved product download directories', 'woocommerce' ) );
 			WC_Admin_Settings::show_messages();
 			return;
@@ -432,15 +432,15 @@ class UI {
 			);
 		}
 
-		if ( 'added' === $edit_status ) {
+		if ( $edit_status === 'added' ) {
 			WC_Admin_Settings::add_message( __( 'URL was successfully added.', 'woocommerce' ) );
 		}
 
-		if ( 'updated' === $edit_status ) {
+		if ( $edit_status === 'updated' ) {
 			WC_Admin_Settings::add_message( __( 'URL was successfully updated.', 'woocommerce' ) );
 		}
 
-		if ( 'failure' === $edit_status && ! empty( $edit_url ) ) {
+		if ( $edit_status === 'failure' && ! empty( $edit_url ) ) {
 			WC_Admin_Settings::add_error(
 				sprintf(
 					/* translators: %s is the submitted URL. */

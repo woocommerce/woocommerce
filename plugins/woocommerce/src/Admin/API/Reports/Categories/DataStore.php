@@ -128,9 +128,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_by_clause = $this->add_order_by_clause( $query_args, $this );
 		$this->add_orderby_order_clause( $query_args, $this );
 
-		if ( false !== strpos( $order_by_clause, '_terms' ) ) {
+		if ( strpos( $order_by_clause, '_terms' ) !== false ) {
 			$join = "JOIN {$wpdb->terms} AS _terms ON {$id_cell_identifier} = _terms.term_id";
-			if ( 'inner' === $from_arg ) {
+			if ( $from_arg === 'inner' ) {
 				// Even though this is an (inner) JOIN, we're adding it as a `left_join` to
 				// affect its order in the query statement. The SqlQuery::$sql_filters variable
 				// determines the order in which joins are concatenated.
@@ -149,10 +149,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return 'time_interval';
 		}
-		if ( 'category' === $order_by ) {
+		if ( $order_by === 'category' ) {
 			return '_terms.name';
 		}
 		return $order_by;
@@ -233,7 +233,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -271,7 +271,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			);
 
-			if ( null === $categories_data ) {
+			if ( $categories_data === null ) {
 				return new \WP_Error( 'woocommerce_analytics_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 

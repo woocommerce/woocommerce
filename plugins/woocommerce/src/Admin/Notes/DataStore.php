@@ -70,7 +70,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		$note_row = false;
 
 		$note_id = $note->get_id();
-		if ( 0 !== $note_id || '0' !== $note_id ) {
+		if ( $note_id !== 0 || $note_id !== '0' ) {
 			$note_row = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT * FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
@@ -79,7 +79,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			);
 		}
 
-		if ( 0 === $note->get_id() || '0' === $note->get_id() ) {
+		if ( $note->get_id() === 0 || $note->get_id() === '0' ) {
 			$this->read_actions( $note );
 			$note->set_object_read( true );
 
@@ -346,7 +346,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		// sanitize order and orderby.
 		$order_by  = '`' . str_replace( '`', '', $args['orderby'] ) . '`';
-		$order_dir = 'asc' === strtolower( $args['order'] ) ? 'ASC' : 'DESC';
+		$order_dir = strtolower( $args['order'] ) === 'asc' ? 'ASC' : 'DESC';
 
 		$query = $wpdb->prepare(
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -378,7 +378,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		// sanitize order and orderby.
 		$order_by  = '`' . str_replace( '`', '', $args['orderby'] ) . '`';
-		$order_dir = 'asc' === strtolower( $args['order'] ) ? 'ASC' : 'DESC';
+		$order_dir = strtolower( $args['order'] ) === 'asc' ? 'ASC' : 'DESC';
 
 		$query = "SELECT * FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$order_by} {$order_dir}";
 

@@ -49,7 +49,7 @@ class WooCommercePayments {
 	 * Maybe add a note on WooCommerce Payments for US based sites older than a week without the plugin installed.
 	 */
 	public static function possibly_add_note() {
-		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) || 'US' !== WC()->countries->get_base_country() ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) || WC()->countries->get_base_country() !== 'US' ) {
 			return;
 		}
 
@@ -61,12 +61,12 @@ class WooCommercePayments {
 
 			$note_id = array_pop( $note_ids );
 			$note    = Notes::get_note( $note_id );
-			if ( false === $note ) {
+			if ( $note === false ) {
 				return;
 			}
 
 			// If the WooCommerce Payments plugin was installed after the note was created, make sure it's marked as actioned.
-			if ( self::is_installed() && Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {
+			if ( self::is_installed() && $note->get_status() !== Note::E_WC_ADMIN_NOTE_ACTIONED ) {
 				$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
 				$note->save();
 			}
@@ -138,7 +138,7 @@ class WooCommercePayments {
 			return true;
 		}
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
-		return 0 === validate_plugin( self::PLUGIN_FILE );
+		return validate_plugin( self::PLUGIN_FILE ) === 0;
 	}
 
 	/**
@@ -172,9 +172,9 @@ class WooCommercePayments {
 		// TODO: Need to validate this request more strictly since we're taking install actions directly?
 		if (
 			! isset( $_GET['page'] ) ||
-			'wc-admin' !== $_GET['page'] ||
+			$_GET['page'] !== 'wc-admin' ||
 			! isset( $_GET['action'] ) ||
-			'setup-woocommerce-payments' !== $_GET['action']
+			$_GET['action'] !== 'setup-woocommerce-payments'
 		) {
 			return;
 		}
@@ -189,7 +189,7 @@ class WooCommercePayments {
 
 		$note_id = array_pop( $note_ids );
 		$note    = Notes::get_note( $note_id );
-		if ( false === $note ) {
+		if ( $note === false ) {
 			return;
 		}
 		$action = $note->get_action( 'get-started' );

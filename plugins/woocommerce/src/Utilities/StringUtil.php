@@ -68,9 +68,9 @@ final class StringUtil {
 	 */
 	public static function contains( string $string, string $contained, bool $case_sensitive = true ): bool {
 		if ( $case_sensitive ) {
-			return false !== strpos( $string, $contained );
+			return strpos( $string, $contained ) !== false;
 		} else {
-			return false !== stripos( $string, $contained );
+			return stripos( $string, $contained ) !== false;
 		}
 	}
 }

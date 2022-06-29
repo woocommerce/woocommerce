@@ -151,7 +151,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 
 		foreach ( $taxonomy_attributes as $attribute_obj ) {
 			// Skip taxonomy attributes that didn't match the query.
-			if ( false === stripos( $attribute_obj->attribute_label, $search_string ) ) {
+			if ( stripos( $attribute_obj->attribute_label, $search_string ) === false ) {
 				continue;
 			}
 

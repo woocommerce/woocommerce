@@ -135,9 +135,9 @@ class CouponPageMoved {
 		/* phpcs:disable WordPress.Security.NonceVerification */
 		if (
 			! isset( $_GET['page'] ) ||
-			'wc-admin' !== $_GET['page'] ||
+			$_GET['page'] !== 'wc-admin' ||
 			! isset( $_GET['action'] ) ||
-			'remove-coupon-menu' !== $_GET['action'] ||
+			$_GET['action'] !== 'remove-coupon-menu' ||
 			! defined( 'WC_ADMIN_PLUGIN_FILE' )
 		) {
 			return;

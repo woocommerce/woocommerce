@@ -242,7 +242,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 		$existing_records = array_filter(
 			$existing_records,
 			function( $record_data ) {
-				return '1' === $record_data->modified;
+				return $record_data->modified === '1';
 			}
 		);
 		$to_update        = array_intersect_key( $data['data'], $existing_records );
@@ -255,7 +255,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
 	 */
 	private function process_insert_batch( array $batch ): void {
-		if ( 0 === count( $batch ) ) {
+		if ( count( $batch ) === 0 ) {
 			return;
 		}
 
@@ -272,7 +272,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 * @param array $ids_mapping Maps rows to update data with their original IDs.
 	 */
 	private function process_update_batch( array $batch, array $ids_mapping ): void {
-		if ( 0 === count( $batch ) ) {
+		if ( count( $batch ) === 0 ) {
 			return;
 		}
 
@@ -368,7 +368,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			}
 			$modified_selector[] =
 				"IFNULL(source.$column_name,CHAR(0)) != IFNULL(destination.{$mapping['destination']},CHAR(0))"
-				. ( 'string' === $mapping['type'] ? ' COLLATE ' . $wpdb->collate : '' );
+				. ( $mapping['type'] === 'string' ? ' COLLATE ' . $wpdb->collate : '' );
 		}
 
 		if ( empty( $modified_selector ) ) {
@@ -573,7 +573,7 @@ WHERE
 				break;
 			case 'date':
 				try {
-					if ( '' === $value ) {
+					if ( $value === '' ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( $value ) )->format( 'Y-m-d H:i:s' );
@@ -584,7 +584,7 @@ WHERE
 				break;
 			case 'date_epoch':
 				try {
-					if ( '' === $value ) {
+					if ( $value === '' ) {
 						$value = null;
 					} else {
 						$value = ( new \DateTime( "@$value" ) )->format( 'Y-m-d H:i:s' );
@@ -778,23 +778,23 @@ WHERE $where_clause
 	 */
 	private function pre_process_row( $row, $schema, $alias, $destination_alias ) {
 		if ( in_array( $schema['type'], array( 'int', 'decimal' ), true ) ) {
-			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
+			if ( $row[ $alias ] === '' || $row[ $alias ] === null ) {
 				$row[ $alias ] = 0; // $wpdb->prepare forces empty values to 0.
 			}
 			$row[ $alias ]             = wc_format_decimal( $row[ $alias ], false, true );
 			$row[ $destination_alias ] = wc_format_decimal( $row[ $destination_alias ], false, true );
 		}
-		if ( 'bool' === $schema['type'] ) {
+		if ( $schema['type'] === 'bool' ) {
 			$row[ $alias ]             = wc_string_to_bool( $row[ $alias ] );
 			$row[ $destination_alias ] = wc_string_to_bool( $row[ $destination_alias ] );
 		}
-		if ( 'date_epoch' === $schema['type'] ) {
-			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
+		if ( $schema['type'] === 'date_epoch' ) {
+			if ( $row[ $alias ] === '' || $row[ $alias ] === null ) {
 				$row[ $alias ] = null;
 			} else {
 				$row[ $alias ] = ( new \DateTime( "@{$row[ $alias ]}" ) )->format( 'Y-m-d H:i:s' );
 			}
-			if ( '0000-00-00 00:00:00' === $row[ $destination_alias ] ) {
+			if ( $row[ $destination_alias ] === '0000-00-00 00:00:00' ) {
 				$row[ $destination_alias ] = null;
 			}
 		}

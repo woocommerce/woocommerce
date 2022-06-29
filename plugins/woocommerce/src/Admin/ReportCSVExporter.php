@@ -199,7 +199,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		if ( isset( $report_schema['properties'] ) ) {
 			foreach ( $report_schema['properties'] as $column_name => $column_info ) {
 				// Expand extended info columns into export.
-				if ( 'extended_info' === $column_name ) {
+				if ( $column_name === 'extended_info' ) {
 					// Remove columns with questionable CSV values, like markup.
 					$extended_info  = array_diff( array_keys( $column_info ), array( 'image' ) );
 					$report_columns = array_merge( $report_columns, $extended_info );

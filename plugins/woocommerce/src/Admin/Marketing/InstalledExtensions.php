@@ -99,7 +99,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/automatewoo.svg';
 
-		if ( 'activated' === $data['status'] && function_exists( 'AW' ) ) {
+		if ( $data['status'] === 'activated' && function_exists( 'AW' ) ) {
 			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings' );
 			$data['docsUrl']     = 'https://automatewoo.com/docs/';
 			$data['status']      = 'configured'; // Currently no configuration step.
@@ -123,7 +123,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/mailchimp.svg';
 
-		if ( 'activated' === $data['status'] && function_exists( 'mailchimp_is_configured' ) ) {
+		if ( $data['status'] === 'activated' && function_exists( 'mailchimp_is_configured' ) ) {
 			$data['docsUrl']     = 'https://mailchimp.com/help/connect-or-disconnect-mailchimp-for-woocommerce/';
 			$data['settingsUrl'] = admin_url( 'admin.php?page=mailchimp-woocommerce' );
 
@@ -150,7 +150,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook.svg';
 
-		if ( 'activated' === $data['status'] && function_exists( 'facebook_for_woocommerce' ) ) {
+		if ( $data['status'] === 'activated' && function_exists( 'facebook_for_woocommerce' ) ) {
 			$integration = facebook_for_woocommerce()->get_integration();
 
 			if ( $integration->is_configured() ) {
@@ -182,7 +182,7 @@ class InstalledExtensions {
 		// TODO: Finalise docs url.
 		$data['docsUrl'] = 'https://woocommerce.com/document/pinterest-for-woocommerce/?utm_medium=product';
 
-		if ( 'activated' === $data['status'] && class_exists( 'Pinterest_For_Woocommerce' ) ) {
+		if ( $data['status'] === 'activated' && class_exists( 'Pinterest_For_Woocommerce' ) ) {
 			$pinterest_onboarding_completed = Pinterest_For_Woocommerce()::is_setup_complete();
 			if ( $pinterest_onboarding_completed ) {
 				$data['status']      = 'configured';
@@ -210,7 +210,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/google.svg';
 
-		if ( 'activated' === $data['status'] && function_exists( 'woogle_get_container' ) && class_exists( '\Automattic\WooCommerce\GoogleListingsAndAds\MerchantCenter\MerchantCenterService' ) ) {
+		if ( $data['status'] === 'activated' && function_exists( 'woogle_get_container' ) && class_exists( '\Automattic\WooCommerce\GoogleListingsAndAds\MerchantCenter\MerchantCenterService' ) ) {
 
 			$merchant_center = woogle_get_container()->get( \Automattic\WooCommerce\GoogleListingsAndAds\MerchantCenter\MerchantCenterService::class );
 
@@ -242,7 +242,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/hubspot.svg';
 
-		if ( 'activated' === $data['status'] && class_exists( '\Hubwoo' ) ) {
+		if ( $data['status'] === 'activated' && class_exists( '\Hubwoo' ) ) {
 
 			// Use same check as HubWoo admin.
 			if ( \Hubwoo::is_setup_completed() ) {
@@ -271,7 +271,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/amazon-ebay.svg';
 
-		if ( 'activated' === $data['status'] && class_exists( '\CodistoConnect' ) ) {
+		if ( $data['status'] === 'activated' && class_exists( '\CodistoConnect' ) ) {
 
 			$codisto_merchantid = get_option( 'codisto_merchantid' );
 
@@ -302,7 +302,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/mailpoet.svg';
 
-		if ( 'activated' === $data['status'] && class_exists( '\MailPoet\API\API' ) ) {
+		if ( $data['status'] === 'activated' && class_exists( '\MailPoet\API\API' ) ) {
 			$mailpoet_api = \MailPoet\API\API::MP( 'v1' );
 
 			if ( ! method_exists( $mailpoet_api, 'isSetupComplete' ) || $mailpoet_api->isSetupComplete() ) {

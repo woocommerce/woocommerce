@@ -114,7 +114,7 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 		$fav_id  = $request->get_param( 'item_id' );
 		$user    = get_userdata( $user_id );
 
-		if ( false === $user ) {
+		if ( $user === false ) {
 			return $this->prepare_error(
 				new \WP_Error(
 					'woocommerce_favorites_invalid_user',

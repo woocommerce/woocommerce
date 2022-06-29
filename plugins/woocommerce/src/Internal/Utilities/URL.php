@@ -109,7 +109,7 @@ class URL {
 		$parsed_components = wp_parse_url( $this->url );
 
 		// If we received a really badly formed URL, let's go no further.
-		if ( false === $parsed_components ) {
+		if ( $parsed_components === false ) {
 			throw new URLException(
 				sprintf(
 				/* translators: %s is the URL. */
@@ -123,9 +123,9 @@ class URL {
 
 		// File URLs cannot have a host. However, the initial path segment *or* the Windows drive letter
 		// (if present) may be incorrectly be interpreted as the host name.
-		if ( 'file' === $this->components['scheme'] && ! empty( $this->components['host'] ) ) {
+		if ( $this->components['scheme'] === 'file' && ! empty( $this->components['host'] ) ) {
 			// If we do not have a drive letter, then simply merge the host and the path together.
-			if ( null === $this->components['drive'] ) {
+			if ( $this->components['drive'] === null ) {
 				$this->components['path'] = $this->components['host'] . ( $this->components['path'] ?? '' );
 			}
 
@@ -142,13 +142,13 @@ class URL {
 		$segments                    = explode( '/', $this->components['path'] );
 		$this->is_absolute           = substr( $this->components['path'], 0, 1 ) === '/' || ! empty( $this->components['host'] );
 		$this->is_non_root_directory = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
-		$resolve_traversals          = 'file' !== $this->components['scheme'] || $this->is_absolute;
+		$resolve_traversals          = $this->components['scheme'] !== 'file' || $this->is_absolute;
 		$retain_traversals           = false;
 
 		// Clean the path.
 		foreach ( $segments as $part ) {
 			// Drop empty segments.
-			if ( strlen( $part ) === 0 || '.' === $part ) {
+			if ( strlen( $part ) === 0 || $part === '.' ) {
 				continue;
 			}
 
@@ -175,7 +175,7 @@ class URL {
 			 *    never wish to do this more than once.
 			 * 3. We only flip the switch after we have examined all leading '..' traversal segments.
 			 */
-			if ( false === $resolve_traversals && '..' !== $part && 'file' === $this->components['scheme'] && ! $this->is_absolute ) {
+			if ( $resolve_traversals === false && $part !== '..' && $this->components['scheme'] === 'file' && ! $this->is_absolute ) {
 				$resolve_traversals = true;
 			}
 
@@ -183,7 +183,7 @@ class URL {
 			 * Set a flag indicating that traversals should be retained. This is done to ensure we don't prematurely
 			 * discard traversals at the start of the path.
 			 */
-			$retain_traversals = $resolve_traversals && '..' === $part;
+			$retain_traversals = $resolve_traversals && $part === '..';
 
 			// Retain this part of the path.
 			$this->path_parts[] = $part;
@@ -223,7 +223,7 @@ class URL {
 		 * then we should only return one parent URL (otherwise, we'd potentially have to return an infinite
 		 * number of parent URLs since we can't know how far the tree extends).
 		 */
-		if ( $max_parent > 0 && ! $this->is_absolute && '..' === $this->path_parts[0] ) {
+		if ( $max_parent > 0 && ! $this->is_absolute && $this->path_parts[0] === '..' ) {
 			$max_parent = 1;
 		}
 
@@ -264,18 +264,18 @@ class URL {
 		 * us to describe them using directory traversals. For example, given "http://hostname/foo/bar/baz.png" we do
 		 * not permit determining anything more than 2 levels up (we cannot go beyond "http://hostname/").
 		 */
-		if ( 'file' !== $this->components['scheme'] && $parent_path_parts_to_keep < 0 ) {
+		if ( $this->components['scheme'] !== 'file' && $parent_path_parts_to_keep < 0 ) {
 			return false;
 		}
 
 		// In the specific case of an absolute filepath describing the root directory, there can be no parent.
-		if ( 'file' === $this->components['scheme'] && $this->is_absolute && empty( $this->path_parts ) ) {
+		if ( $this->components['scheme'] === 'file' && $this->is_absolute && empty( $this->path_parts ) ) {
 			return false;
 		}
 
 		// Handle cases where the path starts with one or more 'dot segments'. Since the path has already been
 		// processed, we can be confident that any such segments are at the start of the path.
-		if ( $parts_count > 0 && ( '.' === $this->path_parts[0] || '..' === $this->path_parts[0] ) ) {
+		if ( $parts_count > 0 && ( $this->path_parts[0] === '.' || $this->path_parts[0] === '..' ) ) {
 			// Determine the index of the last dot segment (ex: given the path '/../../foo' it would be 1).
 			$single_dots   = array_keys( $this->path_parts, '.', true );
 			$double_dots   = array_keys( $this->path_parts, '..', true );
@@ -292,7 +292,7 @@ class URL {
 			$parent_path = implode( '/', array_slice( $this->path_parts, 0, $parent_path_parts_to_keep ) );
 		}
 
-		if ( $this->is_relative() && '' === $parent_path ) {
+		if ( $this->is_relative() && $parent_path === '' ) {
 			$parent_path = '.';
 		}
 
@@ -300,7 +300,7 @@ class URL {
 		$parent_path .= '/';
 
 		// For absolute paths, apply a leading slash (does not apply if we have a root path).
-		if ( $this->is_absolute && 0 !== strpos( $parent_path, '/' ) ) {
+		if ( $this->is_absolute && strpos( $parent_path, '/' ) !== 0 ) {
 			$parent_path = '/' . $parent_path;
 		}
 
@@ -329,22 +329,22 @@ class URL {
 	public function get_url( array $component_overrides = array() ): string {
 		$components = array_merge( $this->components, $component_overrides );
 
-		$scheme = null !== $components['scheme'] ? $components['scheme'] . '://' : '//';
-		$host   = null !== $components['host'] ? $components['host'] : '';
-		$port   = null !== $components['port'] ? ':' . $components['port'] : '';
+		$scheme = $components['scheme'] !== null ? $components['scheme'] . '://' : '//';
+		$host   = $components['host'] !== null ? $components['host'] : '';
+		$port   = $components['port'] !== null ? ':' . $components['port'] : '';
 		$path   = $this->get_path( $components['path'] );
 
 		// Special handling for hostless URLs (typically, filepaths) referencing the current working directory.
-		if ( '' === $host && ( '' === $path || '.' === $path ) ) {
+		if ( $host === '' && ( $path === '' || $path === '.' ) ) {
 			$path = './';
 		}
 
-		$user      = null !== $components['user'] ? $components['user'] : '';
-		$pass      = null !== $components['pass'] ? ':' . $components['pass'] : '';
+		$user      = $components['user'] !== null ? $components['user'] : '';
+		$pass      = $components['pass'] !== null ? ':' . $components['pass'] : '';
 		$user_pass = ( ! empty( $user ) || ! empty( $pass ) ) ? $user . $pass . '@' : '';
 
-		$query    = null !== $components['query'] ? '?' . $components['query'] : '';
-		$fragment = null !== $components['fragment'] ? '#' . $components['fragment'] : '';
+		$query    = $components['query'] !== null ? '?' . $components['query'] : '';
+		$fragment = $components['fragment'] !== null ? '#' . $components['fragment'] : '';
 
 		return $scheme . $user_pass . $host . $port . $path . $query . $fragment;
 	}

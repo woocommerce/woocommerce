@@ -94,7 +94,7 @@ class AdditionalPayments extends Payments {
 		$enabled_gateways = array_filter(
 			$gateways,
 			function( $gateway ) {
-				return 'yes' === $gateway->enabled && 'woocommerce_payments' !== $gateway->id;
+				return $gateway->enabled === 'yes' && $gateway->id !== 'woocommerce_payments';
 			}
 		);
 

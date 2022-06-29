@@ -555,7 +555,7 @@ class Loader {
 	 * @param int $post_id The deleted post id.
 	 */
 	public static function delete_homepage( $post_id ) {
-		if ( 'page' !== get_post_type( $post_id ) ) {
+		if ( get_post_type( $post_id ) !== 'page' ) {
 			return;
 		}
 		$homepage_id = intval( get_option( 'woocommerce_onboarding_homepage_post_id', false ) );

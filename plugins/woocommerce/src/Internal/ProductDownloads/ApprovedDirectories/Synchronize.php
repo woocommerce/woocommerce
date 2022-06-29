@@ -118,7 +118,7 @@ class Synchronize {
 	 * @return bool
 	 */
 	public function start(): bool {
-		if ( null !== $this->queue->get_next( self::SYNC_TASK ) ) {
+		if ( $this->queue->get_next( self::SYNC_TASK ) !== null ) {
 			wc_get_logger()->log( 'warning', __( 'Synchronization of approved product download directories is already in progress.', 'woocommerce' ) );
 			return false;
 		}
@@ -226,7 +226,7 @@ class Synchronize {
 				 *
 				 * @param bool $should_validate
 				 */
-				if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $downloadable->get_type_of_file_path() ) {
+				if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && $downloadable->get_type_of_file_path() === 'shortcode' ) {
 					$download_file = do_shortcode( $download_file );
 				}
 

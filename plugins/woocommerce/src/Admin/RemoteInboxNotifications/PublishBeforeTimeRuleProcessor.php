@@ -19,7 +19,7 @@ class PublishBeforeTimeRuleProcessor implements RuleProcessorInterface {
 	 * @param DateTimeProviderInterface $date_time_provider The DateTime provider.
 	 */
 	public function __construct( $date_time_provider = null ) {
-		$this->date_time_provider = null === $date_time_provider
+		$this->date_time_provider = $date_time_provider === null
 			? new CurrentDateTimeProvider()
 			: $date_time_provider;
 	}

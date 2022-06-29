@@ -85,7 +85,7 @@ class DataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
 			return false;
 		}
 
-		if ( null === SpecRunner::get_locale( $spec->locales ) ) {
+		if ( SpecRunner::get_locale( $spec->locales ) === null ) {
 			$logger->error(
 				'Spec is invalid because the locale could not be retrieved in feed',
 				$logger_context
@@ -180,7 +180,7 @@ class DataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
 			return false;
 		}
 
-		if ( null === SpecRunner::get_action_locale( $action->locales ) ) {
+		if ( SpecRunner::get_action_locale( $action->locales ) === null ) {
 			$logger->error(
 				'Action is invalid because the locale could not be retrieved in feed',
 				$logger_context

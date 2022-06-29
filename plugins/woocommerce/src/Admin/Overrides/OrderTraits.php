@@ -25,7 +25,7 @@ trait OrderTraits {
 		// distributed simply based on number of line items.
 		$product_qty = $item->get_quantity( 'edit' );
 		$order_items = $this->get_item_count();
-		if ( 0 === $order_items ) {
+		if ( $order_items === 0 ) {
 			return 0;
 		}
 
@@ -47,7 +47,7 @@ trait OrderTraits {
 	 */
 	public function get_item_shipping_tax_amount( $item ) {
 		$order_items = $this->get_item_count();
-		if ( 0 === $order_items ) {
+		if ( $order_items === 0 ) {
 			return 0;
 		}
 

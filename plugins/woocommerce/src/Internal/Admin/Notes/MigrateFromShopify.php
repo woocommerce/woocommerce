@@ -55,8 +55,8 @@ class MigrateFromShopify {
 
 		// We will show the notification when the client already is selling and is using Shopify.
 		if (
-			'other' !== $onboarding_profile['selling_venues'] ||
-			'shopify' !== $onboarding_profile['other_platform']
+			$onboarding_profile['selling_venues'] !== 'other' ||
+			$onboarding_profile['other_platform'] !== 'shopify'
 		) {
 			return;
 		}

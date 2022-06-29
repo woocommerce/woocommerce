@@ -156,7 +156,7 @@ abstract class CustomMetaDataStore {
 			'%d'
 		);
 
-		return 1 === $result;
+		return $result === 1;
 	}
 
 	/**

@@ -61,7 +61,7 @@ class OnboardingHelper {
 		// Remove the old help tab if it exists.
 		$help_tabs = $screen->get_help_tabs();
 		foreach ( $help_tabs as $help_tab ) {
-			if ( 'woocommerce_onboard_tab' !== $help_tab['id'] ) {
+			if ( $help_tab['id'] !== 'woocommerce_onboard_tab' ) {
 				continue;
 			}
 
@@ -120,7 +120,7 @@ class OnboardingHelper {
 		if ( ! $task_list ) {
 			return;
 		}
-		$show   = 1 === absint( $_GET['reset_task_list'] ); // phpcs:ignore CSRF ok.
+		$show   = absint( $_GET['reset_task_list'] ) === 1; // phpcs:ignore CSRF ok.
 		$update = $show ? $task_list->unhide() : $task_list->hide(); // phpcs:ignore CSRF ok.
 
 		if ( $update ) {
@@ -152,7 +152,7 @@ class OnboardingHelper {
 		if ( ! $task_list ) {
 			return;
 		}
-		$show   = 1 === absint( $_GET['reset_extended_task_list'] ); // phpcs:ignore CSRF ok.
+		$show   = absint( $_GET['reset_extended_task_list'] ) === 1; // phpcs:ignore CSRF ok.
 		$update = $show ? $task_list->unhide() : $task_list->hide(); // phpcs:ignore CSRF ok.
 
 		if ( $update ) {

@@ -293,7 +293,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -331,7 +331,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$this->total_query->get_query_statement(),
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
-			if ( null === $totals ) {
+			if ( $totals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
@@ -376,7 +376,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$this->interval_query->add_sql_clause( 'select', ", MAX(${table_name}.date_created) AS datetime_anchor" );
-			if ( '' !== $selections ) {
+			if ( $selections !== '' ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
 			$intervals = $wpdb->get_results(
@@ -384,7 +384,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $intervals ) {
+			if ( $intervals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
@@ -474,7 +474,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
+		if ( get_post_type( $post_id ) !== 'shop_order' && get_post_type( $post_id ) !== 'shop_order_refund' ) {
 			return -1;
 		}
 
@@ -540,7 +540,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 		);
 
-		if ( 'shop_order_refund' === $order->get_type() ) {
+		if ( $order->get_type() === 'shop_order_refund' ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
 			if ( $parent_order ) {
 				$data['parent_id'] = $parent_order->get_id();
@@ -559,7 +559,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
 
 		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
-		return ( 1 === $result || 2 === $result );
+		return ( $result === 1 || $result === 2 );
 	}
 
 	/**
@@ -571,7 +571,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$order_id = (int) $post_id;
 
-		if ( 'shop_order' !== get_post_type( $order_id ) && 'shop_order_refund' !== get_post_type( $order_id ) ) {
+		if ( get_post_type( $order_id ) !== 'shop_order' && get_post_type( $order_id ) !== 'shop_order_refund' ) {
 			return;
 		}
 

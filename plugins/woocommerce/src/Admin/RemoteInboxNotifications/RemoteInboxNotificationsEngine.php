@@ -47,7 +47,7 @@ class RemoteInboxNotificationsEngine {
 					array( __CLASS__, 'run_on_woocommerce_admin_updated' ),
 					'woocommerce-remote-inbox-engine'
 				);
-				if ( null === $next_hook ) {
+				if ( $next_hook === null ) {
 					WC()->queue()->schedule_single(
 						time(),
 						'woocommerce_run_on_woocommerce_admin_updated',
@@ -108,7 +108,7 @@ class RemoteInboxNotificationsEngine {
 	public static function run() {
 		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
 
-		if ( false === $specs || 0 === count( $specs ) ) {
+		if ( $specs === false || count( $specs ) === 0 ) {
 			return;
 		}
 
@@ -141,7 +141,7 @@ class RemoteInboxNotificationsEngine {
 	public static function get_stored_state() {
 		$stored_state = get_option( self::STORED_STATE_OPTION_NAME );
 
-		if ( false === $stored_state ) {
+		if ( $stored_state === false ) {
 			$stored_state = new \stdClass();
 
 			$stored_state = StoredStateSetupForProducts::init_stored_state(

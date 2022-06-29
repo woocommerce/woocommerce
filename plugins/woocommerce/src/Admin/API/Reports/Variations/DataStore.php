@@ -97,14 +97,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function add_from_sql_params( $query_args, $arg_name ) {
 		global $wpdb;
 
-		if ( 'sku' !== $query_args['orderby'] ) {
+		if ( $query_args['orderby'] !== 'sku' ) {
 			return;
 		}
 
 		$table_name = self::get_db_table_name();
 		$join       = "LEFT JOIN {$wpdb->postmeta} AS postmeta ON {$table_name}.variation_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
 
-		if ( 'inner' === $arg_name ) {
+		if ( $arg_name === 'inner' ) {
 			$this->subquery->add_sql_clause( 'join', $join );
 		} else {
 			$this->add_sql_clause( 'join', $join );
@@ -216,10 +216,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return self::get_db_table_name() . '.date_created';
 		}
-		if ( 'sku' === $order_by ) {
+		if ( $order_by === 'sku' ) {
 			return 'meta_value';
 		}
 
@@ -244,7 +244,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				// This is caused by simple products with prior sales being converted into variable products.
 				// See: https://github.com/woocommerce/woocommerce-admin/issues/2719.
 				$variation_id      = (int) $product_data['variation_id'];
-				$variation_product = ( 0 === $variation_id ) ? $parent_product : wc_get_product( $variation_id );
+				$variation_product = ( $variation_id === 0 ) ? $parent_product : wc_get_product( $variation_id );
 
 				// Fall back to the parent product if the variation can't be found.
 				$extended_attributes_product = is_a( $variation_product, 'WC_Product' ) ? $variation_product : $parent_product;
@@ -282,7 +282,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$extended_info['attributes'] = $attributes;
 
 				// If there is no set low_stock_amount, use the one in user settings.
-				if ( '' === $extended_info['low_stock_amount'] ) {
+				if ( $extended_info['low_stock_amount'] === '' ) {
 					$extended_info['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 				}
 				$extended_info = $this->cast_numbers( $extended_info );
@@ -408,7 +408,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 
 			$data = (object) array(
@@ -433,7 +433,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$this->subquery->clear_sql_clause( 'select' );
 				$this->subquery->add_sql_clause( 'select', $selections );
 
-				if ( 'date' === $query_args['orderby'] ) {
+				if ( $query_args['orderby'] === 'date' ) {
 					$this->subquery->add_sql_clause( 'select', ", {$table_name}.date_created" );
 				}
 
@@ -482,7 +482,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 			/* phpcs:enable */
 
-			if ( null === $product_data ) {
+			if ( $product_data === null ) {
 				return $data;
 			}
 

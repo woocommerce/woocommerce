@@ -362,7 +362,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	public static function is_experiment_product_task() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',
@@ -386,7 +386,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$import = self::import_sample_products_from_csv( $template_path );
 
-		if ( is_wp_error( $import ) || 0 === count( $import['imported'] ) ) {
+		if ( is_wp_error( $import ) || count( $import['imported'] ) === 0 ) {
 			return new \WP_Error(
 				'woocommerce_rest_product_creation_error',
 				/* translators: %s is template name */
@@ -502,8 +502,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Block content.
 	 */
 	private static function get_homepage_media_block( $image, $align = 'left' ) {
-		$media_position = 'right' === $align ? '"mediaPosition":"right",' : '';
-		$css_class      = 'right' === $align ? ' has-media-on-the-right' : '';
+		$media_position = $align === 'right' ? '"mediaPosition":"right",' : '';
+		$css_class      = $align === 'right' ? ' has-media-on-the-right' : '';
 
 		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
 			return '<!-- wp:media-text {' . $media_position . '"mediaId":' . intval( $image['id'] ) . ',"mediaType":"image"} -->
@@ -695,7 +695,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			update_option( 'woocommerce_onboarding_homepage_post_id', $post_id );
 
 			// Use the full width template on stores using Storefront.
-			if ( 'storefront' === get_stylesheet() ) {
+			if ( get_stylesheet() === 'storefront' ) {
 				update_post_meta( $post_id, '_wp_page_template', 'template-fullwidth.php' );
 			}
 

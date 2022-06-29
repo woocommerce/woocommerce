@@ -162,12 +162,12 @@ class PageController {
 		$current_page = $this->get_current_page();
 
 		// Bail if this isn't a page registered with this controller.
-		if ( false === $current_page ) {
+		if ( $current_page === false ) {
 			// Filter documentation below.
 			return apply_filters( 'woocommerce_navigation_get_breadcrumbs', array( '' ), $current_page );
 		}
 
-		if ( 1 === count( $current_page['title'] ) ) {
+		if ( count( $current_page['title'] ) === 1 ) {
 			$breadcrumbs = $current_page['title'];
 		} else {
 			// If this page has multiple title pieces, only link the first one.
@@ -186,7 +186,7 @@ class PageController {
 				if ( isset( $this->pages[ $parent_id ] ) ) {
 					$parent = $this->pages[ $parent_id ];
 
-					if ( 0 === strpos( $parent['path'], self::PAGE_ROOT ) ) {
+					if ( strpos( $parent['path'], self::PAGE_ROOT ) === 0 ) {
 						$parent['path'] = 'admin.php?page=' . $parent['path'];
 					}
 
@@ -262,10 +262,10 @@ class PageController {
 		if (
 			! empty( $current_screen->taxonomy ) &&
 			isset( $current_screen->post_type ) &&
-			'product' === $current_screen->post_type
+			$current_screen->post_type === 'product'
 		) {
 			// Editing a product attribute.
-			if ( 0 === strpos( $current_screen->taxonomy, 'pa_' ) ) {
+			if ( strpos( $current_screen->taxonomy, 'pa_' ) === 0 ) {
 				$screen_pieces = array( 'product_page_product_attribute-edit' );
 			}
 
@@ -330,7 +330,7 @@ class PageController {
 				}
 
 				// Editing a shipping zone.
-				if ( ( 'shipping' === $tab ) && isset( $_GET['zone_id'] ) ) {
+				if ( ( $tab === 'shipping' ) && isset( $_GET['zone_id'] ) ) {
 					$screen_pieces[] = 'edit_zone';
 				}
 			}
@@ -368,7 +368,7 @@ class PageController {
 	public function is_connected_page() {
 		$current_page = $this->get_current_page();
 
-		if ( false === $current_page ) {
+		if ( $current_page === false ) {
 			$is_connected_page = false;
 		} else {
 			$is_connected_page = isset( $current_page['js_page'] ) ? ! $current_page['js_page'] : true;
@@ -399,7 +399,7 @@ class PageController {
 	public function is_registered_page() {
 		$current_page = $this->get_current_page();
 
-		if ( false === $current_page ) {
+		if ( $current_page === false ) {
 			$is_registered_page = false;
 		} else {
 			$is_registered_page = isset( $current_page['js_page'] ) && $current_page['js_page'];
@@ -446,7 +446,7 @@ class PageController {
 
 		$options = wp_parse_args( $options, $defaults );
 
-		if ( 0 !== strpos( $options['path'], self::PAGE_ROOT ) ) {
+		if ( strpos( $options['path'], self::PAGE_ROOT ) !== 0 ) {
 			$options['path'] = self::PAGE_ROOT . '&path=' . $options['path'];
 		}
 
@@ -527,7 +527,7 @@ class PageController {
 		$wc_admin_key = null;
 		foreach ( $submenu['woocommerce'] as $submenu_key => $submenu_item ) {
 			// Our app entry page menu item has no title.
-			if ( is_null( $submenu_item[0] ) && self::APP_ENTRY_POINT === $submenu_item[2] ) {
+			if ( is_null( $submenu_item[0] ) && $submenu_item[2] === self::APP_ENTRY_POINT ) {
 				$wc_admin_key = $submenu_key;
 				break;
 			}
@@ -553,7 +553,7 @@ class PageController {
 	 */
 	public static function is_admin_page() {
 		// phpcs:disable WordPress.Security.NonceVerification
-		return isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
+		return isset( $_GET['page'] ) && $_GET['page'] === 'wc-admin';
 		// phpcs:enable WordPress.Security.NonceVerification
 	}
 

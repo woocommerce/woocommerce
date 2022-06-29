@@ -304,7 +304,7 @@ class Segmenter extends ReportsSegmenter {
 		global $wpdb;
 		$segmenting_limit = '';
 		$limit_parts      = explode( ',', $intervals_query['limit'] );
-		if ( 2 === count( $limit_parts ) ) {
+		if ( count( $limit_parts ) === 2 ) {
 			$orig_rowcount    = intval( $limit_parts[1] );
 			$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
 		}
@@ -347,7 +347,7 @@ class Segmenter extends ReportsSegmenter {
 	 */
 	protected function get_segments( $type, $query_params, $table_name ) {
 		global $wpdb;
-		if ( ! isset( $this->query_args['segmentby'] ) || '' === $this->query_args['segmentby'] ) {
+		if ( ! isset( $this->query_args['segmentby'] ) || $this->query_args['segmentby'] === '' ) {
 			return array();
 		}
 
@@ -359,7 +359,7 @@ class Segmenter extends ReportsSegmenter {
 		// Product, variation, and category are bound to product, so here product segmenting table is required,
 		// while coupon and customer are bound to order, so we don't need the extra JOIN for those.
 		// This also means that segment selections need to be calculated differently.
-		if ( 'product' === $this->query_args['segmentby'] ) {
+		if ( $this->query_args['segmentby'] === 'product' ) {
 			// @todo How to handle shipping taxes when grouped by product?
 			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$order_level_columns       = $this->get_segment_selections_order_level( $unique_orders_table );
@@ -373,7 +373,7 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_dimension_name = 'product_id';
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
-		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'variation' ) {
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
 				throw new ParameterException( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'woocommerce' ) );
 			}
@@ -391,7 +391,7 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_dimension_name = 'variation_id';
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
-		} elseif ( 'category' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'category' ) {
 			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$order_level_columns       = $this->get_segment_selections_order_level( $unique_orders_table );
 			$segmenting_selections     = array(
@@ -410,7 +410,7 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_dimension_name = 'category_id';
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
-		} elseif ( 'coupon' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'coupon' ) {
 			// As there can be 2 or more coupons applied per one order, coupon amount needs to be split.
 			$coupon_override       = array(
 				'coupons' => 'SUM(coupon_lookup.discount_amount) AS coupons',
@@ -424,7 +424,7 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_groupby    = 'coupon_lookup.coupon_id';
 
 			$segments = $this->get_order_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params );
-		} elseif ( 'customer_type' === $this->query_args['segmentby'] ) {
+		} elseif ( $this->query_args['segmentby'] === 'customer_type' ) {
 			$customer_level_columns = $this->segment_selections_orders( $table_name );
 			$segmenting_selections  = $this->prepare_selections( $customer_level_columns );
 			$this->report_columns   = $customer_level_columns;

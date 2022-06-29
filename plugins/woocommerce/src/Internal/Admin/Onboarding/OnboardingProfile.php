@@ -59,8 +59,8 @@ class OnboardingProfile {
 	public static function needs_completion() {
 		$onboarding_data = get_option( self::DATA_OPTION, array() );
 
-		$is_completed = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
-		$is_skipped   = isset( $onboarding_data['skipped'] ) && true === $onboarding_data['skipped'];
+		$is_completed = isset( $onboarding_data['completed'] ) && $onboarding_data['completed'] === true;
+		$is_skipped   = isset( $onboarding_data['skipped'] ) && $onboarding_data['skipped'] === true;
 
 		// @todo When merging to WooCommerce Core, we should set the `completed` flag to true during the upgrade progress.
 		// https://github.com/woocommerce/woocommerce-admin/pull/2300#discussion_r287237498.

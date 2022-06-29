@@ -165,7 +165,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			// Allows a different admin page to be loaded here,
 			// or allows an empty url if no report exists for a set of performance indicators.
 			if ( ! isset( $report['url'] ) ) {
-				if ( '/stats' === substr( $report['slug'], -6 ) ) {
+				if ( substr( $report['slug'], -6 ) === '/stats' ) {
 					$url_slug = substr( $report['slug'], 0, -6 );
 				} else {
 					$url_slug = $report['slug'];
@@ -195,7 +195,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			return null;
 		}
 
-		if ( 'shop_order_refund' === $order->get_type() ) {
+		if ( $order->get_type() === 'shop_order_refund' ) {
 			$order = wc_get_order( $order->get_parent_id() );
 		}
 
@@ -220,7 +220,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			return null;
 		}
 
-		if ( 'shop_order_refund' === $order->get_type() ) {
+		if ( $order->get_type() === 'shop_order_refund' ) {
 			$order = wc_get_order( $order->get_parent_id() );
 		}
 

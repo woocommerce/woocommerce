@@ -19,7 +19,7 @@ class RuleEvaluator {
 	 * @param GetRuleProcessor $get_rule_processor The GetRuleProcessor to use.
 	 */
 	public function __construct( $get_rule_processor = null ) {
-		$this->get_rule_processor = null === $get_rule_processor
+		$this->get_rule_processor = $get_rule_processor === null
 			? new GetRuleProcessor()
 			: $get_rule_processor;
 	}
@@ -46,7 +46,7 @@ class RuleEvaluator {
 			$rules = array( $rules );
 		}
 
-		if ( 0 === count( $rules ) ) {
+		if ( count( $rules ) === 0 ) {
 			return false;
 		}
 

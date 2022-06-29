@@ -81,7 +81,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $data ) {
+		if ( $data === false ) {
 			$this->initialize_queries();
 			$selections = $this->selected_columns( $query_args );
 			$this->add_sql_query_params( $query_args );
@@ -116,14 +116,14 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 				$this->total_query->get_query_statement(),
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
-			if ( null === $totals ) {
+			if ( $totals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce' ) );
 			}
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$this->interval_query->add_sql_clause( 'select', ', MAX(timestamp) AS datetime_anchor' );
-			if ( '' !== $selections ) {
+			if ( $selections !== '' ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
 
@@ -132,7 +132,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $intervals ) {
+			if ( $intervals === null ) {
 				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce' ) );
 			}
 
@@ -167,7 +167,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
+		if ( $order_by === 'date' ) {
 			return 'time_interval';
 		}
 

@@ -26,7 +26,7 @@ class IsEcommerceRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function process( $rule, $stored_state ) {
 		if ( ! function_exists( 'wc_calypso_bridge_is_ecommerce_plan' ) ) {
-			return false === $rule->value;
+			return $rule->value === false;
 		}
 
 		return (bool) wc_calypso_bridge_is_ecommerce_plan() === $rule->value;

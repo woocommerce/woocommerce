@@ -39,7 +39,7 @@ class Cache {
 		$transient_name  = self::VERSION_OPTION . '-transient-version';
 		$transient_value = get_transient( $transient_name );
 
-		if ( false === $transient_value || true === $refresh ) {
+		if ( $transient_value === false || $refresh === true ) {
 			// Round to the nearest $minutes increment.
 			$minutes = 10;
 			$transient_value = (string) round( time() / ( MINUTE_IN_SECONDS * $minutes ) ) * ( MINUTE_IN_SECONDS * $minutes );

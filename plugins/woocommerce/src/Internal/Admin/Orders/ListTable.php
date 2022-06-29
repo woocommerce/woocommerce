@@ -63,7 +63,7 @@ class ListTable extends WP_List_Table {
 	 * @return mixed
 	 */
 	public function set_items_per_page( $default, string $option, int $value ) {
-		return 'edit_orders_per_page' === $option ? absint( $value ) : $default;
+		return $option === 'edit_orders_per_page' ? absint( $value ) : $default;
 	}
 
 	/**
@@ -190,7 +190,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$all_count         = array_sum( $view_counts );
-		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, 'all' === $current );
+		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, $current === 'all' );
 
 		foreach ( $view_counts as $slug => $count ) {
 			$view_links[ $slug ] = $this->get_view_link( $slug, $statuses[ $slug ], $count, $slug === $current );
@@ -247,7 +247,7 @@ class ListTable extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		echo '<div class="alignleft actions">';
 
-		if ( 'top' === $which ) {
+		if ( $which === 'top' ) {
 			$this->months_filter();
 			$this->customers_filter();
 
@@ -372,7 +372,7 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function default_hidden_columns( array $hidden, WP_Screen $screen ) {
-		if ( isset( $screen->id ) && 'woocommerce_page_wc-orders' === $screen->id ) {
+		if ( isset( $screen->id ) && $screen->id === 'woocommerce_page_wc-orders' ) {
 			$hidden = array_merge(
 				$hidden,
 				array(
@@ -491,7 +491,7 @@ class ListTable extends WP_List_Table {
 
 			$latest_note = current( $latest_notes );
 
-			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
+			if ( isset( $latest_note->content ) && $approved_comments_count === 1 ) {
 				$tooltip = wc_sanitize_tooltip( $latest_note->content );
 			} elseif ( isset( $latest_note->content ) ) {
 				/* translators: %d: notes count */

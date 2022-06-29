@@ -17,9 +17,9 @@ class Users {
 	 * @return bool
 	 */
 	public static function is_site_administrator( int $user_id = 0 ): bool {
-		$user = 0 === $user_id ? wp_get_current_user() : get_user_by( 'id', $user_id );
+		$user = $user_id === 0 ? wp_get_current_user() : get_user_by( 'id', $user_id );
 
-		if ( false === $user ) {
+		if ( $user === false ) {
 			return false;
 		}
 

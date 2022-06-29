@@ -155,7 +155,7 @@ class CustomersScheduler extends ImportScheduler {
 	 * @param string $meta_key Meta key being updated.
 	 */
 	public static function schedule_import_via_last_active( $meta_id, $user_id, $meta_key ) {
-		if ( 'wc_last_active' === $meta_key ) {
+		if ( $meta_key === 'wc_last_active' ) {
 			self::schedule_import( $user_id );
 		}
 	}
