@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Updates ternary expressions to simpler statements based on the null-coalescing operator where possible.
