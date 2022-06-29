@@ -6,7 +6,6 @@ import { difference } from 'lodash';
 import { useEffect, useState } from '@wordpress/element';
 import { Stepper } from '@woocommerce/components';
 import { Card, CardBody, Button } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -16,6 +15,7 @@ import { Plugins } from './components/plugins';
 import { StoreLocation } from './components/store-location';
 import { WCSBanner } from './components/wcs-banner';
 import { TaskProps, ShippingRecommendationProps } from './types';
+import { redirectToWCSSettings } from './utils';
 
 /**
  * Plugins required to automate shipping.
@@ -35,13 +35,9 @@ export const ShippingRecommendation: React.FC<
 		setStepIndex( stepIndex + 1 );
 	};
 
-	const redirectToSettings = () => {
-		if ( window?.location ) {
-			setIsRedirecting( true );
-			window.location.href = getAdminLink(
-				'admin.php?page=wc-settings&tab=shipping&section=woocommerce-services-settings'
-			);
-		}
+	const redirect = () => {
+		setIsRedirecting( true );
+		redirectToWCSSettings();
 	};
 
 	useEffect( () => {
@@ -56,7 +52,7 @@ export const ShippingRecommendation: React.FC<
 			remainingPlugins.length === 0 &&
 			isJetpackConnected
 		) {
-			redirectToSettings();
+			redirect();
 		}
 
 		if ( remainingPlugins.length <= pluginsToActivate.length ) {
@@ -105,15 +101,11 @@ export const ShippingRecommendation: React.FC<
 				'woocommerce'
 			),
 			content: isJetpackConnected ? (
-				<Button
-					onClick={ redirectToSettings }
-					isBusy={ isRedirecting }
-					isPrimary
-				>
+				<Button onClick={ redirect } isBusy={ isRedirecting } isPrimary>
 					{ __( 'Complete task', 'woocommerce' ) }
 				</Button>
 			) : (
-				<Connect onConnect={ redirectToSettings } />
+				<Connect onConnect={ redirect } />
 			),
 		},
 	];
