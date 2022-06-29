@@ -135,7 +135,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		 * defaults to a+ (read and write).
 		 *
 		 * @since 3.1.0
-		 * @param string $mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e)  
+		 * @param string $fopen_mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e)  
 		 */
 		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a+' );
 		$fp = fopen( $this->get_file_path(), $fopen_mode );
