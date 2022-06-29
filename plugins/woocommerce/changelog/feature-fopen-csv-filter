@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+The file writing mode used during CSV exports is now filterable via new hook `woocommerce_csv_exporter_fopen_mode`.
