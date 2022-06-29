@@ -149,14 +149,14 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			[
 				'current_user_can' => function( $capability, ...$args ) use ( $user_has_capability ) {
-					if ( 'moderate_comments' === $capability ) {
+					if ( $capability === 'moderate_comments' ) {
 						return $user_has_capability;
 					} else {
 						return current_user_can( $capability, $args );
 					}
 				},
 				'get_user_meta' => function ( int $user_id, string $key = '', bool $single = false ) use ( $user_has_dismissed_notice ) {
-					if ( 'dismissed_product_reviews_moved_notice' === $key ) {
+					if ( $key === 'dismissed_product_reviews_moved_notice' ) {
 						return $user_has_dismissed_notice;
 					} else {
 						return get_user_meta( $user_id, $key, $single );

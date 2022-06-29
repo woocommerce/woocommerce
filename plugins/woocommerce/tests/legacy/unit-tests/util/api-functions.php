@@ -221,19 +221,19 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	protected function mock_http_responses( $request, $url ) {
 		$mocked_response = false;
 
-		if ( 'http://somedomain.com/nonexistent-image.png' === $url ) {
+		if ( $url === 'http://somedomain.com/nonexistent-image.png' ) {
 			$mocked_response = array(
 				'response' => array(
 					'code'    => 404,
 					'message' => 'Not found.',
 				),
 			);
-		} elseif ( 'http://somedomain.com/invalid-image-1.png' === $url ) {
+		} elseif ( $url === 'http://somedomain.com/invalid-image-1.png' ) {
 			// empty image.
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);
-		} elseif ( 'http://somedomain.com/invalid-image-2.png' === $url ) {
+		} elseif ( $url === 'http://somedomain.com/invalid-image-2.png' ) {
 			// image with an unsupported mime type.
 			// we need to manually copy the file as we are mocking the request. without this an empty file is created.
 			self::file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/file.txt', $request['filename'] );
@@ -241,7 +241,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);
-		} elseif ( 'http://somedomain.com/' . $this->file_name === $url ) {
+		} elseif ( $url === 'http://somedomain.com/' . $this->file_name ) {
 			// we need to manually copy the file as we are mocking the request. without this an empty file is created.
 			self::file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png', $request['filename'] );
 

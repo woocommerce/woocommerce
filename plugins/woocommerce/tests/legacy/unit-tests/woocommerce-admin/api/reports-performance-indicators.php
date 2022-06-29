@@ -274,7 +274,7 @@ class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Tes
 	 * @return WP_Rest_Response
 	 */
 	public function mock_rest_responses( $response, $rest_server, $request ) {
-		if ( 'GET' === $request->get_method() && '/jetpack/v4/module/stats/data' === $request->get_route() ) {
+		if ( $request->get_method() === 'GET' && $request->get_route() === '/jetpack/v4/module/stats/data' ) {
 			$general                 = new \stdClass();
 			$general->visits         = new \stdClass();
 			$general->visits->fields = array(

@@ -509,9 +509,9 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertTrue( 'Random' === $reports[0]['city'] );
-		$this->assertTrue( 'FL' === $reports[0]['state'] );
-		$this->assertTrue( '54321' === $reports[0]['postcode'] );
+		$this->assertTrue( $reports[0]['city'] === 'Random' );
+		$this->assertTrue( $reports[0]['state'] === 'FL' );
+		$this->assertTrue( $reports[0]['postcode'] === '54321' );
 	}
 
 	/**
@@ -547,7 +547,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Didn't update anything.
-		$this->assertTrue( -1 === $result );
+		$this->assertTrue( $result === -1 );
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();

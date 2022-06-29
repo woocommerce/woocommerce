@@ -29,7 +29,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( is_array( $zones ) );
-		$this->assertTrue( 4 === count( $zones ) );
+		$this->assertTrue( count( $zones ) === 4 );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 		$zones = WC_Shipping_Zones::get_zones();
 
 		// Assert.
-		$this->assertTrue( 3 === count( $zones ) );
+		$this->assertTrue( count( $zones ) === 3 );
 	}
 
 	/**

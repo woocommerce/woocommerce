@@ -27,7 +27,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 			$checkout_url = get_permalink( $checkout_page_id );
 
 			// Force SSL if needed
-			if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
+			if ( is_ssl() || get_option( 'woocommerce_force_ssl_checkout' ) === 'yes' ) {
 				$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 			}
 

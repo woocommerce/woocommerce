@@ -545,7 +545,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		$expected_to_be_included_in_count = $filter_type === 'or' || $expected_to_be_visible;
 
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red' ) : array(), $filter_type );
 	}
@@ -813,7 +813,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		$expected_to_be_included_in_count = $filter_type === 'or' || $expected_to_be_visible;
 		$this->assert_counters( 'Features', $expected_to_be_included_in_count ? array( 'Washable', 'Ironable' ) : array(), $filter_type );
 	}
 
@@ -1057,7 +1057,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_counted_attributes = 'or' === $filter_type || $expected_to_be_visible ? array( 'Blue', 'Red' ) : array();
+		$expected_counted_attributes = $filter_type === 'or' || $expected_to_be_visible ? array( 'Blue', 'Red' ) : array();
 
 		$this->assert_counters( 'Color', $expected_counted_attributes, $filter_type );
 	}
@@ -1181,7 +1181,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		$expected_to_be_included_in_count = $filter_type === 'or' || $expected_to_be_visible;
 
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
 	}

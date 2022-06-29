@@ -71,7 +71,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->assertStringStartsWith( '<tr id="comment-' . $review->comment_ID . '"', $row_output );
 
 		foreach ( $reviews_list_table->get_columns() as $column_id => $column_name ) {
-			if ( 'cb' !== $column_id ) {
+			if ( $column_id !== 'cb' ) {
 				$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
 			} else {
 				$this->assertStringContainsString( '<th scope="row" class="check-column"></th>', $row_output );
@@ -123,22 +123,22 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		} else {
 
-			if ( '1' === $review_status ) {
+			if ( $review_status === '1' ) {
 				$review_status = 'approved';
-			} elseif ( '0' === $review_status ) {
+			} elseif ( $review_status === '0' ) {
 				$review_status = 'unapproved';
 			}
 
-			if ( 'approved' === $review_status || 'unapproved' === $review_status ) {
-				$this->assertStringContainsString( 'approved' === $review_status ? 'Unapprove' : 'Approve', $actions );
+			if ( $review_status === 'approved' || $review_status === 'unapproved' ) {
+				$this->assertStringContainsString( $review_status === 'approved' ? 'Unapprove' : 'Approve', $actions );
 				$this->assertStringContainsString( 'Spam', $actions );
-			} elseif ( 'spam' === $review_status ) {
+			} elseif ( $review_status === 'spam' ) {
 				$this->assertStringContainsString( 'Not Spam', $actions );
-			} elseif ( 'trash' === $review_status ) {
+			} elseif ( $review_status === 'trash' ) {
 				$this->assertStringContainsString( 'Restore', $actions );
 			}
 
-			if ( 'trash' === $review_status || 'spam' === $review_status ) {
+			if ( $review_status === 'trash' || $review_status === 'spam' ) {
 				$this->assertStringContainsString( 'Delete Permanently', $actions );
 			} else {
 				$this->assertStringContainsString( 'Trash', $actions );
@@ -815,7 +815,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
 		$method->setAccessible( true );
 
-		if ( null !== $review_type ) {
+		if ( $review_type !== null ) {
 			$_REQUEST['review_type'] = $review_type;
 		} else {
 			unset( $_REQUEST['review_type'] );
@@ -880,13 +880,13 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
 		$method->setAccessible( true );
 
-		if ( null !== $orderby ) {
+		if ( $orderby !== null ) {
 			$_REQUEST['orderby'] = $orderby;
 		} else {
 			unset( $_REQUEST['orderby'] );
 		}
 
-		if ( null !== $order ) {
+		if ( $order !== null ) {
 			$_REQUEST['order'] = $order;
 		} else {
 			unset( $_REQUEST['order'] );
@@ -979,7 +979,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
 		$method->setAccessible( true );
 
-		if ( null !== ( $review_type ) ) {
+		if ( ( $review_type ) !== null ) {
 			$_REQUEST['review_type'] = $review_type;
 		} else {
 			unset( $_REQUEST['review_type'] );

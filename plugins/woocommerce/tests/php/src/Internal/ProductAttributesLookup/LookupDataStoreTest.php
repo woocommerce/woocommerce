@@ -378,7 +378,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 					return 100;
 				},
 				'current_user_can' => function( $capability, ...$args ) {
-					if ( 'delete_posts' === $capability ) {
+					if ( $capability === 'delete_posts' ) {
 						return true;
 					} else {
 						return current_user_can( $capability, $args );
@@ -474,7 +474,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 					return 100;
 				},
 				'current_user_can' => function( $capability, ...$args ) {
-					if ( 'delete_posts' === $capability ) {
+					if ( $capability === 'delete_posts' ) {
 						return true;
 					} else {
 						return current_user_can( $capability, $args );
@@ -543,7 +543,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 					return 100;
 				},
 				'current_user_can' => function( $capability, ...$args ) {
-					if ( 'delete_posts' === $capability ) {
+					if ( $capability === 'delete_posts' ) {
 						return true;
 					} else {
 						return current_user_can( $capability, $args );
@@ -869,7 +869,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
-		if ( 'creation' !== $expected_action ) {
+		if ( $expected_action !== 'creation' ) {
 			$this->insert_lookup_table_data( 2, 2, 'pa_bar', 20, false, false );
 		}
 
@@ -883,9 +883,9 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		// Differences:
 		// Creation or update: the product is stored as having stock.
 		// None: the product remains stored as not having stock.
-		if ( 'creation' === $expected_action || 'update' === $expected_action ) {
+		if ( $expected_action === 'creation' || $expected_action === 'update' ) {
 			$expected[] = array( '2', '2', 'pa_bar', '20', '0', '1' );
-		} elseif ( 'none' === $expected_action ) {
+		} elseif ( $expected_action === 'none' ) {
 			$expected[] = array( '2', '2', 'pa_bar', '20', '0', '0' );
 		}
 
@@ -964,7 +964,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
-		if ( 'creation' !== $expected_action ) {
+		if ( $expected_action !== 'creation' ) {
 			$this->insert_lookup_table_data( 2, 2, 'non-variation-attribute', 10, false, false );
 			$this->insert_lookup_table_data( 3, 2, 'variation-attribute', 20, true, false );
 		}
@@ -980,13 +980,13 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		// Creation: both main product and variation are stored as having stock.
 		// Update: main product only is updated as having stock (variation is supposed to get a separate update).
 		// None: both main product and variation are still stored as not having stock.
-		if ( 'creation' === $expected_action ) {
+		if ( $expected_action === 'creation' ) {
 			$expected[] = array( '2', '2', 'non-variation-attribute', '10', '0', '1' );
 			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '1' );
-		} elseif ( 'update' === $expected_action ) {
+		} elseif ( $expected_action === 'update' ) {
 			$expected[] = array( '2', '2', 'non-variation-attribute', '10', '0', '1' );
 			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '0' );
-		} elseif ( 'none' === $expected_action ) {
+		} elseif ( $expected_action === 'none' ) {
 			$expected[] = array( '2', '2', 'non-variation-attribute', '10', '0', '0' );
 			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '0' );
 		}
@@ -1066,7 +1066,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
-		if ( 'creation' !== $expected_action ) {
+		if ( $expected_action !== 'creation' ) {
 			$this->insert_lookup_table_data( 3, 2, 'variation-attribute', 20, true, false );
 		}
 
@@ -1080,9 +1080,9 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		// Differences:
 		// Creation or update: the variation is stored as having stock.
 		// None: the variation is still stored as not having stock.
-		if ( 'creation' === $expected_action || 'update' === $expected_action ) {
+		if ( $expected_action === 'creation' || $expected_action === 'update' ) {
 			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '1' );
-		} elseif ( 'none' === $expected_action ) {
+		} elseif ( $expected_action === 'none' ) {
 			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '0' );
 		}
 
@@ -1130,7 +1130,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		foreach ( $result as $row ) {
 			foreach ( $row as $column_name => $value ) {
-				if ( 'taxonomy' !== $column_name ) {
+				if ( $column_name !== 'taxonomy' ) {
 					$row[ $column_name ] = (int) $value;
 				}
 			}

@@ -74,7 +74,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( is_array( $zone->get_zone_locations() ) );
-		$this->assertTrue( 2 === count( $zone->get_zone_locations() ) );
+		$this->assertTrue( count( $zone->get_zone_locations() ) === 2 );
 	}
 
 	/**
@@ -116,7 +116,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$methods = $zone->get_shipping_methods();
 
 		// Assert.
-		$this->assertTrue( 1 === count( $methods ) );
+		$this->assertTrue( count( $methods ) === 1 );
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 	}
 
@@ -259,7 +259,7 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$methods = $zone->get_shipping_methods();
 
 		// Assert.
-		$this->assertTrue( 2 === count( $methods ) );
+		$this->assertTrue( count( $methods ) === 2 );
 		$this->assertInstanceOf( 'WC_Shipping_Method', current( $methods ) );
 	}
 

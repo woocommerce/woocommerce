@@ -170,7 +170,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_products' => function( $args ) use ( &$requested_products_offsets ) {
-					if ( 'DESC' === current( $args['orderby'] ) ) {
+					if ( current( $args['orderby'] ) === 'DESC' ) {
 						return array( 100 );
 					} else {
 						$requested_products_offsets[] = $args['offset'];
@@ -228,7 +228,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_products' => function( $args ) use ( &$requested_step_sizes ) {
-					if ( 'DESC' === current( $args['orderby'] ) ) {
+					if ( current( $args['orderby'] ) === 'DESC' ) {
 						return array( 100 );
 					} else {
 						$requested_step_sizes[] = $args['limit'];
@@ -262,7 +262,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_products' => function( $args ) use ( &$requested_products_offsets, $product_ids ) {
-					if ( 'DESC' === current( $args['orderby'] ) ) {
+					if ( current( $args['orderby'] ) === 'DESC' ) {
 						return array( 100 );
 					} else {
 						return $product_ids;

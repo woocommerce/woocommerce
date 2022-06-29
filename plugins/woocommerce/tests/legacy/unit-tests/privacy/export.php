@@ -145,11 +145,11 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Orders', $response['data'][0]['group_label'] );
 		$this->assertStringContainsString( 'order-', $response['data'][0]['item_id'] );
 		$this->assertArrayHasKey( 'data', $response['data'][0] );
-		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
+		$this->assertTrue( count( $response['data'][0]['data'] ) === 8, count( $response['data'][0]['data'] ) );
 
 		// Next page should be orders.
 		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 2 );
 		$this->assertTrue( $response['done'] );
-		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
+		$this->assertTrue( count( $response['data'][0]['data'] ) === 8, count( $response['data'][0]['data'] ) );
 	}
 }

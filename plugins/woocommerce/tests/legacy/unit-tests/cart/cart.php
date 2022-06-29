@@ -1374,7 +1374,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Manually generate ID.
 		$id_parts = array( $product_id );
 
-		if ( $variation_id && 0 != $variation_id ) {
+		if ( $variation_id && $variation_id != 0 ) {
 			$id_parts[] = $variation_id;
 		}
 
@@ -2124,7 +2124,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			array_filter(
 				$variations,
 				function( $variation ) {
-					return 'DUMMY SKU VARIABLE HUGE RED 2' === $variation['sku'];
+					return $variation['sku'] === 'DUMMY SKU VARIABLE HUGE RED 2';
 				}
 			)
 		);

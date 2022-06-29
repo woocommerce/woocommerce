@@ -16,9 +16,9 @@ class WC_Tests_Order_Item_Coupon extends WC_Unit_Test_Case {
 		$coupon = new WC_Order_Item_Coupon();
 
 		$coupon->set_name( 'testcoupon' );
-		$this->assertTrue( 'testcoupon' === $coupon->get_name() && $coupon->get_name() === $coupon->get_code() );
+		$this->assertTrue( $coupon->get_name() === 'testcoupon' && $coupon->get_name() === $coupon->get_code() );
 		$coupon->set_code( 'testcoupon2' );
-		$this->assertTrue( 'testcoupon2' === $coupon->get_name() && $coupon->get_name() === $coupon->get_code() );
+		$this->assertTrue( $coupon->get_name() === 'testcoupon2' && $coupon->get_name() === $coupon->get_code() );
 
 		$coupon->set_discount( '5.00' );
 		$this->assertEquals( '5.00', $coupon->get_discount() );

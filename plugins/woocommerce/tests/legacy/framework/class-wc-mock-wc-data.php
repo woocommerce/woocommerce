@@ -32,7 +32,7 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 	}
 
 	public function create( &$object ) {
-		if ( 'user' === $this->meta_type ) {
+		if ( $this->meta_type === 'user' ) {
 			$content_id = wc_create_new_customer( $object->get_content(), 'username-' . time(), 'hunter2' );
 		} else {
 			$content_id = wp_insert_post( array( 'post_title' => $object->get_content() ) );
@@ -51,7 +51,7 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 		$object->set_defaults();
 		$id = $object->get_id();
 
-		if ( 'user' === $this->meta_type ) {
+		if ( $this->meta_type === 'user' ) {
 			if ( empty( $id ) || ! ( $user_object = get_userdata( $id ) ) ) {
 				return;
 			}
@@ -74,7 +74,7 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 		global $wpdb;
 		$content_id = $object->get_id();
 
-		if ( 'user' === $this->meta_type ) {
+		if ( $this->meta_type === 'user' ) {
 			wp_update_user(
 				array(
 					'ID'         => $customer_id,
@@ -95,7 +95,7 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 	 * Simple delete.
 	 */
 	public function delete( &$object, $args = array() ) {
-		if ( 'user' === $this->meta_type ) {
+		if ( $this->meta_type === 'user' ) {
 			wp_delete_user( $object->get_id() );
 		} else {
 			wp_delete_post( $object->get_id() );

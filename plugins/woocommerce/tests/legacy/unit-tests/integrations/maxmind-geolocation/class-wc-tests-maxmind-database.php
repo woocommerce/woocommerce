@@ -129,18 +129,18 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	protected function mock_http_responses( $request, $url ) {
 		$mocked_response = false;
 
-		if ( 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=testing_license&suffix=tar.gz' === $url ) {
+		if ( $url === 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=testing_license&suffix=tar.gz' ) {
 			// We need to copy the file to where the request is supposed to have streamed it.
 			self::file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/GeoLite2-Country.tar.gz', $request['filename'] );
 
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);
-		} elseif ( 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=invalid_license&suffix=tar.gz' === $url ) {
+		} elseif ( $url === 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=invalid_license&suffix=tar.gz' ) {
 			return new WP_Error( 'http_404', 'Unauthorized', array( 'code' => 401 ) );
-		} elseif ( 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=generic_error&suffix=tar.gz' === $url ) {
+		} elseif ( $url === 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=generic_error&suffix=tar.gz' ) {
 			return new WP_Error( 'http_404', 'Unauthorized', array( 'code' => 500 ) );
-		} elseif ( 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=archive_error&suffix=tar.gz' === $url ) {
+		} elseif ( $url === 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=archive_error&suffix=tar.gz' ) {
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);

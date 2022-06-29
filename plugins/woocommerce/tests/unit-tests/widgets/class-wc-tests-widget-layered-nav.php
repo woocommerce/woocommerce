@@ -527,13 +527,13 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 				10,
 				$variation_attributes
 			);
-			if ( 'all' === $set_as_out_of_stock || ( 'one' === $set_as_out_of_stock && $style === $existing_styles[0] ) ) {
+			if ( $set_as_out_of_stock === 'all' || ( $set_as_out_of_stock === 'one' && $style === $existing_styles[0] ) ) {
 				$variation_object->set_stock_status( 'outofstock' );
 			}
 
 			$variation_object->save();
 
-			if ( 'all' === $set_as_unpublished || ( 'one' === $set_as_unpublished && $style === $existing_styles[0] ) ) {
+			if ( $set_as_unpublished === 'all' || ( $set_as_unpublished === 'one' && $style === $existing_styles[0] ) ) {
 				wp_update_post(
 					array(
 						'ID'          => $variation_object->get_id(),

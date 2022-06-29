@@ -88,7 +88,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	 * @return WP_REST_Response|false mocked response or false to let WP perform a regular request.
 	 */
 	public function mock_rest_responses( $response, $rest_server, $request ) {
-		if ( '/wc-analytics/reports/performance-indicators' === $request->get_route() ) {
+		if ( $request->get_route() === '/wc-analytics/reports/performance-indicators' ) {
 			$response = new WP_REST_Response(
 				array(
 					'status' => 200,
@@ -102,7 +102,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 					),
 				)
 			);
-		} elseif ( '/wc-analytics/reports/revenue/stats' === $request->get_route() ) {
+		} elseif ( $request->get_route() === '/wc-analytics/reports/revenue/stats' ) {
 			$response = new WP_REST_Response(
 				array(
 					'status' => 200,

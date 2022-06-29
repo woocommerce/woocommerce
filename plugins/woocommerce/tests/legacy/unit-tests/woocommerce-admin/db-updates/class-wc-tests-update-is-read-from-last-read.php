@@ -46,7 +46,7 @@ class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
 		"
 		);
 
-		$this->assertTrue( '0' === $notes_with_is_read );
+		$this->assertTrue( $notes_with_is_read === '0' );
 	}
 
 	/**
@@ -93,10 +93,10 @@ class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
 		"
 		);
 
-		$this->assertTrue( '1' === $notes_with_is_read );
+		$this->assertTrue( $notes_with_is_read === '1' );
 
 		// phpcs:ignore
 		$last_read_count = $wpdb->get_var("select count(*) from {$wpdb->usermeta} where meta_key='{$meta_key}'");
-		$this->assertTrue( '0' === $last_read_count );
+		$this->assertTrue( $last_read_count === '0' );
 	}
 }

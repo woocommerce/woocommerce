@@ -198,7 +198,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$settings = (array) $data['settings'];
 
 		$this->assertEquals( 12, count( $settings ) );
-		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
+		$this->assertEquals( ( get_option( 'woocommerce_api_enabled' ) === 'yes' ), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
 	}
@@ -214,8 +214,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$settings = (array) $data['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
-		$this->assertEquals( 'https' === substr( wc_get_page_permalink( 'shop' ), 0, 5 ), $settings['secure_connection'] );
-		$this->assertEquals( ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ), $settings['hide_errors'] );
+		$this->assertEquals( substr( wc_get_page_permalink( 'shop' ), 0, 5 ) === 'https', $settings['secure_connection'] );
+		$this->assertEquals( ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || intval( ini_get( 'display_errors' ) ) === 0, $settings['hide_errors'] );
 	}
 
 	/**
@@ -479,7 +479,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);
-		} elseif ( 'https://api.wordpress.org/themes/info/1.0/' === $url ) {
+		} elseif ( $url === 'https://api.wordpress.org/themes/info/1.0/' ) {
 			$mocked_response = array(
 				'body'     => 'O:8:"stdClass":12:{s:4:"name";s:7:"Default";s:4:"slug";s:7:"default";s:7:"version";s:5:"1.7.2";s:11:"preview_url";s:29:"https://wp-themes.com/default";s:6:"author";s:15:"wordpressdotorg";s:14:"screenshot_url";s:61:"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2";s:6:"rating";d:100;s:11:"num_ratings";s:1:"3";s:10:"downloaded";i:296618;s:12:"last_updated";s:10:"2010-06-14";s:8:"homepage";s:37:"https://wordpress.org/themes/default/";s:13:"download_link";s:55:"https://downloads.wordpress.org/theme/default.1.7.2.zip";}',
 				'response' => array( 'code' => 200 ),

@@ -138,7 +138,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 */
 	protected function do_request( $endpoint, $type = 'GET', $params = [] ) {
 		$request = new \WP_REST_Request( $type, untrailingslashit( $endpoint ) );
-		'GET' === $type ? $request->set_query_params( $params ) : $request->set_body_params( $params );
+		$type === 'GET' ? $request->set_query_params( $params ) : $request->set_body_params( $params );
 		$response = $this->server->dispatch( $request );
 
 		return (object) array(

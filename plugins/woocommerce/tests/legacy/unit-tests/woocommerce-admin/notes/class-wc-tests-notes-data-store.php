@@ -45,7 +45,7 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $note->get_type(), $read_note->get_type() );
 		$this->assertEquals( $note->get_name(), $read_note->get_name() );
 		$this->assertEquals( $note->get_source(), $read_note->get_source() );
-		$this->assertEquals( $note->get_is_snoozable(), '0' !== $read_note->get_is_snoozable() );
+		$this->assertEquals( $note->get_is_snoozable(), $read_note->get_is_snoozable() !== '0' );
 		$this->assertEquals( $note->get_layout(), $read_note->get_layout() );
 		$this->assertEquals( $note->get_image(), $read_note->get_image() );
 		$this->assertEquals( $note->get_actions(), $read_note->get_actions() );
@@ -272,13 +272,13 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// It should have backticks stripped from it and get wrapped in backticks, thus causing an error.
 		$log_file = ini_set( 'error_log', '/dev/null' );
 		$wpdb->hide_errors();
-		$this->assertTrue( '' === $wpdb->last_error );
+		$this->assertTrue( $wpdb->last_error === '' );
 
 		$data_store->get_notes( array( 'orderby' => '`name`;select 1;' ) );
 
 		$this->assertFalse( stripos( '`name`;select', $wpdb->last_query ) );
 		$this->assertTrue( stripos( '`name;select 1;`', $wpdb->last_query ) >= 0 );
-		$this->assertFalse( '' === $wpdb->last_error );
+		$this->assertFalse( $wpdb->last_error === '' );
 
 		ini_set( 'error_log', $log_file );
 		$wpdb->show_errors();
@@ -308,13 +308,13 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// It should have backticks stripped from it and get wrapped in backticks, thus causing an error.
 		$log_file = ini_set( 'error_log', '/dev/null' );
 		$wpdb->hide_errors();
-		$this->assertTrue( '' === $wpdb->last_error );
+		$this->assertTrue( $wpdb->last_error === '' );
 
 		$data_store->lookup_notes( array( 'orderby' => '`name`;select 1;' ) );
 
 		$this->assertFalse( stripos( '`name`;select', $wpdb->last_query ) );
 		$this->assertTrue( stripos( '`name;select 1;`', $wpdb->last_query ) >= 0 );
-		$this->assertFalse( '' === $wpdb->last_error );
+		$this->assertFalse( $wpdb->last_error === '' );
 
 		ini_set( 'error_log', $log_file );
 		$wpdb->show_errors();

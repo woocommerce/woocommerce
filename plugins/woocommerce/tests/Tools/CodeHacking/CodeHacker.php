@@ -139,10 +139,10 @@ final class CodeHacker {
 		$ro = new ReflectionObject( ( $callback ) );
 		try {
 			$rm                    = $ro->getMethod( 'hack' );
-			$has_valid_hack_method = $rm->isPublic() && ! $rm->isStatic() && 2 === $rm->getNumberOfRequiredParameters();
+			$has_valid_hack_method = $rm->isPublic() && ! $rm->isStatic() && $rm->getNumberOfRequiredParameters() === 2;
 
 			$rm                     = $ro->getMethod( 'reset' );
-			$has_valid_reset_method = $rm->isPublic() && ! $rm->isStatic() && 0 === $rm->getNumberOfRequiredParameters();
+			$has_valid_reset_method = $rm->isPublic() && ! $rm->isStatic() && $rm->getNumberOfRequiredParameters() === 0;
 
 			return $has_valid_hack_method && $has_valid_reset_method;
 		} catch ( ReflectionException $exception ) {
@@ -332,9 +332,9 @@ final class CodeHacker {
 	 */
 	public function stream_open( $path, $mode, $options, &$opened_path ) {
 		$use_path = (bool) ( $options & STREAM_USE_PATH );
-		if ( 'rb' === $mode && self::path_in_list_of_paths_to_hack( $path ) && 'php' === pathinfo( $path, PATHINFO_EXTENSION ) ) {
+		if ( $mode === 'rb' && self::path_in_list_of_paths_to_hack( $path ) && pathinfo( $path, PATHINFO_EXTENSION ) === 'php' ) {
 			$content = $this->native( 'file_get_contents', $path, $use_path, $this->context );
-			if ( false === $content ) {
+			if ( $content === false ) {
 				return false;
 			}
 			$modified = self::hack( $content, $path );

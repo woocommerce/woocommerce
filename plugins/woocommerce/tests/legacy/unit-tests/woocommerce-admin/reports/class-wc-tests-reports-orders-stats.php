@@ -4657,7 +4657,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
 		for ( $i = 0; $i < $interval_count; $i ++ ) {
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
 			} elseif ( $hour_offset === $i ) {
@@ -4670,7 +4670,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
 			}
 
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$orders_count        = count( $order_during_this_['hour'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -4679,7 +4679,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$total_sales         = $net_revenue + $shipping;
 				$gross_sales         = $net_revenue + $coupons;
 				$returning_customers = 1;
-			} elseif ( 1 === $i ) {
+			} elseif ( $i === 1 ) {
 				$orders_count        = 1;
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -4716,8 +4716,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'taxes'               => 0,
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
-					'avg_items_per_order' => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-					'avg_order_value'     => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'avg_items_per_order' => $orders_count === 0 ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'     => $orders_count === 0 ? 0 : $net_revenue / $orders_count,
 					'total_customers'     => $returning_customers,
 					'segments'            => array(),
 				),
@@ -4801,7 +4801,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
 		for ( $i = 0; $i < $interval_count; $i ++ ) {
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
 			} elseif ( $hour_offset === $i ) {
@@ -4814,7 +4814,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
 			}
 
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$orders_count    = count( $order_during_this_['hour'] );
 				$num_items_sold  = $orders_count * $qty_per_product;
 				$coupons         = 0;
@@ -4823,7 +4823,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$total_sales     = $net_revenue + $shipping;
 				$gross_sales     = $net_revenue + $coupons;
 				$total_customers = 1;
-			} elseif ( 1 === $i ) {
+			} elseif ( $i === 1 ) {
 				$orders_count    = 1;
 				$num_items_sold  = $orders_count * $qty_per_product;
 				$coupons         = 0;
@@ -4860,8 +4860,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'taxes'               => 0,
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
-					'avg_items_per_order' => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-					'avg_order_value'     => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'avg_items_per_order' => $orders_count === 0 ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'     => $orders_count === 0 ? 0 : $net_revenue / $orders_count,
 					'total_customers'     => $total_customers,
 					'segments'            => array(),
 				),
@@ -4956,7 +4956,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_intervals = array();
 		$interval_count     = 11;
 		for ( $i = 0; $i < $interval_count; $i ++ ) {
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
 			} elseif ( $hour_offset === $i ) {
@@ -4969,7 +4969,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
 			}
 
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$orders_count        = count( $order_during_this_['hour'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -4978,7 +4978,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$total_sales         = $net_revenue + $shipping;
 				$gross_sales         = $net_revenue + $coupons;
 				$returning_customers = 1;
-			} elseif ( 1 === $i ) {
+			} elseif ( $i === 1 ) {
 				$orders_count        = 1;
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5015,8 +5015,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'taxes'               => 0,
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
-					'avg_items_per_order' => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-					'avg_order_value'     => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'avg_items_per_order' => $orders_count === 0 ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'     => $orders_count === 0 ? 0 : $net_revenue / $orders_count,
 					'total_customers'     => $returning_customers,
 					'segments'            => array(),
 				),
@@ -5445,7 +5445,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
 		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
 			} elseif ( $hour_offset === $i ) {
@@ -5458,7 +5458,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
 			}
 
-			if ( 1 === $i ) {
+			if ( $i === 1 ) {
 				$orders_count        = count( $order_during_this_['hour-1'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5467,7 +5467,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$total_sales         = $net_revenue + $shipping;
 				$gross_sales         = $net_revenue + $coupons;
 				$returning_customers = 1;
-			} elseif ( 0 === $i ) {
+			} elseif ( $i === 0 ) {
 				$orders_count        = count( $order_during_this_['hour'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5504,8 +5504,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'taxes'               => 0,
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
-					'avg_items_per_order' => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-					'avg_order_value'     => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'avg_items_per_order' => $orders_count === 0 ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'     => $orders_count === 0 ? 0 : $net_revenue / $orders_count,
 					'total_customers'     => $returning_customers,
 					'segments'            => array(),
 				),
@@ -5626,7 +5626,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
 		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
 			} elseif ( $hour_offset === $i ) {
@@ -5639,7 +5639,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
 			}
 
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$orders_count        = count( $order_during_this_['hour'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5648,7 +5648,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$total_sales         = $net_revenue + $shipping;
 				$gross_sales         = $net_revenue + $coupons;
 				$returning_customers = 1;
-			} elseif ( 1 === $i ) {
+			} elseif ( $i === 1 ) {
 				$orders_count        = count( $order_during_this_['hour-1'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5685,8 +5685,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'taxes'               => 0,
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
-					'avg_items_per_order' => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-					'avg_order_value'     => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'avg_items_per_order' => $orders_count === 0 ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'     => $orders_count === 0 ? 0 : $net_revenue / $orders_count,
 					'total_customers'     => $returning_customers,
 					'segments'            => array(),
 				),
@@ -5799,7 +5799,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_intervals = array();
 		$interval_count     = 11;
 		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
 			} elseif ( $hour_offset === $i ) {
@@ -5812,7 +5812,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
 			}
 
-			if ( 0 === $i ) {
+			if ( $i === 0 ) {
 				$orders_count        = count( $order_during_this_['hour'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5821,7 +5821,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				$total_sales         = $net_revenue + $shipping;
 				$gross_sales         = $net_revenue + $coupons;
 				$returning_customers = 1;
-			} elseif ( 1 === $i ) {
+			} elseif ( $i === 1 ) {
 				$orders_count        = count( $order_during_this_['hour-1'] );
 				$num_items_sold      = $orders_count * $qty_per_product;
 				$coupons             = 0;
@@ -5858,8 +5858,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'taxes'               => 0,
 					'shipping'            => $shipping,
 					'net_revenue'         => $net_revenue,
-					'avg_items_per_order' => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-					'avg_order_value'     => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'avg_items_per_order' => $orders_count === 0 ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'     => $orders_count === 0 ? 0 : $net_revenue / $orders_count,
 					'total_customers'     => $returning_customers,
 					'segments'            => array(),
 				),

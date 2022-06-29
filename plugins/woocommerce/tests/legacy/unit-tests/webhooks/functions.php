@@ -146,7 +146,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_load_webhooks( $status ) );
 
 		// Find a different, but still valid status.
-		$other_status = ( 'active' === $status ) ? 'disabled' : 'active';
+		$other_status = ( $status === 'active' ) ? 'disabled' : 'active';
 
 		$this->assertFalse( wc_load_webhooks( $other_status ) );
 

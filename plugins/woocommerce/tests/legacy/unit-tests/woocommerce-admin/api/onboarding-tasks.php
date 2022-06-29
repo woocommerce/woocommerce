@@ -73,7 +73,7 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$taxonomies = get_taxonomies();
 		foreach ( (array) $taxonomies as $taxonomy ) {
 			// pa - product attribute.
-			if ( 'pa_color' === $taxonomy || 'pa_logo' === $taxonomy ) {
+			if ( $taxonomy === 'pa_color' || $taxonomy === 'pa_logo' ) {
 				unregister_taxonomy( $taxonomy );
 			}
 		}
@@ -98,7 +98,7 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'imported', $data );
 		$this->assertArrayHasKey( 'skipped', $data );
 		// There might be previous products present.
-		if ( 0 === count( $data['skipped'] ) ) {
+		if ( count( $data['skipped'] ) === 0 ) {
 			$this->assertGreaterThan( 1, count( $data['imported'] ) );
 		}
 		$this->assertArrayHasKey( 'updated', $data );
@@ -544,7 +544,7 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$test_list = null;
 
 		foreach ( $response_data as $task_list ) {
-			if ( 'test-list' === $task_list['id'] ) {
+			if ( $task_list['id'] === 'test-list' ) {
 				$test_list = $task_list;
 			}
 		}

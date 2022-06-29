@@ -202,7 +202,7 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 
 		foreach ( $migrated_options as $new_option => $old_option ) {
 			$old_option_value = get_option( $old_option );
-			if ( false === $old_option_value ) {
+			if ( $old_option_value === false ) {
 				continue;
 			}
 			$this->assertNotFalse( get_option( $new_option ), $new_option );

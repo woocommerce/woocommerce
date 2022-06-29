@@ -85,7 +85,7 @@ abstract class CodeHack {
 	 */
 	protected function string_ends_with( $haystack, $needle ) {
 		$length = strlen( $needle );
-		if ( 0 === $length ) {
+		if ( $length === 0 ) {
 			return true;
 		}
 

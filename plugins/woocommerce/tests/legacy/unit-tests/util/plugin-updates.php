@@ -46,7 +46,7 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function populate_untested_plugins( $plugins, $header ) {
-		if ( WC_Plugin_Updates::VERSION_TESTED_HEADER === $header && ! empty( $this->plugins ) ) {
+		if ( $header === WC_Plugin_Updates::VERSION_TESTED_HEADER && ! empty( $this->plugins ) ) {
 			$plugins = $this->plugins;
 			update_option( 'active_plugins', array_keys( $this->plugins ) );
 		}

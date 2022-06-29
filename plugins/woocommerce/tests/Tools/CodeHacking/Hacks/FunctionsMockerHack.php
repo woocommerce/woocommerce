@@ -92,9 +92,9 @@ final class FunctionsMockerHack extends CodeHack {
 
 		foreach ( $tokens as $token ) {
 			$token_type = $this->token_type_of( $token );
-			if ( T_WHITESPACE === $token_type ) {
+			if ( $token_type === T_WHITESPACE ) {
 				$code .= $this->token_to_string( $token );
-			} elseif ( T_STRING === $token_type && ! $previous_token_is_non_global_function_qualifier && in_array( $token[1], $this->mockable_functions, true ) ) {
+			} elseif ( $token_type === T_STRING && ! $previous_token_is_non_global_function_qualifier && in_array( $token[1], $this->mockable_functions, true ) ) {
 				$code .= __CLASS__ . "::{$token[1]}";
 				$previous_token_is_non_global_function_qualifier = false;
 			} else {

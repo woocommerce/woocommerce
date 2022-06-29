@@ -230,7 +230,7 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 		// Grab the size attribute.
 		$size_attr_id = false;
 		foreach ( $global_attrs as $global_attr ) {
-			if ( 'size' === $global_attr->attribute_name ) {
+			if ( $global_attr->attribute_name === 'size' ) {
 				$size_attr_id = $global_attr->attribute_id;
 				break;
 			}

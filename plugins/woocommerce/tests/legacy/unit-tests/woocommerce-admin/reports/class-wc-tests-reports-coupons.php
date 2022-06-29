@@ -180,7 +180,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Test extended info.
 		$gmt_timezone    = new DateTimeZone( 'UTC' );
 		$c1_date_created = $coupon_1->get_date_created();
-		if ( null === $c1_date_created ) {
+		if ( $c1_date_created === null ) {
 			$c1_date_created     = '';
 			$c1_date_created_gmt = '';
 		} else {
@@ -192,7 +192,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$c1_date_expires = $coupon_1->get_date_expires();
-		if ( null === $c1_date_expires ) {
+		if ( $c1_date_expires === null ) {
 			$c1_date_expires     = '';
 			$c1_date_expires_gmt = '';
 		} else {
@@ -218,7 +218,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 
 		$c2_date_created = $coupon_2->get_date_created();
-		if ( null === $c2_date_created ) {
+		if ( $c2_date_created === null ) {
 			$c2_date_created     = '';
 			$c2_date_created_gmt = '';
 		} else {
@@ -230,7 +230,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$c2_date_expires = $coupon_2->get_date_expires();
-		if ( null === $c2_date_expires ) {
+		if ( $c2_date_expires === null ) {
 			$c2_date_expires     = '';
 			$c2_date_expires_gmt = '';
 		} else {
@@ -363,7 +363,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// This would normally happen at checkout.
 		foreach ( $coupon_items as $coupon_item ) {
-			if ( 'coupon_2' !== $coupon_item->get_code() ) {
+			if ( $coupon_item->get_code() !== 'coupon_2' ) {
 				continue;
 			}
 
@@ -417,7 +417,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Test extended info.
 		$gmt_timezone    = new DateTimeZone( 'UTC' );
 		$c1_date_created = $coupon_1->get_date_created();
-		if ( null === $c1_date_created ) {
+		if ( $c1_date_created === null ) {
 			$c1_date_created     = '';
 			$c1_date_created_gmt = '';
 		} else {
@@ -429,7 +429,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$c1_date_expires = $coupon_1->get_date_expires();
-		if ( null === $c1_date_expires ) {
+		if ( $c1_date_expires === null ) {
 			$c1_date_expires     = '';
 			$c1_date_expires_gmt = '';
 		} else {

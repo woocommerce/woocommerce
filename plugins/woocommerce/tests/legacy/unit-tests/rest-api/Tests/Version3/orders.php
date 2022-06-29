@@ -232,11 +232,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		// The name property contains the parent product name and the attribute value (ex. "Dummy Variable Product - small").
 		$this->assertEquals( $variation->get_name(), $last_line_item['name'] );
-		$this->assertTrue( false !== strpos( $last_line_item['name'], $variation->get_attribute( 'pa_size' ) ) );
+		$this->assertTrue( strpos( $last_line_item['name'], $variation->get_attribute( 'pa_size' ) ) !== false );
 		// The parent_name property only contains the parent product name (ex. "Dummy Variable Product").
 		$this->assertEquals( $product->get_name(), $last_line_item['parent_name'] );
 		$this->assertNotEquals( $variation->get_name(), $last_line_item['parent_name'] );
-		$this->assertTrue( false === strpos( $last_line_item['parent_name'], $variation->get_attribute( 'pa_size' ) ) );
+		$this->assertTrue( strpos( $last_line_item['parent_name'], $variation->get_attribute( 'pa_size' ) ) === false );
 	}
 
 	/**

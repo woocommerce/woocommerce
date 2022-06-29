@@ -51,7 +51,7 @@ trait DateFilteringForCrudControllers {
 		$request = new WP_REST_Request( 'GET', $this->get_endpoint_for_date_filtering_tests() );
 		$request->set_query_params(
 			array(
-				$param_name     => false === strpos( $param_name, 'modified' ) ? '2000-01-01T11:00:00' : '2000-02-01T11:00:00',
+				$param_name     => strpos( $param_name, 'modified' ) === false ? '2000-01-01T11:00:00' : '2000-02-01T11:00:00',
 				'dates_are_gmt' => $filter_by_gmt ? 'true' : 'false',
 			)
 		);

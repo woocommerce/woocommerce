@@ -190,7 +190,7 @@ class OrderHelper {
 		// Make sure this is a wp_post order.
 		$post = get_post( $order->get_id() );
 		assert( isset( $post ) );
-		assert( 'shop_order' === $post->post_type );
+		assert( $post->post_type === 'shop_order' );
 
 		$order->save();
 

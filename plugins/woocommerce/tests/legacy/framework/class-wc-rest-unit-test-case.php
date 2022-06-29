@@ -54,7 +54,7 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 	 * @return array Result from the request.
 	 */
 	public function do_rest_request( $url, $verb = 'GET', $body_params = null, $query_params = null ) {
-		if ( '/' !== $url[0] ) {
+		if ( $url[0] !== '/' ) {
 			$url = '/wc/v3/' . $url;
 		}
 

@@ -336,7 +336,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$unique_row = array_filter(
 			$meta_data,
 			function ( $meta_row ) {
-				return 'unique_key_1' === $meta_row->meta_key;
+				return $meta_row->meta_key === 'unique_key_1';
 			}
 		);
 
@@ -346,7 +346,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$non_unique_rows = array_filter(
 			$meta_data,
 			function ( $meta_row ) {
-				return 'non_unique_key_1' === $meta_row->meta_key;
+				return $meta_row->meta_key === 'non_unique_key_1';
 			}
 		);
 		$this->assertEquals( 2, count( $non_unique_rows ) );

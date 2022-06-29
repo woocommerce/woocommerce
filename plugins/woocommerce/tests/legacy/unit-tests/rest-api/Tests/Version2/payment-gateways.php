@@ -328,7 +328,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 				continue;
 			}
 			// Ignore 'title' settings/fields -- they are UI only.
-			if ( 'title' === $field['type'] ) {
+			if ( $field['type'] === 'title' ) {
 				continue;
 			}
 			$data = array(

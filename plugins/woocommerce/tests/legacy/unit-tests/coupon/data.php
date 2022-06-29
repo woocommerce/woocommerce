@@ -13,11 +13,11 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function get_function_name( $function ) {
-		if ( 'exclude_product_ids' === $function ) {
+		if ( $function === 'exclude_product_ids' ) {
 			$function = 'excluded_product_ids';
-		} elseif ( 'exclude_product_categories' === $function ) {
+		} elseif ( $function === 'exclude_product_categories' ) {
 			$function = 'excluded_product_categories';
-		} elseif ( 'customer_email' === $function ) {
+		} elseif ( $function === 'customer_email' ) {
 			$function = 'email_restrictions';
 		}
 
@@ -71,7 +71,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_amount(), $coupon->amount );
 		$this->assertEquals( $coupon->get_amount(), $coupon->coupon_amount );
 		$this->assertEquals( $coupon->get_code(), $coupon->code );
-		$this->assertEquals( $coupon->get_individual_use(), ( 'yes' === $coupon->individual_use ? true : false ) );
+		$this->assertEquals( $coupon->get_individual_use(), ( $coupon->individual_use === 'yes' ? true : false ) );
 		$this->assertEquals( $coupon->get_product_ids(), $coupon->product_ids );
 		$this->assertEquals( $coupon->get_excluded_product_ids(), $coupon->exclude_product_ids );
 		$this->assertEquals( $coupon->get_usage_limit(), $coupon->usage_limit );

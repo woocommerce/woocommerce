@@ -1000,7 +1000,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	protected function mock_http_responses( $request, $url ) {
 		$mocked_response = false;
 
-		if ( false !== strpos( $url, 'https://wordpress.tv/oembed/' ) ) {
+		if ( strpos( $url, 'https://wordpress.tv/oembed/' ) !== false ) {
 			$mocked_response = array(
 				// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				'body'     => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\/\/videopress.com\/embed\/9sRCUigm?hd=0\' frameborder=\'0\' allowfullscreen><\/iframe><script src=\'https:\/\/v0.wordpress.com\/js\/next\/videopress-iframe.js?m=1435166243\'><\/script>"}',

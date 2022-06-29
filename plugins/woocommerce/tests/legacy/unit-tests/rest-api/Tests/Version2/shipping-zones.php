@@ -598,7 +598,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 			'instance_id'        => $instance_id,
 			'title'              => $method->instance_settings['title'],
 			'order'              => $method->method_order,
-			'enabled'            => ( 'yes' === $method->enabled ),
+			'enabled'            => ( $method->enabled === 'yes' ),
 			'method_id'          => $method->id,
 			'method_title'       => $method->method_title,
 			'method_description' => $method->method_description,

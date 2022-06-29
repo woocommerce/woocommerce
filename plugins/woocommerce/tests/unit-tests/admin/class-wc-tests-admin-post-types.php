@@ -121,7 +121,7 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 	 * @param string $expected_new_price Expected value of the product price after the save operation.
 	 */
 	public function bulk_change_price( $type_of_price, $initial_price, $type_of_change, $change_amount, $expected_new_price ) {
-		if ( 'regular' === $type_of_price ) {
+		if ( $type_of_price === 'regular' ) {
 			$props = array( 'regular_price' => $initial_price );
 		} else {
 			$props = array(

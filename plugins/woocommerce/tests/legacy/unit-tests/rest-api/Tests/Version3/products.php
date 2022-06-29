@@ -594,7 +594,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		for ( $i = 0; $i < 8; $i++ ) {
 			$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-			if ( 0 === $i % 2 ) {
+			if ( $i % 2 === 0 ) {
 				wp_update_post(
 					array(
 						'ID'          => $product->get_id(),

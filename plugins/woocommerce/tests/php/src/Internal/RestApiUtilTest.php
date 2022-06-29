@@ -22,7 +22,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_adjust_create_refund_request_parameters_adjusts_reason( $input_reason, $expected_output_reason ) {
 		$request = new \WP_REST_Request();
-		if ( 'none' !== $input_reason ) {
+		if ( $input_reason !== 'none' ) {
 			$request['reason'] = $input_reason;
 		}
 
@@ -45,7 +45,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_adjust_create_refund_request_parameters_adjusts_api_refund( $input_api_refund, $expected_output_api_refund ) {
 		$request = new \WP_REST_Request();
-		if ( 'none' !== $input_api_refund ) {
+		if ( $input_api_refund !== 'none' ) {
 			$request['api_refund'] = $input_api_refund;
 		}
 
