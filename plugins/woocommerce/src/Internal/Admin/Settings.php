@@ -123,12 +123,9 @@ class Settings {
 			$settings['stockStatuses'] = self::get_order_statuses( wc_get_product_stock_status_options() );
 			$settings['currency']      = self::get_currency_settings();
 			$settings['locale']        = array(
-				'siteLocale'    => $settings['siteLocale']
-					?? get_locale(),
-				'userLocale'    => $settings['l10n']['userLocale']
-					?? get_user_locale(),
-				'weekdaysShort' => $settings['l10n']['weekdaysShort']
-					?? array_values( $wp_locale->weekday_abbrev ),
+				'siteLocale'    => $settings['siteLocale'] ?? get_locale(),
+				'userLocale'    => $settings['l10n']['userLocale'] ?? get_user_locale(),
+				'weekdaysShort' => $settings['l10n']['weekdaysShort'] ?? array_values( $wp_locale->weekday_abbrev ),
 			);
 		}
 
