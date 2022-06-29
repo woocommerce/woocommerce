@@ -387,8 +387,7 @@ class Loader {
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
-			$settings['dataEndpoints'] = $settings['dataEndpoints']
-				?? [];
+			$settings['dataEndpoints'] = $settings['dataEndpoints'] ?? array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
