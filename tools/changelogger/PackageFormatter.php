@@ -24,9 +24,13 @@ class PackageFormatter extends Formatter implements FormatterPlugin {
 	public $prologue = "# Changelog \n\nThis project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).";
 
 	/**
-	 * Epilogue text.
-	 *
-	 * @var string
+	 * Return the epilogue string based on the package being released.
 	 */
-	public $epilogue = "---\n\n[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce-admin/blob/main/packages/components/CHANGELOG.md).";
+	public function getEpilogue() {
+		$cwd = getcwd();
+		$pos = stripos( $cwd, 'packages/js/' );
+		$package = substr( $cwd, $pos + 12 );
+
+		return '[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/' . $package . '/CHANGELOG.md).';
+	}
 }

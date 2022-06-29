@@ -64,6 +64,13 @@ class Formatter extends KeepAChangelogParser {
 	public $subentry_pattern = '/^###(.+)\n/m';
 
 	/**
+	 * Return the epiologue.
+	 */
+	public function getEpilogue() {
+		return $this->epilogue;
+	}
+
+	/**
 	 * Get Release link given a version number.
 	 *
 	 * @throws \InvalidArgumentException When directory parsing fails.
@@ -219,7 +226,7 @@ class Formatter extends KeepAChangelogParser {
 
 		$ret->setEntries( $entries );
 		$ret->setPrologue( $this->prologue );
-		$ret->setEpilogue( $this->epilogue );
+		$ret->setEpilogue( $this->getEpilogue() );
 		return $ret;
 	}
 
