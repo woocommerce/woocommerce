@@ -130,7 +130,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 			return false;
 		}
 
-		$fp = fopen( $this->get_file_path(), 'a+' );
+		$fp = fopen( $this->get_file_path(), apply_filters( 'woocommerce_fopen_csv', 'a+' ) );
 
 		if ( $fp ) {
 			fwrite( $fp, $data );
