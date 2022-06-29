@@ -371,12 +371,21 @@ export default class Analyzer extends Command {
 		const matchPatches = /^a\/(.+).php/g;
 		const patches = getPatches( content, matchPatches );
 		const verRegEx = getVersionRegex( version );
-		const matchHooks = `\/\\*\\*(.*?)@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
+		const matchHooks = `\(.*?)@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp( matchHooks, 'gs' );
 
 		for ( const p in patches ) {
 			const patch = patches[ p ];
-			const results = patch.match( newRegEx );
+			// Separate patches into bits beginning with a comment. If a bit does not have an action, disregard.
+			const patchWithHook = patch.split( '/**' ).find( ( s ) => {
+				return (
+					s.includes( 'apply_filters' ) || s.includes( 'do_action' )
+				);
+			} );
+			if ( ! patchWithHook ) {
+				continue;
+			}
+			const results = patchWithHook.match( newRegEx );
 			const hooksList: Map< string, string[] > = new Map<
 				string,
 				string[]
@@ -399,9 +408,9 @@ export default class Analyzer extends Command {
 					continue;
 				}
 
-				const description = getHookDescription( raw );
-
 				const name = getHookName( hookName[ 3 ] );
+
+				const description = getHookDescription( raw, name );
 
 				if ( ! description ) {
 					this.error(
