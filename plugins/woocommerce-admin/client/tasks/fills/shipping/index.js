@@ -31,6 +31,8 @@ import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import { WCSBanner } from '../experimental-shipping-recommendation/components/wcs-banner';
+import { ShipStationBanner } from '../experimental-shipping-recommendation/components/shipstation-banner';
+
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
 
@@ -376,13 +378,39 @@ export class Shipping extends Component {
 						'Enable shipping label printing and discounted rates',
 						'woocommerce'
 					),
-					description: __(
-						'Save time and fulfill your orders with WooCommerce Shipping. You can manage it at any time in WooCommerce Shipping Settings.',
-						'woocommerce'
-					),
+					description: pluginsToActivate.includes(
+						'woocommerce-shipstation-integration'
+					)
+						? interpolateComponents( {
+								mixedString: __(
+									'We recommend using ShipStation to save time at the post office by printing your shipping ' +
+										'labels at home. Try ShipStation free for 30 days. {{link}}Learn more{{/link}}.',
+									'woocommerce'
+								),
+								components: {
+									link: (
+										<Link
+											href="https://woocommerce.com/products/shipstation-integration?utm_medium=product"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+						  } )
+						: __(
+								'Save time and fulfill your orders with WooCommerce Shipping. You can manage it at any time in WooCommerce Shipping Settings.',
+								'woocommerce'
+						  ),
+
 					content: (
 						<>
-							<WCSBanner />
+							{ pluginsToActivate.includes(
+								'woocommerce-services'
+							) ? (
+								<WCSBanner />
+							) : (
+								<ShipStationBanner />
+							) }
 							<Plugins
 								onComplete={ ( plugins, response ) => {
 									createNoticesFromResponse( response );
@@ -415,32 +443,35 @@ export class Shipping extends Component {
 								} }
 								pluginSlugs={ pluginsToActivate }
 							/>
-							{ ! isJetpackConnected && (
-								<Text
-									variant="caption"
-									className="woocommerce-task__caption"
-									size="12"
-									lineHeight="16px"
-									style={ { display: 'block' } }
-								>
-									{ interpolateComponents( {
-										mixedString: agreementText,
-										components: {
-											link: (
-												<Link
-													href={
-														'https://wordpress.com/tos/'
-													}
-													target="_blank"
-													type="external"
-												>
-													<></>
-												</Link>
-											),
-										},
-									} ) }
-								</Text>
-							) }
+							{ ! isJetpackConnected &&
+								pluginsToActivate.includes(
+									'woocommerce-services'
+								) && (
+									<Text
+										variant="caption"
+										className="woocommerce-task__caption"
+										size="12"
+										lineHeight="16px"
+										style={ { display: 'block' } }
+									>
+										{ interpolateComponents( {
+											mixedString: agreementText,
+											components: {
+												link: (
+													<Link
+														href={
+															'https://wordpress.com/tos/'
+														}
+														target="_blank"
+														type="external"
+													>
+														<></>
+													</Link>
+												),
+											},
+										} ) }
+									</Text>
+								) }
 						</>
 					),
 				},
