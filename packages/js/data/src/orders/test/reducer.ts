@@ -100,8 +100,6 @@ describe( 'orders reducer', () => {
 			totalCount,
 		} );
 
-		const resourceName = getOrderResourceName( query );
-
 		expect( state.data[ 1 ].total ).toEqual( initialState.data[ 1 ].total );
 		expect( state.data[ 2 ] ).toEqual( orders[ 1 ] );
 	} );
