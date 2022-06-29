@@ -171,9 +171,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				thingsToDoCount
 			),
 			thingsToDoNextCount: thingsToDoCount,
-			requestingTaskListOptions: ! hasFinishedResolution(
-				'getTaskLists'
-			),
+			requestingTaskListOptions:
+				! hasFinishedResolution( 'getTaskLists' ),
 			setupTaskListComplete: setupList?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
 			setupTasksCount: setupVisibleTasks.length,

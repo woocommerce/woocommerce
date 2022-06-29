@@ -346,10 +346,8 @@ export class StoreDetails extends Component {
 										if ( skipping ) {
 											skipProfiler();
 										} else {
-											this.onContinue(
-												values
-											).then( () =>
-												this.props.goToNextStep()
+											this.onContinue( values ).then(
+												() => this.props.goToNextStep()
 											);
 										}
 									} }
@@ -470,11 +468,8 @@ StoreDetails.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getSettings,
-			getSettingsError,
-			isUpdateSettingsRequesting,
-		} = select( SETTINGS_STORE_NAME );
+		const { getSettings, getSettingsError, isUpdateSettingsRequesting } =
+			select( SETTINGS_STORE_NAME );
 		const {
 			getProfileItems,
 			isOnboardingRequesting,
@@ -547,13 +542,10 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const {
-			invalidateResolutionForStoreSelector,
-			updateProfileItems,
-		} = dispatch( ONBOARDING_STORE_NAME );
-		const { updateAndPersistSettingsForGroup } = dispatch(
-			SETTINGS_STORE_NAME
-		);
+		const { invalidateResolutionForStoreSelector, updateProfileItems } =
+			dispatch( ONBOARDING_STORE_NAME );
+		const { updateAndPersistSettingsForGroup } =
+			dispatch( SETTINGS_STORE_NAME );
 
 		return {
 			createNotice,

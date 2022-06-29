@@ -23,6 +23,7 @@ const StoreLocation = ( {
 	isSettingsRequesting,
 	updateAndPersistSettingsForGroup,
 	settings,
+	buttonText = __( 'Continue', 'woocommerce' ),
 } ) => {
 	const { getLocale, hasFinishedResolution } = useSelect( ( select ) => {
 		const countryStore = select( COUNTRIES_STORE_NAME );
@@ -101,7 +102,7 @@ const StoreLocation = ( {
 						setValue={ setValue }
 					/>
 					<Button isPrimary onClick={ handleSubmit }>
-						{ __( 'Continue', 'woocommerce' ) }
+						{ buttonText }
 					</Button>
 				</Fragment>
 			) }

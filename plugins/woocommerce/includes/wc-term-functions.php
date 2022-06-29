@@ -529,7 +529,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	}
 
 	$o_term_counts = get_transient( 'wc_term_counts' );
-	$term_counts   = $o_term_counts;
+	$term_counts   = false === $o_term_counts ? array() : $o_term_counts;
 
 	foreach ( $terms as &$term ) {
 		if ( is_object( $term ) ) {

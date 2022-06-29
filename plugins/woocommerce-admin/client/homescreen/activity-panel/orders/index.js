@@ -257,53 +257,55 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 		return currencyContext.formatAmount( total );
 	};
 
-	const { orders = [], isRequesting, isError, customerItems } = useSelect(
-		( select ) => {
-			const { getOrders, hasFinishedResolution, getOrdersError } = select(
-				ORDERS_STORE_NAME
-			);
-			// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-			const { getItems } = select( ITEMS_STORE_NAME );
+	const {
+		orders = [],
+		isRequesting,
+		isError,
+		customerItems,
+	} = useSelect( ( select ) => {
+		const { getOrders, hasFinishedResolution, getOrdersError } =
+			select( ORDERS_STORE_NAME );
+		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+		const { getItems } = select( ITEMS_STORE_NAME );
 
-			if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
-				return { isRequesting: false };
-			}
+		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
+			return { isRequesting: false };
+		}
 
-			/* eslint-disable @wordpress/no-unused-vars-before-return */
-			const actionableOrders = getOrders( actionableOrdersQuery, null );
+		/* eslint-disable @wordpress/no-unused-vars-before-return */
+		const actionableOrders = getOrders( actionableOrdersQuery, null );
 
-			const isRequestingActionable = hasFinishedResolution( 'getOrders', [
-				actionableOrdersQuery,
-			] );
+		const isRequestingActionable = hasFinishedResolution( 'getOrders', [
+			actionableOrdersQuery,
+		] );
 
-			if (
-				isRequestingActionable ||
-				unreadOrdersCount === null ||
-				actionableOrders === null
-			) {
-				return {
-					isError: Boolean( getOrdersError( actionableOrdersQuery ) ),
-					isRequesting: true,
-					orderStatuses,
-				};
-			}
-
-			const customers = getItems( 'customers', {
-				users: actionableOrders
-					.map( ( order ) => order.customer_id )
-					.filter( ( id ) => id !== 0 ),
-				_fields: [ 'id', 'name', 'country', 'user_id' ],
-			} );
-
+		if (
+			isRequestingActionable ||
+			unreadOrdersCount === null ||
+			actionableOrders === null
+		) {
 			return {
-				orders: actionableOrders,
-				isError: Boolean( getOrdersError( actionableOrders ) ),
-				isRequesting: isRequestingActionable,
+				isError: Boolean( getOrdersError( actionableOrdersQuery ) ),
+				isRequesting: true,
 				orderStatuses,
-				customerItems: customers,
 			};
 		}
-	);
+
+		const customers = getItems( 'customers', {
+			users: actionableOrders
+				.map( ( order ) => order.customer_id )
+				.filter( ( id ) => id !== 0 ),
+			_fields: [ 'id', 'name', 'country', 'user_id' ],
+		} );
+
+		return {
+			orders: actionableOrders,
+			isError: Boolean( getOrdersError( actionableOrders ) ),
+			isRequesting: isRequestingActionable,
+			orderStatuses,
+			customerItems: customers,
+		};
+	} );
 
 	if ( isError ) {
 		if ( ! orderStatuses.length && window.wcAdminFeatures.analytics ) {

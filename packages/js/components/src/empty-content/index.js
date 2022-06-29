@@ -17,11 +17,8 @@ import { H } from '../section';
  */
 class EmptyContent extends Component {
 	renderIllustration() {
-		const {
-			illustrationWidth,
-			illustrationHeight,
-			illustration,
-		} = this.props;
+		const { illustrationWidth, illustrationHeight, illustration } =
+			this.props;
 		return (
 			<img
 				alt=""

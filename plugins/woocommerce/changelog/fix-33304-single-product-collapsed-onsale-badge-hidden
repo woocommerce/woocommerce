@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix broken design of Single Product template in Twenty Twenty-Two when product had no reviews or additional info. Fix on sale badge being cut off on the Single Product template.

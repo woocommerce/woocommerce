@@ -98,13 +98,8 @@ class SearchFilter extends Component {
 	}
 
 	render() {
-		const {
-			className,
-			config,
-			filter,
-			onFilterChange,
-			isEnglish,
-		} = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } =
+			this.props;
 		const { selected } = this.state;
 		const { rule } = filter;
 		const { input, labels, rules } = config;

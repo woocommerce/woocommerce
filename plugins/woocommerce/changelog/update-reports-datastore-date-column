@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Replace the date_created column name with a class property in the analytics datastore

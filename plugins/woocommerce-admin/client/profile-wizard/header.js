@@ -23,10 +23,10 @@ export default class ProfileWizardHeader extends Component {
 
 	shouldWarnForUnsavedChanges( step ) {
 		if ( typeof this.props.stepValueChanges[ step ] !== 'undefined' ) {
-			const initialValues = this.props.stepValueChanges[ step ]
-				.initialValues;
-			const currentValues = this.props.stepValueChanges[ step ]
-				.currentValues;
+			const initialValues =
+				this.props.stepValueChanges[ step ].initialValues;
+			const currentValues =
+				this.props.stepValueChanges[ step ].currentValues;
 
 			if (
 				Array.isArray( initialValues ) &&

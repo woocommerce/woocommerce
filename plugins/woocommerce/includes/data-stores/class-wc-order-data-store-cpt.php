@@ -306,7 +306,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		// If customer changed, update any downloadable permissions.
-		if ( in_array( 'customer_id', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
+		if ( in_array( 'customer_id', $updated_props, true ) || in_array( 'billing_email', $updated_props, true ) ) {
 			$data_store = WC_Data_Store::load( 'customer-download' );
 			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
 		}
@@ -437,7 +437,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
 				$order->get_id()
 			)
-		);
+		) ?? 0;
 
 		return abs( $total );
 	}
@@ -461,7 +461,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				AND order_itemmeta.meta_key IN ('cost')",
 				$order->get_id()
 			)
-		);
+		) ?? 0;
 
 		return abs( $total );
 	}
@@ -889,6 +889,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['date_query'] = array();
 		}
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$wp_query_args['meta_query'] = array();
 		}
 
@@ -1029,7 +1030,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			return;
 		}
 		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
-			if ( is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'] ) ) {
+			if ( is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'], true ) ) {
 				return;
 			}
 		}
@@ -1155,7 +1156,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		global $wpdb;
 
 		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
-			if ( is_array( $query_vars['fields'] ) && ! in_array( 'meta_data', $query_vars['fields'] ) ) {
+			if ( is_array( $query_vars['fields'] ) && ! in_array( 'meta_data', $query_vars['fields'], true ) ) {
 				return;
 			}
 		}

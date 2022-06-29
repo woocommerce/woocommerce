@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove blog URL from requests to external IP lookup services.

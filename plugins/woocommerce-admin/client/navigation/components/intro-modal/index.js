@@ -28,9 +28,8 @@ export const IntroModal = () => {
 
 	const { isDismissed, isResolving, isWelcomeModalShown } = useSelect(
 		( select ) => {
-			const { getOption, isResolving: isOptionResolving } = select(
-				OPTIONS_STORE_NAME
-			);
+			const { getOption, isResolving: isOptionResolving } =
+				select( OPTIONS_STORE_NAME );
 			const dismissedOption = getOption(
 				INTRO_MODAL_DISMISSED_OPTION_NAME
 			);

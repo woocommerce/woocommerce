@@ -15,7 +15,7 @@ import { State } from './reducer';
  *
  * @type {Array}
  */
-const DEFAULT_NOTICES: [  ] = [];
+const DEFAULT_NOTICES: [] = [];
 
 /**
  * @typedef {Object} WPNotice Notice object.

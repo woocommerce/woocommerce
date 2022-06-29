@@ -287,11 +287,8 @@ class Industry extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getProfileItems,
-			getOnboardingError,
-			isOnboardingRequesting,
-		} = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems, getOnboardingError, isOnboardingRequesting } =
+			select( ONBOARDING_STORE_NAME );
 		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { general: locationSettings = {} } = getSettings( 'general' );
 
@@ -299,9 +296,8 @@ export default compose(
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 			locationSettings,
-			isProfileItemsRequesting: isOnboardingRequesting(
-				'updateProfileItems'
-			),
+			isProfileItemsRequesting:
+				isOnboardingRequesting( 'updateProfileItems' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

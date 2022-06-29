@@ -108,7 +108,7 @@ class Loader {
 					echo '<div class="error"><p>';
 					printf(
 						/* translators: %s: is referring to the plugin's name. */
-						esc_html__( '%1$s plugin has been deactivated to avoid conflicts with %2$s plugin.', 'woocommerce' ),
+						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
 						'<code>WooCommerce Admin</code>',
 						'<code>WooCommerce</code>'
 					);

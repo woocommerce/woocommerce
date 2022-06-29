@@ -14,9 +14,8 @@ const addClassToIframeWhenChildFocus = ( {
 	childSelector,
 	className,
 }: addClassToIframeWhenChildFocusProps ) => {
-	const iframe = document.querySelector< HTMLIFrameElement >(
-		iframeSelector
-	);
+	const iframe =
+		document.querySelector< HTMLIFrameElement >( iframeSelector );
 	const innerDoc =
 		iframe?.contentDocument ||
 		( iframe?.contentWindow && iframe?.contentWindow.document );

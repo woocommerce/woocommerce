@@ -24,9 +24,8 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 } ) => {
 	const isFirstStep = currentStepIndex === 0;
 	const isLastStep = currentStepIndex === steps.length - 1;
-	const { primaryButton = { text: '', isDisabled: false } } = steps[
-		currentStepIndex
-	].meta;
+	const { primaryButton = { text: '', isDisabled: false } } =
+		steps[ currentStepIndex ].meta;
 
 	const NextButton = (
 		<Button
