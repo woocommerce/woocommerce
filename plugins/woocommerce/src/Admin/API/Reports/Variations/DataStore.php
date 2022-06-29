@@ -202,7 +202,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'where', $attribute_order_items_subquery );
 		}
 
-		if ( 0 < count( $where_subquery ) ) {
+		if ( count( $where_subquery ) > 0 ) {
 			$operator = $this->get_match_operator( $query_args );
 			$this->subquery->add_sql_clause( 'where', 'AND (' . implode( " {$operator} ", $where_subquery ) . ')' );
 		}
@@ -263,7 +263,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				// If this is a variation, add its attributes.
 				// NOTE: We don't fall back to the parent product here because it will include all possible attribute options.
 				if (
-					0 < $variation_id &&
+					$variation_id > 0 &&
 					is_callable( array( $variation_product, 'get_variation_attributes' ) )
 				) {
 					$variation_attributes = $variation_product->get_variation_attributes();

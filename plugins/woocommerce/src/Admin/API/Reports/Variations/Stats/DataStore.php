@@ -104,7 +104,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 			$products_where_clause .= $attribute_order_items_subquery;
 		}
 
-		if ( 0 < count( $where_subquery ) ) {
+		if ( count( $where_subquery ) > 0 ) {
 			$operator               = $this->get_match_operator( $query_args );
 			$products_where_clause .= 'AND (' . implode( " {$operator} ", $where_subquery ) . ')';
 		}

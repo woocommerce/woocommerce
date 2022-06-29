@@ -193,7 +193,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery = array_merge( $where_subquery, $attribute_subqueries['where'] );
 		}
 
-		if ( 0 < count( $where_subquery ) ) {
+		if ( count( $where_subquery ) > 0 ) {
 			$this->subquery->add_sql_clause( 'where', 'AND (' . implode( " {$operator} ", $where_subquery ) . ')' );
 		}
 	}

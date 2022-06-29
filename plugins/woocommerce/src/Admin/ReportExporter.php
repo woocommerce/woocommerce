@@ -94,7 +94,7 @@ class ReportExporter {
 		// Create batches, like initial import.
 		$report_batch_args = array( $export_id, $report_type, $report_args );
 
-		if ( 0 < $num_batches ) {
+		if ( $num_batches > 0) {
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {

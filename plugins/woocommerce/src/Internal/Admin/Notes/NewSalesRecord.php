@@ -76,7 +76,7 @@ class NewSalesRecord {
 		$total     = self::sum_sales_for_date( $yesterday );
 
 		// No sales yesterday? Bail.
-		if ( 0 >= $total ) {
+		if ( $total <= 0 ) {
 			return;
 		}
 

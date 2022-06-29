@@ -97,7 +97,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
 		$wheres = array();
 		foreach ( $results as $result ) {
-			'product_variation' === $result->post_type ?
+			$result->post_type === 'product_variation' ?
 				array_push( $wheres, "(product_id={$result->post_parent} and variation_id={$result->ID})" )
 				: array_push( $wheres, "product_id={$result->ID}" );
 		}
@@ -126,7 +126,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		}
 
 		foreach ( $results as &$result ) {
-			'product_variation' === $result->post_type ?
+			$result->post_type === 'product_variation' ?
 				$index_key   = $result->post_parent . '_' . $result->ID
 				: $index_key = $result->ID . '_' . $result->post_parent;
 

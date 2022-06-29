@@ -141,7 +141,7 @@ class SystemStatusReport {
 		$woocommerce_admin_install_timestamp = get_option( 'woocommerce_admin_install_timestamp' );
 
 		$all_options_expected = is_numeric( $woocommerce_admin_install_timestamp )
-			&& 0 < (int) $woocommerce_admin_install_timestamp
+			&& (int) $woocommerce_admin_install_timestamp > 0
 			&& is_array( get_option( 'woocommerce_onboarding_profile', array() ) );
 
 		?>
