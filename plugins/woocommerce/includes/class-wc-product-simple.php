@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Product_Simple extends WC_Product {
 
 	/**
+	 * Track wehther post_upload_ui hook was run.
+	 *
+	 * @var boolean
+	 */
+	public static $post_upload_hook_done = false;
+
+	/**
 	 * Initialize simple product.
 	 *
 	 * @param WC_Product|int $product Product instance or ID.
@@ -22,6 +29,24 @@ class WC_Product_Simple extends WC_Product {
 	public function __construct( $product = 0 ) {
 		$this->supports[] = 'ajax_add_to_cart';
 		parent::__construct( $product );
+		add_action( 'post-upload-ui', array( $this, 'add_product_photo_suggestions' ) );
+	}
+
+	/**
+	 * Adding product photo suggestions in upload modal.
+	 */
+	public function add_product_photo_suggestions() {
+
+		if ( self::$post_upload_hook_done ) {
+			return;
+		}
+
+		echo '<p>';
+		echo 'For best results, upload JPEG files that are 1000 by 1000 pixels or larger.';
+		echo '</p>';
+		echo '<a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">Learn more about product photos</a>';
+
+		self::$post_upload_hook_done = true;
 	}
 
 	/**
