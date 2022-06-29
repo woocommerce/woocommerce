@@ -85,7 +85,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( $this->user );
 
-		if ( 'create' === $action ) {
+		if ( $action === 'create' ) {
 			$tax_rate_id = null;
 
 			$request_body = array_merge(
@@ -231,7 +231,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$data
 		);
 
-		if ( 'asc' === $order_type ) {
+		if ( $order_type === 'asc' ) {
 			$expected = array( $tax_id_1, $tax_id_2, $tax_id_3 );
 		} else {
 			$expected = array( $tax_id_3, $tax_id_2, $tax_id_1 );

@@ -1400,7 +1400,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 
 		$note_id = wc_create_order_note( $order->get_id(), 'Note content', false, false );
-		$this->assertTrue( 0 < $note_id );
+		$this->assertTrue( $note_id > 0 );
 	}
 
 	/**

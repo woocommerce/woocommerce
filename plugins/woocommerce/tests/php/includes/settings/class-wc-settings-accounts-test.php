@@ -114,12 +114,12 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 		FunctionsMockerHack::add_function_mocks(
 			array(
 				'current_user_can' => function( $capability, ...$args ) use ( $current_user_can_manage_privacy_options ) {
-					return 'manage_privacy_options' === $capability ?
+					return $capability === 'manage_privacy_options' ?
 						$current_user_can_manage_privacy_options :
 						current_user_can( $capability, ...$args );
 				},
 				'get_bloginfo'     => function( $show = '', $filter = 'raw' ) use ( $blog_version ) {
-					return 'version' === $show ?
+					return $show === 'version' ?
 						$blog_version :
 						get_bloginfo( $show, $filter );
 				},

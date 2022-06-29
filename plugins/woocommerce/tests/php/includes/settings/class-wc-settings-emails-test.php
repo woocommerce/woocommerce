@@ -169,6 +169,6 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$sut->save();
 
 		$this->assertEquals( $expect_save_settings_for_current_section, $save_settings_for_current_section_invoked );
-		$this->assertEquals( '' === $section_name ? 0 : 1, did_action( 'woocommerce_update_options_email_new_order' ) );
+		$this->assertEquals( $section_name === '' ? 0 : 1, did_action( 'woocommerce_update_options_email_new_order' ) );
 	}
 }

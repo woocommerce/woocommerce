@@ -69,21 +69,21 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	protected function mock_http_responses( $request, $url ) {
 		$mocked_response = false;
 
-		if ( 'GET' === $request['method'] && WC_Helper_API::url( 'test-get' ) === $url ) {
+		if ( $request['method'] === 'GET' && WC_Helper_API::url( 'test-get' ) === $url ) {
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
 			);
 		}
 
-		if ( 'POST' === $request['method'] && WC_Helper_API::url( 'test-post' ) === $url ) {
+		if ( $request['method'] === 'POST' && WC_Helper_API::url( 'test-post' ) === $url ) {
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
 			);
 		}
 
-		if ( 'PUT' === $request['method'] && WC_Helper_API::url( 'test-put' ) === $url ) {
+		if ( $request['method'] === 'PUT' && WC_Helper_API::url( 'test-put' ) === $url ) {
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),

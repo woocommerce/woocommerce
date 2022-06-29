@@ -353,7 +353,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		$value = getenv( 'WP_HTTP_TC_' . $var );
 
-		if ( false !== $value ) {
+		if ( $value !== false ) {
 			return $value;
 		}
 
@@ -396,7 +396,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		$request_fields = self::get_env( 'CACHE_REQUEST_FIELDS' );
 
-		if ( null !== $request_fields ) {
+		if ( $request_fields !== null ) {
 			self::$cache_request_fields = array_flip(
 				array_map( 'trim', explode( ',', $request_fields ) )
 			);

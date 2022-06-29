@@ -24,7 +24,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function( $arg1, $arg2, $url ) {
-				$this->assertTrue( false !== strpos( $url, 'test=test' ) );
+				$this->assertTrue( strpos( $url, 'test=test' ) !== false );
 				return array(
 					'response'    => 200,
 					'status_code' => 200,

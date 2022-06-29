@@ -555,7 +555,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$token->set_extra( __FUNCTION__ );
 		$token->set_token( time() );
 		$token->save();
-		$this->assertTrue( 0 < $object->add_payment_token( $token ) );
+		$this->assertTrue( $object->add_payment_token( $token ) > 0 );
 	}
 
 	/**

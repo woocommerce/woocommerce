@@ -173,7 +173,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$this->assertTrue( $init_invoked );
 		$this->assertEquals( $expect_to_run_process_admin_options, $process_admin_options_invoked );
 
-		$this->assertEquals( '' === $section_name ? 0 : 1, did_action( 'woocommerce_update_options_payment_gateways_bacs' ) );
-		$this->assertEquals( '' === $section_name ? 0 : 1, did_action( 'woocommerce_update_options_checkout_' . $section_name ) );
+		$this->assertEquals( $section_name === '' ? 0 : 1, did_action( 'woocommerce_update_options_payment_gateways_bacs' ) );
+		$this->assertEquals( $section_name === '' ? 0 : 1, did_action( 'woocommerce_update_options_checkout_' . $section_name ) );
 	}
 }

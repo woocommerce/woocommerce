@@ -138,7 +138,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			array_filter(
 				$settings,
 				function( $value ) {
-					return 'woocommerce_cart_page_id' === $value['id'];
+					return $value['id'] === 'woocommerce_cart_page_id';
 				}
 			)
 		);
