@@ -46,7 +46,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	 * @return string | void Rendered block type output.
 	 */
 	protected function render( $attributes, $content ) {
-		if ( null === $attributes['template'] ) {
+		if ( isset( $attributes['template'] ) ) {
 			return;
 		}
 
