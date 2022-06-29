@@ -221,6 +221,32 @@ final class BlockTypesController {
 			);
 		}
 
+		/**
+		 * This disables specific blocks in Widget Areas by not registering them.
+		 */
+		if ( in_array( $pagenow, [ 'widgets.php', 'themes.php', 'customize.php' ], true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$block_types = array_diff(
+				$block_types,
+				[
+					'AllProducts',
+					'Cart',
+					'Checkout',
+				]
+			);
+		}
+
+		/**
+		 * This disables specific blocks in Post and Page editor by not registering them.
+		 */
+		if ( in_array( $pagenow, [ 'post.php', 'post-new.php' ], true ) ) {
+			$block_types = array_diff(
+				$block_types,
+				[
+					'ClassicTemplate',
+				]
+			);
+		}
+
 		return $block_types;
 	}
 
