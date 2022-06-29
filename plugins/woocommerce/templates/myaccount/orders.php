@@ -83,7 +83,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
 	<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>
 
-	<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
+	<?php if ( $customer_orders->max_num_pages > 1 ) : ?>
 		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
 			<?php if ( $current_page !== 1 ) : ?>
 				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>

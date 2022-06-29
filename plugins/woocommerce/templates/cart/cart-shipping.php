@@ -32,7 +32,7 @@ $calculator_text          = '';
 				<?php foreach ( $available_methods as $method ) : ?>
 					<li>
 						<?php
-						if ( 1 < count( $available_methods ) ) {
+						if ( count( $available_methods ) > 1 ) {
 							printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
 						} else {
 							printf( '<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ) ); // WPCS: XSS ok.
