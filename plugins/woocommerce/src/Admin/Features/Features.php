@@ -164,8 +164,7 @@ class Features {
 			$feature_class = self::get_feature_class( $optional_feature_key );
 
 			if ( $feature_class ) {
-				$default = self::$optional_features[ $optional_feature_key ]['default'] ??
-					'no';
+				$default = self::$optional_features[ $optional_feature_key ]['default'] ?? 'no';
 
 				// Check if the feature is currently being enabled, if it is continue.
 				/* phpcs:disable WordPress.Security.NonceVerification */
