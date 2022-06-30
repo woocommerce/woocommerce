@@ -1,4 +1,9 @@
 <?php
+/**
+ * Legacy_Core_Formatter class
+ *
+ * @package  WooCommerce
+ */
 
 namespace Automattic\WooCommerce\MonorepoTools\Changelogger;
 
@@ -16,7 +21,7 @@ require_once 'Formatter.php';
  *
  * Class Formatter
  */
-class LegacyCoreFormatter extends Formatter implements FormatterPlugin {
+class Legacy_Core_Formatter extends Formatter implements FormatterPlugin {
 
 	/**
 	 * Bullet for changes.
@@ -35,7 +40,7 @@ class LegacyCoreFormatter extends Formatter implements FormatterPlugin {
 
 	/**
 	 * Returns an mapping the subheading to the type key.
-	 * 
+	 *
 	 * @return array
 	 */
 	private function getSubheadingTypeMapping() {
@@ -59,8 +64,8 @@ class LegacyCoreFormatter extends Formatter implements FormatterPlugin {
 
 		foreach ( $changelog->getEntries() as $entry ) {
 			$version = $entry->getVersion();
-			if ( substr_count( $version, '.' ) == 1 ) {
-				$version .= '.0';	
+			if ( substr_count( $version, '.' ) === 1 ) {
+				$version .= '.0';
 			}
 
 			$ret .= "= $version YYYY-mm-dd =\n\n";
