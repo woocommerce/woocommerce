@@ -35,12 +35,28 @@ jobs:
 
             - name: Run tests command.
               if: env.E2E_PLAYWRIGHT != 'true'
+              id: run-puppeteer-e2e-tests
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
               run: pnpm exec wc-e2e test:e2e
+
+            - name: Archive Puppeteer E2E test results
+              if: |
+                  always() &&
+                  env.E2E_PLAYWRIGHT != 'true' &&
+                  (
+                    steps.run-puppeteer-e2e-tests.conclusion != 'cancelled' ||
+                    steps.run-puppeteer-e2e-tests.conclusion != 'skipped' 
+                  )             
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pptr-e2e-test-results
+                  path: plugins/woocommerce/tests/e2e/test-results.json
+                  if-no-files-found: ignore
+                  retention-days: 5
 
             - name: Download and install Chromium browser.
               if: env.E2E_PLAYWRIGHT == 'true'
@@ -51,7 +67,7 @@ jobs:
               id: run_playwright_e2e_tests
               if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=e2e/playwright.config.js
+              run: pnpx playwright test --config=e2e/playwright.config.js e2e/tests/activate-and-setup/basic-setup.spec.js
 
             - name: Generate (Playwright) E2E Test report.
               id: generate_e2e_report
@@ -164,6 +180,86 @@ jobs:
             - name: Run k6 tests
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+
+    test-summary:
+        name: Output E2E and API test summary in workflow run and PR comment
+        if: |
+            always() && 
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [ api-tests-run, e2e-tests-run ]
+        steps:
+            - name: Create dirs
+              run: |
+                  mkdir -p repo
+                  mkdir -p artifacts/api 
+                  mkdir -p artifacts/e2e
+                  mkdir -p output
+
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  path: repo
+
+            - name: Download API test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: api-test-report---pr-${{ github.event.number }}
+                  path: artifacts/api
+
+            - name: Get API test summary
+              id: api-summary
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const { statistic, time } = require('./artifacts/api/allure-report/widgets/summary.json')
+                      return { statistic, time }
+
+            - name: Download Playwright E2E test report artifact
+              if: env.E2E_PLAYWRIGHT == 'true'
+              uses: actions/download-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: artifacts/e2e
+
+            - name: Get Playwright E2E test summary
+              if: env.E2E_PLAYWRIGHT == 'true'
+              id: e2e-pw-summary
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const { statistic, time } = require('./artifacts/e2e/allure-report/widgets/summary.json')
+                      return { statistic, time }
+
+            - name: Download Puppeteer E2E test report artifact
+              if: env.E2E_PLAYWRIGHT != 'true'
+              uses: actions/download-artifact@v3
+              with:
+                  name: pptr-e2e-test-results
+                  path: artifacts/e2e
+
+            - name: Get Puppeteer E2E test summary
+              if: env.E2E_PLAYWRIGHT != 'true'
+              id: e2e-pptr-summary
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const { numPassedTests, numFailedTests, numTotalTests, startTime, testResults } = require('./artifacts/e2e/test-results.json')
+                      return { numPassedTests, numFailedTests, numTotalTests, startTime, testResults }
+
+
+            - name: Post test summary on workflow run
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                    const apiSummary = ${{ fromJSON(steps.api-summary.outputs.result) }}
+                    console.log( apiSummary )
+
+            - name: Add/update PR comment with test summary
+              # mytodo  
 
     publish-test-reports:
         name: Publish test reports
