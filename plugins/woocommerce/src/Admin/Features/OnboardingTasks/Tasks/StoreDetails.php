@@ -60,7 +60,7 @@ class StoreDetails extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return '/setup-wizard';
+		return admin_url( 'admin.php?page=wc-settings' );
 	}
 
 	/**
