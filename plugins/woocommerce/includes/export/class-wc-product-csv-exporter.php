@@ -254,7 +254,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		/**
 		 * Allow third-party plugins to filter the data in a single row of the exported CSV file.
 		 *
-		 * @since 6.7.0
+		 * @since 3.1.0
+		 *
 		 * @param array                   $row         An associative array with the data of a single row in the CSV file.
 		 * @param WC_Product              $product     The product object correspnding to the current row.
 		 * @param WC_Product_CSV_Exporter $exporter    The instance of the CSV exporter.
