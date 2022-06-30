@@ -54,7 +54,7 @@ export class Shipping extends Component {
 			window.wcAdminFeatures &&
 			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
 
-		this.store_location_completed = false;
+		this.storeLocationCompleted = false;
 	}
 
 	componentDidMount() {
@@ -153,10 +153,10 @@ export class Shipping extends Component {
 			this.shippingSmartDefaultsEnabled &&
 			step === 'store_location' &&
 			isCompleteAddress &&
-			! this.store_location_completed
+			! this.storeLocationCompleted
 		) {
 			this.completeStep();
-			this.store_location_completed = true;
+			this.storeLocationCompleted = true;
 		} else if ( step === 'store_location' && isCompleteAddress ) {
 			this.completeStep();
 		}
