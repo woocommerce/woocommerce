@@ -334,7 +334,7 @@ jQuery( function ( $ ) {
 		},
 
 		filter_data: function( handle, data ) {
-			const filteredData = $( '#woocommerce-order-items' ).triggerHandler( `${handle}_ajax_data`, [ data ] );
+			const filteredData = $( '#woocommerce-order-items' ).triggerHandler( `woocommerce_order_meta_box_${handle}_ajax_data`, [ data ] );
 
 			if ( filteredData ) {
 				return filteredData;
