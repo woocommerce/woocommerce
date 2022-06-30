@@ -96,6 +96,7 @@ export const hasValidChangelogs = ( name: string ): boolean | void => {
 			return false;
 		}
 
+		// If there is at least one changelog that is not just a comment, there are valid changelogs.
 		return changelogs.some( ( changelog ) => {
 			const contents = readFileSync(
 				join( changelogDir, changelog ),
@@ -113,6 +114,7 @@ export const hasValidChangelogs = ( name: string ): boolean | void => {
 			const textAfterComment = /Comment:.*\n([\s\S]*)?/.exec( contents );
 
 			if ( textAfterComment ) {
+				// Return true if there is more than just whitespace.
 				return textAfterComment[ 1 ].trim().length > 0;
 			}
 
