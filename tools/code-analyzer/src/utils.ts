@@ -198,13 +198,25 @@ export const isValidCommitHash = ( branch: string ): boolean => {
  * Extrace hook description from a raw diff.
  *
  * @param {string} diff raw diff.
+ * @param {string} name hook name.
  * @return {string|false} hook description or false if none exists.
  */
-export const getHookDescription = ( diff: string ): string | false => {
+export const getHookDescription = (
+	diff: string,
+	name: string
+): string | false => {
 	const diffWithoutDeletions = diff.replace( /-.*\n/g, '' );
 
+	const diffWithHook = diffWithoutDeletions
+		.split( '/**' ) // Separate by the beginning of a comment.
+		.find( ( d ) => d.includes( name ) ); // Use just the one associated with our hook.
+
+	if ( ! diffWithHook ) {
+		return false;
+	}
+
 	// Extract hook description.
-	const description = diffWithoutDeletions.match( /\/\*\*([\s\S]*) @since/ );
+	const description = diffWithHook.match( /([\s\S]*?) @since/ );
 
 	if ( ! description ) {
 		return false;
