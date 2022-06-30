@@ -93,12 +93,12 @@ class WC_Tracks_Event {
 		}
 
 		if ( ! self::event_name_is_valid( $_event->_en ) ) {
-			return new WP_Error( 'invalid_event_name', 'A valid event name must be specified. ', 500 );
+			return new WP_Error( 'invalid_event_name', __( 'A valid event name must be specified.', 'woocommerce' ) );
 		}
 
 		foreach ( array_keys( (array) $_event ) as $key ) {
 			if ( ! self::prop_name_is_valid( $key ) ) {
-				return new WP_Error( 'invalid_prop_name', 'A valid prop name must be specified', 500 );
+				return new WP_Error( 'invalid_prop_name', __( 'A valid prop name must be specified', 'woocommerce' ) );
 			}
 		}
 
