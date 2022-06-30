@@ -100,7 +100,7 @@ class WC_Tracks_Event {
 		foreach ( array_keys( (array) $_event ) as $key ) {
 			if ( ! self::prop_name_is_valid( $key ) ) {
 				error_log( "Prop name $_event->_en->$key is invalid. A valid prop name must be specified." ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					return new WP_Error( 'invalid_prop_name', 'A valid prop name must be specified', 500 );
+				return new WP_Error( 'invalid_prop_name', 'A valid prop name must be specified', 500 );
 			}
 		}
 
