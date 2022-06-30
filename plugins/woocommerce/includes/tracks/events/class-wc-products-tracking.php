@@ -134,23 +134,37 @@ class WC_Products_Tracking {
 			"
 			if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
 				var initialStockValue = $( '#_stock' ).val();
-				var hasRecordedEvent = false;
+				var isBlockEditor = false;
+				var child_element = '#publish';
 
-				$( '#publish' ).on( 'click', function() {
-					if ( hasRecordedEvent ) {
-						return;
+				if ( $( '.block-editor' ).length !== 0 && $( '.block-editor' )[0] ) {
+	    			isBlockEditor = true;
+				}
+
+				if ( isBlockEditor ) {
+					child_element = '.editor-post-publish-button';
+				}
+
+				$( '#wpwrap' ).on( 'click', child_element, function() {
+					var description_value  = '';
+					var tagsText = '';
+					var currentStockValue = $( '#_stock' ).val();
+
+					if ( ! isBlockEditor ) {
+						tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
+						description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
+					} else {
+						description_value  = $( '.block-editor-rich-text__editable' ).text();
 					}
 
-					var tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
-					var currentStockValue = $( '#_stock' ).val();
-					var description_value  = $( '#content' ).is( ':visible' ) ? $( '#content' ).val() : tinymce.get( 'content' ).getContent();
 					var properties = {
 						attributes:				$( '.woocommerce_attribute' ).length,
 						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
-						'cross-sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
-						description:			description_value.length ? 'Yes' : 'No',
+						'cross_sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
+						description:			description_value.trim() !== '' ? 'Yes' : 'No',
 						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_block_editor:		isBlockEditor,
 						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
 						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
 						menu_order:				$( '#menu_order' ).val() ? 'Yes' : 'No',
@@ -165,9 +179,7 @@ class WC_Products_Tracking {
 						upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
 						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
 					};
-
 					window.wcTracks.recordEvent( 'product_update', properties );
-					hasRecordedEvent = true;
 				} );
 			}
 			"
