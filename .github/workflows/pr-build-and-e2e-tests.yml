@@ -255,7 +255,7 @@ jobs:
               uses: actions/github-script@v6
               with:
                   script: |
-                    const apiSummary = ${{ steps.api-summary.outputs.result }}
+                    const apiSummary = ${{ toJSON(steps.api-summary.outputs.result) }}
                     console.log( apiSummary )
 
             - name: Add/update PR comment with test summary
