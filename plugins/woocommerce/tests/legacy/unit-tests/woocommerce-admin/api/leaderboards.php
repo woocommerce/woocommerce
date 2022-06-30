@@ -46,6 +46,62 @@ class WC_Admin_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the customers leaderboard are returned by the endpoint.
+	 */
+	public function test_get_leaderboards_customers() {
+		wp_set_current_user( $this->user );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/customers' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'customers', $data[0]['id'] );
+	}
+
+	/**
+	 * Test that the coupons leaderboard are returned by the endpoint.
+	 */
+	public function test_get_leaderboards_coupons() {
+		wp_set_current_user( $this->user );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/coupons' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'coupons', $data[0]['id'] );
+	}
+
+	/**
+	 * Test that the categories leaderboard are returned by the endpoint.
+	 */
+	public function test_get_leaderboards_categories() {
+		wp_set_current_user( $this->user );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/categories' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'categories', $data[0]['id'] );
+	}
+
+	/**
+	 * Test that the products leaderboard are returned by the endpoint.
+	 */
+	public function test_get_leaderboards_products() {
+		wp_set_current_user( $this->user );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/products' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'products', $data[0]['id'] );
+	}
+
+	/**
 	 * Test reports schema.
 	 */
 	public function test_schema() {

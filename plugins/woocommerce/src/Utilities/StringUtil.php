@@ -57,4 +57,20 @@ final class StringUtil {
 
 		return strcasecmp( $string, $ends_with ) === 0;
 	}
+
+	/**
+	 * Checks if one string is contained into another at any position.
+	 *
+	 * @param string $string The string we want to check.
+	 * @param string $contained The string we're looking for inside $string.
+	 * @param bool   $case_sensitive Indicates whether the comparison should be case-sensitive.
+	 * @return bool True if $contained is contained inside $string, false otherwise.
+	 */
+	public static function contains( string $string, string $contained, bool $case_sensitive = true ): bool {
+		if ( $case_sensitive ) {
+			return false !== strpos( $string, $contained );
+		} else {
+			return false !== stripos( $string, $contained );
+		}
+	}
 }

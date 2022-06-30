@@ -51,27 +51,22 @@ const LAYOUTS = [
 ];
 
 export const DisplayOptions = () => {
-	const {
-		defaultHomescreenLayout,
-		taskListComplete,
-		isTaskListHidden,
-	} = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const { getTaskList } = select( ONBOARDING_STORE_NAME );
-		const taskList = getTaskList( 'setup' );
+	const { defaultHomescreenLayout, taskListComplete, isTaskListHidden } =
+		useSelect( ( select ) => {
+			const { getOption } = select( OPTIONS_STORE_NAME );
+			const { getTaskList } = select( ONBOARDING_STORE_NAME );
+			const taskList = getTaskList( 'setup' );
 
-		return {
-			defaultHomescreenLayout:
-				getOption( 'woocommerce_default_homepage_layout' ) ||
-				'single_column',
-			taskListComplete: taskList?.isComplete,
-			isTaskListHidden: taskList?.isHidden,
-		};
-	} );
-	const {
-		updateUserPreferences,
-		homepage_layout: layout,
-	} = useUserPreferences();
+			return {
+				defaultHomescreenLayout:
+					getOption( 'woocommerce_default_homepage_layout' ) ||
+					'single_column',
+				taskListComplete: taskList?.isComplete,
+				isTaskListHidden: taskList?.isHidden,
+			};
+		} );
+	const { updateUserPreferences, homepage_layout: layout } =
+		useUserPreferences();
 
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
@@ -118,7 +113,8 @@ export const DisplayOptions = () => {
 												recordEvent(
 													'homescreen_display_option',
 													{
-														display_option: newLayout,
+														display_option:
+															newLayout,
 													}
 												);
 											} }

@@ -342,7 +342,8 @@ class Theme extends Component {
 	render() {
 		const { activeTab, chosen, demo } = this.state;
 		const themes = this.getThemes( activeTab );
-		const activeThemeSupportsWooCommerce = this.doesActiveThemeSupportWooCommerce();
+		const activeThemeSupportsWooCommerce =
+			this.doesActiveThemeSupportWooCommerce();
 
 		return (
 			<Fragment>
@@ -419,17 +420,13 @@ class Theme extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getProfileItems,
-			getOnboardingError,
-			isOnboardingRequesting,
-		} = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems, getOnboardingError, isOnboardingRequesting } =
+			select( ONBOARDING_STORE_NAME );
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
-			isUpdatingProfileItems: isOnboardingRequesting(
-				'updateProfileItems'
-			),
+			isUpdatingProfileItems:
+				isOnboardingRequesting( 'updateProfileItems' ),
 			profileItems: getProfileItems(),
 		};
 	} ),

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WooCommerce Admin plugin deactivation message was causing much unnecessary alarm and has been improved #33592

@@ -75,10 +75,6 @@ describe( 'Task', () => {
 				{ id: 'extended', isVisible: true, tasks: [] },
 			],
 		} ) );
-		( useExperiment as jest.Mock ).mockImplementation( () => [
-			false,
-			'control',
-		] );
 	} );
 
 	afterEach( () => {
@@ -125,19 +121,6 @@ describe( 'Task', () => {
 		( useSelect as jest.Mock ).mockImplementation( () => ( {
 			isResolving: true,
 		} ) );
-		const { queryByText } = render(
-			<div>
-				<Tasks query={ {} } />
-			</div>
-		);
-		expect( queryByText( 'task-placeholder' ) ).toBeInTheDocument();
-	} );
-
-	it( 'should render the placeholder if isLoadingExperiment is true', () => {
-		( useExperiment as jest.Mock ).mockImplementation( () => [
-			true,
-			'control',
-		] );
 		const { queryByText } = render(
 			<div>
 				<Tasks query={ {} } />

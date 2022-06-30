@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add step name to tour kit step type and export CloseHandler type to be reused elsewhere

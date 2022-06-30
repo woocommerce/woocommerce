@@ -81,9 +81,8 @@
 	}
 
 	h2 {
-		font-size: 1.5em;
-		font-weight: normal;
-		margin-top: 22px;
+		margin-top: $gap-large;
+		margin-bottom: $gap-small;
 	}
 
 	.wooocommerce-task-card__header {
@@ -92,7 +91,7 @@
 	}
 
 	button.is-secondary {
-		margin-right: 12px;
+		margin-right: $gap-small;
 	}
 }
 
@@ -152,7 +151,6 @@
 
 		.svg-background {
 			right: 6%;
-			width: 25%;
 		}
 	}
 
@@ -236,6 +234,10 @@
 		@include single-column;
 	}
 
+	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents-container {
+		padding: 16px;
+	}
+
 	.woocommerce-task-header__contents-container {
 		padding: 20px 24px;
 		position: relative;
@@ -257,6 +259,10 @@
 		position: absolute;
 		z-index: 0;
 		right: 6%;
+		max-width: 25%;
+		max-height: 150px;
+		width: auto;
+		height: auto;
 
 		.admin-theme-color {
 			fill: var(--wp-admin-theme-color);

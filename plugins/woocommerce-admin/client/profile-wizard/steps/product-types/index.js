@@ -198,12 +198,8 @@ export class ProductTypes extends Component {
 
 	render() {
 		const { productTypes = [] } = this.props;
-		const {
-			error,
-			isMonthlyPricing,
-			isWCPayInstalled,
-			selected,
-		} = this.state;
+		const { error, isMonthlyPricing, isWCPayInstalled, selected } =
+			this.state;
 		const {
 			countryCode,
 			isInstallingActivating,
@@ -356,26 +352,23 @@ export default compose(
 			isOnboardingRequesting,
 		} = select( ONBOARDING_STORE_NAME );
 		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { getInstalledPlugins, isPluginsRequesting } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getInstalledPlugins, isPluginsRequesting } =
+			select( PLUGINS_STORE_NAME );
 		const { general: settings = {} } = getSettings( 'general' );
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
-			isProfileItemsRequesting: isOnboardingRequesting(
-				'updateProfileItems'
-			),
+			isProfileItemsRequesting:
+				isOnboardingRequesting( 'updateProfileItems' ),
 			installedPlugins: getInstalledPlugins(),
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ),
 			countryCode: getCountryCode( settings.woocommerce_default_country ),
 			productTypes: getProductTypes(),
-			isProductTypesRequesting: ! hasFinishedResolution(
-				'getProductTypes'
-			),
+			isProductTypesRequesting:
+				! hasFinishedResolution( 'getProductTypes' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

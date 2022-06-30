@@ -15,34 +15,27 @@ jobs:
     name: Lint and Test JS
     runs-on: ubuntu-20.04
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
       
-      - name: Cache modules
-        uses: actions/cache@v3
+      - uses: ./.github/actions/cache-deps
         with:
-          path: |
-            ~/.pnpm-store
-          key: ${{ runner.os }}-npm-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          workflow_name: pr-lint-test-js
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install and Build
+        uses: ./.github/actions/install-build
 
       - name: Lint
-        run: |
-          pnpm nx build woocommerce-admin
-          pnpm nx lint woocommerce-admin
-          pnpm nx lint:js-packages woocommerce-admin
+        run: pnpm -- turbo run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
 
       - name: Test
-        run: |
-          pnpm nx build woocommerce-admin
-          pnpm nx test woocommerce-admin
-          pnpm nx test:packages woocommerce-admin
+        run: pnpm -- turbo run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'

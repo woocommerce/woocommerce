@@ -4,8 +4,12 @@
 		"analytics": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
-		"experimental-products-task": false,
-		"experimental-import-products-task": false,
+		"experimental-products-task": true,
+		"experimental-import-products-task": true,
+		"experimental-fashion-sample-products": true,
+		"experimental-product-tour": true,
+		"shipping-smart-defaults": false,
+		"shipping-setting-tour": false,
 		"homescreen": true,
 		"marketing": true,
 		"minified-js": true,
@@ -22,6 +26,7 @@
 		"store-alerts": true,
 		"transient-notices": true,
 		"wc-pay-promotion": true,
-		"wc-pay-welcome-page": true
+		"wc-pay-welcome-page": true,
+		"wc-pay-subscriptions-page": true
 	}
 }

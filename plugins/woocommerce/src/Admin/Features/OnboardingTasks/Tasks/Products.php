@@ -158,8 +158,7 @@ class Products extends Task {
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_load_sample_return_notice_script( $hook ) {
-		global $post;
-		if ( 'edit.php' !== $hook || 'product' !== $post->post_type ) {
+		if ( 'edit.php' !== $hook || 'product' !== get_query_var( 'post_type' ) ) {
 			return;
 		}
 

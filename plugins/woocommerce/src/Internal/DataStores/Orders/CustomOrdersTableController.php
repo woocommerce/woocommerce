@@ -24,6 +24,23 @@ class CustomOrdersTableController {
 	public const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
 
 	/**
+	 * The name of the option that tells that the authoritative table must be flipped once sync finishes.
+	 */
+	private const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
+
+	/**
+	 * The name of the option that tells whether database transactions are to be used or not for data synchronization.
+	 */
+	public const USE_DB_TRANSACTIONS_OPTION = 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync';
+
+	/**
+	 * The name of the option to store the transaction isolation level to use when database transactions are enabled.
+	 */
+	public const DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION = 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync';
+
+	public const DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL = 'REPEATABLE READ';
+
+	/**
 	 * The data store object to use.
 	 *
 	 * @var OrdersTableDataStore
@@ -371,11 +388,26 @@ class CustomOrdersTableController {
 						__( 'Switch to using the orders table as the authoritative data store for orders when sync finishes', 'woocommerce' );
 					$settings[] = array(
 						'desc' => $message,
-						'id'   => DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
+						'id'   => self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
 						'type' => 'checkbox',
 					);
 				}
 			}
+
+			$settings[] = array(
+				'desc' => __( 'Use database transactions for the orders data synchronization', 'woocommerce' ),
+				'id'   => self::USE_DB_TRANSACTIONS_OPTION,
+				'type' => 'checkbox',
+			);
+
+			$isolation_level_names = self::get_valid_transaction_isolation_levels();
+			$settings[]            = array(
+				'desc'    => __( 'Database transaction isolation level to use', 'woocommerce' ),
+				'id'      => self::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION,
+				'type'    => 'select',
+				'options' => array_combine( $isolation_level_names, $isolation_level_names ),
+				'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
+			);
 		} else {
 			$settings[] = array(
 				'title' => __( 'Custom orders tables', 'woocommerce' ),
@@ -392,6 +424,20 @@ class CustomOrdersTableController {
 		$settings[] = array( 'type' => 'sectionend' );
 
 		return $settings;
+	}
+
+	/**
+	 * Get the valid database transaction isolation level names.
+	 *
+	 * @return string[]
+	 */
+	public static function get_valid_transaction_isolation_levels() {
+		return array(
+			'REPEATABLE READ',
+			'READ COMMITTED',
+			'READ UNCOMMITTED',
+			'SERIALIZABLE',
+		);
 	}
 
 	/**
@@ -422,10 +468,14 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
+		// TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently disabled to ease testing).
+
+		/*
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
+		*/
 
 		return $value;
 	}
@@ -435,11 +485,11 @@ class CustomOrdersTableController {
 	 * Here we switch the authoritative table if needed.
 	 */
 	private function process_sync_finished() {
-		if ( $this->auto_flip_authoritative_table_enabled() ) {
+		if ( ! $this->auto_flip_authoritative_table_enabled() ) {
 			return;
 		}
 
-		update_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
+		update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
 
 		if ( $this->custom_orders_table_usage_is_enabled() ) {
 			update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
@@ -454,7 +504,7 @@ class CustomOrdersTableController {
 	 * @return bool
 	 */
 	private function auto_flip_authoritative_table_enabled(): bool {
-		return 'yes' === get_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
+		return 'yes' === get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
 	}
 
 	/**
@@ -465,16 +515,14 @@ class CustomOrdersTableController {
 
 		// Disabling the sync implies disabling the automatic authoritative table switch too.
 		if ( ! $data_sync_is_enabled && $this->auto_flip_authoritative_table_enabled() ) {
-			update_option( DataSynchronizer::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
+			update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
 		}
 
 		// Enabling the sync implies starting it too, if needed.
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
 		// settings even without modifying them.
-		if ( $data_sync_is_enabled && ! $this->data_synchronizer->pending_data_sync_is_in_progress() ) {
-			$this->data_synchronizer->start_synchronizing_pending_orders();
-		}
+		$this->data_synchronizer->maybe_start_synchronizing_pending_orders( true );
 	}
 
 	/**

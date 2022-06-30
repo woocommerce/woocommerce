@@ -276,7 +276,7 @@ class WC_Admin_Meta_Boxes {
 				get_block_template( $theme . '//' . $template_key );
 
 			// If the block template has the product post type specified, include it.
-			if ( $block_template && in_array( 'product', $block_template->post_types ) ) {
+			if ( $block_template && is_array( $block_template->post_types ) && in_array( 'product', $block_template->post_types ) ) {
 				$filtered_templates[ $template_key ] = $template_name;
 			}
 		}

@@ -4,10 +4,18 @@
 import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { Component, lazy, Suspense } from '@wordpress/element';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Component, lazy, Suspense, createContext } from '@wordpress/element';
+import {
+	unstable_HistoryRouter as HistoryRouter,
+	Route,
+	Routes,
+	useLocation,
+	useMatch,
+	useParams,
+} from 'react-router-dom';
+import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
-import { get, isFunction, identity } from 'lodash';
+import { get, isFunction, identity, memoize } from 'lodash';
 import { parse } from 'qs';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import {
@@ -43,6 +51,20 @@ const WCPayUsageModal = lazy( () =>
 	)
 );
 
+const LayoutContextPrototype = {
+	getExtendedContext( newItem ) {
+		return { ...this, path: [ ...this.path, newItem ] };
+	},
+	toString() {
+		return this.path.join( '/' );
+	},
+	path: [],
+};
+
+export const LayoutContext = createContext(
+	LayoutContextPrototype.getExtendedContext( 'root' )
+);
+
 export class PrimaryLayout extends Component {
 	render() {
 		const { children } = this.props;
@@ -63,7 +85,53 @@ export class PrimaryLayout extends Component {
 	}
 }
 
+/**
+ * Exists for the sole purpose of passing on react-router hooks into
+ * the class based Layout component. Feel free to refactor it by turning _Layout
+ * into a functional component and moving the hooks inside
+ *
+ * @param {Object} root0          root0 React component props
+ * @param {Object} root0.children Children componeents
+ */
+const WithReactRouterProps = ( { children } ) => {
+	const location = useLocation();
+	const match = useMatch( location.pathname );
+	const params = useParams();
+	const matchProp = { params, url: match.pathname };
+	return Children.toArray( children ).map( ( child ) => {
+		return cloneElement( child, {
+			...child.props,
+			location,
+			match: matchProp,
+		} );
+	} );
+};
+
+/**
+ * Wraps _Layout with WithReactRouterProps for non-embedded page renders
+ * We need this because the hooks fail for embedded page renders as there is no Router context above it.
+ *
+ * @param {Object} props React component props
+ */
+const LayoutSwitchWrapper = ( props ) => {
+	if ( props.isEmbedded ) {
+		return <_Layout { ...props } />;
+	}
+	return (
+		<WithReactRouterProps>
+			<_Layout { ...props } />
+		</WithReactRouterProps>
+	);
+};
+
 class _Layout extends Component {
+	memoizedLayoutContext = memoize( ( page ) =>
+		LayoutContextPrototype.getExtendedContext(
+			page?.breadcrumbs[ page.breadcrumbs.length - 1 ]?.toLowerCase() ||
+				'page'
+		)
+	);
+
 	componentDidMount() {
 		this.recordPageViewTrack();
 	}
@@ -148,38 +216,45 @@ class _Layout extends Component {
 		const query = this.getQuery( location && location.search );
 
 		return (
-			<SlotFillProvider>
-				<div className="woocommerce-layout">
-					<Header
-						sections={
-							isFunction( breadcrumbs )
-								? breadcrumbs( this.props )
-								: breadcrumbs
-						}
-						isEmbedded={ isEmbedded }
-						query={ query }
-					/>
-					<TransientNotices />
-					{ ! isEmbedded && (
-						<PrimaryLayout>
-							<div className="woocommerce-layout__main">
-								<Controller { ...restProps } query={ query } />
-							</div>
-						</PrimaryLayout>
-					) }
+			<LayoutContext.Provider
+				value={ this.memoizedLayoutContext( page ) }
+			>
+				<SlotFillProvider>
+					<div className="woocommerce-layout">
+						<Header
+							sections={
+								isFunction( breadcrumbs )
+									? breadcrumbs( this.props )
+									: breadcrumbs
+							}
+							isEmbedded={ isEmbedded }
+							query={ query }
+						/>
+						<TransientNotices />
+						{ ! isEmbedded && (
+							<PrimaryLayout>
+								<div className="woocommerce-layout__main">
+									<Controller
+										{ ...restProps }
+										query={ query }
+									/>
+								</div>
+							</PrimaryLayout>
+						) }
 
-					{ isEmbedded && this.isWCPaySettingsPage() && (
-						<Suspense fallback={ null }>
-							<WCPayUsageModal />
-						</Suspense>
+						{ isEmbedded && this.isWCPaySettingsPage() && (
+							<Suspense fallback={ null }>
+								<WCPayUsageModal />
+							</Suspense>
+						) }
+					</div>
+					<PluginArea scope="woocommerce-admin" />
+					{ window.wcAdminFeatures.navigation && (
+						<PluginArea scope="woocommerce-navigation" />
 					) }
-				</div>
-				<PluginArea scope="woocommerce-admin" />
-				{ window.wcAdminFeatures.navigation && (
-					<PluginArea scope="woocommerce-navigation" />
-				) }
-				<PluginArea scope="woocommerce-tasks" />
-			</SlotFillProvider>
+					<PluginArea scope="woocommerce-tasks" />
+				</SlotFillProvider>
+			</LayoutContext.Provider>
 		);
 	}
 }
@@ -218,11 +293,8 @@ const Layout = compose(
 			return;
 		}
 
-		const {
-			getActivePlugins,
-			getInstalledPlugins,
-			isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 
 		return {
 			activePlugins: getActivePlugins(),
@@ -230,14 +302,18 @@ const Layout = compose(
 			installedPlugins: getInstalledPlugins(),
 		};
 	} )
-)( _Layout );
+)( LayoutSwitchWrapper );
 
 const _PageLayout = () => {
 	const { currentUserCan } = useUser();
 
+	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
+	const path = document.location.pathname;
+	const basename = path.substring( 0, path.lastIndexOf( '/' ) );
+
 	return (
-		<Router history={ getHistory() }>
-			<Switch>
+		<HistoryRouter history={ getHistory() }>
+			<Routes basename={ basename }>
 				{ getPages()
 					.filter(
 						( page ) =>
@@ -250,14 +326,12 @@ const _PageLayout = () => {
 								key={ page.path }
 								path={ page.path }
 								exact
-								render={ ( props ) => (
-									<Layout page={ page } { ...props } />
-								) }
+								element={ <Layout page={ page } /> }
 							/>
 						);
 					} ) }
-			</Switch>
-		</Router>
+			</Routes>
+		</HistoryRouter>
 	);
 };
 

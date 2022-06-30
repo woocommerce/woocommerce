@@ -1,8 +1,8 @@
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '~/utils/admin-settings';
-
+import { isProductTaskExperimentTreatment } from './experimental-products/use-product-layout-experiment';
+import { isImportProductExperiment } from './product-task-experiment';
 import './PaymentGatewaySuggestions';
 import './shipping';
 import './Marketing';
@@ -12,20 +12,32 @@ import './tax';
 import './woocommerce-payments';
 import './purchase';
 
-const onboardingData = getAdminSetting( 'onboarding' );
+const possiblyImportProductTaskExperiment = async () => {
+	const isExperiment = await isProductTaskExperimentTreatment();
+	if ( isExperiment ) {
+		if ( isImportProductExperiment() ) {
+			import( './experimental-import-products' );
+		} else {
+			import( './experimental-products' );
+		}
+	} else {
+		import( './products' );
+	}
+};
 
 if (
 	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-import-products-task' ] &&
-	onboardingData?.profile?.selling_venues &&
-	onboardingData?.profile?.selling_venues !== 'no'
+	( window.wcAdminFeatures[ 'experimental-import-products-task' ] ||
+		window.wcAdminFeatures[ 'experimental-products-task' ] )
 ) {
-	import( './experimental-import-products' );
-} else if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'experimental-products-task' ]
-) {
-	import( './experimental-products' );
+	possiblyImportProductTaskExperiment();
 } else {
 	import( './products' );
+}
+
+if (
+	window.wcAdminFeatures &&
+	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
+) {
+	import( './experimental-shipping-recommendation' );
 }

@@ -92,7 +92,7 @@ class Synchronize {
 				$this->start();
 			}
 		} catch ( Exception $e ) {
-			wc_get_logger()->log( 'warning', __( 'It was not possible to synchronize download directories following the update to 6.4.0.', 'woocommerce' ) );
+			wc_get_logger()->log( 'warning', __( 'It was not possible to synchronize download directories following the most recent update.', 'woocommerce' ) );
 		}
 
 		$this->register->set_mode(

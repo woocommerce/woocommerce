@@ -33,10 +33,10 @@ class Loader extends DeprecatedClassFacade {
 	 * @param  string $feature Feature slug.
 	 * @return bool Returns true if the feature is enabled.
 	 *
-	 * @deprecated since 1.9.0, use Features::is_enabled( $feature )
+	 * @deprecated since 5.0.0, use Features::is_enabled( $feature )
 	 */
 	public static function is_feature_enabled( $feature ) {
-		wc_deprecated_function( 'is_feature_enabled', '1.9', '\Automattic\WooCommerce\Internal\Admin\Features\Features::is_enabled()' );
+		wc_deprecated_function( 'is_feature_enabled', '5.0', '\Automattic\WooCommerce\Internal\Admin\Features\Features::is_enabled()' );
 		return Features::is_enabled( $feature );
 	}
 

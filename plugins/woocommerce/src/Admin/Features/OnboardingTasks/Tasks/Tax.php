@@ -74,7 +74,7 @@ class Tax extends Task {
 			}
 			return __( 'Add tax rates', 'woocommerce' );
 		}
-		return __( 'Set up tax', 'woocommerce' );
+		return __( 'Set up tax rates', 'woocommerce' );
 	}
 
 	/**

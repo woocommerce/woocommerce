@@ -6,10 +6,12 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { Text } from '@woocommerce/experimental';
 import { registerPlugin } from '@wordpress/plugins';
 import { useMemo, useState } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-
+import { recordEvent } from '@woocommerce/tracks';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
@@ -23,9 +25,10 @@ import CardLayout from './card-layout';
 import { LoadSampleProductType } from './constants';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
-
-// TODO: Use experiment data from the API, not hardcoded.
-const SHOW_STACK_LAYOUT = true;
+import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
+import useRecordCompletionTime from '../use-record-completion-time';
+import { getCountryCode } from '~/dashboard/utils';
+import { useProductTaskExperiment } from './use-product-layout-experiment';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -52,37 +55,78 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
+	const [
+		isConfirmingLoadSampleProducts,
+		setIsConfirmingLoadSampleProducts,
+	] = useState( false );
+	const { isLoading: isLoadingExperiment, experimentLayout } =
+		useProductTaskExperiment();
 
-	const productTypes = useProductTypeListItems( getProductTypes() );
+	const { isStoreInUS } = useSelect( ( select ) => {
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: settings = {} } = getSettings< {
+			general?: { [ key: string ]: unknown };
+		} >( 'general' );
+
+		const country =
+			typeof settings.woocommerce_default_country === 'string'
+				? settings.woocommerce_default_country
+				: '';
+
+		return {
+			isStoreInUS: getCountryCode( country ) === 'US',
+		};
+	} );
+
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
 
-	const {
-		loadSampleProduct,
-		isLoadingSampleProducts,
-	} = useLoadSampleProducts( {
-		redirectUrlAfterSuccess: getAdminLink(
-			'edit.php?post_type=product&wc_onboarding_active_task=products'
-		),
-	} );
+	const productTypes = useProductTypeListItems(
+		// Subscriptions only in the US
+		getProductTypes( {
+			exclude: isStoreInUS ? [] : [ 'subscription' ],
+		} ),
+		surfacedProductTypeKeys
+	);
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+
+	const productTypesWithTimeRecord = useMemo(
+		() =>
+			productTypes.map( ( productType ) => ( {
+				...productType,
+				onClick: () => {
+					productType.onClick();
+					recordCompletionTime();
+				},
+			} ) ),
+		[ recordCompletionTime, productTypes ]
+	);
+
+	const { loadSampleProduct, isLoadingSampleProducts } =
+		useLoadSampleProducts( {
+			redirectUrlAfterSuccess: getAdminLink(
+				'edit.php?post_type=product&wc_onboarding_active_task=products'
+			),
+		} );
 
 	const visibleProductTypes = useMemo( () => {
-		const surfacedProductTypes = productTypes.filter( ( productType ) =>
-			surfacedProductTypeKeys.includes( productType.key )
+		const surfacedProductTypes = productTypesWithTimeRecord.filter(
+			( productType ) =>
+				surfacedProductTypeKeys.includes( productType.key )
 		);
 		if ( isExpanded ) {
 			// To show product types in same order, we need to push the other product types to the end.
-			productTypes.forEach(
+			productTypesWithTimeRecord.forEach(
 				( productType ) =>
 					! surfacedProductTypes.includes( productType ) &&
 					surfacedProductTypes.push( productType )
 			);
 
-			if ( ! SHOW_STACK_LAYOUT ) {
+			if ( experimentLayout === 'card' ) {
 				surfacedProductTypes.push( {
 					...LoadSampleProductType,
-					onClick: loadSampleProduct,
+					onClick: () => setIsConfirmingLoadSampleProducts( true ),
 				} );
 			}
 		}
@@ -90,47 +134,88 @@ export const Products = () => {
 	}, [
 		surfacedProductTypeKeys,
 		isExpanded,
-		productTypes,
-		loadSampleProduct,
+		productTypesWithTimeRecord,
+		experimentLayout,
 	] );
 
 	return (
 		<div className="woocommerce-task-products">
-			<Text
-				variant="title"
-				as="h2"
-				className="woocommerce-task-products__title"
-			>
-				{ __( 'What product do you want to add?', 'woocommerce' ) }
-			</Text>
+			{ isLoadingExperiment ? (
+				<Spinner />
+			) : (
+				<>
+					<Text
+						variant="title"
+						as="h2"
+						className="woocommerce-task-products__title"
+					>
+						{ __(
+							'What product do you want to add?',
+							'woocommerce'
+						) }
+					</Text>
 
-			<div className="woocommerce-product-content">
-				{ SHOW_STACK_LAYOUT ? (
-					<Stack
-						items={ visibleProductTypes }
-						onClickLoadSampleProduct={ loadSampleProduct }
-					/>
-				) : (
-					<CardLayout items={ visibleProductTypes } />
-				) }
-				<ViewControlButton
-					isExpanded={ isExpanded }
-					onClick={ () => setIsExpanded( ! isExpanded ) }
-				/>
-				<Footer />
-			</div>
-			{ isLoadingSampleProducts && <LoadSampleProductModal /> }
+					<div className="woocommerce-product-content">
+						{ experimentLayout === 'stacked' ? (
+							<Stack
+								items={ visibleProductTypes }
+								onClickLoadSampleProduct={ () =>
+									setIsConfirmingLoadSampleProducts( true )
+								}
+								showOtherOptions={ isExpanded }
+							/>
+						) : (
+							<CardLayout items={ visibleProductTypes } />
+						) }
+						<ViewControlButton
+							isExpanded={ isExpanded }
+							onClick={ () => {
+								if ( ! isExpanded ) {
+									recordEvent(
+										'tasklist_view_more_product_types_click'
+									);
+								}
+								setIsExpanded( ! isExpanded );
+							} }
+						/>
+						<Footer />
+					</div>
+					{ isLoadingSampleProducts ? (
+						<LoadSampleProductModal />
+					) : (
+						isConfirmingLoadSampleProducts && (
+							<LoadSampleProductConfirmModal
+								onCancel={ () => {
+									setIsConfirmingLoadSampleProducts( false );
+									recordEvent(
+										'tasklist_cancel_load_sample_products_click'
+									);
+								} }
+								onImport={ () => {
+									setIsConfirmingLoadSampleProducts( false );
+									loadSampleProduct();
+								} }
+							/>
+						)
+					) }
+				</>
+			) }
 		</div>
+	);
+};
+
+const ExperimentalProductsFill = () => {
+	const { isLoading, experimentLayout } = useProductTaskExperiment();
+
+	return isLoading ? null : (
+		<WooOnboardingTask id="products" variant={ experimentLayout }>
+			<Products />
+		</WooOnboardingTask>
 	);
 };
 
 registerPlugin( 'wc-admin-onboarding-task-products', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
-	render: () => (
-		// @ts-expect-error WooOnboardingTask is a pure JS component.
-		<WooOnboardingTask id="products">
-			<Products />
-		</WooOnboardingTask>
-	),
+	render: () => <ExperimentalProductsFill />,
 } );

@@ -9,7 +9,6 @@ import { apiFetch } from '@wordpress/data-controls';
 import { ACTION_TYPES } from './action-types';
 import { API_NAMESPACE } from './constants';
 import { PaymentGateway } from './types';
-import { RestApiError } from '../types';
 
 export function getPaymentGatewaysRequest(): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_REQUEST;
@@ -31,11 +30,9 @@ export function getPaymentGatewaysSuccess(
 	};
 }
 
-export function getPaymentGatewaysError(
-	error: RestApiError
-): {
+export function getPaymentGatewaysError( error: unknown ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_ERROR;
-	error: RestApiError;
+	error: unknown;
 } {
 	return {
 		type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_ERROR,
@@ -51,11 +48,9 @@ export function getPaymentGatewayRequest(): {
 	};
 }
 
-export function getPaymentGatewayError(
-	error: RestApiError
-): {
+export function getPaymentGatewayError( error: unknown ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAY_ERROR;
-	error: RestApiError;
+	error: unknown;
 } {
 	return {
 		type: ACTION_TYPES.GET_PAYMENT_GATEWAY_ERROR,
@@ -63,9 +58,7 @@ export function getPaymentGatewayError(
 	};
 }
 
-export function getPaymentGatewaySuccess(
-	paymentGateway: PaymentGateway
-): {
+export function getPaymentGatewaySuccess( paymentGateway: PaymentGateway ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAY_SUCCESS;
 	paymentGateway: PaymentGateway;
 } {
@@ -75,9 +68,7 @@ export function getPaymentGatewaySuccess(
 	};
 }
 
-export function updatePaymentGatewaySuccess(
-	paymentGateway: PaymentGateway
-): {
+export function updatePaymentGatewaySuccess( paymentGateway: PaymentGateway ): {
 	type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_SUCCESS;
 	paymentGateway: PaymentGateway;
 } {
@@ -94,11 +85,9 @@ export function updatePaymentGatewayRequest(): {
 	};
 }
 
-export function updatePaymentGatewayError(
-	error: RestApiError
-): {
+export function updatePaymentGatewayError( error: unknown ): {
 	type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_ERROR;
-	error: RestApiError;
+	error: unknown;
 } {
 	return {
 		type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_ERROR,
@@ -127,7 +116,7 @@ export function* updatePaymentGateway(
 			return response;
 		}
 	} catch ( e ) {
-		yield updatePaymentGatewayError( e as RestApiError );
+		yield updatePaymentGatewayError( e );
 		throw e;
 	}
 }

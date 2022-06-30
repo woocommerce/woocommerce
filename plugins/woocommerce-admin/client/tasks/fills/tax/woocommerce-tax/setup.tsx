@@ -51,9 +51,7 @@ export const Setup: React.FC< SetupProps > = ( {
 		const { getSettings } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;
-		const { hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		) as SettingsSelector;
+		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
 		return {

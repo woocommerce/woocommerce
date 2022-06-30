@@ -192,13 +192,8 @@ class Pagination extends Component {
 	}
 
 	render() {
-		const {
-			total,
-			perPage,
-			className,
-			showPagePicker,
-			showPerPagePicker,
-		} = this.props;
+		const { total, perPage, className, showPagePicker, showPerPagePicker } =
+			this.props;
 		this.pageCount = Math.ceil( total / perPage );
 
 		const classes = classNames( 'woocommerce-pagination', className );

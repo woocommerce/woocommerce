@@ -4,6 +4,8 @@ on:
     branches:
       - trunk
       - 'release/**'
+  workflow_dispatch:
+
 defaults:
   run:
     shell: bash
@@ -13,7 +15,7 @@ concurrency:
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
-    timeout-minutes: 20
+    timeout-minutes: 30
     runs-on: ubuntu-20.04
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
@@ -24,9 +26,9 @@ jobs:
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.8'
+          - wp: '5.9'
             php: 7.2
-          - wp: '5.7'
+          - wp: '5.8'
             php: 7.2
     services:
       database:
@@ -37,8 +39,12 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: ci
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -53,28 +59,11 @@ jobs:
           php --version
           composer --version
 
-      - name: Get cached composer and pnpm directories
-        uses: actions/cache@v3
-        id: cache-deps
-        with:
-          path: |
-            ~/.pnpm-store
-            plugins/woocommerce/packages
-            plugins/woocommerce/**/vendor
-          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Composer dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: pnpm nx composer-install woocommerce
+      - name: Install and Build
+        uses: ./.github/actions/install-build
 
       - name: Build Admin feature config
-        run: pnpm nx build:feature-config woocommerce
+        run: pnpm build:feature-config --filter=woocommerce
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -86,7 +75,7 @@ jobs:
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
              rm -rf ./vendor/phpunit/
-             pnpm nx composer-dump-autoload woocommerce
+             composer dump-autoload
            fi
 
       - name: Init DB and WP
@@ -94,4 +83,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm nx test-unit woocommerce
+        run: pnpm -- turbo run test --filter=woocommerce

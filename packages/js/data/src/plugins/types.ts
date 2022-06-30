@@ -63,9 +63,9 @@ export type PaypalOnboardingStatus = {
 	};
 };
 
-type PluginsResponse< PluginData > = {
+export type PluginsResponse< PluginData > = {
 	data: PluginData;
-	errors: WPError< PluginNames >;
+	errors: WPError< Partial< PluginNames > >;
 	success: boolean;
 	message: string;
 } & Response;

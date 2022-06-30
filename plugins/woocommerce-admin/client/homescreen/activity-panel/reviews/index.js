@@ -49,12 +49,8 @@ class ReviewsPanel extends Component {
 	}
 
 	deleteReview( reviewId ) {
-		const {
-			deleteReview,
-			createNotice,
-			updateReview,
-			clearReviewsCache,
-		} = this.props;
+		const { deleteReview, createNotice, updateReview, clearReviewsCache } =
+			this.props;
 		if ( reviewId ) {
 			deleteReview( reviewId )
 				.then( () => {
@@ -294,7 +290,7 @@ class ReviewsPanel extends Component {
 				{ renderedReviews }
 				<Link
 					href={ getAdminLink(
-						'edit-comments.php?comment_type=review'
+						'edit.php?post_type=product&page=product-reviews'
 					) }
 					onClick={ () => this.recordReviewEvent( 'reviews_manage' ) }
 					className="woocommerce-layout__activity-panel-outbound-link woocommerce-layout__activity-panel-empty"
@@ -370,9 +366,8 @@ export { ReviewsPanel };
 export default compose( [
 	withSelect( ( select, props ) => {
 		const { hasUnapprovedReviews } = props;
-		const { getReviews, getReviewsError, isResolving } = select(
-			REVIEWS_STORE_NAME
-		);
+		const { getReviews, getReviewsError, isResolving } =
+			select( REVIEWS_STORE_NAME );
 		let reviews = [];
 		let isError = false;
 		let isRequesting = false;
@@ -389,9 +384,8 @@ export default compose( [
 		};
 	} ),
 	withDispatch( ( dispatch, props ) => {
-		const { deleteReview, updateReview, invalidateResolution } = dispatch(
-			REVIEWS_STORE_NAME
-		);
+		const { deleteReview, updateReview, invalidateResolution } =
+			dispatch( REVIEWS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		const clearReviewsCache = () => {

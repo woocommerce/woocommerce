@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/customer-effort-score",
-	"version": "2.0.1",
+	"version": "2.1.0",
 	"description": "WooCommerce utility to measure user effort.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -18,6 +18,7 @@
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
+	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
 		"@woocommerce/experimental": "workspace:*",
@@ -39,7 +40,7 @@
 		"@testing-library/react": "^12.1.3",
 		"@types/prop-types": "^15.7.4",
 		"@types/wordpress__components": "^9.8.6",
-		"@woocommerce/style-build": "workspace:*",
+		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
 		"concurrently": "^7.0.0",
@@ -48,6 +49,7 @@
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"postcss-loader": "^3.0.0",
+		"require-turbo": "workspace:*",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.2.1",
 		"ts-jest": "^27.1.3",
@@ -61,16 +63,16 @@
 	},
 	"scripts": {
 		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "pnpm run build:js && pnpm run build:css",
+		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "eslint src",
+		"lint": "node ./node_modules/require-turbo && eslint src",
 		"lint:fix": "eslint src --fix",
-		"test": "pnpm run build && pnpm run test:nobuild",
-		"test:nobuild": "jest --config ./jest.config.json",
+		"test": "node ./node_modules/require-turbo && jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"lint-staged": {

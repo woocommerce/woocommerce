@@ -1,15 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState, useContext } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	OPTIONS_STORE_NAME,
-	ONBOARDING_STORE_NAME,
-	getVisibleTasks,
-} from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, getVisibleTasks } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List } from '@woocommerce/experimental';
 import classnames from 'classnames';
@@ -24,12 +19,15 @@ import { TaskListProps } from '~/tasks/task-list';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { SectionPanelTitle } from './section-panel-title';
 import { TaskListItem } from './task-list-item';
+import { TaskListCompletedHeader } from './completed-header';
+import { LayoutContext } from '~/layout';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
 	onToggle?: ( isOpen: boolean ) => void;
 };
-const PanelBodyWithUpdatedType = PanelBody as React.ComponentType< PanelBodyProps >;
+const PanelBodyWithUpdatedType =
+	PanelBody as React.ComponentType< PanelBodyProps >;
 
 export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	query,
@@ -40,18 +38,20 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	sections,
 	displayProgressHeader,
+	cesHeader = true,
 } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		return {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+	const { hideTaskList, keepCompletedTaskList: keepCompletedTasks } =
+		useDispatch( ONBOARDING_STORE_NAME );
 	const [ openPanel, setOpenPanel ] = useState< string | null >(
 		sections?.find( ( section ) => ! section.isComplete )?.id || null
 	);
+	const layoutContext = useContext( LayoutContext );
 
 	const prevQueryRef = useRef( query );
 
@@ -65,6 +65,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ eventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context: layoutContext.toString(),
 		} );
 	};
 
@@ -87,13 +88,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const keepTasks = () => {
-		const updateOptionsParams = {
-			woocommerce_task_list_keep_completed: 'yes',
-		};
-
-		updateOptions( {
-			...updateOptionsParams,
-		} );
+		keepCompletedTasks( id );
 	};
 
 	let selectedHeaderCard = visibleTasks.find(
@@ -115,14 +110,22 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
-	if ( isComplete && ! keepCompletedTaskList ) {
+	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
 			<>
-				<TaskListCompleted
-					hideTasks={ hideTasks }
-					keepTasks={ keepTasks }
-					twoColumns={ false }
-				/>
+				{ cesHeader ? (
+					<TaskListCompletedHeader
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						customerEffortScore={ true }
+					/>
+				) : (
+					<TaskListCompleted
+						hideTasks={ hideTasks }
+						keepTasks={ keepTasks }
+						twoColumns={ false }
+					/>
+				) }
 			</>
 		);
 	}

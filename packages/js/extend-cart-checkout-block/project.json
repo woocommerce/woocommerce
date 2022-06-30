@@ -1,0 +1,5 @@
+{
+  "root": "packages/js/extend-cart-checkout-block",
+  "sourceRoot": "packages/js/extend-cart-checkout-block",
+  "projectType": "library"
+}

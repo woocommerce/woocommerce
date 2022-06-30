@@ -15,12 +15,19 @@ import {
 	defaultSurfacedProductTypes,
 } from './constants';
 
-export const getProductTypes = (
-	exclude: ProductTypeKey[] = []
-): ProductType[] =>
-	productTypes.filter(
-		( productType ) => ! exclude.includes( productType.key )
-	);
+export const getProductTypes = ( {
+	exclude,
+}: {
+	exclude?: ProductTypeKey[];
+} = {} ): ProductType[] => {
+	if ( exclude && exclude?.length > 0 ) {
+		return productTypes.filter(
+			( productType ) => ! exclude.includes( productType.key )
+		);
+	}
+
+	return [ ...productTypes ];
+};
 
 /**
  * Get key of surfaced product types by onboarding product types.

@@ -97,14 +97,8 @@ class D3Chart extends Component {
 	}
 
 	getParams( uniqueDates ) {
-		const {
-			chartType,
-			colorScheme,
-			data,
-			interval,
-			mode,
-			orderedKeys,
-		} = this.props;
+		const { chartType, colorScheme, data, interval, mode, orderedKeys } =
+			this.props;
 		const newOrderedKeys = orderedKeys || getOrderedKeys( data );
 		const visibleKeys = newOrderedKeys.filter( ( key ) => key.visible );
 		const colorKeys =

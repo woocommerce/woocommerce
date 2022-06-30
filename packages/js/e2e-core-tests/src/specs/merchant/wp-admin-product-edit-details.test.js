@@ -8,6 +8,8 @@ const {
 	uiUnblocked,
 	verifyAndPublish,
 	createSimpleProduct,
+	createVariableProduct,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -20,8 +22,15 @@ let productId;
 const runProductEditDetailsTest = () => {
 	describe( 'Products > Edit Product', () => {
 		beforeAll( async () => {
-			productId = await createSimpleProduct();
 			await merchant.login();
+		} );
+
+		beforeEach( async () => {
+			productId = await createSimpleProduct();
+		} );
+
+		afterEach( async () => {
+			await withRestApi.deleteProduct( productId );
 		} );
 
 		it( 'can edit a product and save the changes', async () => {
@@ -53,6 +62,55 @@ const runProductEditDetailsTest = () => {
 				'This product is pretty awesome.'
 			);
 			await expect( page ).toMatchElement( '#_regular_price', '100.05' );
+		} );
+	} );
+
+	describe( 'Products > Edit Product > Variations', () => {
+		beforeAll( async () => {
+			await merchant.login();
+		} );
+
+		beforeEach( async () => {
+			productId = await createVariableProduct();
+		} );
+
+		afterEach( async () => {
+			await withRestApi.deleteProduct( productId );
+		} );
+
+		it( 'can edit just a single attribute of a product variation', async () => {
+			const expectedVariationDetails = {
+				regularPrice: '10',
+			};
+
+			await merchant.goToProduct( productId );
+			await merchant.updateVariationDetails( expectedVariationDetails );
+
+			// Wait until page is stable again after saving changes
+			await uiUnblocked();
+
+			await merchant.verifyVariationDetails( expectedVariationDetails );
+		} );
+
+		it( 'can edit multiple attributes of a product variation', async () => {
+			const expectedVariationDetails = {
+				sku: 'ABCD0123',
+				regularPrice: '10',
+				salePrice: '8',
+				weight: '2',
+				length: '50',
+				width: '50',
+				height: '50',
+				description: 'This variation is awesome!',
+			};
+
+			await merchant.goToProduct( productId );
+			await merchant.updateVariationDetails( expectedVariationDetails );
+
+			// Wait until page is stable again after saving changes
+			await uiUnblocked();
+
+			await merchant.verifyVariationDetails( expectedVariationDetails );
 		} );
 	} );
 };

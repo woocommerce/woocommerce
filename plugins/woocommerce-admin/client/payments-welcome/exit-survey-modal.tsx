@@ -31,9 +31,8 @@ function ExitSurveyModal( {
 	const [ isInstallChecked, setInstallChecked ] = useState( false );
 	const [ isMoreInfoChecked, setMoreInfoChecked ] = useState( false );
 	const [ isAnotherTimeChecked, setAnotherTimeChecked ] = useState( false );
-	const [ isSomethingElseChecked, setSomethingElseChecked ] = useState(
-		false
-	);
+	const [ isSomethingElseChecked, setSomethingElseChecked ] =
+		useState( false );
 	const [ comments, setComments ] = useState( '' );
 
 	const closeModal = () => {

@@ -1,56 +1,83 @@
 name: Run tests against PR
-on: pull_request
-concurrency: 
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  E2E_PLAYWRIGHT: ${{ false }}
 
 jobs:
     e2e-tests-run:
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Cache modules
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
-              run: pnpm nx composer-install-no-dev woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
 
             - name: Run tests command.
+              if: env.E2E_PLAYWRIGHT != 'true'
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
               run: pnpm exec wc-e2e test:e2e
+
+            - name: Download and install Chromium browser.
+              if: env.E2E_PLAYWRIGHT == 'true'
+              working-directory: plugins/woocommerce
+              run: pnpx playwright install chromium
+
+            - name: Run (Playwright) tests command.
+              id: run_playwright_e2e_tests
+              if: env.E2E_PLAYWRIGHT == 'true'
+              working-directory: plugins/woocommerce
+              run: pnpx playwright test --config=e2e/playwright.config.js
+
+            - name: Generate (Playwright) E2E Test report.
+              id: generate_e2e_report
+              if: |
+                  always() && 
+                  ( env.E2E_PLAYWRIGHT == 'true' ) &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
+
+            - name: Archive (Playwright) E2E test report
+              if: |
+                  always() &&
+                  env.E2E_PLAYWRIGHT == 'true' &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: |
+                      plugins/woocommerce/e2e/allure-results
+                      plugins/woocommerce/e2e/allure-report
+                  if-no-files-found: ignore
+                  retention-days: 5
 
             - name: Archive E2E test screenshots
               uses: actions/upload-artifact@v3
@@ -64,37 +91,22 @@ jobs:
     api-tests-run:
         name: Runs API tests.
         runs-on: ubuntu-20.04
+        env:
+            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Cache modules
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
-              run: pnpm nx composer-install woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -108,49 +120,33 @@ jobs:
                   USER_SECRET: password
               run: pnpm exec wc-api-tests test api
 
-            - name: Upload API test report
+            - name: Archive API test report
+              if: always()
               uses: actions/upload-artifact@v3
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                      packages/js/api-core-tests/allure-results
-                      packages/js/api-core-tests/allure-report
-                  retention-days: 7
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
+                  retention-days: 5
 
     k6-tests-run:
         name: Runs k6 Performance tests
         runs-on: ubuntu-20.04
         steps:
-            - name: Checkout code.
-              uses: actions/checkout@v3
-
-            - name: Cache modules
-              uses: actions/cache@v3
-              id: cache-deps
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/cache-deps
               with:
-                path: |
-                  ~/.pnpm-store
-                  plugins/woocommerce/packages
-                  plugins/woocommerce/**/vendor
-                key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
-
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: Install Composer dependencies
-              if: steps.cache-deps.outputs.cache-hit != 'true'
-              run: pnpm nx composer-install woocommerce
+                workflow_name: pr-build-and-e2e-tests
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
-            - name: Run build
-              run: pnpm nx build woocommerce
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: plugins/woocommerce/tests/e2e/docker
@@ -168,3 +164,48 @@ jobs:
             - name: Run k6 tests
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+
+    publish-test-reports:
+        name: Publish test reports
+        if: |
+            always() && 
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            PR_NUMBER: ${{ github.event.number }}
+            RUN_ID: ${{ github.run_id }}
+            COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        steps:
+            - name: Publish API test report
+              if: env.E2E_PLAYWRIGHT != 'true'
+              env:
+                  ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
+              run: |
+                  gh workflow run publish-report.yml \
+                    -f test_workflow=pr \
+                    -f test_type=api \
+                    -f run_id=$RUN_ID \
+                    -f artifact_name=$ARTIFACT_NAME \
+                    -f pr_number=$PR_NUMBER \
+                    -f commit_sha=$COMMIT_SHA \
+                    --repo woocommerce/woocommerce-test-reports
+
+            - name: Publish API and (Playwright) E2E test reports
+              if: env.E2E_PLAYWRIGHT == 'true'
+              env:
+                  API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
+                  E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+              run: |
+                  gh workflow run publish-reports.yml \
+                    -f test_workflow=pr \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f e2e_artifact=$E2E_ARTIFACT \
+                    -f pr_number=$PR_NUMBER \
+                    -f commit_sha=$COMMIT_SHA \
+                    --repo woocommerce/woocommerce-test-reports

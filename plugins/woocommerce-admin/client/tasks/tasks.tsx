@@ -11,8 +11,8 @@ import {
 	OPTIONS_STORE_NAME,
 	TaskListType,
 	TaskType,
+	WCDataSelector,
 } from '@woocommerce/data';
-import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -32,6 +32,7 @@ import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-
 
 export type TasksProps = {
 	query: { task?: string };
+	context?: string;
 };
 
 function getTaskListComponent( taskListId: string ) {
@@ -62,18 +63,17 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
-		'woocommerce_tasklist_progression'
-	);
 
-	const { isResolving, taskLists } = useSelect( ( select ) => {
-		return {
-			isResolving: ! select(
-				ONBOARDING_STORE_NAME
-			).hasFinishedResolution( 'getTaskLists' ),
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
-		};
-	} );
+	const { isResolving, taskLists } = useSelect(
+		( select: WCDataSelector ) => {
+			return {
+				isResolving: ! select(
+					ONBOARDING_STORE_NAME
+				).hasFinishedResolution( 'getTaskLists' ),
+				taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+			};
+		}
+	);
 
 	const getCurrentTask = () => {
 		if ( ! task ) {
@@ -140,33 +140,21 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		);
 	}
 
-	if ( isLoadingExperiment ) {
-		return <TaskListPlaceholderComponent query={ query } />;
-	}
-
 	return (
 		<>
 			{ taskLists
-				.filter( ( { id }: TaskListType ) =>
-					experimentAssignment?.variationName === 'treatment'
-						? id.endsWith( 'two_column' )
-						: ! id.endsWith( 'two_column' )
+				.filter(
+					( { id }: TaskListType ) => ! id.endsWith( 'two_column' )
 				)
+				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
-					const { id, isHidden, isVisible, isToggleable } = taskList;
-
-					if ( ! isVisible ) {
-						return null;
-					}
+					const { id, isHidden, isToggleable } = taskList;
 
 					const TaskListComponent = getTaskListComponent( id );
 					return (
 						<Fragment key={ id }>
 							<TaskListComponent
-								isExpandable={
-									experimentAssignment?.variationName ===
-									'treatment'
-								}
+								isExpandable={ false }
 								query={ query }
 								twoColumns={ false }
 								{ ...taskList }

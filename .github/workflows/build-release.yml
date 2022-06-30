@@ -7,18 +7,11 @@ jobs:
     name: Build release asset
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code.
-        uses: actions/checkout@v3
-
-      - name: Get cached composer and pnpm directories
-        uses: actions/cache@v3
-        id: cache-deps
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/cache-deps
         with:
-          path: |
-            ~/.pnpm-store
-            plugins/woocommerce/packages
-            plugins/woocommerce/**/vendor
-          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+          workflow_name: build-release
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Install PNPM
         run: npm install -g pnpm@^6.24.2
@@ -68,3 +61,18 @@ jobs:
           token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
           ref: refs/heads/trunk
           inputs: '{ "release_id": "${{ github.event.release.id }}" }'
+  send-release-notification:
+    if: github.event.release.prerelease == true && github.event.release.draft == false && github.event.release.tag_name != 'nightly' 
+    name: Send Release Notification
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Invoke Pre-Release Event
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: ${{ secrets.CD_RELEASE_NOTIFICATION_WORKFLOW }}
+          repo: ${{ secrets.CD_NOTIFICATION_REPO }}
+          token: ${{ secrets.CD_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "tag_name": "${{ github.event.release.tag_name }}" }'
+

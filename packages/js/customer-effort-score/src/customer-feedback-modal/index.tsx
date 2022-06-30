@@ -26,13 +26,19 @@ import { __ } from '@wordpress/i18n';
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
  * @param {string}   props.label               Question to ask the customer.
+ * @param {string}   props.defaultScore        Default score.
+ * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
 	label,
+	defaultScore = NaN,
+	onCloseModal,
 }: {
 	recordScoreCallback: ( score: number, comments: string ) => void;
 	label: string;
+	defaultScore?: number;
+	onCloseModal?: () => void;
 } ): JSX.Element | null {
 	const options = [
 		{
@@ -57,12 +63,17 @@ function CustomerFeedbackModal( {
 		},
 	];
 
-	const [ score, setScore ] = useState( NaN );
+	const [ score, setScore ] = useState( defaultScore || NaN );
 	const [ comments, setComments ] = useState( '' );
 	const [ showNoScoreMessage, setShowNoScoreMessage ] = useState( false );
 	const [ isOpen, setOpen ] = useState( true );
 
-	const closeModal = () => setOpen( false );
+	const closeModal = () => {
+		setOpen( false );
+		if ( onCloseModal ) {
+			onCloseModal();
+		}
+	};
 
 	const onRadioControlChange = ( value: string ) => {
 		const valueAsInt = parseInt( value, 10 );
@@ -111,7 +122,7 @@ function CustomerFeedbackModal( {
 			{ ( score === 1 || score === 2 ) && (
 				<div className="woocommerce-customer-effort-score__comments">
 					<TextareaControl
-						label={ __( 'Comments (Optional)', 'woocommerce' ) }
+						label={ __( 'Comments (optional)', 'woocommerce' ) }
 						help={ __(
 							'Your feedback will go to the WooCommerce development team',
 							'woocommerce'
@@ -152,6 +163,8 @@ function CustomerFeedbackModal( {
 CustomerFeedbackModal.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
+	defaultScore: PropTypes.number,
+	onCloseModal: PropTypes.func,
 };
 
-export default CustomerFeedbackModal;
+export { CustomerFeedbackModal };

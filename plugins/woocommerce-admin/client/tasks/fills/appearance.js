@@ -248,13 +248,8 @@ class Appearance extends Component {
 	}
 
 	getSteps() {
-		const {
-			isDirty,
-			isPending,
-			logo,
-			storeNoticeText,
-			isUpdatingLogo,
-		} = this.state;
+		const { isDirty, isPending, logo, storeNoticeText, isUpdatingLogo } =
+			this.state;
 
 		const steps = [
 			{
@@ -378,12 +373,8 @@ class Appearance extends Component {
 	}
 
 	render() {
-		const {
-			isPending,
-			stepIndex,
-			isUpdatingLogo,
-			isUpdatingNotice,
-		} = this.state;
+		const { isPending, stepIndex, isUpdatingLogo, isUpdatingNotice } =
+			this.state;
 		const currentStep = this.getSteps()[ stepIndex ].key;
 
 		return (

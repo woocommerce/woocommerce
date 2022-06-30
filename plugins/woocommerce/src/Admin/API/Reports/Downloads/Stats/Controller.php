@@ -56,6 +56,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$args['ip_address_includes'] = (array) $request['ip_address_includes'];
 		$args['ip_address_excludes'] = (array) $request['ip_address_excludes'];
 		$args['fields']              = $request['fields'];
+		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		return $args;
 	}
@@ -376,6 +377,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			'items'             => array(
 				'type' => 'string',
 			),
+		);
+		$params['force_cache_refresh'] = array(
+			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wp_validate_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

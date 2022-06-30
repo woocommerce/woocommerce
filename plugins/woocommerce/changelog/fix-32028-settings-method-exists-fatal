@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix possible fatal error during install on PHP 8.x

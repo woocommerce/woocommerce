@@ -1,3 +1,5 @@
+@import 'customer-feedback-simple/customer-feedback-simple.scss';
+
 .woocommerce-customer-effort-score__selection {
 	margin: 1em 0;
 
@@ -68,7 +70,7 @@
 		}
 
 		input[value='3'] + label::before {
-			content: '😐';
+			content: '😑';
 		}
 
 		input[value='4'] + label::before {
@@ -76,7 +78,7 @@
 		}
 
 		input[value='5'] + label::before {
-			content: '😁';
+			content: '😍';
 		}
 	}
 }

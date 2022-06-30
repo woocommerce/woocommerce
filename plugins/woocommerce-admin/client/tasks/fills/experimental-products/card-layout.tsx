@@ -6,6 +6,7 @@ import { Text } from '@woocommerce/experimental';
 import { Link } from '@woocommerce/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -13,6 +14,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { ProductType } from './constants';
 import CardList from '../experimental-import-products/CardList';
 import './card-layout.scss';
+import useRecordCompletionTime from '../use-record-completion-time';
 
 type CardProps = {
 	items: ( ProductType & {
@@ -21,6 +23,8 @@ type CardProps = {
 };
 
 const CardLayout: React.FC< CardProps > = ( { items } ) => {
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+
 	return (
 		<div className="woocommerce-products-card-layout">
 			<Text className="woocommerce-products-card-layout__description">
@@ -32,6 +36,10 @@ const CardLayout: React.FC< CardProps > = ( { items } ) => {
 						sbLink: (
 							<Link
 								onClick={ () => {
+									recordEvent( 'tasklist_add_product', {
+										method: 'manually',
+									} );
+									recordCompletionTime();
 									window.location = getAdminLink(
 										'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
 									);

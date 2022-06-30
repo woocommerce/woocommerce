@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Sanitize order and orderby args in get_notes and lookup_notes. #32614

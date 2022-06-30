@@ -330,7 +330,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $order ) {
-		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url' );
+		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing' );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		// These fields are dependent on other fields.
@@ -392,6 +392,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					break;
 				case 'payment_url':
 					$data['payment_url'] = $order->get_checkout_payment_url();
+					break;
+				case 'is_editable':
+					$data['is_editable'] = $order->is_editable();
+					break;
+				case 'needs_payment':
+					$data['needs_payment'] = $order->needs_payment();
+					break;
+				case 'needs_processing':
+					$data['needs_processing'] = $order->needs_processing();
 					break;
 			}
 		}
@@ -459,6 +468,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'coupon_lines',
 			'refunds',
 			'payment_url',
+			'is_editable',
+			'needs_payment',
+			'needs_processing',
 		);
 
 		$data = array_intersect_key( $data, array_flip( $allowed_fields ) );
@@ -1873,7 +1885,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						),
 					),
 				),
-				'payment_url' => array(
+				'payment_url'          => array(
 					'description' => __( 'Order payment URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -1884,6 +1896,24 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'edit' ),
+				),
+				'is_editable'          => array(
+					'description' => __( 'Whether an order can be edited.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'needs_payment'        => array(
+					'description' => __( 'Whether an order needs payment, based on status and order total.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'needs_processing'     => array(
+					'description' => __( 'Whether an order needs processing before it can be completed.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 			),
 		);

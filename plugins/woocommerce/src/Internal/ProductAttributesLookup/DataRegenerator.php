@@ -137,7 +137,26 @@ class DataRegenerator {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( $this->get_table_creation_sql() );
 
-		$last_existing_product_id =
+		$last_existing_product_id = $this->get_last_existing_product_id();
+		if ( ! $last_existing_product_id ) {
+			// No products exist, nothing to (re)generate.
+			return false;
+		}
+
+		$this->data_store->set_regeneration_in_progress_flag();
+		update_option( 'woocommerce_attribute_lookup_last_product_id_to_process', $last_existing_product_id );
+		update_option( 'woocommerce_attribute_lookup_processed_count', 0 );
+
+		return true;
+	}
+
+	/**
+	 * Get the highest existing product id.
+	 *
+	 * @return int|null Highest existing product id, or null if no products exist at all.
+	 */
+	private function get_last_existing_product_id(): ?int {
+		$last_existing_product_id_array =
 			WC()->call_function(
 				'wc_get_products',
 				array(
@@ -149,16 +168,7 @@ class DataRegenerator {
 				)
 			);
 
-		if ( ! $last_existing_product_id ) {
-			// No products exist, nothing to (re)generate.
-			return false;
-		}
-
-		$this->data_store->set_regeneration_in_progress_flag();
-		update_option( 'woocommerce_attribute_lookup_last_product_id_to_process', current( $last_existing_product_id ) );
-		update_option( 'woocommerce_attribute_lookup_processed_count', 0 );
-
-		return true;
+		return empty( $last_existing_product_id_array ) ? null : current( $last_existing_product_id_array );
 	}
 
 	/**
@@ -493,12 +503,25 @@ class DataRegenerator {
 	}
 
 	/**
-	 * Run additional setup needed after a clean WooCommerce install finishes.
+	 * Run additional setup needed after a WooCommerce install or update finishes.
 	 */
 	private function run_woocommerce_installed_callback() {
 		// The table must exist at this point (created via dbDelta), but we check just in case.
-		if ( $this->data_store->check_lookup_table_exists() ) {
+		if ( ! $this->data_store->check_lookup_table_exists() ) {
+			return;
+		}
+
+		// If a table regeneration is in progress, leave it alone.
+		if ( $this->data_store->regeneration_is_in_progress() ) {
+			return;
+		}
+
+		// If the lookup table has data, or if it's empty because there are no products yet, we're good.
+		// Otherwise (lookup table is empty but products exist) we need to initiate a regeneration if one isn't already in progress.
+		if ( $this->data_store->lookup_table_has_data() || ! $this->get_last_existing_product_id() ) {
 			$this->finalize_regeneration( true );
+		} else {
+			$this->initiate_regeneration();
 		}
 	}
 }

@@ -30,7 +30,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '6.6.0';
+	public $version = '6.8.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -186,6 +186,11 @@ final class WooCommerce {
 	 * @since 3.6.0
 	 */
 	public function on_plugins_loaded() {
+		/**
+		 * Action to signal that WooCommerce has finished loading.
+		 *
+		 * @since 3.6.0
+		 */
 		do_action( 'woocommerce_loaded' );
 	}
 
@@ -251,6 +256,12 @@ final class WooCommerce {
 					'source' => 'fatal-errors',
 				)
 			);
+
+			/**
+			 * Action triggered when there are errors during shutdown.
+			 *
+			 * @since 3.2.0
+			 */
 			do_action( 'woocommerce_shutdown_error', $error );
 		}
 	}
@@ -339,7 +350,10 @@ final class WooCommerce {
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
 		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
+		/**
+		 * Filter to specify if the current request is a REST API request.
+		 */
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**
@@ -613,8 +627,10 @@ final class WooCommerce {
 	 * Init WooCommerce when WordPress Initialises.
 	 */
 	public function init() {
-		// Before init action.
-		do_action( 'before_woocommerce_init' );
+		/**
+		 * Action triggered before WooCommerce initialization begins.
+		 */
+		do_action( 'before_woocommerce_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		// Set up localisation.
 		$this->load_plugin_textdomain();
@@ -635,8 +651,10 @@ final class WooCommerce {
 
 		$this->load_webhooks();
 
-		// Init action.
-		do_action( 'woocommerce_init' );
+		/**
+		 * Action triggered after WooCommerce initialization finishes.
+		 */
+		do_action( 'woocommerce_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**
@@ -650,7 +668,11 @@ final class WooCommerce {
 	 */
 	public function load_plugin_textdomain() {
 		$locale = determine_locale();
-		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' );
+
+		/**
+		 * Filter to adjust the WooCommerce locale to use for translations.
+		 */
+		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		unload_textdomain( 'woocommerce' );
 		load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
@@ -703,15 +725,6 @@ final class WooCommerce {
 		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
-
-		/**
-		 * Legacy image sizes.
-		 *
-		 * @deprecated 3.3.0 These sizes will be removed in 4.6.0.
-		 */
-		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
-		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
-		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 	}
 
 	/**
@@ -738,7 +751,10 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function template_path() {
-		return apply_filters( 'woocommerce_template_path', 'woocommerce/' );
+		/**
+		 * Filter to adjust the base templates path.
+		 */
+		return apply_filters( 'woocommerce_template_path', 'woocommerce/' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**
@@ -774,7 +790,10 @@ final class WooCommerce {
 			$api_request_url = add_query_arg( 'wc-api', $request, trailingslashit( home_url( '', $scheme ) ) );
 		}
 
-		return esc_url_raw( apply_filters( 'woocommerce_api_request_url', $api_request_url, $request, $ssl ) );
+		/**
+		 * Filter to adjust the url of an incoming API request.
+		 */
+		return esc_url_raw( apply_filters( 'woocommerce_api_request_url', $api_request_url, $request, $ssl ) );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**
@@ -824,8 +843,10 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function initialize_session() {
-		// Session class, handles session data for users - can be overwritten if custom handler is needed.
-		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+		/**
+		 * Filter to overwrite the session class that handles session data for users.
+		 */
+		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		if ( is_null( $this->session ) || ! $this->session instanceof $session_class ) {
 			$this->session = new $session_class();
 			$this->session->init();
@@ -941,7 +962,7 @@ final class WooCommerce {
 			return;
 		}
 
-		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm nx build woocommerce-legacy-assets</code> to build and minify assets.', 'woocommerce' );
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm -- turbo run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
 		$message_two = sprintf(
 			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
 			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),
@@ -1015,5 +1036,15 @@ final class WooCommerce {
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
 		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name, ...$args );
+	}
+
+	/**
+	 * Gets the value of a global.
+	 *
+	 * @param string $global_name The name of the global to get the value for.
+	 * @return mixed The value of the global.
+	 */
+	public function get_global( string $global_name ) {
+		return wc_get_container()->get( LegacyProxy::class )->get_global( $global_name );
 	}
 }

@@ -40,12 +40,20 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	private $mocked_statics = array();
 
 	/**
+	 * The currently registered mocks for globals.
+	 *
+	 * @var array
+	 */
+	private $mocked_globals = array();
+
+	/**
 	 * Reset the instance to its initial state by removing all the mocks.
 	 */
 	public function reset() {
 		$this->mocked_classes   = array();
 		$this->mocked_functions = array();
 		$this->mocked_statics   = array();
+		$this->mocked_globals   = array();
 	}
 
 	/**
@@ -116,6 +124,23 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	}
 
 	/**
+	 * Register the global mocks to use.
+	 *
+	 * @param array $mocks An associative array where keys are global names and values are the replacements for each global.
+	 *
+	 * @throws \Exception Invalid parameter.
+	 */
+	public function register_global_mocks( array $mocks ) {
+		foreach ( $mocks as $global_name => $mock ) {
+			if ( ! is_string( $global_name ) ) {
+				throw new \Exception( 'MockableLegacyProxy::register_global_mocks: $mocks must be an associative array of global_name => value.' );
+			}
+		}
+
+		$this->mocked_globals = array_merge( $this->mocked_globals, $mocks );
+	}
+
+	/**
 	 * Call a user function. This should be used to execute any non-idempotent function, especially
 	 * those in the `includes` directory or provided by WordPress.
 	 *
@@ -180,5 +205,22 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 		}
 
 		return parent::get_instance_of( $class_name, ...$args );
+	}
+
+	/**
+	 * Gets the value of a given global.
+	 *
+	 * If a mock value has been defined for the requested global name, that value will be returned
+	 * instead of the actual global.
+	 *
+	 * @param string $global_name The name of the global to retrieve the value for.
+	 * @return mixed The value of the (possibly mocked) global.
+	 */
+	public function get_global( string $global_name ) {
+		if ( array_key_exists( $global_name, $this->mocked_globals ) ) {
+			return $this->mocked_globals[ $global_name ];
+		}
+
+		return parent::get_global( $global_name );
 	}
 }

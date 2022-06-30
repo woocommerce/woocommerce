@@ -98,7 +98,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		// Create a new note containing an action with a nonce.
 		$note = new \Automattic\WooCommerce\Admin\Notes\Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://woocommerce.com/', 'unactioned' );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce' ), 'https://woocommerce.com/', 'unactioned' );
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 		$note->save();
 
@@ -121,7 +121,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		// Create a new note containing an action with a nonce.
 		$note = new \Automattic\WooCommerce\Admin\Notes\Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/?x=1&y=2', 'unactioned' );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce' ), 'https://example.com/?x=1&y=2', 'unactioned' );
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 		$note->save();
 
@@ -257,10 +257,10 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting notes when the user is not in tasklist experiment excludes two notes.
-	 *
 	 * @since 3.5.0
 	 */
 	public function test_getting_notes_when_user_is_not_in_tasklist_experiment_excludes_two_notes() {
+		$this->markTestSkipped( 'We are disabling the experiments for now.' );
 		// Given.
 		wp_set_current_user( $this->user );
 		WC_Helper_Admin_Notes::reset_notes_dbs();

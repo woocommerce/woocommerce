@@ -11,8 +11,8 @@ import {
 	TaskListType,
 	OnboardingState,
 	ExtensionList,
-	ProfileItemsState,
-	Product,
+	ProfileItems,
+	OnboardingProductType,
 } from './types';
 import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
@@ -25,7 +25,7 @@ export const getFreeExtensions = (
 
 export const getProfileItems = (
 	state: OnboardingState
-): ProfileItemsState | Record< string, never > => {
+): ProfileItems | Record< string, never > => {
 	return state.profileItems || {};
 };
 
@@ -92,7 +92,9 @@ export const getEmailPrefill = ( state: OnboardingState ): string => {
 	return state.emailPrefill || '';
 };
 
-export const getProductTypes = ( state: OnboardingState ): Product[] => {
+export const getProductTypes = (
+	state: OnboardingState
+): OnboardingProductType[] => {
 	return state.productTypes || [];
 };
 

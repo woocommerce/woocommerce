@@ -1,39 +1,15 @@
-# Unreleased
+## [3.1.0](https://www.npmjs.com/package/@woocommerce/onboarding/v/3.1.0) - 2022-06-15
 
--   Update TaskList types.
--   Added Typescript type declarations. #32615
-# 3.0.1
+-   Minor - Add ExPlat dependency and product task experiment logic
+-   Minor - Add Jetpack Changelogger
+-   Patch - Migrate @woocommerce/onboarding to TS
+-   Patch - Standardize lint scripts: add lint:fix
+-   Patch - Add task_view tracks prop for experimental products #32933
+-   Minor - Changed task_view experimental_product key to variant (technically a breaking change but since it was introduced in the same version it is fine) #32944
+-   Minor - Removed experimental product hook and instead poll the slot's fill for variant metadata. To be removed when experiment concludes! #33052
+-   Minor - Update TaskList types.
+-   Minor - Added Typescript type declarations. #32615
 
--   Add missing dependency.
+---
 
-# 3.0.0
-
-## Breaking changes
-
--   Update dependencies to support react 17. #8305
--   Drop support for IE11. #8305
-
-# 2.2.2
-
--   Retry fix for missing build-module folder
-
-# 2.2.1
-
--   Fix missing build-module folder
-
-# 2.2.0
-
--   Update WCPayCard CSS to handle @wordpress/card updates. #7412
-
-# 2.1.0
-
--   Fix commonjs module build, allow package to be built in isolation. #7286
--   Import createElement to fix build issues with SlotFill #7403
-
-# 2.0.0
-
--   Renaming exports for payment gateway Slotfill components #7251
-
-# 1.0.0
-
--   Initial package
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/onboarding/CHANGELOG.md).

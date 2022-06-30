@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
 use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
@@ -66,6 +68,10 @@ class Loader {
 		Translations::get_instance();
 		WCAdminUser::get_instance();
 		Settings::get_instance();
+		SystemStatusReport::get_instance();
+
+		wc_get_container()->get( Reviews::class );
+		wc_get_container()->get( ReviewsCommentsOverrides::class );
 
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
@@ -91,16 +97,18 @@ class Loader {
 	 * If WooCommerce Admin is installed and activated, it will attempt to deactivate and show a notice.
 	 */
 	public static function deactivate_wc_admin_plugin() {
-		if ( PluginsHelper::is_plugin_active( 'woocommerce-admin' ) ) {
+		$plugin_path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
+		if ( is_plugin_active( $plugin_path ) ) {
 			$path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce-admin' );
 			deactivate_plugins( $path );
+			$notice_action = is_network_admin() ? 'network_admin_notices' : 'admin_notices';
 			add_action(
-				'admin_notices',
+				$notice_action,
 				function() {
 					echo '<div class="error"><p>';
 					printf(
 						/* translators: %s: is referring to the plugin's name. */
-						esc_html__( '%1$s plugin has been deactivated to avoid conflicts with %2$s plugin.', 'woocommerce' ),
+						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
 						'<code>WooCommerce Admin</code>',
 						'<code>WooCommerce</code>'
 					);
@@ -342,7 +350,9 @@ class Loader {
 				$group_settings   = $setting_options->get_group_settings( $group );
 				$preload_settings = [];
 				foreach ( $group_settings as $option ) {
-					$preload_settings[ $option['id'] ] = $option['value'];
+					if ( array_key_exists( 'id', $option ) && array_key_exists( 'value', $option ) ) {
+						$preload_settings[ $option['id'] ] = $option['value'];
+					}
 				}
 				$settings['preloadSettings'][ $group ] = $preload_settings;
 			}

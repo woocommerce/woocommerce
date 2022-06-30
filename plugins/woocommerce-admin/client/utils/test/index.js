@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getUrlParams } from '../index';
+import { getUrlParams, getTimeFrame } from '../index';
 
 describe( 'getUrlParams', () => {
 	let locationSearch = '?param1=text1&param2=text2';
@@ -28,4 +28,26 @@ describe( 'getUrlParams', () => {
 		const { no_value: noValue } = getUrlParams( locationSearch );
 		expect( noValue ).toBeUndefined();
 	} );
+} );
+
+describe( 'getTimeFrame', () => {
+	test.each( [
+		{
+			timeInMs: 1000,
+			expected: '0-2s',
+		},
+		{
+			timeInMs: 3000,
+			expected: '2-5s',
+		},
+		{
+			timeInMs: 100000,
+			expected: '>60s',
+		},
+	] )(
+		'should return time frames $expected when given $timeInMs',
+		( { timeInMs, expected } ) => {
+			expect( getTimeFrame( timeInMs ) ).toEqual( expected );
+		}
+	);
 } );

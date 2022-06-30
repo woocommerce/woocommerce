@@ -1,6 +1,7 @@
 name: Run code coverage on PR
 on:
-  pull_request
+  pull_request:
+  workflow_dispatch:
 defaults:
   run:
     shell: bash
@@ -10,7 +11,7 @@ concurrency:
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
-    timeout-minutes: 20
+    timeout-minutes: 30
     runs-on: ubuntu-20.04
     services:
       database:
@@ -21,8 +22,7 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 100
 
@@ -39,36 +39,26 @@ jobs:
           php --version
           composer --version
 
-      - name: Get cached composer and pnpm directories
-        uses: actions/cache@v3
-        id: cache-deps
+      - uses: ./.github/actions/cache-deps
         with:
-          path: |
-            ~/.pnpm-store
-            plugins/woocommerce/packages
-            plugins/woocommerce/**/vendor
-          key: ${{ runner.os }}-npm-composer-version-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+          workflow_name: pr-code-coverage
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Composer dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: pnpm nx composer-install woocommerce
+      - name: Install and Build
+        uses: ./.github/actions/install-build
         
       - name: Build Admin feature config
         run: |
-          pnpm nx build:feature-config woocommerce
+          pnpm build:feature-config --filter=woocommerce
 
       - name: Init DB and WP
-        run: pnpm nx install-unit-test-db woocommerce
+        working-directory: plugins/woocommerce
+        run: bash tests/bin/install.sh woo_test root root 127.0.0.1 latest
 
       - name: Run unit tests with code coverage. Allow to fail.
+        working-directory: plugins/woocommerce
         run: |
-          pnpm nx test-code-coverage woocommerce
+          RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh
           exit 0
       
       - name: Send code coverage to Codecov.

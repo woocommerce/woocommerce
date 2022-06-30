@@ -2358,9 +2358,9 @@ function wc_update_630_create_product_attributes_lookup_table() {
 
 	/**
 	 * If the table exists and contains data, it was manually created by user before the migration ran.
-	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed.
+	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed (unless one is in progress already).
 	 */
-	if ( ! $data_store->check_lookup_table_exists() || ! $data_store->lookup_table_has_data() ) {
+	if ( ! $data_store->check_lookup_table_exists() || ( ! $data_store->lookup_table_has_data() && ! $data_store->regeneration_is_in_progress() ) ) {
 		$data_regenerator->initiate_regeneration();
 	}
 
@@ -2403,4 +2403,41 @@ function wc_update_650_approved_download_directories() {
 	$directory_sync = wc_get_container()->get( Download_Directories_Sync::class );
 	$directory_sync->init_hooks();
 	$directory_sync->init_feature( true, false );
+}
+
+/**
+ * In some cases, the approved download directories table may not have been successfully created during the update to
+ * 6.5.0. If this was the case we will need to re-initialize the feature.
+ */
+function wc_update_651_approved_download_directories() {
+	global $wpdb;
+
+	$download_directories = wc_get_container()->get( Download_Directories::class );
+	$directory_sync       = wc_get_container()->get( Download_Directories_Sync::class );
+
+	// Check if at least 1 row exists, without scanning the entire table.
+	$is_populated = (bool) $wpdb->get_var(
+		'SELECT 1 FROM ' . $download_directories->get_table() . ' LIMIT 1'
+	);
+
+	// If the table contains rules (or does not yet, but a sync is in-progress) we should do nothing else at this point.
+	if ( $is_populated || $directory_sync->in_progress() ) {
+		return;
+	}
+
+	// Otherwise, it seems reasonable to assume that the feature was not initialized as expected during the update to
+	// 6.5.0. Let's give that another try.
+	$directory_sync->init_hooks();
+	$directory_sync->init_feature( true, false );
+}
+
+/**
+ * Purges the comments count cache after 6.7.0 split reviews from the comments page.
+ */
+function wc_update_670_purge_comments_count_cache() {
+	if ( ! is_callable( 'WC_Comments::delete_comments_count_cache' ) ) {
+		return;
+	}
+
+	WC_Comments::delete_comments_count_cache();
 }

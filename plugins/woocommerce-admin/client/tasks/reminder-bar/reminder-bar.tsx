@@ -6,7 +6,8 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
-	TaskListType,
+	TaskType,
+	getVisibleTasks,
 } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -24,7 +25,6 @@ import './reminder-bar.scss';
 
 type ReminderBarProps = {
 	taskListId: string;
-	pageTitle: string;
 	updateBodyMargin: () => void;
 };
 
@@ -83,7 +83,7 @@ const ReminderText: React.FC< ReminderTextProps > = ( {
 };
 
 export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
-	taskListId = 'setup_experiment_1',
+	taskListId,
 	updateBodyMargin,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -113,15 +113,10 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 			REMINDER_BAR_HIDDEN_OPTION,
 		] );
 
-		const visibleTasks =
-			taskList?.tasks.filter(
-				( task ) =>
-					! task.isDismissed &&
-					( ! task.isSnoozed || task.snoozedUntil < Date.now() )
-			) || [];
+		const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
 
 		const completedTasks =
-			visibleTasks?.filter( ( task ) => task.isComplete ) || [];
+			visibleTasks.filter( ( task: TaskType ) => task.isComplete ) || [];
 
 		const isResolved = taskListIsResolved && optionIsResolved;
 

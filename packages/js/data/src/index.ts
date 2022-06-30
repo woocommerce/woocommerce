@@ -16,6 +16,9 @@ export { NAVIGATION_STORE_NAME } from './navigation';
 export { OPTIONS_STORE_NAME } from './options';
 export { ITEMS_STORE_NAME } from './items';
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+export { PRODUCTS_STORE_NAME } from './products';
+export { ORDERS_STORE_NAME } from './orders';
+export { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
@@ -67,6 +70,8 @@ export * from './types';
 export * from './countries/types';
 export * from './onboarding/types';
 export * from './plugins/types';
+export * from './products/types';
+export * from './orders/types';
 
 /**
  * Internal dependencies
@@ -83,6 +88,9 @@ import type { REPORTS_STORE_NAME } from './reports';
 import type { ITEMS_STORE_NAME } from './items';
 import type { COUNTRIES_STORE_NAME } from './countries';
 import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+import type { PRODUCTS_STORE_NAME } from './products';
+import type { ORDERS_STORE_NAME } from './orders';
+import type { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -96,7 +104,10 @@ export type WCDataStoreName =
 	| typeof REPORTS_STORE_NAME
 	| typeof ITEMS_STORE_NAME
 	| typeof COUNTRIES_STORE_NAME
-	| typeof PAYMENT_GATEWAYS_STORE_NAME;
+	| typeof PAYMENT_GATEWAYS_STORE_NAME
+	| typeof PRODUCTS_STORE_NAME
+	| typeof ORDERS_STORE_NAME
+	| typeof PRODUCT_ATTRIBUTES_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -105,6 +116,9 @@ import { WPDataSelectors } from './types';
 import { PaymentSelectors } from './payment-gateways/selectors';
 import { PluginSelectors } from './plugins/selectors';
 import { OnboardingSelectors } from './onboarding/selectors';
+import { OptionsSelectors } from './options/types';
+import { ProductsSelectors } from './products/selectors';
+import { OrdersSelectors } from './orders/selectors';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -121,7 +135,7 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	: T extends typeof USER_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof OPTIONS_STORE_NAME
-	? WPDataSelectors
+	? OptionsSelectors
 	: T extends typeof NAVIGATION_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof NOTES_STORE_NAME
@@ -132,6 +146,10 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof COUNTRIES_STORE_NAME
 	? WPDataSelectors
+	: T extends typeof PRODUCTS_STORE_NAME
+	? ProductsSelectors
+	: T extends typeof ORDERS_STORE_NAME
+	? OrdersSelectors
 	: never;
 
 export interface WCDataSelector {
@@ -140,3 +158,4 @@ export interface WCDataSelector {
 
 // Other exports
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
+export { ActionDispatchers as ProductsStoreActions } from './products/actions';

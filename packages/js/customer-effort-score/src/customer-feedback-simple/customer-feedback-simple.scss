@@ -1,0 +1,20 @@
+.customer-feedback-simple__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .components-button {
+        line-height: 32px;
+        font-size: 20px;
+        border-radius: 3px;
+        padding: 6px;
+
+        &:hover {
+            background-color: $gray-100;
+        }
+    }
+}
+
+.customer-feedback-simple__selection {
+    margin-left: $gap-small;
+}

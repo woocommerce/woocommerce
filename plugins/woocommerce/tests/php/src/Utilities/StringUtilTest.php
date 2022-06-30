@@ -48,4 +48,20 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( StringUtil::ends_with( 'test', 'ST', false ) );
 		$this->assertTrue( StringUtil::ends_with( ' foo bar', ' BAR', false ) );
 	}
+
+	/**
+	 * @return void 'contains' should check whether one string contains another.
+	 */
+	public function test_contains() {
+		$this->assertFalse( StringUtil::contains( 'foobar', 'fizzbuzz' ) );
+		$this->assertFalse( StringUtil::contains( 'foobar', 'fizzbuzz', true ) );
+		$this->assertFalse( StringUtil::contains( 'foobar', 'fizzbuzz', false ) );
+
+		$this->assertFalse( StringUtil::contains( 'foobar', 'BA' ) );
+		$this->assertFalse( StringUtil::contains( 'foobar', 'BA', true ) );
+		$this->assertTrue( StringUtil::contains( 'foobar', 'ba' ) );
+		$this->assertTrue( StringUtil::contains( 'foobar', 'ba', true ) );
+
+		$this->assertTrue( StringUtil::contains( 'foobar', 'BA', false ) );
+	}
 }

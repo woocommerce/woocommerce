@@ -18,9 +18,6 @@ const defaultState: PluginsState = {
 
 const restApiError = {
 	code: 'error code',
-	data: {
-		status: 400,
-	},
 	message: 'error message',
 };
 

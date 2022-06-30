@@ -7,8 +7,16 @@ import { Text } from '@woocommerce/experimental';
 import { ExternalLink } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import useRecordCompletionTime from '../use-record-completion-time';
 
 const Footer: React.FC = () => {
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+
 	return (
 		<div className="woocommerce-products-footer">
 			<Text className="woocommerce-products-footer__selling-somewhere-else">
@@ -23,6 +31,10 @@ const Footer: React.FC = () => {
 						importCSVLink: (
 							<Link
 								onClick={ () => {
+									recordEvent( 'tasklist_add_product', {
+										method: 'import',
+									} );
+									recordCompletionTime();
 									window.location = getAdminLink(
 										'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
 									);
@@ -36,6 +48,12 @@ const Footer: React.FC = () => {
 						),
 						_3rdLink: (
 							<ExternalLink
+								onClick={ () => {
+									recordEvent( 'tasklist_add_product', {
+										method: 'migrate',
+									} );
+									recordCompletionTime();
+								} }
 								href="https://woocommerce.com/products/cart2cart/?utm_medium=product"
 								type="external"
 							>

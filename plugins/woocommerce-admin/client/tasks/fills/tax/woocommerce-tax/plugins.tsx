@@ -15,7 +15,12 @@ import { useEffect } from '@wordpress/element';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 import { SetupStepProps } from './setup';
-import { SettingsSelector } from '../utils';
+
+const isWcConnectOptions = (
+	wcConnectOptions: unknown
+): wcConnectOptions is {
+	[ key: string ]: unknown;
+} => typeof wcConnectOptions === 'object' && wcConnectOptions !== null;
 
 export const Plugins: React.FC< SetupStepProps > = ( {
 	nextStep,
@@ -25,9 +30,9 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { isResolving, tosAccepted } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		) as SettingsSelector;
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
+		const wcConnectOptions = getOption( 'wc_connect_options' );
 
 		return {
 			isResolving:
@@ -38,7 +43,8 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 					'wc_connect_options',
 				] ),
 			tosAccepted:
-				getOption( 'wc_connect_options' )?.tos_accepted ||
+				( isWcConnectOptions( wcConnectOptions ) &&
+					wcConnectOptions?.tos_accepted ) ||
 				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
 		};
 	} );

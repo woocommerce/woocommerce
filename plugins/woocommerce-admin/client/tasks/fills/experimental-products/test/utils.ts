@@ -11,7 +11,9 @@ describe( 'getProductTypes', () => {
 
 	it( 'should return the product types without excluded items', () => {
 		expect(
-			getProductTypes( [ 'external', 'digital' ] ).map( ( p ) => p.key )
+			getProductTypes( { exclude: [ 'external', 'digital' ] } ).map(
+				( p ) => p.key
+			)
 		).toEqual( [ 'physical', 'variable', 'subscription', 'grouped' ] );
 	} );
 } );

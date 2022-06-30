@@ -55,9 +55,8 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } = useDispatch(
-		SETTINGS_STORE_NAME
-	);
+	const { updateAndPersistSettingsForGroup } =
+		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving, taxSettings } = useSelect(
 		( select ) => {
 			const { getSettings, hasFinishedResolution } = select(
@@ -135,7 +134,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		updateOptions( {
 			woocommerce_no_sales_tax: true,
 			woocommerce_calc_taxes: 'no',
-			// @ts-expect-error updateOptions returns a Promise, but it is not typed in source.
 		} ).then( () => {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		} );
@@ -265,7 +263,6 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	// @ts-expect-error @types/wordpress__plugins need to be updated
 	scope: 'woocommerce-tasks',
 	render: () => (
-		// @ts-expect-error WooOnboardingTask is still a pure JS file
 		<WooOnboardingTask id="tax">
 			{ ( { onComplete, query, task }: TaxProps ) => (
 				<Tax onComplete={ onComplete } query={ query } task={ task } />

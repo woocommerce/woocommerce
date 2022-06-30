@@ -3,47 +3,12 @@
  */
 import { mapValues } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
-import schema from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
-
-type UserPreferences = {
-	activity_panel_inbox_last_read?: string;
-	activity_panel_reviews_last_read?: string;
-	android_app_banner_dismissed?: string;
-	categories_report_columns?: string;
-	coupons_report_columns?: string;
-	customers_report_columns?: string;
-	dashboard_chart_interval?: string;
-	dashboard_chart_type?: string;
-	dashboard_leaderboard_rows?: string;
-	dashboard_sections?: string;
-	help_panel_highlight_shown?: string;
-	homepage_layout?: string;
-	homepage_stats?: string;
-	orders_report_columns?: string;
-	products_report_columns?: string;
-	revenue_report_columns?: string;
-	task_list_tracked_started_tasks?: {
-		[ key: string ]: number;
-	};
-	taxes_report_columns?: string;
-	variations_report_columns?: string;
-};
-
-type WoocommerceMeta = UserPreferences & {
-	task_list_tracked_started_tasks?: string;
-};
-
-type WCUser = Pick<
-	schema.Schema.BaseUser< 'view' >,
-	schema.Schema.ViewKeys.User
-> & {
-	woocommerce_meta: WoocommerceMeta;
-};
+import { WCUser, UserPreferences } from './types';
 
 /**
  * Retrieve and decode the user's WooCommerce meta values.
@@ -181,7 +146,11 @@ export const useUserPreferences = () => {
 		};
 	} );
 
-	const updateUserPreferences = ( userPrefs: UserPreferences ) => {
+	const updateUserPreferences = <
+		T extends Record< string, unknown > = UserPreferences
+	>(
+		userPrefs: UserPreferences | T
+	) => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.

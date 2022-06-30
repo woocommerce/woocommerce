@@ -2,19 +2,19 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { lazy, useState, useContext, useMemo } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
-import { getAdminLink } from '@woocommerce/settings';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	useUser,
 	useUserPreferences,
+	getVisibleTasks,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -24,7 +24,6 @@ import { useSlot } from '@woocommerce/experimental';
 import './style.scss';
 import { IconFlag } from './icon-flag';
 import { isNotesPanelVisible } from './unread-indicators';
-import { isWCAdmin } from '~/dashboard/utils';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
@@ -38,6 +37,8 @@ import {
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useActiveSetupTasklist } from '~/tasks';
+import { LayoutContext } from '~/layout';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -49,6 +50,12 @@ const InboxPanel = lazy( () =>
 	)
 );
 
+const SetupTasksPanel = lazy( () =>
+	import(
+		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
+	)
+);
+
 export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
@@ -57,6 +64,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
+	const activeSetupList = useActiveSetupTasklist();
+	const layoutContext = useContext( LayoutContext );
+	const updatedLayoutContext = useMemo(
+		() => layoutContext.getExtendedContext( 'activity-panel' ),
+		[ layoutContext ]
+	);
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -133,6 +146,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
+		setupTasksCompleteCount,
+		setupTasksCount,
 		previewSiteBtnTrackData,
 	} = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -140,7 +155,10 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			ONBOARDING_STORE_NAME
 		);
 
-		const isSetupTaskListHidden = getTaskList( 'setup' )?.isHidden;
+		const setupList = getTaskList( activeSetupList );
+
+		const isSetupTaskListHidden = setupList?.isHidden;
+		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
@@ -153,11 +171,14 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				thingsToDoCount
 			),
 			thingsToDoNextCount: thingsToDoCount,
-			requestingTaskListOptions: ! hasFinishedResolution(
-				'getTaskLists'
-			),
-			setupTaskListComplete: getTaskList( 'setup' )?.isComplete,
+			requestingTaskListOptions:
+				! hasFinishedResolution( 'getTaskLists' ),
+			setupTaskListComplete: setupList?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
+			setupTasksCount: setupVisibleTasks.length,
+			setupTasksCompleteCount: setupVisibleTasks.filter(
+				( task ) => task.isComplete
+			).length,
 			isCompletedTask: Boolean(
 				query.task && getTask( query.task )?.isComplete
 			),
@@ -167,7 +188,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
-	const { unhideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -213,14 +233,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		);
 	};
 
-	const redirectToHomeScreen = () => {
-		if ( isWCAdmin( window.location.href ) ) {
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} else {
-			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
-		}
-	};
-
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
 		const activity = {
@@ -235,33 +247,20 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const setup = {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
-			icon: <SetupProgress />,
-			onClick: () => {
-				const currentLocation = window.location.href;
-				const homescreenLocation = getAdminLink(
-					'admin.php?page=wc-admin'
-				);
-
-				// Don't navigate if we're already on the homescreen, this will cause an infinite loop
-				if ( currentLocation !== homescreenLocation ) {
-					// Ensure that if the user is trying to get to the task list they can see it even if
-					// it was dismissed.
-					if ( setupTaskListHidden === 'no' ) {
-						redirectToHomeScreen();
-					} else {
-						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
-					}
-				}
-
-				return null;
-			},
+			icon: (
+				<SetupProgress
+					setupTasksComplete={ setupTasksCompleteCount }
+					setupCompletePercent={ Math.ceil(
+						( setupTasksCompleteCount / setupTasksCount ) * 100
+					) }
+				/>
+			),
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isPerformingSetupTask() &&
-				( ! isHomescreen() || isEmbedded ),
+				! isHomescreen(),
 		};
 
 		const help = {
@@ -337,6 +336,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
+			case 'setup':
+				return <SetupTasksPanel query={ query } />;
 			default:
 				return null;
 		}
@@ -372,55 +373,57 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<div>
-			<H id={ headerId } className="screen-reader-text">
-				{ __( 'Store Activity', 'woocommerce' ) }
-			</H>
-			<Section
-				component="aside"
-				id="woocommerce-activity-panel"
-				className="woocommerce-layout__activity-panel"
-				aria-labelledby={ headerId }
-			>
-				<Tabs
-					tabs={ tabs }
-					tabOpen={ isPanelOpen }
-					selectedTab={ currentTab }
-					onTabClick={ ( tab, tabOpen ) => {
-						if ( tab.onClick ) {
-							tab.onClick();
-							return;
-						}
+		<LayoutContext.Provider value={ updatedLayoutContext }>
+			<div>
+				<H id={ headerId } className="screen-reader-text">
+					{ __( 'Store Activity', 'woocommerce' ) }
+				</H>
+				<Section
+					component="aside"
+					id="woocommerce-activity-panel"
+					className="woocommerce-layout__activity-panel"
+					aria-labelledby={ headerId }
+				>
+					<Tabs
+						tabs={ tabs }
+						tabOpen={ isPanelOpen }
+						selectedTab={ currentTab }
+						onTabClick={ ( tab, tabOpen ) => {
+							if ( tab.onClick ) {
+								tab.onClick();
+								return;
+							}
 
-						togglePanel( tab, tabOpen );
-					} }
-				/>
-				<Panel
-					currentTab
-					isPanelOpen={ isPanelOpen }
-					isPanelSwitching={ isPanelSwitching }
-					tab={ find( getTabs(), { name: currentTab } ) }
-					content={ getPanelContent( currentTab ) }
-					closePanel={ () => closePanel() }
-					clearPanel={ () => clearPanel() }
-				/>
-			</Section>
-			{ showHelpHighlightTooltip ? (
-				<HighlightTooltip
-					delay={ 1000 }
-					useAnchor={ true }
-					title={ __( "We're here for help", 'woocommerce' ) }
-					content={ __(
-						'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-						'woocommerce'
-					) }
-					closeButtonText={ __( 'Got it', 'woocommerce' ) }
-					id="activity-panel-tab-help"
-					onClose={ () => closedHelpPanelHighlight() }
-					onShow={ () => recordEvent( 'help_tooltip_view' ) }
-				/>
-			) : null }
-		</div>
+							togglePanel( tab, tabOpen );
+						} }
+					/>
+					<Panel
+						currentTab
+						isPanelOpen={ isPanelOpen }
+						isPanelSwitching={ isPanelSwitching }
+						tab={ find( getTabs(), { name: currentTab } ) }
+						content={ getPanelContent( currentTab ) }
+						closePanel={ () => closePanel() }
+						clearPanel={ () => clearPanel() }
+					/>
+				</Section>
+				{ showHelpHighlightTooltip ? (
+					<HighlightTooltip
+						delay={ 1000 }
+						useAnchor={ true }
+						title={ __( "We're here for help", 'woocommerce' ) }
+						content={ __(
+							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
+							'woocommerce'
+						) }
+						closeButtonText={ __( 'Got it', 'woocommerce' ) }
+						id="activity-panel-tab-help"
+						onClose={ () => closedHelpPanelHighlight() }
+						onShow={ () => recordEvent( 'help_tooltip_view' ) }
+					/>
+				) : null }
+			</div>
+		</LayoutContext.Provider>
 	);
 };
 

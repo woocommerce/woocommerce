@@ -6,7 +6,6 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { History } from 'history';
 /**
  * Internal dependencies
  */
@@ -19,21 +18,44 @@ export type TaskProps = {
 };
 
 export const Task: React.FC< TaskProps > = ( { query, task } ) => {
-	const id = query.task;
-	const {
-		invalidateResolutionForStoreSelector,
-		optimisticallyCompleteTask,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	const id = query.task || '';
+	if ( ! id ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'No task id provided' );
+		// eslint-enable-next-line no-console
+	}
+
+	const { invalidateResolutionForStoreSelector, optimisticallyCompleteTask } =
+		useDispatch( ONBOARDING_STORE_NAME );
+
+	const updateBadge = useCallback( () => {
+		const badgeElement: HTMLElement | null = document.querySelector(
+			'.toplevel_page_woocommerce .remaining-tasks-badge'
+		);
+
+		if ( ! badgeElement ) {
+			return;
+		}
+
+		const currentBadgeCount = Number( badgeElement.innerText );
+
+		if ( currentBadgeCount === 1 ) {
+			badgeElement.remove();
+		}
+
+		badgeElement.innerHTML = String( currentBadgeCount - 1 );
+	}, [] );
 
 	const onComplete = useCallback(
 		( options ) => {
 			optimisticallyCompleteTask( id );
-			( getHistory() as History ).push(
+			getHistory().push(
 				options && options.redirectPath
 					? options.redirectPath
 					: getNewPath( {}, '/', {} )
 			);
 			invalidateResolutionForStoreSelector( 'getTaskLists' );
+			updateBadge();
 		},
 		[ id ]
 	);

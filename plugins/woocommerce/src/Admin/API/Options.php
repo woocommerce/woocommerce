@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Options Controller.
  *
- * @deprecated since 3.1.0
+ * @deprecated since 6.2.0
  *
  * @extends WC_REST_Data_Controller
  */

@@ -148,6 +148,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
+			context: 'root',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -170,6 +171,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
+			context: 'root',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -193,6 +195,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'extended_tasklist_view', {
+			context: 'root',
 			number_tasks: 0,
 			store_connected: null,
 		} );

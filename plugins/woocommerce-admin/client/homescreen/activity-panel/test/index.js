@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -72,5 +73,15 @@ describe( 'ActivityPanel', () => {
 		render( <ActivityPanel /> );
 		expect( screen.queryByText( '10000' ) ).toBeInTheDocument();
 		expect( screen.queryByText( '20000' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should not render panels when loadingOrderAndProductCount is true', () => {
+		useSelect.mockReturnValue( {
+			isTaskListHidden: false,
+			loadingOrderAndProductCount: true,
+		} );
+		render( <ActivityPanel /> );
+		expect( screen.queryByText( 'custom-panel-1' ) ).toBeNull();
+		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
 	} );
 } );
