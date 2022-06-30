@@ -120,7 +120,7 @@ class ListTable extends WP_List_Table {
 			/**
 			 * Renders after the 'blank state' message for the order list table has rendered.
 			 */
-			do_action( 'wc_marketplace_suggestions_orders_empty_state' );
+			do_action( 'wc_marketplace_suggestions_orders_empty_state' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			?>
 
 			</div>
@@ -460,7 +460,7 @@ class ListTable extends WP_List_Table {
 				human_time_diff( $order->get_date_created()->getTimestamp(), time() )
 			);
 		} else {
-			$show_date = $order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'M j, Y', 'woocommerce' ) ) );
+			$show_date = $order->get_date_created()->date_i18n( apply_filters( 'woocommerce_admin_order_date_format', __( 'M j, Y', 'woocommerce' ) ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		}
 		printf(
 			'<time datetime="%1$s" title="%2$s">%3$s</time>',
@@ -585,6 +585,7 @@ class ListTable extends WP_List_Table {
 		 * are registered.
 		 *
 		 * @param WC_Order $order Current order object.
+		 * @since 6.7.0
 		 */
 		do_action( 'woocommerce_admin_order_actions_start', $order );
 
@@ -611,6 +612,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param array    $action Order actions.
 		 * @param WC_Order $order  Current order object.
+		 * @since 6.7.0
 		 */
 		$actions = apply_filters( 'woocommerce_admin_order_actions', $actions, $order );
 
@@ -622,6 +624,7 @@ class ListTable extends WP_List_Table {
 		 * are rendered.
 		 *
 		 * @param WC_Order $order Current order object.
+		 * @since 6.7.0
 		 */
 		do_action( 'woocommerce_admin_order_actions_end', $order );
 
