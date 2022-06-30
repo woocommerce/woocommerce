@@ -160,7 +160,7 @@ class WC_Products_Tracking {
 					var properties = {
 						attributes:				$( '.woocommerce_attribute' ).length,
 						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
-						'cross_sells':			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
+						cross_sells:			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
 						description:			description_value.trim() !== '' ? 'Yes' : 'No',
 						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
 						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
@@ -209,7 +209,7 @@ class WC_Products_Tracking {
 		$properties = array(
 			'attributes'        => count( $product->get_attributes() ),
 			'categories'        => count( $product->get_category_ids() ),
-			'cross-sells'       => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
+			'cross_sells'       => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
 			'description'       => $product->get_description() ? 'yes' : 'no',
 			'dimensions'        => wc_format_dimensions( $product->get_dimensions( false ) ) !== 'N/A' ? 'yes' : 'no',
 			'enable_reviews'    => $product->get_reviews_allowed() ? 'yes' : 'no',
