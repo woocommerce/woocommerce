@@ -33,9 +33,12 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function setup(): void {
+		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
+
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
+
 		$this->items_per_page();
 		set_screen_options();
 	}
@@ -649,4 +652,141 @@ class ListTable extends WP_List_Table {
 			echo '<input type="hidden" name="status" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) ) . '" >';
 		}
 	}
+
+	/**
+	 * Handle bulk actions.
+	 */
+	public function handle_bulk_actions() {
+		$action = $this->current_action();
+
+		if ( ! $action ) {
+			return;
+		}
+
+		check_admin_referer( 'bulk-orders' );
+
+		$redirect_to = remove_query_arg( array( 'deleted', 'ids' ), wp_get_referer() );
+		$redirect_to = add_query_arg( 'paged', $this->get_pagenum(), $redirect_to );
+
+		/**
+		 * Allows 3rd parties to modify order IDs about to be affected by a bulk action.
+		 *
+		 * @param array Array of order IDs.
+		 */
+		$ids = apply_filters( // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			'woocommerce_bulk_action_ids',
+			isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array(),
+			$action,
+			'order'
+		);
+
+		if ( ! $ids ) {
+			wp_safe_redirect( $redirect_to );
+			exit;
+		}
+
+		$report_action = '';
+		$changed       = 0;
+
+		if ( 'remove_personal_data' === $action ) {
+			$report_action = 'removed_personal_data';
+			$changed       = $this->do_bulk_action_remove_personal_data( $ids );
+		} elseif ( false !== strpos( $action, 'mark_' ) ) {
+			$order_statuses = wc_get_order_statuses();
+			$new_status     = substr( $action, 5 );
+			$report_action  = 'marked_' . $new_status;
+
+			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
+				$changed = $this->do_bulk_action_mark_orders( $ids, $new_status );
+			}
+		}
+
+		if ( $changed ) {
+			$redirect_to = add_query_arg(
+				array(
+					'bulk_action' => $report_action,
+					'changed'     => $changed,
+					'ids'         => implode( ',', $ids ),
+				),
+				$redirect_to
+			);
+		}
+
+		wp_safe_redirect( $redirect_to );
+		exit;
+	}
+
+	/**
+	 * Implements the "remove personal data" bulk action.
+	 *
+	 * @param array $order_ids The Order IDs.
+	 * @return int Number of orders modified.
+	 */
+	private function do_bulk_action_remove_personal_data( $order_ids ): int {
+		$changed = 0;
+
+		foreach ( $order_ids as $id ) {
+			$order = wc_get_order( $id );
+
+			if ( $order ) {
+				do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$changed++;
+			}
+		}
+
+		return $changed;
+	}
+
+	/**
+	 * Implements the "mark <status>" bulk action.
+	 *
+	 * @param array  $order_ids  The order IDs to change.
+	 * @param string $new_status The new order status.
+	 * @return int Number of orders modified.
+	 */
+	private function do_bulk_action_mark_orders( $order_ids, $new_status ): int {
+		$changed = 0;
+
+		// Initialize payment gateways in case order has hooked status transition actions.
+		WC()->payment_gateways();
+
+		foreach ( $order_ids as $id ) {
+			$order = wc_get_order( $id );
+			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
+			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			$changed++;
+		}
+
+		return $changed;
+	}
+
+	/**
+	 * Show confirmation message that order status changed for number of orders.
+	 */
+	public function bulk_action_notices() {
+		if ( empty( $_REQUEST['bulk_action'] ) ) {
+			return;
+		}
+
+		$order_statuses = wc_get_order_statuses();
+		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
+		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) );
+
+		// Check if any status changes happened.
+		foreach ( $order_statuses as $slug => $name ) {
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+				/* translators: %d: orders count */
+				$message = sprintf( _n( '%d order status changed.', '%d order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
+				break;
+			}
+		}
+
+		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			/* translators: %d: orders count */
+			$message = sprintf( _n( 'Removed personal data from %d order.', 'Removed personal data from %d orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
+		}
+	}
+
 }
