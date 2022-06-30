@@ -248,7 +248,10 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				<>
 					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
 					<Toggle
-						heading={ __( 'Other payment methods', 'woocommerce' ) }
+						heading={ __(
+							'Other payment providers',
+							'woocommerce'
+						) }
 						onToggle={ trackToggle }
 					>
 						{ additionalSection }
