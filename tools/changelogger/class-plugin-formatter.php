@@ -13,7 +13,7 @@ use Automattic\Jetpack\Changelogger\FormatterPlugin;
  * Jetpack Changelogger Formatter for WooCommerce plugins
  */
 
-require_once 'Formatter.php';
+require_once 'class-formatter.php';
 
 /**
  * Jetpack Changelogger Formatter for WooCommerce Plugins
