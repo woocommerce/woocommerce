@@ -1,4 +1,9 @@
 <?php
+/**
+ * Plugin_Formatter class
+ *
+ * @package  WooCommerce
+ */
 
 namespace Automattic\WooCommerce\MonorepoTools\Changelogger;
 
@@ -15,7 +20,7 @@ require_once 'Formatter.php';
  *
  * Class Formatter
  */
-class PluginFormatter extends Formatter implements FormatterPlugin {
+class Plugin_Formatter extends Formatter implements FormatterPlugin {
 	/**
 	 * Epilogue text.
 	 *
