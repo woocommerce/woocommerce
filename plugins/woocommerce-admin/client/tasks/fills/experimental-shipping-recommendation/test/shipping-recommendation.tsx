@@ -120,4 +120,17 @@ describe( 'ShippingRecommendation', () => {
 
 		expect( redirectToWCSSettings ).toHaveBeenCalled();
 	} );
+
+	test( 'should allow location step to be manually navigated', () => {
+		const { getByText } = render(
+			<ShippingRecommendation
+				isJetpackConnected={ true }
+				isResolving={ false }
+				activePlugins={ [] }
+			/>
+		);
+
+		getByText( 'Set store location' ).click();
+		expect( getByText( 'Address line 1' ) ).toBeInTheDocument();
+	} );
 } );
