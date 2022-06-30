@@ -182,7 +182,7 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
     test-summary:
-        name: Output E2E and API test summary in workflow run and PR comment
+        name: Post test summary
         if: |
             always() && 
             (
@@ -255,8 +255,8 @@ jobs:
               uses: actions/github-script@v6
               with:
                   script: |
-                    const apiSummary = ${{ fromJSON(steps.api-summary.outputs.result) }}
-                    console.log( apiSummary.statistic )
+                    const apiSummary = ${{ steps.api-summary.outputs.result }}
+                    console.log( apiSummary )
 
             - name: Add/update PR comment with test summary
               run: echo "todo"
