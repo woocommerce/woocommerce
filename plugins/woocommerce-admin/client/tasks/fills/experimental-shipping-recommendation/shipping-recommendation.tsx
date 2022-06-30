@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { difference } from 'lodash';
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { Stepper } from '@woocommerce/components';
 import { Card, CardBody, Button } from '@wordpress/components';
 
@@ -30,6 +30,8 @@ export const ShippingRecommendation: React.FC<
 	);
 	const [ stepIndex, setStepIndex ] = useState( 0 );
 	const [ isRedirecting, setIsRedirecting ] = useState( false );
+	const [ locationStepRedirected, setLocationStepRedirected ] =
+		useState( false );
 
 	const nextStep = () => {
 		setStepIndex( stepIndex + 1 );
@@ -38,6 +40,19 @@ export const ShippingRecommendation: React.FC<
 	const redirect = () => {
 		setIsRedirecting( true );
 		redirectToWCSSettings();
+	};
+
+	const viewLocationStep = () => {
+		setStepIndex( 0 );
+	};
+
+	// Skips to next step only once.
+	const onLocationComplete = () => {
+		if ( locationStepRedirected ) {
+			return;
+		}
+		setLocationStepRedirected( true );
+		nextStep();
 	};
 
 	useEffect( () => {
@@ -69,7 +84,13 @@ export const ShippingRecommendation: React.FC<
 				'The address from which your business operates',
 				'woocommerce'
 			),
-			content: <StoreLocation nextStep={ nextStep } />,
+			content: (
+				<StoreLocation
+					nextStep={ nextStep }
+					onLocationComplete={ onLocationComplete }
+				/>
+			),
+			onClick: viewLocationStep,
 		},
 		{
 			key: 'plugins',
