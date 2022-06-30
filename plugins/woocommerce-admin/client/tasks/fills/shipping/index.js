@@ -54,7 +54,7 @@ export class Shipping extends Component {
 			window.wcAdminFeatures &&
 			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
 
-		this.storeLocationCompleted = false;
+		this.store_location_completed = false;
 	}
 
 	componentDidMount() {
@@ -149,16 +149,16 @@ export class Shipping extends Component {
 			storeAddress && defaultCountry && storePostCode
 		);
 
-		if (
-			this.shippingSmartDefaultsEnabled &&
-			step === 'store_location' &&
-			isCompleteAddress &&
-			! this.storeLocationCompleted
-		) {
-			this.completeStep();
-			this.storeLocationCompleted = true;
-		} else if ( step === 'store_location' && isCompleteAddress ) {
-			this.completeStep();
+		if ( step === 'store_location' && isCompleteAddress ) {
+			if (
+				this.shippingSmartDefaultsEnabled &&
+				! this.storeLocationCompleted
+			) {
+				this.completeStep();
+				this.storeLocationCompleted = true;
+			} else if ( ! this.shippingSmartDefaultsEnabled ) {
+				this.completeStep();
+			}
 		}
 	}
 
