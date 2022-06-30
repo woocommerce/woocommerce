@@ -16,7 +16,7 @@ import {
 	getNextVersion,
 	validateChangelogEntries,
 	writeChangelog,
-	hasChangelogs,
+	hasValidChangelogs,
 } from '../../changelogger';
 
 /**
@@ -85,7 +85,7 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
 			try {
-				if ( hasChangelogs( name ) ) {
+				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
 					const nextVersion = getNextVersion( name );
 					writeChangelog( name );

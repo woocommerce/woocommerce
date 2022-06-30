@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { execSync } from 'child_process';
-import { readdirSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 /**
@@ -78,7 +78,7 @@ export const writeChangelog = ( name: string ) => {
  * @param {string} name Package name.
  * @return {boolean} If there are changelogs.
  */
-export const hasChangelogs = ( name: string ): boolean | void => {
+export const hasValidChangelogs = ( name: string ): boolean | void => {
 	try {
 		const changelogDir = join(
 			getFilepathFromPackageName( name ),
@@ -88,10 +88,38 @@ export const hasChangelogs = ( name: string ): boolean | void => {
 			encoding: 'utf-8',
 		} );
 
-		return (
-			changelogDirContents.filter( ( entry ) => entry !== '.gitkeep' )
-				.length > 0
+		const changelogs = changelogDirContents.filter(
+			( entry ) => entry !== '.gitkeep'
 		);
+
+		if ( changelogs.length === 0 ) {
+			return false;
+		}
+
+		// If there is at least one changelog that is not just a comment, there are valid changelogs.
+		return changelogs.some( ( changelog ) => {
+			const contents = readFileSync(
+				join( changelogDir, changelog ),
+				'utf8'
+			);
+
+			const commentRegex = /Comment:.*\n([\s\S]*)?/;
+			const hasComment = commentRegex.test( contents );
+
+			if ( ! hasComment ) {
+				// Has no comment, must be a real changelog.
+				return true;
+			}
+
+			const textAfterComment = /Comment:.*\n([\s\S]*)?/.exec( contents );
+
+			if ( textAfterComment ) {
+				// Return true if there is more than just whitespace.
+				return textAfterComment[ 1 ].trim().length > 0;
+			}
+
+			return false;
+		} );
 	} catch ( e ) {
 		if ( e instanceof Error ) {
 			console.log( e );
