@@ -32,7 +32,6 @@ import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import { WCSBanner } from '../experimental-shipping-recommendation/components/wcs-banner';
 import { ShipStationBanner } from '../experimental-shipping-recommendation/components/shipstation-banner';
-
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
 
@@ -54,6 +53,8 @@ export class Shipping extends Component {
 		this.shippingSmartDefaultsEnabled =
 			window.wcAdminFeatures &&
 			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
+
+		this.store_location_completed = false;
 	}
 
 	componentDidMount() {
@@ -148,7 +149,15 @@ export class Shipping extends Component {
 			storeAddress && defaultCountry && storePostCode
 		);
 
-		if ( step === 'store_location' && isCompleteAddress ) {
+		if (
+			this.shippingSmartDefaultsEnabled &&
+			step === 'store_location' &&
+			isCompleteAddress &&
+			! this.store_location_completed
+		) {
+			this.completeStep();
+			this.store_location_completed = true;
+		} else if ( step === 'store_location' && isCompleteAddress ) {
 			this.completeStep();
 		}
 	}
@@ -225,7 +234,11 @@ export class Shipping extends Component {
 							recordEvent( 'tasklist_shipping_set_location', {
 								country,
 							} );
+
 							// Don't need to trigger completeStep here as it's triggered by the address updates in the componentDidUpdate function.
+							if ( this.shippingSmartDefaultsEnabled ) {
+								this.completeStep();
+							}
 						} }
 					/>
 				),
@@ -356,6 +369,12 @@ export class Shipping extends Component {
 						'We recommend the following shipping options based on your location. You can manage your shipping options again at any time in WooCommerce Shipping settings.',
 						'woocommerce'
 					),
+					onClick:
+						this.state.step !== 'rates'
+							? () => {
+									this.setState( { step: 'rates' } );
+							  }
+							: undefined,
 					content: (
 						<ShippingRates
 							buttonText={ __(
@@ -481,6 +500,12 @@ export class Shipping extends Component {
 						'Add your store location to help us calculate shipping rates and the best shipping options for you. You can manage your store location again at any time in WooCommerce Settings General.',
 						'woocommerce'
 					),
+					onClick:
+						this.state.step !== 'store_location'
+							? () => {
+									this.setState( { step: 'store_location' } );
+							  }
+							: undefined,
 					buttonText: __( 'Save store location', 'woocommerce' ),
 				},
 			};
