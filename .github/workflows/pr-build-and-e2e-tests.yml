@@ -256,7 +256,7 @@ jobs:
               with:
                   script: |
                     const apiSummary = ${{ toJSON(steps.api-summary.outputs.result) }}
-                    console.log( apiSummary )
+                    console.log( apiSummary.statistic )
 
             - name: Add/update PR comment with test summary
               run: echo "todo"
