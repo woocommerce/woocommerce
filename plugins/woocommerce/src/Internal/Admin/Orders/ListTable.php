@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use WC_Order;
-use WC_Order_Data_Store_Interface;
 use WP_List_Table;
 use WP_Screen;
 
