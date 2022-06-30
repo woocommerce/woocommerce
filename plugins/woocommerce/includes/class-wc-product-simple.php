@@ -42,9 +42,9 @@ class WC_Product_Simple extends WC_Product {
 		}
 
 		echo '<p>';
-		echo 'For best results, upload JPEG files that are 1000 by 1000 pixels or larger.';
+		echo esc_html__( 'For best results, upload JPEG files that are 1000 by 1000 pixels or larger.', 'woocommerce' );
 		echo '</p>';
-		echo '<a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">Learn more about product photos</a>';
+		echo '<a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '</a>';
 
 		self::$post_upload_hook_done = true;
 	}
