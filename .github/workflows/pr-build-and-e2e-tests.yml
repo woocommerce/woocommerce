@@ -229,7 +229,8 @@ jobs:
               with:
                   script: |
                     const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
-                    await script()
+                    const value = await script()
+                    console.log(value)
 
             - name: Add/update PR comment with test summary
               run: echo "todo"
