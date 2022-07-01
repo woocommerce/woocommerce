@@ -5,7 +5,10 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import {
+	CART_STORE_KEY as storeKey,
+	VALIDATION_STORE_KEY,
+} from '@woocommerce/block-data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { StoreCartCoupon } from '@woocommerce/types';
 
@@ -13,7 +16,6 @@ import type { StoreCartCoupon } from '@woocommerce/types';
  * Internal dependencies
  */
 import { useStoreCart } from './use-store-cart';
-import { useValidationContext } from '../../providers/validation';
 
 /**
  * This is a custom hook for loading the Store API /cart/coupons endpoint and an
@@ -27,7 +29,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 	const { cartCoupons, cartIsLoading } = useStoreCart();
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { setValidationErrors } = useValidationContext();
+	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 
 	const {
 		applyCoupon,

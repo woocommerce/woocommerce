@@ -5,8 +5,9 @@ import { __ } from '@wordpress/i18n';
 import Button from '@woocommerce/base-components/button';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { useValidationContext } from '@woocommerce/base-context';
 import type { EnteredAddress, AddressFields } from '@woocommerce/settings';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -25,12 +26,18 @@ const ShippingCalculatorAddress = ( {
 	addressFields,
 }: ShippingCalculatorAddressProps ): JSX.Element => {
 	const [ address, setAddress ] = useState( initialAddress );
-	const { hasValidationErrors, showAllValidationErrors } =
-		useValidationContext();
+	const { showAllValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
+
+	const { hasValidationErrors } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			hasValidationErrors: store.hasValidationErrors,
+		};
+	} );
 
 	const validateSubmit = () => {
 		showAllValidationErrors();
-		return ! hasValidationErrors;
+		return ! hasValidationErrors();
 	};
 
 	return (

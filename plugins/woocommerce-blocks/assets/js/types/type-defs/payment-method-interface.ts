@@ -5,6 +5,7 @@
 import type PaymentMethodLabel from '@woocommerce/base-components/cart-checkout/payment-method-label';
 import type PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payment-method-icons';
 import type LoadingMask from '@woocommerce/base-components/loading-mask';
+import type ValidationInputError from '@woocommerce/base-components/validation-input-error';
 
 /**
  * Internal dependencies
@@ -76,7 +77,7 @@ export interface ComponentProps {
 	// A component used for displaying payment method labels, including an icon.
 	PaymentMethodLabel: typeof PaymentMethodLabel;
 	// A container for holding validation errors
-	ValidationInputError: () => JSX.Element | null;
+	ValidationInputError: typeof ValidationInputError;
 }
 
 export interface EmitResponseProps {

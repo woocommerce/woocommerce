@@ -2,7 +2,6 @@
  * Internal dependencies
  */
 import { AddToCartFormStateContextProvider } from '../form-state';
-import { ValidationContextProvider } from '../../validation';
 import FormSubmit from './submit';
 
 /**
@@ -21,14 +20,12 @@ export const AddToCartFormContextProvider = ( {
 	showFormElements,
 } ) => {
 	return (
-		<ValidationContextProvider>
-			<AddToCartFormStateContextProvider
-				product={ product }
-				showFormElements={ showFormElements }
-			>
-				{ children }
-				<FormSubmit />
-			</AddToCartFormStateContextProvider>
-		</ValidationContextProvider>
+		<AddToCartFormStateContextProvider
+			product={ product }
+			showFormElements={ showFormElements }
+		>
+			{ children }
+			<FormSubmit />
+		</AddToCartFormStateContextProvider>
 	);
 };

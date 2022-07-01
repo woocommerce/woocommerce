@@ -14,7 +14,10 @@ import {
 import { usePrevious } from '@woocommerce/base-hooks';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import {
+	CHECKOUT_STORE_KEY,
+	VALIDATION_STORE_KEY,
+} from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -22,7 +25,6 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import type { CheckoutEventsContextType } from './types';
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
 import { STATUS } from '../../../../../data/checkout/constants';
-import { useValidationContext } from '../../validation';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 import { useCheckoutNotices } from '../../../hooks/use-checkout-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
@@ -64,7 +66,7 @@ export const CheckoutEventsProvider = ( {
 		checkoutActions.setRedirectUrl( redirectUrl );
 	}
 
-	const { setValidationErrors } = useValidationContext();
+	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const { dispatchCheckoutEvent } = useStoreEvents();

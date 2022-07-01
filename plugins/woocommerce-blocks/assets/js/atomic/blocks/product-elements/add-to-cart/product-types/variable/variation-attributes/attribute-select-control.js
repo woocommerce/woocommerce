@@ -6,10 +6,9 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { SelectControl } from 'wordpress-components';
 import { useEffect } from 'react';
 import classnames from 'classnames';
-import {
-	ValidationInputError,
-	useValidationContext,
-} from '@woocommerce/base-context';
+import { ValidationInputError } from '@woocommerce/base-components/validation-input-error';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 // Default option for select boxes.
 const selectAnOption = {
@@ -32,8 +31,16 @@ const AttributeSelectControl = ( {
 		'woo-gutenberg-products-block'
 	),
 } ) => {
-	const { getValidationError, setValidationErrors, clearValidationError } =
-		useValidationContext();
+	const { setValidationErrors, clearValidationError } = useDispatch(
+		VALIDATION_STORE_KEY
+	);
+
+	const { getValidationError } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			getValidationError: store.getValidationError(),
+		};
+	} );
 	const errorId = attributeName;
 	const error = getValidationError( errorId ) || {};
 

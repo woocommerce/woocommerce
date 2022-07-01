@@ -12,6 +12,7 @@ import type { CheckoutState } from './default-state';
 import type { DispatchFromMap, SelectFromMap } from '../mapped-types';
 import * as selectors from './selectors';
 import * as actions from './actions';
+import { FieldValidationStatus } from '../types';
 
 export type CheckoutAfterProcessingWithErrorEventData = {
 	redirectUrl: CheckoutState[ 'redirectUrl' ];
@@ -53,7 +54,9 @@ export type emitValidateEventType = ( {
 	setValidationErrors,
 }: {
 	observers: EventObserversType;
-	setValidationErrors: ( errors: Array< unknown > ) => void;
+	setValidationErrors: (
+		errors: Record< string, FieldValidationStatus >
+	) => void;
 } ) => ( {
 	dispatch,
 	registry,

@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
+import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 
 /**
  * Internal dependencies
  */
-import { ValidatedTextInput } from '../text-input';
 import Combobox from '../combobox';
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';

@@ -6,7 +6,6 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
-	ValidationContextProvider,
 	StoreNoticesContainer,
 	SnackbarNoticesContainer,
 } from '@woocommerce/base-context';
@@ -39,9 +38,7 @@ const Cart = ( { children, attributes = {} } ) => {
 					hasDarkControls,
 				} }
 			>
-				<ValidationContextProvider>
-					{ children }
-				</ValidationContextProvider>
+				{ children }
 			</CartBlockContext.Provider>
 		</LoadingMask>
 	);
