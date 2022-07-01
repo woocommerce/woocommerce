@@ -1008,6 +1008,54 @@ LEFT JOIN {$operational_data_clauses['join']}
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	/**
+	 * Method to delete an order from the database.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $args Array of args to pass to the delete method.
+	 *
+	 * @return void
+	 */
+	public function delete( &$order, $args = array() ) {
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+		$order_id  = $order->get_id();
+
+		if ( ! $order_id ) {
+			return;
+		}
+
+		$order_post = get_post( $order_id );
+		if ( $order_post && ! in_array( $order_post->post_type, wc_get_order_types(), true ) ) {
+			// translators: %d is an order ID.
+			throw new \Exception( sprintf( __( 'Post for order ID %d is of invalid type.', 'woocommerce' ), $order_id ) );
+		}
+
+		if ( ! empty( $args['force_delete'] ) ) {
+			$this->delete_order_data_from_custom_order_tables( $order_id );
+
+			if ( $data_sync->custom_orders_table_is_authoritative() || $data_sync->data_sync_is_enabled() ) {
+				// Deleting the record from the posts table takes care of associated data such as order items, etc.)
+				// through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should manually do the cleanup here.
+				wp_delete_post( $order_id );
+			}
+
+			$order->set_id( 0 );
+
+			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		} else {
+			$this->trash_order( $order );
+
+			if ( $data_sync->data_sync_is_enabled() ) {
+				wp_trash_post( $order_id );
+			}
+
+			$order->set_status( 'trash' );
+
+			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		}
+	}
+
+	/**
 	 * Trashes an order.
 	 *
 	 * @param \WC_Order $order The order object
