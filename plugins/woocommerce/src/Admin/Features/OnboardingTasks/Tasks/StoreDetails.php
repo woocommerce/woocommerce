@@ -69,7 +69,7 @@ class StoreDetails extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
-		return isset( $profiler_data['completed'] ) && true === $profiler_data['completed'];
+		// Mark as completed if the store address and city are set. We don't need to check the country because it's set by default.
+		return get_option( 'woocommerce_store_address', '' ) !== '' && get_option( 'woocommerce_store_city', '' ) !== '';
 	}
 }
