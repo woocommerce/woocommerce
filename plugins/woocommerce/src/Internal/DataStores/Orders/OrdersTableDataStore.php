@@ -1008,6 +1008,43 @@ LEFT JOIN {$operational_data_clauses['join']}
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	/**
+	 * Trashes an order.
+	 *
+	 * @param \WC_Order $order The order object
+	 * @return void
+	 */
+	private function trash_order( $order ) {
+		global $wpdb;
+
+		if ( 'trash' === $order->get_status() ) {
+			return;
+		}
+
+		$trash_metadata = array(
+			'_wp_trash_meta_status' => $order->get_status( 'edit' ),
+			'_wp_trash_meta_time'   => time(),
+		);
+
+		foreach ( $trash_metadata as $meta_key => $meta_value ) {
+			$this->add_meta(
+				$order,
+				(object) array(
+					'key'   => $meta_key,
+					'value' => $meta_value,
+				)
+			);
+		}
+
+		$wpdb->update(
+			self::get_orders_table_name(),
+			array( 'status' => 'trash' ),
+			array( 'id' => $order->get_id() ),
+			array( '%s' ),
+			array( '%d' )
+		);
+	}
+
+	/**
 	 * Deletes order data from custom order tables.
 	 *
 	 * @param int $order_id The order ID.
