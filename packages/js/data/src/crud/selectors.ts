@@ -7,7 +7,7 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { Item, ItemQuery } from './types';
+import { IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
 
@@ -25,11 +25,16 @@ export const createSelectors = ( {
 		return state.errors[ itemQuery ];
 	};
 
-	const getItem = ( state: ResourceState, id: number ) => {
+	const getDeleteItemError = ( state: ResourceState, id: IdType ) => {
+		const itemQuery = getResourceName( CRUD_ACTIONS.DELETE_ITEM, { id } );
+		return state.errors[ itemQuery ];
+	};
+
+	const getItem = ( state: ResourceState, id: IdType ) => {
 		return state.data[ id ];
 	};
 
-	const getItemError = ( state: ResourceState, id: number ) => {
+	const getItemError = ( state: ResourceState, id: IdType ) => {
 		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
 		return state.errors[ itemQuery ];
 	};
@@ -47,7 +52,7 @@ export const createSelectors = ( {
 			}
 
 			if ( query._fields ) {
-				return ids.map( ( id: number ) => {
+				return ids.map( ( id: IdType ) => {
 					return query._fields.reduce(
 						( item: Partial< Item >, field: string ) => {
 							return {
@@ -60,7 +65,7 @@ export const createSelectors = ( {
 				} );
 			}
 
-			return ids.map( ( id: number ) => {
+			return ids.map( ( id: IdType ) => {
 				return state.data[ id ];
 			} );
 		},
@@ -71,7 +76,7 @@ export const createSelectors = ( {
 				: undefined;
 			return [
 				state.items[ itemQuery ],
-				...( ids || [] ).map( ( id: number ) => {
+				...( ids || [] ).map( ( id: string ) => {
 					return state.data[ id ];
 				} ),
 			];
@@ -83,7 +88,7 @@ export const createSelectors = ( {
 		return state.errors[ itemQuery ];
 	};
 
-	const getUpdateItemError = ( state: ResourceState, id: number ) => {
+	const getUpdateItemError = ( state: ResourceState, id: IdType ) => {
 		const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, { id } );
 		return state.errors[ itemQuery ];
 	};
@@ -94,6 +99,7 @@ export const createSelectors = ( {
 		[ `get${ pluralResourceName }` ]: getItems,
 		[ `get${ pluralResourceName }Error` ]: getItemsError,
 		[ `getCreate${ resourceName }Error` ]: getCreateItemError,
+		[ `getDelete${ resourceName }Error` ]: getDeleteItemError,
 		[ `getUpdate${ resourceName }Error` ]: getUpdateItemError,
 	};
 };
