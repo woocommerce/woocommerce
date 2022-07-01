@@ -49,7 +49,7 @@ export interface PriceSliderProps {
 	/**
 	 * Function to call on the change event.
 	 */
-	onChange?: ( value: [ number, number ] ) => void;
+	onChange: ( value: [ number, number ] ) => void;
 	/**
 	 * Function to call when submit event fires.
 	 */
@@ -73,7 +73,7 @@ const PriceSlider = ( {
 	maxPrice,
 	minConstraint,
 	maxConstraint,
-	onChange = () => void 0,
+	onChange,
 	step,
 	currency,
 	showInputFields = true,
