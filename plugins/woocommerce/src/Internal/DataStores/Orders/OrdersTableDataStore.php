@@ -1008,6 +1008,27 @@ LEFT JOIN {$operational_data_clauses['join']}
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	/**
+	 * Deletes order data from custom order tables.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return void
+	 */
+	public function delete_order_data_from_custom_order_tables( $order_id ): void {
+		global $wpdb;
+
+		// Delete COT-specific data.
+		foreach ( $this->get_all_table_names() as $table ) {
+			$wpdb->delete(
+				$table,
+				( self::get_orders_table_name() === $table )
+					? array( 'id' => $order_id )
+					: array( 'order_id' => $order_id ),
+				array( '%d' )
+			);
+		}
+	}
+
+	/**
 	 * Method to create an order in the database.
 	 *
 	 * @param \WC_Order $order
