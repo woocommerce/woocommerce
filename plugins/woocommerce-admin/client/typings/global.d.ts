@@ -29,6 +29,7 @@ declare global {
 			'wc-pay-welcome-page': boolean;
 			'wc-pay-subscriptions-page': boolean;
 			'shipping-smart-defaults': boolean;
+			'shipping-setting-tour': boolean;
 		};
 	}
 }
