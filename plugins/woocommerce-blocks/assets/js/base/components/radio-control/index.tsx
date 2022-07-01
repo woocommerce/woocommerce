@@ -15,7 +15,7 @@ const RadioControl = ( {
 	className = '',
 	id,
 	selected,
-	onChange = () => void 0,
+	onChange,
 	options = [],
 }: RadioControlProps ): JSX.Element | null => {
 	const instanceId = useInstanceId( RadioControl );

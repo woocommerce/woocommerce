@@ -42,7 +42,7 @@ interface SortSelectProps {
 	/**
 	 * The selected value.
 	 */
-	value: string;
+	value?: string;
 }
 
 /**
@@ -56,7 +56,7 @@ const SortSelect = ( {
 	onChange,
 	options,
 	screenReaderLabel,
-	value,
+	value = '',
 }: SortSelectProps ): JSX.Element => {
 	const selectId = `wc-block-components-sort-select__select-${ instanceId }`;
 

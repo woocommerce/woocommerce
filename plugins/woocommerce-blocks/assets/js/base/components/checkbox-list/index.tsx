@@ -21,7 +21,7 @@ interface CheckboxListProps {
 	isDisabled?: boolean;
 	limit?: number;
 	checked?: string[];
-	onChange?: ( value: string ) => void;
+	onChange: ( value: string ) => void;
 	options?: CheckboxListOptions[];
 }
 
@@ -39,7 +39,7 @@ interface CheckboxListProps {
  */
 const CheckboxList = ( {
 	className,
-	onChange = () => void 0,
+	onChange,
 	options = [],
 	checked = [],
 	isLoading = false,
