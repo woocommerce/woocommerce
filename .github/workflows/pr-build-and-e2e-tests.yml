@@ -210,29 +210,12 @@ jobs:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: artifacts/api
 
-            - name: Get API test summary
-              id: api-summary
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const { statistic, time } = require('./artifacts/api/allure-report/widgets/summary.json')
-                      return { statistic, time }
-
             - name: Download Playwright E2E test report artifact
               if: env.E2E_PLAYWRIGHT == 'true'
               uses: actions/download-artifact@v3
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: artifacts/e2e
-
-            - name: Get Playwright E2E test summary
-              if: env.E2E_PLAYWRIGHT == 'true'
-              id: e2e-pw-summary
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const { statistic, time } = require('./artifacts/e2e/allure-report/widgets/summary.json')
-                      return { statistic, time }
 
             - name: Download Puppeteer E2E test report artifact
               if: env.E2E_PLAYWRIGHT != 'true'
@@ -241,22 +224,12 @@ jobs:
                   name: pptr-e2e-test-results
                   path: artifacts/e2e
 
-            - name: Get Puppeteer E2E test summary
-              if: env.E2E_PLAYWRIGHT != 'true'
-              id: e2e-pptr-summary
+            - name: Prepare test summary
               uses: actions/github-script@v6
               with:
                   script: |
-                      const { numPassedTests, numFailedTests, numTotalTests, startTime, testResults } = require('./artifacts/e2e/test-results.json')
-                      return { numPassedTests, numFailedTests, numTotalTests, startTime, testResults }
-
-
-            - name: Post test summary on workflow run
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                    const apiSummary = context.steps.api-summary.outputs.result
-                    console.log( apiSummary.statistic )
+                    const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
+                    await script()
 
             - name: Add/update PR comment with test summary
               run: echo "todo"
