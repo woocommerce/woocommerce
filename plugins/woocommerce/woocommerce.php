@@ -54,7 +54,7 @@ function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.Fu
  * @since  4.4.0
  * @return \Psr\Container\ContainerInterface The WooCommerce PSR11 container.
  */
-function wc_get_container() : \Psr\Container\ContainerInterface {
+function wc_get_container() {
 	return $GLOBALS['wc_container'];
 }
 
