@@ -2,11 +2,9 @@
  * External dependencies
  */
 import { Story, Meta } from '@storybook/react';
-import {
-	useValidationContext,
-	ValidationContextProvider,
-} from '@woocommerce/base-context';
+import { useDispatch } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -31,21 +29,16 @@ export default {
 		options: { table: { disable: true } },
 		value: { control: false },
 	},
-	decorators: [
-		( StoryComponent ) => (
-			<ValidationContextProvider>
-				<StoryComponent />
-			</ValidationContextProvider>
-		),
-	],
+	decorators: [ ( StoryComponent ) => <StoryComponent /> ],
 } as Meta< CountryInputWithCountriesProps >;
 
 const Template: Story< CountryInputWithCountriesProps > = ( args ) => {
 	const [ selectedCountry, selectCountry ] = useState< CountryCode | '' >(
 		''
 	);
-	const { clearValidationError, showValidationError } =
-		useValidationContext();
+	const { clearValidationError, showValidationError } = useDispatch(
+		VALIDATION_STORE_KEY
+	);
 
 	useEffect( () => {
 		showValidationError( 'country' );
