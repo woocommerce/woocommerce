@@ -8,8 +8,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   label_project:
+    permissions:
+      contents: read  # for actions/labeler to determine modified files
+      pull-requests: write  # for actions/labeler to add labels to PRs
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/labeler@v3

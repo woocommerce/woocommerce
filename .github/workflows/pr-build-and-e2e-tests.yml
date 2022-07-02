@@ -166,6 +166,8 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
     publish-test-reports:
+        permissions:
+          contents: none
         name: Publish test reports
         if: |
             always() && 
