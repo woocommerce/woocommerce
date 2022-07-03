@@ -182,10 +182,17 @@
 			}
 
 			td select {
-				// Ensure basic padding for dropdown.
-				padding: 2px;
+				// Add padding to product variation dropdowns.
+				height: 3.5rem;
+				padding: 0.9rem 1.1rem;
+				font-size: var(--wp--preset--font-size--small);
 			}
 		}
+	}
+
+	div.product form.cart table.variations th {
+		// Ensure variation label is vertically centered.
+		line-height: 3.5rem;
 	}
 }
 
