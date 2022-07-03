@@ -22,10 +22,10 @@
 */
 .woocommerce {
 	mark {
-		// Style the mark element in Woo colors.
+		// Style the mark element in theme colors.
 		// For details see https://github.com/woocommerce/woocommerce/pull/31631.
-		background-color: var(--wc-primary, $primary);
-		color: var(--wc-primary-text, $primarytext);
+		background-color: var(--wp--preset--color--foreground, $highlight);
+		color: var(--wp--preset--color--background, $highlightext);
 	}
 
 	/**
