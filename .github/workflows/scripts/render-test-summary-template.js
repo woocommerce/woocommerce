@@ -59,6 +59,9 @@ const getE2EStatsArr = () => {
 			numPassedTests: passed,
 			numFailedTests: failed,
 			numTotalTests: total,
+			numPendingTests: skipped,
+			numRuntimeErrorTestSuites: broken,
+			numTodoTests: unknown,
 			startTime,
 			testResults,
 		} = e2eSummary;
@@ -70,9 +73,9 @@ const getE2EStatsArr = () => {
 			'E2E Tests',
 			passed.toString(),
 			failed.toString(),
-			'0',
-			'0',
-			'0',
+			broken.toString(),
+			skipped.toString(),
+			unknown.toString(),
 			total.toString(),
 			durationFormatted,
 		];
