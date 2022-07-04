@@ -182,7 +182,7 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
     test-summary:
-        name: Post test summary
+        name: Post test results
         if: |
             always() && 
             (
@@ -226,6 +226,10 @@ jobs:
 
             - name: Prepare test summary
               uses: actions/github-script@v6
+              env:
+                  API_SUMMARY_PATH: ${{ GITHUB_WORKSPACE }}/artifacts/api/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ GITHUB_WORKSPACE }}/artifacts/e2e/allure-report/widgets/summary.json
+                  E2E_PPTR_SUMMARY_PATH: ${{ GITHUB_WORKSPACE }}/artifacts/e2e/test-results.json
               with:
                   script: |
                     const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
@@ -244,7 +248,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
+        needs: [ api-tests-run, e2e-tests-run ]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             PR_NUMBER: ${{ github.event.number }}
