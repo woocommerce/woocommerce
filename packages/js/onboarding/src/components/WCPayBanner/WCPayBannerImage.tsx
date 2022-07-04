@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
-export default () => (
+export const WCPayBannerImage = () => (
 	<svg
 		width="294"
 		height="275"

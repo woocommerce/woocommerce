@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+
 export const Giropay = () => (
 	/* eslint-disable */
 	<svg

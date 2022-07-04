@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+
 export const GooglePay = () => (
 	/* eslint-disable */
 	<svg
