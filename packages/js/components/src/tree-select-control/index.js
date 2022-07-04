@@ -287,6 +287,18 @@ const TreeSelectControl = ( {
 		return filteredTreeOptions;
 	}, [ treeOptions, filter ] );
 
+	/**
+	 * Handle key down events in the component
+	 *
+	 * Keys:
+	 * If key down is ESCAPE. Collapse the tree
+	 * If key down is ENTER. Expand the tree
+	 * If key down is ARROW_UP. Navigate up to the previous option
+	 * If key down is ARROW_DOWN. Navigate down to the next option
+	 * If key down is ARROW_DOWN. Navigate down to the next option
+	 *
+	 * @param {Event} event The key down event
+	 */
 	const onKeyDown = ( event ) => {
 		if ( disabled ) return;
 
@@ -325,7 +337,7 @@ const TreeSelectControl = ( {
 	 *
 	 * @return {Array<{id: string, label: string|undefined}>} An array of Tags
 	 */
-	const getTags = () => {
+	const tags = useMemo( () => {
 		if ( ! options.length ) {
 			return [];
 		}
@@ -334,8 +346,13 @@ const TreeSelectControl = ( {
 			const option = optionsRepository[ key ];
 			return { id: key, label: option?.label };
 		} );
-	};
+	}, [ optionsRepository, value, options ] );
 
+	/**
+	 * Handle click event on the option expander
+	 *
+	 * @param {Event} e The click event object
+	 */
 	const handleExpanderClick = ( e ) => {
 		const elements = focus.focusable.find( dropdownRef.current );
 		const index = elements.indexOf( e.currentTarget ) + 1;
@@ -416,10 +433,10 @@ const TreeSelectControl = ( {
 	/**
 	 * Handles a change of a Tag element. We map them to Value format.
 	 *
-	 * @param {Array} tags List of current tags
+	 * @param {Array} newTags List of new tags
 	 */
-	const handleTagsChange = ( tags ) => {
-		onChange( [ ...tags.map( ( el ) => el.id ) ] );
+	const handleTagsChange = ( newTags ) => {
+		onChange( [ ...newTags.map( ( el ) => el.id ) ] );
 	};
 
 	/**
@@ -454,7 +471,7 @@ const TreeSelectControl = ( {
 			<Control
 				ref={ controlRef }
 				disabled={ disabled }
-				tags={ getTags() }
+				tags={ tags }
 				isExpanded={ showTree }
 				onFocus={ () => {
 					setTreeVisible( true );

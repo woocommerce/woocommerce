@@ -55,7 +55,7 @@ const Control = forwardRef(
 		 * Keys:
 		 * When key down is BACKSPACE. Delete the last tag.
 		 *
-		 * @param {Object} event Event object
+		 * @param {Event} event Event object
 		 */
 		const handleKeydown = ( event ) => {
 			if ( BACKSPACE === event.key ) {
