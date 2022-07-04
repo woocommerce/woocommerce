@@ -224,9 +224,6 @@ jobs:
                   name: pptr-e2e-test-results
                   path: artifacts/e2e
 
-            - name: List contents of artifacts folder
-              run: ls -R ./artifacts
-
             - name: Prepare test summary
               uses: actions/github-script@v6
               env:
