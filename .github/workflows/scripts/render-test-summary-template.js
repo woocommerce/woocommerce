@@ -23,6 +23,8 @@ const getAPIStatsArr = () => {
 	const { duration } = apiSummary.time;
 	const durationFormatted = getFormattedDuration( duration );
 
+	console.log( `apiSummary: ${ apiSummary }` );
+
 	return [
 		'API Tests',
 		passed,
@@ -80,6 +82,9 @@ const getE2EStatsArr = () => {
 };
 
 module.exports = async ( { core } ) => {
+	const apiStats = getAPIStatsArr();
+	const e2eStats = getE2EStatsArr();
+
 	await core.summary
 		.addHeading( 'Test Results Summary' )
 		.addRaw( `Commit SHA: ${ GITHUB_SHA }` )
@@ -95,8 +100,8 @@ module.exports = async ( { core } ) => {
 				{ data: 'Total :bar_chart:', header: true },
 				{ data: 'Duration :stopwatch:', header: true },
 			],
-			getAPIStatsArr(),
-			getE2EStatsArr(),
+			apiStats,
+			e2eStats,
 		] )
 		.addRaw( 'To view the full API test report, click ' )
 		.addLink(
