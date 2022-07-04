@@ -37,7 +37,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"lint": "node ./node_modules/require-turbo && eslint src",
 		"lint:fix": "eslint src --fix"

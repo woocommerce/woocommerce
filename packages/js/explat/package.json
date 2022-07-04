@@ -48,7 +48,7 @@
 		"typescript": "^4.6.2"
 	},
 	"scripts": {
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",

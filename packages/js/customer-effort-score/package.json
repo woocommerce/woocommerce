@@ -62,7 +62,7 @@
 		"react-dom": "^17.0.0"
 	},
 	"scripts": {
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",

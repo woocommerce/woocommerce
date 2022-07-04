@@ -14,7 +14,7 @@
 	},
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "node ./node_modules/require-turbo && WC_ADMIN_PHASE=core pnpm run build:feature-config",
 		"build:feature-config": "php bin/generate-feature-config.php",
