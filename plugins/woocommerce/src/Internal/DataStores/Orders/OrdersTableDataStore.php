@@ -1028,7 +1028,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 			$order->set_id( 0 );
 
 			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( ! $data_sync->custom_orders_table_is_authoritative() ) {
+			if ( ! is_a( $order->get_data_store(), self::class ) ) {
 				return;
 			}
 
@@ -1053,7 +1053,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	public function trash_order( &$order ) {
 		global $wpdb;
 
-		if ( 'trash' === $order->get_status() ) {
+		if ( 'trash' === $order->get_status( 'edit' ) ) {
 			return;
 		}
 
