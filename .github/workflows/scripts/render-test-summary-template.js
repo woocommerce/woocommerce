@@ -83,7 +83,7 @@ module.exports = async ( { core } ) => {
 	const apiStats = getAPIStatsArr();
 	const e2eStats = getE2EStatsArr();
 
-	await core.summary
+	const contents = core.summary
 		.addHeading( 'Test Results Summary' )
 		.addRaw( `Commit SHA: ${ SHA }` )
 		.addBreak()
@@ -118,5 +118,9 @@ module.exports = async ( { core } ) => {
 			'WooCommerce Test Reports Dashboard',
 			'https://woocommerce.github.io/woocommerce-test-reports/'
 		)
-		.write();
+		.stringify();
+
+	await core.summary.write();
+
+	return contents;
 };

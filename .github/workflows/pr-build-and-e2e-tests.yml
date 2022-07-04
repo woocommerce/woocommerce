@@ -225,6 +225,7 @@ jobs:
                   path: artifacts/e2e
 
             - name: Prepare test summary
+              id: prepare-test-summary
               uses: actions/github-script@v6
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
@@ -233,12 +234,13 @@ jobs:
                   PR_NUMBER: ${{ github.event.number }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:
+                  result-encoding: string
                   script: |
                       const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
-                      await script( { core } )
+                      return await script( { core } )
 
             - name: Add/update PR comment with test summary
-              run: echo "todo"
+              run: echo "${{steps.prepare-test-summary.outputs.result}}"
               # mytodo
 
     publish-test-reports:
