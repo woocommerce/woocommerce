@@ -460,7 +460,6 @@ const TreeSelectControl = ( {
 					setTreeVisible( true );
 				} }
 				onControlClick={ () => {
-					if ( disabled ) return;
 					setTreeVisible( true );
 				} }
 				instanceId={ instanceId }
