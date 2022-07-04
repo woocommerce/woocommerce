@@ -7,6 +7,7 @@ const {
 	E2E_PW_SUMMARY_PATH,
 	E2E_PPTR_SUMMARY_PATH,
 	GITHUB_SHA,
+	PR_NUMBER,
 } = process.env;
 
 const getFormattedDuration = ( duration ) => {
@@ -97,11 +98,18 @@ module.exports = async ( { core } ) => {
 			getAPIStatsArr(),
 			getE2EStatsArr(),
 		] )
+		.addRaw( 'To view the full API test report, click ' )
 		.addLink(
-			'Link to the full API test report.',
-			'https://github.com'
+			'here.',
+			`https://woocommerce.github.io/woocommerce-test-reports/pr/${ PR_NUMBER }/api/`
 		)
 		.addBreak()
 		.addLink( 'Link to the full E2E test report.', 'https://github.com' )
+		.addBreak()
+		.addRaw( 'To view all test reports, visit the ' )
+		.addLink(
+			'WooCommerce Test Reports Dashboard',
+			'https://woocommerce.github.io/woocommerce-test-reports/'
+		)
 		.write();
 };

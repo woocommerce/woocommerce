@@ -1,14 +1,14 @@
 name: Run tests against PR
 on:
-  pull_request:
-  workflow_dispatch:
+    pull_request:
+    workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 env:
-  E2E_PLAYWRIGHT: ${{ true }}
+    E2E_PLAYWRIGHT: ${{ true }}
 
 jobs:
     e2e-tests-run:
@@ -18,13 +18,13 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -50,7 +50,7 @@ jobs:
                   (
                     steps.run-puppeteer-e2e-tests.conclusion != 'cancelled' ||
                     steps.run-puppeteer-e2e-tests.conclusion != 'skipped' 
-                  )             
+                  )
               uses: actions/upload-artifact@v3
               with:
                   name: pptr-e2e-test-results
@@ -113,8 +113,8 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -153,8 +153,8 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -190,7 +190,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [ api-tests-run, e2e-tests-run ]
+        needs: [api-tests-run, e2e-tests-run]
         steps:
             - name: Create dirs
               run: |
@@ -227,17 +227,18 @@ jobs:
             - name: Prepare test summary
               uses: actions/github-script@v6
               env:
-                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
+                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/api-test-report---pr-${{ github.event.number }}/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/e2e-test-report---pr-${{ github.event.number }}/allure-report/widgets/summary.json
+                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/e2e-test-report---pr-${{ github.event.number }}/test-results.json
+                  PR_NUMBER: ${{ github.event.number }}
               with:
                   script: |
-                    const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
-                    await script( { core } )
+                      const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
+                      await script( { core } )
 
             - name: Add/update PR comment with test summary
               run: echo "todo"
-              # mytodo  
+              # mytodo
 
     publish-test-reports:
         name: Publish test reports
@@ -248,7 +249,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [ api-tests-run, e2e-tests-run ]
+        needs: [api-tests-run, e2e-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             PR_NUMBER: ${{ github.event.number }}
