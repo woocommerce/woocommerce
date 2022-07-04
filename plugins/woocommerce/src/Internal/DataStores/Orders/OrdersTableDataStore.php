@@ -1016,7 +1016,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @return void
 	 */
 	public function delete( &$order, $args = array() ) {
-		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 		$order_id  = $order->get_id();
 
 		if ( ! $order_id ) {
