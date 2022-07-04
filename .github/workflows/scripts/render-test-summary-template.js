@@ -6,7 +6,7 @@ const {
 	API_SUMMARY_PATH,
 	E2E_PW_SUMMARY_PATH,
 	E2E_PPTR_SUMMARY_PATH,
-	GITHUB_SHA,
+	SHA,
 	PR_NUMBER,
 } = process.env;
 
@@ -85,7 +85,7 @@ module.exports = async ( { core } ) => {
 
 	await core.summary
 		.addHeading( 'Test Results Summary' )
-		.addRaw( `Commit SHA: ${ GITHUB_SHA }` )
+		.addRaw( `Commit SHA: ${ SHA }` )
 		.addBreak()
 		.addTable( [
 			[
