@@ -243,17 +243,17 @@ jobs:
               uses: peter-evans/find-comment@v2
               id: find-comment
               with:
-                issue-number: ${{ github.event.pull_request.number }}
-                comment-author: 'github-actions[bot]'
-                body-includes: Test Results Summary
+                  issue-number: ${{ github.event.pull_request.number }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: Test Results Summary
 
             - name: Create or update PR comment
               uses: peter-evans/create-or-update-comment@v2
               with:
-                comment-id: ${{ steps.find-comment.outputs.comment-id }}
-                issue-number: ${{ github.event.pull_request.number }}
-                body: ${{ steps.prepare-test-summary.outputs.result }}
-                edit-mode: replace
+                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: ${{ steps.prepare-test-summary.outputs.result }}
+                  edit-mode: replace
 
     publish-test-reports:
         name: Publish test reports
