@@ -39,7 +39,7 @@
 		}
 	},
 	"scripts": {
-		"prepare": "composer install",
+		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "node ./node_modules/require-turbo && pnpm run build:admin && pnpm run uglify",
 		"build:admin": "wp-scripts build",
