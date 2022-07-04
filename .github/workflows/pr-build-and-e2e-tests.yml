@@ -230,9 +230,9 @@ jobs:
             - name: Prepare test summary
               uses: actions/github-script@v6
               env:
-                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/api-test-report---pr-${{ github.event.number }}/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/e2e-test-report---pr-${{ github.event.number }}/allure-report/widgets/summary.json
-                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/e2e-test-report---pr-${{ github.event.number }}/test-results.json
+                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
                   PR_NUMBER: ${{ github.event.number }}
               with:
                   script: |
