@@ -227,9 +227,9 @@ jobs:
             - name: Prepare test summary
               uses: actions/github-script@v6
               env:
-                  API_SUMMARY_PATH: ${{ GITHUB_WORKSPACE }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ GITHUB_WORKSPACE }}/artifacts/e2e/allure-report/widgets/summary.json
-                  E2E_PPTR_SUMMARY_PATH: ${{ GITHUB_WORKSPACE }}/artifacts/e2e/test-results.json
+                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
               with:
                   script: |
                     const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
