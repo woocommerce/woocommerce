@@ -12,6 +12,7 @@ import {
 	getItemsError,
 	getItemsSuccess,
 } from './actions';
+import { getRestPath } from './utils';
 import { request } from '../utils';
 import { Item, ItemQuery } from './types';
 
@@ -26,10 +27,14 @@ export const createResolvers = ( {
 	pluralResourceName,
 	namespace,
 }: ResolverOptions ) => {
-	const getItem = function* ( id: number ) {
+	const getItem = function* ( id: number, ...urlParameters: string[] ) {
 		try {
 			const item: Item = yield apiFetch( {
-				path: `${ namespace }/${ id }`,
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					{},
+					urlParameters
+				),
 				method: 'GET',
 			} );
 
@@ -41,7 +46,10 @@ export const createResolvers = ( {
 		}
 	};
 
-	const getItems = function* ( query?: Partial< ItemQuery > ) {
+	const getItems = function* (
+		query?: Partial< ItemQuery >,
+		...urlParameters: string[]
+	) {
 		// Require ID when requesting specific fields to later update the resource data.
 		const resourceQuery = query ? { ...query } : {};
 
@@ -54,10 +62,11 @@ export const createResolvers = ( {
 		}
 
 		try {
+			const path = getRestPath( namespace, {}, urlParameters );
 			const { items }: { items: Item[] } = yield request<
 				ItemQuery,
 				Item
-			>( namespace, resourceQuery );
+			>( path, resourceQuery );
 
 			yield getItemsSuccess( query, items );
 			return items;

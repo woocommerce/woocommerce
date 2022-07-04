@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { addQueryArgs } from '@wordpress/url';
 import { apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
 import CRUD_ACTIONS from './crud-actions';
+import { getRestPath } from './utils';
 import TYPES from './action-types';
 import { IdType, Item, ItemQuery } from './types';
 
@@ -106,10 +106,13 @@ export const createDispatchActions = ( {
 	namespace,
 	resourceName,
 }: ResolverOptions ) => {
-	const createItem = function* ( query: Partial< ItemQuery > ) {
+	const createItem = function* (
+		query: Partial< ItemQuery >,
+		...urlParameters: string[]
+	) {
 		try {
 			const item: Item = yield apiFetch( {
-				path: addQueryArgs( namespace, query ),
+				path: getRestPath( namespace, query, urlParameters ),
 				method: 'POST',
 			} );
 
@@ -121,10 +124,18 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	const deleteItem = function* ( id: IdType, force = true ) {
+	const deleteItem = function* (
+		id: IdType,
+		force = true,
+		...urlParameters: string[]
+	) {
 		try {
 			const item: Item = yield apiFetch( {
-				path: addQueryArgs( `${ namespace }/${ id }`, { force } ),
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					{ force },
+					urlParameters
+				),
 				method: 'DELETE',
 			} );
 
@@ -136,10 +147,18 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	const updateItem = function* ( id: IdType, query: Partial< ItemQuery > ) {
+	const updateItem = function* (
+		id: IdType,
+		query: Partial< ItemQuery >,
+		...urlParameters: string[]
+	) {
 		try {
 			const item: Item = yield apiFetch( {
-				path: addQueryArgs( `${ namespace }/${ id }`, query ),
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					query,
+					urlParameters
+				),
 				method: 'PUT',
 			} );
 
