@@ -1,7 +1,7 @@
 # Tree Select Control
 
 A search box which filters options while typing,
-allowing a user to select from multiple option from a filtered list.
+allowing a user to select multiple options from a filtered list.
 The main advantage of Tree Select Controls is that it allows to distribute the options in nested groups. 
 
 ## Usage
