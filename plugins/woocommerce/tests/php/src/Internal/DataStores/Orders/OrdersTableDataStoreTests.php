@@ -261,6 +261,56 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests the `delete()` method on the COT datastore -- trashing.
+	 *
+	 * @return void
+	 */
+	public function test_cot_datastore_delete_trash() {
+		global $wpdb;
+
+		// Tests trashing of orders.
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+		$order->delete();
+
+		$orders_table = $this->sut::get_orders_table_name();
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
+
+		// Make sure order data persists in the database.
+		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
+
+		foreach ( $this->sut->get_all_table_names() as $table ) {
+			if ( $table === $orders_table ) {
+				continue;
+			}
+
+			$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d", $order_id ) ) );
+		}
+	}
+
+	/**
+	 * Tests the `delete()` method on the COT datastore -- full deletes.
+	 *
+	 * @return void
+	 */
+	public function test_cot_datastore_delete() {
+		global $wpdb;
+
+		// Tests trashing of orders.
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		// Make sure no data order persists in the database.
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
+
+		foreach ( $this->sut->get_all_table_names() as $table ) {
+			$field_name = ( $table === $this->sut::get_orders_table_name() ) ? 'id' : 'order_id';
+			$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$field_name} = %d", $order_id ) ) );
+		}
+	}
+
+	/**
 	 * Helper function to delete all meta for post.
 	 *
 	 * @param int $post_id Post ID to delete data for.
