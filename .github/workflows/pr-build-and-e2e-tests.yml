@@ -239,9 +239,21 @@ jobs:
                       const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
                       return await script( { core } )
 
-            - name: Add/update PR comment with test summary
-              run: echo "${{steps.prepare-test-summary.outputs.result}}"
-              # mytodo
+            - name: Find existing PR comment
+              uses: peter-evans/find-comment@v2
+              id: find-comment
+              with:
+                issue-number: ${{ github.event.pull_request.number }}
+                comment-author: 'github-actions[bot]'
+                body-includes: Test Results Summary
+
+            - name: Create or update PR comment
+              uses: peter-evans/create-or-update-comment@v2
+              with:
+                comment-id: ${{ steps.find-comment.outputs.comment-id }}
+                issue-number: ${{ github.event.pull_request.number }}
+                body: ${{ steps.prepare-test-summary.outputs.result }}
+                edit-mode: replace
 
     publish-test-reports:
         name: Publish test reports
