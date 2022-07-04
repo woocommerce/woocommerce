@@ -49,6 +49,14 @@ const Control = forwardRef(
 		const hasTags = tags.length > 0;
 		const showPlaceholder = ! hasTags && ! isExpanded;
 
+		/**
+		 * Handles keydown event
+		 *
+		 * Keys:
+		 * When key down is BACKSPACE. Delete the last tag.
+		 *
+		 * @param {Object} event Event object
+		 */
 		const handleKeydown = ( event ) => {
 			if ( BACKSPACE === event.key ) {
 				if ( value ) return;
