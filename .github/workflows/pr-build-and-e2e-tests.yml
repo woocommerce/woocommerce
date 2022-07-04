@@ -239,7 +239,7 @@ jobs:
                       const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
                       return await script( { core } )
 
-            - name: Find existing PR comment
+            - name: Find PR comment by github-actions[bot]
               uses: peter-evans/find-comment@v2
               id: find-comment
               with:
