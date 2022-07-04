@@ -8,6 +8,7 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -326,6 +327,7 @@ class WC_Post_Data {
 
 				break;
 			case 'shop_order':
+			case DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE:
 				global $wpdb;
 
 				$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );

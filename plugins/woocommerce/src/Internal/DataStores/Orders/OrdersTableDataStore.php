@@ -1023,33 +1023,22 @@ LEFT JOIN {$operational_data_clauses['join']}
 			return;
 		}
 
-		$order_post = get_post( $order_id );
-		if ( $order_post && ! in_array( $order_post->post_type, wc_get_order_types(), true ) ) {
-			// translators: %d is an order ID.
-			throw new \Exception( sprintf( __( 'Post for order ID %d is of invalid type.', 'woocommerce' ), $order_id ) );
-		}
-
 		if ( ! empty( $args['force_delete'] ) ) {
 			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$order->set_id( 0 );
 
-			if ( $data_sync->custom_orders_table_is_authoritative() || $data_sync->data_sync_is_enabled() ) {
-				// Deleting the record from the posts table takes care of associated data such as order items, etc.)
-				// through {@see WC_Post_Data}.
-				// Once we stop creating posts for orders, we should manually do the cleanup here.
-				wp_delete_post( $order_id );
+			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
+			if ( ! $data_sync->custom_orders_table_is_authoritative() ) {
+				return;
 			}
 
-			$order->set_id( 0 );
+			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+			// Once we stop creating posts for orders, we should do the cleanup here instead.
+			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
 			$this->trash_order( $order );
-
-			if ( $data_sync->data_sync_is_enabled() ) {
-				wp_trash_post( $order_id );
-			}
-
-			$order->set_status( 'trash' );
 
 			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		}
@@ -1061,7 +1050,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param \WC_Order $order The order object
 	 * @return void
 	 */
-	private function trash_order( $order ) {
+	public function trash_order( &$order ) {
 		global $wpdb;
 
 		if ( 'trash' === $order->get_status() ) {
@@ -1090,6 +1079,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 			array( '%s' ),
 			array( '%d' )
 		);
+
+		$order->set_status( 'trash' );
 	}
 
 	/**
@@ -1098,7 +1089,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param int $order_id The order ID.
 	 * @return void
 	 */
-	public function delete_order_data_from_custom_order_tables( $order_id ): void {
+	public function delete_order_data_from_custom_order_tables( $order_id ) {
 		global $wpdb;
 
 		// Delete COT-specific data.
