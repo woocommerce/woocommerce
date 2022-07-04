@@ -74,7 +74,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
 const TreeSelectControl = ( {
 	id,
 	label,
-	selectAllLabel = __( 'All', 'google-listings-and-ads' ),
+	selectAllLabel = __( 'All', 'woocommerce' ),
 	help,
 	placeholder,
 	className,
