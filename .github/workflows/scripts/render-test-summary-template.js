@@ -23,16 +23,14 @@ const getAPIStatsArr = () => {
 	const { duration } = apiSummary.time;
 	const durationFormatted = getFormattedDuration( duration );
 
-	console.log( `apiSummary: ${ apiSummary }` );
-
 	return [
 		'API Tests',
-		passed,
-		failed,
-		broken,
-		skipped,
-		unknown,
-		total,
+		passed.toString(),
+		failed.toString(),
+		broken.toString(),
+		skipped.toString(),
+		unknown.toString(),
+		total.toString(),
 		durationFormatted,
 	];
 };
@@ -47,12 +45,12 @@ const getE2EStatsArr = () => {
 
 		return [
 			'E2E Tests',
-			passed,
-			failed,
-			broken,
-			skipped,
-			unknown,
-			total,
+			passed.toString(),
+			failed.toString(),
+			broken.toString(),
+			skipped.toString(),
+			unknown.toString(),
+			total.toString(),
 			durationFormatted,
 		];
 	} else {
@@ -70,12 +68,12 @@ const getE2EStatsArr = () => {
 
 		return [
 			'E2E Tests',
-			passed,
-			failed,
-			0,
-			0,
-			0,
-			total,
+			passed.toString(),
+			failed.toString(),
+			'0',
+			'0',
+			'0',
+			total.toString(),
 			durationFormatted,
 		];
 	}
@@ -109,7 +107,11 @@ module.exports = async ( { core } ) => {
 			`https://woocommerce.github.io/woocommerce-test-reports/pr/${ PR_NUMBER }/api/`
 		)
 		.addBreak()
-		.addLink( 'Link to the full E2E test report.', 'https://github.com' )
+		.addRaw( 'To view the full E2E test report, click ' )
+		.addLink(
+			'here.',
+			'https://woocommerce.github.io/woocommerce-test-reports'
+		)
 		.addBreak()
 		.addRaw( 'To view all test reports, visit the ' )
 		.addLink(
