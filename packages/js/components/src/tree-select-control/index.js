@@ -120,6 +120,7 @@ const TreeSelectControl = ( {
 	} );
 
 	const filterQuery = inputControlValue.trim().toLowerCase();
+	// we only trigger the filter when there are more than 3 characters in the input.
 	const filter = filterQuery.length >= 3 ? filterQuery : '';
 
 	/**
