@@ -59,7 +59,7 @@ const Tags = ( {
 				}
 				const screenReaderLabel = sprintf(
 					// translators: 1: Tag Label, 2: Current Tag index, 3: Total amount of tags.
-					__( '%1$s (%2$d of %3$d)', 'woocommerce-admin' ),
+					__( '%1$s (%2$d of %3$d)', 'woocommerce' ),
 					item.label,
 					i + 1,
 					tags.length
