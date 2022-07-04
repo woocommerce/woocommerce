@@ -8,7 +8,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
-    E2E_PLAYWRIGHT: ${{ true }}
+    E2E_PLAYWRIGHT: ${{ false }}
 
 jobs:
     e2e-tests-run:
@@ -41,7 +41,7 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpm exec wc-e2e test:e2e
+              run: pnpm exec wc-e2e test:e2e ./tests/e2e/specs/activate-and-setup/basic-setup.test.js
 
             - name: Archive Puppeteer E2E test results
               if: |
