@@ -8,7 +8,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
-    E2E_PLAYWRIGHT: ${{ false }}
+    E2E_PLAYWRIGHT: ${{ true }}
 
 jobs:
     e2e-tests-run:
@@ -41,7 +41,7 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpm exec wc-e2e test:e2e ./tests/e2e/specs/activate-and-setup/basic-setup.test.js
+              run: pnpm exec wc-e2e test:e2e
 
             - name: Archive Puppeteer E2E test results
               if: |
@@ -67,7 +67,7 @@ jobs:
               id: run_playwright_e2e_tests
               if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=e2e/playwright.config.js e2e/tests/activate-and-setup/basic-setup.spec.js
+              run: pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Generate (Playwright) E2E Test report.
               id: generate_e2e_report
@@ -264,7 +264,7 @@ jobs:
               contains( needs.*.result, 'failure' )
             )
         runs-on: ubuntu-20.04
-        needs: [api-tests-run, e2e-tests-run]
+        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             PR_NUMBER: ${{ github.event.number }}
