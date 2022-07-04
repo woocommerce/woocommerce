@@ -87,6 +87,7 @@ module.exports = async ( { core } ) => {
 		.addHeading( 'Test Results Summary' )
 		.addRaw( `Commit SHA: ${ SHA }` )
 		.addBreak()
+		.addBreak()
 		.addTable( [
 			[
 				{ data: 'Test :test_tube:', header: true },
