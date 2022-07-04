@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
+use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 defined( 'ABSPATH' ) || exit;
@@ -316,38 +317,9 @@ class WC_Admin_Menus {
 	 */
 	public function orders_menu(): void {
 		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
-			add_submenu_page( 'woocommerce', __( 'Orders', 'woocommerce' ), __( 'Orders', 'woocommerce' ), 'edit_others_shop_orders', 'wc-orders', array( $this, 'orders_page' ) );
-			add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'orders_table' ) );
-
-			// In some cases (such as if the authoritative order store was changed earlier in the current request) we
-			// need an extra step to remove the menu entry for the menu post type.
-			add_action(
-				'admin_init',
-				function () {
-					remove_submenu_page( 'woocommerce', 'edit.php?post_type=shop_order' );
-				}
-			);
+			$this->orders_page_controller = new Custom_Orders_PageController();
+			$this->orders_page_controller->setup();
 		}
-	}
-
-	/**
-	 * Set-up the orders admin list table.
-	 *
-	 * @return void
-	 */
-	public function orders_table(): void {
-		$this->orders_list_table = new Custom_Orders_List_Table();
-		$this->orders_list_table->setup();
-	}
-
-	/**
-	 * Render the orders admin list table.
-	 *
-	 * @return void
-	 */
-	public function orders_page(): void {
-		$this->orders_list_table->prepare_items();
-		$this->orders_list_table->display();
 	}
 
 	/**
