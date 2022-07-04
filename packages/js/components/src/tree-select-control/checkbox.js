@@ -17,8 +17,6 @@ import { createElement } from '@wordpress/element';
  * @return {JSX.Element|null} The Checkbox component
  */
 const Checkbox = ( { option, checked, className, ...props } ) => {
-	if ( ! option ) return null;
-
 	return (
 		<div className={ className }>
 			<div className="components-base-control__field">

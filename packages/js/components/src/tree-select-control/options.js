@@ -55,6 +55,8 @@ const Options = ( {
 		const isRoot = option.value === ROOT_VALUE;
 		const { hasChildren, checked, partialChecked, expanded } = option;
 
+		if ( ! option?.value ) return null;
+
 		return (
 			<div
 				key={ `${ option.key ?? option.value }` }
