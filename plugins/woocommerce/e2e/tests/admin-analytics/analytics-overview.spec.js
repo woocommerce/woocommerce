@@ -123,9 +123,10 @@ test.describe( 'Analytics pages', () => {
 		// clean up
 		await page.click( '//button[@title="Add more sections"]' );
 		await page.click( '//button[@title="Add Performance section"]' );
-		await page.waitForSelector( 'h2.woocommerce-section-header__title', {
-			hasText: 'Performance',
+		await page.waitForSelector( 'h2:has-text("Performance")', {
+			state: 'visible',
 		} );
+		await page.waitForLoadState( 'networkidle' );
 	} );
 
 	test( 'should allow a user to add a section back in', async ( {
