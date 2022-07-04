@@ -730,10 +730,12 @@ class ListTable extends WP_List_Table {
 		foreach ( $order_ids as $id ) {
 			$order = wc_get_order( $id );
 
-			if ( $order ) {
-				do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-				$changed++;
+			if ( ! $order ) {
+				continue;
 			}
+
+			do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			$changed++;
 		}
 
 		return $changed;
@@ -754,7 +756,12 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $order_ids as $id ) {
 			$order = wc_get_order( $id );
-			$order->update_status( $new_status, __( 'Order status changed by bulk edit:', 'woocommerce' ), true );
+
+			if ( ! $order ) {
+				continue;
+			}
+
+			$order->update_status( $new_status, __( 'Order status changed by bulk edit.', 'woocommerce' ), true );
 			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			$changed++;
 		}
@@ -771,22 +778,22 @@ class ListTable extends WP_List_Table {
 		}
 
 		$order_statuses = wc_get_order_statuses();
-		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0;
+		$number         = absint( $_REQUEST['changed'] ?? 0 );
 		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) );
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
 			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
-				/* translators: %d: orders count */
-				$message = sprintf( _n( '%d order status changed.', '%d order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+				/* translators: %s: orders count */
+				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 				break;
 			}
 		}
 
 		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
-			/* translators: %d: orders count */
-			$message = sprintf( _n( 'Removed personal data from %d order.', 'Removed personal data from %d orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
+			/* translators: %s: orders count */
+			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 		}
 	}
