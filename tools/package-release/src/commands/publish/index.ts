@@ -63,11 +63,11 @@ export default class PackageRelease extends Command {
 
 		CliUx.ux.action.start( 'Installing all dependencies' );
 
-		execSync( 'pnpm install', {
-			cwd: MONOREPO_ROOT,
-			encoding: 'utf-8',
-			stdio: 'inherit',
-		} );
+		// execSync( 'pnpm install', {
+		// 	cwd: MONOREPO_ROOT,
+		// 	encoding: 'utf-8',
+		// 	stdio: 'inherit',
+		// } );
 
 		CliUx.ux.action.stop();
 
