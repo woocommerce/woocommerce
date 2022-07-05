@@ -5,8 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Internal\Utilities\BatchProcessor;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * - Providing entry points for creating and deleting the required database tables.
  * - Synchronizing changes between the custom orders tables and the posts table whenever changes in orders happen.
  */
-class DataSynchronizer extends BatchProcessor {
+class DataSynchronizer implements BatchProcessorInterface {
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
@@ -270,8 +270,11 @@ WHERE
 	 *
 	 * @param array $batch Batch details.
 	 */
-	public function process_for_batch( array $batch ) {
+	public function process_batch( array $batch ) {
 		$this->posts_to_cot_migrator->migrate_orders( $batch );
+		if ( 0 === $this->get_total_pending_count() ) {
+			$this->cleanup_synchronization_state();
+		}
 	}
 
 	/**
@@ -291,7 +294,7 @@ WHERE
 	 *
 	 * @return array Batch of records.
 	 */
-	public function get_batch_data( int $size, $last_processed ): array {
+	public function get_next_batch_to_process( int $size, $last_processed ): array {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $size );
 		} else {
@@ -322,18 +325,11 @@ WHERE
 	}
 
 	/**
-	 * Mark update complete.
-	 */
-	public function mark_process_complete() {
-		$this->cleanup_synchronization_state();
-	}
-
-	/**
 	 * A user friendly name for this process.
 	 *
 	 * @return string Name of the process.
 	 */
-	protected function get_name(): string {
+	public function get_name(): string {
 		return 'Order synchronizer';
 	}
 
@@ -342,7 +338,7 @@ WHERE
 	 *
 	 * @return string Description.
 	 */
-	protected function get_description(): string {
+	public function get_description(): string {
 		return 'Synchronizes orders between posts and custom order tables.';
 	}
 }

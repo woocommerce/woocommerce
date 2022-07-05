@@ -3,7 +3,7 @@
  * Controller to manage processing of `BatchProcessor` type. Trigger the `enqueue_processor` method to start a batch process, and it will manage rest of the things.
  */
 
-namespace Automattic\WooCommerce\Internal\Utilities;
+namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
 /**
  * Class BatchProcessingController
@@ -91,19 +91,19 @@ class BatchProcessingController {
 	/**
 	 * Process next batch for given instance of `BatchProcessor`.
 	 *
-	 * @param BatchProcessor $batch_processor Batch processor instance.
+	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
 	 *
 	 * @return bool True if batch was processed, false if not.
 	 */
-	private function process_batch( BatchProcessor $batch_processor ) {
+	private function process_batch( BatchProcessorInterface $batch_processor ) {
 		$details    = $this->get_process_details( $batch_processor );
 		$time_start = microtime( true );
-		$batch      = $batch_processor->get_batch_data( $details['current_batch_size'], $details['last_processed'] );
+		$batch      = $batch_processor->get_next_batch_to_process( $details['current_batch_size'], $details['last_processed'] );
 		if ( empty( $batch ) ) {
 			return false;
 		}
 		try {
-			$batch_processor->process_for_batch( $batch );
+			$batch_processor->process_batch( $batch );
 			$time_taken = microtime( true ) - $time_start;
 			$this->update_progress_status( $batch_processor, $batch, $time_taken );
 			return true;
@@ -117,11 +117,11 @@ class BatchProcessingController {
 	/**
 	 * Get status for this update.
 	 *
-	 * @param BatchProcessor $batch_processor Batch processor instance.
+	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
 	 *
 	 * @return mixed Update status.
 	 */
-	protected function get_process_details( BatchProcessor $batch_processor ) {
+	protected function get_process_details( BatchProcessorInterface $batch_processor ) {
 		return get_option(
 			$this->get_process_option_name( $batch_processor ),
 			array(
@@ -136,11 +136,11 @@ class BatchProcessingController {
 	/**
 	 * Name of the option where we will be saving state of this process.
 	 *
-	 * @param BatchProcessor $processor Batch processor instance.
+	 * @param BatchProcessorInterface $processor Batch processor instance.
 	 *
 	 * @return string
 	 */
-	private function get_process_option_name( BatchProcessor $processor ) {
+	private function get_process_option_name( BatchProcessorInterface $processor ) {
 		$class_name = get_class( $processor );
 		$class_md5 = md5( $class_name );
 		// truncate the class name so we know that it will fit in the option name column along with md5 hash and prefix.
@@ -151,12 +151,12 @@ class BatchProcessingController {
 	/**
 	 * Update the progress status after a batch has completed processing.
 	 *
-	 * @param BatchProcessor  $batch_processor Batch processor instance.
-	 * @param array           $batch Batch that finished processing.
-	 * @param float           $time_taken Time take by the batch to complete processing.
-	 * @param \Exception|null $last_error Exception object in processing the batch, if there was one.
+	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
+	 * @param array                   $batch Batch that finished processing.
+	 * @param float                   $time_taken Time take by the batch to complete processing.
+	 * @param \Exception|null         $last_error Exception object in processing the batch, if there was one.
 	 */
-	protected function update_progress_status( BatchProcessor $batch_processor, array $batch, float $time_taken, \Exception $last_error = null ) {
+	private function update_progress_status( BatchProcessorInterface $batch_processor, array $batch, float $time_taken, \Exception $last_error = null ) {
 		$current_status                      = $this->get_process_details( $batch_processor );
 		$current_status['total_time_spent'] += $time_taken;
 		$current_status['last_processed']    = null !== $last_error ? end( $batch ) : $current_status['last_processed'];
@@ -192,10 +192,10 @@ class BatchProcessingController {
 	 *
 	 * @param string $processor_class_name Class name of batch processor.
 	 *
-	 * @return BatchProcessor Instance of batch processor.
+	 * @return BatchProcessorInterface Instance of batch processor.
 	 * @throws \Exception If processor class doesn't exist.
 	 */
-	private function get_processor_instance( string $processor_class_name ) : BatchProcessor {
+	private function get_processor_instance( string $processor_class_name ) : BatchProcessorInterface {
 		$processor = wc_get_container()->get( $processor_class_name );
 
 		/**
@@ -208,7 +208,7 @@ class BatchProcessingController {
 			// This is a fallback for when the batch processor is not registered in the container.
 			$processor = new $processor_class_name();
 		}
-		if ( ! is_a( $processor, BatchProcessor::class ) ) {
+		if ( ! is_a( $processor, BatchProcessorInterface::class ) ) {
 			throw new \Exception( 'Unable to initialize batch processor instance.' );
 		}
 		return $processor;
@@ -217,7 +217,7 @@ class BatchProcessingController {
 	/**
 	 * Helper method to get list of all pending processes.
 	 *
-	 * @return array List of pending processes.
+	 * @return array List (of string) of pending processes classnames.
 	 */
 	public function get_pending() : array {
 		return get_option( self::PENDING_PROCESSES_OPTION_NAME, array() );

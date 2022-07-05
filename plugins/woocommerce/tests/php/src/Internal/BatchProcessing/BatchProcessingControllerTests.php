@@ -3,8 +3,8 @@
  * Tests for BatchProcessingController class.
  */
 
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\Utilities\BatchProcessingController;
 
 /**
  * Class BatchProcessingControllerTests.
@@ -62,9 +62,9 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 */
 	public function test_process_single_update_unfinished() {
 		$test_process_mock = $this->getMockBuilder( get_class( $this->test_process ) )->getMock();
-		$test_process_mock->expects( $this->once() )->method( 'process_for_batch' )->willReturn( true );
+		$test_process_mock->expects( $this->once() )->method( 'process_batch' )->willReturn( true );
 		$test_process_mock->expects( $this->once() )->method( 'get_total_pending_count' )->willReturn( 10 );
-		$test_process_mock->expects( $this->once() )->method( 'get_batch_data' )->willReturn( array( 'dummy_id' ) );
+		$test_process_mock->expects( $this->once() )->method( 'get_next_batch_to_process' )->willReturn( array( 'dummy_id' ) );
 
 		add_filter(
 			'woocommerce_get_batch_processor',
@@ -84,9 +84,9 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 */
 	public function test_process_single_update_finished() {
 		$test_process_mock = $this->getMockBuilder( get_class( $this->test_process ) )->getMock();
-		$test_process_mock->expects( $this->once() )->method( 'process_for_batch' )->willReturn( true );
+		$test_process_mock->expects( $this->once() )->method( 'process_batch' )->willReturn( true );
 		$test_process_mock->expects( $this->once() )->method( 'get_total_pending_count' )->willReturn( 0 );
-		$test_process_mock->expects( $this->once() )->method( 'get_batch_data' )->willReturn( array( 'dummy_id' ) );
+		$test_process_mock->expects( $this->once() )->method( 'get_next_batch_to_process' )->willReturn( array( 'dummy_id' ) );
 
 		add_filter(
 			'woocommerce_get_batch_processor',
