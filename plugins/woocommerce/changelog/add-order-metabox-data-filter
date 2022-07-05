@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added a mechanism to customize the data being sent via AJAX by the order meta box
