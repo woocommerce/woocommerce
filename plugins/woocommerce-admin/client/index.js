@@ -98,6 +98,7 @@ if ( appRoot ) {
 
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
+		document.querySelector( '#wpbody-content > .woocommerce' ) ||
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
