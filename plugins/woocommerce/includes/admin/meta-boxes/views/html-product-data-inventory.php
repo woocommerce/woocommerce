@@ -119,7 +119,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'value'         => $product_object->get_sold_individually( 'edit' ) ? 'yes' : 'no',
 				'wrapper_class' => 'show_if_simple show_if_variable',
 				'label'         => __( 'Sold individually', 'woocommerce' ),
-				'description'   => __( 'Enable this to only allow one of this item to be bought in a single order', 'woocommerce' ),
+				'description'   => __( 'Limit purchases to 1 item per order', 'woocommerce' ),
 			)
 		);
 
