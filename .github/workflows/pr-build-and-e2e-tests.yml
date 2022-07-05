@@ -236,7 +236,7 @@ jobs:
               with:
                   result-encoding: string
                   script: |
-                      const script = require( './repo/.github/workflows/scripts/render-test-summary-template.js' )
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary.js' )
                       return await script( { core } )
 
             - name: Find PR comment by github-actions[bot]
