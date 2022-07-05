@@ -96,11 +96,18 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `Publishing ${ name }` );
 
 			try {
+				// for now.
+				const currentBranch = execSync(
+					'git rev-parse --abbrev-ref HEAD'
+				);
 				const cwd = getFilepathFromPackageName( name );
-				return execSync( 'pnpm publish --dry-run', {
-					cwd,
-					encoding: 'utf-8',
-				} ).trim();
+				return execSync(
+					`pnpm publish --dry-run --publish-branch-${ currentBranch }`,
+					{
+						cwd,
+						encoding: 'utf-8',
+					}
+				).trim();
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
