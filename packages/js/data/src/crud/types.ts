@@ -51,14 +51,21 @@ export type CrudSelectors<
 > = MapSelectors<
 	{
 		'': WPDataSelector< typeof getItem >;
-		Error: WPDataSelector< typeof getItemError >;
-		DeleteError: WPDataSelector< typeof getItemDeleteError >;
-		UpdateError: WPDataSelector< typeof getItemUpdateError >;
 	},
 	ResourceName,
 	IdType,
-	unknown
+	ItemConfig
 > &
+	MapSelectors<
+		{
+			Error: WPDataSelector< typeof getItemError >;
+			DeleteError: WPDataSelector< typeof getItemDeleteError >;
+			UpdateError: WPDataSelector< typeof getItemUpdateError >;
+		},
+		ResourceName,
+		IdType,
+		unknown
+	> &
 	MapSelectors<
 		{
 			'': WPDataSelector< typeof getItems >;
