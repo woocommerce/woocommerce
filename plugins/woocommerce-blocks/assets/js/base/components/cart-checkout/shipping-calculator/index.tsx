@@ -21,8 +21,7 @@ const ShippingCalculator = ( {
 	},
 	addressFields = [ 'country', 'state', 'city', 'postcode' ],
 }: ShippingCalculatorProps ): JSX.Element => {
-	const { shippingAddress, setShippingAddress, setBillingAddress } =
-		useCustomerData();
+	const { shippingAddress, setShippingAddress } = useCustomerData();
 	return (
 		<div className="wc-block-components-shipping-calculator">
 			<ShippingCalculatorAddress
@@ -30,7 +29,6 @@ const ShippingCalculator = ( {
 				addressFields={ addressFields }
 				onUpdate={ ( newAddress ) => {
 					setShippingAddress( newAddress );
-					setBillingAddress( newAddress );
 					onUpdate( newAddress );
 				} }
 			/>
