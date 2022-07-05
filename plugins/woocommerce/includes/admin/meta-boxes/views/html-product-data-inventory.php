@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					'value'         => $product_object->get_manage_stock( 'edit' ) ? 'yes' : 'no',
 					'wrapper_class' => 'show_if_simple show_if_variable',
 					'label'         => __( 'Manage stock?', 'woocommerce' ),
-					'description'   => __( 'Enable stock management at product level', 'woocommerce' ),
+					'description'   => __( 'Manage stock level (quantity)', 'woocommerce' ),
 				)
 			);
 
