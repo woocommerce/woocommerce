@@ -26,6 +26,8 @@ const getFormattedDuration = ( duration ) => {
 /**
  * Extract the test report statistics (the number of tests that passed, failed, skipped, etc.) from Allure report's `summary.json` file.
  *
+ * @param {string} summaryJSONPath Path to the Allure report's `summary.json` file.
+ * @param {string} testHeader The kind of test that generated the Allure report. For example, "E2E Tests".
  * @returns Array containing stringified values of test stats.
  */
 const getAllureSummaryStats = ( summaryJSONPath, testHeader ) => {
