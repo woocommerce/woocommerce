@@ -61,10 +61,15 @@ export default class PackageRelease extends Command {
 			this.error( 'No packages supplied.' );
 		}
 
+		CliUx.ux.action.start( 'Installing all dependencies' );
+
 		execSync( 'pnpm install', {
 			cwd: MONOREPO_ROOT,
 			encoding: 'utf-8',
+			stdio: 'inherit',
 		} );
+
+		CliUx.ux.action.stop();
 
 		if ( flags.all ) {
 			this.publishPackages( getAllPackges(), flags.dry );
