@@ -137,11 +137,13 @@ const WcPayBanner = () => {
 
 const DefaultPaymentMethodsHeaderText = () => (
 	<>
-		<h2>Payment Methods</h2>
+		<h2>{ __( 'Payment Methods', 'woocommerce' ) }</h2>
 		<div id="payment_gateways_options-description">
 			<p>
-				Installed payment methods are listed below and can be sorted to
-				control their display order on the frontend.
+				{ __(
+					'Installed payment methods are listed below and can be sorted to control their display order on the frontend.',
+					'woocommerce'
+				) }
 			</p>
 		</div>
 	</>
