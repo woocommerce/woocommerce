@@ -124,7 +124,7 @@ const withProductVariations = createHigherOrderComponent(
 						p.variations &&
 						p.variations.find( ( { id } ) => id === variationId )
 				);
-				return parentProduct[ 0 ].id;
+				return parentProduct[ 0 ]?.id;
 			}
 
 			getExpandedProduct() {
