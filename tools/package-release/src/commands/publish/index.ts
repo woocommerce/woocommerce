@@ -63,11 +63,11 @@ export default class PackageRelease extends Command {
 
 		CliUx.ux.action.start( 'Installing all dependencies' );
 
-		// execSync( 'pnpm install', {
-		// 	cwd: MONOREPO_ROOT,
-		// 	encoding: 'utf-8',
-		// 	stdio: 'inherit',
-		// } );
+		execSync( 'pnpm install', {
+			cwd: MONOREPO_ROOT,
+			encoding: 'utf-8',
+			stdio: 'inherit',
+		} );
 
 		CliUx.ux.action.stop();
 
@@ -97,13 +97,9 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `${ verb } ${ name }` );
 
 			try {
-				// for now.
-				const currentBranch = execSync(
-					'git rev-parse --abbrev-ref HEAD'
-				);
 				const cwd = getFilepathFromPackageName( name );
 				return execSync(
-					`SKIP_TURBO=true pnpm publish --dry-run --publish-branch=${ currentBranch }`,
+					`SKIP_TURBO=true pnpm publish --dry-run --publish-branch=trunk`,
 					{
 						cwd,
 						encoding: 'utf-8',
