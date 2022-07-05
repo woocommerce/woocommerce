@@ -102,7 +102,7 @@ export default class PackageRelease extends Command {
 				);
 				const cwd = getFilepathFromPackageName( name );
 				return execSync(
-					`pnpm publish --dry-run --publish-branch-${ currentBranch }`,
+					`SKIP_TURBO=true pnpm publish --dry-run --publish-branch=${ currentBranch }`,
 					{
 						cwd,
 						encoding: 'utf-8',
