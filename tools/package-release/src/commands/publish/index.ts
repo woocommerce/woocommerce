@@ -106,6 +106,7 @@ export default class PackageRelease extends Command {
 					{
 						cwd,
 						encoding: 'utf-8',
+						stdio: 'inherit',
 					}
 				).trim();
 			} catch ( e ) {
