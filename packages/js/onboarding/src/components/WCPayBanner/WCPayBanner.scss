@@ -27,6 +27,10 @@
 		color: $studio-gray-60;
 	}
 
+	.woocommerce-recommended-payments-banner__image_container {
+		display: flex;
+	}
+
 	.woocommerce-recommended-payments-banner__text_container {
 		width: 46%;
 		margin-inline: 24px;
