@@ -231,6 +231,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Update CLI messages in COT migration to be more clear.
 * Fix - Fix payments experiment banner logic to be executed before experiment is called. [#33549](https://github.com/woocommerce/woocommerce/pull/33549)
 * Fix - Move tracks _ui and _ut properties out of filtered tracks properties. [#33621](https://github.com/woocommerce/woocommerce/pull/33621)
+* Fix - Revert marketing task completion logic to only complete after actioned by user. [#33676](https://github.com/woocommerce/woocommerce/pull/33676)
+* Fix - Fix Uncaught DOMException on WooCommerce -> Extensions page. [#33711](https://github.com/woocommerce/woocommerce/pull/33711)
+* Fix - Import correct controls for export function. [#33709](https://github.com/woocommerce/woocommerce/pull/33709)
 * Performance - Remove orderCount and publishedProductCount from preloaded settings and moved to using orders/products data stores.  [#33064](https://github.com/woocommerce/woocommerce/pull/33064)
 * Tweak - Add type hints in the signature of wc_add_number_precision to prevent invalid inputs.  [#26965](https://github.com/woocommerce/woocommerce/pull/26965)
 * Tweak - Introduce new hook `woocommerce_set_cookie_options` to exercise more control over cookie options.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
@@ -240,7 +243,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update product task experiment names [#33428](https://github.com/woocommerce/woocommerce/pull/33428)
 * Tweak - Make the option 'woocommerce_tracker_ua' load on demand.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Update - Log errors during the posts to orders table migrations  [#33136](https://github.com/woocommerce/woocommerce/pull/33136)
-* Update - Change invalidation and TTL of the analytics cache for better cache resilience [#33315](https://github.com/woocommerce/woocommerce/pull/33315)
 * Update - Comment: Changelog already added (see fix-product_attributes_lookup_table_update), the intention is for this to ship in the same release.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Update - Update email marketing checkbox to be unticked by default.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Update - Remove the navigation nudge note  [#33241](https://github.com/woocommerce/woocommerce/pull/33241)
