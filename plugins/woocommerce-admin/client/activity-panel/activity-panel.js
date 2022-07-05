@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState, useContext, useMemo } from '@wordpress/element';
+import {
+	lazy,
+	useState,
+	useContext,
+	useMemo,
+	useEffect,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -14,7 +20,7 @@ import {
 	useUserPreferences,
 	getVisibleTasks,
 } from '@woocommerce/data';
-import { getHistory } from '@woocommerce/navigation';
+import { getHistory, addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -70,6 +76,13 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		() => layoutContext.getExtendedContext( 'activity-panel' ),
 		[ layoutContext ]
 	);
+
+	useEffect( () => {
+		return addHistoryListener( () => {
+			closePanel();
+			clearPanel();
+		} );
+	}, [] );
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
