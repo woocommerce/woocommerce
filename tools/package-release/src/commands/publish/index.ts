@@ -108,7 +108,7 @@ export default class PackageRelease extends Command {
 						encoding: 'utf-8',
 						stdio: 'inherit',
 					}
-				).trim();
+				);
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
