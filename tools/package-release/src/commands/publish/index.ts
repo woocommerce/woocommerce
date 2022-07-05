@@ -93,7 +93,8 @@ export default class PackageRelease extends Command {
 	 */
 	private publishPackages( packages: Array< string >, dryRun: boolean ) {
 		packages.forEach( ( name ) => {
-			CliUx.ux.action.start( `Publishing ${ name }` );
+			const verb = dryRun ? 'Publishing dry run of' : 'Publishing';
+			CliUx.ux.action.start( `${ verb } ${ name }` );
 
 			try {
 				// for now.
