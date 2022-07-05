@@ -235,7 +235,7 @@ export function updateQueryString(
 export const addHistoryListener = ( listener ) => {
 	// Monkey patch pushState to allow trigger the pushstate event listener.
 
-	window.wcNavigation = window.wcNavigation ? window.wcNavigation : {};
+	window.wcNavigation = window.wcNavigation ?? {};
 
 	if ( ! window.wcNavigation.historyPatched ) {
 		( ( history ) => {
