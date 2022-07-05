@@ -13,6 +13,7 @@ import { Link } from '@woocommerce/components';
  */
 import { PaymentMethodsIcons } from './PaymentMethodsIcons';
 import { WCPayBannerImage } from './WCPayBannerImage';
+import { WCPayBannerImageCut } from './WCPayBannerImageCut';
 
 export const WCPayBannerFooter: React.VFC = () => (
 	<CardFooter className="woocommerce-recommended-payments-banner__footer">
@@ -85,20 +86,25 @@ export const WCPayBannerText: React.VFC< {
 export const WCPayBannerBody: React.VFC< {
 	textPosition: 'left' | 'right';
 	actionButton: React.ReactNode;
-} > = ( { actionButton, textPosition } ) => {
+	bannerImage?: React.ReactNode;
+} > = ( {
+	actionButton,
+	textPosition,
+	bannerImage = <WCPayBannerImage />,
+} ) => {
 	return (
 		<CardBody className="woocommerce-recommended-payments-banner__body">
 			{ textPosition === 'left' ? (
 				<>
 					<WCPayBannerText actionButton={ actionButton } />
 					<div className="woocommerce-recommended-payments-banner__image_container">
-						<WCPayBannerImage />
+						{ bannerImage }
 					</div>
 				</>
 			) : (
 				<>
 					<div className="woocommerce-recommended-payments-banner__image_container">
-						<WCPayBannerImage />
+						{ bannerImage }
 					</div>
 					<WCPayBannerText actionButton={ actionButton } />
 				</>

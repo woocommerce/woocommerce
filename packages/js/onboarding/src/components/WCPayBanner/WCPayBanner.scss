@@ -4,15 +4,24 @@
 	animation: isLoaded;
 	animation-duration: 250ms;
 
+	&.components-card {
+		box-shadow: none;
+		border: 1px solid $table-border;
+		border-radius: 2px;
+	}
+
+
 	.woocommerce-recommended-payments-banner__body {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding-bottom: 0;
+		padding: 30px 0 0 0;
 	}
 
 	.woocommerce-recommended-payments__header-title {
 		color: $studio-gray-90;
+		line-height: 32px;
 	}
 
 	.woocommerce-recommended-payments__header-heading {
@@ -36,6 +45,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		padding: 20px 0 30px 0;
 
 		p {
 			color: #757575;
@@ -47,10 +57,6 @@
 	.woocommerce-recommended-payments-banner__footer_icon_container {
 		display: flex;
 		align-items: center;
-
-		p {
-			margin-left: 8px;
-		}
 	}
 
 	.woocommerce-recommended-payments-banner__footer_icon_container > svg {

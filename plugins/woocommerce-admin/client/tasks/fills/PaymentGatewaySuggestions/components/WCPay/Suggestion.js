@@ -7,6 +7,7 @@ import {
 	WCPayBannerFooter,
 	WCPayBannerBody,
 	WCPayBenefits,
+	WCPayBannerImageCut,
 } from '@woocommerce/onboarding';
 import { useDispatch } from '@wordpress/data';
 
@@ -60,6 +61,7 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 							onSetupCallback={ onSetupCallback }
 						/>
 					}
+					bannerImage={ <WCPayBannerImageCut /> }
 				/>
 				<WCPayBannerFooter />
 			</WCPayBanner>
