@@ -84,10 +84,10 @@ const Tags = ( {
 					} }
 				>
 					{ showAll
-						? __( 'Show less', 'google-listing-and-ads' )
+						? __( 'Show less', 'woocommerce' )
 						: sprintf(
 								// translators: %d: The number of extra tags to show
-								__( '+ %d more', 'google-listing-and-ads' ),
+								__( '+ %d more', 'woocommerce' ),
 								tags.length - maxTags
 						  ) }
 				</Button>
