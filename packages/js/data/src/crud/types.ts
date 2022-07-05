@@ -23,7 +23,7 @@ export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
 };
 
-export type CrudActions< ResourceName, ItemConfig, MutableProperties > =
+export type CrudActions< ResourceName, ItemType, MutableProperties > =
 	MapActions<
 		{
 			create: ( query: ItemQuery ) => Item;
@@ -31,7 +31,7 @@ export type CrudActions< ResourceName, ItemConfig, MutableProperties > =
 		},
 		ResourceName,
 		MutableProperties,
-		ItemConfig
+		ItemType
 	> &
 		MapActions<
 			{
@@ -39,14 +39,14 @@ export type CrudActions< ResourceName, ItemConfig, MutableProperties > =
 			},
 			ResourceName,
 			IdType,
-			ItemConfig
+			ItemType
 		>;
 
 export type CrudSelectors<
 	ResourceName,
 	PluralResourceName,
-	ItemConfig,
-	ItemQueryConfig,
+	ItemType,
+	ItemQueryType,
 	MutableProperties
 > = MapSelectors<
 	{
@@ -54,7 +54,7 @@ export type CrudSelectors<
 	},
 	ResourceName,
 	IdType,
-	ItemConfig
+	ItemType
 > &
 	MapSelectors<
 		{
@@ -71,15 +71,15 @@ export type CrudSelectors<
 			'': WPDataSelector< typeof getItems >;
 		},
 		PluralResourceName,
-		ItemQueryConfig,
-		ItemConfig[]
+		ItemQueryType,
+		ItemType[]
 	> &
 	MapSelectors<
 		{
 			Error: WPDataSelector< typeof getItemsError >;
 		},
 		PluralResourceName,
-		ItemQueryConfig,
+		ItemQueryType,
 		unknown
 	> &
 	MapSelectors<
