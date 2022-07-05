@@ -10,21 +10,33 @@ const {
 	PR_NUMBER,
 } = process.env;
 
+/**
+ * Convert the given `duration` from milliseconds to a more user-friendly string.
+ * For example, if `duration = 323000`, this function would return `5m 23s`.
+ *
+ * @param {Number} duration Duration in millisecods, as read from either the `summary.json` file in the Allure report, or from the `test-results.json` file from the Jest-Puppeteer report.
+ * @returns String in "5m 23s" format.
+ */
 const getFormattedDuration = ( duration ) => {
 	const durationMinutes = Math.floor( duration / 1000 / 60 );
 	const durationSeconds = Math.floor( ( duration / 1000 ) % 60 );
 	return `${ durationMinutes }m ${ durationSeconds }s`;
 };
 
-const getAPIStatsArr = () => {
-	const apiSummary = require( API_SUMMARY_PATH );
+/**
+ * Extract the test report statistics (the number of tests that passed, failed, skipped, etc.) from Allure report's `summary.json` file.
+ *
+ * @returns Array containing stringified values of test stats.
+ */
+const getAllureSummaryStats = ( summaryJSONPath, testHeader ) => {
+	const summary = require( summaryJSONPath );
 	const { passed, failed, skipped, broken, unknown, total } =
-		apiSummary.statistic;
-	const { duration } = apiSummary.time;
+		summary.statistic;
+	const { duration } = summary.time;
 	const durationFormatted = getFormattedDuration( duration );
 
 	return [
-		'API Tests',
+		testHeader,
 		passed.toString(),
 		failed.toString(),
 		broken.toString(),
@@ -35,26 +47,25 @@ const getAPIStatsArr = () => {
 	];
 };
 
+/**
+ * Get API test result stats.
+ *
+ * @returns Array of API test result stats.
+ */
+const getAPIStatsArr = () => {
+	return getAllureSummaryStats( API_SUMMARY_PATH, 'API Tests' );
+};
+
+/**
+ * Get E2E test result stats.
+ *
+ * @returns Array of E2E test result stats.
+ */
 const getE2EStatsArr = () => {
 	if ( E2E_PLAYWRIGHT === 'true' ) {
-		const e2eSummary = require( E2E_PW_SUMMARY_PATH );
-		const { passed, failed, skipped, broken, unknown, total } =
-			e2eSummary.statistic;
-		const { duration } = e2eSummary.time;
-		const durationFormatted = getFormattedDuration( duration );
-
-		return [
-			'E2E Tests',
-			passed.toString(),
-			failed.toString(),
-			broken.toString(),
-			skipped.toString(),
-			unknown.toString(),
-			total.toString(),
-			durationFormatted,
-		];
+		return getAllureSummaryStats( E2E_PW_SUMMARY_PATH, 'E2E Tests' );
 	} else {
-		const e2eSummary = require( E2E_PPTR_SUMMARY_PATH );
+		const summary = require( E2E_PPTR_SUMMARY_PATH );
 		const {
 			numPassedTests: passed,
 			numFailedTests: failed,
@@ -64,7 +75,7 @@ const getE2EStatsArr = () => {
 			numTodoTests: unknown,
 			startTime,
 			testResults,
-		} = e2eSummary;
+		} = summary;
 		const endTime = testResults[ testResults.length - 1 ].endTime;
 		const duration = endTime - startTime;
 		const durationFormatted = getFormattedDuration( duration );
@@ -82,6 +93,12 @@ const getE2EStatsArr = () => {
 	}
 };
 
+/**
+ * Generate the contents of the test results summary and post it on the workflow run.
+ *
+ * @param {*} params Objects passed from the calling GitHub Action workflow.
+ * @returns Stringified content of the test results summary.
+ */
 module.exports = async ( { core } ) => {
 	const apiStats = getAPIStatsArr();
 	const e2eStats = getE2EStatsArr();
