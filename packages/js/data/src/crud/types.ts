@@ -31,7 +31,7 @@ export type CrudActions< ResourceName, ItemType, MutableProperties > =
 		},
 		ResourceName,
 		MutableProperties,
-		ItemType
+		Generator< unknown, ItemType >
 	> &
 		MapActions<
 			{
@@ -39,7 +39,7 @@ export type CrudActions< ResourceName, ItemType, MutableProperties > =
 			},
 			ResourceName,
 			IdType,
-			ItemType
+			Generator< unknown, ItemType >
 		>;
 
 export type CrudSelectors<
