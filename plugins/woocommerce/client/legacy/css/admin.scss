@@ -4770,6 +4770,13 @@ img.help_tip {
 			line-height: 24px;
 		}
 
+		.tips_prodcut_types {
+            > .woocommerce-help-tip {
+                display: inline;
+				margin-right: 1em;
+            }
+        }
+
 		.type_box {
 			display: inline;
 			line-height: inherit;
