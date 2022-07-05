@@ -500,7 +500,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 */
 		private function is_order_meta_box_screen( string $screen_id ) {
 			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ) ) ||
-						'woocommerce_page_wc-shop-order' === $screen_id;
+						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
 		}
 
 	}
