@@ -14,7 +14,6 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath } from '@woocommerce/navigation';
-import { getAdminLink } from '@woocommerce/settings';
 import { Button } from '@wordpress/components';
 import ExternalIcon from 'gridicons/dist/external';
 
@@ -216,9 +215,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			footerLink={
 				! isWCPayOrOtherCategoryDoneSetup && (
 					<Button
-						href={ getAdminLink(
-							'admin.php?page=wc-addons&section=payment-gateways'
-						) }
+						href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 						target="_blank"
 						onClick={ trackSeeMore }
 						isTertiary
