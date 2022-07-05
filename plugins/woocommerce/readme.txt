@@ -234,6 +234,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Revert marketing task completion logic to only complete after actioned by user. [#33676](https://github.com/woocommerce/woocommerce/pull/33676)
 * Fix - Fix Uncaught DOMException on WooCommerce -> Extensions page. [#33711](https://github.com/woocommerce/woocommerce/pull/33711)
 * Fix - Import correct controls for export function. [#33709](https://github.com/woocommerce/woocommerce/pull/33709)
+* Fix - Rename event prop from cross-sell to cross_sell. [#33704](https://github.com/woocommerce/woocommerce/pull/33704)
 * Performance - Remove orderCount and publishedProductCount from preloaded settings and moved to using orders/products data stores.  [#33064](https://github.com/woocommerce/woocommerce/pull/33064)
 * Tweak - Add type hints in the signature of wc_add_number_precision to prevent invalid inputs.  [#26965](https://github.com/woocommerce/woocommerce/pull/26965)
 * Tweak - Introduce new hook `woocommerce_set_cookie_options` to exercise more control over cookie options.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
