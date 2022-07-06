@@ -36,7 +36,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"filename": "../../tools/changelogger/PluginFormatter.php"
+				"filename": "../../tools/changelogger/class-plugin-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",
