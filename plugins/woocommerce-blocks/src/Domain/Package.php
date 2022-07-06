@@ -1,8 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Domain;
 
-use Automattic\WooCommerce\Blocks\Package as NewPackage;
+use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+
 
 /**
  * Main package class.
@@ -61,6 +62,24 @@ class Package {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Returns the version of the plugin stored in the database.
+	 *
+	 * @return string
+	 */
+	public function get_version_stored_on_db() {
+		return get_option( Options::WC_BLOCK_VERSION, '' );
+	}
+
+	/**
+	 * Set the version of the plugin stored in the database.
+	 * This is useful during the first installation or after the upgrade process.
+	 */
+	public function set_version_stored_on_db() {
+		update_option( Options::WC_BLOCK_VERSION, $this->get_version() );
+
 	}
 
 	/**
