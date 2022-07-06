@@ -126,13 +126,8 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			expect( isRefreshed ).not.toBeCalled();
-
-			await Promise.all( [
-				page.waitForNavigation( {
-					waitUntil: 'networkidle0',
-				} ),
-				page.click( selectors.frontend.filter ),
-			] );
+			await page.click( selectors.frontend.filter );
+			await page.waitForNetworkIdle();
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList

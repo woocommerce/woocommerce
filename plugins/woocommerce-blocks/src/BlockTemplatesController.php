@@ -371,9 +371,10 @@ class BlockTemplatesController {
 			return $this->template_parts_directory;
 		}
 
-		if ( $this->package->is_experimental_build() && BlockTemplateUtils::should_use_blockified_product_grid_templates() ) {
-			return $this->templates_directory . '/blockified';
-		}
+		// When the blockified Product Grid Block will be implemented, we need to use the blockified templates.
+		// if ( $this->package->is_experimental_build() && BlockTemplateUtils::should_use_blockified_product_grid_templates() ) {
+		// return $this->templates_directory . '/blockified';
+		// }.
 
 		return $this->templates_directory;
 	}
