@@ -144,7 +144,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					</thead>
 					<tbody>
 						<?php
-						foreach ( WC()->payment_gateways->payment_gateways() as $gateway ) {
+						$payment_gateways = WC()->payment_gateways->payment_gateways();
+						foreach ( $payment_gateways as $gateway ) {
 
 							echo '<tr data-gateway_id="' . esc_attr( $gateway->id ) . '">';
 
@@ -226,16 +227,27 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 						 * See https://github.com/woocommerce/woocommerce/issues/32130 for more details.
 						 */
 						if ( WooCommercePayments::is_supported() ) {
+							$wcpay_setup         = isset( $payment_gateways['woocommerce_payments'] ) && ! $payment_gateways['woocommerce_payments']->needs_setup();
 							$active_plugin_slugs = PluginsHelper::get_active_plugin_slugs();
 							$icons               = array();
-							$plugins             = array(
-								'woocommerce-paypal-payments' => 'paypal.png',
-								'woocommerce-gateway-amazon-payments-advanced' => 'amazonpay.png',
-								'klarna-payments-for-woocommerce' => 'klarna.png',
-								'woocommerce-gateway-stripe' => 'stripe2.png',
-								'mollie-payments-for-woocommerce' => 'mollie.png',
-								'woocommerce-payfast-gateway' => 'payfast.png',
-							);
+
+							if ( $wcpay_setup ) {
+								$link_text = __( 'Discover additional payment providers', 'woocommerce' );
+								$plugins   = array(
+									'woocommerce-paypal-payments' => 'paypal.png',
+									'woocommerce-gateway-amazon-payments-advanced' => 'amazonpay.png',
+									'woocommerce-gateway-affirm' => 'affirm.png',
+									'afterpay-gateway-for-woocommerce' => 'afterpay.png',
+									'klarna-payments-for-woocommerce' => 'klarna.png',
+								);
+							} else {
+								$link_text = __( 'Discover other payment providers', 'woocommerce' );
+								$plugins   = array(
+									'woocommerce-gateway-stripe' => 'stripe2.png',
+									'woocommerce-paypal-payments' => 'paypal.png',
+									'woocommerce-square' => 'square.png',
+								);
+							}
 
 							foreach ( $plugins as $plugin => $icon ) {
 								if ( ! in_array( $plugin, $active_plugin_slugs, true ) ) {
@@ -243,8 +255,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 								}
 							}
 
-							$columns_count      = count( $columns );
-							$link_text          = __( 'Discover other payment providers', 'woocommerce' );
+							$columns_count = count( $columns );
+
 							$external_link_icon = '<svg style="margin-left: 4px" class="gridicon gridicons-external needs-offset" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M19 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6v2H5v12h12v-6h2zM13 3v2h4.586l-7.793 7.793 1.414 1.414L19 6.414V11h2V3h-8z"></path></g></svg>';
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
