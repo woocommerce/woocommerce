@@ -105,10 +105,25 @@
 		&:focus {
 			box-shadow: 0 0 0 1px $alert-red;
 		}
+
+		.has-dark-controls &,
+		.has-dark-controls &:hover,
+		.has-dark-controls &:focus,
+		.has-dark-controls &:active {
+			border-color: color.adjust($alert-red, $lightness: 30%);
+		}
+
+		.has-dark-controls &:focus {
+			box-shadow: 0 0 0 1px color.adjust($alert-red, $lightness: 30%);
+		}
 	}
 
 	&.has-error label {
 		color: $alert-red;
+
+		.has-dark-controls & {
+			color: color.adjust($alert-red, $lightness: 30%);
+		}
 	}
 
 	&:only-child {
