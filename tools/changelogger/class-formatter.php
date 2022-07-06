@@ -1,4 +1,9 @@
 <?php
+/**
+ * Formatter class
+ *
+ * @package  WooCommerce
+ */
 
 namespace Automattic\WooCommerce\MonorepoTools\Changelogger;
 
@@ -89,16 +94,16 @@ class Formatter extends KeepAChangelogParser {
 
 		$release_url = '';
 		if ( strpos( $path[1], 'packages/js/' ) !== false ) {
-			$package = substr( $path[1], 12 );
-			$release_url ='https://www.npmjs.com/package/@woocommerce/' . $package . '/v/';
-		} else if ( 'plugins/woocommerce' === $path[1] ) {
+			$package     = substr( $path[1], 12 );
+			$release_url = 'https://www.npmjs.com/package/@woocommerce/' . $package . '/v/';
+		} elseif ( 'plugins/woocommerce' === $path[1] ) {
 			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
-		} else if ( 'plugins/woocommerce-beta-tester' === $path[1] ) {
+		} elseif ( 'plugins/woocommerce-beta-tester' === $path[1] ) {
 			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
 		} else {
 			throw new \InvalidArgumentException( 'Release URL not found.' );
 		}
-	
+
 		return $release_url . $version;
 	}
 
@@ -197,13 +202,13 @@ class Formatter extends KeepAChangelogParser {
 					$row          = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
 					$row_segments = explode( ' - ', $row );
 					$significance = trim( strtolower( $row_segments[0] ) );
-					
+
 					array_push(
 						$changes,
 						array(
 							'subheading'   => $is_subentry ? '' : trim( $row_segments[0] ),
-							'content'      => $is_subentry ? trim( $row ) : trim( isset($row_segments[1]) ? $row_segments[1] : '' ),
-							'significance' => in_array( $significance, array( 'patch', 'minor', 'major' ) ) ? $significance : null,
+							'content'      => $is_subentry ? trim( $row ) : trim( isset( $row_segments[1] ) ? $row_segments[1] : '' ),
+							'significance' => in_array( $significance, array( 'patch', 'minor', 'major' ), true ) ? $significance : null,
 						)
 					);
 				}

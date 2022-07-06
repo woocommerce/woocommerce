@@ -126,7 +126,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"filename": "../../tools/changelogger/LegacyCoreFormatter.php"
+				"filename": "../../tools/changelogger/class-legacy-core-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",
