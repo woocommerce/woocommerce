@@ -78,6 +78,7 @@
 		"require-turbo": "workspace:*",
 		"stylelint": "^13.8.0",
 		"typescript": "3.9.7",
+		"uuid": "^8.3.2",
 		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
 		"wp-textdomain": "1.0.1"

@@ -30,7 +30,7 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// confirm setting saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -45,7 +45,7 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// verify the settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -68,7 +68,7 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(

@@ -156,8 +156,9 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	} );
 } );
 
+// !Changed from Japanese to Malta store, as Japanese Yen does not use decimals
 test.describe(
-	'A japanese store can complete the selective bundle install but does not include WCPay.',
+	'A Malta store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: 'e2e/storage/adminState.json' } );
 
@@ -171,11 +172,11 @@ test.describe(
 			await page.click( '#woocommerce-select-control-0__control-input' );
 			await page.fill(
 				'#woocommerce-select-control-0__control-input',
-				'Japan — Hokkaido'
+				'Malta'
 			);
-			await page.click( 'button >> text=Japan — Hokkaido' );
-			await page.fill( '#inspector-text-control-2', 'Sapporo' );
-			await page.fill( '#inspector-text-control-3', '007-0852' );
+			await page.click( 'button >> text=Malta' );
+			await page.fill( '#inspector-text-control-2', 'Valletta' );
+			await page.fill( '#inspector-text-control-3', 'VLT 1011' );
 			await page.fill(
 				'#inspector-text-control-4',
 				'admin@woocommercecoree2etestsuite.com'
@@ -294,29 +295,16 @@ test.describe( 'Store owner can go through setup Task List', () => {
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		// Close the welcome dialog if it's present
-		await page.waitForLoadState( 'networkidle' ); // explictly wait because the welcome dialog loads last
-		const welcomeDialog = await page.$( '.components-modal__header' );
-		if ( welcomeDialog !== null ) {
-			await page.click(
-				'div.components-modal__header >> button.components-button'
-			);
-		}
-		await expect( welcomeDialog ).not.toBeVisible();
-		await page
-			.locator( 'li[role="button"]:has-text("Set up shipping1 minute")' )
-			.click();
+		await page.click( 'text="Set up shipping"' );
 
-		const shippingPage = await page.textContent( 'h1' );
-		if ( shippingPage === 'Shipping' ) {
+		// check if this is the first time (or if the test is being retried)
+		const currPage = page.url();
+		if ( currPage.indexOf( 'page=wc-settings&tab=shipping' ) > 0 ) {
 			// click the Add shipping zone button on the shipping settings page
 			await page.locator( '.page-title-action' ).click();
-
 			await expect(
-				page.locator( 'h2', {
-					hasText: 'Shipping zones',
-				} )
-			).toBeVisible();
+				page.locator( 'div.woocommerce > form > h2' )
+			).toContainText( 'Shipping zones' );
 		} else {
 			await page.locator( 'button.components-button.is-primary' ).click();
 		}

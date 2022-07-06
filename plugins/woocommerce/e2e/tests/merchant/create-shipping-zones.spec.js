@@ -1,38 +1,59 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const sanFranciscoZIP = '94107';
-const shippingZoneNameUS = 'US with Flat rate';
-const shippingZoneNameFL = 'CA with Free shipping';
-const shippingZoneNameSF = 'SF with Local pickup';
-let productId;
+const maynePostal = 'V0N 2J0';
+const shippingZoneNameFlatRate = 'Canada with Flat rate';
+const shippingZoneNameFreeShip = 'BC with Free shipping';
+const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
-	test( 'add shipping zone for San Francisco with free Local pickup', async ( {
+	test.afterAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.get( 'shipping/zones' ).then( ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				if (
+					response.data[ i ].name === shippingZoneNameFlatRate ||
+					response.data[ i ].name === shippingZoneNameFreeShip ||
+					response.data[ i ].name === shippingZoneNameLocalPickup
+				) {
+					api.delete( `shipping/zones/${ response.data[ i ].id }`, {
+						force: true,
+					} );
+				}
+			}
+		} );
+	} );
+
+	test( 'add shipping zone for Mayne Island with free Local pickup', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameSF }` ) ) {
+		if ( await page.isVisible( `text=${ shippingZoneNameLocalPickup }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 			);
-			await page.fill( '#zone_name', shippingZoneNameSF );
+			await page.fill( '#zone_name', shippingZoneNameLocalPickup );
 
 			await page.click( '.select2-search__field' );
 			await page.type(
 				'.select2-search__field',
-				'California, United States'
+				'British Columbia, Canada'
 			);
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
 
 			await page.click( '.wc-shipping-zone-postcodes-toggle' );
-			await page.fill( '#zone_postcodes', sanFranciscoZIP );
+			await page.fill( '#zone_postcodes', maynePostal );
 
 			await page.click( 'text=Add shipping method' );
 
@@ -49,32 +70,32 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		}
 
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/SF with Local pickup.*/
+			/Mayne Island with Local pickup.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/California, 94107.*/
+			/British Columbia, V0N 2J0.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Local pickup.*/
 		);
 	} );
 
-	test( 'add shipping zone for California with Free shipping', async ( {
+	test( 'add shipping zone for British Columbia with Free shipping', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameFL }` ) ) {
+		if ( await page.isVisible( `text=${ shippingZoneNameFreeShip }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 			);
-			await page.fill( '#zone_name', shippingZoneNameFL );
+			await page.fill( '#zone_name', shippingZoneNameFreeShip );
 
 			await page.click( '.select2-search__field' );
 			await page.type(
 				'.select2-search__field',
-				'California, United States'
+				'British Columbia, Canada'
 			);
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
@@ -94,28 +115,28 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/CA with Free shipping.*/
+			/BC with Free shipping.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/California.*/
+			/British Columbia.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Free shipping.*/
 		);
 	} );
 
-	test( 'add shipping zone for the US with Flat rate', async ( { page } ) => {
+	test( 'add shipping zone for Canada with Flat rate', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameUS }` ) ) {
+		if ( await page.isVisible( `text=${ shippingZoneNameFlatRate }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 			);
-			await page.fill( '#zone_name', shippingZoneNameUS );
+			await page.fill( '#zone_name', shippingZoneNameFlatRate );
 
 			await page.click( '.select2-search__field' );
-			await page.type( '.select2-search__field', 'United States' );
+			await page.type( '.select2-search__field', 'Canada' );
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
@@ -138,10 +159,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/US with Flat rate*/
+			/Canada with Flat rate*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/United States \(US\).*/
+			/Canada.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Flat rate.*/
@@ -151,109 +172,171 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 test.describe( 'Verifies shipping options from customer perspective', () => {
 	// note: tests are being run in an unauthenticated state (not as admin)
-	test.beforeAll( async () => {
+	let productId, shippingFreeId, shippingFlatId, shippingLocalId;
+
+	test.beforeAll( async ( { baseURL } ) => {
 		// need to add a product to the store so that we can order it and check shipping options
 		const api = new wcApi( {
-			url: 'http://localhost:8084',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		api.post( 'products', {
-			name: 'Shipping options are the best',
-			type: 'simple',
-			regular_price: '25.99',
-		} ).then( ( response ) => {
-			productId = response.data.id;
+		await api
+			.post( 'products', {
+				name: 'Shipping options are the best',
+				type: 'simple',
+				regular_price: '25.99',
+			} )
+			.then( ( response ) => {
+				productId = response.data.id;
+			} );
+		// create shipping zones
+		await api
+			.post( 'shipping/zones', {
+				name: shippingZoneNameLocalPickup,
+			} )
+			.then( ( response ) => {
+				shippingLocalId = response.data.id;
+			} );
+		await api
+			.post( 'shipping/zones', {
+				name: shippingZoneNameFreeShip,
+			} )
+			.then( ( response ) => {
+				shippingFreeId = response.data.id;
+			} );
+		await api
+			.post( 'shipping/zones', {
+				name: shippingZoneNameFlatRate,
+			} )
+			.then( ( response ) => {
+				shippingFlatId = response.data.id;
+			} );
+		// set shipping zone locations
+		await api.put( `shipping/zones/${ shippingFlatId }/locations`, [
+			{
+				code: 'CA',
+			},
+		] );
+		await api.put( `shipping/zones/${ shippingFreeId }/locations`, [
+			{
+				code: 'CA:BC',
+				type: 'state',
+			},
+		] );
+		await api.put( `shipping/zones/${ shippingLocalId }/locations`, [
+			{
+				code: 'V0N 2J0',
+				type: 'postcode',
+			},
+		] );
+		// set shipping zone methods
+		await api.post( `shipping/zones/${ shippingFlatId }/methods`, {
+			method_id: 'flat_rate',
+			settings: {
+				cost: '10.00',
+			},
+		} );
+		await api.post( `shipping/zones/${ shippingFreeId }/methods`, {
+			method_id: 'free_shipping',
+		} );
+		await api.post( `shipping/zones/${ shippingLocalId }/methods`, {
+			method_id: 'local_pickup',
 		} );
 	} );
 
-	test.afterAll( async () => {
+	test.beforeEach( async ( { context, page } ) => {
+		// Shopping cart is very sensitive to cookies, so be explicit
+		context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.waitForLoadState( 'networkidle' );
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
-			url: 'http://localhost:8084',
+			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		api.delete( `products/${ productId }`, { force: true } );
+		await api.delete( `products/${ productId }`, { force: true } );
+		await api.delete( `shipping/zones/${ shippingFlatId }`, {
+			force: true,
+		} );
+		await api.delete( `shipping/zones/${ shippingFreeId }`, {
+			force: true,
+		} );
+		await api.delete( `shipping/zones/${ shippingLocalId }`, {
+			force: true,
+		} );
 	} );
 
-	test( 'allows customer to benefit from a free Local pickup if in SF', async ( {
+	test( 'allows customer to benefit from a free Local pickup if on Mayne Island', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop' );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
-
-		await page.click( 'text=Change address' );
-		await page.fill( '#calc_shipping_postcode', '94107' );
+		await page.goto( 'cart/' );
+		await page.click( 'a.shipping-calculator-button' );
+		await page.selectOption( '#calc_shipping_country', 'CA' );
+		await page.selectOption( '#calc_shipping_state', 'BC' );
+		await page.fill( '#calc_shipping_postcode', maynePostal );
 		await page.click( 'button[name=calc_shipping]' );
 		await page.waitForSelector( 'button[name=calc_shipping]', {
 			state: 'hidden',
 		} );
 
-		expect(
-			await page.textContent(
-				'.shipping ul#shipping_method > li > label'
-			)
-		).toBe( 'Local pickup' );
-		expect(
-			await page.textContent(
-				'td[data-title="Total"] > strong > .amount > bdi'
-			)
-		).toBe( '$25.99' );
+		await expect(
+			page.locator( '.shipping ul#shipping_method > li > label' )
+		).toContainText( 'Local pickup' );
+		await expect(
+			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
+		).toContainText( '25.99' );
 	} );
 
-	test( 'allows customer to benefit from a free Free shipping if in CA', async ( {
+	test( 'allows customer to benefit from a free Free shipping if in BC', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop' );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
+		await page.goto( 'cart/' );
 
-		await page.click( 'text=Change address' );
-		await page.fill( '#calc_shipping_postcode', '94000' );
+		await page.click( 'a.shipping-calculator-button' );
+		await page.selectOption( '#calc_shipping_country', 'CA' );
+		await page.selectOption( '#calc_shipping_state', 'BC' );
 		await page.click( 'button[name=calc_shipping]' );
 		await page.waitForSelector( 'button[name=calc_shipping]', {
 			state: 'hidden',
 		} );
 
-		expect(
-			await page.textContent(
-				'.shipping ul#shipping_method > li > label'
-			)
-		).toBe( 'Free shipping' );
-		expect(
-			await page.textContent(
-				'td[data-title="Total"] > strong > .amount > bdi'
-			)
-		).toBe( '$25.99' );
+		await expect(
+			page.locator( '.shipping ul#shipping_method > li > label' )
+		).toContainText( 'Free shipping' );
+		await expect(
+			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
+		).toContainText( '25.99' );
 	} );
 
 	test( 'allows customer to pay for a Flat rate shipping method', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop' );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
+		await page.goto( 'cart/' );
 
-		await page.click( 'text=Change address' );
-		await page.selectOption( '#calc_shipping_state', 'NY' );
-		await page.fill( '#calc_shipping_postcode', '10010' );
+		await page.click( 'a.shipping-calculator-button' );
+		await page.selectOption( '#calc_shipping_country', 'CA' );
+		await page.selectOption( '#calc_shipping_state', 'AB' );
+		await page.fill( '#calc_shipping_postcode', 'T2T 1B3' );
 		await page.click( 'button[name=calc_shipping]' );
 		await page.waitForSelector( 'button[name=calc_shipping]', {
 			state: 'hidden',
 		} );
 
-		expect(
-			await page.textContent(
-				'.shipping ul#shipping_method > li > label'
-			)
-		).toBe( 'Flat rate: $10.00' );
-		expect(
-			await page.textContent(
-				'td[data-title="Total"] > strong > .amount > bdi'
-			)
-		).toBe( '$35.99' );
+		await expect(
+			page.locator( '.shipping ul#shipping_method > li > label' )
+		).toContainText( 'Flat rate:' );
+		await expect(
+			page.locator( '.shipping ul#shipping_method > li > label' )
+		).toContainText( '10.00' );
+		await expect(
+			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
+		).toContainText( '35.99' );
 	} );
 } );

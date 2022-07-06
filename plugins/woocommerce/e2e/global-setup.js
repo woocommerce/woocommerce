@@ -28,9 +28,7 @@ module.exports = async ( config ) => {
 	await adminPage.fill( 'input[name="log"]', 'admin' );
 	await adminPage.fill( 'input[name="pwd"]', 'password' );
 	await adminPage.click( 'text=Log In' );
-	await adminPage
-		.context()
-		.storageState( { path: 'e2e/storage/adminState.json' } );
+	await adminPage.context().storageState( { path: adminState } );
 	// While we're here, let's add a consumer token for API access
 	await adminPage.goto(
 		`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
@@ -51,8 +49,6 @@ module.exports = async ( config ) => {
 	await customerPage.fill( 'input[name="log"]', 'customer' );
 	await customerPage.fill( 'input[name="pwd"]', 'password' );
 	await customerPage.click( 'text=Log In' );
-	await customerPage
-		.context()
-		.storageState( { path: 'e2e/storage/customerState.json' } );
+	await customerPage.context().storageState( { path: customerState } );
 	await browser.close();
 };

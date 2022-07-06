@@ -8,7 +8,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
-    E2E_PLAYWRIGHT: ${{ false }}
+  E2E_PLAYWRIGHT: ${{ true }}
 
 jobs:
     e2e-tests-run:

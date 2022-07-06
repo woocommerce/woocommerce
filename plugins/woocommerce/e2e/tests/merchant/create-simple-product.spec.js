@@ -20,10 +20,13 @@ test.describe( 'Add New Simple Product Page', () => {
 		// and the flat rate shipping method to that zone
 		await api
 			.post( 'shipping/zones', {
-				name: 'Everywhere',
+				name: 'Somewhere',
 			} )
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
+				api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+					{ code: 'CN' },
+				] );
 				api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 					method_id: 'flat_rate',
 				} );

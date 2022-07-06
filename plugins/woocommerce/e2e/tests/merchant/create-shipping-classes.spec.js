@@ -3,6 +3,23 @@ const { test, expect } = require( '@playwright/test' );
 test.describe( 'Merchant can add shipping classes', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
+	test.afterEach( async ( { page } ) => {
+		// no api endpoints for shipping classes, so use the UI to cleanup
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
+		);
+
+		await page.dispatchEvent(
+			'.wc-shipping-class-delete >> nth=0',
+			'click'
+		);
+		await page.dispatchEvent(
+			'.wc-shipping-class-delete >> nth=0',
+			'click'
+		);
+		await page.dispatchEvent( 'text=Save shipping classes', 'click' );
+	} );
+
 	test( 'can add shipping classes', async ( { page } ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
@@ -54,16 +71,5 @@ test.describe( 'Merchant can add shipping classes', () => {
 				).toBeVisible();
 			}
 		}
-
-		// clean up
-		await page.dispatchEvent(
-			'.wc-shipping-class-delete >> nth=0',
-			'click'
-		);
-		await page.dispatchEvent(
-			'.wc-shipping-class-delete >> nth=0',
-			'click'
-		);
-		await page.dispatchEvent( 'text=Save shipping classes', 'click' );
 	} );
 } );
