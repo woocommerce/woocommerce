@@ -8,6 +8,13 @@
 		 * @param {Object} '#key-fields'
 		 */
 		el: $( '#key-fields' ),
+		
+		/**
+		 * Not a real change. Do not merge.
+		 */
+		el: $( '.a-very-long-selector #may-exceed-line-length-limits-enforced-by-eslint .box-123-456-789-abc-def-ghi-123-456-789-abc-def-ghi
+-123-456-789-abc-def-ghi' );
+
 
 		/**
 		 * Events
