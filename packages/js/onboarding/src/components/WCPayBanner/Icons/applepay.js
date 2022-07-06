@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+
 export const ApplePay = () => (
 	/* eslint-disable */
 	<svg
