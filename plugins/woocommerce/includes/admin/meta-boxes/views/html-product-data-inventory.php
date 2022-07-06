@@ -111,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</div>
 
-	<div class="options_group show_if_simple show_if_variable">
+	<div class="inventory_sold_individually options_group show_if_simple show_if_variable">
 		<?php
 		woocommerce_wp_checkbox(
 			array(
@@ -122,6 +122,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'description'   => __( 'Limit purchases to 1 item per order', 'woocommerce' ),
 			)
 		);
+
+		echo wc_help_tip( __( 'Check to let customers to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, for example art or handmade goods.', 'woocommerce' ) );
 
 		do_action( 'woocommerce_product_options_sold_individually' );
 		?>
