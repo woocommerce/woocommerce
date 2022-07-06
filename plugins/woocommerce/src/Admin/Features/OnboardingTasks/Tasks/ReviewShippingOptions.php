@@ -14,7 +14,7 @@ class ReviewShippingOptions extends Task {
 	 * @return string
 	 */
 	public function get_id() {
-		return 'shipping';
+		return 'review-shipping';
 	}
 
 	/**
