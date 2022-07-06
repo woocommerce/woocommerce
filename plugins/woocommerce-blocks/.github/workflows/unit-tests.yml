@@ -91,6 +91,23 @@ jobs:
             - name: blocks.ini setup
               run: echo 'woocommerce_blocks_phase = 3' > blocks.ini
 
+            - name: Get Composer cache directory
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            - name: Set up Composer caching
+              uses: actions/cache@v2
+              env:
+                cache-name: cache-composer-dependencies
+              with:
+                path: ${{ steps.composer-cache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                restore-keys: |
+                  ${{ runner.os }}-composer-
+
+            - name: Install PHP deps
+              run: composer install
+
             - name: Setup Environment
               run: |
                   chmod -R 767 ./ #TODO: Might get implemented in wp-env

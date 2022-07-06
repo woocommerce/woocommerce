@@ -49,7 +49,6 @@ class FeatureGating {
 	public function load_flag() {
 		if ( 0 === $this->flag ) {
 			$default_flag = defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ? self::FEATURE_PLUGIN_FLAG : self::CORE_FLAG;
-
 			if ( file_exists( __DIR__ . '/../../../blocks.ini' ) ) {
 				$allowed_flags = [ self::EXPERIMENTAL_FLAG, self::FEATURE_PLUGIN_FLAG, self::CORE_FLAG ];
 				$woo_options   = parse_ini_file( __DIR__ . '/../../../blocks.ini' );
