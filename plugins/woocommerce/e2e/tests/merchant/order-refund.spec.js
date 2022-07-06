@@ -81,7 +81,9 @@ test.describe( 'WooCommerce Orders > Refund an order', () => {
 
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.do-manual-refund' );
+		await page.click( '.do-manual-refund', {
+			waitForLoadState: 'networkidle',
+		} );
 
 		// Verify the product line item shows the refunded quantity and amount
 		await expect( page.locator( 'small.refunded >> nth=0' ) ).toContainText(
@@ -111,7 +113,10 @@ test.describe( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'a.delete_refund', { force: true } ); // have to force it because not visible
+		await page.click( 'a.delete_refund', {
+			force: true,
+			waitForLoadState: 'networkidle',
+		} ); // have to force it because not visible
 
 		// Verify the refunded row item is no longer showing
 		await expect( page.locator( 'tr.refund' ) ).toHaveCount( 0 );
