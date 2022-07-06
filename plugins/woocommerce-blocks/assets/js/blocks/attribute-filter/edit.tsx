@@ -51,6 +51,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 		queryType,
 		showCounts,
 		showFilterButton,
+		selectType,
 	} = attributes;
 
 	const [ isEditing, setIsEditing ] = useState(
@@ -214,39 +215,71 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak }: EditProps ) => {
 				>
 					<ToggleGroupControl
 						label={ __(
-							'Query Type',
+							'Allow selecting multiple options?',
 							'woo-gutenberg-products-block'
 						) }
-						help={
-							queryType === 'and'
-								? __(
-										'Products that have all of the selected attributes will be shown.',
-										'woo-gutenberg-products-block'
-								  )
-								: __(
-										'Products that have any of the selected attributes will be shown.',
-										'woo-gutenberg-products-block'
-								  )
-						}
-						value={ queryType }
+						value={ selectType || 'multiple' }
 						onChange={ ( value: string ) =>
 							setAttributes( {
-								queryType: value,
+								selectType: value,
 							} )
 						}
 					>
 						<ToggleGroupControlOption
-							value="and"
+							value="multiple"
 							label={ __(
-								'And',
+								'Multiple',
 								'woo-gutenberg-products-block'
 							) }
 						/>
 						<ToggleGroupControlOption
-							value="or"
-							label={ __( 'Or', 'woo-gutenberg-products-block' ) }
+							value="single"
+							label={ __(
+								'Single',
+								'woo-gutenberg-products-block'
+							) }
 						/>
 					</ToggleGroupControl>
+					{ selectType === 'multiple' && (
+						<ToggleGroupControl
+							label={ __(
+								'Query Type',
+								'woo-gutenberg-products-block'
+							) }
+							help={
+								queryType === 'and'
+									? __(
+											'Products that have all of the selected attributes will be shown.',
+											'woo-gutenberg-products-block'
+									  )
+									: __(
+											'Products that have any of the selected attributes will be shown.',
+											'woo-gutenberg-products-block'
+									  )
+							}
+							value={ queryType }
+							onChange={ ( value: string ) =>
+								setAttributes( {
+									queryType: value,
+								} )
+							}
+						>
+							<ToggleGroupControlOption
+								value="and"
+								label={ __(
+									'And',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+							<ToggleGroupControlOption
+								value="or"
+								label={ __(
+									'Or',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+						</ToggleGroupControl>
+					) }
 					<ToggleGroupControl
 						label={ __(
 							'Display Style',

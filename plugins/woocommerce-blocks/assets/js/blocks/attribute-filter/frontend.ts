@@ -26,8 +26,8 @@ const getProps = ( el: HTMLElement ) => {
 				el.dataset.displayStyle ||
 				metadata.attributes.displayStyle.default,
 			showFilterButton: el.dataset.showFilterButton === 'true',
-			isPreview: false,
-			className: el.dataset.className || '',
+			selectType:
+				el.dataset.selectType || metadata.attributes.selectType.default,
 		},
 	};
 };
