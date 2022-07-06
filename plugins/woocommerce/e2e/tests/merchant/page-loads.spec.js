@@ -67,7 +67,8 @@ for ( const currentPage of wcPages ) {
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 					}
 					await page.click(
-						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`
+						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
+						{ waitForLoadState: 'networkidle' }
 					);
 
 					await expect(
