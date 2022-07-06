@@ -42,6 +42,9 @@ describe( 'WooCommerceServicesItem', () => {
 		render( <WooCommerceServicesItem isWCSInstalled={ false } /> );
 
 		screen.queryByRole( 'button', { name: 'Get started' } )?.click();
-		expect( recordEvent ).toBeCalled();
+		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_click', {
+			context: 'root/wc-settings',
+			task_name: 'shipping-recommendation',
+		} );
 	} );
 } );
