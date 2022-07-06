@@ -119,6 +119,7 @@ import { OnboardingSelectors } from './onboarding/selectors';
 import { OptionsSelectors } from './options/types';
 import { ProductsSelectors } from './products/selectors';
 import { OrdersSelectors } from './orders/selectors';
+import { ProductAttributeSelectors } from './product-attributes/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -148,6 +149,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof PRODUCTS_STORE_NAME
 	? ProductsSelectors
+	: T extends typeof PRODUCT_ATTRIBUTES_STORE_NAME
+	? ProductAttributeSelectors
 	: T extends typeof ORDERS_STORE_NAME
 	? OrdersSelectors
 	: never;
@@ -158,4 +161,5 @@ export interface WCDataSelector {
 
 // Other exports
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
+export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
