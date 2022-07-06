@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -230,6 +231,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							$wcpay_setup        = isset( $payment_gateways['woocommerce_payments'] ) && ! $payment_gateways['woocommerce_payments']->needs_setup();
 							$country            = wc_get_base_location()['country'];
 							$plugin_suggestions = Init::get_suggestions();
+							$active_plugins     = PluginsHelper::get_active_plugin_slugs();
 
 							if ( $wcpay_setup ) {
 								$link_text = __( 'Discover additional payment providers', 'woocommerce' );
@@ -241,8 +243,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 							$plugin_suggestions = array_filter(
 								$plugin_suggestions,
-								function( $plugin ) use ( $country, $filter_by ) {
-									if ( ! $plugin->{$filter_by} || ! isset( $plugin->image_72x72 ) ) {
+								function( $plugin ) use ( $country, $filter_by, $active_plugins ) {
+									if ( ! isset( $plugin->{$filter_by} ) || ! isset( $plugin->image_72x72 ) || in_array( $plugin->id, $active_plugins, true ) ) {
 										return false;
 									}
 									return in_array( $country, $plugin->{$filter_by}, true );
