@@ -6,6 +6,8 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
@@ -227,33 +229,27 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 						 * See https://github.com/woocommerce/woocommerce/issues/32130 for more details.
 						 */
 						if ( WooCommercePayments::is_supported() ) {
-							$wcpay_setup         = isset( $payment_gateways['woocommerce_payments'] ) && ! $payment_gateways['woocommerce_payments']->needs_setup();
-							$active_plugin_slugs = PluginsHelper::get_active_plugin_slugs();
-							$icons               = array();
+							$wcpay_setup        = isset( $payment_gateways['woocommerce_payments'] ) && ! $payment_gateways['woocommerce_payments']->needs_setup();
+							$country            = wc_get_base_location()['country'];
+							$plugin_suggestions = Init::get_suggestions();
 
 							if ( $wcpay_setup ) {
 								$link_text = __( 'Discover additional payment providers', 'woocommerce' );
-								$plugins   = array(
-									'woocommerce-paypal-payments' => 'paypal.png',
-									'woocommerce-gateway-amazon-payments-advanced' => 'amazonpay.png',
-									'woocommerce-gateway-affirm' => 'affirm.png',
-									'afterpay-gateway-for-woocommerce' => 'afterpay.png',
-									'klarna-payments-for-woocommerce' => 'klarna.png',
-								);
+								$filter_by = 'category_additional';
 							} else {
 								$link_text = __( 'Discover other payment providers', 'woocommerce' );
-								$plugins   = array(
-									'woocommerce-gateway-stripe' => 'stripe2.png',
-									'woocommerce-paypal-payments' => 'paypal.png',
-									'woocommerce-square' => 'square.png',
-								);
+								$filter_by = 'category_other';
 							}
 
-							foreach ( $plugins as $plugin => $icon ) {
-								if ( ! in_array( $plugin, $active_plugin_slugs, true ) ) {
-									$icons[] = $icon;
+							$plugin_suggestions = array_filter(
+								$plugin_suggestions,
+								function( $plugin ) use ( $country, $filter_by ) {
+									if ( ! isset( $plugin->{$filter_by} ) ) {
+										return false;
+									}
+									return in_array( $country, $plugin->{$filter_by}, true );
 								}
-							}
+							);
 
 							$columns_count = count( $columns );
 
@@ -267,13 +263,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							// phpcs:ignore
 							echo $external_link_icon;
 							echo '</a>';
-							if ( count( $icons ) ) {
-								$image_base_path = plugins_url( 'assets/images/payment_methods/72x72', WC_PLUGIN_FILE );
-								foreach ( $icons as $icon ) {
-									$image_path = $image_base_path . '/' . $icon;
-									$alt        = str_replace( '.png', '', $icon );
+							if ( count( $plugin_suggestions ) ) {
+								foreach ( $plugin_suggestions as $plugin_suggestion ) {
+									$alt = str_replace( '.png', '', basename( $plugin_suggestion->image_72x72 ) );
 									// phpcs:ignore
-									echo "<img src='${image_path}' alt='${alt}' width='24' height='24' style='vertical-align: middle; margin-right: 8px;'/>";
+									echo "<img src='{$plugin_suggestion->image_72x72}' alt='${alt}' width='24' height='24' style='vertical-align: middle; margin-right: 8px;'/>";
 								}
 								echo '& more.';
 							}
