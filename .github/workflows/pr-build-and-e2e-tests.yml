@@ -1,14 +1,14 @@
 name: Run tests against PR
 on:
-  pull_request:
-  workflow_dispatch:
+    pull_request:
+    workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 env:
-  E2E_PLAYWRIGHT: ${{ false }}
+    E2E_PLAYWRIGHT: ${{ false }}
 
 jobs:
     e2e-tests-run:
@@ -18,13 +18,13 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '7.4'
+                  php-version: '7.4'
 
             - name: Install and Build
               uses: ./.github/actions/install-build
@@ -35,12 +35,28 @@ jobs:
 
             - name: Run tests command.
               if: env.E2E_PLAYWRIGHT != 'true'
+              id: run-puppeteer-e2e-tests
               working-directory: plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
               run: pnpm exec wc-e2e test:e2e
+
+            - name: Archive Puppeteer E2E test results
+              if: |
+                  always() &&
+                  env.E2E_PLAYWRIGHT != 'true' &&
+                  (
+                    steps.run-puppeteer-e2e-tests.conclusion != 'cancelled' ||
+                    steps.run-puppeteer-e2e-tests.conclusion != 'skipped' 
+                  )
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pptr-e2e-test-results
+                  path: plugins/woocommerce/tests/e2e/test-results.json
+                  if-no-files-found: ignore
+                  retention-days: 5
 
             - name: Download and install Chromium browser.
               if: env.E2E_PLAYWRIGHT == 'true'
@@ -97,8 +113,8 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -137,8 +153,8 @@ jobs:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
               with:
-                workflow_name: pr-build-and-e2e-tests
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                  workflow_name: pr-build-and-e2e-tests
+                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -164,6 +180,80 @@ jobs:
             - name: Run k6 tests
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+
+    test-summary:
+        name: Post test results
+        if: |
+            always() && 
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [api-tests-run, e2e-tests-run]
+        steps:
+            - name: Create dirs
+              run: |
+                  mkdir -p repo
+                  mkdir -p artifacts/api 
+                  mkdir -p artifacts/e2e
+                  mkdir -p output
+
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  path: repo
+
+            - name: Download API test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: api-test-report---pr-${{ github.event.number }}
+                  path: artifacts/api
+
+            - name: Download Playwright E2E test report artifact
+              if: env.E2E_PLAYWRIGHT == 'true'
+              uses: actions/download-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: artifacts/e2e
+
+            - name: Download Puppeteer E2E test report artifact
+              if: env.E2E_PLAYWRIGHT != 'true'
+              uses: actions/download-artifact@v3
+              with:
+                  name: pptr-e2e-test-results
+                  path: artifacts/e2e
+
+            - name: Prepare test summary
+              id: prepare-test-summary
+              uses: actions/github-script@v6
+              env:
+                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+                  E2E_PPTR_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/test-results.json
+                  PR_NUMBER: ${{ github.event.number }}
+                  SHA: ${{ github.event.pull_request.head.sha }}
+              with:
+                  result-encoding: string
+                  script: |
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary.js' )
+                      return await script( { core } )
+
+            - name: Find PR comment by github-actions[bot]
+              uses: peter-evans/find-comment@v2
+              id: find-comment
+              with:
+                  issue-number: ${{ github.event.pull_request.number }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: Test Results Summary
+
+            - name: Create or update PR comment
+              uses: peter-evans/create-or-update-comment@v2
+              with:
+                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: ${{ steps.prepare-test-summary.outputs.result }}
+                  edit-mode: replace
 
     publish-test-reports:
         name: Publish test reports
