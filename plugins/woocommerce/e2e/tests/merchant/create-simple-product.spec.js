@@ -6,7 +6,7 @@ const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 let shippingZoneId;
 
-test.describe.only( 'Add New Simple Product Page', () => {
+test.describe( 'Add New Simple Product Page', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.beforeAll( async ( { baseURL } ) => {
