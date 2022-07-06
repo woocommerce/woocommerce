@@ -200,7 +200,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// Verify stock reduction system note was added
-		await expect( page.locator( '.system-note >> nth=1' ) ).toHaveText(
+		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
 			/Stock levels reduced: Product with stock \(#\d+\) 10→8/
 		);
 
@@ -217,10 +217,12 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await page.fill( '.refund_order_item_qty >> nth=1', '2' );
 		await page.fill( '#refund_reason', 'No longer wanted' );
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.do-manual-refund' );
+		await page.click( '.do-manual-refund', {
+			waitForLoadState: 'networkidle',
+		} );
 
 		// Verify restock system note was added
-		await expect( page.locator( '.system-note >> nth=0' ) ).toHaveText(
+		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
 			/Item #\d+ stock increased from 8 to 10./
 		);
 
