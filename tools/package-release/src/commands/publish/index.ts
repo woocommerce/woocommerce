@@ -44,10 +44,19 @@ export default class PackageRelease extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
-		dry: Flags.boolean( {
+		'dry-run': Flags.boolean( {
 			char: 'd',
 			default: false,
 			description: 'Perform a dry run of pnpm publish',
+		} ),
+		branch: Flags.string( {
+			char: 'b',
+			description: 'Branch name to publish from',
+			default: 'trunk',
+		} ),
+		'skip-install': Flags.boolean( {
+			description: 'Skip pnpm install',
+			default: false,
 		} ),
 	};
 
@@ -61,18 +70,20 @@ export default class PackageRelease extends Command {
 			this.error( 'No packages supplied.' );
 		}
 
-		CliUx.ux.action.start( 'Installing all dependencies' );
+		if ( ! flags[ 'skip-install' ] ) {
+			CliUx.ux.action.start( 'Installing all dependencies' );
 
-		execSync( 'pnpm install', {
-			cwd: MONOREPO_ROOT,
-			encoding: 'utf-8',
-			stdio: 'inherit',
-		} );
+			execSync( 'pnpm install', {
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+				stdio: 'inherit',
+			} );
 
-		CliUx.ux.action.stop();
+			CliUx.ux.action.stop();
+		}
 
 		if ( flags.all ) {
-			this.publishPackages( getAllPackges(), flags.dry );
+			this.publishPackages( getAllPackges(), flags );
 			return;
 		}
 
@@ -82,7 +93,7 @@ export default class PackageRelease extends Command {
 			validatePackage( name, ( e: string ): void => this.error( e ) )
 		);
 
-		this.publishPackages( packages, flags.dry );
+		this.publishPackages( packages, flags );
 	}
 
 	/**
@@ -91,7 +102,10 @@ export default class PackageRelease extends Command {
 	 * @param {Array<string>} packages Packages to prepare.
 	 * @param {boolean}       dryRun   pnpm dry run.
 	 */
-	private publishPackages( packages: Array< string >, dryRun: boolean ) {
+	private publishPackages(
+		packages: Array< string >,
+		{ 'dry-run': dryRun, branch }: { 'dry-run': boolean; branch: string }
+	) {
 		packages.forEach( ( name ) => {
 			const verb = dryRun ? 'Publishing dry run of' : 'Publishing';
 			CliUx.ux.action.start( `${ verb } ${ name }` );
@@ -99,7 +113,9 @@ export default class PackageRelease extends Command {
 			try {
 				const cwd = getFilepathFromPackageName( name );
 				return execSync(
-					`SKIP_TURBO=true pnpm publish --dry-run --publish-branch=trunk`,
+					`SKIP_TURBO=true pnpm publish ${
+						dryRun ? '--dry-run' : ''
+					} --publish-branch=${ branch }`,
 					{
 						cwd,
 						encoding: 'utf-8',
