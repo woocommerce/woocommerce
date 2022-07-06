@@ -19,6 +19,7 @@ export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 export { PRODUCTS_STORE_NAME } from './products';
 export { ORDERS_STORE_NAME } from './orders';
 export { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
+export { PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
