@@ -54,7 +54,7 @@ export class Shipping extends Component {
 			window.wcAdminFeatures &&
 			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
 
-		this.store_location_completed = false;
+		this.storeLocationCompleted = false;
 	}
 
 	componentDidMount() {
