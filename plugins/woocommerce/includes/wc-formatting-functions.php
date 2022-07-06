@@ -57,7 +57,7 @@ function wc_string_to_array( $string, $delimiter = ',' ) {
  * @return string
  */
 function wc_sanitize_taxonomy_name( $taxonomy ) {
-	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( urldecode( $taxonomy ) ) ), $taxonomy );
+	return apply_filters( 'sanitize_taxonomy_name', urldecode( sanitize_title( urldecode( $taxonomy ?? '' ) ) ), $taxonomy );
 }
 
 /**
@@ -950,7 +950,7 @@ if ( ! function_exists( 'wc_format_hex' ) ) {
 	 * @return string|null
 	 */
 	function wc_format_hex( $hex ) {
-		$hex = trim( str_replace( '#', '', $hex ) );
+		$hex = trim( str_replace( '#', '', $hex ?? '' ) );
 
 		if ( strlen( $hex ) === 3 ) {
 			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];

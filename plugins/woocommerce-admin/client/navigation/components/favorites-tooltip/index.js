@@ -13,22 +13,19 @@ import { HighlightTooltip } from '~/activity-panel/highlight-tooltip';
 const tooltipHiddenOption = 'woocommerce_navigation_favorites_tooltip_hidden';
 
 export const FavoritesTooltip = () => {
-	const {
-		isFavoritesResolving,
-		isOptionResolving,
-		isTooltipHidden,
-	} = useSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
-		return {
-			isFavoritesResolving: select( NAVIGATION_STORE_NAME ).isResolving(
-				'getFavorites'
-			),
-			isOptionResolving: isResolving( 'getOption', [
-				tooltipHiddenOption,
-			] ),
-			isTooltipHidden: getOption( tooltipHiddenOption ) === 'yes',
-		};
-	} );
+	const { isFavoritesResolving, isOptionResolving, isTooltipHidden } =
+		useSelect( ( select ) => {
+			const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+			return {
+				isFavoritesResolving: select(
+					NAVIGATION_STORE_NAME
+				).isResolving( 'getFavorites' ),
+				isOptionResolving: isResolving( 'getOption', [
+					tooltipHiddenOption,
+				] ),
+				isTooltipHidden: getOption( tooltipHiddenOption ) === 'yes',
+			};
+		} );
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 

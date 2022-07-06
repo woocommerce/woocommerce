@@ -30,8 +30,7 @@ export default [
 		_links: {
 			product: [
 				{
-					href:
-						'https://example.com/wp-json/wc-analytics/products/20',
+					href: 'https://example.com/wp-json/wc-analytics/products/20',
 				},
 			],
 		},
@@ -45,8 +44,7 @@ export default [
 		_links: {
 			product: [
 				{
-					href:
-						'https://example.com/wp-json/wc-analytics/products/22',
+					href: 'https://example.com/wp-json/wc-analytics/products/22',
 				},
 			],
 		},
@@ -60,8 +58,7 @@ export default [
 		_links: {
 			product: [
 				{
-					href:
-						'https://example.com/wp-json/wc-analytics/products/23',
+					href: 'https://example.com/wp-json/wc-analytics/products/23',
 				},
 			],
 		},
@@ -75,8 +72,7 @@ export default [
 		_links: {
 			product: [
 				{
-					href:
-						'https://example.com/wp-json/wc-analytics/products/24',
+					href: 'https://example.com/wp-json/wc-analytics/products/24',
 				},
 			],
 		},
@@ -90,8 +86,7 @@ export default [
 		_links: {
 			product: [
 				{
-					href:
-						'https://example.com/wp-json/wc-analytics/products/25',
+					href: 'https://example.com/wp-json/wc-analytics/products/25',
 				},
 			],
 		},

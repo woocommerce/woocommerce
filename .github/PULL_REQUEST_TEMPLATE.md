@@ -2,7 +2,7 @@
 
 -   [ ] Have you followed the [WooCommerce Contributing guideline](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md)?
 -   [ ] Does your code follow the [WordPress' coding standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/)?
--   [ ] Have you checked to ensure there aren't other open [Pull Requests](../../pulls) for the same update/change?
+-   [ ] Have you checked to ensure there aren't other open [Pull Requests](https://github.com/woocommerce/woocommerce/pulls) for the same update/change?
 
 <!-- Mark completed items with an [x] -->
 

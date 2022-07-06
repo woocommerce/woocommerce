@@ -10,9 +10,8 @@ import { __ } from '@wordpress/i18n';
 const DismissAllModal = ( { onClose } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
-	const { batchUpdateNotes, removeAllNotes } = useDispatch(
-		NOTES_STORE_NAME
-	);
+	const { batchUpdateNotes, removeAllNotes } =
+		useDispatch( NOTES_STORE_NAME );
 
 	const dismissAllNotes = async () => {
 		recordEvent( 'wcadmin_inbox_action_dismissall', {} );

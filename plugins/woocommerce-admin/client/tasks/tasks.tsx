@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect, useState } from '@wordpress/element';
+import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
@@ -13,7 +13,6 @@ import {
 	TaskType,
 	WCDataSelector,
 } from '@woocommerce/data';
-import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -64,9 +63,6 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const [ isLoadingExperiment, experimentAssignment ] = useExperiment(
-		'woocommerce_tasklist_progression'
-	);
 
 	const { isResolving, taskLists } = useSelect(
 		( select: WCDataSelector ) => {
@@ -144,17 +140,11 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		);
 	}
 
-	if ( isLoadingExperiment ) {
-		return <TaskListPlaceholderComponent query={ query } />;
-	}
-
 	return (
 		<>
 			{ taskLists
-				.filter( ( { id }: TaskListType ) =>
-					experimentAssignment?.variationName === 'treatment'
-						? id.endsWith( 'two_column' )
-						: ! id.endsWith( 'two_column' )
+				.filter(
+					( { id }: TaskListType ) => ! id.endsWith( 'two_column' )
 				)
 				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
@@ -164,10 +154,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 					return (
 						<Fragment key={ id }>
 							<TaskListComponent
-								isExpandable={
-									experimentAssignment?.variationName ===
-									'treatment'
-								}
+								isExpandable={ false }
 								query={ query }
 								twoColumns={ false }
 								{ ...taskList }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Rename event prop from cross-sell to cross_sell #33704

@@ -1,9 +1,0 @@
-Significance: major
-Type: dev
-
-Upgraded react-router-dom to v6, which itself causes breaking changes. This upgrade will require consumers to also upgrade their react-router-dom to v6. #33156
-
-BREAKING CHANGE:  
-- the returned object from getHistory() has methods changed: goBack() -> back() and goForward() -> forward() 
-- the listen() method from the returned object of getHistory() now takes a listener with an object parameter, ({location, action}) instead of (location, action)
-- location.pathname is now validated and makes a warning if it is not a string

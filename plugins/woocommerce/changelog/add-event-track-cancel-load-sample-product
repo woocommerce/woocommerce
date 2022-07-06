@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add tasklist_cancel_load_sample_products_click event track for product task

@@ -262,9 +262,8 @@ class WC_Site_Tracking {
 			: array();
 
 		$server_details = self::get_server_details();
-		$identity       = WC_Tracks_Client::get_identity( $user->ID );
 		$blog_details   = self::get_blog_details( $user->ID );
 
-		return array_merge( $data, $properties, $server_details, $identity, $blog_details );
+		return array_merge( $data, $properties, $server_details, $blog_details );
 	}
 }

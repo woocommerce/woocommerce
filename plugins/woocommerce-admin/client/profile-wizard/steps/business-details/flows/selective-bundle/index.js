@@ -146,11 +146,8 @@ class BusinessDetails extends Component {
 		extensionInstallationOptions,
 		installableExtensionsData
 	) {
-		const {
-			createNotice,
-			goToNextStep,
-			installAndActivatePlugins,
-		} = this.props;
+		const { createNotice, goToNextStep, installAndActivatePlugins } =
+			this.props;
 
 		const alreadyActivatedExtensions = installableExtensionsData.reduce(
 			( actExtensions, bundle ) => {
@@ -194,10 +191,11 @@ class BusinessDetails extends Component {
 					.then( ( response ) => {
 						const totalInstallationTime =
 							window.performance.now() - installationStartTime;
-						const installedExtensionsData = prepareExtensionTrackingInstallationData(
-							extensionInstallationOptions,
-							response
-						);
+						const installedExtensionsData =
+							prepareExtensionTrackingInstallationData(
+								extensionInstallationOptions,
+								response
+							);
 
 						recordEvent(
 							'storeprofiler_store_business_features_installed_and_activated',
@@ -719,9 +717,8 @@ export const BusinessFeaturesList = compose(
 		const { getProfileItems, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
 		);
-		const { getPluginsError, isPluginsRequesting } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getPluginsError, isPluginsRequesting } =
+			select( PLUGINS_STORE_NAME );
 		const { general: settings = {} } = getSettings( 'general' );
 
 		return {

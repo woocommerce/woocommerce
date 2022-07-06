@@ -240,18 +240,16 @@ export const SelectiveExtensionsBundle = ( {
 	const [ installExtensionOptions, setInstallExtensionOptions ] = useState( {
 		install_extensions: true,
 	} );
-	const {
-		freeExtensions: freeExtensionBundleByCategory,
-		isResolving,
-	} = useSelect( ( select ) => {
-		const { getFreeExtensions, hasFinishedResolution } = select(
-			ONBOARDING_STORE_NAME
-		);
-		return {
-			freeExtensions: getFreeExtensions(),
-			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-		};
-	} );
+	const { freeExtensions: freeExtensionBundleByCategory, isResolving } =
+		useSelect( ( select ) => {
+			const { getFreeExtensions, hasFinishedResolution } = select(
+				ONBOARDING_STORE_NAME
+			);
+			return {
+				freeExtensions: getFreeExtensions(),
+				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
+			};
+		} );
 
 	const { invalidateResolutionForStoreSelector } = useDispatch(
 		ONBOARDING_STORE_NAME

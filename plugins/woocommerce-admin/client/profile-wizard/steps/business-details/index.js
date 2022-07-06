@@ -18,9 +18,10 @@ export const BusinessDetailsStep = ( props ) => {
 				! select( ONBOARDING_STORE_NAME ).hasFinishedResolution(
 					'getProfileItems'
 				) ||
-				! select(
-					SETTINGS_STORE_NAME
-				).hasFinishedResolution( 'getSettings', [ 'general' ] ),
+				! select( SETTINGS_STORE_NAME ).hasFinishedResolution(
+					'getSettings',
+					[ 'general' ]
+				),
 			profileItems: select( ONBOARDING_STORE_NAME ).getProfileItems(),
 		};
 	} );

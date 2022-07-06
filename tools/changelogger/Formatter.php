@@ -64,6 +64,13 @@ class Formatter extends KeepAChangelogParser {
 	public $subentry_pattern = '/^###(.+)\n/m';
 
 	/**
+	 * Return the epiologue.
+	 */
+	public function getEpilogue() {
+		return $this->epilogue;
+	}
+
+	/**
 	 * Get Release link given a version number.
 	 *
 	 * @throws \InvalidArgumentException When directory parsing fails.
@@ -72,10 +79,6 @@ class Formatter extends KeepAChangelogParser {
 	 * @return string Link to the version's release.
 	 */
 	public function getReleaseLink( $version ) {
-		$path_map = array(
-			'packages/js/components' => 'https://www.npmjs.com/package/@woocommerce/components/v/',
-			'plugins/woocommerce'    => 'https://github.com/woocommerce/woocommerce/releases/tag/',
-		);
 
 		// Catpure anything past /woocommerce in the current working directory.
 		preg_match( '/\/woocommerce\/(.+)/', getcwd(), $path );
@@ -84,12 +87,18 @@ class Formatter extends KeepAChangelogParser {
 			throw new \InvalidArgumentException( 'Invalid directory.' );
 		}
 
-		$release_url = $path_map[ $path[1] ];
-
-		if ( ! $release_url ) {
+		$release_url = '';
+		if ( strpos( $path[1], 'packages/js/' ) !== false ) {
+			$package = substr( $path[1], 12 );
+			$release_url ='https://www.npmjs.com/package/@woocommerce/' . $package . '/v/';
+		} else if ( 'plugins/woocommerce' === $path[1] ) {
+			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
+		} else if ( 'plugins/woocommerce-beta-tester' === $path[1] ) {
+			$release_url = 'https://github.com/woocommerce/woocommerce/releases/tag/';
+		} else {
 			throw new \InvalidArgumentException( 'Release URL not found.' );
 		}
-
+	
 		return $release_url . $version;
 	}
 
@@ -187,12 +196,14 @@ class Formatter extends KeepAChangelogParser {
 					$row          = trim( $row );
 					$row          = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
 					$row_segments = explode( ' - ', $row );
-
+					$significance = trim( strtolower( $row_segments[0] ) );
+					
 					array_push(
 						$changes,
 						array(
-							'subheading' => $is_subentry ? '' : trim( $row_segments[0] ),
-							'content'    => $is_subentry ? trim( $row ) : trim( $row_segments[1] ),
+							'subheading'   => $is_subentry ? '' : trim( $row_segments[0] ),
+							'content'      => $is_subentry ? trim( $row ) : trim( isset($row_segments[1]) ? $row_segments[1] : '' ),
+							'significance' => in_array( $significance, array( 'patch', 'minor', 'major' ) ) ? $significance : null,
 						)
 					);
 				}
@@ -201,9 +212,10 @@ class Formatter extends KeepAChangelogParser {
 					$entry->appendChange(
 						$this->newChangeEntry(
 							array(
-								'subheading' => $change['subheading'],
-								'content'    => $change['content'],
-								'timestamp'  => $entry_timestamp,
+								'subheading'   => $change['subheading'],
+								'content'      => $change['content'],
+								'significance' => $change['significance'],
+								'timestamp'    => $entry_timestamp,
 							)
 						)
 					);
@@ -214,7 +226,7 @@ class Formatter extends KeepAChangelogParser {
 
 		$ret->setEntries( $entries );
 		$ret->setPrologue( $this->prologue );
-		$ret->setEpilogue( $this->epilogue );
+		$ret->setEpilogue( $this->getEpilogue() );
 		return $ret;
 	}
 

@@ -61,8 +61,7 @@ const verifyPublishAndTrash = async (
 		await expect( page ).toMatchElement(
 			'#woocommerce-order-notes .note_content',
 			{
-				text:
-					'Order status changed from Pending payment to Processing.',
+				text: 'Order status changed from Pending payment to Processing.',
 			}
 		);
 	}

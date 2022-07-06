@@ -48,6 +48,11 @@ const getTourConfig = ( {
 					behavior: 'auto',
 					block: 'center',
 				},
+				liveResize: {
+					mutation: true,
+					resize: true,
+					rootElementSelector: '#wpwrap',
+				},
 			},
 			popperModifiers: [
 				{

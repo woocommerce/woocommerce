@@ -34,21 +34,20 @@ export const WooCommerceTax: React.FC< TaxChildProps > = ( {
 		const { getSettings } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;
-		const { getActivePlugins, hasFinishedResolution } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getActivePlugins, hasFinishedResolution } =
+			select( PLUGINS_STORE_NAME );
 		const activePlugins = getActivePlugins();
 
 		return {
 			generalSettings: getSettings( 'general' ).general,
-			isJetpackConnected: select(
-				PLUGINS_STORE_NAME
-			).isJetpackConnected(),
+			isJetpackConnected:
+				select( PLUGINS_STORE_NAME ).isJetpackConnected(),
 			isResolving:
 				! hasFinishedResolution( 'isJetpackConnected' ) ||
-				! select(
-					SETTINGS_STORE_NAME
-				).hasFinishedResolution( 'getSettings', [ 'general' ] ) ||
+				! select( SETTINGS_STORE_NAME ).hasFinishedResolution(
+					'getSettings',
+					[ 'general' ]
+				) ||
 				! hasFinishedResolution( 'getActivePlugins' ),
 			pluginsToActivate: difference( AUTOMATION_PLUGINS, activePlugins ),
 		};

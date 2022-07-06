@@ -32,14 +32,8 @@ export const transformExtensionToPlugin = (
 	activePlugins: string[],
 	installedPlugins: string[]
 ): PluginProps => {
-	const {
-		description,
-		image_url,
-		is_built_by_wc,
-		key,
-		manage_url,
-		name,
-	} = extension;
+	const { description, image_url, is_built_by_wc, key, manage_url, name } =
+		extension;
 	const slug = getPluginSlug( key );
 	return {
 		description,
@@ -103,26 +97,21 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 	);
 	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const {
-		activePlugins,
-		freeExtensions,
-		installedPlugins,
-		isResolving,
-	} = useSelect( ( select ) => {
-		const { getActivePlugins, getInstalledPlugins } = select(
-			PLUGINS_STORE_NAME
-		);
-		const { getFreeExtensions, hasFinishedResolution } = select(
-			ONBOARDING_STORE_NAME
-		);
+	const { activePlugins, freeExtensions, installedPlugins, isResolving } =
+		useSelect( ( select ) => {
+			const { getActivePlugins, getInstalledPlugins } =
+				select( PLUGINS_STORE_NAME );
+			const { getFreeExtensions, hasFinishedResolution } = select(
+				ONBOARDING_STORE_NAME
+			);
 
-		return {
-			activePlugins: getActivePlugins(),
-			freeExtensions: getFreeExtensions(),
-			installedPlugins: getInstalledPlugins(),
-			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-		};
-	} );
+			return {
+				activePlugins: getActivePlugins(),
+				freeExtensions: getFreeExtensions(),
+				installedPlugins: getInstalledPlugins(),
+				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
+			};
+		} );
 
 	const [ installedExtensions, pluginLists ] = useMemo(
 		() =>
@@ -156,6 +145,10 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 			} );
 	};
 
+	const onManage = () => {
+		actionTask( 'marketing' );
+	};
+
 	if ( isResolving ) {
 		return <Spinner />;
 	}
@@ -179,6 +172,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 					<PluginList
 						currentPlugin={ currentPlugin }
 						installAndActivate={ installAndActivate }
+						onManage={ onManage }
 						plugins={ installedExtensions }
 					/>
 				</Card>
@@ -209,6 +203,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 							<PluginList
 								currentPlugin={ currentPlugin }
 								installAndActivate={ installAndActivate }
+								onManage={ onManage }
 								key={ key }
 								plugins={ plugins }
 								title={ title }

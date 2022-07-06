@@ -12,12 +12,18 @@
         "build": {
             "dependsOn":  [ "^build" ],
             "inputs": [
-                "src/**.js",
-                "src/**.jsx",
-                "src/**.ts",
-                "src/**.tsx",
-                "src/**.php",
-                "includes/**.php"
+                "src/*.js",
+                "src/**/*.js",
+                "src/*.jsx",
+                "src/**/*.jsx",
+                "src/*.ts",
+                "src/**/*.ts",
+                "src/*.tsx",
+                "src/**/*.tsx",
+                "src/*.php",
+                "src/**/*.php",
+                "includes/*.php",
+                "includes/**/*.php"
             ],
             "outputs": [
                 "dist/**",
@@ -30,26 +36,33 @@
         "woocommerce#build": {
             "dependsOn":  [ 
                 "^build",
-                "@woocommerce/admin-library#build",
-                "woocommerce-legacy-assets#build" 
+                "woocommerce/client/admin#build",
+                "woocommerce/client/legacy#build"
             ],
             "outputs": [],
             "inputs": [
-                "src/**.php",
-                "includes/**.php",
-                "!legacy/**"
+                "src/*.php",
+                "src/**/*.php",
+                "includes/*.php",
+                "includes/**/*.php"
             ]
         },
 
         "test": {
             "dependsOn":  [ "build" ],
             "inputs": [
-                "src/**.js",
-                "src/**.jsx",
-                "src/**.ts",
-                "src/**.tsx",
-                "src/**.php",
-                "includes/**.php"
+                "src/*.js",
+                "src/**/*.js",
+                "src/*.jsx",
+                "src/**/*.jsx",
+                "src/*.ts",
+                "src/**/*.ts",
+                "src/*.tsx",
+                "src/**/*.tsx",
+                "src/*.php",
+                "src/**/*.php",
+                "includes/*.php",
+                "includes/**/*.php"
             ],
             "outputs": []
         },

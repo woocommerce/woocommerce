@@ -21,6 +21,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
+import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
@@ -29,6 +30,8 @@ import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
+import { WCSBanner } from '../experimental-shipping-recommendation/components/wcs-banner';
+import { ShipStationBanner } from '../experimental-shipping-recommendation/components/shipstation-banner';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
 
@@ -46,6 +49,12 @@ export class Shipping extends Component {
 		this.activePlugins = props.activePlugins;
 		this.state = this.initialState;
 		this.completeStep = this.completeStep.bind( this );
+
+		this.shippingSmartDefaultsEnabled =
+			window.wcAdminFeatures &&
+			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
+
+		this.storeLocationCompleted = false;
 	}
 
 	componentDidMount() {
@@ -141,7 +150,15 @@ export class Shipping extends Component {
 		);
 
 		if ( step === 'store_location' && isCompleteAddress ) {
-			this.completeStep();
+			if (
+				this.shippingSmartDefaultsEnabled &&
+				! this.storeLocationCompleted
+			) {
+				this.completeStep();
+				this.storeLocationCompleted = true;
+			} else if ( ! this.shippingSmartDefaultsEnabled ) {
+				this.completeStep();
+			}
 		}
 	}
 
@@ -195,7 +212,7 @@ export class Shipping extends Component {
 		const requiresJetpackConnection =
 			! isJetpackConnected && countryCode === 'US';
 
-		const steps = [
+		let steps = [
 			{
 				key: 'store_location',
 				label: __( 'Set store location', 'woocommerce' ),
@@ -217,7 +234,11 @@ export class Shipping extends Component {
 							recordEvent( 'tasklist_shipping_set_location', {
 								country,
 							} );
+
 							// Don't need to trigger completeStep here as it's triggered by the address updates in the componentDidUpdate function.
+							if ( this.shippingSmartDefaultsEnabled ) {
+								this.completeStep();
+							}
 						} }
 					/>
 				),
@@ -328,12 +349,188 @@ export class Shipping extends Component {
 			},
 		];
 
+		// Override the step fields for the smart shipping defaults.
+		if ( this.shippingSmartDefaultsEnabled ) {
+			const agreementText = pluginsToActivate.includes(
+				'woocommerce-services'
+			)
+				? __(
+						'By installing Jetpack and WooCommerce Shipping you agree to the {{link}}Terms of Service{{/link}}.',
+						'woocommerce'
+				  )
+				: __(
+						'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
+						'woocommerce'
+				  );
+			const shippingSmartDefaultsSteps = {
+				rates: {
+					label: __( 'Review your shipping options', 'woocommerce' ),
+					description: __(
+						'We recommend the following shipping options based on your location. You can manage your shipping options again at any time in WooCommerce Shipping settings.',
+						'woocommerce'
+					),
+					onClick:
+						this.state.step !== 'rates'
+							? () => {
+									this.setState( { step: 'rates' } );
+							  }
+							: undefined,
+					content: (
+						<ShippingRates
+							buttonText={ __(
+								'Save shipping options',
+								'woocommerce'
+							) }
+							shippingZones={ this.state.shippingZones }
+							onComplete={ () => {
+								const { id } = task;
+								optimisticallyCompleteTask( id );
+								invalidateResolutionForStoreSelector();
+								this.completeStep();
+							} }
+							createNotice={ createNotice }
+						/>
+					),
+				},
+				label_printing: {
+					label: __(
+						'Enable shipping label printing and discounted rates',
+						'woocommerce'
+					),
+					description: pluginsToActivate.includes(
+						'woocommerce-shipstation-integration'
+					)
+						? interpolateComponents( {
+								mixedString: __(
+									'We recommend using ShipStation to save time at the post office by printing your shipping ' +
+										'labels at home. Try ShipStation free for 30 days. {{link}}Learn more{{/link}}.',
+									'woocommerce'
+								),
+								components: {
+									link: (
+										<Link
+											href="https://woocommerce.com/products/shipstation-integration?utm_medium=product"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+						  } )
+						: __(
+								'Save time and fulfill your orders with WooCommerce Shipping. You can manage it at any time in WooCommerce Shipping Settings.',
+								'woocommerce'
+						  ),
+
+					content: (
+						<>
+							{ pluginsToActivate.includes(
+								'woocommerce-services'
+							) ? (
+								<WCSBanner />
+							) : (
+								<ShipStationBanner />
+							) }
+							<Plugins
+								onComplete={ ( plugins, response ) => {
+									createNoticesFromResponse( response );
+									recordEvent(
+										'tasklist_shipping_label_printing',
+										{
+											install: true,
+											plugins_to_activate:
+												pluginsToActivate,
+										}
+									);
+									this.completeStep();
+								} }
+								onError={ ( errors, response ) =>
+									createNoticesFromResponse( response )
+								}
+								onSkip={ () => {
+									recordEvent(
+										'tasklist_shipping_label_printing',
+										{
+											install: false,
+											plugins_to_activate:
+												pluginsToActivate,
+										}
+									);
+									getHistory().push(
+										getNewPath( {}, '/', {} )
+									);
+									onComplete();
+								} }
+								pluginSlugs={ pluginsToActivate }
+							/>
+							{ ! isJetpackConnected &&
+								pluginsToActivate.includes(
+									'woocommerce-services'
+								) && (
+									<Text
+										variant="caption"
+										className="woocommerce-task__caption"
+										size="12"
+										lineHeight="16px"
+										style={ { display: 'block' } }
+									>
+										{ interpolateComponents( {
+											mixedString: agreementText,
+											components: {
+												link: (
+													<Link
+														href={
+															'https://wordpress.com/tos/'
+														}
+														target="_blank"
+														type="external"
+													>
+														<></>
+													</Link>
+												),
+											},
+										} ) }
+									</Text>
+								) }
+						</>
+					),
+				},
+				store_location: {
+					label: __( 'Set your store location', 'woocommerce' ),
+					description: __(
+						'Add your store location to help us calculate shipping rates and the best shipping options for you. You can manage your store location again at any time in WooCommerce Settings General.',
+						'woocommerce'
+					),
+					onClick:
+						this.state.step !== 'store_location'
+							? () => {
+									this.setState( { step: 'store_location' } );
+							  }
+							: undefined,
+					buttonText: __( 'Save store location', 'woocommerce' ),
+				},
+			};
+
+			steps = steps.map( ( step ) => {
+				if ( shippingSmartDefaultsSteps.hasOwnProperty( step.key ) ) {
+					step = {
+						...step,
+						...shippingSmartDefaultsSteps[ step.key ],
+					};
+				}
+				// Empty description field if it's not the current step.
+				if ( step.key !== this.state.step ) {
+					step.description = '';
+				}
+				return step;
+			} );
+		}
 		return filter( steps, ( step ) => step.visible );
 	}
 
 	render() {
 		const { isPending, step } = this.state;
 		const { isUpdateSettingsRequesting } = this.props;
+		const steps = this.getSteps();
 
 		return (
 			<div className="woocommerce-task-shipping">
@@ -345,7 +542,7 @@ export class Shipping extends Component {
 							}
 							isVertical
 							currentStep={ step }
-							steps={ this.getSteps() }
+							steps={ steps }
 						/>
 					</CardBody>
 				</Card>
@@ -356,12 +553,10 @@ export class Shipping extends Component {
 
 const ShippingWrapper = compose(
 	withSelect( ( select ) => {
-		const { getSettings, isUpdateSettingsRequesting } = select(
-			SETTINGS_STORE_NAME
-		);
-		const { getActivePlugins, isJetpackConnected } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getSettings, isUpdateSettingsRequesting } =
+			select( SETTINGS_STORE_NAME );
+		const { getActivePlugins, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 		const { getCountry } = select( COUNTRIES_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
@@ -384,9 +579,8 @@ const ShippingWrapper = compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateAndPersistSettingsForGroup } = dispatch(
-			SETTINGS_STORE_NAME
-		);
+		const { updateAndPersistSettingsForGroup } =
+			dispatch( SETTINGS_STORE_NAME );
 		const {
 			invalidateResolutionForStoreSelector,
 			optimisticallyCompleteTask,

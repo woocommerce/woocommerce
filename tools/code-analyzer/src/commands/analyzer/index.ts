@@ -21,6 +21,8 @@ import {
 	getPatches,
 	getHookName,
 	areSchemasEqual,
+	getHookDescription,
+	getHookChangeType,
 } from '../../utils';
 import { generatePatch, generateSchemaDiff } from '../../git';
 
@@ -272,7 +274,8 @@ export default class Analyzer extends Command {
 			return null;
 		}
 
-		const updateFunctionRegex = /\+{1,2}\s*'(\d.\d.\d)' => array\(\n\+{1,2}\s*'(.*)',\n\+{1,2}\s*\),/m;
+		const updateFunctionRegex =
+			/\+{1,2}\s*'(\d.\d.\d)' => array\(\n\+{1,2}\s*'(.*)',\n\+{1,2}\s*\),/m;
 		const match = databaseUpdatePatch.match( updateFunctionRegex );
 
 		if ( ! match ) {
@@ -368,12 +371,21 @@ export default class Analyzer extends Command {
 		const matchPatches = /^a\/(.+).php/g;
 		const patches = getPatches( content, matchPatches );
 		const verRegEx = getVersionRegex( version );
-		const matchHooks = `@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
+		const matchHooks = `\(.*?)@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp( matchHooks, 'gs' );
 
 		for ( const p in patches ) {
 			const patch = patches[ p ];
-			const results = patch.match( newRegEx );
+			// Separate patches into bits beginning with a comment. If a bit does not have an action, disregard.
+			const patchWithHook = patch.split( '/**' ).find( ( s ) => {
+				return (
+					s.includes( 'apply_filters' ) || s.includes( 'do_action' )
+				);
+			} );
+			if ( ! patchWithHook ) {
+				continue;
+			}
+			const results = patchWithHook.match( newRegEx );
 			const hooksList: Map< string, string[] > = new Map<
 				string,
 				string[]
@@ -397,16 +409,31 @@ export default class Analyzer extends Command {
 				}
 
 				const name = getHookName( hookName[ 3 ] );
+
+				const description = getHookDescription( raw, name );
+
+				if ( ! description ) {
+					this.error(
+						`Hook ${ name } has no description. Please add a description.`
+					);
+				}
+
 				const kind =
 					hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
-				const CLIMessage = `\'${ name }\' introduced in ${ version }`;
+				const CLIMessage = `**${ name }** introduced in ${ version }`;
 				const GithubMessage = `\\'${ name }\\' introduced in ${ version }`;
 				const message =
 					output === 'github' ? GithubMessage : CLIMessage;
-				const title = `New ${ kind } found`;
+				const hookChangeType = getHookChangeType( raw );
+				const title = `${ hookChangeType } ${ kind } found`;
 
 				if ( ! hookName[ 2 ].startsWith( '-' ) ) {
-					hooksList.set( name, [ 'NOTICE', title, message ] );
+					hooksList.set( name, [
+						'NOTICE',
+						title,
+						message,
+						description,
+					] );
 				}
 			}
 

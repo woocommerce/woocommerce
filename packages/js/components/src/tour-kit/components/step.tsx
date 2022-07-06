@@ -21,9 +21,8 @@ const getFocusElement = (
 	}
 
 	if ( iframeSelector ) {
-		const iframeElement = document.querySelector< HTMLIFrameElement >(
-			iframeSelector
-		);
+		const iframeElement =
+			document.querySelector< HTMLIFrameElement >( iframeSelector );
 		if ( ! iframeElement ) {
 			return null;
 		}

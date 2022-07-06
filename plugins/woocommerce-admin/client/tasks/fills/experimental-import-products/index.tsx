@@ -44,14 +44,12 @@ export const Products = () => {
 		[ recordCompletionTime ]
 	);
 
-	const {
-		loadSampleProduct,
-		isLoadingSampleProducts,
-	} = useLoadSampleProducts( {
-		redirectUrlAfterSuccess: getAdminLink(
-			'edit.php?post_type=product&wc_onboarding_active_task=products'
-		),
-	} );
+	const { loadSampleProduct, isLoadingSampleProducts } =
+		useLoadSampleProducts( {
+			redirectUrlAfterSuccess: getAdminLink(
+				'edit.php?post_type=product&wc_onboarding_active_task=products'
+			),
+		} );
 
 	const productTypeListItems = useProductTypeListItems(
 		getProductTypes( {

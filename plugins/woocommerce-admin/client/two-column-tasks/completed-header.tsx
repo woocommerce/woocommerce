@@ -46,53 +46,48 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 	return storeAgeInWeeks;
 }
 
-export const TaskListCompletedHeader: React.FC< TaskListCompletedHeaderProps > = ( {
-	hideTasks,
-	keepTasks,
-	customerEffortScore,
-} ) => {
+export const TaskListCompletedHeader: React.FC<
+	TaskListCompletedHeaderProps
+> = ( { hideTasks, keepTasks, customerEffortScore } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
-	const [ hideCustomerEffortScore, setHideCustomerEffortScore ] = useState(
-		false
-	);
-	const {
-		storeAgeInWeeks,
-		cesShownForActions,
-		canShowCustomerEffortScore,
-	} = useSelect( ( select: WCDataSelector ) => {
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		);
+	const [ hideCustomerEffortScore, setHideCustomerEffortScore ] =
+		useState( false );
+	const { storeAgeInWeeks, cesShownForActions, canShowCustomerEffortScore } =
+		useSelect( ( select: WCDataSelector ) => {
+			const { getOption, hasFinishedResolution } =
+				select( OPTIONS_STORE_NAME );
 
-		if ( customerEffortScore ) {
-			const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
-			const adminInstallTimestamp: number =
-				getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-			const cesActions = getOption< string[] >(
-				SHOWN_FOR_ACTIONS_OPTION_NAME
-			);
-			const loadingOptions =
-				! hasFinishedResolution( 'getOption', [
-					SHOWN_FOR_ACTIONS_OPTION_NAME,
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
-				] );
-			return {
-				storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
-				cesShownForActions: cesActions,
-				canShowCustomerEffortScore:
-					! loadingOptions &&
-					allowTracking &&
-					! ( cesActions || [] ).includes( 'store_setup' ),
-				loading: loadingOptions,
-			};
-		}
-		return {};
-	} );
+			if ( customerEffortScore ) {
+				const allowTracking = getOption( ALLOW_TRACKING_OPTION_NAME );
+				const adminInstallTimestamp: number =
+					getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
+				const cesActions = getOption< string[] >(
+					SHOWN_FOR_ACTIONS_OPTION_NAME
+				);
+				const loadingOptions =
+					! hasFinishedResolution( 'getOption', [
+						SHOWN_FOR_ACTIONS_OPTION_NAME,
+					] ) ||
+					! hasFinishedResolution( 'getOption', [
+						ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+					] );
+				return {
+					storeAgeInWeeks: getStoreAgeInWeeks(
+						adminInstallTimestamp
+					),
+					cesShownForActions: cesActions,
+					canShowCustomerEffortScore:
+						! loadingOptions &&
+						allowTracking &&
+						! ( cesActions || [] ).includes( 'store_setup' ),
+					loading: loadingOptions,
+				};
+			}
+			return {};
+		} );
 
 	useEffect( () => {
 		if ( hasSubmittedScore ) {

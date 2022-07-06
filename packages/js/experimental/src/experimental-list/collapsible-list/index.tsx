@@ -129,10 +129,8 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	...listProps
 } ): JSX.Element => {
 	const [ isCollapsed, setCollapsed ] = useState( collapsed );
-	const [
-		isTransitionComponentCollapsed,
-		setTransitionComponentCollapsed,
-	] = useState( collapsed );
+	const [ isTransitionComponentCollapsed, setTransitionComponentCollapsed ] =
+		useState( collapsed );
 	const [ footerLabels, setFooterLabels ] = useState( {
 		collapse: collapseLabel,
 		expand: expandLabel,
@@ -277,7 +275,8 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 													classNames="woocommerce-list__item"
 												>
 													{ cloneElement( child, {
-														animation: animationProp,
+														animation:
+															animationProp,
 														...remainingProps,
 													} ) }
 												</CSSTransition>
