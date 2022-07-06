@@ -84,7 +84,6 @@ class BatchProcessingController {
 			$this->schedule_next_batch( $batch_process );
 		} else {
 			$this->mark_pending_process_complete( $batch_process );
-			$batch_processor->mark_process_complete();
 		}
 	}
 
