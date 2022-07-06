@@ -6,7 +6,7 @@ const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
 let shippingZoneId;
 
-test.describe( 'Add New Simple Product Page', () => {
+test.describe.only( 'Add New Simple Product Page', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -68,8 +68,8 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.click( '#_virtual' );
 		await page.fill( '#_regular_price', productPrice );
 		await page.click( '#publish' );
-		await expect( page.locator( 'div.notice-success' ) ).toHaveText(
-			'Product published. View ProductDismiss this notice.'
+		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
+			'Product published.'
 		);
 	} );
 
@@ -80,7 +80,7 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.click( `h2:has-text("${ virtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toHaveText(
+		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			virtualProductName
 		);
 		await expect(
@@ -94,8 +94,8 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await page.click( '#publish' );
-		await expect( page.locator( 'div.notice-success' ) ).toHaveText(
-			'Product published. View ProductDismiss this notice.'
+		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
+			'Product published.'
 		);
 	} );
 
@@ -106,7 +106,7 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.click( `h2:has-text("${ nonVirtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toHaveText(
+		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			nonVirtualProductName
 		);
 		await expect(
