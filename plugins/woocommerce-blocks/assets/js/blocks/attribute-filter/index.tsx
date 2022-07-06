@@ -66,6 +66,7 @@ registerBlockType( metadata, {
 						headingLevel: 3,
 						displayStyle: instance?.raw?.display_type || 'list',
 						showFilterButton: false,
+						selectType: instance?.raw?.select_type || 'multiple',
 						isPreview: false,
 					} ),
 			},
@@ -83,6 +84,7 @@ registerBlockType( metadata, {
 			headingLevel,
 			displayStyle,
 			showFilterButton,
+			selectType,
 		} = attributes;
 		const data: Record< string, unknown > = {
 			'data-attribute-id': attributeId,
@@ -96,6 +98,9 @@ registerBlockType( metadata, {
 		}
 		if ( showFilterButton ) {
 			data[ 'data-show-filter-button' ] = showFilterButton;
+		}
+		if ( selectType === 'single' ) {
+			data[ 'data-select-type' ] = selectType;
 		}
 		return (
 			<div

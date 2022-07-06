@@ -366,9 +366,7 @@ const AttributeFilterBlock = ( {
 		updateCheckedFilters,
 	] );
 
-	const multiple =
-		blockAttributes.displayStyle !== 'dropdown' ||
-		blockAttributes.queryType === 'or';
+	const multiple = blockAttributes.selectType !== 'single';
 
 	/**
 	 * When a checkbox in the list changes, update state.
