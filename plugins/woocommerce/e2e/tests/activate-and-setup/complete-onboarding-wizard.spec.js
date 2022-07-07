@@ -237,7 +237,9 @@ test.describe(
 			await page.click( 'button >> text=Continue' );
 		} );
 
-		test( 'should display the choose payments task, and not the WC Pay task', async ( {
+		// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
+		// changes when a task is completed.
+		test.skip( 'should display the choose payments task, and not the WC Pay task', async ( {
 			page,
 		} ) => {
 			// If payment has previously been setup, the setup checklist will show something different
