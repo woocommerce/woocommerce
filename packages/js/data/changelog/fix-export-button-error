@@ -1,4 +1,4 @@
-Significance: fix
-Type: minor
+Significance: minor
+Type: fix
 
 Fix 'Cannot read properties of undefined' error when clicking Export button on Analytic pages.
