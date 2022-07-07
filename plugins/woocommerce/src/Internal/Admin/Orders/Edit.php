@@ -120,7 +120,7 @@ class Edit {
 		?>
 		<div class="wrap">
 		<h1 class="wp-heading-inline">
-			<?php echo esc_html( 'Edit Order' ); ?>
+			<?php echo esc_html( 'Edit order' ); ?>
 		</h1>
 		<?php
 		echo ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-orders&action=new' ) ) . '" class="page-title-action"> Add order </a>';
