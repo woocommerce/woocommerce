@@ -294,7 +294,7 @@ test.describe( 'Store owner can go through setup Task List', () => {
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'text="Set up shipping"' );
+		await page.click( ':nth-match(li[role=button], 5)' );
 
 		// check if this is the first time (or if the test is being retried)
 		const currPage = page.url();
