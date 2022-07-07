@@ -258,10 +258,10 @@ test.describe(
 			} );
 			// Start test
 			await expect(
-				page.locator( ':nth-match(li[role=button], 3)' )
+				page.locator( '.woocommerce-task-list__item-title, 3)' )
 			).toContainText( 'Set up payments' );
 			await expect(
-				page.locator( ':nth-match(li[role=button], 3)' )
+				page.locator( '.woocommerce-task-list__item-title, 3)' )
 			).not.toContainText( 'Set up WooCommerce Payments' );
 		} );
 	}
@@ -296,7 +296,7 @@ test.describe( 'Store owner can go through setup Task List', () => {
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		await page.click( ':nth-match(li[role=button], 5)' );
+		await page.click( ':nth-match(.woocommerce-task-list__item-title, 5)' );
 
 		// check if this is the first time (or if the test is being retried)
 		const currPage = page.url();
