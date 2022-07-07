@@ -240,28 +240,27 @@ test.describe(
 		test( 'should display the choose payments task, and not the WC Pay task', async ( {
 			page,
 		} ) => {
-			// Setup
+			// If payment has previously been setup, the setup checklist will show something different
+			// This step resets it
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=checkout'
+			);
+			// Ensure that all payment methods are disabled
+			await expect(
+				page.locator( '.woocommerce-input-toggle--disabled' )
+			).toHaveCount( 3 );
+			// Checklist shows when completing setup wizard
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
 			);
 			await page.click( 'button >> text=Continue with my active theme' );
 			// Start test
-			// If the test is being retried, the modal may have already been dismissed
-			await page.locator( '#adminmenumain' );
-			const modalHeading = await page.$(
-				'h2.woocommerce__welcome-modal__page-content__header'
-			);
-			if ( modalHeading ) {
-				await expect( modalHeading ).toContain(
-					'Welcome to your WooCommerce store’s online HQ!'
-				);
-				await page.click( '[aria-label="Close dialog"]' );
-			}
-			const listItem = await page.textContent(
-				':nth-match(li[role=button], 3)'
-			);
-			expect( listItem ).toContain( 'Set up payments' );
-			expect( listItem ).not.toContain( 'Set up WooCommerce Payments' );
+			await expect(
+				page.locator( ':nth-match(li[role=button], 3)' )
+			).toContainText( 'Set up payments' );
+			await expect(
+				page.locator( ':nth-match(li[role=button], 3)' )
+			).not.toContainText( 'Set up WooCommerce Payments' );
 		} );
 	}
 );
