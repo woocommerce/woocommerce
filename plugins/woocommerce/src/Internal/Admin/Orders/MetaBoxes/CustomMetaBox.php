@@ -39,7 +39,7 @@ class CustomMetaBox {
 			$metadata_to_list[] = array(
 				'meta_id'    => $data['id'],
 				'meta_key'   => $data['key'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- False positive, not a meta query.
-				'meta_value' => $data['value'],
+				'meta_value' => $data['value'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- False positive, not a meta query.
 			);
 		}
 		$this->render_custom_meta_form( $metadata_to_list, $order );
