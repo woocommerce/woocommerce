@@ -115,7 +115,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",

@@ -51,7 +51,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "node ./node_modules/require-turbo && tsc --build",
 		"start": "tsc --build --watch",

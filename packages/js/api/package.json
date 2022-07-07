@@ -26,7 +26,7 @@
 	],
 	"sideEffects": false,
 	"scripts": {
-		"postinstall": "composer install",
+		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
