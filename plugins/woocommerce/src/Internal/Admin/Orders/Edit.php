@@ -34,12 +34,12 @@ class Edit {
 	private $order;
 
 	/**
-	 * Hooks all meta-boxes for order edit page.
+	 * Hooks all meta-boxes for order edit page. This is static since this may be called by post edit form rendering.
 	 *
 	 * @param string $screen_id Screen ID.
 	 * @param string $title Title of the page.
 	 */
-	public function add_order_meta_boxes( string $screen_id, string $title ) {
+	public static function add_order_meta_boxes( string $screen_id, string $title ) {
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-data', sprintf( __( '%s data', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Data::output', $screen_id, 'normal', 'high' );
 		add_meta_box( 'woocommerce-order-items', __( 'Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $screen_id, 'normal', 'high' );
@@ -62,9 +62,11 @@ class Edit {
 
 	/**
 	 * Setup hooks, actions and variables needed to render order edit page.
+	 *
+	 * @param \WC_Order $order Order object.
 	 */
-	private function setup() {
-		$this->initialize_order_object();
+	public function setup( \WC_Order $order ) {
+		$this->order    = $order;
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
@@ -80,45 +82,6 @@ class Edit {
 		 */
 		do_action( 'add_meta_boxes', wc_get_page_screen_id( 'shop-order' ), $this->order );
 		$this->enqueue_scripts();
-	}
-
-	/**
-	 * Setup order object to be used in metaboxes.
-	 *
-	 * @return void
-	 */
-	private function initialize_order_object() {
-		global $theorder;
-		$action = sanitize_text_field( wp_unslash( isset( $_GET['action'] ) ? $_GET['action'] : '' ) );
-		switch ( $action ) {
-			case 'edit':
-				$this->order = wc_get_order( absint( isset( $_GET['id'] ) ? $_GET['id'] : 0 ) );
-				$this->verify_edit_object_and_permission();
-				break;
-			case 'new':
-				$this->order = new \WC_Order();
-				if ( ! current_user_can( 'publish_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
-					wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
-				}
-				break;
-			default:
-				wp_redirect( admin_url( 'admin.php?page=wc-orders' ) );
-				exit;
-		}
-		$theorder = $this->order;
-	}
-
-	/**
-	 * Verify that the order object is valid and user has permission to edit it.
-	 */
-	private function verify_edit_object_and_permission() {
-		if ( ! isset( $this->order ) || ! $this->order ) {
-			wp_die( esc_html__( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
-		}
-
-		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
-		}
 	}
 
 	/**
@@ -142,7 +105,6 @@ class Edit {
 	 * Render order edit page.
 	 */
 	public function display() {
-		$this->setup();
 		$this->render_wrapper_start();
 		$this->render_meta_boxes();
 		$this->render_wrapper_end();

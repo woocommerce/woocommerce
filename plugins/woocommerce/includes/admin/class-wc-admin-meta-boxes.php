@@ -38,17 +38,9 @@ class WC_Admin_Meta_Boxes {
 	public static $meta_box_errors = array();
 
 	/**
-	 * Instance of Admin/Orders/Edit class. Used to add meta boxes for order edit.
-	 *
-	 * @var Edit
-	 */
-	private $order_edit_screen;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->order_edit_screen = new Edit();
 		add_action( 'add_meta_boxes', array( $this, 'remove_meta_boxes' ), 10 );
 		add_action( 'add_meta_boxes', array( $this, 'rename_meta_boxes' ), 20 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 30 );
@@ -157,7 +149,7 @@ class WC_Admin_Meta_Boxes {
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			$order_type_object = get_post_type_object( $type );
-			$this->order_edit_screen->add_order_meta_boxes( $type, $order_type_object->labels->singular_name );
+			Automattic\WooCommerce\Internal\Admin\Orders\Edit::add_order_meta_boxes( $type, $order_type_object->labels->singular_name );
 		}
 
 		// Coupons.

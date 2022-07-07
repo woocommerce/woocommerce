@@ -6,8 +6,6 @@
  * @version 2.5.0
  */
 
-use Automattic\WooCommerce\Internal\Admin\Orders\Edit;
-use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
@@ -21,12 +19,6 @@ if ( class_exists( 'WC_Admin_Menus', false ) ) {
  * WC_Admin_Menus Class.
  */
 class WC_Admin_Menus {
-	/**
-	 * @var Custom_Orders_List_Table
-	 */
-	private $orders_list_table;
-
-	private $order_edit_form;
 
 	/**
 	 * Hook in tabs.
@@ -323,47 +315,6 @@ class WC_Admin_Menus {
 			$this->orders_page_controller = new Custom_Orders_PageController();
 			$this->orders_page_controller->setup();
 		}
-	}
-
-	/**
-	 * Set-up the orders admin list table.
-	 *
-	 * @return void
-	 */
-	public function orders_table(): void {
-		$this->orders_list_table = new Custom_Orders_List_Table();
-		$this->orders_list_table->setup();
-	}
-
-	/**
-	 * Render the orders page.
-	 */
-	public function orders_page(): void {
-		$action = sanitize_text_field( wp_unslash( isset( $_GET['action'] ) ? $_GET['action'] : '' ) );
-		switch ( $action ) {
-			case 'edit':
-			case 'new':
-				$this->edit_order_page();
-				break;
-			default:
-				$this->list_order_page();
-		}
-	}
-
-	/**
-	 * Render the order's admin list table.
-	 */
-	private function list_order_page() {
-		$this->orders_list_table->prepare_items();
-		$this->orders_list_table->display();
-	}
-
-	/**
-	 * Render the order's admin edit page.
-	 */
-	public function edit_order_page() {
-		$this->order_edit_form = new Edit();
-		$this->order_edit_form->display();
 	}
 
 	/**

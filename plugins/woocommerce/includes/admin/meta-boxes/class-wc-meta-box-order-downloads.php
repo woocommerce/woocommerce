@@ -18,13 +18,13 @@ class WC_Meta_Box_Order_Downloads {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WC_Order|WP_Post $post_or_order Post or order object.
+	 * @param WC_Order|WP_Post $post Post or order object.
 	 */
-	public static function output( $post_or_order ) {
-		if ( method_exists( $post_or_order, 'get_id' ) ) {
-			$order_id = $post_or_order->get_id();
+	public static function output( $post ) {
+		if ( method_exists( $post, 'get_id' ) ) {
+			$order_id = $post->get_id();
 		} else {
-			$order_id = $post_or_order->ID;
+			$order_id = $post->ID;
 		}
 		?>
 		<div class="order_download_permissions wc-metaboxes-wrapper">
