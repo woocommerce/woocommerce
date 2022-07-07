@@ -52,9 +52,9 @@ function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.Fu
  * Code in the `includes` directory should use the container to get instances of classes in the `src` directory.
  *
  * @since  4.4.0
- * @return \Psr\Container\ContainerInterface The WooCommerce PSR11 container.
+ * @return Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface The WooCommerce PSR11 container.
  */
-function wc_get_container() : \Psr\Container\ContainerInterface {
+function wc_get_container() : Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface {
 	return $GLOBALS['wc_container'];
 }
 

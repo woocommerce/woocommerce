@@ -17,12 +17,15 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Produc
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
+use Automattic\WooCommerce\Vendor\Psr\Container\ContainerExceptionInterface;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
  *
  * Classes in the `src` directory should specify dependencies from that directory via an 'init' method having arguments
- * with type hints. If an instance of the container itself is needed, the type hint to use is \Psr\Container\ContainerInterface.
+ * with type hints. If an instance of the container itself is needed, the type hint to use is
+ * Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface.
  *
  * Classes in the `src` directory should interact with anything outside (especially code in the `includes` directory
  * and WordPress functions) by using the classes in the `Proxies` directory. The exception is idempotent
@@ -35,7 +38,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsC
  * and those should go in the `src\Internal\DependencyManagement\ServiceProviders` folder unless there's a good reason
  * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
  */
-final class Container implements \Psr\Container\ContainerInterface {
+final class Container implements ContainerInterface {
 	/**
 	 * The list of service provider classes to register.
 	 *
@@ -71,7 +74,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		// Add ourselves as the shared instance of ContainerInterface,
 		// register everything else using service providers.
 
-		$this->container->share( \Psr\Container\ContainerInterface::class, $this );
+		$this->container->share( ContainerInterface::class, $this );
 
 		foreach ( $this->service_providers as $service_provider_class ) {
 			$this->container->addServiceProvider( $service_provider_class );
@@ -84,7 +87,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 * @param string $id Identifier of the entry to look for.
 	 *
 	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
+	 * @throws ContainerExceptionInterface Error while retrieving the entry.
 	 *
 	 * @return mixed Entry.
 	 */

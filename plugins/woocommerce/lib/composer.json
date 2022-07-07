@@ -5,9 +5,7 @@
 	"minimum-stability": "dev",
 	"require": {
 		"php": ">=7.0",
-		"psr/container": "^1.0"
-	},
-	"require-dev": {
+		"psr/container": "^1.0", 
 		"league/container": "3.3.5"
 	},
 	"config": {
@@ -28,9 +26,7 @@
 			"dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
 			"dep_directory": "/packages/",
 			"packages": [
-				"league/container"
-			],
-			"excluded_packages": [
+				"league/container",
 				"psr/container"
 			],
 			"classmap_directory": "/classes/",

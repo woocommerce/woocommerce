@@ -34,9 +34,7 @@ class ExtendedContainer extends BaseContainer {
 	 *
 	 * @var string[]
 	 */
-	private $registration_whitelist = array(
-		\Psr\Container\ContainerInterface::class,
-	);
+	private $registration_whitelist = array();
 
 	/**
 	 * Register a class in the container.

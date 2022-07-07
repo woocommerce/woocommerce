@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+
+Modified a dependency (Psr\Container) by wrapping it inside our own namespace, to reduce risk of conflict with other plugins.
+
