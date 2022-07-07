@@ -253,15 +253,18 @@ test.describe(
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
 			);
-			await page.click( 'button >> text=Continue with my active theme', {
-				waitForLoadState: 'networkidle',
-			} );
+			await page.click( 'button >> text=Continue with my active theme' );
 			// Start test
+			await page.waitForLoadState( 'networkidle' );
 			await expect(
-				page.locator( '.woocommerce-task-list__item-title, 3)' )
+				page.locator(
+					':nth-match(.woocommerce-task-list__item-title, 3)'
+				)
 			).toContainText( 'Set up payments' );
 			await expect(
-				page.locator( '.woocommerce-task-list__item-title, 3)' )
+				page.locator(
+					':nth-match(.woocommerce-task-list__item-title, 3)'
+				)
 			).not.toContainText( 'Set up WooCommerce Payments' );
 		} );
 	}
