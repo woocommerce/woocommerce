@@ -63,9 +63,10 @@ class CustomMetaBox {
 		<p>
 			<?php
 			printf(
-			/* translators: %s: Documentation URL. */
-				esc_html( __( 'Custom fields can be used to add extra metadata to an order that you can <a href="%s">use in your theme</a>.', 'woocommerce' ) ),
-				esc_attr( __( 'https://wordpress.org/support/article/custom-fields/', 'woocommerce' ) )
+				/* translators: 1: opening documentation tag 2: closing documentation tag. */
+				esc_html( __( 'Custom fields can be used to add extra metadata to an order that you can %1$suse in your theme%2$s.', 'woocommerce' ) ),
+				'<a href="' . esc_attr__( 'https://wordpress.org/support/article/custom-fields/', 'woocommerce' ) . '">',
+				'</a>'
 			);
 			?>
 		</p>
