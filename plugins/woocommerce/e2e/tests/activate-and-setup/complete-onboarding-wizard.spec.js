@@ -253,7 +253,9 @@ test.describe(
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
 			);
-			await page.click( 'button >> text=Continue with my active theme' );
+			await page.click( 'button >> text=Continue with my active theme', {
+				waitForLoadState: 'networkidle',
+			} );
 			// Start test
 			await expect(
 				page.locator( ':nth-match(li[role=button], 3)' )
