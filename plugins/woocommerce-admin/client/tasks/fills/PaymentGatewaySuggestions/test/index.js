@@ -143,6 +143,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
+		expect(
+			screen.getByText( 'Choose a payment provider' )
+		).toBeInTheDocument();
+
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title > span:first-child'
 		);
@@ -241,6 +245,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 				query={ query }
 			/>
 		);
+
+		expect(
+			screen.getByText( 'Additional payment options' )
+		).toBeInTheDocument();
 
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
