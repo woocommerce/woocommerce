@@ -27,3 +27,9 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Run changelog validation
+        run: pnpm changelog --filter=* -- validate
