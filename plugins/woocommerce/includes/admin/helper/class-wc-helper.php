@@ -704,7 +704,7 @@ class WC_Helper {
 	 * Initiate a new OAuth connection.
 	 */
 	private static function _helper_auth_connect() {
-		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( empty( $_GET['wc-is-cli'] ) && ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			self::log( 'Could not verify nonce in _helper_auth_connect' );
 			wp_die( 'Could not verify nonce' );
 		}

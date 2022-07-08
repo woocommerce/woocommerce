@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add support for connecting a site to WooCommerce.com via CLI.
