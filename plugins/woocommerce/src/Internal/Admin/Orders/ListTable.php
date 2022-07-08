@@ -170,6 +170,7 @@ class ListTable extends WP_List_Table {
 		);
 
 		$this->set_order_args();
+		$this->set_date_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -226,6 +227,27 @@ class ListTable extends WP_List_Table {
 		}
 
 		$this->order_query_args['order']   = $direction;
+	}
+
+	/**
+	 * Implements date (month-based) filtering.
+	 */
+	private function set_date_args() {
+		$year_month = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
+
+		if ( empty( $year_month ) || ! preg_match( '/^[0-9]{6}$/', $year_month ) ) {
+			return;
+		}
+
+		$year  = (int) substr( $year_month, 0, 4 );
+		$month = (int) substr( $year_month, 4, 2 );
+
+		if ( $month < 0 || $month > 12 ) {
+			return;
+		}
+
+		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
+		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
 	}
 
 	/**
