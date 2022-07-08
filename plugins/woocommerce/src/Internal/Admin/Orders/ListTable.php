@@ -171,6 +171,7 @@ class ListTable extends WP_List_Table {
 
 		$this->set_order_args();
 		$this->set_date_args();
+		$this->set_customer_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -248,6 +249,20 @@ class ListTable extends WP_List_Table {
 
 		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
 		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
+	}
+
+	/**
+	 * Implements filtering of orders by customer.
+	 */
+	private function set_customer_args() {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$customer = (int) wp_unslash( $_GET['_customer_user'] ?? '' );
+
+		if ( $customer < 1 ) {
+			return;
+		}
+
+		$this->order_query_args['customer'] = $customer;
 	}
 
 	/**
