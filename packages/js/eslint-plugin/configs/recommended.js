@@ -19,7 +19,7 @@ module.exports = {
 		'@wordpress/i18n-text-domain': [
 			'error',
 			{
-				allowedTextDomain: 'woocommmerce',
+				allowedTextDomain: 'woocommerce',
 			},
 		],
 		'@wordpress/valid-sprintf': 'warn',
