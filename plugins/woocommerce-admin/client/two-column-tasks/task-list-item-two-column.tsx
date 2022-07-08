@@ -46,7 +46,7 @@ export const TaskListItemTwoColumn: React.FC< TaskListItemProps > = ( {
 
 	const onDismissTask = ( onDismiss?: () => void ) => {
 		dismissTask( taskId );
-		createNotice( 'success', __( 'Task dismissed' ), {
+		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
 			actions: [
 				{
 					label: __( 'Undo', 'woocommerce' ),

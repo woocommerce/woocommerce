@@ -81,7 +81,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 							onManage( slug );
 						} }
 					>
-						{ __( 'Manage', 'woocommmerce-admin' ) }
+						{ __( 'Manage', 'woocommerce' ) }
 					</Button>
 				) }
 				{ isInstalled && ! isActive && (
@@ -91,7 +91,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>
-						{ __( 'Activate', 'woocommmerce-admin' ) }
+						{ __( 'Activate', 'woocommerce' ) }
 					</Button>
 				) }
 				{ ! isInstalled && (
@@ -101,7 +101,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>
-						{ __( 'Get started', 'woocommmerce-admin' ) }
+						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
 				) }
 			</div>
