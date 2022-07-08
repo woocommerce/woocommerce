@@ -6,11 +6,8 @@ import type {
 	PaymentMethods,
 	ExpressPaymentMethods,
 } from '@woocommerce/type-defs/payments';
-
-/**
- * Internal dependencies
- */
-import { usePaymentMethodDataContext } from '../../providers/cart-checkout/payment-methods';
+import { useSelect } from '@wordpress/data';
+import { PAYMENT_METHOD_DATA_STORE_KEY } from '@woocommerce/block-data';
 
 interface PaymentMethodState {
 	paymentMethods: PaymentMethods;
@@ -25,15 +22,26 @@ const usePaymentMethodState = (
 	express = false
 ): PaymentMethodState | ExpressPaymentMethodState => {
 	const {
-		paymentMethods,
-		expressPaymentMethods,
 		paymentMethodsInitialized,
 		expressPaymentMethodsInitialized,
-	} = usePaymentMethodDataContext();
+		availablePaymentMethods,
+		availableExpressPaymentMethods,
+	} = useSelect( ( select ) => {
+		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
 
-	const currentPaymentMethods = useShallowEqual( paymentMethods );
+		return {
+			paymentMethodsInitialized: store.paymentMethodsInitialized(),
+			expressPaymentMethodsInitialized:
+				store.expressPaymentMethodsInitialized(),
+			availablePaymentMethods: store.getAvailablePaymentMethods(),
+			availableExpressPaymentMethods:
+				store.getAvailableExpressPaymentMethods(),
+		};
+	} );
+
+	const currentPaymentMethods = useShallowEqual( availablePaymentMethods );
 	const currentExpressPaymentMethods = useShallowEqual(
-		expressPaymentMethods
+		availableExpressPaymentMethods
 	);
 
 	return {

@@ -354,7 +354,7 @@ class Checkout extends AbstractBlock {
 	}
 
 	/**
-	 * Get customer payment methods for use in checkout.
+	 * Get saved customer payment methods for use in checkout.
 	 */
 	protected function hydrate_customer_payment_methods() {
 		if ( ! is_user_logged_in() || $this->asset_data_registry->exists( 'customerPaymentMethods' ) ) {

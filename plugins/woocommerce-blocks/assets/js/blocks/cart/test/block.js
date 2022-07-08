@@ -9,7 +9,7 @@ import { default as fetchMock } from 'jest-fetch-mock';
 /**
  * Internal dependencies
  */
-import { defaultCartState } from '../../../data/default-states';
+import { defaultCartState } from '../../../data/cart/default-state';
 import { allSettings } from '../../../settings/shared/settings-init';
 
 import Cart from '../block';

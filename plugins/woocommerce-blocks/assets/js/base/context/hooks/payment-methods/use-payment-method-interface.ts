@@ -10,8 +10,11 @@ import { getSetting } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import type { PaymentMethodInterface } from '@woocommerce/types';
-import { useSelect } from '@wordpress/data';
-import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	CHECKOUT_STORE_KEY,
+	PAYMENT_METHOD_DATA_STORE_KEY,
+} from '@woocommerce/block-data';
 import { ValidationInputError } from '@woocommerce/base-components/validation-input-error';
 
 /**
@@ -19,7 +22,7 @@ import { ValidationInputError } from '@woocommerce/base-components/validation-in
  */
 import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
-import { useEmitResponse } from '../use-emit-response';
+import { noticeContexts, responseTypes } from '../../event-emit';
 import { useCheckoutEventsContext } from '../../providers/cart-checkout/checkout-events';
 import { usePaymentMethodDataContext } from '../../providers/cart-checkout/payment-methods';
 import { useShippingDataContext } from '../../providers/cart-checkout/shipping';
@@ -38,6 +41,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		onCheckoutAfterProcessingWithError,
 		onSubmit,
 	} = useCheckoutEventsContext();
+
 	const { isCalculating, isComplete, isIdle, isProcessing, customerId } =
 		useSelect( ( select ) => {
 			const store = select( CHECKOUT_STORE_KEY );
@@ -49,14 +53,23 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 				isCalculating: store.isCalculating(),
 			};
 		} );
+	const { currentStatus, activePaymentMethod, shouldSavePayment } = useSelect(
+		( select ) => {
+			const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
 
-	const {
-		currentStatus,
-		activePaymentMethod,
-		onPaymentProcessing,
-		setExpressPaymentError,
-		shouldSavePayment,
-	} = usePaymentMethodDataContext();
+			return {
+				currentStatus: store.getCurrentStatus(),
+				activePaymentMethod: store.getActivePaymentMethod(),
+				shouldSavePayment: store.getShouldSavePaymentMethod(),
+			};
+		}
+	);
+
+	const { setExpressPaymentError } = useDispatch(
+		PAYMENT_METHOD_DATA_STORE_KEY
+	);
+
+	const { onPaymentProcessing } = usePaymentMethodDataContext();
 	const {
 		shippingErrorStatus,
 		shippingErrorTypes,
@@ -77,7 +90,6 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		useCustomerDataContext();
 	const { cartItems, cartFees, cartTotals, extensions } = useStoreCart();
 	const { appliedCoupons } = useStoreCartCoupons();
-	const { noticeContexts, responseTypes } = useEmitResponse();
 	const currentCartTotals = useRef(
 		prepareTotalItems( cartTotals, needsShipping )
 	);

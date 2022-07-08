@@ -10,20 +10,18 @@ import type { createErrorNotice as originalCreateErrorNotice } from '@wordpress/
 /**
  * Internal dependencies
  */
-import { useEmitResponse } from '../../base/context/hooks/use-emit-response';
+import {
+	isErrorResponse,
+	isFailResponse,
+	isSuccessResponse,
+	shouldRetry,
+} from '../../base/context/event-emit';
 import {
 	CheckoutAndPaymentNotices,
 	CheckoutAfterProcessingWithErrorEventData,
 } from './types';
 import { DispatchFromMap } from '../mapped-types';
 import * as actions from './actions';
-
-const { isErrorResponse, isFailResponse, isSuccessResponse, shouldRetry } =
-	useEmitResponse(); // eslint-disable-line react-hooks/rules-of-hooks
-
-// TODO: `useEmitResponse` is not a react hook, it just exposes some functions as
-// properties of an object. Refactor this to not be a hook, we could simply import
-// those functions where needed
 
 /**
  * Based on the given observers, create Error Notices where necessary

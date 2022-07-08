@@ -19,7 +19,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import PaymentMethods from '../payment-methods';
-import { defaultCartState } from '../../../../data/default-states';
+import { defaultCartState } from '../../../../data/cart/default-state';
 
 jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
 	return (
