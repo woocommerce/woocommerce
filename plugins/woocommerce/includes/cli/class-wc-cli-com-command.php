@@ -33,7 +33,6 @@ class WC_CLI_COM_Command {
 	 *
 	 * @param  array $args WP-CLI positional arguments.
 	 * @param  array $assoc_args WP-CLI associative arguments.
-	 *
 	 */
 	public static function list_extensions( array $args, array $assoc_args ) {
 	}
@@ -56,7 +55,6 @@ class WC_CLI_COM_Command {
 	 *
 	 * @param  array $args WP-CLI positional arguments.
 	 * @param  array $assoc_args WP-CLI associative arguments.
-	 *
 	 */
 	public static function install_extension( array $args, array $assoc_args ) {
 	}
