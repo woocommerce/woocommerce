@@ -87,8 +87,8 @@ class Homescreen {
 		}
 
 		$user_skipped_obw = $settings['onboarding']['profile']['skipped'] ?? false;
-		$store_address = $settings['preloadSettings']['general']['woocommerce_store_address'] ?? '';
-		$product_types = $settings['onboarding']['profile']['product_types'] ?? array();
+		$store_address    = $settings['preloadSettings']['general']['woocommerce_store_address'] ?? '';
+		$product_types    = $settings['onboarding']['profile']['product_types'] ?? array();
 
 		// If user skipped the obw or has not completed the store_details
 		// then we assume the user is going to sell physical products.
@@ -116,6 +116,8 @@ class Homescreen {
 
 		if (
 			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_connected )
+			||
+			( 'US' === $country_code && $is_jetpack_installed )
 			||
 			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
 			||
