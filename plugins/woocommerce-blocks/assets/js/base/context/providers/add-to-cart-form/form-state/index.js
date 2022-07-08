@@ -30,7 +30,7 @@ import {
 	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
-import { useEmitResponse } from '../../../hooks/use-emit-response';
+import { isErrorResponse, isFailResponse } from '../../../event-emit';
 import { removeNoticesByStatus } from '../../../../../utils/notices';
 
 /**
@@ -102,11 +102,6 @@ export const AddToCartFormStateContextProvider = ( {
 	const currentObservers = useShallowEqual( observers );
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
-	const {
-		isSuccessResponse,
-		isErrorResponse,
-		isFailResponse,
-	} = useEmitResponse();
 
 	/**
 	 * @type {AddToCartFormEventRegistration}
@@ -285,9 +280,6 @@ export const AddToCartFormStateContextProvider = ( {
 		addToCartFormState.processingResponse,
 		dispatchActions,
 		createErrorNotice,
-		isErrorResponse,
-		isFailResponse,
-		isSuccessResponse,
 		currentObservers,
 		product?.id,
 	] );

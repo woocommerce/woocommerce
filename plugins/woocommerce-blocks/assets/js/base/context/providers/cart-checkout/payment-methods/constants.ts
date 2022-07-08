@@ -1,10 +1,7 @@
 /**
  * Internal dependencies
  */
-import type {
-	PaymentMethodDataContextType,
-	PaymentMethodDataContextState,
-} from './types';
+import type { PaymentMethodDataContextType } from '../../../../../data/payment-methods/types';
 
 export enum STATUS {
 	PRISTINE = 'pristine',
@@ -23,56 +20,7 @@ export enum ACTION {
 	SET_ACTIVE_PAYMENT_METHOD = 'set_active_payment_method',
 }
 
-// Note - if fields are added/shape is changed, you may want to update PRISTINE reducer clause to preserve your new field.
-export const DEFAULT_PAYMENT_DATA_CONTEXT_STATE: PaymentMethodDataContextState =
-	{
-		currentStatus: STATUS.PRISTINE,
-		shouldSavePaymentMethod: false,
-		activePaymentMethod: '',
-		paymentMethodData: {
-			payment_method: '',
-		},
-		errorMessage: '',
-		paymentMethods: {},
-		expressPaymentMethods: {},
-	};
-
 export const DEFAULT_PAYMENT_METHOD_DATA: PaymentMethodDataContextType = {
-	setPaymentStatus: () => ( {
-		pristine: () => void null,
-		started: () => void null,
-		processing: () => void null,
-		completed: () => void null,
-		error: ( errorMessage: string ) => void errorMessage,
-		failed: ( errorMessage, paymentMethodData ) =>
-			void [ errorMessage, paymentMethodData ],
-		success: ( paymentMethodData, billingAddress ) =>
-			void [ paymentMethodData, billingAddress ],
-	} ),
-	currentStatus: {
-		isPristine: true,
-		isStarted: false,
-		isProcessing: false,
-		isFinished: false,
-		hasError: false,
-		hasFailed: false,
-		isSuccessful: false,
-		isDoingExpressPayment: false,
-	},
-	paymentStatuses: STATUS,
-	paymentMethodData: {},
-	errorMessage: '',
-	activePaymentMethod: '',
-	activeSavedToken: '',
-	setActivePaymentMethod: () => void null,
-	customerPaymentMethods: {},
-	paymentMethods: {},
-	expressPaymentMethods: {},
-	paymentMethodsInitialized: false,
-	expressPaymentMethodsInitialized: false,
+	savedPaymentMethods: {},
 	onPaymentProcessing: () => () => () => void null,
-	setExpressPaymentError: () => void null,
-	isExpressPaymentMethodActive: false,
-	setShouldSavePayment: () => void null,
-	shouldSavePayment: false,
 };

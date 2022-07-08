@@ -25,7 +25,7 @@ import {
 	CheckoutExpressPayment,
 	SavedPaymentMethodOptions,
 } from '../../../../../../blocks/cart-checkout-shared/payment-methods';
-import { defaultCartState } from '../../../../../../data/default-states';
+import { defaultCartState } from '../../../../../../data/cart/default-state';
 
 jest.mock( '@woocommerce/settings', () => {
 	const originalModule = jest.requireActual( '@woocommerce/settings' );

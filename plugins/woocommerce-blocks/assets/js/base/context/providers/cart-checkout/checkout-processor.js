@@ -17,8 +17,13 @@ import {
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	CHECKOUT_STORE_KEY,
+	PAYMENT_METHOD_DATA_STORE_KEY,
 	VALIDATION_STORE_KEY,
 } from '@woocommerce/block-data';
+import {
+	getPaymentMethods,
+	getExpressPaymentMethods,
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -27,7 +32,6 @@ import { preparePaymentData, processCheckoutResponseHeaders } from './utils';
 import { useCheckoutEventsContext } from './checkout-events';
 import { useShippingDataContext } from './shipping';
 import { useCustomerDataContext } from './customer';
-import { usePaymentMethodDataContext } from './payment-methods';
 import { useStoreCart } from '../../hooks/cart/use-store-cart';
 import { useStoreNoticesContext } from '../store-notices';
 
@@ -67,17 +71,29 @@ const CheckoutProcessor = () => {
 	const { shippingErrorStatus } = useShippingDataContext();
 	const { billingAddress, shippingAddress } = useCustomerDataContext();
 	const { cartNeedsPayment, cartNeedsShipping, receiveCart } = useStoreCart();
-	const {
-		activePaymentMethod,
-		isExpressPaymentMethodActive,
-		currentStatus: currentPaymentStatus,
-		paymentMethodData,
-		expressPaymentMethods,
-		paymentMethods,
-		shouldSavePayment,
-	} = usePaymentMethodDataContext();
 	const { setIsSuppressed } = useStoreNoticesContext();
 	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
+
+	const {
+		activePaymentMethod,
+		paymentMethodData,
+		isExpressPaymentMethodActive,
+		currentPaymentStatus,
+		shouldSavePayment,
+	} = useSelect( ( select ) => {
+		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+
+		return {
+			activePaymentMethod: store.getActivePaymentMethod(),
+			paymentMethodData: store.getPaymentMethodData(),
+			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
+			currentPaymentStatus: store.getCurrentStatus(),
+			shouldSavePayment: store.shouldSavePaymentMethod(),
+		};
+	}, [] );
+
+	const paymentMethods = getPaymentMethods();
+	const expressPaymentMethods = getExpressPaymentMethods();
 	const currentBillingAddress = useRef( billingAddress );
 	const currentShippingAddress = useRef( shippingAddress );
 	const currentRedirectUrl = useRef( redirectUrl );

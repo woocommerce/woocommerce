@@ -10,6 +10,7 @@ import type {
 	PaymentMethods,
 	ExpressPaymentMethods,
 } from '@woocommerce/type-defs/payments';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,9 +19,12 @@ import { default as PaymentMethodConfig } from './payment-method-config';
 import { default as ExpressPaymentMethodConfig } from './express-payment-method-config';
 import { canMakePaymentExtensionsCallbacks } from './extensions-config';
 
-type LegacyRegisterPaymentMethodFunction = ( config: unknown ) => unknown;
-type LegacyRegisterExpessPaymentMethodFunction = ( config: unknown ) => unknown;
+import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../data/payment-methods/constants'; // Full path here because otherwise there's a circular dependency.
 
+type LegacyRegisterPaymentMethodFunction = ( config: unknown ) => unknown;
+type LegacyRegisterExpressPaymentMethodFunction = (
+	config: unknown
+) => unknown;
 const paymentMethods: PaymentMethods = {};
 const expressPaymentMethods: ExpressPaymentMethods = {};
 
@@ -44,7 +48,11 @@ export const registerPaymentMethod = (
 		paymentMethodConfig = new PaymentMethodConfig( options );
 	}
 	if ( paymentMethodConfig instanceof PaymentMethodConfig ) {
+		const { updateAvailablePaymentMethods } = dispatch(
+			PAYMENT_METHOD_DATA_STORE_KEY
+		);
 		paymentMethods[ paymentMethodConfig.name ] = paymentMethodConfig;
+		updateAvailablePaymentMethods();
 	}
 };
 
@@ -54,7 +62,7 @@ export const registerPaymentMethod = (
 export const registerExpressPaymentMethod = (
 	options:
 		| ExpressPaymentMethodConfiguration
-		| LegacyRegisterExpessPaymentMethodFunction
+		| LegacyRegisterExpressPaymentMethodFunction
 ): void => {
 	let paymentMethodConfig;
 	if ( typeof options === 'function' ) {
@@ -70,7 +78,11 @@ export const registerExpressPaymentMethod = (
 		paymentMethodConfig = new ExpressPaymentMethodConfig( options );
 	}
 	if ( paymentMethodConfig instanceof ExpressPaymentMethodConfig ) {
+		const { updateAvailableExpressPaymentMethods } = dispatch(
+			PAYMENT_METHOD_DATA_STORE_KEY
+		);
 		expressPaymentMethods[ paymentMethodConfig.name ] = paymentMethodConfig;
+		updateAvailableExpressPaymentMethods();
 	}
 };
 
@@ -111,12 +123,20 @@ export const __experimentalDeRegisterPaymentMethod = (
 	paymentMethodName: string
 ): void => {
 	delete paymentMethods[ paymentMethodName ];
+	const { removeAvailablePaymentMethod } = dispatch(
+		PAYMENT_METHOD_DATA_STORE_KEY
+	);
+	removeAvailablePaymentMethod( paymentMethodName );
 };
 
 export const __experimentalDeRegisterExpressPaymentMethod = (
 	paymentMethodName: string
 ): void => {
 	delete expressPaymentMethods[ paymentMethodName ];
+	const { removeRegisteredExpressPaymentMethod } = dispatch(
+		PAYMENT_METHOD_DATA_STORE_KEY
+	);
+	removeRegisteredExpressPaymentMethod( paymentMethodName );
 };
 
 export const getPaymentMethods = (): PaymentMethods => {

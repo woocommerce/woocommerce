@@ -3,19 +3,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	useEmitResponse,
-	useExpressPaymentMethods,
-} from '@woocommerce/base-context/hooks';
-import {
 	StoreNoticesContainer,
-	usePaymentMethodDataContext,
 	useEditorContext,
+	noticeContexts,
 } from '@woocommerce/base-context';
 import Title from '@woocommerce/base-components/title';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
+import {
+	CHECKOUT_STORE_KEY,
+	PAYMENT_METHOD_DATA_STORE_KEY,
+} from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -42,14 +41,26 @@ const CheckoutExpressPayment = () => {
 			hasError: store.hasError(),
 		};
 	} );
-	const { currentStatus: paymentStatus } = usePaymentMethodDataContext();
-	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
+	const {
+		availableExpressPaymentMethods,
+		expressPaymentMethodsInitialized,
+		paymentStatus,
+	} = useSelect( ( select ) => {
+		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+		return {
+			availableExpressPaymentMethods:
+				store.getAvailableExpressPaymentMethods(),
+			expressPaymentMethodsInitialized:
+				store.expressPaymentMethodsInitialized(),
+			paymentStatus: store.getCurrentStatus(),
+		};
+	} );
 	const { isEditor } = useEditorContext();
-	const { noticeContexts } = useEmitResponse();
 
 	if (
-		! isInitialized ||
-		( isInitialized && Object.keys( paymentMethods ).length === 0 )
+		! expressPaymentMethodsInitialized ||
+		( expressPaymentMethodsInitialized &&
+			Object.keys( availableExpressPaymentMethods ).length === 0 )
 	) {
 		// Make sure errors are shown in the editor and for admins. For example,
 		// when a payment method fails to register.

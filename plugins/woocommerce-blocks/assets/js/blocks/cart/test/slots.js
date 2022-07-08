@@ -12,7 +12,7 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { defaultCartState } from '../../../data/default-states';
+import { defaultCartState } from '../../../data/cart/default-state';
 
 import Cart from '../block';
 import OrderSummaryBlock from '../inner-blocks/cart-order-summary-block/frontend';

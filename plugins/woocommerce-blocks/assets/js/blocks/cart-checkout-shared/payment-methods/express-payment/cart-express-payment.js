@@ -2,17 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useEmitResponse,
-	useExpressPaymentMethods,
-} from '@woocommerce/base-context/hooks';
+import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import {
 	StoreNoticesContainer,
-	usePaymentMethodDataContext,
+	noticeContexts,
 } from '@woocommerce/base-context';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { useSelect } from '@wordpress/data';
-import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import {
+	CHECKOUT_STORE_KEY,
+	PAYMENT_METHOD_DATA_STORE_KEY,
+} from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -22,7 +22,6 @@ import './style.scss';
 
 const CartExpressPayment = () => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
-	const { noticeContexts } = useEmitResponse();
 	const {
 		isCalculating,
 		isProcessing,
@@ -41,7 +40,13 @@ const CartExpressPayment = () => {
 			hasError: store.hasError(),
 		};
 	} );
-	const { currentStatus: paymentStatus } = usePaymentMethodDataContext();
+	const { paymentStatus } = useSelect( ( select ) => {
+		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+
+		return {
+			paymentStatus: store.getCurrentStatus(),
+		};
+	} );
 
 	if (
 		! isInitialized ||

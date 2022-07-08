@@ -31,9 +31,8 @@ const AttributeSelectControl = ( {
 		'woo-gutenberg-products-block'
 	),
 } ) => {
-	const { setValidationErrors, clearValidationError } = useDispatch(
-		VALIDATION_STORE_KEY
-	);
+	const { setValidationErrors, clearValidationError } =
+		useDispatch( VALIDATION_STORE_KEY );
 
 	const { getValidationError } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );

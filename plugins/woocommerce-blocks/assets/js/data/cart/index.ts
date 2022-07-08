@@ -16,6 +16,7 @@ import { controls as sharedControls } from '../shared-controls';
 import { controls } from './controls';
 import type { SelectFromMap, DispatchFromMap } from '../mapped-types';
 import { pushChanges } from './push-changes';
+import { checkPaymentMethodsCanPay } from '../payment-methods/check-payment-methods';
 
 const registeredStore = registerStore< State >( STORE_KEY, {
 	reducer,
@@ -27,6 +28,10 @@ const registeredStore = registerStore< State >( STORE_KEY, {
 } );
 
 registeredStore.subscribe( pushChanges );
+registeredStore.subscribe( async () => {
+	await checkPaymentMethodsCanPay();
+	await checkPaymentMethodsCanPay( true );
+} );
 
 export const CART_STORE_KEY = STORE_KEY;
 

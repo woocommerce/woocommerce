@@ -27,7 +27,6 @@ import { useEventEmitters, reducer as emitReducer } from './event-emit';
 import { STATUS } from '../../../../../data/checkout/constants';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 import { useCheckoutNotices } from '../../../hooks/use-checkout-notices';
-import { useEmitResponse } from '../../../hooks/use-emit-response';
 import { CheckoutState } from '../../../../../data/checkout/default-state';
 
 const CheckoutEventsContext = createContext( {
@@ -70,8 +69,6 @@ export const CheckoutEventsProvider = ( {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const { isSuccessResponse, isErrorResponse, isFailResponse, shouldRetry } =
-		useEmitResponse();
 	const { checkoutNotices, paymentNotices, expressPaymentNotices } =
 		useCheckoutNotices();
 
@@ -159,10 +156,6 @@ export const CheckoutEventsProvider = ( {
 		previousStatus,
 		previousHasError,
 		createErrorNotice,
-		isErrorResponse,
-		isFailResponse,
-		isSuccessResponse,
-		shouldRetry,
 		checkoutNotices,
 		expressPaymentNotices,
 		paymentNotices,
