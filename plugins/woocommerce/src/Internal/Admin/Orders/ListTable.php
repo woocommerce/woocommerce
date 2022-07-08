@@ -20,6 +20,13 @@ class ListTable extends WP_List_Table {
 	private $order_query_args = array();
 
 	/**
+	 * Tracks if a filter (ie, date or customer filter) has been applied.
+	 *
+	 * @var bool
+	 */
+	private $has_filter = false;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -93,7 +100,7 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>
 		";
 
-		if ( $this->has_items() ) {
+		if ( $this->has_items() || $this->has_filter ) {
 			$this->views();
 
 			echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';

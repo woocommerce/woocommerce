@@ -111,6 +111,20 @@ class PageController {
 		if ( $this->orders_table->current_action() ) {
 			$this->orders_table->handle_bulk_actions();
 		}
+
+		$this->strip_http_referer();
 	}
 
+	/**
+	 * Perform a redirect to remove teh `_wp_http_referer` string if present (see also wp-admin/edit.php where a similar
+	 * process takes place), otherwise the size of this field builds to an unmanageable length over time.
+	 */
+	private function strip_http_referer() {
+		$referer_url = esc_url_raw( wp_unslash( $_SERVER['_wp_http_referer'] ?? '' ) );
+
+		if ( ! empty( $referer_url ) ) {
+			wp_safe_redirect( remove_query_arg( array( '_wp_http_referer', '_wpnonce' ), $referer_url ) );
+			exit;
+		}
+	}
 }
