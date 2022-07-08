@@ -171,7 +171,15 @@ class ListTable extends WP_List_Table {
 
 		$this->set_order_args();
 
-		$orders      = wc_get_orders( $this->order_query_args );
+		/**
+		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
+		 * table.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
+		 */
+		$orders      = wc_get_orders( (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args ) );
 		$this->items = $orders->orders;
 
 		$this->set_pagination_args(
