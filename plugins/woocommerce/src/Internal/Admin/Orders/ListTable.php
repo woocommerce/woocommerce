@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use WC_Order;
 use WP_List_Table;
 use WP_Screen;
@@ -11,6 +12,13 @@ use WP_Screen;
  * Admin list table for orders as managed by the OrdersTableDataStore.
  */
 class ListTable extends WP_List_Table {
+	/**
+	 * Contains the arguments to be used in the order query.
+	 *
+	 * @var array
+	 */
+	private $order_query_args = array();
+
 	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
@@ -152,7 +160,8 @@ class ListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 		$limit = $this->get_items_per_page( 'edit_orders_per_page' );
-		$args  = array(
+
+		$this->order_query_args = array(
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
@@ -160,7 +169,9 @@ class ListTable extends WP_List_Table {
 			'type'     => 'shop_order',
 		);
 
-		$orders      = wc_get_orders( $args );
+		$this->set_order_args();
+
+		$orders      = wc_get_orders( $this->order_query_args );
 		$this->items = $orders->orders;
 
 		$this->set_pagination_args(
@@ -169,6 +180,44 @@ class ListTable extends WP_List_Table {
 				'per_page'    => $limit,
 			)
 		);
+	}
+
+	/**
+	 * Updates the WC Order Query arguments as needed to support orderable columns.
+	 */
+	private function set_order_args() {
+		$sortable  = $this->get_sortable_columns();
+		$field     = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
+		$direction = sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) );
+
+		switch ( $direction ) {
+			case 'asc':
+			case 'desc':
+				$direction = strtoupper( $direction );
+				break;
+
+			default:
+				return;
+		}
+
+		if ( ! in_array( $field, $sortable, true ) ) {
+			return;
+		}
+
+		switch ( $field ) {
+			// @todo Revise and replace once work on https://github.com/woocommerce/woocommerce/issues/33613 completes.
+			//       This approach to sorting by order total works with the legacy data store, but will not work well
+			//       with COT (however, we can do something clean and efficient once query support is added by #33613).
+			case 'total':
+				$this->order_query_args['meta_key'] = '_order_total';
+				$this->order_query_args['orderby']  = 'meta_value_num';
+				break;
+
+			default:
+				$this->order_query_args['orderby'] = $field;
+		}
+
+		$this->order_query_args['order']   = $direction;
 	}
 
 	/**
@@ -362,6 +411,19 @@ class ListTable extends WP_List_Table {
 			'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
 			'order_total'      => esc_html__( 'Total', 'woocommerce' ),
 			'wc_actions'       => esc_html__( 'Actions', 'woocommerce' ),
+		);
+	}
+
+	/**
+	 * Defines the default sortable columns.
+	 *
+	 * @return string[]
+	 */
+	public function get_sortable_columns() {
+		return array(
+			'order_number' => 'ID',
+			'order_date'   => 'date',
+			'order_total'  => 'total',
 		);
 	}
 
