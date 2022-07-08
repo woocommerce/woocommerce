@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import {
+	CHECKOUT_STORE_KEY,
+	PAYMENT_METHOD_DATA_STORE_KEY,
+} from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
@@ -9,7 +12,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useCheckoutEventsContext } from '../providers';
-import { usePaymentMethodDataContext } from '../providers/cart-checkout/payment-methods';
 import { usePaymentMethods } from './payment-methods/use-payment-methods';
 
 /**
@@ -35,12 +37,20 @@ export const useCheckoutSubmit = () => {
 			hasError: store.hasError(),
 		};
 	} );
+	const { currentStatus: paymentStatus, activePaymentMethod } = useSelect(
+		( select ) => {
+			const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+
+			return {
+				currentStatus: store.getCurrentStatus(),
+				activePaymentMethod: store.getActivePaymentMethod(),
+			};
+		}
+	);
 
 	const { onSubmit } = useCheckoutEventsContext();
 
 	const { paymentMethods = {} } = usePaymentMethods();
-	const { activePaymentMethod, currentStatus: paymentStatus } =
-		usePaymentMethodDataContext();
 	const paymentMethod = paymentMethods[ activePaymentMethod ] || {};
 	const waitingForProcessing =
 		isProcessing || isAfterProcessing || isBeforeProcessing;

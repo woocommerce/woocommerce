@@ -13,10 +13,10 @@ import type ValidationInputError from '@woocommerce/base-components/validation-i
 import type { Currency } from './currency';
 import type { CartBillingAddress, CartShippingRate } from './cart';
 import type {
+	emitterCallback,
 	responseTypes,
 	noticeContexts,
-} from '../../base/context/hooks/use-emit-response';
-import type { emitterCallback } from '../../base/context/event-emit';
+} from '../../base/context/event-emit';
 import type { PaymentMethodCurrentStatusType } from '../../base/context/providers/cart-checkout/payment-methods/types';
 import type {
 	CartResponseShippingAddress,

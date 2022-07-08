@@ -17,8 +17,11 @@ import {
 	EMPTY_TAX_LINES,
 	EMPTY_PAYMENT_REQUIREMENTS,
 	EMPTY_EXTENSIONS,
-} from './constants';
-import type { ResponseError } from './types';
+} from '../constants';
+import type { ResponseError } from '../types';
+
+const EMPTY_PENDING_QUANTITY: [] = [];
+const EMPTY_PENDING_DELETE: [] = [];
 
 export interface CartState {
 	cartItemsPendingQuantity: Array< string >;
@@ -27,10 +30,6 @@ export interface CartState {
 	metaData: CartMeta;
 	errors: Array< ResponseError >;
 }
-
-export const EMPTY_PENDING_QUANTITY: [] = [];
-export const EMPTY_PENDING_DELETE: [] = [];
-
 export const defaultCartState: CartState = {
 	cartItemsPendingQuantity: EMPTY_PENDING_QUANTITY,
 	cartItemsPendingDelete: EMPTY_PENDING_DELETE,
