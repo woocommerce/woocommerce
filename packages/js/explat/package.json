@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/explat",
-	"version": "2.2.0",
+	"version": "2.3.0",
 	"description": "WooCommerce component and utils for A/B testing.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
