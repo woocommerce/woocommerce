@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.6.1
+Stable tag: 6.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -244,6 +244,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Improve styling of WooCommerce notices (frontend) for the Twenty Twenty theme.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Tweak - Update product task experiment names [#33428](https://github.com/woocommerce/woocommerce/pull/33428)
 * Tweak - Make the option 'woocommerce_tracker_ua' load on demand.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
+* Tweak - Removed Facebook for WooCommerce extension from the Installed marketing extensions list. [#33781](https://github.com/woocommerce/woocommerce/pull/33781)
 * Update - Log errors during the posts to orders table migrations  [#33136](https://github.com/woocommerce/woocommerce/pull/33136)
 * Update - Comment: Changelog already added (see fix-product_attributes_lookup_table_update), the intention is for this to ship in the same release.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Update - Update email marketing checkbox to be unticked by default.  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
