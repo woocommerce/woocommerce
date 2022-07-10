@@ -3,6 +3,7 @@
  */
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
@@ -18,6 +19,17 @@ import { MONOREPO_ROOT, excludedPackages } from './const';
 export const getFilepathFromPackageName = ( name: string ): string =>
 	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
+export const getPackageJson = ( name: string ) => {
+	const filepath = getFilepathFromPackageName( name );
+	const packageJsonFilepath = `${ filepath }/package.json`;
+	const packageJsonExists = existsSync( packageJsonFilepath );
+	if ( ! packageJsonExists ) {
+		return false;
+	}
+
+	return JSON.parse( readFileSync( packageJsonFilepath, 'utf8' ) );
+};
+
 /**
  * Check if package is valid and can be deployed to NPM.
  *
@@ -25,15 +37,11 @@ export const getFilepathFromPackageName = ( name: string ): string =>
  * @return {boolean} true if the package is private.
  */
 export const isValidPackage = ( name: string ): boolean => {
-	const filepath = getFilepathFromPackageName( name );
-	const packageJsonFilepath = `${ filepath }/package.json`;
-	const packageJsonExists = existsSync( packageJsonFilepath );
-	if ( ! packageJsonExists ) {
+	const packageJson = getPackageJson( name );
+
+	if ( ! packageJson ) {
 		return false;
 	}
-	const packageJson = JSON.parse(
-		readFileSync( packageJsonFilepath, 'utf8' )
-	);
 
 	if ( name !== packageJson.name ) {
 		return false;
@@ -110,4 +118,24 @@ export const validatePackage = (
 			`${ name } is not a valid package. It may be private or incorrectly configured.`
 		);
 	}
+};
+
+export const isValidUpdate = ( name: string ) => {
+	const packageJson = getPackageJson( name );
+
+	if ( ! packageJson ) {
+		return false;
+	}
+	const nextVersion = packageJson.version;
+
+	if ( ! nextVersion ) {
+		return false;
+	}
+
+	const npmVersion = execSync( 'pnpm view @woocommerce/number version', {
+		encoding: 'utf-8',
+		stdio: 'inherit',
+	} );
+
+	return nextVersion > npmVersion;
 };

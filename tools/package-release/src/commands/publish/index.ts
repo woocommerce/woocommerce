@@ -11,6 +11,7 @@ import {
 	getAllPackges,
 	validatePackage,
 	getFilepathFromPackageName,
+	isValidUpdate,
 } from '../../validate';
 import { MONOREPO_ROOT } from '../../const';
 
@@ -118,22 +119,20 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `${ verb } ${ name }` );
 
 			try {
-				const cwd = getFilepathFromPackageName( name );
-				return execSync(
-					`SKIP_TURBO=true pnpm publish ${
-						dryRun ? '--dry-run' : ''
-					} --publish-branch=${ branch }`,
-					{
-						cwd,
-						encoding: 'utf-8',
-						stdio: 'inherit',
-					}
-				);
+				return isValidUpdate( name );
+				// const cwd = getFilepathFromPackageName( name );
+				// return execSync(
+				// 	`SKIP_TURBO=true pnpm publish ${
+				// 		dryRun ? '--dry-run' : ''
+				// 	} --publish-branch=${ branch }`,
+				// 	{
+				// 		cwd,
+				// 		encoding: 'utf-8',
+				// 		stdio: 'inherit',
+				// 	}
+				// );
 			} catch ( e ) {
 				if ( e instanceof Error ) {
-					console.log( '<----------///-------------->' );
-					console.log( e.message );
-					console.log( '<----------///-------------->' );
 					this.error( e.message );
 				}
 			}
