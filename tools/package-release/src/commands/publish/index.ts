@@ -132,7 +132,7 @@ export default class PackageRelease extends Command {
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					console.log( '<----------///-------------->' );
-					console.log( e );
+					console.log( e.message );
 					console.log( '<----------///-------------->' );
 					this.error( e.message );
 				}
