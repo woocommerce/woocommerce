@@ -131,6 +131,9 @@ export default class PackageRelease extends Command {
 				);
 			} catch ( e ) {
 				if ( e instanceof Error ) {
+					console.log( '<----------///-------------->' );
+					console.log( e );
+					console.log( '<----------///-------------->' );
 					this.error( e.message );
 				}
 			}
