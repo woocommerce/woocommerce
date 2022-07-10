@@ -4,6 +4,7 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
+import { gt } from 'semver';
 
 /**
  * Internal dependencies
@@ -147,13 +148,11 @@ export const isValidUpdate = ( name: string ): boolean => {
 
 	const npmVersion = execSync( 'pnpm view @woocommerce/number version', {
 		encoding: 'utf-8',
-		stdio: 'inherit',
 	} );
 
-	console.log( nextVersion );
-	console.log( typeof nextVersion );
-	console.log( npmVersion );
-	console.log( typeof npmVersion );
+	console.log( gt( nextVersion.trim(), npmVersion.trim() ) );
 
-	return nextVersion > npmVersion;
+	return false;
+
+	// return nextVersion > npmVersion;
 };
