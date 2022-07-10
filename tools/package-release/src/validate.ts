@@ -4,7 +4,7 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
-import { gt } from 'semver';
+import { gt as greaterVersionThan } from 'semver';
 
 /**
  * Internal dependencies
@@ -150,9 +150,5 @@ export const isValidUpdate = ( name: string ): boolean => {
 		encoding: 'utf-8',
 	} );
 
-	console.log( gt( nextVersion.trim(), npmVersion.trim() ) );
-
-	return false;
-
-	// return nextVersion > npmVersion;
+	return greaterVersionThan( nextVersion.trim(), npmVersion.trim() );
 };

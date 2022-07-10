@@ -1811,6 +1811,7 @@ importers:
       '@oclif/plugin-help': ^5
       '@oclif/plugin-plugins': ^2.0.1
       '@types/node': ^16.9.4
+      '@types/semver': ^7.3.10
       '@woocommerce/eslint-plugin': workspace:*
       globby: ^11
       oclif: ^2
@@ -1823,6 +1824,7 @@ importers:
       '@oclif/core': 1.3.4
       '@oclif/plugin-help': 5.1.11
       '@oclif/plugin-plugins': 2.1.0
+      '@types/semver': 7.3.10
       semver: 7.3.5
     devDependencies:
       '@types/node': 16.10.3
@@ -12227,6 +12229,10 @@ packages:
 
   /@types/scheduler/0.16.2:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
+
+  /@types/semver/7.3.10:
+    resolution: {integrity: sha512-zsv3fsC7S84NN6nPK06u79oWgrPVd0NvOyqgghV1haPaFcVxIrP4DLomRwGAXk0ui4HZA7mOcSFL98sMVW9viw==}
+    dev: false
 
   /@types/source-list-map/0.1.2:
     resolution: {integrity: sha512-K5K+yml8LTo9bWJI/rECfIPrGgxdpeNbj+d53lwN4QjW1MCwlkhUms+gtdzigTeUyBr09+u8BwOIY3MXvHdcsA==}
@@ -36652,7 +36658,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - acorn
 >>>>>>> 1bfe9f5260 (save)
