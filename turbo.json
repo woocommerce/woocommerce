@@ -23,7 +23,11 @@
 				"src/*.php",
 				"src/**/*.php",
 				"includes/*.php",
-				"includes/**/*.php"
+				"includes/**/*.php",
+				"js/*.js",
+				"js/**/*.js",
+				"css/*.scss",
+				"css/**/*.scss"
 			],
 			"outputs": [
 				"dist/**",
@@ -32,12 +36,6 @@
 				"build-style/**",
 				"build-types/**"
 			]
-		},
-		"woocommerce/client/admin#build": {
-			"inputs": [ "js/**/*.js", "js/**/*.scss" ]
-		},
-		"woocommerce/client/legacy#build": {
-			"inputs": [ "js/**/*.js", "js/**/*.scss" ]
 		},
 		"woocommerce#build": {
 			"dependsOn": [
