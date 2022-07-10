@@ -150,5 +150,10 @@ export const isValidUpdate = ( name: string ): boolean => {
 		stdio: 'inherit',
 	} );
 
+	console.log( nextVersion );
+	console.log( typeof nextVersion );
+	console.log( npmVersion );
+	console.log( typeof npmVersion );
+
 	return nextVersion > npmVersion;
 };
