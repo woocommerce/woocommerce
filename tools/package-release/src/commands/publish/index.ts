@@ -79,6 +79,13 @@ export default class PackageRelease extends Command {
 				stdio: 'inherit',
 			} );
 
+			// Sometimes the pnpm lock file is out of sync, this shouldn't prevent a release.
+			execSync( 'git checkout pnpm-lock.yaml', {
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+				stdio: 'inherit',
+			} );
+
 			CliUx.ux.action.stop();
 		}
 
