@@ -119,18 +119,20 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `${ verb } ${ name }` );
 
 			try {
-				return isValidUpdate( name );
-				// const cwd = getFilepathFromPackageName( name );
-				// return execSync(
-				// 	`SKIP_TURBO=true pnpm publish ${
-				// 		dryRun ? '--dry-run' : ''
-				// 	} --publish-branch=${ branch }`,
-				// 	{
-				// 		cwd,
-				// 		encoding: 'utf-8',
-				// 		stdio: 'inherit',
-				// 	}
-				// );
+				if ( isValidUpdate( name ) ) {
+					const cwd = getFilepathFromPackageName( name );
+					return execSync(
+						`SKIP_TURBO=true pnpm publish ${
+							dryRun ? '--dry-run' : ''
+						} --publish-branch=${ branch }`,
+						{
+							cwd,
+							encoding: 'utf-8',
+							stdio: 'inherit',
+						}
+					);
+				}
+				this.log( `${ name } does not have anything to update.` );
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
