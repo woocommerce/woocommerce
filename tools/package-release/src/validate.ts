@@ -19,6 +19,12 @@ import { MONOREPO_ROOT, excludedPackages } from './const';
 export const getFilepathFromPackageName = ( name: string ): string =>
 	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
+/**
+ * Get a package's package.json file in JSON format.
+ *
+ * @param {string} name package name.
+ * @return {Object|false} JSON object or false if it fails.
+ */
 export const getPackageJson = ( name: string ) => {
 	const filepath = getFilepathFromPackageName( name );
 	const packageJsonFilepath = `${ filepath }/package.json`;
@@ -120,12 +126,19 @@ export const validatePackage = (
 	}
 };
 
-export const isValidUpdate = ( name: string ) => {
+/**
+ * Determine if an update is valid by comparing version numbers.
+ *
+ * @param {string} name package name.
+ * @return {boolean} If an update is valid.
+ */
+export const isValidUpdate = ( name: string ): boolean => {
 	const packageJson = getPackageJson( name );
 
 	if ( ! packageJson ) {
 		return false;
 	}
+
 	const nextVersion = packageJson.version;
 
 	if ( ! nextVersion ) {
