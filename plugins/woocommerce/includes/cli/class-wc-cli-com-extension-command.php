@@ -42,24 +42,85 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	}
 
 	/**
-	 * Download and install an extension.
+	 * Installs one or more plugins from wccom marketplace.
 	 *
 	 * ## OPTIONS
 	 *
-	 * <extension>
-	 * : One or more plugins to install. Accepts a plugin slug
+	 * <extension|zip|url>...
+	 * : One or more plugins to install. Accepts a plugin slug, the path to a local zip file, or a URL to a remote zip file.
+	 *
+	 * [--force]
+	 * : If set, the command will overwrite any installed version of the plugin, without prompting
+	 * for confirmation.
 	 *
 	 * [--activate]
 	 * : If set, the plugin will be activated immediately after install.
 	 *
+	 * [--activate-network]
+	 * : If set, the plugin will be network activated immediately after install
+	 *
+	 * [--insecure]
+	 * : Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack.
+	 *
 	 * ## EXAMPLES
 	 *
-	 * wp wc com extension install automatewoo
-	 * wp wc com extension install woocommerce-subscriptions --activate
+	 *     # Install the latest version from woocommerce.com and activate
+	 *     $ wp wc com extension install automatewoo --activate
+	 *     Downloading install package from http://s3.amazonaws.com/bucketname/automatewoo.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef......
+	 *     Using cached file '/home/vagrant/.wp-cli/cache/plugin/automatewoo.zip'...
+	 *     Unpacking the package...
+	 *     Installing the plugin...
+	 *     Plugin installed successfully.
+	 *     Activating 'automatewoo'...
+	 *     Plugin 'automatewoo' activated.
+	 *     Success: Installed 1 of 1 plugins.
 	 *
-	 * @param  array $args WP-CLI positional arguments.
-	 * @param  array $assoc_args WP-CLI associative arguments.
+	 *     # Install from a local zip file
+	 *     $ wp wc com extension install ../my-plugin.zip
+	 *     Unpacking the package...
+	 *     Installing the plugin...
+	 *     Plugin installed successfully.
+	 *     Success: Installed 1 of 1 plugins.
+	 *
+	 *     # Install from a remote zip file
+	 *     $ wp wc com extension install http://s3.amazonaws.com/bucketname/my-plugin.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef
+	 *     Downloading install package from http://s3.amazonaws.com/bucketname/my-plugin.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef
+	 *     Unpacking the package...
+	 *     Installing the plugin...
+	 *     Plugin installed successfully.
+	 *     Success: Installed 1 of 1 plugins.
+	 *
+	 *     # Forcefully re-install an installed plugin
+	 *     $ wp wc com extension install automatewoo --force
+	 *     Downloading install package from http://s3.amazonaws.com/bucketname/automatewoo.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef...
+	 *     Unpacking the package...
+	 *     Installing the plugin...
+	 *     Removing the old version of the plugin...
+	 *     Plugin updated successfully
+	 *     Success: Installed 1 of 1 plugins.
 	 */
-	public static function install_extension( array $args, array $assoc_args ) {
+	public function install( $args, $assoc_args ) {
+		$subscriptions         = WC_Helper_Updater::get_update_data();
+		$extension             = reset( $args );
+		$extension_package_url = null;
+
+		// Remove `--version` as we don't support it.
+		unset( $assoc_args['version'] );
+
+		// Filter by slug
+		foreach ( $subscriptions as $subscription ) {
+			if ( $subscription['slug'] === $extension && ! is_null( $subscription['package'] ) ) {
+
+				$extension_package_url = $subscription['package'];
+				break;
+			}
+		}
+
+		// No package found, pass <extension> to Plugin_Command::install to search in wp.org
+		if ( is_null( $extension_package_url ) ) {
+			$extension_package_url = $extension;
+		}
+
+		parent::install( [ $extension_package_url ], $assoc_args );
 	}
 }
