@@ -10,8 +10,14 @@ interface generalSettings {
 interface preloadSettings {
 	general: generalSettings;
 }
+
+interface preloadOptions {
+	woocommerce_admin_install_timestamp: string;
+}
+
 interface admin {
 	preloadSettings: preloadSettings;
+	preloadOptions: preloadOptions;
 }
 
 interface wcSettings {
