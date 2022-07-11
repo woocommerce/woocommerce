@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Fixed 33702 - Added functions to get formatted billing and shipping addresses
