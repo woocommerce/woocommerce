@@ -28,19 +28,6 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	}
 
 	/**
-	 * List extensions available for the connected site.
-	 *
-	 * ## EXAMPLES
-	 *
-	 * wp wc com extension list
-	 *
-	 * @param array $args WP-CLI positional arguments.
-	 * @param array $assoc_args WP-CLI associative arguments.
-	 */
-	public function list_( $args, $assoc_args ) {
-	}
-
-	/**
 	 * Installs one or more plugins from wccom marketplace.
 	 *
 	 * ## OPTIONS
