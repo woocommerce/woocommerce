@@ -124,4 +124,58 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
 		}
 	}
+
+	/**
+	 * Test coupon and recalculation of totals sequences when
+	 * product prices are tax inclusive.
+	 */
+	public function test_apply_coupon_with_tax_inclusive_settings() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'IN:AP' );
+
+		$tax_rate = array(
+			'tax_rate_country' => 'IN',
+			'tax_rate_state'   => '',
+			'tax_rate'         => '20',
+			'tax_rate_name'    => 'tax',
+			'tax_rate_order'   => '1',
+			'tax_rate_class'   => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 120 );
+		$product->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( '10off' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+
+		/**
+		 * Call the following in this order:
+		 *
+		 * WC_AJAX::calc_line_taxes()
+		 * WC_AJAX::add_coupon_discount()
+		 */
+		$this->assertEquals( 108, $order->get_total() );
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+
+		/**
+		 * Call the following in this order:
+		 *
+		 * WC_AJAX::add_coupon_discount()
+		 * WC_AJAX::calc_line_taxes()
+		 */
+		$this->assertEquals( 108, $order->get_total() );
+	}
 }
