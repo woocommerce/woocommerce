@@ -13,9 +13,9 @@ namespace Automattic\WooCommerce\Internal\BatchProcessing;
 class BatchProcessingController {
 
 	const PENDING_PROCESSES_OPTION_NAME = 'wc_pending_batch_processes';
-	const CONTROLLER_CRON_NAME = 'wc_schedule_pending_batch_processes';
-	const SINGLE_BATCH_PROCESS_ACTION = 'wc_run_batch_process';
-	const ACTION_GROUP = 'wc_batch_processes';
+	const CONTROLLER_CRON_NAME          = 'wc_schedule_pending_batch_processes';
+	const SINGLE_BATCH_PROCESS_ACTION   = 'wc_run_batch_process';
+	const ACTION_GROUP                  = 'wc_batch_processes';
 
 	/**
 	 * BatchProcessingController constructor.
@@ -46,7 +46,7 @@ class BatchProcessingController {
 	 */
 	public function enqueue_processor( string $processor_class_name ) {
 		$pending_updates = $this->get_pending();
-		if ( ! in_array( $processor_class_name, array_keys( $pending_updates ) ) ) {
+		if ( ! in_array( $processor_class_name, array_keys( $pending_updates ), true ) ) {
 			$pending_updates[] = $processor_class_name;
 			$this->set_pending_processes( $pending_updates );
 		}
@@ -132,7 +132,7 @@ class BatchProcessingController {
 	 *
 	 * @return mixed Update status.
 	 */
-	protected function get_process_details( BatchProcessorInterface $batch_processor ) {
+	private function get_process_details( BatchProcessorInterface $batch_processor ) {
 		return get_option(
 			$this->get_process_option_name( $batch_processor ),
 			array(
@@ -153,7 +153,7 @@ class BatchProcessingController {
 	 */
 	private function get_process_option_name( BatchProcessorInterface $processor ) {
 		$class_name = get_class( $processor );
-		$class_md5 = md5( $class_name );
+		$class_md5  = md5( $class_name );
 		// truncate the class name so we know that it will fit in the option name column along with md5 hash and prefix.
 		$class_name = substr( $class_name, 0, 140 );
 		return 'wc_batch_' . $class_name . '_' . $class_md5;
@@ -239,9 +239,9 @@ class BatchProcessingController {
 	 *
 	 * @param string $processor Name of processor class which will be marked compete.
 	 */
-	protected function mark_pending_process_complete( string $processor ) {
+	private function mark_pending_process_complete( string $processor ) {
 		$pending_processes = $this->get_pending();
-		if ( in_array( $processor, $pending_processes ) ) {
+		if ( in_array( $processor, $pending_processes, true ) ) {
 			$pending_processes = array_diff( $pending_processes, array( $processor ) );
 			$this->set_pending_processes( $pending_processes );
 		}
@@ -250,7 +250,7 @@ class BatchProcessingController {
 	/**
 	 * Helper method set pending processes.
 	 *
-	 * @param array $processes List of pending processes.
+	 * @param array $processes List of classnames of all pending processes.
 	 */
 	private function set_pending_processes( array $processes ) {
 		update_option( self::PENDING_PROCESSES_OPTION_NAME, $processes, false );
@@ -273,7 +273,7 @@ class BatchProcessingController {
 	 * @return bool Whether the process is in progress.
 	 */
 	public function is_enqueued( string $processor_name ) : bool {
-		return in_array( $processor_name, $this->get_pending() );
+		return in_array( $processor_name, $this->get_pending(), true );
 	}
 
 	/**
@@ -293,6 +293,5 @@ class BatchProcessingController {
 	protected function log_error( \Exception $error ) : void {
 		// TODO: Implement error logging.
 	}
-
 
 }
