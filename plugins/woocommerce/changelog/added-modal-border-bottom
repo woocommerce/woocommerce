@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Fixed 33720 - I have fixed the border-bottom not coming in the header of the component modal.
