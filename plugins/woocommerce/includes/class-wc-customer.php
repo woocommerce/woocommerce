@@ -1146,4 +1146,51 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function set_is_paying_customer( $is_paying_customer ) {
 		$this->set_prop( 'is_paying_customer', (bool) $is_paying_customer );
 	}
+
+	/**
+	 * Get a formatted billing address for the customer.
+	 *
+	 * @param string $empty_content Content to show if no address is present.
+	 * @return string
+	 */
+	public function get_formatted_billing_address( $empty_content = '' ) {
+		$address     = '';
+		$raw_address = apply_filters( 'woocommerce_get_customer_address', array_merge( $this->data[ 'billing' ], $this->get_prop( 'billing', 'view' ) ), 'billing', $this );
+		
+		$raw_address = apply_filters( 'woocommerce_customer_formatted_billing_address', $raw_address, $this );
+		$address     = WC()->countries->get_formatted_address( $raw_address );
+
+		/**
+		 * Filter customer formatted billing address.
+		 *
+		 * @param string      $address     Formatted billing address string.
+		 * @param array       $raw_address Raw billing address.
+		 * @param WC_Customer $customer    Customer data.
+		 */
+		return apply_filters( 'woocommerce_customer_get_formatted_billing_address', $address ? $address : $empty_content, $raw_address, $this );
+	}
+
+	/**
+	 * Get a formatted shipping address for the order.
+	 *
+	 * @param string $empty_content Content to show if no address is present.
+	 * @return string
+	 */
+	public function get_formatted_shipping_address( $empty_content = '' ) {
+		$address     = '';
+		$raw_address = apply_filters( 'woocommerce_get_customer_address', array_merge( $this->data[ 'shipping' ], $this->get_prop( 'shipping', 'view' ) ), 'shipping', $this );
+		
+		$raw_address = apply_filters( 'woocommerce_customer_formatted_shipping_address', $raw_address, $this );
+		$address     = WC()->countries->get_formatted_address( $raw_address );
+
+		/**
+		 * Filter orders formatted shipping address.
+		 *
+		 * @since 3.8.0
+		 * @param string      $address     Formatted shipping address string.
+		 * @param array       $raw_address Raw shipping address.
+		 * @param WC_Customer $customer    Customer data.
+		 */
+		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address, $this );
+	}
 }
