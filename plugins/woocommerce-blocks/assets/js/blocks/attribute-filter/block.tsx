@@ -29,6 +29,7 @@ import {
 	objectHasProp,
 } from '@woocommerce/types';
 import {
+	changeUrl,
 	PREFIX_QUERY_ARG_FILTER_TYPE,
 	PREFIX_QUERY_ARG_QUERY_TYPE,
 } from '@woocommerce/utils';
@@ -91,7 +92,7 @@ const AttributeFilterBlock = ( {
 		isString
 	);
 
-	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] =
+	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
 		useState( false );
 
 	const attributeObject =
@@ -99,9 +100,12 @@ const AttributeFilterBlock = ( {
 			? previewAttributeObject
 			: getAttributeFromID( blockAttributes.attributeId );
 
-	const [ checked, setChecked ] = useState(
-		getActiveFilters( filteringForPhpTemplate, attributeObject )
+	const initialFilters = useMemo(
+		() => getActiveFilters( attributeObject ),
+		[ attributeObject ]
 	);
+
+	const [ checked, setChecked ] = useState( initialFilters );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState<
 		DisplayOption[]
@@ -250,7 +254,7 @@ const AttributeFilterBlock = ( {
 	 * @param {Object}  query             The object containing the active filter query.
 	 * @param {boolean} allFiltersRemoved If there are active filters or not.
 	 */
-	const redirectPageForPhpTemplate = useCallback(
+	const updateFilterUrl = useCallback(
 		( query, allFiltersRemoved = false ) => {
 			if ( allFiltersRemoved ) {
 				if ( ! attributeObject?.taxonomy ) {
@@ -278,14 +282,14 @@ const AttributeFilterBlock = ( {
 				);
 
 				const newUrl = formatParams( url, query );
-				window.location.href = newUrl;
+				changeUrl( newUrl );
 			} else {
 				const newUrl = formatParams( pageUrl, query );
 				const currentQueryArgs = getQueryArgs( window.location.href );
 				const newUrlQueryArgs = getQueryArgs( newUrl );
 
 				if ( ! isQueryArgsEqual( currentQueryArgs, newUrlQueryArgs ) ) {
-					window.location.href = newUrl;
+					changeUrl( newUrl );
 				}
 			}
 		},
@@ -301,20 +305,17 @@ const AttributeFilterBlock = ( {
 			blockAttributes.queryType === 'or' ? 'in' : 'and'
 		);
 
-		// This is for PHP rendered template filtering only.
-		if ( filteringForPhpTemplate ) {
-			redirectPageForPhpTemplate( query, checkedFilters.length === 0 );
-		}
+		updateFilterUrl( query, checkedFilters.length === 0 );
 	};
 
 	const updateCheckedFilters = useCallback(
-		( checkedFilters: string[] ) => {
+		( checkedFilters: string[], force = false ) => {
 			if ( isEditor ) {
 				return;
 			}
 
 			setChecked( checkedFilters );
-			if ( ! blockAttributes.showFilterButton ) {
+			if ( force || ! blockAttributes.showFilterButton ) {
 				updateAttributeFilter(
 					productAttributesQuery,
 					setProductAttributesQuery,
@@ -462,34 +463,26 @@ const AttributeFilterBlock = ( {
 	);
 
 	/**
-	 * Important: For PHP rendered block templates only.
-	 *
-	 * When we render the PHP block template (e.g. Classic Block) we need to set the default checked values,
-	 * and also update the URL when the filters are clicked/updated.
+	 * Update the filter URL on state change.
 	 */
 	useEffect( () => {
-		if ( filteringForPhpTemplate && attributeObject ) {
-			if (
-				areAllFiltersRemoved( {
-					currentCheckedFilters: checked,
-					hasSetPhpFilterDefaults,
-				} )
-			) {
-				if ( ! blockAttributes.showFilterButton ) {
-					setChecked( [] );
-					redirectPageForPhpTemplate( productAttributesQuery, true );
-				}
-			}
+		if ( ! attributeObject || blockAttributes.showFilterButton ) {
+			return;
+		}
 
-			if ( ! blockAttributes.showFilterButton ) {
-				setChecked( checked );
-				redirectPageForPhpTemplate( productAttributesQuery, false );
-			}
+		if (
+			areAllFiltersRemoved( {
+				currentCheckedFilters: checked,
+				hasSetFilterDefaultsFromUrl,
+			} )
+		) {
+			updateFilterUrl( productAttributesQuery, true );
+		} else {
+			updateFilterUrl( productAttributesQuery, false );
 		}
 	}, [
-		hasSetPhpFilterDefaults,
-		redirectPageForPhpTemplate,
-		filteringForPhpTemplate,
+		hasSetFilterDefaultsFromUrl,
+		updateFilterUrl,
 		productAttributesQuery,
 		attributeObject,
 		checked,
@@ -497,32 +490,29 @@ const AttributeFilterBlock = ( {
 	] );
 
 	/**
-	 * Important: For PHP rendered block templates only.
-	 *
-	 * When we set the default parameter values which we get from the URL in the above useEffect(),
-	 * we need to run updateCheckedFilters which will set these values in state for the Active Filters block.
+	 * Try get the current attribute filter from the URl.
 	 */
 	useEffect( () => {
-		if ( filteringForPhpTemplate ) {
-			const activeFilters = getActiveFilters(
-				filteringForPhpTemplate,
-				attributeObject
-			);
-			if (
-				activeFilters.length > 0 &&
-				! hasSetPhpFilterDefaults &&
-				! attributeTermsLoading
-			) {
-				setHasSetPhpFilterDefaults( true );
-				updateCheckedFilters( activeFilters );
-			}
+		if ( hasSetFilterDefaultsFromUrl || attributeTermsLoading ) {
+			return;
+		}
+
+		if ( initialFilters.length > 0 ) {
+			setHasSetFilterDefaultsFromUrl( true );
+			updateCheckedFilters( initialFilters, true );
+			return;
+		}
+
+		if ( ! filteringForPhpTemplate ) {
+			setHasSetFilterDefaultsFromUrl( true );
 		}
 	}, [
 		attributeObject,
-		filteringForPhpTemplate,
-		hasSetPhpFilterDefaults,
+		hasSetFilterDefaultsFromUrl,
 		attributeTermsLoading,
 		updateCheckedFilters,
+		initialFilters,
+		filteringForPhpTemplate,
 	] );
 
 	if ( ! hasFilterableProducts ) {

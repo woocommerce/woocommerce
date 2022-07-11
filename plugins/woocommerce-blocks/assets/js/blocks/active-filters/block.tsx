@@ -76,17 +76,17 @@ const ActiveFiltersBlock = ( {
 				type: __( 'Stock Status', 'woo-gutenberg-products-block' ),
 				name: STOCK_STATUS_OPTIONS[ slug ],
 				removeCallback: () => {
-					if ( filteringForPhpTemplate ) {
-						return removeArgsFromFilterUrl( {
-							filter_stock_status: slug,
-						} );
+					removeArgsFromFilterUrl( {
+						filter_stock_status: slug,
+					} );
+					if ( ! filteringForPhpTemplate ) {
+						const newStatuses = productStockStatus.filter(
+							( status ) => {
+								return status !== slug;
+							}
+						);
+						setProductStockStatus( newStatuses );
 					}
-					const newStatuses = productStockStatus.filter(
-						( status ) => {
-							return status !== slug;
-						}
-					);
-					setProductStockStatus( newStatuses );
 				},
 				displayStyle: blockAttributes.displayStyle,
 			} );
@@ -107,11 +107,11 @@ const ActiveFiltersBlock = ( {
 			type: __( 'Price', 'woo-gutenberg-products-block' ),
 			name: formatPriceRange( minPrice, maxPrice ),
 			removeCallback: () => {
-				if ( filteringForPhpTemplate ) {
-					return removeArgsFromFilterUrl( 'max_price', 'min_price' );
+				removeArgsFromFilterUrl( 'max_price', 'min_price' );
+				if ( ! filteringForPhpTemplate ) {
+					setMinPrice( undefined );
+					setMaxPrice( undefined );
 				}
-				setMinPrice( undefined );
-				setMaxPrice( undefined );
 			},
 			displayStyle: blockAttributes.displayStyle,
 		} );
@@ -289,13 +289,13 @@ const ActiveFiltersBlock = ( {
 				<button
 					className="wc-block-active-filters__clear-all"
 					onClick={ () => {
-						if ( filteringForPhpTemplate ) {
-							return cleanFilterUrl();
+						cleanFilterUrl();
+						if ( ! filteringForPhpTemplate ) {
+							setMinPrice( undefined );
+							setMaxPrice( undefined );
+							setProductAttributes( [] );
+							setProductStockStatus( [] );
 						}
-						setMinPrice( undefined );
-						setMaxPrice( undefined );
-						setProductAttributes( [] );
-						setProductStockStatus( [] );
 					} }
 				>
 					<Label
