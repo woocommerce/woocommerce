@@ -317,7 +317,7 @@ const ReportTable = ( props ) => {
 			label: (
 				<CheckboxControl
 					onChange={ selectAllRows }
-					aria-label={ __( 'Select All' ) }
+					aria-label={ __( 'Select All', 'woocommerce' ) }
 					checked={ isAllChecked }
 					disabled={ ! hasData }
 				/>

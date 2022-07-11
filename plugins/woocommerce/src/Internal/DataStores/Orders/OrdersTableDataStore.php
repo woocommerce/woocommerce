@@ -1008,6 +1008,102 @@ LEFT JOIN {$operational_data_clauses['join']}
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	/**
+	 * Method to delete an order from the database.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param array    $args Array of args to pass to the delete method.
+	 *
+	 * @return void
+	 */
+	public function delete( &$order, $args = array() ) {
+		$order_id  = $order->get_id();
+
+		if ( ! $order_id ) {
+			return;
+		}
+
+		if ( ! empty( $args['force_delete'] ) ) {
+			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$order->set_id( 0 );
+
+			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
+			if ( ! is_a( $order->get_data_store(), self::class ) ) {
+				return;
+			}
+
+			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+			// Once we stop creating posts for orders, we should do the cleanup here instead.
+			wp_delete_post( $order_id );
+
+			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		} else {
+			$this->trash_order( $order );
+
+			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		}
+	}
+
+	/**
+	 * Trashes an order.
+	 *
+	 * @param \WC_Order $order The order object
+	 * @return void
+	 */
+	public function trash_order( &$order ) {
+		global $wpdb;
+
+		if ( 'trash' === $order->get_status( 'edit' ) ) {
+			return;
+		}
+
+		$trash_metadata = array(
+			'_wp_trash_meta_status' => $order->get_status( 'edit' ),
+			'_wp_trash_meta_time'   => time(),
+		);
+
+		foreach ( $trash_metadata as $meta_key => $meta_value ) {
+			$this->add_meta(
+				$order,
+				(object) array(
+					'key'   => $meta_key,
+					'value' => $meta_value,
+				)
+			);
+		}
+
+		$wpdb->update(
+			self::get_orders_table_name(),
+			array( 'status' => 'trash' ),
+			array( 'id' => $order->get_id() ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		$order->set_status( 'trash' );
+	}
+
+	/**
+	 * Deletes order data from custom order tables.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return void
+	 */
+	public function delete_order_data_from_custom_order_tables( $order_id ) {
+		global $wpdb;
+
+		// Delete COT-specific data.
+		foreach ( $this->get_all_table_names() as $table ) {
+			$wpdb->delete(
+				$table,
+				( self::get_orders_table_name() === $table )
+					? array( 'id' => $order_id )
+					: array( 'order_id' => $order_id ),
+				array( '%d' )
+			);
+		}
+	}
+
+	/**
 	 * Method to create an order in the database.
 	 *
 	 * @param \WC_Order $order

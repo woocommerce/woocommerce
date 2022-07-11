@@ -25,9 +25,9 @@ class ImageUpload extends Component {
 		}
 
 		const frame = wp.media( {
-			title: __( 'Select or upload image' ),
+			title: __( 'Select or upload image', 'woocommerce' ),
 			button: {
-				text: __( 'Select' ),
+				text: __( 'Select', 'woocommerce' ),
 			},
 			library: {
 				type: 'image',

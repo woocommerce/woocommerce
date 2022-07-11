@@ -64,9 +64,11 @@ export const getItems = createSelector(
 			} );
 		}
 
-		return ids.map( ( id: IdType ) => {
-			return state.data[ id ];
-		} );
+		return ids
+			.map( ( id: IdType ) => {
+				return state.data[ id ];
+			} )
+			.filter( ( item ) => item !== undefined );
 	},
 	( state, query ) => {
 		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );

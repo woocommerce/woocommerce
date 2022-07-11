@@ -199,6 +199,141 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Tests create() on the COT datastore.
 	 */
 	public function test_cot_datastore_create() {
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+
+		$this->assertIsInteger( $order_id );
+		$this->assertLessThan( $order_id, 0 );
+
+		wp_cache_flush();
+
+		// Read the order again (fresh).
+		$r_order = new WC_Order();
+		$r_order->set_id( $order_id );
+		$this->switch_data_store( $r_order, $this->sut );
+		$this->sut->read( $r_order );
+
+		// Compare some of the prop/meta values to those that should've been persisted.
+		$props_to_compare = array(
+			'status',
+			'created_via',
+			'currency',
+			'customer_ip_address',
+			'billing_first_name',
+			'billing_last_name',
+			'billing_company',
+			'billing_address_1',
+			'billing_city',
+			'billing_state',
+			'billing_postcode',
+			'billing_country',
+			'billing_email',
+			'billing_phone',
+			'shipping_total',
+			'total',
+		);
+
+		foreach ( $props_to_compare as $prop ) {
+			$this->assertEquals( $order->{"get_$prop"}( 'edit' ), $r_order->{"get_$prop"}( 'edit' ) );
+		}
+
+		$this->assertEquals( $order->get_meta( 'my_meta', true, 'edit' ), $r_order->get_meta( 'my_meta', true, 'edit' ) );
+		$this->assertEquals( $this->sut->get_stock_reduced( $order ), $this->sut->get_stock_reduced( $r_order ) );
+	}
+
+	/**
+	 * Tests creation of full vs placeholder records in the posts table when creating orders in the COT datastore.
+	 *
+	 * @return void
+	 */
+	public function test_cot_datastore_create_sync() {
+		global $wpdb;
+
+		// Sync enabled implies a full post should be created.
+		add_filter( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, function() { return 'yes'; } );
+		$order = $this->create_complex_cot_order();
+		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), 'shop_order' ) ) );
+
+		// Sync disabled implies a placeholder post should be created.
+		add_filter( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, function() { return 'no'; } );
+		$order = $this->create_complex_cot_order();
+		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) ) );
+	}
+
+	/**
+	 * Tests the `delete()` method on the COT datastore -- trashing.
+	 *
+	 * @return void
+	 */
+	public function test_cot_datastore_delete_trash() {
+		global $wpdb;
+
+		// Tests trashing of orders.
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+		$order->delete();
+
+		$orders_table = $this->sut::get_orders_table_name();
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
+
+		// Make sure order data persists in the database.
+		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
+
+		foreach ( $this->sut->get_all_table_names() as $table ) {
+			if ( $table === $orders_table ) {
+				continue;
+			}
+
+			$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d", $order_id ) ) );
+		}
+	}
+
+	/**
+	 * Tests the `delete()` method on the COT datastore -- full deletes.
+	 *
+	 * @return void
+	 */
+	public function test_cot_datastore_delete() {
+		global $wpdb;
+
+		// Tests trashing of orders.
+		$order    = $this->create_complex_cot_order();
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		// Make sure no data order persists in the database.
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
+
+		foreach ( $this->sut->get_all_table_names() as $table ) {
+			$field_name = ( $table === $this->sut::get_orders_table_name() ) ? 'id' : 'order_id';
+			$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$field_name} = %d", $order_id ) ) );
+		}
+	}
+
+	/**
+	 * Helper function to delete all meta for post.
+	 *
+	 * @param int $post_id Post ID to delete data for.
+	 */
+	private function delete_all_meta_for_post( $post_id ) {
+		global $wpdb;
+		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $post_id ) );
+	}
+
+	/**
+	 * Helper method to allow switching data stores.
+	 *
+	 * @param WC_Order      $order Order object.
+	 * @param WC_Data_Store $data_store Data store object to switch order to.
+	 */
+	private function switch_data_store( $order, $data_store ) {
+		$update_data_store_func = function ( $data_store ) {
+			$this->data_store = $data_store;
+		};
+		$update_data_store_func->call( $order, $data_store );
+	}
+
+	private function create_complex_cot_order() {
 		$order = new WC_Order();
 		$this->switch_data_store( $order, $this->sut );
 
@@ -248,67 +383,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$order->update_meta_data( 'my_meta', rand( 0, 255 ) );
 
-		$order_id = $order->save();
+		$order->save();
 
-		$this->assertIsInteger( $order_id );
-		$this->assertLessThan( $order_id, 0 );
-
-		wp_cache_flush();
-
-		// Read the order again (fresh).
-		$r_order = new WC_Order();
-		$r_order->set_id( $order_id );
-		$this->switch_data_store( $r_order, $this->sut );
-		$this->sut->read( $r_order );
-
-		// Compare some of the prop/meta values to those that should've been persisted.
-		$props_to_compare = array(
-			'status',
-			'created_via',
-			'currency',
-			'customer_ip_address',
-			'billing_first_name',
-			'billing_last_name',
-			'billing_company',
-			'billing_address_1',
-			'billing_city',
-			'billing_state',
-			'billing_postcode',
-			'billing_country',
-			'billing_email',
-			'billing_phone',
-			'shipping_total',
-			'total',
-		);
-
-		foreach ( $props_to_compare as $prop ) {
-			$this->assertEquals( $order->{"get_$prop"}( 'edit' ), $r_order->{"get_$prop"}( 'edit' ) );
-		}
-
-		$this->assertEquals( $order->get_meta( 'my_meta', true, 'edit' ), $r_order->get_meta( 'my_meta', true, 'edit' ) );
-		$this->assertEquals( $this->sut->get_stock_reduced( $order ), $this->sut->get_stock_reduced( $r_order ) );
+		return $order;
 	}
 
-	/**
-	 * Helper function to delete all meta for post.
-	 *
-	 * @param int $post_id Post ID to delete data for.
-	 */
-	private function delete_all_meta_for_post( $post_id ) {
-		global $wpdb;
-		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $post_id ) );
-	}
-
-	/**
-	 * Helper method to allow switching data stores.
-	 *
-	 * @param WC_Order      $order Order object.
-	 * @param WC_Data_Store $data_store Data store object to switch order to.
-	 */
-	private function switch_data_store( $order, $data_store ) {
-		$update_data_store_func = function ( $data_store ) {
-			$this->data_store = $data_store;
-		};
-		$update_data_store_func->call( $order, $data_store );
-	}
 }

@@ -81,7 +81,9 @@ test.describe( 'WooCommerce Orders > Refund an order', () => {
 
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.do-manual-refund' );
+		await page.click( '.do-manual-refund', {
+			waitForLoadState: 'networkidle',
+		} );
 
 		// Verify the product line item shows the refunded quantity and amount
 		await expect( page.locator( 'small.refunded >> nth=0' ) ).toContainText(
@@ -111,7 +113,10 @@ test.describe( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'a.delete_refund', { force: true } ); // have to force it because not visible
+		await page.click( 'a.delete_refund', {
+			force: true,
+			waitForLoadState: 'networkidle',
+		} ); // have to force it because not visible
 
 		// Verify the refunded row item is no longer showing
 		await expect( page.locator( 'tr.refund' ) ).toHaveCount( 0 );
@@ -200,7 +205,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// Verify stock reduction system note was added
-		await expect( page.locator( '.system-note >> nth=1' ) ).toHaveText(
+		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
 			/Stock levels reduced: Product with stock \(#\d+\) 10→8/
 		);
 
@@ -217,10 +222,12 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await page.fill( '.refund_order_item_qty >> nth=1', '2' );
 		await page.fill( '#refund_reason', 'No longer wanted' );
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.do-manual-refund' );
+		await page.click( '.do-manual-refund', {
+			waitForLoadState: 'networkidle',
+		} );
 
 		// Verify restock system note was added
-		await expect( page.locator( '.system-note >> nth=0' ) ).toHaveText(
+		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
 			/Item #\d+ stock increased from 8 to 10./
 		);
 

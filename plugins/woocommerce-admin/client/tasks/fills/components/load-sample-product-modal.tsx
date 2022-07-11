@@ -21,10 +21,13 @@ const LoadSampleProductModal: React.FC = () => {
 		>
 			<Spinner color="#007cba" size={ 48 } />
 			<Text className="woocommerce-load-sample-product-modal__title">
-				{ __( 'Loading sample products' ) }
+				{ __( 'Loading sample products', 'woocommerce' ) }
 			</Text>
 			<Text className="woocommerce-load-sample-product-modal__description">
-				{ __( 'We are loading 9 sample products into your store' ) }
+				{ __(
+					'We are loading 9 sample products into your store',
+					'woocommerce'
+				) }
 			</Text>
 		</Modal>
 	);
