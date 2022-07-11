@@ -23,8 +23,20 @@ class BatchProcessingController {
 	 * Schedules necessary actions to process batches.
 	 */
 	public function __construct() {
-		add_action( self::CONTROLLER_CRON_NAME, array( $this, 'schedule_processes' ) );
-		add_action( self::SINGLE_BATCH_PROCESS_ACTION, array( $this, 'process_single_batch' ), 10, 2 );
+		add_action(
+			self::CONTROLLER_CRON_NAME,
+			function () {
+				$this->schedule_processes();
+			}
+		);
+		add_action(
+			self::SINGLE_BATCH_PROCESS_ACTION,
+			function ( $batch_process ) {
+				$this->process_single_batch( $batch_process );
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -59,13 +71,13 @@ class BatchProcessingController {
 	/**
 	 * Schedules update for all updaters that may be stuck. This method is called in CONTROLLER_CRON_NAME action.
 	 */
-	public function schedule_processes() {
+	private function schedule_processes() {
 		$pending_processes = $this->get_pending();
 		if ( empty( $pending_processes ) ) {
 			return;
 		}
 		foreach ( $pending_processes as $process_name ) {
-			if ( ! $this->already_scheduled( $process_name ) ) {
+			if ( ! $this->is_scheduled( $process_name ) ) {
 				$this->schedule_next_batch( $process_name );
 			}
 		}
@@ -77,7 +89,7 @@ class BatchProcessingController {
 	 *
 	 * @param string $batch_process Fully qualified class name of the updater. Must be child class `BatchProcessor`.
 	 */
-	public function process_single_batch( string $batch_process ) {
+	private function process_single_batch( string $batch_process ) {
 		$batch_processor = $this->get_processor_instance( $batch_process );
 		$this->process_batch( $batch_processor );
 		if ( $batch_processor->get_total_pending_count() > 0 ) {
@@ -182,7 +194,7 @@ class BatchProcessingController {
 	 *
 	 * @return bool Whether it's already scheduled.
 	 */
-	public function already_scheduled( string $process_name ) {
+	public function is_scheduled( string $process_name ) {
 		return as_has_scheduled_action( self::SINGLE_BATCH_PROCESS_ACTION, array( $process_name ) );
 	}
 

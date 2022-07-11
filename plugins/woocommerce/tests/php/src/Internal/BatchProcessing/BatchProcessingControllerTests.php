@@ -47,14 +47,14 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 	 * Test that processes are scheduled via action scheduler as expected.
 	 */
 	public function test_schedule_processes() {
-		$this->assertFalse( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
+		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( $this->sut::CONTROLLER_CRON_NAME );
 
-		$this->assertTrue( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
+		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 		do_action( $this->sut::SINGLE_BATCH_PROCESS_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
-		$this->assertTrue( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
+		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 	}
 
@@ -97,7 +97,7 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
 		do_action( $this->sut::SINGLE_BATCH_PROCESS_ACTION, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
-		$this->assertFalse( $this->sut->already_scheduled( get_class( $this->test_process ) ) );
+		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 	}
 }

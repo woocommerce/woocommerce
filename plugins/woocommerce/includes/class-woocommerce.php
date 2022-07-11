@@ -220,15 +220,16 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
 		// These classes set up hooks on instantiation.
-		wc_get_container()->get( ProductDownloadDirectories::class );
-		wc_get_container()->get( DownloadPermissionsAdjuster::class );
-		wc_get_container()->get( AssignDefaultCategory::class );
-		wc_get_container()->get( DataRegenerator::class );
-		wc_get_container()->get( LookupDataStore::class );
-		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
-		wc_get_container()->get( CustomOrdersTableController::class );
-		wc_get_container()->get( OptionSanitizer::class );
-		wc_get_container()->get( BatchProcessingController::class );
+		$container = wc_get_container();
+		$container->get( ProductDownloadDirectories::class );
+		$container->get( DownloadPermissionsAdjuster::class );
+		$container->get( AssignDefaultCategory::class );
+		$container->get( DataRegenerator::class );
+		$container->get( LookupDataStore::class );
+		$container->get( RestockRefundedItemsAdjuster::class );
+		$container->get( CustomOrdersTableController::class );
+		$container->get( OptionSanitizer::class );
+		$container->get( BatchProcessingController::class );
 	}
 
 	/**
