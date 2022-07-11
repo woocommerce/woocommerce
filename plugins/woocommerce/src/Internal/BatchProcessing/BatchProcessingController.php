@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
+use Dompdf\Exception;
+
 /**
  * Class BatchProcessingController
  *
@@ -291,6 +293,7 @@ class BatchProcessingController {
 	 * @param \Exception $error Exception object.
 	 */
 	protected function log_error( \Exception $error ) : void {
+		// phpcs:ignore
 		// TODO: Implement error logging.
 	}
 
