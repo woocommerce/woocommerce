@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array|mixed|string Value of the meta key.
  */
-function wc_get_post_or_object_meta( WP_Post $post, WC_Data $data, string $key, bool $single ) {
+function wc_get_post_or_object_meta( ?WP_Post $post, ?WC_Data $data, string $key, bool $single ) {
 	if ( isset( $data ) && $data instanceof WC_Data ) {
 		if ( method_exists( $data, "get$key" ) ) {
 			return $data->{"get$key"}();
