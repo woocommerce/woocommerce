@@ -9,13 +9,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'Plugin_Command' ) ) {
+	exit;
+}
+
 /**
  * Allows to interact with extensions from WCCOM marketplace via CLI.
  *
  * @version 6.8
  * @package WooCommerce
  */
-class WC_CLI_COM_Command {
+class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	/**
 	 * Registers a commands for managing WooCommerce.com extensions.
 	 */
