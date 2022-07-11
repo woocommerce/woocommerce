@@ -32,8 +32,8 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <extension|zip|url>...
-	 * : One or more plugins to install. Accepts a plugin slug, the path to a local zip file, or a URL to a remote zip file.
+	 * <extension>...
+	 * : One or more plugins to install. Accepts a plugin slug.
 	 *
 	 * [--force]
 	 * : If set, the command will overwrite any installed version of the plugin, without prompting
@@ -59,21 +59,6 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 *     Plugin installed successfully.
 	 *     Activating 'automatewoo'...
 	 *     Plugin 'automatewoo' activated.
-	 *     Success: Installed 1 of 1 plugins.
-	 *
-	 *     # Install from a local zip file
-	 *     $ wp wc com extension install ../my-plugin.zip
-	 *     Unpacking the package...
-	 *     Installing the plugin...
-	 *     Plugin installed successfully.
-	 *     Success: Installed 1 of 1 plugins.
-	 *
-	 *     # Install from a remote zip file
-	 *     $ wp wc com extension install http://s3.amazonaws.com/bucketname/my-plugin.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef
-	 *     Downloading install package from http://s3.amazonaws.com/bucketname/my-plugin.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef
-	 *     Unpacking the package...
-	 *     Installing the plugin...
-	 *     Plugin installed successfully.
 	 *     Success: Installed 1 of 1 plugins.
 	 *
 	 *     # Forcefully re-install an installed plugin
@@ -102,9 +87,12 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 			}
 		}
 
-		// No package found, pass <extension> to Plugin_Command::install to search in wp.org
+		// No package found.
 		if ( is_null( $extension_package_url ) ) {
-			$extension_package_url = $extension;
+			WP_CLI::warning( sprintf( 'We couldn\'t find a Subscription for \'%s\'', $extension ) );
+			WP_CLI\Utils\report_batch_operation_results( $this->item_type, 'install', count( $args ), 0, 1 );
+
+			return;
 		}
 
 		parent::install( [ $extension_package_url ], $assoc_args );
