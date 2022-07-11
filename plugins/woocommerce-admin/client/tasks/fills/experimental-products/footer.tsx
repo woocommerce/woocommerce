@@ -25,7 +25,8 @@ const Footer: React.FC = () => {
 			<Text className="woocommerce-products-footer__import-options">
 				{ interpolateComponents( {
 					mixedString: __(
-						'{{importCSVLink}}Import your products from a CSV file{{/importCSVLink}} or {{_3rdLink}}use a 3rd party migration plugin{{/_3rdLink}}.'
+						'{{importCSVLink}}Import your products from a CSV file{{/importCSVLink}} or {{_3rdLink}}use a 3rd party migration plugin{{/_3rdLink}}.',
+						'woocommerce'
 					),
 					components: {
 						importCSVLink: (

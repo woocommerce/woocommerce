@@ -13,6 +13,7 @@ type QueryParams = {
 	experiment_name: string;
 	anon_id: string | null;
 	woo_country_code: string;
+	woo_wcadmin_install_timestamp: string;
 };
 
 const isValidQueryParams = (
@@ -20,7 +21,10 @@ const isValidQueryParams = (
 ): queryParams is QueryParams => {
 	return (
 		( queryParams as QueryParams ).hasOwnProperty( 'experiment_name' ) &&
-		( queryParams as QueryParams ).hasOwnProperty( 'woo_country_code' )
+		( queryParams as QueryParams ).hasOwnProperty( 'woo_country_code' ) &&
+		( queryParams as QueryParams ).hasOwnProperty(
+			'woo_wcadmin_install_timestamp'
+		)
 	);
 };
 
@@ -52,6 +56,9 @@ const getRequestQueryParams = ( {
 				?.woocommerce_default_country ||
 			window.wcSettings?.admin?.preloadSettings?.general
 				?.woocommerce_default_country,
+		woo_wcadmin_install_timestamp:
+			window.wcSettings?.admin?.preloadOptions
+				?.woocommerce_admin_install_timestamp,
 	} );
 
 	if ( ! isValidQueryParams( queryParams ) ) {

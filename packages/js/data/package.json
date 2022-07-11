@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/data",
-	"version": "4.0.0",
+	"version": "4.1.0",
 	"description": "WooCommerce Admin data store and utilities",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",

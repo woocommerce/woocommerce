@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/number",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"description": "Number formatting utilities for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",

@@ -74,6 +74,18 @@ class DataSynchronizer {
 				$this->maybe_start_synchronizing_pending_orders();
 			}
 		);
+
+		// When posts is authoritative and sync is enabled, deleting a post also deletes COT data.
+		add_action(
+			'deleted_post',
+			function( $postid, $post ) {
+				if ( 'shop_order' === $post->post_type && ! $this->custom_orders_table_is_authoritative() && $this->data_sync_is_enabled() ) {
+					$this->data_store->delete_order_data_from_custom_order_tables( $postid );
+				}
+			},
+			10,
+			2
+		);
 	}
 
 	/**

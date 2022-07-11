@@ -29,20 +29,26 @@ module.exports = async ( config ) => {
 	await adminPage.fill( 'input[name="pwd"]', 'password' );
 	await adminPage.click( 'text=Log In' );
 	await adminPage.context().storageState( { path: adminState } );
-	// While we're here, let's add a consumer token for API access
-	await adminPage.goto(
-		`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
-	);
-	await adminPage.fill( '#key_description', 'Key for API access' );
-	await adminPage.selectOption( '#key_permissions', 'read_write' );
-	await adminPage.click( 'text=Generate API key' );
-	process.env.CONSUMER_KEY = await adminPage.inputValue(
-		'#key_consumer_key'
-	);
-	process.env.CONSUMER_SECRET = await adminPage.inputValue(
-		'#key_consumer_secret'
-	);
 
+	// While we're here, let's add a consumer token for API access
+	// This step was failing occasionally, and globalsetup doesn't retry, so make it retry
+	const nRetries = 5;
+	for ( let i = 0; i < nRetries; i++ ) {
+		try {
+			await adminPage.goto(
+				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
+			);
+			await adminPage.fill( '#key_description', 'Key for API access' );
+			await adminPage.selectOption( '#key_permissions', 'read_write' );
+			await adminPage.click( 'text=Generate API key' );
+			process.env.CONSUMER_KEY = await adminPage.inputValue(
+				'#key_consumer_key'
+			);
+			process.env.CONSUMER_SECRET = await adminPage.inputValue(
+				'#key_consumer_secret'
+			);
+		} catch ( e ) {}
+	}
 	// Sign in as customer user and save state
 	const customerPage = await browser.newPage();
 	await customerPage.goto( `${ baseURL }/wp-admin` );
