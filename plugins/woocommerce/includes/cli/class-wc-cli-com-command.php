@@ -39,7 +39,7 @@ class WC_CLI_COM_Command {
 		$auth = WC_Helper_Options::get( 'auth' );
 
 		if ( ! empty( $auth['access_token'] ) && ! empty( $auth['access_token_secret'] ) ) {
-			WP_CLI::log( WP_CLI::colorize( '%yThis site is already connected.%n' ) );
+			WP_CLI::log( WP_CLI::colorize( '%yThis site is already connected to WooCommerce.com.%n' ) );
 			return;
 		}
 
