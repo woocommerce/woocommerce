@@ -24,8 +24,7 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 * Registers a commands for managing WooCommerce.com extensions.
 	 */
 	public static function register_commands() {
-		WP_CLI::add_command( 'wc com extension install', array( 'WC_CLI_COM_Command', 'install_extension' ) );
-		WP_CLI::add_command( 'wc com extension list', array( 'WC_CLI_COM_Command', 'list_extensions' ) );
+		WP_CLI::add_command( 'wc com extension', 'WC_CLI_COM_Extension_Command' );
 	}
 
 	/**
@@ -35,10 +34,10 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 *
 	 * wp wc com extension list
 	 *
-	 * @param  array $args WP-CLI positional arguments.
-	 * @param  array $assoc_args WP-CLI associative arguments.
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
-	public static function list_extensions( array $args, array $assoc_args ) {
+	public function list_( $args, $assoc_args ) {
 	}
 
 	/**
