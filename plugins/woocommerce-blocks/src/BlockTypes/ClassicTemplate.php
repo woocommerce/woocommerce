@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use WC_Query;
 
 /**
  * Classic Single Product class
@@ -32,8 +33,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_filter( 'render_block', array( $this, 'add_alignment_class_to_wrapper' ), 10, 2 );
-		add_filter( 'query_vars', array( $this, 'add_query_vars_filter' ) );
-		add_filter( 'woocommerce_product_query_meta_query', array( $this, 'filter_products_by_stock' ), 10, 2 );
+		add_filter( 'woocommerce_product_query_meta_query', array( $this, 'filter_products_by_stock' ) );
 
 	}
 
@@ -272,12 +272,18 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	 * @return array
 	 */
 	public function filter_products_by_stock( $meta_query ) {
-		if ( is_admin() ) {
+		global $wp_query;
+
+		if (
+			is_admin() ||
+			! $wp_query->is_main_query() ||
+			! isset( $_GET[ self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
 			return $meta_query;
 		}
 
 		$stock_status = array_keys( wc_get_product_stock_status_options() );
-		$values       = get_query_var( self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM );
+		$values       = sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$values_to_array = explode( ',', $values );
 
@@ -297,18 +303,6 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			);
 		}
 		return $meta_query;
-	}
-
-
-	/**
-	 * Add custom query params
-	 *
-	 * @param array $vars Query vars.
-	 * @return array Query vars.
-	 */
-	public function add_query_vars_filter( $vars ) {
-		$vars[] = self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM;
-		return $vars;
 	}
 
 }

@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
+import { changeUrl, getUrlParameter } from '@woocommerce/utils';
 import {
 	CurrencyResponse,
 	isBoolean,
@@ -25,7 +26,6 @@ import {
  * Internal dependencies
  */
 import usePriceConstraints from './use-price-constraints';
-import { getUrlParameter } from '../../utils/filters';
 import './style.scss';
 import { Attributes } from './types';
 
@@ -96,11 +96,7 @@ const PriceFilterBlock = ( {
 		isBoolean
 	);
 
-	/**
-	 * Important: Only used on the PHP rendered Block pages to track
-	 * the price filter defaults coming from the URL
-	 */
-	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] =
+	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
 		useState( false );
 
 	const minPriceParam = getUrlParameter( 'min_price' );
@@ -117,14 +113,10 @@ const PriceFilterBlock = ( {
 			: undefined
 	);
 
-	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(
-		'min_price',
-		formatPrice( minPriceParam, currency.minorUnit ) || null
-	);
-	const [ maxPriceQuery, setMaxPriceQuery ] = useQueryStateByKey(
-		'max_price',
-		formatPrice( maxPriceParam, currency.minorUnit ) || null
-	);
+	const [ minPriceQuery, setMinPriceQuery ] =
+		useQueryStateByKey( 'min_price' );
+	const [ maxPriceQuery, setMaxPriceQuery ] =
+		useQueryStateByKey( 'max_price' );
 
 	const [ minPrice, setMinPrice ] = useState(
 		formatPrice( minPriceParam, currency.minorUnit ) || null
@@ -150,14 +142,10 @@ const PriceFilterBlock = ( {
 	} );
 
 	/**
-	 * Important: For PHP rendered block templates only.
-	 *
-	 * When we render the PHP block template (e.g. Classic Block) we need
-	 * to set the default min_price and max_price values from the URL
-	 * for the filter to work alongside the Active Filters block.
+	 * Try get the min and/or max price from the URL.
 	 */
 	useEffect( () => {
-		if ( ! hasSetPhpFilterDefaults && filteringForPhpTemplate ) {
+		if ( ! hasSetFilterDefaultsFromUrl ) {
 			setMinPriceQuery(
 				formatPrice( minPriceParam, currency.minorUnit )
 			);
@@ -165,12 +153,11 @@ const PriceFilterBlock = ( {
 				formatPrice( maxPriceParam, currency.minorUnit )
 			);
 
-			setHasSetPhpFilterDefaults( true );
+			setHasSetFilterDefaultsFromUrl( true );
 		}
 	}, [
 		currency.minorUnit,
-		filteringForPhpTemplate,
-		hasSetPhpFilterDefaults,
+		hasSetFilterDefaultsFromUrl,
 		maxPriceParam,
 		minPriceParam,
 		setMaxPriceQuery,
@@ -189,27 +176,26 @@ const PriceFilterBlock = ( {
 					? undefined
 					: newMinPrice;
 
-			// For block templates that render the PHP Classic Template block we need to add the filters as params and reload the page.
-			if ( filteringForPhpTemplate && window ) {
+			if ( window ) {
 				const newUrl = formatParams( window.location.href, {
 					min_price: finalMinPrice / 10 ** currency.minorUnit,
 					max_price: finalMaxPrice / 10 ** currency.minorUnit,
 				} );
-				// If the params have changed, lets reload the page.
+
+				// If the params have changed, lets update the filter URL.
 				if ( window.location.href !== newUrl ) {
-					window.location.href = newUrl;
+					changeUrl( newUrl );
 				}
-			} else {
-				setMinPriceQuery( finalMinPrice );
-				setMaxPriceQuery( finalMaxPrice );
 			}
+
+			setMinPriceQuery( finalMinPrice );
+			setMaxPriceQuery( finalMaxPrice );
 		},
 		[
 			minConstraint,
 			maxConstraint,
 			setMinPriceQuery,
 			setMaxPriceQuery,
-			filteringForPhpTemplate,
 			currency.minorUnit,
 		]
 	);
@@ -229,7 +215,7 @@ const PriceFilterBlock = ( {
 
 			if (
 				filteringForPhpTemplate &&
-				hasSetPhpFilterDefaults &&
+				hasSetFilterDefaultsFromUrl &&
 				! attributes.showFilterButton
 			) {
 				debouncedUpdateQuery( prices[ 0 ], prices[ 1 ] );
@@ -241,7 +227,7 @@ const PriceFilterBlock = ( {
 			setMinPrice,
 			setMaxPrice,
 			filteringForPhpTemplate,
-			hasSetPhpFilterDefaults,
+			hasSetFilterDefaultsFromUrl,
 			debouncedUpdateQuery,
 			attributes.showFilterButton,
 		]

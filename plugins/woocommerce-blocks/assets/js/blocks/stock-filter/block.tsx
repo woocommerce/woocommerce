@@ -24,7 +24,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { decodeEntities } from '@wordpress/html-entities';
 import { isBoolean, objectHasProp } from '@woocommerce/types';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
-import { PREFIX_QUERY_ARG_FILTER_TYPE } from '@woocommerce/utils';
+import { changeUrl, PREFIX_QUERY_ARG_FILTER_TYPE } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -56,7 +56,7 @@ const StockStatusFilterBlock = ( {
 		isBoolean
 	);
 
-	const [ hasSetPhpFilterDefaults, setHasSetPhpFilterDefaults ] =
+	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
 		useState( false );
 
 	const { outofstock, ...otherStockStatusOptions } = getSetting(
@@ -70,9 +70,12 @@ const StockStatusFilterBlock = ( {
 			: { outofstock, ...otherStockStatusOptions }
 	);
 
-	const [ checked, setChecked ] = useState(
-		getActiveFilters( STOCK_STATUS_OPTIONS.current, QUERY_PARAM_KEY )
+	const initialFilters = useMemo(
+		() => getActiveFilters( STOCK_STATUS_OPTIONS.current, QUERY_PARAM_KEY ),
+		[]
 	);
+
+	const [ checked, setChecked ] = useState( initialFilters );
 	const [ displayedOptions, setDisplayedOptions ] = useState(
 		blockAttributes.isPreview ? previewOptions : []
 	);
@@ -86,7 +89,7 @@ const StockStatusFilterBlock = ( {
 
 	const [ queryState ] = useQueryStateByContext();
 	const [ productStockStatusQuery, setProductStockStatusQuery ] =
-		useQueryStateByKey( 'stock_status', [] );
+		useQueryStateByKey( 'stock_status', initialFilters );
 
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
 		useCollectionData( {
@@ -179,7 +182,10 @@ const StockStatusFilterBlock = ( {
 	 *
 	 * @param {Array} checkedOptions Array of checked stock options.
 	 */
-	const redirectPageForPhpTemplate = ( checkedOptions: string[] ) => {
+	const updateFilterUrl = ( checkedOptions: string[] ) => {
+		if ( ! window ) {
+			return;
+		}
 		if ( checkedOptions.length === 0 ) {
 			const url = removeQueryArgs(
 				window.location.href,
@@ -187,8 +193,9 @@ const StockStatusFilterBlock = ( {
 			);
 
 			if ( url !== window.location.href ) {
-				window.location.href = url;
+				changeUrl( url );
 			}
+
 			return;
 		}
 
@@ -196,9 +203,11 @@ const StockStatusFilterBlock = ( {
 			[ QUERY_PARAM_KEY ]: checkedOptions.join( ',' ),
 		} );
 
-		if ( newUrl !== window.location.href ) {
-			window.location.href = newUrl;
+		if ( newUrl === window.location.href ) {
+			return;
 		}
+
+		changeUrl( newUrl );
 	};
 
 	const onSubmit = useCallback(
@@ -206,13 +215,11 @@ const StockStatusFilterBlock = ( {
 			if ( isEditor ) {
 				return;
 			}
-			if ( isChecked ) {
+			if ( isChecked && ! filteringForPhpTemplate ) {
 				setProductStockStatusQuery( checked );
 			}
-			// For PHP templates when the filter button is enabled.
-			if ( filteringForPhpTemplate ) {
-				redirectPageForPhpTemplate( checked );
-			}
+
+			updateFilterUrl( checked );
 		},
 		[
 			isEditor,
@@ -246,32 +253,18 @@ const StockStatusFilterBlock = ( {
 	}, [ checked, currentCheckedQuery, previousCheckedQuery ] );
 
 	/**
-	 * Important: For PHP rendered block templates only.
+	 * Try get the stock filter from the URL.
 	 */
 	useEffect( () => {
-		if ( filteringForPhpTemplate ) {
-			setChecked( checked );
-		}
-	}, [ filteringForPhpTemplate, checked ] );
-
-	/**
-	 * Important: For PHP rendered block templates only.
-	 */
-	useEffect( () => {
-		if ( ! hasSetPhpFilterDefaults && filteringForPhpTemplate ) {
-			setProductStockStatusQuery(
-				getActiveFilters(
-					STOCK_STATUS_OPTIONS.current,
-					QUERY_PARAM_KEY
-				)
-			);
-			setHasSetPhpFilterDefaults( true );
+		if ( ! hasSetFilterDefaultsFromUrl ) {
+			setProductStockStatusQuery( initialFilters );
+			setHasSetFilterDefaultsFromUrl( true );
 		}
 	}, [
-		filteringForPhpTemplate,
 		setProductStockStatusQuery,
-		hasSetPhpFilterDefaults,
-		setHasSetPhpFilterDefaults,
+		hasSetFilterDefaultsFromUrl,
+		setHasSetFilterDefaultsFromUrl,
+		initialFilters,
 	] );
 
 	/**

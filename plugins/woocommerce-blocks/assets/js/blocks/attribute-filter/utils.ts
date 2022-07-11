@@ -44,17 +44,16 @@ export const formatParams = ( url: string, params: Array< Param > = [] ) => {
 
 export const areAllFiltersRemoved = ( {
 	currentCheckedFilters,
-	hasSetPhpFilterDefaults,
+	hasSetFilterDefaultsFromUrl,
 }: {
 	currentCheckedFilters: Array< string >;
-	hasSetPhpFilterDefaults: boolean;
-} ) => hasSetPhpFilterDefaults && currentCheckedFilters.length === 0;
+	hasSetFilterDefaultsFromUrl: boolean;
+} ) => hasSetFilterDefaultsFromUrl && currentCheckedFilters.length === 0;
 
 export const getActiveFilters = (
-	isFilteringForPhpTemplateEnabled: boolean,
 	attributeObject: AttributeObject | undefined
 ) => {
-	if ( isFilteringForPhpTemplateEnabled && attributeObject ) {
+	if ( attributeObject ) {
 		const defaultAttributeParam = getUrlParameter(
 			`filter_${ attributeObject.name }`
 		);
