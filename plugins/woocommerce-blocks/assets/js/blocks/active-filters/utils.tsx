@@ -6,6 +6,7 @@ import { formatPrice } from '@woocommerce/price-format';
 import { RemovableChip } from '@woocommerce/base-components/chip';
 import Label from '@woocommerce/base-components/label';
 import { getQueryArgs, addQueryArgs, removeQueryArgs } from '@wordpress/url';
+import { changeUrl } from '@woocommerce/utils';
 
 /**
  * Format a min/max price range to display.
@@ -158,6 +159,10 @@ export const renderRemovableListItem = ( {
 export const removeArgsFromFilterUrl = (
 	...args: ( string | Record< string, string > )[]
 ) => {
+	if ( ! window ) {
+		return;
+	}
+
 	const url = window.location.href;
 	const currentQuery = getQueryArgs( url );
 	const cleanUrl = removeQueryArgs( url, ...Object.keys( currentQuery ) );
@@ -181,13 +186,19 @@ export const removeArgsFromFilterUrl = (
 		Object.entries( currentQuery ).filter( ( [ , value ] ) => value )
 	);
 
-	window.location.href = addQueryArgs( cleanUrl, filteredQuery );
+	const newUrl = addQueryArgs( cleanUrl, filteredQuery );
+
+	changeUrl( newUrl );
 };
 
 /**
  * Clean the filter URL.
  */
 export const cleanFilterUrl = () => {
+	if ( ! window ) {
+		return;
+	}
+
 	const url = window.location.href;
 	const args = getQueryArgs( url );
 	const cleanUrl = removeQueryArgs( url, ...Object.keys( args ) );
@@ -209,5 +220,7 @@ export const cleanFilterUrl = () => {
 			.map( ( key ) => [ key, args[ key ] ] )
 	);
 
-	window.location.href = addQueryArgs( cleanUrl, remainingArgs );
+	const newUrl = addQueryArgs( cleanUrl, remainingArgs );
+
+	changeUrl( newUrl );
 };

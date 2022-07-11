@@ -101,33 +101,33 @@ const ActiveAttributeFilters = ( {
 						name: decodeEntities( termObject.name || slug ),
 						prefix,
 						removeCallback: () => {
-							if ( filteringForPhpTemplate ) {
-								const currentAttribute = productAttributes.find(
-									( { attribute } ) =>
-										attribute ===
-										`pa_${ attributeObject.name }`
+							const currentAttribute = productAttributes.find(
+								( { attribute } ) =>
+									attribute === `pa_${ attributeObject.name }`
+							);
+
+							// If only one attribute was selected, we remove both filter and query type from the URL.
+							if ( currentAttribute?.slug.length === 1 ) {
+								removeArgsFromFilterUrl(
+									`query_type_${ attributeObject.name }`,
+									`filter_${ attributeObject.name }`
 								);
-
-								// If only one attribute was selected, we remove both filter and query type from the URL.
-								if ( currentAttribute?.slug.length === 1 ) {
-									return removeArgsFromFilterUrl(
-										`query_type_${ attributeObject.name }`,
-										`filter_${ attributeObject.name }`
-									);
-								}
-
+							} else {
 								// Remove only the slug from the URL.
-								return removeArgsFromFilterUrl( {
+								removeArgsFromFilterUrl( {
 									[ `filter_${ attributeObject.name }` ]:
 										slug,
 								} );
 							}
-							removeAttributeFilterBySlug(
-								productAttributes,
-								setProductAttributes,
-								attributeObject,
-								slug
-							);
+
+							if ( ! filteringForPhpTemplate ) {
+								removeAttributeFilterBySlug(
+									productAttributes,
+									setProductAttributes,
+									attributeObject,
+									slug
+								);
+							}
 						},
 						showLabel: false,
 						displayStyle,
