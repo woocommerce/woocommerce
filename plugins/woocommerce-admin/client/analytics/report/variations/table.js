@@ -132,7 +132,7 @@ class VariationsReportTable extends Component {
 			return [
 				{
 					display: deleted ? (
-						name + ' ' + __( '(Deleted)', ' woocommerce-admin' )
+						name + ' ' + __( '(Deleted)', 'woocommerce' )
 					) : (
 						<Link href={ editPostLink } type="wp-admin">
 							{ name }

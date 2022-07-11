@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useRef, useState, createElement } from '@wordpress/element';
+import {
+	useEffect,
+	useRef,
+	useState,
+	createElement,
+	useContext,
+} from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
@@ -29,6 +35,7 @@ import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
 import { TaskListCompletedHeader } from './completed-header';
+import { LayoutContext } from '~/layout';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -71,6 +78,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} >( {} );
 	const [ activeTaskId, setActiveTaskId ] = useState( '' );
 	const [ showDismissModal, setShowDismissModal ] = useState( false );
+	const layoutContext = useContext( LayoutContext );
 
 	const prevQueryRef = useRef( query );
 
@@ -83,6 +91,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ listEventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context: layoutContext.toString(),
 		} );
 	};
 
@@ -179,6 +188,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const trackClick = ( task: TaskType ) => {
 		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
+			context: layoutContext.toString(),
 		} );
 	};
 

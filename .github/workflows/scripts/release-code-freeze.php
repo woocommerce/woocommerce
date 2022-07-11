@@ -39,6 +39,14 @@ $milestone_major_minor = number_format( $latest_float + 0.2, 1 );
 $release_branch_to_create = "release/{$branch_major_minor}";
 $milestone_to_create      = "{$milestone_major_minor}.0";
 
+if ( getenv( 'GITHUB_OUTPUTS' ) ) {
+	echo 'Including GitHub Outputs...' . PHP_EOL;
+	echo '::set-output name=next_version::' . $milestone_major_minor . PHP_EOL;
+	echo '::set-output name=release_version::' . $branch_major_minor . PHP_EOL;
+	echo '::set-output name=branch::' . $release_branch_to_create . PHP_EOL;
+	echo '::set-output name=milestone::' . $milestone_to_create . PHP_EOL;
+}
+
 if ( getenv( 'DRY_RUN' ) ) {
 	echo 'DRY RUN: Skipping actual creation of release branch and milestone...' . PHP_EOL;
 	echo "Release Branch: {$release_branch_to_create}" . PHP_EOL;

@@ -1,48 +1,19 @@
-# Unreleased
+# Changelog 
 
-- Update dependency `@wordpress/hooks` to ^3.5.0
-- Added Typescript type declarations. #32615
-- Updated README with useExperiment example
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 2.1.0
+## [2.3.0](https://www.npmjs.com/package/@woocommerce/packages/js/explat/v/2.3.0) - 2022-07-08 
 
--   Add missing dependencies. #8349
--   Update all js packages with minor/patch version changes. #8392
--   Add `@wordpress/api-fetch` as dependencies. #8428
--   Export `*WithAuth` methods to authenticate WPCOM users. #8428
-# 2.0.0
+-   Patch - Fix fetchExperimentAssignment response
+-   Minor - Remove PHP and Composer dependencies for packaged JS packages
 
-- Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter #8231
-## Breaking changes
+## [2.2.0](https://www.npmjs.com/package/@woocommerce/packages/js/explat/v/2.2.0) - 2022-06-15 
 
--   Update dependencies to support react 17. #8305
--   Drop support for IE11. #8305
+-   Patch - Added useExperiment example
+-   Patch - Standardize lint scripts: add lint:fix
+-   Minor - Add Jetpack Changelogger
+-   Minor - Update dependency `@wordpress/hooks` to ^3.5.0
+-   Minor - Added Typescript type declarations. #32615
+-   Minor - Updated README with useExperiment example
 
-# 1.1.4
-
-- Fix an error when getting woocommerce_default_country value. #7600
-- Attempts to get the woocommerce_default_country value in wcSettings.preloadSettings.general first for the backward compatibility #7600
-
-# 1.1.3
-
-- Retry fix for missing build-module folder
-
-# 1.1.2
-
-- Fix missing build-module folder
-# 1.1.1
-
-- Update add woo_country_code param when fetching an assignment #7533
-
-# 1.1.0
-
--   Fix commonjs module build, allow package to be built in isolation. #7286
--   Fix and refactor explat polling to use setTimeout #7274
-
-# 1.0.1
-
--   Update ExPlat client dependencies
-
-# 1.0.0
-
--   Initial package
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/explat/CHANGELOG.md).

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState, useContext } from '@wordpress/element';
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, getVisibleTasks } from '@woocommerce/data';
@@ -20,12 +20,14 @@ import { ProgressHeader } from '~/task-lists/progress-header';
 import { SectionPanelTitle } from './section-panel-title';
 import { TaskListItem } from './task-list-item';
 import { TaskListCompletedHeader } from './completed-header';
+import { LayoutContext } from '~/layout';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
 	onToggle?: ( isOpen: boolean ) => void;
 };
-const PanelBodyWithUpdatedType = PanelBody as React.ComponentType< PanelBodyProps >;
+const PanelBodyWithUpdatedType =
+	PanelBody as React.ComponentType< PanelBodyProps >;
 
 export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	query,
@@ -44,13 +46,12 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const {
-		hideTaskList,
-		keepCompletedTaskList: keepCompletedTasks,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	const { hideTaskList, keepCompletedTaskList: keepCompletedTasks } =
+		useDispatch( ONBOARDING_STORE_NAME );
 	const [ openPanel, setOpenPanel ] = useState< string | null >(
 		sections?.find( ( section ) => ! section.isComplete )?.id || null
 	);
+	const layoutContext = useContext( LayoutContext );
 
 	const prevQueryRef = useRef( query );
 
@@ -64,6 +65,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ eventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
+			context: layoutContext.toString(),
 		} );
 	};
 

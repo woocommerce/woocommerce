@@ -30,9 +30,7 @@ export function getPaymentGatewaysSuccess(
 	};
 }
 
-export function getPaymentGatewaysError(
-	error: unknown
-): {
+export function getPaymentGatewaysError( error: unknown ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_ERROR;
 	error: unknown;
 } {
@@ -50,9 +48,7 @@ export function getPaymentGatewayRequest(): {
 	};
 }
 
-export function getPaymentGatewayError(
-	error: unknown
-): {
+export function getPaymentGatewayError( error: unknown ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAY_ERROR;
 	error: unknown;
 } {
@@ -62,9 +58,7 @@ export function getPaymentGatewayError(
 	};
 }
 
-export function getPaymentGatewaySuccess(
-	paymentGateway: PaymentGateway
-): {
+export function getPaymentGatewaySuccess( paymentGateway: PaymentGateway ): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAY_SUCCESS;
 	paymentGateway: PaymentGateway;
 } {
@@ -74,9 +68,7 @@ export function getPaymentGatewaySuccess(
 	};
 }
 
-export function updatePaymentGatewaySuccess(
-	paymentGateway: PaymentGateway
-): {
+export function updatePaymentGatewaySuccess( paymentGateway: PaymentGateway ): {
 	type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_SUCCESS;
 	paymentGateway: PaymentGateway;
 } {
@@ -93,9 +85,7 @@ export function updatePaymentGatewayRequest(): {
 	};
 }
 
-export function updatePaymentGatewayError(
-	error: unknown
-): {
+export function updatePaymentGatewayError( error: unknown ): {
 	type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_ERROR;
 	error: unknown;
 } {

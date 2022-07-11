@@ -1,7 +1,14 @@
 <?php
+/**
+ * Admin report functionality.
+ *
+ * @package WooCommerce\Admin\Reports
+ */
+
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -9,20 +16,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Extended by reports to show charts and stats in admin.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
  */
 class WC_Admin_Report {
 
 	/**
-	 * @var array List of transients name that have been updated and need persisting.
+	 * List of transients name that have been updated and need persisting.
+	 *
+	 * @var array
 	 */
 	protected static $transients_to_update = array();
 
 	/**
-	 * @var array The list of transients.
+	 * The list of transients.
+	 *
+	 * @var array
 	 */
 	protected static $cached_results = array();
 
@@ -79,7 +88,7 @@ class WC_Admin_Report {
 	 *     'name'     => 'total_sales'
 	 * )
 	 *
-	 * @param  array $args
+	 * @param  array $args arguments for the report.
 	 * @return mixed depending on query_type
 	 */
 	public function get_order_report_data( $args = array() ) {
@@ -103,6 +112,7 @@ class WC_Admin_Report {
 		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
 		$args         = wp_parse_args( $args, $default_args );
 
+		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 		extract( $args );
 
 		if ( empty( $data ) ) {
@@ -157,7 +167,7 @@ class WC_Admin_Report {
 		$query['select'] = 'SELECT ' . implode( ',', $select );
 		$query['from']   = "FROM {$wpdb->posts} AS posts";
 
-		// Joins
+		// Joins.
 		$joins = array();
 
 		foreach ( ( $data + $where ) as $raw_key => $value ) {
@@ -204,7 +214,7 @@ class WC_Admin_Report {
 					$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
 
 				} else {
-					// If we have a where clause for meta, join the postmeta table
+					// If we have a where clause for meta, join the postmeta table.
 					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
 				}
 			}
@@ -234,12 +244,14 @@ class WC_Admin_Report {
 			}
 		}
 
+		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
 		if ( $filter_range ) {
 			$query['where'] .= "
 				AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $this->start_date ) . "'
 				AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) ) . "'
 			";
 		}
+		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date
 
 		if ( ! empty( $where_meta ) ) {
 
@@ -255,9 +267,10 @@ class WC_Admin_Report {
 
 				$key = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
 
-				if ( strtolower( $value['operator'] ) == 'in' || strtolower( $value['operator'] ) == 'not in' ) {
+				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
 
 					if ( is_array( $value['meta_value'] ) ) {
+						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 						$value['meta_value'] = implode( "','", $value['meta_value'] );
 					}
 
@@ -302,7 +315,7 @@ class WC_Admin_Report {
 
 			foreach ( $where as $value ) {
 
-				if ( strtolower( $value['operator'] ) == 'in' || strtolower( $value['operator'] ) == 'not in' ) {
+				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
 
 					if ( is_array( $value['value'] ) ) {
 						$value['value'] = implode( "','", $value['value'] );
@@ -349,7 +362,7 @@ class WC_Admin_Report {
 		} else {
 			$query_hash = md5( $query_type . $query );
 			$result     = $this->get_cached_query( $query_hash );
-			if ( $result === null ) {
+			if ( null === $result ) {
 				self::enable_big_selects();
 
 				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
@@ -414,7 +427,11 @@ class WC_Admin_Report {
 		$class = strtolower( get_class( $this ) );
 
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
-			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
+			self::$cached_results[ $class ] = get_transient( $class );
+		}
+
+		if ( false === self::$cached_results[ $class ] ) {
+			self::$cached_results[ $class ] = array();
 		}
 
 		self::add_update_transients_hook();
@@ -437,15 +454,17 @@ class WC_Admin_Report {
 	/**
 	 * Put data with post_date's into an array of times.
 	 *
-	 * @param  array  $data array of your data
-	 * @param  string $date_key key for the 'date' field. e.g. 'post_date'
-	 * @param  string $data_key key for the data you are charting
-	 * @param  int    $interval
-	 * @param  string $start_date
-	 * @param  string $group_by
+	 * @param  array  $data array of your data.
+	 * @param  string $date_key key for the 'date' field. e.g. 'post_date'.
+	 * @param  string $data_key key for the data you are charting.
+	 * @param  int    $interval interval to use.
+	 * @param  string $start_date start date.
+	 * @param  string $group_by group by.
 	 * @return array
 	 */
 	public function prepare_chart_data( $data, $date_key, $data_key, $interval, $start_date, $group_by ) {
+		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
+
 		$prepared_data = array();
 
 		// Ensure all days (or months) have values in this range.
@@ -500,6 +519,8 @@ class WC_Admin_Report {
 		}
 
 		return $prepared_data;
+
+		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date
 	}
 
 	/**
@@ -511,6 +532,8 @@ class WC_Admin_Report {
 	 * @return string
 	 */
 	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
+
+		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
 
 		if ( $id ) {
 			$meta_key = ( 'sales' === $type ) ? '_line_total' : '_qty';
@@ -590,7 +613,7 @@ class WC_Admin_Report {
 
 		if ( 'sales' === $type ) {
 			/* translators: 1: total income 2: days */
-			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
+			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), wp_strip_all_tags( wc_price( $total ) ), $days );
 		} else {
 			/* translators: 1: total items sold 2: days */
 			$tooltip = sprintf( _n( 'Sold %1$d item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
@@ -599,29 +622,36 @@ class WC_Admin_Report {
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
 		return '<span class="wc_sparkline ' . ( ( 'sales' === $type ) ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . wc_esc_json( wp_json_encode( $sparkline_data ) ) . '"></span>';
+
+		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
 	}
 
 	/**
 	 * Get the current range and calculate the start and end dates.
 	 *
-	 * @param  string $current_range
+	 * @param  string $current_range Type of range.
 	 */
 	public function calculate_current_range( $current_range ) {
+
+		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 
 		switch ( $current_range ) {
 
 			case 'custom':
-				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( $_GET['start_date'] ) ) );
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+				$this->start_date = max( strtotime( '-20 years' ), strtotime( sanitize_text_field( wp_unslash( $_GET['start_date'] ) ) ) );
 
 				if ( empty( $_GET['end_date'] ) ) {
 					$this->end_date = strtotime( 'midnight', current_time( 'timestamp' ) );
 				} else {
-					$this->end_date = strtotime( 'midnight', strtotime( sanitize_text_field( $_GET['end_date'] ) ) );
+					$this->end_date = strtotime( 'midnight', strtotime( sanitize_text_field( wp_unslash( $_GET['end_date'] ) ) ) );
 				}
 
 				$interval = 0;
 				$min_date = $this->start_date;
 
+				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $min_date = strtotime( '+1 MONTH', $min_date ) ) <= $this->end_date ) {
 					$interval ++;
 				}
@@ -660,7 +690,7 @@ class WC_Admin_Report {
 				break;
 		}
 
-		// Group by
+		// Group by.
 		switch ( $this->chart_groupby ) {
 
 			case 'day':
@@ -674,6 +704,7 @@ class WC_Admin_Report {
 				$this->chart_interval = 0;
 				$min_date             = strtotime( date( 'Y-m-01', $this->start_date ) );
 
+				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $min_date = strtotime( '+1 MONTH', $min_date ) ) <= $this->end_date ) {
 					$this->chart_interval ++;
 				}
@@ -681,6 +712,9 @@ class WC_Admin_Report {
 				$this->barwidth = 60 * 60 * 24 * 7 * 4 * 1000;
 				break;
 		}
+
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
 	}
 
 	/**
@@ -752,12 +786,14 @@ class WC_Admin_Report {
 			return;
 		}
 
-		if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['wc_reports_nonce'] ), 'custom_range' ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! isset( $_GET['wc_reports_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_GET['wc_reports_nonce'] ), 'custom_range' ) ) {
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			wp_die(
 				/* translators: %1$s: open link, %2$s: close link */
-				sprintf( esc_html__( 'This report link has expired. %1$sClick here to view the filtered report%2$s.', 'woocommerce' ), '<a href="' . esc_url( wp_nonce_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'custom_range', 'wc_reports_nonce' ) ) . '">', '</a>' ), // @codingStandardsIgnoreLine.
+				sprintf( esc_html__( 'This report link has expired. %1$sClick here to view the filtered report%2$s.', 'woocommerce' ), '<a href="' . esc_url( wp_nonce_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'custom_range', 'wc_reports_nonce' ) ) . '">', '</a>' ),
 				esc_attr__( 'Confirm navigation', 'woocommerce' )
 			);
+			// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			exit;
 		}
 	}

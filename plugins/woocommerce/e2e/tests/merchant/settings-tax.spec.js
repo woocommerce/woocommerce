@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'WooCommerce Tax Settings', () => {
+test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
 
 	test( 'can enable tax calculation', async ( { page } ) => {
@@ -16,7 +17,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect( page.locator( '#woocommerce_calc_taxes' ) ).toBeChecked();
@@ -25,6 +26,33 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await expect(
 			page.locator( 'a.nav-tab:has-text("Tax")' )
 		).toBeVisible();
+	} );
+} );
+
+test.describe( 'WooCommerce Tax Settings', () => {
+	test.use( { storageState: 'e2e/storage/adminState.json' } );
+
+	test.beforeEach( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.put( 'settings/general/woocommerce_calc_taxes', {
+			value: 'yes',
+		} );
+	} );
+	test.afterEach( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.put( 'settings/general/woocommerce_calc_taxes', {
+			value: 'no',
+		} );
 	} );
 
 	test( 'can set tax options', async ( { page } ) => {
@@ -53,7 +81,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -88,7 +116,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that the settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(
@@ -100,7 +128,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that the settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -178,7 +206,7 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(

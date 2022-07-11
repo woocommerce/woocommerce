@@ -7,7 +7,7 @@ const { MENUS } = require( '../data/elements' );
 /**
  * External dependencies
  */
-const { it, describe, beforeAll } = require( '@jest/globals' );
+const { it, describe, beforeAll, expect } = require( '@jest/globals' );
 
 const runPageLoadTest = () => {
 	describe.each( MENUS )(
@@ -49,6 +49,51 @@ const runPageLoadTest = () => {
 			);
 		}
 	);
+
+	describe( 'Load async chunks', () => {
+		beforeAll( async () => {
+			await merchant.login();
+		} );
+
+		afterAll( async () => {
+			await merchant.logout();
+		} );
+
+		it( 'Should load the CSS/JS chunks with a version parameter on Analytics Page', async () => {
+			await merchant.openAnalyticsPage();
+			const version = await page.evaluate(
+				() => window.wcAdminAssets.version
+			);
+
+			const hasChunks = {
+				js: false,
+				css: false,
+			};
+			page.on( 'request', async ( request ) => {
+				const url = request.url();
+				const resType = request.resourceType();
+
+				if ( url.includes( 'admin/chunks' ) ) {
+					await expect( url ).toMatch(
+						new RegExp(
+							`\\?ver=${ version.replaceAll( '.', '\\.' ) }$`
+						)
+					);
+
+					if ( resType === 'script' ) hasChunks.js = true;
+					if ( resType === 'stylesheet' ) hasChunks.css = true;
+				}
+			} );
+			await Promise.all( [
+				page.reload(),
+				page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} ),
+			] );
+			expect( hasChunks.js ).toBe( true );
+			expect( hasChunks.css ).toBe( true );
+		} );
+	} );
 };
 
 // eslint-disable-next-line jest/no-export

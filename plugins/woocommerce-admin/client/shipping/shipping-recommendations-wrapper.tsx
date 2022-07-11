@@ -8,13 +8,19 @@ import { lazy, Suspense } from '@wordpress/element';
  */
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
+import { ShippingTour } from './shipping-tour';
 
-const ShippingRecommendationsLoader = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "shipping-recommendations" */ './shipping-recommendations'
-		)
-);
+const ShippingRecommendationsLoader = lazy( () => {
+	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {
+		return import(
+			/* webpackChunkName: "shipping-recommendations" */ './experimental-shipping-recommendations'
+		);
+	}
+
+	return import(
+		/* webpackChunkName: "shipping-recommendations" */ './shipping-recommendations'
+	);
+} );
 
 export const ShippingRecommendations: React.FC< EmbeddedBodyProps > = ( {
 	page,
@@ -41,6 +47,9 @@ export const ShippingRecommendations: React.FC< EmbeddedBodyProps > = ( {
 	return (
 		<RecommendationsEligibilityWrapper>
 			<Suspense fallback={ null }>
+				{ window.wcAdminFeatures[ 'shipping-setting-tour' ] && (
+					<ShippingTour />
+				) }
 				<ShippingRecommendationsLoader />
 			</Suspense>
 		</RecommendationsEligibilityWrapper>

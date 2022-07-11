@@ -14,9 +14,8 @@ const DefaultDate = ( { value, onChange } ) => {
 	const { wcAdminSettings } = useSettings( 'wc_admin', [
 		'wcAdminSettings',
 	] );
-	const {
-		woocommerce_default_date_range: defaultDateRange,
-	} = wcAdminSettings;
+	const { woocommerce_default_date_range: defaultDateRange } =
+		wcAdminSettings;
 	const change = ( query ) => {
 		onChange( {
 			target: {

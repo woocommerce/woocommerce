@@ -43,20 +43,16 @@ class ProfileWizard extends Component {
 		this.cachedActivePlugins = props.activePlugins;
 		this.goToNextStep = this.goToNextStep.bind( this );
 		this.trackStepValueChanges = this.trackStepValueChanges.bind( this );
-		this.updateCurrentStepValues = this.updateCurrentStepValues.bind(
-			this
-		);
+		this.updateCurrentStepValues =
+			this.updateCurrentStepValues.bind( this );
 		this.stepValueChanges = {};
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { step: prevStep } = prevProps.query;
 		const { step } = this.props.query;
-		const {
-			isError,
-			isGetProfileItemsRequesting,
-			createNotice,
-		} = this.props;
+		const { isError, isGetProfileItemsRequesting, createNotice } =
+			this.props;
 
 		const isRequestError =
 			! isGetProfileItemsRequesting && prevProps.isRequesting && isError;
@@ -318,11 +314,8 @@ export default compose(
 		const { getProfileItems, getOnboardingError } = select(
 			ONBOARDING_STORE_NAME
 		);
-		const {
-			getActivePlugins,
-			getPluginsError,
-			isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, getPluginsError, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 
 		const profileItems = getProfileItems();
 
@@ -345,10 +338,8 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const {
-			connectToJetpackWithFailureRedirect,
-			createErrorNotice,
-		} = dispatch( PLUGINS_STORE_NAME );
+		const { connectToJetpackWithFailureRedirect, createErrorNotice } =
+			dispatch( PLUGINS_STORE_NAME );
 		const { updateNote } = dispatch( NOTES_STORE_NAME );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );

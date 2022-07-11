@@ -8,8 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Internal\Admin\Loader;
-
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
 /**
  * Task Lists class.
  */
@@ -51,6 +50,7 @@ class TaskLists {
 		'Marketing',
 		'Appearance',
 		'AdditionalPayments',
+		'ReviewShippingOptions',
 	);
 
 	/**
@@ -121,8 +121,7 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' )
-					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' ),
+				'visible'      => false,
 			)
 		);
 
@@ -147,16 +146,16 @@ class TaskLists {
 				'options'                 => array(
 					'use_completed_title' => true,
 				),
-				'visible'                 => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
+				'visible'                 => true,
 			)
 		);
 
 		self::add_list(
 			array(
-				'id'           => 'setup_experiment_2',
-				'hidden_id'    => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
-				'tasks'        => array(
+				'id'                      => 'setup_experiment_2',
+				'hidden_id'               => 'setup',
+				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
+				'tasks'                   => array(
 					'StoreCreation',
 					'StoreDetails',
 					'Purchase',
@@ -168,14 +167,13 @@ class TaskLists {
 					'Marketing',
 					'Appearance',
 				),
-				'event_prefix' => 'tasklist_',
-				'visible'      => self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_2' )
-					&& ! self::is_experiment_treatment( 'woocommerce_tasklist_setup_experiment_1' ),
-				'options'      => array(
+				'event_prefix'            => 'tasklist_',
+				'visible'                 => false,
+				'options'                 => array(
 					'use_completed_title' => true,
 				),
 				'display_progress_header' => true,
-				'sections'     => array(
+				'sections'                => array(
 					array(
 						'id'          => 'basics',
 						'title'       => __( 'Cover the basics', 'woocommerce' ),
@@ -268,6 +266,35 @@ class TaskLists {
 			)
 		);
 
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			self::add_task(
+				'extended',
+				new ReviewShippingOptions(
+					self::get_list( 'extended' )
+				)
+			);
+
+			self::add_task(
+				'extended_two_column',
+				new ReviewShippingOptions(
+					self::get_list( 'extended_two_column' )
+				)
+			);
+
+			// Tasklist that will never be shown in homescreen,
+			// used for having tasks that are accessed by other means.
+			self::add_list(
+				array(
+					'id'           => 'secret_tasklist',
+					'hidden_id'    => 'secret',
+					'tasks'        => array(
+						'ExperimentalShippingRecommendation',
+					),
+					'event_prefix' => 'secret_tasklist_',
+					'visible'      => false,
+				)
+			);
+		}
 	}
 
 	/**

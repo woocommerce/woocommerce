@@ -26,8 +26,7 @@ const paymentGatewaySuggestions = [
 		title: 'Stripe',
 		content:
 			'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay.',
-		image:
-			'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/stripe.png',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/stripe.png',
 		plugins: [ 'woocommerce-gateway-stripe' ],
 		is_visible: true,
 		recommendation_priority: 3,
@@ -39,8 +38,7 @@ const paymentGatewaySuggestions = [
 		title: 'PayPal Payments',
 		content:
 			"Safe and secure payments using credit cards or your customer's PayPal account.",
-		image:
-			'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 		plugins: [ 'woocommerce-paypal-payments' ],
 		is_visible: true,
 		category_other: [ 'US' ],
@@ -50,8 +48,7 @@ const paymentGatewaySuggestions = [
 		id: 'cod',
 		title: 'Cash on delivery',
 		content: 'Take payments in cash upon delivery.',
-		image:
-			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/cod.svg',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/cod.svg',
 		is_visible: true,
 		is_offline: true,
 	},
@@ -59,8 +56,7 @@ const paymentGatewaySuggestions = [
 		id: 'bacs',
 		title: 'Direct bank transfer',
 		content: 'Take payments via bank transfer.',
-		image:
-			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/bacs.svg',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/bacs.svg',
 		is_visible: true,
 		is_offline: true,
 	},
@@ -69,8 +65,7 @@ const paymentGatewaySuggestions = [
 		title: 'WooCommerce Payments',
 		content:
 			'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
-		image:
-			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/wcpay.svg',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/wcpay.svg',
 		plugins: [ 'woocommerce-payments' ],
 		description:
 			'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
@@ -82,8 +77,7 @@ const paymentGatewaySuggestions = [
 		title: 'Eway',
 		content:
 			'The Eway extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.',
-		image:
-			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/eway.png',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/eway.png',
 		plugins: [ 'woocommerce-gateway-eway' ],
 		is_visible: true,
 		category_other: [ 'US' ],
@@ -124,8 +118,12 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( paymentTitles ).toEqual( [] );
 
 		expect(
-			container.getElementsByTagName( 'title' )[ 0 ].textContent
-		).toBe( 'WooCommerce Payments' );
+			container
+				.querySelector(
+					'.woocommerce-recommended-payments__header-heading'
+				)
+				.textContent.includes( 'WooCommerce Payments' )
+		).toBe( true );
 	} );
 
 	test( 'should render all payment gateways if no WCPay', () => {
@@ -144,6 +142,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 				query={ query }
 			/>
 		);
+
+		expect(
+			screen.getByText( 'Choose a payment provider' )
+		).toBeInTheDocument();
 
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title > span:first-child'
@@ -201,8 +203,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 					title: 'PayPal Payments',
 					content:
 						"Safe and secure payments using credit cards or your customer's PayPal account.",
-					image:
-						'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
+					image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 					plugins: [ 'woocommerce-paypal-payments' ],
 					is_visible: true,
 				},
@@ -245,6 +246,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
+		expect(
+			screen.getByText( 'Additional payment options' )
+		).toBeInTheDocument();
+
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
 		);
@@ -274,8 +279,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 					title: 'PayPal Payments',
 					content:
 						"Safe and secure payments using credit cards or your customer's PayPal account.",
-					image:
-						'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
+					image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 					plugins: [ 'woocommerce-paypal-payments' ],
 					is_visible: true,
 				},
@@ -295,7 +299,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		} );
 	} );
 
-	test( 'should record event correctly when other payment methods is clicked', () => {
+	test( 'should record event correctly when Other payment providers is clicked', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -313,7 +317,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Other payment methods' ) );
+		fireEvent.click( screen.getByText( 'Other payment providers' ) );
 
 		// By default it's hidden, so when toggle it shows.
 		// Second call after "tasklist_payments_options".
@@ -323,7 +327,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'tasklist_payment_show_toggle',
 			{
 				toggle: 'show',
-				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "other payment methods".
+				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "Other payment providers".
 			},
 		] );
 	} );
@@ -346,7 +350,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Other payment methods' ) );
+		fireEvent.click( screen.getByText( 'Other payment providers' ) );
 		fireEvent.click( screen.getByText( 'See more' ) );
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]

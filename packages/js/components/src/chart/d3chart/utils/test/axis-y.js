@@ -15,19 +15,13 @@ describe( 'getYGrids', () => {
 	describe( 'positive charts', () => {
 		it( 'returns decimal values when yMax is <= 1 and yMin is 0', () => {
 			expect( getYGrids( 0, 1, 0.3333333333333333 ) ).toEqual( [
-				0,
-				0.3333333333333333,
-				0.6666666666666666,
-				1,
+				0, 0.3333333333333333, 0.6666666666666666, 1,
 			] );
 		} );
 
 		it( 'returns decimal values when yMax and yMin are <= 1', () => {
 			expect( getYGrids( 1, 1, 0.3333333333333333 ) ).toEqual( [
-				0,
-				0.3333333333333333,
-				0.6666666666666666,
-				1,
+				0, 0.3333333333333333, 0.6666666666666666, 1,
 			] );
 		} );
 
@@ -37,10 +31,7 @@ describe( 'getYGrids', () => {
 
 		it( 'returns up to four values when yMax is a big number', () => {
 			expect( getYGrids( 0, 12000, 4000 ) ).toEqual( [
-				0,
-				4000,
-				8000,
-				12000,
+				0, 4000, 8000, 12000,
 			] );
 		} );
 	} );
@@ -48,19 +39,13 @@ describe( 'getYGrids', () => {
 	describe( 'negative charts', () => {
 		it( 'returns decimal values when yMin is >= -1 and yMax is 0', () => {
 			expect( getYGrids( -1, 0, 0.3333333333333333 ) ).toEqual( [
-				0,
-				-0.3333333333333333,
-				-0.6666666666666666,
-				-1,
+				0, -0.3333333333333333, -0.6666666666666666, -1,
 			] );
 		} );
 
 		it( 'returns decimal values when yMax and yMin are >= -1', () => {
 			expect( getYGrids( -1, -1, 0.3333333333333333 ) ).toEqual( [
-				0,
-				-0.3333333333333333,
-				-0.6666666666666666,
-				-1,
+				0, -0.3333333333333333, -0.6666666666666666, -1,
 			] );
 		} );
 
@@ -70,10 +55,7 @@ describe( 'getYGrids', () => {
 
 		it( 'returns up to four values when yMin is a big negative number', () => {
 			expect( getYGrids( -12000, 0, 4000 ) ).toEqual( [
-				0,
-				-4000,
-				-8000,
-				-12000,
+				0, -4000, -8000, -12000,
 			] );
 		} );
 	} );
@@ -81,11 +63,7 @@ describe( 'getYGrids', () => {
 	describe( 'positive & negative charts', () => {
 		it( 'returns decimal values when yMax is <= 1 and yMin is 0', () => {
 			expect( getYGrids( -1, 1, 0.5 ) ).toEqual( [
-				0,
-				-0.5,
-				-1,
-				0.5,
-				1,
+				0, -0.5, -1, 0.5, 1,
 			] );
 		} );
 
@@ -95,11 +73,7 @@ describe( 'getYGrids', () => {
 
 		it( 'returns up to six values when yMax is a big number', () => {
 			expect( getYGrids( -12000, 12000, 6000 ) ).toEqual( [
-				0,
-				-6000,
-				-12000,
-				6000,
-				12000,
+				0, -6000, -12000, 6000, 12000,
 			] );
 		} );
 	} );

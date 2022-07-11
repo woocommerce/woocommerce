@@ -115,9 +115,11 @@ describe( 'import reducer', () => {
 		} );
 		const stringifiedQuery = JSON.stringify( query );
 		expect(
-			( state.errors[ stringifiedQuery ] as {
-				code: string;
-			} ).code
+			(
+				state.errors[ stringifiedQuery ] as {
+					code: string;
+				}
+			 ).code
 		).toBe( 'error' );
 	} );
 } );

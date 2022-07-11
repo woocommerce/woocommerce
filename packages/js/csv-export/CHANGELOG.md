@@ -1,48 +1,15 @@
-# Unreleased
+# Changelog 
 
-# 1.5.0
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
--   Update all js packages with minor/patch version changes. #8392
+## [1.7.0](https://www.npmjs.com/package/@woocommerce/packages/js/csv-export/v/1.7.0) - 2022-07-08 
 
-# 1.4.0
+-   Minor - Remove PHP and Composer dependencies for packaged JS packages
 
--   Fix commonjs module build, allow package to be built in isolation. #7286
-# 1.3.2
+## [1.6.0](https://www.npmjs.com/package/@woocommerce/packages/js/csv-export/v/1.6.0) - 2022-06-14 
 
-- Use tab char for the CSV injection prevention.
+-   Minor - Add Jetpack Changelogger
+-   Patch - Migrate @woocommerce/csv-export to TS
+-   Patch - Standardize lint scripts: add lint:fix
 
-# 1.3.1
-
--   Update dependencies.
-
-# 1.3.0
-
--   Update to @wordpress/eslint coding standards.
-
-# 1.2.0
-
--   Properly escape values with double quotes.
--   Prevent CSV injection.
-
-# 1.1.2
-
--   Update dependencies.
-
-# 1.1.1
-
--   Update license to GPL-3.0-or-later.
-
-# 1.1.0
-
--   Fix error in `getCSVRows` when there is a null or undefined column value.
--   Bump dependency versions.
-
-# 1.0.3
-
-# 1.0.2
-
-# 1.0.1
-
-# 1.0.0
-
--   Released package
+[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/csv-export/CHANGELOG.md).

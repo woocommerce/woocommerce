@@ -1,12 +1,13 @@
 const { devices } = require( '@playwright/test' );
 
 const config = {
-	timeout: 20000,
+	timeout: 60 * 1000,
 	outputDir: './report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: 1,
+	retries: 2,
+	workers: 4,
 	reporter: [
 		[ 'list' ],
 		[ 'html', { outputFolder: 'output' } ],
@@ -24,14 +25,6 @@ const config = {
 			name: 'Chrome',
 			use: { ...devices[ 'Desktop Chrome' ] },
 		},
-		// {
-		//  name: 'Firefox',
-		//  use: { ...devices['Desktop Firefox'] },
-		// },
-		// {
-		//  name: 'Webkit',
-		//  use: { ...devices['Desktop Webkit'] },
-		// },
 	],
 };
 

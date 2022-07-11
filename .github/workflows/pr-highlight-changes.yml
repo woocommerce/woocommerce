@@ -22,7 +22,7 @@ jobs:
               id: results
               run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"
     comment:
-        name: Add comment to hightlight changes
+        name: Add comment to highlight changes
         needs: analyze
         runs-on: ubuntu-20.04
         steps:

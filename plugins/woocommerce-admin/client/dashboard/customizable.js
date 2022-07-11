@@ -240,10 +240,8 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 			query,
 			defaultDateRange
 		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query, defaultDateRange );
+		const { primary: primaryDate, secondary: secondaryDate } =
+			getCurrentDates( query, defaultDateRange );
 		const dateQuery = {
 			period,
 			compare,

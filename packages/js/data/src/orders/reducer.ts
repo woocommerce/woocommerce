@@ -88,9 +88,8 @@ const reducer: Reducer< OrdersState, Actions > = (
 					...state,
 					errors: {
 						...state.errors,
-						[ getOrderResourceName(
-							payload.query
-						) ]: payload.error,
+						[ getOrderResourceName( payload.query ) ]:
+							payload.error,
 					},
 				};
 			default:

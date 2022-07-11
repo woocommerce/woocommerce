@@ -56,7 +56,7 @@ class SectionControls extends Component {
 						<MenuItem isClickable onInvoke={ this.onMoveUp }>
 							<Icon
 								icon={ <ChevronUpIcon /> }
-								label={ __( 'Move up' ) }
+								label={ __( 'Move up', 'woocommerce' ) }
 								size={ 20 }
 								className="icon-control"
 							/>
@@ -68,7 +68,7 @@ class SectionControls extends Component {
 							<Icon
 								icon={ <ChevronDownIcon /> }
 								size={ 20 }
-								label={ __( 'Move down' ) }
+								label={ __( 'Move down', 'woocommerce' ) }
 								className="icon-control"
 							/>
 							{ __( 'Move down', 'woocommerce' ) }
@@ -78,7 +78,7 @@ class SectionControls extends Component {
 						<Icon
 							icon={ trash }
 							size={ 20 }
-							label={ __( 'Remove block' ) }
+							label={ __( 'Remove block', 'woocommerce' ) }
 							className="icon-control"
 						/>
 						{ __( 'Remove section', 'woocommerce' ) }

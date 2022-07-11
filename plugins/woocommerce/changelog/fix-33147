@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Convert null and '' to 0 before verification to mimic $wpdb->prepare.

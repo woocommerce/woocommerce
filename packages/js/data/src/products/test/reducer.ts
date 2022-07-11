@@ -260,4 +260,61 @@ describe( 'products reducer', () => {
 
 		expect( state.errors[ `update/${ id }` ] ).toBe( error );
 	} );
+
+	it( 'should handle DELETE_PRODUCT_SUCCESS', () => {
+		const itemType = 'guyisms';
+		const initialState: ProductState = {
+			products: {
+				[ itemType ]: {
+					data: [ 1, 2 ],
+				},
+			},
+			productsCount: {
+				'total-guyisms:{}': 2,
+			},
+			errors: {},
+			data: {
+				1: { id: 1, name: 'Donkey', status: 'draft' },
+				2: { id: 2, name: 'Sauce', status: 'publish' },
+			},
+		};
+		const product: PartialProduct = {
+			id: 1,
+			status: 'pending',
+		};
+		const anotherProduct: PartialProduct = {
+			id: 2,
+			status: 'draft',
+		};
+
+		let state = reducer( initialState, {
+			type: TYPES.DELETE_PRODUCT_SUCCESS,
+			id: product.id,
+			product,
+			force: false,
+		} );
+		state = reducer( state, {
+			type: TYPES.DELETE_PRODUCT_SUCCESS,
+			id: anotherProduct.id,
+			product: anotherProduct,
+			force: true,
+		} );
+
+		expect( state.errors ).toEqual( initialState.errors );
+
+		expect( state.data[ 1 ].status ).toEqual( 'trash' );
+		expect( state.data[ 2 ].status ).toEqual( 'deleted' );
+	} );
+
+	it( 'should handle DELETE_PRODUCT_ERROR', () => {
+		const id = 1;
+		const error = 'Baaam!';
+		const state = reducer( defaultState, {
+			type: TYPES.DELETE_PRODUCT_ERROR,
+			id,
+			error,
+		} );
+
+		expect( state.errors[ `delete/${ id }` ] ).toBe( error );
+	} );
 } );

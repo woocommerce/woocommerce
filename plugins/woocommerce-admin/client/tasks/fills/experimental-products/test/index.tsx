@@ -160,8 +160,7 @@ describe( 'Products', () => {
 
 		userEvent.click(
 			getByRole( 'menuitem', {
-				name:
-					'Digital product A digital product like service, downloadable book, music or video.',
+				name: 'Digital product A digital product like service, downloadable book, music or video.',
 			} )
 		);
 

@@ -76,7 +76,8 @@ export const LoadSampleProductType = {
 	key: 'load-sample-product' as const,
 	title: __( 'can’t decide?', 'woocommerce' ),
 	content: __(
-		'Load sample products and see what they look like in your store.'
+		'Load sample products and see what they look like in your store.',
+		'woocommerce'
 	),
 	before: <LightBulb />,
 	after: <Icon icon={ chevronRight } />,

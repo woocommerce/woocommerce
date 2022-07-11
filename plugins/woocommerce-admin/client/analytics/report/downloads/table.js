@@ -86,10 +86,8 @@ class DownloadsReportTable extends Component {
 				username,
 			} = download;
 
-			const {
-				code: errorCode,
-				name: productName,
-			} = _embedded.product[ 0 ];
+			const { code: errorCode, name: productName } =
+				_embedded.product[ 0 ];
 			let productDisplay, productValue;
 
 			// Handle deleted products.

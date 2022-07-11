@@ -167,6 +167,7 @@ class DefaultPaymentGateways {
 				),
 				'is_offline'  => true,
 			),
+			// This is for backwards compatibility only (WC < 5.10.0-dev or WCA < 2.9.0-dev).
 			array(
 				'id'                      => 'woocommerce_payments',
 				'title'                   => __( 'WooCommerce Payments', 'woocommerce' ),
@@ -211,7 +212,7 @@ class DefaultPaymentGateways {
 				'recommendation_priority' => 1,
 			),
 			array(
-				'id'                      => 'woocommerce_payments:non-us',
+				'id'                      => 'woocommerce_payments:without-in-person-payments',
 				'title'                   => __( 'WooCommerce Payments', 'woocommerce' ),
 				'content'                 => __(
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
@@ -223,7 +224,7 @@ class DefaultPaymentGateways {
 				'description'             => 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
 				'is_visible'              => array(
 					self::get_rules_for_cbd( false ),
-					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US' ) ) ),
+					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US', 'CA' ) ) ),
 					(object) array(
 						'type'     => 'or',
 						// Older versions of WooCommerce Admin require the ID to be `woocommerce-payments` to show the suggestion card.
@@ -245,8 +246,9 @@ class DefaultPaymentGateways {
 				),
 				'recommendation_priority' => 1,
 			),
+			// This is the same as the above, but with a different description for countries that support in-person payments such as US and CA.
 			array(
-				'id'                      => 'woocommerce_payments:us',
+				'id'                      => 'woocommerce_payments:with-in-person-payments',
 				'title'                   => __( 'WooCommerce Payments', 'woocommerce' ),
 				'content'                 => __(
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
@@ -258,7 +260,7 @@ class DefaultPaymentGateways {
 				'description'             => 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.',
 				'is_visible'              => array(
 					self::get_rules_for_cbd( false ),
-					self::get_rules_for_countries( array( 'US' ) ),
+					self::get_rules_for_countries( array( 'US', 'CA' ) ),
 					(object) array(
 						'type'     => 'or',
 						// Older versions of WooCommerce Admin require the ID to be `woocommerce-payments` to show the suggestion card.

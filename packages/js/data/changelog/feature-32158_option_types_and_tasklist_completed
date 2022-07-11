@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Added TypeScript options selectors and action in onboarding store for keeping the completed task list. #32158

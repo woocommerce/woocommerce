@@ -11,7 +11,9 @@ type ConfirmationModalProps = {
 	buttonLabel?: string;
 };
 
-export const InboxDismissConfirmationModal: React.FC< ConfirmationModalProps > = ( {
+export const InboxDismissConfirmationModal: React.FC<
+	ConfirmationModalProps
+> = ( {
 	onClose,
 	onDismiss,
 	buttonLabel = __( "Yes, I'm sure", 'woocommerce' ),

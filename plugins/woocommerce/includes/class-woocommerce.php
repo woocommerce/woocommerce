@@ -30,7 +30,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '6.7.0';
+	public $version = '6.8.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -725,15 +725,6 @@ final class WooCommerce {
 		add_image_size( 'woocommerce_thumbnail', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
-
-		/**
-		 * Legacy image sizes.
-		 *
-		 * @deprecated 3.3.0 These sizes will be removed in 4.6.0.
-		 */
-		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
-		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
-		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 	}
 
 	/**
@@ -971,7 +962,7 @@ final class WooCommerce {
 			return;
 		}
 
-		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm exec turbo run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm -- turbo run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
 		$message_two = sprintf(
 			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
 			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),

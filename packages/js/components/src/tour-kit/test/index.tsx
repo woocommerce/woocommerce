@@ -19,6 +19,7 @@ const config = {
 				desktop: '.render-step-near-me',
 			},
 			meta: {
+				name: 'step-one',
 				heading: 'Step1',
 				descriptions: {
 					desktop: 'Description',
@@ -30,6 +31,7 @@ const config = {
 				desktop: '.render-step-near-me',
 			},
 			meta: {
+				name: 'step-one',
 				heading: 'Step2',
 				descriptions: {
 					desktop: 'Description',

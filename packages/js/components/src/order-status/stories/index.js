@@ -5,9 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { OrderStatus } from '@woocommerce/components';
 
 const orderStatusMap = {
-	processing: __( 'Processing Order' ),
-	pending: __( 'Pending Order' ),
-	completed: __( 'Completed Order' ),
+	processing: __( 'Processing Order', 'woocommerce' ),
+	pending: __( 'Pending Order', 'woocommerce' ),
+	completed: __( 'Completed Order', 'woocommerce' ),
 };
 
 export const Basic = () => (

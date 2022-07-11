@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Include Tracks indicator property for block editor on product update. #33321

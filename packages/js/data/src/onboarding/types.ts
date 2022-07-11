@@ -30,6 +30,27 @@ export type TaskType = {
 		taxJarActivated?: boolean;
 		avalaraActivated?: boolean;
 	};
+	// Possibly added in DeprecatedTasks.mergeDeprecatedCallbackFunctions
+	isDeprecated?: boolean;
+};
+
+// reference: https://github.com/woocommerce/woocommerce-admin/blob/75cf5292f66bf69202f67356d143743a8796a7f6/docs/examples/extensions/add-task/js/index.js#L77-L101
+export type DeprecatedTaskType = {
+	key: string;
+	title: string;
+	content: string;
+	container: React.ReactNode;
+	completed: boolean;
+	visible: boolean;
+	additionalInfo: string;
+	time: string;
+	isDismissable: boolean;
+	onDelete: () => void;
+	onDismiss: () => void;
+	allowRemindMeLater: string;
+	remindMeLater: () => () => void;
+	level?: string;
+	type?: string;
 };
 
 export type TaskListSection = {
@@ -60,7 +81,7 @@ export type TaskListType = {
 
 export type OnboardingState = {
 	freeExtensions: ExtensionList[];
-	profileItems: ProfileItemsState;
+	profileItems: ProfileItems;
 	taskLists: Record< string, TaskListType >;
 	paymentMethods: Plugin[];
 	productTypes: OnboardingProductType[];
@@ -79,7 +100,7 @@ export type ProductCount = '0' | '1-10' | '11-100' | '101 - 1000' | '1000+';
 export type ProductTypeSlug =
 	| 'physical'
 	| 'bookings'
-	| 'download'
+	| 'downloads'
 	| 'memberships'
 	| 'product-add-ons'
 	| 'product-bundles'
@@ -104,8 +125,8 @@ export type RevenueTypeSlug =
 	| '50000-250000'
 	| 'more-than-250000';
 
-export type ProfileItemsState = {
-	business_extensions: [  ] | null;
+export type ProfileItems = {
+	business_extensions: [] | null;
 	completed: boolean | null;
 	industry: Industry[] | null;
 	number_employees: string | null;

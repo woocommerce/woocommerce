@@ -62,9 +62,8 @@ if ( appRoot ) {
 		} )( HydratedPageLayout );
 	}
 	if ( hydrateUser ) {
-		HydratedPageLayout = withCurrentUserHydration( hydrateUser )(
-			HydratedPageLayout
-		);
+		HydratedPageLayout =
+			withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
 	}
 	render( <HydratedPageLayout />, appRoot );
 } else if ( embeddedRoot ) {
@@ -73,9 +72,8 @@ if ( appRoot ) {
 		window.wcSettings.admin
 	)( EmbedLayout );
 	if ( hydrateUser ) {
-		HydratedEmbedLayout = withCurrentUserHydration( hydrateUser )(
-			HydratedEmbedLayout
-		);
+		HydratedEmbedLayout =
+			withCurrentUserHydration( hydrateUser )( HydratedEmbedLayout );
 	}
 	// Render the header.
 	render( <HydratedEmbedLayout />, embeddedRoot );
@@ -98,6 +96,7 @@ if ( appRoot ) {
 
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
+		document.querySelector( '#wpbody-content > .woocommerce' ) ||
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 

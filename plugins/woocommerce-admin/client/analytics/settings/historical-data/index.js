@@ -30,16 +30,13 @@ class HistoricalData extends Component {
 
 		this.onImportFinished = this.onImportFinished.bind( this );
 		this.onImportStarted = this.onImportStarted.bind( this );
-		this.clearStatusAndTotalsCache = this.clearStatusAndTotalsCache.bind(
-			this
-		);
+		this.clearStatusAndTotalsCache =
+			this.clearStatusAndTotalsCache.bind( this );
 		this.stopImport = this.stopImport.bind( this );
-		this.startStatusCheckInterval = this.startStatusCheckInterval.bind(
-			this
-		);
-		this.cancelStatusCheckInterval = this.cancelStatusCheckInterval.bind(
-			this
-		);
+		this.startStatusCheckInterval =
+			this.startStatusCheckInterval.bind( this );
+		this.cancelStatusCheckInterval =
+			this.cancelStatusCheckInterval.bind( this );
 	}
 
 	startStatusCheckInterval() {
@@ -144,9 +141,8 @@ class HistoricalData extends Component {
 export default compose( [
 	withSelect( ( select ) => {
 		const { getNotes } = select( NOTES_STORE_NAME );
-		const { getImportStarted, getFormSettings } = select(
-			IMPORT_STORE_NAME
-		);
+		const { getImportStarted, getFormSettings } =
+			select( IMPORT_STORE_NAME );
 
 		const notesQuery = {
 			page: 1,
@@ -156,10 +152,8 @@ export default compose( [
 		};
 		const notes = getNotes( notesQuery );
 		const { activeImport, lastImportStartTimestamp } = getImportStarted();
-		const {
-			period: selectedPeriod,
-			skipPrevious: skipChecked,
-		} = getFormSettings();
+		const { period: selectedPeriod, skipPrevious: skipChecked } =
+			getFormSettings();
 
 		return {
 			activeImport,
@@ -171,9 +165,8 @@ export default compose( [
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { updateNote } = dispatch( NOTES_STORE_NAME );
-		const { invalidateResolution, setImportStarted } = dispatch(
-			IMPORT_STORE_NAME
-		);
+		const { invalidateResolution, setImportStarted } =
+			dispatch( IMPORT_STORE_NAME );
 
 		return {
 			invalidateResolution,

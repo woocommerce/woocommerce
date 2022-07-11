@@ -34,3 +34,10 @@ if (
 } else {
 	import( './products' );
 }
+
+if (
+	window.wcAdminFeatures &&
+	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
+) {
+	import( './experimental-shipping-recommendation' );
+}

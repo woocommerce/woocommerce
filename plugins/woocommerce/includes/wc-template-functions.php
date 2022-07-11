@@ -2760,6 +2760,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$args = wp_parse_args( $args, $defaults );
 		$args = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
 
+		if ( is_string( $args['class'] ) ) {
+			$args['class'] = array( $args['class'] );
+		}
+
 		if ( $args['required'] ) {
 			$args['class'][] = 'validate-required';
 			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';

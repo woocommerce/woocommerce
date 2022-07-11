@@ -443,6 +443,7 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
 				'description'    =>
 					__( 'Grow your online sales by promoting your products on TikTok to over one billion monthly active users around the world.', 'woocommerce' ),
+				'manage_url'     => 'admin.php?page=tiktok',
 				'is_visible'     => [
 					[
 						'type'     => 'or',

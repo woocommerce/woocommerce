@@ -5,7 +5,7 @@
 	"license": "GPL-3.0-or-later",
 	"minimum-stability": "dev",
 	"require-dev": {
-		"automattic/jetpack-changelogger": "3.0.2"
+		"automattic/jetpack-changelogger": "3.1.3"
 	},
 	"config": {
 		"platform": {
@@ -15,7 +15,7 @@
 	"extra": {
 		"changelogger": {
 			"formatter": {
-				"filename": "../../../tools/changelogger/PackageFormatter.php"
+				"filename": "../../../tools/changelogger/class-package-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",
@@ -26,7 +26,7 @@
 				"performance": "Address performance issues",
 				"enhancement": "Improve existing functionality"
 			},
-			"changelog": "NEXT_CHANGELOG.md"
+			"changelog": "CHANGELOG.md"
 		}
 	}
 }

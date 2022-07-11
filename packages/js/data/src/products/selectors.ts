@@ -94,6 +94,10 @@ export const getUpdateProductError = (
 	return state.errors[ `update/${ id }/${ resourceName }` ];
 };
 
+export const getDeleteProductError = ( state: ProductState, id: number ) => {
+	return state.errors[ `delete/${ id }` ];
+};
+
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
 	getProducts: WPDataSelector< typeof getProducts >;

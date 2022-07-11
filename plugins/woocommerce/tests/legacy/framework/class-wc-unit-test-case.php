@@ -339,4 +339,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public static function assertIsInteger( $actual, $message = '' ) {
 		return self::assertIsInt( $actual, $message );
 	}
+
+	/**
+	 * Skip the current test on PHP 8.1 and higher.
+	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 */
+	protected function skip_on_php_8_1() {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+		}
+	}
 }
