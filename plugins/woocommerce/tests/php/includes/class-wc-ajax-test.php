@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\WC_AJAX.
  */
 
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
+use Automattic\WooCommerce\Internal\Orders\TaxesController;
+
 /**
  * Class WC_AJAX_Test file.
  */
@@ -128,8 +131,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	/**
 	 * Test coupon and recalculation of totals sequences when
 	 * product prices are tax inclusive.
+	 *
+	 * @param bool $apply_discounts_first If true, apply discount and then calculate taxes; if false, the opposite.
+	 * @testWith [true]
+	 *           [false]
 	 */
-	public function test_apply_coupon_with_tax_inclusive_settings() {
+	public function test_apply_coupon_with_tax_inclusive_settings(bool $apply_discounts_first) {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -144,7 +151,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			'tax_rate_class'   => '',
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 120 );
@@ -159,23 +166,50 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$order = wc_create_order();
 		$order->add_product( $product, 1 );
 
-		/**
-		 * Call the following in this order:
-		 *
-		 * WC_AJAX::calc_line_taxes()
-		 * WC_AJAX::add_coupon_discount()
-		 */
-		$this->assertEquals( 108, $order->get_total() );
+		//TODO: Add tax correctly
+		$order->add_tax($tax_rate_id, 20);
 
-		$order = wc_create_order();
-		$order->add_product( $product, 1 );
+		$container          = wc_get_container();
+		$coupons_controller = $container->get( CouponsController::class );
+		$taxes_controller   = $container->get( TaxesController::class );
 
-		/**
-		 * Call the following in this order:
-		 *
-		 * WC_AJAX::add_coupon_discount()
-		 * WC_AJAX::calc_line_taxes()
-		 */
+		$item = current($order->get_items());
+		$item_id = $item->get_id();
+		var_dump($order->get_tax_totals());
+		$tax = current($order->get_tax_totals());
+		$items_array = [
+			'order_taxes' => [$tax->id => $tax->rate_id],
+			'order_item_id' => [$item_id],
+			'order_item_qty' => [$item_id => $item->get_quantity()],
+			'order_item_name' => [$item_id => $item->get_name()],
+			'order_item_tax_class' => [$item_id => $item->get_tax_class()],
+			'line_subtotal' => [$item_id => $item->get_subtotal()],
+			'line_total' => [$item_id => $item->get_total()],
+			'line_subtotal_tax' => [$item_id => [$tax_rate_id => $item->get_subtotal_tax()]],
+			'line_total_tax' => [$item_id => [$tax_rate_id => $item->get_total_tax()]],
+		];
+
+		$calc_taxes_post_variables = array(
+			'order_id' => $order->get_id(),
+				'items' => http_build_query($items_array),
+				'country' => $tax_rate['tax_rate_country'],
+				'state'   => $tax_rate['tax_rate_state'],
+			);
+
+		$add_coupon_post_variables = array(
+			'order_id' => $order->get_id(),
+			'coupon'   => $coupon->get_code(),
+		);
+
+		if($apply_discounts_first) {
+			$coupons_controller->add_coupon_discount_core($add_coupon_post_variables);
+			$taxes_controller->calc_line_taxes_core($calc_taxes_post_variables);
+		}
+		else {
+			$taxes_controller->calc_line_taxes_core($calc_taxes_post_variables);
+			$coupons_controller->add_coupon_discount_core($add_coupon_post_variables);
+		}
+
 		$this->assertEquals( 108, $order->get_total() );
 	}
 }

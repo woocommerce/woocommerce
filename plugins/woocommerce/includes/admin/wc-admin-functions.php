@@ -270,11 +270,14 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
  * @param array $items Order items to save.
  */
 function wc_save_order_items( $order_id, $items ) {
+	//throw new \Exception(var_export($items, true));
+
 	// Allow other plugins to check change in order items before they are saved.
 	do_action( 'woocommerce_before_save_order_items', $order_id, $items );
 
 	$qty_change_order_notes = array();
 	$order                  = wc_get_order( $order_id );
+	//throw new \Exception(var_export($order->get_tax_totals(), true));
 
 	// Line items and fees.
 	if ( isset( $items['order_item_id'] ) ) {
