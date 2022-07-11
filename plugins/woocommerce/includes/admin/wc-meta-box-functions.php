@@ -12,19 +12,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Gets value of a meta key from WC_Data object if passed, otherwise from the post object.
+ * This helper function to supports backward compatibility for meta box functions, when moving from posts based store to custom tables.
+ *
+ * @param WP_Post $post Post object, meta will be fetched from this only when `$data` is not passed.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
+ * @param string  $key  Key to fetch metadata for.
+ * @param bool    $single  Whether metadata is single.
+ *
+ * @return array|mixed|string Value of the meta key.
+ */
+function wc_get_post_or_object_meta( WP_Post $post, WC_Data $data, string $key, bool $single ) {
+	if ( isset( $data ) && $data instanceof WC_Data ) {
+		if ( method_exists( $data, "get$key" ) ) {
+			return $data->{"get$key"}();
+		}
+		return $data->get_meta( $key, $single );
+	} else {
+		return get_post_meta( $post->ID, $key, $single );
+	}
+}
+
+/**
  * Output a text input box.
  *
- * @param array $field
+ * @param array   $field Field data.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_text_input( $field ) {
-	global $thepostid, $post;
+function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
+	global $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['type']          = isset( $field['type'] ) ? $field['type'] : 'text';
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
@@ -81,13 +103,13 @@ function woocommerce_wp_text_input( $field ) {
 /**
  * Output a hidden input box.
  *
- * @param array $field
+ * @param array   $field Field data.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_hidden_input( $field ) {
-	global $thepostid, $post;
+function woocommerce_wp_hidden_input( $field, WC_Data $data = null ) {
+	global $post;
 
-	$thepostid      = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['value'] = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
@@ -96,17 +118,17 @@ function woocommerce_wp_hidden_input( $field ) {
 /**
  * Output a textarea input box.
  *
- * @param array $field
+ * @param array   $field Field data.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_textarea_input( $field ) {
-	global $thepostid, $post;
+function woocommerce_wp_textarea_input( $field, WC_Data $data = null ) {
+	global $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['rows']          = isset( $field['rows'] ) ? $field['rows'] : 2;
@@ -141,16 +163,16 @@ function woocommerce_wp_textarea_input( $field ) {
 /**
  * Output a checkbox input box.
  *
- * @param array $field
+ * @param array   $field Field data.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_checkbox( $field ) {
-	global $thepostid, $post;
+function woocommerce_wp_checkbox( $field, WC_Data $data = null ) {
+	global $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
@@ -184,18 +206,18 @@ function woocommerce_wp_checkbox( $field ) {
 /**
  * Output a select input box.
  *
- * @param array $field Data about the field to render.
+ * @param array   $field Field data.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_select( $field ) {
-	global $thepostid, $post;
+function woocommerce_wp_select( $field, WC_Data $data = null ) {
+	global $post;
 
-	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
-	$field     = wp_parse_args(
+	$field = wp_parse_args(
 		$field, array(
 			'class'             => 'select short',
 			'style'             => '',
 			'wrapper_class'     => '',
-			'value'             => get_post_meta( $thepostid, $field['id'], true ),
+			'value'             => wc_get_post_or_object_meta( $post, $data, $field['id'], true ),
 			'name'              => $field['id'],
 			'desc_tip'          => false,
 			'custom_attributes' => array(),
@@ -241,16 +263,16 @@ function woocommerce_wp_select( $field ) {
 /**
  * Output a radio input box.
  *
- * @param array $field
+ * @param array   $field Field data.
+ * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
  */
-function woocommerce_wp_radio( $field ) {
-	global $thepostid, $post;
+function woocommerce_wp_radio( $field, WC_Data $data = null ) {
+	global $post;
 
-	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
+	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 

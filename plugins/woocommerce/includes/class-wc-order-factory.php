@@ -22,6 +22,10 @@ class WC_Order_Factory {
 	 * @return WC_Order|bool
 	 */
 	public static function get_order( $order_id = false ) {
+		if ( $order_id instanceof WC_Order ) {
+			return $order_id;
+		}
+
 		$order_id = self::get_order_id( $order_id );
 
 		if ( ! $order_id ) {

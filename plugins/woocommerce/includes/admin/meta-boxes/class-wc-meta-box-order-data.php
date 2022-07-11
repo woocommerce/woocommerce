@@ -143,16 +143,16 @@ class WC_Meta_Box_Order_Data {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post|WC_Order $post Post or order object.
 	 */
 	public static function output( $post ) {
 		global $theorder;
 
-		if ( ! is_object( $theorder ) ) {
-			$theorder = wc_get_order( $post->ID );
-		}
+		$order = wc_get_order( $post );
 
-		$order = $theorder;
+		if ( ! is_object( $theorder ) || ! $theorder instanceof WC_Order ) {
+			$theorder = $order;
+		}
 
 		self::init_address_fields();
 
@@ -164,15 +164,15 @@ class WC_Meta_Box_Order_Data {
 
 		$payment_method = $order->get_payment_method();
 
-		$order_type_object = get_post_type_object( $post->post_type );
+		$order_type_object = get_post_type_object( $order->get_type() );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<style type="text/css">
 			#post-body-content, #titlediv { display:none }
 		</style>
 		<div class="panel-wrap woocommerce">
-			<input name="post_title" type="hidden" value="<?php echo empty( $post->post_title ) ? __( 'Order', 'woocommerce' ) : esc_attr( $post->post_title ); ?>" />
-			<input name="post_status" type="hidden" value="<?php echo esc_attr( $post->post_status ); ?>" />
+			<input name="post_title" type="hidden" value="<?php echo esc_attr( empty( $order->get_title() ) ? __( 'Order', 'woocommerce' ) : $order->get_title() ); ?>" />
+			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel woocommerce-order-data">
 				<h2 class="woocommerce-order-data__heading">
 					<?php
@@ -236,11 +236,11 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide">
 							<label for="order_date"><?php _e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', strtotime( $post->post_date ) ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); ?>" />@
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', strtotime( $order->get_date_created() ) ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
 							&lrm;
-							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', strtotime( $post->post_date ) ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
-							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $post->post_date ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
-							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $post->post_date ) ) ); ?>" />
+							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', strtotime( $order->get_date_created() ) ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
+							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $order->get_date_created() ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
+							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $order->get_date_created() ) ) ); ?>" />
 						</p>
 
 						<p class="form-field form-field-wide wc-order-status">
@@ -384,10 +384,10 @@ class WC_Meta_Box_Order_Data {
 
 								switch ( $field['type'] ) {
 									case 'select':
-										woocommerce_wp_select( $field );
+										woocommerce_wp_select( $field, $theorder );
 										break;
 									default:
-										woocommerce_wp_text_input( $field );
+										woocommerce_wp_text_input( $field, $theorder );
 										break;
 								}
 							}
@@ -423,7 +423,8 @@ class WC_Meta_Box_Order_Data {
 									'id'    => '_transaction_id',
 									'label' => __( 'Transaction ID', 'woocommerce' ),
 									'value' => $order->get_transaction_id( 'edit' ),
-								)
+								),
+								$theorder
 							);
 							?>
 
@@ -473,8 +474,8 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
-							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' == get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $post->post_excerpt ) {
-								echo '<p class="order_note"><strong>' . __( 'Customer provided note:', 'woocommerce' ) . '</strong> ' . nl2br( esc_html( $post->post_excerpt ) ) . '</p>';
+							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+								echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . nl2br( esc_html( $order->get_customer_note() ) ) . '</p>';
 							}
 							?>
 						</div>
@@ -501,10 +502,10 @@ class WC_Meta_Box_Order_Data {
 
 									switch ( $field['type'] ) {
 										case 'select':
-											woocommerce_wp_select( $field );
+											woocommerce_wp_select( $field, $theorder );
 											break;
 										default:
-											woocommerce_wp_text_input( $field );
+											woocommerce_wp_text_input( $field, $theorder );
 											break;
 									}
 								}
@@ -514,7 +515,7 @@ class WC_Meta_Box_Order_Data {
 								?>
 								<p class="form-field form-field-wide">
 									<label for="excerpt"><?php _e( 'Customer provided note', 'woocommerce' ); ?>:</label>
-									<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $post->post_excerpt ); ?></textarea>
+									<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $order->get_customer_note() ); ?></textarea>
 								</p>
 							<?php endif; ?>
 						</div>
@@ -610,7 +611,7 @@ class WC_Meta_Box_Order_Data {
 			if ( $payment_method == 'other') {
 				$payment_method_title = esc_html__( 'Other', 'woocommerce' );
 			}
-			
+
 			$props['payment_method']       = $payment_method;
 			$props['payment_method_title'] = $payment_method_title;
 		}
