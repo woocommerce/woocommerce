@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixed 33810 - Columns of revenue table and when exporting that table, then generating CSV file, I have matched the sequence of columns of that CSV file. And I have also changed the name of the column of Net revenue in the CSV file to Net sales.
