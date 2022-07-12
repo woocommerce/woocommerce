@@ -69,6 +69,9 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 *     Removing the old version of the plugin...
 	 *     Plugin updated successfully
 	 *     Success: Installed 1 of 1 plugins.
+	 *
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function install( $args, $assoc_args ) {
 		$subscriptions         = WC_Helper_Updater::get_update_data();
