@@ -42,8 +42,6 @@ class TaxesController
 		$items = array();
 		parse_str( wp_unslash( $post_variables['items'] ), $items );
 
-		var_dump($items);
-
 		// Save order items first.
 		wc_save_order_items( $order_id, $items );
 

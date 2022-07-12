@@ -166,27 +166,17 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$order = wc_create_order();
 		$order->add_product( $product, 1 );
 
-		//TODO: Add tax correctly
-		$order->add_tax($tax_rate_id, 20);
-
 		$container          = wc_get_container();
 		$coupons_controller = $container->get( CouponsController::class );
 		$taxes_controller   = $container->get( TaxesController::class );
 
 		$item = current($order->get_items());
 		$item_id = $item->get_id();
-		var_dump($order->get_tax_totals());
-		$tax = current($order->get_tax_totals());
 		$items_array = [
-			'order_taxes' => [$tax->id => $tax->rate_id],
 			'order_item_id' => [$item_id],
 			'order_item_qty' => [$item_id => $item->get_quantity()],
-			'order_item_name' => [$item_id => $item->get_name()],
-			'order_item_tax_class' => [$item_id => $item->get_tax_class()],
 			'line_subtotal' => [$item_id => $item->get_subtotal()],
 			'line_total' => [$item_id => $item->get_total()],
-			'line_subtotal_tax' => [$item_id => [$tax_rate_id => $item->get_subtotal_tax()]],
-			'line_total_tax' => [$item_id => [$tax_rate_id => $item->get_total_tax()]],
 		];
 
 		$calc_taxes_post_variables = array(
@@ -210,6 +200,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$coupons_controller->add_coupon_discount_core($add_coupon_post_variables);
 		}
 
+		$order = wc_get_order($order->get_id());
 		$this->assertEquals( 108, $order->get_total() );
 	}
 }
