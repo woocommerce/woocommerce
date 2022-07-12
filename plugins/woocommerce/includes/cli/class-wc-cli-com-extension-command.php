@@ -74,7 +74,7 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
 	public function install( $args, $assoc_args ) {
-		$subscriptions         = WC_Helper_Updater::get_update_data();
+		$subscriptions         = WC_Helper_Updater::get_available_extensions_downloads_data();
 		$extension             = reset( $args );
 		$extension_package_url = null;
 
