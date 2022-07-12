@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
-use Dompdf\Exception;
-
 /**
  * Class BatchProcessingController
  *
@@ -66,7 +64,7 @@ class BatchProcessingController {
 		as_schedule_single_action(
 			$time,
 			self::CONTROLLER_CRON_NAME,
-			$this->get_args_for_init_cron(),
+			array(),
 			self::ACTION_GROUP,
 			$unique
 		);
@@ -107,25 +105,21 @@ class BatchProcessingController {
 	 * Process next batch for given instance of `BatchProcessor`.
 	 *
 	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
-	 *
-	 * @return bool True if batch was processed, false if not.
 	 */
 	private function process_batch( BatchProcessorInterface $batch_processor ) {
 		$details    = $this->get_process_details( $batch_processor );
 		$time_start = microtime( true );
-		$batch      = $batch_processor->get_next_batch_to_process( $details['current_batch_size'], $details['last_processed'] );
+		$batch      = $batch_processor->get_next_batch_to_process( $details['current_batch_size'] );
 		if ( empty( $batch ) ) {
-			return false;
+			return;
 		}
 		try {
 			$batch_processor->process_batch( $batch );
 			$time_taken = microtime( true ) - $time_start;
 			$this->update_progress_status( $batch_processor, $batch, $time_taken );
-			return true;
 		} catch ( \Exception $exception ) {
 			$this->log_error( $exception );
 			$this->update_progress_status( $batch_processor, $batch, $time_taken, $exception );
-			return false;
 		}
 	}
 
@@ -140,7 +134,6 @@ class BatchProcessingController {
 		return get_option(
 			$this->get_process_option_name( $batch_processor ),
 			array(
-				'last_processed'     => null,
 				'total_time_spent'   => 0,
 				'current_batch_size' => $batch_processor->get_default_batch_size(),
 				'last_error'         => null,
@@ -174,7 +167,6 @@ class BatchProcessingController {
 	private function update_progress_status( BatchProcessorInterface $batch_processor, array $batch, float $time_taken, \Exception $last_error = null ) {
 		$current_status                      = $this->get_process_details( $batch_processor );
 		$current_status['total_time_spent'] += $time_taken;
-		$current_status['last_processed']    = null !== $last_error ? end( $batch ) : $current_status['last_processed'];
 		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;
 		update_option( $this->get_process_option_name( $batch_processor ), $current_status, false );
 	}
@@ -224,7 +216,7 @@ class BatchProcessingController {
 			$processor = new $processor_class_name();
 		}
 		if ( ! is_a( $processor, BatchProcessorInterface::class ) ) {
-			throw new \Exception( 'Unable to initialize batch processor instance.' );
+			throw new \Exception( "Unable to initialize batch processor instance for $processor_class_name" );
 		}
 		return $processor;
 	}
@@ -258,15 +250,6 @@ class BatchProcessingController {
 	 */
 	private function set_pending_processes( array $processes ) {
 		update_option( self::PENDING_PROCESSES_OPTION_NAME, $processes, false );
-	}
-
-	/**
-	 * Arguments for recurring action.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_init_cron() {
-		return array();
 	}
 
 	/**

@@ -289,12 +289,11 @@ WHERE
 	/**
 	 * Returns the batch with records that needs to be processed for a given size.
 	 *
-	 * @param int   $size Size of the batch.
-	 * @param mixed $last_processed Identifier of record that was last processed.
+	 * @param int $size Size of the batch.
 	 *
 	 * @return array Batch of records.
 	 */
-	public function get_next_batch_to_process( int $size, $last_processed ): array {
+	public function get_next_batch_to_process( int $size ): array {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $size );
 		} else {
