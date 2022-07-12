@@ -21,7 +21,7 @@
 	"dependencies": {
 		"@jest/globals": "^26.4.2",
 		"@wordpress/deprecated": "^3.2.3",
-		"config": "3.3.3"
+		"config": "3.3.7"
 	},
 	"devDependencies": {
 		"@babel/cli": "7.12.8",
