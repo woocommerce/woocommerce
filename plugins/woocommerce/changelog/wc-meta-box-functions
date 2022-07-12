@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixed issue to check post object and field ID when text input create

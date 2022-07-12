@@ -19,6 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 function woocommerce_wp_text_input( $field ) {
 	global $thepostid, $post;
 
+	if( empty( $thepostid ) && ( ! isset( $post->ID ) || empty( $post->ID ) ) ) {
+		return;
+	}
+
+	if( ! isset( $field['id'] ) || empty( $field['id'] ) ) {
+		return;
+	}
+
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
