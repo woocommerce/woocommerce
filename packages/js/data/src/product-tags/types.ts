@@ -39,7 +39,8 @@ type MutableProperties = Partial< Omit< ProductTag, ReadOnlyProperties > >;
 type ProductTagActions = CrudActions<
 	'ProductTag',
 	ProductTag,
-	MutableProperties
+	MutableProperties,
+	'name'
 >;
 
 export type ProductTagSelectors = CrudSelectors<
