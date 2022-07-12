@@ -1,3 +1,3 @@
 Significance: minor
 Type: add
-Comment: Add the command `wc com extension list` to retrieve and display extension list for the connected site.
+Comment: Add the command `wc com extension list` to retrieve and display the extension list for the connected site.
