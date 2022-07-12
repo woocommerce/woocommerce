@@ -23,24 +23,34 @@ export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
 };
 
-export type CrudActions< ResourceName, ItemType, MutableProperties > =
+type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
+	[ Property in Key ]-?: Type[ Property ];
+};
+
+export type CrudActions<
+	ResourceName,
+	ItemType,
+	MutableProperties,
+	RequiredFields extends keyof MutableProperties | undefined = undefined
+> = MapActions<
+	{
+		create: ( query: Partial< ItemType > ) => Item;
+		update: ( query: Partial< ItemType > ) => Item;
+	},
+	ResourceName,
+	RequiredFields extends keyof MutableProperties
+		? WithRequiredProperty< Partial< MutableProperties >, RequiredFields >
+		: Partial< MutableProperties >,
+	Generator< unknown, ItemType >
+> &
 	MapActions<
 		{
-			create: ( query: ItemQuery ) => Item;
-			update: ( query: ItemQuery ) => Item;
+			delete: ( id: IdType ) => Item;
 		},
 		ResourceName,
-		MutableProperties,
+		IdType,
 		Generator< unknown, ItemType >
-	> &
-		MapActions<
-			{
-				delete: ( id: IdType ) => Item;
-			},
-			ResourceName,
-			IdType,
-			Generator< unknown, ItemType >
-		>;
+	>;
 
 export type CrudSelectors<
 	ResourceName,
