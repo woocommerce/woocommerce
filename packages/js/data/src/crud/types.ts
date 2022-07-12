@@ -28,6 +28,7 @@ export type Item = {
 
 export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
+	parent_id?: IdType;
 };
 
 type WithRequiredProperty< Type, Key extends keyof Type > = Type & {

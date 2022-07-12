@@ -80,6 +80,26 @@ describe( 'crud reducer', () => {
 		expect( state.data[ 2 ] ).toEqual( items[ 1 ] );
 	} );
 
+	it( 'should handle GET_ITEMS_SUCCESS with parent_id', () => {
+		const items: Item[] = [
+			{ id: 1, name: 'Yum!' },
+			{ id: 2, name: 'Dynamite!' },
+		];
+		const query: Partial< ItemQuery > = { status: 'draft' };
+		const state = reducer( defaultState, {
+			type: TYPES.GET_ITEMS_SUCCESS,
+			items,
+			query,
+			parent_id: 5,
+		} );
+
+		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+
+		expect( state.items[ resourceName ].data ).toHaveLength( 2 );
+		expect( state.data[ '5/1' ] ).toEqual( items[ 0 ] );
+		expect( state.data[ '5/2' ] ).toEqual( items[ 1 ] );
+	} );
+
 	it( 'GET_ITEMS_SUCCESS should not remove previously added fields, only update new ones', () => {
 		const initialState: ResourceState = {
 			...defaultState,
