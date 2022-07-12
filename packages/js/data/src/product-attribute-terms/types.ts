@@ -41,7 +41,8 @@ type MutableProperties = Partial<
 type ProductAttributeTermActions = CrudActions<
 	'ProductAttributeTerm',
 	ProductAttributeTerm,
-	MutableProperties
+	MutableProperties,
+	'name'
 >;
 
 export type ProductAttributeTermsSelectors = CrudSelectors<
