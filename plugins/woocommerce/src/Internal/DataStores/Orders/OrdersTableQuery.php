@@ -186,6 +186,8 @@ class OrdersTableQuery {
 		// SQL_CALC_FOUND_ROWS.
 		if ( ( ! $this->arg_isset( 'no_found_rows' ) || ! $this->args['no_found_rows'] ) && $this->limits ) {
 			$found_rows = 'SQL_CALC_FOUND_ROWS';
+		} else {
+			$found_rows = '';
 		}
 
 		// JOIN.
