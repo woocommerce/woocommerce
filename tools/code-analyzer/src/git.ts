@@ -5,12 +5,74 @@ import { CliUx } from '@oclif/core';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { readFileSync } from 'fs';
-
+import { readFileSync, rmSync } from 'fs';
+import { simpleGit } from 'simple-git';
+import { v4 } from 'uuid';
 /**
  * Internal dependencies
  */
 import { startWPEnv, stopWPEnv, isValidCommitHash } from './utils';
+import path = require('path');
+
+export const cloneRepo = async ( repoUrl: string ) => {
+	const tempFolderName = v4();
+	const git = simpleGit( { baseDir: tmpdir() } );
+	await git.clone( repoUrl, tempFolderName );
+
+	return tempFolderName;
+};
+
+const isURL = ( maybeUrl: string ) => {
+	try {
+		new URL( maybeUrl );
+	} catch ( e ) {
+		return false;
+	}
+	return true;
+};
+
+/**
+ * Do a git diff of 2 commit hashes (or branches)
+ *
+ * @param          baseDir
+ * @param {string} hashA   - either a git commit hash or a git branch
+ * @param {string} hashB   - either a git commit hash or a git branch
+ * @return {string} - diff of the changfiles between the 2 hashes
+ */
+export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
+	const git = simpleGit( { baseDir } );
+	return git.diff( [ `${ hashA }..${ hashB }` ] );
+};
+
+/**
+ * generateAPatch generates a diff for a given repo and 2 hashes or branch names.
+ *
+ * @param  repoPath - the url or filepath of the repo to clone.
+ * @param  hashA    - commit hash or branch name.
+ * @param  hashB    - commit hash or branch name.
+ */
+export const generateAPatch = async (
+	repoPath: string,
+	hashA: string,
+	hashB: string
+) => {
+	const context = await cloneRepo( repoPath );
+
+	const tmpRepoPath = path.join( tmpdir(), context );
+
+	if ( ! isURL( repoPath ) ) {
+		// If its local then we should fetch latest on the clone, in case we are missing a hash or branch being compared.
+		await simpleGit( { baseDir: tmpRepoPath } ).fetch();
+	}
+
+	const patch = await diffHashes( tmpRepoPath, hashA, hashB );
+
+	console.log( patch );
+	console.log( 'cleaning up' );
+
+	// time to clean up
+	rmSync( tmpRepoPath, { force: true, recursive: true } );
+};
 
 /**
  * Fetch branches from origin.
@@ -203,8 +265,7 @@ export const generateSchemaDiff = async (
 			description: 'OrdersTableDataStore Schema',
 			base: baseSchema.OrdersTableDataStore,
 			compare: compareSchema.OrdersTableDataStore,
-			method:
-				'Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore->get_database_schema',
+			method: 'Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore->get_database_schema',
 			areEqual:
 				baseSchema.OrdersTableDataStore ===
 				compareSchema.OrdersTableDataStore,
