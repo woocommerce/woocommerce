@@ -74,7 +74,10 @@ export const getItems = createSelector(
 			.filter( ( item ) => item !== undefined );
 	},
 	( state, query ) => {
-		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+		const itemQuery = getResourceName(
+			CRUD_ACTIONS.GET_ITEMS,
+			query || {}
+		);
 		const ids = state.items[ itemQuery ]
 			? state.items[ itemQuery ].data
 			: undefined;

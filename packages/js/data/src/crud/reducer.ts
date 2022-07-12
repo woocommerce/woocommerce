@@ -43,7 +43,7 @@ export const createReducer = () => {
 							...state.errors,
 							[ getResourceName(
 								payload.errorType,
-								payload.query as ItemQuery
+								( payload.query || {} ) as ItemQuery
 							) ]: payload.error,
 						},
 					};
@@ -114,7 +114,7 @@ export const createReducer = () => {
 
 					const itemQuery = getResourceName(
 						CRUD_ACTIONS.GET_ITEMS,
-						payload.query as ItemQuery
+						( payload.query || {} ) as ItemQuery
 					);
 
 					return {
