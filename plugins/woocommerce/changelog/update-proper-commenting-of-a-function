@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Fixed 33822 - I have written the commenting proper of this get_formatted_shipping_address function.
