@@ -6,7 +6,7 @@ The release pull request has been created! This checklist is a guide to follow f
 
 * [ ] Close the milestone of the release you are going to ship. That will prevent newly approved PRs to be automatically assigned to that milestone.
 * [ ] Create a milestone for the next version.
-* [ ] Check that the release automation correctly added the changelog to `readme.txt`
+* [ ] Manually add the changelog entries of all affected PRs to `readme.txt`. (Technically, this should be an automated process, but it seems to broke recently. Please change this entry back, once the automated process works again.)
 * [ ] Ensure you pull your changes from the remote, since GitHub Actions will have added new commits to the branch.
   * [ ] Check the version and date in the changelog section within `readme.txt`, e.g. `= {{version}} - YYYY-MM-DD =`
   * [ ] Check the changelog matches the one in the pull request description above.
