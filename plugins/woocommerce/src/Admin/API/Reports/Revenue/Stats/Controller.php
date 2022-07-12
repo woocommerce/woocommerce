@@ -456,12 +456,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'date'         => __( 'Date', 'woocommerce' ),
 			'orders_count' => __( 'Orders', 'woocommerce' ),
 			'gross_sales'  => __( 'Gross sales', 'woocommerce' ),
-			'total_sales'  => __( 'Total sales', 'woocommerce' ),
 			'refunds'      => __( 'Returns', 'woocommerce' ),
 			'coupons'      => __( 'Coupons', 'woocommerce' ),
+			'net_revenue'  => __( 'Net sales', 'woocommerce' ),
 			'taxes'        => __( 'Taxes', 'woocommerce' ),
 			'shipping'     => __( 'Shipping', 'woocommerce' ),
-			'net_revenue'  => __( 'Net Revenue', 'woocommerce' ),
+			'total_sales'  => __( 'Total sales', 'woocommerce' ),
 		);
 	}
 
@@ -478,12 +478,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'date'         => $item['date_start'],
 			'orders_count' => $subtotals['orders_count'],
 			'gross_sales'  => self::csv_number_format( $subtotals['gross_sales'] ),
-			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
 			'refunds'      => self::csv_number_format( $subtotals['refunds'] ),
 			'coupons'      => self::csv_number_format( $subtotals['coupons'] ),
+			'net_revenue'  => self::csv_number_format( $subtotals['net_revenue'] ),
 			'taxes'        => self::csv_number_format( $subtotals['taxes'] ),
 			'shipping'     => self::csv_number_format( $subtotals['shipping'] ),
-			'net_revenue'  => self::csv_number_format( $subtotals['net_revenue'] ),
+			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
 		);
 	}
 }
