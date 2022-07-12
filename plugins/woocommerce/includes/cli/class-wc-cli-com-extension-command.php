@@ -81,7 +81,7 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 		// Remove `--version` as we don't support it.
 		unset( $assoc_args['version'] );
 
-		// Filter by slug
+		// Filter by slug.
 		foreach ( $subscriptions as $subscription ) {
 			if ( $subscription['slug'] === $extension && ! is_null( $subscription['package'] ) ) {
 
@@ -98,6 +98,6 @@ class WC_CLI_COM_Extension_Command extends Plugin_Command {
 			return;
 		}
 
-		parent::install( [ $extension_package_url ], $assoc_args );
+		parent::install( array( $extension_package_url ), $assoc_args );
 	}
 }
