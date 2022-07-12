@@ -6,15 +6,15 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
+import { getRestPath, parseId } from './utils';
 import {
 	getItemError,
 	getItemSuccess,
 	getItemsError,
 	getItemsSuccess,
 } from './actions';
-import { getRestPath } from './utils';
 import { request } from '../utils';
-import { Item, ItemQuery } from './types';
+import { IdType, IdQuery, Item, ItemQuery } from './types';
 
 type ResolverOptions = {
 	resourceName: string;
@@ -27,13 +27,14 @@ export const createResolvers = ( {
 	pluralResourceName,
 	namespace,
 }: ResolverOptions ) => {
-	const getItem = function* ( id: number, ...urlParameters: string[] ) {
+	const getItem = function* ( idQuery: IdQuery ) {
+		const { id, parent_id } = parseId( idQuery );
 		try {
 			const item: Item = yield apiFetch( {
 				path: getRestPath(
 					`${ namespace }/${ id }`,
 					{},
-					urlParameters
+					parent_id ? [ parent_id ] : []
 				),
 				method: 'GET',
 			} );
@@ -62,7 +63,12 @@ export const createResolvers = ( {
 		}
 
 		try {
-			const path = getRestPath( namespace, {}, urlParameters );
+			const parent_id = query.parent_id as IdType;
+			const path = getRestPath(
+				namespace,
+				{},
+				parent_id ? [ parent_id ] : []
+			);
 			const { items }: { items: Item[] } = yield request<
 				ItemQuery,
 				Item

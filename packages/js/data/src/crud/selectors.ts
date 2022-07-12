@@ -7,9 +7,10 @@ import createSelector from 'rememo';
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { IdType, Item, ItemQuery } from './types';
+import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
+import { parseId } from './utils';
 
 type SelectorOptions = {
 	resourceName: string;
@@ -24,17 +25,23 @@ export const getItemCreateError = (
 	return state.errors[ itemQuery ];
 };
 
-export const getItemDeleteError = ( state: ResourceState, id: IdType ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.DELETE_ITEM, { id } );
+export const getItemDeleteError = (
+	state: ResourceState,
+	idQuery: IdQuery
+) => {
+	const { key } = parseId( idQuery );
+	const itemQuery = getResourceName( CRUD_ACTIONS.DELETE_ITEM, { key } );
 	return state.errors[ itemQuery ];
 };
 
-export const getItem = ( state: ResourceState, id: IdType ) => {
-	return state.data[ id ];
+export const getItem = ( state: ResourceState, idQuery: IdQuery ) => {
+	const { key } = parseId( idQuery );
+	return state.data[ key ];
 };
 
-export const getItemError = ( state: ResourceState, id: IdType ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
+export const getItemError = ( state: ResourceState, idQuery: IdQuery ) => {
+	const { key } = parseId( idQuery );
+	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { key } );
 	return state.errors[ itemQuery ];
 };
 
@@ -95,8 +102,12 @@ export const getItemsError = ( state: ResourceState, query?: ItemQuery ) => {
 	return state.errors[ itemQuery ];
 };
 
-export const getItemUpdateError = ( state: ResourceState, id: IdType ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, { id } );
+export const getItemUpdateError = (
+	state: ResourceState,
+	idQuery: IdQuery
+) => {
+	const { key } = parseId( idQuery );
+	const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, { key } );
 	return state.errors[ itemQuery ];
 };
 

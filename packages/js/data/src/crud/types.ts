@@ -14,6 +14,13 @@ import {
 
 export type IdType = number | string;
 
+export type IdQuery =
+	| IdType
+	| {
+			id: IdType;
+			parent_id: IdType;
+	  };
+
 export type Item = {
 	id: IdType;
 	[ key: string ]: unknown;
