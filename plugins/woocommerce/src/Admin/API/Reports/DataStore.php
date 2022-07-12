@@ -221,6 +221,7 @@ class DataStore extends SqlQuery {
 		if ( true === $this->debug_cache ) {
 			$this->debug_cache_data['should_use_cache']    = $this->should_use_cache();
 			$this->debug_cache_data['force_cache_refresh'] = $this->force_cache_refresh;
+			$this->debug_cache_data['cache_version']       = Cache::get_version();
 			$this->debug_cache_data['cache_hit']           = false;
 		}
 
