@@ -18,6 +18,13 @@ class BatchProcessingController {
 	const ACTION_GROUP                  = 'wc_batch_processes';
 
 	/**
+	 * Instance of WC_Logger class.
+	 *
+	 * @var \WC_Logger_Interface
+	 */
+	private $logger;
+
+	/**
 	 * BatchProcessingController constructor.
 	 *
 	 * Schedules necessary actions to process batches.
@@ -37,6 +44,7 @@ class BatchProcessingController {
 			10,
 			2
 		);
+		$this->logger = wc_get_logger();
 	}
 
 	/**
@@ -278,8 +286,7 @@ class BatchProcessingController {
 	 * @param \Exception $error Exception object.
 	 */
 	protected function log_error( \Exception $error ) : void {
-		// phpcs:ignore
-		// TODO: Implement error logging.
+		$this->logger->error( $error->getMessage(), array( 'exception' => $error ) );
 	}
 
 }
