@@ -10,6 +10,7 @@
   - it resolves the full path if the filePath is valid
   - otherwise, it removes `tests/e2e` from the given filePath before resolving a full path.
 - Updated `getLatestReleaseZipUrl` to make use of the assets download url over the archive zip.
+- Updated `jest-puppeteer@^5.0.4`.
 
 
 ## Added
