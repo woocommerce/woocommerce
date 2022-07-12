@@ -52,21 +52,23 @@ class BatchProcessingController {
 			$pending_updates[] = $processor_class_name;
 			$this->set_pending_processes( $pending_updates );
 		}
-		$this->schedule_init_cron();
+		$this->schedule_init_cron( false, true );
 	}
 
 	/**
 	 * Helper method to start update cron.
 	 *
 	 * @param bool $with_delay Whether to delay the cron start. Send true when rescheduling, false when starting.
+	 * @param bool $unique     Whether to make the cron unique.
 	 */
-	private function schedule_init_cron( bool $with_delay = false ) {
+	private function schedule_init_cron( bool $with_delay = false, bool $unique = false ) {
 		$time = $with_delay ? time() + HOUR_IN_SECONDS : time();
 		as_schedule_single_action(
 			$time,
 			self::CONTROLLER_CRON_NAME,
 			$this->get_args_for_init_cron(),
-			self::ACTION_GROUP
+			self::ACTION_GROUP,
+			$unique
 		);
 	}
 
