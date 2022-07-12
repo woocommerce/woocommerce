@@ -98,11 +98,21 @@ class BatchProcessingController {
 	 * Process update for a scheduled updater.
 	 *
 	 * @param string $batch_process Fully qualified class name of the updater. Must be child class `BatchProcessor`.
+	 *
+	 * @throws \Exception If error occurred during batch processing.
 	 */
 	private function process_single_batch( string $batch_process ) {
-		$batch_processor = $this->get_processor_instance( $batch_process );
-		$this->process_batch( $batch_processor );
-		if ( $batch_processor->get_total_pending_count() > 0 ) {
+		$batch_processor      = $this->get_processor_instance( $batch_process );
+		$pending_count_before = $batch_processor->get_total_pending_count();
+		$error                = $this->process_batch( $batch_processor );
+		$pending_count_after  = $batch_processor->get_total_pending_count();
+		if ( ( $error instanceof \Exception ) && $pending_count_before === $pending_count_after ) {
+			// There is an error in processing, schedule with delay.
+			$this->schedule_next_batch( $batch_process, true );
+			// Throw the error, after a while, AS will stop scheduling this action.
+			throw $error;
+		}
+		if ( $pending_count_after > 0 ) {
 			$this->schedule_next_batch( $batch_process );
 		} else {
 			$this->mark_pending_process_complete( $batch_process );
@@ -113,22 +123,26 @@ class BatchProcessingController {
 	 * Process next batch for given instance of `BatchProcessor`.
 	 *
 	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
+	 *
+	 * @return null|\Exception Exception if error occurred, null otherwise.
 	 */
 	private function process_batch( BatchProcessorInterface $batch_processor ) {
 		$details    = $this->get_process_details( $batch_processor );
 		$time_start = microtime( true );
 		$batch      = $batch_processor->get_next_batch_to_process( $details['current_batch_size'] );
 		if ( empty( $batch ) ) {
-			return;
+			return null;
 		}
 		try {
 			$batch_processor->process_batch( $batch );
 			$time_taken = microtime( true ) - $time_start;
 			$this->update_progress_status( $batch_processor, $batch, $time_taken );
 		} catch ( \Exception $exception ) {
-			$this->log_error( $exception );
+			$this->log_error( $exception, $batch_processor, $batch );
 			$this->update_progress_status( $batch_processor, $batch, $time_taken, $exception );
+			return $exception;
 		}
+		return null;
 	}
 
 	/**
@@ -183,11 +197,13 @@ class BatchProcessingController {
 	 * Scheduler next update batch.
 	 *
 	 * @param string $process_name Fully qualified class name of the processor.
+	 * @param bool   $with_delay   Whether to delay the next update.
 	 *
 	 * @return int Action ID.
 	 */
-	private function schedule_next_batch( string $process_name ) : int {
-		return as_schedule_single_action( time(), self::SINGLE_BATCH_PROCESS_ACTION, array( $process_name ) );
+	private function schedule_next_batch( string $process_name, bool $with_delay = false ) : int {
+		$time = $with_delay ? time() + MINUTE_IN_SECONDS : time();
+		return as_schedule_single_action( $time, self::SINGLE_BATCH_PROCESS_ACTION, array( $process_name ) );
 	}
 
 	/**
@@ -283,10 +299,25 @@ class BatchProcessingController {
 	/**
 	 * Log an error if happens during migration processing.
 	 *
-	 * @param \Exception $error Exception object.
+	 * @param \Exception              $error Exception object.
+	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
+	 * @param array                   $batch Batch that finished processing.
 	 */
-	protected function log_error( \Exception $error ) : void {
-		$this->logger->error( $error->getMessage(), array( 'exception' => $error ) );
+	protected function log_error( \Exception $error, BatchProcessorInterface $batch_processor, array $batch ) : void {
+		$batch_detail_string = '';
+		// Log only first and last, as the entire batch may be too big.
+		if ( count( $batch ) > 0 ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- Logging is for debugging.
+			$batch_detail_string = '\n' . print_r(
+				array(
+					'batch_start' => $batch[0],
+					'batch_end'   => end( $batch ),
+				),
+				true
+			);
+		}
+		$error_message = "Error processing batch for {$batch_processor->get_name()}: {$error->getMessage()}" . $batch_detail_string;
+		$this->logger->error( $error_message, array( 'exception' => $error ) );
 	}
 
 }
