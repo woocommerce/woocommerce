@@ -22,6 +22,12 @@ describe( 'utils', () => {
 		expect( path ).toEqual( 'test/insert/next/path' );
 	} );
 
+	it( 'should throw an error when not all parameters are replaced', () => {
+		expect( () =>
+			getRestPath( 'test/{parent}/{other}/path', {}, [ 'insert' ] )
+		).toThrow( Error );
+	} );
+
 	it( 'should get the key when no parent is provided', () => {
 		const key = getKey( 3, null );
 		expect( key ).toEqual( 3 );

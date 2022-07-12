@@ -21,9 +21,16 @@ export const getRestPath = (
 	query: Partial< ItemQuery >,
 	urlParameters: IdType[] = []
 ) => {
+	const pattern = /\{(.*?)}/;
 	const path = urlParameters.reduce( ( str, param ) => {
-		return str.toString().replace( /\{(.*?)}/, param.toString() );
+		return str.toString().replace( pattern, param.toString() );
 	}, templatePath );
+
+	const regex = new RegExp( pattern );
+	if ( regex.test( path.toString() ) ) {
+		throw new Error( 'Not all URL parameters were replaced' );
+	}
+
 	return addQueryArgs( path.toString(), query );
 };
 
