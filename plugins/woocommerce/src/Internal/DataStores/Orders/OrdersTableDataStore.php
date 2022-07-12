@@ -1233,7 +1233,47 @@ LEFT JOIN {$operational_data_clauses['join']}
 	}
 
 	public function query( $query_vars ) {
-		return array();
+		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
+			$query_vars['no_found_rows'] = true;
+		}
+
+		if ( isset( $query_vars['anonymized'] ) ) {
+			$query_vars['meta_query'] = $query_vars['meta_query'] ?? array();
+
+			if ( $query_vars['anonymized'] ) {
+				$query_vars['meta_query'][] = array( 'key' => '_anonymized', 'value' => 'yes' );
+			} else {
+				$query_vars['meta_query'][] = array( 'key' => '_anonymized', 'compare' => 'NOT EXISTS' );
+			}
+		}
+
+		try {
+			$query = new OrdersTableQuery( $query_vars );
+		} catch ( \Exception $e ) {
+			$query = (object) array(
+				'orders'        => array(),
+				'found_orders'  => 0,
+				'max_num_pages' => 0,
+			);
+		}
+
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			$orders = $query->orders;
+		} else {
+			//update_post_caches( $query->posts ); // We already fetching posts, might as well hydrate some caches.
+			//$orders    = $this->compile_orders( $order_ids, $query_vars, $query );
+			$orders = array_map( 'wc_get_order', $query->orders );
+		}
+
+		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+			return (object) array(
+				'orders'        => $orders,
+				'total'         => $query->found_orders,
+				'max_num_pages' => $query->max_num_pages,
+			);
+		}
+
+		return $orders;
 	}
 
 	public function get_order_item_type( $order, $order_item_id ) {
