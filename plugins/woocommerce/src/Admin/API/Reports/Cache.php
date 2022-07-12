@@ -41,7 +41,7 @@ class Cache {
 
 		if ( false === $transient_value || true === $refresh ) {
 			// Round to the nearest $minutes increment.
-			$minutes = 10;
+			$minutes         = 10;
 			$transient_value = (string) round( time() / ( MINUTE_IN_SECONDS * $minutes ) ) * ( MINUTE_IN_SECONDS * $minutes );
 
 			set_transient( $transient_name, $transient_value );
