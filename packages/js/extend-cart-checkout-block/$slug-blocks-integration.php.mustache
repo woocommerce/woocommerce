@@ -19,13 +19,19 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 
 	/**
 	 * When called invokes any initialization/setup for the integration.
-	 *
 	 */
 	public function initialize() {
-		$this->register_frontend_scripts();
-		$this->register_editor_scripts();
-		$this->register_editor_blocks();
-        $this->register_editor_styles();
+		$this->register_newsletter_block_frontend_scripts();
+		$this->register_newsletter_block_editor_scripts();
+		$this->register_newsletter_block_editor_blocks();
+        $this->register_newsletter_block_editor_styles();
+        $this->register_main_integration();
+	}
+
+	/**
+	 * Registers the main JS file required to add filters and Slot/Fills.
+	 */
+	public function register_main_integration() {
 		$script_path = '/build/index.js';
 		$style_path  = '/build/style-index.css';
 
@@ -95,7 +101,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 
 	}
 
-    public function register_editor_styles() {
+    public function register_newsletter_block_editor_styles() {
         $style_path  = '/build/style-{{slug}}-checkout-newsletter-subscription-block.css';
 
         $style_url  = plugins_url( $style_path, __FILE__ );
@@ -107,7 +113,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
         );
     }
 
-    public function register_editor_scripts() {
+    public function register_newsletter_block_editor_scripts() {
         $script_path       = '/build/{{slug}}-checkout-newsletter-subscription-block.js';
         $script_url        = plugins_url( $script_path, __FILE__ );
         $script_asset_path = dirname( __FILE__ ) . '/build/{{slug}}-checkout-newsletter-subscription-block.asset.php';
@@ -133,7 +139,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
         );
     }
 
-    public function register_frontend_scripts() {
+    public function register_newsletter_block_frontend_scripts() {
         $script_path       = '/build/{{slug}}-checkout-newsletter-subscription-block-frontend.js';
         $script_url        = plugins_url( $script_path, __FILE__ );
         $script_asset_path = dirname( __FILE__ ) . '/build/newsletter-block-frontend.asset.php';
@@ -161,7 +167,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
     /**
      * Register blocks.
      */
-    public function register_editor_blocks() {
+    public function register_newsletter_block_editor_blocks() {
         register_block_type( dirname( __FILE__ ) . '/assets/js/checkout-newsletter-subscription-block', array(
             'editor_script' => '{{slug}}-checkout-newsletter-subscription-block-editor',
         ) );
