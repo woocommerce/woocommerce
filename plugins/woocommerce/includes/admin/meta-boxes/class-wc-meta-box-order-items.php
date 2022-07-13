@@ -22,21 +22,25 @@ class WC_Meta_Box_Order_Items {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post|WC_Order $post Post or order object.
 	 */
 	public static function output( $post ) {
 		global $post, $thepostid, $theorder;
 
-		if ( ! is_int( $thepostid ) ) {
+		if ( ! is_int( $thepostid ) && ( $post instanceof WP_Post ) ) {
 			$thepostid = $post->ID;
 		}
 
 		if ( ! is_object( $theorder ) ) {
-			$theorder = wc_get_order( $thepostid );
+			if ( $post instanceof WC_Order ) {
+				$theorder = $post;
+			} else {
+				$theorder = wc_get_order( $thepostid );
+			}
 		}
 
 		$order = $theorder;
-		$data  = get_post_meta( $post->ID );
+		$data  = ( $post instanceof WP_Post ) ? get_post_meta( $post->ID ) : array();
 
 		include __DIR__ . '/views/html-order-items.php';
 	}
