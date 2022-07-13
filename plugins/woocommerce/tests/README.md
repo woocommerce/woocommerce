@@ -2,6 +2,7 @@
 
 This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) to learn how to setup testing environment for running e2e tests and run them.
 
+
 ## Table of contents
 
 - [WooCommerce Tests](#woocommerce-tests)
