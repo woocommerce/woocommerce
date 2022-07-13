@@ -81,7 +81,12 @@ test.describe( 'Payment setup task', () => {
 			.click()
 			.catch( () => {} );
 
-		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
+		await page.waitForLoadState( 'networkidle' );
+
+		if (
+			( await page.isVisible( 'text=Offline payment methods' ) ) ||
+			( await page.isVisible( 'text=Additional payment gateways' ) )
+		) {
 			// other payment methods are already shown
 		} else {
 			// show other payment methods
