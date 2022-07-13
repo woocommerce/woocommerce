@@ -8,7 +8,7 @@ import { getAdminLink } from '@woocommerce/settings';
 
 domReady( () => {
 	dispatch( 'core/notices' ).createSuccessNotice(
-		__( 'Sample products added' ),
+		__( 'Sample products added', 'woocommerce' ),
 		{
 			id: 'WOOCOMMERCE_ONBOARDING_LOAD_SAMPLE_PRODUCTS_NOTICE',
 			actions: [

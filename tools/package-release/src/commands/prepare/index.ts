@@ -16,17 +16,17 @@ import {
 	getNextVersion,
 	validateChangelogEntries,
 	writeChangelog,
-	hasChangelogs,
+	hasValidChangelogs,
 } from '../../changelogger';
 
 /**
- * PackageRelease class
+ * PackagePrepare class
  */
-export default class PackageRelease extends Command {
+export default class PackagePrepare extends Command {
 	/**
 	 * CLI description
 	 */
-	static description = 'Release Monorepo JS packages';
+	static description = 'Prepare Monorepo JS packages for Release';
 
 	/**
 	 * CLI arguments
@@ -55,7 +55,7 @@ export default class PackageRelease extends Command {
 	 * This method is called to execute the command
 	 */
 	async run(): Promise< void > {
-		const { args, flags } = await this.parse( PackageRelease );
+		const { args, flags } = await this.parse( PackagePrepare );
 
 		if ( ! args.packages && ! flags.all ) {
 			this.error( 'No packages supplied.' );
@@ -85,7 +85,7 @@ export default class PackageRelease extends Command {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
 			try {
-				if ( hasChangelogs( name ) ) {
+				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
 					const nextVersion = getNextVersion( name );
 					writeChangelog( name );

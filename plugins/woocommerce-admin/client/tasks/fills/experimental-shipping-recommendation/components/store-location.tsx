@@ -3,7 +3,7 @@
  */
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -15,7 +15,8 @@ import { default as StoreLocationForm } from '~/tasks/fills/steps/location';
 
 export const StoreLocation: React.FC< {
 	nextStep: () => void;
-} > = ( { nextStep } ) => {
+	onLocationComplete: () => void;
+} > = ( { nextStep, onLocationComplete } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateAndPersistSettingsForGroup } =
 		useDispatch( SETTINGS_STORE_NAME );
@@ -36,8 +37,8 @@ export const StoreLocation: React.FC< {
 		if ( isResolving || ! hasCompleteAddress( generalSettings ) ) {
 			return;
 		}
-		nextStep();
-	}, [ generalSettings, isResolving, nextStep ] );
+		onLocationComplete();
+	}, [ generalSettings, onLocationComplete, isResolving ] );
 
 	if ( isResolving ) {
 		return null;

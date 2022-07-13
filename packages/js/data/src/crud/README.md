@@ -44,7 +44,8 @@ The following actions are available for dispatch on the created data store:
 | Resolver | Method | Endpoint |
 | --- | --- | --- |
 | `createMyThing( query )` | POST | `<namespace>` |
-| `updatetMyThings( id, query )` | PUT | `<namespace>/<id>` |
+| `deleteMyThing( id, force = true )` | DELETE | `<namespace>/<id>` |
+| `updatetMyThing( id, query )` | PUT | `<namespace>/<id>` |
 
 Example usage: `wp.data.dispatch('my/custom/store').updateMyThing( 3, { name: 'New name' } );`
 

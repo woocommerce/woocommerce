@@ -34,8 +34,6 @@ test.describe( 'Add New Variable Product Page', () => {
 				) {
 					api.delete( `products/${ product.id }`, {
 						force: true,
-					} ).then( () => {
-						// nothing to do here.
 					} );
 				}
 			}
@@ -290,8 +288,8 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// remove a variation
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( '.remove_variation.delete', { force: true } );
-		await page.click( '.remove_variation.delete' ); // have to do this twice to get the link to appear
+		await page.hover( '.woocommerce_variation' );
+		await page.click( '.remove_variation.delete' );
 		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount(
 			0
 		);

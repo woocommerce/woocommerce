@@ -10,8 +10,9 @@ const selectors = createDispatchActions( {
 
 describe( 'crud selectors', () => {
 	it( 'should return methods for the default actions', () => {
-		expect( Object.keys( selectors ).length ).toEqual( 2 );
+		expect( Object.keys( selectors ).length ).toEqual( 3 );
 		expect( selectors ).toHaveProperty( 'createProduct' );
+		expect( selectors ).toHaveProperty( 'deleteProduct' );
 		expect( selectors ).toHaveProperty( 'updateProduct' );
 	} );
 } );

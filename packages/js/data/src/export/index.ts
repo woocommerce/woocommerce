@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { registerStore } from '@wordpress/data';
-import { controls } from '@wordpress/data-controls';
 import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 import { Reducer, AnyAction } from 'redux';
 /**
@@ -13,6 +12,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer, { State } from './reducer';
 import { WPDataSelectors } from '../types';
+import controls from '../controls';
 export * from './types';
 export type { State };
 

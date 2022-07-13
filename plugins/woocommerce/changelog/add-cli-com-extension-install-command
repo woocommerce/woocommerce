@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add `wc com extension install` CLI command

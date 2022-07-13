@@ -16,6 +16,12 @@ module.exports = {
 		yoda: [ 'error', 'never' ],
 		// temporary conversion to warnings until the below are all handled.
 		'@wordpress/i18n-translator-comments': 'warn',
+		'@wordpress/i18n-text-domain': [
+			'error',
+			{
+				allowedTextDomain: 'woocommerce',
+			},
+		],
 		'@wordpress/valid-sprintf': 'warn',
 		'@wordpress/no-unsafe-wp-apis': 'warn',
 		'@wordpress/no-global-active-element': 'warn',
@@ -35,10 +41,11 @@ module.exports = {
 				],
 			},
 		],
-		'no-unused-vars': [
+		'@typescript-eslint/no-unused-vars': [
 			'error',
 			{
 				varsIgnorePattern: 'createElement',
+				ignoreRestSiblings: true,
 			},
 		],
 		'react/react-in-jsx-scope': 'error',

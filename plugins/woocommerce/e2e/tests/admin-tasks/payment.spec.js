@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );
@@ -12,6 +13,21 @@ test.describe( 'Payment setup task', () => {
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
+	test.afterAll( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.put( 'payment_gateways/bacs', {
+			enabled: false,
+		} );
+		await api.put( 'payment_gateways/cod', {
+			enabled: false,
+		} );
+	} );
+
 	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
 		page,
 	} ) => {
@@ -23,13 +39,16 @@ test.describe( 'Payment setup task', () => {
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
 		page,
 	} ) => {
+		// load the bank transfer page
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&task=payments&id=bacs'
 		);
+		// purposely no await -- close the help dialog if/when it appears
 		page.locator( '.components-button.is-small.has-icon' )
 			.click()
 			.catch( () => {} );
-		// purposely no await -- close the help dialog if/when it appears
+
+		// fill in bank transfer form
 		await page.fill( '//input[@placeholder="Account name"]', 'Savings' );
 		await page.fill( '//input[@placeholder="Account number"]', '1234' );
 		await page.fill( '//input[@placeholder="Bank name"]', 'Test Bank' );
@@ -37,46 +56,48 @@ test.describe( 'Payment setup task', () => {
 		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );
 		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );
 		await page.click( 'text=Save' );
+
+		// check that bank transfers were set up
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toHaveText( 'Direct bank transfer details added successfully' );
-		await expect( page.locator( 'h1' ) ).toHaveText( 'Set up payments' );
+		).toContainText( 'Direct bank transfer details added successfully' );
+
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
+
 		await expect(
 			page.locator(
-				'a:right-of(h3:has-text("Direct bank transfer")) >> nth=0'
+				'//tr[@data-gateway_id="bacs"]/td[@class="status"]/a'
 			)
-		).toHaveText( 'Manage' );
-
-		// clean up
-		await page.goto(
-			'wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs'
-		);
-		await page.click( 'text="Enable bank transfer"' );
-		await page.click( 'text="Save changes"' );
+		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
 	} );
 
 	test( 'Enabling cash on delivery enables the payment method', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=payments' );
+
+		// purposely no await -- close the help dialog if/when it appears
 		page.locator( '.components-button.is-small.has-icon' )
 			.click()
 			.catch( () => {} );
-		// purposely no await -- close the help dialog if/when it appears
-		await page.click( 'button:has-text("Enable")' ); // enable COD payment option
-		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=payments' );
-		await expect( page.locator( 'h1' ) ).toHaveText( 'Set up payments' );
-		await expect(
-			page.locator(
-				'a:right-of(h3:has-text("Cash on delivery")) >> nth=0'
-			)
-		).toHaveText( 'Manage' );
 
-		// clean up
-		await page.goto(
-			'wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod'
+		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
+			// other payment methods are already shown
+		} else {
+			// show other payment methods
+			await page.click( 'button.toggle-button' );
+		}
+
+		// enable COD payment option
+		await page.click(
+			'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
 		);
-		await page.click( 'text="Enable cash on delivery"' );
-		await page.click( 'text="Save changes"' );
+		await page.waitForLoadState( 'networkidle' );
+
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
+
+		await expect(
+			page.locator( '//tr[@data-gateway_id="cod"]/td[@class="status"]/a' )
+		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
 	} );
 } );

@@ -23,7 +23,11 @@ $readme    = file_get_contents( $readme_file );
 $next_log  = file_get_contents( $next_log_file );
 
 $next_log  = preg_replace( "/= (\d+\.\d+\.\d+) YYYY-mm-dd =/", "= \\1 {$release_date} =", $next_log );
+
+// Convert PR number to markdown link.
+$next_log  = preg_replace( "/\[#(\d+)\]/", '[#$1](https://github.com/woocommerce/woocommerce/pull/$1)', $next_log );
 $changelog = preg_replace( "/^== Changelog ==\n\n/", "== Changelog ==\n\n{$next_log}\n", $changelog );
+
 $readme    = preg_replace( "/== Changelog ==\n(.*?)\[See changelog for all versions\]/s", "== Changelog ==\n\n{$next_log}\n\n[See changelog for all versions]", $readme );
 
 file_put_contents( $changelog_file, $changelog );

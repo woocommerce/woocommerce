@@ -21,6 +21,7 @@ export type PluginProps = {
 	isInstalled: boolean;
 	description?: string;
 	installAndActivate?: ( slug: string ) => void;
+	onManage?: ( slug: string ) => void;
 	imageUrl?: string;
 	manageUrl?: string;
 	name: string;
@@ -31,6 +32,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 	description,
 	imageUrl,
 	installAndActivate = () => {},
+	onManage = () => {},
 	isActive,
 	isBusy,
 	isBuiltByWC,
@@ -72,13 +74,14 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isBusy={ isBusy }
 						isSecondary
 						href={ getAdminLink( manageUrl ) }
-						onClick={ () =>
+						onClick={ () => {
 							recordEvent( 'marketing_manage', {
 								extension_name: slug,
-							} )
-						}
+							} );
+							onManage( slug );
+						} }
 					>
-						{ __( 'Manage', 'woocommmerce-admin' ) }
+						{ __( 'Manage', 'woocommerce' ) }
 					</Button>
 				) }
 				{ isInstalled && ! isActive && (
@@ -88,7 +91,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>
-						{ __( 'Activate', 'woocommmerce-admin' ) }
+						{ __( 'Activate', 'woocommerce' ) }
 					</Button>
 				) }
 				{ ! isInstalled && (
@@ -98,7 +101,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>
-						{ __( 'Get started', 'woocommmerce-admin' ) }
+						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
 				) }
 			</div>

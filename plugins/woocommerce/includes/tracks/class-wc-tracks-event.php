@@ -92,6 +92,16 @@ class WC_Tracks_Event {
 			$_event->_ts = WC_Tracks_Client::build_timestamp();
 		}
 
+		if ( ! self::event_name_is_valid( $_event->_en ) ) {
+			return new WP_Error( 'invalid_event_name', __( 'A valid event name must be specified.', 'woocommerce' ) );
+		}
+
+		foreach ( array_keys( (array) $_event ) as $key ) {
+			if ( ! self::prop_name_is_valid( $key ) ) {
+				return new WP_Error( 'invalid_prop_name', __( 'A valid prop name must be specified', 'woocommerce' ) );
+			}
+		}
+
 		return $_event;
 	}
 

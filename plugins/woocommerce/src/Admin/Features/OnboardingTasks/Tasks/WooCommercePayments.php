@@ -27,7 +27,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid with WooCommerce Payments', 'woocommerce' );
+		return __( 'Set up WooCommerce Payments', 'woocommerce' );
 	}
 
 	/**
@@ -67,7 +67,7 @@ class WooCommercePayments extends Task {
 	 */
 	public function get_additional_info() {
 		return __(
-			'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',
+			'By using WooCommerce Payments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
 			'woocommerce'
 		);
 	}

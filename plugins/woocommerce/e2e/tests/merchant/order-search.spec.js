@@ -1,11 +1,11 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const searchString = 'John Doe';
+const searchString = 'James Doe';
 const itemName = 'Wanted Product';
 
 const customerBilling = {
-	first_name: 'John',
+	first_name: 'James',
 	last_name: 'Doe',
 	company: 'Automattic',
 	country: 'US',
@@ -15,7 +15,7 @@ const customerBilling = {
 	state: 'CA',
 	postcode: '94107',
 	phone: '123456789',
-	email: 'john.doe@example.com',
+	email: 'john.doe.ordersearch@example.com',
 };
 const customerShipping = {
 	first_name: 'Tim',
@@ -28,7 +28,7 @@ const customerShipping = {
 	state: 'NY',
 	postcode: '14201',
 	phone: '123456789',
-	email: 'john.doe@example.com',
+	email: 'john.doe.ordersearch@example.com',
 };
 
 const queries = [
@@ -76,9 +76,9 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 		// update customer info
 		await api
 			.post( 'customers', {
-				email: 'john.doe@example.com',
-				first_name: 'John',
-				last_name: 'Doe',
+				email: customerBilling.email,
+				first_name: customerBilling.first_name,
+				last_name: customerBilling.last_name,
 				username: 'john.doe',
 				billing: customerBilling,
 				shipping: customerShipping,
@@ -134,8 +134,9 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 			await page.fill( '#post-search-input', queries[ i ][ 0 ] );
 			await page.click( '#search-submit' );
 
+			// always check the last item, in case of multiples
 			await expect(
-				page.locator( '.order_number > a.order-view' )
+				page.locator( '.order_number > a.order-view >> nth=-1' )
 			).toContainText( `#${ orderId } ${ searchString }` );
 		} );
 	}

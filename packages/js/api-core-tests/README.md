@@ -22,7 +22,7 @@ For local setup, create a `.env` file in this folder with the three required val
 Alternatively, these values can be passed in via the command line. For example:
 
 ```shell
-BASE_URL=http://localhost:8084 USER_KEY=admin USER_SECRET=password npm run e2e:api
+BASE_URL=http://localhost:8086 USER_KEY=admin USER_SECRET=password npm run e2e:api
 ```
 
 When using a username and password combination instead of a consumer secret and consumer key, make sure to have the [JSON Basic Authentication plugin](https://github.com/WP-API/Basic-Auth) installed and activated on the test site.

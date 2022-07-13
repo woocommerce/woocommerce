@@ -241,4 +241,61 @@ describe( 'crud reducer', () => {
 		expect( state.data[ 2 ].name ).toEqual( item.name );
 		expect( state.data[ 2 ].status ).toEqual( item.status );
 	} );
+
+	it( 'should handle DELETE_ITEM_SUCCESS', () => {
+		const itemType = 'guyisms';
+		const initialState: ResourceState = {
+			items: {
+				[ itemType ]: {
+					data: [ 1, 2 ],
+				},
+			},
+			errors: {},
+			data: {
+				1: { id: 1, name: 'Donkey', status: 'draft' },
+				2: { id: 2, name: 'Sauce', status: 'publish' },
+			},
+		};
+		const item1Updated: Item = {
+			id: 1,
+			status: 'pending',
+		};
+		const item2Updated: Item = {
+			id: 2,
+			status: 'trash',
+		};
+
+		let state = reducer( initialState, {
+			type: TYPES.DELETE_ITEM_SUCCESS,
+			id: item1Updated.id,
+			item: item1Updated,
+			force: true,
+		} );
+		state = reducer( state, {
+			type: TYPES.DELETE_ITEM_SUCCESS,
+			id: item2Updated.id,
+			item: item2Updated,
+			force: false,
+		} );
+
+		expect( state.errors ).toEqual( initialState.errors );
+		expect( state.data[ 1 ] ).toEqual( undefined );
+		expect( state.data[ 2 ].status ).toEqual( 'trash' );
+	} );
+
+	it( 'should handle DELETE_ITEM_ERROR', () => {
+		const id = 2;
+		const resourceName = getResourceName( CRUD_ACTIONS.DELETE_ITEM, {
+			id,
+		} );
+		const error = 'Baaam!';
+		const state = reducer( defaultState, {
+			type: TYPES.DELETE_ITEM_ERROR,
+			id,
+			error,
+			errorType: CRUD_ACTIONS.DELETE_ITEM,
+		} );
+
+		expect( state.errors[ resourceName ] ).toBe( error );
+	} );
 } );

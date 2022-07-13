@@ -28,7 +28,7 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -64,7 +64,7 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -89,7 +89,7 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(

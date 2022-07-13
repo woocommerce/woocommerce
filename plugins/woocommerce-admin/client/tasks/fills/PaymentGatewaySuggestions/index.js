@@ -14,7 +14,6 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath } from '@woocommerce/navigation';
-import { getAdminLink } from '@woocommerce/settings';
 import { Button } from '@wordpress/components';
 import ExternalIcon from 'gridicons/dist/external';
 
@@ -204,29 +203,53 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		);
 	}
 
+	let additionalSectionHeading = __(
+		'Choose a payment provider',
+		'woocommerce'
+	);
+	let additionalSectionHeadingDescription = __(
+		'To start accepting online payments',
+		'woocommerce'
+	);
+	if ( isWCPaySupported ) {
+		if ( isWCPayOrOtherCategoryDoneSetup ) {
+			additionalSectionHeading = __(
+				'Additional payment options',
+				'woocommerce'
+			);
+			additionalSectionHeadingDescription = __(
+				'Give your customers additional choices in ways to pay.',
+				'woocommerce'
+			);
+		} else {
+			additionalSectionHeading = __(
+				'Other payment providers',
+				'woocommerce'
+			);
+			additionalSectionHeadingDescription = __(
+				'Try one of the alternative payment providers.',
+				'woocommerce'
+			);
+		}
+	}
+
 	const additionalSection = !! additionalGateways.length && (
 		<List
-			heading={
-				! wcPayGateway.length &&
-				__( 'Choose a payment provider', 'woocommerce' )
-			}
+			heading={ additionalSectionHeading }
+			headingDescription={ additionalSectionHeadingDescription }
 			recommendation={ recommendation }
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
-				! isWCPayOrOtherCategoryDoneSetup && (
-					<Button
-						href={ getAdminLink(
-							'admin.php?page=wc-addons&section=payment-gateways'
-						) }
-						target="_blank"
-						onClick={ trackSeeMore }
-						isTertiary
-					>
-						{ __( 'See more', 'woocommerce' ) }
-						<ExternalIcon size={ 18 } />
-					</Button>
-				)
+				<Button
+					href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
+					target="_blank"
+					onClick={ trackSeeMore }
+					isTertiary
+				>
+					{ __( 'See more', 'woocommerce' ) }
+					<ExternalIcon size={ 18 } />
+				</Button>
 			}
 		></List>
 	);
@@ -248,7 +271,10 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				<>
 					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
 					<Toggle
-						heading={ __( 'Other payment methods', 'woocommerce' ) }
+						heading={ __(
+							'Other payment providers',
+							'woocommerce'
+						) }
 						onToggle={ trackToggle }
 					>
 						{ additionalSection }

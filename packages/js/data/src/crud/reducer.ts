@@ -9,17 +9,18 @@ import { Reducer } from 'redux';
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
 import { getResourceName } from '../utils';
-import { Item, ItemQuery } from './types';
+import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
+export type Data = Record< IdType, Item >;
 export type ResourceState = {
 	items: Record<
 		string,
 		{
-			data: number[];
+			data: IdType[];
 		}
 	>;
-	data: Record< number, Item >;
+	data: Data;
 	errors: Record< string, unknown >;
 };
 
@@ -62,6 +63,29 @@ export const createReducer = () => {
 						},
 					};
 
+				case TYPES.DELETE_ITEM_SUCCESS:
+					const itemIds = Object.keys( state.data );
+					const nextData = itemIds.reduce< Data >(
+						( items: Data, id: string ) => {
+							if ( id !== payload.id.toString() ) {
+								items[ id ] = state.data[ id ];
+								return items;
+							}
+							if ( payload.force ) {
+								return items;
+							}
+							items[ id ] = payload.item;
+							return items;
+						},
+						{} as Data
+					);
+
+					return {
+						...state,
+						data: nextData,
+					};
+
+				case TYPES.DELETE_ITEM_ERROR:
 				case TYPES.GET_ITEM_ERROR:
 				case TYPES.UPDATE_ITEM_ERROR:
 					return {
@@ -75,10 +99,10 @@ export const createReducer = () => {
 					};
 
 				case TYPES.GET_ITEMS_SUCCESS:
-					const ids: number[] = [];
+					const ids: IdType[] = [];
 
 					const nextResources = payload.items.reduce<
-						Record< number, Item >
+						Record< string, Item >
 					>( ( result, item ) => {
 						ids.push( item.id );
 						result[ item.id ] = {

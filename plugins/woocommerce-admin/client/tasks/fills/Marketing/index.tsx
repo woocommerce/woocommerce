@@ -145,6 +145,10 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 			} );
 	};
 
+	const onManage = () => {
+		actionTask( 'marketing' );
+	};
+
 	if ( isResolving ) {
 		return <Spinner />;
 	}
@@ -168,6 +172,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 					<PluginList
 						currentPlugin={ currentPlugin }
 						installAndActivate={ installAndActivate }
+						onManage={ onManage }
 						plugins={ installedExtensions }
 					/>
 				</Card>
@@ -198,6 +203,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 							<PluginList
 								currentPlugin={ currentPlugin }
 								installAndActivate={ installAndActivate }
+								onManage={ onManage }
 								key={ key }
 								plugins={ plugins }
 								title={ title }

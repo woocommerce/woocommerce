@@ -71,7 +71,7 @@ jobs:
         run: for file in plugins/woocommerce/changelog/*; do echo "$(tr -d '\r' < $file)" > $file; done
 
       - name: "Generate the changelog file"
-        run: pnpm changelog --filter=woocommerce -- write -n -vvv --use-version ${{ steps.freeze.outputs.release_version }}
+        run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ steps.freeze.outputs.release_version }}
         
       - name: "git rm deleted files"
         run: git rm $(git ls-files --deleted)
