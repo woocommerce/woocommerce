@@ -43,6 +43,22 @@ export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 	return git.diff( [ `${ hashA }..${ hashB }` ] );
 };
 
+const refIsHash = ( ref: string ) => {
+	return /^[0-9a-f]{7,40}$/i.test( ref );
+};
+
+export const getCommitHash = async ( baseDir: string, ref: string ) => {
+	const isHash = refIsHash( ref );
+
+	// If its not a hash we assume its a branch
+	if ( ! isHash ) {
+		return simpleGit( { baseDir } ).revparse( [ ref ] );
+	}
+
+	// Its a hash already
+	return ref;
+};
+
 /**
  * generateDiff generates a diff for a given repo and 2 hashes or branch names.
  *
@@ -57,30 +73,53 @@ export const generateDiff = async (
 	hashB: string,
 	onError: ( error: string ) => void
 ) => {
-	// If a local path is provided first lets check if what we're diffing is a repo.
-	if ( ! isURL( repoPath ) ) {
-	}
-
 	try {
 		const context = await cloneRepo( repoPath );
 		const tmpRepoPath = join( tmpdir(), context );
 
-		if ( ! isURL( repoPath ) ) {
-			// If its local then we should fetch latest on the clone, in case we are missing a hash or branch being compared.
-			await simpleGit( { baseDir: tmpRepoPath } ).fetch();
+		await simpleGit( { baseDir: tmpRepoPath } ).pull( [ '--all' ] );
+
+		// checking out any branches will automatically track remote branches.
+		await Promise.all(
+			[ hashA, hashB ]
+				.filter( ( hash ) => ! refIsHash( hash ) )
+				.map( ( branch ) => {
+					return simpleGit( { baseDir: tmpRepoPath } ).checkout( [
+						branch,
+					] );
+				} )
+		);
+
+		// turn both hashes into commit hashes if they are not already.
+		const commitHashA = await getCommitHash( tmpRepoPath, hashA );
+		const commitHashB = await getCommitHash( tmpRepoPath, hashB );
+
+		const isRepo = await simpleGit( {
+			baseDir: tmpRepoPath,
+		} ).checkIsRepo();
+
+		if ( ! isRepo ) {
+			throw new Error( 'Not a git repository' );
 		}
 
-		const patch = await diffHashes( tmpRepoPath, hashA, hashB );
-
-		console.log( patch );
-		console.log( 'cleaning up' );
+		const diff = await diffHashes( tmpRepoPath, commitHashA, commitHashB );
 
 		// time to clean up
 		rmSync( tmpRepoPath, { force: true, recursive: true } );
+
+		return diff;
 	} catch ( e ) {
-		onError(
-			'Unable to create diff. Check that git repo, base hash, and compare hash all exist.'
-		);
+		if ( e instanceof Error ) {
+			onError(
+				`Unable to create diff. Check that git repo, base hash, and compare hash all exist.\n Error: ${ e.message }`
+			);
+		} else {
+			onError(
+				'Unable to create diff. Check that git repo, base hash, and compare hash all exist.'
+			);
+		}
+
+		return '';
 	}
 };
 
