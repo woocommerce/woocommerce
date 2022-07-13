@@ -34,6 +34,27 @@ function wc_get_post_or_object_meta( ?WP_Post $post, ?WC_Data $data, string $key
 }
 
 /**
+ * Helper function to initialize the global $theorder object, mostly used during order meta boxes rendering.
+ *
+ * @param WC_Order|WP_Post $post_or_order_object Post or order object.
+ *
+ * @return WC_Order WC_Order object.
+ */
+function wc_init_theorder_object( $post_or_order_object ) : WC_Order {
+	global $theorder;
+	if ( $theorder instanceof WC_Order ) {
+		return $theorder;
+	}
+
+	if ( $post_or_order_object instanceof WC_Order ) {
+		$theorder = $post_or_order_object;
+	} else {
+		$theorder = wc_get_order( $post_or_order_object->ID );
+	}
+	return $theorder;
+}
+
+/**
  * Output a text input box.
  *
  * @param array   $field Field data.

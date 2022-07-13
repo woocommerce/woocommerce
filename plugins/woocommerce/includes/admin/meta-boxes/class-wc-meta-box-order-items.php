@@ -27,16 +27,9 @@ class WC_Meta_Box_Order_Items {
 	public static function output( $post ) {
 		global $post, $thepostid, $theorder;
 
+		wc_init_theorder_object( $post );
 		if ( ! is_int( $thepostid ) && ( $post instanceof WP_Post ) ) {
 			$thepostid = $post->ID;
-		}
-
-		if ( ! is_object( $theorder ) ) {
-			if ( $post instanceof WC_Order ) {
-				$theorder = $post;
-			} else {
-				$theorder = wc_get_order( $thepostid );
-			}
 		}
 
 		$order = $theorder;

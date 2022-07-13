@@ -17,13 +17,13 @@ class WC_Meta_Box_Order_Notes {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post|WC_Order $post_or_order Post or order object.
+	 * @param WP_Post|WC_Order $post Post or order object.
 	 */
-	public static function output( $post_or_order ) {
-		if ( method_exists( $post_or_order, 'get_id' ) ) {
-			$order_id = $post_or_order->get_id();
+	public static function output( $post ) {
+		if ( $post instanceof WC_Order ) {
+			$order_id = $post->get_id();
 		} else {
-			$order_id = $post_or_order->ID;
+			$order_id = $post->ID;
 		}
 
 		$args = array( 'order_id' => $order_id );

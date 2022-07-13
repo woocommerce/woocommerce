@@ -148,9 +148,7 @@ class WC_Meta_Box_Order_Data {
 	public static function output( $post ) {
 		global $theorder;
 
-		if ( ! is_object( $theorder ) || ! $theorder instanceof WC_Order ) {
-			$theorder = wc_get_order( $post );
-		}
+		wc_init_theorder_object( $post );
 
 		$order = $theorder;
 

@@ -20,17 +20,13 @@ class WC_Meta_Box_Order_Actions {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post Post object.
+	 * @param WP_Post|WC_Order $post Post or order object.
 	 */
 	public static function output( $post ) {
 		global $theorder;
 
-		$order = wc_get_order( $post );
-		// This is used by some callbacks attached to hooks such as woocommerce_order_actions which rely on the global to determine if actions should be displayed for certain orders.
-		// Avoid using this global with the `woocommerce_order_actions` filter, instead use the $order filter arg.
-		if ( ! is_object( $theorder ) || ! $theorder instanceof WC_Order ) {
-			$theorder = $order;
-		}
+		wc_init_theorder_object( $post );
+		$order = $theorder;
 
 		$order_id      = $order->get_id();
 		$order_actions = self::get_available_order_actions_for_order( $order );

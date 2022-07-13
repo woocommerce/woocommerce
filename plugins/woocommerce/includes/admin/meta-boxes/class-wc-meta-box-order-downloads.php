@@ -21,7 +21,7 @@ class WC_Meta_Box_Order_Downloads {
 	 * @param WC_Order|WP_Post $post Post or order object.
 	 */
 	public static function output( $post ) {
-		if ( method_exists( $post, 'get_id' ) ) {
+		if ( $post instanceof WC_Order ) {
 			$order_id = $post->get_id();
 		} else {
 			$order_id = $post->ID;
