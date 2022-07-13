@@ -73,7 +73,7 @@ export default class Analyzer extends Command {
 			options: [ 'core', 'admin', 'beta' ],
 			default: 'core',
 		} ),
-		is_woocommerce: Flags.boolean( {
+		'is-woocommerce': Flags.boolean( {
 			char: 'w',
 			description:
 				'Analyzing WooCommerce? (Will scan for DB schema changes).',
@@ -98,7 +98,7 @@ export default class Analyzer extends Command {
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
-		if ( flags.is_woocommerce ) {
+		if ( flags[ 'is-woocommerce' ] ) {
 			const schemaDiff = await generateSchemaDiff(
 				'woocommerce/woocommerce',
 				args.compare,
