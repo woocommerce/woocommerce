@@ -18,7 +18,7 @@ import { resetWooCommerceState, unhideTaskList } from '../../fixtures';
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-const testAdminHomescreenTasklist = () => {
+export const testAdminHomescreenTasklist = () => {
 	describe( 'Homescreen task list', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -73,5 +73,3 @@ const testAdminHomescreenTasklist = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminHomescreenTasklist };
