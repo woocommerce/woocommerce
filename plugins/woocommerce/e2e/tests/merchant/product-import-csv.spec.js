@@ -8,6 +8,7 @@ const filePathOverride = path.resolve(
 
 const productIds = [];
 const categoryIds = [];
+const attributeIds = [];
 
 const productNames = [
 	'Imported V-Neck T-Shirt',
@@ -86,6 +87,7 @@ const productCategories = [
 	'Music',
 	'Decor',
 ];
+const productAttributes = [ 'Color', 'Size' ];
 
 const errorMessage =
 	'Invalid file type. The importer supports CSV and TXT file formats.';
@@ -122,6 +124,17 @@ test.describe( 'Import Products from a CSV file', () => {
 				for ( let j = 0; j < productCategories.length; j++ ) {
 					if ( response.data[ i ].name === productCategories[ j ] ) {
 						categoryIds.push( response.data[ i ].id );
+					}
+				}
+			}
+		} );
+		// get a list of all product attributes
+		await api.get( 'products/attributes' ).then( ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				// if the product attribute is one that was created, add it to the array
+				for ( let j = 0; j < productAttributes.length; j++ ) {
+					if ( response.data[ i ].name === productAttributes[ j ] ) {
+						attributeIds.push( response.data[ i ].id );
 					}
 				}
 			}
