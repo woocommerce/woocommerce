@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC Status widget errors when analytics feature is disabled

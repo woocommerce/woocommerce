@@ -5,13 +5,34 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Admin\PluginsHelper;
 use WC_Data_Store;
 
 /**
  * Shipping Task
  */
 class Shipping extends Task {
+
+	const ZONE_COUNT_TRANSIENT_NAME = 'woocommerce_shipping_task_zone_count_transient';
+
+	/**
+	 * Constructor
+	 *
+	 * @param TaskList $task_list Parent task list.
+	 */
+	public function __construct( $task_list = null ) {
+		parent::__construct( $task_list );
+		// wp_ajax_woocommerce_shipping_zone_methods_save_changes
+		// and wp_ajax_woocommerce_shipping_zones_save_changes get fired
+		// when a new zone is added or an existing one has been changed.
+		// Delete the zone count transient used in has_shipping_zones() method
+		// to refresh the cache.
+		$delete_transient = function() {
+			delete_transient( self::ZONE_COUNT_TRANSIENT_NAME );
+		};
+		add_action( 'wp_ajax_woocommerce_shipping_zones_save_changes', $delete_transient, 9 );
+		add_action( 'wp_ajax_woocommerce_shipping_zone_methods_save_changes', $delete_transient, 9 );
+	}
+
 	/**
 	 * ID.
 	 *
@@ -133,7 +154,15 @@ class Shipping extends Task {
 	 * @return bool
 	 */
 	public static function has_shipping_zones() {
-		return count( WC_Data_Store::load( 'shipping-zone' )->get_zones() ) > 0;
+		$zone_count = get_transient( self::ZONE_COUNT_TRANSIENT_NAME );
+		if ( false !== $zone_count ) {
+			return (int) $zone_count > 0;
+		}
+
+		$zone_count = count( WC_Data_Store::load( 'shipping-zone' )->get_zones() );
+		set_transient( self::ZONE_COUNT_TRANSIENT_NAME, $zone_count );
+
+		return $zone_count > 0;
 	}
 
 	/**
@@ -165,6 +194,6 @@ class Shipping extends Task {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
-		return [ 'downloads' ] === $product_types;
+		return array( 'downloads' ) === $product_types;
 	}
 }
