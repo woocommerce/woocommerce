@@ -62,6 +62,15 @@ const refIsHash = ( ref: string ) => {
 export const getCommitHash = async ( baseDir: string, ref: string ) => {
 	const isHash = refIsHash( ref );
 
+	// check if its in history, if its not an error will be thrown
+	try {
+		simpleGit( { baseDir } ).show( ref );
+	} catch ( e ) {
+		throw new Error(
+			`${ ref } is not a valid commit hash or branch name that exists in git history`
+		);
+	}
+
 	// If its not a hash we assume its a branch
 	if ( ! isHash ) {
 		return simpleGit( { baseDir } ).revparse( [ ref ] );
