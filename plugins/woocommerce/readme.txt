@@ -203,6 +203,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Improve Twenty Twenty One notice styles  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Enhancement - Swap info and message notice colors in Twenty-Twenty  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Enhancement - Update product template descriptions  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
+* Fix - Revert marketing task completion logic to only complete after actioned by user [#33676](https://github.com/woocommerce/woocommerce/pull/33676)
 * Fix - Suppressing warnings for malformed metadata in product template downloads.  [#33184](https://github.com/woocommerce/woocommerce/pull/33184)
 * Fix - Fix continue button is enabled even when email is null in setup wizard  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
 * Fix - Fix failing TimeInterval test  [#33329](https://github.com/woocommerce/woocommerce/pull/33329)
