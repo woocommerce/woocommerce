@@ -247,7 +247,7 @@ export const ShippingTour = () => {
 								<br />
 								<span>
 									{ __(
-										'A shipping zone is a geography area where a certain set of shippping methods are offered.',
+										'A shipping zone is a geographic area where a certain set of shipping methods are offered.',
 										'woocommerce'
 									) }
 								</span>
@@ -265,7 +265,7 @@ export const ShippingTour = () => {
 					heading: __( 'Shipping methods', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
-							'We defaulted to some recommended shippping methods based on your store location, but you can manage them at any time within each shipping zone settings.',
+							'We defaulted to some recommended shipping methods based on your store location, but you can manage them at any time within each shipping zone settings.',
 							'woocommerce'
 						),
 					},
@@ -310,7 +310,7 @@ export const ShippingTour = () => {
 			},
 			meta: {
 				name: 'shipping-recommendations',
-				heading: __( 'Woocommerce Shipping', 'woocommerce' ),
+				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
 						'If you’d like to speed up your process and print your shipping label straight from your WooCommerce dashboard, WooCommerce Shipping may be for you! ',

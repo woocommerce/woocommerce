@@ -57,7 +57,7 @@ const WooCommerceServicesItem: React.FC< {
 			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
-					{ __( 'Woocommerce Shipping', 'woocommerce' ) }
+					{ __( 'WooCommerce Shipping', 'woocommerce' ) }
 					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 				</span>
 				<span className="woocommerce-list__item-content">
