@@ -41,6 +41,13 @@ class CartSchema extends AbstractSchema {
 	public $coupon_schema;
 
 	/**
+	 * Product item schema instance representing cross-sell items.
+	 *
+	 * @var ProductSchema
+	 */
+	public $cross_sells_item_schema;
+
+	/**
 	 * Fee schema instance.
 	 *
 	 * @var CartFeeSchema
@@ -84,6 +91,7 @@ class CartSchema extends AbstractSchema {
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
 		$this->item_schema             = $this->controller->get( CartItemSchema::IDENTIFIER );
+		$this->cross_sells_item_schema = $this->controller->get( ProductSchema::IDENTIFIER );
 		$this->coupon_schema           = $this->controller->get( CartCouponSchema::IDENTIFIER );
 		$this->fee_schema              = $this->controller->get( CartFeeSchema::IDENTIFIER );
 		$this->shipping_rate_schema    = $this->controller->get( CartShippingRateSchema::IDENTIFIER );
@@ -154,6 +162,16 @@ class CartSchema extends AbstractSchema {
 				'type'        => 'number',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
+			],
+			'cross_sells'             => [
+				'description' => __( 'List of cross-sells items related to cart items.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( $this->cross_sells_item_schema->get_properties() ),
+				],
 			],
 			'needs_payment'           => [
 				'description' => __( 'True if the cart needs payment. False for carts with only free products and no shipping costs.', 'woo-gutenberg-products-block' ),
@@ -323,6 +341,9 @@ class CartSchema extends AbstractSchema {
 		// Get shipping packages to return in the response from the cart.
 		$shipping_packages = $has_calculated_shipping ? $controller->get_shipping_packages() : [];
 
+		// Get visible cross sells products.
+		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
+
 		return [
 			'coupons'                 => $this->get_item_responses_from_schema( $this->coupon_schema, $cart->get_applied_coupons() ),
 			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
@@ -331,6 +352,7 @@ class CartSchema extends AbstractSchema {
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart->get_cart() ),
 			'items_count'             => $cart->get_cart_contents_count(),
 			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
+			'cross_sells'             => $this->get_item_responses_from_schema( $this->cross_sells_item_schema, $cross_sells ),
 			'needs_payment'           => $cart->needs_payment(),
 			'needs_shipping'          => $cart->needs_shipping(),
 			'has_calculated_shipping' => $has_calculated_shipping,
