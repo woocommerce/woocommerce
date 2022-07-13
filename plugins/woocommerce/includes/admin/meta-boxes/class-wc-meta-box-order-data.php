@@ -152,6 +152,8 @@ class WC_Meta_Box_Order_Data {
 			$theorder = wc_get_order( $post );
 		}
 
+		$order = $theorder;
+
 		self::init_address_fields();
 
 		if ( WC()->payment_gateways() ) {
@@ -160,17 +162,17 @@ class WC_Meta_Box_Order_Data {
 			$payment_gateways = array();
 		}
 
-		$payment_method = $theorder->get_payment_method();
+		$payment_method = $order->get_payment_method();
 
-		$order_type_object = get_post_type_object( $theorder->get_type() );
+		$order_type_object = get_post_type_object( $order->get_type() );
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<style type="text/css">
 			#post-body-content, #titlediv { display:none }
 		</style>
 		<div class="panel-wrap woocommerce">
-			<input name="post_title" type="hidden" value="<?php echo esc_attr( empty( $theorder->get_title() ) ? __( 'Order', 'woocommerce' ) : $theorder->get_title() ); ?>" />
-			<input name="post_status" type="hidden" value="<?php echo esc_attr( $theorder->get_status() ); ?>" />
+			<input name="post_title" type="hidden" value="<?php echo esc_attr( empty( $order->get_title() ) ? __( 'Order', 'woocommerce' ) : $order->get_title() ); ?>" />
+			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel woocommerce-order-data">
 				<h2 class="woocommerce-order-data__heading">
 					<?php
@@ -179,7 +181,7 @@ class WC_Meta_Box_Order_Data {
 					printf(
 						esc_html__( '%1$s #%2$s details', 'woocommerce' ),
 						esc_html( $order_type_object->labels->singular_name ),
-						esc_html( $theorder->get_order_number() )
+						esc_html( $order->get_order_number() )
 					);
 
 					?>
@@ -196,10 +198,10 @@ class WC_Meta_Box_Order_Data {
 							esc_html( isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_title() : $payment_method )
 						);
 
-						$transaction_id = $theorder->get_transaction_id();
+						$transaction_id = $order->get_transaction_id();
 						if ( $transaction_id ) {
 							// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure -- legacy code, ignoring sniff.
-							if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $theorder ) ) ) {
+							if ( isset( $payment_gateways[ $payment_method ] ) && ( $url = $payment_gateways[ $payment_method ]->get_transaction_url( $order ) ) ) {
 								$payment_method_string .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 							} else {
 								$payment_method_string .= ' (' . esc_html( $transaction_id ) . ')';
@@ -209,16 +211,16 @@ class WC_Meta_Box_Order_Data {
 						$meta_list[] = $payment_method_string;
 					}
 
-					if ( $theorder->get_date_paid() ) {
+					if ( $order->get_date_paid() ) {
 						/* translators: 1: date 2: time */
 						$meta_list[] = sprintf(
 							__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
-							wc_format_datetime( $theorder->get_date_paid() ),
-							wc_format_datetime( $theorder->get_date_paid(), get_option( 'time_format' ) )
+							wc_format_datetime( $order->get_date_paid() ),
+							wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
 						);
 					}
 
-					if ( $ip_address = $theorder->get_customer_ip_address() ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+					if ( $ip_address = $order->get_customer_ip_address() ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 						/* translators: %s: IP address */
 						$meta_list[] = sprintf(
 							__( 'Customer IP: %s', 'woocommerce' ),
@@ -236,21 +238,21 @@ class WC_Meta_Box_Order_Data {
 
 						<p class="form-field form-field-wide">
 							<label for="order_date"><?php _e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', strtotime( $theorder->get_date_created() ) ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', strtotime( $order->get_date_created() ) ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
 							&lrm;
-							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', strtotime( $theorder->get_date_created() ) ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
-							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $theorder->get_date_created() ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
-							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $theorder->get_date_created() ) ) ); ?>" />
+							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', strtotime( $order->get_date_created() ) ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
+							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $order->get_date_created() ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
+							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $order->get_date_created() ) ) ); ?>" />
 						</p>
 
 						<p class="form-field form-field-wide wc-order-status">
 							<label for="order_status">
 								<?php
 								_e( 'Status:', 'woocommerce' );
-								if ( $theorder->needs_payment() ) {
+								if ( $order->needs_payment() ) {
 									printf(
 										'<a href="%s">%s</a>',
-										esc_url( $theorder->get_checkout_payment_url() ),
+										esc_url( $order->get_checkout_payment_url() ),
 										__( 'Customer payment page &rarr;', 'woocommerce' )
 									);
 								}
@@ -260,7 +262,7 @@ class WC_Meta_Box_Order_Data {
 								<?php
 								$statuses = wc_get_order_statuses();
 								foreach ( $statuses as $status => $status_name ) {
-									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $theorder->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
+									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
 								}
 								?>
 							</select>
@@ -271,11 +273,11 @@ class WC_Meta_Box_Order_Data {
 							<label for="customer_user">
 								<?php
 								_e( 'Customer:', 'woocommerce' );
-								if ( $theorder->get_user_id( 'edit' ) ) {
+								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
 										'post_status'    => 'all',
 										'post_type'      => 'shop_order',
-										'_customer_user' => $theorder->get_user_id( 'edit' ),
+										'_customer_user' => $order->get_user_id( 'edit' ),
 									);
 									printf(
 										'<a href="%s">%s</a>',
@@ -284,7 +286,7 @@ class WC_Meta_Box_Order_Data {
 									);
 									printf(
 										'<a href="%s">%s</a>',
-										esc_url( add_query_arg( 'user_id', $theorder->get_user_id( 'edit' ), admin_url( 'user-edit.php' ) ) ),
+										esc_url( add_query_arg( 'user_id', $order->get_user_id( 'edit' ), admin_url( 'user-edit.php' ) ) ),
 										' ' . __( 'Profile &rarr;', 'woocommerce' )
 									);
 								}
@@ -293,8 +295,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$user_string = '';
 							$user_id     = '';
-							if ( $theorder->get_user_id() ) {
-								$user_id = absint( $theorder->get_user_id() );
+							if ( $order->get_user_id() ) {
+								$user_id = absint( $order->get_user_id() );
 								$user    = get_user_by( 'id', $user_id );
 								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
@@ -310,7 +312,7 @@ class WC_Meta_Box_Order_Data {
 							</select>
 							<!--/email_off-->
 						</p>
-						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $theorder ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 					<div class="order_data_column">
 						<h3>
@@ -324,8 +326,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 
 							// Display values.
-							if ( $theorder->get_formatted_billing_address() ) {
-								echo '<p>' . wp_kses( $theorder->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
+							if ( $order->get_formatted_billing_address() ) {
+								echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 							} else {
 								echo '<p class="none_set"><strong>' . __( 'Address:', 'woocommerce' ) . '</strong> ' . __( 'No billing address set.', 'woocommerce' ) . '</p>';
 							}
@@ -339,10 +341,10 @@ class WC_Meta_Box_Order_Data {
 
 								if ( isset( $field['value'] ) ) {
 									$field_value = $field['value'];
-								} elseif ( is_callable( array( $theorder, 'get_' . $field_name ) ) ) {
-									$field_value = $theorder->{"get_$field_name"}( 'edit' );
+								} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+									$field_value = $order->{"get_$field_name"}( 'edit' );
 								} else {
-									$field_value = $theorder->get_meta( '_' . $field_name );
+									$field_value = $order->get_meta( '_' . $field_name );
 								}
 
 								if ( 'billing_phone' === $field_name ) {
@@ -375,19 +377,19 @@ class WC_Meta_Box_Order_Data {
 								$field_name = 'billing_' . $key;
 
 								if ( ! isset( $field['value'] ) ) {
-									if ( is_callable( array( $theorder, 'get_' . $field_name ) ) ) {
-										$field['value'] = $theorder->{"get_$field_name"}( 'edit' );
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field['value'] = $order->{"get_$field_name"}( 'edit' );
 									} else {
-										$field['value'] = $theorder->get_meta( '_' . $field_name );
+										$field['value'] = $order->get_meta( '_' . $field_name );
 									}
 								}
 
 								switch ( $field['type'] ) {
 									case 'select':
-										woocommerce_wp_select( $field, $theorder );
+										woocommerce_wp_select( $field, $order );
 										break;
 									default:
-										woocommerce_wp_text_input( $field, $theorder );
+										woocommerce_wp_text_input( $field, $order );
 										break;
 								}
 							}
@@ -422,14 +424,14 @@ class WC_Meta_Box_Order_Data {
 								array(
 									'id'    => '_transaction_id',
 									'label' => __( 'Transaction ID', 'woocommerce' ),
-									'value' => $theorder->get_transaction_id( 'edit' ),
+									'value' => $order->get_transaction_id( 'edit' ),
 								),
-								$theorder
+								$order
 							);
 							?>
 
 						</div>
-						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $theorder ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 					<div class="order_data_column">
 						<h3>
@@ -444,8 +446,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 
 							// Display values.
-							if ( $theorder->get_formatted_shipping_address() ) {
-								echo '<p>' . wp_kses( $theorder->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+							if ( $order->get_formatted_shipping_address() ) {
+								echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 							} else {
 								echo '<p class="none_set"><strong>' . __( 'Address:', 'woocommerce' ) . '</strong> ' . __( 'No shipping address set.', 'woocommerce' ) . '</p>';
 							}
@@ -458,10 +460,10 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'shipping_' . $key;
 
-									if ( is_callable( array( $theorder, 'get_' . $field_name ) ) ) {
-										$field_value = $theorder->{"get_$field_name"}( 'edit' );
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field_value = $order->{"get_$field_name"}( 'edit' );
 									} else {
-										$field_value = $theorder->get_meta( '_' . $field_name );
+										$field_value = $order->get_meta( '_' . $field_name );
 									}
 
 									if ( 'shipping_phone' === $field_name ) {
@@ -474,8 +476,8 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
-							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $theorder->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-								echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . nl2br( esc_html( $theorder->get_customer_note() ) ) . '</p>';
+							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+								echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . nl2br( esc_html( $order->get_customer_note() ) ) . '</p>';
 							}
 							?>
 						</div>
@@ -494,18 +496,18 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'shipping_' . $key;
 
-									if ( is_callable( array( $theorder, 'get_' . $field_name ) ) ) {
-										$field['value'] = $theorder->{"get_$field_name"}( 'edit' );
+									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field['value'] = $order->{"get_$field_name"}( 'edit' );
 									} else {
-										$field['value'] = $theorder->get_meta( '_' . $field_name );
+										$field['value'] = $order->get_meta( '_' . $field_name );
 									}
 
 									switch ( $field['type'] ) {
 										case 'select':
-											woocommerce_wp_select( $field, $theorder );
+											woocommerce_wp_select( $field, $order );
 											break;
 										default:
-											woocommerce_wp_text_input( $field, $theorder );
+											woocommerce_wp_text_input( $field, $order );
 											break;
 									}
 								}
@@ -515,12 +517,12 @@ class WC_Meta_Box_Order_Data {
 								?>
 								<p class="form-field form-field-wide">
 									<label for="excerpt"><?php _e( 'Customer provided note', 'woocommerce' ); ?>:</label>
-									<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $theorder->get_customer_note() ); ?></textarea>
+									<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses_post( $order->get_customer_note() ); ?></textarea>
 								</p>
 							<?php endif; ?>
 						</div>
 
-						<?php do_action( 'woocommerce_admin_order_data_after_shipping_address', $theorder ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+						<?php do_action( 'woocommerce_admin_order_data_after_shipping_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 				</div>
 				<div class="clear"></div>
