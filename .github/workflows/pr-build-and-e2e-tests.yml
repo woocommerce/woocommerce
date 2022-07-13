@@ -294,6 +294,7 @@ jobs:
               env:
                   API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
                   E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+                  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
               run: |
                   gh workflow run publish-test-reports-pr.yml \
                     -f run_id=$RUN_ID \
@@ -301,4 +302,5 @@ jobs:
                     -f e2e_artifact=$E2E_ARTIFACT \
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
+                    -f commit_message="$COMMIT_MESSAGE" \
                     --repo woocommerce/woocommerce-test-reports
