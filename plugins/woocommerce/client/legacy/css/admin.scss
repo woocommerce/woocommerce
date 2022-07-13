@@ -5242,6 +5242,9 @@ img.help_tip {
 	p.form-field,
 	fieldset.form-field {
 		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
+		&._sold_individually_field {
+			padding-right: 0px !important;
+		}
 	}
 
 	.sale_price_dates_fields {
@@ -5391,6 +5394,13 @@ img.help_tip {
 
 	.select2-container {
 		float: left;
+	}
+
+	.inventory_sold_individually {
+		display: flex;
+		.woocommerce-help-tip {
+			align-self: center;
+		}
 	}
 }
 
