@@ -33,8 +33,8 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
 
-            - name: Run tests command.
-              if: fromJSON(env.E2E_PLAYWRIGHT)
+            - name: Run Puppeteer E2E tests.
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               id: run-puppeteer-e2e-tests
               working-directory: plugins/woocommerce
               env:
@@ -46,7 +46,7 @@ jobs:
             - name: Archive Puppeteer E2E test results
               if: |
                   always() &&
-                  fromJSON(env.E2E_PLAYWRIGHT) &&
+                  fromJSON(env.E2E_PLAYWRIGHT) != true &&
                   (
                     steps.run-puppeteer-e2e-tests.conclusion != 'cancelled' ||
                     steps.run-puppeteer-e2e-tests.conclusion != 'skipped' 
