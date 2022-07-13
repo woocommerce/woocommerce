@@ -23,7 +23,6 @@ class InstalledExtensions {
 
 		$automatewoo = self::get_automatewoo_extension_data();
 		$mailchimp   = self::get_mailchimp_extension_data();
-		$facebook    = self::get_facebook_extension_data();
 		$pinterest   = self::get_pinterest_extension_data();
 		$google      = self::get_google_extension_data();
 		$hubspot     = self::get_hubspot_extension_data();
@@ -36,10 +35,6 @@ class InstalledExtensions {
 
 		if ( $mailchimp ) {
 			$data[] = $mailchimp;
-		}
-
-		if ( $facebook ) {
-			$data[] = $facebook;
 		}
 
 		if ( $pinterest ) {
@@ -75,7 +70,6 @@ class InstalledExtensions {
 			'automatewoo',
 			'mailchimp-for-woocommerce',
 			'creative-mail-by-constant-contact',
-			'facebook-for-woocommerce',
 			'pinterest-for-woocommerce',
 			'google-listings-and-ads',
 			'hubspot-for-woocommerce',
@@ -130,35 +124,6 @@ class InstalledExtensions {
 			if ( mailchimp_is_configured() ) {
 				$data['status'] = 'configured';
 			}
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Get Facebook extension data.
-	 *
-	 * @return array|bool
-	 */
-	protected static function get_facebook_extension_data() {
-		$slug = 'facebook-for-woocommerce';
-
-		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
-			return false;
-		}
-
-		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook.svg';
-
-		if ( 'activated' === $data['status'] && function_exists( 'facebook_for_woocommerce' ) ) {
-			$integration = facebook_for_woocommerce()->get_integration();
-
-			if ( $integration->is_configured() ) {
-				$data['status'] = 'configured';
-			}
-
-			$data['settingsUrl'] = facebook_for_woocommerce()->get_settings_url();
-			$data['docsUrl']     = facebook_for_woocommerce()->get_documentation_url();
 		}
 
 		return $data;

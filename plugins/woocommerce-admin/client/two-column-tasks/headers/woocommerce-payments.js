@@ -89,7 +89,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ __( '2 minutes' ) }</span>
+					<span>{ __( '2 minutes', 'woocommerce' ) }</span>
 				</p>
 			</div>
 		</div>

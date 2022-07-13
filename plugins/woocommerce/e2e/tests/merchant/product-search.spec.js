@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 let productId;
-const productName = 'Simple product to search';
+const productName = 'Unique thing that we sell';
 const productPrice = '9.99';
 
 test.describe( 'Products > Search and View a product', () => {
@@ -46,6 +46,7 @@ test.describe( 'Products > Search and View a product', () => {
 
 		await page.fill( '#post-search-input', searchString );
 		await page.click( '#search-submit' );
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect( page.locator( '.row-title' ) ).toContainText(
 			productName

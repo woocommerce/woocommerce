@@ -124,6 +124,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       jest-mock-extended: ^1.0.18
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -142,6 +143,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       jest-mock-extended: 1.0.18_jest@27.5.1+typescript@4.6.2
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_23bc83dd0471d6d2a42908007c85fd69
       typescript: 4.6.2
@@ -159,6 +161,7 @@ importers:
       eslint: ^8.2.0
       jest: ^25
       oauth-1.0a: 2.2.6
+      require-turbo: workspace:*
       ts-jest: ^25
       typescript: ^4.4.4
     dependencies:
@@ -174,6 +177,7 @@ importers:
       axios-mock-adapter: 1.20.0_axios@0.24.0
       eslint: 8.2.0
       jest: 25.5.4
+      require-turbo: link:../../../tools/require-turbo
       ts-jest: 25.5.1_jest@25.5.4+typescript@4.4.4
       typescript: 4.4.4
 
@@ -187,6 +191,7 @@ importers:
       jest-allure: ^0.1.3
       jest-runner-groups: ^2.1.0
       postman-collection: ^4.1.0
+      require-turbo: workspace:*
       supertest: ^6.1.4
     dependencies:
       allure-commandline: 2.17.2
@@ -199,6 +204,7 @@ importers:
     devDependencies:
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       eslint: 8.12.0
+      require-turbo: link:../../../tools/require-turbo
 
   packages/js/components:
     specifiers:
@@ -271,6 +277,7 @@ importers:
       prop-types: ^15.8.1
       react-dates: ^21.8.0
       react-transition-group: ^4.4.2
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -348,6 +355,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -364,6 +372,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       moment: ^2.29.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -376,6 +385,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -392,6 +402,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -407,6 +418,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -436,6 +448,7 @@ importers:
       postcss-loader: ^3.0.0
       prop-types: ^15.8.1
       react-transition-group: ^4.4.2
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -467,6 +480,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -507,6 +521,7 @@ importers:
       qs: ^6.10.3
       redux: ^4.1.0
       rememo: ^4.0.0
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -543,6 +558,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       redux: 4.1.2
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -561,6 +577,7 @@ importers:
       moment: ^2.29.1
       moment-timezone: ^0.5.34
       qs: ^6.10.3
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -578,6 +595,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -590,6 +608,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -603,6 +622,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -739,14 +759,14 @@ importers:
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/browserslist-config': ^4.1.0
       '@wordpress/deprecated': ^3.2.3
-      '@wordpress/e2e-test-utils': ^4.16.1
+      '@wordpress/e2e-test-utils': wp-5.8
       config: 3.3.3
       eslint: ^8.1.0
       fishery: ^1.2.0
     dependencies:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 3.2.3
-      '@wordpress/e2e-test-utils': 4.16.1_jest@27.3.1
+      '@wordpress/e2e-test-utils': 5.3.2_jest@27.3.1
       config: 3.3.3
       fishery: 1.4.0
     devDependencies:
@@ -776,6 +796,7 @@ importers:
       eslint-plugin-testing-library: ^5.1.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       requireindex: ^1.2.0
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
@@ -791,6 +812,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -828,6 +850,7 @@ importers:
       postcss-loader: ^3.0.0
       react-transition-group: ^4.4.2
       react-visibility-sensor: ^5.1.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -867,6 +890,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -890,6 +914,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       qs: ^6.10.3
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -909,6 +934,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -925,6 +951,7 @@ importers:
       glob: ^7.2.0
       lodash: ^4.17.21
       mkdirp: ^1.0.4
+      require-turbo: workspace:*
     devDependencies:
       '@babel/core': 7.12.9
       '@woocommerce/eslint-plugin': link:../eslint-plugin
@@ -933,6 +960,7 @@ importers:
       glob: 7.2.0
       lodash: 4.17.21
       mkdirp: 1.0.4
+      require-turbo: link:../../../tools/require-turbo
 
   packages/js/internal-js-tests:
     specifiers:
@@ -947,6 +975,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       regenerator-runtime: ^0.13.9
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -963,6 +992,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -980,6 +1010,7 @@ importers:
       jest-cli: ^27.5.1
       mini-css-extract-plugin: ^2.6.0
       postcss-loader: ^3.0.0
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -1003,6 +1034,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1025,6 +1057,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       qs: ^6.10.3
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1045,6 +1078,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1061,6 +1095,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       redux: ^4.2.0
+      require-turbo: workspace*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1076,6 +1111,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       redux: 4.2.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1089,6 +1125,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       locutus: ^2.0.16
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1101,6 +1138,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1127,6 +1165,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       postcss-loader: ^3.0.0
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
@@ -1155,6 +1194,7 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
@@ -1171,6 +1211,7 @@ importers:
       eslint: ^8.12.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1183,6 +1224,7 @@ importers:
       eslint: 8.12.0
       jest: 27.5.1
       jest-cli: 27.5.1
+      require-turbo: link:../../../tools/require-turbo
       rimraf: 3.0.2
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1225,8 +1267,10 @@ importers:
       jest: ^25.1.0
       mocha: 7.2.0
       prettier: npm:wp-prettier@2.0.5
+      require-turbo: workspace:*
       stylelint: ^13.8.0
       typescript: 3.9.7
+      uuid: ^8.3.2
       webpack: 5.70.0
       webpack-cli: 3.3.12
       wp-textdomain: 1.0.1
@@ -1267,8 +1311,10 @@ importers:
       jest: 25.5.4
       mocha: 7.2.0
       prettier: /wp-prettier/2.0.5
+      require-turbo: link:../../tools/require-turbo
       stylelint: 13.13.1
       typescript: 3.9.7
+      uuid: 8.3.2
       webpack: 5.70.0_webpack-cli@3.3.12
       webpack-cli: 3.3.12_webpack@5.70.0
       wp-textdomain: 1.0.1
@@ -1423,6 +1469,7 @@ importers:
       readline-sync: ^1.4.10
       redux: ^4.1.2
       replace: ^1.2.1
+      require-turbo: workspace:*
       rimraf: ^3.0.2
       rtlcss: ^2.6.2
       sass: ^1.49.9
@@ -1588,6 +1635,7 @@ importers:
       raw-loader: 4.0.2_webpack@5.70.0
       readline-sync: 1.4.10
       replace: 1.2.1
+      require-turbo: link:../../tools/require-turbo
       rimraf: 3.0.2
       rtlcss: 2.6.2
       sass: 1.49.9
@@ -1620,6 +1668,7 @@ importers:
       '@wordpress/hooks': ^2.11.1
       '@wordpress/scripts': ^19.2.4
       eslint: 5.16.0
+      require-turbo: workspace:*
       uglify-js: ^3.5.3
     dependencies:
       '@types/prop-types': 15.7.4
@@ -1637,6 +1686,7 @@ importers:
       '@wordpress/env': 4.8.0
       '@wordpress/scripts': 19.2.4_ee910045e4cc2812de8b965e303c7169
       eslint: 5.16.0
+      require-turbo: link:../../tools/require-turbo
       uglify-js: 3.14.5
 
   plugins/woocommerce/client/legacy:
@@ -1660,6 +1710,7 @@ importers:
       grunt-sass: 3.1.0
       grunt-stylelint: 0.16.0
       gruntify-eslint: 5.0.0
+      require-turbo: workspace:*
       sass: ^1.45.0
       stylelint: 13.8.0
     devDependencies:
@@ -1682,6 +1733,7 @@ importers:
       grunt-sass: 3.1.0_grunt@1.3.0
       grunt-stylelint: 0.16.0_stylelint@13.8.0
       gruntify-eslint: 5.0.0_grunt@1.3.0
+      require-turbo: link:../../../../tools/require-turbo
       sass: 1.49.9
       stylelint: 13.8.0
 
@@ -1787,6 +1839,9 @@ importers:
       ts-node: 10.5.0_506ca6ef959d35afcce359030b1bc9ff
       tslib: 2.3.1
       typescript: 4.6.2
+
+  tools/require-turbo:
+    specifiers: {}
 
 packages:
 
@@ -15083,21 +15138,21 @@ packages:
       - react-native
     dev: false
 
-  /@wordpress/e2e-test-utils/4.16.1_jest@27.3.1:
-    resolution: {integrity: sha512-Dpsq5m0VSvjIhro2MjACSzkOkOf1jGEryzgEMW1ikbT6YI+motspHfGtisKXgYhZJOnjV4PwuEg+9lPVnd971g==}
-    engines: {node: '>=8'}
+  /@wordpress/e2e-test-utils/5.3.2_jest@27.3.1:
+    resolution: {integrity: sha512-K44fl1Fgh2kk2RV14BDFSr2QVa5F2aeZ3IOyvLYo1OqaTD2pxXbdQDL1U4wvbkXxAoub4fsF0ugAYYyvxyLIvw==}
+    engines: {node: '>=12'}
     peerDependencies:
-      jest: '>=24'
+      jest: '>=26'
       puppeteer: '>=1.19.0'
     dependencies:
-      '@babel/runtime': 7.15.4
-      '@wordpress/keycodes': 2.19.3
-      '@wordpress/url': 2.22.2
+      '@babel/runtime': 7.17.7
+      '@wordpress/keycodes': 3.10.0
+      '@wordpress/url': 3.11.0
       jest: 27.3.1
       lodash: 4.17.21
-      node-fetch: 2.6.5
+      node-fetch: 2.6.7
     transitivePeerDependencies:
-      - react-native
+      - encoding
     dev: false
 
   /@wordpress/element/2.20.3:
@@ -16817,7 +16872,7 @@ packages:
     dev: true
 
   /ansicolors/0.3.2:
-    resolution: {integrity: sha1-ZlWX3oap/+Oqm/vmyuXG6kJrSXk=}
+    resolution: {integrity: sha512-QXu7BPrP29VllRxH8GwB7x5iX5qWKAAMLqKQGWTeLWVlNHNOpVMJ91dsxQAIWXpjuW5wqvxu3Jd/nRjrJ+0pqg==}
 
   /ansis/1.3.4:
     resolution: {integrity: sha512-BDXljGSG4gZXmWK64bQzXkI509i5fe8aAa9+eL29e3swaWUqxvxk/XlONjw9AUrNCpQWNdy++0GX7HAhWeR9BQ==}
@@ -17098,7 +17153,7 @@ packages:
     resolution: {integrity: sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==}
 
   /async/0.9.2:
-    resolution: {integrity: sha1-rqdNXmHB+JlhO/ZL2mbUx48v0X0=}
+    resolution: {integrity: sha512-l6ToIJIotphWahxxHyzK9bnLR6kM4jJIIgLShZeqLY7iboHoGkdgFl7W2/Ivi4SkMJYGKqW8vSuk0uKUj6qsSw==}
 
   /async/1.5.2:
     resolution: {integrity: sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==}
@@ -18747,7 +18802,7 @@ packages:
     dev: true
 
   /cardinal/2.1.1:
-    resolution: {integrity: sha1-fMEFXYItISlU0HsIXeolHMe8VQU=}
+    resolution: {integrity: sha512-JSr5eOgoEymtYHBjNWyjrMqet9Am2miJhlfKNdqLp6zoeAh0KN5dRAcxlecj5mAJrmQomgiOBj35xHLrFjqBpw==}
     hasBin: true
     dependencies:
       ansicolors: 0.3.2
@@ -19329,7 +19384,7 @@ packages:
       color-name: 1.1.4
 
   /color-name/1.1.3:
-    resolution: {integrity: sha512-72fSenhMw2HZMTVHeCA9KCmpEIbzWiQsjN+BHcBbS9vr1mtt+vJjPdksIBNUmKAW8TFUDPJK5SUU3QhE9NEXDw==}
+    resolution: {integrity: sha1-p9BVi9icQveV3UIyj3QIMcpTvCU=}
 
   /color-name/1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
@@ -24027,7 +24082,7 @@ packages:
     dev: true
 
   /get-stream/3.0.0:
-    resolution: {integrity: sha1-jpQ9E1jcN1VQVOy+LtsFqhdO3hQ=}
+    resolution: {integrity: sha512-GlhdIUuVakc8SJ6kK0zAFbiGzRFzNnY4jUuEbV9UROo4Y+0Ny4fjvcZFVTeDA4odpFyOQzaw6hXukJSq/f28sQ==}
     engines: {node: '>=4'}
     dev: true
 
@@ -24397,6 +24452,8 @@ packages:
       '@sindresorhus/is': 2.1.1
       '@szmarczak/http-timer': 4.0.6
       '@types/cacheable-request': 6.0.2
+      '@types/keyv': 3.1.4
+      '@types/responselike': 1.0.0
       cacheable-lookup: 2.0.1
       cacheable-request: 7.0.2
       decompress-response: 5.0.0
@@ -25494,11 +25551,11 @@ packages:
       wrappy: 1.0.2
 
   /inherits/2.0.1:
-    resolution: {integrity: sha1-sX0I0ya0Qj5Wjv9xn5GwscvfafE=}
+    resolution: {integrity: sha512-8nWq2nLTAwd02jTqJExUYFSD/fKq6VH9Y/oG2accc/kdI0V98Bag8d5a4gi3XHz73rDWa2PvTtvcWYquKqSENA==}
     dev: true
 
   /inherits/2.0.3:
-    resolution: {integrity: sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=}
+    resolution: {integrity: sha512-x00IRNXNy63jwGkJmzPigoySHbaqpNuzKbBOmzK+g2OdZpQ9w+sxCN+VSB3ja7IAge2OP2qpfxTjeNcyjmW1uw==}
     dev: true
 
   /inherits/2.0.4:
@@ -26134,7 +26191,7 @@ packages:
     dev: true
 
   /is-wsl/1.1.0:
-    resolution: {integrity: sha1-HxbkqiKwTRM2tmGIpmrzxgDDpm0=}
+    resolution: {integrity: sha512-gfygJYZ2gLTDlmbWMI0CE2MwnFzSN/2SZfkMlItC4K/JBlsWVDB0bO6XhqcY13YXE7iMcAJnzTCJjPiTeJJ0Mw==}
     engines: {node: '>=4'}
 
   /is-wsl/2.2.0:
@@ -30676,7 +30733,7 @@ packages:
     dev: true
 
   /node-int64/0.4.0:
-    resolution: {integrity: sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=}
+    resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
 
   /node-libs-browser/2.2.1:
     resolution: {integrity: sha512-h/zcD8H9kaDZ9ALUWwlBUDo6TKF8a7qBSCSEGfjTVIYeqsioSKaAX+BN7NgiMGp6iSIXZ3PxgCu8KS3b71YK5Q==}
@@ -30820,7 +30877,7 @@ packages:
     dev: true
 
   /normalize-path/2.1.1:
-    resolution: {integrity: sha1-GrKLVW4Zg2Oowab35vogE3/mrtk=}
+    resolution: {integrity: sha512-3pKJwH184Xo/lnH6oyP1q2pMd7HcypqqmRs91/6/i2CGtWwIKGCkOOMTm/zXbgTEWHw1uNpNi/igc3ePOYHb6w==}
     engines: {node: '>=0.10.0'}
     dependencies:
       remove-trailing-separator: 1.1.0
@@ -30940,7 +30997,7 @@ packages:
     dev: true
 
   /npm-run-path/2.0.2:
-    resolution: {integrity: sha1-NakjLfo11wZ7TLLd8jV7GHFTbF8=}
+    resolution: {integrity: sha512-lJxZYlT4DW/bRUtFh1MQIWqmLwQfAxnqWG4HhEdjMlkrJYnJn0Jrr2u3mgxqaWsdiBc76TYkTG/mhrnYTuzfHw==}
     engines: {node: '>=4'}
     dependencies:
       path-key: 2.0.1
@@ -31730,7 +31787,7 @@ packages:
     dev: true
 
   /path-key/2.0.1:
-    resolution: {integrity: sha1-QRyttXTFoUDTpLGRDUDYDMn0C0A=}
+    resolution: {integrity: sha512-fEHGKCSmUSDPv4uoj8AlD+joPlq3peND+HRYyxFz4KPw4z926S/b8rIuFs2FYJg3BwsxJf6A9/3eIdLaYC+9Dw==}
     engines: {node: '>=4'}
 
   /path-key/3.1.1:
@@ -31838,7 +31895,7 @@ packages:
     dev: true
 
   /pify/3.0.0:
-    resolution: {integrity: sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=}
+    resolution: {integrity: sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==}
     engines: {node: '>=4'}
 
   /pify/4.0.1:
@@ -32675,9 +32732,6 @@ packages:
       postcss: '>=5.0.0'
     dependencies:
       postcss: 7.0.39
-      postcss-html: 0.36.0_4f7b71a942b8b7a555b8adf78f88122b
-      postcss-less: 3.1.4
-      postcss-scss: 2.1.1
     dev: true
 
   /postcss-unique-selectors/4.0.1:
@@ -33133,10 +33187,11 @@ packages:
   /puppeteer/2.1.1:
     resolution: {integrity: sha512-LWzaDVQkk1EPiuYeTOj+CZRIjda4k2s5w4MK4xoH2+kgWV/SDlkYHmxatDdtYrciHUKSXTsGgPgPP8ILVdBsxg==}
     engines: {node: '>=8.16.0'}
+    deprecated: Version no longer supported. Upgrade to @latest
     requiresBuild: true
     dependencies:
       '@types/mime-types': 2.1.1
-      debug: 4.3.2
+      debug: 4.3.4
       extract-zip: 1.7.0
       https-proxy-agent: 4.0.0
       mime: 2.5.2
@@ -34379,7 +34434,7 @@ packages:
       strip-indent: 3.0.0
 
   /redeyed/2.1.1:
-    resolution: {integrity: sha1-iYS1gV2ZyyIEacme7v/jiRPmzAs=}
+    resolution: {integrity: sha512-FNpGGo1DycYAdnrKFxCMmKYgo/mILAqtRYbkdQD8Ep/Hk2PQ5+aEAEx+IU713RTDmuBaH0c8P5ZozurNu5ObRQ==}
     dependencies:
       esprima: 4.0.1
 
@@ -34642,7 +34697,7 @@ packages:
     dev: false
 
   /remove-trailing-separator/1.1.0:
-    resolution: {integrity: sha1-wkvOKig62tW8P1jg1IJJuSN52O8=}
+    resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
 
   /renderkid/2.0.7:
     resolution: {integrity: sha512-oCcFyxaMrKsKcTY59qnCAtmDVSLfPbrv6A3tVbPdFMMrv5jaK10V6m40cKsoPNhAqN6rmHW9sswW4o3ruSrwUQ==}
@@ -34780,7 +34835,7 @@ packages:
     dev: true
 
   /resolve-cwd/2.0.0:
-    resolution: {integrity: sha1-AKn3OHVW4nA46uIyyqNypqWbZlo=}
+    resolution: {integrity: sha512-ccu8zQTrzVr954472aUVPLEcB3YpKSYR3cg/3lo1okzobPBM+1INXBbBZlDbnI/hbEocnf8j0QVo43hQKrbchg==}
     engines: {node: '>=4'}
     dependencies:
       resolve-from: 3.0.0
@@ -34832,7 +34887,7 @@ packages:
     dev: true
 
   /resolve/1.1.7:
-    resolution: {integrity: sha1-IDEU2CrSxe2ejgQRs5ModeiJ6Xs=}
+    resolution: {integrity: sha512-9znBF0vBcaSN3W2j7wKvdERPwqTxSpCq+if5C0WoTCyV9n24rua28jeuQ2pL/HOf+yUe/Mef+H/5p60K0Id3bg==}
 
   /resolve/1.20.0:
     resolution: {integrity: sha512-wENBPt4ySzg4ybFQW2TT1zMQucPK95HSh/nq2CFTZVOGut2+pQvSsgtda4d26YrYcr067wjbmzOG8byDPBX63A==}
@@ -35346,7 +35401,7 @@ packages:
     dev: true
 
   /shebang-command/1.2.0:
-    resolution: {integrity: sha1-RKrGW2lbAzmJaMOfNj/uXer98eo=}
+    resolution: {integrity: sha512-EV3L1+UQWGor21OmnvojK36mhg+TyIKDh3iFBKBohr5xeXIhNBcx8oWdgkTEEQ+BEFFYdLRuqMfd5L84N1V5Vg==}
     engines: {node: '>=0.10.0'}
     dependencies:
       shebang-regex: 1.0.0
@@ -35358,7 +35413,7 @@ packages:
       shebang-regex: 3.0.0
 
   /shebang-regex/1.0.0:
-    resolution: {integrity: sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=}
+    resolution: {integrity: sha512-wpoSFAxys6b2a2wHZ1XpDSgD7N9iVjg29Ph9uV/uaP9Ex/KXlkTZTeddxDPSYQpgvzKLGJke2UU0AzoGCjNIvQ==}
     engines: {node: '>=0.10.0'}
 
   /shebang-regex/3.0.0:
@@ -35774,7 +35829,7 @@ packages:
     dev: true
 
   /stealthy-require/1.1.1:
-    resolution: {integrity: sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=}
+    resolution: {integrity: sha512-ZnWpYnYugiOVEY5GkcuJK1io5V8QmNYChG62gSit9pQVGErXtrKuPC55ITaVSukmMta5qpMU7vqLt2Lnni4f/g==}
     engines: {node: '>=0.10.0'}
 
   /store2/2.13.2:
@@ -36017,7 +36072,7 @@ packages:
     dev: true
 
   /strip-bom/3.0.0:
-    resolution: {integrity: sha1-IzTBjpx1n3vdVv3vfprj1YjmjtM=}
+    resolution: {integrity: sha512-vavAMRXOgBVNF6nyEEmL3DBK19iRpDcoIwW+swQ+CbGiu7lju6t+JklA1MHweoWtadgt4ISVUsXLyDq34ddcwA==}
     engines: {node: '>=4'}
 
   /strip-bom/4.0.0:
@@ -36025,7 +36080,7 @@ packages:
     engines: {node: '>=8'}
 
   /strip-eof/1.0.0:
-    resolution: {integrity: sha1-u0P/VZim6wXYm1n80SnJgzE2Br8=}
+    resolution: {integrity: sha512-7FCwGGmx8mD5xQd3RPUvnSpUXHM3BWuzjtpD4TXsfcZ9EL4azvVVUscFYwD9nx8Kh+uCBC00XBtAykoMHwTh8Q==}
     engines: {node: '>=0.10.0'}
 
   /strip-final-newline/2.0.0:
@@ -37177,7 +37232,7 @@ packages:
     dev: true
 
   /tr46/0.0.3:
-    resolution: {integrity: sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=}
+    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
 
   /tr46/1.0.1:
     resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
@@ -38575,7 +38630,7 @@ packages:
     dev: false
 
   /webidl-conversions/3.0.1:
-    resolution: {integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=}
+    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
   /webidl-conversions/4.0.2:
     resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}
@@ -39151,7 +39206,7 @@ packages:
       webidl-conversions: 5.0.0
 
   /whatwg-url/5.0.0:
-    resolution: {integrity: sha1-lmRU6HZUYuN2RNNib2dCzotwll0=}
+    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
@@ -39194,7 +39249,7 @@ packages:
     dev: true
 
   /which-module/2.0.0:
-    resolution: {integrity: sha1-2e8H3Od7mQK4o6j6SzHD4/fm6Ho=}
+    resolution: {integrity: sha512-B+enWhmw6cjfVC7kS8Pj9pCrKSc5txArRyaYGe088shv/FGWH+0Rjx/xPgtsWfsUtS27FkP697E4DDhgrgoc0Q==}
 
   /which-pm/2.0.0:
     resolution: {integrity: sha512-Lhs9Pmyph0p5n5Z3mVnN0yWcbQYUAD7rbQUiMsQxOJ3T57k7RFe35SUwWMf7dsbDZks1uOmw4AecB/JMDj3v/w==}

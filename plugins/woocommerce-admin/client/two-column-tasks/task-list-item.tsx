@@ -97,7 +97,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const onDismiss = useCallback( () => {
 		dismissTask( task.id );
-		createNotice( 'success', __( 'Task dismissed' ), {
+		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
 			actions: [
 				{
 					label: __( 'Undo', 'woocommerce' ),
