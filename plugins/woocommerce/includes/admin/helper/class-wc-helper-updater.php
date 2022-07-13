@@ -125,6 +125,37 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Get update data for all plugins.
+	 *
+	 * @return array Update data {product_id => data}
+	 * @see get_update_data
+	 */
+	public static function get_available_extensions_downloads_data() {
+		$payload = array();
+
+		// Scan subscriptions.
+		foreach ( WC_Helper::get_subscriptions() as $subscription ) {
+			$payload[ $subscription['product_id'] ] = array(
+				'product_id' => $subscription['product_id'],
+				'file_id'    => '',
+			);
+		}
+
+		// Scan local plugins which may or may not have a subscription.
+		foreach ( WC_Helper::get_local_woo_plugins() as $data ) {
+			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
+				$payload[ $data['_product_id'] ] = array(
+					'product_id' => $data['_product_id'],
+				);
+			}
+
+			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+		}
+
+		return self::_update_check( $payload );
+	}
+
+	/**
 	 * Get update data for all extensions.
 	 *
 	 * Scans through all subscriptions for the connected user, as well
