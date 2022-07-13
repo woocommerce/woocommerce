@@ -39,12 +39,12 @@ const WooCommerceServicesItem: React.FC< {
 				<img
 					className="woocommerce-services-item__logo"
 					src={ WooIcon }
-					alt="Woocommerce Service Logo"
+					alt="WooCommerce Service Logo"
 				/>
 			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
-					{ __( 'Woocommerce Shipping', 'woocommerce' ) }
+					{ __( 'WooCommerce Shipping', 'woocommerce' ) }
 					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 				</span>
 				<span className="woocommerce-list__item-content">
