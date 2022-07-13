@@ -291,8 +291,7 @@ jobs:
                   API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
                   E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
               run: |
-                  gh workflow run publish-reports.yml \
-                    -f test_workflow=pr \
+                  gh workflow run publish-reports-pr.yml \
                     -f run_id=$RUN_ID \
                     -f api_artifact=$API_ARTIFACT \
                     -f e2e_artifact=$E2E_ARTIFACT \
