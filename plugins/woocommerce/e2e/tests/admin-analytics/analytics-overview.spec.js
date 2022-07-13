@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Analytics pages', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async ( {
 		page,
@@ -29,7 +29,7 @@ test.describe( 'Analytics pages', () => {
 	} );
 
 	test.describe( 'moving sections', () => {
-		test.use( { storageState: 'e2e/storage/adminState.json' } );
+		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test( 'should not display move up for the top, or move down for the bottom section', async ( {
 			page,

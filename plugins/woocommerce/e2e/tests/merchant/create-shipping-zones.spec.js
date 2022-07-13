@@ -7,7 +7,7 @@ const shippingZoneNameFreeShip = 'BC with Free shipping';
 const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {

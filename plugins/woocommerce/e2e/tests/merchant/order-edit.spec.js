@@ -3,7 +3,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
 
 test.describe( 'Edit order', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	let orderId;
 
@@ -87,7 +87,7 @@ test.describe( 'Edit order', () => {
 } );
 
 test.describe( 'Edit order > Downloadable product permissions', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	const productName = 'TDP 001';
 	const product2Name = 'TDP 002';
@@ -113,8 +113,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 					{
 						id: uuid.v4(),
 						name: 'Single',
-						file:
-							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 					},
 				],
 			} )
@@ -130,8 +129,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 					{
 						id: uuid.v4(),
 						name: 'Single',
-						file:
-							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 					},
 				],
 			} )

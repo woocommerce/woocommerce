@@ -19,6 +19,7 @@ const config = {
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		baseURL: 'http://localhost:8086',
+		stateDir: 'e2e/storage/',
 	},
 	projects: [
 		{
