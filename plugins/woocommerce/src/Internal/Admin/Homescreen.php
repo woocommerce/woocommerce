@@ -111,12 +111,9 @@ class Homescreen {
 		}
 
 		$is_jetpack_installed = in_array( 'jetpack', $settings['plugins']['installedPlugins'] ?? array(), true );
-		$is_jetpack_connected = $settings['dataEndpoints']['jetpackStatus']['isUserConnected'] ?? false;
 		$is_wcs_installed     = in_array( 'woocommerce-services', $settings['plugins']['installedPlugins'] ?? array(), true );
 
 		if (
-			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_connected )
-			||
 			( 'US' === $country_code && $is_jetpack_installed )
 			||
 			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
