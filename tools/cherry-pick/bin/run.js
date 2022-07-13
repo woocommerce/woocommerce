@@ -19,10 +19,15 @@ let   githubToken           = '';
 let   tempWooDir            = '';
 let   changelogsToBeDeleted = [];
 let   prCommits             = {};
+let   githubRemoteURL       = 'https';
 
 if ( typeof process.env.GITHUB_CHERRY_PICK_TOKEN === 'undefined' ) {
 	console.error( 'A GitHub token needs to be assigned to the "GITHUB_CHERRY_PICK_TOKEN" environment variable' );
 	process.exit( 1 );
+}
+
+if ( typeof process.env.GITHUB_REMOTE_URL !== 'undefined' ) {
+	githubRemoteURL = process.env.GITHUB_REMOTE_URL;
 }
 
 // If no arguments are passed.
@@ -134,7 +139,13 @@ function cloneWoo() {
 	spinner.start();
 
 	return new Promise( ( resolve, reject ) => {
-		const response = spawn( 'git', [ 'clone', 'https://github.com/woocommerce/woocommerce.git' ] );
+		let url = 'https://github.com/woocommerce/woocommerce.git';
+
+		if ( githubRemoteURL === 'ssh' ) {
+			url = 'git@github.com:woocommerce/woocommerce.git';
+		}
+
+		const response = spawn( 'git', [ 'clone', url ] );
 
 		response.on( 'close', ( code ) => {
 			if ( `${code}` == 0 ) {
