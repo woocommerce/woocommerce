@@ -63,13 +63,13 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx playwright install chromium
 
-            - name: Run (Playwright) tests command.
+            - name: Run Playwright E2E tests.
               id: run_playwright_e2e_tests
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               run: pnpx playwright test --config=e2e/playwright.config.js
 
-            - name: Generate (Playwright) E2E Test report.
+            - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
               if: |
                   always() && 
@@ -81,7 +81,7 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
 
-            - name: Archive (Playwright) E2E test report
+            - name: Archive Playwright E2E test report
               if: |
                   always() &&
                   fromJSON(env.E2E_PLAYWRIGHT) &&
@@ -95,7 +95,7 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-            - name: Archive E2E test screenshots
+            - name: Archive Puppeteer E2E test screenshots
               uses: actions/upload-artifact@v3
               if: always()
               with:
