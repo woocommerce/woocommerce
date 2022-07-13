@@ -96,9 +96,25 @@ describe( 'Selective extensions bundle', () => {
 	} );
 
 	it( 'should list installable free extensions from obw/basics and obw/grow', () => {
-		const { getByText, queryByText } = render(
-			<SelectiveExtensionsBundle isInstallingActivating={ false } />
+		const mockSetInstallExtensionOptions = jest.fn();
+		// Render once to get installExtensionOptions
+		render(
+			<SelectiveExtensionsBundle
+				isInstallingActivating={ false }
+				setInstallExtensionOptions={ mockSetInstallExtensionOptions }
+			/>
 		);
+
+		const { getByText, queryByText } = render(
+			<SelectiveExtensionsBundle
+				isInstallingActivating={ false }
+				setInstallExtensionOptions={ mockSetInstallExtensionOptions }
+				installExtensionOptions={
+					mockSetInstallExtensionOptions.mock.calls[ 0 ][ 0 ]
+				}
+			/>
+		);
+
 		expect(
 			getByText( new RegExp( pluginNames.mailpoet ) )
 		).toBeInTheDocument();
@@ -117,7 +133,10 @@ describe( 'Selective extensions bundle', () => {
 
 	it( 'should list installable extensions when dropdown is clicked', () => {
 		const { getAllByRole, getByText, queryByText } = render(
-			<SelectiveExtensionsBundle isInstallingActivating={ false } />
+			<SelectiveExtensionsBundle
+				isInstallingActivating={ false }
+				setInstallExtensionOptions={ jest.fn() }
+			/>
 		);
 		const collapseButton = getAllByRole( 'button' ).find(
 			( item ) => item.textContent === ''

@@ -211,22 +211,27 @@ export const ExtensionSection = ( {
 	);
 };
 
-export const createInstallExtensionOptions = ( installableExtensions ) => {
-	return installableExtensions.reduce(
-		( acc, curr ) => {
-			const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
-				return {
-					...pluginAcc,
-					[ plugin.key ]: true,
-				};
-			}, {} );
+export const createInstallExtensionOptions = (
+	installableExtensions,
+	prevInstallExtensionOptions
+) => {
+	return installableExtensions.reduce( ( acc, curr ) => {
+		const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
+			if ( acc.hasOwnProperty( plugin.key ) ) {
+				return pluginAcc;
+			}
+
 			return {
-				...acc,
-				...plugins,
+				...pluginAcc,
+				[ plugin.key ]: true,
 			};
-		},
-		{ install_extensions: true }
-	);
+		}, {} );
+
+		return {
+			...acc,
+			...plugins,
+		};
+	}, prevInstallExtensionOptions );
 };
 
 export const SelectiveExtensionsBundle = ( {
@@ -235,11 +240,10 @@ export const SelectiveExtensionsBundle = ( {
 	country,
 	productTypes,
 	industry,
+	setInstallExtensionOptions,
+	installExtensionOptions = { install_extensions: true },
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
-	const [ installExtensionOptions, setInstallExtensionOptions ] = useState( {
-		install_extensions: true,
-	} );
 	const { freeExtensions: freeExtensionBundleByCategory, isResolving } =
 		useSelect( ( select ) => {
 			const { getFreeExtensions, hasFinishedResolution } = select(
@@ -281,11 +285,15 @@ export const SelectiveExtensionsBundle = ( {
 	}, [ freeExtensionBundleByCategory, productTypes, country ] );
 
 	useEffect( () => {
-		if ( ! isInstallingActivating ) {
-			setInstallExtensionOptions( () =>
-				createInstallExtensionOptions( installableExtensions )
-			);
+		if ( isInstallingActivating || installableExtensions.length === 0 ) {
+			return;
 		}
+		setInstallExtensionOptions(
+			createInstallExtensionOptions(
+				installableExtensions,
+				installExtensionOptions
+			)
+		);
 		// Disable reason: This effect should only called when the installableExtensions are changed.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ installableExtensions ] );
