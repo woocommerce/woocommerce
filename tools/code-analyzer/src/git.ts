@@ -13,21 +13,19 @@ import { v4 } from 'uuid';
  * Internal dependencies
  */
 import { startWPEnv, stopWPEnv, isValidCommitHash } from './utils';
-export const cloneRepo = async ( repoUrl: string ) => {
+/**
+ * Clone a git repository.
+ *
+ * @param {string} repoPath- the path (either URL or file path) to the repo to clone.
+ * @param          repoPath
+ * @return {string} the path to the cloned repo.
+ */
+export const cloneRepo = async ( repoPath: string ) => {
 	const tempFolderName = v4();
 	const git = simpleGit( { baseDir: tmpdir() } );
-	await git.clone( repoUrl, tempFolderName );
+	await git.clone( repoPath, tempFolderName );
 
 	return tempFolderName;
-};
-
-const isURL = ( maybeUrl: string ) => {
-	try {
-		new URL( maybeUrl );
-	} catch ( e ) {
-		return false;
-	}
-	return true;
 };
 
 /**
@@ -43,10 +41,24 @@ export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 	return git.diff( [ `${ hashA }..${ hashB }` ] );
 };
 
+/**
+ * Determines if a string is a commit hash or not.
+ *
+ * @param {string} ref - the ref to check
+ * @return {boolean} whether the ref is a commit hash or not.
+ */
 const refIsHash = ( ref: string ) => {
 	return /^[0-9a-f]{7,40}$/i.test( ref );
 };
 
+/**
+ * Get the commit hash for a ref (either branch or commit hash). If a validly
+ * formed hash is provided it is returned unmodified.
+ *
+ * @param {string} baseDir - the dir of the git repo to get the hash from.
+ * @param {string} ref     -    Either a commit hash or a branch name.
+ * @return {string} - the commit hash of the ref.
+ */
 export const getCommitHash = async ( baseDir: string, ref: string ) => {
 	const isHash = refIsHash( ref );
 
@@ -62,10 +74,10 @@ export const getCommitHash = async ( baseDir: string, ref: string ) => {
 /**
  * generateDiff generates a diff for a given repo and 2 hashes or branch names.
  *
- * @param {string} repoPath - the url or filepath of the repo to clone.
- * @param {string} hashA    - commit hash or branch name.
- * @param {string} hashB    - commit hash or branch name.
- * @param          onError
+ * @param {string}   repoPath - the url or filepath of the repo to clone.
+ * @param {string}   hashA    - commit hash or branch name.
+ * @param {string}   hashB    - commit hash or branch name.
+ * @param {Function} onError
  */
 export const generateDiff = async (
 	repoPath: string,
