@@ -115,13 +115,12 @@ export default class PackageRelease extends Command {
 		{ 'dry-run': dryRun, branch }: { 'dry-run': boolean; branch: string }
 	) {
 		packages.forEach( ( name ) => {
-			const verb = dryRun ? 'Performing dry run of' : 'Publishing';
-			CliUx.ux.action.start( `${ verb } ${ name }` );
-
 			try {
+				const verb = dryRun ? 'Performing dry run of' : 'Publishing';
+				CliUx.ux.action.start( `${ verb } ${ name }` );
 				if ( isValidUpdate( name ) ) {
 					const cwd = getFilepathFromPackageName( name );
-					return execSync(
+					execSync(
 						`SKIP_TURBO=true pnpm publish ${
 							dryRun ? '--dry-run' : ''
 						} --publish-branch=${ branch }`,
@@ -131,15 +130,17 @@ export default class PackageRelease extends Command {
 							stdio: 'inherit',
 						}
 					);
+					CliUx.ux.action.stop( `${ name } successfully published.` );
+				} else {
+					CliUx.ux.action.stop(
+						`${ name } does not have anything to update.`
+					);
 				}
-				this.log( `${ name } does not have anything to update.` );
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
 				}
 			}
-
-			CliUx.ux.action.stop();
 		} );
 	}
 }
