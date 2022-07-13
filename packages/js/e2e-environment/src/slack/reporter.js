@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
 const { createReadStream } = require( 'fs' );
 const { WebClient, ErrorCode } = require( '@slack/web-api' );
+
+/**
+ * Internal dependencies
+ */
 const { getTestConfig } = require( '../../utils' );
 const {
 	GITHUB_ACTIONS,
@@ -15,12 +22,14 @@ const {
 	WC_E2E_SCREENSHOTS,
 } = process.env;
 
+/* eslint no-console: off */
+
 let web;
 
 /**
  * Initialize the Slack web client.
  *
- * @return {WebClient}
+ * @return {WebClient} the Slack WebClient.
  */
 const initializeWeb = () => {
 	if ( ! web ) {
@@ -32,7 +41,7 @@ const initializeWeb = () => {
 /**
  * Initialize Slack parameters if tests are running in CI.
  *
- * @return {Object|boolean}
+ * @return {Object|boolean} Object with Slack properties. Boolean if fail.
  */
 const initializeSlack = () => {
 	if ( ! WC_E2E_SCREENSHOTS || ! E2E_SLACK_TOKEN ) {
@@ -67,7 +76,7 @@ const initializeSlack = () => {
 /**
  * Post a message to a Slack channel for a failed test.
  *
- * @param  testName
+ * @param {string} testName
  * @return {Promise<void>}
  */
 async function sendFailedTestMessageToSlack( testName ) {
@@ -75,6 +84,8 @@ async function sendFailedTestMessageToSlack( testName ) {
 	if ( ! branch ) {
 		return;
 	}
+
+	// eslint-disable-next-line
 	const web = initializeWeb();
 
 	try {
@@ -91,7 +102,7 @@ async function sendFailedTestMessageToSlack( testName ) {
 			error.code === ErrorCode.RateLimitedError ||
 			error.code === ErrorCode.HTTPError
 		) {
-			if ( error.data.error != 'channel_not_found' ) {
+			if ( error.data.error !== 'channel_not_found' ) {
 				console.log( error.data );
 			}
 		} else {
@@ -131,7 +142,7 @@ async function sendFailedTestMessageToSlack( testName ) {
 /**
  * Post a screenshot to a Slack channel for a failed test.
  *
- * @param  screenshotOfFailedTest
+ * @param {string} screenshotOfFailedTest
  * @return {Promise<void>}
  */
 async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) {
@@ -139,6 +150,8 @@ async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) {
 	if ( ! pr ) {
 		return;
 	}
+
+	// eslint-disable-next-line
 	const web = initializeWeb();
 	const filename = 'screenshot_of_failed_test.png';
 
