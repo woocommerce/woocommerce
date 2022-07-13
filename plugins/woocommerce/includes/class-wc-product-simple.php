@@ -29,24 +29,21 @@ class WC_Product_Simple extends WC_Product {
 	public function __construct( $product = 0 ) {
 		$this->supports[] = 'ajax_add_to_cart';
 		parent::__construct( $product );
-		add_action( 'post-upload-ui', array( $this, 'add_product_photo_suggestions' ) );
+		add_filter('admin_post_thumbnail_html', array( $this, 'add_product_photo_suggestions' ) );
 	}
 
 	/**
 	 * Adding product photo suggestions in upload modal.
 	 */
-	public function add_product_photo_suggestions() {
+	public function add_product_photo_suggestions ( $content ) {
+		error_log(print_r($content, true));
 
-		if ( self::$post_upload_hook_done ) {
-			return;
-		}
+		$meta_content = '<p>';
+		$meta_content .= esc_html__( 'For best results, upload JPEG files that are 1000 by 1000 pixels or larger. Maximum upload size: 2 GB', 'woocommerce' );
+		$meta_content .= ' <a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '</a>';
+		$meta_content .= '</p>';
 
-		echo '<p>';
-		echo esc_html__( 'For best results, upload JPEG files that are 1000 by 1000 pixels or larger.', 'woocommerce' );
-		echo '</p>';
-		echo '<a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '</a>';
-
-		self::$post_upload_hook_done = true;
+		return "$content $meta_content";
 	}
 
 	/**
