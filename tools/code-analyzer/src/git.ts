@@ -8,12 +8,11 @@ import { tmpdir } from 'os';
 import { readFileSync, rmSync } from 'fs';
 import { simpleGit } from 'simple-git';
 import { v4 } from 'uuid';
+
 /**
  * Internal dependencies
  */
 import { startWPEnv, stopWPEnv, isValidCommitHash } from './utils';
-import path = require('path');
-
 export const cloneRepo = async ( repoUrl: string ) => {
 	const tempFolderName = v4();
 	const git = simpleGit( { baseDir: tmpdir() } );
@@ -34,7 +33,7 @@ const isURL = ( maybeUrl: string ) => {
 /**
  * Do a git diff of 2 commit hashes (or branches)
  *
- * @param          baseDir
+ * @param {string} baseDir - baseDir that the repo is in
  * @param {string} hashA   - either a git commit hash or a git branch
  * @param {string} hashB   - either a git commit hash or a git branch
  * @return {string} - diff of the changfiles between the 2 hashes
@@ -45,33 +44,44 @@ export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 };
 
 /**
- * generateAPatch generates a diff for a given repo and 2 hashes or branch names.
+ * generateDiff generates a diff for a given repo and 2 hashes or branch names.
  *
- * @param  repoPath - the url or filepath of the repo to clone.
- * @param  hashA    - commit hash or branch name.
- * @param  hashB    - commit hash or branch name.
+ * @param {string} repoPath - the url or filepath of the repo to clone.
+ * @param {string} hashA    - commit hash or branch name.
+ * @param {string} hashB    - commit hash or branch name.
+ * @param          onError
  */
-export const generateAPatch = async (
+export const generateDiff = async (
 	repoPath: string,
 	hashA: string,
-	hashB: string
+	hashB: string,
+	onError: ( error: string ) => void
 ) => {
-	const context = await cloneRepo( repoPath );
-
-	const tmpRepoPath = path.join( tmpdir(), context );
-
+	// If a local path is provided first lets check if what we're diffing is a repo.
 	if ( ! isURL( repoPath ) ) {
-		// If its local then we should fetch latest on the clone, in case we are missing a hash or branch being compared.
-		await simpleGit( { baseDir: tmpRepoPath } ).fetch();
 	}
 
-	const patch = await diffHashes( tmpRepoPath, hashA, hashB );
+	try {
+		const context = await cloneRepo( repoPath );
+		const tmpRepoPath = join( tmpdir(), context );
 
-	console.log( patch );
-	console.log( 'cleaning up' );
+		if ( ! isURL( repoPath ) ) {
+			// If its local then we should fetch latest on the clone, in case we are missing a hash or branch being compared.
+			await simpleGit( { baseDir: tmpRepoPath } ).fetch();
+		}
 
-	// time to clean up
-	rmSync( tmpRepoPath, { force: true, recursive: true } );
+		const patch = await diffHashes( tmpRepoPath, hashA, hashB );
+
+		console.log( patch );
+		console.log( 'cleaning up' );
+
+		// time to clean up
+		rmSync( tmpRepoPath, { force: true, recursive: true } );
+	} catch ( e ) {
+		onError(
+			'Unable to create diff. Check that git repo, base hash, and compare hash all exist.'
+		);
+	}
 };
 
 /**
