@@ -89,7 +89,7 @@ export const generateDiff = async (
 		const context = await cloneRepo( repoPath );
 		const tmpRepoPath = join( tmpdir(), context );
 
-		await simpleGit( { baseDir: tmpRepoPath } ).pull( [ '--all' ] );
+		await simpleGit( { baseDir: tmpRepoPath } ).pull();
 
 		// checking out any branches will automatically track remote branches.
 		await Promise.all(
