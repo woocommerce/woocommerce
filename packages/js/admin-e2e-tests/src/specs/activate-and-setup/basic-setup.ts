@@ -19,7 +19,7 @@ const {
 } = require( '@jest/globals' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-const testAdminBasicSetup = () => {
+export const testAdminBasicSetup = () => {
 	describe( 'Store owner can finish initial store setup', () => {
 		const wcSettings = new WcSettings( page );
 		const wpSettings = new WpSettings( page );
@@ -80,5 +80,3 @@ const testAdminBasicSetup = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminBasicSetup };

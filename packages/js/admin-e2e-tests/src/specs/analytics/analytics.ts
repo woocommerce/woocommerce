@@ -8,7 +8,7 @@ import { Login } from '../../pages/Login';
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
 
-const testAdminAnalyticsPages = () => {
+export const testAdminAnalyticsPages = () => {
 	describe( 'Analytics pages', () => {
 		const analyticsPage = new Analytics( page );
 		const customersPage = new Customers( page );
@@ -82,5 +82,3 @@ const testAdminAnalyticsPages = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminAnalyticsPages };

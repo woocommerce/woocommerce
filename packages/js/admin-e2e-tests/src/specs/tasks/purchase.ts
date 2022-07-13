@@ -11,7 +11,7 @@ import { getElementByText, waitForElementByText } from '../../utils/actions';
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-const testAdminPurchaseSetupTask = () => {
+export const testAdminPurchaseSetupTask = () => {
 	describe( 'Purchase setup task', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -96,5 +96,3 @@ const testAdminPurchaseSetupTask = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminPurchaseSetupTask };

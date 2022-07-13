@@ -18,7 +18,7 @@ import { WcSettings } from '../../pages/WcSettings';
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-const testAdminPaymentSetupTask = () => {
+export const testAdminPaymentSetupTask = () => {
 	describe( 'Payment setup task', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -86,5 +86,3 @@ const testAdminPaymentSetupTask = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminPaymentSetupTask };

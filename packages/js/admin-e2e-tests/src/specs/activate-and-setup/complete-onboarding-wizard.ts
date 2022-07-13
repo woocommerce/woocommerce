@@ -25,7 +25,7 @@ const { verifyValueOfInputField } = require( '@woocommerce/e2e-utils' );
 /**
  * This tests a default, happy path for the onboarding wizard.
  */
-const testAdminOnboardingWizard = () => {
+export const testAdminOnboardingWizard = () => {
 	describe( 'Store owner can complete onboarding wizard', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -127,7 +127,7 @@ const testAdminOnboardingWizard = () => {
 	} );
 };
 
-const testSelectiveBundleWCPay = () => {
+export const testSelectiveBundleWCPay = () => {
 	describe( 'A japanese store can complete the selective bundle install but does not include WCPay.', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -229,7 +229,7 @@ const testSelectiveBundleWCPay = () => {
 	} );
 };
 
-const testDifferentStoreCurrenciesWCPay = () => {
+export const testDifferentStoreCurrenciesWCPay = () => {
 	const testCountryCurrencyPairs = [
 		{
 			countryRegionSubstring: 'australia',
@@ -359,7 +359,7 @@ const testDifferentStoreCurrenciesWCPay = () => {
 	} );
 };
 
-const testSubscriptionsInclusion = () => {
+export const testSubscriptionsInclusion = () => {
 	describe( 'A non-US store will not see the Subscriptions inclusion', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -521,7 +521,7 @@ const testSubscriptionsInclusion = () => {
 	} );
 };
 
-const testBusinessDetailsForm = () => {
+export const testBusinessDetailsForm = () => {
 	describe( 'A store that is selling elsewhere will see the "Number of employees” dropdown menu', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -595,7 +595,7 @@ const testBusinessDetailsForm = () => {
 	} );
 };
 
-const testAdminHomescreen = () => {
+export const testAdminHomescreen = () => {
 	describe( 'Homescreen', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -619,13 +619,4 @@ const testAdminHomescreen = () => {
 			);
 		} );
 	} );
-};
-
-module.exports = {
-	testAdminOnboardingWizard,
-	testSelectiveBundleWCPay,
-	testDifferentStoreCurrenciesWCPay,
-	testSubscriptionsInclusion,
-	testBusinessDetailsForm,
-	testAdminHomescreen,
 };

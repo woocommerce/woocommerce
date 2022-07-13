@@ -8,7 +8,7 @@ import { Login } from '../../pages/Login';
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-const testAdminCouponsPage = () => {
+export const testAdminCouponsPage = () => {
 	describe( 'Coupons page', () => {
 		const couponsPage = new Coupons( page );
 		const login = new Login( page );
@@ -26,5 +26,3 @@ const testAdminCouponsPage = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminCouponsPage };
