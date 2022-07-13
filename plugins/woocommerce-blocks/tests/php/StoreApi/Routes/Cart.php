@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
@@ -40,7 +39,20 @@ class Cart extends ControllerTestCase {
 					'weight'        => 10,
 				)
 			),
+
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 3',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+				)
+			),
 		);
+
+		// Add product #3 as a cross-sell for product #1.
+		$this->products[0]->set_cross_sell_ids( array( $this->products[2]->get_id() ) );
+		$this->products[0]->save();
 
 		$this->coupon = $fixtures->get_coupon(
 			array(
@@ -53,7 +65,7 @@ class Cart extends ControllerTestCase {
 		wc_empty_cart();
 		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
-		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
+		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
 		wc()->cart->apply_coupon( $this->coupon->get_code() );
 
 		// Draft order.
@@ -78,6 +90,11 @@ class Cart extends ControllerTestCase {
 				'items'          => function( $value ) {
 					return count( $value ) === 2;
 				},
+				'cross_sells'    => array(
+					array(
+						'id' => $this->products[2]->get_id(),
+					),
+				),
 				'totals'         => array(
 					'currency_code'               => 'USD',
 					'currency_minor_unit'         => 2,
@@ -475,6 +492,7 @@ class Cart extends ControllerTestCase {
 		$this->assertArrayHasKey( 'needs_shipping', $data );
 		$this->assertArrayHasKey( 'items_weight', $data );
 		$this->assertArrayHasKey( 'totals', $data );
+		$this->assertArrayHasKey( 'cross_sells', $data );
 	}
 
 	/**
@@ -483,7 +501,6 @@ class Cart extends ControllerTestCase {
 	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart', 'v1' );
-		$schema     = $controller->get_item_schema();
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();
