@@ -77,7 +77,7 @@ export const getCommitHash = async ( baseDir: string, ref: string ) => {
  * @param {string}   repoPath - the url or filepath of the repo to clone.
  * @param {string}   hashA    - commit hash or branch name.
  * @param {string}   hashB    - commit hash or branch name.
- * @param {Function} onError
+ * @param {Function} onError  - the handler to call when an error occurs.
  */
 export const generateDiff = async (
 	repoPath: string,
