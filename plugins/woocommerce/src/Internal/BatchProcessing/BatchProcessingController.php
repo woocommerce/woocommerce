@@ -232,7 +232,7 @@ class BatchProcessingController {
 		/**
 		 * Filters the instance of processor for current class name.
 		 *
-		 * @since 6.7.0.
+		 * @since 6.8.0.
 		 */
 		$processor = apply_filters( 'woocommerce_get_batch_processor', $processor, $processor_class_name );
 		if ( ! isset( $processor ) && class_exists( $processor_class_name ) ) {
@@ -317,6 +317,12 @@ class BatchProcessingController {
 			);
 		}
 		$error_message = "Error processing batch for {$batch_processor->get_name()}: {$error->getMessage()}" . $batch_detail_string;
+		/**
+		 * Filters the error message for a batch processor.
+		 *
+		 * @since 6.8.0
+		 */
+		$error_message = apply_filters( 'wc_batch_processing_log_message', $error_message, $error, $batch_processor, $batch );
 		$this->logger->error( $error_message, array( 'exception' => $error ) );
 	}
 
