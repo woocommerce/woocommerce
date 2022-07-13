@@ -137,6 +137,9 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 					installed_extensions: installedExtensions.map(
 						( extension ) => extension.slug
 					),
+					section_order: pluginLists
+						.map( ( list ) => list.key )
+						.join( ', ' ),
 				} );
 
 				createNoticesFromResponse( response );
