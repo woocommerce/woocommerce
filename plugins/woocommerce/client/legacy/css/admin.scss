@@ -4769,13 +4769,11 @@ img.help_tip {
 			display: block;
 			line-height: 24px;
 		}
-
-		.tips_product_types {
-            > .woocommerce-help-tip {
-                display: inline;
-				margin-right: 1em;
-            }
-        }
+		.product-data-wrapper {
+			label > * {
+				display: inline-block;
+			}
+		}
 
 		.type_box {
 			display: inline;
