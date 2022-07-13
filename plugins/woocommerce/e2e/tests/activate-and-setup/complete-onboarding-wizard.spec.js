@@ -24,10 +24,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		// Fill postcode of the store
 		await page.fill( '#inspector-text-control-3', '94107' );
 		// Fill store's email address
-		await page.fill(
-			'#inspector-text-control-4',
-			'admin@woocommercecoree2etestsuite.com'
-		);
+		await page.fill( '#inspector-text-control-4', 'wordpress@example.com' );
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
@@ -179,7 +176,7 @@ test.describe(
 			await page.fill( '#inspector-text-control-3', 'VLT 1011' );
 			await page.fill(
 				'#inspector-text-control-4',
-				'admin@woocommercecoree2etestsuite.com'
+				'wordpress@example.com'
 			);
 			await page.check( '#inspector-checkbox-control-0' );
 			await page.click( 'button >> text=Continue' );
@@ -289,10 +286,7 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		await page.click( 'button >> text=United States (US) — California' );
 		await page.fill( '#inspector-text-control-2', 'San Francisco' );
 		await page.fill( '#inspector-text-control-3', '94107' );
-		await page.fill(
-			'#inspector-text-control-4',
-			'admin@woocommercecoree2etestsuite.com'
-		);
+		await page.fill( '#inspector-text-control-4', 'wordpress@example.com' );
 		await page.check( '#inspector-checkbox-control-0' );
 		await page.click( 'button >> text=Continue' );
 		await page.click( 'button >> text=No thanks' );

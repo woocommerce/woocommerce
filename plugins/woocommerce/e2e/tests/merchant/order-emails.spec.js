@@ -7,7 +7,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	const customerBilling = {
 		email: 'john.doe.merchant.test@example.com',
 	};
-	const adminEmail = 'admin@woocommercecoree2etestsuite.com';
+	const adminEmail = 'wordpress@example.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId;
 
