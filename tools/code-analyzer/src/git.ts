@@ -25,7 +25,7 @@ export const cloneRepo = async ( repoPath: string ) => {
 	const git = simpleGit( { baseDir: tmpdir() } );
 	await git.clone( repoPath, tempFolderName );
 
-	return tempFolderName;
+	return join( tmpdir(), tempFolderName );
 };
 
 /**
@@ -86,8 +86,7 @@ export const generateDiff = async (
 	onError: ( error: string ) => void
 ) => {
 	try {
-		const context = await cloneRepo( repoPath );
-		const tmpRepoPath = join( tmpdir(), context );
+		const tmpRepoPath = await cloneRepo( repoPath );
 
 		await simpleGit( { baseDir: tmpRepoPath } ).pull();
 
