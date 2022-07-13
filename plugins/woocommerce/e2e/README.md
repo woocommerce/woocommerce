@@ -1,6 +1,7 @@
 # WooCommerce Playwright End to End Tests
 
  This is still a work in progress. Feel free to add a test here. We will gradually deprecate [Puppeteer](../tests/e2e).
+ 
 
 ## Table of contents
 
