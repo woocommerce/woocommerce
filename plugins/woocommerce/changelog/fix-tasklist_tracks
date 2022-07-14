@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix tracks not including required properties when triggered by API requests. #33872
