@@ -1,4 +1,4 @@
 Significance: minor
-Type: update
+Type: dev
 
-Fixed 33822 - I have written the commenting proper of this get_formatted_shipping_address function.
+Proper comment of get_formatted_shipping_address function.
