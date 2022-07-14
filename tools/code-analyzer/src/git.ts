@@ -119,7 +119,7 @@ export const generateDiff = async (
 	try {
 		const tmpRepoPath = await cloneRepo( repoPath );
 		const git = simpleGit( { baseDir: tmpRepoPath } );
-		await git.pull();
+		await git.fetch();
 
 		const validBranches = [ hashA, hashB ].filter(
 			( hash ) => ! refIsHash( hash )
