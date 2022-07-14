@@ -93,6 +93,16 @@ class WC_Site_Tracking {
 					delete( eventProperties._ui );
 					delete( eventProperties._ut );
 				}
+				// Verify the event name is correct
+				if ( ! /^(([a-z0-9]+)_){2}([a-z0-9_]+)$/.test( eventName ) ) {
+					throw new Error( `A valid event name must be specified. The event name: "${ eventName }" is not valid.` );
+				}
+				// Verify the properties are correct
+				for( prop in eventProperties ) {
+					if ( ! /^[a-z_][a-z0-9_]*$/.test( prop ) ) {
+						throw new Error( `A valid prop name must be specified. The property name: "${ prop }" is not valid.` );
+					}
+				}
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
