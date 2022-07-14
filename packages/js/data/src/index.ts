@@ -20,6 +20,7 @@ export { PRODUCTS_STORE_NAME } from './products';
 export { ORDERS_STORE_NAME } from './orders';
 export { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 export { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
+export { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
@@ -93,6 +94,7 @@ import type { PRODUCTS_STORE_NAME } from './products';
 import type { ORDERS_STORE_NAME } from './orders';
 import type { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 import type { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
+import type { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -110,7 +112,8 @@ export type WCDataStoreName =
 	| typeof PRODUCTS_STORE_NAME
 	| typeof ORDERS_STORE_NAME
 	| typeof PRODUCT_ATTRIBUTES_STORE_NAME
-	| typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+	| typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -124,6 +127,7 @@ import { ProductsSelectors } from './products/selectors';
 import { OrdersSelectors } from './orders/selectors';
 import { ProductAttributeSelectors } from './product-attributes/types';
 import { ProductShippingClassSelectors } from './product-shipping-classes/types';
+import { ShippingZonesSelectors } from './shipping-zones/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -159,6 +163,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? ProductShippingClassSelectors
 	: T extends typeof ORDERS_STORE_NAME
 	? OrdersSelectors
+	: T extends typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
+	? ShippingZonesSelectors
 	: never;
 
 export interface WCDataSelector {
@@ -170,3 +176,4 @@ export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
 export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';
+export { ActionDispatchers as ShippingZonesActions } from './shipping-zones/types';

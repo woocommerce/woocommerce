@@ -54,7 +54,11 @@ export const getMarketingExtensionLists = (
 ): [ PluginProps[], PluginListProps[] ] => {
 	const installed: PluginProps[] = [];
 	const lists: PluginListProps[] = [];
-	freeExtensions.forEach( ( list ) => {
+	const freeExtensionsRandomized: ExtensionList[] = freeExtensions.sort(
+		() => Math.random() - 0.5
+	); // Randomize the order sections appear.
+
+	freeExtensionsRandomized.forEach( ( list ) => {
 		if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
 			return;
 		}
@@ -133,6 +137,9 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 					installed_extensions: installedExtensions.map(
 						( extension ) => extension.slug
 					),
+					section_order: pluginLists
+						.map( ( list ) => list.key )
+						.join( ', ' ),
 				} );
 
 				createNoticesFromResponse( response );
