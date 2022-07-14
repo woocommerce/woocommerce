@@ -128,6 +128,10 @@ test.describe( 'Import Products from a CSV file', () => {
 				}
 			}
 		} );
+		// batch delete all categories in the array
+		await api.post( 'products/categories/batch', {
+			delete: [ ...categoryIds ],
+		} );
 		// get a list of all product attributes
 		await api.get( 'products/attributes' ).then( ( response ) => {
 			for ( let i = 0; i < response.data.length; i++ ) {
@@ -139,9 +143,9 @@ test.describe( 'Import Products from a CSV file', () => {
 				}
 			}
 		} );
-		// batch delete all categories in the array
-		await api.post( 'products/categories/batch', {
-			delete: [ ...categoryIds ],
+		// batch delete attributes in the array
+		await api.post( 'products/attributes/batch', {
+			delete: [ ...attributeIds ],
 		} );
 	} );
 
