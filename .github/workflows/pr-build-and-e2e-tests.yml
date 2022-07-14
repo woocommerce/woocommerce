@@ -9,7 +9,6 @@ concurrency:
 
 env:
   E2E_PLAYWRIGHT: ${{ true }}
-  USE_WP_ENV: ${{ secrets.USE_WP_ENV }}
 
 jobs:
     e2e-tests-run:
@@ -30,15 +29,9 @@ jobs:
             - name: Install and Build
               uses: ./.github/actions/install-build
 
-            - name: Load docker images and start containers using e2e-environment.
-              if: env.USE_WP_ENV != '1'
+            - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
-
-            - name: Load docker images and start containers using wp-env.
-              if: env.USE_WP_ENV == '1'
-              working-directory: plugins/woocommerce
-              run: pnpm env:test
 
             - name: Run tests command.
               if: env.E2E_PLAYWRIGHT != 'true'
@@ -70,17 +63,11 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx playwright install chromium
 
-            - name: Run (Playwright) tests command against e2e-environment.
-              id: rugit n_playwright_e2e_tests
-              if: env.E2E_PLAYWRIGHT == 'true' && env.USE_WP_ENV != '1'
-              working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=e2e/playwright.config.js'
-
-            - name: Run (Playwright) tests command against wp-env.
+            - name: Run (Playwright) tests command.
               id: run_playwright_e2e_tests
-              if: env.E2E_PLAYWRIGHT == 'true' && env.USE_WP_ENV == '1'
+              if: env.E2E_PLAYWRIGHT == 'true'
               working-directory: plugins/woocommerce
-              run: USE_WP_ENV=1 pnpx playwright test --config=e2e/playwright.config.js
+              run: pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Generate (Playwright) E2E Test report.
               id: generate_e2e_report
