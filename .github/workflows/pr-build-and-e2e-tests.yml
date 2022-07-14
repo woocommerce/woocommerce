@@ -301,5 +301,5 @@ jobs:
                     -f e2e_artifact=$E2E_ARTIFACT \
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
-                    -f root_dir=public \
+                    -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
