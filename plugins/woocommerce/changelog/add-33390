@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Add the `WC_Product_CSV_Exporter` object as a third parameter of the `woocommerce_product_export_row_data` filter.

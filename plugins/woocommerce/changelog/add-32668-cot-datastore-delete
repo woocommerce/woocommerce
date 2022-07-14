@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Implement `delete()` in the COT datastore
