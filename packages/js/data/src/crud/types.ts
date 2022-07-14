@@ -105,7 +105,7 @@ export type CrudSelectors<
 export type MapSelectors< Type, ResourceName, ParamType, ReturnType > = {
 	[ Property in keyof Type as `get${ Capitalize<
 		string & ResourceName
-	> }${ Capitalize< string & Property > }` ]: ( x: ParamType ) => ReturnType;
+	> }${ Capitalize< string & Property > }` ]: ( x?: ParamType ) => ReturnType;
 };
 
 export type MapActions< Type, ResourceName, ParamType, ReturnType > = {
