@@ -86,7 +86,7 @@ jobs:
       - name: "Stash any other undesired changes"
         run: git stash
         
-      - run: git fetch trunk
+      - run: git fetch origin trunk
         
       - name: "Checkout trunk"
         run: git checkout trunk
