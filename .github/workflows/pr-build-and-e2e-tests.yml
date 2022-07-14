@@ -70,12 +70,6 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx playwright install chromium
 
-            - name: Run (Playwright) tests command against e2e-environment.
-              id: rugit n_playwright_e2e_tests
-              if: env.E2E_PLAYWRIGHT == 'true' && env.USE_WP_ENV != '1'
-              working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=e2e/playwright.config.js'
-
             - name: Run (Playwright) tests command against wp-env.
               id: run_playwright_e2e_tests
               if: env.E2E_PLAYWRIGHT == 'true' && env.USE_WP_ENV == '1'
