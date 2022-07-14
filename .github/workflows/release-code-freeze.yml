@@ -1,7 +1,5 @@
 name: "Enforce release code freeze"
 on:
-  schedule:
-    - cron: '0 16 * * 4' # Run at 1600 UTC on Thursdays.
   workflow_dispatch:
     inputs:
       timeOverride:
@@ -51,30 +49,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: "Run the script to enforce the code freeze"
-        id: freeze
-        run: php .github/workflows/scripts/release-code-freeze.php
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_OUTPUTS: 1
-
       - name: "Git fetch the newly created release branch"
-        run: git fetch origin ${{ steps.freeze.outputs.branch }}
+        run: git fetch origin release/6.8
         
       - name: "Checkout the release branch"
-        run: git checkout ${{ steps.freeze.outputs.branch }}
+        run: git checkout release/6.8
       
       - name: "Create a new branch for the changelog update PR"
-        run: git checkout -b ${{ format( 'update/{0}-changelog', steps.freeze.outputs.release_version ) }}
+        run: git checkout -b ${{ format( 'update/{0}-changelog', '6.8' ) }}
 
       - name: "Generate the changelog file"
-        run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ steps.freeze.outputs.release_version }}
+        run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version 6.8
         
       - name: "git rm deleted files"
-        run: git rm $(git ls-files --deleted)
+        run: git ls-files --deleted -z | xargs -0 git rm
         
       - name: "Commit deletion"
-        run: git commit -m "Delete changelog files from ${{ steps.freeze.outputs.release_version }} release"
+        run: git commit -m "Delete changelog files from 6.8 release"
         
       - name: "Remember the deletion commit hash"
         id: rev-parse
@@ -87,10 +78,10 @@ jobs:
         run: git add changelog.txt plugins/woocommerce/readme.txt
       
       - name: "Commit changelog and readme files"
-        run: git commit -m "Update the changelog and readme files for the ${{ steps.freeeze.outputs.release_version }} release"
+        run: git commit -m "Update the changelog and readme files for the 6.8 release"
         
       - name: "Push update branch to origin"
-        run: git push origin ${{ format( 'update/{0}-changelog', steps.freeze.outputs.release_version ) }}
+        run: git push origin ${{ format( 'update/{0}-changelog', '6.8' ) }}
         
       - name: "Stash any other undesired changes"
         run: git stash
@@ -99,13 +90,13 @@ jobs:
         run: git checkout trunk
       
       - name: "Create a branch for the changelog files deletion"
-        run: git checkout -b ${{ format( 'delete/{0}-changelog', steps.freeze.outputs.release_version ) }}
+        run: git checkout -b ${{ format( 'delete/{0}-changelog', '6.8' ) }}
         
       - name: "Cherry-pick the deletion commit"
         run: git cherry-pick ${{ steps.rev-parse.outputs.hash }}
         
       - name: "Push deletion branch to origin"
-        run: git push origin ${{ format( 'delete/{0}-changelog', steps.freeze.outputs.release_version ) }}
+        run: git push origin ${{ format( 'delete/{0}-changelog', '6.8' ) }}
         
       - name: "Create release branch PR"
         id: release-pr
@@ -115,10 +106,10 @@ jobs:
             const result = await github.rest.pulls.create( {
               owner: "${{ github.repository_owner }}",
               repo: "${{ github.event.repository.name }}",
-              head: "${{ format( 'update/{0}-changelog', steps.freeze.outputs.release_version ) }}",
-              base: "${{ steps.freeze.outputs.branch }}",
-              title: "${{ format( 'Release: Prepare the changelog for {0}', steps.freeze.outputs.release_version ) }}",
-              body: "${{ format( 'This pull request was automatically generated during the code freeze to prepare the changelog for {0}', steps.freeze.outputs.release_version ) }}"
+              head: "${{ format( 'update/{0}-changelog', '6.8' ) }}",
+              base: "release/6.8",
+              title: "${{ format( 'Release: Prepare the changelog for {0}', '6.8' ) }}",
+              body: "${{ format( 'This pull request was automatically generated during the code freeze to prepare the changelog for {0}', '6.8' ) }}"
             } );
             
             return result.data.number;
@@ -133,28 +124,10 @@ jobs:
             const result = await github.rest.pulls.create( {
               owner: "${{ github.repository_owner }}",
               repo: "${{ github.event.repository.name }}",
-              head: "${{ format( 'delete/{0}-changelog', steps.freeze.outputs.release_version ) }}",
+              head: "${{ format( 'delete/{0}-changelog', '6.8' ) }}",
               base: "trunk",
-              title: "${{ format( 'Release: Remove {0} change files', steps.freeze.outputs.release_version ) }}",
-              body: "${{ format( 'This pull request was automatically generated during the code freeze to remove the changefiles from {0} that are compiled into the `{1}` branch via #{2}', steps.freeze.outputs.release_version, steps.freeze.outputs.branch, steps.release-pr.outputs.result ) }}"
+              title: "${{ format( 'Release: Remove {0} change files', '6.8' ) }}",
+              body: "${{ format( 'This pull request was automatically generated during the code freeze to remove the changefiles from {0} that are compiled into the `{1}` branch via #{2}', '6.8', 'release/6.8', steps.release-pr.outputs.result ) }}"
             } );
             
             return result.data.number;
-        
-
-  notify-slack:
-    name: "Sends code freeze notification to Slack"
-    if: ${{ inputs.skipSlackPing != true }}
-    runs-on: ubuntu-20.04
-    needs: maybe-create-next-milestone-and-release-branch
-    steps:
-      - name: Slack
-        uses: archive/github-actions-slack@v2.0.0
-        id: notify
-        with:
-          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
-          slack-text: |
-            :warning-8c: ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} Code Freeze :ice_cube:
-            
-            The automation to cut the release branch for ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
