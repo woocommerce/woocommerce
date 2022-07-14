@@ -169,7 +169,8 @@ describe( 'BusinessDetails', () => {
 			];
 
 			const values = createInstallExtensionOptions(
-				installableExtensions
+				installableExtensions,
+				{ install_extensions: true }
 			);
 
 			expect( values ).toEqual(
