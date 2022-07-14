@@ -121,6 +121,9 @@ export const isSellingElsewhere = ( selectedOption ) =>
 export const isSellingOtherPlatformInPerson = ( selectedOption ) =>
 	[ 'other', 'brick-mortar-other' ].includes( selectedOption );
 
+export const PERSIST_FREE_FEATURES_DATA_STORAGE_KEY =
+	'wc-admin-free-features-tab-values';
+
 class BusinessDetails extends Component {
 	constructor( props ) {
 		super();
@@ -129,16 +132,19 @@ class BusinessDetails extends Component {
 			isPopoverVisible: false,
 			isValid: false,
 			currentTab: 'business-details',
-			savedValues: null,
+			savedValues: props.initialValues,
 		};
 
 		this.onContinue = this.onContinue.bind( this );
 		this.validate = this.validate.bind( this );
+		this.persistValues = this.persistValues.bind( this );
+		this.persistProfileItems.bind( this );
+
 		props.trackStepValueChanges(
 			props.step.key,
-			{ ...( this.state.savedValues || props.initialValues ) },
-			this.savedValues || props.initialValues,
-			this.persistProfileItems.bind( this )
+			props.initialValues,
+			this.state.savedValues,
+			this.persistValues
 		);
 	}
 
@@ -240,8 +246,28 @@ class BusinessDetails extends Component {
 			} );
 	}
 
+	async persistValues() {
+		await this.persistProfileItems();
+
+		try {
+			window.localStorage.setItem(
+				PERSIST_FREE_FEATURES_DATA_STORAGE_KEY,
+				JSON.stringify( this.state.savedValues.freeFeaturesTab )
+			);
+		} catch ( error ) {
+			this.props.createNotice(
+				'error',
+				__(
+					'There was a problem saving free features state',
+					'woocommerce'
+				)
+			);
+		}
+	}
+
 	async persistProfileItems( additions = {} ) {
 		const { updateProfileItems, createNotice } = this.props;
+		const { businessDetailsTab = {} } = this.state.savedValues;
 
 		const {
 			number_employees: numberEmployees,
@@ -251,7 +277,7 @@ class BusinessDetails extends Component {
 			revenue,
 			selling_venues: sellingVenues,
 			setup_client: isSetupClient,
-		} = this.state.savedValues;
+		} = businessDetailsTab;
 
 		const updates = {
 			number_employees: numberEmployees,
@@ -402,12 +428,13 @@ class BusinessDetails extends Component {
 
 		return (
 			<Form
-				initialValues={
-					this.state.savedValues || this.props.initialValues
-				}
+				initialValues={ this.state.savedValues.businessDetailsTab }
 				onSubmit={ ( values ) => {
 					this.setState( {
-						savedValues: values,
+						savedValues: {
+							...this.state.savedValues,
+							businessDetailsTab: values,
+						},
 						currentTab: BUSINESS_FEATURES_TAB_NAME,
 					} );
 
@@ -418,10 +445,17 @@ class BusinessDetails extends Component {
 					} );
 				} }
 				onChange={ ( _, values, isValid ) => {
-					this.setState( { savedValues: values, isValid } );
+					const savedValues = {
+						...this.state.savedValues,
+						businessDetailsTab: values,
+					};
+					this.setState( {
+						savedValues,
+						isValid,
+					} );
 					this.props.updateCurrentStepValues(
 						this.props.step.key,
-						values
+						savedValues
 					);
 				} }
 				validate={ this.validate }
@@ -612,6 +646,9 @@ class BusinessDetails extends Component {
 
 	renderFreeFeaturesStep() {
 		const { isInstallingActivating, settings, profileItems } = this.props;
+		const {
+			savedValues: { freeFeaturesTab },
+		} = this.state;
 		const country = settings.woocommerce_default_country
 			? settings.woocommerce_default_country
 			: null;
@@ -647,15 +684,34 @@ class BusinessDetails extends Component {
 					country={ country }
 					industry={ profileItems.industry }
 					productTypes={ profileItems.product_types }
+					installExtensionOptions={
+						freeFeaturesTab.installExtensionOptions
+					}
+					setInstallExtensionOptions={ (
+						installExtensionOptions
+					) => {
+						const savedValues = {
+							...this.state.savedValues,
+							freeFeaturesTab: {
+								...freeFeaturesTab,
+								installExtensionOptions,
+							},
+						};
+						this.setState( {
+							savedValues,
+						} );
+						this.props.updateCurrentStepValues(
+							this.props.step.key,
+							savedValues
+						);
+					} }
 				/>
 			</>
 		);
 	}
 
 	render() {
-		const { initialValues } = this.props;
-
-		// There is a hack here to help us manage the selected tab programatically.
+		// There is a hack here to help us manage the selected tab programmatically.
 		// We set the tab name "current-tab". when its the one we want selected. This tricks
 		// the logic in the TabPanel and allows us to switch which tab has the name "current-tab"
 		// and force it to re-render with a different tab selected.
@@ -668,7 +724,8 @@ class BusinessDetails extends Component {
 						this.setState( {
 							currentTab: tabName,
 							savedValues:
-								this.state.savedValues || initialValues,
+								this.state.savedValues ||
+								this.props.initialValues,
 						} );
 						recordEvent( 'storeprofiler_step_view', {
 							step: tabName,
