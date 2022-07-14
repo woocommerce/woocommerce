@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 
 const adminEmail =
-	process.env.USE_WP_ENV !== '1'
+	process.env.USE_WP_ENV !== 1
 		? 'wordpress@example.com'
 		: 'admin@woocommercecoree2etestsuite.com';
 
