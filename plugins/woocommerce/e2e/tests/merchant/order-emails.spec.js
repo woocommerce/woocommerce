@@ -9,7 +9,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	};
 
 	const adminEmail =
-		process.env.USE_WP_ENV !== 1
+		process.env.USE_WP_ENV === '1'
 			? 'wordpress@example.com'
 			: 'admin@woocommercecoree2etestsuite.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
