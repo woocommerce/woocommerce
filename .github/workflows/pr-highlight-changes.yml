@@ -17,7 +17,7 @@ jobs:
                   pnpm build:feature-config --filter=woocommerce
             - name: Run analyzer
               id: run
-              run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF" -o github
+              run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF"
             - name: Print results
               id: results
               run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"
