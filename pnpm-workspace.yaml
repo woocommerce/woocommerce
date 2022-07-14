@@ -6,4 +6,5 @@ packages:
     - 'tools/code-analyzer'
     - 'tools/create-extension'
     - 'tools/package-release'
+    - 'tools/cherry-pick'
     - 'tools/require-turbo'
