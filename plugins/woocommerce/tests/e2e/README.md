@@ -17,13 +17,13 @@ This package uses `Puppeteer` as test runner and `e2e-environment` to spin up a 
   - [Chromium Download](#chromium-download)
 - [Running tests](#running-tests)
   - [Prep work for running tests](#prep-work-for-running-tests)
-  - [How to run tests in headless mode](#how-to-run-tests-in-headless-mode)
+  - [How to run tests in headless mode](#how-to-run-tests-in-headless-mode) 
   - [How to run tests in non-headless mode](#how-to-run-tests-in-non-headless-mode)
   - [How to run tests in debug mode](#how-to-run-tests-in-debug-mode)
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
   - [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions)
-- [Guide for writing e2e tests](#guide-for-writing-e2e-tests)
+- [Guide for writing e2e tests](#guide-for-writing-e2e-tests) 
   - [Tools for writing tests](#tools-for-writing-tests)
   - [Creating test structure](#creating-test-structure)
   - [Writing the test](#writing-the-test)
@@ -39,11 +39,11 @@ Follow [instructions on pnpm.io site](https://pnpm.io/installation) to install p
 
 ### Install Node.js
 
-Follow [instructions on the node.js site](https://nodejs.org/en/download/) to install Node.js.
+Follow [instructions on the node.js site](https://nodejs.org/en/download/) to install Node.js. 
 
 ### Install NVM
 
-Follow instructions in the [NVM repository](https://github.com/nvm-sh/nvm) to install NVM.
+Follow instructions in the [NVM repository](https://github.com/nvm-sh/nvm) to install NVM. 
 
 ### Install Docker
 
@@ -58,7 +58,7 @@ Note, that if you install docker through other methods such as homebrew, for exa
 
 ## Configuration
 
-This section explains how e2e tests are working behind the scenes. These are not instructions on how to build environment for running e2e tests and run them. If you are looking for instructions on how to run e2e tests, jump to [Running tests](#running-tests).
+This section explains how e2e tests are working behind the scenes. These are not instructions on how to build environment for running e2e tests and run them. If you are looking for instructions on how to run e2e tests, jump to [Running tests](#running-tests). 
 
 ### Test Environment
 
@@ -114,7 +114,7 @@ Run the following in a terminal/command line window
 
 - `cd` to the WooCommerce monorepo folder
 
-- `git checkout trunk` (or the branch where you need to run tests)
+- `git checkout trunk` (or the branch where you need to run tests) 
 
 - `nvm use`
 
@@ -135,13 +135,13 @@ c380e1964506        env_wordpress-cli   "entrypoint.sh"          7 seconds ago  
 4c1e3f2a49db        mariadb:10.5.5      "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds        3306/tcp               woocommerce_e2e_db
 ```
 
-Note that by default, Docker will download the latest images available for WordPress, PHP and MariaDB. In the example above, you can see that WordPress 5.5.1 and MariaDB 10.5.5 were used.
+Note that by default, Docker will download the latest images available for WordPress, PHP and MariaDB. In the example above, you can see that WordPress 5.5.1 and MariaDB 10.5.5 were used. 
 
-See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.
+See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.  
 
 - Navigate to `http://localhost:8086/`
 
-If everything went well, you should be able to access the site. If you changed the port to something other than `8086` as per [Test Variables](#test-variables) section, use the appropriate port to access your site.
+If everything went well, you should be able to access the site. If you changed the port to something other than `8086` as per [Test Variables](#test-variables) section, use the appropriate port to access your site. 
 
 As noted in [Test Variables](#test-variables) section, use the following Admin user details to login:
 
@@ -178,7 +178,7 @@ By default, SlowMo mode adds a 50 millisecond delay between test steps. If you'd
 PUPPETEER_SLOWMO=10 pnpm -- turbo run e2e:dev --filter=woocommerce
 ```
 
-The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be.
+The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
 
 For example:
 
@@ -197,7 +197,7 @@ E2E_RETRY_TIMES=2 pnpm exec wc-e2e test:e2e
 ### How to run tests in debug mode
 
 Tests run in headless mode by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
-
+            
 ```bash
 pnpm -- turbo run e2e:debug --filter=woocommerce
 ```
@@ -215,7 +215,7 @@ pnpm -- wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
 
 ### How to skip tests
 
-To skip the tests, use `.only` in the relevant test entry to specify the tests that you do want to run.
+To skip the tests, use `.only` in the relevant test entry to specify the tests that you do want to run. 
 
 For example, in order to skip Setup Wizard tests, add `.only` to the login and activation tests as follows in the `setup-wizard.test.js`:
 
@@ -265,7 +265,7 @@ The following variables can be used to specify the versions of WordPress, PHP an
 
 - `WP_VERSION`
 - `TRAVIS_PHP_VERSION`
-- `TRAVIS_MARIADB_VERSION`
+- `TRAVIS_MARIADB_VERSION`  
 
 The full command to build the site will look as follows:
 
@@ -297,16 +297,16 @@ It is a good practice to start working on the test by identifying what needs to 
 - Merchant can create virtual product
   - Merchant can log in
   - Merchant can create virtual product
-  - Merchant can verify that virtual product was created
-
-Once you identify the structure of the test, you can move on to writing it.
+  - Merchant can verify that virtual product was created   
+  
+Once you identify the structure of the test, you can move on to writing it. 
 
 ### Writing the test
 
 The structure of the test serves as a skeleton for the test itself. You can turn it into a test by using `describe()` and `it()` methods of Jest:
 
 - [`describe()`](https://jestjs.io/docs/en/api#describename-fn) - creates a block that groups together several related tests;
-- [`it()`](https://jestjs.io/docs/en/api#testname-fn-timeout) - actual method that runs the test.
+- [`it()`](https://jestjs.io/docs/en/api#testname-fn-timeout) - actual method that runs the test. 
 
 Based on our example, the test skeleton would look as follows:
 
@@ -336,7 +336,7 @@ it( 'merchant can log in', async () => {
 
 Moving to the next section where we need to actually create a product. You will find that we have a reusable function such as `createSimpleProduct()` in the `components.js` of `@woocommerce/e2e-utils` package. However, note that this function should not be used for testing creating a product because the simple product is created using WooCommerce REST API. This is not how the merchant would typically create a virtual product, we would need to test it by writing actual steps for creating a product in the test.
 
-`createSimpleProduct()` should be used in tests where you need to test something else than creating a simple product. In other words, this function exists in order to quickly fill the site with test data required for running tests. For example, if you want to write a test that will verify that shopper can place a product to the cart on the site, you can use `createSimpleProduct()` to create a product to test the cart.
+`createSimpleProduct()` should be used in tests where you need to test something else than creating a simple product. In other words, this function exists in order to quickly fill the site with test data required for running tests. For example, if you want to write a test that will verify that shopper can place a product to the cart on the site, you can use `createSimpleProduct()` to create a product to test the cart. 
 
 Because `createSimpleProduct()` can't be used in the case of our example test, we'd need to navigate to the page where the user would usually create a product. To do that, there is `openNewProduct()` function of the `merchant` object that we already used above. As a result, that part of the test will look as follows:
 
@@ -346,7 +346,7 @@ it( 'merchant can create virtual product', async () => {
 	} );
 ```
 
-You would then continue writing the test using utilities where possible.
+You would then continue writing the test using utilities where possible. 
 
 Make sure to utilize the functions of the `@automattic/puppeteer-utils` package where possible. For example, if you need to wait for a certain element to be ready to be clicked on and then click on it, you can use `waitAndClick()` function:
 
@@ -368,7 +368,7 @@ FAIL ../specs/front-end/front-end-my-account.test.js (9.219s)
     ✓ allows customer to see account details (1066ms)
 ```
 
-In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it.
+In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it. 
 
 ### Writing tests for WooCommerce extensions
 
