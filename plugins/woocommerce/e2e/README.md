@@ -36,7 +36,10 @@ End-to-end tests are powered by Playwright. The test site is spinned up using `w
 - `pnpm -- turbo run build --filter=woocommerce`
 - `pnpm env:test --filter=woocommerce`
 
-(Optionally, if you want to use the deprecated `e2e-environment`, run the last command as: `pnpm docker:up --filter=woocommerce`)
+To run the test again, re-create the environment to start with a fresh state:
+
+- `pnpm env:destroy --filter=woocommerce`
+- `pnpm env:test --filter=woocommerce`
 
 Running tests afterwards:
 
