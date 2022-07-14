@@ -88,7 +88,13 @@ class Edit {
 	 * Hooks meta box for order specific meta.
 	 */
 	private function add_order_specific_meta_box() {
-		add_meta_box( 'postcustom', __( 'Custom Fields', 'woocommerce' ), array( $this, 'render_custom_meta_box' ), $this->screen_id, 'normal' );
+		add_meta_box(
+			'postcustom',
+			__( 'Custom Fields', 'woocommerce' ),
+			array( $this, 'render_custom_meta_box' ),
+			$this->screen_id,
+			'normal'
+		);
 	}
 
 	/**
@@ -117,6 +123,10 @@ class Edit {
 	 * @param string $message Message to display, if any.
 	 */
 	private function render_wrapper_start( $notice = '', $message = '' ) {
+		$edit_page_url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . $this->order->get_id() );
+		$nonce_action  = 'update-order_' . $this->order->get_id();
+		$form_action   = 'editorder';
+		$referer       = wp_get_referer();
 		?>
 		<div class="wrap">
 		<h1 class="wp-heading-inline">
@@ -127,16 +137,39 @@ class Edit {
 		?>
 		<hr class="wp-header-end">
 
-		<div id="poststuff">
-		<div id="post-body" class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">
-
-		<?php if ( $notice ) : ?>
-			<div id="notice" class="notice notice-warning"><p id="has-newer-autosave"><?php echo wp_kses_post( $notice ); ?></p></div>
+		<?php
+		if ( $notice ) :
+			?>
+			<div id="notice" class="notice notice-warning"><p
+					id="has-newer-autosave"><?php echo wp_kses_post( $notice ); ?></p></div>
 		<?php endif; ?>
 		<?php if ( $message ) : ?>
-			<div id="message" class="updated notice notice-success is-dismissible"><p><?php echo wp_kses_post( $message ); ?></p></div>
+			<div id="message" class="updated notice notice-success is-dismissible">
+				<p><?php echo wp_kses_post( $message ); ?></p></div>
 			<?php
-		endif;
+			endif;
+		?>
+
+		<form name="order" action="<?php echo esc_url( $edit_page_url ); ?>" method="post" id="order"
+		<?php
+		/**
+		 * Fires inside the order edit form tag.
+		 *
+		 * @param \WC_Order $order Order object.
+		 *
+		 * @since 6.9.0
+		 */
+		do_action( 'order_edit_form_tag', $this->order );
+		?>
+		>
+		<?php wp_nonce_field( $nonce_action ); ?>
+		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
+		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
+		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
+		<div id="poststuff">
+		<div id="post-body"
+		class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">
+		<?php
 	}
 
 	/**
@@ -148,9 +181,12 @@ class Edit {
 			<?php do_meta_boxes( $this->screen_id, 'side', $this->order ); ?>
 		</div>
 		<div id="postbox-container-2" class="postbox-container">
+			<?php
+			do_meta_boxes( $this->screen_id, 'normal', $this->order );
+			do_meta_boxes( $this->screen_id, 'advanced', $this->order );
+			?>
+		</div>
 		<?php
-		do_meta_boxes( $this->screen_id, 'normal', $this->order );
-		do_meta_boxes( $this->screen_id, 'advanced', $this->order );
 	}
 
 	/**
@@ -158,7 +194,10 @@ class Edit {
 	 */
 	private function render_wrapper_end() {
 		?>
-		</div></div> </div></div>
+		</div> <!-- /post-body -->
+		</div> <!-- /poststuff  -->
+		</form>
+		</div> <!-- /wrap -->
 		<?php
 	}
 }
