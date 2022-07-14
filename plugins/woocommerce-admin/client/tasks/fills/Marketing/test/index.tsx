@@ -117,10 +117,11 @@ describe( 'getMarketingExtensionLists', () => {
 			[],
 			[]
 		);
+		const listKeys = lists.map( ( list ) => list.key );
 
 		expect( lists.length ).toBe( 2 );
-		expect( lists[ 0 ].key ).toBe( 'task-list/reach' );
-		expect( lists[ 1 ].key ).toBe( 'task-list/grow' );
+		expect( listKeys ).toContain( 'task-list/reach' );
+		expect( listKeys ).toContain( 'task-list/grow' );
 	} );
 
 	test( 'should separate installed plugins', () => {
