@@ -1,4 +1,10 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it, expect } from '@jest/globals';
+import { verifyValueOfInputField } from '@woocommerce/e2e-utils';
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { OnboardingWizard } from '../../pages/OnboardingWizard';
@@ -8,19 +14,6 @@ import { Login } from '../../pages/Login';
 import { WcSettings } from '../../pages/WcSettings';
 import { ProductsSetup } from '../../pages/ProductsSetup';
 import { resetWooCommerceState } from '../../fixtures/reset';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	afterAll,
-	beforeAll,
-	describe,
-	it,
-	expect,
-} = require( '@jest/globals' );
-const config = require( 'config' );
-
-const { verifyValueOfInputField } = require( '@woocommerce/e2e-utils' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 /**
  * This tests a default, happy path for the onboarding wizard.

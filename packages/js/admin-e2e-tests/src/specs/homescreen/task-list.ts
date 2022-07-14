@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { takeScreenshotFor } from '@woocommerce/e2e-environment';
 
 /**
@@ -13,10 +14,6 @@ import { TaskTitles } from '../../constants/taskTitles';
 import { HelpMenu } from '../../elements/HelpMenu';
 import { WcSettings } from '../../pages/WcSettings';
 import { resetWooCommerceState, unhideTaskList } from '../../fixtures';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export const testAdminHomescreenTasklist = () => {
 	describe( 'Homescreen task list', () => {

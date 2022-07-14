@@ -1,12 +1,12 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+/**
  * Internal dependencies
  */
 import { Coupons } from '../../pages/Coupons';
 import { Login } from '../../pages/Login';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export const testAdminCouponsPage = () => {
 	describe( 'Coupons page', () => {

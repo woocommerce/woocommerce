@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { takeScreenshotFor } from '@woocommerce/e2e-environment';
 
 /**
@@ -13,10 +14,6 @@ import { WcHomescreen } from '../../pages/WcHomescreen';
 import { BankAccountTransferSetup } from '../../sections/payment-setup/BankAccountTransferSetup';
 import { waitForTimeout } from '../../utils/actions';
 import { WcSettings } from '../../pages/WcSettings';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export const testAdminPaymentSetupTask = () => {
 	describe( 'Payment setup task', () => {

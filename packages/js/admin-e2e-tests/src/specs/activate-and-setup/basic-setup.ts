@@ -1,23 +1,17 @@
 /**
+ * External dependencies
+ */
+import {
+	clearAndFillInput,
+	verifyValueOfInputField,
+} from '@woocommerce/e2e-utils';
+import { afterAll, beforeAll, describe, it, expect } from '@jest/globals';
+/**
  * Internal dependencies
  */
 import { WcSettings } from '../../pages/WcSettings';
 import { WpSettings } from '../../pages/WpSettings';
 import { Login } from '../../pages/Login';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	clearAndFillInput,
-	verifyValueOfInputField,
-} = require( '@woocommerce/e2e-utils' );
-const {
-	afterAll,
-	beforeAll,
-	describe,
-	it,
-	expect,
-} = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export const testAdminBasicSetup = () => {
 	describe( 'Store owner can finish initial store setup', () => {

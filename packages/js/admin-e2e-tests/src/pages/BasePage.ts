@@ -4,6 +4,10 @@
 import { ElementHandle, Page } from 'puppeteer';
 
 /**
+ * External dependencies
+ */
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { DropdownField } from '../elements/DropdownField';
@@ -11,9 +15,6 @@ import { DropdownTypeaheadField } from '../elements/DropdownTypeaheadField';
 import { FormToggle } from '../elements/FormToggle';
 import { getElementByText, waitForTimeout } from '../utils/actions';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const config = require( 'config' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 const baseUrl = config.get( 'url' );
 
 // Represents a page that can be navigated to

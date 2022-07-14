@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { createSimpleProduct, withRestApi } from '@woocommerce/e2e-utils';
 
 /**
@@ -19,10 +20,6 @@ import {
 } from '../../fixtures';
 import { OrdersActivityPanel } from '../../elements/OrdersActivityPanel';
 import { addReviewToProduct, waitForElementByText } from '../../utils/actions';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 const simpleProductName = 'Simple order';
 export const testAdminHomescreenActivityPanel = () => {

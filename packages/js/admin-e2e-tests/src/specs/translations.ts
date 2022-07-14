@@ -1,4 +1,8 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it } from '@woocommerce/e2e-utils';
+/**
  * Internal dependencies
  */
 import { Login } from '../pages/Login';
@@ -6,10 +10,6 @@ import { OnboardingWizard } from '../pages/OnboardingWizard';
 import { WcHomescreen } from '../pages/WcHomescreen';
 import { Analytics } from '../pages/Analytics';
 import { switchLanguage } from '../fixtures';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export const testAdminTranslations = () => {
 	describe( 'Test client, package, and PHP class translations,', () => {

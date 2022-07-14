@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { expect } from '@jest/globals';
+import config from 'config';
 import { Page } from 'puppeteer';
 
 /**
@@ -15,10 +17,6 @@ import {
 } from '../sections/onboarding/StoreDetailsSection';
 import { ThemeSection } from '../sections/onboarding/ThemeSection';
 import { BasePage } from './BasePage';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { expect } = require( '@jest/globals' );
-const config = require( 'config' );
 
 export class OnboardingWizard extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
