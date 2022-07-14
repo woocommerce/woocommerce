@@ -1,3 +1,0 @@
-Significance: patch
-Type: update
-Comment: Add phpcs-changed to CI to only sniff changed lines of code.
