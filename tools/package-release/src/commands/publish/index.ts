@@ -11,6 +11,7 @@ import {
 	getAllPackges,
 	validatePackage,
 	getFilepathFromPackageName,
+	isValidUpdate,
 } from '../../validate';
 import { MONOREPO_ROOT } from '../../const';
 
@@ -79,6 +80,13 @@ export default class PackageRelease extends Command {
 				stdio: 'inherit',
 			} );
 
+			// Sometimes the pnpm lock file is out of sync, this shouldn't prevent a release.
+			execSync( 'git checkout pnpm-lock.yaml', {
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+				stdio: 'inherit',
+			} );
+
 			CliUx.ux.action.stop();
 		}
 
@@ -107,28 +115,32 @@ export default class PackageRelease extends Command {
 		{ 'dry-run': dryRun, branch }: { 'dry-run': boolean; branch: string }
 	) {
 		packages.forEach( ( name ) => {
-			const verb = dryRun ? 'Performing dry run of' : 'Publishing';
-			CliUx.ux.action.start( `${ verb } ${ name }` );
-
 			try {
-				const cwd = getFilepathFromPackageName( name );
-				return execSync(
-					`SKIP_TURBO=true pnpm publish ${
-						dryRun ? '--dry-run' : ''
-					} --publish-branch=${ branch }`,
-					{
-						cwd,
-						encoding: 'utf-8',
-						stdio: 'inherit',
-					}
-				);
+				const verb = dryRun ? 'Performing dry run of' : 'Publishing';
+				CliUx.ux.action.start( `${ verb } ${ name }` );
+				if ( isValidUpdate( name ) ) {
+					const cwd = getFilepathFromPackageName( name );
+					execSync(
+						`SKIP_TURBO=true pnpm publish ${
+							dryRun ? '--dry-run' : ''
+						} --publish-branch=${ branch }`,
+						{
+							cwd,
+							encoding: 'utf-8',
+							stdio: 'inherit',
+						}
+					);
+					CliUx.ux.action.stop( `${ name } successfully published.` );
+				} else {
+					CliUx.ux.action.stop(
+						`${ name } does not have anything to update.`
+					);
+				}
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
 				}
 			}
-
-			CliUx.ux.action.stop();
 		} );
 	}
 }
