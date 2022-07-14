@@ -8,7 +8,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
-  E2E_PLAYWRIGHT: ${{ true }}
+    E2E_PLAYWRIGHT: true
 
 jobs:
     e2e-tests-run:
@@ -33,8 +33,8 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
 
-            - name: Run tests command.
-              if: env.E2E_PLAYWRIGHT != 'true'
+            - name: Run Puppeteer E2E tests.
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               id: run-puppeteer-e2e-tests
               working-directory: plugins/woocommerce
               env:
@@ -46,7 +46,7 @@ jobs:
             - name: Archive Puppeteer E2E test results
               if: |
                   always() &&
-                  env.E2E_PLAYWRIGHT != 'true' &&
+                  fromJSON(env.E2E_PLAYWRIGHT) != true &&
                   (
                     steps.run-puppeteer-e2e-tests.conclusion != 'cancelled' ||
                     steps.run-puppeteer-e2e-tests.conclusion != 'skipped' 
@@ -59,21 +59,21 @@ jobs:
                   retention-days: 5
 
             - name: Download and install Chromium browser.
-              if: env.E2E_PLAYWRIGHT == 'true'
+              if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               run: pnpx playwright install chromium
 
-            - name: Run (Playwright) tests command.
+            - name: Run Playwright E2E tests.
               id: run_playwright_e2e_tests
-              if: env.E2E_PLAYWRIGHT == 'true'
+              if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               run: pnpx playwright test --config=e2e/playwright.config.js
 
-            - name: Generate (Playwright) E2E Test report.
+            - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
               if: |
                   always() && 
-                  ( env.E2E_PLAYWRIGHT == 'true' ) &&
+                  fromJSON(env.E2E_PLAYWRIGHT) &&
                   (
                     steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
                     steps.run_playwright_e2e_tests.conclusion != 'skipped' 
@@ -81,10 +81,10 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx allure generate --clean e2e/allure-results --output e2e/allure-report
 
-            - name: Archive (Playwright) E2E test report
+            - name: Archive Playwright E2E test report
               if: |
                   always() &&
-                  env.E2E_PLAYWRIGHT == 'true' &&
+                  fromJSON(env.E2E_PLAYWRIGHT) &&
                   steps.generate_e2e_report.conclusion == 'success'
               uses: actions/upload-artifact@v3
               with:
@@ -95,9 +95,13 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-            - name: Archive E2E test screenshots
+            - name: Archive Puppeteer E2E test screenshots
               uses: actions/upload-artifact@v3
-              if: always()
+              if: |
+                  always() &&
+                  (
+                    fromJSON(env.E2E_PLAYWRIGHT) != true
+                  )
               with:
                   name: E2E Screenshots
                   path: plugins/woocommerce/tests/e2e/screenshots
@@ -211,14 +215,14 @@ jobs:
                   path: artifacts/api
 
             - name: Download Playwright E2E test report artifact
-              if: env.E2E_PLAYWRIGHT == 'true'
+              if: fromJSON(env.E2E_PLAYWRIGHT)
               uses: actions/download-artifact@v3
               with:
                   name: e2e-test-report---pr-${{ github.event.number }}
                   path: artifacts/e2e
 
             - name: Download Puppeteer E2E test report artifact
-              if: env.E2E_PLAYWRIGHT != 'true'
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               uses: actions/download-artifact@v3
               with:
                   name: pptr-e2e-test-results
@@ -272,7 +276,7 @@ jobs:
             COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         steps:
             - name: Publish API test report
-              if: env.E2E_PLAYWRIGHT != 'true'
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               env:
                   ARTIFACT_NAME: api-test-report---pr-${{ github.event.number }}
               run: |
@@ -285,17 +289,17 @@ jobs:
                     -f commit_sha=$COMMIT_SHA \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Publish API and (Playwright) E2E test reports
-              if: env.E2E_PLAYWRIGHT == 'true'
+            - name: Publish test reports
+              if: fromJSON(env.E2E_PLAYWRIGHT)
               env:
                   API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
                   E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
               run: |
-                  gh workflow run publish-reports.yml \
-                    -f test_workflow=pr \
+                  gh workflow run publish-test-reports-pr.yml \
                     -f run_id=$RUN_ID \
                     -f api_artifact=$API_ARTIFACT \
                     -f e2e_artifact=$E2E_ARTIFACT \
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
+                    -f s3_root=public \
                     --repo woocommerce/woocommerce-test-reports
