@@ -4,6 +4,7 @@ const fs = require( 'fs' );
 module.exports = async ( config ) => {
 	const { stateDir } = config.projects[ 0 ].use;
 	const { baseURL } = config.projects[ 0 ].use;
+	// used throughout tests for authentication
 	process.env.ADMINSTATE = `${ stateDir }adminState.json`;
 	process.env.CUSTOMERSTATE = `${ stateDir }customerState.json`;
 
