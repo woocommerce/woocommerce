@@ -85,11 +85,7 @@ function checkoutBranch( branch, newBranch = false ) {
 	let output = [];
 
 	return new Promise( ( resolve, reject ) => {
-		let response = spawn( 'git', [ 'checkout', branch ] );
-
-		if ( newBranch ) {
-			response = spawn( 'git', [ 'checkout', '-b', branch ] );
-		}
+		const response = newBranch ? spawn( 'git', [ 'checkout', '-b', branch ] ) : spawn( 'git', [ 'checkout', branch ] );
 
 		response.stdout.on( 'data', ( data ) => {
 			output.push( `${data}` );
