@@ -67,9 +67,6 @@ jobs:
       - name: "Create a new branch for the changelog update PR"
         run: git checkout -b ${{ format( 'update/{0}-changelog', steps.freeze.outputs.release_version ) }}
 
-      - name: "Normalize line-endings in changelog files"
-        run: for file in plugins/woocommerce/changelog/*; do echo "$(tr -d '\r' < $file)" > $file; done
-
       - name: "Generate the changelog file"
         run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ steps.freeze.outputs.release_version }}
         
