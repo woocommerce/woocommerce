@@ -82,6 +82,8 @@ function checkoutBranch( branch, newBranch = false ) {
 		color: 'green'
 	} );
 
+	let output = [];
+
 	return new Promise( ( resolve, reject ) => {
 		let response = spawn( 'git', [ 'checkout', branch ] );
 
@@ -89,13 +91,21 @@ function checkoutBranch( branch, newBranch = false ) {
 			response = spawn( 'git', [ 'checkout', '-b', branch ] );
 		}
 
+		response.stdout.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
+		response.stderr.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
 		response.on( 'close', ( code ) => {
 			if ( `${code}` == 0 ) {
 				spinner.succeed( `Switched to '${branch}'` );
 				resolve();
 			}
 
-			reject( `error: ${code}` );
+			reject( `error: ${output.toString().replace( ',', "\n" )}` );
 		} );
 	} ).catch( err => {
 		spinner.fail( 'Failed to switch branch' );
@@ -138,6 +148,8 @@ function cloneWoo() {
 
 	spinner.start();
 
+	let output = [];
+
 	return new Promise( ( resolve, reject ) => {
 		let url = 'https://github.com/woocommerce/woocommerce.git';
 
@@ -147,13 +159,21 @@ function cloneWoo() {
 
 		const response = spawn( 'git', [ 'clone', url ] );
 
+		response.stdout.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
+		response.stderr.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
 		response.on( 'close', ( code ) => {
 			if ( `${code}` == 0 ) {
 				spinner.succeed();
 				resolve();
 			}
 
-			reject( `error: ${code}` );
+			reject( `error: ${output.toString().replace( ',', "\n" )}` );
 		} );
 	} ).catch( err => {
 		spinner.fail( 'Fail to clone WooCommerce!' );
@@ -338,12 +358,17 @@ function deleteChangelogFiles() {
 
 	const files = changelogsToBeDeleted.join( ' ' );
 	const filesFormatted = "\n" + files.replace( ' ', "\n" );
+	let output = [];
 
 	return new Promise( ( resolve, reject ) => {
 		const response = spawn( 'git', [ 'rm', files ], { shell: true } );
 
+		response.stdout.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
 		response.stderr.on( 'data', ( data ) => {
-			reject( `stderr: ${data}` );
+			output.push( `${data}` );
 		} );
 
 		response.on( 'close', ( code ) => {
@@ -352,7 +377,7 @@ function deleteChangelogFiles() {
 				resolve();
 			}
 
-			reject( `error: ${code}` );
+			reject( `error: ${output.toString().replace( ',', "\n" )}` );
 		} );
 	} ).catch( err => {
 		spinner.fail( 'Fail to delete changelog files' );
@@ -371,11 +396,17 @@ function commitChanges( msg ) {
 		color: 'green'
 	} );
 
+	let output = [];
+
 	return new Promise( ( resolve, reject ) => {
 		const response = spawn( 'git', [ 'commit', '--no-verify', '-am', msg ] );
 
+		response.stdout.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
 		response.stderr.on( 'data', ( data ) => {
-			reject( `stderr: ${data}` );
+			output.push( `${data}` );
 		} );
 
 		response.on( 'close', ( code ) => {
@@ -384,7 +415,7 @@ function commitChanges( msg ) {
 				resolve();
 			}
 
-			reject( `error: ${code}` );
+			reject( `error: ${output.toString().replace( ',', "\n" )}` );
 		} );
 	} ).catch( err => {
 		spinner.fail( 'Fail to commit changes.' );
@@ -405,8 +436,18 @@ function pushBranch( branch ) {
 
 	spinner.start( `Pushing ${branch} to GitHub...` );
 
+	let output = [];
+
 	return new Promise( ( resolve, reject ) => {
 		const response = spawn( 'git', [ 'push', 'origin', branch ] );
+
+		response.stdout.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
+
+		response.stderr.on( 'data', ( data ) => {
+			output.push( `${data}` );
+		} );
 
 		response.on( 'close', ( code ) => {
 			if ( `${code}` == 0 ) {
@@ -414,7 +455,7 @@ function pushBranch( branch ) {
 				resolve();
 			}
 
-			reject( `error: ${code}` );
+			reject( `error: ${output.toString().replace( ',', "\n" )}` );
 		} );
 	} ).catch( err => {
 		spinner.fail( `Fail to push ${branch} up.` );
