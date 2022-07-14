@@ -138,6 +138,7 @@ test.describe( 'Merchant can create virtual product', () => {
 
 	} );
 } );
+```
 
 ## Debugging tests
 
