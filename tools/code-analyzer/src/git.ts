@@ -5,7 +5,7 @@ import { CliUx } from '@oclif/core';
 import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { readFileSync, rmSync } from 'fs';
+import { mkdirSync, readFileSync, rmSync } from 'fs';
 import { simpleGit } from 'simple-git';
 import { v4 } from 'uuid';
 
@@ -13,19 +13,41 @@ import { v4 } from 'uuid';
  * Internal dependencies
  */
 import { startWPEnv, stopWPEnv, isValidCommitHash } from './utils';
+
+/**
+ * Check if a string is a valid url.
+ *
+ * @param {string} maybeURL - the URL string to check
+ * @return {boolean} whether the string is a valid URL or not.
+ */
+const isUrl = ( maybeURL: string ) => {
+	try {
+		new URL( maybeURL );
+		return true;
+	} catch ( e ) {
+		return false;
+	}
+};
+
 /**
  * Clone a git repository.
  *
- * @param {string} repoPath- the path (either URL or file path) to the repo to clone.
- * @param          repoPath
+ * @param {string} repoPath - the path (either URL or file path) to the repo to clone.
  * @return {string} the path to the cloned repo.
  */
 export const cloneRepo = async ( repoPath: string ) => {
-	const tempFolderName = v4();
-	const git = simpleGit( { baseDir: tmpdir() } );
-	await git.clone( repoPath, tempFolderName );
+	const folderPath = join( tmpdir(), 'code-analyzer-tmp', v4() );
+	mkdirSync( folderPath, { recursive: true } );
 
-	return join( tmpdir(), tempFolderName );
+	const git = simpleGit( { baseDir: folderPath } );
+	await git.clone( repoPath, folderPath );
+
+	// If this is a local clone then the simplest way to maintain remote settings is to copy git config across
+	if ( ! isUrl( repoPath ) ) {
+		execSync( `cp ${ repoPath }/.git/config ${ folderPath }/.git/config` );
+	}
+
+	return folderPath;
 };
 
 /**
@@ -64,7 +86,7 @@ export const getCommitHash = async ( baseDir: string, ref: string ) => {
 
 	// check if its in history, if its not an error will be thrown
 	try {
-		simpleGit( { baseDir } ).show( ref );
+		await simpleGit( { baseDir } ).show( ref );
 	} catch ( e ) {
 		throw new Error(
 			`${ ref } is not a valid commit hash or branch name that exists in git history`
@@ -96,19 +118,18 @@ export const generateDiff = async (
 ) => {
 	try {
 		const tmpRepoPath = await cloneRepo( repoPath );
+		const git = simpleGit( { baseDir: tmpRepoPath } );
+		await git.pull();
 
-		await simpleGit( { baseDir: tmpRepoPath } ).pull();
+		const validBranches = [ hashA, hashB ].filter(
+			( hash ) => ! refIsHash( hash )
+		);
 
 		// checking out any branches will automatically track remote branches.
-		await Promise.all(
-			[ hashA, hashB ]
-				.filter( ( hash ) => ! refIsHash( hash ) )
-				.map( ( branch ) => {
-					return simpleGit( { baseDir: tmpRepoPath } ).checkout( [
-						branch,
-					] );
-				} )
-		);
+		for ( const validBranch of validBranches ) {
+			// Note you can't do checkouts in parallel otherwise the git binary will crash
+			await git.checkout( [ validBranch ] );
+		}
 
 		// turn both hashes into commit hashes if they are not already.
 		const commitHashA = await getCommitHash( tmpRepoPath, hashA );
