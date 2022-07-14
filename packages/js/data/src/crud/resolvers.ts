@@ -41,9 +41,9 @@ export const createResolvers = ( {
 		}
 	};
 
-	const getItems = function* ( query: Partial< ItemQuery > ) {
+	const getItems = function* ( query?: Partial< ItemQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
-		const resourceQuery = { ...query };
+		const resourceQuery = query ? { ...query } : {};
 
 		if (
 			resourceQuery &&
