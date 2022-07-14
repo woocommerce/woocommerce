@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the command `wc com extension list` to retrieve and display the extension list for the connected site.

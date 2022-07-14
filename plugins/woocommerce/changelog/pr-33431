@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Correct generation of variation name when attribute is 0.
