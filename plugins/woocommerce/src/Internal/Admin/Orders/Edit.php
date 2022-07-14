@@ -51,6 +51,28 @@ class Edit {
 	}
 
 	/**
+	 * Hooks metabox save functions for order edit page.
+	 *
+	 * @return void
+	 */
+	public static function add_save_meta_boxes() {
+		/**
+		 * Save Order Meta Boxes.
+		 *
+		 * In order:
+		 *      Save the order items.
+		 *      Save the order totals.
+		 *      Save the order downloads.
+		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
+		 *      Save actions - sends out other emails. Last to show latest data.
+		 */
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
+	}
+
+	/**
 	 * Enqueue necessary scripts for order edit page.
 	 */
 	private function enqueue_scripts() {
@@ -70,6 +92,8 @@ class Edit {
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
+		$this->add_save_meta_boxes();
+		$this->handle_order_update();
 		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
 		$this->add_order_specific_meta_box();
 
@@ -124,8 +148,7 @@ class Edit {
 	 */
 	private function render_wrapper_start( $notice = '', $message = '' ) {
 		$edit_page_url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . $this->order->get_id() );
-		$nonce_action  = 'update-order_' . $this->order->get_id();
-		$form_action   = 'editorder';
+		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
 		?>
 		<div class="wrap">
@@ -162,7 +185,7 @@ class Edit {
 		do_action( 'order_edit_form_tag', $this->order );
 		?>
 		>
-		<?php wp_nonce_field( $nonce_action ); ?>
+		<?php wp_nonce_field( $this->get_order_edit_nonce_action() ); ?>
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
@@ -199,5 +222,46 @@ class Edit {
 		</form>
 		</div> <!-- /wrap -->
 		<?php
+	}
+
+	/**
+	 * Takes care of updating order data. Fires action that metaboxes can hook to for order data updating.
+	 *
+	 * @return void
+	 */
+	public function handle_order_update() {
+		global $theorder;
+		if ( ! isset( $this->order ) ) {
+			return;
+		}
+
+		if ( 'edit_order' !== sanitize_text_field( wp_unslash( $_POST['action'] ?? '' ) ) ) {
+			return;
+		}
+
+		check_admin_referer( $this->get_order_edit_nonce_action() );
+
+		/**
+		 * Save meta for shop order.
+		 *
+		 * @param int Order ID.
+		 * @param \WC_Order Post object.
+		 *
+		 * @since 2.1.0
+		 */
+		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
+
+		// Refresh the order from DB.
+		$this->order = wc_get_order( $this->order->get_id() );
+		$theorder    = $this->order;
+	}
+
+	/**
+	 * Helper method to get the name of order edit nonce.
+	 *
+	 * @return string Nonce action name.
+	 */
+	private function get_order_edit_nonce_action() {
+		return 'update-order_' . $this->order->get_id();
 	}
 }
