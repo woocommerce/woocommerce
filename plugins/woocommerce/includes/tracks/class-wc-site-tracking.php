@@ -64,12 +64,17 @@ class WC_Site_Tracking {
 	 * Adds the tracking function to the admin footer.
 	 */
 	public static function add_tracking_function() {
+		$user           = wp_get_current_user();
+		$server_details = WC_Tracks::get_server_details();
+		$blog_details   = WC_Tracks::get_blog_details( $user->ID );
+
+		$client_tracking_properties = array_merge( $server_details, $blog_details );
 		/**
 		 * Add global tracks event properties.
 		 *
 		 * @since 6.5.0
 		 */
-		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', array(), false );
+		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $client_tracking_properties, false );
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
@@ -146,8 +151,6 @@ class WC_Site_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
-		add_filter( 'woocommerce_tracks_event_properties', array( __CLASS__, 'add_global_properties' ), 10, 2 );
-
 		// Define window.wcTracks.recordEvent in case it is enabled client-side.
 		self::register_scripts();
 		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
@@ -194,76 +197,5 @@ class WC_Site_Tracking {
 		}
 	}
 
-	/**
-	 * Get total product counts.
-	 *
-	 * @return int Number of products.
-	 */
-	public static function get_products_count() {
-		$product_counts = WC_Tracker::get_product_counts();
-		return $product_counts['total'];
-	}
 
-	/**
-	 * Gather blog related properties.
-	 *
-	 * @param int $user_id User id.
-	 * @return array Blog details.
-	 */
-	public static function get_blog_details( $user_id ) {
-		$blog_details = get_transient( 'wc_tracks_blog_details' );
-		if ( false === $blog_details ) {
-			$blog_details = array(
-				'url'            => home_url(),
-				'blog_lang'      => get_user_locale( $user_id ),
-				'blog_id'        => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
-				'products_count' => self::get_products_count(),
-				'wc_version'     => WC()->version,
-			);
-			set_transient( 'wc_tracks_blog_details', $blog_details, DAY_IN_SECONDS );
-		}
-		return $blog_details;
-	}
-
-	/**
-	 * Gather details from the request to the server.
-	 *
-	 * @return array Server details.
-	 */
-	public static function get_server_details() {
-		$data = array();
-
-		$data['_via_ua'] = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
-		$data['_via_ip'] = isset( $_SERVER['REMOTE_ADDR'] ) ? wc_clean( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$data['_lg']     = isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) : '';
-		$data['_dr']     = isset( $_SERVER['HTTP_REFERER'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
-
-		$uri         = isset( $_SERVER['REQUEST_URI'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-		$host        = isset( $_SERVER['HTTP_HOST'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
-		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) ? wc_clean( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri : '';
-
-		return $data;
-	}
-
-	/**
-	 * Add global properties to tracks.
-	 *
-	 * @param array $properties Array of event properties.
-	 * @param array $event_name Name of the event, if passed.
-	 * @return array
-	 */
-	public static function add_global_properties( $properties, $event_name = null ) {
-		$user = wp_get_current_user();
-		$data = $event_name
-			? array(
-				'_en' => $event_name,
-				'_ts' => WC_Tracks_Client::build_timestamp(),
-			)
-			: array();
-
-		$server_details = self::get_server_details();
-		$blog_details   = self::get_blog_details( $user->ID );
-
-		return array_merge( $data, $properties, $server_details, $blog_details );
-	}
 }

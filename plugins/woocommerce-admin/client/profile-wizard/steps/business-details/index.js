@@ -2,13 +2,17 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { useMemo } from '@wordpress/element';
 import { Spinner } from '@woocommerce/components';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { BusinessFeaturesList } from './flows/selective-bundle';
+import {
+	BusinessFeaturesList,
+	PERSIST_FREE_FEATURES_DATA_STORAGE_KEY,
+} from './flows/selective-bundle';
 import './style.scss';
 
 export const BusinessDetailsStep = ( props ) => {
@@ -26,6 +30,22 @@ export const BusinessDetailsStep = ( props ) => {
 		};
 	} );
 
+	const freeFeaturesTabValues = useMemo( () => {
+		try {
+			const values = JSON.parse(
+				window.localStorage.getItem(
+					PERSIST_FREE_FEATURES_DATA_STORAGE_KEY
+				)
+			);
+			if ( values ) {
+				return values;
+			}
+		} catch ( _e ) {
+			// Skip errors
+		}
+		return { install_extensions: true };
+	}, [] );
+
 	if ( isLoading ) {
 		return (
 			<div className="woocommerce-admin__business-details__spinner">
@@ -35,13 +55,16 @@ export const BusinessDetailsStep = ( props ) => {
 	}
 
 	const initialValues = {
-		number_employees: profileItems.number_employees || '',
-		other_platform: profileItems.other_platform || '',
-		other_platform_name: profileItems.other_platform_name || '',
-		product_count: profileItems.product_count || '',
-		selling_venues: profileItems.selling_venues || '',
-		revenue: profileItems.revenue || '',
-		setup_client: profileItems.setup_client || false,
+		businessDetailsTab: {
+			number_employees: profileItems.number_employees || '',
+			other_platform: profileItems.other_platform || '',
+			other_platform_name: profileItems.other_platform_name || '',
+			product_count: profileItems.product_count || '',
+			selling_venues: profileItems.selling_venues || '',
+			revenue: profileItems.revenue || '',
+			setup_client: profileItems.setup_client || false,
+		},
+		freeFeaturesTab: freeFeaturesTabValues,
 	};
 
 	return (

@@ -59,6 +59,9 @@ The default values are:
 
 If you want to customize these, check the [Test Variables](#test-variables) section.
 
+
+For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
+
 ### Test Variables
 
 The test environment uses the following test variables:

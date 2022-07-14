@@ -62,6 +62,37 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test can_view function of task when store only sells physical products.
+	 */
+	public function test_can_view_return_true_when_sell_only_physical_type() {
+		update_option(
+			OnboardingProfile::DATA_OPTION,
+			array(
+				'product_types' => array(
+					'physical',
+				),
+			)
+		);
+		$this->assertEquals( $this->task->can_view(), true );
+	}
+
+	/**
+	 * Test can_view function of task when store sells physical and digital products.
+	 */
+	public function test_can_view_return_true_when_sell_physical_and_digital_type() {
+		update_option(
+			OnboardingProfile::DATA_OPTION,
+			array(
+				'product_types' => array(
+					'physical',
+					'digital',
+				),
+			)
+		);
+		$this->assertEquals( $this->task->can_view(), true );
+	}
+
+	/**
 	 * Test can_view function of task when store only sells digital products.
 	 */
 	public function test_can_view_return_false_when_sell_only_digital_type() {

@@ -42,6 +42,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	public static function register_cache_clean() {
 		// Clear the theme cache if we switch themes or our theme is upgraded.
 		add_action( 'switch_theme', array( __CLASS__, 'clean_theme_cache' ) );
+		add_action( 'activate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
+		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action(
 			'upgrader_process_complete',
 			function( $upgrader, $extra ) {
@@ -52,6 +54,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				// Clear the cache if woocommerce is updated.
 				if ( 'plugin' === $extra['type'] ) {
 					\WC_REST_System_Status_V2_Controller::clean_theme_cache();
+					\WC_REST_System_Status_V2_Controller::clean_plugin_cache();
 					return;
 				}
 
@@ -942,23 +945,29 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_active_plugins() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$active_plugins_data = get_transient( 'wc_system_status_active_plugins' );
 
-		if ( ! function_exists( 'get_plugin_data' ) ) {
-			return array();
-		}
+		if ( false === $active_plugins_data ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$active_plugins = (array) get_option( 'active_plugins', array() );
-		if ( is_multisite() ) {
-			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-			$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-		}
+			if ( ! function_exists( 'get_plugin_data' ) ) {
+				return array();
+			}
 
-		$active_plugins_data = array();
+			$active_plugins = (array) get_option( 'active_plugins', array() );
+			if ( is_multisite() ) {
+				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+			}
 
-		foreach ( $active_plugins as $plugin ) {
-			$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-			$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
+			$active_plugins_data = array();
+
+			foreach ( $active_plugins as $plugin ) {
+				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
+			}
+
+			set_transient( 'wc_system_status_active_plugins', $active_plugins_data, HOUR_IN_SECONDS );
 		}
 
 		return $active_plugins_data;
@@ -970,27 +979,33 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_inactive_plugins() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$plugins_data = get_transient( 'wc_system_status_inactive_plugins' );
 
-		if ( ! function_exists( 'get_plugins' ) ) {
-			return array();
-		}
+		if ( false === $plugins_data ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$plugins        = get_plugins();
-		$active_plugins = (array) get_option( 'active_plugins', array() );
-
-		if ( is_multisite() ) {
-			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-			$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-		}
-
-		$plugins_data = array();
-
-		foreach ( $plugins as $plugin => $data ) {
-			if ( in_array( $plugin, $active_plugins, true ) ) {
-				continue;
+			if ( ! function_exists( 'get_plugins' ) ) {
+				return array();
 			}
-			$plugins_data[] = $this->format_plugin_data( $plugin, $data );
+
+			$plugins        = get_plugins();
+			$active_plugins = (array) get_option( 'active_plugins', array() );
+
+			if ( is_multisite() ) {
+				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+			}
+
+			$plugins_data = array();
+
+			foreach ( $plugins as $plugin => $data ) {
+				if ( in_array( $plugin, $active_plugins, true ) ) {
+					continue;
+				}
+				$plugins_data[] = $this->format_plugin_data( $plugin, $data );
+			}
+
+			set_transient( 'wc_system_status_inactive_plugins', $plugins_data, HOUR_IN_SECONDS );
 		}
 
 		return $plugins_data;
@@ -1042,29 +1057,36 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_dropins_mu_plugins() {
-		$dropins = get_dropins();
-		$plugins = array(
-			'dropins'    => array(),
-			'mu_plugins' => array(),
-		);
-		foreach ( $dropins as $key => $dropin ) {
-			$plugins['dropins'][] = array(
-				'plugin' => $key,
-				'name'   => $dropin['Name'],
+		$plugins = get_transient( 'wc_system_status_dropins_mu_plugins' );
+
+		if ( false === $plugins ) {
+			$dropins = get_dropins();
+			$plugins = array(
+				'dropins'    => array(),
+				'mu_plugins' => array(),
 			);
+			foreach ( $dropins as $key => $dropin ) {
+				$plugins['dropins'][] = array(
+					'plugin' => $key,
+					'name'   => $dropin['Name'],
+				);
+			}
+
+			$mu_plugins = get_mu_plugins();
+			foreach ( $mu_plugins as $plugin => $mu_plugin ) {
+				$plugins['mu_plugins'][] = array(
+					'plugin'      => $plugin,
+					'name'        => $mu_plugin['Name'],
+					'version'     => $mu_plugin['Version'],
+					'url'         => $mu_plugin['PluginURI'],
+					'author_name' => $mu_plugin['AuthorName'],
+					'author_url'  => esc_url_raw( $mu_plugin['AuthorURI'] ),
+				);
+			}
+
+			set_transient( 'wc_system_status_dropins_mu_plugins', $plugins, HOUR_IN_SECONDS );
 		}
 
-		$mu_plugins = get_mu_plugins();
-		foreach ( $mu_plugins as $plugin => $mu_plugin ) {
-			$plugins['mu_plugins'][] = array(
-				'plugin'      => $plugin,
-				'name'        => $mu_plugin['Name'],
-				'version'     => $mu_plugin['Version'],
-				'url'         => $mu_plugin['PluginURI'],
-				'author_name' => $mu_plugin['AuthorName'],
-				'author_url'  => esc_url_raw( $mu_plugin['AuthorURI'] ),
-			);
-		}
 		return $plugins;
 	}
 
@@ -1176,6 +1198,15 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public static function clean_theme_cache() {
 		delete_transient( 'wc_system_status_theme_info' );
+	}
+
+	/**
+	 * Clear the system status plugin caches
+	 */
+	public static function clean_plugin_cache() {
+		delete_transient( 'wc_system_status_active_plugins' );
+		delete_transient( 'wc_system_status_inactive_plugins' );
+		delete_transient( 'wc_system_status_dropins_mu_plugins' );
 	}
 
 	/**
