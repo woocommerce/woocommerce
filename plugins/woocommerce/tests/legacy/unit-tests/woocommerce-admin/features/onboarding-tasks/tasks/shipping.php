@@ -73,7 +73,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertEquals( $this->task->can_view(), false );
+		$this->assertEquals( $this->task->can_view(), true );
 	}
 
 	/**

@@ -174,15 +174,7 @@ class Shipping extends Task {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
-		return in_array( 'physical', $product_types, true ) ||
-			count(
-				wc_get_products(
-					array(
-						'virtual' => false,
-						'limit'   => 1,
-					)
-				)
-			) > 0;
+		return in_array( 'physical', $product_types, true );
 	}
 
 	/**
