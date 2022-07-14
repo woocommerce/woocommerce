@@ -57,7 +57,10 @@ This section explains how e2e tests are working behind the scenes. These are not
 
 ### Test Environment
 
-We recommend using Docker for running tests locally in order for the test environment to match the setup on GitHub CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
+Playwright tests can be executed in environments created by the `e2e-environment` or `wp-env` packages. Both packages use Docker for running tests locally in order for the test environment to match the setup on GitHub CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is mapped into the `plugins` folder of that newly built test site.
+
+
+For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
 
 ### Test Variables
 
@@ -79,7 +82,15 @@ The test environment uses the following test variables:
 }
 ```
 
-If you need to modify the port for your local test environment (eg. port is already in use) or use different playwright config, edit `tests/e2e/config/default.json` and `e2e/playwright.config.js`.
+If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
+
+**Modiify the port wp-env**
+
+Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/e2e/playwright.config.js).
+
+**Modiify port for e2e-environment**
+
+Edit [tests/e2e/config/default.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/config/default.json).
 
 ## Running tests
 
@@ -101,9 +112,21 @@ Run the following in a terminal/command line window
 
 - `pnpm -- turbo run build --filter=woocommerce`
 
-- `pnpm docker:up --filter=woocommerce` (this will build the test site using Docker)
+- `pnpm env:test --filter=woocommerce`( for `wp-env` ) or  `pnpm docker:up --filter=woocommerce`( for `e2e-environment` )
 
 - Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
+
+### WP-ENV containers
+
+```bash
+CONTAINER ID   IMAGE              COMMAND                  CREATED          STATUS          PORTS                     NAMES
+98b4d2355897   wordpress:php7.4   "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes   0.0.0.0:8888->80/tcp      8ad7f70fb764617b334080e46db4686a_wordpress_1
+63e79ea05eb2   mariadb            "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes   0.0.0.0:61888->3306/tcp   8ad7f70fb764617b334080e46db4686a_mysql_1
+dc2e7259907d   wordpress:php7.4   "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes   0.0.0.0:8889->80/tcp      8ad7f70fb764617b334080e46db4686a_tests-wordpress_1
+8211d54c5c62   mariadb            "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes   0.0.0.0:61839->3306/tcp   8ad7f70fb764617b334080e46db4686a_tests-mysql_1
+```
+
+### E2E-ENVIRONMENT containers
 
 ```bash
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
@@ -112,9 +135,9 @@ c380e1964506        env_wordpress-cli   "entrypoint.sh"          7 seconds ago  
 4c1e3f2a49db        mariadb:10.5.5      "docker-entrypoint.s…"   10 seconds ago      Up 8 seconds        3306/tcp               woocommerce_e2e_db
 ```
 
-Note that by default, Docker will download the latest images available for WordPress, PHP and MariaDB. In the example above, you can see that WordPress 5.5.1 and MariaDB 10.5.5 were used.
+Note that by default, both `wp-env` and `e2e-environment` will use PHP version 7.4 and latest versrions available for WordPress and MariaDB.
 
-See [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.  
+See [How to run tests using custom WordPress, PHP and MariaDB versions with e2e-environment](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions) if you'd like to use different versions.  
 
 - Navigate to `http://localhost:8086/`
 
@@ -126,12 +149,19 @@ As noted in [Test Variables](#test-variables) section, use the following Admin u
 Username: admin
 PW: password
 ```
+**Stopping WP-ENV**
+
+- `pnpm env:down --filter=woocommerce` when you are done with running e2e test
+
+Running `pnpm env:destroy --filter=woocommerce` before making any changes to test site configuration in `.wp-env.json` and then `pnpm env:test --filter=woocommerce` re-initializes the test container with your new configurations.
+
+**Stopping e2e-environment**
 
 - Run `pnpm docker:down --filter=woocommerce` when you are done with running e2e tests and before making any changes to test site configuration.
 
-Note that running `pnpm docker:down --filter=woocommerce` and then `pnpm docker:up --filter=woocommerce` re-initializes the test container.
+Running `pnpm docker:down --filter=woocommerce` and then `pnpm docker:up --filter=woocommerce` re-initializes the test container.
 
-### How to run tests in headless mode
+### How to run tests in headless mode against `e2e-environment`
 
 To run e2e tests in headless mode use the following command:
 
@@ -139,6 +169,17 @@ To run e2e tests in headless mode use the following command:
 cd plugins/woocommerce
 pnpm playwright test --config=e2e/playwright.config.js
 ```
+
+### How to run tests in headless mode against `wp-env`
+
+To run e2e tests in headless mode use the following command:
+
+```bash
+cd plugins/woocommerce
+USE_WP_ENV=1 pnpm playwright test --config=e2e/playwright.config.js
+```
+
+Note that `USE_WP_ENV` is set to `1` in the command above. This must be set in order for all tests to work correctly against the the `wp-env` environment.
 
 ### How to run tests in non-headless mode
 
@@ -192,29 +233,26 @@ pnpm playwright test --config=e2e/playwright.config.js --workers=1
 To skip the tests, use `.only` in the relevant test entry to specify the tests that you do want to run. For example:
 
 ```js
-test.only( 'Can login', async () => {}
+test.only( 'Can login', async () => {} )
 ```
 
 ```js
-test.only( 'Can make sure WooCommerce is activated. If not, activate it', async () => {}
+test.only( 'Can make sure WooCommerce is activated. If not, activate it', async () => {} )
 ```
 
 You can also use `.skip` in the same fashion. For example:
 
 ```js
-test.skip( 'Can start Setup Wizard', async () => {}
+test.skip( 'Can start Setup Wizard', async () => {} )
 ```
 
 ### How to run tests using custom WordPress, PHP and MariaDB versions
 
 The following variables can be used to specify the versions of WordPress, PHP and MariaDB that you'd like to use to build your test site with Docker:
-
 - `WP_VERSION`
 - `TRAVIS_PHP_VERSION`
 - `TRAVIS_MARIADB_VERSION`  
-
 The full command to build the site will look as follows:
-
 ```bash
 TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 pnpm docker:up --filter=woocommerce
 ```
