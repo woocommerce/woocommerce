@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Use transient to cache Shipping:has_shipping_zones() method

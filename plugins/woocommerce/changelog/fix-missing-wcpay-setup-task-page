@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fixed missing wcpay setup task, task fill page was missing for the woocommerce-payments task

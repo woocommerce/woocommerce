@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-`WP_Background_Process` updated to work nicely with memory_limits expressed in units other than 'M'.
