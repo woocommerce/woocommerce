@@ -136,7 +136,7 @@ jQuery( function( $ ) {
 			}
 
 			show_and_hide_panels();
-			change_product_type_tip_content( select_val );
+			change_product_type_tip( get_product_tip_content( select_val ) );
 
 			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
 
@@ -152,15 +152,44 @@ jQuery( function( $ ) {
 		show_and_hide_panels();
 	} );
 
-	function change_product_type_tip_content( product_type ) {
-		$( '.woocommerce-help-tip' ).tipTip( {
+	function change_product_type_tip( content ) {
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
+		$( '.woocommerce-product-type-tip' ).tipTip( {
 			attribute: 'data-tip',
-			content: `This is the ${ product_type } content`,
+			content: content,
 			fadeIn: 50,
 			fadeOut: 50,
 			delay: 200,
 			keepAlive: true,
 		} );
+	}
+
+	function get_product_tip_content( product_type ) {
+		switch ( product_type ) {
+			case 'simple':
+				return (
+					'<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are ' +
+					'shipped and have no options. For example, a book.'
+				);
+			case 'grouped':
+				return (
+					'<b>Grouped –</b> a collection of related products that can be purchased individually and ' +
+					'only consist of simple products. For example, a set of six drinking glasses.'
+				);
+			case 'external':
+				return '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.';
+			case 'variable':
+				return (
+					'<b>Variable –</b> a product with variations, each of which may have a different SKU, price, ' +
+					'stock option, etc. For example, a t-shirt available in different colors and/or sizes.'
+				);
+			default:
+				return (
+					'Product types define available product details and attributes, such as downloadable ' +
+					"files and variations. They're also used for analytics and inventory management."
+				);
+		}
 	}
 
 	function show_and_hide_panels() {

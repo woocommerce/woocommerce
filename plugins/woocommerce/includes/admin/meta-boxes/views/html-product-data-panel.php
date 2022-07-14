@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endforeach; ?>
 				</optgroup>
 			</select>
-			<?php echo wc_help_tip( __( 'Click in the icon to learn more about each product type', 'woocommerce' ) ); ?>
+			<span class="woocommerce-product-type-tip"></span>
 		</label>
 
 		<?php
