@@ -41,7 +41,7 @@ To run the test again, re-create the environment to start with a fresh state:
 - `pnpm env:destroy --filter=woocommerce`
 - `pnpm env:test --filter=woocommerce`
 
-Running tests afterwards:
+Other ways of running tests:
 
 - `pnpm env:test --filter=woocommerce` (headless)
 - `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=e2e/playwright.config.js --headed` (headed)
@@ -138,6 +138,7 @@ test.describe( 'Merchant can create virtual product', () => {
 
 	} );
 } );
+```
 
 ## Debugging tests
 
