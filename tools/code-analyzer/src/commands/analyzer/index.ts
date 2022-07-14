@@ -24,7 +24,7 @@ import {
 	getHookDescription,
 	getHookChangeType,
 } from '../../utils';
-import { generatePatch, generateSchemaDiff } from '../../git';
+import { generateDiff, generatePatch, generateSchemaDiff } from '../../git';
 
 /**
  * Analyzer class
@@ -64,14 +64,20 @@ export default class Analyzer extends Command {
 		} ),
 		source: Flags.string( {
 			char: 's',
-			description: 'GitHub organization/repository.',
-			default: 'woocommerce/woocommerce',
+			description: 'Git repo url or local path to a git repo.',
+			default: process.cwd(),
 		} ),
 		plugin: Flags.string( {
 			char: 'p',
 			description: 'Plugin to check for',
 			options: [ 'core', 'admin', 'beta' ],
 			default: 'core',
+		} ),
+		'is-woocommerce': Flags.boolean( {
+			char: 'w',
+			description:
+				'Analyzing WooCommerce? (Will scan for DB schema changes).',
+			default: true,
 		} ),
 	};
 
@@ -81,49 +87,28 @@ export default class Analyzer extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
 
-		this.validateArgs( flags.source );
-
-		const patchContent = generatePatch(
+		const diff = await generateDiff(
 			flags.source,
-			args.compare,
 			flags.base,
-			( e: string ): void => this.error( e )
+			args.compare,
+			this.error
 		);
 
 		const pluginData = this.getPluginData( flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
-		if ( flags.source === 'woocommerce/woocommerce' ) {
+		if ( flags[ 'is-woocommerce' ] ) {
 			const schemaDiff = await generateSchemaDiff(
-				flags.source,
+				'woocommerce/woocommerce',
 				args.compare,
 				flags.base,
 				( e: string ): void => this.error( e )
 			);
 
-			this.scanChanges(
-				patchContent,
-				pluginData[ 0 ],
-				flags.output,
-				schemaDiff
-			);
+			this.scanChanges( diff, pluginData[ 0 ], flags.output, schemaDiff );
 		} else {
-			this.scanChanges( patchContent, pluginData[ 0 ], flags.output );
-		}
-	}
-
-	/**
-	 * Validates all of the arguments to make sure
-	 *
-	 * @param {string} source The GitHub repository we are merging.
-	 */
-	private validateArgs( source: string ): void {
-		// We only support pulling from GitHub so the format needs to match that.
-		if ( ! source.match( /^[a-z0-9\-]+\/[a-z0-9\-]+$/ ) ) {
-			this.error(
-				'The "source" argument must be in "organization/repository" format'
-			);
+			this.scanChanges( diff, pluginData[ 0 ], flags.output );
 		}
 	}
 
