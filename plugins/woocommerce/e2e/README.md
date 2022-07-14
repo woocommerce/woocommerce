@@ -126,19 +126,18 @@ Based on our example, the test skeleton would look as follows:
 
 ```js
 test.describe( 'Merchant can create virtual product', () => {
-  test( 'merchant can log in', async () => {
+	test( 'merchant can log in', async () => {
 
-  } );
+	} );
 
-  test( 'merchant can create virtual product', async () => {
+	test( 'merchant can create virtual product', async () => {
 
-  } );
+	} );
 
-  test( 'merchant can verify that virtual product was created', async () => {
+	test( 'merchant can verify that virtual product was created', async () => {
 
-  } );
+	} );
 } );
-```
 
 ## Debugging tests
 
