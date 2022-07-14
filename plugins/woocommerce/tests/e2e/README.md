@@ -1,4 +1,4 @@
-# WooCommerce Puppeteer End to End Tests with Puppeteer (Deprecated)
+# WooCommerce Puppeteer End to End Tests (Deprecated)
 
 **Deprecated. Please check the new E2E setup based on [Playwright + wp-env](./../../e2e).**
 
