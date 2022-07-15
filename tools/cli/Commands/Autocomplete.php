@@ -68,7 +68,7 @@ HELP
 		while ( $file->valid() ) {
 			$line = $file->fgets();
 			if ( stripos( $line, '/woo _completion --generate-hook' ) !== false ) {
-				$output->writeln( 'Your bash terminal already has the autocomplete fix.' );
+				$output->writeln( 'Your bash terminal already has the autocomplete support.' );
 
 				return 0;
 			}
