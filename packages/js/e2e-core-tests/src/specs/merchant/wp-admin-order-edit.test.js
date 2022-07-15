@@ -264,4 +264,5 @@ const runEditOrderTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runEditOrderTest;
