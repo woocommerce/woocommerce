@@ -33,6 +33,8 @@ abstract class ShellCommand extends Command {
 	final protected function execute( InputInterface $input, OutputInterface $output ) {
 		$process = new Process( ...$this->getCommand( $input, $output ) );
 
+		$this->configure_process( $process );
+
 		// Color support for Shell, but not all terminals support them.
 		$process->setTty( $process::isTtySupported() );
 		$process->setTimeout( $this->timeout );
@@ -52,5 +54,10 @@ abstract class ShellCommand extends Command {
 		}
 
 		return $process->getTermSignal();
+	}
+
+	protected function configure_process( Process $process ) {
+		// no-op, overridable by children classes.
+		return null;
 	}
 }

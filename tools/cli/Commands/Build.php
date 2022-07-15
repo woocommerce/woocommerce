@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use WooCommerce\Dev\CLI\ShellCommand;
 
 class Build extends ShellCommand {
@@ -34,5 +35,9 @@ HELP
 		$target = $input->getArgument( 'target' );
 
 		return [ "pnpm -- turbo run build --filter=$target}" ];
+	}
+
+	protected function configure_process( Process $process ) {
+		$process->setWorkingDirectory( $this->rootPath );
 	}
 }
