@@ -335,9 +335,9 @@ jQuery( function ( $ ) {
 
 		filter_data: function( handle, data ) {
 			const filteredData = $( '#woocommerce-order-items' )
-				.triggerHandler( 
-					`woocommerce_order_meta_box_${handle}_ajax_data`, 
-					[ data ] 
+				.triggerHandler(
+					`woocommerce_order_meta_box_${handle}_ajax_data`,
+					[ data ]
 				);
 
 			if ( filteredData ) {
@@ -1537,8 +1537,31 @@ jQuery( function ( $ ) {
 		}
 	};
 
+	/**
+	 * Configures ajax request for custom metadata box in order edit screen.
+	 */
+	var wc_meta_boxes_order_custom_meta = {
+		init: function() {
+			if ( ! $('#order_custom').length ) {
+				return;
+			}
+
+			$( '#order_custom #the-list' ).wpList( {
+				addBefore: function( settings ) {
+					settings.data += "&order_id=" + woocommerce_admin_meta_boxes.post_id + "&action=woocommerce_order_add_meta";
+					settings.action = 'woocommerce_order_add_meta';
+					return settings;
+				},
+				addAfter: function() {or
+					$('table#list-table').show();
+				}
+			});
+		}
+	};
+
 	wc_meta_boxes_order.init();
 	wc_meta_boxes_order_items.init();
 	wc_meta_boxes_order_notes.init();
 	wc_meta_boxes_order_downloads.init();
+	wc_meta_boxes_order_custom_meta.init();
 });

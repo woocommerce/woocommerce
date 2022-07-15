@@ -365,7 +365,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 					'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
-					'post_id'                       => $this->is_order_meta_box_screen( $screen_id ) ? $order_or_post_object->get_id() : ( isset( $post->ID ) ? $post->ID : '' ),
+					'post_id'                       => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? $order_or_post_object->get_id() : ( isset( $post->ID ) ? $post->ID : '' ),
 					'base_country'                  => WC()->countries->get_base_country(),
 					'currency_format_num_decimals'  => wc_get_price_decimals(),
 					'currency_format_symbol'        => get_woocommerce_currency_symbol( $currency ),
