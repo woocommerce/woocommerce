@@ -46,14 +46,7 @@ HELP
 		switch ( $test_type ) {
 			case 'php':
 				$this->prepare_unit_tests();
-
-				for ( $slept = 0; $slept <= 30; $slept ++ ) {
-					exec( 'docker ps', $docker_ps_output );
-					if ( stripos( $docker_ps_output, 'woocommerce_test_db' ) !== false ) {
-						break;
-					}
-					$output->writeln( "Waiting for PHP unit tests environment..." );
-				}
+				$this->wait_for_db( $output );
 
 				return [ 'pnpm test:unit --filter=woocommerce' ];
 			case 'js':
@@ -74,5 +67,15 @@ HELP
 		exec( 'docker run --rm --name woocommerce_test_db -p 3307:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33' );
 		sleep( 5 );
 		exec( $this->rootPath . '/plugins/woocommerce/tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0:3307' );
+	}
+
+	protected function wait_for_db( OutputInterface $output ) {
+		for ( $slept = 0; $slept <= 30; $slept ++ ) {
+			exec( 'docker ps', $docker_ps_output );
+			if ( stripos( implode( ' ', $docker_ps_output ), 'woocommerce_test_db' ) !== false ) {
+				break;
+			}
+			$output->writeln( "Waiting for PHP unit tests environment..." );
+		}
 	}
 }
