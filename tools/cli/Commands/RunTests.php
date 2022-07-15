@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use WooCommerce\Dev\CLI\ShellCommand;
 
 class RunTests extends ShellCommand {
@@ -37,6 +38,10 @@ Usage:
  JavaScript tests: ./woo test js
 HELP
 			);
+	}
+
+	protected function configure_process( Process $process ) {
+		$process->setTimeout( 300 );
 	}
 
 	protected function getCommand( InputInterface $input, OutputInterface $output ): array {
