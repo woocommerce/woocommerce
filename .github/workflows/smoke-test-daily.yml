@@ -233,7 +233,7 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: always()
+        if: false
         runs-on: ubuntu-20.04
         needs: [login-run, build, test-plugins]
         env:
