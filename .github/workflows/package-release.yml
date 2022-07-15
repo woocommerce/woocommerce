@@ -22,6 +22,11 @@ jobs:
               with:
                   php-version: '7.4'
 
+            - name: log
+              run: |
+                  echo ${{ github.ref }}
+                  echo ${{ github.ref_name }}
+
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
 
