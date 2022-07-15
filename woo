@@ -7,6 +7,7 @@ use lucatume\DI52\App;
 use lucatume\DI52\Container;
 use Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand;
 use Symfony\Component\Console\Application;
+use WooCommerce\Dev\CLI\Commands\Autocomplete;
 use WooCommerce\Dev\CLI\Commands\Build;
 use WooCommerce\Dev\CLI\Commands\RunTests;
 
@@ -43,6 +44,7 @@ $container->setVar( 'rootPath', __DIR__ );
 /***********
  * COMMANDS
  **********/
+$application->add( $container->make( Autocomplete::class ) );
 $application->add( $container->make( RunTests::class ) );
 $application->add( $container->make( Build::class ) );
 

@@ -13,11 +13,11 @@ abstract class Command extends SymfonyCommand implements CompletionAwareInterfac
 	protected $rootPath;
 
 	public function __construct() {
-		parent::__construct( static::getCommandName() );
-
 		$this->container    = App::container();
 		$this->checkWritableDir( $this->container->getVar( 'rootPath' ) );
 		$this->rootPath = $this->container->getVar( 'rootPath' );
+		
+		parent::__construct( static::getCommandName() );
 	}
 
 	/**

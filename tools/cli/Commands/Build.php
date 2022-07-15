@@ -31,6 +31,10 @@ HELP
 			);
 	}
 
+	protected function getArguments(): array {
+		return [ 'woocommerce' ];
+	}
+
 	protected function getCommand( InputInterface $input, OutputInterface $output ): array {
 		$target = $input->getArgument( 'target' );
 

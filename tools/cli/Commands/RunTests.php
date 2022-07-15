@@ -2,6 +2,8 @@
 
 namespace WooCommerce\Dev\CLI\Commands;
 
+use Symfony\Component\Console\Completion\CompletionInput;
+use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,6 +40,10 @@ Usage:
  JavaScript tests: ./woo test js
 HELP
 			);
+	}
+
+	protected function getArguments(): array {
+		return [ 'php', 'js' ];
 	}
 
 	protected function configure_process( Process $process ) {
