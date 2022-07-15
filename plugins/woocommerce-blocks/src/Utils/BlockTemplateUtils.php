@@ -298,23 +298,23 @@ class BlockTemplateUtils {
 		$plugin_template_types = array(
 			'single-product'                   => array(
 				'title'       => _x( 'Single Product', 'Template name', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Template used to display the single product.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Displays a single product.', 'woo-gutenberg-products-block' ),
 			),
 			'archive-product'                  => array(
 				'title'       => _x( 'Product Catalog', 'Template name', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Template used to display products.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Displays your products.', 'woo-gutenberg-products-block' ),
 			),
 			'taxonomy-product_cat'             => array(
 				'title'       => _x( 'Products by Category', 'Template name', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Template used to display products by category.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Displays products filtered by a category.', 'woo-gutenberg-products-block' ),
 			),
 			'taxonomy-product_tag'             => array(
 				'title'       => _x( 'Products by Tag', 'Template name', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Template used to display products by tag.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Displays products filtered by a tag.', 'woo-gutenberg-products-block' ),
 			),
 			ProductSearchResultsTemplate::SLUG => array(
 				'title'       => _x( 'Product Search Results', 'Template name', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Template used to display search results for products.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Displays search results for your store.', 'woo-gutenberg-products-block' ),
 			),
 			MiniCartTemplate::SLUG             => array(
 				'title'       => _x( 'Mini Cart', 'Template name', 'woo-gutenberg-products-block' ),
