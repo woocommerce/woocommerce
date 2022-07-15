@@ -41,7 +41,7 @@ HELP
 	}
 
 	protected function configure_process( Process $process ) {
-		$process->setTimeout( 300 );
+		$process->setTimeout( 600 );
 	}
 
 	protected function getCommand( InputInterface $input, OutputInterface $output ): array {
