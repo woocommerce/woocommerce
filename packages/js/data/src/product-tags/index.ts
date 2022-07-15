@@ -11,4 +11,4 @@ createCrudDataStore( {
 	namespace: WC_PRODUCT_TAGS_NAMESPACE,
 } );
 
-export const PRODUCT_TAGS_STORE_NAME = STORE_NAME;
+export const EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME = STORE_NAME;

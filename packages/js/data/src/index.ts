@@ -18,10 +18,10 @@ export { ITEMS_STORE_NAME } from './items';
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 export { PRODUCTS_STORE_NAME } from './products';
 export { ORDERS_STORE_NAME } from './orders';
-export { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
+export { EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 export { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
 export { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
-export { PRODUCT_TAGS_STORE_NAME } from './product-tags';
+export { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 export { PaymentGateway } from './payment-gateways/types';
 
 // Export hooks
@@ -93,10 +93,10 @@ import type { COUNTRIES_STORE_NAME } from './countries';
 import type { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
 import type { PRODUCTS_STORE_NAME } from './products';
 import type { ORDERS_STORE_NAME } from './orders';
-import type { PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
+import type { EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes';
 import type { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
 import type { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
-import type { PRODUCT_TAGS_STORE_NAME } from './product-tags';
+import type { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -113,10 +113,10 @@ export type WCDataStoreName =
 	| typeof PAYMENT_GATEWAYS_STORE_NAME
 	| typeof PRODUCTS_STORE_NAME
 	| typeof ORDERS_STORE_NAME
-	| typeof PRODUCT_ATTRIBUTES_STORE_NAME
+	| typeof EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	| typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
-	| typeof PRODUCT_TAGS_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -161,11 +161,11 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof PRODUCTS_STORE_NAME
 	? ProductsSelectors
-	: T extends typeof PRODUCT_ATTRIBUTES_STORE_NAME
+	: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	? ProductAttributeSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	? ProductShippingClassSelectors
-	: T extends typeof PRODUCT_TAGS_STORE_NAME
+	: T extends typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
 	? ProductTagSelectors
 	: T extends typeof ORDERS_STORE_NAME
 	? OrdersSelectors
