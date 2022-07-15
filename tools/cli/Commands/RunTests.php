@@ -16,7 +16,7 @@ class RunTests extends ShellCommand {
 
 	protected function configure() {
 		$this
-			->setDescription( 'Run PHP, JS or E2E tests.' )
+			->setDescription( 'Run PHP or JS tests.' )
 			->setDefinition(
 				new InputDefinition(
 					[
@@ -35,7 +35,6 @@ class RunTests extends ShellCommand {
 Usage:
  PHP Unit tests: ./woo test php
  JavaScript tests: ./woo test js
- E2E tests: ./woo test e2e
 HELP
 			);
 	}
@@ -55,8 +54,6 @@ HELP
 				} else {
 					return [ "pnpm test:client --filter=woocommerce/client/admin" ];
 				}
-			case 'e2e':
-				return [ 'pnpm test:unit --filter=woocommerce' ];
 			default:
 				throw new \InvalidArgumentException();
 		}
