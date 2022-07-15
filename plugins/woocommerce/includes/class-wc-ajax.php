@@ -1148,7 +1148,7 @@ class WC_AJAX {
 	 * @throws Exception If order or coupon is invalid.
 	 */
 	public static function add_coupon_discount() {
-		wc_get_container()->get(CouponsController::class)->add_coupon_discount();
+		wc_get_container()->get( CouponsController::class )->add_coupon_discount_via_ajax();
 	}
 
 	/**
@@ -1351,7 +1351,7 @@ class WC_AJAX {
 	 * Calc line tax.
 	 */
 	public static function calc_line_taxes() {
-		wc_get_container()->get(TaxesController::class)->calc_line_taxes();
+		wc_get_container()->get( TaxesController::class )->calc_line_taxes_via_ajax();
 	}
 
 	/**

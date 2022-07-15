@@ -5,14 +5,14 @@ namespace Automattic\WooCommerce\Internal\Orders;
 /**
  * Class with methods for handling order coupons.
  */
-class CouponsController
-{
+class CouponsController {
+
 	/**
 	 * Add order discount via Ajax.
 	 *
 	 * @throws Exception If order or coupon is invalid.
 	 */
-	public function add_coupon_discount(): void {
+	public function add_coupon_discount_via_ajax(): void {
 		check_ajax_referer( 'order-item', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
@@ -22,7 +22,7 @@ class CouponsController
 		$response = array();
 
 		try {
-			$order = $this->add_coupon_discount_core($_POST);
+			$order = $this->add_coupon_discount( $_POST );
 
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
@@ -42,7 +42,7 @@ class CouponsController
 	 * @return object The retrieved order object.
 	 * @throws \Exception Invalid order or coupon.
 	 */
-	public function add_coupon_discount_core(array $post_variables): object {
+	public function add_coupon_discount( array $post_variables ): object {
 		$order_id           = isset( $post_variables['order_id'] ) ? absint( $post_variables['order_id'] ) : 0;
 		$order              = wc_get_order( $order_id );
 		$calculate_tax_args = array(
