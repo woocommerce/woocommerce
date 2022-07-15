@@ -106,10 +106,6 @@ class WC_Helper_API {
 		);
 		$args['headers'] = wp_parse_args( $headers, $args['headers'] );
 
-		if ( ! isset( $args['user-agent'] ) ) {
-			$args['user-agent'] = 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' );
-		}
-
 		$url = add_query_arg(
 			array(
 				'token'     => $auth['access_token'],
