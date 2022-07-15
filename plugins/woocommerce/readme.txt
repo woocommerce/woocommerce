@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 6.6.1
+Stable tag: 6.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
