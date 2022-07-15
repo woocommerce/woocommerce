@@ -1,4 +1,5 @@
 const { devices } = require( '@playwright/test' );
+const { BASE_URL } = process.env;
 
 const config = {
 	timeout: 60 * 1000,
@@ -18,7 +19,7 @@ const config = {
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL: 'http://localhost:8086',
+		baseURL: BASE_URL ? BASE_URL : 'http://localhost:8086',
 	},
 	projects: [
 		{
