@@ -34,7 +34,7 @@ HELP
 	protected function getCommand( InputInterface $input, OutputInterface $output ): array {
 		$target = $input->getArgument( 'target' );
 
-		return [ "pnpm -- turbo run build --filter=$target}" ];
+		return [ "pnpm -- turbo run build --filter=$target" ];
 	}
 
 	protected function configure_process( Process $process ) {
