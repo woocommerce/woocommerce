@@ -239,6 +239,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update Danish currency symbol to match CLDR R41 spec. [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
 * Tweak - Use transient to cache Shipping:has_shipping_zones() method [#33813](https://github.com/woocommerce/woocommerce/pull/33813)
 * Performance - Improve performance of Shipping Task. [#33886](https://github.com/woocommerce/woocommerce/pull/33886)
+* Enhancement - Configured wp-env test environment for Playwright tests. Also updated tests to work with the either wp-env or e2e-environment. [#33850](https://github.com/woocommerce/woocommerce/pull/33850)
+* Enhancement - Add the border bottom of the modal's header [#33807](https://github.com/woocommerce/woocommerce/pull/33807)
 * Enhancement - Add capability for set location step to be manually navigated in shipping recommendation task [#33667](https://github.com/woocommerce/woocommerce/pull/33667)
 
 
