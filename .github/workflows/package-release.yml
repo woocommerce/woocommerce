@@ -29,4 +29,4 @@ jobs:
               run: pnpm install
 
             - name: Execute script
-              run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --skip-install
+              run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref }} --skip-install
