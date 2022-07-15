@@ -113,7 +113,7 @@ class Edit {
 	 */
 	private function add_order_specific_meta_box() {
 		add_meta_box(
-			'postcustom',
+			'order_custom',
 			__( 'Custom Fields', 'woocommerce' ),
 			array( $this, 'render_custom_meta_box' ),
 			$this->screen_id,

@@ -18,17 +18,13 @@ class CustomMetaBox {
 	}
 
 	/**
-	 * Renders the meta box to manage custom meta.
+	 * Helper method to get formatted meta data array with proper keys. This can be directly fed to `list_meta()` method.
 	 *
-	 * @param \WP_Post|\WC_Order $order_or_post Post or order object that we are rendering for.
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return array Meta data.
 	 */
-	public function output( $order_or_post ) {
-		if ( is_a( $order_or_post, \WP_Post::class ) ) {
-			$order = wc_get_order( $order_or_post );
-		} else {
-			$order = $order_or_post;
-		}
-
+	private function get_formatted_order_meta_data( \WC_Order $order ) {
 		$metadata         = $order->get_meta_data();
 		$metadata_to_list = array();
 		foreach ( $metadata as $meta ) {
@@ -42,7 +38,21 @@ class CustomMetaBox {
 				'meta_value' => $data['value'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- False positive, not a meta query.
 			);
 		}
-		$this->render_custom_meta_form( $metadata_to_list, $order );
+		return $metadata_to_list;
+	}
+
+	/**
+	 * Renders the meta box to manage custom meta.
+	 *
+	 * @param \WP_Post|\WC_Order $order_or_post Post or order object that we are rendering for.
+	 */
+	public function output( $order_or_post ) {
+		if ( is_a( $order_or_post, \WP_Post::class ) ) {
+			$order = wc_get_order( $order_or_post );
+		} else {
+			$order = $order_or_post;
+		}
+		$this->render_custom_meta_form( $this->get_formatted_order_meta_data( $order ), $order );
 	}
 
 	/**
@@ -57,7 +67,7 @@ class CustomMetaBox {
 			<div id="ajax-response"></div>
 			<?php
 			list_meta( $metadata_to_list );
-			meta_form( $order );
+			meta_form();
 			?>
 		</div>
 		<p>
