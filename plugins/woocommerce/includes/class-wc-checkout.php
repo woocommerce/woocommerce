@@ -856,7 +856,7 @@ class WC_Checkout {
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
-			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
+			$shipping_country = WC()->customer->get_shipping_country();
 
 			if ( empty( $shipping_country ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
