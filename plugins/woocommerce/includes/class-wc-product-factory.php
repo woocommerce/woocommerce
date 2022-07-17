@@ -18,12 +18,22 @@ class WC_Product_Factory {
 	/**
 	 * Get a product.
 	 *
+	 * @global WC_Product|null $product if in the loop
+	 *
 	 * @param mixed $product_id WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
 	 * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
 	 * @return WC_Product|bool Product object or false if the product cannot be loaded.
 	 */
 	public function get_product( $product_id = false, $deprecated = array() ) {
+		global $product;
+
 		$product_id = $this->get_product_id( $product_id );
+
+		// use the existing global instead of creating a new instance to reduce memory consumption and improve performance
+		// if the global $post changed, they are different and we cannot use the existing global value
+		if ( $product instanceof WC_Product && $product->get_id() === $product_id ) {
+			return $product;
+		}
 
 		if ( ! $product_id ) {
 			return false;
