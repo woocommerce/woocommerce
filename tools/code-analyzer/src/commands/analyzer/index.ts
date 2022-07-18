@@ -116,7 +116,7 @@ export default class Analyzer extends Command {
 
 			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
 			execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
-			execSync( 'pnpm run build:feature-config', {
+			execSync( 'pnpm run build:feature-config --filter=woocommerce', {
 				cwd: pluginPath,
 			} );
 
