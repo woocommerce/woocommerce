@@ -1,12 +1,12 @@
-# How to release Javascript packages
+# Releasing Javascript packages
 
-When a packages contains sufficient changes to justify a release to [NPM](https://www.npmjs.com/), follow these instructions to create a new release from the monorepo.
+When a package contains sufficient changes to justify a release to [NPM](https://www.npmjs.com/), follow these instructions to create a new release from the monorepo.
 
 ## Prepare packages for release
 
-In order to prepare a package for release, version numbers require a bump to signify a new version as well as compilation of the changelog. The monorepo [Actions Tab contains a Prepare Package Release workflow](https://github.com/woocommerce/woocommerce/actions/workflows/prepare-package-release.yml).
+In order to prepare a package for release, a changelog will need to be compiled along with an appropriate version bump.
 
-1. Click the "Run workflow" button.
+1. Visit the monorepo Action [Prepare Package Release workflow](https://github.com/woocommerce/woocommerce/actions/workflows/prepare-package-release.yml). Click the "Run workflow" button.
 
 ![image](https://user-images.githubusercontent.com/1922453/179434424-f08af974-5597-4c6f-955b-43faf062c7a7.png)
 
