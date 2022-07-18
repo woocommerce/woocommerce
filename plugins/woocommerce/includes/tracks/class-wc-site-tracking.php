@@ -94,12 +94,12 @@ class WC_Site_Tracking {
 					delete( eventProperties._ut );
 				}
 				// Verify the event name is correct
-				if ( ! /^(([a-z0-9]+)_){2}([a-z0-9_]+)$/.test( eventName ) ) {
+				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
 					throw new Error( `A valid event name must be specified. The event name: "${ eventName }" is not valid.` );
 				}
 				// Verify the properties are correct
 				for( prop in eventProperties ) {
-					if ( ! /^[a-z_][a-z0-9_]*$/.test( prop ) ) {
+					if ( ! <?php echo esc_js( WC_Tracks_Event::PROP_NAME_REGEX ); ?>.test( prop ) ) {
 						throw new Error( `A valid prop name must be specified. The property name: "${ prop }" is not valid.` );
 					}
 				}
