@@ -3,7 +3,6 @@ module.exports = {
 	rootDir: '../../../',
 	// Automatically clear mock calls and instances between every test
 	clearMocks: true,
-
 	moduleNameMapper: {
 		'@woocommerce/blocks-test-utils': '<rootDir>/tests/utils',
 	},
@@ -14,7 +13,8 @@ module.exports = {
 			'jest-html-reporters',
 			{ publicPath: './reports/e2e', filename: 'index.html' },
 		],
-	],
+		process.env.CI && '@wordpress/e2e-tests/config/flaky-tests-reporter.js',
+	].filter( Boolean ),
 
 	testEnvironment: '<rootDir>/tests/e2e/config/environment.js',
 	testRunner: 'jest-circus/runner',
@@ -30,7 +30,6 @@ module.exports = {
 		'<rootDir>/tests/e2e/config/jest.setup.js',
 		'expect-puppeteer',
 	],
-
 	testPathIgnorePatterns: [ '<rootDir>/tests/e2e/specs/performance' ],
 	transformIgnorePatterns: [ 'node_modules/(?!(woocommerce)/)' ],
 };

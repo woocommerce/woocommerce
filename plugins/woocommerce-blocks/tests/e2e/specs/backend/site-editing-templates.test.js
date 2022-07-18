@@ -92,6 +92,14 @@ const BLOCK_DATA = {
 		},
 		name: 'woocommerce/legacy-template',
 	},
+	'product-search-results': {
+		attributes: {
+			title: 'WooCommerce Product Search Results Block',
+			template: 'product-search-results',
+			placeholder: 'archive-product',
+		},
+		name: 'woocommerce/legacy-template',
+	},
 };
 
 const SELECTORS = {
@@ -515,7 +523,7 @@ describe( 'Store Editing Templates', () => {
 			);
 
 			expect( classicBlock.attributes.template ).toBe(
-				BLOCK_DATA[ 'archive-product' ].attributes.template
+				BLOCK_DATA[ 'product-search-results' ].attributes.template
 			);
 			expect( await getCurrentSiteEditorContent() ).toMatchSnapshot();
 		} );

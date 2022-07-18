@@ -14,7 +14,7 @@ exports[`Store Editing Templates Product Search Results block template should co
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"header\\"} /-->
 
 <!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
-<div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"archive-product\\"} /--></div>
+<div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"product-search-results\\"} /--></div>
 <!-- /wp:group -->
 
 <!-- wp:template-part {\\"slug\\":\\"footer\\",\\"theme\\":\\"emptytheme\\",\\"tagName\\":\\"footer\\"} /-->"

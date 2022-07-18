@@ -34,7 +34,7 @@ const block = {
 		frontend: {
 			productsList: '.wc-block-grid__products > li',
 			classicProductsList: '.products.columns-3 > li',
-			filter: 'label[for=outofstock]',
+			filter: 'input[id=outofstock]',
 			submitButton: '.wc-block-components-filter-submit-button',
 		},
 	},
@@ -104,6 +104,10 @@ describe( `${ block.name } Block`, () => {
 			await goToShopPage();
 		} );
 
+		beforeEach( async () => {
+			await goToShopPage();
+		} );
+
 		afterAll( async () => {
 			await deleteAllTemplates( 'wp_template' );
 			await deleteAllTemplates( 'wp_template_part' );
@@ -126,8 +130,13 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			expect( isRefreshed ).not.toBeCalled();
-			await page.click( selectors.frontend.filter );
-			await page.waitForNetworkIdle();
+
+			await page.waitForSelector( selectors.frontend.filter );
+
+			await Promise.all( [
+				page.waitForNavigation(),
+				page.click( selectors.frontend.filter ),
+			] );
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
@@ -150,10 +159,11 @@ describe( `${ block.name } Block`, () => {
 
 			await waitForCanvas();
 			await selectBlockByName( block.slug );
-			await openBlockEditorSettings();
+			await openBlockEditorSettings( { isFSEEditor: true } );
 			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
 			);
+
 			const [ filterButtonToggle ] = await page.$x(
 				selectors.editor.filterButtonToggle
 			);
