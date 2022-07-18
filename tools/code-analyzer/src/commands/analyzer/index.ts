@@ -8,7 +8,6 @@ import { readFileSync, rmSync } from 'fs';
 /**
  * Internal dependencies
  */
-import { MONOREPO_ROOT } from '../../const';
 import {
 	printTemplateResults,
 	printHookResults,
@@ -105,7 +104,7 @@ export default class Analyzer extends Command {
 		);
 		CliUx.ux.action.stop();
 
-		const pluginData = this.getPluginData( flags.plugin );
+		const pluginData = this.getPluginData( tmpRepoPath, flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
@@ -151,7 +150,7 @@ export default class Analyzer extends Command {
 	 * @param {string} plugin Plugin slug.
 	 * @return {string[]} Promise.
 	 */
-	private getPluginData( plugin: string ): string[] {
+	private getPluginData( tmpRepoPath: string, plugin: string ): string[] {
 		/**
 		 * List of plugins from our monorepo.
 		 */
@@ -159,7 +158,7 @@ export default class Analyzer extends Command {
 			core: {
 				name: 'WooCommerce',
 				mainFile: join(
-					MONOREPO_ROOT,
+					tmpRepoPath,
 					'plugins',
 					'woocommerce',
 					'woocommerce.php'
@@ -168,7 +167,7 @@ export default class Analyzer extends Command {
 			admin: {
 				name: 'WooCommerce Admin',
 				mainFile: join(
-					MONOREPO_ROOT,
+					tmpRepoPath,
 					'plugins',
 					'woocommerce-admin',
 					'woocommerce-admin.php'
@@ -177,7 +176,7 @@ export default class Analyzer extends Command {
 			beta: {
 				name: 'WooCommerce Beta Tester',
 				mainFile: join(
-					MONOREPO_ROOT,
+					tmpRepoPath,
 					'plugins',
 					'woocommerce-beta-tester',
 					'woocommerce-beta-tester.php'
