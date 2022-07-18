@@ -164,6 +164,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix undefined offset notice on payment settings page [#33956](https://github.com/woocommerce/woocommerce/pull/33956)
 * Fix - Convert null and '' to 0 before verification to mimic $wpdb->prepare. [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
 * Fix - Correct generation of variation name when attribute is 0. [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
 * Fix - couple of follow up fixes for Playwright tests [#33766](https://github.com/woocommerce/woocommerce/pull/33766)
