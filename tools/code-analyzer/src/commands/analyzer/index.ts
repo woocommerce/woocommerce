@@ -22,6 +22,7 @@ import {
 	areSchemasEqual,
 	getHookDescription,
 	getHookChangeType,
+	generateJSONFile,
 } from '../../utils';
 import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
 import { execSync } from 'child_process';
@@ -66,6 +67,11 @@ export default class Analyzer extends Command {
 			char: 's',
 			description: 'Git repo url or local path to a git repo.',
 			default: process.cwd(),
+		} ),
+		file: Flags.string( {
+			char: 'f',
+			description: 'Filename for change description JSON.',
+			default: 'changes.json',
 		} ),
 		plugin: Flags.string( {
 			char: 'p',
@@ -209,7 +215,7 @@ export default class Analyzer extends Command {
 	 * @param {string}  output         Output style.
 	 * @param {boolean} schemaEquality if schemas are equal between branches.
 	 */
-	private scanChanges(
+	private async scanChanges(
 		content: string,
 		version: string,
 		output: string,
@@ -222,11 +228,19 @@ export default class Analyzer extends Command {
 				areEqual: boolean;
 			};
 		} | void
-	): void {
+	) {
+		const { flags } = await this.parse( Analyzer );
+
 		CliUx.ux.action.start( 'Generating changes' );
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
+
+		await generateJSONFile( join( process.cwd(), flags.file ), {
+			templates: Object.fromEntries( templates.entries() ),
+			hooks: Object.fromEntries( hooks.entries() ),
+			schema: databaseUpdates || {},
+		} );
 
 		if ( templates.size ) {
 			printTemplateResults(
