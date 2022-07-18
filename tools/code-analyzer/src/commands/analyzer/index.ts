@@ -3,12 +3,11 @@
  */
 import { CliUx, Command, Flags } from '@oclif/core';
 import { join } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, rmSync } from 'fs';
 
 /**
  * Internal dependencies
  */
-import { MONOREPO_ROOT } from '../../const';
 import {
 	printTemplateResults,
 	printHookResults,
@@ -24,7 +23,8 @@ import {
 	getHookDescription,
 	getHookChangeType,
 } from '../../utils';
-import { generateDiff, generatePatch, generateSchemaDiff } from '../../git';
+import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
+import { execSync } from 'child_process';
 
 /**
  * Analyzer class
@@ -87,29 +87,61 @@ export default class Analyzer extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
 
+		CliUx.ux.action.start(
+			`Making a temporary clone of '${ flags.source }'`
+		);
+		const tmpRepoPath = await cloneRepo( flags.source );
+		CliUx.ux.action.stop();
+
+		CliUx.ux.action.start(
+			`Comparing '${ flags.base }' with '${ args.compare }'`
+		);
 		const diff = await generateDiff(
-			flags.source,
+			tmpRepoPath,
 			flags.base,
 			args.compare,
 			this.error
 		);
+		CliUx.ux.action.stop();
 
-		const pluginData = this.getPluginData( flags.plugin );
+		const pluginData = this.getPluginData( tmpRepoPath, flags.plugin );
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
 		if ( flags[ 'is-woocommerce' ] ) {
+			CliUx.ux.action.start( 'Building WooCommerce' );
+
+			const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
+
+			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
+			execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
+			execSync( 'pnpm run build:feature-config --filter=woocommerce', {
+				cwd: pluginPath,
+			} );
+
+			CliUx.ux.action.stop();
+			CliUx.ux.action.start(
+				`Comparing WooCommerce DB schemas of '${ flags.base }' and '${ args.compare }'`
+			);
+
 			const schemaDiff = await generateSchemaDiff(
-				'woocommerce/woocommerce',
+				tmpRepoPath,
 				args.compare,
 				flags.base,
 				( e: string ): void => this.error( e )
 			);
 
+			CliUx.ux.action.stop();
+
 			this.scanChanges( diff, pluginData[ 0 ], flags.output, schemaDiff );
 		} else {
 			this.scanChanges( diff, pluginData[ 0 ], flags.output );
 		}
+
+		// Clean up the temporary repo.
+		CliUx.ux.action.start( 'Cleaning up temporary files' );
+		rmSync( tmpRepoPath, { force: true, recursive: true } );
+		CliUx.ux.action.stop();
 	}
 
 	/**
@@ -118,7 +150,7 @@ export default class Analyzer extends Command {
 	 * @param {string} plugin Plugin slug.
 	 * @return {string[]} Promise.
 	 */
-	private getPluginData( plugin: string ): string[] {
+	private getPluginData( tmpRepoPath: string, plugin: string ): string[] {
 		/**
 		 * List of plugins from our monorepo.
 		 */
@@ -126,7 +158,7 @@ export default class Analyzer extends Command {
 			core: {
 				name: 'WooCommerce',
 				mainFile: join(
-					MONOREPO_ROOT,
+					tmpRepoPath,
 					'plugins',
 					'woocommerce',
 					'woocommerce.php'
@@ -135,7 +167,7 @@ export default class Analyzer extends Command {
 			admin: {
 				name: 'WooCommerce Admin',
 				mainFile: join(
-					MONOREPO_ROOT,
+					tmpRepoPath,
 					'plugins',
 					'woocommerce-admin',
 					'woocommerce-admin.php'
@@ -144,7 +176,7 @@ export default class Analyzer extends Command {
 			beta: {
 				name: 'WooCommerce Beta Tester',
 				mainFile: join(
-					MONOREPO_ROOT,
+					tmpRepoPath,
 					'plugins',
 					'woocommerce-beta-tester',
 					'woocommerce-beta-tester.php'
@@ -191,6 +223,7 @@ export default class Analyzer extends Command {
 			};
 		} | void
 	): void {
+		CliUx.ux.action.start( 'Generating changes' );
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
@@ -234,6 +267,8 @@ export default class Analyzer extends Command {
 		} else {
 			this.log( 'No database updates found' );
 		}
+
+		CliUx.ux.action.stop();
 	}
 	/**
 	 * Scan patches for changes in the database
