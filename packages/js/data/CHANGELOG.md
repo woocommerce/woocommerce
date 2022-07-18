@@ -2,21 +2,26 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.1.0](https://www.npmjs.com/package/@woocommerce/packages/js/data/v/4.1.0) - 2022-07-08 
+## [4.2.0](https://www.npmjs.com/package/@woocommerce/data/v/4.2.0) - 2022-07-18 
+
+-   Minor - Add new data store for shipping zones. #33830
+-   Minor - Add product tags data store
+
+## [4.1.0](https://www.npmjs.com/package/@woocommerce/data/v/4.1.0) - 2022-07-08 
 
 -   Minor - Fix 'Cannot read properties of undefined' error when clicking Export button on Analytic pages.
 -   Minor - Add CRUD data store utilities
 -   Minor - Add product deletion via datastore API #33285
 -   Minor - Add product shipping class data store. #33765
+-   Minor - Migrate onboarding data store to TS
+-   Minor - Remove PHP and Composer dependencies for packaged JS packages
 -   Patch - Fix product type
 -   Patch - Migrate @woocommerce/data user and use-select-with-refresh to TS
 -   Patch - Migrate item store to TS
--   Minor - Migrate onboarding data store to TS
--   Minor - Remove PHP and Composer dependencies for packaged JS packages
 
-## [4.0.0](https://www.npmjs.com/package/@woocommerce/packages/js/data/v/4.0.0) - 2022-06-14 
+## [4.0.0](https://www.npmjs.com/package/@woocommerce/data/v/4.0.0) - 2022-06-14 
 
--   Major [ **BREAKING CHANGE** ] - Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
+-    - Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
 -   Minor - Add create product actions in products data store #33278
 -   Minor - Add new orders data store, for retrieving orders data. #33063
 -   Minor - Add update product actions to product data store #33282
