@@ -52,13 +52,12 @@ const goToShopPage = () =>
 const setMaxPrice = async () => {
 	await page.waitForSelector( selectors.frontend.priceMaxAmount );
 	await page.focus( selectors.frontend.priceMaxAmount );
-	await page.click( selectors.frontend.priceMaxAmount, {
-		clickCount: 3,
-	} );
-	await page.keyboard.type( '1.99' );
-	await page.$eval( selectors.frontend.priceMaxAmount, ( el ) =>
-		( el as HTMLElement ).blur()
+	await page.$eval(
+		selectors.frontend.priceMaxAmount,
+		( el ) => ( ( el as HTMLInputElement ).value = '' )
 	);
+	await page.keyboard.type( '1.99' );
+	await page.keyboard.press( 'Tab' );
 };
 
 describe( `${ block.name } Block`, () => {
@@ -91,7 +90,6 @@ describe( `${ block.name } Block`, () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
 			await setMaxPrice();
-			await page.waitForNetworkIdle();
 			await waitForAllProductsBlockLoaded();
 
 			await page.waitForSelector( selectors.frontend.productsList );
@@ -121,6 +119,10 @@ describe( `${ block.name } Block`, () => {
 			await goToShopPage();
 		} );
 
+		beforeEach( async () => {
+			await goToShopPage();
+		} );
+
 		afterAll( async () => {
 			await deleteAllTemplates( 'wp_template' );
 			await deleteAllTemplates( 'wp_template_part' );
@@ -145,12 +147,7 @@ describe( `${ block.name } Block`, () => {
 			await expect( page ).toMatch( block.foundProduct );
 			expect( isRefreshed ).not.toBeCalled();
 
-			await Promise.all( [
-				setMaxPrice(),
-				page.waitForNavigation( {
-					waitUntil: 'networkidle0',
-				} ),
-			] );
+			await Promise.all( [ page.waitForNavigation(), setMaxPrice() ] );
 
 			await page.waitForSelector(
 				selectors.frontend.classicProductsList
@@ -177,7 +174,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await selectBlockByName( block.slug );
-			await openBlockEditorSettings();
+			await openBlockEditorSettings( { isFSEEditor: true } );
 			await page.waitForXPath(
 				block.selectors.editor.filterButtonToggle
 			);
