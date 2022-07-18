@@ -27,3 +27,33 @@ In order to prepare a package for release, a changelog will need to be compiled 
 2. Confirm the package has been updated by visiting NPM. For example see https://www.npmjs.com/package/@woocommerce/components.
 
 ## Release packages using the command line
+
+### Prepare packages
+
+1. At monorepo root, run the following command to prepare all packages. Instead of the `-a` flag, you can pass in a list of packages separated by commas.
+
+```
+./tools/package-release/bin/dev prepare -a
+```
+
+2. Create a pull request with the resulting changes and merge it.
+
+See more about the prepare script using `./tools/package-release/bin/dev publish --help`.
+
+### Release Packages
+
+1. Pull down the latest commits from Github.
+
+2. Run the release script from monorepo root, first as a dry run.
+
+```
+./tools/package-release/bin/dev publish -a --dry-run
+```
+
+3. Run the release for real this time.
+
+```
+./tools/package-release/bin/dev publish -a
+```
+
+See more about the publish script using `./tools/package-release/bin/dev publish --help`.
