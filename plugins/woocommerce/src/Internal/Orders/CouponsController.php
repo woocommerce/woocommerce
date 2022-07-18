@@ -25,7 +25,7 @@ class CouponsController {
 			$order = $this->add_coupon_discount( $_POST );
 
 			ob_start();
-			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
+			include __DIR__ . '/../../../includes/admin/meta-boxes/views/html-order-items.php';
 			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
