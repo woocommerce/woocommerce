@@ -105,7 +105,7 @@ export const createReducer = () => {
 					const nextResources = payload.items.reduce<
 						Record< string, Item >
 					>( ( result, item ) => {
-						const key = getKey( item.id, payload.parent_id );
+						const key = getKey( item.id, payload.urlParameters );
 						ids.push( key );
 						result[ key ] = {
 							...( state.data[ key ] || {} ),

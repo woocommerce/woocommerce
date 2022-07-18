@@ -6,7 +6,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { getParamsFromQuery, getRestPath, parseId } from './utils';
+import { getUrlParameters, getRestPath, parseId } from './utils';
 import {
 	getItemError,
 	getItemSuccess,
@@ -20,28 +20,30 @@ type ResolverOptions = {
 	resourceName: string;
 	pluralResourceName: string;
 	namespace: string;
-	urlParameters: string[];
 };
 
 export const createResolvers = ( {
 	resourceName,
 	pluralResourceName,
 	namespace,
-	urlParameters,
 }: ResolverOptions ) => {
 	const getItem = function* ( idQuery: IdQuery ) {
-		const params = parseId( idQuery, urlParameters );
-		const { id } = params;
+		const urlParameters = getUrlParameters( namespace, idQuery );
+		const { id, key } = parseId( idQuery, urlParameters );
 		try {
 			const item: Item = yield apiFetch( {
-				path: getRestPath( `${ namespace }/${ id }`, {}, params ),
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					{},
+					urlParameters
+				),
 				method: 'GET',
 			} );
 
-			yield getItemSuccess( item.id, item, urlParameters );
+			yield getItemSuccess( key, item );
 			return item;
 		} catch ( error ) {
-			yield getItemError( id, error, urlParameters );
+			yield getItemError( key, error );
 			throw error;
 		}
 	};
@@ -49,7 +51,7 @@ export const createResolvers = ( {
 	const getItems = function* ( query?: Partial< ItemQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
 		const resourceQuery = query ? { ...query } : {};
-		const params = getParamsFromQuery( resourceQuery, urlParameters );
+		const urlParameters = getUrlParameters( namespace, query );
 
 		if (
 			resourceQuery &&
@@ -60,7 +62,7 @@ export const createResolvers = ( {
 		}
 
 		try {
-			const path = getRestPath( namespace, {}, params );
+			const path = getRestPath( namespace, {}, urlParameters );
 			const { items }: { items: Item[] } = yield request<
 				ItemQuery,
 				Item
@@ -69,7 +71,7 @@ export const createResolvers = ( {
 			yield getItemsSuccess( query, items, urlParameters );
 			return items;
 		} catch ( error ) {
-			yield getItemsError( query, error, urlParameters );
+			yield getItemsError( query, error );
 			throw error;
 		}
 	};

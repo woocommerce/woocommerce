@@ -6,7 +6,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { getParamsFromQuery, getRestPath, parseId } from './utils';
+import { getUrlParameters, getRestPath, parseId } from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
 import { IdType, IdQuery, Item, ItemQuery } from './types';
@@ -14,110 +14,66 @@ import { IdType, IdQuery, Item, ItemQuery } from './types';
 type ResolverOptions = {
 	resourceName: string;
 	namespace: string;
-	urlParameters: IdType[];
 };
 
-export function createItemError(
-	query: Partial< ItemQuery >,
-	error: unknown,
-	urlParameters: IdType[]
-) {
-	const params = getParamsFromQuery( query, urlParameters );
+export function createItemError( query: Partial< ItemQuery >, error: unknown ) {
 	return {
 		type: TYPES.CREATE_ITEM_ERROR as const,
 		query,
 		error,
 		errorType: CRUD_ACTIONS.CREATE_ITEM,
-		params,
 	};
 }
 
-export function createItemSuccess(
-	idQuery: IdQuery,
-	item: Item,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function createItemSuccess( key: IdType, item: Item ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
-		key: params.key,
+		key,
 		item,
-		params,
 	};
 }
 
-export function deleteItemError(
-	idQuery: IdQuery,
-	error: unknown,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function deleteItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.DELETE_ITEM_ERROR as const,
-		key: params.key,
+		key,
 		error,
 		errorType: CRUD_ACTIONS.DELETE_ITEM,
-		params,
 	};
 }
 
-export function deleteItemSuccess(
-	idQuery: IdQuery,
-	force: boolean,
-	item: Item,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function deleteItemSuccess( key: IdQuery, force: boolean, item: Item ) {
 	return {
 		type: TYPES.DELETE_ITEM_SUCCESS as const,
-		key: params.key,
+		key,
 		force,
 		item,
-		params,
 	};
 }
 
-export function getItemError(
-	idQuery: IdQuery,
-	error: unknown,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function getItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.GET_ITEM_ERROR as const,
-		key: params.key,
+		key,
 		error,
 		errorType: CRUD_ACTIONS.GET_ITEM,
-		params,
 	};
 }
 
-export function getItemSuccess(
-	idQuery: IdQuery,
-	item: Item,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function getItemSuccess( key: IdType, item: Item ) {
 	return {
 		type: TYPES.GET_ITEM_SUCCESS as const,
-		key: params.key,
+		key,
 		item,
-		params,
 	};
 }
 
-export function getItemsError(
-	query: Partial< ItemQuery >,
-	error: unknown,
-	urlParameters: IdType[]
-) {
-	const params = getParamsFromQuery( query, urlParameters );
+export function getItemsError( query: Partial< ItemQuery >, error: unknown ) {
 	return {
 		type: TYPES.GET_ITEMS_ERROR as const,
 		query,
 		error,
 		errorType: CRUD_ACTIONS.GET_ITEMS,
-		params,
 	};
 }
 
@@ -126,84 +82,71 @@ export function getItemsSuccess(
 	items: Item[],
 	urlParameters: IdType[]
 ) {
-	const params = getParamsFromQuery( query, urlParameters );
 	return {
 		type: TYPES.GET_ITEMS_SUCCESS as const,
 		items,
 		query,
-		params,
+		urlParameters,
 	};
 }
 
-export function updateItemError(
-	idQuery: IdQuery,
-	error: unknown,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function updateItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.UPDATE_ITEM_ERROR as const,
-		key: params.key,
+		key,
 		error,
 		errorType: CRUD_ACTIONS.UPDATE_ITEM,
-		params,
 	};
 }
 
-export function updateItemSuccess(
-	idQuery: IdQuery,
-	item: Item,
-	urlParameters: IdType[]
-) {
-	const params = parseId( idQuery, urlParameters );
+export function updateItemSuccess( key: IdType, item: Item ) {
 	return {
 		type: TYPES.UPDATE_ITEM_SUCCESS as const,
-		key: params.key,
+		key,
 		item,
-		params,
 	};
 }
 
 export const createDispatchActions = ( {
 	namespace,
 	resourceName,
-	urlParameters = [],
 }: ResolverOptions ) => {
 	const createItem = function* ( query: Partial< ItemQuery > ) {
-		const params = getParamsFromQuery( query, urlParameters );
+		const urlParameters = getUrlParameters( namespace, query );
 
 		try {
 			const item: Item = yield apiFetch( {
-				path: getRestPath( namespace, query, params ),
+				path: getRestPath( namespace, query, urlParameters ),
 				method: 'POST',
 			} );
+			const { key } = parseId( item.id, urlParameters );
 
-			yield createItemSuccess( item.id, item, urlParameters );
+			yield createItemSuccess( key, item );
 			return item;
 		} catch ( error ) {
-			yield createItemError( query, error, urlParameters );
+			yield createItemError( query, error );
 			throw error;
 		}
 	};
 
 	const deleteItem = function* ( idQuery: IdQuery, force = true ) {
-		try {
-			const params = parseId( idQuery, urlParameters );
-			const { id } = params;
+		const urlParameters = getUrlParameters( namespace, idQuery );
+		const { id, key } = parseId( idQuery, urlParameters );
 
+		try {
 			const item: Item = yield apiFetch( {
 				path: getRestPath(
 					`${ namespace }/${ id }`,
 					{ force },
-					params
+					urlParameters
 				),
 				method: 'DELETE',
 			} );
 
-			yield deleteItemSuccess( idQuery, force, item, urlParameters );
+			yield deleteItemSuccess( key, force, item );
 			return item;
 		} catch ( error ) {
-			yield deleteItemError( idQuery, error, urlParameters );
+			yield deleteItemError( key, error );
 			throw error;
 		}
 	};
@@ -212,19 +155,23 @@ export const createDispatchActions = ( {
 		idQuery: IdQuery,
 		query: Partial< ItemQuery >
 	) {
-		try {
-			const params = parseId( idQuery, urlParameters );
-			const { id } = params;
+		const urlParameters = getUrlParameters( namespace, idQuery );
+		const { id, key } = parseId( idQuery, urlParameters );
 
+		try {
 			const item: Item = yield apiFetch( {
-				path: getRestPath( `${ namespace }/${ id }`, query, params ),
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					query,
+					urlParameters
+				),
 				method: 'PUT',
 			} );
 
-			yield updateItemSuccess( idQuery, item, urlParameters );
+			yield updateItemSuccess( key, item );
 			return item;
 		} catch ( error ) {
-			yield updateItemError( idQuery, error, urlParameters );
+			yield updateItemError( key, error );
 			throw error;
 		}
 	};

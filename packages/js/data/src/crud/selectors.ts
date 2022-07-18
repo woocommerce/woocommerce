@@ -6,7 +6,7 @@ import createSelector from 'rememo';
 /**
  * Internal dependencies
  */
-import { applyUrlParameters, parseId } from './utils';
+import { applyNamespace, parseId } from './utils';
 import { getResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
@@ -15,7 +15,7 @@ import CRUD_ACTIONS from './crud-actions';
 type SelectorOptions = {
 	resourceName: string;
 	pluralResourceName: string;
-	urlParameters: IdType[];
+	namespace: string;
 };
 
 export const getItemCreateError = (
@@ -120,36 +120,30 @@ export const getItemUpdateError = (
 export const createSelectors = ( {
 	resourceName,
 	pluralResourceName,
-	urlParameters = [],
+	namespace,
 }: SelectorOptions ) => {
 	return {
-		[ `get${ resourceName }` ]: applyUrlParameters(
-			getItem,
-			urlParameters
-		),
-		[ `get${ resourceName }Error` ]: applyUrlParameters(
+		[ `get${ resourceName }` ]: applyNamespace( getItem, namespace ),
+		[ `get${ resourceName }Error` ]: applyNamespace(
 			getItemError,
-			urlParameters
+			namespace
 		),
-		[ `get${ pluralResourceName }` ]: applyUrlParameters(
-			getItems,
-			urlParameters
-		),
-		[ `get${ pluralResourceName }Error` ]: applyUrlParameters(
+		[ `get${ pluralResourceName }` ]: applyNamespace( getItems, namespace ),
+		[ `get${ pluralResourceName }Error` ]: applyNamespace(
 			getItemsError,
-			urlParameters
+			namespace
 		),
-		[ `get${ resourceName }CreateError` ]: applyUrlParameters(
+		[ `get${ resourceName }CreateError` ]: applyNamespace(
 			getItemCreateError,
-			urlParameters
+			namespace
 		),
-		[ `get${ resourceName }DeleteError` ]: applyUrlParameters(
+		[ `get${ resourceName }DeleteError` ]: applyNamespace(
 			getItemDeleteError,
-			urlParameters
+			namespace
 		),
-		[ `get${ resourceName }UpdateError` ]: applyUrlParameters(
+		[ `get${ resourceName }UpdateError` ]: applyNamespace(
 			getItemUpdateError,
-			urlParameters
+			namespace
 		),
 	};
 };

@@ -5,7 +5,7 @@ import { getKey, getRestPath, parseId } from '../utils';
 
 describe( 'utils', () => {
 	it( 'should get the rest path when no parameters are given', () => {
-		const path = getRestPath( 'test/path', {} );
+		const path = getRestPath( 'test/path', {}, [] );
 		expect( path ).toEqual( 'test/path' );
 	} );
 
@@ -29,12 +29,12 @@ describe( 'utils', () => {
 	} );
 
 	it( 'should get the key when no parent is provided', () => {
-		const key = getKey( 3, null );
+		const key = getKey( 3, [] );
 		expect( key ).toEqual( 3 );
 	} );
 
 	it( 'should get the key when a parent is provided', () => {
-		const key = getKey( 3, 5 );
+		const key = getKey( 3, [ 5 ] );
 		expect( key ).toEqual( '5/3' );
 	} );
 
@@ -42,13 +42,11 @@ describe( 'utils', () => {
 		const parsed = parseId( 3 );
 		expect( parsed.key ).toEqual( 3 );
 		expect( parsed.id ).toEqual( 3 );
-		expect( parsed.parent_id ).toEqual( null );
 	} );
 
 	it( 'should get the correct ID information when an object is given', () => {
-		const parsed = parseId( { id: 3, parent_id: 5 } );
+		const parsed = parseId( { id: 3, parent_id: 5 }, [ 5 ] );
 		expect( parsed.key ).toEqual( '5/3' );
 		expect( parsed.id ).toEqual( 3 );
-		expect( parsed.parent_id ).toEqual( 5 );
 	} );
 } );

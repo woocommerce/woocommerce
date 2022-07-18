@@ -11,31 +11,28 @@ import { IdQuery, IdType, ItemQuery } from './types';
 /**
  * Get a REST path given a template path and URL params.
  *
- * @param  templatePath  Path with variable names.
- * @param  query         Item query.
- * @param  urlParameters Array of items to replace in the templatePath.
+ * @param  templatePath Path with variable names.
+ * @param  query        Item query.
+ * @param  parameters   Array of items to replace in the templatePath.
  * @return string REST path.
  */
 export const getRestPath = (
 	templatePath: string,
 	query: Partial< ItemQuery >,
-	parameters: {
-		[ key: string ]: IdType;
-	} = {}
+	parameters: IdType[]
 ) => {
-	const path = Object.keys( parameters ).reduce( ( str, param ) => {
-		return str
-			.toString()
-			.replace( `{${ param }}`, parameters[ param ].toString() );
-	}, templatePath );
+	let path = templatePath;
 
-	const pattern = /\{${str}}/;
-	const regex = new RegExp( pattern );
+	path.match( /{(.*?)}/g )?.forEach( ( str, i ) => {
+		path = path.replace( str, parameters[ i ].toString() );
+	} );
+
+	const regex = new RegExp( /{|}/ );
 	if ( regex.test( path.toString() ) ) {
 		throw new Error( 'Not all URL parameters were replaced' );
 	}
 
-	return addQueryArgs( path.toString(), query );
+	return addQueryArgs( path, query );
 };
 
 /**
@@ -46,20 +43,21 @@ export const getRestPath = (
  * @return string
  */
 export const getKey = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
-	if ( typeof query === 'string' || typeof query === 'number' ) {
-		return query;
-	}
+	const id =
+		typeof query === 'string' || typeof query === 'number'
+			? query
+			: query.id;
 
 	if ( ! urlParameters.length ) {
-		return query.id;
+		return id;
 	}
 
 	let prefix = '';
 	urlParameters.forEach( ( param ) => {
-		prefix = prefix + query[ param ] + '/';
+		prefix = param + '/';
 	} );
 
-	return `${ prefix }${ query.id }`;
+	return `${ prefix }${ id }`;
 };
 
 /**
@@ -94,9 +92,10 @@ export const parseId = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 		};
 	}
 
-	const params = getParamsFromQuery( query, urlParameters );
-	const key = getKey( query, urlParameters );
-	return { id: query.id, ...params, key };
+	return {
+		id: query.id,
+		key: getKey( query, urlParameters ),
+	};
 };
 
 /**
@@ -114,12 +113,42 @@ export const deleteParamsFromQuery = (
 	} );
 };
 
+/**
+ * Create a new function that adds in the namespace.
+ *
+ * @param  fn        Function to wrap.
+ * @param  namespace Namespace to pass to last argument of function.
+ * @return Wrapped function
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const applyUrlParameters = < T extends ( ...args: any[] ) => unknown >(
+export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
 	fn: T,
-	urlParameters: IdType[]
+	namespace: string
 ) => {
 	return ( ...args: Parameters< T > ) => {
-		fn( ...args, urlParameters );
+		fn( ...args, namespace );
 	};
+};
+
+/**
+ * Get URL parameters from namespace and provided query.
+ *
+ * @param  namespace Namespace string to replace params in.
+ * @param  query     Query object with key values.
+ * @return Array of URL parameter values.
+ */
+export const getUrlParameters = (
+	namespace: string,
+	query: Partial< ItemQuery > | IdQuery
+) => {
+	const params: IdType[] = [];
+
+	namespace.match( /{(.*?)}/g )?.forEach( ( match ) => {
+		const key = match.substr( 1, match.length - 2 );
+		if ( query.hasOwnProperty( key ) ) {
+			params.push( key );
+		}
+	} );
+
+	return params;
 };

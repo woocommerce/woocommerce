@@ -67,7 +67,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
-			parent_id: null,
+			urlParameters: [],
 		} );
 
 		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
@@ -80,7 +80,7 @@ describe( 'crud reducer', () => {
 		expect( state.data[ 2 ] ).toEqual( items[ 1 ] );
 	} );
 
-	it( 'should handle GET_ITEMS_SUCCESS with parent_id', () => {
+	it( 'should handle GET_ITEMS_SUCCESS with urlParameters', () => {
 		const items: Item[] = [
 			{ id: 1, name: 'Yum!' },
 			{ id: 2, name: 'Dynamite!' },
@@ -90,7 +90,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
-			parent_id: 5,
+			urlParameters: [ 5 ],
 		} );
 
 		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
@@ -123,7 +123,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
-			parent_id: null,
+			urlParameters: [],
 		} );
 
 		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
