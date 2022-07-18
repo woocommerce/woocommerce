@@ -36,14 +36,16 @@ class WC_Product_Simple extends WC_Product {
 	 * Adding product photo suggestions in upload modal.
 	 */
 	public function add_product_photo_suggestions ( $content ) {
-		error_log(print_r($content, true));
 
-		$meta_content = '<p>';
-		$meta_content .= esc_html__( 'For best results, upload JPEG files that are 1000 by 1000 pixels or larger. Maximum upload size: 2 GB', 'woocommerce' );
-		$meta_content .= ' <a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '</a>';
-		$meta_content .= '</p>';
+		$suggestion  = '<div class="image-added-detail">';
+		$suggestion .= '<p>';
+		$suggestion .= '<span class="dashicons-info-outline dashicons"></span>';
+		$suggestion .= esc_html__( 'Upload JPEG files that are 1000 x 1000 pixels or larger (max. 2 GB).', 'woocommerce' );
+		$suggestion .= ' <a href="https://woocommerce.com/posts/fast-high-quality-product-photos/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to prepare images?', 'woocommerce' ) . '<span class="dashicons-external dashicons"></span></a>';
+		$suggestion .= '</p>';
+		$suggestion .= '</div>';
 
-		return "$content $meta_content";
+		return $content . $suggestion;
 	}
 
 	/**
