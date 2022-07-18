@@ -63,6 +63,7 @@ const runOrderStatusFiltersTest = () => {
 				const shownStatus = { text: statusText };
 				const hiddenStatuses = orderStatus
 					.filter( ( pair ) => ! pair.includes( statusText ) )
+					// eslint-disable-next-line no-shadow
 					.map( ( [ statusText ] ) => {
 						return { text: statusText };
 					} );
@@ -97,4 +98,5 @@ const runOrderStatusFiltersTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runOrderStatusFiltersTest;

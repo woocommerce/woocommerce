@@ -36,6 +36,7 @@ const runOrderApplyCouponTest = () => {
 			await page.removeAllListeners( 'dialog' );
 
 			// Make sure the simple product price is greater than the coupon amount
+			// eslint-disable-next-line jest/no-standalone-expect
 			await expect( Number( simpleProductPrice ) ).toBeGreaterThan( 5.0 );
 		} );
 
@@ -68,9 +69,7 @@ const runOrderApplyCouponTest = () => {
 			await expect( page ).toMatchElement( '.wc-order-item-discount', {
 				text: '5.00',
 			} );
-			await expect(
-				page
-			).toMatchElement(
+			await expect( page ).toMatchElement(
 				'.line_cost > .view > .woocommerce-Price-amount',
 				{ text: discountedPrice }
 			);
@@ -102,17 +101,13 @@ const runOrderApplyCouponTest = () => {
 				'.wc-order-item-discount',
 				{ text: '5.00' }
 			);
-			await expect(
-				page
-			).not.toMatchElement(
+			await expect( page ).not.toMatchElement(
 				'.line-cost .view .woocommerce-Price-amount',
 				{ text: discountedPrice }
 			);
 
 			// Verify the original price is the order total
-			await expect(
-				page
-			).toMatchElement(
+			await expect( page ).toMatchElement(
 				'.line_cost > .view > .woocommerce-Price-amount',
 				{ text: simpleProductPrice }
 			);
@@ -120,4 +115,5 @@ const runOrderApplyCouponTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runOrderApplyCouponTest;

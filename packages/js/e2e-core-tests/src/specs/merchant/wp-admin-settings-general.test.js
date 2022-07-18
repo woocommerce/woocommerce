@@ -59,9 +59,7 @@ const runUpdateGeneralSettingsTest = () => {
 				expect( page ).toMatchElement( '#message', {
 					text: 'Your settings have been saved.',
 				} ),
-				expect(
-					page
-				).toMatchElement(
+				expect( page ).toMatchElement(
 					'select[name="woocommerce_default_country"]',
 					{ text: 'United States (US) — California' }
 				),
@@ -88,9 +86,7 @@ const runUpdateGeneralSettingsTest = () => {
 					'#woocommerce_allowed_countries',
 					{ text: 'Sell to specific countries' }
 				),
-				expect(
-					page
-				).toMatchElement(
+				expect( page ).toMatchElement(
 					'select[name="woocommerce_specific_allowed_countries[]"]',
 					{ text: 'United States (US)' }
 				),
