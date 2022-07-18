@@ -146,9 +146,7 @@ describe( `${ block.name } Block`, () => {
 			expect( isRefreshed ).not.toBeCalled();
 
 			await Promise.all( [
-				page.waitForNavigation( {
-					waitUntil: 'networkidle0',
-				} ),
+				page.waitForNavigation(),
 				page.click( selectors.frontend.filter ),
 			] );
 
@@ -173,7 +171,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await selectBlockByName( block.slug );
-			await openBlockEditorSettings();
+			await openBlockEditorSettings( { isFSEEditor: true } );
 			const [ filterButtonToggle ] = await page.$x(
 				block.selectors.editor.filterButtonToggle
 			);

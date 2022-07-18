@@ -53,7 +53,7 @@ const block = {
 
 const FILTER_STOCK_STATUS_TITLE = 'Stock Status';
 const FILTER_STOCK_STATUS_PROPERTY = 'In stock';
-const FILTER_CAPACITY_TITLE = 'Capacity';
+const FILTER_CAPACITY_TITLE = 'Capacity:';
 const FILTER_CAPACITY_PROPERTY = '128gb';
 
 const { selectors } = block;
@@ -68,9 +68,24 @@ const insertBlocks = async () => {
 const configurateFilterProductsByAttributeBlock = async (
 	pageOrCanvas: Page | Frame
 ) => {
-	await pageOrCanvas.click( selectors.editor.firstAttributeInTheList );
+	await pageOrCanvas.$eval(
+		selectors.editor.firstAttributeInTheList,
+		( el ) => ( el as HTMLElement ).click()
+	);
 	await pageOrCanvas.click( selectors.editor.doneButton );
 };
+
+const getActiveFilterTypeText = () =>
+	page.$eval(
+		selectors.frontend.activeFilterType,
+		( el ) => ( el as HTMLElement ).innerText
+	);
+
+const getActiveFilterNameText = () =>
+	page.$eval(
+		selectors.frontend.activeFilterName,
+		( el ) => ( el as HTMLElement ).childNodes[ 0 ].textContent
+	);
 
 describe( 'Shopper → Active Filters Block', () => {
 	describe( 'With All Products block', () => {
@@ -115,11 +130,10 @@ describe( 'Shopper → Active Filters Block', () => {
 				text: FILTER_CAPACITY_PROPERTY,
 			} );
 
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterType,
-				{
-					text: FILTER_CAPACITY_TITLE,
-				}
+			const activeFilterType = await getActiveFilterTypeText();
+
+			expect( activeFilterType ).toBe(
+				FILTER_CAPACITY_TITLE.toUpperCase()
 			);
 
 			await waitForAllProductsBlockLoaded();
@@ -130,12 +144,9 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await expect( page ).toMatch( FILTER_STOCK_STATUS_TITLE );
 
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterName,
-				{
-					text: FILTER_STOCK_STATUS_PROPERTY,
-				}
-			);
+			const activeFilterNameText = await getActiveFilterNameText();
+
+			expect( activeFilterNameText ).toBe( FILTER_STOCK_STATUS_PROPERTY );
 
 			await waitForAllProductsBlockLoaded();
 
@@ -188,13 +199,6 @@ describe( 'Shopper → Active Filters Block', () => {
 			await expect( page ).toClick( 'label', {
 				text: FILTER_CAPACITY_PROPERTY,
 			} );
-
-			await expect( page ).toMatchElement(
-				selectors.frontend.removeAllFiltersButton,
-				{
-					text: 'Clear All',
-				}
-			);
 
 			await page.click( selectors.frontend.removeAllFiltersButton );
 
@@ -252,13 +256,11 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await page.waitForSelector( block.class );
 
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterType,
-				{
-					text: FILTER_CAPACITY_TITLE,
-				}
-			);
+			const activeFilterType = await getActiveFilterTypeText();
 
+			expect( activeFilterType ).toBe(
+				FILTER_CAPACITY_TITLE.toUpperCase()
+			);
 			await page.waitForSelector( selectors.frontend.stockFilterBlock );
 
 			await expect( page ).toClick( 'label', {
@@ -269,19 +271,8 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await page.waitForSelector( block.class );
 
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterType,
-				{
-					text: 'Stock Status',
-				}
-			);
-
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterName,
-				{
-					text: FILTER_STOCK_STATUS_PROPERTY,
-				}
-			);
+			const activeFilterNameText = await getActiveFilterNameText();
+			expect( activeFilterNameText ).toBe( FILTER_STOCK_STATUS_PROPERTY );
 
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
@@ -314,13 +305,6 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await page.waitForSelector( block.class );
 
-			await expect( page ).toMatchElement(
-				selectors.frontend.activeFilterType,
-				{
-					text: FILTER_CAPACITY_TITLE,
-				}
-			);
-
 			await clickLink( selectors.frontend.removeFilterButton );
 
 			const products = await page.$$(
@@ -346,13 +330,6 @@ describe( 'Shopper → Active Filters Block', () => {
 			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 			await page.waitForSelector( block.class );
-
-			await expect( page ).toMatchElement(
-				selectors.frontend.removeAllFiltersButton,
-				{
-					text: 'Clear All',
-				}
-			);
 
 			await clickLink( selectors.frontend.removeAllFiltersButton );
 

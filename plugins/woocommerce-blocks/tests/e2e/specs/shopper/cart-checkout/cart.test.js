@@ -21,10 +21,15 @@ describe( 'Shopper → Cart', () => {
 	it( 'User can view empty cart message', async () => {
 		await shopper.block.goToCart();
 
+		await page.waitForSelector( '.wc-block-cart__empty-cart__title' );
+
 		// Verify cart is empty'
-		await expect( page ).toMatchElement( 'h2', {
-			text: 'Your cart is currently empty!',
-		} );
+		await expect( page ).toMatchElement(
+			'.wc-block-cart__empty-cart__title',
+			{
+				text: 'Your cart is currently empty!',
+			}
+		);
 	} );
 
 	it( 'User can remove a product from cart', async () => {

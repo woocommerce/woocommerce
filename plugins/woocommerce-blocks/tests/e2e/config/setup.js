@@ -49,6 +49,7 @@ module.exports = async ( globalConfig ) => {
 			enablePaymentGateways(),
 			setupPageSettings(),
 		] ).catch( console.log );
+
 		const [ taxes, coupons, categories, tags, shippingZones, attributes ] =
 			results;
 		// Create products after categories.

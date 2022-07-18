@@ -22,7 +22,9 @@ import { clickLink } from '.';
  * @param {string} link the page or post you want to visit.
  */
 async function visitPage( link ) {
-	await page.goto( link );
+	await page.goto( link, {
+		waitUntil: 'load',
+	} );
 	await page.waitForSelector( '.edit-post-layout' );
 	const isWelcomeGuideActive = await page.evaluate( () =>
 		wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
