@@ -18,7 +18,7 @@ export type IdQuery =
 	| IdType
 	| {
 			id: IdType;
-			parent_id: IdType;
+			[ key: string ]: IdType;
 	  };
 
 export type Item = {
@@ -29,6 +29,10 @@ export type Item = {
 export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
 	parent_id?: IdType;
+};
+
+export type Params = {
+	[ key: string ]: IdType;
 };
 
 type WithRequiredProperty< Type, Key extends keyof Type > = Type & {

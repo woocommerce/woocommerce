@@ -19,13 +19,17 @@ import { IdQuery, IdType, ItemQuery } from './types';
 export const getRestPath = (
 	templatePath: string,
 	query: Partial< ItemQuery >,
-	urlParameters: IdType[] = []
+	parameters: {
+		[ key: string ]: IdType;
+	} = {}
 ) => {
-	const pattern = /\{(.*?)}/;
-	const path = urlParameters.reduce( ( str, param ) => {
-		return str.toString().replace( pattern, param.toString() );
+	const path = Object.keys( parameters ).reduce( ( str, param ) => {
+		return str
+			.toString()
+			.replace( `{${ param }}`, parameters[ param ].toString() );
 	}, templatePath );
 
+	const pattern = /\{${str}}/;
 	const regex = new RegExp( pattern );
 	if ( regex.test( path.toString() ) ) {
 		throw new Error( 'Not all URL parameters were replaced' );
@@ -37,16 +41,43 @@ export const getRestPath = (
 /**
  * Get a key from an item ID and optional parent.
  *
- * @param  id        Item ID.
- * @param  parent_id Optional parent ID.
+ * @param  query         Item Query.
+ * @param  urlParameters Parameters used for URL.
  * @return string
  */
-export const getKey = ( id: IdType, parent_id: IdType | null | undefined ) => {
-	if ( ! parent_id ) {
-		return id;
+export const getKey = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
+	if ( typeof query === 'string' || typeof query === 'number' ) {
+		return query;
 	}
 
-	return `${ parent_id }/${ id }`;
+	if ( ! urlParameters.length ) {
+		return query.id;
+	}
+
+	let prefix = '';
+	urlParameters.forEach( ( param ) => {
+		prefix = prefix + query[ param ] + '/';
+	} );
+
+	return `${ prefix }${ query.id }`;
+};
+
+/**
+ * Get parameters from query.
+ *
+ * @param  query         Query object to look for params.
+ * @param  parameterKeys Keys to look for.
+ * @return object        Object of found parameters in query.
+ */
+export const getParamsFromQuery = (
+	query: Partial< ItemQuery >,
+	parameterKeys: IdType[]
+) => {
+	const params = {} as { [ key: string ]: IdType };
+	parameterKeys.forEach( ( key ) => {
+		params[ key ] = query[ key ] as IdType;
+	} );
+	return params;
 };
 
 /**
@@ -55,15 +86,40 @@ export const getKey = ( id: IdType, parent_id: IdType | null | undefined ) => {
  * @param  query Id Query
  * @return string ID.
  */
-export const parseId = ( query: IdQuery ) => {
+export const parseId = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 	if ( typeof query === 'string' || typeof query === 'number' ) {
 		return {
 			id: query,
-			parent_id: null,
 			key: query,
 		};
 	}
 
-	const key = getKey( query.id, query.parent_id );
-	return { ...query, key };
+	const params = getParamsFromQuery( query, urlParameters );
+	const key = getKey( query, urlParameters );
+	return { id: query.id, ...params, key };
+};
+
+/**
+ * Delete params from a query.
+ *
+ * @param  query         Query to delete from.
+ * @param  parameterKeys Keys to delete.
+ */
+export const deleteParamsFromQuery = (
+	query: Partial< ItemQuery >,
+	parameterKeys: string[]
+) => {
+	parameterKeys.forEach( ( key ) => {
+		delete query[ key ];
+	} );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const applyUrlParameters = < T extends ( ...args: any[] ) => unknown >(
+	fn: T,
+	urlParameters: IdType[]
+) => {
+	return ( ...args: Parameters< T > ) => {
+		fn( ...args, urlParameters );
+	};
 };

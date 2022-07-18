@@ -6,15 +6,16 @@ import createSelector from 'rememo';
 /**
  * Internal dependencies
  */
+import { applyUrlParameters, parseId } from './utils';
 import { getResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
-import { parseId } from './utils';
 
 type SelectorOptions = {
 	resourceName: string;
 	pluralResourceName: string;
+	urlParameters: IdType[];
 };
 
 export const getItemCreateError = (
@@ -104,24 +105,51 @@ export const getItemsError = ( state: ResourceState, query?: ItemQuery ) => {
 
 export const getItemUpdateError = (
 	state: ResourceState,
-	idQuery: IdQuery
+	idQuery: IdQuery,
+	urlParameters: IdType[]
 ) => {
-	const { key } = parseId( idQuery );
-	const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, { key } );
+	const params = parseId( idQuery, urlParameters );
+	const { key } = params;
+	const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, {
+		key,
+		params,
+	} );
 	return state.errors[ itemQuery ];
 };
 
 export const createSelectors = ( {
 	resourceName,
 	pluralResourceName,
+	urlParameters = [],
 }: SelectorOptions ) => {
 	return {
-		[ `get${ resourceName }` ]: getItem,
-		[ `get${ resourceName }Error` ]: getItemError,
-		[ `get${ pluralResourceName }` ]: getItems,
-		[ `get${ pluralResourceName }Error` ]: getItemsError,
-		[ `get${ resourceName }CreateError` ]: getItemCreateError,
-		[ `get${ resourceName }DeleteError` ]: getItemDeleteError,
-		[ `get${ resourceName }UpdateError` ]: getItemUpdateError,
+		[ `get${ resourceName }` ]: applyUrlParameters(
+			getItem,
+			urlParameters
+		),
+		[ `get${ resourceName }Error` ]: applyUrlParameters(
+			getItemError,
+			urlParameters
+		),
+		[ `get${ pluralResourceName }` ]: applyUrlParameters(
+			getItems,
+			urlParameters
+		),
+		[ `get${ pluralResourceName }Error` ]: applyUrlParameters(
+			getItemsError,
+			urlParameters
+		),
+		[ `get${ resourceName }CreateError` ]: applyUrlParameters(
+			getItemCreateError,
+			urlParameters
+		),
+		[ `get${ resourceName }DeleteError` ]: applyUrlParameters(
+			getItemDeleteError,
+			urlParameters
+		),
+		[ `get${ resourceName }UpdateError` ]: applyUrlParameters(
+			getItemUpdateError,
+			urlParameters
+		),
 	};
 };

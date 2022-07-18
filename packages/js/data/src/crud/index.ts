@@ -18,6 +18,7 @@ type CrudDataStore = {
 	resourceName: string;
 	pluralResourceName: string;
 	namespace: string;
+	urlParameters?: string[];
 };
 
 export const createCrudDataStore = ( {
@@ -25,20 +26,24 @@ export const createCrudDataStore = ( {
 	resourceName,
 	namespace,
 	pluralResourceName,
+	urlParameters = [],
 }: CrudDataStore ) => {
 	const reducer = createReducer();
 	const actions = createDispatchActions( {
 		resourceName,
 		namespace,
+		urlParameters,
 	} );
 	const resolvers = createResolvers( {
 		resourceName,
 		pluralResourceName,
 		namespace,
+		urlParameters,
 	} );
 	const selectors = createSelectors( {
 		resourceName,
 		pluralResourceName,
+		urlParameters,
 	} );
 
 	registerStore( storeName, {

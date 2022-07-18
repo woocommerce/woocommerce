@@ -6,53 +6,50 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { getRestPath, parseId } from './utils';
+import { getParamsFromQuery, getRestPath, parseId } from './utils';
 import {
 	getItemError,
 	getItemSuccess,
 	getItemsError,
 	getItemsSuccess,
 } from './actions';
+import { IdQuery, Item, ItemQuery } from './types';
 import { request } from '../utils';
-import { IdType, IdQuery, Item, ItemQuery } from './types';
 
 type ResolverOptions = {
 	resourceName: string;
 	pluralResourceName: string;
 	namespace: string;
+	urlParameters: string[];
 };
 
 export const createResolvers = ( {
 	resourceName,
 	pluralResourceName,
 	namespace,
+	urlParameters,
 }: ResolverOptions ) => {
 	const getItem = function* ( idQuery: IdQuery ) {
-		const { id, parent_id } = parseId( idQuery );
+		const params = parseId( idQuery, urlParameters );
+		const { id } = params;
 		try {
 			const item: Item = yield apiFetch( {
-				path: getRestPath(
-					`${ namespace }/${ id }`,
-					{},
-					parent_id ? [ parent_id ] : []
-				),
+				path: getRestPath( `${ namespace }/${ id }`, {}, params ),
 				method: 'GET',
 			} );
 
-			yield getItemSuccess( item.id, item );
+			yield getItemSuccess( item.id, item, urlParameters );
 			return item;
 		} catch ( error ) {
-			yield getItemError( id, error );
+			yield getItemError( id, error, urlParameters );
 			throw error;
 		}
 	};
 
-	const getItems = function* (
-		query?: Partial< ItemQuery >,
-		...urlParameters: string[]
-	) {
+	const getItems = function* ( query?: Partial< ItemQuery > ) {
 		// Require ID when requesting specific fields to later update the resource data.
 		const resourceQuery = query ? { ...query } : {};
+		const params = getParamsFromQuery( resourceQuery, urlParameters );
 
 		if (
 			resourceQuery &&
@@ -63,21 +60,16 @@ export const createResolvers = ( {
 		}
 
 		try {
-			const parent_id = query.parent_id as IdType;
-			const path = getRestPath(
-				namespace,
-				{},
-				parent_id ? [ parent_id ] : []
-			);
+			const path = getRestPath( namespace, {}, params );
 			const { items }: { items: Item[] } = yield request<
 				ItemQuery,
 				Item
 			>( path, resourceQuery );
 
-			yield getItemsSuccess( query, items );
+			yield getItemsSuccess( query, items, urlParameters );
 			return items;
 		} catch ( error ) {
-			yield getItemsError( query, error );
+			yield getItemsError( query, error, urlParameters );
 			throw error;
 		}
 	};
