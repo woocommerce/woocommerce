@@ -95,12 +95,12 @@ class WC_Site_Tracking {
 				}
 				// Verify the event name is correct
 				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
-					throw new Error( `A valid event name must be specified. The event name: "${ eventName }" is not valid.` );
+					console.error( `A valid event name must be specified. The event name: "${ eventName }" is not valid.` );
 				}
 				// Verify the properties are correct
 				for( prop in eventProperties ) {
 					if ( ! <?php echo esc_js( WC_Tracks_Event::PROP_NAME_REGEX ); ?>.test( prop ) ) {
-						throw new Error( `A valid prop name must be specified. The property name: "${ prop }" is not valid.` );
+						console.error( `A valid prop name must be specified. The property name: "${ prop }" is not valid.` );
 					}
 				}
 				window._tkq = window._tkq || [];
