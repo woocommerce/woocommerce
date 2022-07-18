@@ -22,10 +22,15 @@ jobs:
               with:
                   php-version: '7.4'
 
-            - name: log
-              run: |
-                  echo ${{ github.ref }}
-                  echo ${{ github.ref_name }}
+            # - name: Set NPM credentials
+            #   run: |
+            #       npm set "//registry.npmjs.org/:_authToken" ${{ secrets.NPM_TOKEN }}
+
+            - name: Setup Node
+              uses: actions/setup-node@v2
+              with:
+                  node-version: '16'
+                  registry-url: 'https://registry.npmjs.org'
 
             - name: Install PNPM
               run: npm install -g pnpm@^6.24.2
@@ -35,3 +40,5 @@ jobs:
 
             - name: Execute script
               run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} --skip-install
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
