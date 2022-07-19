@@ -64,6 +64,7 @@ jobs:
               run: pnpx playwright install chromium
 
             - name: Run Playwright E2E tests.
+              timeout-minutes: 60
               id: run_playwright_e2e_tests
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
