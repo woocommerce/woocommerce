@@ -7,7 +7,7 @@ on:
                 required: false
                 default: '-a'
 jobs:
-    prepare:
+    release:
         name: Run packages release script
         runs-on: ubuntu-20.04
         steps:
@@ -21,10 +21,6 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   php-version: '7.4'
-
-            # - name: Set NPM credentials
-            #   run: |
-            #       npm set "//registry.npmjs.org/:_authToken" ${{ secrets.NPM_TOKEN }}
 
             - name: Setup Node
               uses: actions/setup-node@v2
