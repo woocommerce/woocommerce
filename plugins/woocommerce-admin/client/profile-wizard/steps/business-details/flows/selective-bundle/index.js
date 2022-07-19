@@ -13,6 +13,7 @@ import {
 	__experimentalText as Text,
 	FlexItem,
 	CheckboxControl,
+	Spinner,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { SelectControl, Form, TextControl } from '@woocommerce/components';
@@ -725,27 +726,33 @@ class BusinessDetails extends Component {
 
 	render() {
 		const tabs = [];
-		if ( this.props.hasFinishedGetFreeExtensionsResolution ) {
+		if ( ! this.props.hasFinishedGetFreeExtensionsResolution ) {
+			return (
+				<div className="woocommerce-admin__business-details__spinner">
+					<Spinner />
+				</div>
+			);
+		}
+
+		tabs.push( {
+			name:
+				this.state.currentTab === BUSINESS_DETAILS_TAB_NAME
+					? 'current-tab'
+					: BUSINESS_DETAILS_TAB_NAME,
+			id: BUSINESS_DETAILS_TAB_NAME,
+			title: __( 'Business details', 'woocommerce' ),
+		} );
+
+		if ( this.props.hasInstallableExtensions ) {
 			tabs.push( {
 				name:
-					this.state.currentTab === BUSINESS_DETAILS_TAB_NAME
+					this.state.currentTab === BUSINESS_FEATURES_TAB_NAME
 						? 'current-tab'
-						: BUSINESS_DETAILS_TAB_NAME,
-				id: BUSINESS_DETAILS_TAB_NAME,
-				title: __( 'Business details', 'woocommerce' ),
+						: BUSINESS_FEATURES_TAB_NAME,
+				id: BUSINESS_FEATURES_TAB_NAME,
+				title: __( 'Free features', 'woocommerce' ),
+				className: this.state.isValid ? '' : 'is-disabled',
 			} );
-
-			if ( this.props.hasInstallableExtensions ) {
-				tabs.push( {
-					name:
-						this.state.currentTab === BUSINESS_FEATURES_TAB_NAME
-							? 'current-tab'
-							: BUSINESS_FEATURES_TAB_NAME,
-					id: BUSINESS_FEATURES_TAB_NAME,
-					title: __( 'Free features', 'woocommerce' ),
-					className: this.state.isValid ? '' : 'is-disabled',
-				} );
-			}
 		}
 
 		// There is a hack here to help us manage the selected tab programmatically.
