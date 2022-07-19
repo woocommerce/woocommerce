@@ -435,13 +435,19 @@ class BusinessDetails extends Component {
 			<Form
 				initialValues={ this.state.savedValues.businessDetailsTab }
 				onSubmit={ ( values ) => {
-					this.setState( {
-						savedValues: {
-							...this.state.savedValues,
-							businessDetailsTab: values,
-						},
-						currentTab: BUSINESS_FEATURES_TAB_NAME,
-					} );
+					if ( this.props.hasInstallableExtensions ) {
+						this.setState( {
+							savedValues: {
+								...this.state.savedValues,
+								businessDetailsTab: values,
+							},
+							currentTab: BUSINESS_FEATURES_TAB_NAME,
+						} );
+					} else {
+						goToNextStep( {
+							step: BUSINESS_FEATURES_TAB_NAME,
+						} );
+					}
 
 					this.trackBusinessDetailsStep( values );
 					recordEvent( 'storeprofiler_step_view', {
@@ -729,12 +735,7 @@ class BusinessDetails extends Component {
 				title: __( 'Business details', 'woocommerce' ),
 			} );
 
-			const hasInstallableExtensions =
-				this.props.installableExtensions.some(
-					( { plugins } ) => plugins.length > 0
-				);
-
-			if ( hasInstallableExtensions ) {
+			if ( this.props.hasInstallableExtensions ) {
 				tabs.push( {
 					name:
 						this.state.currentTab === BUSINESS_FEATURES_TAB_NAME
@@ -805,25 +806,31 @@ export const BusinessFeaturesList = compose(
 			? settings.woocommerce_default_country
 			: null;
 
+		const installableExtensions = freeExtensions
+			? getInstallableExtensions( {
+					freeExtensionBundleByCategory: freeExtensions,
+					country,
+					productTypes: profileItems.product_types,
+			  } )
+			: [];
+		const hasInstallableExtensions = installableExtensions.some(
+			( { plugins } ) => plugins.length > 0
+		);
+
 		return {
 			hasInstallActivateError:
 				getPluginsError( 'installPlugins' ) ||
 				getPluginsError( 'activatePlugins' ),
-			installableExtensions: freeExtensions
-				? getInstallableExtensions( {
-						freeExtensionBundleByCategory: freeExtensions,
-						country,
-						productTypes: profileItems.product_types,
-				  } )
-				: [],
+			hasInstallableExtensions,
+			hasFinishedGetFreeExtensionsResolution:
+				hasFinishedResolution( 'getFreeExtensions' ),
+			installableExtensions,
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			isSettingsError: Boolean( getSettingsError( 'general' ) ),
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ) ||
 				isPluginsRequesting( 'getJetpackConnectUrl' ),
-			hasFinishedGetFreeExtensionsResolution:
-				hasFinishedResolution( 'getFreeExtensions' ),
 			profileItems,
 			settings,
 		};
