@@ -974,7 +974,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get a list of inplugins active on the site.
+	 * Get a list of plugins inactive on the site.
 	 *
 	 * @return array
 	 */
