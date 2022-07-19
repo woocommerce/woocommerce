@@ -81,21 +81,6 @@ export const parseId = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 };
 
 /**
- * Delete params from a query.
- *
- * @param  query         Query to delete from.
- * @param  parameterKeys Keys to delete.
- */
-export const deleteParamsFromQuery = (
-	query: Partial< ItemQuery >,
-	parameterKeys: string[]
-) => {
-	parameterKeys.forEach( ( key ) => {
-		delete query[ key ];
-	} );
-};
-
-/**
  * Create a new function that adds in the namespace.
  *
  * @param  fn        Function to wrap.
@@ -112,6 +97,12 @@ export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
 	};
 };
 
+/**
+ * Get the key names from a namespace string.
+ *
+ * @param  namespace Namespace to get keys from.
+ * @return Array of keys.
+ */
 export const getNamespaceKeys = ( namespace: string ) => {
 	const keys: string[] = [];
 
