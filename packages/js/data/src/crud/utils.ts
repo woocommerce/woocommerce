@@ -61,24 +61,6 @@ export const getKey = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 };
 
 /**
- * Get parameters from query.
- *
- * @param  query         Query object to look for params.
- * @param  parameterKeys Keys to look for.
- * @return object        Object of found parameters in query.
- */
-export const getParamsFromQuery = (
-	query: Partial< ItemQuery >,
-	parameterKeys: IdType[]
-) => {
-	const params = {} as { [ key: string ]: IdType };
-	parameterKeys.forEach( ( key ) => {
-		params[ key ] = query[ key ] as IdType;
-	} );
-	return params;
-};
-
-/**
  * Parse an ID query into a ID string.
  *
  * @param  query Id Query
@@ -126,7 +108,7 @@ export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
 	namespace: string
 ) => {
 	return ( ...args: Parameters< T > ) => {
-		fn( ...args, namespace );
+		return fn( ...args, namespace );
 	};
 };
 
@@ -139,14 +121,20 @@ export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
  */
 export const getUrlParameters = (
 	namespace: string,
-	query: Partial< ItemQuery > | IdQuery
+	query: IdQuery | Partial< ItemQuery >
 ) => {
+	if ( typeof query !== 'object' ) {
+		return [];
+	}
+
 	const params: IdType[] = [];
+	const keys: string[] = [];
 
 	namespace.match( /{(.*?)}/g )?.forEach( ( match ) => {
 		const key = match.substr( 1, match.length - 2 );
+		keys.push( key );
 		if ( query.hasOwnProperty( key ) ) {
-			params.push( key );
+			params.push( query[ key ] as IdType );
 		}
 	} );
 

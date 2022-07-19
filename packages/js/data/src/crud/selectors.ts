@@ -6,7 +6,7 @@ import createSelector from 'rememo';
 /**
  * Internal dependencies
  */
-import { applyNamespace, parseId } from './utils';
+import { applyNamespace, getUrlParameters, parseId } from './utils';
 import { getResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
@@ -28,20 +28,32 @@ export const getItemCreateError = (
 
 export const getItemDeleteError = (
 	state: ResourceState,
-	idQuery: IdQuery
+	idQuery: IdQuery,
+	namespace: string
 ) => {
-	const { key } = parseId( idQuery );
+	const urlParameters = getUrlParameters( namespace, idQuery );
+	const { key } = parseId( idQuery, urlParameters );
 	const itemQuery = getResourceName( CRUD_ACTIONS.DELETE_ITEM, { key } );
 	return state.errors[ itemQuery ];
 };
 
-export const getItem = ( state: ResourceState, idQuery: IdQuery ) => {
-	const { key } = parseId( idQuery );
+export const getItem = (
+	state: ResourceState,
+	idQuery: IdQuery,
+	namespace: string
+) => {
+	const urlParameters = getUrlParameters( namespace, idQuery );
+	const { key } = parseId( idQuery, urlParameters );
 	return state.data[ key ];
 };
 
-export const getItemError = ( state: ResourceState, idQuery: IdQuery ) => {
-	const { key } = parseId( idQuery );
+export const getItemError = (
+	state: ResourceState,
+	idQuery: IdQuery,
+	namespace: string
+) => {
+	const urlParameters = getUrlParameters( namespace, idQuery );
+	const { key } = parseId( idQuery, urlParameters );
 	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { key } );
 	return state.errors[ itemQuery ];
 };
@@ -75,11 +87,13 @@ export const getItems = createSelector(
 			} );
 		}
 
-		return ids
+		const data = ids
 			.map( ( id: IdType ) => {
 				return state.data[ id ];
 			} )
 			.filter( ( item ) => item !== undefined );
+
+		return data;
 	},
 	( state, query ) => {
 		const itemQuery = getResourceName(
@@ -89,6 +103,7 @@ export const getItems = createSelector(
 		const ids = state.items[ itemQuery ]
 			? state.items[ itemQuery ].data
 			: undefined;
+
 		return [
 			state.items[ itemQuery ],
 			...( ids || [] ).map( ( id: string ) => {
