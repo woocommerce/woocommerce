@@ -13,6 +13,7 @@ const config = {
 		[ 'html', { outputFolder: 'output' } ],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
 	],
+	maxFailures: process.env.CI ? 10 : undefined,
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',
