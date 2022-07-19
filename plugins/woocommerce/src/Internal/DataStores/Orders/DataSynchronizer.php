@@ -270,7 +270,7 @@ WHERE
 	 *
 	 * @param array $batch Batch details.
 	 */
-	public function process_batch( array $batch ) {
+	public function process_batch( array $batch ) : void {
 		$this->posts_to_cot_migrator->migrate_orders( $batch );
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
