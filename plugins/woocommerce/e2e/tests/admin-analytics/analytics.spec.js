@@ -26,7 +26,7 @@ test.describe( 'Analytics pages', () => {
 			const pageTitle = page.locator( 'h1' );
 			await expect( pageTitle ).toContainText( aPages );
 			await expect(
-				page.locator( '#woocommerce-layout__primary' )
+				page.locator( '#woocommerce-layout__primary_foo' )
 			).toBeVisible();
 		} );
 	}
