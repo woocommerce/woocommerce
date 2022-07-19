@@ -1021,7 +1021,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @return void
 	 */
 	public function delete( &$order, $args = array() ) {
-		$order_id  = $order->get_id();
+		$order_id = $order->get_id();
 
 		if ( ! $order_id ) {
 			return;
@@ -1243,12 +1243,18 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		if ( isset( $query_vars['anonymized'] ) ) {
-			$query_vars['meta_query'] = $query_vars['meta_query'] ?? array();
+			$query_vars['meta_query'] = $query_vars['meta_query'] ?? array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
 			if ( $query_vars['anonymized'] ) {
-				$query_vars['meta_query'][] = array( 'key' => '_anonymized', 'value' => 'yes' );
+				$query_vars['meta_query'][] = array(
+					'key'   => '_anonymized',
+					'value' => 'yes',
+				);
 			} else {
-				$query_vars['meta_query'][] = array( 'key' => '_anonymized', 'compare' => 'NOT EXISTS' );
+				$query_vars['meta_query'][] = array(
+					'key'     => '_anonymized',
+					'compare' => 'NOT EXISTS',
+				);
 			}
 		}
 
@@ -1265,8 +1271,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
 			$orders = $query->orders;
 		} else {
-			//update_post_caches( $query->posts ); // We already fetching posts, might as well hydrate some caches.
-			//$orders    = $this->compile_orders( $order_ids, $query_vars, $query );
 			$orders = array_map( 'wc_get_order', $query->orders );
 		}
 
