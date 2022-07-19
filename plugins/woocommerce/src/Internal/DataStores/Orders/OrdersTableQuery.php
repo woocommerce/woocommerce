@@ -18,7 +18,7 @@ class OrdersTableQuery {
 	/**
 	 * Values to ignore when parsing query arguments.
 	 */
-	private const SKIPPED_VALUES = array( '', array(), null );
+	public const SKIPPED_VALUES = array( '', array(), null );
 
 	/**
 	 * Query vars set by the user.
@@ -105,6 +105,14 @@ class OrdersTableQuery {
 	private $found_orders = 0;
 
 	/**
+	 * Meta query parser.
+	 *
+	 * @var OrdersTableMetaQuery
+	 */
+	private $meta_query = null;
+
+
+	/**
 	 * Sets up and runs the query after processing arguments.
 	 *
 	 * @param array $args Array of query vars.
@@ -124,8 +132,9 @@ class OrdersTableQuery {
 		$this->original_args = $args;
 		$this->args          = $args;
 
-		$this->remap_args();
-		$this->validate_args();
+		// TODO: args to be implemented.
+		unset( $this->args['type'], $this->args['customer'], $this->args['customer_note'], $this->args['name'] );
+
 		$this->build_query();
 		$this->run_query();
 	}
@@ -135,7 +144,7 @@ class OrdersTableQuery {
 	 *
 	 * @return void
 	 */
-	private function remap_args(): void {
+	private function maybe_remap_args(): void {
 		$mapping = array(
 			// WP_Query legacy.
 			'post_date'           => 'date_created_gmt',
@@ -186,15 +195,37 @@ class OrdersTableQuery {
 				unset( $this->args[ $query_key ] );
 			}
 		}
+
+		// meta_query.
+		$this->args['meta_query'] = ( $this->arg_isset( 'meta_query' ) && is_array( $this->args['meta_query'] ) ) ? $this->args['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+
+		$shortcut_meta_query = array();
+		foreach ( array( 'key', 'value', 'compare', 'type', 'compare_key', 'type_key' ) as $key ) {
+			if ( $this->arg_isset( "meta_{$key}" ) ) {
+				$shortcut_meta_query[ $key ] = $this->args[ "meta_{$key}" ];
+			}
+		}
+
+		if ( ! empty( $shortcut_meta_query ) ) {
+			if ( ! empty( $this->args['meta_query'] ) ) {
+				$this->args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
+					$shortcut_meta_query,
+					$this->args['meta_query'],
+				);
+			} else {
+				$this->args['meta_query'] = array( $shortcut_meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			}
+		}
 	}
 
 	/**
-	 * Validates query vars.
+	 * Sanitizes the 'status' query var.
 	 *
 	 * @return void
 	 */
-	private function validate_args(): void {
-		// Order statuses.
+	private function sanitize_status(): void {
+		// Sanitize status.
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
 		if ( empty( $this->args['status'] ) || 'any' === $this->args['status'] ) {
@@ -210,16 +241,6 @@ class OrdersTableQuery {
 
 			$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
 		}
-
-		// 'order' and 'orderby' vars.
-		$this->args['order'] = $this->sanitize_order( $this->args['order'] ?? '' );
-		$this->sanitize_orderby( $this->args['orderby'] ?? 'date' );
-
-		// TODO: 'type', 'customer'.
-		// TODO: Keys from $this->internal_meta_keys (i.e. _key)
-		// TODO: meta_query
-		// TODO: customer_note, name.
-		unset( $this->args['type'], $this->args['customer'], $this->args['meta_query'], $this->args['customer_note'], $this->args['name'] );
 	}
 
 	/**
@@ -229,17 +250,17 @@ class OrdersTableQuery {
 	 */
 	private function sanitize_orderby(): void {
 		// Allowed keys.
-		// TODO: rand, metakeys, etc.
+		// TODO: rand, meta keys, etc.
 		$allowed_keys = array( 'ID', 'id', 'type', 'date', 'modified', 'parent' );
 
 		// Translate $orderby to a valid field.
 		$mapping = array(
-			'ID'       => 'orders.id',
-			'id'       => 'orders.id',
-			'type'     => 'orders.type',
-			'date'     => 'orders.date_created_gmt',
-			'modified' => 'orders.date_updated_gmt',
-			'parent'   => 'orders.parent_order_id',
+			'ID'       => "{$this->tables['orders']}.id",
+			'id'       => "{$this->tables['orders']}.id",
+			'type'     => "{$this->tables['orders']}.type",
+			'date'     => "{$this->tables['orders']}.date_created_gmt",
+			'modified' => "{$this->tables['orders']}.date_updated_gmt",
+			'parent'   => "{$this->tables['orders']}.parent_order_id",
 		);
 
 		$order   = $this->args['order'];
@@ -279,12 +300,35 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function build_query(): void {
-		$this->parse_core_fields();
-		$this->parse_orderby();
-		$this->parse_limit();
+		$this->maybe_remap_args();
+
+		// Build query.
+		$this->process_orders_table_query_args();
+		$this->process_operational_data_table_query_args();
+		$this->process_addresses_table_query_args();
+
+		// Meta queries.
+		if ( ! empty( $this->args['meta_query'] ) ) {
+			$this->meta_query = new OrdersTableMetaQuery( $this );
+
+			$sql = $this->meta_query->get_sql_clauses();
+
+			$this->join  = array_merge( $this->join, $sql['join'] );
+			$this->where = array_merge( $this->where, (array) $sql['where'] );
+
+			$this->groupby[] = "{$this->tables['orders']}.id";
+		}
+
+		$this->process_orderby();
+		$this->process_limit();
+
+		$orders_table = $this->tables['orders'];
+
+		// DISTINCT.
+		$distinct = '';
 
 		// SELECT [fields].
-		$this->fields = 'orders.id';
+		$this->fields = "{$orders_table}.id";
 		$fields       = $this->fields;
 
 		// SQL_CALC_FOUND_ROWS.
@@ -295,21 +339,12 @@ class OrdersTableQuery {
 		}
 
 		// JOIN.
-		$join = '';
-		foreach ( $this->join as $alias => $_join ) {
-			$join .= " LEFT JOIN ${_join['table']} {$alias} ON ({$_join['on']})";
-		}
+		$join = implode( ' ', $this->join );
 
 		// WHERE.
 		$where = '1=1';
 		foreach ( $this->where as $_where ) {
-			$condition = $this->get_where_condition( $_where['table'], $_where['field'], $_where['value'], $_where['type'] ?? false, $_where['operator'] ?? false );
-
-			if ( ! $condition ) {
-				continue;
-			}
-
-			$where .= " AND ({$condition})";
+			$where .= " AND ({$_where})";
 		}
 
 		// ORDER BY.
@@ -318,12 +353,10 @@ class OrdersTableQuery {
 		// LIMITS.
 		$limits = $this->limits ? 'LIMIT ' . implode( ',', $this->limits ) : '';
 
-		$distinct = '';
-		$groupby  = '';
+		// GROUP BY.
+		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
-		$orders_table = $this->tables['orders'];
-
-		$this->sql = "SELECT $found_rows $distinct $fields FROM $orders_table orders $join WHERE $where $groupby $orderby $limits";
+		$this->sql = "SELECT $found_rows $distinct $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 	}
 
 	/**
@@ -336,7 +369,7 @@ class OrdersTableQuery {
 	 * @param string $operator The operator to use in the condition. Defaults to '=' or 'IN' depending on $value.
 	 * @return string The resulting WHERE condition.
 	 */
-	private function get_where_condition( string $table, string $field, $value, string $type, string $operator = '' ): string {
+	public function get_where_condition( string $table, string $field, $value, string $type, string $operator = '' ): string {
 		global $wpdb;
 
 		$db_util  = wc_get_container()->get( DatabaseUtil::class );
@@ -372,87 +405,119 @@ class OrdersTableQuery {
 	}
 
 	/**
-	 * Processes query vars for all supported core fields from custom order tables.
+	 * Processes fields related to the orders table.
 	 *
 	 * @return void
 	 */
-	private function parse_core_fields(): void {
-		global $wpdb;
+	private function process_orders_table_query_args(): void {
+		$this->sanitize_status();
 
-		// Orders.
-		foreach ( array( 'id', 'status', 'type', 'currency', 'tax_amount', 'customer_id', 'billing_email', 'total_amount', 'parent_order_id', 'payment_method', 'payment_method_title', 'transaction_id', 'ip_address', 'user_agent' ) as $arg_key ) {
-			if ( ! $this->arg_isset( $arg_key ) ) {
-				continue;
-			}
+		$fields = array_filter(
+			array(
+				'id',
+				'status',
+				'type',
+				'currency',
+				'tax_amount',
+				'customer_id',
+				'billing_email',
+				'total_amount',
+				'parent_order_id',
+				'payment_method',
+				'payment_method_title',
+				'transaction_id',
+				'ip_address',
+				'user_agent',
+			),
+			array( $this, 'arg_isset' )
+		);
 
-			$this->where[] = array(
-				'table' => 'orders',
-				'field' => $arg_key,
-				'value' => $this->args[ $arg_key ],
-				'type'  => $this->mappings['orders'][ $arg_key ]['type'],
-			);
+		foreach ( $fields as $arg_key ) {
+			$this->where[] = $this->get_where_condition( $this->tables['orders'], $arg_key, $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
 		}
 
 		if ( $this->arg_isset( 'parent_exclude' ) ) {
-			$this->where[] = array(
-				'table'    => 'orders',
-				'field'    => 'id',
-				'operator' => '!=',
-				'value'    => $this->args['parent_exclude'],
-				'type'     => 'int',
-			);
+			$this->where[] = $this->get_where_condition( $this->tables['orders'], 'parent_order_id', $this->args['parent_exclude'], 'int', '!=' );
 		}
 
 		if ( $this->arg_isset( 'exclude' ) ) {
-			$this->where[] = array(
-				'table'    => 'orders',
-				'field'    => 'id',
-				'operator' => '!=',
-				'value'    => $this->args['exclude'],
-				'type'     => 'int',
-			);
+			$this->where[] = $this->get_where_condition( $this->tables['orders'], 'id', $this->args['exclude'], 'int', '!=' );
+		}
+	}
+
+	/**
+	 * Processes fields related to the operational data table.
+	 *
+	 * @return void
+	 */
+	private function process_operational_data_table_query_args(): void {
+		$fields = array_filter(
+			array(
+				'created_via',
+				'woocommerce_version',
+				'prices_include_tax',
+				'order_key',
+				'discount_total_amount',
+				'discount_tax_amount',
+				'shipping_total_amount',
+				'shipping_tax_amount',
+			),
+			array( $this, 'arg_isset' )
+		);
+
+		if ( ! $fields ) {
+			return;
 		}
 
-		// Operational data.
-		foreach ( array( 'created_via', 'woocommerce_version', 'prices_include_tax', 'order_key', 'discount_total_amount', 'discount_tax_amount', 'shipping_total_amount', 'shipping_tax_amount' ) as $arg_key ) {
-			if ( ! $this->arg_isset( $arg_key ) ) {
+		$this->join[] = "INNER JOIN {$this->tables['operational_data']} ON ( {$this->tables['orders']}.id = {$this->tables['operational_data']}.order_id )";
+
+		foreach ( $fields as $arg_key ) {
+			$this->where[] = $this->get_where_condition( $this->tables['operational_data'], $arg_key, $this->args[ $arg_key ], $this->mappings['operational_data'][ $arg_key ]['type'] );
+		}
+	}
+
+	/**
+	 * Processes fields related to the addresses table.
+	 *
+	 * @return void
+	 */
+	private function process_addresses_table_query_args(): void {
+		global $wpdb;
+
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			$fields = array_filter(
+				array(
+					$address_type . '_first_name',
+					$address_type . '_last_name',
+					$address_type . '_company',
+					$address_type . '_address_1',
+					$address_type . '_address_2',
+					$address_type . '_city',
+					$address_type . '_state',
+					$address_type . '_postcode',
+					$address_type . '_country',
+					$address_type . '_phone',
+				),
+				array( $this, 'arg_isset' )
+			);
+
+			if ( ! $fields ) {
 				continue;
 			}
 
-			if ( ! isset( $this->join['operational_data'] ) ) {
-				$this->join['operational_data'] = array(
-					'table' => $this->tables['operational_data'],
-					'on'    => 'orders.id = operational_data.order_id',
-				);
-			}
-
-			$this->where[] = array(
-				'table' => 'operational_data',
-				'field' => $arg_key,
-				'value' => $this->args[ $arg_key ],
-				'type'  => $this->mappings['operational_data'][ $arg_key ]['type'],
+			$this->join[] = $wpdb->prepare(
+				"INNER JOIN {$this->tables['addresses']} AS {$address_type} ON ( {$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$address_type
 			);
-		}
 
-		// Process billing & shipping address fields.
-		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			foreach ( array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' ) as $field_name ) {
-				if ( ! $this->arg_isset( "{$address_type}_{$field_name}" ) ) {
-					continue;
-				}
+			foreach ( $fields as $arg_key ) {
+				$column_name = str_replace( "{$address_type}_", '', $arg_key );
 
-				if ( ! isset( $this->join[ "{$address_type}_address" ] ) ) {
-					$this->join[ "{$address_type}_address" ] = array(
-						'table' => $this->tables['addresses'],
-						'on'    => $wpdb->prepare( "orders.id = {$address_type}_address.order_id AND {$address_type}_address.address_type = %s", $address_type ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					);
-				}
-
-				$this->where[] = array(
-					'table' => "{$address_type}_address",
-					'field' => $field_name,
-					'value' => $this->args[ "{$address_type}_{$field_name}" ],
-					'type'  => $this->mappings[ "{$address_type}_address" ][ $field_name ]['type'],
+				$this->where[] = $this->get_where_condition(
+					$address_type,
+					$column_name,
+					$this->args[ $arg_key ],
+					$this->mappings[ "{$address_type}_address" ][ $column_name ]['type']
 				);
 			}
 		}
@@ -463,7 +528,11 @@ class OrdersTableQuery {
 	 *
 	 * @return void
 	 */
-	private function parse_orderby(): void {
+	private function process_orderby(): void {
+		// 'order' and 'orderby' vars.
+		$this->args['order'] = $this->sanitize_order( $this->args['order'] ?? '' );
+		$this->sanitize_orderby( $this->args['orderby'] ?? 'date' );
+
 		$orderby = $this->args['orderby'];
 
 		if ( 'none' === $orderby ) {
@@ -484,7 +553,7 @@ class OrdersTableQuery {
 	 *
 	 * @return void
 	 */
-	private function parse_limit(): void {
+	private function process_limit(): void {
 		$paginate = ( $this->arg_isset( 'paginate' ) ? (bool) $this->args['paginate'] : false );
 		$limit    = ( $this->arg_isset( 'limit' ) ? absint( $this->args['limit'] ) : false );
 		$page     = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
@@ -503,7 +572,7 @@ class OrdersTableQuery {
 	 * @param string $arg_key Query var.
 	 * @return bool TRUE if query var is set.
 	 */
-	private function arg_isset( string $arg_key ): bool {
+	public function arg_isset( string $arg_key ): bool {
 		return ( isset( $this->args[ $arg_key ] ) && ! in_array( $this->args[ $arg_key ], self::SKIPPED_VALUES, true ) );
 	}
 
@@ -550,6 +619,32 @@ class OrdersTableQuery {
 			default:
 				break;
 		}
+	}
+
+	/**
+	 * Returns the value of one of the query arguments.
+	 *
+	 * @param string $arg_name Query var.
+	 * @return mixed
+	 */
+	public function get( $arg_name ) {
+		return isset( $this->args[ $arg_name ] ) ? $this->args[ $arg_name ] : null;
+	}
+
+	/**
+	 * Returns the name of one of the OrdersTableDatastore tables.
+	 *
+	 * @param string $table_id Table identifier. One of 'orders', 'operational_data', 'addresses', 'meta'.
+	 * @return string The prefixed table name.
+	 * @throws \Exception When table ID is not found.
+	 */
+	public function get_table_name( $table_id = '' ): string {
+		if ( ! isset( $this->tables[ $table_id ] ) ) {
+			// Translators: %s is a table identifier.
+			throw new \Exception( sprintf( __( 'Invalid table id: %s.', 'woocommerce' ), $table_id ) );
+		}
+
+		return $this->tables[ $table_id ];
 	}
 
 }
