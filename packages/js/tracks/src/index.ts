@@ -2,6 +2,10 @@
  * External dependencies
  */
 import debug from 'debug';
+/**
+ * Internal dependencies
+ */
+import { validateEventName, validateProperties } from './utils';
 
 /**
  * Module variables
@@ -40,7 +44,9 @@ export function recordEvent(
 	if (
 		! window.wcTracks ||
 		typeof window.wcTracks.recordEvent !== 'function' ||
-		process.env.NODE_ENV === 'development'
+		process.env.NODE_ENV === 'development' ||
+		! validateEventName( eventName ) ||
+		! validateProperties( eventProperties )
 	) {
 		return false;
 	}
