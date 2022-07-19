@@ -82,11 +82,15 @@ class BatchProcessingController {
 	 * Enqueue a processor so that it will get batch processing requests from within scheduled actions.
 	 *
 	 * @param string $processor_class_name Fully qualified class name of the processor, must implement `BatchProcessorInterface`.
+	 *
+	 * @throws \Exception When unable to instantiate processor object.
 	 */
 	public function enqueue_processor( string $processor_class_name ): void {
 		$pending_updates = $this->get_enqueued_processors();
 		if ( ! in_array( $processor_class_name, array_keys( $pending_updates ), true ) ) {
 			$pending_updates[] = $processor_class_name;
+			$processor = $this->get_processor_instance( $processor_class_name );
+			$this->reset_processor_state( $processor );
 			$this->set_enqueued_processors( $pending_updates );
 		}
 		$this->schedule_watchdog_action( false, true );
@@ -148,7 +152,7 @@ class BatchProcessingController {
 		if ( $pending_count_after > 0 ) {
 			$this->schedule_batch_processing( $processor_class_name );
 		} else {
-			$this->dequeue_processor( $processor_class_name );
+			$this->dequeue_processor( $batch_processor );
 		}
 	}
 
@@ -186,13 +190,14 @@ class BatchProcessingController {
 	 *
 	 * @return array Current state for the processor, or a "blank" state if none exists yet.
 	 */
-	private function get_process_details( BatchProcessorInterface $batch_processor ): array {
+	public function get_process_details( BatchProcessorInterface $batch_processor ): array {
 		return get_option(
 			$this->get_processor_state_option_name( $batch_processor ),
 			array(
 				'total_time_spent'   => 0,
 				'current_batch_size' => $batch_processor->get_default_batch_size(),
 				'last_error'         => null,
+				'status'             => 'inactive',
 			)
 		);
 	}
@@ -218,12 +223,23 @@ class BatchProcessingController {
 	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
 	 * @param float                   $time_taken Time take by the batch to complete processing.
 	 * @param \Exception|null         $last_error Exception object in processing the batch, if there was one.
+	 * @param string                  $status Whether the process is inactive, in-progress or conpleted.
 	 */
-	private function update_processor_state( BatchProcessorInterface $batch_processor, float $time_taken, \Exception $last_error = null ): void {
+	private function update_processor_state( BatchProcessorInterface $batch_processor, float $time_taken, \Exception $last_error = null, string $status = 'in-progress' ): void {
 		$current_status                      = $this->get_process_details( $batch_processor );
 		$current_status['total_time_spent'] += $time_taken;
 		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;
+		$current_status['status']            = $status;
 		update_option( $this->get_processor_state_option_name( $batch_processor ), $current_status, false );
+	}
+
+	/**
+	 * Helper method to reset processor state.
+	 *
+	 * @param BatchProcessorInterface $batchProcessor Batch processor instance.
+	 */
+	private function reset_processor_state( BatchProcessorInterface $batchProcessor ) : void {
+		delete_option( $this->get_processor_state_option_name( $batchProcessor ) );
 	}
 
 	/**
@@ -292,12 +308,13 @@ class BatchProcessingController {
 	/**
 	 * Dequeue a processor once it has no more items pending processing.
 	 *
-	 * @param string $processor_class_name Full processor class name.
+	 * @param BatchProcessorInterface $processor Processor instance.
 	 */
-	private function dequeue_processor( string $processor_class_name ): void {
+	private function dequeue_processor( BatchProcessorInterface $processor ): void {
 		$pending_processes = $this->get_enqueued_processors();
-		if ( in_array( $processor_class_name, $pending_processes, true ) ) {
-			$pending_processes = array_diff( $pending_processes, array( $processor_class_name ) );
+		$this->update_processor_state( $processor, 0, null, 'completed' );
+		if ( in_array( $processor, $pending_processes, true ) ) {
+			$pending_processes = array_diff( $pending_processes, array( $processor ) );
 			$this->set_enqueued_processors( $pending_processes );
 		}
 	}

@@ -100,4 +100,28 @@ class BatchProcessingControllerTests extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
 		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 	}
+
+	/**
+	 * @testdox Batch status resets when it's enqueued again after completion.
+	 */
+	public function test_state_is_reset_on_update_finished() {
+		$test_process_mock = $this->getMockBuilder( get_class( $this->test_process ) )->getMock();
+		$test_process_mock->expects( $this->once() )->method( 'process_batch' )->willReturn( true );
+		$test_process_mock->method( 'get_total_pending_count' )->willReturn( 0 );
+		$test_process_mock->expects( $this->once() )->method( 'get_next_batch_to_process' )->willReturn( array() );
+		add_filter(
+			'woocommerce_get_batch_processor',
+			function() use ( $test_process_mock ) {
+				return $test_process_mock;
+			}
+		);
+		$this->sut->enqueue_processor( get_class( $this->test_process ) );
+		do_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->test_process ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$process_details = $this->sut->get_process_details( $this->test_process );
+		$this->assertEquals( 'completed', $process_details['status'] );
+
+		$this->sut->enqueue_processor( get_class( $this->test_process ) );
+		$process_details = $this->sut->get_process_details( $this->test_process );
+		$this->assertEquals( 'inactive', $process_details['status'] );
+	}
 }
