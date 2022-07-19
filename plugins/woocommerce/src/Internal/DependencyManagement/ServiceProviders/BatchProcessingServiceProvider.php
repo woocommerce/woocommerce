@@ -1,21 +1,19 @@
 <?php
 /**
- * Service provider for COTMigration.
+ * Service provider for ActionUpdateController class.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
-use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 
 /**
- * Class COTMigrationServiceProvider
+ * Class BatchProcessingServiceProvider
  *
  * @package Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders
  */
-class COTMigrationServiceProvider extends AbstractServiceProvider {
+class BatchProcessingServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * Services provided by this provider.
@@ -23,9 +21,7 @@ class COTMigrationServiceProvider extends AbstractServiceProvider {
 	 * @var string[]
 	 */
 	protected $provides = array(
-		PostsToOrdersMigrationController::class,
-		CLIRunner::class,
-		DataSynchronizer::class,
+		BatchProcessingController::class,
 	);
 
 	/**
@@ -36,6 +32,6 @@ class COTMigrationServiceProvider extends AbstractServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		$this->share( PostsToOrdersMigrationController::class );
+		$this->share( BatchProcessingController::class, new BatchProcessingController() );
 	}
 }
