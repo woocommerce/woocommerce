@@ -17,6 +17,19 @@ import classNames from 'classnames';
  */
 import './style.scss';
 
+/**
+ * @param {Object}    props
+ * @param {string=}   props.categories
+ * @param {boolean=}  props.isLoading
+ * @param {string=}   props.error
+ * @param {Function}  props.onChange
+ * @param {Function=} props.onOperatorChange
+ * @param {string=}   props.operator
+ * @param {number[]}  props.selected
+ * @param {boolean=}  props.isCompact
+ * @param {boolean=}  props.isSingle
+ * @param {boolean=}  props.showReviewCount
+ */
 const ProductCategoryControl = ( {
 	categories,
 	error,
