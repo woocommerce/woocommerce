@@ -112,6 +112,17 @@ export const applyNamespace = < T extends ( ...args: any[] ) => unknown >(
 	};
 };
 
+export const getNamespaceKeys = ( namespace: string ) => {
+	const keys: string[] = [];
+
+	namespace.match( /{(.*?)}/g )?.forEach( ( match ) => {
+		const key = match.substr( 1, match.length - 2 );
+		keys.push( key );
+	} );
+
+	return keys;
+};
+
 /**
  * Get URL parameters from namespace and provided query.
  *
@@ -128,15 +139,33 @@ export const getUrlParameters = (
 	}
 
 	const params: IdType[] = [];
-	const keys: string[] = [];
-
-	namespace.match( /{(.*?)}/g )?.forEach( ( match ) => {
-		const key = match.substr( 1, match.length - 2 );
-		keys.push( key );
+	const keys = getNamespaceKeys( namespace );
+	keys.forEach( ( key ) => {
 		if ( query.hasOwnProperty( key ) ) {
 			params.push( query[ key ] as IdType );
 		}
 	} );
 
 	return params;
+};
+
+/**
+ * Clean a query of all namespaced params.
+ *
+ * @param  query     Query to clean.
+ * @param  namespace
+ * @return Cleaned query object.
+ */
+export const cleanQuery = (
+	query: Partial< ItemQuery >,
+	namespace: string
+) => {
+	const cleaned = { ...query };
+
+	const keys = getNamespaceKeys( namespace );
+	keys.forEach( ( key ) => {
+		delete cleaned[ key ];
+	} );
+
+	return cleaned;
 };

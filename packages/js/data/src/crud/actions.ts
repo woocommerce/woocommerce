@@ -6,7 +6,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { getUrlParameters, getRestPath, parseId } from './utils';
+import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
 import { IdType, IdQuery, Item, ItemQuery } from './types';
@@ -68,7 +68,10 @@ export function getItemSuccess( key: IdType, item: Item ) {
 	};
 }
 
-export function getItemsError( query: Partial< ItemQuery >, error: unknown ) {
+export function getItemsError(
+	query: Partial< ItemQuery > | undefined,
+	error: unknown
+) {
 	return {
 		type: TYPES.GET_ITEMS_ERROR as const,
 		query,
@@ -78,7 +81,7 @@ export function getItemsError( query: Partial< ItemQuery >, error: unknown ) {
 }
 
 export function getItemsSuccess(
-	query: Partial< ItemQuery >,
+	query: Partial< ItemQuery > | undefined,
 	items: Item[],
 	urlParameters: IdType[]
 ) {
@@ -116,7 +119,11 @@ export const createDispatchActions = ( {
 
 		try {
 			const item: Item = yield apiFetch( {
-				path: getRestPath( namespace, query, urlParameters ),
+				path: getRestPath(
+					namespace,
+					cleanQuery( query, namespace ),
+					urlParameters
+				),
 				method: 'POST',
 			} );
 			const { key } = parseId( item.id, urlParameters );
@@ -162,7 +169,7 @@ export const createDispatchActions = ( {
 			const item: Item = yield apiFetch( {
 				path: getRestPath(
 					`${ namespace }/${ id }`,
-					query,
+					cleanQuery( query, namespace ),
 					urlParameters
 				),
 				method: 'PUT',

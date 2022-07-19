@@ -6,7 +6,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { getUrlParameters, getRestPath, parseId } from './utils';
+import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
 import {
 	getItemError,
 	getItemSuccess,
@@ -49,10 +49,10 @@ export const createResolvers = ( {
 	};
 
 	const getItems = function* ( query?: Partial< ItemQuery > ) {
-		// Require ID when requesting specific fields to later update the resource data.
-		const resourceQuery = query ? { ...query } : {};
-		const urlParameters = getUrlParameters( namespace, query );
+		const urlParameters = getUrlParameters( namespace, query || {} );
+		const resourceQuery = cleanQuery( query || {}, namespace );
 
+		// Require ID when requesting specific fields to later update the resource data.
 		if (
 			resourceQuery &&
 			resourceQuery._fields &&
