@@ -990,6 +990,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 				continue;
 			}
 
+			// 'status' is a little special (for backwards compat.).
+			if ( 'status' === $column ) {
+				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] );
+			}
+
 			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );
 			$row_format[ $column ] = $this->database_util->get_wpdb_format_for_type( $details['type'] );
 		}
