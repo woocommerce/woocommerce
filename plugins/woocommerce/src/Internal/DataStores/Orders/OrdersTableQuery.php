@@ -263,8 +263,8 @@ class OrdersTableQuery {
 			'parent'   => "{$this->tables['orders']}.parent_order_id",
 		);
 
-		$order   = $this->args['order'];
-		$orderby = $this->args['orderby'];
+		$order   = $this->args['order'] ?? '';
+		$orderby = $this->args['orderby'] ?? '';
 
 		if ( 'none' === $orderby ) {
 			return;
@@ -313,10 +313,12 @@ class OrdersTableQuery {
 
 			$sql = $this->meta_query->get_sql_clauses();
 
-			$this->join  = array_merge( $this->join, $sql['join'] );
-			$this->where = array_merge( $this->where, (array) $sql['where'] );
+			$this->join  = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
+			$this->where = $sql['where'] ? array_merge( $this->where, array( $sql['where'] ) ) : $this->where;
 
-			$this->groupby[] = "{$this->tables['orders']}.id";
+			if ( $sql['join'] ) {
+				$this->groupby[] = "{$this->tables['orders']}.id";
+			}
 		}
 
 		$this->process_orderby();
@@ -348,7 +350,7 @@ class OrdersTableQuery {
 		}
 
 		// ORDER BY.
-		$orderby = 'ORDER BY ' . $this->orderby;
+		$orderby = $this->orderby ? ( 'ORDER BY ' . $this->orderby ) : '';
 
 		// LIMITS.
 		$limits = $this->limits ? 'LIMIT ' . implode( ',', $this->limits ) : '';
@@ -390,6 +392,12 @@ class OrdersTableQuery {
 
 		if ( ! in_array( $operator, array( '=', '!=', 'IN', 'NOT IN' ), true ) ) {
 			return false;
+		}
+
+		if ( is_array( $value ) ) {
+			$value = array_map( array( $db_util, 'format_object_value_for_db' ), $value, array_fill( 0, count( $value ), $type ) );
+		} else {
+			$value = $db_util->format_object_value_for_db( $value, $type );
 		}
 
 		if ( is_array( $value ) ) {

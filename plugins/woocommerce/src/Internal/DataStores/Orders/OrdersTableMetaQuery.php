@@ -246,10 +246,17 @@ class OrdersTableMetaQuery {
 				continue;
 			}
 
-			$chunks[] = $this->flatten_where_clauses( $w );
+			$flattened = $this->flatten_where_clauses( $w );
+			if ( $flattened ) {
+				$chunks[] = $flattened;
+			}
 		}
 
-		return '(' . implode( " {$operator} ", $chunks ) . ')';
+		if ( $chunks ) {
+			return '(' . implode( " {$operator} ", $chunks ) . ')';
+		} else {
+			return '';
+		}
 	}
 
 	/**
@@ -265,6 +272,7 @@ class OrdersTableMetaQuery {
 		$queries     = $this->queries;
 		$sql_where   = $this->process( $queries );
 		$this->where = $sql_where;
+
 	}
 
 	/**
@@ -362,7 +370,7 @@ class OrdersTableMetaQuery {
 				continue;
 			}
 
-			if ( $this->is_operator_compatible_with_shared_join( $clause, $sibling, $parent_query['relation'] ) ) {
+			if ( $this->is_operator_compatible_with_shared_join( $clause, $sibling, $parent_query['relation'] ?? 'AND' ) ) {
 				$alias = $sibling['alias'];
 				break;
 			}
