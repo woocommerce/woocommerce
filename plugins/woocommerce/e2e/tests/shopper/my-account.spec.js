@@ -8,7 +8,7 @@ const pages = [
 ];
 
 test.describe( 'My account page', () => {
-	test.use( { storageState: 'e2e/storage/customerState.json' } );
+	test.use( { storageState: process.env.CUSTOMERSTATE } );
 
 	test( 'allows customer to login', async ( { page } ) => {
 		await page.goto( 'my-account/' );

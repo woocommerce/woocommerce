@@ -15,7 +15,7 @@ const stockAmount = '100';
 const lowStockAmount = '10';
 
 test.describe( 'Add New Variable Product Page', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {

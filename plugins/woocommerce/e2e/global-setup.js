@@ -2,17 +2,21 @@ const { chromium } = require( '@playwright/test' );
 const fs = require( 'fs' );
 
 module.exports = async ( config ) => {
+	const { stateDir } = config.projects[ 0 ].use;
+	const { baseURL } = config.projects[ 0 ].use;
+	// used throughout tests for authentication
+	process.env.ADMINSTATE = `${ stateDir }adminState.json`;
+	process.env.CUSTOMERSTATE = `${ stateDir }customerState.json`;
+
 	// Clear out the previous save states
-	const adminState = 'e2e/storage/adminState.json';
-	const customerState = 'e2e/storage/customerState.json';
-	fs.unlink( adminState, function ( err ) {
+	fs.unlink( process.env.ADMINSTATE, function ( err ) {
 		if ( err ) {
 			// File doesn't exist yet, so will just create it.
 		} else {
 			// File exists. Delete it so it can be re-created.
 		}
 	} );
-	fs.unlink( customerState, function ( err ) {
+	fs.unlink( process.env.CUSTOMERSTATE, function ( err ) {
 		if ( err ) {
 			// File doesn't exist yet, so will just create it.
 		} else {
@@ -20,7 +24,6 @@ module.exports = async ( config ) => {
 		}
 	} );
 
-	const { baseURL } = config.projects[ 0 ].use;
 	// Sign in as admin user and save state
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
@@ -28,7 +31,7 @@ module.exports = async ( config ) => {
 	await adminPage.fill( 'input[name="log"]', 'admin' );
 	await adminPage.fill( 'input[name="pwd"]', 'password' );
 	await adminPage.click( 'text=Log In' );
-	await adminPage.context().storageState( { path: adminState } );
+	await adminPage.context().storageState( { path: process.env.ADMINSTATE } );
 
 	// While we're here, let's add a consumer token for API access
 	// This step was failing occasionally, and globalsetup doesn't retry, so make it retry
@@ -55,6 +58,8 @@ module.exports = async ( config ) => {
 	await customerPage.fill( 'input[name="log"]', 'customer' );
 	await customerPage.fill( 'input[name="pwd"]', 'password' );
 	await customerPage.click( 'text=Log In' );
-	await customerPage.context().storageState( { path: customerState } );
+	await customerPage
+		.context()
+		.storageState( { path: process.env.CUSTOMERSTATE } );
 	await browser.close();
 };

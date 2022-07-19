@@ -1,7 +1,44 @@
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Analytics pages', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.afterEach( async ( { page } ) => {
+		// do some cleanup after each test to make sure things are where they should be
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
+			{ waitForLoadState: 'networkidle' }
+		);
+
+		// Grab all of the section headings
+		const sections = await page.$$(
+			'h2.woocommerce-section-header__title'
+		);
+		if ( sections.length < 3 ) {
+			// performance section is hidden
+			await page.click( '//button[@title="Add more sections"]' );
+			await page.click( '//button[@title="Add Performance section"]' );
+			await page.waitForSelector( 'h2:has-text("Performance")', {
+				state: 'visible',
+			} );
+			await page.waitForLoadState( 'networkidle' );
+		}
+		const lastSection = await page.textContent(
+			'h2.woocommerce-section-header__title >> nth=2'
+		);
+		if ( lastSection === 'Performance' ) {
+			// sections are in the wrong order
+			await page.click(
+				'//button[@title="Choose which analytics to display and the section name"]'
+			);
+			await page.click( 'text=Move up' );
+			await page.click(
+				'//button[@title="Choose which analytics to display and the section name"]'
+			);
+			await page.click( 'text=Move up' );
+			await page.waitForTimeout( 1000 );
+		}
+	} );
 
 	test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async ( {
 		page,
@@ -9,11 +46,9 @@ test.describe( 'Analytics pages', () => {
 		// Create an array of the sections we're expecting to find.
 		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
+			{ waitForLoadState: 'networkidle' }
 		);
-
-		await page.waitForLoadState( 'networkidle' );
-
 		// Grab all of the section headings
 		const sections = await page.$$(
 			'h2.woocommerce-section-header__title'
@@ -29,7 +64,7 @@ test.describe( 'Analytics pages', () => {
 	} );
 
 	test.describe( 'moving sections', () => {
-		test.use( { storageState: 'e2e/storage/adminState.json' } );
+		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test( 'should not display move up for the top, or move down for the bottom section', async ( {
 			page,
@@ -37,14 +72,14 @@ test.describe( 'Analytics pages', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
-			// check the top section
+			// check the top section (Performance)
 			await page.click(
 				'//button[@title="Choose which analytics to display and the section name"]'
 			);
 			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
 
-			// check the bottom section
+			// check the bottom section (Leaderboards)
 			await page.click(
 				'//button[@title="Choose which leaderboards to display and other settings"]'
 			);
@@ -115,18 +150,11 @@ test.describe( 'Analytics pages', () => {
 		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
 		await page.click( 'text=Remove section' );
 		// Grab all of the section headings
+		await page.waitForLoadState( 'networkidle' );
 		const sections = await page.$$(
 			'h2.woocommerce-section-header__title'
 		);
 		await expect( sections.length ).toEqual( 2 );
-
-		// clean up
-		await page.click( '//button[@title="Add more sections"]' );
-		await page.click( '//button[@title="Add Performance section"]' );
-		await page.waitForSelector( 'h2:has-text("Performance")', {
-			state: 'visible',
-		} );
-		await page.waitForLoadState( 'networkidle' );
 	} );
 
 	test( 'should allow a user to add a section back in', async ( {
@@ -145,15 +173,5 @@ test.describe( 'Analytics pages', () => {
 		await expect(
 			page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
 		).toContainText( 'Performance' );
-
-		// clean up by moving performance section back to the top
-		await page.click(
-			'//button[@title="Choose which analytics to display and the section name"]'
-		);
-		await page.click( 'text=Move up' );
-		await page.click(
-			'//button[@title="Choose which analytics to display and the section name"]'
-		);
-		await page.click( 'text=Move up' );
 	} );
 } );
