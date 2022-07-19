@@ -2,6 +2,7 @@ const { devices } = require( '@playwright/test' );
 
 const config = {
 	timeout: 60 * 1000,
+	expect: { timeout: 10000 },
 	outputDir: './report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
