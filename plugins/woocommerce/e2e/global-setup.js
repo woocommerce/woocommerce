@@ -62,6 +62,7 @@ module.exports = async ( config ) => {
 			console.log(
 				'Admin log-in failed. Retrying... ' + i + '/' + adminRetries
 			);
+			console.log( e );
 		}
 	}
 
@@ -100,6 +101,7 @@ module.exports = async ( config ) => {
 					'/' +
 					nRetries
 			);
+			console.log( e );
 		}
 	}
 
@@ -143,6 +145,7 @@ module.exports = async ( config ) => {
 					'/' +
 					customerRetries
 			);
+			console.log( e );
 		}
 	}
 
