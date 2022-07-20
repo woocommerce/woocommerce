@@ -93,17 +93,18 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Invalid event name.
 		$event = \WC_Tracks_Event::validate_and_sanitize(
-			array(
-				...$event_props,
-				'_en' => 'invalidName',
+			array_merge(
+				$event_props,
+				array( '_en' => 'invalidName' )
 			)
 		);
 		$this->assertTrue( is_wp_error( $event ) );
 		$this->assertEquals( $event->get_error_code(), 'invalid_event_name' );
+
 		$event = \WC_Tracks_Event::validate_and_sanitize(
-			array(
-				...$event_props,
-				'_en' => 'invalid-name',
+			array_merge(
+				$event_props,
+				array( '_en' => 'invalid-name' )
 			)
 		);
 		$this->assertTrue( is_wp_error( $event ) );
@@ -111,17 +112,18 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Invalid property name.
 		$event = \WC_Tracks_Event::validate_and_sanitize(
-			array(
-				...$event_props,
-				'invalid-property-name' => 'My value',
+			array_merge(
+				$event_props,
+				array( 'invalid-property-name' => 'My value' )
 			)
 		);
 		$this->assertTrue( is_wp_error( $event ) );
 		$this->assertEquals( $event->get_error_code(), 'invalid_prop_name' );
+
 		$event = \WC_Tracks_Event::validate_and_sanitize(
-			array(
-				...$event_props,
-				'invalid property name' => 'My value',
+			array_merge(
+				$event_props,
+				array( 'invalid property name' => 'My value' )
 			)
 		);
 		$this->assertTrue( is_wp_error( $event ) );
