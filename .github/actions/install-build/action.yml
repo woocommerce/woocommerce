@@ -10,7 +10,7 @@ runs:
   using: "composite"
   steps:
     - name: Install
-      uses: ./../install
+      uses: ./.github/actions/install
 
     - name: Run build
       shell: bash
