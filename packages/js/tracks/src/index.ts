@@ -5,7 +5,7 @@ import debug from 'debug';
 /**
  * Internal dependencies
  */
-import { validateEventName, validateProperties } from './utils';
+import { validateEventNameAndProperties } from './utils';
 
 /**
  * Module variables
@@ -41,12 +41,14 @@ export function recordEvent(
 			!! window.wcTracks.isEnabled,
 	} );
 
+	if ( ! validateEventNameAndProperties( eventName, eventProperties ) ) {
+		return false;
+	}
+
 	if (
 		! window.wcTracks ||
 		typeof window.wcTracks.recordEvent !== 'function' ||
-		process.env.NODE_ENV === 'development' ||
-		! validateEventName( eventName ) ||
-		! validateProperties( eventProperties )
+		process.env.NODE_ENV === 'development'
 	) {
 		return false;
 	}
