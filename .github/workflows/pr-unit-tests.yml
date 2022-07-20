@@ -55,8 +55,8 @@ jobs:
           php --version
           composer --version
 
-      - name: Install and Build
-        uses: ./.github/actions/install-build
+      - name: Install
+        uses: ./.github/actions/install
 
       - name: Build Admin feature config
         run: |

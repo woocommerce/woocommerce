@@ -9,15 +9,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install PNPM
-      shell: bash
-      working-directory: ${{ inputs.working_directory }}
-      run: npm install -g pnpm@^6.24.2
-
-    - name: Install dependencies
-      shell: bash
-      working-directory: ${{ inputs.working_directory }}
-      run: COMPOSER_NO_DEV=1 pnpm install
+    - name: Install
+      uses: ./../install
 
     - name: Run build
       shell: bash
