@@ -9,7 +9,7 @@ const props = {
 };
 
 describe( 'recordEvent', () => {
-	let windowSpy;
+	let windowSpy: jest.SpyInstance;
 	const recordEventMock = jest.fn();
 
 	beforeEach( () => {
