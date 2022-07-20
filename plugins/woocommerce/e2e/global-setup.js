@@ -13,17 +13,21 @@ module.exports = async ( config ) => {
 		fs.unlinkSync( process.env.ADMINSTATE );
 		console.log( 'Admin state file deleted successfully.' );
 	} catch ( err ) {
-		console.log(
-			'Admin state file does not exist or could not be deleted: ' + err
-		);
+		if ( err.code === 'ENOENT' ) {
+			console.log( 'Admin state file does not exist.' );
+		} else {
+			console.log( 'Admin state file could not be deleted: ' + err );
+		}
 	}
 	try {
 		fs.unlinkSync( process.env.CUSTOMERSTATE );
 		console.log( 'Customer state file deleted successfully.' );
 	} catch ( err ) {
-		console.log(
-			'Customer state file does not exist or could not be deleted: ' + err
-		);
+		if ( err.code === 'ENOENT' ) {
+			console.log( 'Customer state file does not exist.' );
+		} else {
+			console.log( 'Customer state file could not be deleted: ' + err );
+		}
 	}
 
 	// Pre-requisites
