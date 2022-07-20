@@ -17,7 +17,7 @@
 		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
 		"create-hook-reference": "node ./bin/hook-reference/index.js",
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
-		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm -w exec turbo run build --filter='./packages/js/*' --force && cross-env WC_ADMIN_PHASE=development webpack",
+		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm -w exec turbo run build --filter='./packages/js/*' && cross-env WC_ADMIN_PHASE=development webpack",
 		"example": "webpack --config docs/examples/extensions/examples.config.js --watch",
 		"preinstall": "npx only-allow pnpm",
 		"install-if-deps-outdated": "node bin/install-if-deps-outdated.js",

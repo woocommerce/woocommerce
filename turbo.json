@@ -10,7 +10,7 @@
         },
 
         "build": {
-            "dependsOn":  [ "^build" ],
+            "dependsOn":  [ "^build", "$WC_ADMIN_PHASE" ],
             "inputs": [
                 "src/*.js",
                 "src/**/*.js",
