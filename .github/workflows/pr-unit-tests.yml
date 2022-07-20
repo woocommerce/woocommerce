@@ -54,6 +54,7 @@ jobs:
         run: |
           php --version
           composer --version
+          composer config --help
 
       - name: Install and Build
         uses: ./.github/actions/install-build
