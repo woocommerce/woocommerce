@@ -884,18 +884,7 @@ class WC_Helper {
 			admin_url( 'admin.php' )
 		);
 
-		WC_Helper_API::post(
-			'oauth/invalidate_token',
-			array(
-				'authenticated' => true,
-			)
-		);
-
-		WC_Helper_Options::update( 'auth', array() );
-		WC_Helper_Options::update( 'auth_user_data', array() );
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		self::disconnect();
 
 		wp_safe_redirect( $redirect_uri );
 		die();
@@ -1675,6 +1664,26 @@ class WC_Helper {
 		}
 
 		self::$log->log( $level, $message, array( 'source' => 'helper' ) );
+	}
+
+	/**
+	 * Handles WC Helper disconnect tasks.
+	 *
+	 * @return void
+	 */
+	public static function disconnect() {
+		WC_Helper_API::post(
+			'oauth/invalidate_token',
+			array(
+				'authenticated' => true,
+			)
+		);
+
+		WC_Helper_Options::update( 'auth', array() );
+		WC_Helper_Options::update( 'auth_user_data', array() );
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
 	}
 }
 
