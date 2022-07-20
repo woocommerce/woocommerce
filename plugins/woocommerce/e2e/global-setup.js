@@ -26,6 +26,11 @@ module.exports = async ( config ) => {
 		);
 	}
 
+	// Pre-requisites
+	let adminLoggedIn = false;
+	const customerLoggedIn = false;
+	let customerKeyConfigured = false;
+
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
 
@@ -42,9 +47,17 @@ module.exports = async ( config ) => {
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
 			console.log( 'Logged-in as admin successfully.' );
+			adminLoggedIn = true;
 		} catch ( e ) {
 			console.log( 'Admin log-in failed. Retrying...' );
 		}
+	}
+
+	if ( ! adminLoggedIn ) {
+		console.error(
+			'Cannot proceed e2e test, as admin login failed. Please check if the test site has been setup correctly.'
+		);
+		process.exit( 1 );
 	}
 
 	// While we're here, let's add a consumer token for API access
@@ -66,10 +79,19 @@ module.exports = async ( config ) => {
 				'#key_consumer_secret'
 			);
 			console.log( 'Added consumer token successfully.' );
+			customerKeyConfigured = true;
 		} catch ( e ) {
 			console.log( 'Failed to add consumer token. Retrying...' );
 		}
 	}
+
+	if ( ! customerKeyConfigured ) {
+		console.error(
+			'Cannot proceed e2e test, as we could not set the customer key. Please check if the test site has been setup correctly.'
+		);
+		process.exit( 1 );
+	}
+
 	// Sign in as customer user and save state
 	const customerRetries = 5;
 	for ( let i = 0; i < customerRetries; i++ ) {
@@ -88,5 +110,12 @@ module.exports = async ( config ) => {
 		} catch ( e ) {
 			console.log( 'Customer log-in failed. Retrying...' );
 		}
+	}
+
+	if ( ! customerLoggedIn ) {
+		console.error(
+			'Cannot proceed e2e test, as customer login failed. Please check if the test site has been setup correctly.'
+		);
+		process.exit( 1 );
 	}
 };
