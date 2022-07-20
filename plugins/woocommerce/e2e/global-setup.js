@@ -9,8 +9,22 @@ module.exports = async ( config ) => {
 	process.env.CUSTOMERSTATE = `${ stateDir }customerState.json`;
 
 	// Clear out the previous save states
-	fs.unlinkSync( process.env.ADMINSTATE );
-	fs.unlinkSync( process.env.CUSTOMERSTATE );
+	try {
+		fs.unlinkSync( process.env.ADMINSTATE );
+		console.log( 'Admin state file deleted successfully.' );
+	} catch ( err ) {
+		console.log(
+			'Admin state file does not exist or could not be deleted: ' + err
+		);
+	}
+	try {
+		fs.unlinkSync( process.env.CUSTOMERSTATE );
+		console.log( 'Customer state file deleted successfully.' );
+	} catch ( err ) {
+		console.log(
+			'Customer state file does not exist or could not be deleted: ' + err
+		);
+	}
 
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
