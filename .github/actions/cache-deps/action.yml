@@ -1,5 +1,5 @@
-name: Cache Dependencies (Composite)
-description: Creates and restores caches for dependencies.
+name: Cache Dependencies and builds (Composite)
+description: Creates and restores caches for dependencies and builds.
 inputs:
   workflow_cache:
     required: true
@@ -11,7 +11,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Dependency caching
+    - name: Dependency and build caching
       uses: actions/cache@v3
       id: cache-deps
       with:
@@ -19,4 +19,5 @@ runs:
           ~/.pnpm-store
           ~/.local/share/pnpm/store
           ~/.cache/composer/files
-        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+          **/.cache/turbo
+        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml', '**/turbo-build.log') }}
