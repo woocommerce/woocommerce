@@ -70,7 +70,7 @@ jobs:
           if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
              cd plugins/woocommerce
              curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
-             unzip -d -q /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+             unzip -q -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
              ls -la ./vendor/
              composer -vvv bin phpunit --help
              composer -vvv bin phpunit config --help
