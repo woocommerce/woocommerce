@@ -5,6 +5,9 @@ inputs:
     required: false
     description: The directory to target.
     default: ./
+  workflow_cache:
+    required: true
+    description: The workflow cache key.
 
 runs:
   using: "composite"
