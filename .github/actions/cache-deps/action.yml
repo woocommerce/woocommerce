@@ -1,5 +1,5 @@
-name: Cache Dependencies and builds (Composite)
-description: Creates and restores caches for dependencies and builds.
+name: Cache Dependencies (Composite)
+description: Creates and restores caches for dependencies.
 inputs:
   workflow_cache:
     required: true
@@ -11,7 +11,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Dependency and build caching
+    - name: Dependency caching
       uses: actions/cache@v3
       id: cache-deps
       with:

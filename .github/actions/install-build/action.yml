@@ -19,7 +19,7 @@ runs:
       with:
         path: |
           **/.cache/turbo
-        key: ${{ runner.os }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/turbo-build.log') }}
+        key: ${{ runner.os }}-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/turbo-build.log') }}
 
     - name: Install dependencies
       shell: bash
