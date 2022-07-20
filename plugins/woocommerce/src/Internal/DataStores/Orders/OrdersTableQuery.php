@@ -562,12 +562,11 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function process_limit(): void {
-		$paginate = ( $this->arg_isset( 'paginate' ) ? (bool) $this->args['paginate'] : false );
-		$limit    = ( $this->arg_isset( 'limit' ) ? absint( $this->args['limit'] ) : false );
-		$page     = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
-		$offset   = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
+		$limit  = ( $this->arg_isset( 'limit' ) ? absint( $this->args['limit'] ) : false );
+		$page   = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
+		$offset = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
 
-		if ( ! $paginate ) {
+		if ( ! $limit ) {
 			return;
 		}
 
