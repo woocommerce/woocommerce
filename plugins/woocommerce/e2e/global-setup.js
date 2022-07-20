@@ -1,4 +1,4 @@
-const { chromium } = require( '@playwright/test' );
+const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
 
 module.exports = async ( config ) => {
@@ -37,6 +37,7 @@ module.exports = async ( config ) => {
 
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
+	const customerPage = await browser.newPage();
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
@@ -47,6 +48,10 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="log"]', 'admin' );
 			await adminPage.fill( 'input[name="pwd"]', 'password' );
 			await adminPage.click( 'text=Log In' );
+			await adminPage.goto( '/wp-admin' );
+			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
+				'Dashboard'
+			);
 			await adminPage
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
@@ -110,11 +115,21 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			const customerPage = await browser.newPage();
 			await customerPage.goto( `${ baseURL }/wp-admin` );
 			await customerPage.fill( 'input[name="log"]', 'customer' );
 			await customerPage.fill( 'input[name="pwd"]', 'password' );
 			await customerPage.click( 'text=Log In' );
+
+			await customerPage.goto( 'my-account/' );
+			await expect(
+				customerPage.locator( 'h1.entry-title' )
+			).toContainText( 'My account' );
+			await expect(
+				customerPage.locator(
+					'div.woocommerce-MyAccount-content > p >> nth=0'
+				)
+			).toContainText( 'Jane Smith' );
+
 			await customerPage
 				.context()
 				.storageState( { path: process.env.CUSTOMERSTATE } );
