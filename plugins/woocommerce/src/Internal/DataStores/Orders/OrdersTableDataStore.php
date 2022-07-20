@@ -632,7 +632,44 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		$order->read_meta_data();
+		$this->set_order_props_from_data( $order, $order_data );
+		$order->set_object_read( true );
+	}
 
+	/**
+	 * Reads multiple orders from custom tables in one pass.
+	 *
+	 * @since 6.9.0
+	 * @param array[\WC_Order] $orders Order objects.
+	 * @throws \Exception If passed an invalid order.
+	 */
+	public function read_multiple( &$orders ) {
+		$order_ids = array_keys( $orders );
+		$data      = $this->get_order_data_for_ids( $order_ids );
+
+		if ( count( $data ) !== count( $order_ids ) ) {
+			throw new \Exception( __( 'Invalid order IDs in call to read_multiple()', 'woocommerce' ) );
+		}
+
+		foreach ( $data as $order_data ) {
+			$order_id = absint( $order_data->id );
+			$order    = $orders[ $order_id ];
+
+			$order->set_defaults();
+			$order->set_id( $order_id );
+			$order->read_meta_data();
+			$this->set_order_props_from_data( $order, $order_data );
+			$order->set_object_read( true );
+		}
+	}
+
+	/**
+	 * Sets order properties based on a row from the database.
+	 *
+	 * @param \WC_Order $order      The order object.
+	 * @param object    $order_data A row of order data from the database.
+	 */
+	private function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) ) {
@@ -646,8 +683,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				}
 			}
 		}
-
-		$order->set_object_read( true );
 	}
 
 	/**
@@ -1271,7 +1306,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
 			$orders = $query->orders;
 		} else {
-			$orders = array_map( 'wc_get_order', $query->orders );
+			$orders = WC()->order_factory->get_orders( $query->orders );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
