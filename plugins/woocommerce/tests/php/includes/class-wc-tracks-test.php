@@ -62,9 +62,9 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the event validation and sanitization.
+	 * Test the event validation and sanitization with a valid event.
 	 */
-	public function test_event_validation_and_sanitization() {
+	public function test_event_validation_and_sanitization_valid_event() {
 		$event_props = array(
 			'_en'            => 'valid_event_name',
 			'_ts'            => WC_Tracks_Client::build_timestamp(),
@@ -78,6 +78,18 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( property_exists( $event, '_ts' ) );
 		$this->assertTrue( property_exists( $event, 'valid_property' ) );
 		$this->assertFalse( property_exists( $event, '_via_ip' ) );
+	}
+
+	/**
+	 * Test the event validation and sanitization with an invalid event.
+	 */
+	public function test_event_validation_and_sanitization_invalid_event_name() {
+		$event_props = array(
+			'_en'            => 'valid_event_name',
+			'_ts'            => WC_Tracks_Client::build_timestamp(),
+			'valid_property' => 'My value',
+			'_via_ip'        => '192.168.10.1',
+		);
 
 		// Invalid event name.
 		$event = \WC_Tracks_Event::validate_and_sanitize(
