@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { STORE_NAME, WC_PRODUCT_SHIPPING_CLASSES_NAMESPACE } from './constants';
+import { STORE_NAME, WC_PRODUCT_CATEGORIES_NAMESPACE } from './constants';
 import { createCrudDataStore } from '../crud';
 
 createCrudDataStore( {
