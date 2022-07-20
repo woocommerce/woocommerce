@@ -224,6 +224,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update wcpay to include a mention of in-person payments for Canada [#33669](https://github.com/woocommerce/woocommerce/pull/33669)
 * Update - Update WooCommerce Blocks to 8.0.0 [#33736](https://github.com/woocommerce/woocommerce/pull/33736)
 * Update - Uses WC_Data_Store directly to count the shipping zones to avoid any unncessary query to the D.B [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
+* Dev - Exclude "e2e" directory from build [#33934](https://github.com/woocommerce/woocommerce/pull/33934)
 * Dev - Add playwright e2e README.md [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
 * Dev - Add `$transaction_id` as arg to various `payment_complete` hooks. [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
 * Dev - Add `wc com extension install` CLI command [#33775](https://github.com/woocommerce/woocommerce/pull/33775)
