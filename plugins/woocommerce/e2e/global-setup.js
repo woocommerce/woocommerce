@@ -32,17 +32,13 @@ module.exports = async ( config ) => {
 	let customerKeyConfigured = false;
 
 	const browser = await chromium.launch();
-	const context = await browser.newContext();
 	const adminPage = await browser.newPage();
-
-	// Trace setup
-	await context.tracing.start( { screenshots: true, snapshots: true } );
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
-			console.log( 'Trying to log-in as admin... Try:' + i );
+			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', 'admin' );
 			await adminPage.fill( 'input[name="pwd"]', 'password' );
@@ -54,7 +50,9 @@ module.exports = async ( config ) => {
 			adminLoggedIn = true;
 			break;
 		} catch ( e ) {
-			console.log( 'Admin log-in failed. Retrying...' );
+			console.log(
+				'Admin log-in failed. Retrying... ' + i + '/' + adminRetries
+			);
 		}
 	}
 
@@ -62,7 +60,6 @@ module.exports = async ( config ) => {
 		console.error(
 			'Cannot proceed e2e test, as admin login failed. Please check if the test site has been setup correctly.'
 		);
-		await context.tracing.stop( { path: 'setup.zip' } );
 		process.exit( 1 );
 	}
 
@@ -71,7 +68,7 @@ module.exports = async ( config ) => {
 	const nRetries = 5;
 	for ( let i = 0; i < nRetries; i++ ) {
 		try {
-			console.log( 'Trying to add consumer token... Try:' + i );
+			console.log( 'Trying to add consumer token...' );
 			await adminPage.goto(
 				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
@@ -88,7 +85,12 @@ module.exports = async ( config ) => {
 			customerKeyConfigured = true;
 			break;
 		} catch ( e ) {
-			console.log( 'Failed to add consumer token. Retrying...' );
+			console.log(
+				'Failed to add consumer token. Retrying... ' +
+					i +
+					'/' +
+					nRetries
+			);
 		}
 	}
 
@@ -96,7 +98,6 @@ module.exports = async ( config ) => {
 		console.error(
 			'Cannot proceed e2e test, as we could not set the customer key. Please check if the test site has been setup correctly.'
 		);
-		await context.tracing.stop( { path: 'setup.zip' } );
 		process.exit( 1 );
 	}
 
@@ -104,7 +105,7 @@ module.exports = async ( config ) => {
 	const customerRetries = 5;
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
-			console.log( 'Trying to log-in as customer... Try:' + i );
+			console.log( 'Trying to log-in as customer...' );
 			const customerPage = await browser.newPage();
 			await customerPage.goto( `${ baseURL }/wp-admin` );
 			await customerPage.fill( 'input[name="log"]', 'customer' );
@@ -117,7 +118,12 @@ module.exports = async ( config ) => {
 			customerLoggedIn = true;
 			break;
 		} catch ( e ) {
-			console.log( 'Customer log-in failed. Retrying...' );
+			console.log(
+				'Customer log-in failed. Retrying... ' +
+					i +
+					'/' +
+					customerRetries
+			);
 		}
 	}
 
@@ -125,12 +131,8 @@ module.exports = async ( config ) => {
 		console.error(
 			'Cannot proceed e2e test, as customer login failed. Please check if the test site has been setup correctly.'
 		);
-		await context.tracing.stop( { path: 'setup.zip' } );
 		process.exit( 1 );
 	}
-
-	// Stop trace if no errors ocurred.
-	await context.tracing.stop( { path: 'setup.zip' } );
 
 	await browser.close();
 };
