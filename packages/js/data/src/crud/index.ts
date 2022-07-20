@@ -18,7 +18,6 @@ type CrudDataStore = {
 	resourceName: string;
 	pluralResourceName: string;
 	namespace: string;
-	urlParameters?: string[];
 };
 
 export const createCrudDataStore = ( {

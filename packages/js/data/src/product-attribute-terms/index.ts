@@ -9,7 +9,6 @@ createCrudDataStore( {
 	resourceName: 'ProductAttributeTerm',
 	pluralResourceName: 'ProductAttributeTerms',
 	namespace: WC_PRODUCT_ATTRIBUTE_TERMS_NAMESPACE,
-	urlParameters: [ 'attribute_id' ],
 } );
 
 export const EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME = STORE_NAME;
