@@ -71,7 +71,7 @@ class WC_Helper {
 		$notices = self::_get_return_notices();
 
 		// No active connection.
-		if ( empty( $auth['access_token'] ) ) {
+		if ( ! self::is_site_connected() ) {
 			$connect_url = add_query_arg(
 				array(
 					'page'              => 'wc-addons',
@@ -1684,6 +1684,18 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+	}
+
+	/**
+	 * Checks if `access_token` exists in `auth` option.
+	 *
+	 * @return bool
+	 */
+	public static function is_site_connected(): bool {
+		$auth = WC_Helper_Options::get( 'auth' );
+
+		// If `access_token` is empty, there's no active connection.
+		return ! empty( $auth['access_token'] );
 	}
 }
 
