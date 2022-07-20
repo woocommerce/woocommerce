@@ -149,28 +149,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		// Dummy product object.
-		$product = new class() extends WC_Product {
-			/**
-			 * Returns whether or not the product is taxable.
-			 *
-			 * @return boolean
-			 */
-			public function is_taxable() {
-				return true;
-			}
-
-			/**
-			 * Returns the tax class.
-			 *
-			 * @param string $context View or edit context.
-			 * @return string
-			 */
-			public function get_tax_class( $context = 'view' ) {
-				return '';
-			}
-		};
-
 		// Add dummy tax-rate.
 		$tax_rate    = array(
 			'tax_rate_country'  => '',
@@ -185,6 +163,12 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
+		$wc_tax_enabled = wc_tax_enabled();
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+		}
+
+		$product         = WC_Helper_Product::create_simple_product();
 		$expected_prices = array(
 			'10'  => array( 8.33, 10, 10, 12 ),
 			'50'  => array( 41.67, 50, 50, 60 ),
@@ -193,6 +177,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		foreach ( $expected_prices as $price => $value ) {
 			$product->set_price( $price );
+			$product->save();
 			if ( $prices_include_tax && $is_vat_exempt ) {
 				$this->assertEquals( $value[0], wc_get_price_including_tax( $product ) );
 			} elseif ( $prices_include_tax && ! $is_vat_exempt ) {
@@ -206,5 +191,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Test clean up.
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
 	}
 }
