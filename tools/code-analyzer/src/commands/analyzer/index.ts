@@ -139,9 +139,15 @@ export default class Analyzer extends Command {
 
 			CliUx.ux.action.stop();
 
-			this.scanChanges( diff, pluginData[ 0 ], flags.output, schemaDiff );
+			this.scanChanges(
+				diff,
+				pluginData[ 0 ],
+				flags.output,
+				flags.file,
+				schemaDiff
+			);
 		} else {
-			this.scanChanges( diff, pluginData[ 0 ], flags.output );
+			this.scanChanges( diff, pluginData[ 0 ], flags.output, flags.file );
 		}
 
 		// Clean up the temporary repo.
@@ -210,15 +216,17 @@ export default class Analyzer extends Command {
 	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
-	 * @param {string}  content        Patch content.
-	 * @param {string}  version        Current product version.
-	 * @param {string}  output         Output style.
-	 * @param {boolean} schemaEquality if schemas are equal between branches.
+	 * @param {string}  content         Patch content.
+	 * @param {string}  version         Current product version.
+	 * @param {string}  output          Output style.
+	 * @param {string}  changesFileName Name of a file to output change information to.
+	 * @param {boolean} schemaEquality  if schemas are equal between branches.
 	 */
 	private async scanChanges(
 		content: string,
 		version: string,
 		output: string,
+		changesFileName: string,
 		schemaDiff: {
 			[ key: string ]: {
 				description: string;
@@ -229,14 +237,12 @@ export default class Analyzer extends Command {
 			};
 		} | void
 	) {
-		const { flags } = await this.parse( Analyzer );
-
 		CliUx.ux.action.start( 'Generating changes' );
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
 
-		await generateJSONFile( join( process.cwd(), flags.file ), {
+		await generateJSONFile( join( process.cwd(), changesFileName ), {
 			templates: Object.fromEntries( templates.entries() ),
 			hooks: Object.fromEntries( hooks.entries() ),
 			schema: databaseUpdates || {},
