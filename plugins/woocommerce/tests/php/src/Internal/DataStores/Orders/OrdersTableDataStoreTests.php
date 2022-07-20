@@ -366,7 +366,6 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		// Limit results.
 		unset( $query_vars['total'], $query_vars['prices_include_tax'] );
-		$query_vars['paginate'] = true;
 		$query_vars['limit']    = 1;
 		$query = new OrdersTableQuery( $query_vars );
 		$this->assertEquals( 1, count( $query->orders ) );
