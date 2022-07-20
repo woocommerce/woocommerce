@@ -51,7 +51,8 @@ class ServiceProviderAggregate implements ServiceProviderAggregateInterface
 
         throw new ContainerException(
             'A service provider must be a fully qualified class name or instance ' .
-            'of (\Automattic\WooCommerce\Vendor\League\Container\ServiceProvider\ServiceProviderInterface)'
+            'of (\Automattic\WooCommerce\Vendor\League\Container\ServiceProvider\ServiceProviderInterface)' .
+            $provider . ' given.'
         );
     }
 
