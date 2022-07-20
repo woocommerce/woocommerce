@@ -9,20 +9,8 @@ module.exports = async ( config ) => {
 	process.env.CUSTOMERSTATE = `${ stateDir }customerState.json`;
 
 	// Clear out the previous save states
-	fs.unlink( process.env.ADMINSTATE, function ( err ) {
-		if ( err ) {
-			// File doesn't exist yet, so will just create it.
-		} else {
-			// File exists. Delete it so it can be re-created.
-		}
-	} );
-	fs.unlink( process.env.CUSTOMERSTATE, function ( err ) {
-		if ( err ) {
-			// File doesn't exist yet, so will just create it.
-		} else {
-			// File exists. Delete it so it can be re-created.
-		}
-	} );
+	fs.unlinkSync( process.env.ADMINSTATE );
+	fs.unlinkSync( process.env.CUSTOMERSTATE );
 
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
@@ -31,6 +19,7 @@ module.exports = async ( config ) => {
 	const adminRetries = 5;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
+			console.log( 'Trying to log-in as admin... Try:' + i );
 			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', 'admin' );
 			await adminPage.fill( 'input[name="pwd"]', 'password' );
@@ -38,7 +27,10 @@ module.exports = async ( config ) => {
 			await adminPage
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
-		} catch ( e ) {}
+			console.log( 'Logged-in as admin successfully.' );
+		} catch ( e ) {
+			console.log( 'Admin log-in failed. Retrying...' );
+		}
 	}
 
 	// While we're here, let's add a consumer token for API access
@@ -46,6 +38,7 @@ module.exports = async ( config ) => {
 	const nRetries = 5;
 	for ( let i = 0; i < nRetries; i++ ) {
 		try {
+			console.log( 'Trying to add consumer token... Try:' + i );
 			await adminPage.goto(
 				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
@@ -58,12 +51,16 @@ module.exports = async ( config ) => {
 			process.env.CONSUMER_SECRET = await adminPage.inputValue(
 				'#key_consumer_secret'
 			);
-		} catch ( e ) {}
+			console.log( 'Added consumer token successfully.' );
+		} catch ( e ) {
+			console.log( 'Failed to add consumer token. Retrying...' );
+		}
 	}
 	// Sign in as customer user and save state
 	const customerRetries = 5;
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
+			console.log( 'Trying to log-in as customer... Try:' + i );
 			const customerPage = await browser.newPage();
 			await customerPage.goto( `${ baseURL }/wp-admin` );
 			await customerPage.fill( 'input[name="log"]', 'customer' );
@@ -73,6 +70,9 @@ module.exports = async ( config ) => {
 				.context()
 				.storageState( { path: process.env.CUSTOMERSTATE } );
 			await browser.close();
-		} catch ( e ) {}
+			console.log( 'Logged-in as customer successfully.' );
+		} catch ( e ) {
+			console.log( 'Customer log-in failed. Retrying...' );
+		}
 	}
 };
