@@ -6,7 +6,7 @@ import createSelector from 'rememo';
 /**
  * Internal dependencies
  */
-import { applyNamespace, cleanQuery, getUrlParameters, parseId } from './utils';
+import { applyNamespace, getUrlParameters, parseId } from './utils';
 import { getResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
