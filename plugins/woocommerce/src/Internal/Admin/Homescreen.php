@@ -52,7 +52,7 @@ class Homescreen {
 
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) && function_exists( 'get_current_screen' ) ) {
 			add_filter(
 				'woocommerce_admin_shared_settings',
 				array( $this, 'maybe_set_default_shipping_options_on_home' ),
