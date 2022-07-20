@@ -1,0 +1,28 @@
+.qrcode-container {
+	width: 580px;
+	max-width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.jetpack-container {
+	display: flex;
+	.install-header {
+		// font-size: large;
+	}
+
+	.install-footer {
+		font-size: smaller;
+	}
+
+	.jetpack-logo {
+		width: 135px;
+		margin: 0 0 0.75em 21px;
+	}
+
+	.wcs-notice {
+		width: 220px;
+		height: 121px;
+	}
+}

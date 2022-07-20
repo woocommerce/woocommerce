@@ -1,20 +1,164 @@
 /**
  * External dependencies
  */
-import { Button, Popover, Card, CardBody } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import {
+	Popover,
+	Card,
+	CardBody,
+	Spinner,
+	Button,
+} from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import Phone from 'gridicons/dist/phone';
 import classNames from 'classnames';
+import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
+import apiFetch from '@wordpress/api-fetch';
+import interpolateComponents from '@automattic/interpolate-components';
+
+/**
+ * Internal dependencies
+ */
+import JetpackLogo from './images/jetpack-logo.png';
+import WcsNotice from './images/wcs-notice.png';
+import './style.scss';
+
+type JetpackStatusResponse = {
+	installed: boolean;
+	activated: boolean;
+	connected: boolean;
+	user_connected: boolean;
+};
+
+type GenerateQRResponse = {
+	image: string;
+};
+
+const getJetpackStatus = () => {
+	return apiFetch< JetpackStatusResponse >( {
+		path: `${ WC_ADMIN_NAMESPACE }/login-qr/jetpack_status`,
+	} );
+};
+
+const generateQRCode = () => {
+	return apiFetch< GenerateQRResponse >( {
+		path: `${ WC_ADMIN_NAMESPACE }/login-qr/generate_qr`,
+	} );
+};
 
 export const LoginQR = () => {
-	// Todo: Add Jetpack installed & connected logic
+	const [ isLoadingJetpack, setIsLoadingJetpack ] = useState( true );
+	const [ isLoadingQr, setIsLoadingQr ] = useState( true );
+	const [ isFetchedJetpack, setIsFetchedJetpack ] = useState( false );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
+	const [ isJetpackInstalled, setIsJetpackInstalled ] = useState( false );
+	const [ isJetpackActivated, setIsJetpackActivated ] = useState( false );
+	const [ qrImageSrc, setQrImageSrc ] = useState( '' );
+	const [ isJetpackUserConnected, setIsJetpackUserConnected ] =
+		useState( false );
 
-	const click = () => {
+	const isJetpackReady =
+		isJetpackInstalled && isJetpackActivated && isJetpackUserConnected;
+
+	const fetchQr = () => {
+		setIsLoadingQr( true );
+		generateQRCode()
+			.then( ( response ) => {
+				setQrImageSrc( response.image );
+			} )
+			.finally( () => setIsLoadingQr( false ) );
+	};
+
+	useEffect( () => {
+		if ( isPopoverVisible && ! isFetchedJetpack ) {
+			getJetpackStatus()
+				.then( ( response ) => {
+					setIsJetpackInstalled( response.installed );
+					setIsJetpackActivated( response.activated );
+					setIsJetpackUserConnected( response.user_connected );
+					setIsFetchedJetpack( true );
+				} )
+				.finally( () => setIsLoadingJetpack( false ) );
+		}
+	}, [ isFetchedJetpack, isPopoverVisible ] );
+
+	const menuClick = () => {
 		setIsPopoverVisible( true );
 		// Todo: recordEvent()
+	};
+
+	const JetpackStatus = () => {
+		return (
+			<div className="jetpack-container">
+				<div>
+					<div className="">
+						<img
+							className="jetpack-logo"
+							src={ JetpackLogo }
+							alt=""
+						/>
+						<img className="wcs-notice" src={ WcsNotice } alt="" />
+					</div>
+				</div>
+				<div>
+					<p className="install-header">
+						{ __(
+							'Install and connect your store to have access to a magic link QR code!',
+							'woocommerce'
+						) }
+					</p>
+					<p className="install-footer">
+						{ interpolateComponents( {
+							mixedString: __(
+								'By clicking "Install Jetpack and connect", you agree to the {{ tosLink /}}',
+								'woocommerce'
+							),
+							components: {
+								tosLink: (
+									<a
+										href="https://wordpress.com/tos/"
+										target="_blank"
+										rel="noreferrer"
+									>
+										{ __(
+											'Terms of Service',
+											'woocommerce'
+										) }
+									</a>
+								),
+							},
+						} ) }
+					</p>
+					<Button
+						variant="primary"
+						onClick={ () => {
+							setIsJetpackInstalled( true );
+							setIsJetpackActivated( true );
+							setIsJetpackUserConnected( true );
+							fetchQr();
+						} }
+					>
+						{ __( 'Install Jetpack and connect', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		);
+	};
+
+	const QRCode = () => {
+		return (
+			<>
+				<img alt="QRCode" src={ qrImageSrc }></img>
+				<div
+					style={ {
+						textAlign: 'center',
+					} }
+				>
+					You should scan this to get free WooCommerce store points!
+				</div>
+			</>
+		);
 	};
 
 	return (
@@ -24,7 +168,7 @@ export const LoginQR = () => {
 					'woocommerce-layout__activity-panel-tab',
 					isPopoverVisible ? 'is-opened' : ''
 				) }
-				onClick={ click }
+				onClick={ menuClick }
 			>
 				<Phone />
 				{ __( 'App login', 'woocommerce' ) }
@@ -35,16 +179,25 @@ export const LoginQR = () => {
 					position="bottom center"
 					onClose={ () => setIsPopoverVisible( false ) }
 				>
-					<Card>
+					<Card className="qrcode-container">
 						<CardBody>
-							<img
-								alt="QRCode"
-								src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQAQMAAAC6caSPAAAABlBMVEX///8AAABVwtN+AAACFUlEQVR4nO3bO3KDMBDG8fWkoOQIOQpHg6P5KBwhpQsGRY9dSRA7r4nkFP9tEmT9VH2DHoAIRbWu0eXa/eV8S83zJq/avErp4i8gkB5k0YBOe/A3mapfRV4C0XHiBQTShbyEDrdAfIIt0aEtjOMSieMsEMgTyJj/pkZfm+8DgTyT+Brc9ZK7xvoq/BBICyKpUoI9iVc6zjeWChBIA5LLyMW9pV1SiHUkpSCQHuROFeLjvd3vA4G0JJbksmlPSdZGXynROg4E0oOITu3WVaf4nGSnN9jdekIgPyaz7W70ON3iWWKZ15ZWEEhbUrY8yRvVZeQU/55vsBBIW2In50NJ8l7P7NYrnBotAoH0I+UMaNb5Px4QhXG2dIOdjvM+BNKepF9d6BorJnmV6oDoej/8EEgTMuawii0C8k48NNm5Zbz7bhBIF6KVWmOC7YCoeroznMIPgbQl+kw8X8SHjxpvOZwpjafH6BBISyL6a9kd2XLUSscpSYZA2hMRm/erDZHtkiI5LhUgkF+RGMvF4mkLTnuJUjO7QiAdyKHK2jKV7sRFTp9FQCBtic3brrylpgvO9eM7vdXAEEhTov/Ur5pXb6lp3m0xsEIgfUj9Yc4y5AMi98lSAQLpSUKvULN99L3leDsI5HlkKgdEQ/3dmHkIpAdJ2a0375I/zHExvI/ehYNAWpFchyRLvsEafbSxgkD+nFDUv6t37pg7IDeGw/cAAAAASUVORK5CYII="
-							></img>
-							<div style={ { textAlign: 'center' } }>
-								You should scan this to get free WooCommerce
-								store points!
-							</div>
+							{ isLoadingJetpack ? (
+								<Spinner />
+							) : (
+								<>
+									{ isJetpackReady ? (
+										<>
+											{ isLoadingQr ? (
+												<Spinner />
+											) : (
+												<QRCode></QRCode>
+											) }
+										</>
+									) : (
+										<JetpackStatus></JetpackStatus>
+									) }
+								</>
+							) }
 						</CardBody>
 					</Card>
 				</Popover>
