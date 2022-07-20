@@ -4,6 +4,10 @@ const fs = require( 'fs' );
 module.exports = async ( config ) => {
 	const { stateDir } = config.projects[ 0 ].use;
 	const { baseURL } = config.projects[ 0 ].use;
+
+	console.log( `State Dir: ${ stateDir }` );
+	console.log( `Base URL: ${ baseURL }` );
+
 	// used throughout tests for authentication
 	process.env.ADMINSTATE = `${ stateDir }adminState.json`;
 	process.env.CUSTOMERSTATE = `${ stateDir }customerState.json`;
@@ -48,7 +52,7 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="log"]', 'admin' );
 			await adminPage.fill( 'input[name="pwd"]', 'password' );
 			await adminPage.click( 'text=Log In' );
-			await adminPage.goto( '/wp-admin' );
+			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
 			);
@@ -60,7 +64,7 @@ module.exports = async ( config ) => {
 			break;
 		} catch ( e ) {
 			console.log(
-				'Admin log-in failed. Retrying... ' + i + '/' + adminRetries
+				`Admin log-in failed, Retrying... ${ i }/${ adminRetries }`
 			);
 			console.log( e );
 		}
@@ -96,10 +100,7 @@ module.exports = async ( config ) => {
 			break;
 		} catch ( e ) {
 			console.log(
-				'Failed to add consumer token. Retrying... ' +
-					i +
-					'/' +
-					nRetries
+				`Failed to add consumer token. Retrying... ${ i }/${ nRetries }`
 			);
 			console.log( e );
 		}
@@ -122,7 +123,7 @@ module.exports = async ( config ) => {
 			await customerPage.fill( 'input[name="pwd"]', 'password' );
 			await customerPage.click( 'text=Log In' );
 
-			await customerPage.goto( 'my-account/' );
+			await customerPage.goto( `${ baseURL }/my-account/` );
 			await expect(
 				customerPage.locator( 'h1.entry-title' )
 			).toContainText( 'My account' );
@@ -140,10 +141,7 @@ module.exports = async ( config ) => {
 			break;
 		} catch ( e ) {
 			console.log(
-				'Customer log-in failed. Retrying... ' +
-					i +
-					'/' +
-					customerRetries
+				`Customer log-in failed. Retrying... ${ i }/${ customerRetries }`
 			);
 			console.log( e );
 		}
