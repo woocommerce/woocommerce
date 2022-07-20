@@ -28,6 +28,8 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
+              with:
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -128,6 +130,8 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
+              with:
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
@@ -168,6 +172,8 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
+              with:
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Workaround to use initialization file with prepopulated data.
               working-directory: plugins/woocommerce/tests/e2e/docker

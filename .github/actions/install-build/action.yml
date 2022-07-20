@@ -5,6 +5,9 @@ inputs:
     required: false
     description: The directory to target.
     default: ./
+  workflow_cache:
+    required: true
+    description: The workflow cache key.
 
 runs:
   using: "composite"
@@ -19,7 +22,7 @@ runs:
       with:
         path: |
           **/.cache/turbo
-        key: ${{ runner.os }}-${{ secrets.WORKFLOW_CACHE }}-${{ hashFiles('**/turbo-build.log') }}
+        key: ${{ runner.os }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/turbo-build.log') }}
 
     - name: Install dependencies
       shell: bash

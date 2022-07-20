@@ -33,6 +33,8 @@ jobs:
 
       - name: Install and Build
         uses: ./.github/actions/install-build
+        with:
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Lint
         run: pnpm -- turbo run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'

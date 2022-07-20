@@ -46,6 +46,8 @@ jobs:
 
       - name: Install and Build
         uses: ./.github/actions/install-build
+        with:
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
         
       - name: Build Admin feature config
         run: |
