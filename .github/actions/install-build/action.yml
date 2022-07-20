@@ -14,6 +14,13 @@ runs:
       working-directory: ${{ inputs.working_directory }}
       run: npm install -g pnpm@^6.24.2
 
+    - name: Turborepo Build caching
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/.cache/turbo
+        key: ${{ runner.os }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/turbo-build.log') }}
+
     - name: Install dependencies
       shell: bash
       working-directory: ${{ inputs.working_directory }}

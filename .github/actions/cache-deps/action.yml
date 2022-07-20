@@ -19,5 +19,4 @@ runs:
           ~/.pnpm-store
           ~/.local/share/pnpm/store
           ~/.cache/composer/files
-          **/.cache/turbo
-        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml', '**/turbo-build.log') }}
+        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
