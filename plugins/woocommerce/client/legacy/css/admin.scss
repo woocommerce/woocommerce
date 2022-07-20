@@ -4646,9 +4646,41 @@ img.help_tip {
 	width: 100%;
 }
 
-#postimagediv img {
-	border: 1px solid #d5d5d5;
-	max-width: 100%;
+#postimagediv {
+
+	.inside {
+		padding: 0;
+		margin: 0;
+	}
+
+	p {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.image-added-detail {
+		border-top: 1px solid #dcdcde;
+		background-color: #f6f7f7;
+		color: #7f8388;
+		font-size: 12px;
+		margin-top: 4px;
+
+		.dashicons {
+			font-size: 13px;
+			width: 13px;
+			height: 13px;
+			margin: 3px 3px 0 0;
+		}
+
+		a {
+			text-decoration: none;
+		}
+	}
+
+	img {
+		border: 1px solid #d5d5d5;
+		max-width: 100%;
+	}
 }
 
 #woocommerce-product-images .inside {
