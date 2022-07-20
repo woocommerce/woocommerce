@@ -1012,7 +1012,7 @@ mark.amount {
 /**
   * Help Tip
   */
-.woocommerce-help-tip {
+.woocommerce-help-tip, .woocommerce-product-type-tip {
 	color: #666;
 	display: inline-block;
 	font-size: 1.1em;
@@ -1032,13 +1032,13 @@ mark.amount {
 
 .wc-wp-version-gte-53 {
 
-	.woocommerce-help-tip {
+	.woocommerce-help-tip, .woocommerce-product-type-tip {
 		font-size: 1.2em;
 		cursor: help;
 	}
 }
 
-h2 .woocommerce-help-tip {
+h2 .woocommerce-help-tip, .woocommerce-product-type-tip {
 	margin-top: -5px;
 	margin-left: 0.25em;
 }
@@ -4768,6 +4768,15 @@ img.help_tip {
 		span {
 			display: block;
 			line-height: 24px;
+		}
+		.product-data-wrapper {
+			label > * {
+				display: inline-block;
+			}
+			.woocommerce-product-type-tip {
+				font-size: 1.4em;
+				margin-left: 9px;
+			}
 		}
 
 		.type_box {
