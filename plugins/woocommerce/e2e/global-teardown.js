@@ -27,6 +27,7 @@ module.exports = async ( config ) => {
 			await adminPage.dispatchEvent( 'a.submitdelete', 'click' );
 			console.log( 'Cleared up consumer token successfully.' );
 			consumerTokenCleared = true;
+			break;
 		} catch ( e ) {
 			console.log( 'Failed to clear consumer token. Retrying...' );
 		}

@@ -52,6 +52,7 @@ module.exports = async ( config ) => {
 				.storageState( { path: process.env.ADMINSTATE } );
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
+			break;
 		} catch ( e ) {
 			console.log( 'Admin log-in failed. Retrying...' );
 		}
@@ -85,6 +86,7 @@ module.exports = async ( config ) => {
 			);
 			console.log( 'Added consumer token successfully.' );
 			customerKeyConfigured = true;
+			break;
 		} catch ( e ) {
 			console.log( 'Failed to add consumer token. Retrying...' );
 		}
@@ -111,9 +113,9 @@ module.exports = async ( config ) => {
 			await customerPage
 				.context()
 				.storageState( { path: process.env.CUSTOMERSTATE } );
-			await browser.close();
 			console.log( 'Logged-in as customer successfully.' );
 			customerLoggedIn = true;
+			break;
 		} catch ( e ) {
 			console.log( 'Customer log-in failed. Retrying...' );
 		}
@@ -129,4 +131,6 @@ module.exports = async ( config ) => {
 
 	// Stop trace if no errors ocurred.
 	await context.tracing.stop( { path: 'setup.zip' } );
+
+	await browser.close();
 };
