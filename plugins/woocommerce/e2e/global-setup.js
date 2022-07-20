@@ -28,11 +28,15 @@ module.exports = async ( config ) => {
 
 	// Pre-requisites
 	let adminLoggedIn = false;
-	const customerLoggedIn = false;
+	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
 
 	const browser = await chromium.launch();
+	const context = await browser.newContext();
 	const adminPage = await browser.newPage();
+
+	// Trace setup
+	await context.tracing.start( { screenshots: true, snapshots: true } );
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
@@ -57,6 +61,7 @@ module.exports = async ( config ) => {
 		console.error(
 			'Cannot proceed e2e test, as admin login failed. Please check if the test site has been setup correctly.'
 		);
+		await context.tracing.stop( { path: 'setup.zip' } );
 		process.exit( 1 );
 	}
 
@@ -89,6 +94,7 @@ module.exports = async ( config ) => {
 		console.error(
 			'Cannot proceed e2e test, as we could not set the customer key. Please check if the test site has been setup correctly.'
 		);
+		await context.tracing.stop( { path: 'setup.zip' } );
 		process.exit( 1 );
 	}
 
@@ -107,6 +113,7 @@ module.exports = async ( config ) => {
 				.storageState( { path: process.env.CUSTOMERSTATE } );
 			await browser.close();
 			console.log( 'Logged-in as customer successfully.' );
+			customerLoggedIn = true;
 		} catch ( e ) {
 			console.log( 'Customer log-in failed. Retrying...' );
 		}
@@ -116,6 +123,10 @@ module.exports = async ( config ) => {
 		console.error(
 			'Cannot proceed e2e test, as customer login failed. Please check if the test site has been setup correctly.'
 		);
+		await context.tracing.stop( { path: 'setup.zip' } );
 		process.exit( 1 );
 	}
+
+	// Stop trace if no errors ocurred.
+	await context.tracing.stop( { path: 'setup.zip' } );
 };
