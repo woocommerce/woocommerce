@@ -77,7 +77,7 @@ const runTaskListTest = () => {
 			expect( taskListItems.length ).toBeInRange( 5, 6 );
 
 			// Work around for https://github.com/woocommerce/woocommerce-admin/issues/6761
-			if ( taskListItems.length == 6 ) {
+			if ( taskListItems.length === 6 ) {
 				// Click on "Set up shipping" task to move to the next step
 				const [ setupTaskListItem ] = await page.$x(
 					'//div[contains(text(),"Set up shipping")]'
@@ -101,6 +101,7 @@ const runTaskListTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = {
 	runOnboardingFlowTest,
 	runTaskListTest,

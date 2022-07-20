@@ -12,7 +12,9 @@ test.describe(
 		} );
 
 		test.describe( 'Sign in as admin', () => {
-			test.use( { storageState: 'e2e/storage/adminState.json' } );
+			test.use( {
+				storageState: process.env.ADMINSTATE,
+			} );
 			test( 'Load wp-admin', async ( { page } ) => {
 				await page.goto( '/wp-admin' );
 				const title = page.locator( 'div.wrap > h1' );
@@ -21,7 +23,9 @@ test.describe(
 		} );
 
 		test.describe( 'Sign in as customer', () => {
-			test.use( { storageState: 'e2e/storage/customerState.json' } );
+			test.use( {
+				storageState: process.env.CUSTOMERSTATE,
+			} );
 			test( 'Load customer my account page', async ( { page } ) => {
 				await page.goto( '/my-account' );
 				const title = page.locator( 'h1.entry-title' );

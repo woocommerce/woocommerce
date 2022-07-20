@@ -2,7 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [10.2.0](https://www.npmjs.com/package/@woocommerce/packages/js/components/v/10.2.0) - 2022-07-08 
+## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19 
+
+-   Patch - Fix missing text domain
+
+## [10.2.0](https://www.npmjs.com/package/@woocommerce/components/v/10.2.0) - 2022-07-08 
 
 -   Minor - Add step name to tour kit step type and export CloseHandler type to be reused elsewhere
 -   Minor - Tree Select Control Component
@@ -11,7 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Remove PHP and Composer dependencies for packaged JS packages
 -   Patch - Tweak tour kit gap between content and controls
 
-## [10.1.0](https://www.npmjs.com/package/@woocommerce/packages/js/components/v/10.1.0) - 2022-06-09 
+## [10.1.0](https://www.npmjs.com/package/@woocommerce/components/v/10.1.0) - 2022-06-09 
 
 -   Minor - Add tour kit component
 -   Minor - Update dependency `memoize-one` to ^6.0.0. #32936
