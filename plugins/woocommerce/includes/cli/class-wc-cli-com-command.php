@@ -101,11 +101,11 @@ class WC_CLI_COM_Command {
 	 *     # Disconnect without prompt for confirmation.
 	 *     $ wp wc com disconnect --yes
 	 *
-	 * @param  array  $args
-	 * @param  array  $assoc_args
-	 *
+	 * @param array $args Positional arguments to include when calling the command.
+	 * @param array $assoc_args Associative arguments to include when calling the command.
+
 	 * @return void
-	 * @throws \WP_CLI\ExitException
+	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
 	 */
 	public static function disconnect( array $args, array $assoc_args ) {
 		if ( ! WC_Helper::is_site_connected() ) {
