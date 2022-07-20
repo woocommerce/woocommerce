@@ -71,6 +71,8 @@ jobs:
              cd plugins/woocommerce
              curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
              unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+             composer bin phpunit --help
+             composer bin phpunit config --help
              composer bin phpunit config --unset platform
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
