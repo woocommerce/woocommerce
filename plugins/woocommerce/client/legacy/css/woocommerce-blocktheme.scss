@@ -40,10 +40,26 @@
 		padding: 0.9rem 1.1rem;
 	}
 
-	#respond input#submit.alt,
-	a.button.alt,
-	button.button.alt,
-	input.button.alt {
+	button.button,
+	a.button {
+		background-color: var(--wp--preset--color--foreground, $primary);
+		color: var(--wp--preset--color--background, $primarytext);
+
+		&.disabled,
+		&:disabled,
+		&:disabled[disabled],
+		&.disabled:hover,
+		&:disabled:hover,
+		&:disabled[disabled]:hover {
+			background-color: var(--wp--preset--color--foreground, $primary);
+			color: var(--wp--preset--color--background, $primarytext);
+			opacity: 0.5;
+		}
+	}
+
+	#respond input#submit,
+	input.button,
+	a.button.alt {
 		// Style primary WooCommerce CTAs in theme colors by default.
 		background-color: var(--wp--preset--color--foreground, $primary);
 		color: var(--wp--preset--color--background, $primarytext);
