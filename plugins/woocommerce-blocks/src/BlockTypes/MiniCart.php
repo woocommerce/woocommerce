@@ -339,7 +339,10 @@ class MiniCart extends AbstractBlock {
 
 		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_family' ) );
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-		$wrapper_styles  = $classes_styles['styles'];
+		if ( ! empty( $attributes['className'] ) ) {
+			$wrapper_classes .= ' ' . $attributes['className'];
+		}
+		$wrapper_styles = $classes_styles['styles'];
 
 		$aria_label = sprintf(
 		/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
