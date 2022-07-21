@@ -46,11 +46,6 @@ jobs:
           workflow_name: ci
           workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-      - uses: ./.github/actions/cache-builds
-        with:
-          workflow_name: ci
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

@@ -21,11 +21,6 @@ jobs:
                   workflow_name: pr-build-and-e2e-tests
                   workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - uses: ./.github/actions/cache-builds
-              with:
-                  workflow_name: pr-build-and-e2e-tests
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -126,11 +121,6 @@ jobs:
                   workflow_name: pr-build-and-e2e-tests
                   workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - uses: ./.github/actions/cache-builds
-              with:
-                  workflow_name: pr-build-and-e2e-tests
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -167,11 +157,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/cache-deps
-              with:
-                  workflow_name: pr-build-and-e2e-tests
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-            - uses: ./.github/actions/cache-builds
               with:
                   workflow_name: pr-build-and-e2e-tests
                   workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
