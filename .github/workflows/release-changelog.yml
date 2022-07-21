@@ -58,14 +58,14 @@ jobs:
         id: rev-parse
         run: echo "::set-output name=hash::$(git rev-parse HEAD)"
         
-      - name: "Insert NEXT_CHANGELOG contents into changelog and readme"
+      - name: "Insert NEXT_CHANGELOG contents into readme"
         run: php .github/workflows/scripts/release-changelog.php
       
       - name: "git add changelog and readme files"
-        run: git add changelog.txt plugins/woocommerce/readme.txt
+        run: git add plugins/woocommerce/readme.txt
       
       - name: "Commit changelog and readme files"
-        run: git commit -m "Update the changelog and readme files for the ${{ inputs.releaseVersion }} release"
+        run: git commit -m "Update the readme files for the ${{ inputs.releaseVersion }} release"
         
       - name: "Push update branch to origin"
         run: git push origin ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
