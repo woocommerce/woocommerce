@@ -451,6 +451,14 @@
 		// Ensure headline is top aligned (/my-account/edit-address/shipping/).
 		margin-block-start: 0;
 	}
+
+	.woocommerce-orders-table__cell.woocommerce-orders-table__cell-order-actions {
+		a {
+			display: block;
+			margin-bottom: 1em;
+			text-align: center;
+		}
+	}
 }
 
 /**
