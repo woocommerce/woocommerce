@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a fatal when a block is used in the frontend #33989
