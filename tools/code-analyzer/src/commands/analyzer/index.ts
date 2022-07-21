@@ -26,6 +26,7 @@ import {
 } from '../../utils';
 import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
 import { execSync } from 'child_process';
+import { OutputFlags } from '@oclif/core/lib/interfaces';
 
 /**
  * Analyzer class
@@ -92,6 +93,8 @@ export default class Analyzer extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
+		const bar = await this.parse( Analyzer );
+		const bex = bar.flags;
 
 		CliUx.ux.action.start(
 			`Making a temporary clone of '${ flags.source }'`
@@ -139,15 +142,9 @@ export default class Analyzer extends Command {
 
 			CliUx.ux.action.stop();
 
-			this.scanChanges(
-				diff,
-				pluginData[ 0 ],
-				flags.output,
-				flags.file,
-				schemaDiff
-			);
+			this.scanChanges( diff, pluginData[ 0 ], flags, schemaDiff );
 		} else {
-			this.scanChanges( diff, pluginData[ 0 ], flags.output, flags.file );
+			this.scanChanges( diff, pluginData[ 0 ], flags );
 		}
 
 		// Clean up the temporary repo.
@@ -225,8 +222,7 @@ export default class Analyzer extends Command {
 	private async scanChanges(
 		content: string,
 		version: string,
-		output: string,
-		changesFileName: string,
+		flags: OutputFlags< typeof Analyzer[ 'flags' ] >,
 		schemaDiff: {
 			[ key: string ]: {
 				description: string;
@@ -237,12 +233,13 @@ export default class Analyzer extends Command {
 			};
 		} | void
 	) {
+		const { output, file } = flags;
 		CliUx.ux.action.start( 'Generating changes' );
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
 
-		await generateJSONFile( join( process.cwd(), changesFileName ), {
+		await generateJSONFile( join( process.cwd(), file ), {
 			templates: Object.fromEntries( templates.entries() ),
 			hooks: Object.fromEntries( hooks.entries() ),
 			schema: databaseUpdates || {},
