@@ -42,7 +42,7 @@ function wc_beta_tester_handle_get_recent_tracks_events( $request ) {
 function wc_beta_tester_handle_put_recent_tracks_event( $request ) {
 	$event = json_decode( $request->get_body() );
 
-	log_recent_tracks_event( $event );
+	wc_beta_tester_log_tracks_event( $event );
 
 	return new WP_REST_Response( $event, 200 );
 }
