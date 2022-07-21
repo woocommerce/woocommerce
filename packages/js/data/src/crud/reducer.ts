@@ -8,6 +8,7 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
+import { getKey } from './utils';
 import { getResourceName } from '../utils';
 import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
@@ -56,25 +57,25 @@ export const createReducer = () => {
 						...state,
 						data: {
 							...itemData,
-							[ payload.id ]: {
-								...( itemData[ payload.id ] || {} ),
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
 								...payload.item,
 							},
 						},
 					};
 
 				case TYPES.DELETE_ITEM_SUCCESS:
-					const itemIds = Object.keys( state.data );
-					const nextData = itemIds.reduce< Data >(
-						( items: Data, id: string ) => {
-							if ( id !== payload.id.toString() ) {
-								items[ id ] = state.data[ id ];
+					const itemKeys = Object.keys( state.data );
+					const nextData = itemKeys.reduce< Data >(
+						( items: Data, key: string ) => {
+							if ( key !== payload.key.toString() ) {
+								items[ key ] = state.data[ key ];
 								return items;
 							}
 							if ( payload.force ) {
 								return items;
 							}
-							items[ id ] = payload.item;
+							items[ key ] = payload.item;
 							return items;
 						},
 						{} as Data
@@ -93,7 +94,7 @@ export const createReducer = () => {
 						errors: {
 							...state.errors,
 							[ getResourceName( payload.errorType, {
-								id: payload.id,
+								key: payload.key,
 							} ) ]: payload.error,
 						},
 					};
@@ -104,9 +105,10 @@ export const createReducer = () => {
 					const nextResources = payload.items.reduce<
 						Record< string, Item >
 					>( ( result, item ) => {
-						ids.push( item.id );
-						result[ item.id ] = {
-							...( state.data[ item.id ] || {} ),
+						const key = getKey( item.id, payload.urlParameters );
+						ids.push( key );
+						result[ key ] = {
+							...( state.data[ key ] || {} ),
 							...item,
 						};
 						return result;
