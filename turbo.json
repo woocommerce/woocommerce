@@ -58,7 +58,9 @@
                 "client/*.ts",
                 "client/**/*.ts",
                 "client/*.tsx",
-                "client/**/*.tsx"
+                "client/**/*.tsx",
+                "client/*.scss",
+                "client/**/*.scss"
             ]
         },
         
