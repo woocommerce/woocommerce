@@ -1,5 +1,5 @@
 const { devices } = require( '@playwright/test' );
-const { CI } = process.env;
+const { CI, E2E_MAX_FAILURES } = process.env;
 
 const config = {
 	timeout: 90 * 1000,
@@ -8,14 +8,14 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: process.env.CI ? 4 : 2,
+	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
 		[ 'html', { outputFolder: 'output' } ],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
 	],
-	maxFailures: CI ? 15 : undefined,
+	maxFailures: CI ? E2E_MAX_FAILURES : 0,
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',

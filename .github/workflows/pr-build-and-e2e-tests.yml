@@ -80,6 +80,8 @@ jobs:
               id: run_playwright_e2e_tests
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
+              env:
+                  E2E_MAX_FAILURES: 15
               run: pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
