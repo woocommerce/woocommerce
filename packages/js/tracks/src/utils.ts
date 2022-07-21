@@ -6,38 +6,32 @@ import { ExtraProperties } from '.';
 
 export const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
-function validatePropertyName( propertyName: string ) {
-	return PROP_NAME_REGEX.test( propertyName );
-}
-
-function validateProperties( props: ExtraProperties ) {
-	for ( const prop of Object.keys( props ) ) {
-		if ( ! validatePropertyName( prop ) ) {
-			return false;
-		}
-	}
-	return true;
-}
-
-function validateEventName( eventName: string ) {
-	return EVENT_NAME_REGEX.test( eventName );
-}
-
 export function validateEventNameAndProperties(
 	eventName: string,
 	props: ExtraProperties | undefined = {}
 ) {
-	if ( ! validateEventName( eventName ) ) {
+	let isValid = true;
+	if ( ! EVENT_NAME_REGEX.test( eventName ) ) {
 		if ( isDevelopmentMode ) {
-			console.error( 'An invalid event name has been sent.' ); // eslint-disable-line no-console
+			/* eslint-disable no-console */
+			console.error(
+				`A valid event name must be specified. The event name: "${ eventName }" is not valid.`
+			);
+			/* eslint-enable no-console */
 		}
-		return false;
+		isValid = false;
 	}
-	if ( ! validateProperties( props ) ) {
-		if ( isDevelopmentMode ) {
-			console.error( 'An invalid prop name has been sent.' ); // eslint-disable-line no-console
+	for ( const prop of Object.keys( props ) ) {
+		if ( ! PROP_NAME_REGEX.test( prop ) ) {
+			if ( isDevelopmentMode ) {
+				/* eslint-disable no-console */
+				console.error(
+					`A valid prop name must be specified. The property name: "${ prop }" is not valid.`
+				);
+				/* eslint-enable no-console */
+			}
+			isValid = false;
 		}
-		return false;
 	}
-	return true;
+	return isValid;
 }

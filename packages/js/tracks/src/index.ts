@@ -41,15 +41,12 @@ export function recordEvent(
 			!! window.wcTracks.isEnabled,
 	} );
 
-	if ( ! validateEventNameAndProperties( eventName, eventProperties ) ) {
-		return false;
-	}
-
 	if (
 		! window.wcTracks ||
 		typeof window.wcTracks.recordEvent !== 'function' ||
 		isDevelopmentMode
 	) {
+		validateEventNameAndProperties( eventName, eventProperties );
 		return false;
 	}
 
