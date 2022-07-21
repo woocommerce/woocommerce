@@ -1,13 +1,18 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { noop } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { SearchListControl } from '../';
+
+const SELECTORS = {
+	listItems: '.woocommerce-search-list__list > li',
+	searchInput: '.components-text-control__input[type="search"]',
+};
 
 const list = [
 	{ id: 1, name: 'Apricots' },
@@ -108,13 +113,50 @@ describe( 'SearchListControl', () => {
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
-				search="bERry"
 				selected={ [] }
 				onChange={ noop }
 				debouncedSpeak={ noop }
 			/>
 		);
+
+		fireEvent.change(
+			component.container.querySelector( SELECTORS.searchInput ),
+			{ target: { value: 'BeRrY' } }
+		);
+
 		expect( component ).toMatchSnapshot();
+
+		const $listItems = component.container.querySelectorAll(
+			SELECTORS.listItems
+		);
+
+		expect( $listItems ).toHaveLength( 2 );
+	} );
+
+	// @see https://github.com/woocommerce/woocommerce-blocks/issues/6524
+	test( "should render search results in their original case regardless of user's input case", () => {
+		const EXPECTED = [ 'Elderberry', 'Mulberry' ];
+
+		const component = render(
+			<SearchListControl
+				instanceId={ 1 }
+				list={ list }
+				selected={ [] }
+				onChange={ noop }
+				debouncedSpeak={ noop }
+			/>
+		);
+
+		fireEvent.change(
+			component.container.querySelector( SELECTORS.searchInput ),
+			{ target: { value: 'BeRrY' } }
+		);
+
+		const listItems = Array.from(
+			component.container.querySelectorAll( SELECTORS.listItems )
+		).map( ( $el ) => $el.textContent );
+
+		expect( listItems ).toEqual( expect.arrayContaining( EXPECTED ) );
 	} );
 
 	test( 'should render a search box with a search term, and no matching options', () => {
