@@ -7,7 +7,7 @@
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/recent-tracks-events',
-	'wca_test_helper_get_recent_tracks_events',
+	'wc_beta_tester_handle_get_recent_tracks_events',
 	array(
 		'methods' => 'GET',
 	)
@@ -15,21 +15,21 @@ register_woocommerce_admin_test_helper_rest_route(
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/recent-tracks-events',
-	'wca_test_helper_add_recent_tracks_event',
+	'wc_beta_tester_handle_put_recent_tracks_event',
 	array(
 		'methods' => 'PUT',
 	)
 );
 
-add_filter( 'woocommerce_tracks_event_properties', 'wca_test_helper_tracks_event_properties_filter', 10, 2 );
+add_filter( 'woocommerce_tracks_event_properties', 'wc_beta_tester_log_tracks_event_properties', 10, 2 );
 
 /**
  * Handle request to get recent Tracks events.
  *
  * @param WP_REST_Request $request Request instance.
  */
-function wca_test_helper_get_recent_tracks_events( $request ) {
-	$events = get_recent_tracks_events();
+function wc_beta_tester_handle_get_recent_tracks_events( $request ) {
+	$events = wc_beta_tester_get_recent_tracks_events();
 
 	return new WP_REST_Response( $events, 200 );
 }
@@ -39,7 +39,7 @@ function wca_test_helper_get_recent_tracks_events( $request ) {
  *
  * @param WP_REST_Request $request Request instance.
  */
-function wca_test_helper_add_recent_tracks_event( $request ) {
+function wc_beta_tester_handle_put_recent_tracks_event( $request ) {
 	$event = json_decode( $request->get_body() );
 
 	log_recent_tracks_event( $event );
@@ -53,14 +53,14 @@ function wca_test_helper_add_recent_tracks_event( $request ) {
  * @param array  $properties Event properties.
  * @param string $event_name Event name.
  */
-function wca_test_helper_tracks_event_properties_filter( $properties, $event_name ) {
+function wc_beta_tester_log_tracks_event_properties( $properties, $event_name ) {
 	if ( false === $event_name ) {
 		return $properties;
 	}
 
-	$event = build_tracks_event( $properties, $event_name );
+	$event = wc_beta_tester_build_tracks_event( $properties, $event_name );
 
-	log_recent_tracks_event( $event );
+	wc_beta_tester_log_tracks_event( $event );
 
 	return $properties;
 }
@@ -70,7 +70,7 @@ function wca_test_helper_tracks_event_properties_filter( $properties, $event_nam
  *
  * @param object $event Tracks event.
  */
-function log_recent_tracks_event( $event ) {
+function wc_beta_tester_log_tracks_event( $event ) {
 	$event_as_json = wp_json_encode( $event );
 
 	$log_file_name = get_recent_tracks_events_log_file_name();
@@ -83,7 +83,7 @@ function log_recent_tracks_event( $event ) {
  * @param array  $properties Event properties.
  * @param string $event_name Event name.
  */
-function build_tracks_event( $properties, $event_name ) {
+function wc_beta_tester_build_tracks_event( $properties, $event_name ) {
 	$event = array(
 		'eventname'  => $event_name,
 		'eventprops' => $properties,
@@ -94,7 +94,7 @@ function build_tracks_event( $properties, $event_name ) {
 /**
  * Get recent Tracks events.
  */
-function get_recent_tracks_events() {
+function wc_beta_tester_get_recent_tracks_events() {
 	// TODO: this implementation feels very inefficient;
 	// it would be nice to be able to just send the string back and set content type to JSON.
 	$log_file_name = get_recent_tracks_events_log_file_name();
