@@ -463,7 +463,14 @@ class MiniCart extends AbstractBlock {
 	 * @return object;
 	 */
 	protected function get_cart_payload() {
-		return WC()->api->get_endpoint_data( '/wc/store/cart' );
+		$notices = wc_get_notices(); // Backup the notices because StoreAPI will remove them.
+		$payload = WC()->api->get_endpoint_data( '/wc/store/cart' );
+
+		if ( ! empty( $notices ) ) {
+			wc_set_notices( $notices ); // Restore the notices.
+		}
+
+		return $payload;
 	}
 
 	/**
