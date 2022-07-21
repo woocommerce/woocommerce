@@ -13,6 +13,7 @@ export type PluginListProps = {
 	currentPlugin?: string | null;
 	key?: string;
 	installAndActivate?: ( slug: string ) => void;
+	onManage?: ( slug: string ) => void;
 	plugins?: PluginProps[];
 	title?: string;
 };
@@ -20,6 +21,7 @@ export type PluginListProps = {
 export const PluginList: React.FC< PluginListProps > = ( {
 	currentPlugin,
 	installAndActivate = () => {},
+	onManage = () => {},
 	plugins = [],
 	title,
 } ) => {
@@ -51,6 +53,7 @@ export const PluginList: React.FC< PluginListProps > = ( {
 						name={ name }
 						imageUrl={ imageUrl }
 						installAndActivate={ installAndActivate }
+						onManage={ onManage }
 						isActive={ isActive }
 						isBuiltByWC={ isBuiltByWC }
 						isBusy={ currentPlugin === slug }

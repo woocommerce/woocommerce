@@ -118,7 +118,13 @@ jQuery( function( $ ) {
 			// Init TipTip
 			$( '#tiptip_holder' ).removeAttr( 'style' );
 			$( '#tiptip_arrow' ).removeAttr( 'style' );
-			$( '.woocommerce_variations .tips, .woocommerce_variations .help_tip, .woocommerce_variations .woocommerce-help-tip', wrapper )
+			$(
+				'.woocommerce_variations .tips, ' +
+				'.woocommerce_variations .help_tip, ' +
+				'.woocommerce_variations .woocommerce-help-tip, ' +
+				'.toolbar-variations-defaults .woocommerce-help-tip',
+				wrapper
+			)
 				.tipTip({
 					'attribute': 'data-tip',
 					'fadeIn':    50,
@@ -812,7 +818,7 @@ jQuery( function( $ ) {
 				default :
 					$( 'select.variation_actions' ).trigger( do_variation_action );
 					data = $( 'select.variation_actions' ).triggerHandler( do_variation_action + '_ajax_data', data );
-					
+
 					if ( null === data ) {
 						return;
 					}

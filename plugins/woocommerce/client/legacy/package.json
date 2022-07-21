@@ -6,8 +6,8 @@
 	"private": true,
 	"main": "Gruntfile.js",
 	"scripts": {
-		"build": "grunt assets",
-		"lint": "grunt eslint stylelint --force"
+		"build": "node ./node_modules/require-turbo && grunt assets",
+		"lint": "node ./node_modules/require-turbo && grunt eslint stylelint --force"
 	},
 	"devDependencies": {
 		"@wordpress/stylelint-config": "19.1.0",
@@ -29,6 +29,7 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
+		"require-turbo": "workspace:*",
 		"sass": "^1.45.0",
 		"stylelint": "13.8.0"
 	}

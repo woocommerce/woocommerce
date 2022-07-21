@@ -13,12 +13,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME, PluginsStoreActions } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * Internal dependencies
- */
-import strings from './strings';
-import Banner from './banner';
 import {
 	Visa,
 	MasterCard,
@@ -30,7 +24,13 @@ import {
 	Discover,
 	JCB,
 	UnionPay,
-} from './cards';
+} from '@woocommerce/onboarding';
+
+/**
+ * Internal dependencies
+ */
+import strings from './strings';
+import Banner from './banner';
 import './style.scss';
 import FrequentlyAskedQuestions from './faq';
 import ExitSurveyModal from './exit-survey-modal';

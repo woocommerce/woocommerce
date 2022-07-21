@@ -208,7 +208,7 @@ const PaymentRecommendations: React.FC = () => {
 						size="20"
 						lineHeight="28px"
 					>
-						{ __( 'Additional ways to get paid', 'woocommerce' ) }
+						{ __( 'Recommended payment providers', 'woocommerce' ) }
 					</Text>
 					<Text
 						className={
@@ -243,7 +243,7 @@ const PaymentRecommendations: React.FC = () => {
 			<List items={ pluginsList } />
 			<CardFooter>
 				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
-					{ __( 'See more options', 'woocommerce' ) }
+					{ __( 'Discover other payment providers', 'woocommerce' ) }
 					<ExternalIcon size={ 18 } />
 				</Button>
 			</CardFooter>

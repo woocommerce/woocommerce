@@ -118,8 +118,12 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( paymentTitles ).toEqual( [] );
 
 		expect(
-			container.getElementsByTagName( 'title' )[ 0 ].textContent
-		).toBe( 'WooCommerce Payments' );
+			container
+				.querySelector(
+					'.woocommerce-recommended-payments__header-heading'
+				)
+				.textContent.includes( 'WooCommerce Payments' )
+		).toBe( true );
 	} );
 
 	test( 'should render all payment gateways if no WCPay', () => {
@@ -138,6 +142,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 				query={ query }
 			/>
 		);
+
+		expect(
+			screen.getByText( 'Choose a payment provider' )
+		).toBeInTheDocument();
 
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title > span:first-child'
@@ -238,6 +246,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
+		expect(
+			screen.getByText( 'Additional payment options' )
+		).toBeInTheDocument();
+
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
 		);
@@ -287,7 +299,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		} );
 	} );
 
-	test( 'should record event correctly when other payment methods is clicked', () => {
+	test( 'should record event correctly when Other payment providers is clicked', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -305,7 +317,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Other payment methods' ) );
+		fireEvent.click( screen.getByText( 'Other payment providers' ) );
 
 		// By default it's hidden, so when toggle it shows.
 		// Second call after "tasklist_payments_options".
@@ -315,7 +327,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'tasklist_payment_show_toggle',
 			{
 				toggle: 'show',
-				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "other payment methods".
+				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "Other payment providers".
 			},
 		] );
 	} );
@@ -338,7 +350,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Other payment methods' ) );
+		fireEvent.click( screen.getByText( 'Other payment providers' ) );
 		fireEvent.click( screen.getByText( 'See more' ) );
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]

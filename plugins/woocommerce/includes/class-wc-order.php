@@ -948,8 +948,8 @@ class WC_Order extends WC_Abstract_Order {
 		 * Filter orders formatted shipping address.
 		 *
 		 * @since 3.8.0
-		 * @param string   $address     Formatted billing address string.
-		 * @param array    $raw_address Raw billing address.
+		 * @param string   $address     Formatted shipping address string.
+		 * @param array    $raw_address Raw shipping address.
 		 * @param WC_Order $order       Order data. @since 3.9.0
 		 */
 		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address, $this );

@@ -4,32 +4,32 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60aa0827b607ee34ee91ad1429694c57",
+    "content-hash": "75af54f4e83b1e2c7c96371c3288e355",
     "packages": [],
     "packages-dev": [
         {
             "name": "automattic/jetpack-changelogger",
-            "version": "v3.0.2",
+            "version": "v3.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-changelogger.git",
-                "reference": "b76f9cb4c22ec08490eff91a2e0e5aa586ee04b3"
+                "reference": "cdd256d8ba6369f82d9377de7e9e2598e3e16ae0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-changelogger/zipball/b76f9cb4c22ec08490eff91a2e0e5aa586ee04b3",
-                "reference": "b76f9cb4c22ec08490eff91a2e0e5aa586ee04b3",
+                "url": "https://api.github.com/repos/Automattic/jetpack-changelogger/zipball/cdd256d8ba6369f82d9377de7e9e2598e3e16ae0",
+                "reference": "cdd256d8ba6369f82d9377de7e9e2598e3e16ae0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6",
-                "symfony/console": "^3.4 | ^5.2",
-                "symfony/process": "^3.4 | ^5.2",
-                "wikimedia/at-ease": "^1.2 | ^2.0"
+                "symfony/console": "^3.4 || ^5.2",
+                "symfony/process": "^3.4 || ^5.2",
+                "wikimedia/at-ease": "^1.2 || ^2.0"
             },
             "require-dev": {
-                "wikimedia/testing-access-wrapper": "^1.0 | ^2.0",
-                "yoast/phpunit-polyfills": "1.0.2"
+                "wikimedia/testing-access-wrapper": "^1.0 || ^2.0",
+                "yoast/phpunit-polyfills": "1.0.3"
             },
             "bin": [
                 "bin/changelogger"
@@ -38,7 +38,7 @@
             "extra": {
                 "autotagger": true,
                 "branch-alias": {
-                    "dev-master": "3.0.x-dev"
+                    "dev-trunk": "3.1.x-dev"
                 },
                 "mirror-repo": "Automattic/jetpack-changelogger",
                 "version-constants": {
@@ -60,9 +60,9 @@
             ],
             "description": "Jetpack Changelogger tool. Allows for managing changelogs by dropping change files into a changelog directory with each PR.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-changelogger/tree/v3.0.2"
+                "source": "https://github.com/Automattic/jetpack-changelogger/tree/v3.1.3"
             },
-            "time": "2021-11-02T14:06:49+00:00"
+            "time": "2022-06-21T07:31:56+00:00"
         },
         {
             "name": "psr/log",
@@ -265,6 +265,7 @@
                     "type": "tidelift"
                 }
             ],
+            "abandoned": "symfony/error-handler",
             "time": "2022-04-12T15:19:55+00:00"
         },
         {
@@ -333,7 +334,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/main"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.26.0"
             },
             "funding": [
                 {

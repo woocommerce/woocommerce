@@ -120,7 +120,11 @@ function Snackbar(
 			tabIndex="0"
 			role={ ! explicitDismiss ? 'button' : '' }
 			onKeyPress={ ! explicitDismiss ? dismissMe : noop }
-			aria-label={ ! explicitDismiss ? __( 'Dismiss this notice' ) : '' }
+			aria-label={
+				! explicitDismiss
+					? __( 'Dismiss this notice', 'woocommerce' )
+					: ''
+			}
 		>
 			<div className={ snackbarContentClassnames }>
 				{ icon && (

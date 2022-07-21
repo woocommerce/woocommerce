@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Fix code that throws deprecation notices in tests in PHP 8.1

@@ -2,12 +2,16 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	const customerBilling = {
-		email: 'john.doe@example.com',
+		email: 'john.doe.merchant.test@example.com',
 	};
-	const adminEmail = 'admin@woocommercecoree2etestsuite.com';
+
+	const adminEmail =
+		process.env.USE_WP_ENV === '1'
+			? 'wordpress@example.com'
+			: 'admin@woocommercecoree2etestsuite.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId;
 
@@ -29,7 +33,11 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	} );
 
 	test.beforeEach( async ( { page } ) => {
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		// clear out the email logs before each test
 		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
 			await page.click( '#cb-select-all-1' );
@@ -46,6 +54,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ newOrderId }`, { force: true } );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
@@ -65,16 +74,18 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			.then( ( response ) => {
 				newOrderId = response.data.id;
 			} );
-
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		// search to narrow it down to just the messages we want
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		await expect(
 			page.locator( 'td.column-receiver >> nth=1' )
 		).toContainText( adminEmail );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
-
-		await api.delete( `orders/${ newOrderId }`, { force: true } );
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
@@ -87,8 +98,12 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.click( 'button.wc-reload' );
 		await page.waitForLoadState( 'networkidle' );
 
-		// confirm the message was delivered in the logs
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		// search to narrow it down to just the messages we want
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			adminEmail
 		);
@@ -105,7 +120,11 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		// confirm the message was delivered in the logs
-		await page.goto( 'wp-admin/tools.php?page=wpml_plugin_log' );
+		await page.goto(
+			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+				customerBilling.email
+			) }`
+		);
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			customerBilling.email
 		);

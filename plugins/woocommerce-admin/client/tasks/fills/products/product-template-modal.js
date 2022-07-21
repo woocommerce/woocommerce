@@ -159,7 +159,7 @@ export default function ProductTemplateModal( { onClose } ) {
 
 	return (
 		<Modal
-			title={ __( 'Start with a template' ) }
+			title={ __( 'Start with a template', 'woocommerce' ) }
 			isDismissible={ true }
 			onRequestClose={ () => onClose() }
 			className="woocommerce-product-template-modal"
@@ -193,7 +193,7 @@ export default function ProductTemplateModal( { onClose } ) {
 						disabled={ ! selectedTemplate || isRedirecting }
 						onClick={ createTemplate }
 					>
-						{ __( 'Go' ) }
+						{ __( 'Go', 'woocommerce' ) }
 					</Button>
 				</div>
 			</div>

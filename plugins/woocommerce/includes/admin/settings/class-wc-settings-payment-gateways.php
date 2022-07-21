@@ -6,6 +6,8 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -143,7 +145,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					</thead>
 					<tbody>
 						<?php
-						foreach ( WC()->payment_gateways->payment_gateways() as $gateway ) {
+						$payment_gateways = WC()->payment_gateways->payment_gateways();
+						foreach ( $payment_gateways as $gateway ) {
 
 							echo '<tr data-gateway_id="' . esc_attr( $gateway->id ) . '">';
 
@@ -198,7 +201,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 												$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 											}
 											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Set up', 'woocommerce' ) . '</a>';
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
 										}
 										break;
 									case 'status':
@@ -225,18 +228,49 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 						 * See https://github.com/woocommerce/woocommerce/issues/32130 for more details.
 						 */
 						if ( WooCommercePayments::is_supported() ) {
-							$columns_count      = count( $columns );
-							$link_text          = __( 'Other payment methods', 'woocommerce' );
+							$wcpay_setup        = isset( $payment_gateways['woocommerce_payments'] ) && ! $payment_gateways['woocommerce_payments']->needs_setup();
+							$country            = wc_get_base_location()['country'];
+							$plugin_suggestions = Init::get_suggestions();
+							$active_plugins     = PluginsHelper::get_active_plugin_slugs();
+
+							if ( $wcpay_setup ) {
+								$link_text = __( 'Discover additional payment providers', 'woocommerce' );
+								$filter_by = 'category_additional';
+							} else {
+								$link_text = __( 'Discover other payment providers', 'woocommerce' );
+								$filter_by = 'category_other';
+							}
+
+							$plugin_suggestions = array_filter(
+								$plugin_suggestions,
+								function( $plugin ) use ( $country, $filter_by, $active_plugins ) {
+									if ( ! isset( $plugin->{$filter_by} ) || ! isset( $plugin->image_72x72 ) || ! isset( $plugin->plugins[0] ) || in_array( $plugin->plugins[0], $active_plugins, true ) ) {
+										return false;
+									}
+									return in_array( $country, $plugin->{$filter_by}, true );
+								}
+							);
+
+							$columns_count = count( $columns );
+
 							$external_link_icon = '<svg style="margin-left: 4px" class="gridicon gridicons-external needs-offset" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M19 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6v2H5v12h12v-6h2zM13 3v2h4.586l-7.793 7.793 1.414 1.414L19 6.414V11h2V3h-8z"></path></g></svg>';
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
 							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
-							echo "<a id='settings-other-payment-methods' href='" . esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) ) . "' target='_blank' class='components-button is-tertiary'>";
+							echo "<a id='settings-other-payment-methods' href='https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
 							// phpcs:ignore
 							echo $link_text;
 							// phpcs:ignore
 							echo $external_link_icon;
 							echo '</a>';
+							if ( count( $plugin_suggestions ) ) {
+								foreach ( $plugin_suggestions as $plugin_suggestion ) {
+									$alt = str_replace( '.png', '', basename( $plugin_suggestion->image_72x72 ) );
+									// phpcs:ignore
+									echo "<img src='{$plugin_suggestion->image_72x72}' alt='${alt}' width='24' height='24' style='vertical-align: middle; margin-right: 8px;'/>";
+								}
+								echo '& more.';
+							}
 							echo '</td>';
 							echo '</tr>';
 						}

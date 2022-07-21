@@ -392,7 +392,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			// If this is a term slug, get the term's nice name.
 			if ( taxonomy_exists( $name ) ) {
 				$term = get_term_by( 'slug', $value, $name );
-				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
+				if ( ! is_wp_error( $term ) && $term && null !== $term->name && '' !== $term->name ) {
 					$value = $term->name;
 				}
 			}
@@ -987,7 +987,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		)
 	);
 
-	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
+	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
 	if ( '' === $price ) {
@@ -1071,7 +1071,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		)
 	);
 
-	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
+	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
 	if ( '' === $price ) {
