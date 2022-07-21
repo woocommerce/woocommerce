@@ -73,8 +73,7 @@ jobs:
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
               if: |
-                  always() && 
-                  ! github.event.pull_request.head.repo.fork &&
+                  always() &&
                   fromJSON(env.E2E_PLAYWRIGHT) &&
                   (
                     steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
