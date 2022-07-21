@@ -82,4 +82,4 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.WC_BOT_TRIAGE_TOKEN }}" \
             -d '{"ref":"refs/heads/trunk","inputs":{"releaseBranch":"${{ needs.maybe-create-next-milestone-and-release-branch.outputs.branch }}","releaseVersion":"${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }}"}}' \
-            https://api.github.com/repos/jonathansadowski/woocommerce/actions/workflows/release-changelog.yml/dispatches
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/release-changelog.yml/dispatches
