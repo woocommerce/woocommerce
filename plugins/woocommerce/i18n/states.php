@@ -1122,6 +1122,7 @@ return array(
 		'SN' => __( 'Sinoe', 'woocommerce' ),
 	),
 	'LU' => array(),
+	"MF" => array(), // No states in Saint Martin (French part)
 	'MD' => array( // Moldovan states.
 		'C'  => __( 'Chișinău', 'woocommerce' ),
 		'BL' => __( 'Bălți', 'woocommerce' ),
