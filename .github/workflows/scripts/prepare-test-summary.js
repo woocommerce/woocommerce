@@ -9,6 +9,7 @@ const {
 	SHA,
 	PR_NUMBER,
 	E2E_GRAND_TOTAL,
+	E2E_MAX_FAILURES,
 } = process.env;
 
 /**
@@ -128,7 +129,7 @@ const createE2ETableRow = () => {
  * Add a warning when the number of executed Playwright E2E tests were fewer than the total.
  */
 const addWarningE2EIncomplete = ( warnings ) => {
-	if ( ! E2E_PLAYWRIGHT ) {
+	if ( ! E2E_PLAYWRIGHT || E2E_MAX_FAILURES === undefined ) {
 		return;
 	}
 
@@ -138,7 +139,7 @@ const addWarningE2EIncomplete = ( warnings ) => {
 
 	if ( total < expectedTotal ) {
 		warnings.push(
-			`**Incomplete E2E test run.** We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. E2E tests in CI will automatically end when they reach a certain number of failures. This is a fail-fast mechanism to save time on testing a buggy build. Please refer to the full E2E report linked below to fix these failures.`
+			`INCOMPLETE E2E RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. E2E tests in CI will automatically end when they encounter too many failures. This is a fail-fast mechanism to save time on testing a buggy build. Keep the failures to a minimum in order to allow the entire E2E tests to run against this pull request.`
 		);
 	}
 };
@@ -155,9 +156,7 @@ const addWarningFailuresBrokenTests = ( warnings ) => {
 		: getPuppeteerStats();
 
 	if ( apiFailed || apiBroken || e2eFailed || e2eBroken ) {
-		warnings.push(
-			'**Failed and broken tests detected.** Refer to the full API and/or E2E test reports linked below to fix these failures and broken tests.'
-		);
+		warnings.push( 'FAILED/BROKEN TESTS. There were failed and/or broken API and E2E tests. Please fix them first prior to merging this pull request. You may refer to the full API/E2E test reports linked below for debugging.' );
 	}
 };
 
@@ -173,7 +172,7 @@ const addSummaryWarnings = ( core ) => {
 	addWarningFailuresBrokenTests( warnings );
 	if ( warnings.length > 0 ) {
 		core.summary
-			.addHeading( ':warning: Warning', 3 )
+			.addHeading( ':warning: Warning :warning:', 3 )
 			.addRaw(
 				'Please address the following issues prior to merging this pull request:'
 			)
