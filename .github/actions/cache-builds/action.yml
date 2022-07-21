@@ -17,4 +17,4 @@ runs:
       with:
         path: |
           **/.cache/turbo
-        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/.cache/turbo') }}
+        key: ${{ runner.os }}-build-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/turbo-build.log') }}
