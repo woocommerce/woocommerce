@@ -168,8 +168,7 @@ const runCartAndCheckoutConsistentShippingTest = () => {
 				{
 					// Test fails here because actual text is 'Enter your address to view shipping options.'
 					// Logged in GitHub as issue #33205
-					text:
-						'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
+					text: 'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
 				}
 			);
 		} );

@@ -201,8 +201,7 @@ const runCreateOrderTest = () => {
 			await expect( page ).toMatchElement(
 				'#woocommerce-order-notes .note_content',
 				{
-					text:
-						'Order status changed from Pending payment to Processing.',
+					text: 'Order status changed from Pending payment to Processing.',
 				}
 			);
 		} );
@@ -285,4 +284,5 @@ const runCreateOrderTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runCreateOrderTest;

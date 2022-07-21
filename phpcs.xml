@@ -127,12 +127,6 @@
 	</rule>
 
 	<!-- Temporary -->
-	<rule ref="WooCommerce.Commenting.CommentHooks.MissingHooksComment">
-		<exclude-pattern>plugins/woocommerce/src/Internal/Admin/</exclude-pattern>
-		<exclude-pattern>src/Admin/</exclude-pattern>
-	</rule>
-
-	<!-- Temporary -->
 	<rule ref="WordPress.Security.NonceVerification.Recommended">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>

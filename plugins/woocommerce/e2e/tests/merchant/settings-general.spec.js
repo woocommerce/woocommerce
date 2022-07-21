@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'WooCommerce General Settings', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -30,7 +30,7 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// confirm setting saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -45,7 +45,7 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// verify the settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(
@@ -68,7 +68,7 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.click( 'text=Save changes' );
 
 		// verify that settings have been saved
-		await expect( page.locator( 'div.inline' ) ).toContainText(
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
 		await expect(

@@ -102,10 +102,6 @@ abstract class CustomMetaDataStore {
 	public function add_meta( &$object, $meta ) {
 		global $wpdb;
 
-		if ( ! is_a( $meta, 'WC_Meta_Data' ) ) {
-			return false;
-		}
-
 		$db_info = $this->get_db_info();
 
 		$object_id  = $object->get_id();

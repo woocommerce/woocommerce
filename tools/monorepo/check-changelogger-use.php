@@ -200,7 +200,7 @@ foreach ( $touched_projects as $slug => $files ) {
 		} elseif ( getenv( 'CI' ) ) {
 			printf( "---\n" ); // Bracket message containing newlines for better visibility in GH's logs.
 			printf(
-				"::error::Project %s is being changed, but no change file in %s is touched!%%0A%%0AUse `pnpm changelog --filter=%s` to add a change file.\n",
+				"::error::Project %s is being changed, but no change file in %s is touched!%%0A%%0AUse `pnpm changelog add --filter=%s` to add a change file.\n",
 				$slug,
 				"$slug/{$changelogger_projects[ $slug ]['changes-dir']}/",
 				$slug
@@ -218,7 +218,7 @@ foreach ( $touched_projects as $slug => $files ) {
 	}
 }
 if ( $exit && ! getenv( 'CI' ) && ! $list ) {
-	printf( "\e[32mUse `pnpm changelog --filter={project}` to add a change file for each project.\e[0m\n" );
+	printf( "\e[32mUse `pnpm changelog add --filter={project}` to add a change file for each project.\e[0m\n" );
 }
 
 exit( $exit );

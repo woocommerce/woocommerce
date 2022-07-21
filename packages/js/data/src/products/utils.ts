@@ -28,10 +28,6 @@ export function getProductResourceName( query: Partial< ProductQuery > ) {
 export function getTotalProductCountResourceName(
 	query: Partial< ProductQuery >
 ) {
-	// Disable eslint rule because we're using this spread to omit properties
-	// that don't affect item totals count results.
-	// eslint-disable-next-line no-unused-vars, camelcase
 	const { _fields, page, per_page, ...totalsQuery } = query;
-
 	return getProductResourceName( totalsQuery );
 }

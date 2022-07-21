@@ -12,6 +12,7 @@ import './List.scss';
 
 export const List = ( {
 	heading,
+	headingDescription,
 	markConfigured,
 	recommendation,
 	paymentGateways,
@@ -19,7 +20,16 @@ export const List = ( {
 } ) => {
 	return (
 		<Card>
-			{ heading && <CardHeader as="h2">{ heading }</CardHeader> }
+			{ heading && (
+				<CardHeader as="h2">
+					{ heading }
+					{ headingDescription && (
+						<p className="woocommerce-task-payment-header__description">
+							{ headingDescription }
+						</p>
+					) }
+				</CardHeader>
+			) }
 			{ paymentGateways.map( ( paymentGateway ) => {
 				const { id } = paymentGateway;
 				return (

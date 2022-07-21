@@ -38,7 +38,7 @@ for ( const currentPage of wcPages ) {
 	test.describe(
 		`WooCommerce Page Load > Load ${ currentPage.name } sub pages`,
 		() => {
-			test.use( { storageState: 'e2e/storage/adminState.json' } );
+			test.use( { storageState: process.env.ADMINSTATE } );
 
 			test.beforeEach( async ( { page } ) => {
 				if ( currentPage.name === 'WooCommerce' ) {
@@ -67,7 +67,8 @@ for ( const currentPage of wcPages ) {
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 					}
 					await page.click(
-						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`
+						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
+						{ waitForLoadState: 'networkidle' }
 					);
 
 					await expect(

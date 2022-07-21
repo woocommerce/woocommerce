@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { useExperiment } from '@woocommerce/explat';
+import { loadExperimentAssignment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -16,76 +16,87 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 jest.mock( '@woocommerce/explat' );
 
+const whenExperimentAssigned = (
+	experimentVariation: 'treatment' | 'control'
+) =>
+	( loadExperimentAssignment as jest.Mock ).mockImplementation( () => {
+		return Promise.resolve( { variationName: experimentVariation } );
+	} );
+
+const paymentsBannerShouldBe = async ( status: 'hidden' | 'visible' ) => {
+	const { container } = render( <PaymentsBannerWrapper /> );
+
+	await waitFor( () => {
+		container.querySelector( '.woocommerce-recommended-payments-banner' );
+	} );
+
+	const banner = expect(
+		container.querySelector( '.woocommerce-recommended-payments-banner' )
+	);
+
+	return status === 'visible'
+		? banner.toBeInTheDocument()
+		: banner.not.toBeInTheDocument();
+};
+
+const whenWcPay = ( {
+	supported,
+	activated,
+	installed,
+}: {
+	supported: boolean;
+	activated: boolean;
+	installed: boolean;
+} ) => {
+	( useSelect as jest.Mock ).mockReturnValue( {
+		installedPaymentGateways: [
+			installed ? { id: 'woocommerce_payments', enabled: activated } : {},
+		],
+		paymentGatewaySuggestions: supported
+			? [ { id: 'woocommerce_payments:us' } ]
+			: [],
+		hasFinishedResolution: true,
+	} );
+};
+
 describe( 'Payment Settings Banner', () => {
-	it( 'should render the banner if woocommerce payments is supported but setup not completed', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			installedPaymentGateways: [
-				{ id: 'woocommerce_payments', enabled: false },
-			],
-			paymentGatewaySuggestions: [ { id: 'woocommerce_payments:us' } ],
-		} );
+	it( 'should render the banner if woocommerce payments is supported but setup not completed', async () => {
+		expect.assertions( 1 );
 
-		( useExperiment as jest.Mock ).mockImplementation( () => [
-			false,
-			{ variationName: 'treatment' },
-		] );
+		whenWcPay( { supported: true, activated: false, installed: true } );
 
-		const { container } = render( <PaymentsBannerWrapper /> );
-		expect(
-			container.querySelector(
-				'.woocommerce-recommended-payments-banner'
-			)
-		).toBeInTheDocument();
+		whenExperimentAssigned( 'treatment' );
+
+		await paymentsBannerShouldBe( 'visible' );
 	} );
 
-	it( 'should not render the banner if treatment is control', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			installedPaymentGateways: [
-				{ id: 'woocommerce_payments', enabled: false },
-			],
-			paymentGatewaySuggestions: [ { id: 'woocommerce_payments:us' } ],
-		} );
+	it( 'should not render the banner if treatment is control', async () => {
+		expect.assertions( 1 );
 
-		( useExperiment as jest.Mock ).mockImplementation( () => [
-			false,
-			{ variationName: 'control' },
-		] );
+		whenWcPay( { supported: true, activated: false, installed: true } );
 
-		const { container } = render( <PaymentsBannerWrapper /> );
-		expect(
-			container.querySelector(
-				'.woocommerce-recommended-payments-banner'
-			)
-		).not.toBeInTheDocument();
+		whenExperimentAssigned( 'control' );
+
+		await paymentsBannerShouldBe( 'hidden' );
 	} );
 
-	it( 'should not render anything if woocommerce payments is not supported', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			installedPaymentGateways: [],
-			paymentGatewaySuggestions: [],
-		} );
+	it( 'should not render anything if woocommerce payments is not supported', async () => {
+		expect.assertions( 1 );
 
-		const { container } = render( <PaymentsBannerWrapper /> );
-		expect(
-			container.querySelector(
-				'.woocommerce-recommended-payments-banner'
-			)
-		).not.toBeInTheDocument();
+		whenWcPay( { supported: false, activated: false, installed: false } );
+
+		whenExperimentAssigned( 'treatment' );
+
+		await paymentsBannerShouldBe( 'hidden' );
 	} );
 
-	it( 'should not render anything if woocommerce payments is setup', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			installedPaymentGateways: [
-				{ id: 'woocommerce_payments', enabled: true },
-			],
-			paymentGatewaySuggestions: [ { id: 'woocommerce_payments:us' } ],
-		} );
+	it( 'should not render anything if woocommerce payments is setup', async () => {
+		expect.assertions( 1 );
 
-		const { container } = render( <PaymentsBannerWrapper /> );
-		expect(
-			container.querySelector(
-				'.woocommerce-recommended-payments-banner'
-			)
-		).not.toBeInTheDocument();
+		whenWcPay( { supported: true, activated: true, installed: true } );
+
+		whenExperimentAssigned( 'treatment' );
+
+		await paymentsBannerShouldBe( 'hidden' );
 	} );
 } );

@@ -1012,7 +1012,7 @@ mark.amount {
 /**
   * Help Tip
   */
-.woocommerce-help-tip {
+.woocommerce-help-tip, .woocommerce-product-type-tip {
 	color: #666;
 	display: inline-block;
 	font-size: 1.1em;
@@ -1032,13 +1032,13 @@ mark.amount {
 
 .wc-wp-version-gte-53 {
 
-	.woocommerce-help-tip {
+	.woocommerce-help-tip, .woocommerce-product-type-tip {
 		font-size: 1.2em;
 		cursor: help;
 	}
 }
 
-h2 .woocommerce-help-tip {
+h2 .woocommerce-help-tip, .woocommerce-product-type-tip {
 	margin-top: -5px;
 	margin-left: 0.25em;
 }
@@ -4646,9 +4646,41 @@ img.help_tip {
 	width: 100%;
 }
 
-#postimagediv img {
-	border: 1px solid #d5d5d5;
-	max-width: 100%;
+#postimagediv {
+
+	.inside {
+		padding: 0;
+		margin: 0;
+	}
+
+	p {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.image-added-detail {
+		border-top: 1px solid #dcdcde;
+		background-color: #f6f7f7;
+		color: #7f8388;
+		font-size: 12px;
+		margin-top: 4px;
+
+		.dashicons {
+			font-size: 13px;
+			width: 13px;
+			height: 13px;
+			margin: 3px 3px 0 0;
+		}
+
+		a {
+			text-decoration: none;
+		}
+	}
+
+	img {
+		border: 1px solid #d5d5d5;
+		max-width: 100%;
+	}
 }
 
 #woocommerce-product-images .inside {
@@ -4768,6 +4800,15 @@ img.help_tip {
 		span {
 			display: block;
 			line-height: 24px;
+		}
+		.product-data-wrapper {
+			label > * {
+				display: inline-block;
+			}
+			.woocommerce-product-type-tip {
+				font-size: 1.4em;
+				margin-left: 9px;
+			}
 		}
 
 		.type_box {
@@ -5242,6 +5283,9 @@ img.help_tip {
 	p.form-field,
 	fieldset.form-field {
 		padding: 5px 20px 5px 162px !important; /** Padding for aligning labels left - 12px + 150 label width **/
+		&._sold_individually_field {
+			padding-right: 0px !important;
+		}
 	}
 
 	.sale_price_dates_fields {
@@ -5391,6 +5435,13 @@ img.help_tip {
 
 	.select2-container {
 		float: left;
+	}
+
+	.inventory_sold_individually {
+		display: flex;
+		.woocommerce-help-tip {
+			align-self: center;
+		}
 	}
 }
 
@@ -5857,6 +5908,7 @@ img.tips {
 	z-index: 8675309;
 	position: absolute;
 	top: 0;
+	pointer-events: none;
 
 	/*rtl:ignore*/
 	left: 0;

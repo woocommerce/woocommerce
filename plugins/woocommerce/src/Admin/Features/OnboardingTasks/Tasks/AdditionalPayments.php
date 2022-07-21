@@ -27,7 +27,10 @@ class AdditionalPayments extends Payments {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up additional payment providers', 'woocommerce' );
+		return __(
+			'Set up additional payment options',
+			'woocommerce'
+		);
 	}
 
 	/**

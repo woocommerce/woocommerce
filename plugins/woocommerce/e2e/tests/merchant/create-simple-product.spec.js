@@ -7,7 +7,7 @@ const productPrice = '9.99';
 let shippingZoneId;
 
 test.describe( 'Add New Simple Product Page', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		// need to add a shipping zone
@@ -20,10 +20,13 @@ test.describe( 'Add New Simple Product Page', () => {
 		// and the flat rate shipping method to that zone
 		await api
 			.post( 'shipping/zones', {
-				name: 'Everywhere',
+				name: 'Somewhere',
 			} )
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
+				api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+					{ code: 'CN' },
+				] );
 				api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 					method_id: 'flat_rate',
 				} );
@@ -62,11 +65,23 @@ test.describe( 'Add New Simple Product Page', () => {
 	test( 'can create simple virtual product', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		await page.fill( '#title', virtualProductName );
-		await page.click( '#_virtual' );
 		await page.fill( '#_regular_price', productPrice );
+		await page.click( '#_virtual' );
 		await page.click( '#publish' );
-		await expect( page.locator( 'div.notice-success' ) ).toHaveText(
-			'Product published. View ProductDismiss this notice.'
+		await page.waitForLoadState( 'networkidle' );
+
+		// When running in parallel, clicking the publish button sometimes saves products as a draft
+		if (
+			( await page.innerText( '#post-status-display' ) ).includes(
+				'Draft'
+			)
+		) {
+			await page.click( '#publish' );
+			await page.waitForLoadState( 'networkidle' );
+		}
+
+		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
+			'Product published.'
 		);
 	} );
 
@@ -77,7 +92,7 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.click( `h2:has-text("${ virtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toHaveText(
+		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			virtualProductName
 		);
 		await expect(
@@ -91,8 +106,20 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await page.click( '#publish' );
-		await expect( page.locator( 'div.notice-success' ) ).toHaveText(
-			'Product published. View ProductDismiss this notice.'
+		await page.waitForLoadState( 'networkidle' );
+
+		// When running in parallel, clicking the publish button sometimes saves products as a draft
+		if (
+			( await page.innerText( '#post-status-display' ) ).includes(
+				'Draft'
+			)
+		) {
+			await page.click( '#publish' );
+			await page.waitForLoadState( 'networkidle' );
+		}
+
+		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
+			'Product published.'
 		);
 	} );
 
@@ -103,7 +130,7 @@ test.describe( 'Add New Simple Product Page', () => {
 		await page.click( `h2:has-text("${ nonVirtualProductName }")` );
 		await page.click( 'text=Add to cart' );
 		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toHaveText(
+		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			nonVirtualProductName
 		);
 		await expect(

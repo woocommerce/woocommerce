@@ -45,7 +45,11 @@ describe( 'Rendering', () => {
 
 	it( 'should render install and no thanks buttons', async () => {
 		const { getByRole } = render(
-			<Plugins pluginSlugs={ [ 'jetpack' ] } onComplete={ () => {} } />
+			<Plugins
+				pluginSlugs={ [ 'jetpack' ] }
+				onComplete={ () => {} }
+				onSkip={ () => {} }
+			/>
 		);
 
 		expect(
@@ -54,6 +58,17 @@ describe( 'Rendering', () => {
 		expect(
 			getByRole( 'button', { name: 'No thanks' } )
 		).toBeInTheDocument();
+	} );
+
+	it( 'should not render no thanks when onSkip handler is not provided', async () => {
+		const { getByRole, queryByText } = render(
+			<Plugins pluginSlugs={ [ 'jetpack' ] } onComplete={ () => {} } />
+		);
+
+		expect(
+			getByRole( 'button', { name: 'Install & enable' } )
+		).toBeInTheDocument();
+		expect( queryByText( 'No thanks' ) ).not.toBeInTheDocument();
 	} );
 
 	it( 'should render an abort button when the abort handler is provided', async () => {
@@ -65,7 +80,7 @@ describe( 'Rendering', () => {
 			/>
 		);
 
-		expect( getAllByRole( 'button' ) ).toHaveLength( 3 );
+		expect( getAllByRole( 'button' ) ).toHaveLength( 2 );
 		expect( getByRole( 'button', { name: 'Abort' } ) ).toBeInTheDocument();
 	} );
 } );

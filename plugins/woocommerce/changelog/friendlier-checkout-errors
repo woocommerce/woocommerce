@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Show a generic error when trying to process a checkout while offline.

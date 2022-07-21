@@ -51,97 +51,163 @@ jQuery( function( $ ) {
 			} else {
 				woocommerce_product_data.addClass( 'closed' );
 			}
-		});
-	});
+		} );
+	} );
 
 	// Catalog Visibility.
-	$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).on( 'click', function() {
-		if ( $( '#catalog-visibility-select' ).is( ':hidden' ) ) {
-			$( '#catalog-visibility-select' ).slideDown( 'fast' );
-			$( this ).hide();
-		}
-		return false;
-	});
-	$( '#catalog-visibility' ).find( '.save-post-visibility' ).on( 'click', function() {
-		$( '#catalog-visibility-select' ).slideUp( 'fast' );
-		$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).show();
+	$( '#catalog-visibility' )
+		.find( '.edit-catalog-visibility' )
+		.on( 'click', function () {
+			if ( $( '#catalog-visibility-select' ).is( ':hidden' ) ) {
+				$( '#catalog-visibility-select' ).slideDown( 'fast' );
+				$( this ).hide();
+			}
+			return false;
+		} );
+	$( '#catalog-visibility' )
+		.find( '.save-post-visibility' )
+		.on( 'click', function () {
+			$( '#catalog-visibility-select' ).slideUp( 'fast' );
+			$( '#catalog-visibility' )
+				.find( '.edit-catalog-visibility' )
+				.show();
 
-		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
+			var label = $( 'input[name=_visibility]:checked' ).attr(
+				'data-label'
+			);
 
-		if ( $( 'input[name=_featured]' ).is( ':checked' ) ) {
-			label = label + ', ' + woocommerce_admin_meta_boxes.featured_label;
-			$( 'input[name=_featured]' ).attr( 'checked', 'checked' );
-		}
+			if ( $( 'input[name=_featured]' ).is( ':checked' ) ) {
+				label =
+					label + ', ' + woocommerce_admin_meta_boxes.featured_label;
+				$( 'input[name=_featured]' ).attr( 'checked', 'checked' );
+			}
 
-		$( '#catalog-visibility-display' ).text( label );
-		return false;
-	});
-	$( '#catalog-visibility' ).find( '.cancel-post-visibility' ).on( 'click', function() {
-		$( '#catalog-visibility-select' ).slideUp( 'fast' );
-		$( '#catalog-visibility' ).find( '.edit-catalog-visibility' ).show();
+			$( '#catalog-visibility-display' ).text( label );
+			return false;
+		} );
+	$( '#catalog-visibility' )
+		.find( '.cancel-post-visibility' )
+		.on( 'click', function () {
+			$( '#catalog-visibility-select' ).slideUp( 'fast' );
+			$( '#catalog-visibility' )
+				.find( '.edit-catalog-visibility' )
+				.show();
 
-		var current_visibility = $( '#current_visibility' ).val();
-		var current_featured   = $( '#current_featured' ).val();
+			var current_visibility = $( '#current_visibility' ).val();
+			var current_featured = $( '#current_featured' ).val();
 
-		$( 'input[name=_visibility]' ).prop( 'checked', false );
-		$( 'input[name=_visibility][value=' + current_visibility + ']' ).attr( 'checked', 'checked' );
+			$( 'input[name=_visibility]' ).prop( 'checked', false );
+			$(
+				'input[name=_visibility][value=' + current_visibility + ']'
+			).attr( 'checked', 'checked' );
 
-		var label = $( 'input[name=_visibility]:checked' ).attr( 'data-label' );
+			var label = $( 'input[name=_visibility]:checked' ).attr(
+				'data-label'
+			);
 
-		if ( 'yes' === current_featured ) {
-			label = label + ', ' + woocommerce_admin_meta_boxes.featured_label;
-			$( 'input[name=_featured]' ).attr( 'checked', 'checked' );
-		} else {
-			$( 'input[name=_featured]' ).prop( 'checked', false );
-		}
+			if ( 'yes' === current_featured ) {
+				label =
+					label + ', ' + woocommerce_admin_meta_boxes.featured_label;
+				$( 'input[name=_featured]' ).attr( 'checked', 'checked' );
+			} else {
+				$( 'input[name=_featured]' ).prop( 'checked', false );
+			}
 
-		$( '#catalog-visibility-display' ).text( label );
-		return false;
-	});
+			$( '#catalog-visibility-display' ).text( label );
+			return false;
+		} );
 
 	// Product type specific options.
-	$( 'select#product-type' ).on( 'change', function() {
+	$( 'select#product-type' )
+		.on( 'change', function () {
+			// Get value.
+			var select_val = $( this ).val();
 
-		// Get value.
-		var select_val = $( this ).val();
+			if ( 'variable' === select_val ) {
+				$( 'input#_manage_stock' ).trigger( 'change' );
+				$( 'input#_downloadable' ).prop( 'checked', false );
+				$( 'input#_virtual' ).prop( 'checked', false );
+			} else if ( 'grouped' === select_val ) {
+				$( 'input#_downloadable' ).prop( 'checked', false );
+				$( 'input#_virtual' ).prop( 'checked', false );
+			} else if ( 'external' === select_val ) {
+				$( 'input#_downloadable' ).prop( 'checked', false );
+				$( 'input#_virtual' ).prop( 'checked', false );
+			}
 
-		if ( 'variable' === select_val ) {
-			$( 'input#_manage_stock' ).trigger( 'change' );
-			$( 'input#_downloadable' ).prop( 'checked', false );
-			$( 'input#_virtual' ).prop( 'checked', false );
-		} else if ( 'grouped' === select_val ) {
-			$( 'input#_downloadable' ).prop( 'checked', false );
-			$( 'input#_virtual' ).prop( 'checked', false );
-		} else if ( 'external' === select_val ) {
-			$( 'input#_downloadable' ).prop( 'checked', false );
-			$( 'input#_virtual' ).prop( 'checked', false );
+			show_and_hide_panels();
+			change_product_type_tip( get_product_tip_content( select_val ) );
+
+			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
+
+			$( document.body ).trigger(
+				'woocommerce-product-type-change',
+				select_val,
+				$( this )
+			);
+		} )
+		.trigger( 'change' );
+
+	$( 'input#_downloadable, input#_virtual' ).on( 'change', function () {
+		show_and_hide_panels();
+	} );
+
+	function change_product_type_tip( content ) {
+		$( '#tiptip_holder' ).removeAttr( 'style' );
+		$( '#tiptip_arrow' ).removeAttr( 'style' );
+		$( '.woocommerce-product-type-tip' ).tipTip( {
+			attribute: 'data-tip',
+			content: content,
+			fadeIn: 50,
+			fadeOut: 50,
+			delay: 200,
+			keepAlive: true,
+		} );
+	}
+
+	function get_product_tip_content( product_type ) {
+		switch ( product_type ) {
+			case 'simple':
+				return (
+					'<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are ' +
+					'shipped and have no options. For example, a book.'
+				);
+			case 'grouped':
+				return (
+					'<b>Grouped –</b> a collection of related products that can be purchased individually and ' +
+					'only consist of simple products. For example, a set of six drinking glasses.'
+				);
+			case 'external':
+				return '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.';
+			case 'variable':
+				return (
+					'<b>Variable –</b> a product with variations, each of which may have a different SKU, price, ' +
+					'stock option, etc. For example, a t-shirt available in different colors and/or sizes.'
+				);
+			default:
+				return (
+					'Product types define available product details and attributes, such as downloadable ' +
+					"files and variations. They're also used for analytics and inventory management."
+				);
 		}
-
-		show_and_hide_panels();
-
-		$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
-
-		$( document.body ).trigger( 'woocommerce-product-type-change', select_val, $( this ) );
-
-	}).trigger( 'change' );
-
-	$( 'input#_downloadable, input#_virtual' ).on( 'change', function() {
-		show_and_hide_panels();
-	});
+	}
 
 	function show_and_hide_panels() {
-		var product_type    = $( 'select#product-type' ).val();
-		var is_virtual      = $( 'input#_virtual:checked' ).length;
+		var product_type = $( 'select#product-type' ).val();
+		var is_virtual = $( 'input#_virtual:checked' ).length;
 		var is_downloadable = $( 'input#_downloadable:checked' ).length;
 
 		// Hide/Show all with rules.
 		var hide_classes = '.hide_if_downloadable, .hide_if_virtual';
 		var show_classes = '.show_if_downloadable, .show_if_virtual';
 
-		$.each( woocommerce_admin_meta_boxes.product_types, function( index, value ) {
+		$.each( woocommerce_admin_meta_boxes.product_types, function (
+			index,
+			value
+		) {
 			hide_classes = hide_classes + ', .hide_if_' + value;
 			show_classes = show_classes + ', .show_if_' + value;
-		});
+		} );
 
 		$( hide_classes ).show();
 		$( show_classes ).hide();

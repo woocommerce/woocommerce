@@ -333,12 +333,28 @@ jQuery( function ( $ ) {
 			$( '#woocommerce-order-items' ).unblock();
 		},
 
+		filter_data: function( handle, data ) {
+			const filteredData = $( '#woocommerce-order-items' )
+				.triggerHandler( 
+					`woocommerce_order_meta_box_${handle}_ajax_data`, 
+					[ data ] 
+				);
+
+			if ( filteredData ) {
+				return filteredData;
+			}
+
+			return data;
+		},
+
 		reload_items: function() {
 			var data = {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				action:   'woocommerce_load_order_items',
 				security: woocommerce_admin_meta_boxes.order_item_nonce
 			};
+
+			data = wc_meta_boxes_order_items.filter_data( 'reload_items', data );
 
 			wc_meta_boxes_order_items.block();
 
@@ -462,6 +478,8 @@ jQuery( function ( $ ) {
 					user_email : user_email
 				} );
 
+				data = wc_meta_boxes_order_items.filter_data( 'add_coupon', data );
+
 				$.ajax( {
 					url:     woocommerce_admin_meta_boxes.ajax_url,
 					data:    data,
@@ -499,6 +517,8 @@ jQuery( function ( $ ) {
 				security : woocommerce_admin_meta_boxes.order_item_nonce,
 				coupon : $this.data( 'code' )
 			} );
+
+			data = wc_meta_boxes_order_items.filter_data( 'remove_coupon', data );
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
@@ -587,6 +607,8 @@ jQuery( function ( $ ) {
 					amount  : value
 				} );
 
+				data = wc_meta_boxes_order_items.filter_data( 'add_fee', data );
+
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 					if ( response.success ) {
 						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
@@ -594,7 +616,7 @@ jQuery( function ( $ ) {
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
 							window.wcTracks.recordEvent( 'order_edit_added_fee', {
-								order_id: data.post_id,
+								order_id: woocommerce_admin_meta_boxes.post_id,
 								status: $( '#order_status' ).val()
 							} );
 					} else {
@@ -616,11 +638,13 @@ jQuery( function ( $ ) {
 				dataType : 'json'
 			};
 
+			data = wc_meta_boxes_order_items.filter_data( 'add_shipping', data );
+
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
 					$( 'table.woocommerce_order_items tbody#order_shipping_line_items' ).append( response.data.html );
 					window.wcTracks.recordEvent( 'order_edit_add_shipping', {
-						order_id: data.post_id,
+						order_id: woocommerce_admin_meta_boxes.post_id,
 						status: $( '#order_status' ).val()
 					} );
 				} else {
@@ -683,6 +707,8 @@ jQuery( function ( $ ) {
 					data.items = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
 				}
 
+				data = wc_meta_boxes_order_items.filter_data( 'delete_item', data );
+
 				$.ajax({
 					url:     woocommerce_admin_meta_boxes.ajax_url,
 					data:    data,
@@ -707,7 +733,7 @@ jQuery( function ( $ ) {
 					},
 					complete: function() {
 						window.wcTracks.recordEvent( 'order_edit_remove_item', {
-							order_id: data.post_id,
+							order_id: woocommerce_admin_meta_boxes.post_id,
 							status: $( '#order_status' ).val()
 						} );
 					}
@@ -726,6 +752,8 @@ jQuery( function ( $ ) {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					security: woocommerce_admin_meta_boxes.order_item_nonce
 				};
+
+				data = wc_meta_boxes_order_items.filter_data( 'delete_tax', data );
 
 				$.ajax({
 					url:  woocommerce_admin_meta_boxes.ajax_url,
@@ -797,6 +825,8 @@ jQuery( function ( $ ) {
 					security: woocommerce_admin_meta_boxes.calc_totals_nonce
 				} );
 
+				data = wc_meta_boxes_order_items.filter_data( 'recalculate', data );
+
 				$( document.body ).trigger( 'order-totals-recalculate-before', data );
 
 				$.ajax({
@@ -815,7 +845,7 @@ jQuery( function ( $ ) {
 						$( document.body ).trigger( 'order-totals-recalculate-complete', response );
 
 						window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
-							order_id: data.post_id,
+							order_id: woocommerce_admin_meta_boxes.post_id,
 							ok_cancel: 'OK',
 							status: $( '#order_status' ).val()
 						} );
@@ -839,6 +869,8 @@ jQuery( function ( $ ) {
 				action:   'woocommerce_save_order_items',
 				security: woocommerce_admin_meta_boxes.order_item_nonce
 			};
+
+			data = wc_meta_boxes_order_items.filter_data( 'save_line_items', data );
 
 			wc_meta_boxes_order_items.block();
 
@@ -866,7 +898,7 @@ jQuery( function ( $ ) {
 				},
 				complete: function() {
 					window.wcTracks.recordEvent( 'order_edit_save_line_items', {
-						order_id: data.post_id,
+						order_id: woocommerce_admin_meta_boxes.post_id,
 						status: $( '#order_status' ).val()
 					} );
 				}
@@ -938,6 +970,8 @@ jQuery( function ( $ ) {
 						security              : woocommerce_admin_meta_boxes.order_item_nonce
 					};
 
+					data = wc_meta_boxes_order_items.filter_data( 'do_refund', data );
+
 					$.ajax( {
 						url:     woocommerce_admin_meta_boxes.ajax_url,
 						data:    data,
@@ -979,6 +1013,8 @@ jQuery( function ( $ ) {
 						refund_id: refund_id,
 						security:  woocommerce_admin_meta_boxes.order_item_nonce
 					};
+
+					data = wc_meta_boxes_order_items.filter_data( 'delete_refund', data );
 
 					$.ajax({
 						url:     woocommerce_admin_meta_boxes.ajax_url,
@@ -1192,6 +1228,8 @@ jQuery( function ( $ ) {
 					data.items = $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize();
 				}
 
+				data = wc_meta_boxes_order_items.filter_data( 'add_items', data );
+
 				$.ajax({
 					type: 'POST',
 					url: woocommerce_admin_meta_boxes.ajax_url,
@@ -1216,7 +1254,7 @@ jQuery( function ( $ ) {
 					},
 					complete: function() {
 						window.wcTracks.recordEvent( 'order_edit_add_products', {
-							order_id: data.post_id,
+							order_id: woocommerce_admin_meta_boxes.post_id,
 							status: $( '#order_status' ).val()
 						} );
 					},
@@ -1248,6 +1286,8 @@ jQuery( function ( $ ) {
 						security: woocommerce_admin_meta_boxes.order_item_nonce
 					};
 
+					data = wc_meta_boxes_order_items.filter_data( 'add_tax', data );
+
 					$.ajax({
 						url      : woocommerce_admin_meta_boxes.ajax_url,
 						data     : data,
@@ -1265,7 +1305,7 @@ jQuery( function ( $ ) {
 						},
 						complete: function() {
 							window.wcTracks.recordEvent( 'order_edit_add_tax', {
-								order_id: data.post_id,
+								order_id: woocommerce_admin_meta_boxes.post_id,
 								status: $( '#order_status' ).val()
 							} );
 						}
@@ -1330,7 +1370,7 @@ jQuery( function ( $ ) {
 				$( '#woocommerce-order-notes' ).unblock();
 				$( '#add_order_note' ).val( '' );
 				window.wcTracks.recordEvent( 'order_edit_add_order_note', {
-					order_id: data.post_id,
+					order_id: woocommerce_admin_meta_boxes.post_id,
 					note_type: data.note_type || 'private',
 					status: $( '#order_status' ).val()
 				} );
