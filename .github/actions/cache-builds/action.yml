@@ -1,0 +1,20 @@
+name: Cache Builds (Composite)
+description: Creates and restores caches for builds.
+inputs:
+  workflow_cache:
+    required: true
+    description: The workflow cache key.
+  workflow_name:
+    required: true
+    description: The name of the workflow.
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build caching
+      uses: actions/cache@v3
+      id: cache-deps
+      with:
+        path: |
+          **/.cache/turbo
+        key: ${{ runner.os }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/turbo-build.log') }}

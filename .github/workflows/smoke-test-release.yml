@@ -19,6 +19,11 @@ jobs:
                 workflow_name: smoke-test-release
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
+            - uses: ./.github/actions/cache-builds
+              with:
+                workflow_name: smoke-test-release
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -73,6 +78,11 @@ jobs:
                   path: package/woocommerce
 
             - uses: ./package/woocommerce/.github/actions/cache-deps
+              with:
+                workflow_name: smoke-test-release
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+            - uses: ./package/woocommerce/.github/actions/cache-builds
               with:
                 workflow_name: smoke-test-release
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
@@ -153,6 +163,11 @@ jobs:
                   path: package/woocommerce
 
             - uses: ./package/woocommerce/.github/actions/cache-deps
+              with:
+                workflow_name: smoke-test-release
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+            - uses: ./package/woocommerce/.github/actions/cache-builds
               with:
                 workflow_name: smoke-test-release
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
