@@ -173,7 +173,7 @@ const addSummaryWarnings = ( core ) => {
 	addWarningFailuresBrokenTests( warnings );
 	if ( warnings.length > 0 ) {
 		core.summary
-			.addHeading( ':warning: Warning :warning:', 3 )
+			.addHeading( ':warning: Warning', 3 )
 			.addRaw(
 				'Please address the following issues prior to merging this pull request:'
 			)
