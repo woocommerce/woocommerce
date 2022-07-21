@@ -9,7 +9,6 @@ const {
 	SHA,
 	PR_NUMBER,
 	E2E_GRAND_TOTAL,
-	E2E_MAX_FAILURES,
 } = process.env;
 
 /**
@@ -129,7 +128,7 @@ const createE2ETableRow = () => {
  * Add a warning when the number of executed Playwright E2E tests were fewer than the total.
  */
 const addWarningE2EIncomplete = ( warnings ) => {
-	if ( ! E2E_PLAYWRIGHT || E2E_MAX_FAILURES === undefined ) {
+	if ( ! E2E_PLAYWRIGHT ) {
 		return;
 	}
 
