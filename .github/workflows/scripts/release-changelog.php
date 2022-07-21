@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper script for inserting NEXT_CHANGELOG contents into changelog.
+ * Helper script for inserting NEXT_CHANGELOG contents into readme.txt.
  */
 
 $now = time();
@@ -27,4 +27,4 @@ $next_log  = preg_replace( "/\[#(\d+)\]/", '[#$1](https://github.com/woocommerce
 
 $readme    = preg_replace( "/== Changelog ==\n(.*?)\[See changelog for all versions\]/s", "== Changelog ==\n\n{$next_log}\n\n[See changelog for all versions]", $readme );
 
-file_put_contents( $changelog_file, $changelog );
+file_put_contents( $readme_file, $readme );
