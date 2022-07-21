@@ -156,7 +156,9 @@ const addWarningFailuresBrokenTests = ( warnings ) => {
 		: getPuppeteerStats();
 
 	if ( apiFailed || apiBroken || e2eFailed || e2eBroken ) {
-		warnings.push( 'FAILED/BROKEN TESTS. There were failed and/or broken API and E2E tests. Please fix them first prior to merging this pull request. You may refer to the full API/E2E test reports linked below for debugging.' );
+		warnings.push(
+			'FAILED/BROKEN TESTS. There were failed and/or broken API and E2E tests. Please fix them first prior to merging this pull request. You may refer to the full API/E2E test reports linked below for debugging.'
+		);
 	}
 };
 
@@ -250,7 +252,9 @@ module.exports = async ( { core } ) => {
 
 	addSummaryFooter( core );
 
+	const summary = core.summary.stringify();
+
 	await core.summary.write();
 
-	return core.summary.stringify();
+	return summary;
 };
