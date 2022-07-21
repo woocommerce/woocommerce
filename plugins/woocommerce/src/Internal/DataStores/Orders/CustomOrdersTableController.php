@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,6 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * ...and in general, any functionality that doesn't imply database access.
  */
 class CustomOrdersTableController {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
@@ -76,80 +79,15 @@ class CustomOrdersTableController {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		add_filter(
-			'woocommerce_order_data_store',
-			function ( $default_data_store ) {
-				return $this->get_data_store_instance( $default_data_store );
-			},
-			999,
-			1
-		);
-
-		add_filter(
-			'woocommerce_debug_tools',
-			function( $tools ) {
-				return $this->add_initiate_regeneration_entry_to_tools_array( $tools );
-			},
-			999,
-			1
-		);
-
-		add_filter(
-			'woocommerce_get_sections_advanced',
-			function( $sections ) {
-				return $this->get_settings_sections( $sections );
-			},
-			999,
-			1
-		);
-
-		add_filter(
-			'woocommerce_get_settings_advanced',
-			function ( $settings, $section_id ) {
-				return $this->get_settings( $settings, $section_id );
-			},
-			999,
-			2
-		);
-
-		add_filter(
-			'updated_option',
-			function( $option, $old_value, $value ) {
-				$this->process_updated_option( $option, $old_value, $value );
-			},
-			999,
-			3
-		);
-
-		add_filter(
-			'pre_update_option',
-			function( $value, $option, $old_value ) {
-				return $this->process_pre_update_option( $option, $old_value, $value );
-			},
-			999,
-			3
-		);
-
-		add_filter(
-			DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION,
-			function() {
-				$this->process_sync_finished();
-			}
-		);
-
-		add_action(
-			'woocommerce_update_options_advanced_custom_data_stores',
-			function() {
-				$this->process_options_updated();
-			}
-		);
-
-		add_action(
-			'woocommerce_after_register_post_type',
-			function() {
-				$this->register_post_type_for_order_placeholders();
-			}
-		);
+		$this->add_filter( 'woocommerce_order_data_store', 'get_data_store_instance', 999, 1 );
+		$this->add_filter( 'woocommerce_debug_tools', 'add_initiate_regeneration_entry_to_tools_array', 999, 1 );
+		$this->add_filter( 'woocommerce_get_sections_advanced', 'get_settings_sections', 999, 1 );
+		$this->add_filter( 'woocommerce_get_settings_advanced', 'get_settings', 999, 2 );
+		$this->add_filter( 'updated_option', 'process_updated_option', 999, 3 );
+		$this->add_filter( 'pre_update_option', 'process_pre_update_option', 999, 3 );
+		$this->add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, 'process_sync_finished' );
+		$this->add_action( 'woocommerce_update_options_advanced_custom_data_stores', 'process_options_updated' );
+		$this->add_action( 'woocommerce_after_register_post_type', 'register_post_type_for_order_placeholders' );
 	}
 
 	/**
@@ -460,13 +398,13 @@ class CustomOrdersTableController {
 	 * Handler for the setting pre-update hook.
 	 * We use it to verify that authoritative orders table switch doesn't happen while sync is pending.
 	 *
+	 * @param mixed  $value New value of the setting.
 	 * @param string $option Setting name.
 	 * @param mixed  $old_value Old value of the setting.
-	 * @param mixed  $value New value of the setting.
 	 *
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
-	private function process_pre_update_option( $option, $old_value, $value ) {
+	private function process_pre_update_option( $value, $option, $old_value ) {
 		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
 			return $value;
 		}

@@ -5,9 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,6 +29,8 @@ defined( 'ABSPATH' ) || exit;
  * and another one for enabling or disabling the actual lookup table usage.
  */
 class DataRegenerator {
+
+	use AccessiblePrivateMethods;
 
 	public const PRODUCTS_PER_GENERATION_STEP = 10;
 
@@ -55,28 +56,9 @@ class DataRegenerator {
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
 
-		add_filter(
-			'woocommerce_debug_tools',
-			function( $tools ) {
-				return $this->add_initiate_regeneration_entry_to_tools_array( $tools );
-			},
-			1,
-			999
-		);
-
-		add_action(
-			'woocommerce_run_product_attribute_lookup_regeneration_callback',
-			function () {
-				$this->run_regeneration_step_callback();
-			}
-		);
-
-		add_action(
-			'woocommerce_installed',
-			function() {
-				$this->run_woocommerce_installed_callback();
-			}
-		);
+		$this->add_filter( 'woocommerce_debug_tools', 'add_initiate_regeneration_entry_to_tools_array', 1, 999 );
+		$this->add_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback', 'run_regeneration_step_callback' );
+		$this->add_action( 'woocommerce_installed', 'run_woocommerce_installed_callback' );
 	}
 
 	/**

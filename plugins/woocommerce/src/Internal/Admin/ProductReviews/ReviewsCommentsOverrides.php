@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WP_Comment_Query;
 
 /**
@@ -9,35 +10,17 @@ use WP_Comment_Query;
  */
 class ReviewsCommentsOverrides {
 
+	use AccessiblePrivateMethods;
+
 	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-
-		add_action(
-			'admin_notices',
-			function() {
-				$this->display_notices();
-			}
-		);
-
-		add_filter(
-			'woocommerce_dismiss_admin_notice_capability',
-			function( $default_capability, $notice_name ) {
-				return $this->get_dismiss_capability( $default_capability, $notice_name );
-			},
-			10,
-			2
-		);
-
-		add_filter(
-			'comments_list_table_query_args',
-			function( $args ) {
-				return $this->exclude_reviews_from_comments( $args );
-			}
-		);
+		$this->add_action( 'admin_notices', 'display_notices' );
+		$this->add_filter( 'woocommerce_dismiss_admin_notice_capability', 'get_dismiss_capability', 10, 2 );
+		$this->add_filter( 'comments_list_table_query_args', 'exclude_reviews_from_comments' );
 	}
 
 	/**
