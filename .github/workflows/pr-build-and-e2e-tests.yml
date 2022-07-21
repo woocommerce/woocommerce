@@ -273,8 +273,7 @@ jobs:
               with:
                   comment-id: ${{ steps.find-comment.outputs.comment-id }}
                   issue-number: ${{ github.event.pull_request.number }}
-                  body: |
-                      ${{ steps.prepare-test-summary.outputs.result }}
+                  body: ${{ steps.prepare-test-summary.outputs.result }}
                   edit-mode: replace
 
     publish-test-reports:
