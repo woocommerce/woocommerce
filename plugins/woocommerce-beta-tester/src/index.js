@@ -8,6 +8,9 @@ import { render } from '@wordpress/element';
  */
 import { App } from './app';
 import './index.scss';
+import { hookupLoggingOfRecentClientTracksEvents } from './tracks/recent-tracks-events';
+
+hookupLoggingOfRecentClientTracksEvents();
 
 const appRoot = document.getElementById(
 	'woocommerce-admin-test-helper-app-root'
