@@ -4,7 +4,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const couponCode = `code-${ new Date().getTime().toString() }`;
 
 test.describe( 'Add New Coupon Page', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
