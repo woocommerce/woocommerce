@@ -45,7 +45,7 @@ import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-n
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useActiveSetupTasklist } from '~/tasks';
 import { LayoutContext } from '~/layout';
-import { LoginQR } from './login-qr';
+import { AppLoginWrapper } from './login-qr';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -328,10 +328,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const loginQR = {
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
+				// insert jetpack eligibility check here if we don't want to show it at all when jetpack not connected
 				! isEmbedded &&
 				isHomescreen() &&
 				! isPerformingSetupTask(),
-			component: LoginQR,
+			component: AppLoginWrapper,
 		};
 
 		return [

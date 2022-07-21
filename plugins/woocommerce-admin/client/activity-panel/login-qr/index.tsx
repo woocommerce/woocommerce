@@ -13,9 +13,17 @@ import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import Phone from 'gridicons/dist/phone';
 import classNames from 'classnames';
-import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 import interpolateComponents from '@automattic/interpolate-components';
+import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	WC_ADMIN_NAMESPACE,
+	PLUGINS_STORE_NAME,
+	useUser,
+} from '@woocommerce/data';
+import { getAdminLink } from '@woocommerce/settings';
+import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
+import type { FunctionComponent } from 'react';
 
 /**
  * Internal dependencies
@@ -24,22 +32,16 @@ import JetpackLogo from './images/jetpack-logo.png';
 import WcsNotice from './images/wcs-notice.png';
 import './style.scss';
 
-type JetpackStatusResponse = {
-	installed: boolean;
-	activated: boolean;
-	connected: boolean;
-	user_connected: boolean;
-};
-
 type GenerateQRResponse = {
 	image: string;
 };
 
-const getJetpackStatus = () => {
-	return apiFetch< JetpackStatusResponse >( {
-		path: `${ WC_ADMIN_NAMESPACE }/login-qr/jetpack_status`,
-	} );
-};
+// i'd rather not add another API endpoint since I'm pretty sure this can be queried elsewhere but I haven't gone and found out where
+// const getJetpackStatus = () => {
+// 	return apiFetch< JetpackStatusResponse >( {
+// 		path: `${ WC_ADMIN_NAMESPACE }/login-qr/jetpack_status`,
+// 	} );
+// };
 
 const generateQRCode = () => {
 	return apiFetch< GenerateQRResponse >( {
@@ -47,19 +49,20 @@ const generateQRCode = () => {
 	} );
 };
 
-export const LoginQR = () => {
-	const [ isLoadingJetpack, setIsLoadingJetpack ] = useState( true );
+export const AppLogin: FunctionComponent< AppLoginProps > = ( {
+	jetpackInstallState,
+	onClickInstall,
+	isBusy,
+} ) => {
 	const [ isLoadingQr, setIsLoadingQr ] = useState( true );
-	const [ isFetchedJetpack, setIsFetchedJetpack ] = useState( false );
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
-	const [ isJetpackInstalled, setIsJetpackInstalled ] = useState( false );
-	const [ isJetpackActivated, setIsJetpackActivated ] = useState( false );
-	const [ qrImageSrc, setQrImageSrc ] = useState( '' );
-	const [ isJetpackUserConnected, setIsJetpackUserConnected ] =
-		useState( false );
 
-	const isJetpackReady =
-		isJetpackInstalled && isJetpackActivated && isJetpackUserConnected;
+	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
+
+	const [ qrImageSrc, setQrImageSrc ] = useState( '' );
+
+	// wrapper currently doesn't check for jetpack user connected since it's not populated in any WP data stores that we can reach from here
+	// const [ isJetpackUserConnected, setIsJetpackUserConnected ] =
+	// 	useState( false );
 
 	const fetchQr = () => {
 		setIsLoadingQr( true );
@@ -70,23 +73,16 @@ export const LoginQR = () => {
 			.finally( () => setIsLoadingQr( false ) );
 	};
 
-	useEffect( () => {
-		if ( isPopoverVisible && ! isFetchedJetpack ) {
-			getJetpackStatus()
-				.then( ( response ) => {
-					setIsJetpackInstalled( response.installed );
-					setIsJetpackActivated( response.activated );
-					setIsJetpackUserConnected( response.user_connected );
-					setIsFetchedJetpack( true );
-				} )
-				.finally( () => setIsLoadingJetpack( false ) );
-		}
-	}, [ isFetchedJetpack, isPopoverVisible ] );
-
 	const menuClick = () => {
 		setIsPopoverVisible( true );
 		// Todo: recordEvent()
 	};
+
+	useEffect( () => {
+		if ( jetpackInstallState === 'activated' ) {
+			fetchQr();
+		}
+	}, [ jetpackInstallState ] );
 
 	const JetpackStatus = () => {
 		return (
@@ -133,10 +129,7 @@ export const LoginQR = () => {
 					<Button
 						variant="primary"
 						onClick={ () => {
-							setIsJetpackInstalled( true );
-							setIsJetpackActivated( true );
-							setIsJetpackUserConnected( true );
-							fetchQr();
+							onClickInstall();
 						} }
 					>
 						{ __( 'Install Jetpack and connect', 'woocommerce' ) }
@@ -181,11 +174,11 @@ export const LoginQR = () => {
 				>
 					<Card className="qrcode-container">
 						<CardBody>
-							{ isLoadingJetpack ? (
+							{ isBusy ? (
 								<Spinner />
 							) : (
 								<>
-									{ isJetpackReady ? (
+									{ jetpackInstallState === 'activated' ? (
 										<>
 											{ isLoadingQr ? (
 												<Spinner />
@@ -205,3 +198,50 @@ export const LoginQR = () => {
 		</div>
 	);
 };
+
+// below largely copied from install-jetpack-cta.js, we should refactor this component to be reusable since this pattern is used a lot
+// just need to extract out the part where we render the child and make it composable
+export const AppLoginWrapper = () => {
+	const { currentUserCan } = useUser();
+	const { canUserInstallPlugins, jetpackInstallState, isBusy } = useSelect(
+		( select ) => {
+			const { getPluginInstallState, isPluginsRequesting } =
+				select( PLUGINS_STORE_NAME );
+			const installState = getPluginInstallState( 'jetpack' );
+			const busyState =
+				isPluginsRequesting( 'getJetpackConnectUrl' ) ||
+				isPluginsRequesting( 'installPlugins' ) ||
+				isPluginsRequesting( 'activatePlugins' );
+
+			return {
+				isBusy: busyState,
+				jetpackInstallState: installState,
+				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
+			};
+		}
+	);
+
+	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
+
+	if ( ! canUserInstallPlugins ) {
+		return null;
+	}
+
+	const onClickInstall = () => {
+		installJetpackAndConnect( createErrorNotice, getAdminLink );
+	};
+
+	return (
+		<AppLogin
+			jetpackInstallState={ jetpackInstallState }
+			isBusy={ isBusy }
+			onClickInstall={ onClickInstall }
+		/>
+	);
+};
+
+interface AppLoginProps {
+	jetpackInstallState: 'activated' | 'installed' | 'unavailable';
+	isBusy: boolean;
+	onClickInstall: () => void;
+}
