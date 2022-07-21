@@ -47,7 +47,21 @@
                 "includes/**/*.php"
             ]
         },
-
+        "woocommerce/client/admin#build": {
+            "dependsOn":  [ "^build", "$WC_ADMIN_PHASE" ],
+            "outputs": [],
+            "inputs": [
+                "client/*.js",
+                "client/**/*.js",
+                "client/*.jsx",
+                "client/**/*.jsx",
+                "client/*.ts",
+                "client/**/*.ts",
+                "client/*.tsx",
+                "client/**/*.tsx"
+            ]
+        },
+        
         "test": {
             "dependsOn":  [ "build" ],
             "inputs": [
