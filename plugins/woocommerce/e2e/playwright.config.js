@@ -15,7 +15,7 @@ const config = {
 		[ 'html', { outputFolder: 'output' } ],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
 	],
-	maxFailures: CI ? Number( E2E_MAX_FAILURES ) : 0,
+	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',
