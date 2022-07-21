@@ -21,9 +21,19 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+          tools: composer
 
       - name: Check change files are touched for touched projects
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: php tools/monorepo/check-changelogger-use.php --debug "$BASE" "$HEAD"
+
+      - name: Install PNPM
+        run: npm install -g pnpm@^6.24.2
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run changelog validation
+        run: pnpm changelog --filter=* -- validate

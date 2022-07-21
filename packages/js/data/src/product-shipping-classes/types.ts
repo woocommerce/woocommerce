@@ -26,14 +26,13 @@ type Query = BaseQueryParams< keyof ProductShippingClass > & {
 
 type ReadOnlyProperties = 'id';
 
-type MutableProperties = Partial<
-	Omit< ProductShippingClass, ReadOnlyProperties >
->;
+type MutableProperties = Omit< ProductShippingClass, ReadOnlyProperties >;
 
 type ProductShippingClassActions = CrudActions<
 	'ProductShippingClass',
 	ProductShippingClass,
-	MutableProperties
+	MutableProperties,
+	'name'
 >;
 
 export type ProductShippingClassSelectors = CrudSelectors<

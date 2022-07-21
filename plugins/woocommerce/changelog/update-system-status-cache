@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Cache plugin data in system status API endpoint

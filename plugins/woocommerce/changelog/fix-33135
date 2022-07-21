@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed incorrect tax calculation in edit order for "Local Pickup" shipping method.

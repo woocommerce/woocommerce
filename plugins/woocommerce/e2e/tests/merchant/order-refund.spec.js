@@ -4,7 +4,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 test.describe( 'WooCommerce Orders > Refund an order', () => {
 	let productId, orderId, currencySymbol;
 
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -132,7 +132,7 @@ test.describe( 'WooCommerce Orders > Refund an order', () => {
 test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 	let productWithStockId, productWithNoStockId, orderId;
 
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {

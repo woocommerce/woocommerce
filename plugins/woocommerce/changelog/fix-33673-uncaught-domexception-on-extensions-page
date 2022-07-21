@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Uncaught DOMException on WooCommerce -> Extensions page

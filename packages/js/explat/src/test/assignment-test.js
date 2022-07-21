@@ -85,6 +85,28 @@ describe( 'fetchExperimentAssignment', () => {
 		} );
 		await expect( assignment ).toEqual( data );
 	} );
+
+	it( 'adds woo_wcadmin_install_timestamp to request args', () => {
+		const filterArgs = { args: {} };
+		addFilter(
+			'woocommerce_explat_request_args',
+			'woo_wcadmin_install_timestamp_test',
+			function ( args ) {
+				filterArgs.args = args;
+				return args;
+			}
+		);
+
+		const fetchPromise = fetchExperimentAssignmentWithAuth( {
+			experimentName: '123',
+			anonId: 'abc',
+		} );
+		Promise.resolve( fetchPromise );
+
+		expect( filterArgs.args ).toHaveProperty(
+			'woo_wcadmin_install_timestamp'
+		);
+	} );
 } );
 
 describe( 'fetchExperimentAssignmentWithAuth', () => {
@@ -112,6 +134,28 @@ describe( 'fetchExperimentAssignmentWithAuth', () => {
 				credentials: 'include',
 				headers: { Accept: 'application/json, */*;q=0.1' },
 			}
+		);
+	} );
+
+	it( 'adds woo_wcadmin_install_timestamp to request args', () => {
+		const filterArgs = { args: {} };
+		addFilter(
+			'woocommerce_explat_request_args',
+			'woo_wcadmin_install_timestamp_test',
+			function ( args ) {
+				filterArgs.args = args;
+				return args;
+			}
+		);
+
+		const fetchPromise = fetchExperimentAssignmentWithAuth( {
+			experimentName: '123',
+			anonId: 'abc',
+		} );
+		Promise.resolve( fetchPromise );
+
+		expect( filterArgs.args ).toHaveProperty(
+			'woo_wcadmin_install_timestamp'
 		);
 	} );
 } );

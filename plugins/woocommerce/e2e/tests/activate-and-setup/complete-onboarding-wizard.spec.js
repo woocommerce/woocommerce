@@ -1,7 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 
+const adminEmail =
+	process.env.USE_WP_ENV === '1'
+		? 'wordpress@example.com'
+		: 'admin@woocommercecoree2etestsuite.com';
+
 test.describe( 'Store owner can complete onboarding wizard', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
 		// These tests all take place with a US store
@@ -24,10 +29,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		// Fill postcode of the store
 		await page.fill( '#inspector-text-control-3', '94107' );
 		// Fill store's email address
-		await page.fill(
-			'#inspector-text-control-4',
-			'admin@woocommercecoree2etestsuite.com'
-		);
+		await page.fill( '#inspector-text-control-4', adminEmail );
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
@@ -160,7 +162,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 test.describe(
 	'A Malta store can complete the selective bundle install but does not include WCPay.',
 	() => {
-		test.use( { storageState: 'e2e/storage/adminState.json' } );
+		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeEach( async ( { page } ) => {
 			// These tests all take place with a store based in Japan
@@ -177,10 +179,7 @@ test.describe(
 			await page.click( 'button >> text=Malta' );
 			await page.fill( '#inspector-text-control-2', 'Valletta' );
 			await page.fill( '#inspector-text-control-3', 'VLT 1011' );
-			await page.fill(
-				'#inspector-text-control-4',
-				'admin@woocommercecoree2etestsuite.com'
-			);
+			await page.fill( '#inspector-text-control-4', adminEmail );
 			await page.check( '#inspector-checkbox-control-0' );
 			await page.click( 'button >> text=Continue' );
 			await page.click( 'button >> text=No thanks' );
@@ -273,7 +272,7 @@ test.describe(
 );
 
 test.describe( 'Store owner can go through setup Task List', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(
@@ -289,10 +288,7 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		await page.click( 'button >> text=United States (US) — California' );
 		await page.fill( '#inspector-text-control-2', 'San Francisco' );
 		await page.fill( '#inspector-text-control-3', '94107' );
-		await page.fill(
-			'#inspector-text-control-4',
-			'admin@woocommercecoree2etestsuite.com'
-		);
+		await page.fill( '#inspector-text-control-4', adminEmail );
 		await page.check( '#inspector-checkbox-control-0' );
 		await page.click( 'button >> text=Continue' );
 		await page.click( 'button >> text=No thanks' );

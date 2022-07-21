@@ -39,8 +39,11 @@ export const getItemError = ( state: ResourceState, id: IdType ) => {
 };
 
 export const getItems = createSelector(
-	( state: ResourceState, query: ItemQuery ) => {
-		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+	( state: ResourceState, query?: ItemQuery ) => {
+		const itemQuery = getResourceName(
+			CRUD_ACTIONS.GET_ITEMS,
+			query || {}
+		);
 
 		const ids = state.items[ itemQuery ]
 			? state.items[ itemQuery ].data
@@ -50,7 +53,7 @@ export const getItems = createSelector(
 			return null;
 		}
 
-		if ( query._fields ) {
+		if ( query && query._fields ) {
 			return ids.map( ( id: IdType ) => {
 				return query._fields.reduce(
 					( item: Partial< Item >, field: string ) => {
@@ -71,7 +74,10 @@ export const getItems = createSelector(
 			.filter( ( item ) => item !== undefined );
 	},
 	( state, query ) => {
-		const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+		const itemQuery = getResourceName(
+			CRUD_ACTIONS.GET_ITEMS,
+			query || {}
+		);
 		const ids = state.items[ itemQuery ]
 			? state.items[ itemQuery ].data
 			: undefined;
@@ -84,8 +90,8 @@ export const getItems = createSelector(
 	}
 );
 
-export const getItemsError = ( state: ResourceState, query: ItemQuery ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+export const getItemsError = ( state: ResourceState, query?: ItemQuery ) => {
+	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query || {} );
 	return state.errors[ itemQuery ];
 };
 

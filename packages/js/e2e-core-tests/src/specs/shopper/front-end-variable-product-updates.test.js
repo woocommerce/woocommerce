@@ -66,9 +66,7 @@ const runVariableProductUpdateTest = () => {
 					text: '200 kg',
 				}
 			);
-			await expect(
-				page
-			).toMatchElement(
+			await expect( page ).toMatchElement(
 				'.woocommerce-product-attributes-item--dimensions',
 				{ text: '10 × 20 × 15 cm' }
 			);

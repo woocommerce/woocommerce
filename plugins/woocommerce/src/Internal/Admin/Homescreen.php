@@ -52,7 +52,7 @@ class Homescreen {
 
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) && function_exists( 'get_current_screen' ) ) {
 			add_filter(
 				'woocommerce_admin_shared_settings',
 				array( $this, 'maybe_set_default_shipping_options_on_home' ),
@@ -87,8 +87,8 @@ class Homescreen {
 		}
 
 		$user_skipped_obw = $settings['onboarding']['profile']['skipped'] ?? false;
-		$store_address = $settings['preloadSettings']['general']['woocommerce_store_address'] ?? '';
-		$product_types = $settings['onboarding']['profile']['product_types'] ?? array();
+		$store_address    = $settings['preloadSettings']['general']['woocommerce_store_address'] ?? '';
+		$product_types    = $settings['onboarding']['profile']['product_types'] ?? array();
 
 		// If user skipped the obw or has not completed the store_details
 		// then we assume the user is going to sell physical products.
@@ -111,11 +111,10 @@ class Homescreen {
 		}
 
 		$is_jetpack_installed = in_array( 'jetpack', $settings['plugins']['installedPlugins'] ?? array(), true );
-		$is_jetpack_connected = $settings['dataEndpoints']['jetpackStatus']['isUserConnected'] ?? false;
 		$is_wcs_installed     = in_array( 'woocommerce-services', $settings['plugins']['installedPlugins'] ?? array(), true );
 
 		if (
-			( 'US' === $country_code && $is_jetpack_installed && $is_wcs_installed && $is_jetpack_connected )
+			( 'US' === $country_code && $is_jetpack_installed )
 			||
 			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
 			||

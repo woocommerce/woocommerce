@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -127,7 +128,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
 
-			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			//phpcs:ignore
+			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
 
 			$reports = new WC_Admin_Report();
 

@@ -18,7 +18,7 @@ describe( 'WooCommerceServicesItem', () => {
 		render( <WooCommerceServicesItem isWCSInstalled={ false } /> );
 
 		expect(
-			screen.queryByText( 'Woocommerce Shipping' )
+			screen.queryByText( 'WooCommerce Shipping' )
 		).toBeInTheDocument();
 
 		expect(
@@ -30,7 +30,7 @@ describe( 'WooCommerceServicesItem', () => {
 		render( <WooCommerceServicesItem isWCSInstalled={ true } /> );
 
 		expect(
-			screen.queryByText( 'Woocommerce Shipping' )
+			screen.queryByText( 'WooCommerce Shipping' )
 		).toBeInTheDocument();
 
 		expect(

@@ -44,7 +44,7 @@ let simpleProductId,
 	orderId;
 
 test.describe( 'WooCommerce Orders > Add new order', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {

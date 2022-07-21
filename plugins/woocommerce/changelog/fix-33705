@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixing bug where the activity panel stopped functioning after route changes.

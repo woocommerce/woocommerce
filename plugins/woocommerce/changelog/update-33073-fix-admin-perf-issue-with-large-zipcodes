@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Uses WC_Data_Store directly to count the shipping zones to avoid any unncessary query to the D.B

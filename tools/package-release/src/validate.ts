@@ -3,6 +3,8 @@
  */
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { execSync } from 'child_process';
+import { gt as greaterVersionThan } from 'semver';
 
 /**
  * Internal dependencies
@@ -19,21 +21,34 @@ export const getFilepathFromPackageName = ( name: string ): string =>
 	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
 /**
- * Check if package is valid and can be deployed to NPM.
+ * Get a package's package.json file in JSON format.
  *
  * @param {string} name package name.
- * @return {boolean} true if the package is private.
+ * @return {Object|false} JSON object or false if it fails.
  */
-export const isValidPackage = ( name: string ): boolean => {
+export const getPackageJson = ( name: string ) => {
 	const filepath = getFilepathFromPackageName( name );
 	const packageJsonFilepath = `${ filepath }/package.json`;
 	const packageJsonExists = existsSync( packageJsonFilepath );
 	if ( ! packageJsonExists ) {
 		return false;
 	}
-	const packageJson = JSON.parse(
-		readFileSync( packageJsonFilepath, 'utf8' )
-	);
+
+	return JSON.parse( readFileSync( packageJsonFilepath, 'utf8' ) );
+};
+
+/**
+ * Check if package is valid and can be deployed to NPM.
+ *
+ * @param {string} name package name.
+ * @return {boolean} true if the package is private.
+ */
+export const isValidPackage = ( name: string ): boolean => {
+	const packageJson = getPackageJson( name );
+
+	if ( ! packageJson ) {
+		return false;
+	}
 
 	if ( name !== packageJson.name ) {
 		return false;
@@ -110,4 +125,30 @@ export const validatePackage = (
 			`${ name } is not a valid package. It may be private or incorrectly configured.`
 		);
 	}
+};
+
+/**
+ * Determine if an update is valid by comparing version numbers.
+ *
+ * @param {string} name package name.
+ * @return {boolean} If an update is valid.
+ */
+export const isValidUpdate = ( name: string ): boolean => {
+	const packageJson = getPackageJson( name );
+
+	if ( ! packageJson ) {
+		return false;
+	}
+
+	const nextVersion = packageJson.version;
+
+	if ( ! nextVersion ) {
+		return false;
+	}
+
+	const npmVersion = execSync( 'pnpm view @woocommerce/number version', {
+		encoding: 'utf-8',
+	} );
+
+	return greaterVersionThan( nextVersion.trim(), npmVersion.trim() );
 };
