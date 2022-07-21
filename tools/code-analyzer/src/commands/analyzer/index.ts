@@ -93,8 +93,6 @@ export default class Analyzer extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
-		const bar = await this.parse( Analyzer );
-		const bex = bar.flags;
 
 		CliUx.ux.action.start(
 			`Making a temporary clone of '${ flags.source }'`
