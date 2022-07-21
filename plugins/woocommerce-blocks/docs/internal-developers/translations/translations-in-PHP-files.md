@@ -34,11 +34,11 @@ See also <https://developer.wordpress.org/reference/functions/_e/>.
 
 ### `_ex()`
 
-The function `_ex()` displaya the translated string with gettext context. This function is only available for PHP.
+The function `_ex()` displays the translated string with gettext context. This function is only available for PHP.
 
 ```php
 // Schema
-_ex( string $text, string $domain = 'default' );
+_ex( string $text, string $context, string $domain = 'default' );
 
 // Example
 _ex( 'Place Order', 'Place order button text', 'woo-gutenberg-products-block' );
