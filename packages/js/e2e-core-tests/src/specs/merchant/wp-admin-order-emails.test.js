@@ -33,6 +33,7 @@ const runMerchantOrderEmailsTest = () => {
 				await page.click(
 					'div.order_data_column:nth-child(2) > h3:nth-child(1) > a:nth-child(1)'
 				),
+				// eslint-disable-next-line jest/no-standalone-expect
 				await expect( page ).toFill( '#_billing_email', customerEmail ),
 				await clickUpdateOrder( 'Order updated.' ),
 			] );
@@ -82,4 +83,5 @@ const runMerchantOrderEmailsTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runMerchantOrderEmailsTest;

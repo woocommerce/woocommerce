@@ -8,7 +8,7 @@ const productPrice = '15.99';
 test.describe(
 	'WooCommerce Merchant Flow: Orders > Customer Payment Page',
 	() => {
-		test.use( { storageState: 'e2e/storage/adminState.json' } );
+		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {

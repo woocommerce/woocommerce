@@ -1,0 +1,26 @@
+name: Prime caches against trunk
+on: 
+  push:
+    branches:
+      - trunk
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true  
+
+jobs:
+  prime:
+    name: Prime cache
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        workflow: [ 'pr-unit-tests', 'pr-build-and-e2e-tests', 'pr-code-coverage', 'pr-code-sniff', 'pr-lint-test-js', 'pr-smoke-test' ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/cache-deps
+        with:
+          workflow_name: ${{ matrix.workflow }}
+          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
