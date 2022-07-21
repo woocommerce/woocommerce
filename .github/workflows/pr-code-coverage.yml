@@ -46,6 +46,10 @@ jobs:
 
       - name: Install and Build
         uses: ./.github/actions/install-build
+
+      - name: Install composer dev dependencies
+        working-directory: plugins/woocommerce
+        run: composer install
         
       - name: Build Admin feature config
         run: |
