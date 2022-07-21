@@ -34,8 +34,6 @@ jobs:
 
             - name: Install and Build
               uses: ./.github/actions/install-build
-              with:
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Install Jest
               run: npm install -g jest
@@ -213,7 +211,6 @@ jobs:
               uses: ./package/woocommerce/.github/actions/install-build
               with:
                 working_directory: package/woocommerce
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
