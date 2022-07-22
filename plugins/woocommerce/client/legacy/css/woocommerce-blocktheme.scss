@@ -490,8 +490,12 @@
 p.demo_store,
 .woocommerce-store-notice {
 	// Add theme colors to the store notice.
-	color: var(--wp--preset--color--background, $primarytext);
+
 	background: var(--wp--preset--color--foreground, $primary);
+	bottom: 0;
+	color: var(--wp--preset--color--background, $primarytext);
+	position: fixed;
+	top: auto !important;
 
 	a {
 		color: var(--wp--preset--color--background, $primarytext);
