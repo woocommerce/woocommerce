@@ -33,7 +33,6 @@ type ProductCategory = {
 };
 
 type Query = BaseQueryParams< keyof ProductCategory > & {
-	context?: string;
 	hide_empty?: boolean;
 	slug?: string;
 	product?: number;
