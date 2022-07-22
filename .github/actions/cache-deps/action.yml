@@ -21,4 +21,4 @@ runs:
           ~/.cache/composer/files
           **/node_modules/.cache/turbo
           **/.turbo
-        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml', '**/turbo.json') }}
