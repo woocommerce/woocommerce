@@ -138,7 +138,7 @@ const addWarningE2EIncomplete = ( warnings ) => {
 
 	if ( total < expectedTotal ) {
 		warnings.push(
-			`INCOMPLETE E2E RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. E2E tests in CI will automatically end when they encounter too many failures. This is a fail-fast mechanism to save time on testing a buggy build. Keep the failures to a minimum in order to allow the entire E2E tests to run against this pull request.`
+			`INCOMPLETE E2E RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. Note that in CI, E2E tests automatically end when they encounter too many failures.`
 		);
 	}
 };
@@ -156,7 +156,7 @@ const addWarningFailuresBrokenTests = ( warnings ) => {
 
 	if ( apiFailed || apiBroken || e2eFailed || e2eBroken ) {
 		warnings.push(
-			'FAILED/BROKEN TESTS. There were failed and/or broken API and E2E tests. Please fix them first prior to merging this pull request. You may refer to the full API/E2E test reports linked below for debugging.'
+			'FAILED/BROKEN TESTS. There were failed and/or broken API and E2E tests.'
 		);
 	}
 };
@@ -169,8 +169,8 @@ const addWarningFailuresBrokenTests = ( warnings ) => {
 const addSummaryWarnings = ( core ) => {
 	const warnings = [];
 
-	addWarningE2EIncomplete( warnings );
 	addWarningFailuresBrokenTests( warnings );
+	addWarningE2EIncomplete( warnings );
 	if ( warnings.length > 0 ) {
 		core.summary
 			.addHeading( ':warning: Warning', 3 )
