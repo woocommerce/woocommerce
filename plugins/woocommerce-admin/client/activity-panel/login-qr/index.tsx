@@ -31,13 +31,15 @@ import JetpackLogo from './images/jetpack-logo.png';
 import WcsNotice from './images/wcs-notice.png';
 import './style.scss';
 
-type GenerateQRResponse = {
-	image: string;
-};
+export type MagicLinkResponse = {
+	data: unknown;
+	code: string;
+	message: string;
+} & Response;
 
-const generateQRCode = () => {
-	return apiFetch< GenerateQRResponse >( {
-		path: `${ WC_ADMIN_NAMESPACE }/login-qr/generate_qr`,
+const sendMagicLink = () => {
+	return apiFetch< MagicLinkResponse >( {
+		path: `${ WC_ADMIN_NAMESPACE }/login-qr/send-magic-link`,
 	} );
 };
 
@@ -46,11 +48,13 @@ export const AppLogin: FunctionComponent< AppLoginProps > = ( {
 	onClickInstall,
 	isBusy,
 } ) => {
-	const [ isLoadingQr, setIsLoadingQr ] = useState( true );
+	const [ isLoadingQr, setIsLoadingQr ] = useState( false );
 
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
-	const [ qrImageSrc, setQrImageSrc ] = useState( '' );
+	const [ isSuccess, setIsSuccess ] = useState( false );
+
+	const { createNotice } = useDispatch( 'core/notices' );
 
 	// wrapper currently doesn't check for jetpack user connected since it's not populated in any WP data stores that we can reach from here
 	// const [ isJetpackUserConnected, setIsJetpackUserConnected ] =
@@ -58,9 +62,41 @@ export const AppLogin: FunctionComponent< AppLoginProps > = ( {
 
 	const fetchQr = () => {
 		setIsLoadingQr( true );
-		generateQRCode()
+		sendMagicLink()
 			.then( ( response ) => {
-				setQrImageSrc( response.image );
+				if ( response.code === 'success' ) {
+					setIsSuccess( true );
+				} else {
+					createNotice(
+						'error',
+						__( 'Sorry, an unknown error occured.', 'woocommerce' )
+					);
+				}
+			} )
+			.catch( ( response ) => {
+				if ( response.code === 'error_sending_mobile_magic_link' ) {
+					createNotice(
+						'error',
+						__(
+							'Sorry, there was an error trying to request for a magic link',
+							'woocommerce'
+						)
+					);
+				} else if (
+					response.code === 'invalid_user_permission_view_admin'
+				) {
+					createNotice(
+						'error',
+						__(
+							"Sorry, your account don't have sufficient permission.",
+							'woocommerce'
+						)
+					);
+				} else if ( response.code === 'jetpack_not_connected' ) {
+					createNotice( 'error', response.message );
+				} else {
+					createNotice( 'error', response.message );
+				}
 			} )
 			.finally( () => setIsLoadingQr( false ) );
 	};
@@ -72,7 +108,6 @@ export const AppLogin: FunctionComponent< AppLoginProps > = ( {
 
 	useEffect( () => {
 		if ( jetpackInstallState === 'activated' ) {
-			fetchQr();
 		}
 	}, [ jetpackInstallState ] );
 
@@ -131,16 +166,15 @@ export const AppLogin: FunctionComponent< AppLoginProps > = ( {
 		);
 	};
 
-	const QRCode = () => {
+	const Success = () => {
 		return (
 			<>
-				<img alt="QRCode" src={ qrImageSrc }></img>
 				<div
 					style={ {
 						textAlign: 'center',
 					} }
 				>
-					You should scan this to get free WooCommerce store points!
+					{ __( 'Login link is sent to your email.', 'woocommerce' ) }
 				</div>
 			</>
 		);
@@ -172,10 +206,17 @@ export const AppLogin: FunctionComponent< AppLoginProps > = ( {
 								<>
 									{ jetpackInstallState === 'activated' ? (
 										<>
-											{ isLoadingQr ? (
-												<Spinner />
+											{ isSuccess ? (
+												<Success />
 											) : (
-												<QRCode></QRCode>
+												<Button
+													variant="primary"
+													isBusy={ isLoadingQr }
+													disabled={ isLoadingQr }
+													onClick={ fetchQr }
+												>
+													Get magic link
+												</Button>
 											) }
 										</>
 									) : (

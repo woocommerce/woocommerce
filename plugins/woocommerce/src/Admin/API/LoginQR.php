@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+
 /**
  * REST API Data countries controller class.
  *
@@ -52,11 +54,11 @@ class LoginQR extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/generate_qr',
+			'/' . $this->rest_base . '/send-magic-link',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'generate_qr' ),
+					'callback'            => array( $this, 'send_magic_link' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -83,15 +85,46 @@ class LoginQR extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Generate QR code.
+	 * Sends request to generate magic link email.
 	 *
 	 * @return array
 	 */
-	public function generate_qr() {
-		return rest_ensure_response(
-			[
-				'image' => 'data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQAQMAAAC6caSPAAAABlBMVEX///8AAABVwtN+AAACFUlEQVR4nO3bO3KDMBDG8fWkoOQIOQpHg6P5KBwhpQsGRY9dSRA7r4nkFP9tEmT9VH2DHoAIRbWu0eXa/eV8S83zJq/avErp4i8gkB5k0YBOe/A3mapfRV4C0XHiBQTShbyEDrdAfIIt0aEtjOMSieMsEMgTyJj/pkZfm+8DgTyT+Brc9ZK7xvoq/BBICyKpUoI9iVc6zjeWChBIA5LLyMW9pV1SiHUkpSCQHuROFeLjvd3vA4G0JJbksmlPSdZGXynROg4E0oOITu3WVaf4nGSnN9jdekIgPyaz7W70ON3iWWKZ15ZWEEhbUrY8yRvVZeQU/55vsBBIW2In50NJ8l7P7NYrnBotAoH0I+UMaNb5Px4QhXG2dIOdjvM+BNKepF9d6BorJnmV6oDoej/8EEgTMuawii0C8k48NNm5Zbz7bhBIF6KVWmOC7YCoeroznMIPgbQl+kw8X8SHjxpvOZwpjafH6BBISyL6a9kd2XLUSscpSYZA2hMRm/erDZHtkiI5LhUgkF+RGMvF4mkLTnuJUjO7QiAdyKHK2jKV7sRFTp9FQCBtic3brrylpgvO9eM7vdXAEEhTov/Ur5pXb6lp3m0xsEIgfUj9Yc4y5AMi98lSAQLpSUKvULN99L3leDsI5HlkKgdEQ/3dmHkIpAdJ2a0375I/zHExvI/ehYNAWpFchyRLvsEafbSxgkD+nFDUv6t37pg7IDeGw/cAAAAASUVORK5CYII=',
-			]
-		);
+	public function send_magic_link() {
+		// Attempt to get email from Jetpack.
+		if ( class_exists( Jetpack_Connection_Manager::class ) ) {
+			$jetpack_connection_manager = new Jetpack_Connection_Manager();
+			if ( $jetpack_connection_manager->is_active() ) {
+				$jetpack_user = $jetpack_connection_manager->get_connected_user_data();
+
+				$params = [
+					// This is currently not sending the right magic link email.
+					// Change client_id and client_secret to Woo since this is generating WordPress magic link instead.
+					'client_id'     => 39911,
+					'client_secret' => 'cOaYKdrkgXz8xY7aysv4fU6wL6sK5J8a6ojReEIAPwggsznj4Cb6mW0nffTxtYT8',
+					'email'         => $jetpack_user['email'],
+					'scheme'        => 'woocommerce',
+				];
+
+				$raw_response = wp_remote_post(
+					'https://public-api.wordpress.com/rest/v1.3/auth/send-login-email',
+					array(
+						'timeout'     => 30,
+						'redirection' => 5,
+						'body'        => wp_json_encode( $params ),
+					)
+				);
+
+				$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
+
+				$response_code = wp_remote_retrieve_response_code( $raw_response );
+				if ( 200 !== $response_code ) {
+					return new \WP_Error( $response['error'], $response['message'] );
+				}
+
+				return rest_ensure_response( [ 'code' => 'success' ] );
+			}
+		}
+
+		return new \WP_Error( 'jetpack_not_connected', __( 'Jetpack is not connected.', 'woocommerce' ) );
 	}
 }
