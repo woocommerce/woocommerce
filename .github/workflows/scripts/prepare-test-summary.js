@@ -138,7 +138,7 @@ const addWarningE2EIncomplete = ( warnings ) => {
 
 	if ( total < expectedTotal ) {
 		warnings.push(
-			`INCOMPLETE E2E RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. Note that in CI, E2E tests automatically end when they encounter too many failures.`
+			`INCOMPLETE E2E TEST RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. Note that in CI, E2E tests automatically end when they encounter too many failures.`
 		);
 	}
 };
