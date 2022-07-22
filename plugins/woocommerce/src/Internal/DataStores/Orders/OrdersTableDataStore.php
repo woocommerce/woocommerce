@@ -706,6 +706,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return array|object|null DB Order objects or error.
 	 */
 	private function get_order_data_for_ids( $ids ) {
+		if ( ! $ids ) {
+			return array();
+		}
+
 		global $wpdb;
 		$order_table_query = $this->get_order_table_select_statement();
 		$id_placeholder    = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
