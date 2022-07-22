@@ -10,6 +10,8 @@
  * @version     2.2.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -148,7 +150,7 @@ class WC_Meta_Box_Order_Data {
 	public static function output( $post ) {
 		global $theorder;
 
-		wc_init_theorder_object( $post );
+		OrderUtil::init_theorder_object( $post );
 
 		$order = $theorder;
 

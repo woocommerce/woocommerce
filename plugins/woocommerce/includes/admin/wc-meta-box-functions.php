@@ -7,51 +7,11 @@
  * @package     WooCommerce\Admin\Functions
  * @version     2.3.0
  */
+
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
-}
-
-/**
- * Gets value of a meta key from WC_Data object if passed, otherwise from the post object.
- * This helper function to supports backward compatibility for meta box functions, when moving from posts based store to custom tables.
- *
- * @param WP_Post $post Post object, meta will be fetched from this only when `$data` is not passed.
- * @param WC_Data $data WC_Data object, will be preferred over post object when passed.
- * @param string  $key  Key to fetch metadata for.
- * @param bool    $single  Whether metadata is single.
- *
- * @return array|mixed|string Value of the meta key.
- */
-function wc_get_post_or_object_meta( ?WP_Post $post, ?WC_Data $data, string $key, bool $single ) {
-	if ( isset( $data ) && $data instanceof WC_Data ) {
-		if ( method_exists( $data, "get$key" ) ) {
-			return $data->{"get$key"}();
-		}
-		return $data->get_meta( $key, $single );
-	} else {
-		return get_post_meta( $post->ID, $key, $single );
-	}
-}
-
-/**
- * Helper function to initialize the global $theorder object, mostly used during order meta boxes rendering.
- *
- * @param WC_Order|WP_Post $post_or_order_object Post or order object.
- *
- * @return WC_Order WC_Order object.
- */
-function wc_init_theorder_object( $post_or_order_object ) : WC_Order {
-	global $theorder;
-	if ( $theorder instanceof WC_Order ) {
-		return $theorder;
-	}
-
-	if ( $post_or_order_object instanceof WC_Order ) {
-		$theorder = $post_or_order_object;
-	} else {
-		$theorder = wc_get_order( $post_or_order_object->ID );
-	}
-	return $theorder;
 }
 
 /**
@@ -67,7 +27,7 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
+	$field['value']         = $field['value'] ?? OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['type']          = isset( $field['type'] ) ? $field['type'] : 'text';
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
@@ -130,7 +90,7 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 function woocommerce_wp_hidden_input( $field, WC_Data $data = null ) {
 	global $post;
 
-	$field['value'] = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
+	$field['value'] = isset( $field['value'] ) ? $field['value'] : OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
@@ -149,7 +109,7 @@ function woocommerce_wp_textarea_input( $field, WC_Data $data = null ) {
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
+	$field['value']         = $field['value'] ?? OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['rows']          = isset( $field['rows'] ) ? $field['rows'] : 2;
@@ -193,7 +153,7 @@ function woocommerce_wp_checkbox( $field, WC_Data $data = null ) {
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
+	$field['value']         = $field['value'] ?? OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['cbvalue']       = isset( $field['cbvalue'] ) ? $field['cbvalue'] : 'yes';
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
@@ -238,7 +198,7 @@ function woocommerce_wp_select( $field, WC_Data $data = null ) {
 			'class'             => 'select short',
 			'style'             => '',
 			'wrapper_class'     => '',
-			'value'             => wc_get_post_or_object_meta( $post, $data, $field['id'], true ),
+			'value'             => OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true ),
 			'name'              => $field['id'],
 			'desc_tip'          => false,
 			'custom_attributes' => array(),
@@ -293,7 +253,7 @@ function woocommerce_wp_radio( $field, WC_Data $data = null ) {
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
-	$field['value']         = isset( $field['value'] ) ? $field['value'] : wc_get_post_or_object_meta( $post, $data, $field['id'], true );
+	$field['value']         = $field['value'] ?? OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
 

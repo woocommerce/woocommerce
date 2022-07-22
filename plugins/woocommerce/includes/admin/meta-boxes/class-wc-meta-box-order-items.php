@@ -10,6 +10,8 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -27,7 +29,7 @@ class WC_Meta_Box_Order_Items {
 	public static function output( $post ) {
 		global $post, $thepostid, $theorder;
 
-		wc_init_theorder_object( $post );
+		OrderUtil::init_theorder_object( $post );
 		if ( ! is_int( $thepostid ) && ( $post instanceof WP_Post ) ) {
 			$thepostid = $post->ID;
 		}
