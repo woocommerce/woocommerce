@@ -74,7 +74,7 @@ trait AccessiblePrivateMethods {
 	 */
 	protected function add_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		if ( is_string( $callback ) && method_exists( $this, $callback ) ) {
-			$this->mark_method_as_accessible( $callback );
+			ArrayUtil::push_once( $this->_accessible_private_methods, $callback );
 			$callback = array( $this, $callback );
 		} elseif ( is_array( $callback ) && count( $callback ) >= 2 && $callback[0] === $this ) {
 			$this->mark_method_as_accessible( $callback[1] );
