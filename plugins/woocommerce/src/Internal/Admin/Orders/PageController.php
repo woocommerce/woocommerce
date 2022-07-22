@@ -28,6 +28,13 @@ class PageController {
 	private $current_action = '';
 
 	/**
+	 * Order object to be used in edit/new form.
+	 *
+	 * @var \WC_Order
+	 */
+	private $order;
+
+	/**
 	 * Sets up the page controller, including registering the menu item.
 	 *
 	 * @return void
@@ -162,6 +169,7 @@ class PageController {
 			wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
 		}
 		$this->order = new \WC_Order();
+		$this->order->set_object_read( false );
 		$this->order->set_status( 'auto-draft' );
 		$this->order->save();
 		$theorder = $this->order;
