@@ -136,7 +136,7 @@ class OrdersTableQuery {
 		);
 		$this->mappings = $datastore->get_all_order_column_mappings();
 
-		$this->args          = $args;
+		$this->args = $args;
 
 		// TODO: args to be implemented.
 		unset( $this->args['type'], $this->args['customer'], $this->args['customer_note'], $this->args['name'] );
@@ -372,9 +372,9 @@ class OrdersTableQuery {
 	 *
 	 * @param string $table    The table the field belongs to.
 	 * @param string $field    The field or column name.
+	 * @param string $operator The operator to use in the condition. Defaults to '=' or 'IN' depending on $value.
 	 * @param mixed  $value    The value.
 	 * @param string $type     The column type as specified in {@see OrdersTableDataStore} column mappings.
-	 * @param string $operator The operator to use in the condition. Defaults to '=' or 'IN' depending on $value.
 	 * @return string The resulting WHERE condition.
 	 */
 	public function where( string $table, string $field, string $operator, $value, string $type ): string {
