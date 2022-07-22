@@ -206,7 +206,7 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
-							$to_add = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
+							$to_add                 = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
 							$payment_method_string .= $to_add;
 						}
 
