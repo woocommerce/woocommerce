@@ -5,6 +5,10 @@ inputs:
     required: false
     description: The directory to target.
     default: ./
+  composer_no_dev:
+    required: false
+    description: COMPOSER_NO_DEV option.
+    default: 1
 
 runs:
   using: "composite"
@@ -17,7 +21,7 @@ runs:
     - name: Install dependencies
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: COMPOSER_NO_DEV=1 pnpm install
+      run: COMPOSER_NO_DEV=${{ inputs.composer_no_dev }} pnpm install
 
     - name: Run build
       shell: bash
