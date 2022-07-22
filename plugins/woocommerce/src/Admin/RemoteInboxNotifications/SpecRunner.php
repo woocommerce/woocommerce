@@ -104,7 +104,7 @@ class SpecRunner {
 	 * @returns object The locale that was found, or null if no matching locale was found.
 	 */
 	public static function get_locale( $locales ) {
-		$wp_locale           = get_locale();
+		$wp_locale           = get_user_locale();
 		$matching_wp_locales = array_values(
 			array_filter(
 				$locales,
@@ -144,7 +144,7 @@ class SpecRunner {
 	 * @return object The matching locale, or the en_US fallback locale, or null if neither was found.
 	 */
 	public static function get_action_locale( $action_locales ) {
-		$wp_locale           = get_locale();
+		$wp_locale           = get_user_locale();
 		$matching_wp_locales = array_values(
 			array_filter(
 				$action_locales,

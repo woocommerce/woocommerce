@@ -48,7 +48,7 @@ class Notes {
 					 * @since 6.9.0
 					 * @param Note $note The note object from the database.
 					 */
-					$note = apply_filters( 'woocommerce_get_note', $note );
+					$note = apply_filters( 'woocommerce_get_note_from_db', $note );
 				}
 				$note_id                            = $note->get_id();
 				$notes[ $note_id ]                  = $note->get_data();
