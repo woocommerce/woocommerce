@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Generate ID when creating a new order in COT for consistency with posts.
