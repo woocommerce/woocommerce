@@ -38,10 +38,10 @@ final class OrderUtil {
 	 * Gets value of a meta key from WC_Data object if passed, otherwise from the post object.
 	 * This helper function support backward compatibility for meta box functions, when moving from posts based store to custom tables.
 	 *
-	 * @param WP_Post|null $post Post object, meta will be fetched from this only when `$data` is not passed.
+	 * @param WP_Post|null  $post Post object, meta will be fetched from this only when `$data` is not passed.
 	 * @param \WC_Data|null $data WC_Data object, will be preferred over post object when passed.
-	 * @param string       $key Key to fetch metadata for.
-	 * @param bool         $single Whether metadata is single.
+	 * @param string        $key Key to fetch metadata for.
+	 * @param bool          $single Whether metadata is single.
 	 *
 	 * @return array|mixed|string Value of the meta key.
 	 */
