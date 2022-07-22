@@ -57,6 +57,8 @@ class RemoteInboxNotificationsEngine {
 				}
 			}
 		);
+
+		add_filter( 'woocommerce_get_note', array( __CLASS__, 'get_note' ), 10, 1 );
 	}
 
 	/**
@@ -179,5 +181,39 @@ class RemoteInboxNotificationsEngine {
 	 */
 	public static function update_stored_state( $stored_state ) {
 		update_option( self::STORED_STATE_OPTION_NAME, $stored_state, false );
+	}
+
+	/**
+	 * Get the note. This is used to display localized note.
+	 *
+	 * @param Note $note_from_db The note object created from db.
+	 * @return Note The note.
+	 */
+	public static function get_note( $note_from_db ) {
+		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
+
+		if ( false === $specs || 0 === count( $specs ) ) {
+			return $note_from_db;
+		}
+
+		foreach ( $specs as $spec ) {
+			if ( $spec->slug !== $note_from_db->get_name() ) {
+				continue;
+			}
+
+			$locale = SpecRunner::get_locale( $spec->locales );
+			if ( null === $locale ) {
+				// No locale found, so don't update the note.
+				break;
+			}
+
+			$note = clone $note_from_db;
+			$note->set_title( $locale->title );
+			$note->set_content( $locale->content );
+			$note->set_actions( SpecRunner::get_actions( $spec ) );
+			return $note;
+		}
+
+		return $note_from_db;
 	}
 }
