@@ -198,14 +198,16 @@ class WC_Meta_Box_Order_Data {
 
 						$transaction_id = $order->get_transaction_id();
 						if ( $transaction_id ) {
+							$to_add = null;
 							if ( isset( $payment_gateways[ $payment_method ] ) ) {
 								$url = $payment_gateways[ $payment_method ]->get_transaction_url( $order );
 								if ( $url ) {
-									$payment_method_string .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+									$to_add .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
 								}
-							} else {
-								$payment_method_string .= ' (' . esc_html( $transaction_id ) . ')';
 							}
+
+							$to_add = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
+							$payment_method_string .= $to_add;
 						}
 
 						$meta_list[] = $payment_method_string;
