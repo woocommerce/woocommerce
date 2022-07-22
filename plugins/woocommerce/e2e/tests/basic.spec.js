@@ -29,7 +29,7 @@ test.describe(
 			test( 'Load customer my account page', async ( { page } ) => {
 				await page.goto( '/my-account' );
 				const title = page.locator( 'h1.entry-title' );
-				await expect( title ).toHaveText( 'Foo' );
+				await expect( title ).toHaveText( 'My account' );
 			} );
 		} );
 	}
