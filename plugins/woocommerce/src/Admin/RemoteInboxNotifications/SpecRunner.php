@@ -67,23 +67,8 @@ class SpecRunner {
 			$note->set_source( $spec->source );
 		}
 
-		// Clear then create actions.
-		$note->clear_actions();
-		$actions = isset( $spec->actions ) ? $spec->actions : array();
-		foreach ( $actions as $action ) {
-			$action_locale = self::get_action_locale( $action->locales );
-
-			$url = self::get_url( $action );
-
-			$note->add_action(
-				$action->name,
-				( null === $action_locale || ! isset( $action_locale->label ) )
-					? ''
-					: $action_locale->label,
-				$url,
-				$action->status
-			);
-		}
+		// Recreate actions.
+		$note->set_actions( self::get_actions( $spec ) );
 
 		$note->save();
 	}
@@ -188,5 +173,32 @@ class SpecRunner {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the actions for a note.
+	 *
+	 * @param object $spec The spec.
+	 *
+	 * @return array The actions.
+	 */
+	public static function get_actions( $spec ) {
+		$note    = new Note();
+		$actions = isset( $spec->actions ) ? $spec->actions : array();
+		foreach ( $actions as $action ) {
+			$action_locale = self::get_action_locale( $action->locales );
+
+			$url = self::get_url( $action );
+
+			$note->add_action(
+				$action->name,
+				( null === $action_locale || ! isset( $action_locale->label ) )
+					? ''
+					: $action_locale->label,
+				$url,
+				$action->status
+			);
+		}
+		return $note->get_actions();
 	}
 }
