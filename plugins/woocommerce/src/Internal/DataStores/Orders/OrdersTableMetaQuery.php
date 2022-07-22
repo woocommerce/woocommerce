@@ -53,6 +53,20 @@ class OrdersTableMetaQuery {
 	private const ALIAS_PREFIX = 'meta';
 
 	/**
+	 * Name of the main orders table.
+	 *
+	 * @var string
+	 */
+	private $meta_table = '';
+
+	/**
+	 * Name of the metadata table.
+	 *
+	 * @var string
+	 */
+	private $orders_table = '';
+
+	/**
 	 * Sanitized `meta_query`.
 	 *
 	 * @var array
@@ -81,13 +95,6 @@ class OrdersTableMetaQuery {
 	private $table_aliases = array();
 
 	/**
-	 * The meta_query relation.
-	 *
-	 * @var string
-	 */
-	private $relation = 'AND';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param OrdersTableQuery $q The main query being performed.
@@ -100,7 +107,6 @@ class OrdersTableMetaQuery {
 		}
 
 		$this->queries  = $this->sanitize_meta_query( $meta_query );
-		$this->relation = $this->sanitize_relation( $meta_query['relation'] ?? 'AND' );
 
 		$this->meta_table   = $q->get_table_name( 'meta' );
 		$this->orders_table = $q->get_table_name( 'orders' );
@@ -116,7 +122,7 @@ class OrdersTableMetaQuery {
 	 *     @type string $where WHERE clause.
 	 * }
 	 */
-	public function get_sql_clauses() {
+	public function get_sql_clauses(): array {
 		return array(
 			'join'  => $this->sanitize_join( $this->join ),
 			'where' => $this->flatten_where_clauses( $this->where ),
@@ -129,7 +135,7 @@ class OrdersTableMetaQuery {
 	 * @param array $arg The meta_query clause.
 	 * @return boolean TRUE if atomic, FALSE otherwise.
 	 */
-	private static function is_atomic( $arg ) {
+	private function is_atomic( array $arg ): bool {
 		return isset( $arg['key'] ) || isset( $arg['value'] );
 	}
 
@@ -139,10 +145,10 @@ class OrdersTableMetaQuery {
 	 * @param array $q A meta_query array.
 	 * @return array A sanitized meta query array.
 	 */
-	private function sanitize_meta_query( $q ) {
+	private function sanitize_meta_query( array $q ): array {
 		$sanitized = array();
 
-		if ( self::is_atomic( $q ) ) {
+		if ( $this->is_atomic( $q ) ) {
 			if ( isset( $q['value'] ) && array() === $q['value'] ) {
 				unset( $q['value'] );
 			}
@@ -189,7 +195,7 @@ class OrdersTableMetaQuery {
 	 * @param string $relation An unsanitized relation prop.
 	 * @return string
 	 */
-	private function sanitize_relation( $relation ): string {
+	private function sanitize_relation( string $relation ): string {
 		if ( ! empty( $relation ) && 'OR' === strtoupper( $relation ) ) {
 			return 'OR';
 		}
@@ -203,7 +209,7 @@ class OrdersTableMetaQuery {
 	 * @param string $type MySQL type.
 	 * @return string MySQL type.
 	 */
-	private function sanitize_cast_type( $type = '' ): string {
+	private function sanitize_cast_type( string $type = '' ): string {
 		$meta_type = strtoupper( $type );
 
 		if ( ! $meta_type || ! preg_match( '/^(?:BINARY|CHAR|DATE|DATETIME|SIGNED|UNSIGNED|TIME|NUMERIC(?:\(\d+(?:,\s?\d+)?\))?|DECIMAL(?:\(\d+(?:,\s?\d+)?\))?)$/', $meta_type ) ) {
@@ -223,7 +229,7 @@ class OrdersTableMetaQuery {
 	 * @param array $join A JOIN array.
 	 * @return array A sanitized JOIN array.
 	 */
-	private function sanitize_join( $join ): array {
+	private function sanitize_join( array $join ): array {
 		return array_filter( array_unique( array_map( 'trim', $join ) ) );
 	}
 
@@ -282,10 +288,10 @@ class OrdersTableMetaQuery {
 	 * @param null|array $parent The parent of the element being processed.
 	 * @return array A nested array of WHERE conditions.
 	 */
-	private function process( &$arg, &$parent = null ) {
+	private function process( array &$arg, &$parent = null ): array {
 		$where = array();
 
-		if ( self::is_atomic( $arg ) ) {
+		if ( $this->is_atomic( $arg ) ) {
 			$arg['alias'] = $this->find_or_create_table_alias_for_clause( $arg, $parent );
 			$arg['cast']  = $this->sanitize_cast_type( $arg['type'] ?? '' );
 
@@ -327,7 +333,7 @@ class OrdersTableMetaQuery {
 	 * @param string $alias  Metadata table alias to use.
 	 * @return string An SQL JOIN clause.
 	 */
-	private function generate_join_for_clause( $clause, $alias ) {
+	private function generate_join_for_clause( array $clause, string $alias ): string {
 		global $wpdb;
 
 		if ( 'NOT EXISTS' === $clause['compare'] ) {
@@ -354,7 +360,7 @@ class OrdersTableMetaQuery {
 	 * @param array $parent_query The parent query this clause is in.
 	 * @return string A table alias for use in an SQL JOIN clause.
 	 */
-	private function find_or_create_table_alias_for_clause( $clause, $parent_query ): string {
+	private function find_or_create_table_alias_for_clause( array $clause, array $parent_query ): string {
 		if ( ! empty( $clause['alias'] ) ) {
 			return $clause['alias'];
 		}
@@ -393,8 +399,8 @@ class OrdersTableMetaQuery {
 	 * @param string $relation The relation involving both clauses.
 	 * @return boolean TRUE if the clauses can share a table alias, FALSE otherwise.
 	 */
-	private function is_operator_compatible_with_shared_join( $clause, $sibling, $relation = 'AND' ) {
-		if ( ! self::is_atomic( $clause ) || ! self::is_atomic( $sibling ) ) {
+	private function is_operator_compatible_with_shared_join( array $clause, array $sibling, string $relation = 'AND' ): bool {
+		if ( ! $this->is_atomic( $clause ) || ! $this->is_atomic( $sibling ) ) {
 			return false;
 		}
 
@@ -414,13 +420,13 @@ class OrdersTableMetaQuery {
 	 * Adapted from WordPress' `WP_Meta_Query::get_sql_for_clause()` method.
 	 *
 	 * @param array $clause An atomic meta_query clause.
-	 * @return null|string An SQL WHERE clause or NULL if $clause is invalid.
+	 * @return string An SQL WHERE clause or an empty string if $clause is invalid.
 	 */
-	private function generate_where_for_clause_key( $clause ) {
+	private function generate_where_for_clause_key( array $clause ): string {
 		global $wpdb;
 
 		if ( ! array_key_exists( 'key', $clause ) ) {
-			return;
+			return '';
 		}
 
 		if ( 'NOT EXISTS' === $clause['compare'] ) {
@@ -491,6 +497,9 @@ class OrdersTableMetaQuery {
 				$meta_compare_string = $meta_compare_string_start . "AND $subquery_alias.meta_key REGEXP $cast %s " . $meta_compare_string_end;
 				$where               = $wpdb->prepare( $meta_compare_string, $clause['key'] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				break;
+			default:
+				$where = '';
+				break;
 		}
 
 		return $where;
@@ -501,13 +510,13 @@ class OrdersTableMetaQuery {
 	 * Adapted from WordPress' `WP_Meta_Query::get_sql_for_clause()` method.
 	 *
 	 * @param array $clause An atomic meta_query clause.
-	 * @return null|string An SQL WHERE clause or NULL if $clause is invalid.
+	 * @return string An SQL WHERE clause or an empty string if $clause is invalid.
 	 */
-	private function generate_where_for_clause_value( $clause ) {
+	private function generate_where_for_clause_value( $clause ): string {
 		global $wpdb;
 
 		if ( ! array_key_exists( 'value', $clause ) ) {
-			return;
+			return '';
 		}
 
 		$meta_value = $clause['value'];

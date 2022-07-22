@@ -21,11 +21,18 @@ class OrdersTableQuery {
 	public const SKIPPED_VALUES = array( '', array(), null );
 
 	/**
-	 * Query vars set by the user.
+	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
 	 *
 	 * @var array
 	 */
-	private $original_args = array();
+	private $tables = array();
+
+	/**
+	 * Column mappings for all COT tables.
+	 *
+	 * @var array
+	 */
+	private $mappings = array();
 
 	/**
 	 * Query vars after processing and sanitization.
@@ -129,7 +136,6 @@ class OrdersTableQuery {
 		);
 		$this->mappings = $datastore->get_all_order_column_mappings();
 
-		$this->original_args = $args;
 		$this->args          = $args;
 
 		// TODO: args to be implemented.
@@ -248,7 +254,7 @@ class OrdersTableQuery {
 	 *
 	 * @return void
 	 */
-	private function sanitize_orderby(): void {
+	private function sanitize_order_orderby(): void {
 		// Allowed keys.
 		// TODO: rand, meta keys, etc.
 		$allowed_keys = array( 'ID', 'id', 'type', 'date', 'modified', 'parent' );
@@ -289,7 +295,7 @@ class OrdersTableQuery {
 	 * @return string The sanitized order.
 	 */
 	private function sanitize_order( string $order ): string {
-		$order = strtoupper( is_string( $order ) ? $order : '' );
+		$order = strtoupper( $order );
 
 		return in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'DESC';
 	}
@@ -350,7 +356,7 @@ class OrdersTableQuery {
 		}
 
 		// ORDER BY.
-		$orderby = $this->orderby ? ( 'ORDER BY ' . $this->orderby ) : '';
+		$orderby = $this->orderby ? ( 'ORDER BY ' . implode( ', ', $this->orderby ) ) : '';
 
 		// LIMITS.
 		$limits = $this->limits ? 'LIMIT ' . implode( ',', $this->limits ) : '';
@@ -371,11 +377,11 @@ class OrdersTableQuery {
 	 * @param string $operator The operator to use in the condition. Defaults to '=' or 'IN' depending on $value.
 	 * @return string The resulting WHERE condition.
 	 */
-	public function get_where_condition( string $table, string $field, $value, string $type, string $operator = '' ): string {
+	public function where( string $table, string $field, string $operator, $value, string $type ): string {
 		global $wpdb;
 
 		$db_util  = wc_get_container()->get( DatabaseUtil::class );
-		$operator = strtoupper( $operator ? $operator : '=' );
+		$operator = strtoupper( '' !== $operator ? $operator : '=' );
 
 		try {
 			$format = $db_util->get_wpdb_format_for_type( $type );
@@ -441,15 +447,15 @@ class OrdersTableQuery {
 		);
 
 		foreach ( $fields as $arg_key ) {
-			$this->where[] = $this->get_where_condition( $this->tables['orders'], $arg_key, $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
+			$this->where[] = $this->where( $this->tables['orders'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
 		}
 
 		if ( $this->arg_isset( 'parent_exclude' ) ) {
-			$this->where[] = $this->get_where_condition( $this->tables['orders'], 'parent_order_id', $this->args['parent_exclude'], 'int', '!=' );
+			$this->where[] = $this->where( $this->tables['orders'], 'parent_order_id', '!=', $this->args['parent_exclude'], 'int' );
 		}
 
 		if ( $this->arg_isset( 'exclude' ) ) {
-			$this->where[] = $this->get_where_condition( $this->tables['orders'], 'id', $this->args['exclude'], 'int', '!=' );
+			$this->where[] = $this->where( $this->tables['orders'], 'id', '!=', $this->args['exclude'], 'int' );
 		}
 	}
 
@@ -480,7 +486,7 @@ class OrdersTableQuery {
 		$this->join[] = "INNER JOIN {$this->tables['operational_data']} ON ( {$this->tables['orders']}.id = {$this->tables['operational_data']}.order_id )";
 
 		foreach ( $fields as $arg_key ) {
-			$this->where[] = $this->get_where_condition( $this->tables['operational_data'], $arg_key, $this->args[ $arg_key ], $this->mappings['operational_data'][ $arg_key ]['type'] );
+			$this->where[] = $this->where( $this->tables['operational_data'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['operational_data'][ $arg_key ]['type'] );
 		}
 	}
 
@@ -521,9 +527,10 @@ class OrdersTableQuery {
 			foreach ( $fields as $arg_key ) {
 				$column_name = str_replace( "{$address_type}_", '', $arg_key );
 
-				$this->where[] = $this->get_where_condition(
+				$this->where[] = $this->where(
 					$address_type,
 					$column_name,
+					'=',
 					$this->args[ $arg_key ],
 					$this->mappings[ "{$address_type}_address" ][ $column_name ]['type']
 				);
@@ -539,7 +546,7 @@ class OrdersTableQuery {
 	private function process_orderby(): void {
 		// 'order' and 'orderby' vars.
 		$this->args['order'] = $this->sanitize_order( $this->args['order'] ?? '' );
-		$this->sanitize_orderby( $this->args['orderby'] ?? 'date' );
+		$this->sanitize_order_orderby();
 
 		$orderby = $this->args['orderby'];
 
@@ -553,7 +560,7 @@ class OrdersTableQuery {
 			$orderby_array[] = "{$_orderby} {$order}";
 		}
 
-		$this->orderby = implode( ', ', $orderby_array );
+		$this->orderby = $orderby_array;
 	}
 
 	/**
@@ -588,7 +595,7 @@ class OrdersTableQuery {
 	 *
 	 * @return void
 	 */
-	private function run_query() {
+	private function run_query(): void {
 		global $wpdb;
 
 		// Run query.
@@ -634,8 +641,8 @@ class OrdersTableQuery {
 	 * @param string $arg_name Query var.
 	 * @return mixed
 	 */
-	public function get( $arg_name ) {
-		return isset( $this->args[ $arg_name ] ) ? $this->args[ $arg_name ] : null;
+	public function get( string $arg_name ) {
+		return $this->args[ $arg_name ] ?? null;
 	}
 
 	/**
@@ -645,7 +652,7 @@ class OrdersTableQuery {
 	 * @return string The prefixed table name.
 	 * @throws \Exception When table ID is not found.
 	 */
-	public function get_table_name( $table_id = '' ): string {
+	public function get_table_name( string $table_id = '' ): string {
 		if ( ! isset( $this->tables[ $table_id ] ) ) {
 			// Translators: %s is a table identifier.
 			throw new \Exception( sprintf( __( 'Invalid table id: %s.', 'woocommerce' ), $table_id ) );
