@@ -34,12 +34,22 @@ class Notes {
 	 * @return array Array of arrays.
 	 */
 	public static function get_notes( $context = 'edit', $args = array() ) {
-		$data_store = self::load_data_store();
-		$raw_notes  = $data_store->get_notes( $args );
-		$notes      = array();
+		$data_store  = self::load_data_store();
+		$raw_notes   = $data_store->get_notes( $args );
+		$notes       = array();
+		$user_locale = get_user_locale();
 		foreach ( (array) $raw_notes as $raw_note ) {
 			try {
-				$note                               = new Note( $raw_note );
+				$note = new Note( $raw_note );
+				if ( $user_locale !== $note->get_locale() ) {
+					/**
+					 * Filter the note. This is used to modify the note before it is returned when the user's locale does not match the note's locale.
+					 *
+					 * @since 6.9.0
+					 * @param Note $note The note object from the database.
+					 */
+					$note = apply_filters( 'woocommerce_get_note', $note );
+				}
 				$note_id                            = $note->get_id();
 				$notes[ $note_id ]                  = $note->get_data();
 				$notes[ $note_id ]['name']          = $note->get_name( $context );
