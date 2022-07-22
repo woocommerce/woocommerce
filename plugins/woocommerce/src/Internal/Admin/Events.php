@@ -176,7 +176,7 @@ class Events {
 	public function get_note( $note_from_db ) {
 		$note_classes = array_merge( self::$note_classes_to_added_or_updated, self::$other_note_classes );
 		foreach ( $note_classes as $note_class ) {
-			if ( $note_class::NOTE_NAME === $note_from_db->get_name() ) {
+			if ( defined( "$note_class::NOTE_NAME" ) && $note_class::NOTE_NAME === $note_from_db->get_name() ) {
 				if ( method_exists( $note_class, 'get_note' ) ) {
 					$note_from_class = $note_class::get_note();
 					$note            = clone $note_from_db;
