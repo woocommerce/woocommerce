@@ -9,5 +9,10 @@
 		"camelcase": 0,
 		"react/react-in-jsx-scope": "off",
 		"no-alert": "off"
-	}
+	},
+	"settings": {
+		"jest": {
+			"version": 28
+		}
+    }
 }
