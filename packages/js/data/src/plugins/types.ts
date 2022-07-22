@@ -15,6 +15,7 @@ export type SelectorKeysWithActions =
 	| 'installPlugins'
 	| 'activatePlugins'
 	| 'isJetpackConnected'
+	| 'getJetpackConnectionData'
 	| 'getJetpackConnectUrl'
 	| 'getPaypalOnboardingStatus';
 
@@ -24,6 +25,7 @@ export type PluginsState = {
 	requesting: Partial< Record< SelectorKeysWithActions, boolean > >;
 	jetpackConnectUrls: Record< string, unknown >;
 	jetpackConnection?: boolean;
+	jetpackConnectionData?: JetpackConnectionDataResponse;
 	recommended: Partial< Record< RecommendedTypes, Plugin[] > >;
 	paypalOnboardingStatus?: Partial< PaypalOnboardingStatus >;
 	// TODO clarify what the error record's type is
@@ -80,3 +82,40 @@ export type ActivatePluginsResponse = PluginsResponse< {
 	activated: string[];
 	active: string[];
 } >;
+
+export type JetpackConnectionDataResponse = {
+	currentUser: {
+		isConnected: boolean;
+		isMaster: boolean;
+		username: string;
+		id: number;
+		wpcomUser: {
+			ID: number;
+			login: string;
+			email: string;
+			display_name: string;
+			text_direction: string;
+			site_count: number;
+			jetpack_connect: string;
+			color_scheme: string;
+			sidebar_collapsed: boolean;
+			user_locale: string;
+			avatar: string;
+		};
+		gravatar: string;
+		permissions: {
+			connect: boolean;
+			connect_user: boolean;
+			disconnect: boolean;
+			admin_page: boolean;
+			manage_modules: boolean;
+			network_admin: boolean;
+			network_sites_page: boolean;
+			edit_posts: boolean;
+			publish_posts: boolean;
+			manage_options: boolean;
+			view_stats: boolean;
+			manage_plugins: boolean;
+		};
+	};
+} & Response;

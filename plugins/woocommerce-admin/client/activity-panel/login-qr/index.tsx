@@ -10,7 +10,6 @@ import {
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
 import Phone from 'gridicons/dist/phone';
 import classNames from 'classnames';
 import apiFetch from '@wordpress/api-fetch';
@@ -35,13 +34,6 @@ import './style.scss';
 type GenerateQRResponse = {
 	image: string;
 };
-
-// i'd rather not add another API endpoint since I'm pretty sure this can be queried elsewhere but I haven't gone and found out where
-// const getJetpackStatus = () => {
-// 	return apiFetch< JetpackStatusResponse >( {
-// 		path: `${ WC_ADMIN_NAMESPACE }/login-qr/jetpack_status`,
-// 	} );
-// };
 
 const generateQRCode = () => {
 	return apiFetch< GenerateQRResponse >( {
@@ -203,23 +195,30 @@ export const AppLogin: FunctionComponent< AppLoginProps > = ( {
 // just need to extract out the part where we render the child and make it composable
 export const AppLoginWrapper = () => {
 	const { currentUserCan } = useUser();
-	const { canUserInstallPlugins, jetpackInstallState, isBusy } = useSelect(
-		( select ) => {
-			const { getPluginInstallState, isPluginsRequesting } =
-				select( PLUGINS_STORE_NAME );
-			const installState = getPluginInstallState( 'jetpack' );
-			const busyState =
-				isPluginsRequesting( 'getJetpackConnectUrl' ) ||
-				isPluginsRequesting( 'installPlugins' ) ||
-				isPluginsRequesting( 'activatePlugins' );
+	const {
+		canUserInstallPlugins,
+		jetpackInstallState,
+		isBusy,
+		jetpackConnectionData,
+	} = useSelect( ( select ) => {
+		const {
+			getPluginInstallState,
+			isPluginsRequesting,
+			getJetpackConnectionData,
+		} = select( PLUGINS_STORE_NAME );
+		const installState = getPluginInstallState( 'jetpack' );
+		const busyState =
+			isPluginsRequesting( 'getJetpackConnectUrl' ) ||
+			isPluginsRequesting( 'installPlugins' ) ||
+			isPluginsRequesting( 'activatePlugins' );
 
-			return {
-				isBusy: busyState,
-				jetpackInstallState: installState,
-				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
-			};
-		}
-	);
+		return {
+			jetpackConnectionData: getJetpackConnectionData(),
+			isBusy: busyState,
+			jetpackInstallState: installState,
+			canUserInstallPlugins: currentUserCan( 'install_plugins' ),
+		};
+	} );
 
 	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
 
@@ -231,6 +230,8 @@ export const AppLoginWrapper = () => {
 		installJetpackAndConnect( createErrorNotice, getAdminLink );
 	};
 
+	// eslint-disable-next-line no-console
+	console.log( 'jetpack connection data', jetpackConnectionData );
 	return (
 		<AppLogin
 			jetpackInstallState={ jetpackInstallState }
