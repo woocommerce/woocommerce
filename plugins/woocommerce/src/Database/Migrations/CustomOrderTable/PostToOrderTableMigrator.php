@@ -22,7 +22,6 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 	protected function get_schema_config(): array {
 		global $wpdb;
 
-		// TODO: Remove hardcoding.
 		$this->table_names = array(
 			'orders'    => $wpdb->prefix . 'wc_orders',
 			'addresses' => $wpdb->prefix . 'wc_order_addresses',
