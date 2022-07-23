@@ -24,3 +24,6 @@ jobs:
         with:
           workflow_name: ${{ matrix.workflow }}
           workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+
+      - name: Install and Build
+        uses: ./.github/actions/install-build
