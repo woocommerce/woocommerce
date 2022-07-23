@@ -159,6 +159,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 		}
 
 		$orders_table = $wpdb->prefix . 'wc_orders';
+		$order_post_types = wc_get_order_types();
+		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = "
@@ -166,16 +168,18 @@ SELECT COUNT(1) FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
 WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 		} else {
-			$missing_orders_count_sql = "
+			$missing_orders_count_sql = $wpdb->prepare( "
 SELECT COUNT(1) FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.id=orders.id
 WHERE
-  posts.post_type = 'shop_order'
+  posts.post_type IN ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL";
+  AND orders.id IS NULL",
+			$order_post_types
+			);
 		}
 
-		$sql = "
+		$sql = $wpdb->prepare("
 SELECT(
 	($missing_orders_count_sql)
 	+
@@ -183,10 +187,12 @@ SELECT(
 		SELECT orders.id FROM $orders_table orders
 		JOIN $wpdb->posts posts on posts.ID = orders.id
 		WHERE
-		  posts.post_type = 'shop_order'
+		  posts.post_type IN ($order_post_type_placeholder)
 		  AND orders.date_updated_gmt != posts.post_modified_gmt
 	) x)
-) count";
+) count",
+		$order_post_types
+		);
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $sql );
@@ -223,16 +229,20 @@ SELECT(
 		}
 
 		$orders_table = $wpdb->prefix . 'wc_orders';
+		$order_post_types = wc_get_order_types();
+		$order_post_type_placeholders = implode( ',', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
-				$sql = "
+				$sql = $wpdb->prepare("
 SELECT posts.ID FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
-  posts.post_type='shop_order'
+  posts.post_type IN ($order_post_type_placeholders)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL";
+  AND orders.id IS NULL",
+					$order_post_types
+				);
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = "
@@ -241,12 +251,14 @@ INNER JOIN $orders_table orders ON posts.id=orders.id
 WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 				break;
 			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
-				$sql = "
+				$sql = $wpdb->prepare("
 SELECT orders.id FROM $orders_table orders
 JOIN $wpdb->posts posts on posts.ID = orders.id
 WHERE
-  posts.post_type = 'shop_order'
-  AND orders.date_updated_gmt != posts.post_modified_gmt";
+  posts.post_type IN ($order_post_type_placeholders)
+  AND orders.date_updated_gmt != posts.post_modified_gmt",
+					$order_post_types
+				);
 				break;
 			default:
 				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );

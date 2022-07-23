@@ -81,6 +81,10 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 				'type'        => 'int',
 				'destination' => 'parent_order_id',
 			),
+			'post_type'         => array(
+				'type'        => 'string',
+				'destination' => 'type',
+			),
 		);
 	}
 
