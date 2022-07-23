@@ -24,15 +24,11 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
-	private const ORDERS_SYNC_BATCH_SIZE      = 250;
-
+	private const ORDERS_SYNC_BATCH_SIZE = 250;
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
 	public const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
 	public const ID_TYPE_MISSING_IN_POSTS_TABLE  = 1;
 	public const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
-
-	// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
-	const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
 
 	/**
 	 * The data store object to use.
@@ -152,14 +148,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function get_current_orders_pending_sync_count(): int {
 		global $wpdb;
 
-		// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
-		$count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
-		if ( false !== $count ) {
-			return (int) $count;
-		}
-
-		$orders_table = $wpdb->prefix . 'wc_orders';
-		$order_post_types = wc_get_order_types();
+		$orders_table                = $wpdb->prefix . 'wc_orders';
+		$order_post_types            = wc_get_order_types();
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
@@ -168,18 +158,22 @@ SELECT COUNT(1) FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
 WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 		} else {
-			$missing_orders_count_sql = $wpdb->prepare( "
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
+			$missing_orders_count_sql = $wpdb->prepare(
+				"
 SELECT COUNT(1) FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.id=orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
   AND orders.id IS NULL",
-			$order_post_types
+				$order_post_types
 			);
 		}
 
-		$sql = $wpdb->prepare("
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- placeholder are provided in $order_post_type_placeholder.
+		$sql = $wpdb->prepare(
+			"
 SELECT(
 	($missing_orders_count_sql)
 	+
@@ -191,7 +185,7 @@ SELECT(
 		  AND orders.date_updated_gmt != posts.post_modified_gmt
 	) x)
 ) count",
-		$order_post_types
+			$order_post_types
 		);
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -228,13 +222,14 @@ SELECT(
 			throw new \Exception( '$limit must be at least 1' );
 		}
 
-		$orders_table = $wpdb->prefix . 'wc_orders';
-		$order_post_types = wc_get_order_types();
+		$orders_table                 = $wpdb->prefix . 'wc_orders';
+		$order_post_types             = wc_get_order_types();
 		$order_post_type_placeholders = implode( ',', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
-				$sql = $wpdb->prepare("
+				$sql = $wpdb->prepare(
+					"
 SELECT posts.ID FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
@@ -251,7 +246,8 @@ INNER JOIN $orders_table orders ON posts.id=orders.id
 WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 				break;
 			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
-				$sql = $wpdb->prepare("
+				$sql = $wpdb->prepare(
+					"
 SELECT orders.id FROM $orders_table orders
 JOIN $wpdb->posts posts on posts.ID = orders.id
 WHERE
