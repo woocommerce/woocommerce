@@ -164,11 +164,11 @@ class ListTable extends WP_List_Table {
 		);
 
 		$orders      = wc_get_orders( $args );
-		$this->items = $orders->orders;
+		$this->items = $orders->orders ?? array();
 
 		$this->set_pagination_args(
 			array(
-				'total_items' => $orders->total,
+				'total_items' => $orders->total ?? 0,
 				'per_page'    => $limit,
 			)
 		);
