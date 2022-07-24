@@ -4,7 +4,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-const RecentTracksEventsViewer = () => {
+const Viewer = () => {
 	const [ recentTracksEvents, setRecentTracksEvents ] = useState();
 
 	const getRecentTracksEvents = async () => {
@@ -78,4 +78,4 @@ const RecentTracksEventsViewer = () => {
 	);
 };
 
-export default RecentTracksEventsViewer;
+export default Viewer;
