@@ -1547,13 +1547,21 @@ jQuery( function ( $ ) {
 			}
 
 			$( '#order_custom #the-list' ).wpList( {
+				/**
+				 * Add order id and action to the request.
+				 */
 				addBefore: function( settings ) {
 					settings.data += "&order_id=" + woocommerce_admin_meta_boxes.post_id + "&action=woocommerce_order_add_meta";
-					settings.action = 'woocommerce_order_add_meta';
 					return settings;
 				},
-				addAfter: function() {or
+
+				addAfter: function() {
 					$('table#list-table').show();
+				},
+
+				delBefore: function( settings ) {
+					settings.data += "&order_id=" + woocommerce_admin_meta_boxes.post_id + "&action=woocommerce_order_delete_meta";
+					return settings;
 				}
 			});
 		}
