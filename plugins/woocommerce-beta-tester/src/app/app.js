@@ -13,6 +13,7 @@ import { default as Options } from '../options';
 import { default as Experiments } from '../experiments';
 import { default as Features } from '../features';
 import { default as RestAPIFilters } from '../rest-api-filters';
+import { default as Tracks } from '../tracks';
 
 const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 	{
@@ -44,6 +45,11 @@ const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 		name: 'rest-api-filters',
 		title: 'REST API FIlters',
 		content: <RestAPIFilters />,
+	},
+	{
+		name: 'tracks',
+		title: 'Tracks',
+		content: <Tracks />,
 	},
 ] );
 
