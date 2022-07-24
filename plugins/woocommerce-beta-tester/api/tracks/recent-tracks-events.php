@@ -29,6 +29,10 @@ add_filter( 'woocommerce_tracks_event_properties', 'wc_beta_tester_log_tracks_ev
  * @param WP_REST_Request $request Request instance.
  */
 function wc_beta_tester_handle_get_recent_tracks_events( $request ) {
+	if ( ! wc_beta_tester_is_recent_tracks_events_enabled() ) {
+		return new WP_REST_Response( 'Recent Tracks events are not enabled', 503 );
+	}
+
 	$events = wc_beta_tester_get_recent_tracks_events();
 
 	return new WP_REST_Response( $events, 200 );
@@ -40,6 +44,10 @@ function wc_beta_tester_handle_get_recent_tracks_events( $request ) {
  * @param WP_REST_Request $request Request instance.
  */
 function wc_beta_tester_handle_put_recent_tracks_event( $request ) {
+	if ( ! wc_beta_tester_is_recent_tracks_events_enabled() ) {
+		return new WP_REST_Response( 'Recent Tracks events are not enabled', 503 );
+	}
+
 	$event = json_decode( $request->get_body() );
 
 	wc_beta_tester_log_tracks_event( $event );
@@ -95,7 +103,7 @@ function wc_beta_tester_build_tracks_event( $properties, $event_name ) {
  * Get recent Tracks events.
  */
 function wc_beta_tester_get_recent_tracks_events() {
-	// TODO: this implementation feels very inefficient;
+	// this implementation feels very inefficient;
 	// it would be nice to be able to just send the string back and set content type to JSON.
 	$log_file_name = get_recent_tracks_events_log_file_name();
 
@@ -114,4 +122,11 @@ function wc_beta_tester_get_recent_tracks_events() {
  */
 function get_recent_tracks_events_log_file_name() {
 	return trailingslashit( WC_LOG_DIR ) . 'wca_test_helper_recent_tracks_events.log';
+}
+
+/**
+ * Returns true if the recent Tracks events feature is enabled.
+ */
+function wc_beta_tester_is_recent_tracks_events_enabled() {
+	return get_option( 'wc_beta_tester_recent_tracks_enabled', '0' ) === '1';
 }
