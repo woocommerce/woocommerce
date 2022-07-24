@@ -70,4 +70,20 @@ final class OrderUtil {
 	public static function get_post_or_order_id( $post_or_order_object ) : int {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_post_or_order_id( $post_or_order_object );
 	}
+
+	/**
+	 * Helper function to id from an post or order object.
+	 *
+	 * @param WP_Post/WC_Order $post_or_order_object WP_Post/WC_Order object to get ID for.
+	 *
+	 * @return int Order or post ID.
+	 */
+	public static function get_post_or_order_id( $post_or_order_object ) : int {
+		if ( $post_or_order_object instanceof WC_Order ) {
+			return $post_or_order_object->get_id();
+		} elseif ( $post_or_order_object instanceof WP_Post ) {
+			return $post_or_order_object->ID;
+		}
+		return 0;
+	}
 }
