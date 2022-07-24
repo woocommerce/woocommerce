@@ -67,7 +67,7 @@ class CustomMetaBox {
 			<div id="ajax-response"></div>
 			<?php
 			list_meta( $metadata_to_list );
-			meta_form();
+			$this->render_meta_form( $order );
 			?>
 		</div>
 		<p>
@@ -98,6 +98,84 @@ class CustomMetaBox {
 		}
 
 		return $keys;
+	}
+
+	/**
+	 * Reimplementation of WP core's `meta_form` function. Renders meta form box.
+	 *
+	 * @param \WC_Order $order WC_Order object.
+	 *
+	 * @return void
+	 */
+	public function render_meta_form( \WC_Order $order ) : void {
+		$meta_key_input_id = 'metakeyselect';
+		/**
+		 * Filters values for the meta key dropdown in the Custom Fields meta box.
+		 *
+		 * Compatibility filter for `postmeta_form_keys` filter.
+		 *
+		 * @since 6.9.0
+		 *
+		 * @param array|null $keys Pre-defined meta keys to be used in place of a postmeta query. Default null.
+		 * @param \WC_Order  $order The current post object.
+		 */
+		$keys = apply_filters( 'postmeta_form_keys', null, $order );
+		?>
+		<p><strong><?php esc_html_e( 'Add New Custom Field:', 'woocommerce' ); ?></strong></p>
+		<table id="newmeta">
+			<thead>
+			<tr>
+				<th class="left"><label for="<?php echo esc_attr( $meta_key_input_id ); ?>"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label></th>
+				<th><label for="metavalue"><?php esc_html_e( 'Value', 'woocommerce' ); ?></label></th>
+			</tr>
+			</thead>
+
+			<tbody>
+			<tr>
+				<td id="newmetaleft" class="left">
+					<?php if ( $keys ) { ?>
+						<select id="metakeyselect" name="metakeyselect">
+							<option value="#NONE#"><?php esc_html_e( '&mdash; Select &mdash;', 'woocommerce' ); ?></option>
+							<?php
+							foreach ( $keys as $key ) {
+								if ( is_protected_meta( $key, 'post' ) || ! current_user_can( 'edit_others_shop_order', $order->get_id() ) ) {
+									continue;
+								}
+								echo "\n<option value='" . esc_attr( $key ) . "'>" . esc_html( $key ) . '</option>';
+							}
+							?>
+						</select>
+						<input class="hide-if-js" type="text" id="metakeyinput" name="metakeyinput" value="" />
+						<a href="#postcustomstuff" class="hide-if-no-js" onclick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew').toggle();return false;">
+							<span id="enternew"><?php esc_html_e( 'Enter new', 'woocommerce' ); ?></span>
+							<span id="cancelnew" class="hidden"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></span></a>
+					<?php } else { ?>
+						<input type="text" id="metakeyinput" name="metakeyinput" value="" />
+					<?php } ?>
+				</td>
+				<td><textarea id="metavalue" name="metavalue" rows="2" cols="25"></textarea></td>
+			</tr>
+
+			<tr><td colspan="2">
+					<div class="submit">
+						<?php
+						submit_button(
+							__( 'Add Custom Field', 'woocommerce' ),
+							'',
+							'addmeta',
+							false,
+							array(
+								'id'            => 'newmeta-submit',
+								'data-wp-lists' => 'add:the-list:newmeta',
+							)
+						);
+						?>
+					</div>
+					<?php wp_nonce_field( 'add-meta', '_ajax_nonce-add-meta', false ); ?>
+				</td></tr>
+			</tbody>
+		</table>
+		<?php
 	}
 
 	/**

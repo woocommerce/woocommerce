@@ -731,6 +731,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		global $wpdb;
+		if ( empty( $ids ) ) {
+			return array();
+		}
 		$order_table_query = $this->get_order_table_select_statement();
 		$id_placeholder    = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
