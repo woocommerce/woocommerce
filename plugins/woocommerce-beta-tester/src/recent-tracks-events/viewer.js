@@ -1,8 +1,29 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+
+// from https://overreacted.io/making-setinterval-declarative-with-react-hooks/
+function useInterval( callback, delay ) {
+	const savedCallback = useRef();
+
+	// Remember the latest callback.
+	useEffect( () => {
+		savedCallback.current = callback;
+	}, [ callback ] );
+
+	// Set up the interval.
+	useEffect( () => {
+		function tick() {
+			savedCallback.current();
+		}
+		if ( delay !== null ) {
+			const id = setInterval( tick, delay );
+			return () => clearInterval( id );
+		}
+	}, [ delay ] );
+}
 
 const Viewer = () => {
 	const [ recentTracksEvents, setRecentTracksEvents ] = useState();
@@ -16,9 +37,9 @@ const Viewer = () => {
 		setRecentTracksEvents( response );
 	};
 
-	useEffect( () => {
+	useInterval( () => {
 		getRecentTracksEvents();
-	}, [] );
+	}, 1000 );
 
 	const renderTracksEventProperty = ( tracksEventProperty ) => {
 		let propertyValue = tracksEventProperty[ 1 ];
