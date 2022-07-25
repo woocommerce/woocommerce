@@ -10,6 +10,9 @@
 	},
 	"scripts": {
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
+		"build": "turbo run turbo:build",
+		"lint": "turbo run turbo:lint",
+		"test": "turbo run turbo:test",
 		"turbo:build": "pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"turbo:lint": "pnpm run lint:js && pnpm run lint:css",
 		"turbo:test": "pnpm run test:client",

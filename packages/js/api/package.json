@@ -31,6 +31,7 @@
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
 		"prepack": "pnpm run build",
+		"build": "turbo run turbo:build",
 		"turbo:build": "pnpm run clean && npm run compile",
 		"turbo:lint": "eslint src",
 		"lint:fix": "eslint src --fix",

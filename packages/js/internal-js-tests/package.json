@@ -17,6 +17,8 @@
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
 	"scripts": {
+		"build": "turbo run turbo:build",
+		"lint": "turbo run turbo:lint",
 		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"turbo:lint": "eslint src",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",

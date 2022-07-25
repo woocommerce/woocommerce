@@ -29,6 +29,7 @@
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"scripts": {
+		"lint": "turbo run turbo:lint",
 		"turbo:lint": "eslint index.js",
 		"lint:fix": "eslint index.js --fix"
 	},

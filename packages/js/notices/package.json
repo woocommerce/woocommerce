@@ -38,6 +38,8 @@
 	"private": true,
 	"scripts": {
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "turbo run turbo:build",
+		"lint": "turbo run turbo:lint",
 		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"turbo:lint": "eslint src",
 		"start": "tsc --build --watch",

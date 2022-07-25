@@ -38,6 +38,7 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
+		"lint": "turbo run turbo:lint",
 		"turbo:lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},
