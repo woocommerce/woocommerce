@@ -1667,6 +1667,7 @@ importers:
       '@wordpress/env': ^4.8.0
       '@wordpress/hooks': ^2.11.1
       '@wordpress/scripts': ^19.2.4
+      classnames: ^2.3.1
       eslint: 8.2.0
       jest: 28.1.3
       require-turbo: workspace:*
@@ -1681,6 +1682,7 @@ importers:
       '@wordpress/data-controls': 1.21.3
       '@wordpress/element': 2.20.3
       '@wordpress/hooks': 2.12.3
+      classnames: 2.3.1
     devDependencies:
       '@woocommerce/dependency-extraction-webpack-plugin': link:../../packages/js/dependency-extraction-webpack-plugin
       '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin

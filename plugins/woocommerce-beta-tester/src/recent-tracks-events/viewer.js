@@ -3,6 +3,12 @@
  */
 import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import classnames from 'classnames';
+
+/**
+ * Internal dependencies
+ */
+import './viewer.scss';
 
 // from https://overreacted.io/making-setinterval-declarative-with-react-hooks/
 function useInterval( callback, delay ) {
@@ -26,27 +32,63 @@ function useInterval( callback, delay ) {
 }
 
 const Viewer = () => {
+	const listRef = useRef( null );
 	const bottomOfListRef = useRef( null );
-	const [ recentTracksEvents, setRecentTracksEvents ] = useState();
+	const [ doInitialScroll, setDoInitialScroll ] = useState( true );
+	const [ recentTracksEvents, setRecentTracksEvents ] = useState( [] );
 
-	const getRecentTracksEvents = async () => {
+	async function getRecentTracksEvents() {
 		const response = await apiFetch( {
 			path: '/wc-admin-test-helper/recent-tracks-events',
 			method: 'GET',
 		} );
 
 		setRecentTracksEvents( response );
-	};
+	}
 
 	useInterval( () => {
 		getRecentTracksEvents();
 	}, 1000 );
 
 	useEffect( () => {
-		bottomOfListRef.current?.scrollIntoView( { behavior: 'smooth' } );
-	}, [ recentTracksEvents ] );
+		const amountScrolledBack =
+			listRef.current?.scrollHeight - listRef.current?.scrollTop;
+		const shouldScroll =
+			doInitialScroll ||
+			amountScrolledBack < listRef.current?.clientHeight + 50;
 
-	const renderTracksEventProperty = ( tracksEventProperty ) => {
+		if ( doInitialScroll && recentTracksEvents.length > 0 ) {
+			setDoInitialScroll( false );
+		}
+
+		if ( shouldScroll ) {
+			bottomOfListRef.current?.scrollIntoView( { behavior: 'smooth' } );
+		}
+	}, [ doInitialScroll, recentTracksEvents ] );
+
+	return (
+		<div className="wc-beta-tester-recent-tracks-events-viewer">
+			<div className="wc-beta-tester-recent-tracks-events-viewer__header">
+				Recent Tracks Events
+			</div>
+			<ul
+				ref={ listRef }
+				className="wc-beta-tester-recent-tracks-events-viewer__events-list"
+			>
+				{ recentTracksEvents &&
+					recentTracksEvents.map( ( tracksEvent ) => (
+						<TracksEvent tracksEvent={ tracksEvent } />
+					) ) }
+				<li ref={ bottomOfListRef } />
+			</ul>
+		</div>
+	);
+};
+
+const TracksEvent = ( props ) => {
+	const [ isExpanded, setIsExpanded ] = useState( false );
+
+	function renderTracksEventProperty( tracksEventProperty ) {
 		let propertyValue = tracksEventProperty[ 1 ];
 
 		if ( propertyValue === true ) {
@@ -56,52 +98,47 @@ const Viewer = () => {
 		}
 
 		return (
-			<li style={ { color: 'gray' } }>
-				{ tracksEventProperty[ 0 ] }: { propertyValue }
+			<li className="wc-beta-tester-recent-tracks-events-viewer__event-property">
+				<span className="wc-beta-tester-recent-tracks-events-viewer__event-property__name">
+					{ tracksEventProperty[ 0 ] }:{ ' ' }
+				</span>
+				<span className="wc-beta-tester-recent-tracks-events-viewer__event-property__value">
+					{ propertyValue }
+				</span>
 			</li>
 		);
-	};
+	}
 
-	const renderTracksEventProperties = ( tracksEventProperties ) => {
+	function renderTracksEventProperties( tracksEventProperties ) {
 		return (
-			<ul>
+			<ul className="wc-beta-tester-recent-tracks-events-viewer__event-properties-list">
 				{ Object.entries( tracksEventProperties ).map(
 					renderTracksEventProperty
 				) }
 			</ul>
 		);
-	};
+	}
 
-	const renderTracksEvent = ( tracksEvent ) => {
-		return (
-			<li>
-				<div>{ tracksEvent.eventname }</div>
-				{ tracksEvent.eventprops &&
-					renderTracksEventProperties( tracksEvent.eventprops ) }
-			</li>
-		);
-	};
+	function toggleIsExpanded() {
+		setIsExpanded( ! isExpanded );
+	}
 
 	return (
-		<div
-			style={ {
-				position: 'fixed',
-				bottom: 0,
-				height: '150px',
-				width: '100%',
-				overflow: 'scroll',
-				zIndex: 9999,
-				backgroundColor: 'black',
-				color: 'white',
-			} }
+		<li
+			className={ classnames(
+				'wc-beta-tester-recent-tracks-events-viewer__event',
+				{ 'is-expanded': isExpanded }
+			) }
 		>
-			<div>Recent Tracks Events</div>
-			<ul>
-				{ recentTracksEvents &&
-					recentTracksEvents.map( renderTracksEvent ) }
-				<li ref={ bottomOfListRef } />
-			</ul>
-		</div>
+			<div
+				onClick={ toggleIsExpanded }
+				className="wc-beta-tester-recent-tracks-events-viewer__event__name"
+			>
+				<span>{ props.tracksEvent.eventname }</span>
+			</div>
+			{ props.tracksEvent.eventprops &&
+				renderTracksEventProperties( props.tracksEvent.eventprops ) }
+		</li>
 	);
 };
 

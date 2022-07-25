@@ -20,6 +20,7 @@
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
+    "classnames": "^2.3.1",
 		"@types/prop-types": "^15.7.4",
 		"@woocommerce/data": "workspace:*",
 		"@wordpress/api-fetch": "^3.21.5",

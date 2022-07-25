@@ -1,0 +1,60 @@
+.wc-beta-tester-recent-tracks-events-viewer {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	bottom: 0;
+	height: 150px;
+	width: 100%;
+	z-index: 9999;
+	background-color: black;
+	color: white;
+}
+
+.wc-beta-tester-recent-tracks-events-viewer__header {
+	background-color: #101010;
+	border-bottom: 1px solid #202020;
+	padding: 8px;
+}
+
+.wc-beta-tester-recent-tracks-events-viewer__events-list {
+	flex-grow: 1;
+	overflow: scroll;
+	margin: 0;
+}
+
+.wc-beta-tester-recent-tracks-events-viewer__event {
+	padding-left: 8px;
+
+	.wc-beta-tester-recent-tracks-events-viewer__event__name::before {
+		content: '▶';
+		margin-right: 8px;
+	}
+
+	.wc-beta-tester-recent-tracks-events-viewer__event-properties-list {
+		display: none;
+		padding-left: 16px;
+	}
+
+	&.is-expanded {
+		background: #202020;
+
+		.wc-beta-tester-recent-tracks-events-viewer__event__name::before {
+			content: '▼';
+		}
+
+		.wc-beta-tester-recent-tracks-events-viewer__event-properties-list {
+			display: block;
+		}
+	}
+}
+
+
+
+.wc-beta-tester-recent-tracks-events-viewer__event-property {
+	color: gray;
+	margin: 0;
+
+	.wc-beta-tester-recent-tracks-events-viewer__event-property__value {
+		color: lightgray;
+	}
+}
