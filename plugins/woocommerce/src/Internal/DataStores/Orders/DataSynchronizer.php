@@ -133,7 +133,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function get_sync_status() {
 		return array(
 			'initial_pending_count' => (int) get_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION, 0 ),
-			'current_pending_count' => $this->get_total_pending_count(),
+			'current_pending_count' => $this->get_current_orders_pending_sync_count(),
 		);
 	}
 
@@ -283,6 +283,9 @@ WHERE
 	 * @return int Number of pending records.
 	 */
 	public function get_total_pending_count(): int {
+		if ( ! $this->data_sync_is_enabled() ) {
+			return 0;
+		}
 		return $this->get_current_orders_pending_sync_count();
 	}
 
@@ -294,6 +297,10 @@ WHERE
 	 * @return array Batch of records.
 	 */
 	public function get_next_batch_to_process( int $size ): array {
+		if ( ! $this->data_sync_is_enabled() ) {
+			return array();
+		}
+
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_MISSING_IN_POSTS_TABLE, $size );
 		} else {
