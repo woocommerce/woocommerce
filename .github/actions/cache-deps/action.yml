@@ -23,4 +23,6 @@ runs:
           **/plugins/woocommerce/assets
           **/build
           **/dist
+          **/build-module
+          **/build-types
         key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
