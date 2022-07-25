@@ -139,7 +139,7 @@ class OrdersTableQuery {
 		$this->args = $args;
 
 		// TODO: args to be implemented.
-		unset( $this->args['type'], $this->args['customer'], $this->args['customer_note'], $this->args['name'] );
+		unset( $this->args['type'], $this->args['customer_note'], $this->args['name'] );
 
 		$this->build_query();
 		$this->run_query();
@@ -457,6 +457,49 @@ class OrdersTableQuery {
 		if ( $this->arg_isset( 'exclude' ) ) {
 			$this->where[] = $this->where( $this->tables['orders'], 'id', '!=', $this->args['exclude'], 'int' );
 		}
+
+		// 'customer' is a very special field.
+		if ( $this->arg_isset( 'customer' ) ) {
+			$customer_query = $this->generate_customer_query( $this->args['customer'] );
+
+			if ( $customer_query ) {
+				$this->where[] = $customer_query;
+			}
+		}
+	}
+
+	/**
+	 * Generate SQL conditions for the 'customer' query.
+	 *
+	 * @param array  $values   List of customer ids or emails.
+	 * @param string $relation 'OR' or 'AND' relation used to build the customer query.
+	 * @return string SQL to be used in a WHERE clause.
+	 */
+	private function generate_customer_query( $values, string $relation = 'OR' ): string {
+		$values = is_array( $values ) ? $values : array( $values );
+		$ids    = array();
+		$emails = array();
+
+		foreach ( $values as $value ) {
+			if ( is_array( $value ) ) {
+				$sql      = $this->generate_customer_query( $value, 'AND' );
+				$pieces[] = $sql ? '(' . $sql . ')' : '';
+			} elseif ( is_numeric( $value ) ) {
+				$ids[] = absint( $value );
+			} elseif ( is_string( $value ) && is_email( $value ) ) {
+				$emails[] = sanitize_email( $value );
+			}
+		}
+
+		if ( $ids ) {
+			$pieces[] = $this->where( $this->tables['orders'], 'customer_id', '=', $ids, 'int' );
+		}
+
+		if ( $emails ) {
+			$pieces[] = $this->where( $this->tables['orders'], 'billing_email', '=', $emails, 'string' );
+		}
+
+		return $pieces ? implode( " $relation ", $pieces ) : '';
 	}
 
 	/**
