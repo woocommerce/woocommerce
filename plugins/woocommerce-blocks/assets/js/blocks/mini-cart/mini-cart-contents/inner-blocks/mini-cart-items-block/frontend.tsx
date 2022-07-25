@@ -13,7 +13,10 @@ const Block = ( {
 	className,
 }: MiniCartItemsBlockProps ): JSX.Element => {
 	return (
-		<div className={ classNames( className, 'wc-block-mini-cart__items' ) }>
+		<div
+			className={ classNames( className, 'wc-block-mini-cart__items' ) }
+			tabIndex={ -1 }
+		>
 			{ children }
 		</div>
 	);
