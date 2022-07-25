@@ -26,6 +26,7 @@ function useInterval( callback, delay ) {
 }
 
 const Viewer = () => {
+	const bottomOfListRef = useRef( null );
 	const [ recentTracksEvents, setRecentTracksEvents ] = useState();
 
 	const getRecentTracksEvents = async () => {
@@ -40,6 +41,10 @@ const Viewer = () => {
 	useInterval( () => {
 		getRecentTracksEvents();
 	}, 1000 );
+
+	useEffect( () => {
+		bottomOfListRef.current?.scrollIntoView( { behavior: 'smooth' } );
+	}, [ recentTracksEvents ] );
 
 	const renderTracksEventProperty = ( tracksEventProperty ) => {
 		let propertyValue = tracksEventProperty[ 1 ];
@@ -94,6 +99,7 @@ const Viewer = () => {
 			<ul>
 				{ recentTracksEvents &&
 					recentTracksEvents.map( renderTracksEvent ) }
+				<li ref={ bottomOfListRef } />
 			</ul>
 		</div>
 	);
