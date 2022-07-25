@@ -21,4 +21,6 @@ runs:
           ~/.cache/composer/files
           **/.turbo-cache
           **/plugins/woocommerce/assets
+          **/build
+          **/dist
         key: ${{ runner.os }}-${{ inputs.workflow_name }}-${{ inputs.workflow_cache }}-${{ hashFiles('**/composer.lock', '**/pnpm-lock.yaml') }}
