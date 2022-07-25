@@ -5,12 +5,13 @@
 		"turbo:lint": {
 			"cache": false
 		},
+
 		"lint:fix": {
 			"cache": false
 		},
 
 		"turbo:build": {
-			"dependsOn": [ "^build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"inputs": [
 				"src/*.js",
 				"src/**/*.js",
@@ -33,9 +34,10 @@
 				"build-types/**"
 			]
 		},
+
 		"woocommerce#build": {
 			"dependsOn": [
-				"^build",
+				"^turbo:build",
 				"woocommerce/client/admin#turbo:build",
 				"woocommerce/client/legacy#turbo:build"
 			],
@@ -47,8 +49,9 @@
 				"includes/**/*.php"
 			]
 		},
-		"woocommerce/client/admin#build": {
-			"dependsOn": [ "^build", "$WC_ADMIN_PHASE" ],
+
+		"woocommerce/client/admin#turbo:build": {
+			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"outputs": [],
 			"inputs": [
 				"client/*.js",
