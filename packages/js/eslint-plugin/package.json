@@ -38,7 +38,7 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"lint": "turbo run turbo:lint --filter $npm_package_name",
+		"lint": "../../../bin/run-turbo.sh turbo:lint",
 		"turbo:lint": "eslint ./rules ./configs",
 		"lint:fix": "eslint ./rules ./configs --fix"
 	},
