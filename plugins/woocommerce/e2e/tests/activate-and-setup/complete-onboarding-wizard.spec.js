@@ -1,9 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
+const { ADMIN_USER_EMAIL } = process.env;
 
 const adminEmail =
 	process.env.USE_WP_ENV === '1'
 		? 'wordpress@example.com'
-		: 'admin@woocommercecoree2etestsuite.com';
+		: ADMIN_USER_EMAIL ?? 'admin@woocommercecoree2etestsuite.com';
 
 test.describe( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: 'e2e/storage/adminState.json' } );

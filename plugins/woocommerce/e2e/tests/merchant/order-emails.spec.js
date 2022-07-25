@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { ADMIN_USER_EMAIL } = process.env;
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
@@ -11,7 +12,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	const adminEmail =
 		process.env.USE_WP_ENV === '1'
 			? 'wordpress@example.com'
-			: 'admin@woocommercecoree2etestsuite.com';
+			: ADMIN_USER_EMAIL ?? 'admin@woocommercecoree2etestsuite.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId;
 

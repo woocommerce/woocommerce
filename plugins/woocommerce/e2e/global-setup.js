@@ -1,5 +1,8 @@
 const { chromium } = require( '@playwright/test' );
 const fs = require( 'fs' );
+const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
+const adminUsername = ADMIN_USER ?? 'admin';
+const adminPassword = ADMIN_PASSWORD ?? 'admin';
 
 module.exports = async ( config ) => {
 	// Clear out the previous save states
@@ -25,8 +28,8 @@ module.exports = async ( config ) => {
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
 	await adminPage.goto( `${ baseURL }/wp-admin` );
-	await adminPage.fill( 'input[name="log"]', 'admin' );
-	await adminPage.fill( 'input[name="pwd"]', 'password' );
+	await adminPage.fill( 'input[name="log"]', adminUsername );
+	await adminPage.fill( 'input[name="pwd"]', adminPassword );
 	await adminPage.click( 'text=Log In' );
 	await adminPage.context().storageState( { path: adminState } );
 
