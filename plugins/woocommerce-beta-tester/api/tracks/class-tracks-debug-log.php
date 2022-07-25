@@ -5,9 +5,9 @@
  * @package WC_Beta_Tester
  */
 
- /**
-  * Class Tracks_Debug_Log.
-  */
+/**
+ * Class Tracks_Debug_Log.
+ */
 class Tracks_Debug_Log {
 	/**
 	 * Logger class to use.
@@ -30,7 +30,7 @@ class Tracks_Debug_Log {
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
 
-		$logger = wc_get_logger();
+		$logger       = wc_get_logger();
 		$this->logger = $logger;
 
 		add_action( 'admin_footer', array( $this, 'log_footer_pixels' ), 5 );
@@ -75,7 +75,7 @@ class Tracks_Debug_Log {
 	 */
 	public function log_remote_pixels( $preempt, $parsed_args, $url ) {
 		if ( strpos( $url, WC_Tracks_Client::PIXEL ) === 0 ) {
-			$parsed_url = parse_url( $url );
+			$parsed_url = wp_parse_url( $url );
 			parse_str( $parsed_url['query'], $params );
 			$this->log_event( $params['_en'], $params );
 		}
