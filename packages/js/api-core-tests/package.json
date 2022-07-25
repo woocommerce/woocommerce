@@ -4,12 +4,12 @@
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"scripts": {
-		"e2e": "jest",
 		"e2e:api": "jest --group=api",
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
-		"lint": "node ./node_modules/require-turbo && eslint data endpoints tests utils --ext=js,ts,tsx",
+		"turbo:e2e": "jest",
+		"turbo:lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
 		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
 	},
 	"repository": {
@@ -32,8 +32,7 @@
 	},
 	"devDependencies": {
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.12.0",
-		"require-turbo": "workspace:*"
+		"eslint": "^8.12.0"
 	},
 	"publishConfig": {
 		"access": "public"
