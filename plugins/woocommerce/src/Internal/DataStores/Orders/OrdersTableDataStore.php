@@ -1031,7 +1031,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 			// 'status' is a little special (for backwards compat.).
 			if ( 'status' === $column ) {
-				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] );
+				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] ? $changes['status'] : 'pending' );
 			}
 
 			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );
