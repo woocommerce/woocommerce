@@ -69,7 +69,11 @@
 		"turbo": "^1.2.16",
 		"typescript": "4.2.4",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.70.0"
+		"webpack": "^5.70.0",
+		"build": "turbo run turbo:build",
+		"lint": "turbo run turbo:lint",
+		"test": "turbo run turbo:test",
+		"e2e": "turbo run turbo:e2e"
 	},
 	"dependencies": {
 		"@babel/core": "7.12.9",
