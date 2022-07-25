@@ -11,8 +11,15 @@ const config = {
 	workers: 4,
 	reporter: [
 		[ 'list' ],
-		[ 'html', { outputFolder: 'output' } ],
+		[
+			'html',
+			{
+				outputFolder: 'output',
+				open: process.env.CI ? 'never' : 'always',
+			},
+		],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
+		[ 'json', { outputFile: 'e2e/test-results.json' } ],
 	],
 	use: {
 		screenshot: 'only-on-failure',
