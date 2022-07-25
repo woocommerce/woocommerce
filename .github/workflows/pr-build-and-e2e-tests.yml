@@ -29,10 +29,6 @@ jobs:
             - name: Install and Build
               uses: ./.github/actions/install-build
 
-            - name: TEST - CHECK ASSETS
-              run: |
-                ls -R plugins/woocommerce/assets/js
-
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               run: pnpm exec wc-e2e docker:up
