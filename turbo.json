@@ -10,7 +10,7 @@
         },
 
         "build": {
-            "dependsOn":  [ "^build" ],
+            "dependsOn":  [ "^build", "$WC_ADMIN_PHASE" ],
             "inputs": [
                 "src/*.js",
                 "src/**/*.js",
@@ -47,7 +47,23 @@
                 "includes/**/*.php"
             ]
         },
-
+        "woocommerce/client/admin#build": {
+            "dependsOn":  [ "^build", "$WC_ADMIN_PHASE" ],
+            "outputs": [],
+            "inputs": [
+                "client/*.js",
+                "client/**/*.js",
+                "client/*.jsx",
+                "client/**/*.jsx",
+                "client/*.ts",
+                "client/**/*.ts",
+                "client/*.tsx",
+                "client/**/*.tsx",
+                "client/*.scss",
+                "client/**/*.scss"
+            ]
+        },
+        
         "test": {
             "dependsOn":  [ "build" ],
             "inputs": [

@@ -3,6 +3,8 @@
  */
 import { createServer, Server } from 'net';
 import { execSync } from 'child_process';
+import { join } from 'path';
+import { writeFile } from 'fs/promises';
 
 /**
  * Format version string for regex.
@@ -114,20 +116,24 @@ export const isWPEnvPortTaken = () => {
 };
 
 /**
- * Start wp-engine.
+ * Start wp-env.
  *
- * @param {Function} error error print method.
+ * @param {string}   tmpRepoPath - path to the temporary repo to start wp-env from.
+ * @param {Function} error       -  error print method.
  * @return {boolean} if starting the container succeeded.
  */
-export const startWPEnv = async ( error: ( s: string ) => void ) => {
+export const startWPEnv = async (
+	tmpRepoPath: string,
+	error: ( s: string ) => void
+) => {
 	try {
 		// Stop wp-env if its already running.
 		execSync( 'wp-env stop', {
-			cwd: 'plugins/woocommerce',
+			cwd: join( tmpRepoPath, 'plugins/woocommerce' ),
 			encoding: 'utf-8',
 		} );
 	} catch ( e ) {
-		// If an error is produced here, it means wp-env is not initialized and therefor not running already.
+		// If an error is produced here, it means wp-env is not initialized and therefore not running already.
 	}
 
 	try {
@@ -138,7 +144,7 @@ export const startWPEnv = async ( error: ( s: string ) => void ) => {
 		}
 
 		execSync( 'wp-env start', {
-			cwd: 'plugins/woocommerce',
+			cwd: join( tmpRepoPath, 'plugins/woocommerce' ),
 			encoding: 'utf-8',
 		} );
 		return true;
@@ -153,15 +159,19 @@ export const startWPEnv = async ( error: ( s: string ) => void ) => {
 };
 
 /**
- * Stop wp-engine.
+ * Stop wp-env.
  *
- * @param {Function} error error print method.
+ * @param {string}   tmpRepoPath - path to the temporary repo to stop wp-env from.
+ * @param {Function} error       - error print method.
  * @return {boolean} if stopping the container succeeded.
  */
-export const stopWPEnv = ( error: ( s: string ) => void ): boolean => {
+export const stopWPEnv = (
+	tmpRepoPath: string,
+	error: ( s: string ) => void
+): boolean => {
 	try {
 		execSync( 'wp-env stop', {
-			cwd: 'plugins/woocommerce',
+			cwd: join( tmpRepoPath, 'plugins/woocommerce' ),
 			encoding: 'utf-8',
 		} );
 		return true;
@@ -171,25 +181,6 @@ export const stopWPEnv = ( error: ( s: string ) => void ): boolean => {
 			message = e.message;
 			error( message );
 		}
-		return false;
-	}
-};
-
-/**
- * Check if branch string is actually a commit hash and exists in git history.
- *
- * @param {string } branch branch name or commit hash.
- * @return {boolean} If string is valid commit hash.
- */
-export const isValidCommitHash = ( branch: string ): boolean => {
-	try {
-		// See if hash is valid and exists in the history.
-		execSync( `git show -s ${ branch }`, {
-			encoding: 'utf-8',
-		} );
-		return true;
-	} catch ( e ) {
-		// git show -s produces an error if the string is not a valid hash.
 		return false;
 	}
 };
@@ -243,4 +234,18 @@ export const getHookChangeType = ( diff: string ): 'Updated' | 'New' => {
 	const sinces = diff.match( sincesRegex ) || [];
 	// If there is more than one 'since' in the diff, it means that line was updated meaning the hook already exists.
 	return sinces.length > 1 ? 'Updated' : 'New';
+};
+
+export const generateJSONFile = ( filePath: string, data: unknown ) => {
+	const json = JSON.stringify(
+		data,
+		function replacer( key, value ) {
+			if ( value instanceof Map ) {
+				return Array.from( value.entries() );
+			}
+			return value;
+		},
+		2
+	);
+	return writeFile( filePath, json );
 };

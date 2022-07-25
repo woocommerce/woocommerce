@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add default styles for block themes to ensure WooCommerce looks better out of the box with block themes that are not optimized for WooCommerce specifically.

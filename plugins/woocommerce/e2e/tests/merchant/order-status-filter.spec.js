@@ -16,7 +16,7 @@ const orderStatus = [
 ];
 
 test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -56,6 +56,7 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
 
 		await page.click( 'li.all > a' );
+		await page.waitForLoadState( 'networkidle' );
 		// because tests are running in parallel, we can't know how many orders there
 		// are beyond the ones we created here.
 		for ( let i = 0; i < orderStatus.length; i++ ) {
@@ -72,6 +73,7 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
 
 			await page.click( `li.${ orderStatus[ i ][ 1 ] }` );
+			await page.waitForLoadState( 'networkidle' );
 			const countElements = await page
 				.locator( statusColumnTextSelector )
 				.count();

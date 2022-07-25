@@ -36,7 +36,11 @@ export const createCrudDataStore = ( {
 		pluralResourceName,
 		namespace,
 	} );
-	const selectors = createSelectors( { resourceName, pluralResourceName } );
+	const selectors = createSelectors( {
+		resourceName,
+		pluralResourceName,
+		namespace,
+	} );
 
 	registerStore( storeName, {
 		reducer: reducer as Reducer< ResourceState >,

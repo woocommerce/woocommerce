@@ -46,7 +46,9 @@ jobs:
 
       - name: Install and Build
         uses: ./.github/actions/install-build
-        
+        with:
+          composer_no_dev: 0
+
       - name: Build Admin feature config
         run: |
           pnpm build:feature-config --filter=woocommerce

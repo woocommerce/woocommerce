@@ -3,6 +3,7 @@
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
@@ -308,6 +309,190 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$field_name = ( $table === $this->sut::get_orders_table_name() ) ? 'id' : 'order_id';
 			$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$field_name} = %d", $order_id ) ) );
 		}
+	}
+
+	/**
+	 * Tests the `OrdersTableQuery` class on the COT datastore.
+	 */
+	public function test_cot_query_basic() {
+		// We bypass the `query()` method as it's mainly just a thin wrapper around
+		// `OrdersTableQuery`.
+		$user_id = wp_insert_user(
+			array(
+				'user_login' => 'testname',
+				'user_pass'  => 'testpass',
+				'user_email' => 'email@example.com',
+			)
+		);
+
+		$order1 = new WC_Order();
+		$this->switch_data_store( $order1, $this->sut );
+		$order1->set_prices_include_tax( true );
+		$order1->set_total( '100.0' );
+		$order1->set_order_key( 'my-order-key' );
+		$order1->set_customer_id( $user_id );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$this->switch_data_store( $order2, $this->sut );
+		$order2->set_prices_include_tax( false );
+		$order2->set_total( '50.0' );
+		$order2->save();
+
+		$query_vars = array(
+			'status' => 'all',
+		);
+
+		// Get all orders.
+		$query = new OrdersTableQuery( $query_vars );
+		$this->assertEquals( 2, count( $query->orders ) );
+
+		// Get orders with a specific property.
+		$query_vars['prices_include_tax'] = 'no';
+		$query = new OrdersTableQuery( $query_vars );
+		$this->assertEquals( 1, count( $query->orders ) );
+		$this->assertEquals( $query->orders[0], $order2->get_id() );
+
+		$query_vars['prices_include_tax'] = 'yes';
+		$query = new OrdersTableQuery( $query_vars );
+		$this->assertEquals( 1, count( $query->orders ) );
+		$this->assertEquals( $query->orders[0], $order1->get_id() );
+
+		// Get orders with two specific properties.
+		$query_vars['total'] = '100.0';
+		$query = new OrdersTableQuery( $query_vars );
+		$this->assertEquals( 1, count( $query->orders ) );
+		$this->assertEquals( $query->orders[0], $order1->get_id() );
+
+		// Limit results.
+		unset( $query_vars['total'], $query_vars['prices_include_tax'] );
+		$query_vars['limit']    = 1;
+		$query = new OrdersTableQuery( $query_vars );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		// By customer ID.
+		$query = new OrdersTableQuery(
+			array(
+				'status'      => 'all',
+				'customer_id' => $user_id
+			)
+		);
+		$this->assertEquals( 1, count( $query->orders ) );
+	}
+
+	/**
+	 * Tests meta queries in the `OrdersTableQuery` class.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_meta() {
+		$order1 = new WC_Order();
+		$this->switch_data_store( $order1, $this->sut );
+		$order1->add_meta_data( 'color', 'green', true );
+		$order1->add_meta_data( 'animal', 'lion', true );
+		$order1->add_meta_data( 'place', 'London', true );
+		$order1->add_meta_data( 'movie', 'Magnolia', true );
+		$order1->set_status( 'completed' );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$this->switch_data_store( $order2, $this->sut );
+		$order2->add_meta_data( 'color', 'blue', true );
+		$order2->add_meta_data( 'animal', 'cow', true );
+		$order2->add_meta_data( 'place', 'near London', true );
+		$order2->set_status( 'completed' );
+		$order2->save();
+
+		$order3 = new WC_Order();
+		$this->switch_data_store( $order3, $this->sut );
+		$order3->add_meta_data( 'color', 'green', true );
+		$order3->add_meta_data( 'animal', 'lion', true );
+		$order3->add_meta_data( 'place', 'Paris', true );
+		$order3->add_meta_data( 'movie', 'Citizen Kane', true );
+		$order3->set_status( 'completed' );
+		$order3->save();
+
+		// Orders with color=green.
+		$query = new OrdersTableQuery(
+			array(
+				'meta_query' => array(
+					array(
+						'key'   => 'color',
+						'value' => 'green',
+					)
+				)
+			)
+		);
+		$this->assertEquals( 2, count( $query->orders ) );
+
+		// Orders with a 'movie' meta (regardless of value) and animal=lion.
+		$query = new OrdersTableQuery(
+			array(
+				'meta_query' => array(
+					array(
+						'key'   => 'animal',
+						'value' => 'lion'
+					),
+					array(
+						'key'   => 'movie',
+					)
+				)
+			)
+		);
+		$this->assertEquals( 2, count( $query->orders ) );
+		$this->assertContains( $order1->get_id(), $query->orders );
+		$this->assertContains( $order3->get_id(), $query->orders );
+
+		// Orders with place ~London ("London" and "near London").
+		$query = new OrdersTableQuery(
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => 'place',
+						'value'   => 'London',
+						'compare' => 'LIKE',
+					),
+				)
+			)
+		);
+		$this->assertEquals( 2, count( $query->orders ) );
+		$this->assertContains( $order1->get_id(), $query->orders );
+		$this->assertContains( $order2->get_id(), $query->orders );
+
+		// Orders with (color=blue OR place=Paris) AND 'animal' set.
+		$query = new OrdersTableQuery(
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => 'animal',
+					),
+					array(
+						'relation' => 'OR',
+						array(
+							'key'   => 'color',
+							'value' => 'blue',
+						),
+						array(
+							'key'   => 'place',
+							'value' => 'Paris',
+						)
+					)
+				)
+			)
+		);
+		$this->assertEquals( 2, count( $query->orders ) );
+		$this->assertContains( $order2->get_id(), $query->orders );
+		$this->assertContains( $order3->get_id(), $query->orders );
+
+		// Orders with no 'movie' set (and using meta_key and meta_compare directly instead of meta_query as shortcut).
+		$query = new OrdersTableQuery(
+			array(
+				'meta_key'     => 'movie',
+				'meta_compare' => 'NOT EXISTS',
+			)
+		);
+		$this->assertEquals( 1, count( $query->orders ) );
+		$this->assertContains( $order2->get_id(), $query->orders );
 	}
 
 	/**

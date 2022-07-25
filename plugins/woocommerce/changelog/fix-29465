@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Use method_exists instead of throwing in AbstractServiceProvider::reflect_class_or_callable
