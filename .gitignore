@@ -95,6 +95,7 @@ changes.json
 /plugins/woocommerce/e2e/output
 /plugins/woocommerce/e2e/report
 /plugins/woocommerce/e2e/storage
+/plugins/woocommerce/e2e/test-results.json
 
 # Turborepo
 .turbo
