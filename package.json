@@ -14,10 +14,9 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "turbo run turbo:build",
-		"lint": "turbo run turbo:lint",
-		"test": "turbo run turbo:test",
-		"e2e": "turbo run turbo:e2e",
+		"build": "bin/run-turbo-root.sh turbo:build",
+		"lint": "bin/run-turbo-root.sh turbo:lint",
+		"test": "bin/run-turbo-root.sh turbo:test",
 		"build-storybook": "build-storybook  -c ./tools/storybook/.storybook",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
@@ -25,8 +24,7 @@
 		"storybook": "./tools/storybook/import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./tools/storybook/.storybook -p 6007 --ci",
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook",
 		"create-extension": "node ./tools/create-extension/index.js",
-		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"turbo": "turbo"
+		"cherry-pick": "node ./tools/cherry-pick/bin/run"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.16.11",

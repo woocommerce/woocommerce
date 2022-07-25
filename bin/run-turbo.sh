@@ -1,1 +1,1 @@
-pnpm -C "$BASH_SOURCE/../../" -- turbo run $1 --filter=$npm_package_name "${@:2}"
+pnpm -C "$BASH_SOURCE/../../" exec turbo run --filter=$npm_package_name "$1" -- -- ${@:2}
