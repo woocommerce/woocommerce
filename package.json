@@ -14,6 +14,10 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
+		"build": "turbo run turbo:build",
+		"lint": "turbo run turbo:lint",
+		"test": "turbo run turbo:test",
+		"e2e": "turbo run turbo:e2e",
 		"build-storybook": "build-storybook  -c ./tools/storybook/.storybook",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
@@ -69,11 +73,7 @@
 		"turbo": "^1.2.16",
 		"typescript": "4.2.4",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.70.0",
-		"build": "turbo run turbo:build",
-		"lint": "turbo run turbo:lint",
-		"test": "turbo run turbo:test",
-		"e2e": "turbo run turbo:e2e"
+		"webpack": "^5.70.0"
 	},
 	"dependencies": {
 		"@babel/core": "7.12.9",
