@@ -10,7 +10,7 @@
 		},
 
 		"turbo:build": {
-			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ "^build", "$WC_ADMIN_PHASE" ],
 			"inputs": [
 				"src/*.js",
 				"src/**/*.js",
@@ -35,9 +35,9 @@
 		},
 		"woocommerce#build": {
 			"dependsOn": [
-				"^turbo:build",
-				"woocommerce/client/admin#build",
-				"woocommerce/client/legacy#build"
+				"^build",
+				"woocommerce/client/admin#turbo:build",
+				"woocommerce/client/legacy#turbo:build"
 			],
 			"outputs": [],
 			"inputs": [
@@ -48,7 +48,7 @@
 			]
 		},
 		"woocommerce/client/admin#build": {
-			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ "^build", "$WC_ADMIN_PHASE" ],
 			"outputs": [],
 			"inputs": [
 				"client/*.js",
