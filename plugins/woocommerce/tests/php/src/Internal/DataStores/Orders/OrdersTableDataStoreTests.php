@@ -508,6 +508,78 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		// phpcs:enable
 	}
+
+	/**
+	 * Tests queries involving the 'customer' query var.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_customer() {
+		$user_email_1 = 'email1@example.com';
+		$user_email_2 = 'email2@example.com';
+		$user_id_1    = wp_insert_user(
+			array(
+				'user_login' => 'user_1',
+				'user_pass'  => 'testing',
+				'user_email' => $user_email_1,
+			)
+		);
+		$user_id_2    = wp_insert_user(
+			array(
+				'user_login' => 'user_2',
+				'user_pass'  => 'testing',
+				'user_email' => $user_email_2,
+			)
+		);
+
+		$order1 = new WC_Order();
+		$this->switch_data_store( $order1, $this->sut );
+		$order1->set_customer_id( $user_id_1 );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$this->switch_data_store( $order2, $this->sut );
+		$order2->set_customer_id( $user_id_2 );
+		$order2->save();
+
+		$order3 = new WC_Order();
+		$this->switch_data_store( $order3, $this->sut );
+		$order3->set_customer_id( $user_id_2 );
+		$order3->save();
+
+		// Search for orders of either user (by ID). Should return all orders.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( $user_id_1, $user_id_2 ),
+			)
+		);
+		$this->assertEquals( 3, $query->found_orders );
+
+		// Search for user 1 (by e-mail) and user 2 (by ID). Should return all orders.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( $user_email_1, $user_id_2 ),
+			)
+		);
+		$this->assertEquals( 3, $query->found_orders );
+
+		// Search for orders that match user 1 (email and ID). Should return order 1.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( array( $user_email_1, $user_id_1 ) ),
+			)
+		);
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertContains( $order1->get_id(), $query->orders );
+
+		// Search for orders that match user 1 (email) and user 2 (ID). Should return no order.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( array( $user_email_1, $user_id_2 ) ),
+			)
+		);
+		$this->assertEquals( 0, $query->found_orders );
+
 	}
 
 	/**
