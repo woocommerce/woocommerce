@@ -83,7 +83,7 @@ jobs:
                   # UPDATE_WC: 1
                   # DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
-                  pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
+                   pnpx playwright test --config=e2e/playwright.config.js /smoke-tests/update-woocommerce.js
                   # pnpm exec wc-e2e test:e2e
 
             - name: Run API smoke tests
