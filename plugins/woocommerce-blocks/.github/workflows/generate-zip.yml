@@ -50,7 +50,7 @@ jobs:
       - name: Add release ZIP URL as comment to the PR
         uses: mshick/add-pr-comment@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_FOR_ACTIONS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           message: |
             The release ZIP for this PR is accessible via:
@@ -61,4 +61,3 @@ jobs:
 
       - name: Delete ZIP file
         run: rm -rf wc-blocks-pr-release__temp
-        
