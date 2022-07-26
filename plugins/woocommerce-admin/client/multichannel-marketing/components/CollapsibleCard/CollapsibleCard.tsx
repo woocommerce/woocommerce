@@ -5,6 +5,7 @@ import { useState } from '@wordpress/element';
 import {
 	Card,
 	CardBody,
+	CardDivider,
 	CardHeader,
 	CardFooter,
 	Button,
@@ -18,8 +19,8 @@ import './CollapsibleCard.scss';
 
 export type CollapsibleCardProps = {
 	header: string;
-	children: string | JSX.Element;
-	footer?: string | JSX.Element;
+	children: React.ReactNode;
+	footer?: React.ReactNode;
 };
 
 const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
@@ -52,4 +53,4 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 	);
 };
 
-export { CollapsibleCard, CardBody };
+export { CollapsibleCard, CardBody, CardDivider };
