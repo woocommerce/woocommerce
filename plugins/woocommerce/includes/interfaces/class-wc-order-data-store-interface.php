@@ -20,7 +20,7 @@ interface WC_Order_Data_Store_Interface {
 	 * @param WC_Order $order Order object.
 	 * @return float
 	 */
-	public function get_total_refunded( $order );
+	public function get_total_refunded( $order ) : float;
 
 	/**
 	 * Get the total tax refunded.
