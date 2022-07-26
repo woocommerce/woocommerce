@@ -174,6 +174,10 @@ class Events {
 	 * @param Note $note_from_db The note object from the database.
 	 */
 	public function get_note_from_db( $note_from_db ) {
+		if ( get_user_locale() === $note_from_db->get_locale() ) {
+			return;
+		}
+
 		$note_classes = array_merge( self::$note_classes_to_added_or_updated, self::$other_note_classes );
 		foreach ( $note_classes as $note_class ) {
 			if ( defined( "$note_class::NOTE_NAME" ) && $note_class::NOTE_NAME === $note_from_db->get_name() ) {

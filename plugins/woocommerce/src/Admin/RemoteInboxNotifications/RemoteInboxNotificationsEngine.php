@@ -190,8 +190,11 @@ class RemoteInboxNotificationsEngine {
 	 * @return Note The note.
 	 */
 	public static function get_note_from_db( $note_from_db ) {
-		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
+		if ( get_user_locale() === $note_from_db->get_locale() ) {
+			return;
+		}
 
+		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
 		if ( false === $specs || 0 === count( $specs ) ) {
 			return $note_from_db;
 		}
@@ -207,11 +210,9 @@ class RemoteInboxNotificationsEngine {
 				break;
 			}
 
-			$note = clone $note_from_db;
-			$note->set_title( $locale->title );
-			$note->set_content( $locale->content );
-			$note->set_actions( SpecRunner::get_actions( $spec ) );
-			return $note;
+			$note_from_db->set_title( $locale->title );
+			$note_from_db->set_content( $locale->content );
+			$note_from_db->set_actions( SpecRunner::get_actions( $spec ) );
 		}
 
 		return $note_from_db;
