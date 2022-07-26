@@ -4,5 +4,12 @@
 		font-weight: 400;
 		line-height: 28px;
 		letter-spacing: 0;
+
+		.components-button {
+			min-width: 0;
+			width: 24px;
+			height: 24px;
+			padding: 0;
+		}
 	}
 }
