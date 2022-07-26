@@ -149,7 +149,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		global $wpdb;
 
 		$orders_table                = $wpdb->prefix . 'wc_orders';
-		$order_post_types            = wc_get_order_types();
+		$order_post_types            = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
@@ -223,7 +223,7 @@ SELECT(
 		}
 
 		$orders_table                 = $wpdb->prefix . 'wc_orders';
-		$order_post_types             = wc_get_order_types();
+		$order_post_types             = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholders = implode( ',', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		switch ( $type ) {
