@@ -16,7 +16,7 @@
 		"automattic/jetpack-autoloader": "^2.9.1"
 	},
 	"require-dev": {
-		"wp-phpunit/wp-phpunit": "^5.4",
+		"wp-phpunit/wp-phpunit": "^6.0",
 		"woocommerce/woocommerce-sniffs": "0.1.0",
 		"yoast/phpunit-polyfills": "^1.0",
 		"johnbillion/wp-hooks-generator": "^0.7.0",
