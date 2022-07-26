@@ -20,7 +20,7 @@ final class OrderUtil {
 	 * @return string
 	 */
 	public static function get_order_admin_screen() : string {
-		return self::is_cot_enabled()
+		return self::custom_orders_table_usage_is_enabled()
 			? wc_get_page_screen_id( 'shop-order' )
 			: 'shop_order';
 	}
@@ -30,7 +30,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function is_cot_enabled() : bool {
+	public static function custom_orders_table_usage_is_enabled() : bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
 	}
 
