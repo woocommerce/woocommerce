@@ -5,6 +5,9 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
+/**
+ * Test task fixture.
+ */
 require_once __DIR__ . '/test-task.php';
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
