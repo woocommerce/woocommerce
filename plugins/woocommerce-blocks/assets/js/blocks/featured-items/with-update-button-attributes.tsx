@@ -48,14 +48,14 @@ export const withUpdateButtonAttributes =
 			( item as WP_REST_API_Category )?.link ||
 			( item as ProductResponseItem )?.permalink;
 
-		const Block = useSelect( ( select ) => {
+		const block = useSelect( ( select ) => {
 			return select( 'core/block-editor' ).getBlock( clientId );
 		} );
-		const InnerButton = Block?.innerBlocks[ 0 ];
-		const buttonBlockId = InnerButton?.clientId || '';
+		const innerBlock = block?.innerBlocks[ 0 ]?.innerBlocks[ 0 ];
+		const buttonBlockId = innerBlock?.clientId || '';
 		const currentButtonAttributes = useMemo(
-			() => InnerButton?.attributes || {},
-			[ InnerButton ]
+			() => innerBlock?.attributes || {},
+			[ innerBlock ]
 		);
 		const { url } = currentButtonAttributes;
 
