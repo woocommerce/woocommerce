@@ -1,5 +1,5 @@
 const { devices } = require( '@playwright/test' );
-const { BASE_URL } = process.env;
+const { CI, BASE_URL } = process.env;
 
 const config = {
 	timeout: 90 * 1000,
@@ -8,7 +8,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: process.env.CI ? 4 : 2,
+	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
@@ -16,7 +16,7 @@ const config = {
 			'html',
 			{
 				outputFolder: 'output',
-				open: process.env.CI ? 'never' : 'always',
+				open: CI ? 'never' : 'always',
 			},
 		],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
