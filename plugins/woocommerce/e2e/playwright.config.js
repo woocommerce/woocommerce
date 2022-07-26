@@ -8,6 +8,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
+	testIgnore: '**/smoke-tests',
 	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
