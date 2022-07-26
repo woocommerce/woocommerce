@@ -6,6 +6,8 @@
  * @version 2.3.0
  */
 
+ // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+
 use Automattic\Jetpack\Constants;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,30 +57,39 @@ class WC_Frontend_Scripts {
 	public static function get_styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		return apply_filters(
-			'woocommerce_enqueue_styles',
-			array(
-				'woocommerce-layout'      => array(
-					'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
-					'deps'    => '',
-					'version' => $version,
-					'media'   => 'all',
-					'has_rtl' => true,
-				),
-				'woocommerce-smallscreen' => array(
-					'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
-					'deps'    => 'woocommerce-layout',
-					'version' => $version,
-					'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
-					'has_rtl' => true,
-				),
-				'woocommerce-general'     => array(
-					'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
-					'deps'    => '',
-					'version' => $version,
-					'media'   => 'all',
-					'has_rtl' => true,
-				),
+		return array_filter(
+			apply_filters(
+				'woocommerce_enqueue_styles',
+				array(
+					'woocommerce-layout'      => array(
+						'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
+						'deps'    => '',
+						'version' => $version,
+						'media'   => 'all',
+						'has_rtl' => true,
+					),
+					'woocommerce-smallscreen' => array(
+						'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
+						'deps'    => 'woocommerce-layout',
+						'version' => $version,
+						'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
+						'has_rtl' => true,
+					),
+					'woocommerce-general'     => array(
+						'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
+						'deps'    => '',
+						'version' => $version,
+						'media'   => 'all',
+						'has_rtl' => true,
+					),
+					'woocommerce-blocktheme'  => wc_current_theme_is_fse_theme() ? array(
+						'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
+						'deps'    => '',
+						'version' => $version,
+						'media'   => 'all',
+						'has_rtl' => true,
+					) : false,
+				)
 			)
 		);
 	}
@@ -476,8 +487,8 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-geolocation':
 				$params = array(
-					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'home_url'     => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
+					'wc_ajax_url' => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+					'home_url'    => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
 				);
 				break;
 			case 'wc-single-product':

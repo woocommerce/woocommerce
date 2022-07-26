@@ -35,7 +35,7 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: ./.github/actions/cache-deps
         with:
@@ -57,6 +57,8 @@ jobs:
 
       - name: Install and Build
         uses: ./.github/actions/install-build
+        with:
+          composer_no_dev: 0
 
       - name: Build Admin feature config
         run: |

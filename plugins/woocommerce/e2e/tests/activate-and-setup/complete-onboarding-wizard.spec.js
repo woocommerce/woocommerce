@@ -7,7 +7,7 @@ const adminEmail =
 		: ADMIN_USER_EMAIL ?? 'admin@woocommercecoree2etestsuite.com';
 
 test.describe( 'Store owner can complete onboarding wizard', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
 		// These tests all take place with a US store
@@ -163,7 +163,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 test.describe(
 	'A Malta store can complete the selective bundle install but does not include WCPay.',
 	() => {
-		test.use( { storageState: 'e2e/storage/adminState.json' } );
+		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeEach( async ( { page } ) => {
 			// These tests all take place with a store based in Japan
@@ -273,7 +273,7 @@ test.describe(
 );
 
 test.describe( 'Store owner can go through setup Task List', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(

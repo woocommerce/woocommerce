@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const guestEmail = 'checkout-guest@example.com';
-const customerEmail = 'checkout-customer@example.com';
+const customerEmail = 'customer@woocommercecoree2etestsuite.com';
 
 test.describe( 'Checkout page', () => {
 	const singleProductPrice = '9.99';

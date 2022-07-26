@@ -11,6 +11,7 @@ import { Reducer, AnyAction } from 'redux';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
+import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
 import { WPDataSelectors } from '../types';
 export * from './types';
@@ -21,6 +22,7 @@ registerStore< State >( STORE_NAME, {
 	actions,
 	controls,
 	selectors,
+	resolvers,
 } );
 
 export const IMPORT_STORE_NAME = STORE_NAME;

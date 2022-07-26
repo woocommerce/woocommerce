@@ -6,6 +6,7 @@ import { createSelectors } from '../selectors';
 const selectors = createSelectors( {
 	resourceName: 'Product',
 	pluralResourceName: 'Products',
+	namespace: '',
 } );
 
 describe( 'crud selectors', () => {

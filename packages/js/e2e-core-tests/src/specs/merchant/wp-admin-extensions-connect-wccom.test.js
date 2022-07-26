@@ -41,4 +41,5 @@ const runInitiateWccomConnectionTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runInitiateWccomConnectionTest;

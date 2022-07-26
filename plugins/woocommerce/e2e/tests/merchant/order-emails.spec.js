@@ -3,7 +3,7 @@ const { ADMIN_USER_EMAIL } = process.env;
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	const customerBilling = {
 		email: 'john.doe.merchant.test@example.com',

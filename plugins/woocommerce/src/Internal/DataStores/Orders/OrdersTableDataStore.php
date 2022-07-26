@@ -632,7 +632,44 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		$order->read_meta_data();
+		$this->set_order_props_from_data( $order, $order_data );
+		$order->set_object_read( true );
+	}
 
+	/**
+	 * Reads multiple orders from custom tables in one pass.
+	 *
+	 * @since 6.9.0
+	 * @param array[\WC_Order] $orders Order objects.
+	 * @throws \Exception If passed an invalid order.
+	 */
+	public function read_multiple( &$orders ) {
+		$order_ids = array_keys( $orders );
+		$data      = $this->get_order_data_for_ids( $order_ids );
+
+		if ( count( $data ) !== count( $order_ids ) ) {
+			throw new \Exception( __( 'Invalid order IDs in call to read_multiple()', 'woocommerce' ) );
+		}
+
+		foreach ( $data as $order_data ) {
+			$order_id = absint( $order_data->id );
+			$order    = $orders[ $order_id ];
+
+			$order->set_defaults();
+			$order->set_id( $order_id );
+			$order->read_meta_data();
+			$this->set_order_props_from_data( $order, $order_data );
+			$order->set_object_read( true );
+		}
+	}
+
+	/**
+	 * Sets order properties based on a row from the database.
+	 *
+	 * @param \WC_Order $order      The order object.
+	 * @param object    $order_data A row of order data from the database.
+	 */
+	private function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) ) {
@@ -646,8 +683,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				}
 			}
 		}
-
-		$order->set_object_read( true );
 	}
 
 	/**
@@ -671,6 +706,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return array|object|null DB Order objects or error.
 	 */
 	private function get_order_data_for_ids( $ids ) {
+		if ( ! $ids ) {
+			return array();
+		}
+
 		global $wpdb;
 		$order_table_query = $this->get_order_table_select_statement();
 		$id_placeholder    = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
@@ -990,6 +1029,11 @@ LEFT JOIN {$operational_data_clauses['join']}
 				continue;
 			}
 
+			// 'status' is a little special (for backwards compat.).
+			if ( 'status' === $column ) {
+				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] );
+			}
+
 			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );
 			$row_format[ $column ] = $this->database_util->get_wpdb_format_for_type( $details['type'] );
 		}
@@ -1016,7 +1060,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @return void
 	 */
 	public function delete( &$order, $args = array() ) {
-		$order_id  = $order->get_id();
+		$order_id = $order->get_id();
 
 		if ( ! $order_id ) {
 			return;
@@ -1233,7 +1277,51 @@ LEFT JOIN {$operational_data_clauses['join']}
 	}
 
 	public function query( $query_vars ) {
-		return array();
+		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
+			$query_vars['no_found_rows'] = true;
+		}
+
+		if ( isset( $query_vars['anonymized'] ) ) {
+			$query_vars['meta_query'] = $query_vars['meta_query'] ?? array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+
+			if ( $query_vars['anonymized'] ) {
+				$query_vars['meta_query'][] = array(
+					'key'   => '_anonymized',
+					'value' => 'yes',
+				);
+			} else {
+				$query_vars['meta_query'][] = array(
+					'key'     => '_anonymized',
+					'compare' => 'NOT EXISTS',
+				);
+			}
+		}
+
+		try {
+			$query = new OrdersTableQuery( $query_vars );
+		} catch ( \Exception $e ) {
+			$query = (object) array(
+				'orders'        => array(),
+				'found_orders'  => 0,
+				'max_num_pages' => 0,
+			);
+		}
+
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			$orders = $query->orders;
+		} else {
+			$orders = WC()->order_factory->get_orders( $query->orders );
+		}
+
+		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+			return (object) array(
+				'orders'        => $orders,
+				'total'         => $query->found_orders,
+				'max_num_pages' => $query->max_num_pages,
+			);
+		}
+
+		return $orders;
 	}
 
 	public function get_order_item_type( $order, $order_item_id ) {

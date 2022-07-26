@@ -2,17 +2,25 @@ const { devices } = require( '@playwright/test' );
 const { BASE_URL } = process.env;
 
 const config = {
-	timeout: 60 * 1000,
+	timeout: 90 * 1000,
+	expect: { timeout: 20 * 1000 },
 	outputDir: './report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: 2,
+	retries: process.env.CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
-		[ 'html', { outputFolder: 'output' } ],
+		[
+			'html',
+			{
+				outputFolder: 'output',
+				open: process.env.CI ? 'never' : 'always',
+			},
+		],
 		[ 'allure-playwright', { outputFolder: 'e2e/allure-results' } ],
+		[ 'json', { outputFile: 'e2e/test-results.json' } ],
 	],
 	use: {
 		screenshot: 'only-on-failure',
@@ -20,6 +28,7 @@ const config = {
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		baseURL: BASE_URL ?? 'http://localhost:8086',
+		stateDir: 'e2e/storage/',
 	},
 	projects: [
 		{
