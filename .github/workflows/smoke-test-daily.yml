@@ -4,15 +4,13 @@ on:
         - cron: '25 3 * * *'
     workflow_dispatch:
 
-env:
-    E2E_PLAYWRIGHT: true
-
 jobs:
     login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
+            E2E_PLAYWRIGHT: true
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
