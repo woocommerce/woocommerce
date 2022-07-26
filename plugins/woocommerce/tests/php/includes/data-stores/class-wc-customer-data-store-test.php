@@ -2,11 +2,20 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
  * Class WC_Customer_Data_Store_CPT_Test.
  */
 class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Runs before each test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		OrderHelper::create_order_custom_table_if_not_exist();
+	}
 
 	/**
 	 * Test that metadata cannot overwrite customer's column data.
@@ -64,29 +73,30 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_get_last_customer_order_using_cot() {
 		global $wpdb;
 
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$customer_1       = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+		$customer_2       = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+		$last_valid_order = WC_Helper_Order::create_order( $customer_1->get_id() );
 
-		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
-		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
 		$sql =
 			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
 			( id, customer_id, status )
 			VALUES
-			( 1, %d, 'wc-completed' ), ( 2, %d, 'wc-completed' ), ( 3, %d, 'wc-invalid-status' ),
+			( 1, %d, 'wc-completed' ), ( %d, %d, 'wc-completed' ), ( 3, %d, 'wc-invalid-status' ),
 			( 4, %d, 'wc-completed' ), ( 5, %d, 'wc-completed' )";
 
 		$customer_1_id = $customer_1->get_id();
 		$customer_2_id = $customer_2->get_id();
 		//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$query = $wpdb->prepare( $sql, $customer_1_id, $customer_1_id, $customer_1_id, $customer_2_id, $customer_2_id );
+		$query = $wpdb->prepare( $sql, $customer_1_id, $last_valid_order->get_id(), $customer_1_id, $customer_1_id, $customer_2_id, $customer_2_id );
 		$wpdb->query( $query );
 		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$sut          = new WC_Customer_Data_Store();
 		$actual_order = $sut->get_last_order( $customer_1 );
 
-		$this->assertEquals( 2, $actual_order->get_id() );
+		$this->assertEquals( $last_valid_order->get_id(), $actual_order->get_id() );
 	}
 
 	/**
