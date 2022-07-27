@@ -57,7 +57,7 @@ jobs:
             ```
             https://wcblocks.wpcomstaging.com/wp-content/uploads/woocommerce-gutenberg-products-block-${{ github.event.pull_request.number }}.zip
             ```
-          allow-repeats: true
+          allow-repeats: false
 
       - name: Delete ZIP file
         run: rm -rf wc-blocks-pr-release__temp
