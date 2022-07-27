@@ -120,6 +120,10 @@ abstract class DataSourcePoller {
 	 * @return bool Whether any specs were read.
 	 */
 	public function read_specs_from_data_sources() {
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking' ) ) {
+			return false;
+		}
+
 		$specs        = array();
 		$data_sources = apply_filters( self::FILTER_NAME, $this->data_sources, $this->id );
 
