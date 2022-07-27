@@ -1,8 +1,8 @@
 const { devices } = require( '@playwright/test' );
-const { CI, BASE_URL } = process.env;
+const { CI, BASE_URL, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 const config = {
-	timeout: 90 * 1000,
+	timeout: DEFAULT_TIMEOUT_OVERRIDE ?? 90 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: './report',
 	globalSetup: require.resolve( './global-setup' ),
