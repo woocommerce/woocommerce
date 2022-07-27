@@ -31,8 +31,8 @@
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
 		"prepack": "pnpm run build",
-		"build": "../../../bin/run-turbo.sh turbo:build",
-		"lint": "../../../bin/run-turbo.sh turbo:lint",
+		"build": "./node_modules/.bin/run-turbo turbo:build",
+		"lint": "./node_modules/.bin/run-turbo turbo:lint",
 		"turbo:build": "pnpm run clean && npm run compile",
 		"turbo:lint": "eslint src",
 		"lint:fix": "eslint src --fix",
@@ -52,6 +52,7 @@
 		"axios-mock-adapter": "^1.20.0",
 		"eslint": "^8.2.0",
 		"jest": "^25",
+		"run-turbo": "workspace:*",
 		"ts-jest": "^25",
 		"typescript": "^4.4.4"
 	},

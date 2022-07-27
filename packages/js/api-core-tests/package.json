@@ -8,8 +8,8 @@
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
-		"e2e": "../../../bin/run-turbo.sh turbo:e2e",
-		"lint": "../../../bin/run-turbo.sh turbo:lint",
+		"e2e": "./node_modules/.bin/run-turbo turbo:e2e",
+		"lint": "./node_modules/.bin/run-turbo turbo:lint",
 		"turbo:e2e": "jest",
 		"turbo:lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
 		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
@@ -33,6 +33,7 @@
 		"supertest": "^6.1.4"
 	},
 	"devDependencies": {
+		"run-turbo": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0"
 	},

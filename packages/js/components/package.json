@@ -79,6 +79,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
 		"@babel/runtime": "^7.17.2",
+		"run-turbo": "workspace:*",
 		"@storybook/addon-actions": "^6.4.0",
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/addon-controls": "^6.4.19",
@@ -116,9 +117,9 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "../../../bin/run-turbo.sh turbo:build",
-		"lint": "../../../bin/run-turbo.sh turbo:lint",
-		"test": "../../../bin/run-turbo.sh turbo:test",
+		"build": "./node_modules/.bin/run-turbo turbo:build",
+		"lint": "./node_modules/.bin/run-turbo turbo:lint",
+		"test": "./node_modules/.bin/run-turbo turbo:test",
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
 		"turbo:lint": "eslint src --ext=js,ts,tsx",
 		"turbo:test": "jest --config ./jest.config.json",

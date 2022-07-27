@@ -38,6 +38,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"run-turbo": "workspace:*",
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
@@ -52,8 +53,8 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "../../../bin/run-turbo.sh turbo:build",
-		"lint": "../../../bin/run-turbo.sh turbo:lint",
+		"build": "./node_modules/.bin/run-turbo turbo:build",
+		"lint": "./node_modules/.bin/run-turbo turbo:lint",
 		"turbo:build": "tsc --build",
 		"turbo:lint": "eslint src",
 		"start": "tsc --build --watch",
