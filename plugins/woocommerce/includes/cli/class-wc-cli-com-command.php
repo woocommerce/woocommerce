@@ -106,7 +106,8 @@ class WC_CLI_COM_Command {
 			return;
 		}
 
-		$password = self::ask( 'Insert your connection password:' );
+		// @todo add URL to application password section
+		$password = self::ask( 'Connection password:' );
 		$password = sanitize_text_field( $password );
 		if ( empty( $password ) ) {
 			WP_CLI::error( 'Invalid password.' );
