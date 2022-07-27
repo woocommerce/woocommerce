@@ -809,26 +809,7 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
-		WC_Helper_Options::update(
-			'auth',
-			array(
-				'access_token'        => $access_token['access_token'],
-				'access_token_secret' => $access_token['access_token_secret'],
-				'site_id'             => $access_token['site_id'],
-				'user_id'             => get_current_user_id(),
-				'updated'             => time(),
-			)
-		);
-
-		// Obtain the connected user info.
-		if ( ! self::_flush_authentication_cache() ) {
-			self::log( 'Could not obtain connected user info in _helper_auth_return' );
-			WC_Helper_Options::update( 'auth', array() );
-			wp_die( 'Something went wrong.' );
-		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'] );
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
@@ -1696,6 +1677,36 @@ class WC_Helper {
 
 		// If `access_token` is empty, there's no active connection.
 		return ! empty( $auth['access_token'] );
+	}
+
+	/**
+	 * @param string $access_token
+	 * @param string $access_token_secret
+	 * @param int $site_id
+	 *
+	 * @return void
+	 */
+	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id ): void {
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => $access_token,
+				'access_token_secret' => $access_token_secret,
+				'site_id'             => $site_id,
+				'user_id'             => get_current_user_id(),
+				'updated'             => time(),
+			)
+		);
+
+		// Obtain the connected user info.
+		if ( ! self::_flush_authentication_cache() ) {
+			self::log( 'Could not obtain connected user info in _helper_auth_return.' );
+			WC_Helper_Options::update( 'auth', array() );
+			wp_die( 'Something went wrong. Could not obtain connected user info in _helper_auth_return.' );
+		}
+
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
 	}
 }
 
