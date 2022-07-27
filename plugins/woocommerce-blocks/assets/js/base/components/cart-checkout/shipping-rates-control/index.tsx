@@ -65,7 +65,9 @@ const Packages = ( {
 					packageData={ packageData }
 					collapsible={ collapsible }
 					collapse={ collapse }
-					showItems={ showItems }
+					showItems={
+						showItems || packageData?.shipping_rates?.length > 1
+					}
 					noResultsMessage={ noResultsMessage }
 					renderOption={ renderOption }
 				/>
