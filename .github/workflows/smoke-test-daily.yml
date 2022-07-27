@@ -170,6 +170,7 @@ jobs:
 
     build:
         name: Build zip for PR
+        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
@@ -202,6 +203,7 @@ jobs:
 
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
+        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         needs: [build]
         strategy:
@@ -277,7 +279,7 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: false
+        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         needs: [login-run, build, test-plugins]
         env:
