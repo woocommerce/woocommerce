@@ -3,7 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
-import { Spinner } from '@woocommerce/components';
+import { Spinner } from '@wordpress/components';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
