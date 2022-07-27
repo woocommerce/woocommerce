@@ -32,7 +32,7 @@ type ProductCategory = {
 	count: number;
 };
 
-type Query = BaseQueryParams< keyof ProductCategory > & {
+type Query = Partial< BaseQueryParams< keyof ProductCategory > > & {
 	hide_empty?: boolean;
 	slug?: string;
 	product?: number;
