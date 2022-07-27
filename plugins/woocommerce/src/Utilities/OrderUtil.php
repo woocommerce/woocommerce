@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
-use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use WC_Order;
 use WP_Post;
@@ -23,7 +22,7 @@ final class OrderUtil {
 	 * @return string
 	 */
 	public static function get_order_admin_screen() : string {
-		return wc_get_container()->get( PageController::class )->get_order_admin_screen();
+		return wc_get_container()->get( self::class )->get_order_admin_screen_from_instance();
 	}
 
 	/**
