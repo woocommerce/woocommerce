@@ -1680,7 +1680,9 @@ class WC_Helper {
 	}
 
 	/**
-	 * @param string $password
+	 * Allows to connect with WCCOM using application password. used it to connect via CLI
+	 *
+	 * @param string $password The application password
 	 *
 	 * @return void|WP_Error
 	 */
@@ -1719,9 +1721,11 @@ class WC_Helper {
 	}
 
 	/**
-	 * @param string $access_token
-	 * @param string $access_token_secret
-	 * @param int $site_id
+	 * Updates auth options and flushes cache
+	 *
+	 * @param string $access_token The access token.
+	 * @param string $access_token_secret The secret access token.
+	 * @param int $site_id The site id returned by the API.
 	 *
 	 * @return void
 	 */

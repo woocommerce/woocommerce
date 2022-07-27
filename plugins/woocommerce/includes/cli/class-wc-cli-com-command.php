@@ -126,14 +126,16 @@ class WC_CLI_COM_Command {
 	/**
 	 * We are asking a question and returning an answer as a string.
 	 *
-	 * @param $question
+	 * @param  string $question The question being prompt
 	 *
 	 * @return string
 	 */
 	protected static function ask( $question ) {
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 		// Adding space to question and showing it.
 		fwrite( STDOUT, $question . ' ' );
 
 		return trim( fgets( STDIN ) );
+		// phpcs:enable
 	}
 }
