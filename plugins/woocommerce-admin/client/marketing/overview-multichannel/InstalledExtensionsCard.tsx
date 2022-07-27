@@ -23,6 +23,10 @@ const InstalledExtensionsCard = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
 		usePlugins();
 
+	if ( installedPlugins.length === 0 ) {
+		return null;
+	}
+
 	const getButton = ( plugin: Plugin ) => {
 		if ( plugin.status === 'installed' ) {
 			return (
