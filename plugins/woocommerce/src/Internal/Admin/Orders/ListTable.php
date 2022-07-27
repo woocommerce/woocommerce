@@ -174,7 +174,7 @@ class ListTable extends WP_List_Table {
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
 		 * table.
 		 *
-		 * @since 6.8.0
+		 * @since 6.9.0
 		 *
 		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
 		 */
