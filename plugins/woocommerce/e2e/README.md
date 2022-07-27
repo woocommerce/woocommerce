@@ -33,7 +33,7 @@ End-to-end tests are powered by Playwright. The test site is spinned up using `w
 
 - `nvm use`
 - `pnpm install`
-- `pnpm -- turbo run build --filter=woocommerce`
+- `pnpm run build --filter=woocommerce`
 - `pnpm env:test --filter=woocommerce`
 
 To run the test again, re-create the environment to start with a fresh state:

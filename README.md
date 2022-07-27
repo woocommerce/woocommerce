@@ -26,7 +26,7 @@ pnpm install
 pnpm run build
 ```
 
-At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm -- turbo run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
+At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
 
 Check out [our development guide](DEVELOPMENT.md) if you would like a more comprehensive look at working in our repository.
 

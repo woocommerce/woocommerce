@@ -8,7 +8,7 @@ Please refer to [the Getting Started section of the `README.md`](README.md#getti
 
 ## Turborepo Commands
 
-Our repository uses [Turborepo](https://turborepo.org) for `build`, `lint`, and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. When using `pnpm -- turbo run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
+Our repository uses [Turborepo](https://turborepo.org) for `build`, `lint`, and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. This is done transparently when running these commands. When using `pnpm run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
 
 ### Plugin, Package, and Tool Filtering
 
@@ -22,25 +22,25 @@ Here are some examples of the ways you can use Turborepo commands:
 
 ```bash
 # Lint and build all plugins, packages, and tools
-pnpm -- turbo run lint build
+pnpm run lint build
 
 # Build WooCommerce Core and all of its dependencies
-pnpm -- turbo run build --filter='woocommerce'
+pnpm run build --filter='woocommerce'
 
 # Lint the @woocommerce/components package
-pnpm -- turbo run lint --filter='@woocommerce/components'
+pnpm run lint --filter='@woocommerce/components'
 
 # Test all of the @woocommerce scoped packages
-pnpm -- turbo run test --filter='@woocommerce/*'
+pnpm run test --filter='@woocommerce/*'
 
 # Build all of the JavaScript packages
-pnpm -- turbo run build --filter='./packages/js/*'
+pnpm run build --filter='./packages/js/*'
 
 # Build everything except WooCommerce Core
-pnpm -- turbo run build --filter='!woocommerce' 
+pnpm run build --filter='!woocommerce' 
 
 # Lint everything that has changed since the last commit
-pnpm -- turbo run build --filter='[HEAD^1]'
+pnpm run build --filter='[HEAD^1]'
 ```
 
 ## Other Commands
