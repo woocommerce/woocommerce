@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Fix default smart shipping not working by moving function check point to the correct place
