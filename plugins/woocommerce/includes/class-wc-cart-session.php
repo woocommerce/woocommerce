@@ -371,7 +371,7 @@ final class WC_Cart_Session {
 			if ( ! $product->is_in_stock() ) {
 				continue;
 			}
-			
+
 			foreach ( $item->get_meta_data() as $meta ) {
 				if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
 					$variations[ $meta->key ] = $meta->value;
