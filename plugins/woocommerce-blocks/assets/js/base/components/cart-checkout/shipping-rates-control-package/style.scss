@@ -1,4 +1,9 @@
 .wc-block-components-shipping-rates-control__package {
+	margin-bottom: $gap-larger;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
 
 	.wc-block-components-panel__button {
 		margin-bottom: 0;
