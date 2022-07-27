@@ -17,9 +17,44 @@ env:
     TIME_OVERRIDE: ${{ inputs.timeOverride }}
 
 jobs:
+  verify-code-freeze:
+    name: "Verify that today is the day of the code freeze"
+    runs-on: ubuntu-20.04
+    outputs:
+      freeze: ${{ steps.check-freeze.outputs.freeze }}
+    steps:
+      - name: "Install PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: "Check whether today is the code freeze day"
+        id: check-freeze
+        shell: php {0}
+        run: |
+          <?php
+          $now = time();
+          if ( getenv( 'TIME_OVERRIDE' ) ) {
+            $now = strtotime( getenv( 'TIME_OVERRIDE' ) );
+          }
+
+          // Code freeze comes 26 days prior to release day.
+          $release_time         = strtotime( '+26 days', $now );
+          $release_day_of_week  = date( 'l', $release_time );
+          $release_day_of_month = (int) date( 'j', $release_time );
+
+          // If 26 days from now isn't the second Tuesday, then it's not code freeze day.
+          if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
+            echo '::set-output name=freeze::1';
+          } else {
+            echo '::set-output name=freeze::0';
+          }
+
   maybe-create-next-milestone-and-release-branch:
     name: "Maybe create next milestone and release branch"
     runs-on: ubuntu-20.04
+    needs: verify-code-freeze
+    if: needs.verify-code-freeze.outputs.freeze == 0
     outputs:
       branch: ${{ steps.freeze.outputs.branch }}
       release_version: ${{ steps.freeze.outputs.release_version }}
