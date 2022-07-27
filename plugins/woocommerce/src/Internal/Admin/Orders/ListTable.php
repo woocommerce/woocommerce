@@ -430,7 +430,7 @@ class ListTable extends WP_List_Table {
 		return array(
 			'order_number' => 'ID',
 			'order_date'   => 'date',
-			'order_total'  => 'total',
+			'order_total'  => 'order_total',
 		);
 	}
 
