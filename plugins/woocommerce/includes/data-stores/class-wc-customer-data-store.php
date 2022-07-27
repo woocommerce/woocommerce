@@ -340,11 +340,20 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
+		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * Filters the id of the last order from a given customer.
+		 *
+		 * @param string @last_order_id The last order id as retrieved from the database.
+		 * @param WC_Customer The customer whose last order id is being retrieved.
+		 * @return string The actual last order id to use.
+		 */
 		$last_order_id = apply_filters(
 			'woocommerce_customer_get_last_order',
 			get_user_meta( $customer->get_id(), '_last_order', true ),
 			$customer
 		);
+		//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( '' === $last_order_id ) {
 			global $wpdb;
@@ -473,7 +482,17 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					AND     meta2.meta_key      = '_order_total'";
 			}
 
-			$sql   = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer );
+			//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/**
+			 * Filters the SQL query used to get the combined total of all the orders from a given customer.
+			 *
+			 * @param string The SQL query to use.
+			 * @param WC_Customer The customer to get the total spent for.
+			 * @return string The actual SQL query to use.
+			 */
+			$sql = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer );
+			//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
 			$spent = $wpdb->get_var( $sql );
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
