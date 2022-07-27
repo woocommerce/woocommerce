@@ -6,6 +6,8 @@
 	"private": true,
 	"main": "Gruntfile.js",
 	"scripts": {
+		"build": "./node_modules/.bin/run-turbo turbo:build",
+		"lint": "./node_modules/.bin/run-turbo turbo:build",
 		"turbo:build": "grunt assets",
 		"turbo:lint": "grunt eslint stylelint --force"
 	},
@@ -29,6 +31,7 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
+		"run-turbo": "workspace:*",
 		"sass": "^1.45.0",
 		"stylelint": "13.8.0"
 	}
