@@ -2,7 +2,7 @@ const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
 const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
-const adminPassword = ADMIN_PASSWORD ?? 'admin';
+const adminPassword = ADMIN_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
 	const { stateDir } = config.projects[ 0 ].use;
