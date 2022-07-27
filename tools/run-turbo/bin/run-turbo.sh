@@ -1,3 +1,4 @@
+#!/bin/bash
 search_up() {
     local look=${PWD%/}
 
