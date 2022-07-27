@@ -66,6 +66,17 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpx playwright install-deps chromium
 
+            - name: Download WooCommerce nightly build zip
+              if: fromJSON(env.E2E_PLAYWRIGHT)
+              id: nightly-zip
+              working-directory: plugins/woocommerce/e2e
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  mkdir plugins
+                  gh release download nightly
+                  echo "::set-output name=PLUGIN_PATH::${{ github.workspace }}/plugins/woocommerce/e2e/plugins/woocommerce-trunk-nightly.zip"
+
             - name: Run Playwright E2E smoke test.
               if: fromJSON(E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
@@ -74,15 +85,14 @@ jobs:
                   ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+                  UPDATE_WC: 1
+                  PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
                   # SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
                   # SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-                  # E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
-                  # E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
-                  # UPDATE_WC: 1
                   # DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
-                   pnpx playwright test --config=e2e/playwright.config.js e2e/tests/smoke-tests/update-woocommerce.spec.js
-                  # pnpm exec wc-e2e test:e2e
+                  pnpx playwright test --config=e2e/playwright.config.js e2e/tests/smoke-tests/update-woocommerce.spec.js
+              # pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Run API smoke tests
               if: always()
@@ -148,6 +158,12 @@ jobs:
                   P_ID: 274
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
+
+            - name: Delete downloaded WooCommerce nightly zip
+              if: fromJSON(env.E2E_PLAYWRIGHT)
+              env:
+                  PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
+              run: rm -rf $PLUGIN_PATH
 
     build:
         name: Build zip for PR
