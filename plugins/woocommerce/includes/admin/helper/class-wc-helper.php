@@ -1694,7 +1694,13 @@ class WC_Helper {
 		);
 
 		$code = wp_remote_retrieve_response_code( $request );
-		if ( 200 !== $code ) {
+
+		if ( 403 === $code ) {
+			$message = 'Invalid password';
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-invalid-password', $message );
+		} elseif ( 200 !== $code ) {
 			$message = sprintf( 'Call to /connect returned a non-200 response code (%d)', $code );
 			self::log( $message );
 
