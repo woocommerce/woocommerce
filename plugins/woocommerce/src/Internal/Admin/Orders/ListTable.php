@@ -235,6 +235,7 @@ class ListTable extends WP_List_Table {
 		return $view_links;
 	}
 
+	// phpcs:disable Generic.Commenting.Todo.CommentFound
 	/**
 	 * Count orders by status.
 	 *
