@@ -1,0 +1,29 @@
+.woocommerce-marketing-installed-extensions-card {
+	.components-card-body {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+
+		.woocommerce-admin-marketing-product-icon {
+			flex-shrink: 0;
+		}
+
+		.woocommerce-marketing-installed-extensions-card__details {
+			flex-grow: 1;
+
+			&-name {
+				font-size: 14px;
+				font-weight: 600;
+				line-height: 20px;
+				margin-bottom: 4px;
+			}
+
+			&-description {
+				font-size: 13px;
+				font-weight: 400;
+				line-height: 16px;
+				color: $gray-700;
+			}
+		}
+	}
+}

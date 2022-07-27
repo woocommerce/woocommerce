@@ -11,6 +11,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { chevronUp, chevronDown } from '@wordpress/icons';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import './CollapsibleCard.scss';
 
 export type CollapsibleCardProps = {
 	header: string;
+	className: string;
 	children: React.ReactNode;
 	footer?: React.ReactNode;
 };
@@ -27,6 +29,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 	header,
 	footer,
 	children,
+	className,
 } ) => {
 	const [ collapsed, setCollapsed ] = useState( false );
 
@@ -35,7 +38,12 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 	};
 
 	return (
-		<Card className="woocommerce-collapsible-card">
+		<Card
+			className={ classnames(
+				'woocommerce-collapsible-card',
+				className
+			) }
+		>
 			<CardHeader>
 				<div>{ header }</div>
 				<Button
