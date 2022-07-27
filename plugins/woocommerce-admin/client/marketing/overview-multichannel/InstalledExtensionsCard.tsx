@@ -12,8 +12,8 @@ import {
 	CollapsibleCard,
 	CardBody,
 	CardDivider,
-} from './components/CollapsibleCard';
-import { STORE_KEY } from '../marketing/data/constants';
+} from '../components/CollapsibleCard';
+import { STORE_KEY } from '../data/constants';
 
 type Plugin = {
 	slug: string;
