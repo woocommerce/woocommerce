@@ -1,8 +1,11 @@
 const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
-const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
+const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
+	process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
+const customerUsername = CUSTOMER_USER ?? 'customer';
+const customerPassword = CUSTOMER_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
 	const { stateDir } = config.projects[ 0 ].use;
@@ -122,8 +125,8 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `${ baseURL }/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', 'customer' );
-			await customerPage.fill( 'input[name="pwd"]', 'password' );
+			await customerPage.fill( 'input[name="log"]', customerUsername );
+			await customerPage.fill( 'input[name="pwd"]', customerPassword );
 			await customerPage.click( 'text=Log In' );
 
 			await customerPage.goto( `${ baseURL }/my-account/` );
