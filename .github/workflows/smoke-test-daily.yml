@@ -72,10 +72,13 @@ jobs:
               working-directory: plugins/woocommerce/e2e
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  PLUGIN_DIR: ${{ ${{ github.workspace }}/plugins/woocommerce/e2e/plugins }}
               run: |
-                  mkdir plugins
+                  mkdir $PLUGIN_DIR
+                  cd $PLUGIN_DIR
                   gh release download nightly
-                  echo "::set-output name=PLUGIN_PATH::${{ github.workspace }}/plugins/woocommerce/e2e/plugins/woocommerce-trunk-nightly.zip"
+                  echo "::set-output name=PLUGIN_DIR::$PLUGIN_DIR"
+                  echo "::set-output name=PLUGIN_PATH::$PLUGIN_DIR/woocommerce-trunk-nightly.zip"
 
             - name: Run Playwright E2E smoke test.
               if: fromJSON(E2E_PLAYWRIGHT)
@@ -162,8 +165,8 @@ jobs:
             - name: Delete downloaded WooCommerce nightly zip
               if: fromJSON(env.E2E_PLAYWRIGHT)
               env:
-                  PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
-              run: rm -rf $PLUGIN_PATH
+                  PLUGIN_DIR: ${{ steps.nightly-zip.outputs.PLUGIN_DIR }}
+              run: rm -rf $PLUGIN_DIR
 
     build:
         name: Build zip for PR
