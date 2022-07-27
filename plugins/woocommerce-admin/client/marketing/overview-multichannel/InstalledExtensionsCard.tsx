@@ -3,7 +3,6 @@
  */
 import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -15,26 +14,14 @@ import {
 	CardBody,
 	CardDivider,
 } from '../components/CollapsibleCard';
-import { STORE_KEY } from '../data/constants';
 import { ProductIcon } from '../components';
-import { Plugin, UsePluginsType } from './types';
+import { Plugin } from './types';
+import { usePlugins } from './usePlugins';
 import './InstalledExtensionsCard.scss';
 
-const usePlugins = (): UsePluginsType => {
-	return useSelect( ( select ) => {
-		const { getInstalledPlugins, getActivatingPlugins } =
-			select( STORE_KEY );
-
-		return {
-			installedPlugins: getInstalledPlugins(),
-			activatingPlugins: getActivatingPlugins(),
-		};
-	}, [] );
-};
-
 const InstalledExtensionsCard = () => {
-	const { installedPlugins, activatingPlugins } = usePlugins();
-	const { activateInstalledPlugin } = useDispatch( STORE_KEY );
+	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
+		usePlugins();
 
 	const getButton = ( plugin: Plugin ) => {
 		if ( plugin.status === 'installed' ) {

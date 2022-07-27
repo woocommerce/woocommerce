@@ -9,8 +9,3 @@ export type Plugin = {
 	settingsUrl?: string;
 	dashboardUrl?: string;
 };
-
-export type UsePluginsType = {
-	installedPlugins: Plugin[];
-	activatingPlugins: string[];
-};
