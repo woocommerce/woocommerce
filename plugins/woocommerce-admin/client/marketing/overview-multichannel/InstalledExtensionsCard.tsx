@@ -5,6 +5,7 @@ import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -43,6 +44,9 @@ const InstalledExtensionsCard = () => {
 					isBusy={ activatingPlugins.includes( plugin.slug ) }
 					disabled={ activatingPlugins.includes( plugin.slug ) }
 					onClick={ () => {
+						recordEvent( 'marketing_installed_activate', {
+							name: plugin.name,
+						} );
 						activateInstalledPlugin( plugin.slug );
 					} }
 				>
@@ -53,7 +57,15 @@ const InstalledExtensionsCard = () => {
 
 		if ( plugin.status === 'activated' ) {
 			return (
-				<Button variant="primary" href={ plugin.settingsUrl }>
+				<Button
+					variant="primary"
+					href={ plugin.settingsUrl }
+					onClick={ () => {
+						recordEvent( 'marketing_installed_finish_setup', {
+							name: plugin.name,
+						} );
+					} }
+				>
 					{ __( 'Finish setup', 'woocommerce' ) }
 				</Button>
 			);
@@ -64,6 +76,12 @@ const InstalledExtensionsCard = () => {
 				<Button
 					variant="secondary"
 					href={ plugin.dashboardUrl || plugin.settingsUrl }
+					onClick={ () => {
+						recordEvent( 'marketing_installed_options', {
+							name: plugin.name,
+							link: 'manage',
+						} );
+					} }
 				>
 					{ __( 'Manage', 'woocommerce' ) }
 				</Button>
