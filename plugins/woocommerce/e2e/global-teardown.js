@@ -6,10 +6,13 @@ module.exports = async ( config ) => {
 	const browser = await chromium.launch();
 	const adminPage = await browser.newPage();
 
+	let consumerTokenCleared = false;
+
 	// Clean up the consumer keys
 	const keysRetries = 5;
 	for ( let i = 0; i < keysRetries; i++ ) {
 		try {
+			console.log( 'Trying to clear consumer token... Try:' + i );
 			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', 'admin' );
 			await adminPage.fill( 'input[name="pwd"]', 'password' );
@@ -18,6 +21,16 @@ module.exports = async ( config ) => {
 				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);
 			await adminPage.dispatchEvent( 'a.submitdelete', 'click' );
-		} catch ( e ) {}
+			console.log( 'Cleared up consumer token successfully.' );
+			consumerTokenCleared = true;
+			break;
+		} catch ( e ) {
+			console.log( 'Failed to clear consumer token. Retrying...' );
+		}
+	}
+
+	if ( ! consumerTokenCleared ) {
+		console.error( 'Could not clear consumer token.' );
+		process.exit( 1 );
 	}
 };
