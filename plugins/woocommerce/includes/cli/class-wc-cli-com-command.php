@@ -21,6 +21,7 @@ class WC_CLI_COM_Command {
 	 */
 	public static function register_commands() {
 		WP_CLI::add_command( 'wc com extension list', array( 'WC_CLI_COM_Command', 'list_extensions' ) );
+		WP_CLI::add_command( 'wc com connect', array( 'WC_CLI_COM_Command', 'connect' ) );
 	}
 
 	/**
@@ -84,5 +85,49 @@ class WC_CLI_COM_Command {
 		);
 
 		$formatter->display_items( $data );
+	}
+
+	/**
+	 * @param  array  $args
+	 * @param  array  $assoc_args
+	 *
+	 * @return void
+	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
+	 */
+	public static function connect( array $args, array $assoc_args ) {
+		if ( WC_Helper::is_site_connected() ) {
+			WP_CLI::error( 'Your store is already connected.' );
+
+			return;
+		}
+
+		$password = self::ask( 'Insert your connection password:' );
+		$password = sanitize_text_field( $password );
+		if ( empty( $password ) ) {
+			WP_CLI::error( 'Invalid password.' );
+		}
+
+		$auth = WC_Helper::connect_with_password( $password );
+		if ( is_wp_error( $auth ) ) {
+			WP_CLI::error( $auth->get_error_message() );
+		}
+
+		if ( WC_Helper::is_site_connected() ) {
+			WP_CLI::success( 'Store connected successfully.' );
+		}
+	}
+
+	/**
+	 * We are asking a question and returning an answer as a string.
+	 *
+	 * @param $question
+	 *
+	 * @return string
+	 */
+	protected static function ask( $question ) {
+		// Adding space to question and showing it.
+		fwrite( STDOUT, $question . ' ' );
+
+		return trim( fgets( STDIN ) );
 	}
 }
