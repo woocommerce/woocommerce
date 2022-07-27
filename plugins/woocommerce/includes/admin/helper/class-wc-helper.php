@@ -1680,6 +1680,39 @@ class WC_Helper {
 	}
 
 	/**
+	 * @param string $password
+	 *
+	 * @return void|WP_Error
+	 */
+	public static function connect_with_password( string $password ) {
+		$request = WC_Helper_API::post(
+			'connect',
+			array(
+				'headers' => array( 'X-API-Key' => $password ),
+				'body'    => wp_json_encode( array( 'home_url' => home_url() ) ),
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $code ) {
+			$message = sprintf( 'Call to /connect returned a non-200 response code (%d)', $code );
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-' . $code, $message );
+		}
+
+		$access_data = json_decode( wp_remote_retrieve_body( $request ) );
+		if ( empty( $access_data['access_token'] ) || empty( $access_data['access_token_secret'] ) ) {
+			$message = sprintf( 'Call to /connect returned an invalid body: %s', wp_remote_retrieve_body( $request ) );
+			self::log( $message );
+
+			return new WP_Error( 'connect-with-password-invalid-response', $message );
+		}
+
+		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'] );
+	}
+
+	/**
 	 * @param string $access_token
 	 * @param string $access_token_secret
 	 * @param int $site_id
