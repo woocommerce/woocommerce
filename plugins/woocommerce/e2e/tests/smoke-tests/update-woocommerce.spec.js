@@ -4,7 +4,7 @@ const { test, expect } = require( '@playwright/test' );
 test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 	// Skip this test group when the UPDATE_WC environment variable wasn't set, for example in PR smoke tests.
 	test.skip(
-		() => ! Boolean( UPDATE_WC ),
+		! Boolean( UPDATE_WC ),
 		'Skipping the WooCommerce plugin upload test.'
 	);
 
