@@ -195,36 +195,14 @@ class ListTable extends WP_List_Table {
 	private function set_order_args() {
 		$sortable  = $this->get_sortable_columns();
 		$field     = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
-		$direction = sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) );
-
-		switch ( $direction ) {
-			case 'asc':
-			case 'desc':
-				$direction = strtoupper( $direction );
-				break;
-
-			default:
-				return;
-		}
+		$direction = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) ) );
 
 		if ( ! in_array( $field, $sortable, true ) ) {
 			return;
 		}
 
-		switch ( $field ) {
-			// @todo Revise and replace once work on https://github.com/woocommerce/woocommerce/issues/33613 completes.
-			//       This approach to sorting by order total works with the legacy data store, but will not work well
-			//       with COT (however, we can do something clean and efficient once query support is added by #33613).
-			case 'total':
-				$this->order_query_args['meta_key'] = '_order_total';
-				$this->order_query_args['orderby']  = 'meta_value_num';
-				break;
-
-			default:
-				$this->order_query_args['orderby'] = $field;
-		}
-
-		$this->order_query_args['order']   = $direction;
+		$this->order_query_args['orderby'] = $field;
+		$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
 	}
 
 	/**
