@@ -4,6 +4,6 @@
 import InstalledExtensionsCard from './InstalledExtensionsCard';
 import '../data';
 
-export const MultichannelMarketing: React.FC = () => {
+export const MarketingOverviewMultichannel: React.FC = () => {
 	return <InstalledExtensionsCard />;
 };

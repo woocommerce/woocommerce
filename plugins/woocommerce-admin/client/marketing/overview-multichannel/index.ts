@@ -4,4 +4,4 @@
  *
  * See: https://reactjs.org/docs/code-splitting.html#named-exports.
  */
-export { MultichannelMarketing as default } from './MultichannelMarketing';
+export { MarketingOverviewMultichannel as default } from './MarketingOverviewMultichannel';
