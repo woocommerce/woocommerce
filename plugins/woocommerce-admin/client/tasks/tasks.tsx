@@ -35,30 +35,6 @@ export type TasksProps = {
 	context?: string;
 };
 
-function getTaskListComponent( taskListId: string ) {
-	switch ( taskListId ) {
-		case 'setup_experiment_1':
-			return TwoColumnTaskList;
-		case 'setup_experiment_2':
-			return SectionedTaskList;
-		default:
-			return TaskList;
-	}
-}
-
-function getTaskListPlaceholderComponent(
-	taskListId: string
-): React.FC< TasksPlaceholderProps > {
-	switch ( taskListId ) {
-		case 'setup_experiment_1':
-			return TwoColumnTaskListPlaceholder;
-		case 'setup_experiment_2':
-			return SectionedTaskListPlaceholder;
-		default:
-			return TasksPlaceholder;
-	}
-}
-
 export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
@@ -123,13 +99,8 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
-	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
-	const TaskListPlaceholderComponent = getTaskListPlaceholderComponent(
-		taskListIds[ 0 ]
-	);
-
 	if ( isResolving ) {
-		return <TaskListPlaceholderComponent query={ query } />;
+		return <TwoColumnTaskListPlaceholder query={ query } />;
 	}
 
 	if ( currentTask ) {
@@ -150,10 +121,9 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
 
-					const TaskListComponent = getTaskListComponent( id );
 					return (
 						<Fragment key={ id }>
-							<TaskListComponent
+							<TwoColumnTaskList
 								isExpandable={ false }
 								query={ query }
 								twoColumns={ false }

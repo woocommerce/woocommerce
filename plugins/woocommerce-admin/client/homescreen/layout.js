@@ -123,11 +123,9 @@ export const Layout = ( {
 	const renderTaskList = () => {
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-				{ activeSetupTaskList &&
-					isDashboardShown &&
-					[ 'setup_experiment_1', 'setup_experiment_2' ].includes(
-						activeSetupTaskList
-					) && <ProgressTitle taskListId={ activeSetupTaskList } /> }
+				{ activeSetupTaskList && isDashboardShown && (
+					<ProgressTitle taskListId={ activeSetupTaskList } />
+				) }
 				<Tasks query={ query } />
 			</Suspense>
 		);
