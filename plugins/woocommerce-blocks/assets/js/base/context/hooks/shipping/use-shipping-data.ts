@@ -9,6 +9,7 @@ import { useEffect, useRef } from '@wordpress/element';
 import { deriveSelectedShippingRates } from '@woocommerce/base-utils';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { isObject } from '@woocommerce/types';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -30,12 +31,19 @@ export const useShippingData = (): ShippingData => {
 		hasCalculatedShipping,
 		isLoadingRates,
 	} = useSelect( ( select ) => {
+		const isEditor = !! select( 'core/editor' );
 		const store = select( storeKey );
 		return {
-			shippingRates: store.getShippingRates(),
-			needsShipping: store.getNeedsShipping(),
-			hasCalculatedShipping: store.getHasCalculatedShipping(),
-			isLoadingRates: store.isCustomerDataUpdating(),
+			shippingRates: isEditor
+				? previewCart.shipping_rates
+				: store.getShippingRates(),
+			needsShipping: isEditor
+				? previewCart.needs_shipping
+				: store.getNeedsShipping(),
+			hasCalculatedShipping: isEditor
+				? previewCart.needs_shipping
+				: store.getHasCalculatedShipping(),
+			isLoadingRates: isEditor ? false : store.isCustomerDataUpdating(),
 		};
 	} );
 	const { isSelectingRate, selectShippingRate } = useSelectShippingRate();
