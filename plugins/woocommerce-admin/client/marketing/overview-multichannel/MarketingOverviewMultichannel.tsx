@@ -3,7 +3,12 @@
  */
 import InstalledExtensionsCard from './InstalledExtensionsCard';
 import '../data';
+import './MarketingOverviewMultichannel.scss';
 
 export const MarketingOverviewMultichannel: React.FC = () => {
-	return <InstalledExtensionsCard />;
+	return (
+		<div className="woocommerce-marketing-overview-multichannel">
+			<InstalledExtensionsCard />
+		</div>
+	);
 };
