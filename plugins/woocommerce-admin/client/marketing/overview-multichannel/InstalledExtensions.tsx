@@ -17,9 +17,9 @@ import {
 import { ProductIcon } from '../components';
 import { Plugin } from './types';
 import { usePlugins } from './usePlugins';
-import './InstalledExtensionsCard.scss';
+import './InstalledExtensions.scss';
 
-const InstalledExtensionsCard = () => {
+const InstalledExtensions = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
 		usePlugins();
 
@@ -112,4 +112,4 @@ const InstalledExtensionsCard = () => {
 	);
 };
 
-export default InstalledExtensionsCard;
+export default InstalledExtensions;
