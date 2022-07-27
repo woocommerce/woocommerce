@@ -164,7 +164,7 @@ class ListTable extends WP_List_Table {
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'all' ) ),
+			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'any' ) ),
 			'type'     => 'shop_order',
 		);
 
