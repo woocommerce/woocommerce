@@ -3,7 +3,7 @@
  */
 import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
 
 /**
@@ -16,8 +16,8 @@ import {
 } from '../components/CollapsibleCard';
 import { STORE_KEY } from '../data/constants';
 import { ProductIcon } from '../components';
-import './InstalledExtensionsCard.scss';
 import { Plugin, UsePluginsType } from './types';
+import './InstalledExtensionsCard.scss';
 
 const usePlugins = (): UsePluginsType => {
 	return useSelect( ( select ) => {
@@ -25,22 +25,25 @@ const usePlugins = (): UsePluginsType => {
 			select( STORE_KEY );
 
 		return {
-			installed: getInstalledPlugins(),
-			activating: getActivatingPlugins(),
+			installedPlugins: getInstalledPlugins(),
+			activatingPlugins: getActivatingPlugins(),
 		};
 	}, [] );
 };
 
 const InstalledExtensionsCard = () => {
-	const { installed } = usePlugins();
+	const { installedPlugins, activatingPlugins } = usePlugins();
+	const { activateInstalledPlugin } = useDispatch( STORE_KEY );
 
 	const getButton = ( plugin: Plugin ) => {
 		if ( plugin.status === 'installed' ) {
 			return (
 				<Button
 					variant="secondary"
+					isBusy={ activatingPlugins.includes( plugin.slug ) }
+					disabled={ activatingPlugins.includes( plugin.slug ) }
 					onClick={ () => {
-						/* TODO */
+						activateInstalledPlugin( plugin.slug );
 					} }
 				>
 					{ __( 'Activate', 'woocommerce' ) }
@@ -75,7 +78,7 @@ const InstalledExtensionsCard = () => {
 			className="woocommerce-marketing-installed-extensions-card"
 			header={ __( 'Installed extensions', 'woocommerce' ) }
 		>
-			{ installed.map( ( el, idx ) => {
+			{ installedPlugins.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
 						<CardBody>
@@ -90,7 +93,9 @@ const InstalledExtensionsCard = () => {
 							</div>
 							{ getButton( el ) }
 						</CardBody>
-						{ idx !== installed.length - 1 && <CardDivider /> }
+						{ idx !== installedPlugins.length - 1 && (
+							<CardDivider />
+						) }
 					</Fragment>
 				);
 			} ) }

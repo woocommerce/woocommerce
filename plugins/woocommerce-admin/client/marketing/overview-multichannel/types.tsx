@@ -11,6 +11,6 @@ export type Plugin = {
 };
 
 export type UsePluginsType = {
-	installed: Plugin[];
-	activating: Plugin[];
+	installedPlugins: Plugin[];
+	activatingPlugins: string[];
 };
