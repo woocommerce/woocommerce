@@ -88,8 +88,13 @@ class WC_CLI_COM_Command {
 	}
 
 	/**
-	 * @param  array  $args
-	 * @param  array  $assoc_args
+	 * ## EXAMPLES
+	 *
+	 *     # Connect to WCCOM using password.
+	 *     $ wp wc com connect
+	 *
+	 * @param array $args Positional arguments to include when calling the command.
+	 * @param array $assoc_args Associative arguments to include when calling the command.
 	 *
 	 * @return void
 	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
