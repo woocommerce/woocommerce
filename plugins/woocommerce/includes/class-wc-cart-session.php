@@ -371,12 +371,9 @@ final class WC_Cart_Session {
 			if ( ! $product->is_in_stock() ) {
 				continue;
 			}
-
+			
 			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->key ) ) {
-					$term                     = get_term_by( 'slug', $meta->value, $meta->key );
-					$variations[ $meta->key ] = $term ? $term->name : $meta->value;
-				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+				if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
 					$variations[ $meta->key ] = $meta->value;
 				}
 			}
