@@ -58,7 +58,7 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="log"]', adminUsername );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
-			await adminPage.waitForLoadState( 'networkidle' );
+
 			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
@@ -135,10 +135,8 @@ module.exports = async ( config ) => {
 				customerPage.locator( 'h1.entry-title' )
 			).toContainText( 'My account' );
 			await expect(
-				customerPage.locator(
-					'div.woocommerce-MyAccount-content > p >> nth=0'
-				)
-			).toContainText( 'Jane Smith' );
+				customerPage.locator( 'div.woocommerce-MyAccount-content' )
+			).toContainText( 'Hello' );
 
 			await customerPage
 				.context()
