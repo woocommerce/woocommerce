@@ -27,7 +27,7 @@ abstract class ObjectCache {
 	/**
 	 * Maximum expiration time value, in seconds, that can be passed to 'set'.
 	 */
-	public const MAX_EXPIRATION = 24 * 60 * 60;
+	public const MAX_EXPIRATION = MONTH_IN_SECONDS;
 
 	/**
 	 * This needs to be set in each derived class.
@@ -42,7 +42,7 @@ abstract class ObjectCache {
 	 *
 	 * @var int
 	 */
-	protected $default_expiration = 3600;
+	protected $default_expiration = HOUR_IN_SECONDS;
 
 	/**
 	 * Temporarily used when retrieving data in 'get'.
@@ -233,13 +233,16 @@ abstract class ObjectCache {
 	 * Retrieve a cached object, and if no object is cached with the given id,
 	 * try to get one via get_from_datastore method or by supplying a callback and then cache it.
 	 *
+	 * If you want to provide a callable but still use the default expiration value,
+	 * pass "ObjectCache::DEFAULT_EXPIRATION" as the second parameter.
+	 *
 	 * @param int|string    $id The id of the object to retrieve.
-	 * @param callable|null $get_from_datastore_callback Optional callback to get the object if it's not cached, it must return an object/array or null.
 	 * @param int           $expiration Expiration of the cached data in seconds from the current time, used if an object is retrieved from datastore and cached.
+	 * @param callable|null $get_from_datastore_callback Optional callback to get the object if it's not cached, it must return an object/array or null.
 	 * @return object|array|null Cached object, or null if it's not cached and can't be retrieved from datastore or via callback.
 	 * @throws CacheException Invalid id parameter.
 	 */
-	public function get( $id, callable $get_from_datastore_callback = null, int $expiration = self::DEFAULT_EXPIRATION ) {
+	public function get( $id, int $expiration = self::DEFAULT_EXPIRATION, callable $get_from_datastore_callback = null ) {
 		if ( ! is_string( $id ) && ! is_int( $id ) ) {
 			throw new CacheException( "Object id must be an int or a string for 'get'", $this );
 		}
