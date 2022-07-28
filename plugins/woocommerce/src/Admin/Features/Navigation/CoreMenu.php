@@ -213,6 +213,10 @@ class CoreMenu {
 			);
 		}
 
+		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
+			$product_items['new']['url'] = 'wc-admin&path=/add-product';
+		}
+
 		return array_merge(
 			array(
 				$home_item,
