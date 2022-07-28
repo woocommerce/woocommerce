@@ -439,5 +439,4 @@ class CustomMetaBox {
 		}
 		wp_die( 0 );
 	}
-
 }

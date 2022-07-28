@@ -102,7 +102,7 @@ class Edit {
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
 		if ( ! isset( $this->custom_meta_box ) ) {
-			$this->custom_meta_box = new CustomMetaBox();
+			$this->custom_meta_box = wc_get_container()->get( CustomMetaBox::class );
 		}
 		$this->save_order_specific_meta_boxes();
 		$this->add_save_meta_boxes();
