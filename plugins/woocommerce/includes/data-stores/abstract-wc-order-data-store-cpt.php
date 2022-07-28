@@ -435,4 +435,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function update_payment_token_ids( $order, $token_ids ) {
 		update_post_meta( $order->get_id(), '_payment_tokens', $token_ids );
 	}
+
+	/**
+	 * Get the order's title.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return string Order title.
+	 */
+	public function get_title( WC_Order $order ) {
+		return get_the_title( $order->get_id() );
+	}
 }
