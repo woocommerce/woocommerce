@@ -95,6 +95,7 @@ jobs:
                   PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
                   DEFAULT_TIMEOUT_OVERRIDE: ${{ 120000 }}
               run: |
+                  ls e2e/tests/smoke-tests
                   pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
 
