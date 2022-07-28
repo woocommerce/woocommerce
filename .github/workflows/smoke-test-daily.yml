@@ -99,7 +99,7 @@ jobs:
               # pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Run API smoke tests
-              if: always()
+              if: false # mytodo revert to always()
               id: run_api_tests
               working-directory: plugins/woocommerce
               env:
@@ -110,12 +110,12 @@ jobs:
               run: pnpm exec wc-api-tests test api
 
             - name: Archive API test report
-              if: |
-                  always() &&
-                  (
-                    steps.run_api_tests.conclusion != 'cancelled' ||
-                    steps.run_api_tests.conclusion != 'skipped'
-                  )
+              if: false # mytodo revert
+                  # always() &&
+                  # (
+                  #   steps.run_api_tests.conclusion != 'cancelled' ||
+                  #   steps.run_api_tests.conclusion != 'skipped'
+                  # )
               uses: actions/upload-artifact@v3
               with:
                   name: api-test-report---daily
@@ -125,7 +125,7 @@ jobs:
                   retention-days: 5
 
             - name: Update performance test site with E2E test
-              if: always()
+              if: false # mytodo revert to always()
               working-directory: plugins/woocommerce
               env:
                   SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
@@ -146,12 +146,12 @@ jobs:
               continue-on-error: true
 
             - name: Install k6
-              if: always()
+              if: false # mytodo revert to always()
               run: |
                   curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
 
             - name: Run k6 smoke tests
-              if: always()
+              if: false # mytodo revert to always()
               env:
                   URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
                   HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
@@ -164,7 +164,7 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
             - name: Delete downloaded WooCommerce nightly zip
-              if: fromJSON(env.E2E_PLAYWRIGHT)
+              if: always() && fromJSON(env.E2E_PLAYWRIGHT)
               env:
                   PLUGIN_DIR: ${{ steps.nightly-zip.outputs.PLUGIN_DIR }}
               run: rm -rf $PLUGIN_DIR
