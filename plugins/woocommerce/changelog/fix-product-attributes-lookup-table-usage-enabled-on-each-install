@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop re-enabling product attributes lookup table usage after each install
