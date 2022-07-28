@@ -1,4 +1,7 @@
 const { chromium } = require( '@playwright/test' );
+const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
+const adminUsername = ADMIN_USER ?? 'admin';
+const adminPassword = ADMIN_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
 	const { baseURL } = config.projects[ 0 ].use;
@@ -14,8 +17,8 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to clear consumer token... Try:' + i );
 			await adminPage.goto( `${ baseURL }/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', 'admin' );
-			await adminPage.fill( 'input[name="pwd"]', 'password' );
+			await adminPage.fill( 'input[name="log"]', adminUsername );
+			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 			await adminPage.goto(
 				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
