@@ -59,12 +59,16 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `${ baseURL }/wp-admin` );
+			await adminPage.goto( `${ baseURL }/wp-admin`, {
+				waitUntil: 'networkidle',
+			} );
 			await adminPage.fill( 'input[name="log"]', adminUsername );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 
-			await adminPage.goto( `${ baseURL }/wp-admin` );
+			await adminPage.goto( `${ baseURL }/wp-admin`, {
+				waitUntil: 'networkidle',
+			} );
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
 			);
