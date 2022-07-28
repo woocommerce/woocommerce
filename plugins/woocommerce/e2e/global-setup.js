@@ -65,10 +65,7 @@ module.exports = async ( config ) => {
 			await adminPage.click( 'text=Log In' );
 
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'Dashboard',
-				{
-					timeout: 90 * 1000,
-				}
+				'Dashboard'
 			);
 			await adminPage
 				.context()
@@ -148,8 +145,10 @@ module.exports = async ( config ) => {
 				customerPage.locator( 'h1.entry-title' )
 			).toContainText( 'My account' );
 			await expect(
-				customerPage.locator( 'div.woocommerce-MyAccount-content' )
-			).toContainText( 'Hello' );
+				customerPage.locator(
+					'div.woocommerce-MyAccount-content > p >> nth=0'
+				)
+			).toContainText( 'Jane Smith' );
 
 			await customerPage
 				.context()
