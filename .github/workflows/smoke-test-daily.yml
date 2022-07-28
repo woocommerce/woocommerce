@@ -28,7 +28,8 @@ jobs:
               with:
                   php-version: '7.4'
 
-            - name: Install dependencies
+            - name: Install dependencies # mytodo re-add Install and Build step
+              if: fromJSON(env.E2E_PLAYWRIGHT)
               env:
                   COMPOSER_NO_DEV: 1
               run: |
