@@ -16,7 +16,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
               with:
-                  ref: trunk
+                  ref: e2e/rep-s3-daily # mytodo revert to trunk
 
             - uses: ./.github/actions/cache-deps
               with:
@@ -62,7 +62,7 @@ jobs:
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
                   pnpm exec wc-e2e test:e2e
 
-            - name: Install Playwright dependencies.
+            - name: Download and install Chromium
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               run: pnpx playwright install chromium
@@ -95,7 +95,6 @@ jobs:
                   PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
                   DEFAULT_TIMEOUT_OVERRIDE: ${{ 120000 }}
               run: |
-                  ls e2e/tests/smoke-tests
                   pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
 
