@@ -31,7 +31,9 @@ jobs:
             - name: Install dependencies
               env:
                   COMPOSER_NO_DEV: 1
-              run: pnpm install
+              run: |
+                  npm install -g pnpm@^6.24.2
+                  pnpm install
 
             - name: Install Jest
               if: fromJSON(env.E2E_PLAYWRIGHT) != true
