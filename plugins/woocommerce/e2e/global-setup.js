@@ -74,6 +74,12 @@ module.exports = async ( config ) => {
 				`Admin log-in failed, Retrying... ${ i }/${ adminRetries }`
 			);
 			console.log( e );
+
+			// mytodo remove this
+			await adminPage.screenshot( {
+				fullPage: true,
+				path: `./tmp/global-setup-screenshots/admin-login-try-${ i }.png`,
+			} );
 		}
 	}
 

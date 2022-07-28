@@ -86,6 +86,11 @@ jobs:
                   echo "::set-output name=PLUGIN_DIR::$PLUGIN_DIR"
                   echo "::set-output name=PLUGIN_PATH::$PLUGIN_DIR/woocommerce-trunk-nightly.zip"
 
+            # mytodo remove this
+            - name: Temporarily make dir for global setup screenshots
+              working-directory: plugins/woocommerce
+              run: mkdir -p e2e/tmp/global-setup-screenshots
+
             - name: Run Playwright E2E smoke test.
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
@@ -102,6 +107,15 @@ jobs:
               run: |
                   pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
+
+            # mytodo remove this
+            - name: Archive global setup screenshots
+              uses: actions/upload-artifact@v3
+              working-directory: plugins/woocommerce
+              with:
+                  name: e2e-global-setup-screenshots
+                  path: ${{ github.workspace }}/plugins/woocommerce/e2e/tmp/global-setup-screenshots
+                  retention-days: 1
 
             - name: Run API smoke tests
               if: false # mytodo revert to always()
