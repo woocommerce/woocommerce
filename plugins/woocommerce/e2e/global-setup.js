@@ -1,7 +1,12 @@
 const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
-const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
-	process.env;
+const {
+	ADMIN_USER,
+	ADMIN_PASSWORD,
+	CUSTOMER_USER,
+	CUSTOMER_PASSWORD,
+	GITHUB_WORKSPACE,
+} = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
 const customerUsername = CUSTOMER_USER ?? 'customer';
@@ -70,16 +75,16 @@ module.exports = async ( config ) => {
 			adminLoggedIn = true;
 			break;
 		} catch ( e ) {
+			// mytodo remove this
+			await adminPage.screenshot( {
+				fullPage: true,
+				path: `${ GITHUB_WORKSPACE }/plugins/woocommerce/e2e/tmp/global-setup-screenshots/admin-login-try-${ i }.png`,
+			} );
+
 			console.log(
 				`Admin log-in failed, Retrying... ${ i }/${ adminRetries }`
 			);
 			console.log( e );
-
-			// mytodo remove this
-			await adminPage.screenshot( {
-				fullPage: true,
-				path: `./tmp/global-setup-screenshots/admin-login-try-${ i }.png`,
-			} );
 		}
 	}
 
