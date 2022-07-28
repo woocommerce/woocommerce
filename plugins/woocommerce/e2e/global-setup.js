@@ -64,9 +64,11 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 
-			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'Dashboard'
+				'Dashboard',
+				{
+					timeout: 90 * 1000,
+				}
 			);
 			await adminPage
 				.context()
