@@ -30,6 +30,12 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 import ProductTemplateModal from './product-template-modal';
 import { getCountryCode } from '../../../dashboard/utils';
 
+const addProductManually = window.wcAdminFeatures[
+	'new-product-management-experience'
+]
+	? 'admin.php?page=wc-admin&path=/add-product'
+	: 'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true';
+
 const getSubTasks = () => [
 	{
 		key: 'addProductTemplate',
@@ -61,9 +67,7 @@ const getSubTasks = () => [
 		after: <Icon icon={ chevronRight } />,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', { method: 'manually' } ),
-		href: getAdminLink(
-			'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
-		),
+		href: getAdminLink( addProductManually ),
 	},
 	{
 		key: 'importProducts',
