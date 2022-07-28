@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix shipping zone fails to create after installing jetpack and wcs
