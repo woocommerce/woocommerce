@@ -25,6 +25,11 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
 import { AddProductPage } from '~/products';
 
+const EditProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "analytics-report" */ '../products/edit-product-page'
+	)
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -80,6 +85,14 @@ export const getPages = () => {
 		navArgs: {
 			id: 'woocommerce-home',
 		},
+		capability: 'manage_woocommerce',
+	} );
+
+	pages.push( {
+		container: EditProductPage,
+		path: '/product-edit',
+		breadcrumbs: [],
+		wpOpenMenu: 'toplevel_page_woocommerce',
 		capability: 'manage_woocommerce',
 	} );
 
