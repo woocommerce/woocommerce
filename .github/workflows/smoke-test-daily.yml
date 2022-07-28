@@ -110,6 +110,7 @@ jobs:
 
             # mytodo remove this
             - name: Archive global setup screenshots
+              if: always()
               uses: actions/upload-artifact@v3
               with:
                   name: e2e-global-setup-screenshots
