@@ -22,6 +22,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
@@ -116,6 +117,7 @@ class Bootstrap {
 		$this->container->get( BlockTypesController::class );
 		$this->container->get( BlockTemplatesController::class );
 		$this->container->get( ProductSearchResultsTemplate::class );
+		$this->container->get( ProductAttributeTemplate::class );
 		$this->container->get( ClassicTemplatesCompatibility::class );
 		if ( $this->package->feature()->is_feature_plugin_build() ) {
 			$this->container->get( PaymentsApi::class );
@@ -247,6 +249,12 @@ class Bootstrap {
 			ProductSearchResultsTemplate::class,
 			function () {
 				return new ProductSearchResultsTemplate();
+			}
+		);
+		$this->container->register(
+			ProductAttributeTemplate::class,
+			function () {
+				return new ProductAttributeTemplate();
 			}
 		);
 		$this->container->register(
