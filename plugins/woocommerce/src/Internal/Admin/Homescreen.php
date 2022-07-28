@@ -7,6 +7,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 
 /**
  * Contains backend logic for the homescreen feature.
@@ -52,7 +53,7 @@ class Homescreen {
 
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) && function_exists( 'get_current_screen' ) ) {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
 			add_filter(
 				'woocommerce_admin_shared_settings',
 				array( $this, 'maybe_set_default_shipping_options_on_home' ),
@@ -73,6 +74,10 @@ class Homescreen {
 	 * @return array
 	 */
 	public function maybe_set_default_shipping_options_on_home( $settings ) {
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return $settings;
+		}
+
 		$current_screen = get_current_screen();
 
 		// Abort if it's not the homescreen.
@@ -125,6 +130,7 @@ class Homescreen {
 			$zone->add_location( $country_code, 'country' );
 			$zone->add_shipping_method( 'free_shipping' );
 			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+			Shipping::delete_zone_count_transient();
 		}
 
 		return $settings;
