@@ -164,6 +164,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix incorrect name in Review Shipping Task tracks event [#34045](https://github.com/woocommerce/woocommerce/pull/34045)
 * Fix - Fix shipping zone fails to create after installing jetpack and wcs [#34074](https://github.com/woocommerce/woocommerce/pull/34074)
 * Fix - Stop re-enabling product attributes lookup table usage after each install [#34072](https://github.com/woocommerce/woocommerce/pull/34072)
 * Fix - Add back missing tracks in add product task [#34070](https://github.com/woocommerce/woocommerce/pull/34070)
