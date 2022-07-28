@@ -7,6 +7,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 
 /**
  * Contains backend logic for the homescreen feature.
@@ -129,6 +130,7 @@ class Homescreen {
 			$zone->add_location( $country_code, 'country' );
 			$zone->add_shipping_method( 'free_shipping' );
 			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+			Shipping::delete_zone_count_transient();
 		}
 
 		return $settings;
