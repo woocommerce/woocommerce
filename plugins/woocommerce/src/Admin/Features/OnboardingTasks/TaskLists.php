@@ -286,7 +286,7 @@ class TaskLists {
 			self::add_list(
 				array(
 					'id'           => 'secret_tasklist',
-					'hidden_id'    => 'secret',
+					'hidden_id'    => 'setup',
 					'tasks'        => array(
 						'ExperimentalShippingRecommendation',
 					),
