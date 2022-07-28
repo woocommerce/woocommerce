@@ -32,6 +32,7 @@ jobs:
               uses: ./.github/actions/install-build
 
             - name: Install Jest
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               run: npm install -g jest
 
             - name: Get latest commit message
