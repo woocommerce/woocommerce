@@ -61,14 +61,6 @@ module.exports = async ( config ) => {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', adminUsername );
-			await expect(
-				adminPage.locator( 'input[name="log"]' )
-			).toHaveValue( adminUsername ); // mytodo remove this
-			// mytodo remove this
-			await adminPage.screenshot( {
-				fullPage: true,
-				path: `${ GITHUB_WORKSPACE }/plugins/woocommerce/e2e/tmp/global-setup-screenshots/after-typing-username-try-${ i }.png`,
-			} );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 
