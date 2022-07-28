@@ -10,34 +10,27 @@ jobs:
         runs-on: ubuntu-20.04
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
-            E2E_PLAYWRIGHT: true
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
             - uses: actions/checkout@v3
               with:
-                  ref: e2e/rep-s3-daily # mytodo revert to trunk
+                  ref: trunk
 
             - uses: ./.github/actions/cache-deps
               with:
-                  workflow_name: smoke-test-daily
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                workflow_name: smoke-test-daily
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: '7.4'
+                php-version: '7.4'
 
-            - name: Install dependencies # mytodo re-add Install and Build step
-              if: fromJSON(env.E2E_PLAYWRIGHT)
-              env:
-                  COMPOSER_NO_DEV: 1
-              run: |
-                  npm install -g pnpm@^6.24.2
-                  pnpm install
+            - name: Install and Build
+              uses: ./.github/actions/install-build
 
             - name: Install Jest
-              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               run: npm install -g jest
 
             - name: Get latest commit message
@@ -46,8 +39,7 @@ jobs:
                   COMMIT_MESSAGE=$(git log --pretty=format:%s -1)
                   echo "::set-output name=commit_message::$COMMIT_MESSAGE"
 
-            - name: Run Puppeteer E2E smoke test.
-              if: fromJSON(env.E2E_PLAYWRIGHT) != true
+            - name: Run E2E smoke test.
               working-directory: plugins/woocommerce
               env:
                   SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -67,58 +59,8 @@ jobs:
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
                   pnpm exec wc-e2e test:e2e
 
-            - name: Download and install Chromium
-              if: fromJSON(env.E2E_PLAYWRIGHT)
-              working-directory: plugins/woocommerce
-              run: pnpx playwright install chromium
-
-            - name: Download WooCommerce nightly build zip
-              if: fromJSON(env.E2E_PLAYWRIGHT)
-              id: nightly-zip
-              working-directory: plugins/woocommerce/e2e
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  PLUGIN_DIR: ${{ github.workspace }}/plugins/woocommerce/e2e/plugins
-              run: |
-                  mkdir $PLUGIN_DIR
-                  cd $PLUGIN_DIR
-                  gh release download nightly
-                  echo "::set-output name=PLUGIN_DIR::$PLUGIN_DIR"
-                  echo "::set-output name=PLUGIN_PATH::$PLUGIN_DIR/woocommerce-trunk-nightly.zip"
-
-            # mytodo remove this
-            - name: Temporarily make dir for global setup screenshots
-              working-directory: plugins/woocommerce
-              run: mkdir -p e2e/tmp/global-setup-screenshots
-
-            - name: Run Playwright E2E smoke test.
-              if: fromJSON(env.E2E_PLAYWRIGHT)
-              working-directory: plugins/woocommerce
-              env:
-                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-                  ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-                  ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-                  ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-                  CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-                  CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-                  UPDATE_WC: true
-                  PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-              run: |
-                  pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
-              # pnpx playwright test --config=e2e/playwright.config.js
-
-            # mytodo remove this
-            - name: Archive global setup screenshots
-              if: always()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: e2e-global-setup-screenshots
-                  path: ${{ github.workspace }}/plugins/woocommerce/e2e/tmp/global-setup-screenshots
-                  retention-days: 1
-
             - name: Run API smoke tests
-              if: false # mytodo revert to always()
+              if: always()
               id: run_api_tests
               working-directory: plugins/woocommerce
               env:
@@ -129,13 +71,12 @@ jobs:
               run: pnpm exec wc-api-tests test api
 
             - name: Archive API test report
-              if:
-                  false # mytodo revert
-                  # always() &&
-                  # (
-                  #   steps.run_api_tests.conclusion != 'cancelled' ||
-                  #   steps.run_api_tests.conclusion != 'skipped'
-                  # )
+              if: |
+                  always() &&
+                  (
+                    steps.run_api_tests.conclusion != 'cancelled' ||
+                    steps.run_api_tests.conclusion != 'skipped'
+                  )
               uses: actions/upload-artifact@v3
               with:
                   name: api-test-report---daily
@@ -145,33 +86,33 @@ jobs:
                   retention-days: 5
 
             - name: Update performance test site with E2E test
-              if: false # mytodo revert to always()
+              if: always()
               working-directory: plugins/woocommerce
               env:
-                  SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
-                  SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
-                  SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-                  SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-                  SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-                  WC_E2E_SCREENSHOTS: 1
-                  E2E_RETEST: 1
-                  E2E_RETRY_TIMES: 0
-                  E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
-                  UPDATE_WC: 1
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
+                SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
+                SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
+                SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
+                SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+                SMOKE_TEST_CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+                SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+                WC_E2E_SCREENSHOTS: 1
+                E2E_RETEST: 1
+                E2E_RETRY_TIMES: 0
+                E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+                E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
+                UPDATE_WC: 1
+                DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
-                  pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
+                pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
               continue-on-error: true
 
             - name: Install k6
-              if: false # mytodo revert to always()
+              if: always()
               run: |
                   curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
 
             - name: Run k6 smoke tests
-              if: false # mytodo revert to always()
+              if: always()
               env:
                   URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
                   HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
@@ -183,48 +124,40 @@ jobs:
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
-            - name: Delete downloaded WooCommerce nightly zip
-              if: always() && fromJSON(env.E2E_PLAYWRIGHT)
-              env:
-                  PLUGIN_DIR: ${{ steps.nightly-zip.outputs.PLUGIN_DIR }}
-              run: rm -rf $PLUGIN_DIR
-
     build:
         name: Build zip for PR
-        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         steps:
-            - uses: actions/checkout@v3
+          - uses: actions/checkout@v3
 
-            - uses: ./.github/actions/cache-deps
-              with:
-                  workflow_name: smoke-test-daily
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+          - uses: ./.github/actions/cache-deps
+            with:
+              workflow_name: smoke-test-daily
+              workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
-            - name: Install PNPM
-              run: npm install -g pnpm@^6.24.2
+          - name: Install PNPM
+            run: npm install -g pnpm@^6.24.2
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '7.4'
+          - name: Setup PHP
+            uses: shivammathur/setup-php@v2
+            with:
+              php-version: '7.4'
 
-            - name: Build zip
-              working-directory: plugins/woocommerce
-              run: bash bin/build-zip.sh
+          - name: Build zip
+            working-directory: plugins/woocommerce
+            run: bash bin/build-zip.sh
 
-            - name: Upload the zip file as an artifact
-              uses: actions/upload-artifact@v3
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  name: woocommerce
-                  path: plugins/woocommerce/woocommerce.zip
-                  retention-days: 7
+          - name: Upload the zip file as an artifact
+            uses: actions/upload-artifact@v3
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+              name: woocommerce
+              path: plugins/woocommerce/woocommerce.zip
+              retention-days: 7
 
     test-plugins:
         name: Smoke tests with ${{ matrix.plugin }} plugin installed
-        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         needs: [build]
         strategy:
@@ -256,18 +189,18 @@ jobs:
 
             - uses: ./package/woocommerce/.github/actions/cache-deps
               with:
-                  workflow_name: smoke-test-daily
-                  workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+                workflow_name: smoke-test-daily
+                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: '7.4'
+                php-version: '7.4'
 
             - name: Install and Build
               uses: ./package/woocommerce/.github/actions/install-build
               with:
-                  working_directory: package/woocommerce
+                working_directory: package/woocommerce
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v3
@@ -278,8 +211,8 @@ jobs:
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp
               run: |
-                  unzip woocommerce.zip -d .
-                  rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
+                unzip woocommerce.zip -d .
+                rsync -a woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce
@@ -300,7 +233,7 @@ jobs:
 
     publish-test-reports:
         name: Publish test reports
-        if: false # mytodo re-enable
+        if: always()
         runs-on: ubuntu-20.04
         needs: [login-run, build, test-plugins]
         env:
