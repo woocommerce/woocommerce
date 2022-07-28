@@ -97,7 +97,7 @@ jobs:
                   CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
                   UPDATE_WC: true
                   PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
-                  DEFAULT_TIMEOUT_OVERRIDE: ${{ 120000 }}
+                  DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
                   pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
