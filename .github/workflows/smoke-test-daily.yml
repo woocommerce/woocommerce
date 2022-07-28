@@ -95,7 +95,7 @@ jobs:
                   PLUGIN_PATH: ${{ steps.nightly-zip.outputs.PLUGIN_PATH }}
                   DEFAULT_TIMEOUT_OVERRIDE: ${{ 120000 }}
               run: |
-                  pnpx playwright test --config=e2e/playwright.config.js e2e/tests/smoke-tests/update-woocommerce.spec.js
+                  pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
 
             - name: Run API smoke tests
@@ -110,7 +110,8 @@ jobs:
               run: pnpm exec wc-api-tests test api
 
             - name: Archive API test report
-              if: false # mytodo revert
+              if:
+                  false # mytodo revert
                   # always() &&
                   # (
                   #   steps.run_api_tests.conclusion != 'cancelled' ||
