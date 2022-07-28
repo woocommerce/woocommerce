@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use WC_Order;
 use WP_List_Table;
@@ -119,6 +120,8 @@ class ListTable extends WP_List_Table {
 			<?php
 			/**
 			 * Renders after the 'blank state' message for the order list table has rendered.
+			 *
+			 * @since 6.6.1
 			 */
 			do_action( 'wc_marketplace_suggestions_orders_empty_state' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			?>
@@ -374,7 +377,7 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function default_hidden_columns( array $hidden, WP_Screen $screen ) {
-		if ( isset( $screen->id ) && 'woocommerce_page_wc-orders' === $screen->id ) {
+		if ( isset( $screen->id ) && wc_get_page_screen_id( 'shop-order' ) === $screen->id ) {
 			$hidden = array_merge(
 				$hidden,
 				array(
@@ -433,8 +436,21 @@ class ListTable extends WP_List_Table {
 			echo '<strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong>';
 		} else {
 			echo '<a href="#" class="order-preview" data-order-id="' . absint( $order->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
-			echo '<a href="' . esc_url( admin_url( 'post.php?post=' . absint( $order->get_id() ) ) . '&action=edit' ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
+			echo '<a href="' . esc_url( $this->get_order_edit_link( $order ) ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
+	}
+
+	/**
+	 * Get the edit link for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return mixed|string Edit link for the order.
+	 */
+	private function get_order_edit_link( WC_Order $order ) {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order->get_id() ) ) . '&action=edit' :
+			admin_url( 'post.php?post=' . absint( $order->get_id() ) ) . '&action=edit';
 	}
 
 	/**

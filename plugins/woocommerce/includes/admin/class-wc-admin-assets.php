@@ -274,7 +274,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
 			}
-			if ( in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
+			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
 				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard' ), $version );
@@ -305,14 +305,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
-			if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
+			if ( in_array( str_replace( 'edit-', '', $screen_id ), array( 'shop_coupon', 'product' ) ) || $this->is_order_meta_box_screen( $screen_id ) ) {
 				$post_id                = isset( $post->ID ) ? $post->ID : '';
 				$currency               = '';
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
 
-				if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
+				if ( $post_id && $this->is_order_meta_box_screen( $screen_id ) ) {
 					$order = wc_get_order( $post_id );
 					if ( $order ) {
 						$currency = $order->get_currency();
@@ -489,6 +489,18 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
+		}
+
+		/**
+		 * Helper function to determine whether the current screen is an order edit screen.
+		 *
+		 * @param string $screen_id Screen ID.
+		 *
+		 * @return bool Whether the current screen is an order edit screen.
+		 */
+		private function is_order_meta_box_screen( string $screen_id ) {
+			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ) ) ||
+						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
 		}
 
 	}
