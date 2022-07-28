@@ -72,7 +72,7 @@ jobs:
               working-directory: plugins/woocommerce/e2e
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  PLUGIN_DIR: ${{ ${{ github.workspace }}/plugins/woocommerce/e2e/plugins }}
+                  PLUGIN_DIR: ${{ github.workspace }}/plugins/woocommerce/e2e/plugins
               run: |
                   mkdir $PLUGIN_DIR
                   cd $PLUGIN_DIR
