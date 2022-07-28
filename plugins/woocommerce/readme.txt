@@ -164,6 +164,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Stop re-enabling product attributes lookup table usage after each install [#34072](https://github.com/woocommerce/woocommerce/pull/34072)
 * Fix - Add back missing tracks in add product task [#34070](https://github.com/woocommerce/woocommerce/pull/34070)
 * Fix - Fix historical import data in analytics settings [#34054](https://github.com/woocommerce/woocommerce/pull/34054)
 * Fix - Fix undefined offset notice on payment settings page [#33956](https://github.com/woocommerce/woocommerce/pull/33956)
