@@ -41,7 +41,7 @@ jobs:
                   echo "::set-output name=commit_message::$COMMIT_MESSAGE"
 
             - name: Run Puppeteer E2E smoke test.
-              if: fromJSON(E2E_PLAYWRIGHT) != true
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               working-directory: plugins/woocommerce
               env:
                   SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -81,7 +81,7 @@ jobs:
                   echo "::set-output name=PLUGIN_PATH::$PLUGIN_DIR/woocommerce-trunk-nightly.zip"
 
             - name: Run Playwright E2E smoke test.
-              if: fromJSON(E2E_PLAYWRIGHT)
+              if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
               env:
                   BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
