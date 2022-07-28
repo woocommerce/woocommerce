@@ -99,8 +99,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
+	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
+	const TaskListPlaceholderComponent =
+		taskListIds[ 0 ] === 'setup'
+			? TwoColumnTaskListPlaceholder
+			: TasksPlaceholder;
+
 	if ( isResolving ) {
-		return <TwoColumnTaskListPlaceholder query={ query } />;
+		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
 	if ( currentTask ) {
@@ -120,10 +126,12 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
+					const TaskListComponent =
+						id === 'setup' ? TwoColumnTaskList : TaskList;
 
 					return (
 						<Fragment key={ id }>
-							<TwoColumnTaskList
+							<TaskListComponent
 								isExpandable={ false }
 								query={ query }
 								twoColumns={ false }
