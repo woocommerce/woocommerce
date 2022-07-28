@@ -55,7 +55,7 @@ module.exports = async ( config ) => {
 	const customerPage = await browser.newPage();
 
 	// Sign in as admin user and save state
-	const adminRetries = 3; // mytodo switch back to 5
+	const adminRetries = 2; // mytodo switch back to 5
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
