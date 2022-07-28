@@ -65,7 +65,7 @@ jobs:
             - name: Install Playwright dependencies.
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
-              run: pnpx playwright install-deps chromium
+              run: pnpx playwright install chromium
 
             - name: Download WooCommerce nightly build zip
               if: fromJSON(env.E2E_PLAYWRIGHT)
