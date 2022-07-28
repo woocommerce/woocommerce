@@ -176,7 +176,6 @@ class Shipping extends Task {
 	 * Delete the zone count transient used in has_shipping_zones() method
 	 * to refresh the cache.
 	 *
-	 * @return bool
 	 */
 	public static function delete_zone_count_transient() {
 		delete_transient( self::ZONE_COUNT_TRANSIENT_NAME );
