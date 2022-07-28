@@ -111,7 +111,6 @@ jobs:
             # mytodo remove this
             - name: Archive global setup screenshots
               uses: actions/upload-artifact@v3
-              working-directory: plugins/woocommerce
               with:
                   name: e2e-global-setup-screenshots
                   path: ${{ github.workspace }}/plugins/woocommerce/e2e/tmp/global-setup-screenshots
