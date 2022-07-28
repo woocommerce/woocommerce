@@ -41,7 +41,7 @@ export const useShippingData = (): ShippingData => {
 				? previewCart.needs_shipping
 				: store.getNeedsShipping(),
 			hasCalculatedShipping: isEditor
-				? previewCart.needs_shipping
+				? previewCart.has_calculated_shipping
 				: store.getHasCalculatedShipping(),
 			isLoadingRates: isEditor ? false : store.isCustomerDataUpdating(),
 		};
