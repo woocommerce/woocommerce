@@ -100,7 +100,6 @@ jobs:
             - name: Run Playwright E2E smoke test.
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
-              continue-on-error: true
               env:
                   BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
                   ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
