@@ -186,31 +186,6 @@ class CustomMetaBox {
 	}
 
 	/**
-	 * Save custom meta data for an order.
-	 *
-	 * @param int       $order_id Order ID.
-	 * @param \WC_Order $order Order object.
-	 *
-	 * @return void
-	 */
-	public function save( int $order_id, \WC_Order $order ) {
-		// handle meta delete.
-		if ( empty( $_POST['deletemeta'] ) ) {
-			return;
-		}
-
-		$delete_meta_id     = (int) sanitize_text_field( wp_unslash( key( $_POST['deletemeta'] ?? array() ) ) );
-		$delete_meta_object = wp_list_filter( $order->get_meta_data(), array( 'id' => $delete_meta_id ) );
-
-		if ( empty( $delete_meta_object ) ) {
-			return;
-		}
-
-		$order->delete_meta_data_by_mid( $delete_meta_id );
-		$order->save();
-	}
-
-	/**
 	 * Helper method to verify order edit permissions.
 	 *
 	 * @param int $order_id Order ID.
@@ -401,7 +376,7 @@ class CustomMetaBox {
 		$r .= "\n\t\t<td class='left'><label class='screen-reader-text' for='meta-{$entry['meta_id']}-key'>" . __( 'Key', 'woocommerce' ) . "</label><input name='meta[{$entry['meta_id']}][key]' id='meta-{$entry['meta_id']}-key' type='text' size='20' value='{$entry['meta_key']}' />";
 
 		$r .= "\n\t\t<div class='submit'>";
-		$r .= get_submit_button( __( 'Delete', 'woocommerce' ), 'deletemeta small', "deletemeta[{$entry['meta_id']}]", false, array( 'data-wp-lists' => "delete:the-list:meta-{$entry['meta_id']}::_ajax_nonce=$delete_nonce" ) );
+		$r .= get_submit_button( __( 'Delete', 'woocommerce' ), 'deletemeta small', "deletemeta[{$entry['meta_id']}]", false, array( 'data-wp-lists' => "delete:the-list:meta-{$entry['meta_id']}::_ajax_nonce:$delete_nonce" ) );
 		$r .= "\n\t\t";
 		$r .= get_submit_button( __( 'Update', 'woocommerce' ), 'updatemeta small', "meta-{$entry['meta_id']}-submit", false, array( 'data-wp-lists' => "add:the-list:meta-{$entry['meta_id']}::_ajax_nonce-add-meta={$this->update_nonce}" ) );
 		$r .= '</div>';
@@ -418,14 +393,15 @@ class CustomMetaBox {
 	 * @return void
 	 */
 	public function delete_meta_ajax() {
-		$meta_id = (int) $_POST['meta_id'] ?? 0;
-		if ( ! $meta_id ) {
+		$meta_id  = (int) $_POST['id'] ?? 0;
+		$order_id = (int) $_POST['order_id'] ?? 0;
+		if ( ! $meta_id || ! $order_id ) {
 			wp_send_json_error( 'invalid_meta_id' );
 			wp_die();
 		}
 		check_ajax_referer( "delete-meta_$meta_id" );
 
-		$order          = self::verify_order_edit_permission_for_ajax();
+		$order          = $this->verify_order_edit_permission_for_ajax( $order_id );
 		$meta_to_delete = wp_list_filter( $order->get_meta_data(), array( 'id' => $meta_id ) );
 
 		if ( empty( $meta_to_delete ) ) {
