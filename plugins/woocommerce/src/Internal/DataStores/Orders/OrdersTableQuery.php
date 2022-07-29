@@ -154,7 +154,9 @@ class OrdersTableQuery {
 		$mapping = array(
 			// WP_Query legacy.
 			'post_date'           => 'date_created_gmt',
+			'post_date_gmt'       => 'date_created_gmt',
 			'post_modified'       => 'date_modified_gmt',
+			'post_modified_gmt'   => 'date_updated_gmt',
 			'post_status'         => 'status',
 			'_date_completed'     => 'date_completed_gmt',
 			'_date_paid'          => 'date_paid_gmt',
@@ -182,7 +184,9 @@ class OrdersTableQuery {
 			'version'             => 'woocommerce_version',
 			'date_created'        => 'date_created_gmt',
 			'date_modified'       => 'date_updated_gmt',
+			'date_modified_gmt'   => 'date_updated_gmt',
 			'date_completed'      => 'date_completed_gmt',
+			'date_completed_gmt'  => 'date_completed_gmt',
 			'date_paid'           => 'date_paid_gmt',
 			'discount_total'      => 'discount_total_amount',
 			'discount_tax'        => 'discount_tax_amount',
