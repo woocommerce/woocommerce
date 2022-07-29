@@ -18,8 +18,8 @@ Fixes #
 
 #### Other Checks
 
-- [ ] This PR adds/removes a feature flag & I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md) .
-- [ ] This PR adds/removes an experimental interfaces and I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md)
+- [ ] This PR adds/removes a feature flag & I've updated [this doc](../docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md).
+- [ ] This PR adds/removes an experimental interfaces and I've updated [this doc](../docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md)
 - [ ] I tagged two reviewers because this PR makes queries to the database or I think it might have some security impact.
 
 ### Screenshots
