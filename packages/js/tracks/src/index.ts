@@ -2,10 +2,6 @@
  * External dependencies
  */
 import debug from 'debug';
-/**
- * Internal dependencies
- */
-import { isDevelopmentMode, validateEventNameAndProperties } from './utils';
 
 /**
  * Module variables
@@ -32,6 +28,7 @@ export function recordEvent(
 	eventName: string,
 	eventProperties?: ExtraProperties
 ) {
+	const isDevelopmentMode = process.env.NODE_ENV === 'development';
 	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties, {
 		_tqk: window._tkq,
 		shouldRecord:
@@ -46,7 +43,7 @@ export function recordEvent(
 		typeof window.wcTracks.recordEvent !== 'function' ||
 		isDevelopmentMode
 	) {
-		validateEventNameAndProperties( eventName, eventProperties );
+		window.wcTracks.validateEvent( eventName, eventProperties );
 		return false;
 	}
 

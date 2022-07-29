@@ -1,7 +1,12 @@
 declare global {
 	interface Window {
 		wcTracks: {
+			validateEvent: any;
 			isEnabled: boolean;
+			validateEvent: (
+				name: string,
+				properties: unknown,
+			) => void;
 			recordEvent: (
 				name: string,
 				properties: unknown,
