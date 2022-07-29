@@ -60,3 +60,4 @@ export { Badge } from './badge';
 export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
+export { CollapsibleContent } from './collapsible-content';

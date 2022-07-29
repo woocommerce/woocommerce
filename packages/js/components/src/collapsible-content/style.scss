@@ -1,0 +1,18 @@
+.woocommerce-collapsible-content {
+
+	button {
+		all: unset;
+		font-size: 13px;
+		color: #007CBA;
+		cursor: pointer;
+
+		> div {
+			display: flex;
+			align-items: center;
+		}
+	}
+
+	svg {
+		fill: #007CBA;
+	}
+}
