@@ -376,6 +376,49 @@ class OrdersTableQuery {
 	}
 
 	/**
+	 * JOINs the main orders table with another table.
+	 *
+	 * @param string  $table      Table name (including prefix).
+	 * @param string  $alias      Table alias to use. Defaults to $table.
+	 * @param string  $on         ON clause. Defaults to "wc_orders.id = {$alias}.order_id".
+	 * @param boolean $alias_once If TRUE, table won't be JOIN'ed again if already JOIN'ed.
+	 * @return void
+	 * @throws \Exception When an error occurs, such as trying to re-use an alias with $alias_once = FALSE.
+	 */
+	public function join( string $table, string $alias = '', string $on = '', bool $alias_once = false ) {
+		$alias = empty( $alias ) ? $table : $alias;
+
+		if ( $this->tables['orders'] === $alias ) {
+			// translators: %s is a table name.
+			throw new \Exception( sprintf( __( '%s can not be used as a table alias in OrdersTableQuery', 'woocommerce' ), $alias ) );
+		}
+
+		if ( empty( $on ) ) {
+			if ( $this->tables['orders'] === $table ) {
+				$on = "{$this->tables['orders']}.id = {$alias}.id";
+			} else {
+				$on = "{$this->tables['orders']}.id = {$alias}.order_id";
+			}
+		}
+
+		if ( isset( $this->join[ $alias ] ) ) {
+			if ( ! $alias_once ) {
+				// translators: %s is a table name.
+				throw new \Exception( sprintf( __( 'Can not re-use table alias "%s" in OrdersTableQuery.', 'woocommerce' ), $alias ) );
+			}
+
+			return;
+		}
+
+		$sql_join  = '';
+		$sql_join .= "INNER JOIN {$table} ";
+		$sql_join .= ( $alias !== $table ) ? "AS {$alias} " : '';
+		$sql_join .= "ON ( {$on} )";
+
+		$this->join[ $alias ] = $sql_join;
+	}
+
+	/**
 	 * Generates a properly escaped and sanitized WHERE condition for a given field.
 	 *
 	 * @param string $table    The table the field belongs to.
@@ -534,7 +577,12 @@ class OrdersTableQuery {
 			return;
 		}
 
-		$this->join[] = "INNER JOIN {$this->tables['operational_data']} ON ( {$this->tables['orders']}.id = {$this->tables['operational_data']}.order_id )";
+		$this->join(
+			$this->tables['operational_data'],
+			'',
+			'',
+			true
+		);
 
 		foreach ( $fields as $arg_key ) {
 			$this->where[] = $this->where( $this->tables['operational_data'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['operational_data'][ $arg_key ]['type'] );
@@ -570,9 +618,11 @@ class OrdersTableQuery {
 				continue;
 			}
 
-			$this->join[] = $wpdb->prepare(
-				"INNER JOIN {$this->tables['addresses']} AS {$address_type} ON ( {$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$address_type
+			$this->join(
+				$this->tables['addresses'],
+				$address_type,
+				$wpdb->prepare( "{$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s", $address_type ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				false
 			);
 
 			foreach ( $fields as $arg_key ) {
