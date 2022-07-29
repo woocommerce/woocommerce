@@ -122,7 +122,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith [0]
 	 *           [-2]
-	 *           [99999]
+	 *           [9999999]
 	 *
 	 * @param int $expiration The expiration value to test.
 	 */
@@ -327,7 +327,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith [0]
 	 *           [-2]
-	 *           [99999]
+	 *           [9999999]
 	 *
 	 * @param int $expiration The expiration value to test.
 	 */
@@ -335,7 +335,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectException( CacheException::class );
 		$this->expectExceptionMessage( 'Invalid expiration value, must be ObjectCache::DEFAULT_EXPIRATION or a value between 1 and ObjectCache::MAX_EXPIRATION' );
 
-		$this->sut->get( 'the_id', null, $expiration );
+		$this->sut->get( 'the_id', $expiration );
 	}
 
 	/**
@@ -365,7 +365,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 			return array( 'id' => $id );
 		};
 
-		$result = $this->sut->get( 'the_id', $callback );
+		$result = $this->sut->get( 'the_id', ObjectCache::DEFAULT_EXPIRATION, $callback );
 
 		$expected = array( 'id' => 'the_id' );
 		$this->assertEquals( $expected, $result );
@@ -383,7 +383,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 			return array( 'id' => $id );
 		};
 
-		$result = $this->sut->get( 'the_id', $callback, $expiration );
+		$result = $this->sut->get( 'the_id', $expiration, $callback );
 
 		$expected = array( 'id' => 'the_id' );
 		$this->assertEquals( $expected, $result );
@@ -437,7 +437,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 		// phpcs:enable Squiz.Commenting
 
-		$result = $sut->get( 'the_id', null, $expiration );
+		$result = $sut->get( 'the_id', $expiration );
 
 		$expected = array( 'id' => 'the_id' );
 		$this->assertEquals( $expected, $result );

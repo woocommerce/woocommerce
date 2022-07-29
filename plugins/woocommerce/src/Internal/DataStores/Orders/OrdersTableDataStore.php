@@ -726,6 +726,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return array|object|null DB Order objects or error.
 	 */
 	private function get_order_data_for_ids( $ids ) {
+		if ( ! $ids ) {
+			return array();
+		}
+
 		global $wpdb;
 		if ( empty( $ids ) ) {
 			return array();
@@ -1051,7 +1055,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 			// 'status' is a little special (for backwards compat.).
 			if ( 'status' === $column ) {
-				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] );
+				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] ? $changes['status'] : 'pending' );
 			}
 
 			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );

@@ -175,23 +175,26 @@ class PageController {
 	 */
 	private function setup_action_edit_order(): void {
 		global $theorder;
-		$this->order = wc_get_order( absint( isset( $_GET['id'] ) ? $_GET['id'] : 0 ) );
-		$this->verify_edit_permission();
-		$theorder = $this->order;
-	}
-
-	/**
-	 * Handles initialization of the orders edit form with a new order.
-	 *
-	 * @return void
-	 */
-	private function setup_action_new_order(): void {
-		global $theorder;
-		$this->verify_create_permission();
-		$this->order = new \WC_Order();
-		$this->order->set_object_read( false );
-		$this->order->set_status( 'auto-draft' );
-		$this->order->save();
+		switch ( $this->current_action ) {
+			case 'edit_order':
+				$this->order = wc_get_order( absint( isset( $_GET['id'] ) ? $_GET['id'] : 0 ) );
+				if ( 'edit_order' === $this->current_action && ( ! isset( $this->order ) || ! $this->order ) ) {
+					wp_die( esc_html__( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
+				}
+				if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+					wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
+				}
+				break;
+			case 'new_order':
+				$this->order = new \WC_Order();
+				if ( ! current_user_can( 'publish_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+					wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
+				}
+				break;
+			default:
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-orders' ) );
+				exit;
+		}
 		$theorder = $this->order;
 	}
 

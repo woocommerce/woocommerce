@@ -55,6 +55,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		RestockRefundedItemsAdjusterServiceProvider::class,
 		UtilsClassesServiceProvider::class,
 		COTMigrationServiceProvider::class,
+		ObjectCacheServiceProvider::class,
 		BatchProcessingServiceProvider::class,
 		ObjectCacheServiceProvider::class,
 	);

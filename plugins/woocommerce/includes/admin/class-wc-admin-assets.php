@@ -312,12 +312,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
 
-				// Eventually this will become wc_data_or_post object as we implement more custom tables.
-				$order_or_post_object = $post;
-				if ( ( $theorder instanceof WC_Order ) && $this->is_order_meta_box_screen( $screen_id ) ) {
-					$order_or_post_object = $theorder;
-					if ( $order_or_post_object ) {
-						$currency = $order_or_post_object->get_currency();
+				if ( $post_id && $this->is_order_meta_box_screen( $screen_id ) ) {
+					$order = wc_get_order( $post_id );
+					if ( $order ) {
+						$currency = $order->get_currency();
 
 						if ( ! $order_or_post_object->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
 							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );

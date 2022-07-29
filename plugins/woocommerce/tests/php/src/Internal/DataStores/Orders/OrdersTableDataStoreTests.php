@@ -251,12 +251,22 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		// Sync enabled implies a full post should be created.
-		add_filter( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, function() { return 'yes'; } );
+		add_filter(
+			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			function() {
+				return 'yes';
+			}
+		);
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), 'shop_order' ) ) );
 
 		// Sync disabled implies a placeholder post should be created.
-		add_filter( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, function() { return 'no'; } );
+		add_filter(
+			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			function() {
+				return 'no';
+			}
+		);
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) ) );
 	}
@@ -275,7 +285,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$order->delete();
 
 		$orders_table = $this->sut::get_orders_table_name();
-		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
+		$this->assertEquals( 'trash', $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Make sure order data persists in the database.
 		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
@@ -285,7 +295,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				continue;
 			}
 
-			$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d", $order_id ) ) );
+			$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
@@ -307,7 +317,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		foreach ( $this->sut->get_all_table_names() as $table ) {
 			$field_name = ( $table === $this->sut::get_orders_table_name() ) ? 'id' : 'order_id';
-			$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$field_name} = %d", $order_id ) ) );
+			$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$field_name} = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
@@ -349,32 +359,32 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		// Get orders with a specific property.
 		$query_vars['prices_include_tax'] = 'no';
-		$query = new OrdersTableQuery( $query_vars );
+		$query                            = new OrdersTableQuery( $query_vars );
 		$this->assertEquals( 1, count( $query->orders ) );
 		$this->assertEquals( $query->orders[0], $order2->get_id() );
 
 		$query_vars['prices_include_tax'] = 'yes';
-		$query = new OrdersTableQuery( $query_vars );
+		$query                            = new OrdersTableQuery( $query_vars );
 		$this->assertEquals( 1, count( $query->orders ) );
 		$this->assertEquals( $query->orders[0], $order1->get_id() );
 
 		// Get orders with two specific properties.
 		$query_vars['total'] = '100.0';
-		$query = new OrdersTableQuery( $query_vars );
+		$query               = new OrdersTableQuery( $query_vars );
 		$this->assertEquals( 1, count( $query->orders ) );
 		$this->assertEquals( $query->orders[0], $order1->get_id() );
 
 		// Limit results.
 		unset( $query_vars['total'], $query_vars['prices_include_tax'] );
-		$query_vars['limit']    = 1;
-		$query = new OrdersTableQuery( $query_vars );
+		$query_vars['limit'] = 1;
+		$query               = new OrdersTableQuery( $query_vars );
 		$this->assertEquals( 1, count( $query->orders ) );
 
 		// By customer ID.
 		$query = new OrdersTableQuery(
 			array(
 				'status'      => 'all',
-				'customer_id' => $user_id
+				'customer_id' => $user_id,
 			)
 		);
 		$this->assertEquals( 1, count( $query->orders ) );
@@ -412,6 +422,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$order3->set_status( 'completed' );
 		$order3->save();
 
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+
 		// Orders with color=green.
 		$query = new OrdersTableQuery(
 			array(
@@ -419,8 +431,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 					array(
 						'key'   => 'color',
 						'value' => 'green',
-					)
-				)
+					),
+				),
 			)
 		);
 		$this->assertEquals( 2, count( $query->orders ) );
@@ -431,12 +443,12 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 				'meta_query' => array(
 					array(
 						'key'   => 'animal',
-						'value' => 'lion'
+						'value' => 'lion',
 					),
 					array(
-						'key'   => 'movie',
-					)
-				)
+						'key' => 'movie',
+					),
+				),
 			)
 		);
 		$this->assertEquals( 2, count( $query->orders ) );
@@ -452,7 +464,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 						'value'   => 'London',
 						'compare' => 'LIKE',
 					),
-				)
+				),
 			)
 		);
 		$this->assertEquals( 2, count( $query->orders ) );
@@ -464,7 +476,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			array(
 				'meta_query' => array(
 					array(
-						'key'     => 'animal',
+						'key' => 'animal',
 					),
 					array(
 						'relation' => 'OR',
@@ -475,9 +487,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 						array(
 							'key'   => 'place',
 							'value' => 'Paris',
-						)
-					)
-				)
+						),
+					),
+				),
 			)
 		);
 		$this->assertEquals( 2, count( $query->orders ) );
@@ -493,6 +505,81 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( 1, count( $query->orders ) );
 		$this->assertContains( $order2->get_id(), $query->orders );
+
+		// phpcs:enable
+	}
+
+	/**
+	 * Tests queries involving the 'customer' query var.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_customer() {
+		$user_email_1 = 'email1@example.com';
+		$user_email_2 = 'email2@example.com';
+		$user_id_1    = wp_insert_user(
+			array(
+				'user_login' => 'user_1',
+				'user_pass'  => 'testing',
+				'user_email' => $user_email_1,
+			)
+		);
+		$user_id_2    = wp_insert_user(
+			array(
+				'user_login' => 'user_2',
+				'user_pass'  => 'testing',
+				'user_email' => $user_email_2,
+			)
+		);
+
+		$order1 = new WC_Order();
+		$this->switch_data_store( $order1, $this->sut );
+		$order1->set_customer_id( $user_id_1 );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$this->switch_data_store( $order2, $this->sut );
+		$order2->set_customer_id( $user_id_2 );
+		$order2->save();
+
+		$order3 = new WC_Order();
+		$this->switch_data_store( $order3, $this->sut );
+		$order3->set_customer_id( $user_id_2 );
+		$order3->save();
+
+		// Search for orders of either user (by ID). Should return all orders.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( $user_id_1, $user_id_2 ),
+			)
+		);
+		$this->assertEquals( 3, $query->found_orders );
+
+		// Search for user 1 (by e-mail) and user 2 (by ID). Should return all orders.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( $user_email_1, $user_id_2 ),
+			)
+		);
+		$this->assertEquals( 3, $query->found_orders );
+
+		// Search for orders that match user 1 (email and ID). Should return order 1.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( array( $user_email_1, $user_id_1 ) ),
+			)
+		);
+		$this->assertEquals( 1, $query->found_orders );
+		$this->assertContains( $order1->get_id(), $query->orders );
+
+		// Search for orders that match user 1 (email) and user 2 (ID). Should return no order.
+		$query = new OrdersTableQuery(
+			array(
+				'customer' => array( array( $user_email_1, $user_id_2 ) ),
+			)
+		);
+		$this->assertEquals( 0, $query->found_orders );
+
 	}
 
 	/**
@@ -518,6 +605,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$update_data_store_func->call( $order, $data_store );
 	}
 
+	/**
+	 * Creates a complex COT order with address info, line items, etc.
+	 * @return \WC_Order
+	 */
 	private function create_complex_cot_order() {
 		$order = new WC_Order();
 		$this->switch_data_store( $order, $this->sut );
@@ -566,7 +657,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$order->get_data_store()->set_stock_reduced( $order, true, false );
 
-		$order->update_meta_data( 'my_meta', rand( 0, 255 ) );
+		$order->update_meta_data( 'my_meta', rand( 0, 255 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rand_rand
 
 		$order->save();
 

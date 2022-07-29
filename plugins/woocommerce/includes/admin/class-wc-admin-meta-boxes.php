@@ -8,6 +8,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Orders\Edit;
 
 defined( 'ABSPATH' ) || exit;
 
