@@ -29,103 +29,106 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useValidationContext();
 
-	const results: Pick<
+	const {
+		applyCoupon,
+		removeCoupon,
+		isApplyingCoupon,
+		isRemovingCoupon,
+	}: Pick<
 		StoreCartCoupon,
-		'applyCoupon' | 'removeCoupon' | 'isApplyingCoupon' | 'isRemovingCoupon'
+		| 'applyCoupon'
+		| 'removeCoupon'
+		| 'isApplyingCoupon'
+		| 'isRemovingCoupon'
+		| 'receiveApplyingCoupon'
 	> = useSelect(
 		( select, { dispatch } ) => {
 			const store = select( storeKey );
-			const isApplyingCoupon = store.isApplyingCoupon();
-			const isRemovingCoupon = store.isRemovingCoupon();
-			const {
-				applyCoupon,
-				removeCoupon,
-				receiveApplyingCoupon,
-			}: {
-				applyCoupon: ( coupon: string ) => Promise< boolean >;
-				removeCoupon: ( coupon: string ) => Promise< boolean >;
-				receiveApplyingCoupon: ( coupon: string ) => void;
-			} = dispatch( storeKey );
-
-			const applyCouponWithNotices = ( couponCode: string ) => {
-				applyCoupon( couponCode )
-					.then( ( result ) => {
-						if ( result === true ) {
-							createNotice(
-								'info',
-								sprintf(
-									/* translators: %s coupon code. */
-									__(
-										'Coupon code "%s" has been applied to your cart.',
-										'woo-gutenberg-products-block'
-									),
-									couponCode
-								),
-								{
-									id: 'coupon-form',
-									type: 'snackbar',
-									context,
-								}
-							);
-						}
-					} )
-					.catch( ( error ) => {
-						setValidationErrors( {
-							coupon: {
-								message: decodeEntities( error.message ),
-								hidden: false,
-							},
-						} );
-						// Finished handling the coupon.
-						receiveApplyingCoupon( '' );
-					} );
-			};
-
-			const removeCouponWithNotices = ( couponCode: string ) => {
-				removeCoupon( couponCode )
-					.then( ( result ) => {
-						if ( result === true ) {
-							createNotice(
-								'info',
-								sprintf(
-									/* translators: %s coupon code. */
-									__(
-										'Coupon code "%s" has been removed from your cart.',
-										'woo-gutenberg-products-block'
-									),
-									couponCode
-								),
-								{
-									id: 'coupon-form',
-									type: 'snackbar',
-									context,
-								}
-							);
-						}
-					} )
-					.catch( ( error ) => {
-						createErrorNotice( error.message, {
-							id: 'coupon-form',
-							context,
-						} );
-						// Finished handling the coupon.
-						receiveApplyingCoupon( '' );
-					} );
-			};
+			const actions = dispatch( storeKey );
 
 			return {
-				applyCoupon: applyCouponWithNotices,
-				removeCoupon: removeCouponWithNotices,
-				isApplyingCoupon,
-				isRemovingCoupon,
+				applyCoupon: actions.applyCoupon,
+				removeCoupon: actions.removeCoupon,
+				isApplyingCoupon: store.isApplyingCoupon(),
+				isRemovingCoupon: store.isRemovingCoupon(),
+				receiveApplyingCoupon: actions.receiveApplyingCoupon,
 			};
 		},
 		[ createErrorNotice, createNotice ]
 	);
 
+	const applyCouponWithNotices = ( couponCode: string ) => {
+		applyCoupon( couponCode )
+			.then( ( result ) => {
+				if ( result === true ) {
+					createNotice(
+						'info',
+						sprintf(
+							/* translators: %s coupon code. */
+							__(
+								'Coupon code "%s" has been applied to your cart.',
+								'woo-gutenberg-products-block'
+							),
+							couponCode
+						),
+						{
+							id: 'coupon-form',
+							type: 'snackbar',
+							context,
+						}
+					);
+				}
+			} )
+			.catch( ( error ) => {
+				setValidationErrors( {
+					coupon: {
+						message: decodeEntities( error.message ),
+						hidden: false,
+					},
+				} );
+				// Finished handling the coupon.
+				receiveApplyingCoupon( '' );
+			} );
+	};
+
+	const removeCouponWithNotices = ( couponCode: string ) => {
+		removeCoupon( couponCode )
+			.then( ( result ) => {
+				if ( result === true ) {
+					createNotice(
+						'info',
+						sprintf(
+							/* translators: %s coupon code. */
+							__(
+								'Coupon code "%s" has been removed from your cart.',
+								'woo-gutenberg-products-block'
+							),
+							couponCode
+						),
+						{
+							id: 'coupon-form',
+							type: 'snackbar',
+							context,
+						}
+					);
+				}
+			} )
+			.catch( ( error ) => {
+				createErrorNotice( error.message, {
+					id: 'coupon-form',
+					context,
+				} );
+				// Finished handling the coupon.
+				receiveApplyingCoupon( '' );
+			} );
+	};
+
 	return {
 		appliedCoupons: cartCoupons,
 		isLoading: cartIsLoading,
-		...results,
+		applyCoupon: applyCouponWithNotices,
+		removeCoupon: removeCouponWithNotices,
+		isApplyingCoupon,
+		isRemovingCoupon,
 	};
 };
