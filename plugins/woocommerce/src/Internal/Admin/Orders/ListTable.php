@@ -13,6 +13,13 @@ use WP_Screen;
  */
 class ListTable extends WP_List_Table {
 	/**
+	 * Contains the arguments to be used in the order query.
+	 *
+	 * @var array
+	 */
+	private $order_query_args = array();
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -155,15 +162,26 @@ class ListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 		$limit = $this->get_items_per_page( 'edit_orders_per_page' );
-		$args  = array(
+
+		$this->order_query_args = array(
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'all' ) ),
+			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'any' ) ),
 			'type'     => 'shop_order',
 		);
 
-		$orders      = wc_get_orders( $args );
+		$this->set_order_args();
+
+		/**
+		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
+		 * table.
+		 *
+		 * @since 6.9.0
+		 *
+		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
+		 */
+		$orders      = wc_get_orders( (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args ) );
 		$this->items = $orders->orders;
 
 		$this->set_pagination_args(
@@ -172,6 +190,22 @@ class ListTable extends WP_List_Table {
 				'per_page'    => $limit,
 			)
 		);
+	}
+
+	/**
+	 * Updates the WC Order Query arguments as needed to support orderable columns.
+	 */
+	private function set_order_args() {
+		$sortable  = $this->get_sortable_columns();
+		$field     = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
+		$direction = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) ) );
+
+		if ( ! in_array( $field, $sortable, true ) ) {
+			return;
+		}
+
+		$this->order_query_args['orderby'] = $field;
+		$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
 	}
 
 	/**
@@ -204,6 +238,7 @@ class ListTable extends WP_List_Table {
 		return $view_links;
 	}
 
+	// phpcs:disable Generic.Commenting.Todo.CommentFound
 	/**
 	 * Count orders by status.
 	 *
@@ -365,6 +400,19 @@ class ListTable extends WP_List_Table {
 			'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
 			'order_total'      => esc_html__( 'Total', 'woocommerce' ),
 			'wc_actions'       => esc_html__( 'Actions', 'woocommerce' ),
+		);
+	}
+
+	/**
+	 * Defines the default sortable columns.
+	 *
+	 * @return string[]
+	 */
+	public function get_sortable_columns() {
+		return array(
+			'order_number' => 'ID',
+			'order_date'   => 'date',
+			'order_total'  => 'order_total',
 		);
 	}
 

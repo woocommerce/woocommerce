@@ -261,12 +261,16 @@ class OrdersTableQuery {
 
 		// Translate $orderby to a valid field.
 		$mapping = array(
-			'ID'       => "{$this->tables['orders']}.id",
-			'id'       => "{$this->tables['orders']}.id",
-			'type'     => "{$this->tables['orders']}.type",
-			'date'     => "{$this->tables['orders']}.date_created_gmt",
-			'modified' => "{$this->tables['orders']}.date_updated_gmt",
-			'parent'   => "{$this->tables['orders']}.parent_order_id",
+			'ID'            => "{$this->tables['orders']}.id",
+			'id'            => "{$this->tables['orders']}.id",
+			'type'          => "{$this->tables['orders']}.type",
+			'date'          => "{$this->tables['orders']}.date_created_gmt",
+			'date_created'  => "{$this->tables['orders']}.date_created_gmt",
+			'modified'      => "{$this->tables['orders']}.date_updated_gmt",
+			'date_modified' => "{$this->tables['orders']}.date_updated_gmt",
+			'parent'        => "{$this->tables['orders']}.parent_order_id",
+			'total'         => "{$this->tables['orders']}.total_amount",
+			'order_total'   => "{$this->tables['orders']}.total_amount",
 		);
 
 		$order   = $this->args['order'] ?? '';
