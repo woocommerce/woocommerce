@@ -1,22 +1,115 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { Pagination } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { CollapsibleCard, CardBody } from '../components/CollapsibleCard';
+import { CollapsibleCard } from '../components/CollapsibleCard';
+import { STORE_KEY } from '../data/constants';
+import './LearnMarketing.scss';
+
+type Post = {
+	author_avatar: string;
+	author_name: string;
+	date: string;
+	image: string;
+	link: string;
+	title: string;
+};
+
+type PostTileProps = {
+	post: Post;
+};
+
+const PostTile: React.FC< PostTileProps > = ( { post } ) => {
+	if ( ! post ) {
+		return (
+			<div className="woocommerce-marketing-learn-marketing-card__post">
+				<div className="woocommerce-marketing-learn-marketing-card__post-img woocommerce-marketing-learn-marketing-card__post-img--placeholder"></div>
+				<div className="woocommerce-marketing-learn-marketing-card__post-title woocommerce-marketing-learn-marketing-card__post-title--placeholder"></div>
+				<div className="woocommerce-marketing-learn-marketing-card__post-description woocommerce-marketing-learn-marketing-card__post-description--placeholder"></div>
+			</div>
+		);
+	}
+
+	return (
+		<a
+			className="woocommerce-marketing-learn-marketing-card__post"
+			href={ post.link }
+			target="_blank"
+			rel="noopener noreferrer"
+			onClick={ () => {
+				recordEvent( 'marketing_knowledge_article', {
+					title: post.title,
+				} );
+			} }
+		>
+			<div className="woocommerce-marketing-learn-marketing-card__post-img">
+				{ post.image && <img src={ post.image } alt="" /> }
+			</div>
+			<div className="woocommerce-marketing-learn-marketing-card__post-title">
+				{ post.title }
+			</div>
+			<div className="woocommerce-marketing-learn-marketing-card__post-description">
+				{
+					// translators: %s: author's name.
+					sprintf( __( 'By %s', 'woocommerce' ), post.author_name )
+				}
+				{ post.author_avatar && (
+					<img
+						src={ post.author_avatar.replace( 's=96', 's=32' ) }
+						alt=""
+					/>
+				) }
+			</div>
+		</a>
+	);
+};
+
+const blogPostCategory = 'marketing';
+const perPage = 2;
 
 const LearnMarketing = () => {
+	const [ page, setPage ] = useState( 1 );
+	const { posts } = useSelect( ( select ) => {
+		const { getBlogPosts, getBlogPostsError, isResolving } =
+			select( STORE_KEY );
+
+		return {
+			posts: getBlogPosts( blogPostCategory ),
+			isLoading: isResolving( 'getBlogPosts', [ blogPostCategory ] ),
+			error: getBlogPostsError( blogPostCategory ),
+		};
+	}, [] );
+
 	return (
 		<CollapsibleCard
 			initialCollapsed
+			className="woocommerce-marketing-learn-marketing-card"
 			header={ __( 'Learn about marketing a store', 'woocommerce' ) }
-			footer="footer" // TODO: footer.
+			footer={
+				<Pagination
+					showPagePicker={ false }
+					showPerPagePicker={ false }
+					page={ page }
+					perPage={ perPage }
+					total={ posts && posts.length }
+					onPageChange={ ( newPage: number ) => {
+						setPage( newPage );
+					} }
+				/>
+			}
 		>
-			{ /* TODO: body */ }
-			<CardBody>body</CardBody>
+			<div className="woocommerce-marketing-learn-marketing-card__posts">
+				<PostTile post={ posts[ ( page - 1 ) * perPage ] } />
+				<PostTile post={ posts[ ( page - 1 ) * perPage + 1 ] } />
+			</div>
 		</CollapsibleCard>
 	);
 };
