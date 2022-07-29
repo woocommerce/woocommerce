@@ -300,6 +300,7 @@ class BlockTemplatesController {
 		foreach ( $template_files as $template_file ) {
 			// Skip the template if it's blockified, and we should only use classic ones.
 			// Until the blockified Product Grid Block is implemented, we need to always skip the blockified templates.
+			// phpcs:ignore Squiz.PHP.CommentedOutCode
 			if ( // $this->package->is_experimental_build() &&
 				// ! BlockTemplateUtils::should_use_blockified_product_grid_templates() &&
 				strpos( $template_file, 'blockified' ) !== false ) {
