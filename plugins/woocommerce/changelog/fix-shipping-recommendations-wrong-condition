@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed wrong condition used for showing shipping recommendations tour step

@@ -11,7 +11,7 @@ import {
 	useRef,
 	createPortal,
 } from '@wordpress/element';
-import { OPTIONS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 const REVIEWED_DEFAULTS_OPTION =
 	'woocommerce_admin_reviewed_default_shipping_zones';
@@ -200,10 +200,6 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 export const ShippingTour = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { show: showTour } = useShowShippingTour();
-	const activePlugins = useSelect( ( select ) =>
-		select( PLUGINS_STORE_NAME ).getActivePlugins()
-	);
-
 	const [ step, setStepNumber ] = useState( 0 );
 
 	const tourConfig: TourKitTypes.WooConfig = {
@@ -281,8 +277,8 @@ export const ShippingTour = () => {
 
 	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
 
-	const isShippingRecommendationsPresent = ! activePlugins.includes(
-		'woocommerce-services'
+	const isShippingRecommendationsPresent = document.querySelector(
+		SHIPPING_RECOMMENDATIONS_SELECTOR
 	);
 
 	if ( isWcsSectionPresent ) {
