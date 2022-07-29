@@ -34,4 +34,27 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		ob_end_clean();
 		$this->assertFalse( empty( $content ) );
 	}
+
+	/**
+	 * Test that order meta function outputs linked meta.
+	 */
+	public function test_order_meta() {
+		add_filter(
+			'woocommerce_email_order_meta_keys',
+			function () {
+				return array( 'dummy_key' );
+			}
+		);
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->add_meta_data( 'dummy_key', 'dummy_meta_value' );
+		$order->save();
+
+		$email_object = new WC_Emails();
+		ob_start();
+		$email_object->order_meta( $order, true, true );
+		$content = ob_get_contents();
+		ob_end_clean();
+		$this->assertContains( 'dummy_key', $content );
+		$this->assertContains( 'dummy_meta_value', $content );
+	}
 }
