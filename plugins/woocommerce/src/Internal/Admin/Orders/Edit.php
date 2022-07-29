@@ -73,15 +73,6 @@ class Edit {
 	}
 
 	/**
-	 * Hook save action for order custom meta box.
-	 *
-	 * @return void
-	 */
-	private function save_order_specific_meta_boxes() {
-		add_action( 'woocommerce_process_shop_order_meta', array( $this->custom_meta_box, 'save' ), 1, 2 );
-	}
-
-	/**
 	 * Enqueue necessary scripts for order edit page.
 	 */
 	private function enqueue_scripts() {
@@ -104,7 +95,6 @@ class Edit {
 		if ( ! isset( $this->custom_meta_box ) ) {
 			$this->custom_meta_box = wc_get_container()->get( CustomMetaBox::class );
 		}
-		$this->save_order_specific_meta_boxes();
 		$this->add_save_meta_boxes();
 		$this->handle_order_update();
 		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
