@@ -1021,17 +1021,17 @@ LEFT JOIN {$operational_data_clauses['join']}
 			$changes[ $key ] = $this->{"get_$key"}( $order );
 		}
 
+		// Make sure 'status' is correct.
+		if ( array_key_exists( 'status', $column_mapping ) ) {
+			$changes['status'] = $this->get_post_status( $order );
+		}
+
 		$row        = array();
 		$row_format = array();
 
 		foreach ( $column_mapping as $column => $details ) {
 			if ( ! isset( $details['name'] ) || ! array_key_exists( $details['name'], $changes ) ) {
 				continue;
-			}
-
-			// 'status' is a little special (for backwards compat.).
-			if ( 'status' === $column ) {
-				$changes['status'] = 'wc-' . str_replace( 'wc-', '', $changes['status'] ? $changes['status'] : 'pending' );
 			}
 
 			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );
