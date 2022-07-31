@@ -1,2 +1,2 @@
 #!/bin/bash
-pnpm exec turbo run "$1" -- -- ${@:2}
+pnpm -- turbo run "$1" -- -- ${@:2}
