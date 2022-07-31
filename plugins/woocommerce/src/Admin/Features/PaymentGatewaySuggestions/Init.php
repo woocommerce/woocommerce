@@ -31,10 +31,15 @@ class Init {
 
 	/**
 	 * Go through the specs and run them.
+	 *
+	 * @param array|null $specs payment suggestion spec array.
+	 * @return array
 	 */
-	public static function get_suggestions() {
+	public static function get_suggestions( array $specs = null ) {
 		$suggestions = array();
-		$specs       = self::get_specs();
+		if ( null === $specs ) {
+			$specs = self::get_specs();
+		}
 
 		foreach ( $specs as $spec ) {
 			$suggestion    = EvaluateSuggestion::evaluate( $spec );

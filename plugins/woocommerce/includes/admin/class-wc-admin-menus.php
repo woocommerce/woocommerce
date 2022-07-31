@@ -6,7 +6,6 @@
  * @version 2.5.0
  */
 
-use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
@@ -20,10 +19,6 @@ if ( class_exists( 'WC_Admin_Menus', false ) ) {
  * WC_Admin_Menus Class.
  */
 class WC_Admin_Menus {
-	/**
-	 * @var Custom_Orders_List_Table
-	 */
-	private $orders_list_table;
 
 	/**
 	 * Hook in tabs.

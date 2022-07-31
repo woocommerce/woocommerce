@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add support for the 'customer' query var to the COT datastore.
