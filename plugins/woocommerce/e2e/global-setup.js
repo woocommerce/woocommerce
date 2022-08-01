@@ -8,8 +8,7 @@ const customerUsername = CUSTOMER_USER ?? 'customer';
 const customerPassword = CUSTOMER_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
-	const { stateDir } = config.projects[ 0 ].use;
-	const { baseURL } = config.projects[ 0 ].use;
+	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
 	console.log( `State Dir: ${ stateDir }` );
 	console.log( `Base URL: ${ baseURL }` );
@@ -48,13 +47,11 @@ module.exports = async ( config ) => {
 	const browser = await chromium.launch();
 	const adminContext = await browser.newContext( {
 		baseURL,
-		userAgent:
-			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
+		userAgent,
 	} );
 	const customerContext = await browser.newContext( {
 		baseURL,
-		userAgent:
-			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
+		userAgent,
 	} );
 	const adminPage = await adminContext.newPage();
 	const customerPage = await customerContext.newPage();
