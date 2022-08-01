@@ -31,9 +31,6 @@ const config = {
 		viewport: { width: 1280, height: 720 },
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		stateDir: 'e2e/storage/',
-		userAgent: CI
-			? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36'
-			: undefined,
 	},
 	projects: [
 		{

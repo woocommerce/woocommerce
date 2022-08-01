@@ -1,16 +1,18 @@
 const { chromium } = require( '@playwright/test' );
-const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
+const { ADMIN_USER, ADMIN_PASSWORD, USER_AGENT } = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
-	const { baseURL, userAgent } = config.projects[ 0 ].use;
+	const { baseURL } = config.projects[ 0 ].use;
+
+	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
+	const contextOptions = baseURL.includes( 'http://localhost' )
+		? { baseURL }
+		: { baseURL, userAgent: USER_AGENT };
 
 	const browser = await chromium.launch();
-	const context = await browser.newContext( {
-		baseURL,
-		userAgent,
-	} );
+	const context = await browser.newContext( contextOptions );
 	const adminPage = await context.newPage();
 
 	let consumerTokenCleared = false;
