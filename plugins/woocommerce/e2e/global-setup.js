@@ -97,9 +97,6 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < nRetries; i++ ) {
 		try {
 			console.log( 'Trying to add consumer token...' );
-			await adminPage
-				.context()
-				.tracing.start( { screenshots: true, snapshots: true } );
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
@@ -112,14 +109,10 @@ module.exports = async ( config ) => {
 			process.env.CONSUMER_SECRET = await adminPage.inputValue(
 				'#key_consumer_secret'
 			);
-			await adminPage.context().tracing.stop();
 			console.log( 'Added consumer token successfully.' );
 			customerKeyConfigured = true;
 			break;
 		} catch ( e ) {
-			await adminPage.context().tracing.stop( {
-				path: `./e2e/test-results/failed-token-${ i }.zip`,
-			} );
 			console.log(
 				`Failed to add consumer token. Retrying... ${ i }/${ nRetries }`
 			);
