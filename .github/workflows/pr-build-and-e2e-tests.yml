@@ -13,7 +13,7 @@ jobs:
         runs-on: ubuntu-20.04
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
-            E2E_PLAYWRIGHT: false
+            E2E_PLAYWRIGHT: true
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
