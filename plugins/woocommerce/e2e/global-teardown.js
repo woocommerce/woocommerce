@@ -1,4 +1,4 @@
-const { firefox } = require( '@playwright/test' );
+const { chromium } = require( '@playwright/test' );
 const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
@@ -6,8 +6,13 @@ const adminPassword = ADMIN_PASSWORD ?? 'password';
 module.exports = async ( config ) => {
 	const { baseURL } = config.projects[ 0 ].use;
 
-	const browser = await firefox.launch();
-	const adminPage = await browser.newPage();
+	const browser = await chromium.launch();
+	const context = await browser.newContext( {
+		baseURL,
+		userAgent:
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
+	} );
+	const adminPage = await context.newPage();
 
 	let consumerTokenCleared = false;
 
@@ -16,12 +21,12 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < keysRetries; i++ ) {
 		try {
 			console.log( 'Trying to clear consumer token... Try:' + i );
-			await adminPage.goto( `${ baseURL }/wp-admin` );
+			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', adminUsername );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 			await adminPage.goto(
-				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
+				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);
 			await adminPage.dispatchEvent( 'a.submitdelete', 'click' );
 			console.log( 'Cleared up consumer token successfully.' );

@@ -1,4 +1,4 @@
-const { firefox, expect } = require( '@playwright/test' );
+const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
 const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
 	process.env;
@@ -45,16 +45,26 @@ module.exports = async ( config ) => {
 	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
 
-	const browser = await firefox.launch();
-	const adminPage = await browser.newPage();
-	const customerPage = await browser.newPage();
+	const browser = await chromium.launch();
+	const adminContext = browser.newContext( {
+		baseURL,
+		userAgent:
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
+	} );
+	const customerContext = browser.newContext( {
+		baseURL,
+		userAgent:
+			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
+	} );
+	const adminPage = await adminContext.newPage();
+	const customerPage = await customerContext.newPage();
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `${ baseURL }/wp-admin` );
+			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', adminUsername );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
@@ -94,7 +104,7 @@ module.exports = async ( config ) => {
 				.context()
 				.tracing.start( { screenshots: true, snapshots: true } );
 			await adminPage.goto(
-				`${ baseURL }/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
+				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
 			await adminPage.fill( '#key_description', 'Key for API access' );
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
@@ -132,12 +142,12 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `${ baseURL }/wp-admin` );
+			await customerPage.goto( `/wp-admin` );
 			await customerPage.fill( 'input[name="log"]', customerUsername );
 			await customerPage.fill( 'input[name="pwd"]', customerPassword );
 			await customerPage.click( 'text=Log In' );
 
-			await customerPage.goto( `${ baseURL }/my-account/` );
+			await customerPage.goto( `/my-account/` );
 			await expect(
 				customerPage.locator( 'h1.entry-title' )
 			).toContainText( 'My account' );

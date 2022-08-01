@@ -75,12 +75,10 @@ jobs:
                   pnpm exec wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
               # pnpm exec wc-e2e test:e2e
 
-            - name: Download and install Chromium and Firefox
+            - name: Download and install Chromium
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
-              run: |
-                  pnpx playwright install --with-deps chromium
-                  pnpx playwright install --with-deps firefox
+              run: pnpx playwright install chromium
 
             - name: Download WooCommerce nightly build zip
               if: fromJSON(env.E2E_PLAYWRIGHT)
