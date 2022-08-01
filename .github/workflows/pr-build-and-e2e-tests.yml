@@ -35,7 +35,7 @@ jobs:
                   php-version: '7.4'
 
             - name: Install and Build
-              if: fromJSON(env.E2E_PLAYWRIGHT) != true
+              # if: fromJSON(env.E2E_PLAYWRIGHT) != true
               uses: ./.github/actions/install-build
 
             - name: Install dependencies
