@@ -95,12 +95,6 @@ jobs:
                   gh release download nightly
                   echo "::set-output name=PLUGIN_PATH::$PLUGIN_DIR/woocommerce-trunk-nightly.zip"
 
-            # mytodo remove this
-            - name: Temporarily make dir for global setup screenshots
-              if: fromJSON(env.E2E_PLAYWRIGHT)
-              working-directory: plugins/woocommerce
-              run: mkdir -p e2e/tmp/global-setup-screenshots
-
             - name: Run Playwright E2E smoke test.
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
