@@ -59,9 +59,6 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
 			await adminPage.waitForLoadState( 'networkidle' );
-			await expect(
-				adminPage.locator( '#wp-admin-bar-my-account' )
-			).toBeVisible();
 
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
