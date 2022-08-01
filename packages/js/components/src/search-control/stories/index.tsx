@@ -35,6 +35,31 @@ export const Multiple: React.FC = () => (
 	</>
 );
 
+export const FuzzyMatching: React.FC = () => {
+	const getFilteredItems = (
+		allItems: ItemType[],
+		selectedItems: ItemType[],
+		inputValue: string
+	) => {
+		const pattern =
+			'.*' + inputValue.toLowerCase().split( '' ).join( '.*' ) + '.*';
+		const re = new RegExp( pattern );
+
+		return allItems.filter( ( item ) => {
+			return re.test( item.label.toLowerCase() );
+		} );
+	};
+
+	return (
+		<SearchControl
+			hasMultiple
+			getFilteredItems={ getFilteredItems }
+			items={ sampleItems }
+			label="Fuzzy matching"
+		/>
+	);
+};
+
 export const Async: React.FC = () => {
 	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( [] );
 	const [ isFetching, setIsFetching ] = useState( false );
