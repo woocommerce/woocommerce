@@ -70,12 +70,6 @@ module.exports = async ( config ) => {
 			adminLoggedIn = true;
 			break;
 		} catch ( e ) {
-			// mytodo remove this
-			await adminPage.screenshot( {
-				fullPage: true,
-				path: `e2e/tmp/global-setup-screenshots/admin-login-try-${ i }.png`,
-			} );
-
 			console.log(
 				`Admin log-in failed, Retrying... ${ i }/${ adminRetries }`
 			);
