@@ -348,7 +348,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			$order->update_meta_data( 'Payment type', wc_clean( $posted['payment_type'] ) );
 		}
 		if ( ! empty( $posted['txn_id'] ) ) {
-			$order->update_meta_data( '_transaction_id', wc_clean( $posted['txn_id'] ) );
+			$order->set_transaction_id( wc_clean( $posted['txn_id'] ) );
 		}
 		if ( ! empty( $posted['payment_status'] ) ) {
 			$order->update_meta_data( '_paypal_status', wc_clean( $posted['payment_status'] ) );

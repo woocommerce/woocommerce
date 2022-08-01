@@ -145,4 +145,28 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		return $value;
 	}
 
+	/**
+	 * Test that paypal metadata is saved properly in opn request.
+	 */
+	public function test_ipn_save_paypal_meta_data() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$posted_meta = array(
+			'payment_type'   => 'paypal',
+			'txn_id'         => $this->transaction_id_26960,
+			'payment_status' => 'Completed',
+		);
+
+		$call_posted_meta = function ( $order, $posted_meta ) {
+			$this->save_paypal_meta_data( $order, $posted_meta );
+		};
+
+		$call_posted_meta->call( ( new WC_Gateway_Paypal_IPN_Handler( true ) ), $order, $posted_meta );
+
+		$this->assertEquals( $order->get_meta( 'Payment type' ), 'paypal' );
+		$this->assertEquals( $order->get_transaction_id(), $this->transaction_id_26960 );
+		$this->assertEquals( $order->get_meta( '_paypal_status' ), 'Completed' );
+	}
+
 }
