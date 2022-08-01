@@ -7,6 +7,7 @@ import { createElement } from 'react';
  * Internal dependencies
  */
 import { ChildrenType, ItemType, Props, getItemPropsType } from './types';
+import { MenuItem } from './menu-item';
 
 type MenuProps = {
 	children?: ChildrenType;
@@ -14,8 +15,6 @@ type MenuProps = {
 	highlightedIndex: number;
 	isOpen: boolean;
 	items: ItemType[];
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore These are the types provided by Downshift.
 	getItemProps: getItemPropsType;
 };
 
@@ -27,24 +26,32 @@ export const Menu = ( {
 	items,
 	getItemProps,
 }: MenuProps ) => {
+	if ( children ) {
+		return (
+			<ul { ...menuProps }>
+				{ children( {
+					highlightedIndex,
+					isOpen,
+					items,
+					getItemProps,
+				} ) }
+			</ul>
+		);
+	}
+
 	return (
 		<ul { ...menuProps }>
-			{ children &&
-				children( { highlightedIndex, isOpen, items, getItemProps } ) }
-			{ ! children &&
-				isOpen &&
+			{ isOpen &&
 				items.map( ( item, index: number ) => (
-					<li
-						style={
-							highlightedIndex === index
-								? { backgroundColor: '#bde4ff' }
-								: {}
-						}
+					<MenuItem
 						key={ `${ item.value }${ index }` }
-						{ ...getItemProps( { item, index } ) }
+						index={ index }
+						isActive={ highlightedIndex === index }
+						item={ item }
+						getItemProps={ getItemProps }
 					>
 						{ item.value }
-					</li>
+					</MenuItem>
 				) ) }
 		</ul>
 	);
