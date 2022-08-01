@@ -7,16 +7,13 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
-env:
-    E2E_PLAYWRIGHT: true
-
 jobs:
     login-run:
         name: Daily smoke test on trunk.
         runs-on: ubuntu-20.04
         env:
             API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
-            E2E_PLAYWRIGHT: true
+            E2E_PLAYWRIGHT: false
         outputs:
             commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
         steps:
@@ -35,12 +32,12 @@ jobs:
                   php-version: '7.4'
 
             - name: Install and Build
-              # if: fromJSON(env.E2E_PLAYWRIGHT) != true
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               uses: ./.github/actions/install-build
 
             - name: Install dependencies
-              # if: fromJSON(env.E2E_PLAYWRIGHT)
-              if: false
+              if: fromJSON(env.E2E_PLAYWRIGHT)
+              # if: false
               env:
                   COMPOSER_NO_DEV: 1
               run: |
@@ -81,7 +78,7 @@ jobs:
             - name: Download and install Chromium
               if: fromJSON(env.E2E_PLAYWRIGHT)
               working-directory: plugins/woocommerce
-              run: pnpx playwright install chromium
+              run: pnpx playwright install --with-deps chromium
 
             - name: Download WooCommerce nightly build zip
               if: fromJSON(env.E2E_PLAYWRIGHT)
