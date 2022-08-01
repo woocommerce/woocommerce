@@ -1,4 +1,4 @@
-const { chromium } = require( '@playwright/test' );
+const { firefox } = require( '@playwright/test' );
 const { ADMIN_USER, ADMIN_PASSWORD } = process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
@@ -6,7 +6,7 @@ const adminPassword = ADMIN_PASSWORD ?? 'password';
 module.exports = async ( config ) => {
 	const { baseURL } = config.projects[ 0 ].use;
 
-	const browser = await chromium.launch();
+	const browser = await firefox.launch();
 	const adminPage = await browser.newPage();
 
 	let consumerTokenCleared = false;
