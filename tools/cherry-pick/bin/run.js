@@ -204,9 +204,11 @@ function cherryPick( commit ) {
 
 	spinner.start();
 
-	const response = spawnSync( 'git', [ 'cherry-pick', commit ] );
+	const response = spawnSync( 'git', [ 'cherry-pick', commit ], {
+		encoding: 'utf-8',
+	} );
 
-	if ( response.status == 0 ) {
+	if ( response.status === 0 ) {
 		spinner.succeed();
 		return;
 	}
@@ -217,6 +219,7 @@ function cherryPick( commit ) {
 			response.stderr.match( 'error: could not apply' )
 		) {
 			spinner.fail( `Fail cherry picking ${ commit }` );
+			console.log( response.stdout );
 			throw `stderr: ${ response.stderr }`;
 		}
 	}
