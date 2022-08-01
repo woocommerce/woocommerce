@@ -94,7 +94,7 @@ class WC_Orders_Tracking {
 	 * @param int $id Order id.
 	 */
 	public function track_created_date_change( $id ) {
-		if ( OrderUtil::is_order( $id ) ) {
+		if ( ! OrderUtil::is_order( $id ) ) {
 			return;
 		}
 
