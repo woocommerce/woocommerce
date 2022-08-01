@@ -7,11 +7,12 @@ const config = {
 		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: './report',
-	globalSetup: require.resolve( './global-setup' ),
-	globalTeardown: require.resolve( './global-teardown' ),
+	// globalSetup: require.resolve( './global-setup' ),
+	// globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
 	retries: CI ? 4 : 2,
 	workers: 4,
+	testMatch: 'basic.spec.js',
 	reporter: [
 		[ 'list' ],
 		[
