@@ -95,4 +95,54 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		return $value;
 	}
 
+	/**
+	 * Test do_capture when API returns success.
+	 */
+	public function test_capture_payment() {
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_paypal_status', 'pending' );
+		$order->set_transaction_id( $this->transaction_id_26960 );
+		$order->set_payment_method( 'paypal' );
+		$order->save();
+
+		// Force HTTP error.
+		add_filter( 'pre_http_request', array( $this, '__return_paypal_success' ), 10, 2 );
+
+		( new WC_Gateway_Paypal() )->capture_payment( $order->get_id() );
+
+		remove_filter( 'pre_http_request', array( $this, '__return_paypal_success' ) );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'Completed', $order->get_meta( '_paypal_status' ) );
+	}
+
+	/**
+	 * Helper function for raising success when this is a PayPal request using transaction_id_26960.
+	 *
+	 * @param bool  $value      Original pre-value, likely to be false.
+	 * @param array $parsed_url Parsed URL object.
+	 *
+	 * @return bool|WP_Error Return success object or return original value.
+	 */
+	public function __return_paypal_success( $value, $parsed_url ) {
+		$response_body = array(
+			'TRANSACTIONID'   => $this->transaction_id_26960,
+			'PAYMENTSTATUS'   => 'Completed',
+			'AMT'             => '100.00',
+			'CURRENCYCODE'    => 'USD',
+			'AVSCODE'         => 'X',
+			'CVV2MATCH'       => 'M',
+			'ACK'             => 'Success',
+			'AUTHORIZATIONID' => $this->transaction_id_26960,
+		);
+		$response      = array( 'body' => http_build_query( $response_body ) );
+		if ( isset( $parsed_url['body'] ) && isset( $parsed_url['body']['AUTHORIZATIONID'] ) && $this->transaction_id_26960 === $parsed_url['body']['AUTHORIZATIONID'] ) {
+			return $response;
+		}
+		if ( isset( $parsed_url['body'] ) && isset( $parsed_url['body']['TRANSACTIONID'] ) && $this->transaction_id_26960 === $parsed_url['body']['TRANSACTIONID'] ) {
+			return $response;
+		}
+		return $value;
+	}
+
 }
