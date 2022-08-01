@@ -35,9 +35,8 @@ jobs:
               if: fromJSON(env.E2E_PLAYWRIGHT) != true
               uses: ./.github/actions/install-build
 
-            - name: Install dependencies
+            - name: Install PNPM and project dependencies
               if: fromJSON(env.E2E_PLAYWRIGHT)
-              # if: false
               env:
                   COMPOSER_NO_DEV: 1
               run: |
