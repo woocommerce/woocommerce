@@ -46,12 +46,12 @@ module.exports = async ( config ) => {
 	let customerKeyConfigured = false;
 
 	const browser = await chromium.launch();
-	const adminContext = browser.newContext( {
+	const adminContext = await browser.newContext( {
 		baseURL,
 		userAgent:
 			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
 	} );
-	const customerContext = browser.newContext( {
+	const customerContext = await browser.newContext( {
 		baseURL,
 		userAgent:
 			'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36',
