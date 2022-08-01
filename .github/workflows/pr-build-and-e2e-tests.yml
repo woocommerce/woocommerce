@@ -93,7 +93,6 @@ jobs:
                   mkdir $PLUGIN_DIR
                   cd $PLUGIN_DIR
                   gh release download nightly
-                  echo "::set-output name=PLUGIN_DIR::$PLUGIN_DIR"
                   echo "::set-output name=PLUGIN_PATH::$PLUGIN_DIR/woocommerce-trunk-nightly.zip"
 
             # mytodo remove this
