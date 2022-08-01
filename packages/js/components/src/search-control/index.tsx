@@ -8,8 +8,8 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { ChildrenType, ItemType } from './types';
 import { SelectedItems } from './selected-items';
-import { ItemType } from './types';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import {
@@ -18,6 +18,7 @@ import {
 } from './utils';
 
 type SearchControlProps = {
+	children?: ChildrenType;
 	items: ItemType[];
 	label: string;
 	hasMultiple?: boolean;
@@ -28,15 +29,18 @@ type SearchControlProps = {
 		selectedItems: ItemType[],
 		inputValue: string
 	) => ItemType[];
+	onInputChange?: ( value: string | undefined ) => void;
 };
 
 export const SearchControl = ( {
+	children,
 	hasMultiple = false,
 	items,
 	label,
 	initialSelectedItems = [],
 	itemToString = defaultItemToString,
 	getFilteredItems = defaultGetFilteredItems,
+	onInputChange = () => null,
 }: SearchControlProps ) => {
 	const [ inputValue, setInputValue ] = useState( '' );
 	const {
@@ -73,6 +77,7 @@ export const SearchControl = ( {
 		} ) => {
 			switch ( type ) {
 				case useCombobox.stateChangeTypes.InputChange:
+					onInputChange( value );
 					setInputValue( value || '' );
 
 					break;
@@ -118,6 +123,7 @@ export const SearchControl = ( {
 				/>
 			</div>
 			<Menu
+				children={ children }
 				menuProps={ getMenuProps() }
 				items={ filteredItems }
 				highlightedIndex={ highlightedIndex }

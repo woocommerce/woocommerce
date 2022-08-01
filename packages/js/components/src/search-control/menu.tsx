@@ -6,9 +6,10 @@ import { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { ItemType, Props } from './types';
+import { ChildrenType, ItemType, Props } from './types';
 
 type MenuProps = {
+	children?: ChildrenType;
 	menuProps: Props;
 	highlightedIndex: number;
 	isOpen: boolean;
@@ -19,6 +20,7 @@ type MenuProps = {
 };
 
 export const Menu = ( {
+	children,
 	menuProps,
 	highlightedIndex,
 	isOpen,
@@ -27,7 +29,10 @@ export const Menu = ( {
 }: MenuProps ) => {
 	return (
 		<ul { ...menuProps }>
-			{ isOpen &&
+			{ children &&
+				children( { highlightedIndex, isOpen, items, getItemProps } ) }
+			{ ! children &&
+				isOpen &&
 				items.map( ( item, index: number ) => (
 					<li
 						style={
