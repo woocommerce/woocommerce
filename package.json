@@ -15,8 +15,8 @@
 	},
 	"scripts": {
 		"build": "./node_modules/.bin/run-turbo turbo:build",
-		"lint": "bin/run-turbo-root.sh turbo:lint",
-		"test": "bin/run-turbo-root.sh turbo:test",
+		"lint": "./node_modules/.bin/run-turbo turbo:lint",
+		"test": "./node_modules/.bin/run-turbo turbo:test",
 		"build-storybook": "build-storybook  -c ./tools/storybook/.storybook",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",

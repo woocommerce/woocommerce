@@ -1,4 +1,4 @@
-const { exec, spawn } = require( 'child_process' );
+const { spawn } = require( 'child_process' );
 
 const args = process.argv.slice( 2 );
 
