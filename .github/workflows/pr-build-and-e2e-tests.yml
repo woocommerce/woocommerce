@@ -112,15 +112,6 @@ jobs:
                   pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
 
-            # mytodo remove this
-            - name: Archive global setup screenshots
-              if: always() && fromJSON(env.E2E_PLAYWRIGHT)
-              uses: actions/upload-artifact@v3
-              with:
-                  name: e2e-global-setup-screenshots
-                  path: ${{ github.workspace }}/plugins/woocommerce/e2e/tmp/global-setup-screenshots
-                  retention-days: 1
-
     e2e-tests-run:
         name: Runs E2E tests.
         if: false # mytodo revert
