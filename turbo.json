@@ -35,7 +35,7 @@
 			]
 		},
 
-		"woocommerce#build": {
+		"woocommerce#turbo:build": {
 			"dependsOn": [
 				"^turbo:build",
 				"woocommerce/client/admin#turbo:build",

@@ -8,8 +8,8 @@
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
-		"e2e": "./node_modules/.bin/run-turbo turbo:e2e",
-		"lint": "./node_modules/.bin/run-turbo turbo:lint",
+		"e2e": "./node_modules/./bin/run-turbo-pkg turbo:e2e",
+		"lint": "./node_modules/./bin/run-turbo-pkg turbo:lint",
 		"turbo:e2e": "jest",
 		"turbo:lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
 		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"

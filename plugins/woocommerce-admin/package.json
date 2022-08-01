@@ -10,9 +10,9 @@
 	},
 	"scripts": {
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
-		"build": "./node_modules/.bin/run-turbo turbo:build",
-		"lint": "./node_modules/.bin/run-turbo turbo:lint",
-		"test": "./node_modules/.bin/run-turbo turbo:test",
+		"build": "./node_modules/./bin/run-turbo-pkg turbo:build",
+		"lint": "./node_modules/./bin/run-turbo-pkg turbo:lint",
+		"test": "./node_modules/./bin/run-turbo-pkg turbo:test",
 		"turbo:build": "pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"turbo:lint": "pnpm run lint:js && pnpm run lint:css",
 		"turbo:test": "pnpm run test:client",

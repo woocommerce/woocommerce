@@ -39,7 +39,7 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"lint": "./node_modules/.bin/run-turbo turbo:lint",
+		"lint": "./node_modules/./bin/run-turbo-pkg turbo:lint",
 		"turbo:lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},

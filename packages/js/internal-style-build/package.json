@@ -29,7 +29,7 @@
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"scripts": {
-		"lint": "./node_modules/.bin/run-turbo turbo:lint",
+		"lint": "./node_modules/./bin/run-turbo-pkg turbo:lint",
 		"turbo:lint": "eslint index.js",
 		"lint:fix": "eslint index.js --fix"
 	},

@@ -9,6 +9,7 @@
 		"node": "^16.13.1"
 	},
 	"bin": {
-		"run-turbo": "./bin/run-turbo.sh"
+		"run-turbo": "./bin/run-turbo.sh",
+		"run-turbo-pkg": "./bin/run-turbo-pkg.sh"
 	}
 }
