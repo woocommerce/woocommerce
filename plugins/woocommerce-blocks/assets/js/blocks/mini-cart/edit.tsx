@@ -4,7 +4,6 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { ReactElement } from 'react';
 import { formatPrice } from '@woocommerce/price-format';
-import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import { PanelBody, ExternalLink, SelectControl } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -108,7 +107,6 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					<QuantityBadge count={ productCount } />
 				</button>
 			</Noninteractive>
-			<CartCheckoutCompatibilityNotice blockName="mini-cart" />
 		</div>
 	);
 };

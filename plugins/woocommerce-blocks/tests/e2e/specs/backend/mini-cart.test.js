@@ -19,7 +19,6 @@ import {
 	goToSiteEditor,
 	useTheme,
 	waitForCanvas,
-	addBlockToFSEArea,
 } from '../../utils.js';
 
 const block = {
@@ -30,8 +29,6 @@ const block = {
 		insertButton: "//button//span[text()='Mini Cart']",
 		insertButtonDisabled:
 			"//button[@aria-disabled]//span[text()='Mini Cart']",
-		compatibilityNoticeTitle:
-			"//h1[contains(text(), 'Compatibility notice')]",
 	},
 };
 
@@ -39,14 +36,6 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 ) {
 	// eslint-disable-next-line jest/no-focused-tests, jest/expect-expect
 	test.only( `skipping ${ block.name } tests`, () => {} );
 }
-
-const removeDismissedCompatibilityNoticesFromLocalStorage = async () => {
-	await page.evaluate( () => {
-		window.localStorage.removeItem(
-			'wc-blocks_dismissed_compatibility_notices'
-		);
-	} );
-};
 
 const addBlockToWidgetsArea = async () => {
 	await closeModalIfExists();
@@ -58,10 +47,6 @@ const addBlockToWidgetsArea = async () => {
 
 describe( `${ block.name } Block`, () => {
 	describe( 'in widget editor', () => {
-		beforeAll( async () => {
-			await removeDismissedCompatibilityNoticesFromLocalStorage();
-		} );
-
 		beforeEach( async () => {
 			await openWidgetEditor();
 		} );
@@ -71,28 +56,6 @@ describe( `${ block.name } Block`, () => {
 			expect( await isBlockInsertedInWidgetsArea( block.slug ) ).toBe(
 				true
 			);
-		} );
-
-		it( 'the compatibility notice appears', async () => {
-			await addBlockToWidgetsArea();
-			const compatibilityNoticeTitle = await page.$x(
-				block.selectors.compatibilityNoticeTitle
-			);
-			expect( compatibilityNoticeTitle.length ).toBe( 1 );
-		} );
-
-		it( "after the compatibility notice is dismissed, it doesn't appear again", async () => {
-			await page.evaluate( () => {
-				window.localStorage.setItem(
-					'wc-blocks_dismissed_compatibility_notices',
-					'["mini-cart"]'
-				);
-			} );
-			await addBlockToWidgetsArea();
-			const compatibilityNoticeTitle = await page.$x(
-				block.selectors.compatibilityNoticeTitle
-			);
-			expect( compatibilityNoticeTitle.length ).toBe( 0 );
 		} );
 
 		it( 'can only be inserted once', async () => {
@@ -113,35 +76,12 @@ describe( `${ block.name } Block`, () => {
 			await goToSiteEditor(
 				process.env.GUTENBERG_EDITOR_CONTEXT || 'core'
 			);
-			await removeDismissedCompatibilityNoticesFromLocalStorage();
 			await waitForCanvas();
 		} );
 
 		it( 'can be inserted in FSE area', async () => {
 			await insertBlock( block.name );
 			await expect( canvas() ).toMatchElement( block.class );
-		} );
-
-		it( 'the compatibility notice appears', async () => {
-			await addBlockToFSEArea( block.name );
-			const compatibilityNoticeTitle = await page.$x(
-				block.selectors.compatibilityNoticeTitle
-			);
-			expect( compatibilityNoticeTitle.length ).toBe( 1 );
-		} );
-
-		it( "after the compatibility notice is dismissed, it doesn't appear again", async () => {
-			await page.evaluate( () => {
-				window.localStorage.setItem(
-					'wc-blocks_dismissed_compatibility_notices',
-					'["mini-cart"]'
-				);
-			} );
-			await addBlockToFSEArea( block.name );
-			const compatibilityNoticeTitle = await page.$x(
-				block.selectors.compatibilityNoticeTitle
-			);
-			expect( compatibilityNoticeTitle.length ).toBe( 0 );
 		} );
 
 		it( 'can only be inserted once', async () => {
