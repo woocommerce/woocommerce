@@ -1,4 +1,4 @@
-const { chromium, expect } = require( '@playwright/test' );
+const { firefox, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
 const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
 	process.env;
@@ -45,7 +45,7 @@ module.exports = async ( config ) => {
 	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
 
-	const browser = await chromium.launch();
+	const browser = await firefox.launch();
 	const adminPage = await browser.newPage();
 	const customerPage = await browser.newPage();
 
