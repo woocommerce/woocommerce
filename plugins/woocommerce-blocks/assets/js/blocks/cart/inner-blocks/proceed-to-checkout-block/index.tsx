@@ -9,9 +9,8 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
  */
 import attributes from './attributes';
 import { Edit, Save } from './edit';
-import metadata from './block.json';
 
-registerFeaturePluginBlockType( metadata, {
+registerFeaturePluginBlockType( 'woocommerce/proceed-to-checkout-block', {
 	icon: {
 		src: (
 			<Icon

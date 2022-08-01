@@ -9,17 +9,19 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import metadata from './block.json';
 
-registerFeaturePluginBlockType( metadata, {
-	icon: {
-		src: (
-			<Icon
-				icon={ totals }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	edit: Edit,
-	save: Save,
-} );
+registerFeaturePluginBlockType(
+	'woocommerce/cart-order-summary-heading-block',
+	{
+		icon: {
+			src: (
+				<Icon
+					icon={ totals }
+					className="wc-block-editor-components-block-icon"
+				/>
+			),
+		},
+		edit: Edit,
+		save: Save,
+	}
+);

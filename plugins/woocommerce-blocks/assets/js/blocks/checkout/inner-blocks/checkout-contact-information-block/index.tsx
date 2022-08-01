@@ -9,18 +9,20 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
  */
 import { Edit, Save } from './edit';
 import attributes from './attributes';
-import metadata from './block.json';
 
-registerFeaturePluginBlockType( metadata, {
-	icon: {
-		src: (
-			<Icon
-				icon={ atSymbol }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	attributes,
-	edit: Edit,
-	save: Save,
-} );
+registerFeaturePluginBlockType(
+	'woocommerce/checkout-contact-information-block',
+	{
+		icon: {
+			src: (
+				<Icon
+					icon={ atSymbol }
+					className="wc-block-editor-components-block-icon"
+				/>
+			),
+		},
+		attributes,
+		edit: Edit,
+		save: Save,
+	}
+);

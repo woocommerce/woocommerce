@@ -2,6 +2,7 @@
  * External dependencies
  */
 const path = require( 'path' );
+const fs = require( 'fs' );
 const { kebabCase } = require( 'lodash' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
@@ -262,13 +263,18 @@ const getMainConfig = ( options = {} ) => {
 					{
 						from: './assets/js/blocks/**/block.json',
 						to( { absoluteFilename } ) {
-							const blockName = absoluteFilename
+							/**
+							 * Getting the block name from the JSON metadata is less error prone
+							 * than extracting it from the file path.
+							 */
+							const JSONFile = fs.readFileSync(
+								path.resolve( __dirname, absoluteFilename )
+							);
+							const metadata = JSON.parse( JSONFile.toString() );
+							const blockName = metadata.name
 								.split( '/' )
-								.at( -2 );
+								.at( 1 );
 							return `./${ blockName }/block.json`;
-						},
-						globOptions: {
-							ignore: [ '**/inner-blocks/**' ],
 						},
 					},
 				],
