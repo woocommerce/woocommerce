@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ReactElement, Component } from 'react';
+import { UseComboboxGetItemPropsOptions } from 'downshift';
 
 export type ItemType = {
 	value: string;
@@ -11,17 +12,19 @@ export type Props = {
 	[ key: string ]: string;
 };
 
+export type getItemPropsType = (
+	options: UseComboboxGetItemPropsOptions< ItemType >
+	// These are the types provided by Downshift.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => any;
+
 export type ChildrenProps = {
 	items: ItemType[];
 	isOpen: boolean;
 	highlightedIndex: number;
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore These are the types provided by Downshift.
-	getItemProps: ( { item: any, index: any } ) => Props;
+	getItemProps: getItemPropsType;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore These are the types provided by Downshift.
 export type ChildrenType = ( {
 	items,
 	isOpen,

@@ -6,7 +6,7 @@ import { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { ChildrenType, ItemType, Props } from './types';
+import { ChildrenType, ItemType, Props, getItemPropsType } from './types';
 
 type MenuProps = {
 	children?: ChildrenType;
@@ -16,7 +16,7 @@ type MenuProps = {
 	items: ItemType[];
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore These are the types provided by Downshift.
-	getItemProps: ( { item: any, index: any } ) => Props;
+	getItemProps: getItemPropsType;
 };
 
 export const Menu = ( {
