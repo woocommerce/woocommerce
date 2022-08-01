@@ -117,7 +117,7 @@ test.describe( 'WooCommerce plugin can be uploaded and activated', () => {
 		// Fail the test if the message didn't appear.
 		test.fail(
 			! ( await updateCompleteMessage.isVisible() ),
-			'The "WooCommerce database update complete." was not visible after 1 minute.'
+			'The expected message "WooCommerce database update complete." did not appear after waiting for a long while.'
 		);
 
 		// If the message appeared, click on the "Thanks!" button.
