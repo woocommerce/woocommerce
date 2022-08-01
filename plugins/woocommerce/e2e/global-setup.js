@@ -1,4 +1,5 @@
 const { chromium, expect } = require( '@playwright/test' );
+const [ userAgent ] = require( 'top-user-agents' );
 const fs = require( 'fs' );
 const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
 	process.env;
@@ -45,11 +46,9 @@ module.exports = async ( config ) => {
 	let customerKeyConfigured = false;
 
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
-	process.env.USER_AGENT =
-		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/102.0.5005.40 Safari/537.36';
 	const contextOptions = baseURL.includes( 'http://localhost' )
 		? { baseURL }
-		: { baseURL, userAgent: process.env.USER_AGENT };
+		: { baseURL, userAgent };
 
 	const browser = await chromium.launch();
 	const adminContext = await browser.newContext( contextOptions );

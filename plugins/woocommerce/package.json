@@ -82,6 +82,7 @@
 		"prettier": "npm:wp-prettier@2.0.5",
 		"require-turbo": "workspace:*",
 		"stylelint": "^13.8.0",
+		"top-user-agents": "^1.0.46",
 		"typescript": "3.9.7",
 		"uuid": "^8.3.2",
 		"webpack": "5.70.0",
