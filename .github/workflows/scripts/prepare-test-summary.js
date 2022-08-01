@@ -133,12 +133,12 @@ module.exports = async ( { core } ) => {
 		.addRaw( 'To view the full E2E test report, click ' )
 		.addLink(
 			'here.',
-			'https://woocommerce.github.io/woocommerce-test-reports'
+			`https://woocommerce.github.io/woocommerce-test-reports/pr/${ PR_NUMBER }/e2e/`
 		)
 		.addBreak()
 		.addRaw( 'To view all test reports, visit the ' )
 		.addLink(
-			'WooCommerce Test Reports Dashboard',
+			'WooCommerce Test Reports Dashboard.',
 			'https://woocommerce.github.io/woocommerce-test-reports/'
 		)
 		.stringify();

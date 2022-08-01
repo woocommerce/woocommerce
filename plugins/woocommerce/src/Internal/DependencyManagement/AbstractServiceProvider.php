@@ -73,11 +73,6 @@ abstract class AbstractServiceProvider extends BaseServiceProvider {
 	 * @return \ReflectionClass|null The class of the parameter, or null if it hasn't any.
 	 */
 	private function get_class( \ReflectionParameter $parameter ) {
-		// TODO: Remove this 'if' block once minimum PHP version for WooCommerce is bumped to at least 7.1.
-		if ( version_compare( PHP_VERSION, '7.1', '<' ) ) {
-			return $parameter->getClass();
-		}
-
 		return $parameter->getType() && ! $parameter->getType()->isBuiltin()
 			? new \ReflectionClass( $parameter->getType()->getName() )
 			: null;
@@ -95,28 +90,26 @@ abstract class AbstractServiceProvider extends BaseServiceProvider {
 	 */
 	private function reflect_class_or_callable( string $class_name, $concrete ) {
 		if ( ! isset( $concrete ) || is_string( $concrete ) && class_exists( $concrete ) ) {
-			try {
-				$class  = $concrete ?? $class_name;
-				$method = new \ReflectionMethod( $class, Definition::INJECTION_METHOD );
-				if ( ! isset( $method ) ) {
-					return null;
-				}
+			$class = $concrete ?? $class_name;
 
-				$missing_modifiers = array();
-				if ( ! $method->isFinal() ) {
-					$missing_modifiers[] = 'final';
-				}
-				if ( ! $method->isPublic() ) {
-					$missing_modifiers[] = 'public';
-				}
-				if ( ! empty( $missing_modifiers ) ) {
-					throw new ContainerException( "Method '" . Definition::INJECTION_METHOD . "' of class '$class' isn't '" . implode( ' ', $missing_modifiers ) . "', instances can't be created." );
-				}
-
-				return $method;
-			} catch ( \ReflectionException $ex ) {
+			if ( ! method_exists( $class, Definition::INJECTION_METHOD ) ) {
 				return null;
 			}
+
+			$method = new \ReflectionMethod( $class, Definition::INJECTION_METHOD );
+
+			$missing_modifiers = array();
+			if ( ! $method->isFinal() ) {
+				$missing_modifiers[] = 'final';
+			}
+			if ( ! $method->isPublic() ) {
+				$missing_modifiers[] = 'public';
+			}
+			if ( ! empty( $missing_modifiers ) ) {
+				throw new ContainerException( "Method '" . Definition::INJECTION_METHOD . "' of class '$class' isn't '" . implode( ' ', $missing_modifiers ) . "', instances can't be created." );
+			}
+
+			return $method;
 		} elseif ( is_callable( $concrete ) ) {
 			try {
 				return new \ReflectionFunction( $concrete );

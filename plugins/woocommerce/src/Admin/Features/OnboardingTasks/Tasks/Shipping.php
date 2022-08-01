@@ -24,13 +24,8 @@ class Shipping extends Task {
 		// wp_ajax_woocommerce_shipping_zone_methods_save_changes
 		// and wp_ajax_woocommerce_shipping_zones_save_changes get fired
 		// when a new zone is added or an existing one has been changed.
-		// Delete the zone count transient used in has_shipping_zones() method
-		// to refresh the cache.
-		$delete_transient = function() {
-			delete_transient( self::ZONE_COUNT_TRANSIENT_NAME );
-		};
-		add_action( 'wp_ajax_woocommerce_shipping_zones_save_changes', $delete_transient, 9 );
-		add_action( 'wp_ajax_woocommerce_shipping_zone_methods_save_changes', $delete_transient, 9 );
+		add_action( 'wp_ajax_woocommerce_shipping_zones_save_changes', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
+		add_action( 'wp_ajax_woocommerce_shipping_zone_methods_save_changes', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
 	}
 
 	/**
@@ -174,15 +169,15 @@ class Shipping extends Task {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
-		return in_array( 'physical', $product_types, true ) ||
-			count(
-				wc_get_products(
-					array(
-						'virtual' => false,
-						'limit'   => 1,
-					)
-				)
-			) > 0;
+		return in_array( 'physical', $product_types, true );
+	}
+
+	/**
+	 * Delete the zone count transient used in has_shipping_zones() method
+	 * to refresh the cache.
+	 */
+	public static function delete_zone_count_transient() {
+		delete_transient( self::ZONE_COUNT_TRANSIENT_NAME );
 	}
 
 	/**

@@ -8,6 +8,7 @@ const filePathOverride = path.resolve(
 
 const productIds = [];
 const categoryIds = [];
+const attributeIds = [];
 
 const productNames = [
 	'Imported V-Neck T-Shirt',
@@ -86,12 +87,13 @@ const productCategories = [
 	'Music',
 	'Decor',
 ];
+const productAttributes = [ 'Color', 'Size' ];
 
 const errorMessage =
 	'Invalid file type. The importer supports CSV and TXT file formats.';
 
 test.describe( 'Import Products from a CSV file', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -129,6 +131,21 @@ test.describe( 'Import Products from a CSV file', () => {
 		// batch delete all categories in the array
 		await api.post( 'products/categories/batch', {
 			delete: [ ...categoryIds ],
+		} );
+		// get a list of all product attributes
+		await api.get( 'products/attributes' ).then( ( response ) => {
+			for ( let i = 0; i < response.data.length; i++ ) {
+				// if the product attribute is one that was created, add it to the array
+				for ( let j = 0; j < productAttributes.length; j++ ) {
+					if ( response.data[ i ].name === productAttributes[ j ] ) {
+						attributeIds.push( response.data[ i ].id );
+					}
+				}
+			}
+		} );
+		// batch delete attributes in the array
+		await api.post( 'products/attributes/batch', {
+			delete: [ ...attributeIds ],
 		} );
 	} );
 

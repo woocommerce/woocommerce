@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Merchant can add shipping classes', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterEach( async ( { page } ) => {
 		// no api endpoints for shipping classes, so use the UI to cleanup

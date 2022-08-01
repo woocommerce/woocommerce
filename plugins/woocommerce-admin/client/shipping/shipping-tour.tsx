@@ -11,7 +11,7 @@ import {
 	useRef,
 	createPortal,
 } from '@wordpress/element';
-import { OPTIONS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 const REVIEWED_DEFAULTS_OPTION =
 	'woocommerce_admin_reviewed_default_shipping_zones';
@@ -200,10 +200,6 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 export const ShippingTour = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { show: showTour } = useShowShippingTour();
-	const activePlugins = useSelect( ( select ) =>
-		select( PLUGINS_STORE_NAME ).getActivePlugins()
-	);
-
 	const [ step, setStepNumber ] = useState( 0 );
 
 	const tourConfig: TourKitTypes.WooConfig = {
@@ -247,7 +243,7 @@ export const ShippingTour = () => {
 								<br />
 								<span>
 									{ __(
-										'A shipping zone is a geography area where a certain set of shippping methods are offered.',
+										'A shipping zone is a geographic area where a certain set of shipping methods are offered.',
 										'woocommerce'
 									) }
 								</span>
@@ -265,7 +261,7 @@ export const ShippingTour = () => {
 					heading: __( 'Shipping methods', 'woocommerce' ),
 					descriptions: {
 						desktop: __(
-							'We defaulted to some recommended shippping methods based on your store location, but you can manage them at any time within each shipping zone settings.',
+							'We defaulted to some recommended shipping methods based on your store location, but you can manage them at any time within each shipping zone settings.',
 							'woocommerce'
 						),
 					},
@@ -281,8 +277,8 @@ export const ShippingTour = () => {
 
 	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
 
-	const isShippingRecommendationsPresent = ! activePlugins.includes(
-		'woocommerce-services'
+	const isShippingRecommendationsPresent = document.querySelector(
+		SHIPPING_RECOMMENDATIONS_SELECTOR
 	);
 
 	if ( isWcsSectionPresent ) {
@@ -310,7 +306,7 @@ export const ShippingTour = () => {
 			},
 			meta: {
 				name: 'shipping-recommendations',
-				heading: __( 'Woocommerce Shipping', 'woocommerce' ),
+				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
 						'If you’d like to speed up your process and print your shipping label straight from your WooCommerce dashboard, WooCommerce Shipping may be for you! ',

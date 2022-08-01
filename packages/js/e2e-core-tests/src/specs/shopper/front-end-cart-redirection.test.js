@@ -69,4 +69,5 @@ const runCartRedirectionTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runCartRedirectionTest;

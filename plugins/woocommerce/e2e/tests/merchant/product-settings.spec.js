@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test( 'can update settings', async ( { page } ) => {
 		await page.goto(

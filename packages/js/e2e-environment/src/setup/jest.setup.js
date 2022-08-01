@@ -8,6 +8,10 @@ import {
 	isOfflineMode,
 	setBrowserViewport,
 } from '@wordpress/e2e-test-utils';
+
+/**
+ * Internal dependencies
+ */
 import { consoleShouldSuppress, addConsoleSuppression } from '../../utils';
 import { setupJestRetries } from '../../config/jest-object.config';
 

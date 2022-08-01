@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-import { addQueryArgs } from '@wordpress/url';
 import { apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
+import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
-import { IdType, Item, ItemQuery } from './types';
+import { IdType, IdQuery, Item, ItemQuery } from './types';
 
 type ResolverOptions = {
 	resourceName: string;
@@ -25,50 +25,53 @@ export function createItemError( query: Partial< ItemQuery >, error: unknown ) {
 	};
 }
 
-export function createItemSuccess( id: IdType, item: Item ) {
+export function createItemSuccess( key: IdType, item: Item ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
-		id,
+		key,
 		item,
 	};
 }
 
-export function deleteItemError( id: IdType, error: unknown ) {
+export function deleteItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.DELETE_ITEM_ERROR as const,
-		id,
+		key,
 		error,
 		errorType: CRUD_ACTIONS.DELETE_ITEM,
 	};
 }
 
-export function deleteItemSuccess( id: IdType, force: boolean, item: Item ) {
+export function deleteItemSuccess( key: IdQuery, force: boolean, item: Item ) {
 	return {
 		type: TYPES.DELETE_ITEM_SUCCESS as const,
-		id,
+		key,
 		force,
 		item,
 	};
 }
 
-export function getItemError( id: unknown, error: unknown ) {
+export function getItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.GET_ITEM_ERROR as const,
-		id,
+		key,
 		error,
 		errorType: CRUD_ACTIONS.GET_ITEM,
 	};
 }
 
-export function getItemSuccess( id: IdType, item: Item ) {
+export function getItemSuccess( key: IdType, item: Item ) {
 	return {
 		type: TYPES.GET_ITEM_SUCCESS as const,
-		id,
+		key,
 		item,
 	};
 }
 
-export function getItemsError( query: unknown, error: unknown ) {
+export function getItemsError(
+	query: Partial< ItemQuery > | undefined,
+	error: unknown
+) {
 	return {
 		type: TYPES.GET_ITEMS_ERROR as const,
 		query,
@@ -77,27 +80,32 @@ export function getItemsError( query: unknown, error: unknown ) {
 	};
 }
 
-export function getItemsSuccess( query: unknown, items: Item[] ) {
+export function getItemsSuccess(
+	query: Partial< ItemQuery > | undefined,
+	items: Item[],
+	urlParameters: IdType[]
+) {
 	return {
 		type: TYPES.GET_ITEMS_SUCCESS as const,
 		items,
 		query,
+		urlParameters,
 	};
 }
 
-export function updateItemError( id: unknown, error: unknown ) {
+export function updateItemError( key: IdType, error: unknown ) {
 	return {
 		type: TYPES.UPDATE_ITEM_ERROR as const,
-		id,
+		key,
 		error,
 		errorType: CRUD_ACTIONS.UPDATE_ITEM,
 	};
 }
 
-export function updateItemSuccess( id: IdType, item: Item ) {
+export function updateItemSuccess( key: IdType, item: Item ) {
 	return {
 		type: TYPES.UPDATE_ITEM_SUCCESS as const,
-		id,
+		key,
 		item,
 	};
 }
@@ -107,13 +115,20 @@ export const createDispatchActions = ( {
 	resourceName,
 }: ResolverOptions ) => {
 	const createItem = function* ( query: Partial< ItemQuery > ) {
+		const urlParameters = getUrlParameters( namespace, query );
+
 		try {
 			const item: Item = yield apiFetch( {
-				path: addQueryArgs( namespace, query ),
+				path: getRestPath(
+					namespace,
+					cleanQuery( query, namespace ),
+					urlParameters
+				),
 				method: 'POST',
 			} );
+			const { key } = parseId( item.id, urlParameters );
 
-			yield createItemSuccess( item.id, item );
+			yield createItemSuccess( key, item );
 			return item;
 		} catch ( error ) {
 			yield createItemError( query, error );
@@ -121,32 +136,49 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	const deleteItem = function* ( id: IdType, force = true ) {
+	const deleteItem = function* ( idQuery: IdQuery, force = true ) {
+		const urlParameters = getUrlParameters( namespace, idQuery );
+		const { id, key } = parseId( idQuery, urlParameters );
+
 		try {
 			const item: Item = yield apiFetch( {
-				path: addQueryArgs( `${ namespace }/${ id }`, { force } ),
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					{ force },
+					urlParameters
+				),
 				method: 'DELETE',
 			} );
 
-			yield deleteItemSuccess( id, force, item );
+			yield deleteItemSuccess( key, force, item );
 			return item;
 		} catch ( error ) {
-			yield deleteItemError( id, error );
+			yield deleteItemError( key, error );
 			throw error;
 		}
 	};
 
-	const updateItem = function* ( id: IdType, query: Partial< ItemQuery > ) {
+	const updateItem = function* (
+		idQuery: IdQuery,
+		query: Partial< ItemQuery >
+	) {
+		const urlParameters = getUrlParameters( namespace, idQuery );
+		const { id, key } = parseId( idQuery, urlParameters );
+
 		try {
 			const item: Item = yield apiFetch( {
-				path: addQueryArgs( `${ namespace }/${ id }`, query ),
+				path: getRestPath(
+					`${ namespace }/${ id }`,
+					cleanQuery( query, namespace ),
+					urlParameters
+				),
 				method: 'PUT',
 			} );
 
-			yield updateItemSuccess( item.id, item );
+			yield updateItemSuccess( key, item );
 			return item;
 		} catch ( error ) {
-			yield updateItemError( query, error );
+			yield updateItemError( key, error );
 			throw error;
 		}
 	};

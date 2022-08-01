@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Payment setup task', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(
@@ -81,7 +81,12 @@ test.describe( 'Payment setup task', () => {
 			.click()
 			.catch( () => {} );
 
-		if ( await page.isVisible( 'text=Offline payment methods' ) ) {
+		await page.waitForLoadState( 'networkidle' );
+
+		if (
+			( await page.isVisible( 'text=Offline payment methods' ) ) ||
+			( await page.isVisible( 'text=Additional payment gateways' ) )
+		) {
 			// other payment methods are already shown
 		} else {
 			// show other payment methods

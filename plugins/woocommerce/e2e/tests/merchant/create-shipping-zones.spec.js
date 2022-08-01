@@ -7,7 +7,7 @@ const shippingZoneNameFreeShip = 'BC with Free shipping';
 const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -19,9 +19,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await api.get( 'shipping/zones' ).then( ( response ) => {
 			for ( let i = 0; i < response.data.length; i++ ) {
 				if (
-					response.data[ i ].name === shippingZoneNameFlatRate ||
-					response.data[ i ].name === shippingZoneNameFreeShip ||
-					response.data[ i ].name === shippingZoneNameLocalPickup
+					[
+						shippingZoneNameFlatRate,
+						shippingZoneNameFreeShip,
+						shippingZoneNameLocalPickup,
+					].includes( response.data[ i ].name )
 				) {
 					api.delete( `shipping/zones/${ response.data[ i ].id }`, {
 						force: true,

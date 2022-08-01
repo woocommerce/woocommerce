@@ -44,7 +44,7 @@ describe( 'crud reducer', () => {
 
 		const state = reducer( initialState, {
 			type: TYPES.GET_ITEM_SUCCESS,
-			id: update.id,
+			key: update.id,
 			item: update,
 		} );
 
@@ -67,6 +67,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
+			urlParameters: [],
 		} );
 
 		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
@@ -77,6 +78,26 @@ describe( 'crud reducer', () => {
 
 		expect( state.data[ 1 ] ).toEqual( items[ 0 ] );
 		expect( state.data[ 2 ] ).toEqual( items[ 1 ] );
+	} );
+
+	it( 'should handle GET_ITEMS_SUCCESS with urlParameters', () => {
+		const items: Item[] = [
+			{ id: 1, name: 'Yum!' },
+			{ id: 2, name: 'Dynamite!' },
+		];
+		const query: Partial< ItemQuery > = { status: 'draft' };
+		const state = reducer( defaultState, {
+			type: TYPES.GET_ITEMS_SUCCESS,
+			items,
+			query,
+			urlParameters: [ 5 ],
+		} );
+
+		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
+
+		expect( state.items[ resourceName ].data ).toHaveLength( 2 );
+		expect( state.data[ '5/1' ] ).toEqual( items[ 0 ] );
+		expect( state.data[ '5/2' ] ).toEqual( items[ 1 ] );
 	} );
 
 	it( 'GET_ITEMS_SUCCESS should not remove previously added fields, only update new ones', () => {
@@ -102,6 +123,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
+			urlParameters: [],
 		} );
 
 		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEMS, query );
@@ -133,12 +155,12 @@ describe( 'crud reducer', () => {
 	} );
 
 	it( 'should handle GET_ITEM_ERROR', () => {
-		const id = 3;
-		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
+		const key = 3;
+		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEM, { key } );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
 			type: TYPES.GET_ITEM_ERROR,
-			id,
+			key,
 			error,
 			errorType: CRUD_ACTIONS.GET_ITEM,
 		} );
@@ -147,12 +169,12 @@ describe( 'crud reducer', () => {
 	} );
 
 	it( 'should handle GET_ITEM_ERROR', () => {
-		const id = 3;
-		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEM, { id } );
+		const key = 3;
+		const resourceName = getResourceName( CRUD_ACTIONS.GET_ITEM, { key } );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
 			type: TYPES.GET_ITEM_ERROR,
-			id,
+			key,
 			error,
 			errorType: CRUD_ACTIONS.GET_ITEM,
 		} );
@@ -175,14 +197,14 @@ describe( 'crud reducer', () => {
 	} );
 
 	it( 'should handle UPDATE_ITEM_ERROR', () => {
-		const id = 2;
+		const key = 2;
 		const resourceName = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, {
-			id,
+			key,
 		} );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
 			type: TYPES.UPDATE_ITEM_ERROR,
-			id,
+			key,
 			error,
 			errorType: CRUD_ACTIONS.UPDATE_ITEM,
 		} );
@@ -212,7 +234,7 @@ describe( 'crud reducer', () => {
 
 		const state = reducer( initialState, {
 			type: TYPES.UPDATE_ITEM_SUCCESS,
-			id: item.id,
+			key: item.id,
 			item,
 		} );
 
@@ -234,7 +256,7 @@ describe( 'crud reducer', () => {
 
 		const state = reducer( defaultState, {
 			type: TYPES.CREATE_ITEM_SUCCESS,
-			id: item.id,
+			key: item.id,
 			item,
 		} );
 
@@ -267,13 +289,13 @@ describe( 'crud reducer', () => {
 
 		let state = reducer( initialState, {
 			type: TYPES.DELETE_ITEM_SUCCESS,
-			id: item1Updated.id,
+			key: item1Updated.id,
 			item: item1Updated,
 			force: true,
 		} );
 		state = reducer( state, {
 			type: TYPES.DELETE_ITEM_SUCCESS,
-			id: item2Updated.id,
+			key: item2Updated.id,
 			item: item2Updated,
 			force: false,
 		} );
@@ -284,14 +306,14 @@ describe( 'crud reducer', () => {
 	} );
 
 	it( 'should handle DELETE_ITEM_ERROR', () => {
-		const id = 2;
+		const key = 2;
 		const resourceName = getResourceName( CRUD_ACTIONS.DELETE_ITEM, {
-			id,
+			key,
 		} );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
 			type: TYPES.DELETE_ITEM_ERROR,
-			id,
+			key,
 			error,
 			errorType: CRUD_ACTIONS.DELETE_ITEM,
 		} );

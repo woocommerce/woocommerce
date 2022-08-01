@@ -78,6 +78,7 @@ const runProductEditDetailsTest = () => {
 			await withRestApi.deleteProduct( productId );
 		} );
 
+		// eslint-disable-next-line jest/expect-expect
 		it( 'can edit just a single attribute of a product variation', async () => {
 			const expectedVariationDetails = {
 				regularPrice: '10',
@@ -92,6 +93,7 @@ const runProductEditDetailsTest = () => {
 			await merchant.verifyVariationDetails( expectedVariationDetails );
 		} );
 
+		// eslint-disable-next-line jest/expect-expect
 		it( 'can edit multiple attributes of a product variation', async () => {
 			const expectedVariationDetails = {
 				sku: 'ABCD0123',
