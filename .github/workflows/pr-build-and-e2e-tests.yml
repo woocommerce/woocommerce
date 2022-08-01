@@ -112,12 +112,13 @@ jobs:
                   pnpx playwright test e2e/tests/smoke-tests/update-woocommerce.spec.js --config=e2e/playwright.config.js
               # pnpx playwright test --config=e2e/playwright.config.js
 
+            # mytodo remove this
             - name: Archive
               if: always()
               uses: actions/upload-artifact@v3
               with:
                   name: test-results
-                  path: plugins/woocommerce/tests/e2e/test-results
+                  path: plugins/woocommerce/e2e/test-results
                   if-no-files-found: ignore
                   retention-days: 1
 
