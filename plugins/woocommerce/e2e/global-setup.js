@@ -1,12 +1,7 @@
 const { chromium, expect } = require( '@playwright/test' );
 const fs = require( 'fs' );
-const {
-	ADMIN_USER,
-	ADMIN_PASSWORD,
-	CUSTOMER_USER,
-	CUSTOMER_PASSWORD,
-	GITHUB_WORKSPACE,
-} = process.env;
+const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
+	process.env;
 const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
 const customerUsername = CUSTOMER_USER ?? 'customer';
@@ -59,15 +54,15 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `${ baseURL }/wp-login.php` );
+			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', adminUsername );
 			await adminPage.fill( 'input[name="pwd"]', adminPassword );
 			await adminPage.click( 'text=Log In' );
+			await adminPage.waitForLoadState( 'networkidle' );
 			await expect(
 				adminPage.locator( '#wp-admin-bar-my-account' )
 			).toBeVisible();
 
-			await adminPage.goto( `${ baseURL }/wp-admin` );
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'
 			);
@@ -81,7 +76,7 @@ module.exports = async ( config ) => {
 			// mytodo remove this
 			await adminPage.screenshot( {
 				fullPage: true,
-				path: `${ GITHUB_WORKSPACE }/plugins/woocommerce/e2e/tmp/global-setup-screenshots/admin-login-try-${ i }.png`,
+				path: `e2e/tmp/global-setup-screenshots/admin-login-try-${ i }.png`,
 			} );
 
 			console.log(
