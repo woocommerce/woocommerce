@@ -8,17 +8,19 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import metadata from './block.json';
 
-registerFeaturePluginBlockType( metadata, {
-	icon: {
-		src: (
-			<Icon
-				icon={ tag }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	edit: Edit,
-	save: Save,
-} );
+registerFeaturePluginBlockType(
+	'woocommerce/checkout-order-summary-coupon-form-block',
+	{
+		icon: {
+			src: (
+				<Icon
+					icon={ tag }
+					className="wc-block-editor-components-block-icon"
+				/>
+			),
+		},
+		edit: Edit,
+		save: Save,
+	}
+);

@@ -10,9 +10,8 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
  */
 import { Edit, Save } from './edit';
 import attributes from './attributes';
-import metadata from './block.json';
 
-registerFeaturePluginBlockType( metadata, {
+registerFeaturePluginBlockType( 'woocommerce/cart-order-summary-taxes-block', {
 	icon: {
 		src: (
 			<Icon
