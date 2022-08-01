@@ -30,6 +30,7 @@ type SearchControlProps = {
 		inputValue: string
 	) => ItemType[];
 	onInputChange?: ( value: string | undefined ) => void;
+	onSelect?: ( selected: ItemType, selectedItems?: ItemType[] ) => void;
 };
 
 export const SearchControl = ( {
@@ -41,6 +42,7 @@ export const SearchControl = ( {
 	itemToString = defaultItemToString,
 	getFilteredItems = defaultGetFilteredItems,
 	onInputChange = () => null,
+	onSelect = () => null,
 }: SearchControlProps ) => {
 	const [ inputValue, setInputValue ] = useState( '' );
 	const {
@@ -88,8 +90,16 @@ export const SearchControl = ( {
 						setInputValue(
 							hasMultiple ? '' : itemToString( selected )
 						);
-						addSelectedItem( selected );
-						// selectItem( null );
+						if ( hasMultiple ) {
+							onSelect( selected, [
+								...selectedItems,
+								selected,
+							] );
+							addSelectedItem( selected );
+						} else {
+							onSelect( selected );
+							selectItem( selected );
+						}
 					}
 
 					break;

@@ -36,6 +36,37 @@ export const Multiple: React.FC = () => (
 	</>
 );
 
+export const Callback: React.FC = () => {
+	const [ color, setColor ] = useState( 'gray' );
+
+	const colors = [
+		{ value: 'blue', label: 'Blue' },
+		{ value: 'red', label: 'Red' },
+		{ value: 'yellow', label: 'Yellow' },
+		{ value: 'green', label: 'Green' },
+		{ value: 'purple', label: 'Purple' },
+	];
+
+	return (
+		<>
+			<SearchControl
+				items={ colors }
+				label="Callback method"
+				onSelect={ ( selected ) => {
+					setColor( selected.value );
+				} }
+			/>
+			<div
+				style={ {
+					backgroundColor: color,
+					width: '100px',
+					height: '100px',
+				} }
+			/>
+		</>
+	);
+};
+
 export const FuzzyMatching: React.FC = () => {
 	const getFilteredItems = (
 		allItems: ItemType[],
