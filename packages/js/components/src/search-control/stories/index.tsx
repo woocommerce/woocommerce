@@ -9,6 +9,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { ItemType } from '../types';
+import { MenuItem } from '../menu-item';
 import { SearchControl } from '../';
 
 const sampleItems = [
@@ -92,17 +93,15 @@ export const Async: React.FC = () => {
 					return (
 						<>
 							{ items.map( ( item, index: number ) => (
-								<li
-									style={
-										highlightedIndex === index
-											? { backgroundColor: '#bde4ff' }
-											: {}
-									}
+								<MenuItem
 									key={ `${ item.value }${ index }` }
-									{ ...getItemProps( { item, index } ) }
+									index={ index }
+									isActive={ highlightedIndex === index }
+									item={ item }
+									getItemProps={ getItemProps }
 								>
 									{ item.label }
-								</li>
+								</MenuItem>
 							) ) }
 						</>
 					);
