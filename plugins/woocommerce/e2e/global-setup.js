@@ -169,5 +169,7 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
+	await adminContext.close();
+	await customerContext.close();
 	await browser.close();
 };
