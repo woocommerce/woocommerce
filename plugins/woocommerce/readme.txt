@@ -202,6 +202,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Update StoreDetails task action url to navigate to the setting page [#33671](https://github.com/woocommerce/woocommerce/pull/33671)
 * Fix - WooCommerce Admin plugin deactivation message was causing much unnecessary alarm and has been improved #33592 [#33643](https://github.com/woocommerce/woocommerce/pull/33643)
 * Fix - `WP_Background_Process` updated to work nicely with memory_limits expressed in units other than 'M'. [#30908](https://github.com/woocommerce/woocommerce/pull/30908)
+* Fix - Fixed wrong condition used for showing shipping recommendations tour step [#34120](https://github.com/woocommerce/woocommerce/pull/30908)
 * Add - Added a mechanism to customize the data being sent via AJAX by the order meta box [#33563](https://github.com/woocommerce/woocommerce/pull/33563)
 * Add - Added partial spotlight floater to shipping smart defaults tour. [#33772](https://github.com/woocommerce/woocommerce/pull/33772)
 * Add - Added tests for react admin translations [#33510](https://github.com/woocommerce/woocommerce/pull/33510)
