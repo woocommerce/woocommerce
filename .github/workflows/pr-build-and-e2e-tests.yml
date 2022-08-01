@@ -121,7 +121,7 @@ jobs:
 
             # mytodo remove this
             - name: Archive global setup screenshots
-              if: always() && fromJSON(E2E_PLAYWRIGHT)
+              if: always() && fromJSON(env.E2E_PLAYWRIGHT)
               uses: actions/upload-artifact@v3
               with:
                   name: e2e-global-setup-screenshots
