@@ -92,3 +92,11 @@ export const isQueryArgsEqual = (
 		true
 	);
 };
+
+export const formatSlug = ( slug: string ) =>
+	slug
+		.trim()
+		.replace( /\s/g, '-' )
+		.replace( /_/g, '-' )
+		.replace( /-+/g, '-' )
+		.replace( /[^a-zA-Z0-9-]/g, '' );

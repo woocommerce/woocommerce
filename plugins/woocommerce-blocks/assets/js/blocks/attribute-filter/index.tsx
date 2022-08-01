@@ -34,7 +34,7 @@ registerBlockType( metadata, {
 		...metadata.supports,
 		...( isFeaturePluginBuild() && {
 			__experimentalBorder: {
-				radius: true,
+				radius: false,
 				color: true,
 				width: false,
 			},
