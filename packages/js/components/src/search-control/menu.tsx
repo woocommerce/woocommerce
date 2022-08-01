@@ -50,7 +50,7 @@ export const Menu = ( {
 						item={ item }
 						getItemProps={ getItemProps }
 					>
-						{ item.value }
+						{ item.label }
 					</MenuItem>
 				) ) }
 		</ul>

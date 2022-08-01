@@ -4,7 +4,7 @@
 import { ItemType } from './types';
 
 export const itemToString = ( item: ItemType | null ) => {
-	return item ? item.value : '';
+	return item ? item.label : '';
 };
 
 export const getFilteredItems = (
@@ -15,6 +15,6 @@ export const getFilteredItems = (
 	return allItems.filter(
 		( item ) =>
 			selectedItems.indexOf( item ) < 0 &&
-			item.value.toLowerCase().startsWith( inputValue.toLowerCase() )
+			item.label.toLowerCase().startsWith( inputValue.toLowerCase() )
 	);
 };

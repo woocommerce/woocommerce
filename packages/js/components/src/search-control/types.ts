@@ -6,6 +6,7 @@ import { UseComboboxGetItemPropsOptions } from 'downshift';
 
 export type ItemType = {
 	value: string;
+	label: string;
 };
 
 export type Props = {

@@ -12,11 +12,11 @@ import { ItemType } from '../types';
 import { SearchControl } from '../';
 
 const sampleItems = [
-	{ value: 'apple' },
-	{ value: 'pear' },
-	{ value: 'orange' },
-	{ value: 'grape' },
-	{ value: 'banana' },
+	{ value: 'apple', label: 'Apple' },
+	{ value: 'pear', label: 'Pear' },
+	{ value: 'orange', label: 'Orange' },
+	{ value: 'grape', label: 'Grape' },
+	{ value: 'banana', label: 'Banana' },
 ];
 
 export const Single: React.FC = () => (
@@ -36,9 +36,7 @@ export const Multiple: React.FC = () => (
 );
 
 export const Async: React.FC = () => {
-	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( [
-		{ value: 'blue' },
-	] );
+	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( [] );
 	const [ isFetching, setIsFetching ] = useState( false );
 
 	const fetchItems = ( value: string ) => {
@@ -78,7 +76,7 @@ export const Async: React.FC = () => {
 									key={ `${ item.value }${ index }` }
 									{ ...getItemProps( { item, index } ) }
 								>
-									{ item.value }
+									{ item.label }
 								</li>
 							) ) }
 						</>
