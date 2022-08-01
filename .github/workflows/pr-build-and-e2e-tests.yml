@@ -27,6 +27,7 @@ jobs:
                   workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
             - name: Setup PHP
+              if: fromJSON(env.E2E_PLAYWRIGHT) != true
               uses: shivammathur/setup-php@v2
               with:
                   php-version: '7.4'
