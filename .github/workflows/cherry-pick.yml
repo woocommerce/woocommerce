@@ -1,0 +1,26 @@
+name: Cherry Pick Tool
+on:
+  pull_request:
+    types: [closed, edited]
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: Provide the release branch you want to cherry pick into. Example release/6.9
+        default: ''
+        required: true
+      pull_requests:
+        description: The pull request number. Separate pull request numbers with a comma (no space) if more than one.
+        required: true
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cherry-pick-run:
+    name: Run cherry pick tool
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo ${{ github.event }}
+
