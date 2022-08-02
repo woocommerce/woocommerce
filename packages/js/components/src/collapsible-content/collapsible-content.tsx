@@ -9,18 +9,18 @@ import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
  */
 
 export type CollapsedProps = {
-	isCollapsed?: boolean;
+	initialCollapsed?: boolean;
 	toggleText: string;
 	children: React.ReactNode;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const CollapsibleContent: React.FC< CollapsedProps > = ( {
-	isCollapsed = true,
+	initialCollapsed = true,
 	toggleText,
 	children,
 	...props
 }: CollapsedProps ) => {
-	const [ collapsed, setCollapsed ] = useState( isCollapsed );
+	const [ collapsed, setCollapsed ] = useState( initialCollapsed );
 	return (
 		<div
 			aria-expanded={ collapsed ? 'false' : 'true' }

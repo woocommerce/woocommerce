@@ -16,6 +16,14 @@ export const Basic: React.FC = () => {
 	);
 };
 
+export const Expanded: React.FC = () => {
+	return (
+		<CollapsibleContent toggleText="Advanced" initialCollapsed={ false }>
+			All this business in here is initially expanded.
+		</CollapsibleContent>
+	);
+};
+
 export default {
 	title: 'WooCommerce Admin/components/CollapsibleContent',
 	component: Basic,
