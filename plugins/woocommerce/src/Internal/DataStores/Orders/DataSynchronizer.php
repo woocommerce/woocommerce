@@ -333,6 +333,12 @@ WHERE
 	 * @return int Default batch size.
 	 */
 	public function get_default_batch_size(): int {
+		$batch_size = self::ORDERS_SYNC_BATCH_SIZE;
+
+		if ( $this->custom_orders_table_is_authoritative() ) {
+			// Backfilling is slower then migration.
+			$batch_size = absint( self::ORDERS_SYNC_BATCH_SIZE / 10 ) + 1;
+		}
 		/**
 		 * Filter to customize the count of orders that will be synchronized in each step of the custom orders table to/from posts table synchronization process.
 		 *
@@ -340,7 +346,7 @@ WHERE
 		 *
 		 * @param int Default value for the count.
 		 */
-		return apply_filters( 'woocommerce_orders_cot_and_posts_sync_step_size', self::ORDERS_SYNC_BATCH_SIZE );
+		return apply_filters( 'woocommerce_orders_cot_and_posts_sync_step_size', $batch_size );
 	}
 
 	/**
