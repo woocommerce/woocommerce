@@ -27,7 +27,7 @@ import { AddProductPage } from '~/products';
 
 const EditProductPage = lazy( () =>
 	import(
-		/* webpackChunkName: "analytics-report" */ '../products/edit-product-page'
+		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
 	)
 );
 const AnalyticsReport = lazy( () =>
