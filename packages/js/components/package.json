@@ -117,9 +117,9 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build -- --filter=$npm_package_name -- ",
-		"lint": "pnpm -w exec turbo run turbo:lint -- --filter=$npm_package_name -- ",
-		"test": "pnpm -w exec turbo run turbo:test -- --filter=$npm_package_name -- ",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- -- ",
+		"lint": "pnpm -w exec turbo run turbo:lint --filter=$npm_package_name -- -- ",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- -- ",
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
 		"turbo:lint": "eslint src --ext=js,ts,tsx",
 		"turbo:test": "jest --config ./jest.config.json",

@@ -39,7 +39,7 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"lint": "pnpm -w exec turbo run turbo:lint -- --filter=$npm_package_name -- ",
+		"lint": "pnpm -w exec turbo run turbo:lint --filter=$npm_package_name -- -- ",
 		"turbo:lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},

@@ -29,7 +29,7 @@
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"scripts": {
-		"lint": "pnpm -w exec turbo run turbo:lint -- --filter=$npm_package_name -- ",
+		"lint": "pnpm -w exec turbo run turbo:lint --filter=$npm_package_name -- -- ",
 		"turbo:lint": "eslint index.js",
 		"lint:fix": "eslint index.js --fix"
 	},
