@@ -8,6 +8,7 @@ import { createElement } from 'react';
  */
 import { ChildrenType, ItemType, Props, getItemPropsType } from './types';
 import { MenuItem } from './menu-item';
+import './menu.scss';
 
 type MenuProps = {
 	children?: ChildrenType;

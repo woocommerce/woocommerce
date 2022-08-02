@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { createElement } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
 import { useState } from '@wordpress/element';
@@ -16,6 +17,7 @@ import {
 	itemToString as defaultItemToString,
 	getFilteredItems as defaultGetFilteredItems,
 } from './utils';
+import './style.scss';
 
 type SearchControlProps = {
 	children?: ChildrenType;
@@ -47,6 +49,7 @@ export const SearchControl = ( {
 	onSelect = () => null,
 	selected,
 }: SearchControlProps ) => {
+	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
 	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
 	const selectedItems = Array.isArray( selected ) ? selected : [ selected ];
@@ -54,7 +57,6 @@ export const SearchControl = ( {
 
 	const {
 		isOpen,
-		getToggleButtonProps,
 		getLabelProps,
 		getMenuProps,
 		getInputProps,
@@ -91,12 +93,16 @@ export const SearchControl = ( {
 	} );
 
 	return (
-		<div className="woocommerce-search-control">
+		<div
+			className={ classnames( 'woocommerce-search-control', {
+				'is-focused': isFocused,
+			} ) }
+		>
 			{ /* Downshift's getLabelProps handles the necessary label attributes. */ }
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div>
+			<div className="woocommerce-search-control__combo-box-wrapper">
 				{ hasMultiple && (
 					<SelectedItems
 						items={ selectedItems }
@@ -107,15 +113,19 @@ export const SearchControl = ( {
 				) }
 				<ComboBox
 					comboBoxProps={ getComboboxProps() }
-					inputProps={ getInputProps(
-						getDropdownProps( { preventKeyAction: isOpen } )
-					) }
-					toggleButtonProps={ getToggleButtonProps() }
+					inputProps={ getInputProps( {
+						...getDropdownProps( { preventKeyAction: isOpen } ),
+						className: 'woocommerce-search-control__input',
+						onFocus: () => setIsFocused( true ),
+						onBlur: () => setIsFocused( false ),
+					} ) }
 				/>
 			</div>
 			<Menu
 				children={ children }
-				menuProps={ getMenuProps() }
+				menuProps={ getMenuProps( {
+					className: 'woocommerce-search-control__menu',
+				} ) }
 				items={ filteredItems }
 				highlightedIndex={ highlightedIndex }
 				isOpen={ isOpen }

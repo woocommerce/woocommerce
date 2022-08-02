@@ -32,6 +32,8 @@ export { default as Rating } from './rating';
 export { default as ReportFilters } from './filters';
 export { default as ReviewRating } from './rating/review';
 export { default as Search } from './search';
+export { SearchControl } from './search-control';
+export { MenuItem as SearchControlMenuItem } from './search-control/menu-item';
 export { default as SearchListControl } from './search-list-control';
 export { default as SearchListItem } from './search-list-control/item';
 export { default as SectionHeader } from './section-header';

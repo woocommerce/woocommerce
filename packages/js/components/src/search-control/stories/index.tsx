@@ -177,35 +177,33 @@ export const CustomRender: React.FC = () => {
 						<>
 							{ items.map( ( item, index: number ) => {
 								const isSelected = selected.includes( item );
+
 								return (
-									<li
+									<MenuItem
 										key={ `${ item.value }${ index }` }
-										style={
-											highlightedIndex === index
-												? { backgroundColor: '#bde4ff' }
-												: {}
-										}
-										{ ...getItemProps( {
-											item,
-											index,
-										} ) }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ getItemProps }
 									>
-										<input
-											type="checkbox"
-											checked={ isSelected }
-											value={ item.value }
-											onChange={ () => null }
-										/>
-										<span
-											style={ {
-												fontWeight: isSelected
-													? 'bold'
-													: 'normal',
-											} }
-										>
-											{ item.label }
-										</span>
-									</li>
+										<>
+											<input
+												type="checkbox"
+												checked={ isSelected }
+												value={ item.value }
+												onChange={ () => null }
+											/>
+											<span
+												style={ {
+													fontWeight: isSelected
+														? 'bold'
+														: 'normal',
+												} }
+											>
+												{ item.label }
+											</span>
+										</>
+									</MenuItem>
 								);
 							} ) }
 						</>

@@ -7,6 +7,7 @@ import { createElement, ReactElement } from 'react';
  * Internal dependencies
  */
 import { ItemType, getItemPropsType } from './types';
+import './menu-item.scss';
 
 type MenuItemProps = {
 	index: number;
@@ -27,6 +28,7 @@ export const MenuItem = ( {
 		<li
 			style={ isActive ? { backgroundColor: '#bde4ff' } : {} }
 			{ ...getItemProps( { item, index } ) }
+			className="woocommerce-search-control__menu-item"
 		>
 			{ children }
 		</li>
