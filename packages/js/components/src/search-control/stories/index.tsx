@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
+import { CheckboxControl, Spinner } from '@wordpress/components';
 import React, { createElement } from 'react';
-import { Spinner } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
 /**
@@ -11,6 +11,7 @@ import { useState } from '@wordpress/element';
 import { ItemType } from '../types';
 import { MenuItem } from '../menu-item';
 import { SearchControl } from '../';
+import { Menu } from '../menu';
 
 const sampleItems = [
 	{ value: 'apple', label: 'Apple' },
@@ -115,29 +116,35 @@ export const Async: React.FC = () => {
 				onSelect={ ( item ) => setSelectedItem( item ) }
 				onRemove={ () => setSelectedItem( null ) }
 			>
-				{ ( { items, isOpen, highlightedIndex, getItemProps } ) => {
-					if ( ! isOpen ) {
-						return null;
-					}
-
-					if ( isFetching ) {
-						return <Spinner />;
-					}
-
+				{ ( {
+					items,
+					isOpen,
+					highlightedIndex,
+					getItemProps,
+					getMenuProps,
+				} ) => {
 					return (
-						<>
-							{ items.map( ( item, index: number ) => (
-								<MenuItem
-									key={ `${ item.value }${ index }` }
-									index={ index }
-									isActive={ highlightedIndex === index }
-									item={ item }
-									getItemProps={ getItemProps }
-								>
-									{ item.label }
-								</MenuItem>
-							) ) }
-						</>
+						<Menu isOpen={ isOpen } menuProps={ getMenuProps() }>
+							<>
+								{ isFetching ? (
+									<Spinner />
+								) : (
+									items.map( ( item, index: number ) => (
+										<MenuItem
+											key={ `${ item.value }${ index }` }
+											index={ index }
+											isActive={
+												highlightedIndex === index
+											}
+											item={ item }
+											getItemProps={ getItemProps }
+										>
+											{ item.label }
+										</MenuItem>
+									) )
+								) }
+							</>
+						</Menu>
 					);
 				} }
 			</SearchControl>
@@ -165,48 +172,59 @@ export const CustomRender: React.FC = () => {
 		<>
 			<SearchControl
 				hasMultiple
-				label="Async"
+				label="Custom render"
 				items={ sampleItems }
 				getFilteredItems={ ( allItems ) => allItems }
 				selected={ selected }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
 			>
-				{ ( { items, highlightedIndex, getItemProps } ) => {
+				{ ( {
+					items,
+					highlightedIndex,
+					getItemProps,
+					getMenuProps,
+				} ) => {
 					return (
-						<>
-							{ items.map( ( item, index: number ) => {
-								const isSelected = selected.includes( item );
+						<Menu isOpen={ true } menuProps={ getMenuProps() }>
+							<>
+								{ items.map( ( item, index: number ) => {
+									const isSelected =
+										selected.includes( item );
 
-								return (
-									<MenuItem
-										key={ `${ item.value }${ index }` }
-										index={ index }
-										isActive={ highlightedIndex === index }
-										item={ item }
-										getItemProps={ getItemProps }
-									>
-										<>
-											<input
-												type="checkbox"
-												checked={ isSelected }
-												value={ item.value }
-												onChange={ () => null }
-											/>
-											<span
-												style={ {
-													fontWeight: isSelected
-														? 'bold'
-														: 'normal',
-												} }
-											>
-												{ item.label }
-											</span>
-										</>
-									</MenuItem>
-								);
-							} ) }
-						</>
+									return (
+										<MenuItem
+											key={ `${ item.value }${ index }` }
+											index={ index }
+											isActive={
+												highlightedIndex === index
+											}
+											item={ item }
+											getItemProps={ getItemProps }
+										>
+											<>
+												<CheckboxControl
+													onChange={ () => null }
+													checked={ isSelected }
+													label={
+														<span
+															style={ {
+																fontWeight:
+																	isSelected
+																		? 'bold'
+																		: 'normal',
+															} }
+														>
+															{ item.label }
+														</span>
+													}
+												/>
+											</>
+										</MenuItem>
+									);
+								} ) }
+							</>
+						</Menu>
 					);
 				} }
 			</SearchControl>

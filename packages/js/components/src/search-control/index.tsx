@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import { createElement } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
-import { useState } from '@wordpress/element';
+import { useState, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,6 +13,7 @@ import { ChildrenType, ItemType } from './types';
 import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
+import { MenuItem } from './menu-item';
 import {
 	itemToString as defaultItemToString,
 	getFilteredItems as defaultGetFilteredItems,
@@ -38,7 +39,31 @@ type SearchControlProps = {
 };
 
 export const SearchControl = ( {
-	children,
+	children = ( {
+		items,
+		highlightedIndex,
+		getItemProps,
+		getMenuProps,
+		isOpen,
+	} ) => {
+		return (
+			<Menu menuProps={ getMenuProps() } isOpen={ isOpen }>
+				<>
+					{ items.map( ( item, index: number ) => (
+						<MenuItem
+							key={ `${ item.value }${ index }` }
+							index={ index }
+							isActive={ highlightedIndex === index }
+							item={ item }
+							getItemProps={ getItemProps }
+						>
+							{ item.label }
+						</MenuItem>
+					) ) }
+				</>
+			</Menu>
+		);
+	},
 	hasMultiple = false,
 	items,
 	label,
@@ -121,16 +146,14 @@ export const SearchControl = ( {
 					} ) }
 				/>
 			</div>
-			<Menu
-				children={ children }
-				menuProps={ getMenuProps( {
-					className: 'woocommerce-search-control__menu',
-				} ) }
-				items={ filteredItems }
-				highlightedIndex={ highlightedIndex }
-				isOpen={ isOpen }
-				getItemProps={ getItemProps }
-			/>
+
+			{ children( {
+				items: filteredItems,
+				highlightedIndex,
+				getItemProps,
+				getMenuProps,
+				isOpen,
+			} ) }
 		</div>
 	);
 };
