@@ -10,6 +10,7 @@ on:
         required: true
       pull_requests:
         description: The pull request number. Separate pull request numbers with a comma (no space) if more than one.
+        default: ''
         required: true
 
 concurrency: 
@@ -22,5 +23,5 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - run: echo ${{ github.event }}
+      - run: echo '${{ toJSON(github) }}'
 
