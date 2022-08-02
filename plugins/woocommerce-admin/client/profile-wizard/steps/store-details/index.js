@@ -335,7 +335,7 @@ export class StoreDetails extends Component {
 													'woocommerce'
 											  )
 											: __(
-													'Email address (Optional)',
+													'Email address',
 													'woocommerce'
 											  )
 									}
@@ -367,7 +367,6 @@ export class StoreDetails extends Component {
 									</div>
 								</FlexItem>
 							</CardBody>
-
 							<CardFooter justify="center">
 								<Button
 									isPrimary
