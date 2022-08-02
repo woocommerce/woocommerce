@@ -1,5 +1,9 @@
-.product-form-layout__category {
-	.product-field-layout {
+.product-category-layout {
+	display: grid;
+	grid-template-columns: 32% auto;
+	gap: $gap-large;
+
+	&__fields {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;

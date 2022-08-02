@@ -14,14 +14,14 @@ export const ProductCategoryLayout: React.FC< ProductCategoryLayoutProps > = ( {
 	children,
 } ) => {
 	return (
-		<div className="product-form-layout__category">
-			<div className="product-category-layout">
+		<div className="product-form-layout__category product-category-layout">
+			<div className="product-category-layout__header">
 				<h3 className="product-category-layout__title">{ title }</h3>
 				<div>
 					<p>{ description }</p>
 				</div>
 			</div>
-			<div className="product-field-layout">{ children }</div>
+			<div className="product-category-layout__fields">{ children }</div>
 		</div>
 	);
 };

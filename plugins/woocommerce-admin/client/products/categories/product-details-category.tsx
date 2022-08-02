@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { ProductCategoryLayout } from '../layout/product-category-layout';
+import { ProductFieldLayout } from '../layout/product-field-layout';
 
 export const ProductDetailsCategory: React.FC = () => {
 	return (
@@ -18,11 +19,13 @@ export const ProductDetailsCategory: React.FC = () => {
 				'woocommerce'
 			) }
 		>
-			<TextControl
-				label={ __( 'Name', 'woocommerce' ) }
-				value={ '' }
-				onChange={ () => {} }
-			/>
+			<ProductFieldLayout name="Name">
+				<TextControl
+					label={ __( 'Name', 'woocommerce' ) }
+					value={ '' }
+					onChange={ () => {} }
+				/>
+			</ProductFieldLayout>
 		</ProductCategoryLayout>
 	);
 };

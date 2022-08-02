@@ -3,10 +3,6 @@
 	margin: 0 auto;
 
 	&__category {
-		display: grid;
-		grid-template-columns: 32% auto;
-		gap: $gap-large;
-
 		&:not(:first-child) {
 			margin-top: $gap-largest + $gap-smaller;
 		}
