@@ -8,8 +8,5 @@
 	"license": "GPLv2",
 	"bin": {
 		"run-turbo": "./bin/run-turbo.sh"
-	},
-	"devDependencies": {
-		"run-turbo": "workspace:^1.0.0"
 	}
 }

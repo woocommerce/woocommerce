@@ -6,8 +6,8 @@
 	"private": true,
 	"main": "Gruntfile.js",
 	"scripts": {
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- -- ",
-		"lint": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- -- ",
+		"build": "./node_modules/.bin/run-turbo turbo:build",
+		"lint": "./node_modules/.bin/run-turbo turbo:build",
 		"turbo:build": "grunt assets",
 		"turbo:lint": "grunt eslint stylelint --force"
 	},

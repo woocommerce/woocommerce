@@ -53,8 +53,8 @@
 	"scripts": {
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- -- ",
-		"lint": "pnpm -w exec turbo run turbo:lint --filter=$npm_package_name -- -- ",
+		"build": "./node_modules/.bin/run-turbo turbo:build",
+		"lint": "./node_modules/.bin/run-turbo turbo:lint",
 		"turbo:build": "tsc --build",
 		"turbo:lint": "eslint src",
 		"start": "tsc --build --watch",
