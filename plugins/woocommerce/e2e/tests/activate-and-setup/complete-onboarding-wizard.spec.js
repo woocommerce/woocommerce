@@ -13,10 +13,6 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		// Fill store's address - first line
-		await page.fill( '#inspector-text-control-0', 'addr 1' );
-		// Fill store's address - second line
-		await page.fill( '#inspector-text-control-1', 'addr 2' );
 		// Type the requested country/region
 		await page.click( '#woocommerce-select-control-0__control-input' );
 		await page.fill(
@@ -24,12 +20,14 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			'United States (US) — California'
 		);
 		await page.click( 'button >> text=United States (US) — California' );
+		// Fill store's address - first line
+		await page.fill( '#inspector-text-control-0', 'addr 1' );
+		// Fill postcode of the store
+		await page.fill( '#inspector-text-control-1', '94107' );
 		// Fill the city where the store is located
 		await page.fill( '#inspector-text-control-2', 'San Francisco' );
-		// Fill postcode of the store
-		await page.fill( '#inspector-text-control-3', '94107' );
 		// Fill store's email address
-		await page.fill( '#inspector-text-control-4', adminEmail );
+		await page.fill( '#inspector-text-control-3', adminEmail );
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
