@@ -4,7 +4,12 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { ReactElement } from 'react';
 import { formatPrice } from '@woocommerce/price-format';
-import { PanelBody, ExternalLink, SelectControl } from '@wordpress/components';
+import {
+	PanelBody,
+	ExternalLink,
+	SelectControl,
+	ToggleControl,
+} from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
@@ -16,6 +21,7 @@ import QuantityBadge from './quantity-badge';
 
 interface Attributes {
 	addToCartBehaviour: string;
+	hasHiddenPrice: boolean;
 }
 
 interface Props {
@@ -24,7 +30,7 @@ interface Props {
 }
 
 const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
-	const { addToCartBehaviour } = attributes;
+	const { addToCartBehaviour, hasHiddenPrice } = attributes;
 	const blockProps = useBlockProps( {
 		className: `wc-block-mini-cart`,
 	} );
@@ -76,6 +82,22 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							},
 						] }
 					/>
+					<ToggleControl
+						label={ __(
+							'Hide Cart Price',
+							'woo-gutenberg-products-block'
+						) }
+						help={ __(
+							'Toggles the visibility of the Mini Cart price.',
+							'woo-gutenberg-products-block'
+						) }
+						checked={ hasHiddenPrice }
+						onChange={ () =>
+							setAttributes( {
+								hasHiddenPrice: ! hasHiddenPrice,
+							} )
+						}
+					/>
 				</PanelBody>
 				{ templatePartEditUri && (
 					<PanelBody
@@ -101,9 +123,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 			</InspectorControls>
 			<Noninteractive>
 				<button className="wc-block-mini-cart__button">
-					<span className="wc-block-mini-cart__amount">
-						{ formatPrice( productTotal ) }
-					</span>
+					{ ! hasHiddenPrice && (
+						<span className="wc-block-mini-cart__amount">
+							{ formatPrice( productTotal ) }
+						</span>
+					) }
 					<QuantityBadge count={ productCount } />
 				</button>
 			</Noninteractive>
