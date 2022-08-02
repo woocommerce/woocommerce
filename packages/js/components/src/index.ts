@@ -19,6 +19,7 @@ export { H, Section } from './section';
 export { default as ImageUpload } from './image-upload';
 export { default as Link } from './link';
 export { default as List } from './list';
+export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
