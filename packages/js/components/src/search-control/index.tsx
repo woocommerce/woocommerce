@@ -26,11 +26,13 @@ type SearchControlProps = {
 	itemToString?: ( item: ItemType | null ) => string;
 	getFilteredItems?: (
 		allItems: ItemType[],
-		selectedItems: ItemType[],
-		inputValue: string
+		inputValue: string,
+		selectedItems: ItemType[]
 	) => ItemType[];
 	onInputChange?: ( value: string | undefined ) => void;
-	onSelect?: ( selected: ItemType, selectedItems?: ItemType[] ) => void;
+	onRemove?: ( item: ItemType ) => void;
+	onSelect?: ( selected: ItemType | null | undefined ) => void;
+	selected: ItemType | ItemType[];
 };
 
 export const SearchControl = ( {
@@ -38,24 +40,17 @@ export const SearchControl = ( {
 	hasMultiple = false,
 	items,
 	label,
-	initialSelectedItems = [],
 	itemToString = defaultItemToString,
 	getFilteredItems = defaultGetFilteredItems,
 	onInputChange = () => null,
+	onRemove = () => null,
 	onSelect = () => null,
+	selected,
 }: SearchControlProps ) => {
 	const [ inputValue, setInputValue ] = useState( '' );
-	const {
-		getSelectedItemProps,
-		getDropdownProps,
-		addSelectedItem,
-		removeSelectedItem,
-		selectedItems,
-	} = useMultipleSelection( {
-		initialSelectedItems,
-	} );
-
-	const filteredItems = getFilteredItems( items, selectedItems, inputValue );
+	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
+	const selectedItems = Array.isArray( selected ) ? selected : [ selected ];
+	const filteredItems = getFilteredItems( items, inputValue, selectedItems );
 
 	const {
 		isOpen,
@@ -66,17 +61,12 @@ export const SearchControl = ( {
 		getComboboxProps,
 		highlightedIndex,
 		getItemProps,
-		selectItem,
-		selectedItem,
 	} = useCombobox( {
 		inputValue,
 		items: filteredItems,
 		itemToString,
-		onStateChange: ( {
-			inputValue: value,
-			type,
-			selectedItem: selected,
-		} ) => {
+		selectedItem: null,
+		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
 				case useCombobox.stateChangeTypes.InputChange:
 					onInputChange( value );
@@ -86,20 +76,11 @@ export const SearchControl = ( {
 				case useCombobox.stateChangeTypes.InputKeyDownEnter:
 				case useCombobox.stateChangeTypes.ItemClick:
 				case useCombobox.stateChangeTypes.InputBlur:
-					if ( selected ) {
+					if ( selectedItem ) {
+						onSelect( selectedItem );
 						setInputValue(
-							hasMultiple ? '' : itemToString( selected )
+							hasMultiple ? '' : itemToString( selectedItem )
 						);
-						if ( hasMultiple ) {
-							onSelect( selected, [
-								...selectedItems,
-								selected,
-							] );
-							addSelectedItem( selected );
-						} else {
-							onSelect( selected );
-							selectItem( selected );
-						}
 					}
 
 					break;
@@ -121,7 +102,7 @@ export const SearchControl = ( {
 						items={ selectedItems }
 						itemToString={ itemToString }
 						getSelectedItemProps={ getSelectedItemProps }
-						removeSelectedItem={ removeSelectedItem }
+						onRemove={ onRemove }
 					/>
 				) }
 				<ComboBox

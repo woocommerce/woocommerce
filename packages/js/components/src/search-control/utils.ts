@@ -9,8 +9,8 @@ export const itemToString = ( item: ItemType | null ) => {
 
 export const getFilteredItems = (
 	allItems: ItemType[],
-	selectedItems: ItemType[],
-	inputValue: string
+	inputValue: string,
+	selectedItems: ItemType[]
 ) => {
 	return allItems.filter(
 		( item ) =>

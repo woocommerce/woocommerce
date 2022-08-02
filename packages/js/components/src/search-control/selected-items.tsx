@@ -16,14 +16,14 @@ type SelectedItemsProps = {
 	getSelectedItemProps: ( { selectedItem: any, index: any } ) => {
 		[ key: string ]: string;
 	};
-	removeSelectedItem: ( item: ItemType ) => void;
+	onRemove: ( item: ItemType ) => void;
 };
 
 export const SelectedItems = ( {
 	items,
 	itemToString,
 	getSelectedItemProps,
-	removeSelectedItem,
+	onRemove,
 }: SelectedItemsProps ) => {
 	return (
 		<div className="woocommerce-search-control__selected-items">
@@ -33,9 +33,7 @@ export const SelectedItems = ( {
 					{ ...getSelectedItemProps( { selectedItem: item, index } ) }
 				>
 					{ itemToString( item ) }
-					<button onClick={ () => removeSelectedItem( item ) }>
-						&#10005;
-					</button>
+					<button onClick={ () => onRemove( item ) }>&#10005;</button>
 				</span>
 			) ) }
 		</div>
