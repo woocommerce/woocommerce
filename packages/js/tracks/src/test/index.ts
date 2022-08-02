@@ -8,6 +8,10 @@ const props = {
 	test: 'test value',
 };
 
+jest.mock( '../utils', () => ( {
+	isDevelopmentMode: false,
+} ) );
+
 describe( 'recordEvent', () => {
 	let windowSpy: jest.SpyInstance;
 	const recordEventMock = jest.fn();
