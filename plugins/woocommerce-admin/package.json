@@ -199,7 +199,6 @@
 		"replace": "^1.2.1",
 		"rimraf": "^3.0.2",
 		"rtlcss": "^2.6.2",
-		"run-turbo": "workspace:*",
 		"sass": "^1.49.9",
 		"sass-loader": "^10.2.1",
 		"style-loader": "^0.23.1",

@@ -84,7 +84,6 @@
 		"jest": "^25.1.0",
 		"mocha": "7.2.0",
 		"prettier": "npm:wp-prettier@2.0.5",
-		"run-turbo": "workspace:*",
 		"stylelint": "^13.8.0",
 		"typescript": "3.9.7",
 		"uuid": "^8.3.2",

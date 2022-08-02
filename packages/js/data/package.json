@@ -46,7 +46,6 @@
 		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "^7.17.5",
 		"@babel/runtime": "^7.17.2",
-		"run-turbo": "workspace:*",
 		"@testing-library/react": "^12.1.3",
 		"@testing-library/react-hooks": "^7.0.2",
 		"@types/md5": "^2.3.2",

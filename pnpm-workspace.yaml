@@ -7,4 +7,3 @@ packages:
     - 'tools/create-extension'
     - 'tools/package-release'
     - 'tools/cherry-pick'
-    - 'tools/run-turbo'

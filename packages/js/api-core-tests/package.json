@@ -33,7 +33,6 @@
 		"supertest": "^6.1.4"
 	},
 	"devDependencies": {
-		"run-turbo": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.12.0"
 	},

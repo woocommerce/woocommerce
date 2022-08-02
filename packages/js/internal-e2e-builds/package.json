@@ -28,8 +28,7 @@
 		"eslint": "^8.12.0",
 		"glob": "^7.2.0",
 		"mkdirp": "^1.0.4",
-		"lodash": "^4.17.21",
-		"run-turbo": "workspace:*"
+		"lodash": "^4.17.21"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

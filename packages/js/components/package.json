@@ -79,7 +79,6 @@
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
 		"@babel/runtime": "^7.17.2",
-		"run-turbo": "workspace:*",
 		"@storybook/addon-actions": "^6.4.0",
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/addon-controls": "^6.4.19",

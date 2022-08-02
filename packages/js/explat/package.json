@@ -35,7 +35,6 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
-		"run-turbo": "workspace:*",
 		"@types/cookie": "^0.4.1",
 		"@types/node": "^17.0.21",
 		"@types/qs": "^6.9.7",
