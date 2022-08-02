@@ -2,14 +2,6 @@
 	"$schema": "https://turborepo.org/schema.json",
 	"baseBranch": "origin/trunk",
 	"pipeline": {
-		"turbo:lint": {
-			"cache": false
-		},
-
-		"lint:fix": {
-			"cache": false
-		},
-
 		"turbo:build": {
 			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"inputs": [

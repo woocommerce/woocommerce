@@ -9,7 +9,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
 		"lint": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
 		"turbo:build": "grunt assets",
-		"turbo:lint": "grunt eslint stylelint --force"
+		"lint": "grunt eslint stylelint --force"
 	},
 	"devDependencies": {
 		"@wordpress/stylelint-config": "19.1.0",

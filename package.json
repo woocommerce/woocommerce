@@ -15,7 +15,6 @@
 	},
 	"scripts": {
 		"build": "pnpm exec turbo run turbo:build -- -- ",
-		"lint": "pnpm exec turbo run turbo:lint -- --",
 		"test": "pnpm exec turbo run turbo:test -- --",
 		"build-storybook": "build-storybook  -c ./tools/storybook/.storybook",
 		"preinstall": "npx only-allow pnpm",

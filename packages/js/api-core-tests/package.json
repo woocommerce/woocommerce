@@ -9,9 +9,8 @@
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
 		"e2e": "pnpm -w exec turbo run turbo:e --filter=$npm_package_name -- --",
-		"lint": "pnpm -w exec turbo run turbo:lint --filter=$npm_package_name -- --",
 		"turbo:e2e": "jest",
-		"turbo:lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
+		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
 		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
 	},
 	"repository": {
