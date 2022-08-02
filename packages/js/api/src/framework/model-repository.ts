@@ -77,7 +77,7 @@ export type ListFn< T extends ModelRepositoryParams > = (
  * A callback for listing child models using a data source.
  *
  * @callback ListChildFn
- * @param {P} parent   The parent identifier for the model.
+ * @param {P} parent The parent identifier for the model.
  * @param {L} [params] The list parameters for the query.
  * @return {Promise.<Array.<T>>} Resolves to an array of created models.
  * @template {Model} T
@@ -105,7 +105,7 @@ export type CreateFn< T extends ModelRepositoryParams > = (
  * A callback for creating a child model using a data source.
  *
  * @callback CreateChildFn
- * @param {ModelID}     parent     The parent identifier for the model.
+ * @param {ModelID} parent The parent identifier for the model.
  * @param {Partial.<T>} properties The properties of the model to create.
  * @return {Promise.<T>} Resolves to the created model.
  * @template {Model} T
@@ -131,7 +131,7 @@ export type ReadFn< T extends ModelRepositoryParams > = (
  * A callback for reading a child model using a data source.
  *
  * @callback ReadChildFn
- * @param {P}       parent  The parent identifier for the model.
+ * @param {P} parent The parent identifier for the model.
  * @param {ModelID} childID The ID of the model.
  * @return {Promise.<T>} Resolves to the read model.
  * @template {Model} T
@@ -146,7 +146,7 @@ export type ReadChildFn< T extends ModelRepositoryParams > = (
  * A callback for updating a model using a data source.
  *
  * @callback UpdateFn
- * @param {ModelID}     id         The ID of the model.
+ * @param {ModelID} id The ID of the model.
  * @param {Partial.<T>} properties The properties to update.
  * @return {Promise.<T>} Resolves to the updated model.
  * @template {Model} T
@@ -160,8 +160,8 @@ export type UpdateFn< T extends ModelRepositoryParams > = (
  * A callback for updating a child model using a data source.
  *
  * @callback UpdateChildFn
- * @param {P}           parent     The parent identifier for the model.
- * @param {ModelID}     childID    The ID of the model.
+ * @param {P} parent The parent identifier for the model.
+ * @param {ModelID} childID The ID of the model.
  * @param {Partial.<T>} properties The properties to update.
  * @return {Promise.<T>} Resolves to the updated model.
  * @template {Model} T
@@ -186,7 +186,7 @@ export type DeleteFn = ( id: ModelID ) => Promise< boolean >;
  * A callback for deleting a child model from a data source.
  *
  * @callback DeleteChildFn
- * @param {P}       parent  The parent identifier for the model.
+ * @param {P} parent The parent identifier for the model.
  * @param {ModelID} childID The ID of the model.
  * @return {Promise.<boolean>} Resolves to true once the model has been deleted.
  * @template {ModelParentID} P
@@ -344,7 +344,7 @@ export interface DeletesChildModels< T extends ModelRepositoryParams > {
  * @template {Object} L
  */
 export class ModelRepository< T extends ModelRepositoryParams >
-	implements
+implements
 		ListsModels< T >,
 		ListsChildModels< T >,
 		ReadsModels< T >,
@@ -352,8 +352,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 		UpdatesModels< T >,
 		UpdatesChildModels< T >,
 		DeletesModels< T >,
-		DeletesChildModels< T >
-{
+		DeletesChildModels< T > {
 	/**
 	 * The hook used to list models.
 	 *
@@ -417,11 +416,11 @@ export class ModelRepository< T extends ModelRepositoryParams >
 	/**
 	 * Creates a new repository instance.
 	 *
-	 * @param {ListFn.<T,L>|ListChildFn<T,P,L>}       listHook   The hook for model listing.
-	 * @param {CreateFn.<T>|null}                     createHook The hook for model creation.
-	 * @param {ReadFn.<T>|ReadChildFn.<T,P>|null}     readHook   The hook for model reading.
+	 * @param {ListFn.<T,L>|ListChildFn<T,P,L>} listHook The hook for model listing.
+	 * @param {CreateFn.<T>|null} createHook The hook for model creation.
+	 * @param {ReadFn.<T>|ReadChildFn.<T,P>|null} readHook The hook for model reading.
 	 * @param {UpdateFn.<T>|UpdateChildFn.<T,P>|null} updateHook The hook for model updating.
-	 * @param {DeleteFn|DeleteChildFn.<P>|null}       deleteHook The hook for model deletion.
+	 * @param {DeleteFn|DeleteChildFn.<P>|null} deleteHook The hook for model deletion.
 	 */
 	public constructor(
 		listHook: HasParent< T, ListChildFn< T >, ListFn< T > > | null,
@@ -441,7 +440,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 	 * Lists models using the repository.
 	 *
 	 * @param {L|P} [paramsOrParent] The params for the lookup or the parent to list if the model is a child.
-	 * @param {L}   [params]         The params when using the parent.
+	 * @param {L} [params] The params when using the parent.
 	 * @return {Promise.<Array.<T>>} Resolves to the listed models.
 	 */
 	public list(
@@ -461,7 +460,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 		}
 
 		return ( this.listHook as ListChildFn< T > )(
-			paramsOrParent as unknown as ParentID< T >,
+			( paramsOrParent as unknown ) as ParentID< T >,
 			params
 		);
 	}
@@ -469,8 +468,8 @@ export class ModelRepository< T extends ModelRepositoryParams >
 	/**
 	 * Creates a new model using the repository.
 	 *
-	 * @param {P|ModelID}   propertiesOrParent The properties to create the model with or the model parent.
-	 * @param {Partial.<T>} properties         The properties to create the model with.
+	 * @param {P|ModelID} propertiesOrParent The properties to create the model with or the model parent.
+	 * @param {Partial.<T>} properties The properties to create the model with.
 	 * @return {Promise.<T>} Resolves to the created model.
 	 */
 	public create(
@@ -494,7 +493,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 		}
 
 		return ( this.createHook as CreateChildFn< T > )(
-			propertiesOrParent as unknown as ParentID< T >,
+			( propertiesOrParent as unknown ) as ParentID< T >,
 			properties as Partial< ModelClass< T > >
 		);
 	}
@@ -503,7 +502,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 	 * Reads a model using the repository.
 	 *
 	 * @param {ModelID|P} idOrParent The ID of the model or its parent if the model is a child.
-	 * @param {ModelID}   [childID]  The ID of the model when using the parent.
+	 * @param {ModelID} [childID] The ID of the model when using the parent.
 	 * @return {Promise.<T>} Resolves to the loaded model.
 	 */
 	public read(
@@ -521,7 +520,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 		}
 
 		return ( this.readHook as ReadChildFn< T > )(
-			idOrParent as unknown as ParentID< T >,
+			( idOrParent as unknown ) as ParentID< T >,
 			childID
 		);
 	}
@@ -529,9 +528,9 @@ export class ModelRepository< T extends ModelRepositoryParams >
 	/**
 	 * Updates the model's properties using the repository.
 	 *
-	 * @param {ModelID|P}           idOrParent          The ID of the model or its parent if the model is a child.
+	 * @param {ModelID|P} idOrParent The ID of the model or its parent if the model is a child.
 	 * @param {Partial.<T>|ModelID} propertiesOrChildID The properties for the model or the ID when using the parent.
-	 * @param {Partial.<T>}         [properties]        The properties for child models.
+	 * @param {Partial.<T>} [properties] The properties for child models.
 	 * @return {Promise.<T>} Resolves to the updated model.
 	 */
 	public update(
@@ -548,14 +547,14 @@ export class ModelRepository< T extends ModelRepositoryParams >
 		if ( properties === undefined ) {
 			return ( this.updateHook as UpdateFn< T > )(
 				idOrParent as ModelID,
-				propertiesOrChildID as unknown as UpdateParams< T >
+				( propertiesOrChildID as unknown ) as UpdateParams< T >
 			);
 		}
 
 		return ( this.updateHook as UpdateChildFn< T > )(
-			idOrParent as unknown as ParentID< T >,
+			( idOrParent as unknown ) as ParentID< T >,
 			propertiesOrChildID as ModelID,
-			properties as unknown as UpdateParams< T >
+			( properties as unknown ) as UpdateParams< T >
 		);
 	}
 
@@ -563,7 +562,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 	 * Deletes a model using the repository.
 	 *
 	 * @param {ModelID|P} idOrParent The ID of the model or its parent if the model is a child.
-	 * @param {ModelID}   [childID]  The ID of the model when using the parent.
+	 * @param {ModelID} [childID] The ID of the model when using the parent.
 	 * @return {Promise.<T>} Resolves to the loaded model.
 	 */
 	public delete(
@@ -581,7 +580,7 @@ export class ModelRepository< T extends ModelRepositoryParams >
 		}
 
 		return ( this.deleteHook as DeleteChildFn< T > )(
-			idOrParent as unknown as ParentID< T >,
+			( idOrParent as unknown ) as ParentID< T >,
 			childID
 		);
 	}
