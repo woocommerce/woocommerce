@@ -1,9 +1,9 @@
 /**
  * Internal dependencies
  */
+import { ProductDetailsCategory } from './categories/product-details-category';
+import { ProductImagesCategory } from './categories/product-images-category';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductCategoryLayout } from './layout/product-category-layout';
-import { ProductFieldLayout } from './layout/product-field-layout';
 
 const categories = [
 	{
@@ -47,9 +47,10 @@ const categories = [
 
 const EditProductPage: React.FC = () => {
 	return (
-		<div>
-			<ProductFormLayout categories={ categories } />
-		</div>
+		<ProductFormLayout>
+			<ProductDetailsCategory />
+			<ProductImagesCategory />
+		</ProductFormLayout>
 	);
 };
 

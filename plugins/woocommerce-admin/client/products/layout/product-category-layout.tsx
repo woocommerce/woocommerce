@@ -1,16 +1,9 @@
 /**
  * Internal dependencies
  */
-import { ProductFieldLayout } from './product-field-layout';
+import './product-category-layout.scss';
 
 type ProductCategoryLayoutProps = {
-	fields: {
-		label: string;
-		key: string;
-		autoComplete: string;
-		value: string;
-		onChange: () => void;
-	}[];
 	title: string;
 	description: string;
 };
@@ -18,7 +11,7 @@ type ProductCategoryLayoutProps = {
 export const ProductCategoryLayout: React.FC< ProductCategoryLayoutProps > = ( {
 	title,
 	description,
-	fields,
+	children,
 } ) => {
 	return (
 		<div className="product-form-layout__category">
@@ -28,19 +21,7 @@ export const ProductCategoryLayout: React.FC< ProductCategoryLayoutProps > = ( {
 					<p>{ description }</p>
 				</div>
 			</div>
-			<div className="product-field-layout">
-				{ fields.map(
-					( { label, key, autoComplete, value, onChange } ) => (
-						<ProductFieldLayout
-							label={ label }
-							key={ key }
-							autoComplete={ autoComplete }
-							value={ value }
-							onChange={ onChange }
-						/>
-					)
-				) }
-			</div>
+			<div className="product-field-layout">{ children }</div>
 		</div>
 	);
 };
