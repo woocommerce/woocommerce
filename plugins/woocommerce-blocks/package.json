@@ -139,7 +139,7 @@
 		"@wordpress/env": "4.9.0",
 		"@wordpress/html-entities": "3.12.0",
 		"@wordpress/i18n": "4.12.0",
-		"@wordpress/is-shallow-equal": "4.12.0",
+		"@wordpress/is-shallow-equal": "4.13.0",
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "22.3.0",
 		"autoprefixer": "10.4.7",
