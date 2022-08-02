@@ -389,7 +389,7 @@ class OrdersTableQuery {
 					$value = "{$table}.{$value}";
 
 					if ( $table !== $this->tables['orders'] ) {
-						$this->join( $table, '', '', true );
+						$this->join( $table, '', '', 'inner', true );
 					}
 				}
 			}
@@ -555,12 +555,14 @@ class OrdersTableQuery {
 	 * @param string  $table      Table name (including prefix).
 	 * @param string  $alias      Table alias to use. Defaults to $table.
 	 * @param string  $on         ON clause. Defaults to "wc_orders.id = {$alias}.order_id".
+	 * @param string  $join_type  JOIN type: LEFT, RIGHT or INNER.
 	 * @param boolean $alias_once If TRUE, table won't be JOIN'ed again if already JOIN'ed.
 	 * @return void
 	 * @throws \Exception When an error occurs, such as trying to re-use an alias with $alias_once = FALSE.
 	 */
-	public function join( string $table, string $alias = '', string $on = '', bool $alias_once = false ) {
-		$alias = empty( $alias ) ? $table : $alias;
+	private function join( string $table, string $alias = '', string $on = '', string $join_type = 'inner', bool $alias_once = false ) {
+		$alias     = empty( $alias ) ? $table : $alias;
+		$join_type = strtoupper( trim( $join_type ) );
 
 		if ( $this->tables['orders'] === $alias ) {
 			// translators: %s is a table name.
@@ -584,8 +586,12 @@ class OrdersTableQuery {
 			return;
 		}
 
+		if ( '' === $join_type || ! in_array( $join_type, array( 'LEFT', 'RIGHT', 'INNER' ), true ) ) {
+			$join_type = 'INNER';
+		}
+
 		$sql_join  = '';
-		$sql_join .= "INNER JOIN {$table} ";
+		$sql_join .= "{$join_type} JOIN {$table} ";
 		$sql_join .= ( $alias !== $table ) ? "AS {$alias} " : '';
 		$sql_join .= "ON ( {$on} )";
 
@@ -755,6 +761,7 @@ class OrdersTableQuery {
 			$this->tables['operational_data'],
 			'',
 			'',
+			'inner',
 			true
 		);
 
@@ -796,6 +803,7 @@ class OrdersTableQuery {
 				$this->tables['addresses'],
 				$address_type,
 				$wpdb->prepare( "{$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s", $address_type ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'inner',
 				false
 			);
 
