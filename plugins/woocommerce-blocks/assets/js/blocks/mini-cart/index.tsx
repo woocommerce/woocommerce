@@ -56,6 +56,10 @@ const settings: BlockConfiguration = {
 			type: 'string',
 			default: 'none',
 		},
+		hasHiddenPrice: {
+			type: 'boolean',
+			default: false,
+		},
 	},
 
 	edit,

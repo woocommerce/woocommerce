@@ -41,6 +41,7 @@ interface Props {
 	style?: Record< string, Record< string, string > >;
 	contents: string;
 	addToCartBehaviour: string;
+	hasHiddenPrice: boolean;
 }
 
 const MiniCartBlock = ( {
@@ -49,6 +50,7 @@ const MiniCartBlock = ( {
 	style,
 	contents = '',
 	addToCartBehaviour = 'none',
+	hasHiddenPrice = false,
 }: Props ): JSX.Element => {
 	const {
 		cartItemsCount: cartItemsCountFromApi,
@@ -212,13 +214,15 @@ const MiniCartBlock = ( {
 				} }
 				aria-label={ ariaLabel }
 			>
-				<span className="wc-block-mini-cart__amount">
-					{ formatPrice(
-						subTotal,
-						getCurrencyFromPriceResponse( cartTotals )
-					) }
-				</span>
-				{ taxLabel !== '' && subTotal !== 0 && (
+				{ ! hasHiddenPrice && (
+					<span className="wc-block-mini-cart__amount">
+						{ formatPrice(
+							subTotal,
+							getCurrencyFromPriceResponse( cartTotals )
+						) }
+					</span>
+				) }
+				{ taxLabel !== '' && subTotal !== 0 && ! hasHiddenPrice && (
 					<small className="wc-block-mini-cart__tax-label">
 						{ taxLabel }
 					</small>
