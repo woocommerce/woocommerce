@@ -35,7 +35,7 @@ class PageController {
 	private $order;
 
 	/**
-	 * Verify that user has permission to edit order.e
+	 * Verify that user has permission to edit orders.
 	 *
 	 * @return void
 	 */
@@ -63,6 +63,8 @@ class PageController {
 	}
 
 	/**
+=======
+>>>>>>> trunk
 	 * Sets up the page controller, including registering the menu item.
 	 *
 	 * @return void
