@@ -224,6 +224,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
+			if ( ! method_exists( $order, 'get_' . $prop ) ) {
+				continue;
+			}
 			$value = $order->{"get_$prop"}( 'edit' );
 			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
@@ -338,7 +341,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'post_status'   => $this->get_post_status( $order ),
 				'post_parent'   => $order->get_parent_id(),
-				'post_excerpt'  => $this->get_post_excerpt( $order ),
+				'post_excerpt'  => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
 				'post_type'     => 'shop_order',
 			)
 		);
