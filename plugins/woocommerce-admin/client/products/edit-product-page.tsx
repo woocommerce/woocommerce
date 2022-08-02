@@ -48,33 +48,7 @@ const categories = [
 const EditProductPage: React.FC = () => {
 	return (
 		<div>
-			<ProductFormLayout>
-				{ categories.map( ( { id, title, description, fields } ) => (
-					<ProductCategoryLayout
-						key={ id }
-						title={ title }
-						description={ description }
-					>
-						{ fields.map(
-							( {
-								label,
-								key,
-								autoComplete,
-								value,
-								onChange,
-							} ) => (
-								<ProductFieldLayout
-									label={ label }
-									key={ key }
-									autoComplete={ autoComplete }
-									value={ value }
-									onChange={ onChange }
-								/>
-							)
-						) }
-					</ProductCategoryLayout>
-				) ) }
-			</ProductFormLayout>
+			<ProductFormLayout categories={ categories } />
 		</div>
 	);
 };

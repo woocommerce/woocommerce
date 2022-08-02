@@ -24,14 +24,12 @@ export const ProductFieldLayout: React.FC< ProductFieldLayoutProps > = ( {
 	onChange,
 } ) => {
 	return (
-		<div className="product-field-layout">
-			<TextControl
-				key={ key }
-				label={ label }
-				autoComplete={ autoComplete }
-				value={ value }
-				onChange={ onChange }
-			/>
-		</div>
+		<TextControl
+			key={ key }
+			label={ label }
+			autoComplete={ autoComplete }
+			value={ value }
+			onChange={ onChange }
+		/>
 	);
 };
