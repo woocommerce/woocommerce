@@ -29,7 +29,7 @@
 		"glob": "^7.2.0",
 		"lodash": "^4.17.21",
 		"mkdirp": "^1.0.4",
-		"run-turbo": "workspace:^1.0.0"
+		"run-turbo": "workspace:*"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

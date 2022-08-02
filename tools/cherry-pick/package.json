@@ -17,8 +17,5 @@
 	"dependencies": {
 		"node-fetch": "^3.2.6",
 		"ora": "^6.1.2"
-	},
-	"devDependencies": {
-		"run-turbo": "workspace:^1.0.0"
 	}
 }

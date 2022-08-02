@@ -67,7 +67,7 @@
 		"prettier": "npm:wp-prettier@^2.2.1-beta-1",
 		"regenerator-runtime": "^0.13.9",
 		"request": "^2.88.2",
-		"run-turbo": "workspace:^1.0.0",
+		"run-turbo": "workspace:*",
 		"sass": "^1.49.9",
 		"sass-loader": "^10.2.1",
 		"turbo": "^1.2.16",

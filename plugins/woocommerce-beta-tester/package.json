@@ -15,7 +15,7 @@
 		"@wordpress/env": "^4.8.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "5.16.0",
-		"run-turbo": "workspace:^1.0.0",
+		"run-turbo": "workspace:*",
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {

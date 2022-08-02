@@ -29,7 +29,6 @@
 		"eslint": "^7.32.0",
 		"globby": "^11",
 		"oclif": "^2",
-		"run-turbo": "workspace:^1.0.0",
 		"shx": "^0.3.3",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
