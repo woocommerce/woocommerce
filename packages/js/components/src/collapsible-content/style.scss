@@ -1,6 +1,6 @@
 .woocommerce-collapsible-content {
 
-	button {
+	.woocommerce-collapsible-content__toggle {
 		all: unset;
 		font-size: 13px;
 		color: #007CBA;
@@ -10,9 +10,14 @@
 			display: flex;
 			align-items: center;
 		}
+	
+		svg {
+			fill: #007CBA;
+			margin-left: 2px;
+		}
 	}
 
-	svg {
-		fill: #007CBA;
+	.woocommerce-collapsible-content__content {
+		margin-top: $gap-large;
 	}
 }
