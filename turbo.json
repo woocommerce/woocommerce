@@ -32,7 +32,8 @@
 				"build-module/**",
 				"build-style/**",
 				"build-types/**"
-			]
+			],
+			"outputMode": "new-only"
 		},
 
 		"woocommerce#turbo:build": {
@@ -47,7 +48,8 @@
 				"src/**/*.php",
 				"includes/*.php",
 				"includes/**/*.php"
-			]
+			],
+			"outputMode": "new-only"
 		},
 
 		"woocommerce/client/admin#turbo:build": {
@@ -64,7 +66,8 @@
 				"client/**/*.tsx",
 				"client/*.scss",
 				"client/**/*.scss"
-			]
+			],
+			"outputMode": "new-only"
 		},
 
 		"turbo:test": {

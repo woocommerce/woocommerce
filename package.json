@@ -14,9 +14,9 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "pnpm exec turbo run turbo:build --output-logs=new-only -- -- ",
-		"lint": "pnpm exec turbo run turbo:lint --output-logs=new-only -- --",
-		"test": "pnpm exec turbo run turbo:test --output-logs=new-only -- --",
+		"build": "pnpm exec turbo run turbo:build -- -- ",
+		"lint": "pnpm exec turbo run turbo:lint -- --",
+		"test": "pnpm exec turbo run turbo:test -- --",
 		"build-storybook": "build-storybook  -c ./tools/storybook/.storybook",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
@@ -67,7 +67,6 @@
 		"prettier": "npm:wp-prettier@^2.2.1-beta-1",
 		"regenerator-runtime": "^0.13.9",
 		"request": "^2.88.2",
-		"run-turbo": "workspace:*",
 		"sass": "^1.49.9",
 		"sass-loader": "^10.2.1",
 		"turbo": "^1.2.16",

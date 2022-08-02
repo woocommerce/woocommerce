@@ -48,7 +48,6 @@ importers:
       prettier: npm:wp-prettier@^2.2.1-beta-1
       regenerator-runtime: ^0.13.9
       request: ^2.88.2
-      run-turbo: workspace:*
       sass: ^1.49.9
       sass-loader: ^10.2.1
       turbo: ^1.2.16
@@ -103,7 +102,6 @@ importers:
       prettier: /wp-prettier/2.6.2
       regenerator-runtime: 0.13.9
       request: 2.88.2
-      run-turbo: link:tools/run-turbo
       sass: 1.49.9
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       turbo: 1.2.16
@@ -127,7 +125,6 @@ importers:
       jest-cli: ^27.5.1
       jest-mock-extended: ^1.0.18
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -146,7 +143,6 @@ importers:
       jest-cli: 27.5.1
       jest-mock-extended: 1.0.18_jest@27.5.1+typescript@4.6.2
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_23bc83dd0471d6d2a42908007c85fd69
       typescript: 4.6.2
 
@@ -163,7 +159,6 @@ importers:
       eslint: ^8.2.0
       jest: ^25
       oauth-1.0a: 2.2.6
-      run-turbo: workspace:*
       ts-jest: ^25
       typescript: ^4.4.4
     dependencies:
@@ -179,7 +174,6 @@ importers:
       axios-mock-adapter: 1.20.0_axios@0.24.0
       eslint: 8.2.0
       jest: 25.5.4
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 25.5.1_jest@25.5.4+typescript@4.4.4
       typescript: 4.4.4
 
@@ -193,7 +187,6 @@ importers:
       jest-allure: ^0.1.3
       jest-runner-groups: ^2.1.0
       postman-collection: ^4.1.0
-      run-turbo: workspace:*
       supertest: ^6.1.4
     dependencies:
       allure-commandline: 2.17.2
@@ -206,7 +199,6 @@ importers:
     devDependencies:
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       eslint: 8.12.0
-      run-turbo: link:../../../tools/run-turbo
 
   packages/js/components:
     specifiers:
@@ -280,7 +272,6 @@ importers:
       react-dates: ^21.8.0
       react-transition-group: ^4.4.2
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -358,7 +349,6 @@ importers:
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -375,7 +365,6 @@ importers:
       jest-cli: ^27.5.1
       moment: ^2.29.1
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -388,7 +377,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -405,7 +393,6 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -421,7 +408,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -451,7 +437,6 @@ importers:
       prop-types: ^15.8.1
       react-transition-group: ^4.4.2
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -483,7 +468,6 @@ importers:
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -524,7 +508,6 @@ importers:
       redux: ^4.1.0
       rememo: ^4.0.0
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -561,7 +544,6 @@ importers:
       jest-cli: 27.5.1
       redux: 4.1.2
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -580,7 +562,6 @@ importers:
       moment-timezone: ^0.5.34
       qs: ^6.10.3
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -598,7 +579,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -611,7 +591,6 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
       webpack: ^5.70.0
@@ -625,7 +604,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
       webpack: 5.70.0_webpack-cli@3.3.12
@@ -650,7 +628,6 @@ importers:
       '@wordpress/deprecated': ^3.2.3
       config: 3.3.3
       eslint: ^8.12.0
-      run-turbo: workspace:*
     dependencies:
       '@jest/globals': 26.6.2
       '@wordpress/deprecated': 3.2.3
@@ -670,7 +647,6 @@ importers:
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/browserslist-config': 4.1.0
       eslint: 8.12.0
-      run-turbo: link:../../../tools/run-turbo
 
   packages/js/e2e-environment:
     specifiers:
@@ -706,7 +682,6 @@ importers:
       puppeteer: 2.1.1
       readline-sync: ^1.4.10
       request: ^2.88.2
-      run-turbo: workspace:*
       semver: ^7.3.2
       sprintf-js: ^1.1.2
     dependencies:
@@ -744,7 +719,6 @@ importers:
       '@wordpress/browserslist-config': 4.1.0
       eslint: 8.2.0
       ndb: 1.1.5
-      run-turbo: link:../../../tools/run-turbo
       semver: 7.3.5
 
   packages/js/e2e-utils:
@@ -769,7 +743,6 @@ importers:
       config: 3.3.3
       eslint: ^8.1.0
       fishery: ^1.2.0
-      run-turbo: workspace:*
     dependencies:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 3.2.3
@@ -792,7 +765,6 @@ importers:
       '@wordpress/babel-preset-default': 3.0.2
       '@wordpress/browserslist-config': 4.1.0
       eslint: 8.1.0
-      run-turbo: link:../../../tools/run-turbo
 
   packages/js/eslint-plugin:
     specifiers:
@@ -806,7 +778,6 @@ importers:
       jest-cli: ^27.5.1
       requireindex: ^1.2.0
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -821,7 +792,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -859,7 +829,6 @@ importers:
       react-transition-group: ^4.4.2
       react-visibility-sensor: ^5.1.1
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -899,7 +868,6 @@ importers:
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -923,7 +891,6 @@ importers:
       jest-cli: ^27.5.1
       qs: ^6.10.3
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -943,15 +910,11 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
   packages/js/extend-cart-checkout-block:
-    specifiers:
-      run-turbo: workspace:*
-    devDependencies:
-      run-turbo: link:../../../tools/run-turbo
+    specifiers: {}
 
   packages/js/internal-e2e-builds:
     specifiers:
@@ -962,7 +925,6 @@ importers:
       glob: ^7.2.0
       lodash: ^4.17.21
       mkdirp: ^1.0.4
-      run-turbo: workspace:*
     devDependencies:
       '@babel/core': 7.12.9
       '@woocommerce/eslint-plugin': link:../eslint-plugin
@@ -971,7 +933,6 @@ importers:
       glob: 7.2.0
       lodash: 4.17.21
       mkdirp: 1.0.4
-      run-turbo: link:../../../tools/run-turbo
 
   packages/js/internal-js-tests:
     specifiers:
@@ -987,7 +948,6 @@ importers:
       jest-cli: ^27.5.1
       regenerator-runtime: ^0.13.9
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -1004,7 +964,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -1022,7 +981,6 @@ importers:
       mini-css-extract-plugin: ^2.6.0
       postcss-loader: ^3.0.0
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1046,7 +1004,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
       webpack: 5.70.0
@@ -1069,7 +1026,6 @@ importers:
       jest-cli: ^27.5.1
       qs: ^6.10.3
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -1090,7 +1046,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -1107,7 +1062,6 @@ importers:
       jest-cli: ^27.5.1
       redux: ^4.2.0
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -1123,7 +1077,6 @@ importers:
       jest-cli: 27.5.1
       redux: 4.2.0
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -1137,7 +1090,6 @@ importers:
       jest-cli: ^27.5.1
       locutus: ^2.0.16
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -1150,7 +1102,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -1177,7 +1128,6 @@ importers:
       jest-cli: ^27.5.1
       postcss-loader: ^3.0.0
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
       typescript: ^4.6.2
@@ -1206,7 +1156,6 @@ importers:
       jest-cli: 27.5.1
       postcss-loader: 3.0.0
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
@@ -1223,7 +1172,6 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       rimraf: ^3.0.2
-      run-turbo: workspace:*
       ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
@@ -1236,7 +1184,6 @@ importers:
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
-      run-turbo: link:../../../tools/run-turbo
       ts-jest: 27.1.3_b64eba0a9f1c7068f7f3a75addda5ccd
       typescript: 4.6.2
 
@@ -1278,7 +1225,6 @@ importers:
       jest: ^25.1.0
       mocha: 7.2.0
       prettier: npm:wp-prettier@2.0.5
-      run-turbo: workspace:*
       stylelint: ^13.8.0
       typescript: 3.9.7
       uuid: ^8.3.2
@@ -1322,7 +1268,6 @@ importers:
       jest: 25.5.4
       mocha: 7.2.0
       prettier: /wp-prettier/2.0.5
-      run-turbo: link:../../tools/run-turbo
       stylelint: 13.13.1
       typescript: 3.9.7
       uuid: 8.3.2
@@ -1482,7 +1427,6 @@ importers:
       replace: ^1.2.1
       rimraf: ^3.0.2
       rtlcss: ^2.6.2
-      run-turbo: workspace:*
       sass: ^1.49.9
       sass-loader: ^10.2.1
       style-loader: ^0.23.1
@@ -1648,7 +1592,6 @@ importers:
       replace: 1.2.1
       rimraf: 3.0.2
       rtlcss: 2.6.2
-      run-turbo: link:../../tools/run-turbo
       sass: 1.49.9
       sass-loader: 10.2.1_sass@1.49.9+webpack@5.70.0
       style-loader: 0.23.1
@@ -1679,7 +1622,6 @@ importers:
       '@wordpress/hooks': ^2.11.1
       '@wordpress/scripts': ^19.2.4
       eslint: 5.16.0
-      run-turbo: workspace:*
       uglify-js: ^3.5.3
     dependencies:
       '@types/prop-types': 15.7.4
@@ -1697,7 +1639,6 @@ importers:
       '@wordpress/env': 4.8.0
       '@wordpress/scripts': 19.2.4_ee910045e4cc2812de8b965e303c7169
       eslint: 5.16.0
-      run-turbo: link:../../tools/run-turbo
       uglify-js: 3.14.5
 
   plugins/woocommerce/client/legacy:
@@ -1721,7 +1662,6 @@ importers:
       grunt-sass: 3.1.0
       grunt-stylelint: 0.16.0
       gruntify-eslint: 5.0.0
-      run-turbo: workspace:*
       sass: ^1.45.0
       stylelint: 13.8.0
     devDependencies:
@@ -1744,7 +1684,6 @@ importers:
       grunt-sass: 3.1.0_grunt@1.3.0
       grunt-stylelint: 0.16.0_stylelint@13.8.0
       gruntify-eslint: 5.0.0_grunt@1.3.0
-      run-turbo: link:../../../../tools/run-turbo
       sass: 1.49.9
       stylelint: 13.8.0
 
@@ -1860,9 +1799,6 @@ importers:
       ts-node: 10.5.0_506ca6ef959d35afcce359030b1bc9ff
       tslib: 2.3.1
       typescript: 4.6.2
-
-  tools/run-turbo:
-    specifiers: {}
 
 packages:
 
