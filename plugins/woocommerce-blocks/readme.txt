@@ -107,7 +107,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fix: Navigate through Mini Cart contents with keyboard. ([6731](https://github.com/woocommerce/woocommerce-blocks/pull/6731))
 - Fix: Ensure add to cart notices are displayed on pages containing the Mini Cart block. ([6728](https://github.com/woocommerce/woocommerce-blocks/pull/6728))
 - Fix Cart an d Checkout blocks compatiblity issue with wordpress.com in which blocks wouldn't load in the editor. ([6718](https://github.com/woocommerce/woocommerce-blocks/pull/6718))
-- N/A. ([6716](https://github.com/woocommerce/woocommerce-blocks/pull/6716))
 - Fixes an issue where search lists would not preserve the case of the original item. ([6551](https://github.com/woocommerce/woocommerce-blocks/pull/6551))
 
 = 8.1.0 - 2022-07-18 =
