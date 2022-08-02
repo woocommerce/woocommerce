@@ -336,7 +336,7 @@ WHERE
 		$batch_size = self::ORDERS_SYNC_BATCH_SIZE;
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
-			// Backfilling is slower then migration.
+			// Back-filling is slower than migration.
 			$batch_size = absint( self::ORDERS_SYNC_BATCH_SIZE / 10 ) + 1;
 		}
 		/**
