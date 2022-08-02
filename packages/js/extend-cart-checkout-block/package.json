@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block#readme"
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block#readme",
+  "devDependencies": {
+    "run-turbo": "workspace:^1.0.0"
+  }
 }

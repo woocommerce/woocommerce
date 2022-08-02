@@ -1,0 +1,15 @@
+{
+	"name": "run-turbo",
+	"version": "1.0.0",
+	"description": "Simplify running turbo",
+	"main": " ",
+	"scripts": {},
+	"author": "Automattic",
+	"license": "GPLv2",
+	"bin": {
+		"run-turbo": "./bin/run-turbo.sh"
+	},
+	"devDependencies": {
+		"run-turbo": "workspace:^1.0.0"
+	}
+}

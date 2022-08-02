@@ -11,5 +11,8 @@
 		"chalk": "^4.1.2",
 		"fs-extra": "10.1.0",
 		"promptly": "^3.2.0"
+	},
+	"devDependencies": {
+		"run-turbo": "workspace:^1.0.0"
 	}
 }
