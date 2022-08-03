@@ -8,7 +8,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { ProductCategoryLayout } from '../layout/product-category-layout';
-import { ProductFieldLayout } from '../layout/product-field-layout';
 
 export const ProductImagesCategory: React.FC = () => {
 	return (
