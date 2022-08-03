@@ -5,6 +5,9 @@ on:
     issues:
         types: [edited]
 name: Project management automations
+permissions:
+  pull-requests: write
+  actions: write
 jobs:
     project-management-automation:
         runs-on: ubuntu-latest
