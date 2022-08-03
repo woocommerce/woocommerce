@@ -4,19 +4,23 @@
 import { ChangeEvent } from 'react';
 import { createContext, useContext } from '@wordpress/element';
 
-export type FormContext< Values > = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type FormContext< Values extends Record< string, any > > = {
 	values: Values;
 	errors: Record< string, string >;
 	touched: { [ P in keyof Values ]?: boolean | undefined };
 	setTouched: React.Dispatch<
 		React.SetStateAction< { [ P in keyof Values ]?: boolean | undefined } >
 	>;
-	setValue: ( name: string, value: unknown ) => void;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	setValue: ( name: string, value: any ) => void;
 	handleSubmit: () => Promise< Values >;
-	getInputProps: ( name: string ) => {
-		value: string;
+	getInputProps< Value = string >(
+		name: string
+	): {
+		value: Value;
 		checked: boolean;
-		selected: string;
+		selected: Value;
 		onChange: ( value: ChangeEvent< HTMLInputElement > ) => void;
 		onBlur: () => void;
 		className: string | undefined;
@@ -31,7 +35,8 @@ export const FormContext = createContext< FormContext< any > >(
 	{} as FormContext< any >
 );
 
-export function useFormContext< Values >() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useFormContext< Values extends Record< string, any > >() {
 	const formik = useContext< FormContext< Values > >( FormContext );
 
 	return formik;

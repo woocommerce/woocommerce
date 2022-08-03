@@ -67,7 +67,8 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	);
 
 	return (
-		<Form< Record< string, string > >
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		<Form< Record< string, any > >
 			initialValues={ initialValues }
 			onChange={ onChange }
 			onSubmit={ onSubmit }

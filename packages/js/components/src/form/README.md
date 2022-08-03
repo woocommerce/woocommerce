@@ -34,7 +34,7 @@ const initialValues = { firstName: '' };
 const Field = () => {
 	const formProps = useFormContext< { foo: string } >();
 
-	return <input type="text" { ...formProps.getInputProps( 'firstName' ) } />
+	return <input type="text" { ...formProps.getInputProps<string>( 'firstName' ) } />
 }
 
 <Form

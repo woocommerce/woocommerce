@@ -49,7 +49,8 @@ type FormProps< Values > = {
 	 * Function to call when a value changes in the form.
 	 */
 	onChange?: (
-		value: { name: string; value: unknown },
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		value: { name: string; value: any },
 		values: Values,
 		hasErrors: boolean
 	) => void;
@@ -63,7 +64,8 @@ type FormProps< Values > = {
 /**
  * A form component to handle form state and provide input helper props.
  */
-function Form< Values extends Record< string, string > >(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function Form< Values extends Record< string, any > >(
 	props: PropsWithChildren< FormProps< Values > >
 ): React.ReactElement | null {
 	const [ values, setValues ] = useState< Values >( props.initialValues );
@@ -91,7 +93,8 @@ function Form< Values extends Record< string, string > >(
 	};
 
 	const setValue = useCallback(
-		( name: string, value: unknown ) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( name: string, value: any ) => {
 			setValues( { ...values, [ name ]: value } );
 			validate( { ...values, [ name ]: value }, () => {
 				const { onChange, onChangeCallback } = props;
@@ -172,7 +175,17 @@ function Form< Values extends Record< string, string > >(
 		}
 	};
 
-	const getInputProps = ( name: string ) => {
+	function getInputProps< Value = string >(
+		name: string
+	): {
+		value: Value;
+		checked: boolean;
+		selected: Value;
+		onChange: ( value: ChangeEvent< HTMLInputElement > ) => void;
+		onBlur: () => void;
+		className: string | undefined;
+		help: string | null;
+	} {
 		return {
 			value: values[ name ],
 			checked: Boolean( values[ name ] ),
@@ -184,7 +197,7 @@ function Form< Values extends Record< string, string > >(
 				touched[ name ] && errors[ name ] ? 'has-error' : undefined,
 			help: touched[ name ] ? errors[ name ] : null,
 		};
-	};
+	}
 
 	const getStateAndHelpers = () => {
 		return {
