@@ -136,6 +136,7 @@ const SavedPaymentMethodOptions = () => {
 				id={ 'wc-payment-method-saved-tokens' }
 				selected={ activeSavedToken }
 				options={ options }
+				onChange={ () => void 0 }
 			/>
 			{ savedPaymentMethodHandler }
 		</>
