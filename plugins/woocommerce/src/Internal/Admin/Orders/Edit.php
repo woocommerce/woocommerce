@@ -51,6 +51,28 @@ class Edit {
 	}
 
 	/**
+	 * Hooks metabox save functions for order edit page.
+	 *
+	 * @return void
+	 */
+	public static function add_save_meta_boxes() {
+		/**
+		 * Save Order Meta Boxes.
+		 *
+		 * In order:
+		 *      Save the order items.
+		 *      Save the order totals.
+		 *      Save the order downloads.
+		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
+		 *      Save actions - sends out other emails. Last to show latest data.
+		 */
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40 );
+		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
+	}
+
+	/**
 	 * Enqueue necessary scripts for order edit page.
 	 */
 	private function enqueue_scripts() {
@@ -70,6 +92,11 @@ class Edit {
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
+		if ( ! isset( $this->custom_meta_box ) ) {
+			$this->custom_meta_box = wc_get_container()->get( CustomMetaBox::class );
+		}
+		$this->add_save_meta_boxes();
+		$this->handle_order_update();
 		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
 		$this->add_order_specific_meta_box();
 
@@ -88,16 +115,60 @@ class Edit {
 	 * Hooks meta box for order specific meta.
 	 */
 	private function add_order_specific_meta_box() {
-		add_meta_box( 'postcustom', __( 'Custom Fields', 'woocommerce' ), array( $this, 'render_custom_meta_box' ), $this->screen_id, 'normal' );
+		add_meta_box(
+			'order_custom',
+			__( 'Custom Fields', 'woocommerce' ),
+			array( $this, 'render_custom_meta_box' ),
+			$this->screen_id,
+			'normal'
+		);
+	}
+
+	/**
+	 * Takes care of updating order data. Fires action that metaboxes can hook to for order data updating.
+	 *
+	 * @return void
+	 */
+	public function handle_order_update() {
+		global $theorder;
+		if ( ! isset( $this->order ) ) {
+			return;
+		}
+
+		if ( 'edit_order' !== sanitize_text_field( wp_unslash( $_POST['action'] ?? '' ) ) ) {
+			return;
+		}
+
+		check_admin_referer( $this->get_order_edit_nonce_action() );
+
+		/**
+		 * Save meta for shop order.
+		 *
+		 * @param int Order ID.
+		 * @param \WC_Order Post object.
+		 *
+		 * @since 2.1.0
+		 */
+		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
+
+		// Refresh the order from DB.
+		$this->order = wc_get_order( $this->order->get_id() );
+		$theorder    = $this->order;
+	}
+
+	/**
+	 * Helper method to get the name of order edit nonce.
+	 *
+	 * @return string Nonce action name.
+	 */
+	private function get_order_edit_nonce_action() {
+		return 'update-order_' . $this->order->get_id();
 	}
 
 	/**
 	 * Render meta box for order specific meta.
 	 */
 	public function render_custom_meta_box() {
-		if ( ! isset( $this->custom_meta_box ) ) {
-			$this->custom_meta_box = new CustomMetaBox();
-		}
 		$this->custom_meta_box->output( $this->order );
 	}
 
@@ -117,6 +188,9 @@ class Edit {
 	 * @param string $message Message to display, if any.
 	 */
 	private function render_wrapper_start( $notice = '', $message = '' ) {
+		$edit_page_url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . $this->order->get_id() );
+		$form_action   = 'edit_order';
+		$referer       = wp_get_referer();
 		?>
 		<div class="wrap">
 		<h1 class="wp-heading-inline">
@@ -127,16 +201,39 @@ class Edit {
 		?>
 		<hr class="wp-header-end">
 
-		<div id="poststuff">
-		<div id="post-body" class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">
-
-		<?php if ( $notice ) : ?>
-			<div id="notice" class="notice notice-warning"><p id="has-newer-autosave"><?php echo wp_kses_post( $notice ); ?></p></div>
+		<?php
+		if ( $notice ) :
+			?>
+			<div id="notice" class="notice notice-warning"><p
+					id="has-newer-autosave"><?php echo wp_kses_post( $notice ); ?></p></div>
 		<?php endif; ?>
 		<?php if ( $message ) : ?>
-			<div id="message" class="updated notice notice-success is-dismissible"><p><?php echo wp_kses_post( $message ); ?></p></div>
+			<div id="message" class="updated notice notice-success is-dismissible">
+				<p><?php echo wp_kses_post( $message ); ?></p></div>
 			<?php
-		endif;
+			endif;
+		?>
+
+		<form name="order" action="<?php echo esc_url( $edit_page_url ); ?>" method="post" id="order"
+		<?php
+		/**
+		 * Fires inside the order edit form tag.
+		 *
+		 * @param \WC_Order $order Order object.
+		 *
+		 * @since 6.9.0
+		 */
+		do_action( 'order_edit_form_tag', $this->order );
+		?>
+		>
+		<?php wp_nonce_field( $this->get_order_edit_nonce_action() ); ?>
+		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
+		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
+		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
+		<div id="poststuff">
+		<div id="post-body"
+		class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">
+		<?php
 	}
 
 	/**
@@ -148,9 +245,12 @@ class Edit {
 			<?php do_meta_boxes( $this->screen_id, 'side', $this->order ); ?>
 		</div>
 		<div id="postbox-container-2" class="postbox-container">
+			<?php
+			do_meta_boxes( $this->screen_id, 'normal', $this->order );
+			do_meta_boxes( $this->screen_id, 'advanced', $this->order );
+			?>
+		</div>
 		<?php
-		do_meta_boxes( $this->screen_id, 'normal', $this->order );
-		do_meta_boxes( $this->screen_id, 'advanced', $this->order );
 	}
 
 	/**
@@ -158,7 +258,10 @@ class Edit {
 	 */
 	private function render_wrapper_end() {
 		?>
-		</div></div> </div></div>
+		</div> <!-- /post-body -->
+		</div> <!-- /poststuff  -->
+		</form>
+		</div> <!-- /wrap -->
 		<?php
 	}
 }

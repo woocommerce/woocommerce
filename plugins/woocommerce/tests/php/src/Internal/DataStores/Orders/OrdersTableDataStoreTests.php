@@ -197,6 +197,54 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Test update when row in one of the associated tables is missing.
+	 */
+	public function test_cot_datastore_update_when_incomplete_record() {
+		global $wpdb;
+		static $props_to_update = array(
+			'billing_first_name' => 'John',
+			'billing_last_name'  => 'Doe',
+			'shipping_phone'     => '555-55-55',
+			'status'             => 'on-hold',
+			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
+		);
+
+		// Set up order.
+		$post_order = OrderHelper::create_order();
+		$this->migrator->migrate_orders( array( $post_order->get_id() ) );
+
+		// Read order using the COT datastore.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $post_order->get_id() );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+
+		// Make some changes to the order and save.
+		$order->set_props( $props_to_update );
+
+		// Let's delete a row from one of the table.
+		$wpdb->delete( $this->sut::get_addresses_table_name(), array( 'order_id' => $order->get_id() ), array( '%d' ) );
+
+		// Try to update as if nothing happened.
+		// Make some changes to the order and save.
+		$order->set_props( $props_to_update );
+
+		$order->save();
+		// Re-read order and make sure changes were persisted.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $post_order->get_id() );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+
+		foreach ( $props_to_update as $prop => $value ) {
+			$this->assertEquals( $order->{"get_$prop"}( 'edit' ), $value );
+		}
+
+	}
+
+	/**
 	 * Tests create() on the COT datastore.
 	 */
 	public function test_cot_datastore_create() {

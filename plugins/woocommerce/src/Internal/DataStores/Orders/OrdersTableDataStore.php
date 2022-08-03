@@ -376,6 +376,26 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Helper function to get alias for op table, this is used in select query.
+	 *
+	 * @return string Alias.
+	 */
+	private function get_op_table_alias() : string {
+		return 'order_operational_data';
+	}
+
+	/**
+	 * Helper function to get alias for address table, this is used in select query.
+	 *
+	 * @param string $type Address type.
+	 *
+	 * @return string Alias.
+	 */
+	private function get_address_table_alias( string $type ) : string {
+		return "address_$type";
+	}
+
+	/**
 	 * Backfills order details in to WP_Post DB. Uses WC_Order_Data_store_CPT.
 	 *
 	 * @param \WC_Order $order Order object to backfill.
@@ -711,6 +731,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		global $wpdb;
+		if ( empty( $ids ) ) {
+			return array();
+		}
 		$order_table_query = $this->get_order_table_select_statement();
 		$id_placeholder    = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
@@ -733,9 +756,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$order_table                  = $this::get_orders_table_name();
 		$order_table_alias            = 'wc_order';
 		$select_clause                = $this->generate_select_clause_for_props( $order_table_alias, $this->order_column_mapping );
-		$billing_address_table_alias  = 'address_billing';
-		$shipping_address_table_alias = 'address_shipping';
-		$op_data_table_alias          = 'order_operational_data';
+		$billing_address_table_alias  = $this->get_address_table_alias( 'billing' );
+		$shipping_address_table_alias = $this->get_address_table_alias( 'shipping' );
+		$op_data_table_alias          = $this->get_op_table_alias();
 		$billing_address_clauses      = $this->join_billing_address_table_to_order_query( $order_table_alias, $billing_address_table_alias );
 		$shipping_address_clauses     = $this->join_shipping_address_table_to_order_query( $order_table_alias, $shipping_address_table_alias );
 		$operational_data_clauses     = $this->join_operational_data_table_to_order_query( $order_table_alias, $op_data_table_alias );
@@ -926,7 +949,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 	protected function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
 		$result = array();
 
-		// wc_orders.
+		$existing_order_row = $order->get_id() ? $this->get_order_data_for_id( $order->get_id() ) : array();
+
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
 		if ( 'create' === $context && ! $row ) {
 			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
@@ -949,8 +973,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 				'table'        => self::get_operational_data_table_name(),
 				'data'         => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
 				'format'       => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
-				'where'        => 'update' === $context ? array( 'order_id' => $order->get_id() ) : null,
-				'where_format' => 'update' === $context ? '%d' : null,
+				'where'        => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? array( 'order_id' => $order->get_id() ) : null,
+				'where_format' => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? '%d' : null,
 			);
 		}
 
@@ -975,13 +999,13 @@ LEFT JOIN {$operational_data_clauses['join']}
 							'address_type' => '%s',
 						)
 					),
-					'where'        => 'update' === $context
+					'where'        => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } )
 									? array(
 										'order_id'     => $order->get_id(),
 										'address_type' => $address_type,
 									)
 									: null,
-					'where_format' => 'update' === $context ? array( '%d', '%s' ) : null,
+					'where_format' => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } ) ? array( '%d', '%s' ) : null,
 				);
 			}
 		}

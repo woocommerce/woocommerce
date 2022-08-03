@@ -98,7 +98,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Enqueue scripts.
 		 */
 		public function admin_scripts() {
-			global $wp_query, $post;
+			global $wp_query, $post, $theorder;
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
@@ -312,12 +312,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
 
-				if ( $post_id && $this->is_order_meta_box_screen( $screen_id ) ) {
-					$order = wc_get_order( $post_id );
-					if ( $order ) {
-						$currency = $order->get_currency();
+				// Eventually this will become wc_data_or_post object as we implement more custom tables.
+				$order_or_post_object = $post;
+				if ( ( $theorder instanceof WC_Order ) && $this->is_order_meta_box_screen( $screen_id ) ) {
+					$order_or_post_object = $theorder;
+					if ( $order_or_post_object ) {
+						$currency = $order_or_post_object->get_currency();
 
-						if ( ! $order->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
+						if ( ! $order_or_post_object->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
 							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );
 						}
 					}
@@ -363,7 +365,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'add_order_note_nonce'          => wp_create_nonce( 'add-order-note' ),
 					'delete_order_note_nonce'       => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                => WC()->plugin_url() . '/assets/images/calendar.png',
-					'post_id'                       => isset( $post->ID ) ? $post->ID : '',
+					'post_id'                       => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
 					'base_country'                  => WC()->countries->get_base_country(),
 					'currency_format_num_decimals'  => wc_get_price_decimals(),
 					'currency_format_symbol'        => get_woocommerce_currency_symbol( $currency ),
