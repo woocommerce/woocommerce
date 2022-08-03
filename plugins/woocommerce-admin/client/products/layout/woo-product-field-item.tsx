@@ -3,45 +3,14 @@
  */
 import React from 'react';
 import { Slot, Fill } from '@wordpress/components';
-import { cloneElement, isValidElement } from '@wordpress/element';
 import { snakeCase } from 'lodash';
 
+/**
+ * Internal dependencies
+ */
+import { createOrderedChildren, sortFillsByOrder } from '~/utils';
+
 // TODO: move this to a published JS package once ready.
-
-/**
- * Ordered product field item.
- *
- * @param {Node}   children - Node children.
- * @param {number} order    - Node order.
- * @param {Array}  props    - Fill props.
- * @return {Node} Node.
- */
-const createOrderedChildren = (
-	children: React.ReactNode,
-	order: number,
-	props: Fill.Props
-) => {
-	if ( typeof children === 'function' ) {
-		return cloneElement( children( props ), { order } );
-	} else if ( isValidElement( children ) ) {
-		return cloneElement( children, { ...props, order } );
-	}
-	throw Error( 'Invalid children type' );
-};
-
-/**
- * Sort fills by order for slot children.
- *
- * @param {Array} fills - slot's `Fill`s.
- * @return {Node} Node.
- */
-const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
-	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
-	const sortedFills = [ ...fills ].sort( ( a, b ) => {
-		return a[ 0 ].props.order - b[ 0 ].props.order;
-	} );
-	return <>{ sortedFills }</>;
-};
 
 /**
  * Create a Fill for extensions to add items to the Product edit page.
