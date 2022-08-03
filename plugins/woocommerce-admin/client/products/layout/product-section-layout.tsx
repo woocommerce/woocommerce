@@ -6,15 +6,15 @@ import { Children, isValidElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './product-category-layout.scss';
+import './product-section-layout.scss';
 import { ProductFieldLayout } from './product-field-layout';
 
-type ProductCategoryLayoutProps = {
+type ProductSectionLayoutProps = {
 	title: string;
 	description: string;
 };
 
-export const ProductCategoryLayout: React.FC< ProductCategoryLayoutProps > = ( {
+export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
 	title,
 	description,
 	children,

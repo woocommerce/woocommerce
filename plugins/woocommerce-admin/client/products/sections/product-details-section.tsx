@@ -7,11 +7,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ProductCategoryLayout } from '../layout/product-category-layout';
+import { ProductSectionLayout } from '../layout/product-section-layout';
 
-export const ProductDetailsCategory: React.FC = () => {
+export const ProductDetailsSection: React.FC = () => {
 	return (
-		<ProductCategoryLayout
+		<ProductSectionLayout
 			title={ __( 'Product details', 'woocommerce' ) }
 			description={ __(
 				'This info will be displayed on the product page, category pages, social media, and search results.',
@@ -24,6 +24,6 @@ export const ProductDetailsCategory: React.FC = () => {
 				value={ '' }
 				onChange={ () => {} }
 			/>
-		</ProductCategoryLayout>
+		</ProductSectionLayout>
 	);
 };

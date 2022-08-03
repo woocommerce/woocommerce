@@ -7,11 +7,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ProductCategoryLayout } from '../layout/product-category-layout';
+import { ProductSectionLayout } from '../layout/product-section-layout';
 
-export const ProductImagesCategory: React.FC = () => {
+export const ProductImagesSection: React.FC = () => {
 	return (
-		<ProductCategoryLayout
+		<ProductSectionLayout
 			title={ __( 'Images', 'woocommerce' ) }
 			description={ __(
 				'For best results, use JPEG files that are 1000 by 1000 pixels or larger..',
@@ -24,6 +24,6 @@ export const ProductImagesCategory: React.FC = () => {
 				value={ '' }
 				onChange={ () => {} }
 			/>
-		</ProductCategoryLayout>
+		</ProductSectionLayout>
 	);
 };
