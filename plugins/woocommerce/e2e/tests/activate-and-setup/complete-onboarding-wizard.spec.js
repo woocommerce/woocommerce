@@ -297,18 +297,29 @@ test.describe( 'Store owner can go through setup Task List', () => {
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		await page.click( ':nth-match(.woocommerce-task-list__item-title, 5)' );
+		await page.click( 'div >> text=Review Shipping Options' );
 
-		// check if this is the first time (or if the test is being retried)
-		const currPage = page.url();
-		if ( currPage.indexOf( 'page=wc-settings&tab=shipping' ) > 0 ) {
-			// click the Add shipping zone button on the shipping settings page
-			await page.locator( '.page-title-action' ).click();
-			await expect(
-				page.locator( 'div.woocommerce > form > h2' )
-			).toContainText( 'Shipping zones' );
-		} else {
-			await page.locator( 'button.components-button.is-primary' ).click();
+		// dismiss tourkit if visible
+		const tourkitVisible = await page
+			.locator( 'button.woocommerce-tour-kit-step-controls__close-btn' )
+			.isVisible();
+		if ( tourkitVisible ) {
+			await page.click(
+				'button.woocommerce-tour-kit-step-controls__close-btn'
+			);
 		}
+
+		// check for automatically added shipping zone
+		await expect(
+			page.locator( 'tr[data-id="1"] >> td.wc-shipping-zone-name > a' )
+		).toContainText( 'United States (US)' );
+		await expect(
+			page.locator( 'tr[data-id="1"] >> td.wc-shipping-zone-region' )
+		).toContainText( 'United States (US)' );
+		await expect(
+			page.locator(
+				'tr[data-id="1"] >> td.wc-shipping-zone-methods > div > ul > li'
+			)
+		).toContainText( 'Free shipping' );
 	} );
 } );
