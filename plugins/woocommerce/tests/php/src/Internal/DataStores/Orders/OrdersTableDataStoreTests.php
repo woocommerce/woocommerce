@@ -86,11 +86,17 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
-		$post_data      = get_post( $post_order_id, ARRAY_A );
-		$post_meta_data = get_post_meta( $post_order_id );
-		// TODO: Remove `_recorded_sales` from exempted keys after https://github.com/woocommerce/woocommerce/issues/32843.
-		$exempted_keys         = array( 'post_modified', 'post_modified_gmt', '_recorded_sales' );
-		$convert_to_float_keys = array( '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_cart_discount', 'cart_tax' );
+		$post_data             = get_post( $post_order_id, ARRAY_A );
+		$post_meta_data        = get_post_meta( $post_order_id );
+		$exempted_keys         = array( 'post_modified', 'post_modified_gmt' );
+		$convert_to_float_keys = array(
+			'_cart_discount_tax',
+			'_order_shipping',
+			'_order_shipping_tax',
+			'_order_tax',
+			'_cart_discount',
+			'cart_tax',
+		);
 		$exempted_keys         = array_flip( array_merge( $exempted_keys, $convert_to_float_keys ) );
 
 		$post_data_float      = array_intersect_key( $post_data, array_flip( $convert_to_float_keys ) );
