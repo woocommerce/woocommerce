@@ -297,7 +297,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @param string      $expected_final_option_value Expected final value of the attribute usage option.
 	 */
 	public function test_after_install_table_usage_is_enabled_if_it_wasnt_disabled( ?string $previous_option_value, string $expected_final_option_value ) {
-		if ( null === $previous_option_value ) {
+		if ( $previous_option_value === null ) {
 			delete_option( 'woocommerce_attribute_lookup_enabled' );
 		} else {
 			update_option( 'woocommerce_attribute_lookup_enabled', $previous_option_value );

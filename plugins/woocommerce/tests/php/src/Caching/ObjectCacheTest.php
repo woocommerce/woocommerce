@@ -269,7 +269,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_set_with_custom_serialization_that_returns_errors( int $errors_count ) {
 		$exception = null;
-		$errors    = 1 === $errors_count ? array( 'Foo failed' ) : array( 'Foo failed', 'Bar failed' );
+		$errors    = $errors_count === 1 ? array( 'Foo failed' ) : array( 'Foo failed', 'Bar failed' );
 		$object    = array( 'foo' );
 
 		// phpcs:disable Squiz.Commenting
@@ -299,7 +299,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		}
 
 		$expected_message = 'Object validation/serialization failed';
-		if ( 1 === $errors_count ) {
+		if ( $errors_count === 1 ) {
 			$expected_message .= ': Foo failed';
 		}
 		$this->assertEquals( $expected_message, $exception->getMessage() );
