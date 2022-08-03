@@ -22,9 +22,11 @@ import {
 	areSchemasEqual,
 	getHookDescription,
 	getHookChangeType,
+	generateJSONFile,
 } from '../../utils';
 import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
 import { execSync } from 'child_process';
+import { OutputFlags } from '@oclif/core/lib/interfaces';
 
 /**
  * Analyzer class
@@ -66,6 +68,11 @@ export default class Analyzer extends Command {
 			char: 's',
 			description: 'Git repo url or local path to a git repo.',
 			default: process.cwd(),
+		} ),
+		file: Flags.string( {
+			char: 'f',
+			description: 'Filename for change description JSON.',
+			default: 'changes.json',
 		} ),
 		plugin: Flags.string( {
 			char: 'p',
@@ -133,9 +140,9 @@ export default class Analyzer extends Command {
 
 			CliUx.ux.action.stop();
 
-			this.scanChanges( diff, pluginData[ 0 ], flags.output, schemaDiff );
+			this.scanChanges( diff, pluginData[ 0 ], flags, schemaDiff );
 		} else {
-			this.scanChanges( diff, pluginData[ 0 ], flags.output );
+			this.scanChanges( diff, pluginData[ 0 ], flags );
 		}
 
 		// Clean up the temporary repo.
@@ -204,15 +211,16 @@ export default class Analyzer extends Command {
 	/**
 	 * Scan patches for changes in templates, hooks and database schema
 	 *
-	 * @param {string}  content        Patch content.
-	 * @param {string}  version        Current product version.
-	 * @param {string}  output         Output style.
-	 * @param {boolean} schemaEquality if schemas are equal between branches.
+	 * @param {string}  content         Patch content.
+	 * @param {string}  version         Current product version.
+	 * @param {string}  output          Output style.
+	 * @param {string}  changesFileName Name of a file to output change information to.
+	 * @param {boolean} schemaEquality  if schemas are equal between branches.
 	 */
-	private scanChanges(
+	private async scanChanges(
 		content: string,
 		version: string,
-		output: string,
+		flags: OutputFlags< typeof Analyzer[ 'flags' ] >,
 		schemaDiff: {
 			[ key: string ]: {
 				description: string;
@@ -222,11 +230,18 @@ export default class Analyzer extends Command {
 				areEqual: boolean;
 			};
 		} | void
-	): void {
+	) {
+		const { output, file } = flags;
 		CliUx.ux.action.start( 'Generating changes' );
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
+
+		await generateJSONFile( join( process.cwd(), file ), {
+			templates: Object.fromEntries( templates.entries() ),
+			hooks: Object.fromEntries( hooks.entries() ),
+			schema: databaseUpdates || {},
+		} );
 
 		if ( templates.size ) {
 			printTemplateResults(
