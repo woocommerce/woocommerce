@@ -15,6 +15,7 @@
 		"minified-js": true,
 		"mobile-app-banner": true,
 		"navigation": true,
+		"new-product-management-experience": true,
 		"onboarding": true,
 		"onboarding-tasks": true,
 		"payment-gateway-suggestions": true,
