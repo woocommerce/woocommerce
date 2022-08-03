@@ -9,12 +9,12 @@
 		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
 	"scripts": {
+		"turbo:build": "pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
+		"turbo:test": "pnpm run test:client",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- --",
-		"turbo:build": "pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"lint": "pnpm run lint:js && pnpm run lint:css",
-		"turbo:test": "pnpm run test:client",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"build:packages": "cross-env NODE_ENV=production pnpm -w run build --filter='./packages/js/*'",
 		"clean": "rimraf ../woocommerce/assets/client/admin/*",

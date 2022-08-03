@@ -114,13 +114,13 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
+		"turbo:build": "pnpm run build:js && pnpm run build:css",
+		"turbo:test": "jest --config ./jest.config.json",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- --",
-		"turbo:build": "pnpm run build:js && pnpm run build:css",
 		"lint": "eslint src --ext=js,ts,tsx",
-		"turbo:test": "jest --config ./jest.config.json",
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",

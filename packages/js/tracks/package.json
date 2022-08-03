@@ -28,11 +28,11 @@
 		"access": "public"
 	},
 	"scripts": {
+		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
-		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"lint": "eslint src",
 		"start": "tsc --build --watch",
 		"prepack": "pnpm run clean && pnpm run build",

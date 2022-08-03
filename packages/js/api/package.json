@@ -26,16 +26,16 @@
 	],
 	"sideEffects": false,
 	"scripts": {
+		"turbo:build": "pnpm run clean && npm run compile",
+		"turbo:test": "jest",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
 		"prepack": "pnpm run build",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
-		"turbo:build": "pnpm run clean && npm run compile",
 		"lint": "eslint src",
-		"lint:fix": "eslint src --fix",
-		"turbo:test": "jest"
+		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
 		"axios": "^0.24.0",
