@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"postinstall": "composer install"
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger"
 	},
 	"repository": {
 		"type": "git",
