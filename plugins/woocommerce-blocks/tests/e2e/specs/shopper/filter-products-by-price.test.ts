@@ -71,6 +71,7 @@ describe( `${ block.name } Block`, () => {
 
 			await insertBlock( block.name );
 			await insertBlock( 'All Products' );
+			await insertBlock( 'Active Product Filters' );
 			await publishPost();
 
 			const link = await page.evaluate( () =>
@@ -90,12 +91,18 @@ describe( `${ block.name } Block`, () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
 			await setMaxPrice();
+			await expect( page ).toMatchElement(
+				'.wc-block-active-filters__title',
+				{
+					text: 'Active filters',
+				}
+			);
 			await waitForAllProductsBlockLoaded();
 
-			await page.waitForSelector( selectors.frontend.productsList );
 			const products = await page.$$( selectors.frontend.productsList );
 
 			expect( isRefreshed ).not.toBeCalled();
+
 			expect( products ).toHaveLength( 1 );
 
 			await expect( page ).toMatch( block.foundProduct );

@@ -72,10 +72,7 @@ describe( `${ block.name } Block`, () => {
 		useTheme( 'emptytheme' );
 
 		beforeEach( async () => {
-			// TODO: Update to always use site-editor.php once WordPress 6.0 is released and fix is verified.
-			await goToSiteEditor(
-				process.env.GUTENBERG_EDITOR_CONTEXT || 'core'
-			);
+			await goToSiteEditor();
 			await waitForCanvas();
 		} );
 
