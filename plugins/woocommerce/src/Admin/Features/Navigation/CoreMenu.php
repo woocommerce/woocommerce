@@ -213,8 +213,15 @@ class CoreMenu {
 			);
 		}
 
+		$add_product_mbp = array();
 		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
-			$product_items['new']['url'] = 'admin.php?page=wc-admin&path=/add-product';
+			$add_product_mbp = array(
+				'id'     => 'woocommerce-add-product-mbp',
+				'title'  => __( 'Add New (MVP)', 'woocommerce' ),
+				'url'    => 'admin.php?page=wc-admin&path=/add-product',
+				'parent' => 'woocommerce-products',
+				'order'  => 50,
+			);
 		}
 
 		return array_merge(
@@ -246,6 +253,7 @@ class CoreMenu {
 					'menuId'     => 'secondary',
 					'order'      => 10,
 				),
+				$add_product_mbp,
 			),
 			// Tools category.
 			self::get_tool_items(),
