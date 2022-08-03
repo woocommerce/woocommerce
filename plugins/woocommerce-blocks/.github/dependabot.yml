@@ -7,6 +7,8 @@ updates:
       schedule:
           interval: 'monthly'
       open-pull-requests-limit: 10
+      labels:
+      - "skip-changelog"
 
       # Maintain dependencies for npm
     - package-ecosystem: 'npm'
@@ -21,3 +23,5 @@ updates:
       schedule:
           interval: 'weekly'
       open-pull-requests-limit: 10
+      labels:
+      - "skip-changelog"
