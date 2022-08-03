@@ -70,4 +70,27 @@ final class OrderUtil {
 	public static function get_post_or_order_id( $post_or_order_object ) : int {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_post_or_order_id( $post_or_order_object );
 	}
+
+	/**
+	 * Checks if passed id, post or order object is a WC_Order object.
+	 *
+	 * @param int|WP_Post|WC_Order $order_id Order ID, post object or order object.
+	 * @param string[]             $types    Types to match against.
+	 *
+	 * @return bool Whether the passed param is an order.
+	 */
+	public static function is_order( $order_id, $types = array( 'shop_order' ) ) {
+		return wc_get_container()->get( COTMigrationUtil::class )->is_order( $order_id, $types );
+	}
+
+	/**
+	 * Returns type pf passed id, post or order object.
+	 *
+	 * @param int|WP_Post|WC_Order $order_id Order ID, post object or order object.
+	 *
+	 * @return string|null Type of the order.
+	 */
+	public static function get_order_type( $order_id ) {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_order_type( $order_id );
+	}
 }

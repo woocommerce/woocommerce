@@ -89,7 +89,9 @@ class COTMigrationUtil {
 	 * @return int Order or post ID.
 	 */
 	public function get_post_or_order_id( $post_or_order_object ) : int {
-		if ( $post_or_order_object instanceof WC_Order ) {
+		if ( is_int( $post_or_order_object ) ) {
+			return $post_or_order_object;
+		} elseif ( $post_or_order_object instanceof WC_Order ) {
 			return $post_or_order_object->get_id();
 		} elseif ( $post_or_order_object instanceof WP_Post ) {
 			return $post_or_order_object->ID;
@@ -97,4 +99,30 @@ class COTMigrationUtil {
 		return 0;
 	}
 
+	/**
+	 * Checks if passed id, post or order object is a WC_Order object.
+	 *
+	 * @param int|WP_Post|WC_Order $order_id Order ID, post object or order object.
+	 * @param string[]             $types    Types to match against.
+	 *
+	 * @return bool Whether the passed param is an order.
+	 */
+	public function is_order( $order_id, array $types = array( 'shop_order' ) ) : bool {
+		$order_id         = $this->get_post_or_order_id( $order_id );
+		$order_data_store = \WC_Data_Store::load( 'order' );
+		return in_array( $order_data_store->get_order_type( $order_id ), $types, true );
+	}
+
+	/**
+	 * Returns type pf passed id, post or order object.
+	 *
+	 * @param int|WP_Post|WC_Order $order_id Order ID, post object or order object.
+	 *
+	 * @return string|null Type of the order.
+	 */
+	public function get_order_type( $order_id ) : ?string {
+		$order_id         = $this->get_post_or_order_id( $order_id );
+		$order_data_store = \WC_Data_Store::load( 'order' );
+		return $order_data_store->get_order_type( $order_id );
+	}
 }
