@@ -168,12 +168,24 @@ class WC_AJAX {
 			'shipping_zone_methods_save_settings',
 			'shipping_classes_save_changes',
 			'toggle_gateway_enabled',
-			'order_add_meta',
-			'order_delete_meta',
 		);
 
 		foreach ( $ajax_events as $ajax_event ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
+		}
+
+		$ajax_private_events = array(
+			'order_add_meta',
+			'order_delete_meta',
+		);
+
+		foreach ( $ajax_private_events as $ajax_event ) {
+			add_action(
+				'wp_ajax_woocommerce_' . $ajax_event,
+				function() use ( $ajax_event ) {
+					call_user_func( array( __CLASS__, $ajax_event ) );
+				}
+			);
 		}
 	}
 
@@ -3128,7 +3140,7 @@ class WC_AJAX {
 	/**
 	 * Reimplementation of WP core's `wp_ajax_add_meta` method to support order custom meta updates with custom tables.
 	 */
-	public static function order_add_meta() {
+	private static function order_add_meta() {
 		wc_get_container()->get( CustomMetaBox::class )->add_meta_ajax();
 	}
 
@@ -3137,7 +3149,7 @@ class WC_AJAX {
 	 *
 	 * @return void
 	 */
-	public static function order_delete_meta() : void {
+	private static function order_delete_meta() : void {
 		wc_get_container()->get( CustomMetaBox::class )->delete_meta_ajax();
 	}
 }
