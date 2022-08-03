@@ -32,7 +32,6 @@
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- --",
 		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"lint": "eslint src",
 		"start": "tsc --build --watch",
