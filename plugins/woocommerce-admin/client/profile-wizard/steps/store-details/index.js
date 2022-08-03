@@ -35,9 +35,9 @@ import {
 	StoreAddress,
 	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
-import UsageModal from '../usage-modal';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
+import SkipButton from '../skip-button';
 import './style.scss';
 
 // FlexItem is not available until WP version 5.5. This code is safe to remove
@@ -62,8 +62,7 @@ export class StoreDetails extends Component {
 		super( props );
 
 		this.state = {
-			showUsageModal: false,
-			skipping: false,
+			isStoreDetailsPopoverVisible: false,
 			isSkipSetupPopoverVisible: false,
 		};
 
@@ -111,12 +110,7 @@ export class StoreDetails extends Component {
 		);
 	}
 
-	onSubmit() {
-		this.setState( {
-			showUsageModal: true,
-			skipping: false,
-		} );
-	}
+	onSubmit() {}
 
 	onFormValueChange( changedFormValue ) {
 		this.changedFormValues[ changedFormValue.name ] =
@@ -244,22 +238,7 @@ export class StoreDetails extends Component {
 	}
 
 	render() {
-		const { showUsageModal, skipping, isSkipSetupPopoverVisible } =
-			this.state;
-		const {
-			skipProfiler,
-			isLoading,
-			isBusy,
-			initialValues,
-			invalidateResolutionForStoreSelector,
-		} = this.props;
-
-		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
-		const skipSetupText = __(
-			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
-			'woocommerce'
-		);
-		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
+		const { isLoading, isBusy, initialValues } = this.props;
 
 		if ( isLoading ) {
 			return (
@@ -302,25 +281,6 @@ export class StoreDetails extends Component {
 						setValue,
 					} ) => (
 						<Card>
-							{ showUsageModal && (
-								<UsageModal
-									onContinue={ () => {
-										if ( skipping ) {
-											skipProfiler();
-										} else {
-											this.onContinue( values ).then(
-												() => this.props.goToNextStep()
-											);
-										}
-									} }
-									onClose={ () =>
-										this.setState( {
-											showUsageModal: false,
-											skipping: false,
-										} )
-									}
-								/>
-							) }
 							<CardBody>
 								<StoreAddress
 									getInputProps={ getInputProps }
@@ -380,46 +340,7 @@ export class StoreDetails extends Component {
 						</Card>
 					) }
 				</Form>
-				<div className="woocommerce-profile-wizard__footer">
-					<Button
-						isLink
-						className="woocommerce-profile-wizard__footer-link"
-						onClick={ () => {
-							invalidateResolutionForStoreSelector(
-								'getTaskLists'
-							);
-							this.setState( {
-								showUsageModal: true,
-								skipping: true,
-							} );
-							return false;
-						} }
-					>
-						{ __( 'Skip setup store details', 'woocommerce' ) }
-					</Button>
-					<Button
-						isTertiary
-						label={ skipSetupText }
-						onClick={ () =>
-							this.setState( { isSkipSetupPopoverVisible: true } )
-						}
-					>
-						<Icon icon={ info } />
-					</Button>
-					{ isSkipSetupPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( {
-									isSkipSetupPopoverVisible: false,
-								} )
-							}
-						>
-							{ skipSetupText }
-						</Popover>
-					) }
-				</div>
+				<SkipButton />
 			</div>
 		);
 	}
@@ -503,14 +424,12 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { invalidateResolutionForStoreSelector, updateProfileItems } =
-			dispatch( ONBOARDING_STORE_NAME );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { updateAndPersistSettingsForGroup } =
 			dispatch( SETTINGS_STORE_NAME );
 
 		return {
 			createNotice,
-			invalidateResolutionForStoreSelector,
 			updateProfileItems,
 			updateAndPersistSettingsForGroup,
 		};
