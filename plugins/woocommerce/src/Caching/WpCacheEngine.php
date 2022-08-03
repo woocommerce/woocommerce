@@ -13,7 +13,7 @@ class WpCacheEngine implements CacheEngine {
 
 	public function get_cached_object( string $key ) {
 		$value = wp_cache_get( $key, self::CACHE_GROUP_NAME );
-		return false === $value ? null : $value;
+		return $value === false ? null : $value;
 	}
 
 	public function cache_object( string $key, $object, int $expiration ): bool {
@@ -25,7 +25,7 @@ class WpCacheEngine implements CacheEngine {
 	}
 
 	public function is_cached( string $key ): bool {
-		return false !== wp_cache_get( $key, self::CACHE_GROUP_NAME );
+		return wp_cache_get( $key, self::CACHE_GROUP_NAME ) !== false;
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionComment.Missing

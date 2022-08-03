@@ -80,13 +80,13 @@ class Homescreen {
 		$current_screen = get_current_screen();
 
 		// Abort if it's not the homescreen.
-		if ( ! isset( $current_screen->id ) || 'woocommerce_page_wc-admin' !== $current_screen->id ) {
+		if ( ! isset( $current_screen->id ) || $current_screen->id !== 'woocommerce_page_wc-admin' ) {
 			return $settings;
 		}
 
 		// Abort if we already created the shipping options.
 		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
-		if ( 'yes' === $already_created ) {
+		if ( $already_created === 'yes' ) {
 			return $settings;
 		}
 
@@ -96,11 +96,11 @@ class Homescreen {
 
 		// If user skipped the obw or has not completed the store_details
 		// then we assume the user is going to sell physical products.
-		if ( $user_skipped_obw || '' === $store_address ) {
+		if ( $user_skipped_obw || $store_address === '' ) {
 			$product_types[] = 'physical';
 		}
 
-		if ( false === in_array( 'physical', $product_types, true ) ) {
+		if ( in_array( 'physical', $product_types, true ) === false ) {
 			return $settings;
 		}
 
@@ -110,7 +110,7 @@ class Homescreen {
 		// we also need to make sure woocommerce_store_address is not empty
 		// to make sure store country is set by an actual user
 		// since woocommerce_store_address is set to US:CA by default.
-		if ( '' === $country_code || null === $country_name || '' === $store_address ) {
+		if ( $country_code === '' || $country_name === null || $store_address === '' ) {
 			return $settings;
 		}
 
@@ -118,11 +118,11 @@ class Homescreen {
 		$is_wcs_installed     = in_array( 'woocommerce-services', $settings['plugins']['installedPlugins'] ?? array(), true );
 
 		if (
-			( 'US' === $country_code && $is_jetpack_installed )
+			( $country_code === 'US' && $is_jetpack_installed )
 			||
 			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
 			||
-			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
+			( $country_code === 'US' && $is_jetpack_installed === false && $is_wcs_installed === false )
 		) {
 			$zone = new \WC_Shipping_Zone();
 			$zone->set_zone_name( $country_name );

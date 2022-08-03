@@ -891,10 +891,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	protected function persist_order_to_db( &$order ) {
 		global $wpdb;
 
-		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
+		$context   = ( absint( $order->get_id() ) === 0 ) ? 'create' : 'update';
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
-		if ( 'create' === $context ) {
+		if ( $context === 'create' ) {
 			// XXX: do we want to add some backwards compat for 'woocommerce_new_order_data'?
 			$post_id = wp_insert_post(
 				array(
@@ -911,7 +911,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		// Figure out what needs to be updated in the database.
-		$db_updates = $this->get_db_rows_for_order( $order, $context, ( 'update' === $context ) );
+		$db_updates = $this->get_db_rows_for_order( $order, $context, ( $context === 'update' ) );
 
 		// Persist changes.
 		foreach ( $db_updates as $update ) {
@@ -923,7 +923,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 					? $wpdb->insert( $update['table'], $update['data'], array_values( $update['format'] ) )
 					: $wpdb->update( $update['table'], $update['data'], $update['where'], array_values( $update['format'] ), $update['where_format'] );
 
-			if ( false === $result ) {
+			if ( $result === false ) {
 				// translators: %s is a table name.
 				throw new \Exception( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) );
 			}
@@ -952,7 +952,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$existing_order_row = $order->get_id() ? $this->get_order_data_for_id( $order->get_id() ) : array();
 
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
-		if ( 'create' === $context && ! $row ) {
+		if ( $context === 'create' && ! $row ) {
 			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
 		}
 
@@ -961,8 +961,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 				'table'        => self::get_orders_table_name(),
 				'data'         => array_merge( $row['data'], array( 'id' => $order->get_id() ) ),
 				'format'       => array_merge( $row['format'], array( 'id' => '%d' ) ),
-				'where'        => 'update' === $context ? array( 'id' => $order->get_id() ) : null,
-				'where_format' => 'update' === $context ? '%d' : null,
+				'where'        => $context === 'update' ? array( 'id' => $order->get_id() ) : null,
+				'where_format' => $context === 'update' ? '%d' : null,
 			);
 		}
 
@@ -1120,7 +1120,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	public function trash_order( &$order ) {
 		global $wpdb;
 
-		if ( 'trash' === $order->get_status( 'edit' ) ) {
+		if ( $order->get_status( 'edit' ) === 'trash' ) {
 			return;
 		}
 
@@ -1177,7 +1177,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 	 * @param \WC_Order $order
 	 */
 	public function create( &$order ) {
-		if ( '' === $order->get_order_key() ) {
+		if ( $order->get_order_key() === '' ) {
 			$order->set_order_key( wc_generate_order_key() );
 		}
 
@@ -1331,7 +1331,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 			);
 		}
 
-		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+		if ( isset( $query_vars['return'] ) && $query_vars['return'] === 'ids' ) {
 			$orders = $query->orders;
 		} else {
 			$orders = WC()->order_factory->get_orders( $query->orders );

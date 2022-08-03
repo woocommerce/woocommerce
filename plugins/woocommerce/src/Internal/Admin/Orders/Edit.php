@@ -135,7 +135,7 @@ class Edit {
 			return;
 		}
 
-		if ( 'edit_order' !== sanitize_text_field( wp_unslash( $_POST['action'] ?? '' ) ) ) {
+		if ( sanitize_text_field( wp_unslash( $_POST['action'] ?? '' ) ) !== 'edit_order' ) {
 			return;
 		}
 
@@ -232,7 +232,7 @@ class Edit {
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
 		<div id="poststuff">
 		<div id="post-body"
-		class="metabox-holder columns-<?php echo ( 1 === get_current_screen()->get_columns() ) ? '1' : '2'; ?>">
+		class="metabox-holder columns-<?php echo ( get_current_screen()->get_columns() === 1 ) ? '1' : '2'; ?>">
 		<?php
 	}
 

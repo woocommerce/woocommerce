@@ -98,7 +98,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 
 		if ( $should_display ) {
 			return Suggestions::get_suggestions();
-		} elseif ( false === $should_display && true === $force_default ) {
+		} elseif ( $should_display === false && $force_default === true ) {
 			return rest_ensure_response( Suggestions::get_suggestions( DefaultPaymentGateways::get_all() ) );
 		}
 

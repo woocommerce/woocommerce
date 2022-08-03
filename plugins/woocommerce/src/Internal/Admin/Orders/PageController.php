@@ -40,7 +40,7 @@ class PageController {
 	 * @return void
 	 */
 	private function verify_edit_permission() {
-		if ( 'edit_order' === $this->current_action && ( ! isset( $this->order ) || ! $this->order ) ) {
+		if ( $this->current_action === 'edit_order' && ( ! isset( $this->order ) || ! $this->order ) ) {
 			wp_die( esc_html__( 'You attempted to edit an order that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
 		}
 		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
@@ -71,7 +71,7 @@ class PageController {
 	 */
 	public function setup(): void {
 		// Register menu.
-		if ( 'admin_menu' === current_action() ) {
+		if ( current_action() === 'admin_menu' ) {
 			$this->register_menu();
 		} else {
 			add_action( 'admin_menu', 'register_menu', 9 );

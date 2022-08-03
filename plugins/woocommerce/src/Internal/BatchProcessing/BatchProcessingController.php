@@ -226,7 +226,7 @@ class BatchProcessingController {
 	private function update_processor_state( BatchProcessorInterface $batch_processor, float $time_taken, \Exception $last_error = null ): void {
 		$current_status                      = $this->get_process_details( $batch_processor );
 		$current_status['total_time_spent'] += $time_taken;
-		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;
+		$current_status['last_error']        = $last_error !== null ? $last_error->getMessage() : null;
 		update_option( $this->get_processor_state_option_name( $batch_processor ), $current_status, false );
 	}
 

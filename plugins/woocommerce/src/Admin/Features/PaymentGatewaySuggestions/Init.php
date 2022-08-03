@@ -37,7 +37,7 @@ class Init {
 	 */
 	public static function get_suggestions( array $specs = null ) {
 		$suggestions = array();
-		if ( null === $specs ) {
+		if ( $specs === null ) {
 			$specs = self::get_specs();
 		}
 

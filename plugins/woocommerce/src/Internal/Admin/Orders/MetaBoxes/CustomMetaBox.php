@@ -218,7 +218,7 @@ class CustomMetaBox {
 		$order_id = (int) $_POST['order_id'] ?? 0;
 		$order    = $this->verify_order_edit_permission_for_ajax( $order_id );
 
-		if ( isset( $_POST['metakeyselect'] ) && '#NONE#' === $_POST['metakeyselect'] && empty( $_POST['metakeyinput'] ) ) {
+		if ( isset( $_POST['metakeyselect'] ) && $_POST['metakeyselect'] === '#NONE#' && empty( $_POST['metakeyinput'] ) ) {
 			wp_die( 1 );
 		}
 
@@ -300,7 +300,7 @@ class CustomMetaBox {
 			wp_send_json_error( 'protected_meta' );
 			wp_die();
 		}
-		if ( '' === trim( $key ) ) {
+		if ( trim( $key ) === '' ) {
 			wp_send_json_error( 'invalid_meta_key' );
 			wp_die();
 		}

@@ -234,9 +234,9 @@ class OrdersTableQuery {
 		// Sanitize status.
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
-		if ( empty( $this->args['status'] ) || 'any' === $this->args['status'] ) {
+		if ( empty( $this->args['status'] ) || $this->args['status'] === 'any' ) {
 			$this->args['status'] = $valid_statuses;
-		} elseif ( 'all' === $this->args['status'] ) {
+		} elseif ( $this->args['status'] === 'all' ) {
 			$this->args['status'] = array();
 		} else {
 			$this->args['status'] = is_array( $this->args['status'] ) ? $this->args['status'] : array( $this->args['status'] );
@@ -276,7 +276,7 @@ class OrdersTableQuery {
 		$order   = $this->args['order'] ?? '';
 		$orderby = $this->args['orderby'] ?? '';
 
-		if ( 'none' === $orderby ) {
+		if ( $orderby === 'none' ) {
 			return;
 		}
 
@@ -385,7 +385,7 @@ class OrdersTableQuery {
 		global $wpdb;
 
 		$db_util  = wc_get_container()->get( DatabaseUtil::class );
-		$operator = strtoupper( '' !== $operator ? $operator : '=' );
+		$operator = strtoupper( $operator !== '' ? $operator : '=' );
 
 		try {
 			$format = $db_util->get_wpdb_format_for_type( $type );
@@ -394,9 +394,9 @@ class OrdersTableQuery {
 		}
 
 		// = and != can be shorthands for IN and NOT in for array values.
-		if ( is_array( $value ) && '=' === $operator ) {
+		if ( is_array( $value ) && $operator === '=' ) {
 			$operator = 'IN';
-		} elseif ( is_array( $value ) && '!=' === $operator ) {
+		} elseif ( is_array( $value ) && $operator === '!=' ) {
 			$operator = 'NOT IN';
 		}
 
@@ -597,7 +597,7 @@ class OrdersTableQuery {
 
 		$orderby = $this->args['orderby'];
 
-		if ( 'none' === $orderby ) {
+		if ( $orderby === 'none' ) {
 			$this->orderby = '';
 			return;
 		}

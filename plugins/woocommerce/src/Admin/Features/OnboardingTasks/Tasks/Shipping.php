@@ -95,7 +95,7 @@ class Shipping extends Task {
 	 */
 	public function can_view() {
 		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			if ( 'yes' === get_option( 'woocommerce_admin_created_default_shipping_zones' ) ) {
+			if ( get_option( 'woocommerce_admin_created_default_shipping_zones' ) === 'yes' ) {
 				// If the user has already created a default shipping zone, we don't need to show the task.
 				return false;
 			}
@@ -117,7 +117,7 @@ class Shipping extends Task {
 			// Check if a store address is set so that we don't default to WooCommerce's default country US.
 			// Similar logic: https://github.com/woocommerce/woocommerce/blob/059d542394b48468587f252dcb6941c6425cd8d3/plugins/woocommerce-admin/client/profile-wizard/steps/store-details/index.js#L511-L516.
 			$store_country = '';
-			if ( ! empty( get_option( 'woocommerce_store_address', '' ) ) || 'US' !== $default_store_country ) {
+			if ( ! empty( get_option( 'woocommerce_store_address', '' ) ) || $default_store_country !== 'US' ) {
 				$store_country = $default_store_country;
 			}
 
@@ -150,7 +150,7 @@ class Shipping extends Task {
 	 */
 	public static function has_shipping_zones() {
 		$zone_count = get_transient( self::ZONE_COUNT_TRANSIENT_NAME );
-		if ( false !== $zone_count ) {
+		if ( $zone_count !== false ) {
 			return (int) $zone_count > 0;
 		}
 
@@ -189,6 +189,6 @@ class Shipping extends Task {
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
-		return array( 'downloads' ) === $product_types;
+		return $product_types === array( 'downloads' );
 	}
 }

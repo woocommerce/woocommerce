@@ -149,7 +149,7 @@ class OrdersTableMetaQuery {
 		$sanitized = array();
 
 		if ( $this->is_atomic( $q ) ) {
-			if ( isset( $q['value'] ) && array() === $q['value'] ) {
+			if ( isset( $q['value'] ) && $q['value'] === array() ) {
 				unset( $q['value'] );
 			}
 
@@ -169,7 +169,7 @@ class OrdersTableMetaQuery {
 
 		// Nested.
 		foreach ( $q as $key => $arg ) {
-			if ( 'relation' === $key ) {
+			if ( $key === 'relation' ) {
 				$relation = $arg;
 			} elseif ( ! is_array( $arg ) ) {
 				continue;
@@ -183,7 +183,7 @@ class OrdersTableMetaQuery {
 		}
 
 		if ( $sanitized ) {
-			$sanitized['relation'] = 1 === count( $sanitized ) ? 'OR' : $this->sanitize_relation( $relation ?? 'AND' );
+			$sanitized['relation'] = count( $sanitized ) === 1 ? 'OR' : $this->sanitize_relation( $relation ?? 'AND' );
 		}
 
 		return $sanitized;
@@ -196,7 +196,7 @@ class OrdersTableMetaQuery {
 	 * @return string
 	 */
 	private function sanitize_relation( string $relation ): string {
-		if ( ! empty( $relation ) && 'OR' === strtoupper( $relation ) ) {
+		if ( ! empty( $relation ) && strtoupper( $relation ) === 'OR' ) {
 			return 'OR';
 		}
 
@@ -216,7 +216,7 @@ class OrdersTableMetaQuery {
 			return 'CHAR';
 		}
 
-		if ( 'NUMERIC' === $meta_type ) {
+		if ( $meta_type === 'NUMERIC' ) {
 			$meta_type = 'SIGNED';
 		}
 
@@ -248,7 +248,7 @@ class OrdersTableMetaQuery {
 		$operator = $this->sanitize_relation( $where['operator'] ?? '' );
 
 		foreach ( $where as $key => $w ) {
-			if ( 'operator' === $key ) {
+			if ( $key === 'operator' ) {
 				continue;
 			}
 
@@ -311,7 +311,7 @@ class OrdersTableMetaQuery {
 			}
 
 			// Merge chunks of the form OR(m) with the surrounding clause.
-			if ( 1 === count( $chunks ) ) {
+			if ( count( $chunks ) === 1 ) {
 				$where = $chunks[0];
 			} else {
 				$where = array_merge(
@@ -336,8 +336,8 @@ class OrdersTableMetaQuery {
 	private function generate_join_for_clause( array $clause, string $alias ): string {
 		global $wpdb;
 
-		if ( 'NOT EXISTS' === $clause['compare'] ) {
-			if ( 'LIKE' === $clause['compare_key'] ) {
+		if ( $clause['compare'] === 'NOT EXISTS' ) {
+			if ( $clause['compare_key'] === 'LIKE' ) {
 				return $wpdb->prepare(
 					"LEFT JOIN {$this->meta_table} AS {$alias} ON ( {$this->orders_table}.id = {$alias}.order_id AND {$alias}.meta_key LIKE %s )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					'%' . $wpdb->esc_like( $clause['key'] ) . '%'
@@ -406,7 +406,7 @@ class OrdersTableMetaQuery {
 
 		$valid_operators = array();
 
-		if ( 'OR' === $relation ) {
+		if ( $relation === 'OR' ) {
 			$valid_operators = array( '=', 'IN', 'BETWEEN', 'LIKE', 'REGEXP', 'RLIKE', '>', '>=', '<', '<=' );
 		} elseif ( isset( $sibling['key'] ) && isset( $clause['key'] ) && $sibling['key'] === $clause['key'] ) {
 			$valid_operators = array( '!=', 'NOT IN', 'NOT LIKE' );
@@ -429,7 +429,7 @@ class OrdersTableMetaQuery {
 			return '';
 		}
 
-		if ( 'NOT EXISTS' === $clause['compare'] ) {
+		if ( $clause['compare'] === 'NOT EXISTS' ) {
 			return "{$clause['alias']}.order_id IS NULL";
 		}
 
@@ -463,7 +463,7 @@ class OrdersTableMetaQuery {
 			case 'RLIKE':
 			case 'REGEXP':
 				$operator = $clause['compare_key'];
-				if ( isset( $clause['type_key'] ) && 'BINARY' === strtoupper( $clause['type_key'] ) ) {
+				if ( isset( $clause['type_key'] ) && strtoupper( $clause['type_key'] ) === 'BINARY' ) {
 					$cast = 'BINARY';
 				} else {
 					$cast = '';
@@ -488,7 +488,7 @@ class OrdersTableMetaQuery {
 				break;
 			case 'NOT REGEXP':
 				$operator = $clause['compare_key'];
-				if ( isset( $clause['type_key'] ) && 'BINARY' === strtoupper( $clause['type_key'] ) ) {
+				if ( isset( $clause['type_key'] ) && strtoupper( $clause['type_key'] ) === 'BINARY' ) {
 					$cast = 'BINARY';
 				} else {
 					$cast = '';
@@ -564,7 +564,7 @@ class OrdersTableMetaQuery {
 		}
 
 		if ( $where ) {
-			if ( 'CHAR' === $clause['cast'] ) {
+			if ( $clause['cast'] === 'CHAR' ) {
 				return "{$clause['alias']}.meta_value {$meta_compare} {$where}";
 			} else {
 				return "CAST({$clause['alias']}.meta_value AS {$clause['cast']}) {$meta_compare} {$where}";
