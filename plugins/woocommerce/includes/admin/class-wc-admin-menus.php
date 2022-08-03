@@ -9,7 +9,6 @@
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable as Custom_Orders_List_Table;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\Admin\Products;
 use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
