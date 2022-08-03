@@ -15,7 +15,9 @@ import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
  */
 import UsageModal from './usage-modal';
 
-const SkipButton: React.FC = () => {
+const SkipButton: React.FC< {
+	onSkipped?: () => void;
+} > = ( { onSkipped } ) => {
 	/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 	const skipSetupText = __(
 		'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
@@ -36,7 +38,9 @@ const SkipButton: React.FC = () => {
 			skipped: true,
 		} )
 			.then( () => {
-				recordEvent( 'storeprofiler_store_details_skip' );
+				if ( onSkipped ) {
+					onSkipped();
+				}
 				getHistory().push( getNewPath( {}, '/', {} ) );
 			} )
 			.catch( () => {
