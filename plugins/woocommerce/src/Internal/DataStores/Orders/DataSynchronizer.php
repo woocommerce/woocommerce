@@ -169,7 +169,7 @@ WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 SELECT COUNT(1) FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.id=orders.id
 WHERE
-  posts.post_type in ($order_post_type_placeholder) AND
+  posts.post_type in ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
   AND orders.id IS NULL",
 				$order_post_types
@@ -178,7 +178,9 @@ WHERE
 			$operator = '<';
 		}
 
-		$sql = "
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $missing_orders_count_sql is prepared.
+		$sql = $wpdb->prepare(
+			"
 SELECT(
 	($missing_orders_count_sql)
 	+
@@ -189,7 +191,10 @@ SELECT(
 		  posts.post_type IN ($order_post_type_placeholder)
 		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
 	) x)
-) count";
+) count",
+			$order_post_types
+		);
+		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $sql );
@@ -201,7 +206,7 @@ SELECT(
 	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
 	 */
 	public function custom_orders_table_is_authoritative(): bool {
-		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		return wc_string_to_bool( get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) );
 	}
 
 	/**
