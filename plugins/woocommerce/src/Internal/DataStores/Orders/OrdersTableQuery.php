@@ -151,7 +151,7 @@ class OrdersTableQuery {
 		$this->args = $args;
 
 		// TODO: args to be implemented.
-		unset( $this->args['type'], $this->args['customer_note'], $this->args['name'] );
+		unset( $this->args['customer_note'], $this->args['name'] );
 
 		$this->build_query();
 		$this->run_query();
@@ -656,6 +656,9 @@ class OrdersTableQuery {
 	 */
 	private function process_orders_table_query_args(): void {
 		$this->sanitize_status();
+
+		// TODO: not yet implemented.
+		unset( $this->args['type'] );
 
 		$fields = array_filter(
 			array(
