@@ -335,7 +335,11 @@ export class StoreDetails extends Component {
 						</Card>
 					) }
 				</Form>
-				<SkipButton />
+				<SkipButton
+					onSkipped={ () => {
+						recordEvent( 'storeprofiler_store_details_skip' );
+					} }
+				/>
 			</div>
 		);
 	}
