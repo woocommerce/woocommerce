@@ -229,6 +229,7 @@ class CustomOrdersTableController {
 	 *
 	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
 	 * @param string                                 $type              The type of the data store to get.
+	 *
 	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
 	private function get_data_store_instance( $default_data_store, string $type ) {
@@ -503,14 +504,10 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
-		// TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently disabled to ease testing).
-
-		/*
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
-		*/
 
 		return $value;
 	}

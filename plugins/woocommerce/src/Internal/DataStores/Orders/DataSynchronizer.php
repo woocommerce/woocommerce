@@ -174,7 +174,7 @@ WHERE
 			$operator = '<';
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- placeholder are provided in $order_post_type_placeholder.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $missing_orders_count_sql is prepared.
 		$sql = $wpdb->prepare(
 			"
 SELECT(
@@ -190,6 +190,7 @@ SELECT(
 ) count",
 			$order_post_types
 		);
+		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $sql );
@@ -201,7 +202,7 @@ SELECT(
 	 * @return bool Whether the custom orders table the authoritative data source for orders currently.
 	 */
 	public function custom_orders_table_is_authoritative(): bool {
-		return 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		return wc_string_to_bool( get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) );
 	}
 
 	/**
