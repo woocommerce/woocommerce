@@ -23,11 +23,10 @@ import { Spinner } from '@woocommerce/components';
 import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
-import { AddProductPage } from '~/products';
 
-const EditProductPage = lazy( () =>
+const AddProductPage = lazy( () =>
 	import(
-		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
+		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
 	)
 );
 const AnalyticsReport = lazy( () =>
@@ -85,14 +84,6 @@ export const getPages = () => {
 		navArgs: {
 			id: 'woocommerce-home',
 		},
-		capability: 'manage_woocommerce',
-	} );
-
-	pages.push( {
-		container: EditProductPage,
-		path: '/product-edit',
-		breadcrumbs: [],
-		wpOpenMenu: 'toplevel_page_woocommerce',
 		capability: 'manage_woocommerce',
 	} );
 
