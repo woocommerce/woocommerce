@@ -19,13 +19,12 @@ export const ProductImagesCategory: React.FC = () => {
 				'woocommerce'
 			) }
 		>
-			<ProductFieldLayout name="Images">
-				<TextControl
-					label={ __( 'Images', 'woocommerce' ) }
-					value={ '' }
-					onChange={ () => {} }
-				/>
-			</ProductFieldLayout>
+			<TextControl
+				label={ __( 'Images', 'woocommerce' ) }
+				name="images"
+				value={ '' }
+				onChange={ () => {} }
+			/>
 		</ProductCategoryLayout>
 	);
 };

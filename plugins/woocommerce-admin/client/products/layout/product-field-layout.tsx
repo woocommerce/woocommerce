@@ -4,18 +4,28 @@
 import { WooProductFieldItem } from './woo-product-field-item';
 
 type ProductFieldLayoutProps = {
-	name: string;
+	fieldName: string;
+	categoryName: string;
 };
 
 export const ProductFieldLayout: React.FC< ProductFieldLayoutProps > = ( {
-	name,
+	fieldName,
+	categoryName,
 	children,
 } ) => {
 	return (
 		<div className="product-field-layout">
-			<WooProductFieldItem.Slot fieldName={ name } location="before" />
+			<WooProductFieldItem.Slot
+				fieldName={ fieldName }
+				categoryName={ categoryName }
+				location="before"
+			/>
 			{ children }
-			<WooProductFieldItem.Slot fieldName={ name } location="after" />
+			<WooProductFieldItem.Slot
+				fieldName={ fieldName }
+				categoryName={ categoryName }
+				location="after"
+			/>
 		</div>
 	);
 };

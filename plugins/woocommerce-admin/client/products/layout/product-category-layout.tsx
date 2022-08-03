@@ -1,7 +1,13 @@
 /**
+ * External dependencies
+ */
+import { Children, isValidElement } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import './product-category-layout.scss';
+import { ProductFieldLayout } from './product-field-layout';
 
 type ProductCategoryLayoutProps = {
 	title: string;
@@ -21,7 +27,21 @@ export const ProductCategoryLayout: React.FC< ProductCategoryLayoutProps > = ( {
 					<p>{ description }</p>
 				</div>
 			</div>
-			<div className="product-category-layout__fields">{ children }</div>
+			<div className="product-category-layout__fields">
+				{ Children.map( children, ( child ) => {
+					if ( isValidElement( child ) && child.props.name ) {
+						return (
+							<ProductFieldLayout
+								fieldName={ child.props.name }
+								categoryName={ title }
+							>
+								{ child }
+							</ProductFieldLayout>
+						);
+					}
+					return child;
+				} ) }
+			</div>
 		</div>
 	);
 };
