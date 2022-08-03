@@ -23,6 +23,7 @@ import { Text } from '@woocommerce/experimental';
  */
 import { getCurrencyRegion } from '../../dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import SkipButton from './skip-button';
 
 const onboarding = getAdminSetting( 'onboarding', {} );
 
@@ -280,6 +281,7 @@ class Industry extends Component {
 						</Button>
 					</CardFooter>
 				</Card>
+				<SkipButton />
 			</Fragment>
 		);
 	}
