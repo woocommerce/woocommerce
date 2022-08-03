@@ -281,7 +281,11 @@ class Industry extends Component {
 						</Button>
 					</CardFooter>
 				</Card>
-				<SkipButton />
+				<SkipButton
+					onSkipped={ () => {
+						recordEvent( 'storeprofiler_store_industry_skip' );
+					} }
+				/>
 			</Fragment>
 		);
 	}

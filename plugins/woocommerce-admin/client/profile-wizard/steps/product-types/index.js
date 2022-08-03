@@ -338,7 +338,11 @@ export class ProductTypes extends Component {
 							</Text>
 						) }
 				</div>
-				<SkipButton />
+				<SkipButton
+					onSkipped={ () => {
+						recordEvent( 'storeprofiler_store_product_type_skip' );
+					} }
+				/>
 			</div>
 		);
 	}

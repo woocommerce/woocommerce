@@ -396,7 +396,11 @@ export const SelectiveExtensionsBundle = ( {
 				installExtensionOptions,
 				isInstallingActivating
 			) }
-			<SkipButton />
+			<SkipButton
+				onSkipped={ () => {
+					recordEvent( 'storeprofiler_store_business_features_skip' );
+				} }
+			/>
 		</div>
 	);
 };
