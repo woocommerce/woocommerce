@@ -1,1 +1,1 @@
-export * from './add-product-wrapper';
+export * from './add-product-page';

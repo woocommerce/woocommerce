@@ -4,7 +4,7 @@
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 
-export const AddProduct: React.FC = () => {
+export const AddProductPage: React.FC = () => {
 	useEffect( () => {
 		recordEvent( 'view_new_product_management_experience' );
 	}, [] );

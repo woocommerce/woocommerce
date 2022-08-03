@@ -23,7 +23,7 @@ import { Spinner } from '@woocommerce/components';
 import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
-import { AddProduct } from '~/products';
+import { AddProductPage } from '~/products';
 
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
@@ -165,7 +165,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
 		pages.push( {
-			container: AddProduct,
+			container: AddProductPage,
 			path: '/add-product',
 			breadcrumbs: [
 				[ '/add-product', __( 'Product', 'woocommerce' ) ],
