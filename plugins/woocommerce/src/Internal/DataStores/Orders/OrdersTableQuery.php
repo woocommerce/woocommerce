@@ -370,7 +370,15 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function process_date_query_columns() {
-		$table_mapping = array(
+		global $wpdb;
+
+		$legacy_columns = array(
+			'post_date'         => 'date_created_gmt',
+			'post_date_gmt'     => 'date_created_gmt',
+			'post_modified'     => 'date_modified_gmt',
+			'post_modified_gmt' => 'date_updated_gmt',
+		);
+		$table_mapping  = array(
 			'date_created_gmt'   => $this->tables['orders'],
 			'date_updated_gmt'   => $this->tables['orders'],
 			'date_paid_gmt'      => $this->tables['operational_data'],
@@ -383,14 +391,27 @@ class OrdersTableQuery {
 
 		array_walk_recursive(
 			$this->args['date_query'],
-			function( &$value, $key ) use ( $table_mapping ) {
-				if ( 'column' === $key && isset( $table_mapping[ $value ] ) ) {
-					$table = $table_mapping[ $value ];
-					$value = "{$table}.{$value}";
+			function( &$value, $key ) use ( $legacy_columns, $table_mapping, $wpdb ) {
+				if ( 'column' !== $key ) {
+					return;
+				}
 
-					if ( $table !== $this->tables['orders'] ) {
-						$this->join( $table, '', '', 'inner', true );
-					}
+				// Translate legacy columns from wp_posts if necessary.
+				$value =
+					( isset( $legacy_columns[ $value ] ) || isset( $legacy_columns[ "{$wpdb->posts}.{$value}" ] ) )
+					? $legacy_columns[ $value ]
+					: $value;
+
+				$table = $table_mapping[ $value ] ?? null;
+
+				if ( ! $table ) {
+					return;
+				}
+
+				$value = "{$table}.{$value}";
+
+				if ( $table !== $this->tables['orders'] ) {
+					$this->join( $table, '', '', 'inner', true );
 				}
 			}
 		);
