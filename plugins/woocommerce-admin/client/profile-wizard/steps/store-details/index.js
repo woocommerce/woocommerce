@@ -67,7 +67,6 @@ export class StoreDetails extends Component {
 		};
 
 		this.onContinue = this.onContinue.bind( this );
-		this.onSubmit = this.onSubmit.bind( this );
 		this.validateStoreDetails = this.validateStoreDetails.bind( this );
 		this.onFormValueChange = this.onFormValueChange.bind( this );
 		this.changedFormValues = {};
@@ -109,8 +108,6 @@ export class StoreDetails extends Component {
 			currencySymbols
 		);
 	}
-
-	onSubmit() {}
 
 	onFormValueChange( changedFormValue ) {
 		this.changedFormValues[ changedFormValue.name ] =
@@ -273,13 +270,7 @@ export class StoreDetails extends Component {
 					validate={ this.validateStoreDetails }
 					onChange={ this.onFormValueChange }
 				>
-					{ ( {
-						getInputProps,
-						handleSubmit,
-						values,
-						isValidForm,
-						setValue,
-					} ) => (
+					{ ( { getInputProps, values, isValidForm, setValue } ) => (
 						<Card>
 							<CardBody>
 								<StoreAddress
@@ -330,7 +321,11 @@ export class StoreDetails extends Component {
 							<CardFooter justify="center">
 								<Button
 									isPrimary
-									onClick={ handleSubmit }
+									onClick={ () => {
+										this.onContinue( values ).then( () =>
+											this.props.goToNextStep()
+										);
+									} }
 									isBusy={ isBusy }
 									disabled={ ! isValidForm || isBusy }
 								>
