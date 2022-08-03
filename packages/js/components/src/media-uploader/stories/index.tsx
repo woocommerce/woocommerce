@@ -2,8 +2,8 @@
  * External dependencies
  */
 import React, { createElement } from 'react';
+import { Card, CardBody, Modal, Notice } from '@wordpress/components';
 import { MediaItem } from '@wordpress/media-utils';
-import { Modal, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
 /**
@@ -63,7 +63,7 @@ const MockMediaUpload = ( { onSelect, render } ) => {
 
 const ImageGallery = ( { images }: { images: File[] } ) => {
 	return (
-		<>
+		<div style={ { marginBottom: '16px' } }>
 			{ images.map( ( image, index ) => {
 				return (
 					<img
@@ -77,7 +77,7 @@ const ImageGallery = ( { images }: { images: File[] } ) => {
 					/>
 				);
 			} ) }
-		</>
+		</div>
 	);
 };
 
@@ -99,16 +99,20 @@ export const Basic: React.FC = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
 
 	return (
-		<>
-			<ImageGallery images={ images } />
-			<MediaUploader
-				MediaUploadComponent={ MockMediaUpload }
-				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
-				onError={ () => null }
-				onUpload={ ( files ) => setImages( [ ...images, ...files ] ) }
-				uploadMedia={ mockUploadMedia }
-			/>
-		</>
+		<Card size="large">
+			<CardBody>
+				<ImageGallery images={ images } />
+				<MediaUploader
+					MediaUploadComponent={ MockMediaUpload }
+					onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+					onError={ () => null }
+					onUpload={ ( files ) =>
+						setImages( [ ...images, ...files ] )
+					}
+					uploadMedia={ mockUploadMedia }
+				/>
+			</CardBody>
+		</Card>
 	);
 };
 
@@ -116,16 +120,19 @@ export const DisabledDropZone: React.FC = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
 
 	return (
-		<>
-			<ImageGallery images={ images } />
-			<MediaUploader
-				hasDropZone={ false }
-				MediaUploadComponent={ MockMediaUpload }
-				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
-				onError={ () => null }
-				uploadMedia={ mockUploadMedia }
-			/>
-		</>
+		<Card size="large">
+			<CardBody>
+				<ImageGallery images={ images } />
+				<MediaUploader
+					hasDropZone={ false }
+					label={ 'Click the button below to upload' }
+					MediaUploadComponent={ MockMediaUpload }
+					onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+					onError={ () => null }
+					uploadMedia={ mockUploadMedia }
+				/>
+			</CardBody>
+		</Card>
 	);
 };
 
@@ -133,17 +140,21 @@ export const MaxUploadFileSize: React.FC = () => {
 	const [ error, setError ] = useState< ErrorType | null >( null );
 
 	return (
-		<>
-			{ error && <Notice status={ 'error' }>{ error.message }</Notice> }
+		<Card size="large">
+			<CardBody>
+				{ error && (
+					<Notice status={ 'error' }>{ error.message }</Notice>
+				) }
 
-			<MediaUploader
-				maxUploadFileSize={ 1000 }
-				MediaUploadComponent={ MockMediaUpload }
-				onSelect={ () => null }
-				onError={ ( e ) => setError( e ) }
-				onUpload={ () => null }
-			/>
-		</>
+				<MediaUploader
+					maxUploadFileSize={ 1000 }
+					MediaUploadComponent={ MockMediaUpload }
+					onSelect={ () => null }
+					onError={ ( e ) => setError( e ) }
+					onUpload={ () => null }
+				/>
+			</CardBody>
+		</Card>
 	);
 };
 

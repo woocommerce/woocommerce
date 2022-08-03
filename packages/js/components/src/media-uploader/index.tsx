@@ -18,6 +18,7 @@ type MediaUploaderProps = {
 	allowedMediaTypes?: string[];
 	buttonText?: string;
 	hasDropZone?: boolean;
+	icon?: JSX.Element;
 	label?: string;
 	maxUploadFileSize?: number;
 	MediaUploadComponent?: < T extends boolean = false >(
@@ -54,7 +55,9 @@ export const MediaUploader = ( {
 				onSelect={ onSelect }
 				allowedTypes={ allowedMediaTypes }
 				render={ ( { open } ) => (
-					<Button onClick={ open }>{ buttonText }</Button>
+					<Button variant="secondary" onClick={ open }>
+						{ buttonText }
+					</Button>
 				) }
 			/>
 
