@@ -1263,7 +1263,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
 		if ( ! $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( time() );
+			$order->set_date_created( gmdate( 'Y-m-d H:i:s e' ) );
 		}
 
 		$this->update_post_meta( $order );
@@ -1292,12 +1292,24 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		if ( null === $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( time() );
+			$order->set_date_created( gmdate( 'Y-m-d H:i:s e' ) );
 		}
 
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 
-		$changes = $this->persist_updates( $order );
+		// Fetch changes.
+		$changes = $order->get_changes();
+
+		if ( ! isset( $changes['date_modified'] ) ) {
+			$order->set_date_modified( gmdate( 'Y-m-d H:i:s e' ) );
+		}
+
+		$this->update_post_meta( $order );
+
+		// Update with latest changes.
+		$changes = $order->get_changes();
+
+		$this->persist_order_to_db( $order );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
