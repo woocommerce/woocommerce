@@ -40,6 +40,27 @@ export const PrimaryDisabled: React.FC = () => {
 	);
 };
 
+export const SomeDisabled: React.FC = () => {
+	return (
+		<SplitButtonDropdown>
+			<Button
+				text="Default Action"
+				onClick={ () => clickHandler( 'Default' ) }
+				disabled
+			></Button>
+			<Button
+				text="Secondary Action"
+				onClick={ () => clickHandler( 'Secondary' ) }
+			></Button>
+			<Button
+				text="Tertiary Action"
+				onClick={ () => clickHandler( 'Tertiary' ) }
+				disabled
+			></Button>
+		</SplitButtonDropdown>
+	);
+};
+
 export default {
 	title: 'WooCommerce Admin/components/SplitButton',
 	component: SplitButtonDropdown,
