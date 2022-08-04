@@ -421,4 +421,17 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	public function test_record_tracks_event() {
 		$this->assertEquals( 'setup_tasklist_test_event', $this->list->record_tracks_event( 'test_event' ) );
 	}
+
+	/**
+	 * Test task list sort_tasks with custom config.
+	 */
+	public function test_default_layout_after_hide_setup_tasklist() {
+		$list = new TaskList(
+			array(
+				'id' => 'setup',
+			)
+		);
+		$list->hide();
+		$this->assertEquals( get_option( 'woocommerce_default_homepage_layout', null ), 'two_columns' );
+	}
 }
