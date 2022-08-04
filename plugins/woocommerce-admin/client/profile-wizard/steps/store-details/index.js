@@ -36,6 +36,7 @@ import {
 import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 import SkipButton from '../skip-button';
+import UsageModal from '../usage-modal';
 import './style.scss';
 
 // FlexItem is not available until WP version 5.5. This code is safe to remove
@@ -60,11 +61,12 @@ export class StoreDetails extends Component {
 		super( props );
 
 		this.state = {
-			isStoreDetailsPopoverVisible: false,
+			showUsageModal: false,
 			isSkipSetupPopoverVisible: false,
 		};
 
 		this.onContinue = this.onContinue.bind( this );
+		this.onSubmit = this.onSubmit.bind( this );
 		this.validateStoreDetails = this.validateStoreDetails.bind( this );
 		this.onFormValueChange = this.onFormValueChange.bind( this );
 		this.changedFormValues = {};
@@ -105,6 +107,12 @@ export class StoreDetails extends Component {
 			localeInfo,
 			currencySymbols
 		);
+	}
+
+	onSubmit() {
+		this.setState( {
+			showUsageModal: true,
+		} );
 	}
 
 	onFormValueChange( changedFormValue ) {
@@ -233,6 +241,7 @@ export class StoreDetails extends Component {
 	}
 
 	render() {
+		const { showUsageModal } = this.state;
 		const { isLoading, isBusy, initialValues } = this.props;
 
 		if ( isLoading ) {
@@ -268,8 +277,28 @@ export class StoreDetails extends Component {
 					validate={ this.validateStoreDetails }
 					onChange={ this.onFormValueChange }
 				>
-					{ ( { getInputProps, values, isValidForm, setValue } ) => (
+					{ ( {
+						getInputProps,
+						handleSubmit,
+						values,
+						isValidForm,
+						setValue,
+					} ) => (
 						<Card>
+							{ showUsageModal && (
+								<UsageModal
+									onContinue={ () => {
+										this.onContinue( values ).then( () =>
+											this.props.goToNextStep()
+										);
+									} }
+									onClose={ () =>
+										this.setState( {
+											showUsageModal: false,
+										} )
+									}
+								/>
+							) }
 							<CardBody>
 								<StoreAddress
 									getInputProps={ getInputProps }
@@ -319,11 +348,7 @@ export class StoreDetails extends Component {
 							<CardFooter justify="center">
 								<Button
 									isPrimary
-									onClick={ () => {
-										this.onContinue( values ).then( () =>
-											this.props.goToNextStep()
-										);
-									} }
+									onClick={ handleSubmit }
 									isBusy={ isBusy }
 									disabled={ ! isValidForm || isBusy }
 								>
