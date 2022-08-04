@@ -1407,7 +1407,7 @@ CREATE TABLE $addresses_table_name (
 	email varchar(320) null,
 	phone varchar(100) null,
 	KEY order_id (order_id),
-	KEY address_type_order_id (address_type, order_id)
+	UNIQUE KEY address_type_order_id (address_type, order_id)
 ) $collate;
 CREATE TABLE $operational_data_table_name (
 	id bigint(20) unsigned auto_increment primary key,
@@ -1428,8 +1428,8 @@ CREATE TABLE $operational_data_table_name (
 	discount_tax_amount decimal(26, 8) NULL,
 	discount_total_amount decimal(26, 8) NULL,
 	recorded_sales tinyint(1) NULL,
-	KEY order_id (order_id),
-	KEY order_key (order_key)
+	UNIQUE KEY order_id (order_id),
+	UNIQUE KEY order_key (order_key)
 ) $collate;
 CREATE TABLE $meta_table (
 	id bigint(20) unsigned auto_increment primary key,
