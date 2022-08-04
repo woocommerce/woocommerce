@@ -17,12 +17,10 @@ class WC_Shop_Customizer {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( ! wc_current_theme_is_fse_theme() ) {
-			add_action( 'customize_register', array( $this, 'add_sections' ) );
-			add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
-			add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
-			add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
-		}
+		add_action( 'customize_register', array( $this, 'add_sections' ) );
+		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
+		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
 	}
 
 	/**
@@ -887,4 +885,6 @@ class WC_Shop_Customizer {
 	}
 }
 
-new WC_Shop_Customizer();
+if ( ! wc_current_theme_is_fse_theme() ) {
+	new WC_Shop_Customizer();
+}
