@@ -32,17 +32,23 @@ export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
 	menuIcon = chevronDown,
 	menuIconExpanded = chevronUp,
 	children,
+	disabled,
 	variant = 'primary',
 	...props
 }: SplitButtonDropdownProps ) => {
-	const [ mainButton, ...menuButtons ] = children;
-
+	const groupActionProps = Object.assign(
+		{ variant },
+		disabled ? { disabled } : {}
+	);
+	const mainActionProps = {
+		...props,
+		...groupActionProps,
+		className: `woocommerce-split-button-dropdown__main-button ${ className }`,
+	};
+	const [ mainAction, ...menuActions ] = children;
 	return (
 		<ButtonGroup className={ `woocommerce-split-button-dropdown` }>
-			{ cloneElement( mainButton, {
-				className: 'woocommerce-split-button-dropdown__main-button',
-				variant,
-			} ) }
+			{ cloneElement( mainAction, mainActionProps ) }
 			<Dropdown
 				contentClassName={ `woocommerce-split-button-dropdown__menu ${ className }` }
 				position="bottom left"
@@ -50,11 +56,9 @@ export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
 					return (
 						<Button
 							{ ...props }
+							{ ...groupActionProps }
 							className={ `woocommerce-split-button-dropdown__toggle ${ className }` }
 							onClick={ onToggle }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore
-							variant={ variant }
 						>
 							<Icon
 								icon={ isOpen ? menuIconExpanded : menuIcon }
@@ -65,8 +69,8 @@ export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
 				renderContent={ () => {
 					return (
 						<div>
-							{ menuButtons.map( ( button, index ) => {
-								return cloneElement( button, {
+							{ menuActions.map( ( action, index ) => {
+								return cloneElement( action, {
 									key: index,
 								} );
 							} ) }
