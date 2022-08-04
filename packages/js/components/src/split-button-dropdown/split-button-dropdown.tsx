@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { cloneElement, createElement } from '@wordpress/element';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { Button, ButtonGroup, Dropdown } from '@wordpress/components';
 
@@ -24,7 +24,7 @@ export type SplitButtonDropdownProps = {
 	variant?: string;
 	menuIcon?: JSX.Element;
 	menuIconExpanded?: JSX.Element;
-	children: React.ReactNode[];
+	children: JSX.Element[];
 };
 
 export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
@@ -35,27 +35,26 @@ export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
 	variant = 'primary',
 	...props
 }: SplitButtonDropdownProps ) => {
-	const groupButtonProps = { variant };
-	const [ primaryButton, ...menuButtons ] = children;
-	const primaryButtonProps = Object.assign(
-		{},
-		primaryButton?.props || {},
-		{ className: `woocommerce-split-button-dropdown__main ${ className }` },
-		groupButtonProps
-	);
+	const [ mainButton, ...menuButtons ] = children;
 
 	return (
 		<ButtonGroup className={ `woocommerce-split-button-dropdown` }>
-			<Button { ...primaryButtonProps }></Button>
+			{ cloneElement( mainButton, {
+				className: 'woocommerce-split-button-dropdown__main-button',
+				variant,
+			} ) }
 			<Dropdown
 				contentClassName={ `woocommerce-split-button-dropdown__menu ${ className }` }
+				position="bottom left"
 				renderToggle={ ( { isOpen, onToggle } ) => {
 					return (
 						<Button
 							{ ...props }
-							{ ...groupButtonProps }
 							className={ `woocommerce-split-button-dropdown__toggle ${ className }` }
 							onClick={ onToggle }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							variant={ variant }
 						>
 							<Icon
 								icon={ isOpen ? menuIconExpanded : menuIcon }
@@ -64,7 +63,15 @@ export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
 					);
 				} }
 				renderContent={ () => {
-					return <div>{ menuButtons }</div>;
+					return (
+						<div>
+							{ menuButtons.map( ( button, index ) => {
+								return cloneElement( button, {
+									key: index,
+								} );
+							} ) }
+						</div>
+					);
 				} }
 			/>
 		</ButtonGroup>
