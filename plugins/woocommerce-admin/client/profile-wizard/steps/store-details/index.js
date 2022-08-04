@@ -64,7 +64,6 @@ export class StoreDetails extends Component {
 		this.state = {
 			showUsageModal: false,
 			skipping: false,
-			isStoreDetailsPopoverVisible: false,
 			isSkipSetupPopoverVisible: false,
 		};
 
@@ -245,12 +244,8 @@ export class StoreDetails extends Component {
 	}
 
 	render() {
-		const {
-			showUsageModal,
-			skipping,
-			isStoreDetailsPopoverVisible,
-			isSkipSetupPopoverVisible,
-		} = this.state;
+		const { showUsageModal, skipping, isSkipSetupPopoverVisible } =
+			this.state;
 		const {
 			skipProfiler,
 			isLoading,
@@ -262,11 +257,6 @@ export class StoreDetails extends Component {
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
 			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
-			'woocommerce'
-		);
-
-		const configureCurrencyText = __(
-			'Your store address will help us configure currency\n options and shipping rules automatically.\n This information will not be publicly visible and can\n easily be changed later.',
 			'woocommerce'
 		);
 		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
@@ -292,38 +282,10 @@ export class StoreDetails extends Component {
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
-							"Tell us about your store and we'll get you set up in no time",
+							'Tell us where you run your business to help us configure currency, shipping, taxes, and more in a fully automated way.',
 							'woocommerce'
 						) }
-
-						<Button
-							isTertiary
-							label={ __(
-								'Learn more about store details',
-								'woocommerce'
-							) }
-							onClick={ () =>
-								this.setState( {
-									isStoreDetailsPopoverVisible: true,
-								} )
-							}
-						>
-							<Icon icon={ info } />
-						</Button>
 					</Text>
-					{ isStoreDetailsPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( {
-									isStoreDetailsPopoverVisible: false,
-								} )
-							}
-						>
-							{ configureCurrencyText }
-						</Popover>
-					) }
 				</div>
 
 				<Form
@@ -373,7 +335,7 @@ export class StoreDetails extends Component {
 													'woocommerce'
 											  )
 											: __(
-													'Email address (Optional)',
+													'Email address',
 													'woocommerce'
 											  )
 									}
@@ -405,7 +367,6 @@ export class StoreDetails extends Component {
 									</div>
 								</FlexItem>
 							</CardBody>
-
 							<CardFooter justify="center">
 								<Button
 									isPrimary
