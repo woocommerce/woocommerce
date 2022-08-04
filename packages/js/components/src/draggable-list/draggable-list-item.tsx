@@ -9,6 +9,7 @@ import { Draggable } from '@wordpress/components';
 export type DraggableListItemProps = {
 	id: string | number;
 	children: JSX.Element;
+	isDragging: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLDivElement >;
@@ -17,19 +18,16 @@ export type DraggableListItemProps = {
 export const DraggableListItem = ( {
 	id,
 	children,
+	isDragging = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 }: DraggableListItemProps ) => {
-	const [ isDragging, setIsDragging ] = useState( false );
-
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
-		setIsDragging( true );
 		onDragStart( event );
 	};
 
 	const handleDragEnd = ( event: DragEvent< HTMLDivElement > ) => {
-		setIsDragging( false );
 		onDragEnd( event );
 	};
 
@@ -40,7 +38,6 @@ export const DraggableListItem = ( {
 			} ) }
 			id={ `woocommerce-draggable-list__item-${ id }` }
 		>
-			<div className="woocommerce-draggable-list__item-slot-before" />
 			<Draggable
 				elementId={ `woocommerce-draggable-list__item-${ id }` }
 				transferData={ {} }
@@ -59,7 +56,6 @@ export const DraggableListItem = ( {
 					</div>
 				) }
 			</Draggable>
-			<div className="woocommerce-draggable-list__item-slot-after" />
 		</li>
 	);
 };

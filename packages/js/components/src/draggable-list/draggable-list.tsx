@@ -13,12 +13,14 @@ import {
  * Internal dependencies
  */
 import { DraggableListItem } from './draggable-list-item';
+import { moveIndex } from './utils';
 
 export type DraggableListProps = {
 	children: JSX.Element | JSX.Element[];
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLDivElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
+	onOrderChange?: () => void;
 };
 
 export const DraggableList = ( {
@@ -28,24 +30,44 @@ export const DraggableList = ( {
 	onDragStart = () => null,
 }: DraggableListProps ) => {
 	const [ items, setItems ] = useState< JSX.Element[] >( [] );
-	const [ dropTarget, setDropTarget ] = useState< EventTarget | null >(
-		null
-	);
+	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
+	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
 	useEffect( () => {
 		setItems( Array.isArray( children ) ? children : [ children ] );
 	}, [ children ] );
 
-	const handleOnDragStart = ( event: DragEvent< HTMLDivElement > ) => {
+	const handleDragStart = (
+		event: DragEvent< HTMLDivElement >,
+		index: number
+	) => {
+		setDragIndex( index );
 		onDragStart( event );
 	};
-	const handleOnDragEnd = ( event: DragEvent< HTMLDivElement > ) => {
-		setDropTarget( null );
+
+	const handleDragEnd = (
+		event: DragEvent< HTMLDivElement >,
+		index: number
+	) => {
+		if (
+			dropIndex !== null &&
+			dragIndex !== null &&
+			dropIndex !== dragIndex
+		) {
+			const nextItems = moveIndex( dragIndex, dropIndex, items );
+			setItems( nextItems as JSX.Element[] );
+		}
+
+		setDragIndex( null );
+		setDropIndex( null );
 		onDragEnd( event );
 	};
 
-	const handleOnDragOver = ( event: DragEvent< HTMLDivElement > ) => {
-		setDropTarget( event.target );
+	const handleDragOver = (
+		event: DragEvent< HTMLDivElement >,
+		index: number
+	) => {
+		setDropIndex( index );
 		onDragOver( event );
 	};
 
@@ -56,12 +78,22 @@ export const DraggableList = ( {
 					<DraggableListItem
 						id={ index }
 						key={ index }
-						onDragStart={ handleOnDragStart }
-						onDragEnd={ handleOnDragEnd }
-						onDragOver={ handleOnDragOver }
+						isDragging={ index === dragIndex }
+						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
+						onDragStart={ ( event ) =>
+							handleDragStart( event, index )
+						}
+						onDragOver={ ( event ) =>
+							handleDragOver( event, index )
+						}
 					>
 						{ child }
 					</DraggableListItem>
+					{ dropIndex === index && (
+						<div className="woocommerce-draggable-list__slot">
+							{ index }
+						</div>
+					) }
 				</>
 			) ) }
 		</ul>
