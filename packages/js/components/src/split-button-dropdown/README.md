@@ -26,6 +26,7 @@ In addition to those listed here, you can use any props accepted by Button and t
 
 Name | Type | Default | Description
 --- | --- | --- | ---
+`disabled` | boolean | `null` | As in Button, but will be applied to both the primary action button and the dropdown. Will override something specifically set on the first child button.
 `variant` | String | "primary" | As in Button, but with a different default value. Will override a value specifically set on the first child button.
 `className` | String | `null` | This will show up in the container element as well as the elements associated with the primary button, the dropdown toggle button, and the dropdown menu. Will override a value specifically set on the first child button.
 `menuIcon` | Icon | `chevronDown` | Icon for the dropdown toggle button when the dropdown is collapsed.
