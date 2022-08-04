@@ -111,13 +111,13 @@
 		}
 
 		.connect-account__card {
-			> .components-card__header {
+			.components-card__header {
 				align-items: baseline;
 			}
 
 			// Phone-ish sizes.
 			@media (max-width: 680px) {
-				> .components-card__header {
+				.components-card__header {
 					flex-direction: column;
 				}
 
@@ -190,30 +190,40 @@
 		}
 	}
 
-	.limited-time-offer {
-		.flag-icon {
-			display: inline-block;
-			width: 14px;
-			height: 14px;
-			margin-right: 8px;
-		}
+	.gift-icon {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		margin-right: $gap-smaller;
 	}
 
+	.offer-header {
+		display: flex;
+		color: $studio-gray-30;
+		text-transform: uppercase;
+	}
 
 	.offer-copy {
-		font-size: 16px;
-		line-height: 24px;
-		width: 380px;
-		font-weight: normal;
+		font-size: 14px;
+		line-height: 21px;
+		font-weight: 500;
+		color: $gray-900;
 	}
 
 	.discount-copy {
-		width: 380px;
 		margin-top: 6px;
+		color: $gray-600;
 	}
 
-	.components-card__body {
-		background: url(./wcpay-banner.png) no-repeat right;
+	@include breakpoint('>600px') {
+		.components-card__body {
+			background: url(./wcpay-offer.svg) no-repeat right;
+		}
+
+		.limited-time-offer {
+			// max-width: 300px;
+			max-width: calc(100% - 240px);
+		}
 	}
 }
 
