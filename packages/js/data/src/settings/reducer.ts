@@ -10,7 +10,7 @@ import { Reducer } from 'redux';
 import TYPES from './action-types';
 import { getResourceName } from '../utils';
 import { Actions } from './actions';
-import { SettingsGroup, SettingsState } from './types';
+import { Settings, SettingsState } from './types';
 
 const updateGroupDataInNewState = (
 	newState: SettingsState,
@@ -23,7 +23,7 @@ const updateGroupDataInNewState = (
 	}: {
 		group: string;
 		groupIds: string[];
-		data: SettingsGroup;
+		data: Settings;
 		time: Date;
 		error: unknown;
 	}

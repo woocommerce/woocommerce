@@ -1,7 +1,12 @@
-export type Settings = Record< string, unknown >;
-
-export type SettingsGroup = {
-	[ key: string ]: Settings;
+export type Settings = {
+	[ key: string ]: unknown;
+} & {
+	general?: {
+		[ key: string ]: string;
+	};
+	tax?: {
+		[ key: string ]: string;
+	};
 };
 
 export type SettingsState = {

@@ -14,7 +14,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
 import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './constants';
 import TYPES from './action-types';
-import { SettingsGroup } from './types';
+import { Settings } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -22,7 +22,7 @@ const resolveSelect =
 
 export function updateSettingsForGroup(
 	group: string,
-	data: SettingsGroup,
+	data: Settings,
 	time = new Date()
 ) {
 	return {
@@ -35,7 +35,7 @@ export function updateSettingsForGroup(
 
 export function updateErrorForGroup(
 	group: string,
-	data: SettingsGroup | null,
+	data: Settings | null,
 	error: unknown,
 	time = new Date()
 ) {
@@ -80,7 +80,9 @@ export function* persistSettingsForGroup( group: string ) {
 	}
 
 	// get data slice for keys
-	const dirtyData: SettingsGroup = yield resolveSelect(
+	const dirtyData: {
+		[ key: string ]: Record< string, unknown >;
+	} = yield resolveSelect(
 		STORE_NAME,
 		'getSettingsForGroup',
 		group,
@@ -127,7 +129,7 @@ export function* persistSettingsForGroup( group: string ) {
 // allows updating and persisting immediately in one action.
 export function* updateAndPersistSettingsForGroup(
 	group: string,
-	data: SettingsGroup
+	data: Settings
 ) {
 	yield updateSettingsForGroup( group, data );
 	yield* persistSettingsForGroup( group );
