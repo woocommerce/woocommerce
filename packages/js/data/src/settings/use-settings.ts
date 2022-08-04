@@ -9,7 +9,7 @@ import { useCallback } from '@wordpress/element';
  */
 import { STORE_NAME } from './constants';
 
-export const useSettings = ( group, settingsKeys = [] ) => {
+export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 	const { requestedSettings, settingsError, isRequesting, isDirty } =
 		useSelect(
 			( select ) => {
