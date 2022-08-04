@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Overrides\Order;
 use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
