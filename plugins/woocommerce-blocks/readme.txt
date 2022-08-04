@@ -86,6 +86,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 8.2.1 - 2022-08-03 =
+
+#### Bug Fixes
+
+- Fixed an issue where shoppers could not switch between different saved payment methods. ([6825](https://github.com/woocommerce/woocommerce-blocks/pull/6825))
+
 = 8.2.0 - 2022-08-02 =
 
 #### Enhancements
