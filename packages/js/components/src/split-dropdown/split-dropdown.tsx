@@ -8,10 +8,7 @@ import { Button, ButtonGroup, Dropdown } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-
-export type SplitButtonDropdownProps = {
-	isSmall?: boolean;
-	isPressed?: boolean;
+export type SplitDropdownProps = {
 	className?: string;
 	disabled?: boolean;
 	icon?: string | typeof Icon;
@@ -27,37 +24,34 @@ export type SplitButtonDropdownProps = {
 	children: JSX.Element[];
 };
 
-export const SplitButtonDropdown: React.FC< SplitButtonDropdownProps > = ( {
+export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 	className = '',
 	menuIcon = chevronDown,
 	menuIconExpanded = chevronUp,
 	children,
 	disabled,
 	variant = 'primary',
-	...props
-}: SplitButtonDropdownProps ) => {
+}: SplitDropdownProps ) => {
 	const groupActionProps = Object.assign(
 		{ variant },
 		disabled ? { disabled } : {}
 	);
 	const mainActionProps = {
-		...props,
 		...groupActionProps,
-		className: `woocommerce-split-button-dropdown__main-button ${ className }`,
+		className: `woocommerce-split-dropdown__main-button ${ className }`,
 	};
 	const [ mainAction, ...menuActions ] = children;
 	return (
-		<ButtonGroup className={ `woocommerce-split-button-dropdown` }>
+		<ButtonGroup className={ `woocommerce-split-dropdown ${ className }` }>
 			{ cloneElement( mainAction, mainActionProps ) }
 			<Dropdown
-				contentClassName={ `woocommerce-split-button-dropdown__menu ${ className }` }
+				contentClassName={ `woocommerce-split-dropdown__menu ${ className }` }
 				position="bottom left"
 				renderToggle={ ( { isOpen, onToggle } ) => {
 					return (
 						<Button
-							{ ...props }
 							{ ...groupActionProps }
-							className={ `woocommerce-split-button-dropdown__toggle ${ className }` }
+							className={ `woocommerce-split-dropdown__toggle ${ className }` }
 							onClick={ onToggle }
 						>
 							<Icon

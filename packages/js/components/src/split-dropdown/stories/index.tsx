@@ -8,21 +8,11 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { SplitButtonDropdown } from '..';
+import { SplitDropdown } from '..';
 
 export const Primary: React.FC = () => {
 	return (
-		<SplitButtonDropdown>
-			<Button>Default Action</Button>
-			<Button>Secondary Action</Button>
-			<Button>Tertiary Action</Button>
-		</SplitButtonDropdown>
-	);
-};
-
-export const PrimaryDisabled: React.FC = () => {
-	return (
-		<SplitButtonDropdown disabled>
+		<SplitDropdown>
 			<Button onClick={ () => clickHandler( 'Default' ) }>
 				Default Action
 			</Button>
@@ -32,33 +22,45 @@ export const PrimaryDisabled: React.FC = () => {
 			<Button onClick={ () => clickHandler( 'Tertiary' ) }>
 				Tertiary Action
 			</Button>
-		</SplitButtonDropdown>
-	);
-};
-
-export const Secondary: React.FC = () => {
-	return (
-		<SplitButtonDropdown variant="secondary">
-			<Button>Default Action</Button>
-			<Button>Secondary Action</Button>
-			<Button>Tertiary Action</Button>
-		</SplitButtonDropdown>
+		</SplitDropdown>
 	);
 };
 
 export const PrimaryDisabled: React.FC = () => {
 	return (
-		<SplitButtonDropdown disabled>
-			<Button text="Default Action"></Button>
-			<Button text="Secondary Action"></Button>
-			<Button text="Tertiary Action"></Button>
-		</SplitButtonDropdown>
+		<SplitDropdown disabled>
+			<Button onClick={ () => clickHandler( 'Default' ) }>
+				Default Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Secondary' ) }>
+				Secondary Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Tertiary' ) }>
+				Tertiary Action
+			</Button>
+		</SplitDropdown>
+	);
+};
+
+export const Secondary: React.FC = () => {
+	return (
+		<SplitDropdown variant="secondary">
+			<Button onClick={ () => clickHandler( 'Default' ) }>
+				Default Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Secondary' ) }>
+				Secondary Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Tertiary' ) }>
+				Tertiary Action
+			</Button>
+		</SplitDropdown>
 	);
 };
 
 export const SomeDisabled: React.FC = () => {
 	return (
-		<SplitButtonDropdown>
+		<SplitDropdown>
 			<Button
 				text="Default Action"
 				onClick={ () => clickHandler( 'Default' ) }
@@ -73,11 +75,11 @@ export const SomeDisabled: React.FC = () => {
 				onClick={ () => clickHandler( 'Tertiary' ) }
 				disabled
 			></Button>
-		</SplitButtonDropdown>
+		</SplitDropdown>
 	);
 };
 
 export default {
-	title: 'WooCommerce Admin/components/SplitButton',
-	component: SplitButtonDropdown,
+	title: 'WooCommerce Admin/components/SplitDropdown',
+	component: SplitDropdown,
 };
