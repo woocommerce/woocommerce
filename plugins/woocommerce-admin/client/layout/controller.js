@@ -23,8 +23,12 @@ import { Spinner } from '@woocommerce/components';
 import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
-import { AddProductPage } from '~/products';
 
+const AddProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
+	)
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
