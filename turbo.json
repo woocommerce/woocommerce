@@ -79,19 +79,6 @@
 				"includes/**/*.php"
 			],
 			"outputs": []
-		},
-
-		"turbo:e2e": {
-			"dependsOn": [ "turbo:build" ],
-			"cache": false
-		},
-		"e2e:debug": {
-			"dependsOn": [ "turbo:build" ],
-			"cache": false
-		},
-		"e2e:dev": {
-			"dependsOn": [ "turbo:build" ],
-			"cache": false
 		}
 	}
 }

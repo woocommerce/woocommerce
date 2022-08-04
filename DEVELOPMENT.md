@@ -22,7 +22,7 @@ Here are some examples of the ways you can use Turborepo / pnpm commands:
 
 ```bash
 # Lint and build all plugins, packages, and tools
-pnpm run lint build
+pnpm run lint && pnpm run build 
 
 # Build WooCommerce Core and all of its dependencies
 pnpm run build --filter='woocommerce'
@@ -39,7 +39,7 @@ pnpm run build --filter='./packages/js/*'
 # Build everything except WooCommerce Core
 pnpm run build --filter='!woocommerce' 
 
-# Lint everything that has changed since the last commit
+# Build everything that has changed since the last commit
 pnpm run build --filter='[HEAD^1]'
 ```
 

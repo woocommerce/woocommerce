@@ -175,7 +175,7 @@ The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operation
 By default, SlowMo mode adds a 50 millisecond delay between test steps. If you'd like to override the length of the delay and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below:
 
 ```
-PUPPETEER_SLOWMO=10 pnpm -- run e2e:dev --filter=woocommerce
+PUPPETEER_SLOWMO=10 pnpm run e2e:dev --filter=woocommerce
 ```
 
 The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 

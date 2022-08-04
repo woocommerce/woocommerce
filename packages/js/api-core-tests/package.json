@@ -4,12 +4,11 @@
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"scripts": {
-		"turbo:e2e": "jest",
+		"e2e": "jest",
 		"e2e:api": "jest --group=api",
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
-		"e2e": "pnpm -w exec turbo run turbo:e --filter=$npm_package_name -- --",
 		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
 		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
 	},
