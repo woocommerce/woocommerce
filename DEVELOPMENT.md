@@ -8,7 +8,7 @@ Please refer to [the Getting Started section of the `README.md`](README.md#getti
 
 ## Turborepo Commands
 
-Our repository uses [Turborepo](https://turborepo.org) for `build`, `lint`, and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. This is done transparently when running these commands. When using `pnpm run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
+Our repository uses [Turborepo](https://turborepo.org) for `build` and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. This is done transparently when running these commands. When using `pnpm run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
 
 ### Plugin, Package, and Tool Filtering
 
@@ -18,7 +18,7 @@ If you would like to read more about the syntax, please check out [the Turborepo
 
 ### Examples
 
-Here are some examples of the ways you can use Turborepo commands:
+Here are some examples of the ways you can use Turborepo / pnpm commands:
 
 ```bash
 # Lint and build all plugins, packages, and tools
@@ -41,6 +41,17 @@ pnpm run build --filter='!woocommerce'
 
 # Lint everything that has changed since the last commit
 pnpm run build --filter='[HEAD^1]'
+```
+
+### Cache busting Turbo
+
+In the event that you need to force turbo not to cache a command you can set the env variable `TURBO_FORCE=true`.
+
+e.g.
+
+```bash
+# Force an uncached build of WooCommerce Core and all of its dependencies
+TURBO_FORCE=true pnpm run build --filter='woocommerce'
 ```
 
 ## Other Commands
