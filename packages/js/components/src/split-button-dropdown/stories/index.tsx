@@ -20,7 +20,7 @@ export const Primary: React.FC = () => {
 	);
 };
 
-export const Default: React.FC = () => {
+export const Secondary: React.FC = () => {
 	return (
 		<SplitButtonDropdown variant="secondary">
 			<Button>Default Action</Button>
