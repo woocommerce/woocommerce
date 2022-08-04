@@ -14,6 +14,13 @@ class WcPayWelcomePage {
 	const EXPERIMENT_NAME_BASE = 'woocommerce_payments_menu_promo_nz_ie_:yyyy_:mm';
 
 	/**
+	 * WCPayWelcomePage constructor.
+	 */
+	public function __construct() {
+		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
+	}
+
+	/**
 	 * Registers the WooCommerce Payments welcome page.
 	 */
 	public function register_payments_welcome_page() {
@@ -24,15 +31,22 @@ class WcPayWelcomePage {
 			return;
 		}
 
+		// Store is in a supported country.
 		if ( ! WooCommercePayments::is_supported() ) {
 			return;
 		}
 
-		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+		// Suggestions may be disabled via a setting.
+		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return;
 		}
 
-		if ( ! $this->should_add_the_menu() ) {
+		// User can disabled all suggestions via filter.
+		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
+			return;
+		}
+
+		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
 			return;
 		}
 
@@ -80,31 +94,5 @@ class WcPayWelcomePage {
 				$menu[ $index ][0] .= ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			}
 		}
-	}
-
-	/**
-	 * Checks if user is in the experiment.
-	 *
-	 * @return bool Whether the user is in the treatment group.
-	 */
-	private function should_add_the_menu() {
-		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
-		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
-			$anon_id,
-			'woocommerce',
-			$allow_tracking
-		);
-
-		$date            = new \DateTime( 'now', wp_timezone() );
-		$experiment_name = strtr(
-			self::EXPERIMENT_NAME_BASE,
-			array(
-				':yyyy' => $date->format( 'Y' ),
-				':mm'   => $date->format( 'm' ),
-			)
-		);
-
-		return $abtest->get_variation( $experiment_name ) === 'treatment';
 	}
 }
