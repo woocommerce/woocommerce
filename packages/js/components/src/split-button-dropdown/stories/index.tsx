@@ -7,23 +7,25 @@ import { Button } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { SplitButton } from '../';
+import { SplitButtonDropdown } from '..';
 
 export const Primary: React.FC = () => {
 	return (
-		<SplitButton variant="primary" text="Default Action">
+		<SplitButtonDropdown>
+			<Button text="Default Action"></Button>
 			<Button text="Secondary Action"></Button>
-			<Button text="Tertiary Action" isDestructive={ true }></Button>
-		</SplitButton>
+			<Button text="Tertiary Action"></Button>
+		</SplitButtonDropdown>
 	);
 };
 
 export const Default: React.FC = () => {
 	return (
-		<SplitButton text="Default Action">
+		<SplitButtonDropdown variant="secondary">
+			<Button text="Default Action"></Button>
 			<Button text="Secondary Action"></Button>
-			<Button text="Tertiary Action" isDestructive={ true }></Button>
-		</SplitButton>
+			<Button text="Tertiary Action"></Button>
+		</SplitButtonDropdown>
 	);
 };
 
