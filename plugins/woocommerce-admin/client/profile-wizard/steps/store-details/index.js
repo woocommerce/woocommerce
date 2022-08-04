@@ -10,7 +10,6 @@ import {
 	CheckboxControl,
 	FlexItem as MaybeFlexItem,
 	Spinner,
-	Popover,
 } from '@wordpress/components';
 import { Component, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -24,7 +23,6 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { Icon, info } from '@wordpress/icons';
 import { isEmail } from '@wordpress/url';
 
 /**
