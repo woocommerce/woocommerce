@@ -60,6 +60,20 @@ class WC_Regenerate_Images {
 	}
 
 	/**
+	 * Returns true if Photon image CDN is active on the site
+	 *
+	 * In case Photon is active, don't attempt to generate thumbnails, as those are generated on the fly
+	 * and served from the Photon CDN. Thus, they're unnecessary and just take disk space and CPU cycles to generate.
+	 * Additionally, when Photon is active, WP will accept even pretty large images and attempting to resize them
+	 * will crash the image processing library.
+	 *
+	 * https://developer.wordpress.com/docs/photon/
+	 */
+	protected static function is_photon_active() {
+		return class_exists( 'Jetpack' ) && method_exists( 'Jetpack', 'get_active_modules' ) && in_array( 'photon', Jetpack::get_active_modules() );
+	}
+
+	/**
 	 * If an intermediate size meta differs from the actual image size (settings were changed?) return false so the wrong size is not used.
 	 *
 	 * @param array  $data Size data.
@@ -80,7 +94,7 @@ class WC_Regenerate_Images {
 		// See if the image size has changed from our settings.
 		if ( ! self::image_size_matches_settings( $data, $size ) ) {
 			// If Photon is running we can just return false and let Jetpack handle regeneration.
-			if ( method_exists( 'Jetpack', 'is_module_active' ) && Jetpack::is_module_active( 'photon' ) ) {
+			if ( self::is_photon_active() ) {
 				return false;
 			} else {
 				// If we get here, Jetpack is not running and we don't have the correct image sized stored. Try to return closest match.
@@ -200,6 +214,11 @@ class WC_Regenerate_Images {
 	 */
 	public static function maybe_resize_image( $image, $attachment_id, $size, $icon ) {
 		if ( ! apply_filters( 'woocommerce_resize_images', true ) ) {
+			return $image;
+		}
+
+		// If Photon is active, don't attempt to resize images, Photon will handle it outside WP.
+		if ( self::is_photon_active() ) {
 			return $image;
 		}
 
@@ -446,6 +465,11 @@ class WC_Regenerate_Images {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->kill_process();
+
+		// In case Photon is active, don't enqueue image regeneration, thumbnails are handled by Photon.
+		if ( self::is_photon_active() ) {
+			return;
+		}
 
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine
