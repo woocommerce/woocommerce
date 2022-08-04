@@ -11,9 +11,9 @@ export type Settings = {
 
 export type SettingsState = {
 	[ key: string ]: {
-		data: unknown;
-		error: unknown;
-		lastReceived: Date;
+		data?: unknown;
+		lastReceived?: Date;
+		error?: unknown;
 		isRequesting?: boolean;
 		dirty?: string[];
 	};
