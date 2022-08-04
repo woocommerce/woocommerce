@@ -316,7 +316,7 @@ Object {
             class="components-button woocommerce-profile-wizard__footer-link is-link"
             type="button"
           >
-            Skip setup store details
+            Skip
           </button>
           <button
             aria-label="Manual setup is only recommended for
@@ -629,7 +629,7 @@ Object {
           class="components-button woocommerce-profile-wizard__footer-link is-link"
           type="button"
         >
-          Skip setup store details
+          Skip
         </button>
         <button
           aria-label="Manual setup is only recommended for
