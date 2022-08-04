@@ -35,7 +35,7 @@ test.describe(
 			} );
 		} );
 
-		test( 'add shipping zone with region and then delete the region', async ( {
+		test.skip( 'add shipping zone with region and then delete the region', async ( {
 			page,
 		} ) => {
 			await page.goto(
