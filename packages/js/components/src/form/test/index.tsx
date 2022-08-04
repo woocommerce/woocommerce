@@ -1,14 +1,33 @@
 /**
  * External dependencies
  */
+import { createElement, Fragment } from '@wordpress/element';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Form from '../';
+import { Form, useFormContext } from '../';
+import type { FormContext } from '../';
+
+const TestInputWithContext = () => {
+	const formProps = useFormContext< { foo: string } >();
+	const fieldValue = formProps.values.foo;
+
+	return (
+		<Fragment>
+			<span>foo: { fieldValue }</span>
+			<button
+				onClick={ () => {
+					formProps.setValue( 'foo', 'bar' );
+				} }
+			>
+				Submit
+			</button>
+		</Fragment>
+	);
+};
 
 describe( 'Form', () => {
 	it( 'should default to call the deprecated onSubmitCallback if it is provided.', async () => {
@@ -16,18 +35,23 @@ describe( 'Form', () => {
 		const onSubmit = jest.fn().mockName( 'onSubmit' );
 
 		const { queryByText } = render(
-			<Form
+			<Form< Record< string, string > >
 				onSubmitCallback={ onSubmitCallback }
 				onSubmit={ onSubmit }
 				validate={ () => ( {} ) }
 			>
-				{ ( { handleSubmit } ) => {
+				{ ( {
+					handleSubmit,
+				}: FormContext< Record< string, string > > ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
 				} }
 			</Form>
 		);
 
-		userEvent.click( queryByText( 'Submit' ) );
+		const submitButton = queryByText( 'Submit' );
+		if ( submitButton ) {
+			userEvent.click( submitButton );
+		}
 
 		await waitFor( () =>
 			expect( onSubmitCallback ).toHaveBeenCalledTimes( 1 )
@@ -45,7 +69,7 @@ describe( 'Form', () => {
 				onChange={ mockOnChange }
 				validate={ () => ( {} ) }
 			>
-				{ ( { setValue } ) => {
+				{ ( { setValue }: FormContext< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -59,7 +83,10 @@ describe( 'Form', () => {
 			</Form>
 		);
 
-		userEvent.click( queryByText( 'Change' ) );
+		const changeButton = queryByText( 'Change' );
+		if ( changeButton ) {
+			userEvent.click( changeButton );
+		}
 
 		await waitFor( () =>
 			expect( mockOnChangeCallback ).toHaveBeenCalledTimes( 1 )
@@ -72,13 +99,18 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onSubmit={ mockOnSubmit } validate={ () => ( {} ) }>
-				{ ( { handleSubmit } ) => {
+				{ ( {
+					handleSubmit,
+				}: FormContext< Record< string, string > > ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
 				} }
 			</Form>
 		);
 
-		userEvent.click( queryByText( 'Submit' ) );
+		const submitButton = queryByText( 'Submit' );
+		if ( submitButton ) {
+			userEvent.click( submitButton );
+		}
 
 		await waitFor( () =>
 			expect( mockOnSubmit ).toHaveBeenCalledTimes( 1 )
@@ -90,7 +122,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
-				{ ( { setValue } ) => {
+				{ ( { setValue }: FormContext< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -104,10 +136,35 @@ describe( 'Form', () => {
 			</Form>
 		);
 
-		userEvent.click( queryByText( 'Submit' ) );
+		const submitButton = queryByText( 'Submit' );
+		if ( submitButton ) {
+			userEvent.click( submitButton );
+		}
 
 		await waitFor( () =>
 			expect( mockOnChange ).toHaveBeenCalledTimes( 1 )
 		);
+	} );
+
+	describe( 'FormContext', () => {
+		it( 'should allow nested field to use useFormContext to set field value', async () => {
+			const mockOnChange = jest.fn();
+
+			const { queryByText } = render(
+				<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
+					<TestInputWithContext />
+				</Form>
+			);
+
+			const submitButton = queryByText( 'Submit' );
+			if ( submitButton ) {
+				userEvent.click( submitButton );
+			}
+			expect( queryByText( 'foo: bar' ) ).toBeInTheDocument();
+
+			await waitFor( () =>
+				expect( mockOnChange ).toHaveBeenCalledTimes( 1 )
+			);
+		} );
 	} );
 } );
