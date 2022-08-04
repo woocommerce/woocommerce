@@ -653,7 +653,7 @@ class BusinessDetails extends Component {
 							<SkipButton
 								onSkipped={ () => {
 									recordEvent(
-										'storeprofiler_store_business_features_skip'
+										'storeprofiler_store_business_details_skip'
 									);
 								} }
 							/>
