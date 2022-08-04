@@ -20,6 +20,22 @@ export const Primary: React.FC = () => {
 	);
 };
 
+export const PrimaryDisabled: React.FC = () => {
+	return (
+		<SplitButtonDropdown disabled>
+			<Button onClick={ () => clickHandler( 'Default' ) }>
+				Default Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Secondary' ) }>
+				Secondary Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Tertiary' ) }>
+				Tertiary Action
+			</Button>
+		</SplitButtonDropdown>
+	);
+};
+
 export const Secondary: React.FC = () => {
 	return (
 		<SplitButtonDropdown variant="secondary">
