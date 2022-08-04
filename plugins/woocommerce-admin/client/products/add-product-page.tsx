@@ -8,8 +8,10 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { ProductFormLayout } from './layout/product-form-layout';
+import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { ProductImagesSection } from './sections/product-images-section';
+import './add-product-page.scss';
 
 const AddProductPage: React.FC = () => {
 	useEffect( () => {
@@ -20,6 +22,8 @@ const AddProductPage: React.FC = () => {
 			<ProductFormLayout>
 				<ProductDetailsSection />
 				<ProductImagesSection />
+
+				<ProductFormActions />
 			</ProductFormLayout>
 		</div>
 	);
