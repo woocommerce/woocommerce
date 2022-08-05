@@ -892,20 +892,17 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function process_limit(): void {
-		$row_count = ( $this->arg_isset( 'limit' ) ? (int) $this->args['limit'] : false );
-		$page      = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
-		$offset    = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
+		$limit  = ( $this->arg_isset( 'limit' ) ? $this->args['limit'] : false );
+		$page   = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
+		$offset = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
 
-		// Bool false indicates no limit was specified; less than -1 means an invalid value was passed (such as -3).
-		if ( $row_count === false || $row_count < -1 ) {
+		if ( ! $limit || $this->args['limit'] === -1 ) {
 			return;
 		}
 
-		if ( $offset === false && $row_count > -1 ) {
-			$offset = (int) ( ( $page - 1 ) * $row_count );
-		}
+		$limit = absint( $limit );
 
-		$this->limits = array( $offset, $row_count );
+		$this->limits = array( $offset ? $offset : absint( ( $page - 1 ) * $limit ), $limit );
 	}
 
 	/**
