@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 100
 
       - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
+        run: npm install -g pnpm@7.8.0
 
       - name: "Install PHP"
         uses: shivammathur/setup-php@v2
