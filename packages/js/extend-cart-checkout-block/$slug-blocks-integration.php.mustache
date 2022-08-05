@@ -23,7 +23,6 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 	public function initialize() {
 		$this->register_newsletter_block_frontend_scripts();
 		$this->register_newsletter_block_editor_scripts();
-		$this->register_newsletter_block_editor_blocks();
         $this->register_newsletter_block_editor_styles();
         $this->register_main_integration();
 	}
@@ -162,15 +161,6 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
             '{{slug}}', // text domain
             dirname( __FILE__ ) . '/languages'
         );
-    }
-
-    /**
-     * Register blocks.
-     */
-    public function register_newsletter_block_editor_blocks() {
-        register_block_type( dirname( __FILE__ ) . '/assets/js/checkout-newsletter-subscription-block', array(
-            'editor_script' => '{{slug}}-checkout-newsletter-subscription-block-editor',
-        ) );
     }
 
 	/**
