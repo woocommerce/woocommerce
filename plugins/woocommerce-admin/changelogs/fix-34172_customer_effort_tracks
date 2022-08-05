@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Add support for sections in our TaskList class and create a new sectional task list component. #32302
