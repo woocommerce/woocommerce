@@ -10,7 +10,7 @@ import { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import EnrichedLabel from '../fileds/enriched-label';
+import EnrichedLabel from '../fields/enriched-label';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 const selectedIndustry = false;
@@ -40,12 +40,12 @@ export const ProductDetailsSection: React.FC = () => {
 				onChange={ () => {} }
 			/>
 			<CheckboxControl
-				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }` }
+				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }-feature-this-product` }
 				label={
 					<EnrichedLabel
 						label="Feature this product"
-						helpDescription="Do you need help?"
-						moreUrl="https://wordpress.org"
+						helpDescription="Include this product in a featured section on your website with a widget or shortcode."
+						moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
 						slug={ PRODUCT_DETAILS_SLUG }
 					/>
 				}
@@ -54,7 +54,7 @@ export const ProductDetailsSection: React.FC = () => {
 				className="woocommerce-add-product__checkbox"
 			/>
 			<CheckboxControl
-				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }` }
+				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }-hide-in-shop-page` }
 				label={
 					<EnrichedLabel
 						label="Hide in shop page"
@@ -68,7 +68,7 @@ export const ProductDetailsSection: React.FC = () => {
 				className="woocommerce-add-product__checkbox"
 			/>
 			<CheckboxControl
-				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }` }
+				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }-hide-search-results` }
 				label={
 					<EnrichedLabel
 						label="Hide from search results"
