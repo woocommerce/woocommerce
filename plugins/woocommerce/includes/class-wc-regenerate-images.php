@@ -36,12 +36,13 @@ class WC_Regenerate_Images {
 	public static function init() {
 		add_action( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 );
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'add_uncropped_metadata' ) );
-		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 
 		// Not required when Jetpack Photon is in use.
-		if ( method_exists( 'Jetpack', 'is_module_active' ) && Jetpack::is_module_active( 'photon' ) ) {
+		if ( self::is_photon_active() ) {
 			return;
 		}
+
+		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
