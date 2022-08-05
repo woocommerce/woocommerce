@@ -218,7 +218,7 @@ class TaskList {
 	 */
 	public function maybe_set_default_layout( $completed_or_hidden_tasklist_ids ) {
 		if ( in_array( 'setup', $completed_or_hidden_tasklist_ids ) ) {
-			update_option( 'woocommerce_default_homepage_layout', 'two_columns' );
+			update_option( 'woocommerce_default_homepage_layout', 'two_columns', true );
 		}
 	}
 
