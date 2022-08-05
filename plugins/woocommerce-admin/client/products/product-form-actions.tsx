@@ -9,150 +9,25 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { chevronDown } from '@wordpress/icons';
 import { useFormContext } from '@woocommerce/components';
-import {
-	Product,
-	ProductsStoreActions,
-	ProductStatus,
-	PRODUCTS_STORE_NAME,
-	ReadOnlyProperties,
-	productReadOnlyProperties,
-} from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import './product-form-actions.scss';
-
-function removeReadonlyProperties(
-	product: Product
-): Omit< Product, ReadOnlyProperties > {
-	productReadOnlyProperties.forEach( ( key ) => delete product[ key ] );
-	return product;
-}
+import { useProductHelper } from './use-product-helper';
 
 export const ProductFormActions: React.FC = () => {
-	const { createProduct, updateProduct, deleteProduct } = useDispatch(
-		PRODUCTS_STORE_NAME
-	) as ProductsStoreActions;
-	const { createNotice } = useDispatch( 'core/notices' );
+	const {
+		createProductWithStatus,
+		updateProductWithStatus,
+		deleteProductAndRedirect,
+		copyProductWithStatus,
+	} = useProductHelper();
 	const { isDirty, values } = useFormContext< Product >();
-
-	const createProductWithStatus = async (
-		product: Omit< Product, ReadOnlyProperties >,
-		status: ProductStatus,
-		skipNotice = false,
-		skipRedirect = false
-	) => {
-		return createProduct( {
-			...product,
-			status,
-		} ).then( ( newProduct ) => {
-			if ( ! skipRedirect ) {
-				navigateTo( {
-					url:
-						'admin.php?page=wc-admin&path=/product/' +
-						newProduct.id,
-				} );
-			}
-			if ( ! skipNotice ) {
-				createNotice(
-					'success',
-					newProduct.status === 'publish'
-						? __(
-								'🎉 Product published. View in store',
-								'woocommerce'
-						  )
-						: __(
-								'🎉 Product successfully created.',
-								'woocommerce'
-						  ),
-					{
-						actions:
-							newProduct.status === 'publish' &&
-							newProduct.permalink
-								? [
-										{
-											label: __(
-												'View in store',
-												'woocommerce'
-											),
-											onClick: () => {
-												recordEvent(
-													'product_preview',
-													{
-														new_product_page: true,
-													}
-												);
-												window.open(
-													newProduct.permalink,
-													'_blank'
-												);
-											},
-										},
-								  ]
-								: [],
-					}
-				);
-			}
-		} );
-	};
-
-	const updateProductWithStatus = async (
-		product: Omit< Product, ReadOnlyProperties >,
-		status: ProductStatus,
-		skipNotice = false
-	) => {
-		return updateProduct( values.id, {
-			...product,
-			status,
-		} ).then( ( updatedProduct ) => {
-			if ( ! skipNotice ) {
-				createNotice(
-					'success',
-					updatedProduct.status === 'publish'
-						? __(
-								'🎉 Product successfully updated.',
-								'woocommerce'
-						  )
-						: __(
-								'🎉 Product successfully updated.',
-								'woocommerce'
-						  ),
-					{
-						actions:
-							updatedProduct.status === 'publish' &&
-							updatedProduct.permalink
-								? [
-										{
-											label: __(
-												'View in store',
-												'woocommerce'
-											),
-											onClick: () => {
-												recordEvent(
-													'product_preview',
-													{
-														new_product_page: true,
-													}
-												);
-												window.open(
-													updatedProduct.permalink,
-													'_blank'
-												);
-											},
-										},
-								  ]
-								: [],
-					}
-				);
-			}
-		} );
-	};
 
 	const onSaveDraft = () => {
 		recordEvent( 'product_edit', {
@@ -185,13 +60,7 @@ export const ProductFormActions: React.FC = () => {
 		} else {
 			await createProductWithStatus( values, 'publish', false, true );
 		}
-		await createProductWithStatus(
-			removeReadonlyProperties( {
-				...values,
-				name: ( values.name || 'AUTO-DRAFT' ) + ' - Copy',
-			} ),
-			'draft'
-		);
+		await copyProductWithStatus( values );
 	};
 
 	const onCopyToNewDraft = async () => {
@@ -201,13 +70,7 @@ export const ProductFormActions: React.FC = () => {
 		if ( values.id ) {
 			await updateProductWithStatus( values, values.status || 'draft' );
 		}
-		await createProductWithStatus(
-			removeReadonlyProperties( {
-				...values,
-				name: ( values.name || 'AUTO-DRAFT' ) + ' - Copy',
-			} ),
-			values.status || 'draft'
-		);
+		await copyProductWithStatus( values );
 	};
 
 	const onTrash = () => {
@@ -215,18 +78,7 @@ export const ProductFormActions: React.FC = () => {
 			new_product_page: true,
 		} );
 		if ( values.id ) {
-			deleteProduct( values.id ).then( () => {
-				createNotice(
-					'success',
-					__(
-						'🎉 Successfully moved product to Trash.',
-						'woocommerce'
-					)
-				);
-				navigateTo( {
-					url: 'edit.php?post_type=product',
-				} );
-			} );
+			deleteProductAndRedirect( values.id );
 		}
 	};
 
