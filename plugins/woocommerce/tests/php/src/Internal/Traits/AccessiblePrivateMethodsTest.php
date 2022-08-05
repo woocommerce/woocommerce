@@ -424,13 +424,13 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 class BaseClass {
 	//phpcs:disable Squiz.Commenting.FunctionComment.Missing
 	public function __call( $name, $arguments ) {
-		if ( 'method_in_parent_class' === $name ) {
+		if ( $name === 'method_in_parent_class' ) {
 			return 'Argument: ' . $arguments[0];
 		}
 	}
 
 	public static function __callStatic( $name, $arguments ) {
-		if ( 'static_method_in_parent_class' === $name ) {
+		if ( $name === 'static_method_in_parent_class' ) {
 			return 'Static argument: ' . $arguments[0];
 		}
 	}

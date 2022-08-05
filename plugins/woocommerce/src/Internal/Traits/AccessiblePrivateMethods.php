@@ -198,7 +198,7 @@ trait AccessiblePrivateMethods {
 			return call_user_func_array( array( __CLASS__, $name ), $arguments );
 		} elseif ( is_callable( array( 'parent', '__callStatic' ) ) ) {
 			return parent::__callStatic( $name, $arguments );
-		} elseif ( 'add_action' === $name || 'add_filter' === $name ) {
+		} elseif ( $name === 'add_action' || $name === 'add_filter' ) {
 			$proper_method_name = 'add_static_' . substr( $name, 4 );
 			throw new \Error( __CLASS__ . '::' . $name . " can't be called statically, did you mean '$proper_method_name'?" );
 		} elseif ( method_exists( __CLASS__, $name ) ) {
