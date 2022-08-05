@@ -46,7 +46,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, false );
 		$post_data_store = WC_Data_Store::load( 'order' );
 
-		$cot_enabled = 'cot' === $authoritative_source ? 'yes' : 'no';
+		$cot_enabled = $authoritative_source === 'cot' ? 'yes' : 'no';
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $cot_enabled );
 		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
 
