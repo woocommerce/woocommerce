@@ -37,8 +37,6 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 		className: `woocommerce-split-dropdown__main-button ${ className }`,
 	};
 	const [ mainItem, ...menuItems ] = children;
-	const menuIcon = chevronDown;
-	const menuIconExpanded = chevronUp;
 	return (
 		<ButtonGroup className={ `woocommerce-split-dropdown ${ className }` }>
 			{ cloneElement( mainItem, mainItemProps ) }
@@ -52,9 +50,7 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 							className={ `woocommerce-split-dropdown__toggle ${ className }` }
 							onClick={ onToggle }
 						>
-							<Icon
-								icon={ isOpen ? menuIconExpanded : menuIcon }
-							/>
+							<Icon icon={ isOpen ? chevronUp : chevronDown } />
 						</Button>
 					);
 				} }
