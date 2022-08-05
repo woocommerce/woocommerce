@@ -71,7 +71,7 @@ class WC_Regenerate_Images {
 	 * https://developer.wordpress.com/docs/photon/
 	 */
 	protected static function is_photon_active() {
-		return class_exists( 'Jetpack' ) && method_exists( 'Jetpack', 'get_active_modules' ) && in_array( 'photon', Jetpack::get_active_modules() );
+		return class_exists( 'Jetpack' ) && method_exists( 'Jetpack', 'get_active_modules' ) && in_array( 'photon', Jetpack::get_active_modules(), true );
 	}
 
 	/**
