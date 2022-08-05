@@ -14,9 +14,10 @@ import {
  */
 import { DraggableListItem } from './draggable-list-item';
 import { isUpperHalf, moveIndex } from './utils';
+import { DraggableListChild } from './types';
 
 export type DraggableListProps = {
-	children: JSX.Element | JSX.Element[];
+	children: DraggableListChild | DraggableListChild[];
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
@@ -29,7 +30,7 @@ export const DraggableList = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 }: DraggableListProps ) => {
-	const [ items, setItems ] = useState< JSX.Element[] >( [] );
+	const [ items, setItems ] = useState< DraggableListChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 

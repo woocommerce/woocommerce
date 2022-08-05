@@ -1,14 +1,20 @@
 /**
  * External dependencies
  */
-import { DragEvent, DragEventHandler } from 'react';
+import { DragEvent, DragEventHandler, ReactNode } from 'react';
 import classnames from 'classnames';
-import { createElement, useState } from '@wordpress/element';
+import { cloneElement, createElement, Fragment } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { Handle } from './handle';
+import { DraggableListChild } from './types';
 
 export type DraggableListItemProps = {
 	id: string | number;
-	children: JSX.Element;
+	children: DraggableListChild;
 	isDragging: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
@@ -45,16 +51,21 @@ export const DraggableListItem = ( {
 				onDragStart={ handleDragStart as () => void }
 				onDragEnd={ handleDragEnd as () => void }
 			>
-				{ ( { onDraggableStart, onDraggableEnd } ) => (
-					<div
-						className="example-drag-handle"
-						draggable
-						onDragStart={ onDraggableStart }
-						onDragEnd={ onDraggableEnd }
-					>
-						{ children }
-					</div>
-				) }
+				{ ( { onDraggableStart, onDraggableEnd } ) => {
+					if ( typeof children === 'function' ) {
+						return children( { onDraggableStart, onDraggableEnd } );
+					}
+
+					return (
+						<>
+							<Handle
+								onDragEnd={ onDraggableEnd }
+								onDragStart={ onDraggableStart }
+							/>
+							{ children }
+						</>
+					);
+				} }
 			</Draggable>
 		</li>
 	);
