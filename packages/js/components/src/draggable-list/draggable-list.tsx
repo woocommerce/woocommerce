@@ -13,12 +13,12 @@ import {
  * Internal dependencies
  */
 import { DraggableListItem } from './draggable-list-item';
-import { moveIndex } from './utils';
+import { isUpperHalf, moveIndex } from './utils';
 
 export type DraggableListProps = {
 	children: JSX.Element | JSX.Element[];
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLDivElement >;
+	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: () => void;
 };
@@ -64,20 +64,29 @@ export const DraggableList = ( {
 	};
 
 	const handleDragOver = (
-		event: DragEvent< HTMLDivElement >,
+		event: DragEvent< HTMLLIElement >,
 		index: number
 	) => {
-		setDropIndex( index );
+		if ( dragIndex === null ) {
+			return;
+		}
+
+		const targetIndex = isUpperHalf( event ) ? index : index + 1;
+		setDropIndex( targetIndex );
 		onDragOver( event );
 	};
 
 	return (
 		<ul className="woocommerce-draggable-list">
 			{ items.map( ( child, index ) => (
-				<>
+				<Fragment key={ index }>
+					{ dropIndex === index && (
+						<div className="woocommerce-draggable-list__slot">
+							<strong>{ index }</strong>
+						</div>
+					) }
 					<DraggableListItem
 						id={ index }
-						key={ index }
 						isDragging={ index === dragIndex }
 						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
 						onDragStart={ ( event ) =>
@@ -89,13 +98,9 @@ export const DraggableList = ( {
 					>
 						{ child }
 					</DraggableListItem>
-					{ dropIndex === index && (
-						<div className="woocommerce-draggable-list__slot">
-							{ index }
-						</div>
-					) }
-				</>
+				</Fragment>
 			) ) }
+			<div className="woocommerce-draggable-list__slot">last</div>
 		</ul>
 	);
 };

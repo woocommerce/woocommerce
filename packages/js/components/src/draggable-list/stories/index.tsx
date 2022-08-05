@@ -14,8 +14,9 @@ export const Basic = () => (
 		onDragStart={ () => console.log( 'dragging' ) }
 		onDragEnd={ () => console.log( 'drag complete' ) }
 	>
-		<li>Item 1</li>
-		<li>Item 2</li>
+		<span>Item 1</span>
+		<span>Item 2</span>
+		<span>Item 3</span>
 	</DraggableList>
 );
 

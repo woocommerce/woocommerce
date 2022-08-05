@@ -12,7 +12,7 @@ export type DraggableListItemProps = {
 	isDragging: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLDivElement >;
+	onDragOver?: DragEventHandler< HTMLLIElement >;
 };
 
 export const DraggableListItem = ( {
@@ -37,6 +37,7 @@ export const DraggableListItem = ( {
 				'is-dragging': isDragging,
 			} ) }
 			id={ `woocommerce-draggable-list__item-${ id }` }
+			onDragOver={ onDragOver }
 		>
 			<Draggable
 				elementId={ `woocommerce-draggable-list__item-${ id }` }
@@ -50,7 +51,6 @@ export const DraggableListItem = ( {
 						draggable
 						onDragStart={ onDraggableStart }
 						onDragEnd={ onDraggableEnd }
-						onDragOver={ onDragOver }
 					>
 						{ children }
 					</div>
