@@ -224,9 +224,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
-			if ( ! method_exists( $order, 'get_' . $prop ) ) {
-				continue;
-			}
 			$value = $order->{"get_$prop"}( 'edit' );
 			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
