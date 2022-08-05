@@ -288,7 +288,9 @@ WHERE
 	public function process_batch( array $batch ) : void {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			foreach ( $batch as $id ) {
-				$this->data_store->backfill_post_record( wc_get_order( $id ) );
+				$order      = wc_get_order( $id );
+				$data_store = $order->get_data_store();
+				$data_store->backfill_post_record( $order );
 			}
 		} else {
 			$this->posts_to_cot_migrator->migrate_orders( $batch );
