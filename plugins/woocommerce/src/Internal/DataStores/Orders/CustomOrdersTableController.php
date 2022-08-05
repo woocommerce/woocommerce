@@ -57,6 +57,13 @@ class CustomOrdersTableController {
 	private $data_synchronizer;
 
 	/**
+	 * The batch processing controller to use.
+	 *
+	 * @var BatchProcessingController
+	 */
+	private $batch_processing_controller;
+
+	/**
 	 * Is the feature visible?
 	 *
 	 * @var bool
@@ -156,12 +163,14 @@ class CustomOrdersTableController {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 * @param OrdersTableDataStore $data_store The data store to use.
-	 * @param DataSynchronizer     $data_synchronizer The data synchronizer to use.
+	 * @param OrdersTableDataStore      $data_store The data store to use.
+	 * @param DataSynchronizer          $data_synchronizer The data synchronizer to use.
+	 * @param BatchProcessingController $batch_processing_controller The batch processing controller to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer ) {
-		$this->data_store        = $data_store;
-		$this->data_synchronizer = $data_synchronizer;
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, BatchProcessingController $batch_processing_controller ) {
+		$this->data_store                  = $data_store;
+		$this->data_synchronizer           = $data_synchronizer;
+		$this->batch_processing_controller = $batch_processing_controller;
 	}
 
 	/**
@@ -316,7 +325,6 @@ class CustomOrdersTableController {
 		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
 			return $settings;
 		}
-		$updates_controller = wc_get_container()->get( BatchProcessingController::class );
 
 		if ( $this->data_synchronizer->check_orders_table_exists() ) {
 			$settings[] = array(
@@ -364,7 +372,7 @@ class CustomOrdersTableController {
 						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
 				}
 
-				if ( $updates_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
+				if ( $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
 					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
 				} else {
 					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
@@ -521,13 +529,15 @@ class CustomOrdersTableController {
 			update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
 		}
 
-		// Enabling the sync implies starting it too, if needed.
+		// Enabling/disabling the sync implies starting/stopping it too, if needed.
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
-		// settings even without modifying them.
+		// settings even without modifying them (and the opposite: sync will be stopped if for
+		// some reason it was ongoing while it was disabled).
 		if ( $data_sync_is_enabled ) {
-			$update_controller = wc_get_container()->get( BatchProcessingController::class );
-			$update_controller->enqueue_processor( DataSynchronizer::class );
+			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		} else {
+			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
 		}
 	}
 

@@ -22,22 +22,28 @@ test.describe( 'My account page', () => {
 
 		// assert that navigation is visible
 		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link >> nth=0' )
+			page.locator( '.woocommerce-MyAccount-navigation-link--dashboard' )
 		).toContainText( 'Dashboard' );
 		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link >> nth=1' )
+			page.locator( '.woocommerce-MyAccount-navigation-link--orders' )
 		).toContainText( 'Orders' );
 		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link >> nth=2' )
+			page.locator( '.woocommerce-MyAccount-navigation-link--downloads' )
 		).toContainText( 'Downloads' );
 		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link >> nth=3' )
+			page.locator(
+				'.woocommerce-MyAccount-navigation-link--edit-address'
+			)
 		).toContainText( 'Addresses' );
 		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link >> nth=4' )
+			page.locator(
+				'.woocommerce-MyAccount-navigation-link--edit-account'
+			)
 		).toContainText( 'Account details' );
 		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link >> nth=5' )
+			page.locator(
+				'.woocommerce-MyAccount-navigation-link--customer-logout'
+			)
 		).toContainText( 'Logout' );
 	} );
 

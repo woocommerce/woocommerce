@@ -260,7 +260,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 
-			if ( get_post_status( $order_id ) === 'wc-completed' ) {
+			if ( $order->get_status() === 'wc-completed' ) {
 				$complete++;
 			}
 

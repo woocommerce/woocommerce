@@ -2053,7 +2053,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $tax_display Tax to display.
 	 */
 	protected function add_order_item_totals_payment_method_row( &$total_rows, $tax_display ) {
-		if ( $this->get_total() > 0 && $this->get_payment_method_title() && 'other' !== $this->get_payment_method_title() ) {
+		if ( $this->get_total() > 0 && $this->get_payment_method_title() && 'other' !== $this->get_payment_method() ) {
 			$total_rows['payment_method'] = array(
 				'label' => __( 'Payment method:', 'woocommerce' ),
 				'value' => $this->get_payment_method_title(),

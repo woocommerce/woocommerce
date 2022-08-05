@@ -35,7 +35,7 @@ jobs:
         uses: ./.github/actions/install-build
 
       - name: Lint
-        run: pnpm -- turbo run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
+        run: pnpm run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
 
       - name: Test
-        run: pnpm -- turbo run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
+        run: pnpm run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color

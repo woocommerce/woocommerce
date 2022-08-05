@@ -965,7 +965,7 @@ class WC_Admin_Post_Types {
 					$percent   = $price / 100;
 					$new_price = max( 0, $regular_price - ( NumberUtil::round( $regular_price * $percent, wc_get_price_decimals() ) ) );
 				} else {
-					$new_price = max( 0, $regular_price - $price );
+					$new_price = max( 0, (float) $regular_price - (float) $price );
 				}
 				break;
 

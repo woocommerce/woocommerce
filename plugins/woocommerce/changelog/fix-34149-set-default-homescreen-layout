@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix regression setting homescreen default layout after setup task dismissal or completion

@@ -2250,4 +2250,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 		return false;
 	}
+
+	/**
+	 * Get order title.
+	 *
+	 * @return string Order title.
+	 */
+	public function get_title() : string {
+		if ( method_exists( $this->data_store, 'get_title' ) ) {
+			return $this->data_store->get_title( $this );
+		} else {
+			return __( 'Order', 'woocommerce' );
+		}
+	}
 }

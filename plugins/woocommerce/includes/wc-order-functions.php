@@ -638,7 +638,7 @@ function wc_create_refund( $args = array() ) {
 
 	} catch ( Exception $e ) {
 		if ( isset( $refund ) && is_a( $refund, 'WC_Order_Refund' ) ) {
-			wp_delete_post( $refund->get_id(), true );
+			$refund->delete( true );
 		}
 		return new WP_Error( 'error', $e->getMessage() );
 	}
