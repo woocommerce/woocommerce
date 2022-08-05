@@ -40,7 +40,7 @@ export const CustomHandle = () => {
 		onDraggableEnd,
 	}: CustomListItemProps ) => {
 		return (
-			<span key="tet-key">
+			<>
 				<Handle
 					onDragEnd={ onDraggableEnd }
 					onDragStart={ onDraggableStart }
@@ -48,7 +48,7 @@ export const CustomHandle = () => {
 					<Icon icon={ wordpress } size={ 16 } />
 				</Handle>
 				{ children }
-			</span>
+			</>
 		);
 	};
 	return (

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { DragEvent, DragEventHandler } from 'react';
+import classnames from 'classnames';
 import {
 	createElement,
 	useCallback,
@@ -96,7 +97,11 @@ export const SortableList = ( {
 	);
 
 	return (
-		<ul className="woocommerce-sortable-list">
+		<ul
+			className={ classnames( 'woocommerce-sortable-list', {
+				'is-dragging': dragIndex !== null,
+			} ) }
+		>
 			{ items.map( ( child, index ) => (
 				<ListItem
 					key={ index }
