@@ -75,7 +75,7 @@ class COTMigrationUtil {
 	 */
 	public function is_custom_order_tables_in_sync() : bool {
 		$sync_status = $this->data_synchronizer->get_sync_status();
-		return 0 === $sync_status['current_pending_count'] && $this->data_synchronizer->data_sync_is_enabled();
+		return $sync_status['current_pending_count'] === 0 && $this->data_synchronizer->data_sync_is_enabled();
 	}
 
 	/**
