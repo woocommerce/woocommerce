@@ -28,19 +28,19 @@ export default function EnrichedLabel( {
 				{ label }
 			</span>
 			{ helpDescription && (
-				<Button
-					label={ __( 'Help button', 'woocommerce' ) }
-					onClick={ () => {
-						setIsPopoverVisible( true );
-					} }
+				<div
+					className="woocommerce-add-product__help-wrapper"
+					onMouseLeave={ () => setIsPopoverVisible( false ) }
 				>
-					<Icon icon={ help } />
+					<Button
+						label={ __( 'Help button', 'woocommerce' ) }
+						onMouseEnter={ () => setIsPopoverVisible( true ) }
+					>
+						<Icon icon={ help } />
+					</Button>
+
 					{ isPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () => setIsPopoverVisible( false ) }
-						>
+						<Popover focusOnMount="container" position="top center">
 							{ interpolateComponents( {
 								mixedString:
 									helpDescription +
@@ -72,7 +72,7 @@ export default function EnrichedLabel( {
 							} ) }
 						</Popover>
 					) }
-				</Button>
+				</div>
 			) }
 		</Fragment>
 	);
