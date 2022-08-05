@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use WC_Order;
 use WP_List_Table;
@@ -11,6 +12,13 @@ use WP_Screen;
  * Admin list table for orders as managed by the OrdersTableDataStore.
  */
 class ListTable extends WP_List_Table {
+	/**
+	 * Contains the arguments to be used in the order query.
+	 *
+	 * @var array
+	 */
+	private $order_query_args = array();
+
 	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
@@ -119,6 +127,8 @@ class ListTable extends WP_List_Table {
 			<?php
 			/**
 			 * Renders after the 'blank state' message for the order list table has rendered.
+			 *
+			 * @since 6.6.1
 			 */
 			do_action( 'wc_marketplace_suggestions_orders_empty_state' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			?>
@@ -152,23 +162,50 @@ class ListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 		$limit = $this->get_items_per_page( 'edit_orders_per_page' );
-		$args  = array(
+
+		$this->order_query_args = array(
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'all' ) ),
+			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'any' ) ),
 			'type'     => 'shop_order',
 		);
 
-		$orders      = wc_get_orders( $args );
+		$this->set_order_args();
+
+		/**
+		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
+		 * table.
+		 *
+		 * @since 6.9.0
+		 *
+		 * @param array $query_args Arguments to be passed to `wc_get_orders()`.
+		 */
+		$orders      = wc_get_orders( (array) apply_filters( 'woocommerce_order_list_table_prepare_items_query_args', $this->order_query_args ) );
 		$this->items = $orders->orders;
 
 		$this->set_pagination_args(
 			array(
-				'total_items' => $orders->total,
+				'total_items' => $orders->total ?? 0,
 				'per_page'    => $limit,
 			)
 		);
+	}
+
+	/**
+	 * Updates the WC Order Query arguments as needed to support orderable columns.
+	 */
+	private function set_order_args() {
+		$sortable  = $this->get_sortable_columns();
+		$field     = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
+		$direction = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) ) );
+
+		if ( ! in_array( $field, $sortable, true ) ) {
+			return;
+		}
+
+		$this->order_query_args['orderby'] = $field;
+		$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
 	}
 
 	/**
@@ -201,6 +238,7 @@ class ListTable extends WP_List_Table {
 		return $view_links;
 	}
 
+	// phpcs:disable Generic.Commenting.Todo.CommentFound
 	/**
 	 * Count orders by status.
 	 *
@@ -366,6 +404,19 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Defines the default sortable columns.
+	 *
+	 * @return string[]
+	 */
+	public function get_sortable_columns() {
+		return array(
+			'order_number' => 'ID',
+			'order_date'   => 'date',
+			'order_total'  => 'order_total',
+		);
+	}
+
+	/**
 	 * Specify the columns we wish to hide by default.
 	 *
 	 * @param array     $hidden Columns set to be hidden.
@@ -374,7 +425,7 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function default_hidden_columns( array $hidden, WP_Screen $screen ) {
-		if ( isset( $screen->id ) && 'woocommerce_page_wc-orders' === $screen->id ) {
+		if ( isset( $screen->id ) && wc_get_page_screen_id( 'shop-order' ) === $screen->id ) {
 			$hidden = array_merge(
 				$hidden,
 				array(
@@ -433,8 +484,21 @@ class ListTable extends WP_List_Table {
 			echo '<strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong>';
 		} else {
 			echo '<a href="#" class="order-preview" data-order-id="' . absint( $order->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
-			echo '<a href="' . esc_url( admin_url( 'post.php?post=' . absint( $order->get_id() ) ) . '&action=edit' ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
+			echo '<a href="' . esc_url( $this->get_order_edit_link( $order ) ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
+	}
+
+	/**
+	 * Get the edit link for an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @return mixed|string Edit link for the order.
+	 */
+	private function get_order_edit_link( WC_Order $order ) {
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order->get_id() ) ) . '&action=edit' :
+			admin_url( 'post.php?post=' . absint( $order->get_id() ) ) . '&action=edit';
 	}
 
 	/**

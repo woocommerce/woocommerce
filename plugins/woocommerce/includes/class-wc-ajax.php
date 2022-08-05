@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -171,6 +172,20 @@ class WC_AJAX {
 
 		foreach ( $ajax_events as $ajax_event ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
+		}
+
+		$ajax_private_events = array(
+			'order_add_meta',
+			'order_delete_meta',
+		);
+
+		foreach ( $ajax_private_events as $ajax_event ) {
+			add_action(
+				'wp_ajax_woocommerce_' . $ajax_event,
+				function() use ( $ajax_event ) {
+					call_user_func( array( __CLASS__, $ajax_event ) );
+				}
+			);
 		}
 	}
 
@@ -3120,6 +3135,22 @@ class WC_AJAX {
 
 		wp_send_json_error( 'invalid_gateway_id' );
 		wp_die();
+	}
+
+	/**
+	 * Reimplementation of WP core's `wp_ajax_add_meta` method to support order custom meta updates with custom tables.
+	 */
+	private static function order_add_meta() {
+		wc_get_container()->get( CustomMetaBox::class )->add_meta_ajax();
+	}
+
+	/**
+	 * Reimplementation of WP core's `wp_ajax_delete_meta` method to support order custom meta updates with custom tables.
+	 *
+	 * @return void
+	 */
+	private static function order_delete_meta() : void {
+		wc_get_container()->get( CustomMetaBox::class )->delete_meta_ajax();
 	}
 }
 

@@ -32,6 +32,15 @@
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
 
+	<rule ref="Generic.ControlStructures.DisallowYodaConditions" >
+		<include-pattern>includes/</include-pattern>
+		<type>warning</type>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.ControlStructures.DisallowYodaComparison" >
+		<exclude-pattern>includes/</exclude-pattern>
+	</rule>
+
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>

@@ -32,8 +32,8 @@
 		"@babel/plugin-transform-runtime": "^7.16.4",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-env": "7.12.7",
-		"@woocommerce/internal-e2e-builds": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-e2e-builds": "workspace:*",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/browserslist-config": "^4.1.0",
@@ -47,10 +47,11 @@
 		"access": "public"
 	},
 	"scripts": {
+		"turbo:build": "./bin/build.sh && pnpm run clean && pnpm run compile",
 		"prepare": "pnpm run build",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
-		"build": "./bin/build.sh && pnpm run clean && pnpm run compile",
 		"lint": "eslint src --ext=js,ts,tsx",
 		"lint:fix": "eslint src --ext=js,ts,tsx --fix"
 	},
