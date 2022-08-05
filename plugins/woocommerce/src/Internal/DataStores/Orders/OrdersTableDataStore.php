@@ -668,7 +668,7 @@ WHERE
 	 *
 	 * @return string Order type.
 	 */
-	public function get_order_type( $order_id ) : string {
+	public function get_order_type( $order_id ) {
 		global $wpdb;
 		if ( $order_id instanceof \WC_Order ) {
 			return $order_id->get_type();
