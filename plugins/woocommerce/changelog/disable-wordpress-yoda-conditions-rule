@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Disable the WordPress.PHP.YodaConditions.NotYoda phpcs rule
