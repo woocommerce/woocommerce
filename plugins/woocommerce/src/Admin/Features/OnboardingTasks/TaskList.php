@@ -217,8 +217,8 @@ class TaskList {
 	 * @param array $completed_or_hidden_tasklist_ids Array of tasklist ids.
 	 */
 	public function maybe_set_default_layout( $completed_or_hidden_tasklist_ids ) {
-		if ( in_array( 'setup', $completed_or_hidden_tasklist_ids ) ) {
-			update_option( 'woocommerce_default_homepage_layout', 'two_columns', true );
+		if ( in_array( 'setup', $completed_or_hidden_tasklist_ids, true ) ) {
+			update_option( 'woocommerce_default_homepage_layout', 'two_columns' );
 		}
 	}
 
