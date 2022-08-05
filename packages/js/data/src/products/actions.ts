@@ -24,13 +24,10 @@ export function getProductSuccess( id: number, product: PartialProduct ) {
 	};
 }
 
-export function getProductError(
-	query: Partial< ProductQuery >,
-	error: unknown
-) {
+export function getProductError( productId: number, error: unknown ) {
 	return {
 		type: TYPES.GET_PRODUCT_ERROR as const,
-		query,
+		productId,
 		error,
 	};
 }
@@ -116,7 +113,9 @@ export function getProductsTotalCountError(
 	};
 }
 
-export function* createProduct( data: Omit< Product, ReadOnlyProperties > ) {
+export function* createProduct(
+	data: Omit< Product, ReadOnlyProperties >
+): Generator< unknown, Product, Product > {
 	try {
 		const product: Product = yield apiFetch( {
 			path: WC_PRODUCT_NAMESPACE,
@@ -135,7 +134,7 @@ export function* createProduct( data: Omit< Product, ReadOnlyProperties > ) {
 export function* updateProduct(
 	id: number,
 	data: Omit< Product, ReadOnlyProperties >
-) {
+): Generator< unknown, Product, Product > {
 	try {
 		const product: Product = yield apiFetch( {
 			path: `${ WC_PRODUCT_NAMESPACE }/${ id }`,
@@ -172,7 +171,10 @@ export function deleteProductError( id: number, error: unknown ) {
 	};
 }
 
-export function* removeProduct( id: number, force = false ) {
+export function* deleteProduct(
+	id: number,
+	force = false
+): Generator< unknown, Product, Product > {
 	try {
 		const url = force
 			? `${ WC_PRODUCT_NAMESPACE }/${ id }?force=true`
@@ -209,4 +211,5 @@ export type Actions = ReturnType<
 export type ActionDispatchers = DispatchFromMap< {
 	createProduct: typeof createProduct;
 	updateProduct: typeof updateProduct;
+	deleteProduct: typeof deleteProduct;
 } >;

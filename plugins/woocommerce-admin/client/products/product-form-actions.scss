@@ -7,6 +7,10 @@ $gutenberg-blue-darker: #0063a1;
 	align-items: center;
 	justify-content: flex-end;
 
+	> .components-button {
+		margin-right: $gap-smaller;
+	}
+
 	.components-button:not(.is-primary):not(.is-destructive) {
 		color: $gutenberg-blue;
 

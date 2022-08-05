@@ -1,0 +1,16 @@
+.woocommerce-add-product,
+.woocommerce-edit-product {
+	.woocommerce-product-form-actions {
+		margin-top: $gap-largest + $gap-smaller;
+	}
+}
+
+.woocommerce-edit-product {
+	&__error {
+		background: #fff;
+		text-align: center;
+		border: 1px solid $gray-400;
+		border-radius: 2px;
+		padding: 1em 2em;
+	}
+}

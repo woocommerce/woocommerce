@@ -8,20 +8,22 @@ import { createContext, useContext } from '@wordpress/element';
 export type FormContext< Values extends Record< string, any > > = {
 	values: Values;
 	errors: Record< string, string >;
+	isDirty: boolean;
 	touched: { [ P in keyof Values ]?: boolean | undefined };
+	changedFields: { [ P in keyof Values ]?: boolean | undefined };
 	setTouched: React.Dispatch<
 		React.SetStateAction< { [ P in keyof Values ]?: boolean | undefined } >
 	>;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	setValue: ( name: string, value: any ) => void;
 	handleSubmit: () => Promise< Values >;
-	getInputProps< Value = string >(
+	getInputProps< Value extends Values[ keyof Values ] >(
 		name: string
 	): {
 		value: Value;
 		checked: boolean;
-		selected: Value;
-		onChange: ( value: ChangeEvent< HTMLInputElement > ) => void;
+		selected?: boolean;
+		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
 		onBlur: () => void;
 		className: string | undefined;
 		help: string | null;

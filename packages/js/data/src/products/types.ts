@@ -38,31 +38,47 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	short_description: string;
 	sku: string;
 	price: string;
+	price_html: string;
 	regular_price: string;
 	sale_price: string;
+	on_sale: boolean;
+	purchasable: boolean;
+	total_sales: number;
+	backorders_allowed: boolean;
+	backordered: boolean;
+	shipping_required: boolean;
+	shipping_taxable: boolean;
+	shipping_class_id: number;
+	average_rating: string;
+	rating_count: number;
+	related_ids: number[];
+	variations: number[];
 };
 
-export type ReadOnlyProperties =
-	| 'id'
-	| 'permalink'
-	| 'date_created'
-	| 'date_created_gmt'
-	| 'date_modified'
-	| 'date_modified_gmt'
-	| 'price'
-	| 'price_html'
-	| 'on_sale'
-	| 'purchasable'
-	| 'total_sales'
-	| 'backorders_allowed'
-	| 'backordered'
-	| 'shipping_required'
-	| 'shipping_taxable'
-	| 'shipping_class_id'
-	| 'average_rating'
-	| 'rating_count'
-	| 'related_ids'
-	| 'variations';
+export const productReadOnlyProperties = [
+	'id',
+	'permalink',
+	'date_created',
+	'date_created_gmt',
+	'date_modified',
+	'date_modified_gmt',
+	'price',
+	'price_html',
+	'on_sale',
+	'purchasable',
+	'total_sales',
+	'backorders_allowed',
+	'backordered',
+	'shipping_required',
+	'shipping_taxable',
+	'shipping_class_id',
+	'average_rating',
+	'rating_count',
+	'related_ids',
+	'variations',
+] as const;
+
+export type ReadOnlyProperties = typeof productReadOnlyProperties[ number ];
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 

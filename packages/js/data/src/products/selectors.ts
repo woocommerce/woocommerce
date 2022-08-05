@@ -14,6 +14,14 @@ import { WPDataSelector, WPDataSelectors } from '../types';
 import { ProductState } from './reducer';
 import { PartialProduct, ProductQuery } from './types';
 
+export const getProduct = (
+	state: ProductState,
+	productId: number,
+	defaultValue = undefined
+) => {
+	return state.data[ productId ] || defaultValue;
+};
+
 export const getProducts = createSelector(
 	( state: ProductState, query: ProductQuery, defaultValue = undefined ) => {
 		const resourceName = getProductResourceName( query );
@@ -100,6 +108,7 @@ export const getDeleteProductError = ( state: ProductState, id: number ) => {
 
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
+	getProduct: WPDataSelector< typeof getProduct >;
 	getProducts: WPDataSelector< typeof getProducts >;
 	getProductsTotalCount: WPDataSelector< typeof getProductsTotalCount >;
 	getProductsError: WPDataSelector< typeof getProductsError >;

@@ -20,7 +20,7 @@ type FormProps< Values > = {
 	/**
 	 * Object of all initial errors to store in state.
 	 */
-	errors: Record< keyof Values, string >;
+	errors: { [ P in keyof Values ]?: string };
 	/**
 	 * Object key:value pair list of all initial field values.
 	 */
@@ -61,6 +61,12 @@ type FormProps< Values > = {
 	validate?: ( values: Values ) => Record< string, string >;
 };
 
+function isChangeEvent< T >(
+	value: T | ChangeEvent< HTMLInputElement >
+): value is ChangeEvent< HTMLInputElement > {
+	return ( value as ChangeEvent< HTMLInputElement > ).target !== undefined;
+}
+
 /**
  * A form component to handle form state and provide input helper props.
  */
@@ -70,6 +76,9 @@ function Form< Values extends Record< string, any > >(
 ): React.ReactElement | null {
 	const [ values, setValues ] = useState< Values >( props.initialValues );
 	const [ errors, setErrors ] = useState< Record< string, string > >( {} );
+	const [ changedFields, setChangedFields ] = useState< {
+		[ P in keyof Values ]?: boolean;
+	} >( {} );
 	const [ touched, setTouched ] = useState< {
 		[ P in keyof Values ]?: boolean;
 	} >( {} );
@@ -77,7 +86,7 @@ function Form< Values extends Record< string, any > >(
 	const validate = useCallback(
 		( newValues: Values, onValidate = () => {} ) => {
 			const newErrors = props.validate ? props.validate( newValues ) : {};
-			setErrors( newErrors );
+			setErrors( newErrors || {} );
 			onValidate();
 		},
 		[ props.validate ]
@@ -86,6 +95,15 @@ function Form< Values extends Record< string, any > >(
 	useEffect( () => {
 		validate( values );
 	}, [] );
+
+	useEffect( () => {
+		if ( values !== props.initialValues ) {
+			setValues( props.initialValues );
+			setChangedFields( {} );
+			setTouched( {} );
+			setErrors( {} );
+		}
+	}, [ props.initialValues ] );
 
 	const isValidForm = async () => {
 		await validate( values );
@@ -96,6 +114,23 @@ function Form< Values extends Record< string, any > >(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: string, value: any ) => {
 			setValues( { ...values, [ name ]: value } );
+			if (
+				props.initialValues[ name ] !== value &&
+				! changedFields[ name ]
+			) {
+				setChangedFields( {
+					...changedFields,
+					[ name ]: true,
+				} );
+			} else if (
+				props.initialValues[ name ] === value &&
+				changedFields[ name ]
+			) {
+				setChangedFields( {
+					...changedFields,
+					[ name ]: false,
+				} );
+			}
 			validate( { ...values, [ name ]: value }, () => {
 				const { onChange, onChangeCallback } = props;
 
@@ -124,9 +159,12 @@ function Form< Values extends Record< string, any > >(
 	);
 
 	const handleChange = useCallback(
-		( name: string, value: ChangeEvent< HTMLInputElement > ) => {
+		(
+			name: string,
+			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+		) => {
 			// Handle native events.
-			if ( value.target ) {
+			if ( isChangeEvent( value ) && value.target ) {
 				if ( value.target.type === 'checkbox' ) {
 					setValue( name, ! values[ name ] );
 				} else {
@@ -175,13 +213,15 @@ function Form< Values extends Record< string, any > >(
 		}
 	};
 
-	function getInputProps< Value = string >(
+	function getInputProps< Value = Values[ keyof Values ] >(
 		name: string
 	): {
 		value: Value;
 		checked: boolean;
-		selected: Value;
-		onChange: ( value: ChangeEvent< HTMLInputElement > ) => void;
+		selected?: boolean;
+		onChange: (
+			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+		) => void;
 		onBlur: () => void;
 		className: string | undefined;
 		help: string | null;
@@ -190,8 +230,9 @@ function Form< Values extends Record< string, any > >(
 			value: values[ name ],
 			checked: Boolean( values[ name ] ),
 			selected: values[ name ],
-			onChange: ( value: ChangeEvent< HTMLInputElement > ) =>
-				handleChange( name, value ),
+			onChange: (
+				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+			) => handleChange( name, value ),
 			onBlur: () => handleBlur( name ),
 			className:
 				touched[ name ] && errors[ name ] ? 'has-error' : undefined,
@@ -212,6 +253,8 @@ function Form< Values extends Record< string, any > >(
 		};
 	};
 
+	const isDirty = Object.values( changedFields ).some( Boolean );
+
 	if ( props.children && typeof props.children === 'function' ) {
 		const element = props.children( getStateAndHelpers() );
 		return (
@@ -220,6 +263,8 @@ function Form< Values extends Record< string, any > >(
 					values,
 					errors,
 					touched,
+					isDirty,
+					changedFields,
 					setTouched,
 					setValue,
 					handleSubmit,
@@ -237,6 +282,8 @@ function Form< Values extends Record< string, any > >(
 				values,
 				errors,
 				touched,
+				isDirty,
+				changedFields,
 				setTouched,
 				setValue,
 				handleSubmit,
