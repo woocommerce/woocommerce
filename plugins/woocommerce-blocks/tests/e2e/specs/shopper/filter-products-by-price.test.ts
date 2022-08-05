@@ -52,10 +52,10 @@ const goToShopPage = () =>
 const setMaxPrice = async () => {
 	await page.waitForSelector( selectors.frontend.priceMaxAmount );
 	await page.focus( selectors.frontend.priceMaxAmount );
-	await page.$eval(
-		selectors.frontend.priceMaxAmount,
-		( el ) => ( ( el as HTMLInputElement ).value = '' )
-	);
+	await page.keyboard.down( 'Shift' );
+	await page.keyboard.press( 'Home' );
+	await page.keyboard.up( 'Shift' );
+	await page.keyboard.press( 'Backspace' );
 	await page.keyboard.type( '1.99' );
 	await page.keyboard.press( 'Tab' );
 };
