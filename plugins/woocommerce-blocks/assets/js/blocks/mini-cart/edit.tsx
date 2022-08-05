@@ -18,6 +18,7 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
  * Internal dependencies
  */
 import QuantityBadge from './quantity-badge';
+import { useTypographyProps } from '../../hooks/style-attributes';
 
 interface Attributes {
 	addToCartBehaviour: string;
@@ -42,6 +43,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 
 	const productCount = 0;
 	const productTotal = 0;
+
+	const typographyProps = useTypographyProps( attributes );
 
 	return (
 		<div { ...blockProps }>
@@ -124,7 +127,10 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 			<Noninteractive>
 				<button className="wc-block-mini-cart__button">
 					{ ! hasHiddenPrice && (
-						<span className="wc-block-mini-cart__amount">
+						<span
+							className="wc-block-mini-cart__amount"
+							style={ typographyProps.style }
+						>
 							{ formatPrice( productTotal ) }
 						</span>
 					) }

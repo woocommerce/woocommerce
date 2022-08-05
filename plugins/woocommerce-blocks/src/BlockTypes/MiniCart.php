@@ -303,8 +303,9 @@ class MiniCart extends AbstractBlock {
 		$cart_controller     = $this->get_cart_controller();
 		$cart                = $cart_controller->get_cart_instance();
 		$cart_contents_total = $cart->get_subtotal();
+		$typography_styles   = isset( StyleAttributesUtils::get_font_weight_class_and_style( $attributes )['style'] ) ? StyleAttributesUtils::get_font_weight_class_and_style( $attributes )['style'] : null;
 
-		return '<span class="wc-block-mini-cart__amount">' . esc_html( wp_strip_all_tags( wc_price( $cart_contents_total ) ) ) . '</span>
+		return '<span class="wc-block-mini-cart__amount" style="' . esc_attr( $typography_styles ) . '">' . esc_html( wp_strip_all_tags( wc_price( $cart_contents_total ) ) ) . '</span>
 		' . $this->get_include_tax_label_markup();
 	}
 
