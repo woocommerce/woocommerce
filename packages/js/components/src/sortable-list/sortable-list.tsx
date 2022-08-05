@@ -4,10 +4,11 @@
 import { DragEvent, DragEventHandler } from 'react';
 import {
 	createElement,
-	Fragment,
+	useCallback,
 	useEffect,
 	useState,
 } from '@wordpress/element';
+import { throttle } from 'lodash';
 
 /**
  * Internal dependencies
@@ -89,6 +90,11 @@ export const SortableList = ( {
 		onDragOver( event );
 	};
 
+	const throttledHandleDragOver = useCallback(
+		throttle( handleDragOver, 16 ),
+		[ dragIndex ]
+	);
+
 	return (
 		<ul className="woocommerce-sortable-list">
 			{ items.map( ( child, index ) => (
@@ -100,7 +106,9 @@ export const SortableList = ( {
 					isDraggingOver={ index === dropIndex }
 					onDragEnd={ ( event ) => handleDragEnd( event, index ) }
 					onDragStart={ ( event ) => handleDragStart( event, index ) }
-					onDragOver={ ( event ) => handleDragOver( event, index ) }
+					onDragOver={ ( event ) =>
+						throttledHandleDragOver( event, index )
+					}
 					style={
 						dropIndex !== null && dropIndex <= index
 							? {
