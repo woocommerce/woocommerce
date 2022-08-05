@@ -60,37 +60,6 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
-		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/United States Zone.*/
-		);
-
-		//delete created shipping zone region after confirmation it exists
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-
-		await page.locator( 'a:has-text("United States") >> nth=0' ).click();
-
-		//delete
-		await page.locator( 'text=×' ).click();
-		//save changes
-		await page.click( '#submit' );
-
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-
-		//prove that the Region has been removed (Everywhere will display)
-		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Everywhere.*/
-		);
-
-		//hover over option to reveal Delete
-		await page.locator( 'a:has-text("United States") >> nth=0' ).hover();
-
-		//set up dialog handler
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.locator( 'a:has-text("Delete") >> nth=0' ).click();
-
-		await expect( page.locator( '.wc-shipping-zones' ) ).not.toHaveText(
-			/United States.*/
-		);
 	} );
 
 	test( 'add shipping zone for Mayne Island with free Local pickup', async ( {
@@ -129,6 +98,45 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
+			await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+				/United States Zone.*/
+			);
+
+			//delete created shipping zone region after confirmation it exists
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=shipping'
+			);
+
+			await page
+				.locator( 'a:has-text("United States") >> nth=0' )
+				.click();
+
+			//delete
+			await page.locator( 'text=×' ).click();
+			//save changes
+			await page.click( '#submit' );
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=shipping'
+			);
+
+			//prove that the Region has been removed (Everywhere will display)
+			await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+				/Everywhere.*/
+			);
+
+			//hover over option to reveal Delete
+			await page
+				.locator( 'a:has-text("United States") >> nth=0' )
+				.hover();
+
+			//set up dialog handler
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+			await page.locator( 'a:has-text("Delete") >> nth=0' ).click();
+
+			await expect( page.locator( '.wc-shipping-zones' ) ).not.toHaveText(
+				/Everywhere.*/
+			);
 		}
 
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
