@@ -20,6 +20,7 @@ export type ListItemProps = {
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
+	shouldRenderHandle: boolean;
 	style?: React.CSSProperties;
 };
 
@@ -31,6 +32,7 @@ export const ListItem = ( {
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
+	shouldRenderHandle = true,
 	style,
 }: ListItemProps ) => {
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
@@ -58,17 +60,18 @@ export const ListItem = ( {
 				onDragEnd={ handleDragEnd as () => void }
 			>
 				{ ( { onDraggableStart, onDraggableEnd } ) => {
-					if ( typeof children === 'function' ) {
-						return children( { onDraggableStart, onDraggableEnd } );
-					}
-
 					return (
 						<>
-							<Handle
-								onDragEnd={ onDraggableEnd }
-								onDragStart={ onDraggableStart }
-							/>
-							{ children }
+							{ shouldRenderHandle && (
+								<Handle
+									onDragEnd={ onDraggableEnd }
+									onDragStart={ onDraggableStart }
+								/>
+							) }
+							{ cloneElement( children, {
+								onDraggableStart,
+								onDraggableEnd,
+							} ) }
 						</>
 					);
 				} }

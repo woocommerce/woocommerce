@@ -1,13 +1,1 @@
-/**
- * External dependencies
- */
-import { DragEventHandler } from 'react';
-
-export type FunctionalChildProps = {
-	onDraggableStart: DragEventHandler;
-	onDraggableEnd: DragEventHandler;
-};
-
-export type FunctionalChild = ( props: FunctionalChildProps ) => JSX.Element;
-
-export type SortableListChild = JSX.Element | FunctionalChild;
+export type SortableListChild = JSX.Element;

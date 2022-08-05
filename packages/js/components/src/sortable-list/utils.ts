@@ -3,10 +3,10 @@
  */
 import { DragEvent } from 'react';
 
-export const moveIndex = (
+export const moveIndex = < T >(
 	fromIndex: number,
 	toIndex: number,
-	arr: unknown[]
+	arr: T[]
 ) => {
 	const newArr = [ ...arr ];
 	const item = arr[ fromIndex ];
