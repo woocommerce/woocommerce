@@ -38,6 +38,27 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for font-weight from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_font_weight_class_and_style( $attributes ) {
+
+		$custom_font_weight = $attributes['style']['typography']['fontWeight'] ?? '';
+
+		if ( '' !== $custom_font_weight ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'font-weight: %s;', $custom_font_weight ),
+			);
+		}
+		return null;
+	}
+
+
+	/**
 	 * Get class and style for font-family from attributes.
 	 *
 	 * @param array $attributes Block attributes.
@@ -340,6 +361,7 @@ class StyleAttributesUtils {
 			'text_color'       => self::get_text_color_class_and_style( $attributes ),
 			'font_size'        => self::get_font_size_class_and_style( $attributes ),
 			'font_family'      => self::get_font_family_class_and_style( $attributes ),
+			'font_weight'      => self::get_font_weight_class_and_style( $attributes ),
 			'link_color'       => self::get_link_color_class_and_style( $attributes ),
 			'background_color' => self::get_background_color_class_and_style( $attributes ),
 			'border_color'     => self::get_border_color_class_and_style( $attributes ),
