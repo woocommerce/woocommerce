@@ -38,6 +38,8 @@ const settings: BlockConfiguration = {
 			fontSize: true,
 			...( isFeaturePluginBuild() && {
 				__experimentalFontFamily: true,
+				__experimentalFontWeight: true,
+				__experimentalSkipSerialization: true,
 			} ),
 		},
 	},

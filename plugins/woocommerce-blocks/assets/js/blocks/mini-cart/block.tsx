@@ -34,6 +34,7 @@ import QuantityBadge from './quantity-badge';
 import { MiniCartContentsBlock } from './mini-cart-contents/block';
 import './style.scss';
 import { blockName } from './mini-cart-contents/attributes';
+import { useTypographyProps } from '../../hooks/style-attributes';
 
 interface Props {
 	isInitiallyOpen?: boolean;
@@ -44,14 +45,16 @@ interface Props {
 	hasHiddenPrice: boolean;
 }
 
-const MiniCartBlock = ( {
-	isInitiallyOpen = false,
-	colorClassNames,
-	style,
-	contents = '',
-	addToCartBehaviour = 'none',
-	hasHiddenPrice = false,
-}: Props ): JSX.Element => {
+const MiniCartBlock = ( attributes: Props ): JSX.Element => {
+	const {
+		isInitiallyOpen = false,
+		colorClassNames,
+		style,
+		contents = '',
+		addToCartBehaviour = 'none',
+		hasHiddenPrice = false,
+	} = attributes;
+
 	const {
 		cartItemsCount: cartItemsCountFromApi,
 		cartIsLoading,
@@ -201,6 +204,8 @@ const MiniCartBlock = ( {
 		color: style?.color?.text,
 	};
 
+	const typographyProps = useTypographyProps( attributes );
+
 	return (
 		<>
 			<button
@@ -215,7 +220,10 @@ const MiniCartBlock = ( {
 				aria-label={ ariaLabel }
 			>
 				{ ! hasHiddenPrice && (
-					<span className="wc-block-mini-cart__amount">
+					<span
+						className="wc-block-mini-cart__amount"
+						style={ typographyProps.style }
+					>
 						{ formatPrice(
 							subTotal,
 							getCurrencyFromPriceResponse( cartTotals )
