@@ -28,27 +28,27 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 	disabled,
 	variant = 'primary',
 }: SplitDropdownProps ) => {
-	const groupActionProps = Object.assign(
+	const groupItemProps = Object.assign(
 		{ variant },
 		disabled ? { disabled } : {}
 	);
-	const mainActionProps = {
-		...groupActionProps,
+	const mainItemProps = {
+		...groupItemProps,
 		className: `woocommerce-split-dropdown__main-button ${ className }`,
 	};
-	const [ mainAction, ...menuActions ] = children;
+	const [ mainItem, ...menuItems ] = children;
 	const menuIcon = chevronDown;
 	const menuIconExpanded = chevronUp;
 	return (
 		<ButtonGroup className={ `woocommerce-split-dropdown ${ className }` }>
-			{ cloneElement( mainAction, mainActionProps ) }
+			{ cloneElement( mainItem, mainItemProps ) }
 			<Dropdown
 				contentClassName={ `woocommerce-split-dropdown__menu ${ className }` }
 				position="bottom left"
 				renderToggle={ ( { isOpen, onToggle } ) => {
 					return (
 						<Button
-							{ ...groupActionProps }
+							{ ...groupItemProps }
 							className={ `woocommerce-split-dropdown__toggle ${ className }` }
 							onClick={ onToggle }
 						>
@@ -61,8 +61,8 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 				renderContent={ () => {
 					return (
 						<div>
-							{ menuActions.map( ( action, index ) => {
-								return cloneElement( action, {
+							{ menuItems.map( ( item, index ) => {
+								return cloneElement( item, {
 									key: index,
 								} );
 							} ) }
