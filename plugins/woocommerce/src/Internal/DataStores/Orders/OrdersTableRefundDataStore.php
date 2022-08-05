@@ -122,4 +122,14 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		);
 	}
 
+
+	/**
+	 * Returns data store object to use backfilling.
+	 *
+	 * @return \WC_Order_Refund_Data_Store_CPT
+	 */
+	protected function get_post_data_store_for_backfill() {
+		return new \WC_Order_Refund_Data_Store_CPT();
+	}
+
 }

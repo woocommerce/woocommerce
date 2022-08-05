@@ -400,12 +400,25 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Returns data store object to use backfilling.
+	 *
+	 * @return \Abstract_WC_Order_Data_Store_CPT
+	 */
+	protected function get_post_data_store_for_backfill() {
+		return new \WC_Order_Data_Store_CPT();
+	}
+
+	/**
 	 * Backfills order details in to WP_Post DB. Uses WC_Order_Data_store_CPT.
 	 *
 	 * @param \WC_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
-		$cpt_data_store = new \WC_Order_Data_Store_CPT();
+		$cpt_data_store = $this->get_post_data_store_for_backfill();
+		if ( is_null( $cpt_data_store ) || ! method_exists( $cpt_data_store, 'update_order_from_object' ) ) {
+			return;
+		}
+
 		$cpt_data_store->update_order_from_object( $order );
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
