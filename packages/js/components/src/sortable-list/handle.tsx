@@ -21,7 +21,7 @@ export const Handle = ( {
 	onDragEnd = () => null,
 }: HandleProps ) => (
 	<span
-		className="woocommerce-draggable-list__handle"
+		className="woocommerce-sortable-list__handle"
 		draggable
 		onDragStart={ onDragStart }
 		onDragEnd={ onDragEnd }

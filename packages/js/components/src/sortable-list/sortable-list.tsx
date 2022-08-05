@@ -12,25 +12,25 @@ import {
 /**
  * Internal dependencies
  */
-import { DraggableListItem } from './draggable-list-item';
+import { ListItem } from './list-item';
 import { isUpperHalf, moveIndex } from './utils';
-import { DraggableListChild } from './types';
+import { SortableListChild } from './types';
 
-export type DraggableListProps = {
-	children: DraggableListChild | DraggableListChild[];
+export type SortableListProps = {
+	children: SortableListChild | SortableListChild[];
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: () => void;
 };
 
-export const DraggableList = ( {
+export const SortableList = ( {
 	children,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	onDragStart = () => null,
-}: DraggableListProps ) => {
-	const [ items, setItems ] = useState< DraggableListChild[] >( [] );
+}: SortableListProps ) => {
+	const [ items, setItems ] = useState< SortableListChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
@@ -78,15 +78,15 @@ export const DraggableList = ( {
 	};
 
 	return (
-		<ul className="woocommerce-draggable-list">
+		<ul className="woocommerce-sortable-list">
 			{ items.map( ( child, index ) => (
 				<Fragment key={ index }>
 					{ dropIndex === index && (
-						<div className="woocommerce-draggable-list__slot">
+						<div className="woocommerce-sortable-list__slot">
 							<strong>{ index }</strong>
 						</div>
 					) }
-					<DraggableListItem
+					<ListItem
 						id={ index }
 						isDragging={ index === dragIndex }
 						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
@@ -98,10 +98,10 @@ export const DraggableList = ( {
 						}
 					>
 						{ child }
-					</DraggableListItem>
+					</ListItem>
 				</Fragment>
 			) ) }
-			<div className="woocommerce-draggable-list__slot">last</div>
+			<div className="woocommerce-sortable-list__slot">last</div>
 		</ul>
 	);
 };

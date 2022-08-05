@@ -10,4 +10,4 @@ export type FunctionalChildProps = {
 
 export type FunctionalChild = ( props: FunctionalChildProps ) => JSX.Element;
 
-export type DraggableListChild = JSX.Element | FunctionalChild;
+export type SortableListChild = JSX.Element | FunctionalChild;

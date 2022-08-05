@@ -8,18 +8,18 @@ import { Icon, wordpress } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { DraggableList } from '../';
+import { SortableList } from '..';
 import { Handle } from '../handle';
 
 export const Basic = () => {
 	return (
-		<DraggableList>
+		<SortableList>
 			<>Item 1</>
 			<>Item 2</>
 			<>Item 3</>
 			<>Item 4</>
 			<>Item 5</>
-		</DraggableList>
+		</SortableList>
 	);
 };
 
@@ -40,17 +40,17 @@ export const CustomHandle = () => {
 		};
 	};
 	return (
-		<DraggableList>
+		<SortableList>
 			{ renderItem( 'Item 1' ) }
 			{ renderItem( 'Item 2' ) }
 			{ renderItem( 'Item 3' ) }
 			{ renderItem( 'Item 4' ) }
 			{ renderItem( 'Item 5' ) }
-		</DraggableList>
+		</SortableList>
 	);
 };
 
 export default {
-	title: 'WooCommerce Admin/components/DraggableList',
-	component: DraggableList,
+	title: 'WooCommerce Admin/components/SortableList',
+	component: SortableList,
 };

@@ -10,25 +10,25 @@ import { Draggable } from '@wordpress/components';
  * Internal dependencies
  */
 import { Handle } from './handle';
-import { DraggableListChild } from './types';
+import { SortableListChild } from './types';
 
-export type DraggableListItemProps = {
+export type ListItemProps = {
 	id: string | number;
-	children: DraggableListChild;
+	children: SortableListChild;
 	isDragging: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 };
 
-export const DraggableListItem = ( {
+export const ListItem = ( {
 	id,
 	children,
 	isDragging = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
-}: DraggableListItemProps ) => {
+}: ListItemProps ) => {
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
 		onDragStart( event );
 	};
@@ -39,14 +39,14 @@ export const DraggableListItem = ( {
 
 	return (
 		<li
-			className={ classnames( 'woocommerce-draggable-list__item', {
+			className={ classnames( 'woocommerce-sortable-list__item', {
 				'is-dragging': isDragging,
 			} ) }
-			id={ `woocommerce-draggable-list__item-${ id }` }
+			id={ `woocommerce-sortable-list__item-${ id }` }
 			onDragOver={ onDragOver }
 		>
 			<Draggable
-				elementId={ `woocommerce-draggable-list__item-${ id }` }
+				elementId={ `woocommerce-sortable-list__item-${ id }` }
 				transferData={ {} }
 				onDragStart={ handleDragStart as () => void }
 				onDragEnd={ handleDragEnd as () => void }

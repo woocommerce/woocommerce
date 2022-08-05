@@ -1,15 +1,15 @@
-.woocommerce-draggable-list__item {
+.woocommerce-sortable-list__item {
     background: $studio-white;
     border: 1px solid $gray-400;
     margin: 0;
     padding: $gap-small;
 
     &.is-dragging {
-        opacity: 0.5;
+        display: none;
     }
 }
 
-.woocommerce-draggable-list__slot {
+.woocommerce-sortable-list__slot {
     width: 100%;
     height: 50px;
     background-color: red;
