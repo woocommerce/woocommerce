@@ -32,6 +32,7 @@ export const SortableList = ( {
 }: SortableListProps ) => {
 	const [ items, setItems ] = useState< SortableListChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
+	const [ dragHeight, setDragHeight ] = useState< number >( 0 );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
 	useEffect( () => {
@@ -42,6 +43,13 @@ export const SortableList = ( {
 		event: DragEvent< HTMLDivElement >,
 		index: number
 	) => {
+		const target = event.target as HTMLElement;
+		const listItem = target.closest(
+			'.woocommerce-sortable-list__item'
+		) as HTMLElement;
+
+		setDragHeight( listItem.offsetHeight );
+		setDropIndex( index );
 		setDragIndex( index );
 		onDragStart( event );
 	};
@@ -80,28 +88,25 @@ export const SortableList = ( {
 	return (
 		<ul className="woocommerce-sortable-list">
 			{ items.map( ( child, index ) => (
-				<Fragment key={ index }>
-					{ dropIndex === index && (
-						<div className="woocommerce-sortable-list__slot">
-							<strong>{ index }</strong>
-						</div>
-					) }
-					<ListItem
-						id={ index }
-						isDragging={ index === dragIndex }
-						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
-						onDragStart={ ( event ) =>
-							handleDragStart( event, index )
-						}
-						onDragOver={ ( event ) =>
-							handleDragOver( event, index )
-						}
-					>
-						{ child }
-					</ListItem>
-				</Fragment>
+				<ListItem
+					key={ index }
+					id={ index }
+					isDragging={ index === dragIndex }
+					isDraggingOver={ index === dropIndex }
+					onDragEnd={ ( event ) => handleDragEnd( event, index ) }
+					onDragStart={ ( event ) => handleDragStart( event, index ) }
+					onDragOver={ ( event ) => handleDragOver( event, index ) }
+					style={
+						dropIndex !== null && dropIndex <= index
+							? {
+									transform: `translate(0, ${ dragHeight }px)`,
+							  }
+							: {}
+					}
+				>
+					{ child }
+				</ListItem>
 			) ) }
-			<div className="woocommerce-sortable-list__slot">last</div>
 		</ul>
 	);
 };
