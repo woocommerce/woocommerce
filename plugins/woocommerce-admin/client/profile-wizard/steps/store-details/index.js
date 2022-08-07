@@ -110,9 +110,13 @@ export class StoreDetails extends Component {
 	}
 
 	onSubmit() {
-		this.setState( {
-			showUsageModal: true,
-		} );
+		if ( this.props.allowTracking ) {
+			this.props.skipProfiler();
+		} else {
+			this.setState( {
+				showUsageModal: true,
+			} );
+		}
 	}
 
 	onFormValueChange( changedFormValue ) {
@@ -386,11 +390,13 @@ export default compose(
 			getCountries,
 			hasFinishedResolution: hasFinishedResolutionCountries,
 		} = select( COUNTRIES_STORE_NAME );
-		const { isResolving } = select( OPTIONS_STORE_NAME );
+		const { isResolving, getOption } = select( OPTIONS_STORE_NAME );
 
 		const profileItems = getProfileItems();
 		const emailPrefill = getEmailPrefill();
 
+		const allowTracking =
+			getOption( 'woocommerce_allow_tracking' ) === 'yes';
 		const { general: settings = {} } = getSettings( 'general' );
 		const isBusy =
 			isOnboardingRequesting( 'updateProfileItems' ) ||
@@ -442,6 +448,7 @@ export default compose(
 			isBusy,
 			settings,
 			errorsRef,
+			allowTracking,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
