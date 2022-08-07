@@ -5,10 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, info } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
-import { recordEvent } from '@woocommerce/tracks';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,6 +26,13 @@ const SkipButton: React.FC< {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { invalidateResolutionForStoreSelector, updateProfileItems } =
 		useDispatch( ONBOARDING_STORE_NAME );
+
+	const trackingAllowed = useSelect(
+		( select ) =>
+			select( OPTIONS_STORE_NAME ).getOption(
+				'woocommerce_allow_tracking'
+			) === 'yes'
+	);
 
 	const [ isSkipSetupPopoverVisible, setSkipSetupPopoverVisibility ] =
 		useState( false );
@@ -64,8 +70,8 @@ const SkipButton: React.FC< {
 						skipProfiler();
 					} }
 					onClose={ () => {
-						setShowUsageModal( false );
 						invalidateResolutionForStoreSelector( 'getTaskLists' );
+						setShowUsageModal( false );
 					} }
 				/>
 			) }
@@ -74,7 +80,11 @@ const SkipButton: React.FC< {
 					isLink
 					className="woocommerce-profile-wizard__footer-link"
 					onClick={ () => {
-						setShowUsageModal( true );
+						if ( trackingAllowed ) {
+							skipProfiler();
+						} else {
+							setShowUsageModal( true );
+						}
 					} }
 				>
 					{ __( 'Skip', 'woocommerce' ) }
