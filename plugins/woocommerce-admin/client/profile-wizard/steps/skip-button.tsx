@@ -61,11 +61,11 @@ const SkipButton: React.FC< {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore -- ignoring it for now as UsageModal is not in ts yet.
 					onContinue={ () => {
-						setTimeout( () => skipProfiler(), 0 );
+						skipProfiler();
 					} }
 					onClose={ () => {
+						setShowUsageModal( false );
 						invalidateResolutionForStoreSelector( 'getTaskLists' );
-						setTimeout( () => setShowUsageModal( false ), 0 );
 					} }
 				/>
 			) }
