@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const maynePostal = 'V0N 2J0';
-const shippingZoneNameUSRegion = 'United States Zone';
+const shippingZoneNameUSRegion = 'USA Zone';
 const shippingZoneNameFlatRate = 'Canada with Flat rate';
 const shippingZoneNameFreeShip = 'BC with Free shipping';
 const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
@@ -199,13 +199,13 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/United States Zone.*/
+			/USA Zone.*/
 		);
 
 		//delete created shipping zone region after confirmation it exists
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
 
-		await page.locator( 'a:has-text("United States") >> nth=0' ).click();
+		await page.locator( 'a:has-text("USA Zone") >> nth=0' ).click();
 
 		//delete
 		await page.locator( 'text=×' ).click();
@@ -219,12 +219,17 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/Everywhere.*/
 		);
 
+		await page.pause();
+
 		//hover over option to reveal Delete
-		await page.locator( 'a:has-text("United States") >> nth=0' ).hover();
+		await page.locator( 'a:has-text("USA Zone")' ).hover();
 
 		//set up dialog handler
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.locator( 'a:has-text("Delete") >> nth=0' ).click();
+		await page.locator( 'text=Delete' ).nth( 4 ).click();
+
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+		await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 
 		await expect( page.locator( '.wc-shipping-zones' ) ).not.toHaveText(
 			/Everywhere.*/
