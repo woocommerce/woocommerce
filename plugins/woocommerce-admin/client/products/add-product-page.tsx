@@ -25,7 +25,6 @@ const AddProductPage: React.FC = () => {
 			<Form< Partial< Product > > initialValues={ {} } errors={ {} }>
 				<ProductFormLayout>
 					<ProductDetailsSection />
-					<ProductImagesSection />
 
 					<ProductFormActions />
 				</ProductFormLayout>

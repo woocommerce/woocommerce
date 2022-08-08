@@ -94,7 +94,6 @@ const EditProductPage: React.FC = () => {
 					>
 						<ProductFormLayout>
 							<ProductDetailsSection />
-							<ProductImagesSection />
 
 							<ProductFormActions />
 						</ProductFormLayout>
