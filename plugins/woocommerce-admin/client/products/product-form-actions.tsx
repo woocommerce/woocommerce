@@ -43,9 +43,20 @@ export const ProductFormActions: React.FC = () => {
 		};
 	} );
 
+	const getProductDataForTracks = () => {
+		return {
+			product_id: values.id,
+			product_type: values.type,
+			is_downloadable: values.downloadable,
+			is_virtual: values.virtual,
+			manage_stock: values.manage_stock,
+		};
+	};
+
 	const onSaveDraft = () => {
 		recordEvent( 'product_edit', {
 			new_product_page: true,
+			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
 			createProductWithStatus( values, 'draft' );
@@ -57,6 +68,7 @@ export const ProductFormActions: React.FC = () => {
 	const onPublish = () => {
 		recordEvent( 'product_update', {
 			new_product_page: true,
+			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
 			createProductWithStatus( values, 'publish' );
@@ -66,8 +78,9 @@ export const ProductFormActions: React.FC = () => {
 	};
 
 	const onPublishAndDuplicate = async () => {
-		recordEvent( 'product_update_and_duplicate', {
+		recordEvent( 'product_publish_and_copy', {
 			new_product_page: true,
+			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
 			await updateProductWithStatus( values, 'publish' );
@@ -80,6 +93,7 @@ export const ProductFormActions: React.FC = () => {
 	const onCopyToNewDraft = async () => {
 		recordEvent( 'product_copy', {
 			new_product_page: true,
+			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
 			await updateProductWithStatus( values, values.status || 'draft' );
@@ -90,6 +104,7 @@ export const ProductFormActions: React.FC = () => {
 	const onTrash = () => {
 		recordEvent( 'product_delete', {
 			new_product_page: true,
+			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
 			deleteProductAndRedirect( values.id );
@@ -110,8 +125,9 @@ export const ProductFormActions: React.FC = () => {
 			) : null }
 			<Button
 				onClick={ () =>
-					recordEvent( 'product_preview', {
+					recordEvent( 'product_preview_changes', {
 						new_product_page: true,
+						...getProductDataForTracks(),
 					} )
 				}
 				href={ values.permalink + '?preview=true' }
