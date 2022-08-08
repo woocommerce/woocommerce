@@ -28,7 +28,7 @@ function getNoticePreviewActions( status: ProductStatus, permalink: string ) {
 				{
 					label: __( 'View in store', 'woocommerce' ),
 					onClick: () => {
-						recordEvent( 'product_preview', {
+						recordEvent( 'product_preview_changes', {
 							new_product_page: true,
 						} );
 						window.open( permalink, '_blank' );
@@ -129,9 +129,10 @@ export function useProductHelper() {
 					if ( ! skipNotice ) {
 						createNotice(
 							'success',
-							updatedProduct.status === 'publish'
+							product.status === 'draft' &&
+								updatedProduct.status === 'publish'
 								? __(
-										'🎉 Product successfully updated.',
+										'🎉 Product published. View in store.',
 										'woocommerce'
 								  )
 								: __(
