@@ -229,6 +229,7 @@ class WC_Regenerate_Images {
 		}
 
 		// Skip resizing if the image is too large to be loaded into the memory. A heuristic to prevent out of memory errors.
+		// Once https://core.trac.wordpress.org/ticket/23127 is merged, we can catch the error from GD instead.
 		$full_size                = self::get_full_size_image_dimensions( $attachment_id );
 		$gd_image_size_in_memory  = 0;
 		$available_memory         = self::get_image_memory_limit();
@@ -511,7 +512,7 @@ class WC_Regenerate_Images {
 	 */
 	protected static function get_image_memory_limit() {
 		$mem_limit_bytes = 0;
-		$mem_limit       = self::_get_wp_image_memory_limit();
+		$mem_limit       = self::get_wp_image_memory_limit();
 
 		if ( $mem_limit === false ) {
 			$mem_limit = ini_get( 'memory_limit' );
