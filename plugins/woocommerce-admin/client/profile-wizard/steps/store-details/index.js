@@ -111,7 +111,7 @@ export class StoreDetails extends Component {
 
 	onSubmit() {
 		if ( this.props.allowTracking ) {
-			this.props.skipProfiler();
+			this.props.goToNextStep();
 		} else {
 			this.setState( {
 				showUsageModal: true,
