@@ -341,7 +341,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param  WC_Order $order Order object.
 	 * @return float
 	 */
-	public function get_total_refunded( $order ) : float {
+	public function get_total_refunded( $order ) {
 		global $wpdb;
 
 		$total = $wpdb->get_var(

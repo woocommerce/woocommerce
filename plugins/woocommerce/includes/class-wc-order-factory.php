@@ -50,7 +50,7 @@ class WC_Order_Factory {
 	 *
 	 * @throws \Exception When an invalid order is found.
 	 */
-	public static function get_orders( array $order_ids = array(), bool $skip_invalid = false ) {
+	public static function get_orders( $order_ids = array(), $skip_invalid = false ) {
 		$result    = array();
 		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
 

@@ -607,7 +607,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return float Refunded amount.
 	 */
-	public function get_total_refunded( $order ) : float {
+	public function get_total_refunded( $order ) {
 		global $wpdb;
 		$order_table = self::get_orders_table_name();
 		$total       = $wpdb->get_var(
