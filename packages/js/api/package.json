@@ -26,15 +26,17 @@
 	],
 	"sideEffects": false,
 	"scripts": {
+		"turbo:build": "pnpm run clean && npm run compile",
+		"turbo:test": "jest",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name -- --",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
-		"build": "node ./node_modules/require-turbo && pnpm run clean && npm run compile",
 		"prepack": "pnpm run build",
-		"lint": "node ./node_modules/require-turbo && eslint src",
-		"lint:fix": "eslint src --fix",
-		"test": "node ./node_modules/require-turbo && jest"
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
 		"axios": "^0.24.0",
@@ -50,7 +52,6 @@
 		"axios-mock-adapter": "^1.20.0",
 		"eslint": "^8.2.0",
 		"jest": "^25",
-		"require-turbo": "workspace:*",
 		"ts-jest": "^25",
 		"typescript": "^4.4.4"
 	},

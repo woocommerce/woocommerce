@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure order status is correctly prefixed in COT tables.

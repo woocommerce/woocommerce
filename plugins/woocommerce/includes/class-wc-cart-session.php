@@ -45,6 +45,19 @@ final class WC_Cart_Session {
 	 * Register methods for this object on the appropriate WordPress hooks.
 	 */
 	public function init() {
+		/**
+		 * Filters whether hooks should be initialized for the current cart session.
+		 *
+		 * @param bool $must_initialize Will be passed as true, meaning that the cart hooks should be initialized.
+		 * @param bool $session The WC_Cart_Session object that is being initialized.
+		 * @returns bool True if the cart hooks should be actually initialized, false if not.
+		 *
+		 * @since 6.9.0
+		 */
+		if ( ! apply_filters( 'woocommerce_cart_session_initialize', true, $this ) ) {
+			return;
+		}
+
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ), 1000 );

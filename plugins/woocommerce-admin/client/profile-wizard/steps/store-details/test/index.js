@@ -32,6 +32,27 @@ const testProps = {
 	isLoading: false,
 };
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {
+			locale: 'en_US',
+			countries: [
+				{
+					code: 'US',
+					name: 'United States',
+					states: [],
+				},
+			],
+			loadingCountries: false,
+			hasFinishedResolution: true,
+		} ),
+	};
+} );
+
 describe( 'StoreDetails', () => {
 	describe( 'Snapshot test', () => {
 		test( 'should match saved snapshot', () => {
@@ -39,6 +60,30 @@ describe( 'StoreDetails', () => {
 			expect( container ).toMatchSnapshot();
 		} );
 	} );
+
+	it( 'should disable the "Continue" button when the mandatory field (Country / Region) is empty', () => {
+		const { getByRole } = render( <StoreDetails { ...testProps } /> );
+		expect( getByRole( 'button', { name: 'Continue' } ) ).toBeDisabled();
+	} );
+
+	it( 'should enable the "Continue" button when the mandatory field (Country / Region) is filled', () => {
+		const { getByRole } = render(
+			<StoreDetails
+				{ ...{
+					...testProps,
+					initialValues: {
+						...testProps.initialValues,
+						countryState: 'US',
+					},
+				} }
+			/>
+		);
+
+		expect(
+			getByRole( 'button', { name: 'Continue' } )
+		).not.toBeDisabled();
+	} );
+
 	describe( 'Email validation test cases', () => {
 		test( 'should fail email validation and disable continue button when isAgreeMarketing is true and email is empty', async () => {
 			const container = render(

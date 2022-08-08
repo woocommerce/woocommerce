@@ -57,8 +57,10 @@ class WC_Template_Cache extends WC_Unit_Test_Case {
 		$cached_templates = wp_cache_get( 'cached_templates', 'woocommerce' );
 		wc_clear_template_cache();
 
-		foreach ( (array) $cached_templates as $template ) {
-			$this->assertEmpty( wp_cache_get( $template, 'woocommerce' ) );
+		if ( $cached_templates ) {
+			foreach ( (array) $cached_templates as $template ) {
+				$this->assertEmpty( wp_cache_get( $template, 'woocommerce' ) );
+			}
 		}
 		$this->assertEmpty( wp_cache_get( 'cached_templates', 'woocommerce' ) );
 	}

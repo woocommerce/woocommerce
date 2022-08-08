@@ -23,4 +23,4 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
-php tools/monorepo/check-changelogger-use.php --debug $PROTECTED_BRANCH $CURRENT_BRANCH
+php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH

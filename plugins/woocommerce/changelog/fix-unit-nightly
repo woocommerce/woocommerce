@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fixes a unit test for WP nightly. No functional change.
+
+
