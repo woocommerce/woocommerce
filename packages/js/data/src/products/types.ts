@@ -19,6 +19,12 @@ export type ProductStatus =
 	| 'trash'
 	| 'future';
 
+export type ProductDownload = {
+	id: string;
+	name: string;
+	file: string;
+};
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status'
@@ -37,6 +43,23 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	description: string;
 	short_description: string;
 	sku: string;
+	date_on_sale_from: string | null;
+	date_on_sale_from_gmt: string | null;
+	date_on_sale_to: string | null;
+	date_on_sale_to_gmt: string | null;
+	virtual: boolean;
+	downloadable: boolean;
+	downloads: ProductDownload[];
+	download_limit: number;
+	download_expiry: number;
+	external_url: string;
+	button_text: string;
+	tax_status: 'taxable' | 'shipping' | 'none';
+	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
+	manage_stock: boolean;
+	stock_quantity: number;
+	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	backorders: 'no' | 'notify' | 'yes';
 	price: string;
 	price_html: string;
 	regular_price: string;
@@ -109,5 +132,5 @@ export type ProductQuery<
 	on_sale: boolean;
 	min_price: string;
 	max_price: string;
-	stock_status: 'instock' | 'outofstock';
+	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 };
