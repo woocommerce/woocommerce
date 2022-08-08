@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
 import { DragEventHandler } from 'react';
 
@@ -25,6 +26,7 @@ export const Handle = ( {
 		draggable
 		onDragStart={ onDragStart }
 		onDragEnd={ onDragEnd }
+		aria-label={ __( 'Move this item', 'woocommerce' ) }
 	>
 		{ children ? children : <DraggableIcon /> }
 	</span>

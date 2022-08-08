@@ -15,12 +15,12 @@ import { SortableListChild } from './types';
 export type ListItemProps = {
 	id: string | number;
 	children: SortableListChild;
-	isDragging: boolean;
-	isDraggingOver: boolean;
+	isDragging?: boolean;
+	isDraggingOver?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
-	shouldRenderHandle: boolean;
+	shouldRenderHandle?: boolean;
 	style?: React.CSSProperties;
 };
 
