@@ -47,6 +47,27 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	 */
 	public function read( &$refund ) {
 		parent::read( $refund );
+		$this->set_refund_props( $refund );
+	}
+
+	/**
+	 * Read multiple refund objects from custom tables.
+	 *
+	 * @param \WC_Order $refunds Refund objects.
+	 */
+	public function read_multiple( &$refunds ) {
+		parent::read_multiple( $refunds );
+		foreach ( $refunds as $refund ) {
+			$this->set_refund_props( $refund );
+		}
+	}
+
+	/**
+	 * Helper method to set refund props.
+	 *
+	 * @param \WC_Order $refund Refund object.
+	 */
+	private function set_refund_props( $refund ) {
 		$refund->set_props(
 			array(
 				'amount'           => $refund->get_meta( '_refund_amount', true ),
