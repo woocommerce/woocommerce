@@ -4,6 +4,6 @@ const TYPES = {
 	CLEAR_SETTINGS: 'CLEAR_SETTINGS',
 	SET_IS_REQUESTING: 'SET_IS_REQUESTING',
 	CLEAR_IS_DIRTY: 'CLEAR_IS_DIRTY',
-};
+} as const;
 
 export default TYPES;

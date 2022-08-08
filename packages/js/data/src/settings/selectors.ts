@@ -2,8 +2,9 @@
  * Internal dependencies
  */
 import { getResourceName, getResourcePrefix } from '../utils';
+import { SettingsState, Settings } from './types';
 
-export const getSettingsGroupNames = ( state ) => {
+export const getSettingsGroupNames = ( state: SettingsState ) => {
 	const groupNames = new Set(
 		Object.keys( state ).map( ( resourceName ) => {
 			return getResourcePrefix( resourceName );
@@ -12,10 +13,10 @@ export const getSettingsGroupNames = ( state ) => {
 	return [ ...groupNames ];
 };
 
-export const getSettings = ( state, group ) => {
-	const settings = {};
+export const getSettings = ( state: SettingsState, group: string ) => {
+	const settings: Settings = {};
 	const settingIds = ( state[ group ] && state[ group ].data ) || [];
-	if ( settingIds.length === 0 ) {
+	if ( ! Array.isArray( settingIds ) || settingIds.length === 0 ) {
 		return settings;
 	}
 	settingIds.forEach( ( id ) => {
@@ -24,11 +25,15 @@ export const getSettings = ( state, group ) => {
 	return settings;
 };
 
-export const getDirtyKeys = ( state, group ) => {
+export const getDirtyKeys = ( state: SettingsState, group: string ) => {
 	return state[ group ].dirty || [];
 };
 
-export const getIsDirty = ( state, group, keys = [] ) => {
+export const getIsDirty = (
+	state: SettingsState,
+	group: string,
+	keys: string[] = []
+) => {
 	const dirtyMap = getDirtyKeys( state, group );
 	// if empty array bail
 	if ( dirtyMap.length === 0 ) {
@@ -39,15 +44,22 @@ export const getIsDirty = ( state, group, keys = [] ) => {
 	return keys.some( ( key ) => dirtyMap.includes( key ) );
 };
 
-export const getSettingsForGroup = ( state, group, keys ) => {
+export const getSettingsForGroup = (
+	state: SettingsState,
+	group: string,
+	keys: string[]
+) => {
 	const allSettings = getSettings( state, group );
-	return keys.reduce( ( accumulator, key ) => {
+	return keys.reduce< Settings >( ( accumulator, key ) => {
 		accumulator[ key ] = allSettings[ key ] || {};
 		return accumulator;
 	}, {} );
 };
 
-export const isUpdateSettingsRequesting = ( state, group ) => {
+export const isUpdateSettingsRequesting = (
+	state: SettingsState,
+	group: string
+) => {
 	return state[ group ] && Boolean( state[ group ].isRequesting );
 };
 
@@ -70,11 +82,12 @@ export const isUpdateSettingsRequesting = ( state, group ) => {
  *                   name.
  */
 export function getSetting(
-	state,
-	group,
-	name,
+	state: SettingsState,
+	group: string,
+	name: string,
 	fallback = false,
-	filter = ( val ) => val
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- _fallback in default filter is unused.
+	filter = ( val: unknown, _fallback: unknown | boolean ) => val
 ) {
 	const resourceName = getResourceName( group, name );
 	const value =
@@ -82,15 +95,22 @@ export function getSetting(
 	return filter( value, fallback );
 }
 
-export const getLastSettingsErrorForGroup = ( state, group ) => {
+export const getLastSettingsErrorForGroup = (
+	state: SettingsState,
+	group: string
+) => {
 	const settingsIds = state[ group ].data;
-	if ( settingsIds.length === 0 ) {
+	if ( ! Array.isArray( settingsIds ) || settingsIds.length === 0 ) {
 		return state[ group ].error;
 	}
 	return [ ...settingsIds ].pop().error;
 };
 
-export const getSettingsError = ( state, group, id ) => {
+export const getSettingsError = (
+	state: SettingsState,
+	group: string,
+	id: string
+) => {
 	if ( ! id ) {
 		return ( state[ group ] && state[ group ].error ) || false;
 	}

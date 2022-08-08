@@ -2,16 +2,31 @@
  * External dependencies
  */
 import { union } from 'lodash';
+import { Reducer } from 'redux';
 
 /**
  * Internal dependencies
  */
 import TYPES from './action-types';
 import { getResourceName } from '../utils';
+import { Actions } from './actions';
+import { Settings, SettingsState } from './types';
 
 const updateGroupDataInNewState = (
-	newState,
-	{ group, groupIds, data, time, error }
+	newState: SettingsState,
+	{
+		group,
+		groupIds,
+		data,
+		time,
+		error,
+	}: {
+		group: string;
+		groupIds: string[];
+		data: Settings;
+		time: Date;
+		error: unknown;
+	}
 ) => {
 	groupIds.forEach( ( id ) => {
 		newState[ getResourceName( group, id ) ] = {
@@ -23,33 +38,35 @@ const updateGroupDataInNewState = (
 	return newState;
 };
 
-const receiveSettings = (
-	state = {},
-	{ type, group, data, error, time, isRequesting }
-) => {
+const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 	const newState = {};
-	switch ( type ) {
+	switch ( action.type ) {
 		case TYPES.SET_IS_REQUESTING:
 			state = {
 				...state,
-				[ group ]: {
-					...state[ group ],
-					isRequesting,
+				[ action.group ]: {
+					...state[ action.group ],
+					isRequesting: action.isRequesting,
 				},
 			};
 			break;
 		case TYPES.CLEAR_IS_DIRTY:
 			state = {
 				...state,
-				[ group ]: {
-					...state[ group ],
+				[ action.group ]: {
+					...state[ action.group ],
 					dirty: [],
 				},
 			};
 			break;
 		case TYPES.UPDATE_SETTINGS_FOR_GROUP:
 		case TYPES.UPDATE_ERROR_FOR_GROUP:
+			const { data, group, time } = action;
 			const groupIds = data ? Object.keys( data ) : [];
+			const error =
+				action.type === TYPES.UPDATE_ERROR_FOR_GROUP
+					? action.error
+					: null;
 			if ( data === null ) {
 				state = {
 					...state,
@@ -60,12 +77,15 @@ const receiveSettings = (
 					},
 				};
 			} else {
+				const stateGroup = state[ group ];
 				state = {
 					...state,
 					[ group ]: {
 						data:
-							state[ group ] && state[ group ].data
-								? [ ...state[ group ].data, ...groupIds ]
+							stateGroup &&
+							stateGroup.data &&
+							Array.isArray( stateGroup.data )
+								? [ ...stateGroup.data, ...groupIds ]
 								: groupIds,
 						error,
 						lastReceived: time,
@@ -91,4 +111,5 @@ const receiveSettings = (
 	return state;
 };
 
-export default receiveSettings;
+export type State = ReturnType< typeof reducer >;
+export default reducer;

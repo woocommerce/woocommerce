@@ -2,20 +2,22 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect } from '@wordpress/data';
+import { useSelect, select as wpSelect } from '@wordpress/data';
 import { createElement, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
+import { Settings } from './types';
 
-export const withSettingsHydration = ( group, settings ) =>
-	createHigherOrderComponent(
+export const withSettingsHydration = ( group: string, settings: Settings ) =>
+	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const settingsRef = useRef( settings );
 
-			useSelect( ( select, registry ) => {
+			// @ts-expect-error registry is not defined in the wp.data typings
+			useSelect( ( select: typeof wpSelect, registry ) => {
 				if ( ! settingsRef.current ) {
 					return;
 				}
