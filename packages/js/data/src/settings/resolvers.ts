@@ -26,7 +26,18 @@ type RawSetting = {
 	label: string;
 	description: string;
 	tip?: string;
-	type: string;
+	type:
+		| 'text'
+		| 'email'
+		| 'number'
+		| 'color'
+		| 'password'
+		| 'textarea'
+		| 'select'
+		| 'multiselect'
+		| 'radio'
+		| 'image_width'
+		| 'checkbox';
 	default: unknown;
 	value: unknown;
 	options: {
