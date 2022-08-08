@@ -169,7 +169,11 @@ export const ProductFormActions: React.FC = () => {
 										'woocommerce'
 									) }
 								</MenuItem>
-								<MenuItem onClick={ onTrash } isDestructive>
+								<MenuItem
+									onClick={ onTrash }
+									isDestructive
+									disabled={ ! values.id }
+								>
 									{ __( 'Move to trash', 'woocommerce' ) }
 								</MenuItem>
 							</MenuGroup>
