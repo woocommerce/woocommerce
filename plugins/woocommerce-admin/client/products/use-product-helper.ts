@@ -44,6 +44,15 @@ export function useProductHelper() {
 	) as ProductsStoreActions;
 	const { createNotice } = useDispatch( 'core/notices' );
 
+	/**
+	 * Create product with status.
+	 *
+	 * @param {Product} product the product to be created.
+	 * @param {string}  status the product status.
+	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
+	 * @param {boolean} skipRedirect if the user should skip the redirection to the new product page (default: false).
+	 * @return {Promise<Product>} Returns a promise with the created product.
+	 */
 	const createProductWithStatus = useCallback(
 		async (
 			product: Omit< Product, ReadOnlyProperties >,
@@ -98,73 +107,101 @@ export function useProductHelper() {
 		[]
 	);
 
-	const updateProductWithStatus = async (
-		product: Product,
-		status: ProductStatus,
-		skipNotice = false
-	) => {
-		return updateProduct( product.id, {
-			...product,
-			status,
-		} ).then(
-			( updatedProduct ) => {
-				if ( ! skipNotice ) {
+	/**
+	 * Update product with status.
+	 *
+	 * @param {Product} product the product to be updated (should contain product id).
+	 * @param {string}  status the product status.
+	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
+	 * @return {Promise<Product>} Returns a promise with the updated product.
+	 */
+	const updateProductWithStatus = useCallback(
+		async (
+			product: Product,
+			status: ProductStatus,
+			skipNotice = false
+		) => {
+			return updateProduct( product.id, {
+				...product,
+				status,
+			} ).then(
+				( updatedProduct ) => {
+					if ( ! skipNotice ) {
+						createNotice(
+							'success',
+							updatedProduct.status === 'publish'
+								? __(
+										'🎉 Product successfully updated.',
+										'woocommerce'
+								  )
+								: __(
+										'🎉 Product successfully updated.',
+										'woocommerce'
+								  ),
+							{
+								actions: getNoticePreviewActions(
+									updatedProduct.status,
+									updatedProduct.permalink
+								),
+							}
+						);
+					}
+				},
+				() => {
 					createNotice(
-						'success',
-						updatedProduct.status === 'publish'
-							? __(
-									'🎉 Product successfully updated.',
-									'woocommerce'
-							  )
-							: __(
-									'🎉 Product successfully updated.',
-									'woocommerce'
-							  ),
-						{
-							actions: getNoticePreviewActions(
-								updatedProduct.status,
-								updatedProduct.permalink
-							),
-						}
+						'error',
+						__( 'Failed to update product.', 'woocommerce' )
 					);
 				}
-			},
-			() => {
-				createNotice(
-					'error',
-					__( 'Failed to update product.', 'woocommerce' )
-				);
-			}
-		);
-	};
-
-	const copyProductWithStatus = async (
-		product: Product,
-		status: ProductStatus = 'draft'
-	) => {
-		return createProductWithStatus(
-			removeReadonlyProperties( {
-				...product,
-				name: ( product.name || 'AUTO-DRAFT' ) + ' - Copy',
-			} ),
-			status
-		);
-	};
-
-	const deleteProductAndRedirect = (
-		id: number,
-		redirectUrl = 'edit.php?post_type=product'
-	) => {
-		deleteProduct( id ).then( () => {
-			createNotice(
-				'success',
-				__( '🎉 Successfully moved product to Trash.', 'woocommerce' )
 			);
-			navigateTo( {
-				url: redirectUrl,
+		},
+		[]
+	);
+
+	/**
+	 * Creates a copy of the given product with the given status.
+	 *
+	 * @param {Product} product the product to be copied.
+	 * @param {string}  status the product status.
+	 * @return {Promise<Product>} promise with the newly created and copied product.
+	 */
+	const copyProductWithStatus = useCallback(
+		async ( product: Product, status: ProductStatus = 'draft' ) => {
+			return createProductWithStatus(
+				removeReadonlyProperties( {
+					...product,
+					name: ( product.name || 'AUTO-DRAFT' ) + ' - Copy',
+				} ),
+				status
+			);
+		},
+		[]
+	);
+
+	/**
+	 * Deletes a product by given id and redirects to the product list page.
+	 *
+	 * @param {number} id the product id to be deleted.
+	 * @param {string} redirectUrl the redirection url, defaults to product list ('edit.php?post_type=product').
+	 * @return {Promise<Product>} promise with the deleted product.
+	 */
+	const deleteProductAndRedirect = useCallback(
+		( id: number, redirectUrl = 'edit.php?post_type=product' ) => {
+			return deleteProduct( id ).then( () => {
+				createNotice(
+					'success',
+					__(
+						'🎉 Successfully moved product to Trash.',
+						'woocommerce'
+					)
+				);
+				navigateTo( {
+					url: redirectUrl,
+				} );
 			} );
-		} );
-	};
+		},
+		[]
+	);
 
 	return {
 		createProductWithStatus,

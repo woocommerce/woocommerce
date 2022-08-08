@@ -9,9 +9,14 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import { chevronDown } from '@wordpress/icons';
 import { useFormContext } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import {
+	Product,
+	PRODUCTS_STORE_NAME,
+	WCDataSelector,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -28,6 +33,15 @@ export const ProductFormActions: React.FC = () => {
 		copyProductWithStatus,
 	} = useProductHelper();
 	const { isDirty, values } = useFormContext< Product >();
+	const { isPendingAction } = useSelect( ( select: WCDataSelector ) => {
+		const { isPending } = select( PRODUCTS_STORE_NAME );
+		return {
+			isPendingAction:
+				isPending( 'createProduct' ) ||
+				isPending( 'deleteProduct', values.id ) ||
+				isPending( 'updateProduct', values.id ),
+		};
+	} );
 
 	const onSaveDraft = () => {
 		recordEvent( 'product_edit', {
@@ -110,6 +124,7 @@ export const ProductFormActions: React.FC = () => {
 				<Button
 					onClick={ onPublish }
 					variant="primary"
+					isBusy={ isPendingAction }
 					disabled={ ! isDirty && !! isPublished }
 				>
 					{ isPublished
