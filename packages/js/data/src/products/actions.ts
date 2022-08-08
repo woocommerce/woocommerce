@@ -32,6 +32,12 @@ export function getProductError( productId: number, error: unknown ) {
 	};
 }
 
+function createProductStart() {
+	return {
+		type: TYPES.CREATE_PRODUCT_START as const,
+	};
+}
+
 function createProductSuccess( id: number, product: Partial< Product > ) {
 	return {
 		type: TYPES.CREATE_PRODUCT_SUCCESS as const,
@@ -48,6 +54,13 @@ export function createProductError(
 		type: TYPES.CREATE_PRODUCT_ERROR as const,
 		query,
 		error,
+	};
+}
+
+function updateProductStart( id: number ) {
+	return {
+		type: TYPES.UPDATE_PRODUCT_START as const,
+		id,
 	};
 }
 
@@ -116,6 +129,7 @@ export function getProductsTotalCountError(
 export function* createProduct(
 	data: Omit< Product, ReadOnlyProperties >
 ): Generator< unknown, Product, Product > {
+	yield createProductStart();
 	try {
 		const product: Product = yield apiFetch( {
 			path: WC_PRODUCT_NAMESPACE,
@@ -135,6 +149,7 @@ export function* updateProduct(
 	id: number,
 	data: Omit< Product, ReadOnlyProperties >
 ): Generator< unknown, Product, Product > {
+	yield updateProductStart( id );
 	try {
 		const product: Product = yield apiFetch( {
 			path: `${ WC_PRODUCT_NAMESPACE }/${ id }`,
@@ -148,6 +163,13 @@ export function* updateProduct(
 		yield updateProductError( id, error );
 		throw error;
 	}
+}
+
+export function deleteProductStart( id: number ) {
+	return {
+		type: TYPES.DELETE_PRODUCT_START as const,
+		id,
+	};
 }
 
 export function deleteProductSuccess(
@@ -175,6 +197,7 @@ export function* deleteProduct(
 	id: number,
 	force = false
 ): Generator< unknown, Product, Product > {
+	yield deleteProductStart( id );
 	try {
 		const url = force
 			? `${ WC_PRODUCT_NAMESPACE }/${ id }?force=true`
@@ -194,6 +217,7 @@ export function* deleteProduct(
 }
 
 export type Actions = ReturnType<
+	| typeof createProductStart
 	| typeof createProductError
 	| typeof createProductSuccess
 	| typeof getProductSuccess
@@ -202,8 +226,10 @@ export type Actions = ReturnType<
 	| typeof getProductsError
 	| typeof getProductsTotalCountSuccess
 	| typeof getProductsTotalCountError
+	| typeof updateProductStart
 	| typeof updateProductError
 	| typeof updateProductSuccess
+	| typeof deleteProductStart
 	| typeof deleteProductSuccess
 	| typeof deleteProductError
 >;
