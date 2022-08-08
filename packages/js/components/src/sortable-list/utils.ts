@@ -3,6 +3,14 @@
  */
 import { DragEvent } from 'react';
 
+/**
+ * Move an item from an index in an array to a new index.s
+ *
+ * @param  fromIndex Index to move the item from.
+ * @param  toIndex   Index to move the item to.
+ * @param  arr       The array to copy.
+ * @return array
+ */
 export const moveIndex = < T >(
 	fromIndex: number,
 	toIndex: number,
