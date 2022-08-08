@@ -230,9 +230,9 @@ class WC_Regenerate_Images {
 
 		// Skip resizing if the image is too large to be loaded into the memory. A heuristic to prevent out of memory errors.
 		// Once https://core.trac.wordpress.org/ticket/23127 is merged, we can catch the error from GD instead.
-		$full_size                = self::get_full_size_image_dimensions( $attachment_id );
-		$gd_image_size_in_memory  = 0;
-		$available_memory         = self::get_image_memory_limit();
+		$full_size               = self::get_full_size_image_dimensions( $attachment_id );
+		$gd_image_size_in_memory = 0;
+		$available_memory        = self::get_image_memory_limit();
 		if ( is_int( $full_size['width'] ) && is_int( $full_size['height'] ) ) {
 			$gd_image_size_in_memory = $full_size['width'] * $full_size['height'] * 5; // 5 bytes per pixel, https://stackoverflow.com/questions/18465390/php-fatal-error-out-of-memory-when-creating-an-image#comment27312125_18465539
 		}
@@ -553,6 +553,17 @@ class WC_Regenerate_Images {
 
 		/**
 		 * This is a WP core filter from wp_raise_memory_limit().
+		 *
+		 * Filters the memory limit allocated for image manipulation.
+		 *
+		 * @since 3.5.0
+		 * @since 4.6.0 The default now takes the original `memory_limit` into account.
+		 *
+		 * @param int|string $filtered_limit Maximum memory limit to allocate for images.
+		 *                                   Default `WP_MAX_MEMORY_LIMIT` or the original
+		 *                                   php.ini `memory_limit`, whichever is higher.
+		 *                                   Accepts an integer (bytes), or a shorthand string
+		 *                                   notation, such as '256M'.
 		 */
 		$filtered_limit = apply_filters( 'image_memory_limit', $filtered_limit );
 
