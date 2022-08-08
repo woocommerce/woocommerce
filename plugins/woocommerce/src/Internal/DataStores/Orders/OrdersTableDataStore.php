@@ -625,7 +625,7 @@ WHERE
 				$order->get_id()
 			)
 		);
-		return isset( $total ) ? $total : 0;
+		return -1 * ( isset( $total ) ? $total : 0 );
 	}
 
 	//phpcs:disable Squiz.Commenting, Generic.Commenting
