@@ -228,6 +228,18 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
+		// Skip resizing if the image is too large to be loaded into the memory. A heuristic to prevent out of memory errors.
+		$full_size               = self::get_full_size_image_dimensions( $attachment_id );
+		$gd_image_size_in_memory = 0;
+		$available_memory         = self::get_image_memory_limit();
+		if ( is_int( $full_size['width'] ) && is_int( $full_size['height'] ) ) {
+			$gd_image_size_in_memory = $full_size['width'] * $full_size['height'] * 5; // 5 bytes per pixel, https://stackoverflow.com/questions/18465390/php-fatal-error-out-of-memory-when-creating-an-image#comment27312125_18465539
+		}
+
+		if ( $gd_image_size_in_memory >= $available_memory ) {
+			return $image;
+		}
+
 		$target_size      = wc_get_image_size( $size );
 		$image_width      = $image[1];
 		$image_height     = $image[2];
@@ -490,6 +502,66 @@ class WC_Regenerate_Images {
 
 		// Lets dispatch the queue to start processing.
 		self::$background_process->save()->dispatch();
+	}
+
+	/**
+	 * Return the memory limit used for image processing in WP.
+	 *
+	 * @return int Number of bytes of available memory for the PHP process.
+	 */
+	protected static function get_image_memory_limit() {
+		$mem_limit_bytes = 0;
+		$mem_limit       = self::_get_wp_image_memory_limit();
+
+		if ( $mem_limit === false ) {
+			$mem_limit     = ini_get( 'memory_limit' );
+		}
+
+		if ( $mem_limit ) {
+			$mem_limit_bytes = wp_convert_hr_to_bytes( $mem_limit );
+		}
+
+		return $mem_limit_bytes;
+	}
+
+	/**
+	 * Returns the memory limit that would be used after running wp_raise_memory_limit( 'image' ) function,
+	 * without changing the limit.
+	 *
+	 * This is a reduced copy of core's wp_raise_memory_limit.
+	 * It would be great if there was wp_raise_memory_limit( $context, $test_mode ) that wouldn't change the
+	 * memory limit, but there isn't one.
+	 *
+	 * @return false|int|string
+	 */
+	private static function _get_wp_image_memory_limit() {
+		if ( false === wp_is_ini_value_changeable( 'memory_limit' ) ) {
+			return false;
+		}
+
+		$current_limit     = ini_get( 'memory_limit' );
+		$current_limit_int = wp_convert_hr_to_bytes( $current_limit );
+
+		if ( -1 === $current_limit_int ) {
+			return false;
+		}
+
+		$wp_max_limit     = WP_MAX_MEMORY_LIMIT;
+		$wp_max_limit_int = wp_convert_hr_to_bytes( $wp_max_limit );
+		$filtered_limit   = $wp_max_limit;
+
+		// This is a WP core filter.
+		$filtered_limit = apply_filters( 'image_memory_limit', $filtered_limit );
+
+		$filtered_limit_int = wp_convert_hr_to_bytes( $filtered_limit );
+
+		if ( -1 === $filtered_limit_int || ( $filtered_limit_int > $wp_max_limit_int && $filtered_limit_int > $current_limit_int ) ) {
+			return $filtered_limit;
+		} elseif ( -1 === $wp_max_limit_int || $wp_max_limit_int > $current_limit_int ) {
+			return $wp_max_limit;
+		}
+
+		return false;
 	}
 }
 
