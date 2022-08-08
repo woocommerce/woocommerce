@@ -111,7 +111,7 @@ abstract class ObjectCache {
 	 * @return CacheEngine
 	 */
 	private function get_cache_engine(): CacheEngine {
-		if ( null === $this->cache_engine ) {
+		if ( $this->cache_engine === null ) {
 			$engine = $this->get_cache_engine_instance();
 
 			/**
@@ -164,14 +164,14 @@ abstract class ObjectCache {
 	/**
 	 * Add an object to the cache, or update an already cached object.
 	 *
-	 * @param int|string|null $id Id of the object to be cached, if null, get_object_id will be used to get it.
 	 * @param object|array    $object The object to be cached.
+	 * @param int|string|null $id Id of the object to be cached, if null, get_object_id will be used to get it.
 	 * @param int             $expiration Expiration of the cached data in seconds from the current time, or DEFAULT_EXPIRATION to use the default value.
 	 * @return bool True on success, false on error.
 	 * @throws CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
-	public function set( $id = null, $object, int $expiration = self::DEFAULT_EXPIRATION ): bool {
-		if ( null === $object ) {
+	public function set( $object, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
+		if ( $object === null ) {
 			throw new CacheException( "Can't cache a null value", $this, $id );
 		}
 
@@ -185,15 +185,15 @@ abstract class ObjectCache {
 
 		$this->verify_expiration_value( $expiration );
 
-		if ( null === $id ) {
+		if ( $id === null ) {
 			$id = $this->get_object_id( $object );
-			if ( null === $id ) {
+			if ( $id === null ) {
 				throw new CacheException( "Null id supplied and the cache class doesn't implement get_object_id", $this );
 			}
 		}
 
 		$errors = $this->validate( $object );
-		if ( null !== $errors && 1 === count( $errors ) ) {
+		if ( $errors !== null && count( $errors ) === 1 ) {
 			throw new CacheException( 'Object validation/serialization failed: ' . $errors[0], $this, $id, $errors );
 		} elseif ( ! empty( $errors ) ) {
 			throw new CacheException( 'Object validation/serialization failed', $this, $id, $errors );
@@ -213,7 +213,7 @@ abstract class ObjectCache {
 		$data = apply_filters( "woocommerce_after_serializing_{$this->object_type}_for_caching", $data, $object, $id );
 
 		$this->last_cached_data = $data;
-		return $this->get_cache_engine()->cache_object( $this->get_cache_key_prefix() . $id, $data, self::DEFAULT_EXPIRATION === $expiration ? $this->default_expiration : $expiration );
+		return $this->get_cache_engine()->cache_object( $this->get_cache_key_prefix() . $id, $data, $expiration === self::DEFAULT_EXPIRATION ? $this->default_expiration : $expiration );
 	}
 
 	/**
@@ -224,7 +224,7 @@ abstract class ObjectCache {
 	 * @throws CacheException Expiration time is negative or higher than MAX_EXPIRATION.
 	 */
 	private function verify_expiration_value( int $expiration ): void {
-		if ( self::DEFAULT_EXPIRATION !== $expiration && ( ( $expiration < 1 ) || ( $expiration > self::MAX_EXPIRATION ) ) ) {
+		if ( $expiration !== self::DEFAULT_EXPIRATION && ( ( $expiration < 1 ) || ( $expiration > self::MAX_EXPIRATION ) ) ) {
 			throw new CacheException( 'Invalid expiration value, must be ObjectCache::DEFAULT_EXPIRATION or a value between 1 and ObjectCache::MAX_EXPIRATION', $this );
 		}
 	}
@@ -250,18 +250,18 @@ abstract class ObjectCache {
 		$this->verify_expiration_value( $expiration );
 
 		$data = $this->get_cache_engine()->get_cached_object( $this->get_cache_key_prefix() . $id );
-		if ( null === $data ) {
+		if ( $data === null ) {
 			if ( $get_from_datastore_callback ) {
 				$object = $get_from_datastore_callback( $id );
 			} else {
 				$object = $this->get_from_datastore( $id );
 			}
 
-			if ( null === $object ) {
+			if ( $object === null ) {
 				return null;
 			}
 
-			$this->set( $id, $object, $expiration );
+			$this->set( $object, $id, $expiration );
 			$data = $this->last_cached_data;
 		}
 
