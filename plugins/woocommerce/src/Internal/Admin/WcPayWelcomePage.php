@@ -31,6 +31,16 @@ class WcPayWelcomePage {
 			return;
 		}
 
+		// No existing WCPay account.
+		if ( $this->has_wcpay_account() ) {
+			return;
+		}
+
+		// Not in WPCOM starter plan.
+		if ( $this->is_wpcom_start_plan() ) {
+			return;
+		}
+
 		// Store is in a supported country.
 		if ( ! WooCommercePayments::is_supported() ) {
 			return;
@@ -46,6 +56,7 @@ class WcPayWelcomePage {
 			return;
 		}
 
+		// Manually dismissed.
 		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
 			return;
 		}
@@ -94,5 +105,28 @@ class WcPayWelcomePage {
 				$menu[ $index ][0] .= ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			}
 		}
+	}
+
+	/**
+	 * Whether a WCPay account exists. By checking account data cache.
+	 *
+	 * @return boolean
+	 */
+	private function has_wcpay_account(): bool {
+		$account_data = get_option( 'wcpay_account_data' );
+		return isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] );
+	}
+
+	/**
+	 * Whether the site is on a WPCOM starter plan.
+	 *
+	 * @return boolean
+	 */
+	private function is_wpcom_start_plan(): bool {
+		if ( function_exists( 'wpcom_site_has_feature' ) ) {
+			return wpcom_site_has_feature( \WPCOM_Features::STARTER_PLAN );
+		}
+
+		return false;
 	}
 }
