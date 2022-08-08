@@ -233,6 +233,83 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'update_if_cached' does nothing if no object is cached with the passed (or obtained) id.
+	 *
+	 * @testWith [1234]
+	 *           [null]
+	 *
+	 * @param ?int $id Id to pass to update_if_cached.
+	 */
+	public function test_update_if_cached_does_nothing_for_not_cached_id( ?int $id ) {
+		// phpcs:disable Squiz.Commenting
+
+		$sut = new class() extends ObjectCache {
+			public function get_object_type(): string {
+				return 'the_type';
+			}
+
+			protected function get_object_id( $object ) {
+				return $object['id'];
+			}
+		};
+
+		// phpcs:enable Squiz.Commenting
+
+		$result = $sut->update_if_cached( array( 'id' => 1234 ), $id );
+		$this->assertFalse( $result );
+		$this->assertEmpty( $this->cache_engine->cache );
+	}
+
+	/**
+	 * @testdox 'update_if_cached' updates an already cached object the same way as 'set'.
+	 *
+	 * @testWith [1234]
+	 *           [null]
+	 *
+	 * @param ?int $id Id to pass to update_if_cached.
+	 */
+	public function test_update_if_cached_updates_already_cached_object( ?int $id ) {
+		// phpcs:disable Squiz.Commenting
+
+		$sut = new class() extends ObjectCache {
+			public function get_object_type(): string {
+				return 'the_type';
+			}
+
+			protected function get_object_id( $object ) {
+				return $object['id'];
+			}
+
+			protected function get_random_string(): string {
+				return 'random';
+			}
+		};
+
+		// phpcs:enable Squiz.Commenting
+
+		$sut->set( array( 'id' => 1234 ), $id );
+		$this->assertEquals( 'woocommerce_object_cache|the_type|random|1234', array_keys( $this->cache_engine->cache )[0] );
+
+		$new_value = array(
+			'id'  => 1234,
+			'foo' => 'bar',
+		);
+		$result    = $sut->update_if_cached( $new_value, $id );
+		$this->assertTrue( $result );
+		$this->assertEquals( $this->cache_engine->cache['woocommerce_object_cache|the_type|random|1234'], array( 'data' => $new_value ) );
+	}
+
+	/**
+	 * @testdox 'update_if_cached' throws an exception if no object id is passed and the class doesn't implement 'get_object_id'.
+	 */
+	public function test_update_if_cached_null_id_without_id_retrieval_implementation() {
+		$this->expectException( CacheException::class );
+		$this->expectExceptionMessage( "Null id supplied and the cache class doesn't implement get_object_id" );
+
+		$this->sut->update_if_cached( array( 'foo' ) );
+	}
+
+	/**
 	 * @testdox 'set' caches the value returned by 'serialize'.
 	 */
 	public function test_set_with_custom_serialization() {
