@@ -219,18 +219,19 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/Everywhere.*/
 		);
 
-		await page.pause();
-
 		//hover over option to reveal Delete
 		await page.locator( 'a:has-text("USA Zone")' ).hover();
 
 		//set up dialog handler
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.locator( 'text=Delete' ).nth( 4 ).click();
+		//by the time this test executes, it is the 6th shipping zone
+		//therefore remove nth 5 (as zero based)
+		await page.locator( 'text=Delete' ).nth( 5 ).click();
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
+		await page.reload();
 
+		//ensure Zone with Evertwhere Region has now been removed
 		await expect( page.locator( '.wc-shipping-zones' ) ).not.toHaveText(
 			/Everywhere.*/
 		);
