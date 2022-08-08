@@ -191,13 +191,15 @@ class Edit {
 		$edit_page_url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . $this->order->get_id() );
 		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
+		$new_page_url  = wc_get_container()->get( PageController::class )->get_new_page_url();
+
 		?>
 		<div class="wrap">
 		<h1 class="wp-heading-inline">
 			<?php echo esc_html( 'Edit order' ); ?>
 		</h1>
 		<?php
-		echo ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-orders&action=new' ) ) . '" class="page-title-action"> Add order </a>';
+		echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action"> Add order </a>';
 		?>
 		<hr class="wp-header-end">
 
