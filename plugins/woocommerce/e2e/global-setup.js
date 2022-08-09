@@ -1,5 +1,4 @@
 const { chromium, expect } = require( '@playwright/test' );
-const [ userAgent ] = require( 'top-user-agents' );
 const fs = require( 'fs' );
 const { ADMIN_USER, ADMIN_PASSWORD, CUSTOMER_USER, CUSTOMER_PASSWORD } =
 	process.env;
