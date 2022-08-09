@@ -3,7 +3,7 @@ export type Plugin = {
 	icon: string;
 	name: string;
 	description: string;
-	status: string;
+	status: 'installed' | 'activated' | 'configured';
 	docsUrl?: string;
 	supportUrl?: string;
 	settingsUrl?: string;
