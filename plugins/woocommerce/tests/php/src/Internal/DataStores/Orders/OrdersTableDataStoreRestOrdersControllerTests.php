@@ -88,22 +88,3 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 	}
 
 }
-
-// /**
-//  * class WC_REST_Orders_Controller_Tests.
-//  * Orders Controller tests for V3 REST API.
-//  */
-// class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
-
-// 	/**
-// 	 * Setup our test server, endpoints, and user info.
-// 	 */
-// 	public function setUp(): void {
-// 		parent::setUp();
-// 		$this->endpoint = new WC_REST_Orders_Controller();
-// 		$this->user     = $this->factory->user->create(
-// 			array(
-// 				'role' => 'administrator',
-// 			)
-// 		);
-// 	}

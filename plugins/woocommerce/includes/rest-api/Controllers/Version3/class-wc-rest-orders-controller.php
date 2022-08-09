@@ -317,7 +317,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		// Do no use WC_Order_Query for the CPT datastore.
+		// Do not use WC_Order_Query for the CPT datastore.
 		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			return parent::get_objects( $query_args );
 		}
