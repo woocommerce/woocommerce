@@ -20,7 +20,7 @@ const Banner = () => {
 					</div>
 					<h1 className="offer-copy">{ strings.bannerCopy }</h1>
 					<div className="discount-copy">
-						{ strings.discountCopy }
+						{ strings.discountCopy } { strings.termsAndConditions }
 					</div>
 				</div>
 			</CardBody>

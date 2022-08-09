@@ -218,11 +218,12 @@
 	@include breakpoint('>600px') {
 		.components-card__body {
 			background: url(./wcpay-offer.svg) no-repeat right;
+			background-size: 240px auto;
 		}
 
 		.limited-time-offer {
 			// max-width: 300px;
-			max-width: calc(100% - 240px);
+			max-width: calc(100% - 200px);
 		}
 	}
 }

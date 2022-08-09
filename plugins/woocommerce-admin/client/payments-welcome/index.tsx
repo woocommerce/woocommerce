@@ -206,9 +206,7 @@ const ConnectPageOnboarding = ( {
 			<CardBody>
 				<div className="content">
 					<p className="onboarding-description">
-						{ strings.onboarding.description }
-						<br />
-						<LearnMore />
+						{ strings.onboarding.description } <LearnMore />
 					</p>
 
 					<h3 className="accepted-payment-methods">
