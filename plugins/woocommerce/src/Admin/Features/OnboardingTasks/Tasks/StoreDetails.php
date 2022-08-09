@@ -60,7 +60,7 @@ class StoreDetails extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-settings' );
+		return admin_url( 'admin.php?page=wc-settings&tab=general&tutorial=true' );
 	}
 
 	/**
@@ -69,7 +69,8 @@ class StoreDetails extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		// Mark as completed if the store address and city are set. We don't need to check the country because it's set by default.
-		return get_option( 'woocommerce_store_address', '' ) !== '' && get_option( 'woocommerce_store_city', '' ) !== '';
+		// Mark as completed if the store address, city and postcode are set. We don't need to check the country because it's set by default.
+		return get_option( 'woocommerce_store_address', '' ) !== '' && get_option( 'woocommerce_store_city', '' ) !== '' &&
+		get_option( 'woocommerce_store_postcode', '' ) !== '';
 	}
 }

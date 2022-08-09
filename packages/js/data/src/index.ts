@@ -22,6 +22,7 @@ export { EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attributes
 export { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
 export { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 export { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
+export { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
 export { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 export { PaymentGateway } from './payment-gateways/types';
 
@@ -98,6 +99,7 @@ import type { EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME } from './product-attri
 import type { EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME } from './product-shipping-classes';
 import type { EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME } from './shipping-zones';
 import type { EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME } from './product-tags';
+import type { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories';
 import type { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 
 export type WCDataStoreName =
@@ -119,7 +121,8 @@ export type WCDataStoreName =
 	| typeof EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	| typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
-	| typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
+	| typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -135,6 +138,7 @@ import { ProductAttributeSelectors } from './product-attributes/types';
 import { ProductShippingClassSelectors } from './product-shipping-classes/types';
 import { ShippingZonesSelectors } from './shipping-zones/types';
 import { ProductTagSelectors } from './product-tags/types';
+import { ProductCategorySelectors } from './product-categories/types';
 import { ProductAttributeTermsSelectors } from './product-attribute-terms/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
@@ -171,6 +175,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? ProductShippingClassSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
 	? ProductTagSelectors
+	: T extends typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
+	? ProductCategorySelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 	? ProductAttributeTermsSelectors
 	: T extends typeof ORDERS_STORE_NAME
@@ -187,6 +193,7 @@ export interface WCDataSelector {
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';
+export { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
 export { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';
 export { ActionDispatchers as ProductsStoreActions } from './products/actions';
 export { ActionDispatchers as ProductShippingClassesActions } from './product-shipping-classes/types';

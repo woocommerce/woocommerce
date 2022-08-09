@@ -4,15 +4,15 @@
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"require": {
-		"php": ">=7.0",
-		"psr/container": "^1.0"
+		"php": ">=7.2"
 	},
 	"require-dev": {
-		"league/container": "3.3.5"
+		"league/container": "3.3.5",
+		"psr/container": "^1.1"
 	},
 	"config": {
 		"platform": {
-			"php": "7.0"
+			"php": "7.2"
 		}
 	},
 	"scripts": {
@@ -28,10 +28,10 @@
 			"dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
 			"dep_directory": "/packages/",
 			"packages": [
-				"league/container"
+				"league/container",
+				"psr/container"
 			],
 			"excluded_packages": [
-				"psr/container"
 			],
 			"classmap_directory": "/classes/",
 			"classmap_prefix": "WC_Vendor_",
