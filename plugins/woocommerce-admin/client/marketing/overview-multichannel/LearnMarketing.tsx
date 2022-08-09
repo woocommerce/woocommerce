@@ -95,22 +95,65 @@ const LearnMarketing = () => {
 			);
 		}
 
-		if ( posts.length ) {
+		if ( error || posts.length === 0 ) {
+			return null;
+		}
+
+		return (
+			<Pagination
+				showPagePicker={ false }
+				showPerPagePicker={ false }
+				page={ page }
+				perPage={ perPage }
+				total={ posts && posts.length }
+				onPageChange={ ( newPage: number ) => {
+					setPage( newPage );
+				} }
+			/>
+		);
+	};
+
+	const renderBody = () => {
+		if ( isLoading ) {
 			return (
-				<Pagination
-					showPagePicker={ false }
-					showPerPagePicker={ false }
-					page={ page }
-					perPage={ perPage }
-					total={ posts && posts.length }
-					onPageChange={ ( newPage: number ) => {
-						setPage( newPage );
-					} }
+				<>
+					<PlaceholderPostTile />
+					<PlaceholderPostTile />
+				</>
+			);
+		}
+
+		if ( error ) {
+			return (
+				<EmptyContent
+					title={ __(
+						"Oops, our posts aren't loading right now",
+						'woocommerce'
+					) }
+					message={ <ReadBlogMessage /> }
+					illustration=""
+					actionLabel=""
 				/>
 			);
 		}
 
-		return null;
+		if ( posts.length === 0 ) {
+			return (
+				<EmptyContent
+					title={ __( 'No posts yet', 'woocommerce' ) }
+					message={ <ReadBlogMessage /> }
+					illustration=""
+					actionLabel=""
+				/>
+			);
+		}
+
+		return (
+			<>
+				<PostTile post={ posts[ ( page - 1 ) * perPage ] } />
+				<PostTile post={ posts[ ( page - 1 ) * perPage + 1 ] } />
+			</>
+		);
 	};
 
 	return (
@@ -120,32 +163,8 @@ const LearnMarketing = () => {
 			header={ __( 'Learn about marketing a store', 'woocommerce' ) }
 			footer={ renderFooter() }
 		>
-			<div className="woocommerce-marketing-learn-marketing-card__posts">
-				{ isLoading && (
-					<>
-						<PlaceholderPostTile />
-						<PlaceholderPostTile />
-					</>
-				) }
-				{ error && (
-					<EmptyContent
-						title={ __(
-							"Oops, our posts aren't loading right now",
-							'woocommerce'
-						) }
-						message={ <ReadBlogMessage /> }
-						illustration=""
-						actionLabel=""
-					/>
-				) }
-				{ posts.length > 0 && (
-					<>
-						<PostTile post={ posts[ ( page - 1 ) * perPage ] } />
-						<PostTile
-							post={ posts[ ( page - 1 ) * perPage + 1 ] }
-						/>
-					</>
-				) }
+			<div className="woocommerce-marketing-learn-marketing-card__body">
+				{ renderBody() }
 			</div>
 		</CollapsibleCard>
 	);
