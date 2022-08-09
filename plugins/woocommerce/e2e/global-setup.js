@@ -8,7 +8,7 @@ const customerUsername = CUSTOMER_USER ?? 'customer';
 const customerPassword = CUSTOMER_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
-	const { stateDir, baseURL } = config.projects[ 0 ].use;
+	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
 	console.log( `State Dir: ${ stateDir }` );
 	console.log( `Base URL: ${ baseURL }` );
@@ -45,10 +45,9 @@ module.exports = async ( config ) => {
 	let customerKeyConfigured = false;
 
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
-	const contextOptions = baseURL.includes( 'http://localhost' )
-		? { baseURL }
-		: { baseURL, userAgent };
+	const contextOptions = { baseURL, userAgent };
 
+	// Create browser, browserContext, and page for customer and admin users
 	const browser = await chromium.launch();
 	const adminContext = await browser.newContext( contextOptions );
 	const customerContext = await browser.newContext( contextOptions );

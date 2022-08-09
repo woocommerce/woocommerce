@@ -4,12 +4,10 @@ const adminUsername = ADMIN_USER ?? 'admin';
 const adminPassword = ADMIN_PASSWORD ?? 'password';
 
 module.exports = async ( config ) => {
-	const { baseURL } = config.projects[ 0 ].use;
+	const { baseURL, userAgent } = config.projects[ 0 ].use;
 
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
-	const contextOptions = baseURL.includes( 'http://localhost' )
-		? { baseURL }
-		: { baseURL, userAgent };
+	const contextOptions = { baseURL, userAgent };
 
 	const browser = await chromium.launch();
 	const context = await browser.newContext( contextOptions );
