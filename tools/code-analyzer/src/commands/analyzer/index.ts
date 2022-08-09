@@ -237,12 +237,6 @@ export default class Analyzer extends Command {
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
 
-		await generateJSONFile( join( process.cwd(), file ), {
-			templates: Object.fromEntries( templates.entries() ),
-			hooks: Object.fromEntries( hooks.entries() ),
-			schema: databaseUpdates || {},
-		} );
-
 		if ( templates.size ) {
 			printTemplateResults(
 				templates,
@@ -282,6 +276,13 @@ export default class Analyzer extends Command {
 		} else {
 			this.log( 'No database updates found' );
 		}
+
+		await generateJSONFile( join( process.cwd(), file ), {
+			templates: Object.fromEntries( templates.entries() ),
+			hooks: Object.fromEntries( hooks.entries() ),
+			db: databaseUpdates || {},
+			schema: schemaDiff || {},
+		} );
 
 		CliUx.ux.action.stop();
 	}
