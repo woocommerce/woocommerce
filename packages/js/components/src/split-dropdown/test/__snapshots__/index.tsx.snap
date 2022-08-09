@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SplitDropdown it renders correctly collapsed 1`] = `
+<div>
+  <div
+    class="components-button-group woocommerce-split-dropdown woocommerce-split-dropdown__container"
+    role="group"
+  >
+    <button
+      class="components-button woocommerce-split-dropdown__main-button is-primary"
+      type="button"
+    >
+      Default Action
+    </button>
+    <div
+      class="components-dropdown"
+      tabindex="-1"
+    >
+      <button
+        class="components-button woocommerce-split-dropdown__toggle is-primary"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
