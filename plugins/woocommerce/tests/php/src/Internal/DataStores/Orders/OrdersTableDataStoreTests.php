@@ -1,12 +1,10 @@
 <?php
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class OrdersTableDataStoreTests.
@@ -52,7 +50,6 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-
 		parent::tearDown();
 	}
 
