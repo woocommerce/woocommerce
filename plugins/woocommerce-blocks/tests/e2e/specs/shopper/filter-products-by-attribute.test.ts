@@ -87,6 +87,8 @@ describe( `${ block.name } Block`, () => {
 		it( 'should show only products that match the filter', async () => {
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
+
+			await page.waitForSelector( selectors.frontend.filter );
 			await page.click( selectors.frontend.filter );
 			await waitForAllProductsBlockLoaded();
 			const products = await page.$$( selectors.frontend.productsList );
@@ -119,12 +121,15 @@ describe( `${ block.name } Block`, () => {
 			);
 			await canvasEl.click( selectors.editor.doneButton );
 			await saveTemplate();
-			await goToShopPage();
 		} );
 
 		afterAll( async () => {
 			await deleteAllTemplates( 'wp_template' );
 			await deleteAllTemplates( 'wp_template_part' );
+		} );
+
+		beforeEach( async () => {
+			await goToShopPage();
 		} );
 
 		it( 'should render', async () => {
@@ -144,6 +149,8 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			expect( isRefreshed ).not.toBeCalled();
+
+			await page.waitForSelector( selectors.frontend.filter );
 
 			await Promise.all( [
 				page.waitForNavigation(),
