@@ -1690,8 +1690,12 @@ class WC_Helper {
 		$request = WC_Helper_API::post(
 			'connect',
 			array(
-				'headers' => array( 'X-API-Key' => $password ),
-				'body'    => wp_json_encode( array( 'home_url' => home_url() ) ),
+				'headers'       => array(
+					'X-API-Key'    => $password,
+					'Content-Type' => 'application/json',
+				),
+				'body'          => wp_json_encode( array( 'home_url' => home_url() ) ),
+				'authenticated' => false,
 			)
 		);
 
