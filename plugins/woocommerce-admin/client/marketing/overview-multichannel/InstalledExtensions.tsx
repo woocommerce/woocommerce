@@ -13,8 +13,8 @@ import {
 	CollapsibleCard,
 	CardBody,
 	CardDivider,
-} from '../components/CollapsibleCard';
-import { ProductIcon } from '../components';
+	ProductIcon,
+} from '../components';
 import { Plugin } from './types';
 import { usePlugins } from './usePlugins';
 import './InstalledExtensions.scss';
