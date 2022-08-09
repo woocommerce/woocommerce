@@ -61,20 +61,25 @@ export const Secondary: React.FC = () => {
 export const SomeDisabled: React.FC = () => {
 	return (
 		<SplitDropdown>
-			<Button
-				text="Default Action"
-				onClick={ () => clickHandler( 'Default' ) }
-				disabled
-			></Button>
-			<Button
-				text="Secondary Action"
-				onClick={ () => clickHandler( 'Secondary' ) }
-			></Button>
-			<Button
-				text="Tertiary Action"
-				onClick={ () => clickHandler( 'Tertiary' ) }
-				disabled
-			></Button>
+			<Button onClick={ () => clickHandler( 'Default' ) } disabled>
+				Default Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Secondary' ) }>
+				Secondary Action
+			</Button>
+			<Button onClick={ () => clickHandler( 'Tertiary' ) } disabled>
+				Tertiary Action
+			</Button>
+		</SplitDropdown>
+	);
+};
+
+export const SingleAction: React.FC = () => {
+	return (
+		<SplitDropdown>
+			<Button onClick={ () => clickHandler( 'Only' ) }>
+				Only Action
+			</Button>
 		</SplitDropdown>
 	);
 };

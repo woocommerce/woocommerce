@@ -8,15 +8,15 @@ This is a ButtonGroup with a primary action and a menu hidden behind a Dropdown 
 ```jsx
     // Primary button variant (default)
     <SplitDropdown>
-        <Button onClick={ primaryActionHandler } text="Primary Action"></Button>
-        <Button onClick={ secondaryActionHandler } text="Secondary Action"></Button>
-        <Button onClick={ tertiaryActionHandler } text="Tertiary Action"></Button>
+        <Button onClick={ primaryActionHandler }>Primary Action</Button>
+        <Button onClick={ secondaryActionHandler }>Secondary Action</Button>
+        <Button onClick={ tertiaryActionHandler }>Tertiary Action</Button>
     </SplitDropdown>
     // Secondary button variant, disabled
     <SplitDropdown variant="secondary" disabled>
-        <Button onClick={ primaryActionHandler } text="Primary Action"></Button>
-        <Button onClick={ secondaryActionHandler } text="Secondary Action"></Button>
-        <Button onClick={ tertiaryActionHandler } text="Tertiary Action"></Button>
+        <Button onClick={ primaryActionHandler }>Primary Action</Button>
+        <Button onClick={ secondaryActionHandler }>Secondary Action</Button>
+        <Button onClick={ tertiaryActionHandler }>Tertiary Action</Button>
     </SplitDropdown>
 ```
 
