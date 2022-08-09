@@ -140,9 +140,9 @@ export default class Analyzer extends Command {
 
 			CliUx.ux.action.stop();
 
-			this.scanChanges( diff, pluginData[ 0 ], flags, schemaDiff );
+			await this.scanChanges( diff, pluginData[ 0 ], flags, schemaDiff );
 		} else {
-			this.scanChanges( diff, pluginData[ 0 ], flags );
+			await this.scanChanges( diff, pluginData[ 0 ], flags );
 		}
 
 		// Clean up the temporary repo.
@@ -233,9 +233,11 @@ export default class Analyzer extends Command {
 	) {
 		const { output, file } = flags;
 		CliUx.ux.action.start( 'Generating changes' );
+
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
 		const databaseUpdates = this.scanDatabases( content );
+		let schemaDiffResult = {};
 
 		if ( templates.size ) {
 			printTemplateResults(
@@ -257,7 +259,7 @@ export default class Analyzer extends Command {
 		}
 
 		if ( ! areSchemasEqual( schemaDiff ) ) {
-			printSchemaChange(
+			schemaDiffResult = printSchemaChange(
 				schemaDiff,
 				version,
 				output,
@@ -281,7 +283,7 @@ export default class Analyzer extends Command {
 			templates: Object.fromEntries( templates.entries() ),
 			hooks: Object.fromEntries( hooks.entries() ),
 			db: databaseUpdates || {},
-			schema: schemaDiff || {},
+			schema: schemaDiffResult || {},
 		} );
 
 		CliUx.ux.action.stop();
@@ -446,11 +448,12 @@ export default class Analyzer extends Command {
 
 				const name = getHookName( hookName[ 3 ] );
 
-				const description = getHookDescription( raw, name );
+				const description = getHookDescription( raw, name ) || '';
 
 				if ( ! description ) {
 					this.error(
-						`Hook ${ name } has no description. Please add a description.`
+						`Hook ${ name } has no description. Please add a description.`,
+						{ exit: false }
 					);
 				}
 
