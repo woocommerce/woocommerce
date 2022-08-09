@@ -41,4 +41,18 @@ describe( 'SplitDropdown', () => {
 			).toHaveLength( 1 )
 		);
 	} );
+	test( 'it does not render the toggle where there are no items for the dropdown menu', () => {
+		const { container, getByText, queryByText } = render(
+			<SplitDropdown>
+				<Button>Only Action</Button>
+			</SplitDropdown>
+		);
+
+		// should have no toggle
+		expect(
+			container.getElementsByClassName(
+				'woocommerce-split-dropdown__toggle'
+			)?.length
+		).toBe( 0 );
+	} );
 } );

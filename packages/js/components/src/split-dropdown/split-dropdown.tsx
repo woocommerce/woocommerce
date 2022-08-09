@@ -20,7 +20,7 @@ export type SplitDropdownProps = {
 	label?: string;
 	text?: string;
 	variant?: string;
-	children: JSX.Element[];
+	children: JSX.Element | JSX.Element[];
 };
 
 export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
@@ -40,7 +40,9 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 			className
 		),
 	};
-	const [ mainItem, ...menuItems ] = children;
+	const [ mainItem, ...menuItems ] = Array.isArray( children )
+		? children
+		: [ children ];
 	return (
 		<ButtonGroup
 			className={ classNames(
@@ -50,38 +52,42 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 			) }
 		>
 			{ cloneElement( mainItem, mainItemProps ) }
-			<Dropdown
-				contentClassName={ classNames(
-					'woocommerce-split-dropdown__menu',
-					className
-				) }
-				position="bottom left"
-				renderToggle={ ( { isOpen, onToggle } ) => {
-					return (
-						<Button
-							{ ...groupItemProps }
-							className={ classNames(
-								'woocommerce-split-dropdown__toggle',
-								className
-							) }
-							onClick={ onToggle }
-						>
-							<Icon icon={ isOpen ? chevronUp : chevronDown } />
-						</Button>
-					);
-				} }
-				renderContent={ () => {
-					return (
-						<div>
-							{ menuItems.map( ( item, index ) => {
-								return cloneElement( item, {
-									key: index,
-								} );
-							} ) }
-						</div>
-					);
-				} }
-			/>
+			{ menuItems.length > 0 && (
+				<Dropdown
+					contentClassName={ classNames(
+						'woocommerce-split-dropdown__menu',
+						className
+					) }
+					position="bottom left"
+					renderToggle={ ( { isOpen, onToggle } ) => {
+						return (
+							<Button
+								{ ...groupItemProps }
+								className={ classNames(
+									'woocommerce-split-dropdown__toggle',
+									className
+								) }
+								onClick={ onToggle }
+							>
+								<Icon
+									icon={ isOpen ? chevronUp : chevronDown }
+								/>
+							</Button>
+						);
+					} }
+					renderContent={ () => {
+						return (
+							<div>
+								{ menuItems.map( ( item, index ) => {
+									return cloneElement( item, {
+										key: index,
+									} );
+								} ) }
+							</div>
+						);
+					} }
+				/>
+			) }
 		</ButtonGroup>
 	);
 };

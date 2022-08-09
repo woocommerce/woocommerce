@@ -1,7 +1,7 @@
 SplitDropdown
 ===
 
-This is a ButtonGroup with a primary action and a menu hidden behind a Dropdown toggle button. The component expects to receive elements (probably Buttons) as children. The primary action will be the first child, and the dropdown menu will contain the rest of the children.
+This is a ButtonGroup with a primary action and a menu hidden behind a Dropdown toggle button. The component expects to receive elements (probably Buttons) as children. The primary action will be the first child, and the dropdown menu will contain the rest of the children, if any. If only one child is given to this component the dropdown toggle will not be rendered.
 
 ## Usage
 
