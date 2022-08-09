@@ -55,7 +55,7 @@ export const MediaUploader = ( {
 				onSelect={ onSelect }
 				allowedTypes={ allowedMediaTypes }
 				render={ ( { open } ) => (
-					<Button variant="secondary" onClick={ open }>
+					<Button isSecondary onClick={ open }>
 						{ buttonText }
 					</Button>
 				) }

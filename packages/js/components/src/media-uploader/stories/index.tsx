@@ -10,7 +10,12 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { MediaUploader } from '../';
-import { ErrorType, File } from '../types';
+import { File } from '../types';
+
+declare let Blob: {
+	prototype: Blob;
+	new (): Blob;
+};
 
 const MockMediaUpload = ( { onSelect, render } ) => {
 	const [ isOpen, setOpen ] = useState( false );
@@ -81,19 +86,26 @@ const ImageGallery = ( { images }: { images: File[] } ) => {
 	);
 };
 
-const mockUploadMedia = ( { filesList, onFileChange } ) =>
-	new Promise< void >( ( resolve ) => {
+const readImage = ( file: Blob ) => {
+	return new Promise< MediaItem >( ( resolve ) => {
 		const fileReader = new FileReader();
 		fileReader.onload = function ( event ) {
-			const file = {
+			const image = {
 				alt: 'Temporary image',
 				url: event?.target?.result,
 			} as MediaItem;
-			onFileChange( [ file ] );
-			resolve();
+			resolve( image );
 		};
-		fileReader.readAsDataURL( filesList[ 0 ] );
+		fileReader.readAsDataURL( file );
 	} );
+};
+
+const mockUploadMedia = async ( { filesList, onFileChange } ) => {
+	const images = await Promise.all(
+		filesList.map( ( file ) => readImage( file ) )
+	);
+	onFileChange( images );
+};
 
 export const Basic: React.FC = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
@@ -137,20 +149,22 @@ export const DisabledDropZone: React.FC = () => {
 };
 
 export const MaxUploadFileSize: React.FC = () => {
-	const [ error, setError ] = useState< ErrorType | null >( null );
+	const [ error, setError ] = useState< string | null >( null );
 
 	return (
 		<Card size="large">
 			<CardBody>
 				{ error && (
-					<Notice status={ 'error' }>{ error.message }</Notice>
+					<Notice isDismissible={ false } status={ 'error' }>
+						{ error }
+					</Notice>
 				) }
 
 				<MediaUploader
 					maxUploadFileSize={ 1000 }
 					MediaUploadComponent={ MockMediaUpload }
 					onSelect={ () => null }
-					onError={ ( e ) => setError( e ) }
+					onError={ ( e ) => setError( e.message ) }
 					onUpload={ () => null }
 				/>
 			</CardBody>
