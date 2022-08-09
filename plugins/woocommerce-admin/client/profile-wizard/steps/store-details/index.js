@@ -10,7 +10,6 @@ import {
 	CheckboxControl,
 	FlexItem as MaybeFlexItem,
 	Spinner,
-	Popover,
 } from '@wordpress/components';
 import { Component, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -24,7 +23,6 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { Icon, info } from '@wordpress/icons';
 import { isEmail } from '@wordpress/url';
 
 /**
@@ -35,9 +33,10 @@ import {
 	StoreAddress,
 	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
-import UsageModal from '../usage-modal';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
+import SkipButton from '../skip-button';
+import UsageModal from '../usage-modal';
 import './style.scss';
 
 // FlexItem is not available until WP version 5.5. This code is safe to remove
@@ -63,8 +62,6 @@ export class StoreDetails extends Component {
 
 		this.state = {
 			showUsageModal: false,
-			skipping: false,
-			isStoreDetailsPopoverVisible: false,
 			isSkipSetupPopoverVisible: false,
 		};
 
@@ -113,10 +110,13 @@ export class StoreDetails extends Component {
 	}
 
 	onSubmit() {
-		this.setState( {
-			showUsageModal: true,
-			skipping: false,
-		} );
+		if ( this.props.allowTracking ) {
+			this.props.goToNextStep();
+		} else {
+			this.setState( {
+				showUsageModal: true,
+			} );
+		}
 	}
 
 	onFormValueChange( changedFormValue ) {
@@ -245,31 +245,8 @@ export class StoreDetails extends Component {
 	}
 
 	render() {
-		const {
-			showUsageModal,
-			skipping,
-			isStoreDetailsPopoverVisible,
-			isSkipSetupPopoverVisible,
-		} = this.state;
-		const {
-			skipProfiler,
-			isLoading,
-			isBusy,
-			initialValues,
-			invalidateResolutionForStoreSelector,
-		} = this.props;
-
-		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
-		const skipSetupText = __(
-			'Manual setup is only recommended for\n experienced WooCommerce users or developers.',
-			'woocommerce'
-		);
-
-		const configureCurrencyText = __(
-			'Your store address will help us configure currency\n options and shipping rules automatically.\n This information will not be publicly visible and can\n easily be changed later.',
-			'woocommerce'
-		);
-		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
+		const { showUsageModal } = this.state;
+		const { isLoading, isBusy, initialValues } = this.props;
 
 		if ( isLoading ) {
 			return (
@@ -292,38 +269,10 @@ export class StoreDetails extends Component {
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
-							"Tell us about your store and we'll get you set up in no time",
+							'Tell us where you run your business to help us configure currency, shipping, taxes, and more in a fully automated way.',
 							'woocommerce'
 						) }
-
-						<Button
-							isTertiary
-							label={ __(
-								'Learn more about store details',
-								'woocommerce'
-							) }
-							onClick={ () =>
-								this.setState( {
-									isStoreDetailsPopoverVisible: true,
-								} )
-							}
-						>
-							<Icon icon={ info } />
-						</Button>
 					</Text>
-					{ isStoreDetailsPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( {
-									isStoreDetailsPopoverVisible: false,
-								} )
-							}
-						>
-							{ configureCurrencyText }
-						</Popover>
-					) }
 				</div>
 
 				<Form
@@ -343,18 +292,13 @@ export class StoreDetails extends Component {
 							{ showUsageModal && (
 								<UsageModal
 									onContinue={ () => {
-										if ( skipping ) {
-											skipProfiler();
-										} else {
-											this.onContinue( values ).then(
-												() => this.props.goToNextStep()
-											);
-										}
+										this.onContinue( values ).then( () =>
+											this.props.goToNextStep()
+										);
 									} }
 									onClose={ () =>
 										this.setState( {
 											showUsageModal: false,
-											skipping: false,
 										} )
 									}
 								/>
@@ -373,7 +317,7 @@ export class StoreDetails extends Component {
 													'woocommerce'
 											  )
 											: __(
-													'Email address (Optional)',
+													'Email address',
 													'woocommerce'
 											  )
 									}
@@ -405,7 +349,6 @@ export class StoreDetails extends Component {
 									</div>
 								</FlexItem>
 							</CardBody>
-
 							<CardFooter justify="center">
 								<Button
 									isPrimary
@@ -419,46 +362,11 @@ export class StoreDetails extends Component {
 						</Card>
 					) }
 				</Form>
-				<div className="woocommerce-profile-wizard__footer">
-					<Button
-						isLink
-						className="woocommerce-profile-wizard__footer-link"
-						onClick={ () => {
-							invalidateResolutionForStoreSelector(
-								'getTaskLists'
-							);
-							this.setState( {
-								showUsageModal: true,
-								skipping: true,
-							} );
-							return false;
-						} }
-					>
-						{ __( 'Skip setup store details', 'woocommerce' ) }
-					</Button>
-					<Button
-						isTertiary
-						label={ skipSetupText }
-						onClick={ () =>
-							this.setState( { isSkipSetupPopoverVisible: true } )
-						}
-					>
-						<Icon icon={ info } />
-					</Button>
-					{ isSkipSetupPopoverVisible && (
-						<Popover
-							focusOnMount="container"
-							position="top center"
-							onClose={ () =>
-								this.setState( {
-									isSkipSetupPopoverVisible: false,
-								} )
-							}
-						>
-							{ skipSetupText }
-						</Popover>
-					) }
-				</div>
+				<SkipButton
+					onSkipped={ () => {
+						recordEvent( 'storeprofiler_store_details_skip' );
+					} }
+				/>
 			</div>
 		);
 	}
@@ -482,11 +390,13 @@ export default compose(
 			getCountries,
 			hasFinishedResolution: hasFinishedResolutionCountries,
 		} = select( COUNTRIES_STORE_NAME );
-		const { isResolving } = select( OPTIONS_STORE_NAME );
+		const { isResolving, getOption } = select( OPTIONS_STORE_NAME );
 
 		const profileItems = getProfileItems();
 		const emailPrefill = getEmailPrefill();
 
+		const allowTracking =
+			getOption( 'woocommerce_allow_tracking' ) === 'yes';
 		const { general: settings = {} } = getSettings( 'general' );
 		const isBusy =
 			isOnboardingRequesting( 'updateProfileItems' ) ||
@@ -538,18 +448,17 @@ export default compose(
 			isBusy,
 			settings,
 			errorsRef,
+			allowTracking,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { invalidateResolutionForStoreSelector, updateProfileItems } =
-			dispatch( ONBOARDING_STORE_NAME );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { updateAndPersistSettingsForGroup } =
 			dispatch( SETTINGS_STORE_NAME );
 
 		return {
 			createNotice,
-			invalidateResolutionForStoreSelector,
 			updateProfileItems,
 			updateAndPersistSettingsForGroup,
 		};

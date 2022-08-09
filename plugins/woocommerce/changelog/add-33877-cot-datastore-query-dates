@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Adds support for date_query to the COT datastore.

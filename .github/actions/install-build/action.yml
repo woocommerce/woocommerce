@@ -26,4 +26,4 @@ runs:
     - name: Run build
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: pnpm -- turbo run build --filter=woocommerce
+      run: pnpm run build --filter="${{ inputs.working_directory }}" --color

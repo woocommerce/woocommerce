@@ -30,6 +30,7 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import { getCountryCode } from '../../../dashboard/utils';
 import ProductTypeLabel from './label';
 import './style.scss';
+import SkipButton from '../skip-button';
 
 export class ProductTypes extends Component {
 	constructor() {
@@ -337,6 +338,11 @@ export class ProductTypes extends Component {
 							</Text>
 						) }
 				</div>
+				<SkipButton
+					onSkipped={ () => {
+						recordEvent( 'storeprofiler_store_product_type_skip' );
+					} }
+				/>
 			</div>
 		);
 	}

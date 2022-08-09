@@ -164,7 +164,6 @@ class WC_Unit_Tests_Bootstrap {
 		$inner_container = $inner_container_property->getValue( wc_get_container() );
 
 		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
-		$inner_container->reset_all_resolved();
 
 		$GLOBALS['wc_container'] = $inner_container;
 	}

@@ -12,7 +12,7 @@ import { fetchWithHeaders } from './controls';
 
 export function getResourceName(
 	prefix: string,
-	identifier: Record< string, unknown >
+	identifier: Record< string, unknown > | string
 ) {
 	const identifierString = JSON.stringify(
 		identifier,
