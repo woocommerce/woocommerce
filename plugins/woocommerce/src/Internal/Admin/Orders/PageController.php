@@ -185,7 +185,7 @@ class PageController {
 		}
 	}
 
-  /**
+	/**
 	 * Handles initialization of the orders edit form.
 	 *
 	 * @return void
