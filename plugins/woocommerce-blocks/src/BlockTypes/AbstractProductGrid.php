@@ -82,6 +82,15 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		}
 
 		/**
+		 * Override product description to prevent infinite loop.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce-blocks/pull/6849
+		 */
+		foreach ( $products as $product ) {
+			$product->set_description( '' );
+		}
+
+		/**
 		 * Product List Render event.
 		 *
 		 * Fires a WP Hook named `experimental__woocommerce_blocks-product-list-render` on render so that the client
