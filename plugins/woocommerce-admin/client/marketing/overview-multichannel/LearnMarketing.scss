@@ -58,4 +58,12 @@
 			height: 16px;
 		}
 	}
+
+	&__footer {
+		&--placeholder {
+			@include placeholder();
+			width: 150px;
+			height: 32px;
+		}
+	}
 }

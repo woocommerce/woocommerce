@@ -27,17 +27,17 @@ type PostTileProps = {
 	post: Post;
 };
 
-const PostTile: React.FC< PostTileProps > = ( { post } ) => {
-	if ( ! post ) {
-		return (
-			<div className="woocommerce-marketing-learn-marketing-card__post">
-				<div className="woocommerce-marketing-learn-marketing-card__post-img woocommerce-marketing-learn-marketing-card__post-img--placeholder"></div>
-				<div className="woocommerce-marketing-learn-marketing-card__post-title woocommerce-marketing-learn-marketing-card__post-title--placeholder"></div>
-				<div className="woocommerce-marketing-learn-marketing-card__post-description woocommerce-marketing-learn-marketing-card__post-description--placeholder"></div>
-			</div>
-		);
-	}
+const PlaceholderPostTile = () => {
+	return (
+		<div className="woocommerce-marketing-learn-marketing-card__post">
+			<div className="woocommerce-marketing-learn-marketing-card__post-img woocommerce-marketing-learn-marketing-card__post-img--placeholder"></div>
+			<div className="woocommerce-marketing-learn-marketing-card__post-title woocommerce-marketing-learn-marketing-card__post-title--placeholder"></div>
+			<div className="woocommerce-marketing-learn-marketing-card__post-description woocommerce-marketing-learn-marketing-card__post-description--placeholder"></div>
+		</div>
+	);
+};
 
+const PostTile: React.FC< PostTileProps > = ( { post } ) => {
 	return (
 		<a
 			className="woocommerce-marketing-learn-marketing-card__post"
@@ -77,7 +77,7 @@ const perPage = 2;
 
 const LearnMarketing = () => {
 	const [ page, setPage ] = useState( 1 );
-	const { posts } = useSelect( ( select ) => {
+	const { posts, isLoading } = useSelect( ( select ) => {
 		const { getBlogPosts, getBlogPostsError, isResolving } =
 			select( STORE_KEY );
 
@@ -90,25 +90,44 @@ const LearnMarketing = () => {
 
 	return (
 		<CollapsibleCard
-			initialCollapsed
+			initialCollapsed={ false }
 			className="woocommerce-marketing-learn-marketing-card"
 			header={ __( 'Learn about marketing a store', 'woocommerce' ) }
 			footer={
-				<Pagination
-					showPagePicker={ false }
-					showPerPagePicker={ false }
-					page={ page }
-					perPage={ perPage }
-					total={ posts && posts.length }
-					onPageChange={ ( newPage: number ) => {
-						setPage( newPage );
-					} }
-				/>
+				<>
+					{ isLoading && (
+						<div className="woocommerce-marketing-learn-marketing-card__footer--placeholder"></div>
+					) }
+					{ posts.length > 0 && (
+						<Pagination
+							showPagePicker={ false }
+							showPerPagePicker={ false }
+							page={ page }
+							perPage={ perPage }
+							total={ posts && posts.length }
+							onPageChange={ ( newPage: number ) => {
+								setPage( newPage );
+							} }
+						/>
+					) }
+				</>
 			}
 		>
 			<div className="woocommerce-marketing-learn-marketing-card__posts">
-				<PostTile post={ posts[ ( page - 1 ) * perPage ] } />
-				<PostTile post={ posts[ ( page - 1 ) * perPage + 1 ] } />
+				{ isLoading && (
+					<>
+						<PlaceholderPostTile />
+						<PlaceholderPostTile />
+					</>
+				) }
+				{ posts.length > 0 && (
+					<>
+						<PostTile post={ posts[ ( page - 1 ) * perPage ] } />
+						<PostTile
+							post={ posts[ ( page - 1 ) * perPage + 1 ] }
+						/>
+					</>
+				) }
 			</div>
 		</CollapsibleCard>
 	);
