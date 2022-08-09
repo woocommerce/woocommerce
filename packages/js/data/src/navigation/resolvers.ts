@@ -17,7 +17,7 @@ export function* getFavorites() {
 	yield getFavoritesRequest();
 
 	try {
-		const results = yield apiFetch( {
+		const results: string[] = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/navigation/favorites/me`,
 		} );
 
