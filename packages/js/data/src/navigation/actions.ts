@@ -46,7 +46,7 @@ export function getFavoritesSuccess( favorites: string[] ) {
 	};
 }
 
-export function addFavoriteRequest( favorite: unknown ) {
+export function addFavoriteRequest( favorite: string ) {
 	return {
 		type: TYPES.ADD_FAVORITE_REQUEST,
 		favorite,
@@ -68,7 +68,7 @@ export function addFavoriteSuccess( favorite: string ) {
 	};
 }
 
-export function removeFavoriteRequest( favorite: unknown ) {
+export function removeFavoriteRequest( favorite: string ) {
 	return {
 		type: TYPES.REMOVE_FAVORITE_REQUEST,
 		favorite,
@@ -111,7 +111,7 @@ export function* addFavorite( favorite: string ) {
 	yield addFavoriteRequest( favorite );
 
 	try {
-		const results: unknown = yield apiFetch( {
+		const results: string[] = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/navigation/favorites/me`,
 			method: 'POST',
 			data: {
@@ -135,7 +135,7 @@ export function* removeFavorite( favorite: string ) {
 	yield removeFavoriteRequest( favorite );
 
 	try {
-		const results: unknown = yield apiFetch( {
+		const results: string[] = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/navigation/favorites/me`,
 			method: 'DELETE',
 			data: {
