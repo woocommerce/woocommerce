@@ -18,7 +18,7 @@ import classnames from 'classnames';
  */
 import './CollapsibleCard.scss';
 
-export type CollapsibleCardProps = {
+type CollapsibleCardProps = {
 	header: string;
 	children: React.ReactNode;
 	className?: string;
@@ -49,6 +49,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 			<CardHeader>
 				<div>{ header }</div>
 				<Button
+					isSmall
 					icon={ collapsed ? chevronDown : chevronUp }
 					onClick={ handleClick }
 				></Button>

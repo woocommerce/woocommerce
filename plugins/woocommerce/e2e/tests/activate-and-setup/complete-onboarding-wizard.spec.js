@@ -13,10 +13,6 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		// Fill store's address - first line
-		await page.fill( '#inspector-text-control-0', 'addr 1' );
-		// Fill store's address - second line
-		await page.fill( '#inspector-text-control-1', 'addr 2' );
 		// Type the requested country/region
 		await page.click( '#woocommerce-select-control-0__control-input' );
 		await page.fill(
@@ -24,12 +20,14 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			'United States (US) — California'
 		);
 		await page.click( 'button >> text=United States (US) — California' );
+		// Fill store's address - first line
+		await page.fill( '#inspector-text-control-0', 'addr 1' );
+		// Fill postcode of the store
+		await page.fill( '#inspector-text-control-1', '94107' );
 		// Fill the city where the store is located
 		await page.fill( '#inspector-text-control-2', 'San Francisco' );
-		// Fill postcode of the store
-		await page.fill( '#inspector-text-control-3', '94107' );
 		// Fill store's email address
-		await page.fill( '#inspector-text-control-4', adminEmail );
+		await page.fill( '#inspector-text-control-3', adminEmail );
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
@@ -169,17 +167,16 @@ test.describe(
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 			);
-			await page.fill( '#inspector-text-control-0', 'addr 1' );
-			await page.fill( '#inspector-text-control-1', 'addr 2' );
 			await page.click( '#woocommerce-select-control-0__control-input' );
 			await page.fill(
 				'#woocommerce-select-control-0__control-input',
 				'Malta'
 			);
 			await page.click( 'button >> text=Malta' );
+			await page.fill( '#inspector-text-control-0', 'addr 1' );
+			await page.fill( '#inspector-text-control-1', 'VLT 1011' );
 			await page.fill( '#inspector-text-control-2', 'Valletta' );
-			await page.fill( '#inspector-text-control-3', 'VLT 1011' );
-			await page.fill( '#inspector-text-control-4', adminEmail );
+			await page.fill( '#inspector-text-control-3', adminEmail );
 			await page.check( '#inspector-checkbox-control-0' );
 			await page.click( 'button >> text=Continue' );
 			await page.click( 'button >> text=No thanks' );
@@ -278,17 +275,16 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.fill( '#inspector-text-control-0', 'addr 1' );
-		await page.fill( '#inspector-text-control-1', 'addr 2' );
 		await page.click( '#woocommerce-select-control-0__control-input' );
 		await page.fill(
 			'#woocommerce-select-control-0__control-input',
 			'United States (US) — California'
 		);
 		await page.click( 'button >> text=United States (US) — California' );
+		await page.fill( '#inspector-text-control-0', 'addr 1' );
+		await page.fill( '#inspector-text-control-1', '94107' );
 		await page.fill( '#inspector-text-control-2', 'San Francisco' );
-		await page.fill( '#inspector-text-control-3', '94107' );
-		await page.fill( '#inspector-text-control-4', adminEmail );
+		await page.fill( '#inspector-text-control-3', adminEmail );
 		await page.check( '#inspector-checkbox-control-0' );
 		await page.click( 'button >> text=Continue' );
 		await page.click( 'button >> text=No thanks' );
@@ -297,18 +293,29 @@ test.describe( 'Store owner can go through setup Task List', () => {
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		await page.click( ':nth-match(.woocommerce-task-list__item-title, 5)' );
+		await page.click( 'div >> text=Review Shipping Options' );
 
-		// check if this is the first time (or if the test is being retried)
-		const currPage = page.url();
-		if ( currPage.indexOf( 'page=wc-settings&tab=shipping' ) > 0 ) {
-			// click the Add shipping zone button on the shipping settings page
-			await page.locator( '.page-title-action' ).click();
-			await expect(
-				page.locator( 'div.woocommerce > form > h2' )
-			).toContainText( 'Shipping zones' );
-		} else {
-			await page.locator( 'button.components-button.is-primary' ).click();
+		// dismiss tourkit if visible
+		const tourkitVisible = await page
+			.locator( 'button.woocommerce-tour-kit-step-controls__close-btn' )
+			.isVisible();
+		if ( tourkitVisible ) {
+			await page.click(
+				'button.woocommerce-tour-kit-step-controls__close-btn'
+			);
 		}
+
+		// check for automatically added shipping zone
+		await expect(
+			page.locator( 'tr[data-id="1"] >> td.wc-shipping-zone-name > a' )
+		).toContainText( 'United States (US)' );
+		await expect(
+			page.locator( 'tr[data-id="1"] >> td.wc-shipping-zone-region' )
+		).toContainText( 'United States (US)' );
+		await expect(
+			page.locator(
+				'tr[data-id="1"] >> td.wc-shipping-zone-methods > div > ul > li'
+			)
+		).toContainText( 'Free shipping' );
 	} );
 } );
