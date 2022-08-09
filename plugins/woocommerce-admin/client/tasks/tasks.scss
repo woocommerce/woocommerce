@@ -54,7 +54,6 @@
 
 .components-modal__frame {
 	.components-modal__header {
-		border-bottom: 0;
 		margin-bottom: 0;
 	}
 
@@ -235,7 +234,7 @@
 	margin-top: $gap;
 }
 
-.woocommerce-task-list__setup_experiment_1 {
+.woocommerce-task-list__setup {
 	.woocommerce-experimental-list .woocommerce-experimental-list__item.complete {
 		text-decoration: line-through;
 

@@ -1,10 +1,15 @@
-/** @format */
+/**
+ * External dependencies
+ */
+import { bind } from 'jest-each';
+
+/**
+ * Internal dependencies
+ */
 import {
 	sendFailedTestScreenshotToSlack,
 	sendFailedTestMessageToSlack,
 } from '../slack';
-
-import { bind } from 'jest-each';
 const { takeScreenshotFor } = require( '../../utils' );
 
 /**
@@ -78,8 +83,8 @@ global.it = ( () => {
 /**
  * Save a screenshot during a test if the test fails.
  *
- * @param  testName
- * @param  callback
+ * @param {string}   testName
+ * @param {Function} callback
  * @return {Promise<void>}
  */
 const screenshotTest = async ( testName, callback ) => {

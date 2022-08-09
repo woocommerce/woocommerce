@@ -24,6 +24,11 @@ import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
 
+const AddProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
+	)
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -159,6 +164,22 @@ export const getPages = () => {
 				id: 'woocommerce-marketing-overview',
 			},
 			capability: 'view_woocommerce_reports',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
+		pages.push( {
+			container: AddProductPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
 		} );
 	}
 

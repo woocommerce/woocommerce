@@ -19,7 +19,10 @@
 	"dependencies": {
 		"@oclif/core": "^1",
 		"@oclif/plugin-help": "^5",
-		"@oclif/plugin-plugins": "^2.0.1"
+		"@oclif/plugin-plugins": "^2.0.1",
+		"@types/uuid": "^8.3.4",
+		"simple-git": "^3.10.0",
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@types/node": "^16.9.4",
@@ -47,7 +50,8 @@
 		}
 	},
 	"scripts": {
-		"build": "shx rm -rf dist && tsc -b",
+		"turbo:build": "shx rm -rf dist && tsc -b",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
 		"lint": "eslint . --ext .ts --config .eslintrc",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint",

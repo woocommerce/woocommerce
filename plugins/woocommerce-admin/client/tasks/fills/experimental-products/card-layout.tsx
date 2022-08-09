@@ -30,7 +30,8 @@ const CardLayout: React.FC< CardProps > = ( { items } ) => {
 			<Text className="woocommerce-products-card-layout__description">
 				{ interpolateComponents( {
 					mixedString: __(
-						'{{sbLink}}Start blank{{/sbLink}} or select a product type:'
+						'{{sbLink}}Start blank{{/sbLink}} or select a product type:',
+						'woocommerce'
 					),
 					components: {
 						sbLink: (

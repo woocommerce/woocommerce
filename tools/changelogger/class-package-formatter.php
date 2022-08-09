@@ -38,4 +38,23 @@ class Package_Formatter extends Formatter implements FormatterPlugin {
 
 		return '[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/' . $package . '/CHANGELOG.md).';
 	}
+
+	/**
+	 * Get Release link given a version number.
+	 *
+	 * @throws \InvalidArgumentException When directory parsing fails.
+	 * @param string $version Release version.
+	 *
+	 * @return string Link to the version's release.
+	 */
+	public function getReleaseLink( $version ) {
+		// Catpure anything past /woocommerce in the current working directory.
+		preg_match( '/\/woocommerce\/packages\/js\/(.+)/', getcwd(), $path );
+
+		if ( ! count( $path ) ) {
+			throw new \InvalidArgumentException( 'Invalid directory.' );
+		}
+
+		return 'https://www.npmjs.com/package/@woocommerce/' . $path[1] . '/v/' . $version;
+	}
 }

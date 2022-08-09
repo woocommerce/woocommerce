@@ -1,16 +1,15 @@
 /**
  * External dependencies
  */
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { Button, Card, CheckboxControl, Spinner } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { Link } from '@woocommerce/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
-import { pluginNames, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { pluginNames } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -20,6 +19,7 @@ import './style.scss';
 import sanitizeHTML from '~/lib/sanitize-html';
 import { setAllPropsToValue } from '~/lib/collections';
 import { getCountryCode } from '../../../../../../dashboard/utils';
+import SkipButton from '../../../../skip-button';
 
 const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 
@@ -211,81 +211,72 @@ export const ExtensionSection = ( {
 	);
 };
 
-export const createInstallExtensionOptions = ( installableExtensions ) => {
-	return installableExtensions.reduce(
-		( acc, curr ) => {
-			const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
-				return {
-					...pluginAcc,
-					[ plugin.key ]: true,
-				};
-			}, {} );
+export const createInstallExtensionOptions = (
+	installableExtensions,
+	prevInstallExtensionOptions
+) => {
+	return installableExtensions.reduce( ( acc, curr ) => {
+		const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
+			if ( acc.hasOwnProperty( plugin.key ) ) {
+				return pluginAcc;
+			}
+
 			return {
-				...acc,
-				...plugins,
+				...pluginAcc,
+				[ plugin.key ]: true,
 			};
-		},
-		{ install_extensions: true }
-	);
+		}, {} );
+
+		return {
+			...acc,
+			...plugins,
+		};
+	}, prevInstallExtensionOptions );
+};
+
+export const getInstallableExtensions = ( {
+	freeExtensionBundleByCategory,
+	country,
+	productTypes,
+} ) => {
+	return freeExtensionBundleByCategory.filter( ( extensionBundle ) => {
+		if (
+			window.wcAdminFeatures &&
+			window.wcAdminFeatures.subscriptions &&
+			getCountryCode( country ) === 'US'
+		) {
+			if ( productTypes.includes( 'subscriptions' ) ) {
+				extensionBundle.plugins = extensionBundle.plugins.filter(
+					( extension ) =>
+						extension.key !== 'woocommerce-payments' ||
+						( extension.key === 'woocommerce-payments' &&
+							! extension.is_activated )
+				);
+			}
+		}
+		return ALLOWED_PLUGIN_CATEGORIES.includes( extensionBundle.key );
+	} );
 };
 
 export const SelectiveExtensionsBundle = ( {
 	isInstallingActivating,
 	onSubmit,
-	country,
-	productTypes,
-	industry,
+	setInstallExtensionOptions,
+	installableExtensions,
+	installExtensionOptions = { install_extensions: true },
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
-	const [ installExtensionOptions, setInstallExtensionOptions ] = useState( {
-		install_extensions: true,
-	} );
-	const { freeExtensions: freeExtensionBundleByCategory, isResolving } =
-		useSelect( ( select ) => {
-			const { getFreeExtensions, hasFinishedResolution } = select(
-				ONBOARDING_STORE_NAME
-			);
-			return {
-				freeExtensions: getFreeExtensions(),
-				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-			};
-		} );
-
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		ONBOARDING_STORE_NAME
-	);
 
 	useEffect( () => {
-		invalidateResolutionForStoreSelector( 'getFreeExtensions' );
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ country, industry ] );
-
-	const installableExtensions = useMemo( () => {
-		return freeExtensionBundleByCategory.filter( ( extensionBundle ) => {
-			if (
-				window.wcAdminFeatures &&
-				window.wcAdminFeatures.subscriptions &&
-				getCountryCode( country ) === 'US'
-			) {
-				if ( productTypes.includes( 'subscriptions' ) ) {
-					extensionBundle.plugins = extensionBundle.plugins.filter(
-						( extension ) =>
-							extension.key !== 'woocommerce-payments' ||
-							( extension.key === 'woocommerce-payments' &&
-								! extension.is_activated )
-					);
-				}
-			}
-			return ALLOWED_PLUGIN_CATEGORIES.includes( extensionBundle.key );
-		} );
-	}, [ freeExtensionBundleByCategory, productTypes, country ] );
-
-	useEffect( () => {
-		if ( ! isInstallingActivating ) {
-			setInstallExtensionOptions( () =>
-				createInstallExtensionOptions( installableExtensions )
-			);
+		if ( isInstallingActivating || installableExtensions.length === 0 ) {
+			return;
 		}
+		setInstallExtensionOptions(
+			createInstallExtensionOptions(
+				installableExtensions,
+				installExtensionOptions
+			)
+		);
 		// Disable reason: This effect should only called when the installableExtensions are changed.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ installableExtensions ] );
@@ -393,8 +384,8 @@ export const SelectiveExtensionsBundle = ( {
 								installableExtensions
 							);
 						} }
-						isBusy={ isInstallingActivating || isResolving }
-						disabled={ isInstallingActivating || isResolving }
+						isBusy={ isInstallingActivating }
+						disabled={ isInstallingActivating }
 						isPrimary
 					>
 						{ __( 'Continue', 'woocommerce' ) }
@@ -405,6 +396,13 @@ export const SelectiveExtensionsBundle = ( {
 				installExtensionOptions,
 				isInstallingActivating
 			) }
+			<SkipButton
+				onSkipped={ () => {
+					recordEvent(
+						'storeprofiler_store_business_details_free_features_skip'
+					);
+				} }
+			/>
 		</div>
 	);
 };

@@ -39,6 +39,7 @@ function wc_get_screen_ids() {
 		'edit-product_tag',
 		'profile',
 		'user-edit',
+		wc_get_page_screen_id( 'shop-order' ),
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
@@ -55,6 +56,21 @@ function wc_get_screen_ids() {
 	}
 
 	return apply_filters( 'woocommerce_screen_ids', $screen_ids );
+}
+
+/**
+ * Get page ID for a specific WC resource.
+ *
+ * @param string $for Name of the resource.
+ *
+ * @return string Page ID. Empty string if resource not found.
+ */
+function wc_get_page_screen_id( $for ) {
+	switch ( $for ) {
+		case 'shop-order':
+			return 'woocommerce_page_wc-orders';
+	}
+	return '';
 }
 
 /**

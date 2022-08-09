@@ -2,12 +2,13 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const maynePostal = 'V0N 2J0';
+const shippingZoneNameUSRegion = 'USA Zone';
 const shippingZoneNameFlatRate = 'Canada with Flat rate';
 const shippingZoneNameFreeShip = 'BC with Free shipping';
 const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -19,9 +20,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await api.get( 'shipping/zones' ).then( ( response ) => {
 			for ( let i = 0; i < response.data.length; i++ ) {
 				if (
-					response.data[ i ].name === shippingZoneNameFlatRate ||
-					response.data[ i ].name === shippingZoneNameFreeShip ||
-					response.data[ i ].name === shippingZoneNameLocalPickup
+					[
+						shippingZoneNameUSRegion,
+						shippingZoneNameFlatRate,
+						shippingZoneNameFreeShip,
+						shippingZoneNameLocalPickup,
+					].includes( response.data[ i ].name )
 				) {
 					api.delete( `shipping/zones/${ response.data[ i ].id }`, {
 						force: true,
@@ -166,6 +170,53 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Flat rate.*/
+		);
+	} );
+
+	test( 'add shipping zone with region and then delete the region', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+		if ( await page.isVisible( `text=${ shippingZoneNameUSRegion }` ) ) {
+			// this shipping zone already exists, don't create it
+		} else {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+			);
+			await page.fill( '#zone_name', shippingZoneNameUSRegion );
+
+			await page.click( '.select2-search__field' );
+			await page.type( '.select2-search__field', 'United States' );
+			await page.click(
+				'.select2-results__option.select2-results__option--highlighted'
+			);
+
+			await page.click( '#submit' );
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=shipping'
+			);
+			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
+		}
+		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+			/USA Zone.*/
+		);
+
+		//delete created shipping zone region after confirmation it exists
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+
+		await page.locator( 'a:has-text("USA Zone") >> nth=0' ).click();
+
+		//delete
+		await page.locator( 'text=×' ).click();
+		//save changes
+		await page.click( '#submit' );
+
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+
+		//prove that the Region has been removed (Everywhere will display)
+		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+			/Everywhere.*/
 		);
 	} );
 } );

@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Allow unused destructured variables in lint rules #35548

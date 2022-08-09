@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Retry login in e2e to reduce flakiness

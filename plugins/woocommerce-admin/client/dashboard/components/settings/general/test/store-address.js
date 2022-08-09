@@ -8,9 +8,9 @@ import { render, fireEvent } from '@testing-library/react';
  * Internal dependencies
  */
 import {
-	isAddressFieldRequired,
 	useGetCountryStateAutofill,
 	getStateFilter,
+	StoreAddress,
 } from '../store-address';
 
 const AutofillWrapper = ( { options, value, onChange } ) => {
@@ -216,27 +216,44 @@ describe( 'getStateFilter', () => {
 	);
 } );
 
-describe( 'isAddressFieldRequired', () => {
-	it( 'should return true if fieldName is not a key in locale', () => {
-		expect( isAddressFieldRequired( 'address_1', { foo: 'bar' } ) ).toBe(
-			true
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {
+			locale: 'en_US',
+			countries: [],
+			loadingCountries: false,
+			hasFinishedResolution: true,
+		} ),
+	};
+} );
+
+describe( 'StoreAddress', () => {
+	const mockedGetInputProps = jest.fn().mockReturnValue( '' );
+
+	it( 'should render should in the order of Country / Region, Address, Post / Zip Code, City, Email Address.', () => {
+		const { container } = render(
+			<StoreAddress
+				getInputProps={ mockedGetInputProps }
+				setValue={ jest.fn() }
+			/>
 		);
-	} );
-	it( 'should return true if locale object marks it as required', () => {
-		expect(
-			isAddressFieldRequired( 'address_1', {
-				address_1: { required: true },
-			} )
-		).toBe( true );
-	} );
-	it( 'should return false if locale object marks it as not required', () => {
-		expect(
-			isAddressFieldRequired( 'address_1', {
-				address_1: { required: false },
-			} )
-		).toBe( false );
-	} );
-	it( 'should return false if fieldName is address_2', () => {
-		expect( isAddressFieldRequired( 'address_2', {} ) ).toBe( false );
+		const labels = container.querySelectorAll( 'label' );
+		const expectedLabelsInOrder = [
+			'Country / Region *',
+			'Address',
+			'Post code',
+			'City',
+			'Email address',
+		];
+
+		[ ...labels ].forEach( ( label, index ) =>
+			expect( label.textContent ).toEqual(
+				expectedLabelsInOrder[ index ]
+			)
+		);
 	} );
 } );

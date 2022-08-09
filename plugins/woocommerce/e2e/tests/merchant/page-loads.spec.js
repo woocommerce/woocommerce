@@ -38,7 +38,7 @@ for ( const currentPage of wcPages ) {
 	test.describe(
 		`WooCommerce Page Load > Load ${ currentPage.name } sub pages`,
 		() => {
-			test.use( { storageState: 'e2e/storage/adminState.json' } );
+			test.use( { storageState: process.env.ADMINSTATE } );
 
 			test.beforeEach( async ( { page } ) => {
 				if ( currentPage.name === 'WooCommerce' ) {
@@ -61,7 +61,7 @@ for ( const currentPage of wcPages ) {
 						await page.goto(
 							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 						);
-						await page.click( 'text=Skip setup store details' );
+						await page.click( 'button:has-text("Skip")' );
 						await page.click( 'text=No thanks' );
 						await page.waitForLoadState( 'networkidle' );
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );

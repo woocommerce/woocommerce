@@ -2,12 +2,16 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
-	test.use( { storageState: 'e2e/storage/adminState.json' } );
+	test.use( { storageState: process.env.ADMINSTATE } );
 
 	const customerBilling = {
 		email: 'john.doe.merchant.test@example.com',
 	};
-	const adminEmail = 'admin@woocommercecoree2etestsuite.com';
+
+	const adminEmail =
+		process.env.USE_WP_ENV === '1'
+			? 'wordpress@example.com'
+			: 'admin@woocommercecoree2etestsuite.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId;
 

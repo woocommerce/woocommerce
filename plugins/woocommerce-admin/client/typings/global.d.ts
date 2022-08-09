@@ -15,6 +15,7 @@ declare global {
 			'minified-js': boolean;
 			'mobile-app-banner': boolean;
 			navigation: boolean;
+			'new-product-management-experience': boolean;
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;

@@ -29,6 +29,7 @@ import ThemeUploader from './uploader';
 import ThemePreview from './preview';
 import { getPriceValue } from '../../../dashboard/utils';
 import { getAdminSetting, setAdminSetting } from '~/utils/admin-settings';
+import SkipButton from '../skip-button';
 
 class Theme extends Component {
 	constructor() {
@@ -46,7 +47,6 @@ class Theme extends Component {
 		this.onClosePreview = this.onClosePreview.bind( this );
 		this.onSelectTab = this.onSelectTab.bind( this );
 		this.openDemo = this.openDemo.bind( this );
-		this.skipStep = this.skipStep.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -163,12 +163,6 @@ class Theme extends Component {
 		} );
 		document.body.classList.add( 'woocommerce-theme-preview-active' );
 		this.setState( { demo: theme } );
-	}
-
-	skipStep() {
-		const { activeTheme = '' } = getAdminSetting( 'onboarding', {} );
-		recordEvent( 'storeprofiler_store_theme_skip_step', { activeTheme } );
-		this.props.goToNextStep();
 	}
 
 	renderTheme( theme ) {
@@ -403,15 +397,18 @@ class Theme extends Component {
 					/>
 				) }
 				{ activeThemeSupportsWooCommerce && (
-					<p className="woocommerce-profile-wizard__themes-skip-this-step">
-						<Button
-							isLink
-							className="woocommerce-profile-wizard__skip"
-							onClick={ () => this.skipStep() }
-						>
-							{ __( 'Skip this step', 'woocommerce' ) }
-						</Button>
-					</p>
+					<SkipButton
+						onSkipped={ () => {
+							const { activeTheme = '' } = getAdminSetting(
+								'onboarding',
+								{}
+							);
+							recordEvent(
+								'storeprofiler_store_theme_skip_step',
+								{ activeTheme }
+							);
+						} }
+					/>
 				) }
 			</Fragment>
 		);

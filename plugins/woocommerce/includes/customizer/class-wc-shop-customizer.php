@@ -885,4 +885,6 @@ class WC_Shop_Customizer {
 	}
 }
 
-new WC_Shop_Customizer();
+if ( ! wc_current_theme_is_fse_theme() ) {
+	new WC_Shop_Customizer();
+}

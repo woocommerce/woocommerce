@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Wrap default payment gateway strings in __() function call

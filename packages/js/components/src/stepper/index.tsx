@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { createElement, Fragment } from '@wordpress/element';
-import React from 'react';
+import type React from 'react';
 
 /**
  * Internal dependencies

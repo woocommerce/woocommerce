@@ -60,4 +60,5 @@ const runCreateCouponTest = () => {
 	} );
 };
 
+// eslint-disable-next-line jest/no-export
 module.exports = runCreateCouponTest;
