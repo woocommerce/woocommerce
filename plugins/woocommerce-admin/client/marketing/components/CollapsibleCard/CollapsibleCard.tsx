@@ -18,7 +18,7 @@ import classnames from 'classnames';
  */
 import './CollapsibleCard.scss';
 
-export type CollapsibleCardProps = {
+type CollapsibleCardProps = {
 	header: string;
 	className: string;
 	children: React.ReactNode;
