@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { CheckboxControl, TextControl } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -13,10 +15,9 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import EnrichedLabel from '../fields/enriched-label';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
-const selectedIndustry = false;
 
 export const ProductDetailsSection: React.FC = () => {
-	const formContext = useFormContext< Product >();
+	const { getInputProps } = useFormContext< Product >();
 	return (
 		<ProductSectionLayout
 			title={ __( 'Product details', 'woocommerce' ) }
@@ -27,20 +28,11 @@ export const ProductDetailsSection: React.FC = () => {
 		>
 			<TextControl
 				label={ __( 'Name', 'woocommerce' ) }
-				// name="name"
-				// { ...formContext.getInputProps< string >( 'name' ) }
 				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
-				value={ 'e.g. 12 oz Coffee Mug' }
-				onChange={ () => {} }
-			/>
-			<TextControl
-				label={ __( 'Category', 'woocommerce' ) }
-				name={ `${ PRODUCT_DETAILS_SLUG }-category` }
-				value={ 'Search or create category...' }
-				onChange={ () => {} }
+				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
+				{ ...getInputProps< string >( 'name' ) }
 			/>
 			<CheckboxControl
-				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }-feature-this-product` }
 				label={
 					<EnrichedLabel
 						label="Feature this product"
@@ -49,37 +41,11 @@ export const ProductDetailsSection: React.FC = () => {
 						slug={ PRODUCT_DETAILS_SLUG }
 					/>
 				}
-				onChange={ () => {} }
-				checked={ selectedIndustry || false }
-				className="woocommerce-add-product__checkbox"
-			/>
-			<CheckboxControl
-				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }-hide-in-shop-page` }
-				label={
-					<EnrichedLabel
-						label="Hide in shop page"
-						helpDescription="Do you need help?"
-						moreUrl="https://wordpress.org"
-						slug={ PRODUCT_DETAILS_SLUG }
-					/>
-				}
-				onChange={ () => {} }
-				checked={ selectedIndustry || false }
-				className="woocommerce-add-product__checkbox"
-			/>
-			<CheckboxControl
-				key={ `checkbox-control-${ PRODUCT_DETAILS_SLUG }-hide-search-results` }
-				label={
-					<EnrichedLabel
-						label="Hide from search results"
-						helpDescription="Do you need help?"
-						moreUrl="https://wordpress.org"
-						slug={ PRODUCT_DETAILS_SLUG }
-					/>
-				}
-				onChange={ () => {} }
-				checked={ selectedIndustry || false }
-				className="woocommerce-add-product__checkbox"
+				{ ...getInputProps< string >( 'featured' ) }
+				className={ classnames(
+					'woocommerce-add-product__checkbox',
+					getInputProps< string >( 'featured' ).className
+				) }
 			/>
 		</ProductSectionLayout>
 	);
