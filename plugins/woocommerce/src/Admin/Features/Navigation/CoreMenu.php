@@ -213,21 +213,12 @@ class CoreMenu {
 			);
 		}
 
-		$add_product_mvp  = array();
-		$edit_product_mvp = array();
+		$add_product_mvp = array();
 		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
 			$add_product_mvp = array(
 				'id'     => 'woocommerce-add-product-mbp',
 				'title'  => __( 'Add New (MVP)', 'woocommerce' ),
 				'url'    => 'admin.php?page=wc-admin&path=/add-product',
-				'parent' => 'woocommerce-products',
-				'order'  => 50,
-			);
-
-			$edit_product_mvp = array(
-				'id'     => 'woocommerce-edit-product-mbp',
-				'title'  => __( 'Add New (MVP)', 'woocommerce' ),
-				'url'    => 'admin.php?page=wc-admin&path=/product/([0-9])+$',
 				'parent' => 'woocommerce-products',
 				'order'  => 50,
 			);
