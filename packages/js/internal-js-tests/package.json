@@ -17,11 +17,12 @@
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
 	"scripts": {
-		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"lint": "eslint src",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "node ./node_modules/require-turbo && eslint src",
 		"lint:fix": "eslint src --fix"
 	},
 	"dependencies": {
@@ -38,7 +39,6 @@
 		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
-		"require-turbo": "workspace:*",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
 		"typescript": "^4.6.2"

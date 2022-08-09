@@ -35,6 +35,36 @@ class PageController {
 	private $order;
 
 	/**
+	 * Verify that user has permission to edit orders.
+	 *
+	 * @return void
+	 */
+	private function verify_edit_permission() {
+		if ( 'edit_order' === $this->current_action && ( ! isset( $this->order ) || ! $this->order ) ) {
+			wp_die( esc_html__( 'You attempted to edit an order that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
+		}
+		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
+		}
+	}
+
+	/**
+	 * Verify that user has permission to create order.
+	 *
+	 * @return void
+	 */
+	private function verify_create_permission() {
+		if ( ! current_user_can( 'publish_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
+		}
+		if ( isset( $this->order ) ) {
+			$this->verify_edit_permission();
+		}
+	}
+
+	/**
+=======
+>>>>>>> trunk
 	 * Sets up the page controller, including registering the menu item.
 	 *
 	 * @return void
@@ -135,7 +165,6 @@ class PageController {
 	private function setup_action_list_orders(): void {
 		$this->orders_table = new ListTable();
 		$this->orders_table->setup();
-
 		if ( $this->orders_table->current_action() ) {
 			$this->orders_table->handle_bulk_actions();
 		}
@@ -149,12 +178,7 @@ class PageController {
 	private function setup_action_edit_order(): void {
 		global $theorder;
 		$this->order = wc_get_order( absint( isset( $_GET['id'] ) ? $_GET['id'] : 0 ) );
-		if ( 'edit_order' === $this->current_action && ( ! isset( $this->order ) || ! $this->order ) ) {
-			wp_die( esc_html__( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
-		}
-		if ( ! current_user_can( 'edit_others_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
-		}
+		$this->verify_edit_permission();
 		$theorder = $this->order;
 	}
 
@@ -165,9 +189,7 @@ class PageController {
 	 */
 	private function setup_action_new_order(): void {
 		global $theorder;
-		if ( ! current_user_can( 'publish_shop_orders' ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
-		}
+		$this->verify_create_permission();
 		$this->order = new \WC_Order();
 		$this->order->set_object_read( false );
 		$this->order->set_status( 'auto-draft' );

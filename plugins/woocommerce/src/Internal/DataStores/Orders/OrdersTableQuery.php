@@ -21,6 +21,11 @@ class OrdersTableQuery {
 	public const SKIPPED_VALUES = array( '', array(), null );
 
 	/**
+	 * Regex used to catch "shorthand" comparisons in date-related query args.
+	 */
+	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
+
+	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
 	 *
 	 * @var array
@@ -118,6 +123,13 @@ class OrdersTableQuery {
 	 */
 	private $meta_query = null;
 
+	/**
+	 * Date query parser.
+	 *
+	 * @var WP_Date_Query
+	 */
+	private $date_query = null;
+
 
 	/**
 	 * Sets up and runs the query after processing arguments.
@@ -139,7 +151,7 @@ class OrdersTableQuery {
 		$this->args = $args;
 
 		// TODO: args to be implemented.
-		unset( $this->args['type'], $this->args['customer_note'], $this->args['name'] );
+		unset( $this->args['customer_note'], $this->args['name'] );
 
 		$this->build_query();
 		$this->run_query();
@@ -154,7 +166,9 @@ class OrdersTableQuery {
 		$mapping = array(
 			// WP_Query legacy.
 			'post_date'           => 'date_created_gmt',
+			'post_date_gmt'       => 'date_created_gmt',
 			'post_modified'       => 'date_modified_gmt',
+			'post_modified_gmt'   => 'date_updated_gmt',
 			'post_status'         => 'status',
 			'_date_completed'     => 'date_completed_gmt',
 			'_date_paid'          => 'date_paid_gmt',
@@ -182,7 +196,9 @@ class OrdersTableQuery {
 			'version'             => 'woocommerce_version',
 			'date_created'        => 'date_created_gmt',
 			'date_modified'       => 'date_updated_gmt',
+			'date_modified_gmt'   => 'date_updated_gmt',
 			'date_completed'      => 'date_completed_gmt',
+			'date_completed_gmt'  => 'date_completed_gmt',
 			'date_paid'           => 'date_paid_gmt',
 			'discount_total'      => 'discount_total_amount',
 			'discount_tax'        => 'discount_tax_amount',
@@ -223,6 +239,182 @@ class OrdersTableQuery {
 				$this->args['meta_query'] = array( $shortcut_meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			}
 		}
+	}
+
+	/**
+	 * Generates a `WP_Date_Query` compatible query from a given date.
+	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
+	 *
+	 * @param mixed $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
+	 */
+	private function date_to_date_query_arg( $date ): array {
+		$result    = array(
+			'year'  => '',
+			'month' => '',
+			'day'   => '',
+		);
+		$precision = 'second';
+
+		if ( is_numeric( $date ) ) {
+			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
+		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
+			// YYYY-MM-DD queries have 'day' precision for backwards compat.
+			$date      = wc_string_to_datetime( $date );
+			$precision = 'day';
+		}
+
+		$result['year']  = $date->date( 'Y' );
+		$result['month'] = $date->date( 'm' );
+		$result['day']   = $date->date( 'd' );
+
+		if ( 'second' === $precision ) {
+			$result['hour']   = $date->date( 'H' );
+			$result['minute'] = $date->date( 'i' );
+			$result['second'] = $date->date( 's' );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Processes date-related query args and merges the result into 'date_query'.
+	 *
+	 * @return void
+	 * @throws \Exception When date args are invalid.
+	 */
+	private function process_date_args(): void {
+		$valid_operators = array( '>', '>=', '=', '<=', '<', '...' );
+		$date_queries    = array();
+		$gmt_date_keys   = array(
+			'date_created_gmt',
+			'date_updated_gmt',
+			'date_paid_gmt',
+			'date_completed_gmt',
+		);
+
+		foreach ( array_filter( $gmt_date_keys, array( $this, 'arg_isset' ) ) as $date_key ) {
+			$date_value = $this->args[ $date_key ];
+			$operator   = '=';
+			$dates      = array();
+
+			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
+				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
+
+				if ( ! empty( $matches[1] ) ) {
+					$dates[] = $this->date_to_date_query_arg( $matches[1] );
+				}
+
+				$dates[] = $this->date_to_date_query_arg( $matches[3] );
+			} else {
+				$dates[] = $this->date_to_date_query_arg( $date_value );
+			}
+
+			if ( empty( $dates ) || ! $operator || ( '...' === $operator && count( $dates ) < 2 ) ) {
+				throw new \Exception( 'Invalid date_query' );
+			}
+
+			$operator_to_keys = array();
+
+			if ( in_array( $operator, array( '>', '>=', '...' ), true ) ) {
+				$operator_to_keys[] = 'after';
+			}
+
+			if ( in_array( $operator, array( '<', '<=', '...' ), true ) ) {
+				$operator_to_keys[] = 'before';
+			}
+
+			$date_queries[] = array_merge(
+				array(
+					'column'    => $date_key,
+					'inclusive' => ! in_array( $operator, array( '<', '>' ), true ),
+				),
+				'=' === $operator
+					? end( $dates )
+					: array_combine( $operator_to_keys, $dates )
+			);
+		}
+
+		// Add top-level date parameters to the date_query.
+		$tl_query = array();
+		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day', 'year' ) as $tl_key ) {
+			if ( $this->arg_isset( $tl_key ) ) {
+				$tl_query[ $tl_key ] = $this->args[ $tl_key ];
+				unset( $this->args[ $tl_key ] );
+			}
+		}
+
+		if ( $tl_query ) {
+			$tl_query['column'] = 'date_created_gmt';
+			$date_queries[]     = $tl_query;
+		}
+
+		if ( $date_queries ) {
+			if ( ! $this->arg_isset( 'date_query' ) ) {
+				$this->args['date_query'] = array();
+			}
+
+			$this->args['date_query'] = array_merge(
+				array( 'relation' => 'AND' ),
+				$date_queries,
+				$this->args['date_query']
+			);
+		}
+
+		$this->process_date_query_columns();
+	}
+
+	/**
+	 * Makes sure all 'date_query' columns are correctly prefixed and their respective tables are being JOIN'ed.
+	 *
+	 * @return void
+	 */
+	private function process_date_query_columns() {
+		global $wpdb;
+
+		$legacy_columns = array(
+			'post_date'         => 'date_created_gmt',
+			'post_date_gmt'     => 'date_created_gmt',
+			'post_modified'     => 'date_modified_gmt',
+			'post_modified_gmt' => 'date_updated_gmt',
+		);
+		$table_mapping  = array(
+			'date_created_gmt'   => $this->tables['orders'],
+			'date_updated_gmt'   => $this->tables['orders'],
+			'date_paid_gmt'      => $this->tables['operational_data'],
+			'date_completed_gmt' => $this->tables['operational_data'],
+		);
+
+		if ( empty( $this->args['date_query'] ) ) {
+			return;
+		}
+
+		array_walk_recursive(
+			$this->args['date_query'],
+			function( &$value, $key ) use ( $legacy_columns, $table_mapping, $wpdb ) {
+				if ( 'column' !== $key ) {
+					return;
+				}
+
+				// Translate legacy columns from wp_posts if necessary.
+				$value =
+					( isset( $legacy_columns[ $value ] ) || isset( $legacy_columns[ "{$wpdb->posts}.{$value}" ] ) )
+					? $legacy_columns[ $value ]
+					: $value;
+
+				$table = $table_mapping[ $value ] ?? null;
+
+				if ( ! $table ) {
+					return;
+				}
+
+				$value = "{$table}.{$value}";
+
+				if ( $table !== $this->tables['orders'] ) {
+					$this->join( $table, '', '', 'inner', true );
+				}
+			}
+		);
 	}
 
 	/**
@@ -313,6 +505,7 @@ class OrdersTableQuery {
 		$this->maybe_remap_args();
 
 		// Build query.
+		$this->process_date_args();
 		$this->process_orders_table_query_args();
 		$this->process_operational_data_table_query_args();
 		$this->process_addresses_table_query_args();
@@ -329,6 +522,12 @@ class OrdersTableQuery {
 			if ( $sql['join'] ) {
 				$this->groupby[] = "{$this->tables['orders']}.id";
 			}
+		}
+
+		// Date queries.
+		if ( ! empty( $this->args['date_query'] ) ) {
+			$this->date_query = new \WP_Date_Query( $this->args['date_query'], "{$this->tables['orders']}.date_created_gmt" );
+			$this->where[]    = substr( trim( $this->date_query->get_sql() ), 3 ); // WP_Date_Query includes "AND".
 		}
 
 		$this->process_orderby();
@@ -369,6 +568,55 @@ class OrdersTableQuery {
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
 		$this->sql = "SELECT $found_rows $distinct $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+	}
+
+	/**
+	 * JOINs the main orders table with another table.
+	 *
+	 * @param string  $table      Table name (including prefix).
+	 * @param string  $alias      Table alias to use. Defaults to $table.
+	 * @param string  $on         ON clause. Defaults to "wc_orders.id = {$alias}.order_id".
+	 * @param string  $join_type  JOIN type: LEFT, RIGHT or INNER.
+	 * @param boolean $alias_once If TRUE, table won't be JOIN'ed again if already JOIN'ed.
+	 * @return void
+	 * @throws \Exception When an error occurs, such as trying to re-use an alias with $alias_once = FALSE.
+	 */
+	private function join( string $table, string $alias = '', string $on = '', string $join_type = 'inner', bool $alias_once = false ) {
+		$alias     = empty( $alias ) ? $table : $alias;
+		$join_type = strtoupper( trim( $join_type ) );
+
+		if ( $this->tables['orders'] === $alias ) {
+			// translators: %s is a table name.
+			throw new \Exception( sprintf( __( '%s can not be used as a table alias in OrdersTableQuery', 'woocommerce' ), $alias ) );
+		}
+
+		if ( empty( $on ) ) {
+			if ( $this->tables['orders'] === $table ) {
+				$on = "{$this->tables['orders']}.id = {$alias}.id";
+			} else {
+				$on = "{$this->tables['orders']}.id = {$alias}.order_id";
+			}
+		}
+
+		if ( isset( $this->join[ $alias ] ) ) {
+			if ( ! $alias_once ) {
+				// translators: %s is a table name.
+				throw new \Exception( sprintf( __( 'Can not re-use table alias "%s" in OrdersTableQuery.', 'woocommerce' ), $alias ) );
+			}
+
+			return;
+		}
+
+		if ( '' === $join_type || ! in_array( $join_type, array( 'LEFT', 'RIGHT', 'INNER' ), true ) ) {
+			$join_type = 'INNER';
+		}
+
+		$sql_join  = '';
+		$sql_join .= "{$join_type} JOIN {$table} ";
+		$sql_join .= ( $alias !== $table ) ? "AS {$alias} " : '';
+		$sql_join .= "ON ( {$on} )";
+
+		$this->join[ $alias ] = $sql_join;
 	}
 
 	/**
@@ -429,6 +677,9 @@ class OrdersTableQuery {
 	 */
 	private function process_orders_table_query_args(): void {
 		$this->sanitize_status();
+
+		// TODO: not yet implemented.
+		unset( $this->args['type'] );
 
 		$fields = array_filter(
 			array(
@@ -530,7 +781,13 @@ class OrdersTableQuery {
 			return;
 		}
 
-		$this->join[] = "INNER JOIN {$this->tables['operational_data']} ON ( {$this->tables['orders']}.id = {$this->tables['operational_data']}.order_id )";
+		$this->join(
+			$this->tables['operational_data'],
+			'',
+			'',
+			'inner',
+			true
+		);
 
 		foreach ( $fields as $arg_key ) {
 			$this->where[] = $this->where( $this->tables['operational_data'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['operational_data'][ $arg_key ]['type'] );
@@ -566,9 +823,12 @@ class OrdersTableQuery {
 				continue;
 			}
 
-			$this->join[] = $wpdb->prepare(
-				"INNER JOIN {$this->tables['addresses']} AS {$address_type} ON ( {$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$address_type
+			$this->join(
+				$this->tables['addresses'],
+				$address_type,
+				$wpdb->prepare( "{$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s", $address_type ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'inner',
+				false
 			);
 
 			foreach ( $fields as $arg_key ) {

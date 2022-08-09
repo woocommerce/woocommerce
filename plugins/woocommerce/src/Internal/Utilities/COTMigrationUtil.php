@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WC_Order;
 use WP_Post;
 
@@ -13,6 +14,35 @@ use WP_Post;
  * Utility functions meant for helping in migration from posts tables to custom order tables.
  */
 class COTMigrationUtil {
+
+	/**
+	 * Custom order table controller.
+	 *
+	 * @var CustomOrdersTableController
+	 */
+	private $table_controller;
+
+	/**
+	 * Data synchronizer.
+	 *
+	 * @var DataSynchronizer
+	 */
+	private $data_synchronizer;
+
+	/**
+	 * Initialize method, invoked by the DI container.
+	 *
+	 * @internal Automatically called by the container.
+	 * @param CustomOrdersTableController $table_controller Custom order table controller.
+	 * @param DataSynchronizer            $data_synchronizer Data synchronizer.
+	 *
+	 * @return void
+	 */
+	final public function init( CustomOrdersTableController $table_controller, DataSynchronizer $data_synchronizer ) {
+		$this->table_controller  = $table_controller;
+		$this->data_synchronizer = $data_synchronizer;
+	}
+
 	/**
 	 * Helper function to get screen name of orders page in wp-admin.
 	 *
@@ -35,7 +65,17 @@ class COTMigrationUtil {
 	 * @return bool
 	 */
 	private function custom_orders_table_usage_is_enabled() : bool {
-		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+		return $this->table_controller->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Checks if posts and order custom table sync is enabled and there are no pending orders.
+	 *
+	 * @return bool
+	 */
+	public function is_custom_order_tables_in_sync() : bool {
+		$sync_status = $this->data_synchronizer->get_sync_status();
+		return $sync_status['current_pending_count'] === 0 && $this->data_synchronizer->data_sync_is_enabled();
 	}
 
 	/**
@@ -89,7 +129,9 @@ class COTMigrationUtil {
 	 * @return int Order or post ID.
 	 */
 	public function get_post_or_order_id( $post_or_order_object ) : int {
-		if ( $post_or_order_object instanceof WC_Order ) {
+		if ( is_int( $post_or_order_object ) ) {
+			return $post_or_order_object;
+		} elseif ( $post_or_order_object instanceof WC_Order ) {
 			return $post_or_order_object->get_id();
 		} elseif ( $post_or_order_object instanceof WP_Post ) {
 			return $post_or_order_object->ID;
@@ -97,4 +139,30 @@ class COTMigrationUtil {
 		return 0;
 	}
 
+	/**
+	 * Checks if passed id, post or order object is a WC_Order object.
+	 *
+	 * @param int|WP_Post|WC_Order $order_id Order ID, post object or order object.
+	 * @param string[]             $types    Types to match against.
+	 *
+	 * @return bool Whether the passed param is an order.
+	 */
+	public function is_order( $order_id, array $types = array( 'shop_order' ) ) : bool {
+		$order_id         = $this->get_post_or_order_id( $order_id );
+		$order_data_store = \WC_Data_Store::load( 'order' );
+		return in_array( $order_data_store->get_order_type( $order_id ), $types, true );
+	}
+
+	/**
+	 * Returns type pf passed id, post or order object.
+	 *
+	 * @param int|WP_Post|WC_Order $order_id Order ID, post object or order object.
+	 *
+	 * @return string|null Type of the order.
+	 */
+	public function get_order_type( $order_id ) : ?string {
+		$order_id         = $this->get_post_or_order_id( $order_id );
+		$order_data_store = \WC_Data_Store::load( 'order' );
+		return $order_data_store->get_order_type( $order_id );
+	}
 }

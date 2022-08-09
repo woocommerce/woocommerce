@@ -15,7 +15,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { AUTOMATION_PLUGINS, SettingsSelector } from '../utils';
+import { AUTOMATION_PLUGINS } from '../utils';
 import { Connect } from './connect';
 import { Plugins } from './plugins';
 import { StoreLocation } from '../components/store-location';
@@ -48,9 +48,7 @@ export const Setup: React.FC< SetupProps > = ( {
 		[]
 	);
 	const { activePlugins, isResolving } = useSelect( ( select ) => {
-		const { getSettings } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
+		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 

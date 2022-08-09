@@ -14,7 +14,20 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::create_order_custom_table_if_not_exist();
+	}
+
+	/**
+	 * Destroys system under test.
+	 */
+	public function tearDown(): void {
+		// Add back removed filter.
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		parent::tearDown();
 	}
 
 	/**

@@ -42,7 +42,6 @@
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"jest-mock-extended": "^1.0.18",
-		"require-turbo": "workspace:*",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
 		"typescript": "^4.6.2"
@@ -51,12 +50,13 @@
 		"access": "public"
 	},
 	"scripts": {
+		"turbo:build": "tsc --build",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "node ./node_modules/require-turbo && tsc --build",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name -- --",
+		"lint": "eslint src",
 		"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "node ./node_modules/require-turbo && eslint src",
 		"lint:fix": "eslint src --fix",
 		"prepack": "pnpm run clean && pnpm run build"
 	},

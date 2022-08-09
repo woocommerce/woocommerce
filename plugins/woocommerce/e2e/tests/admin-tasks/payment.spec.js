@@ -8,7 +8,7 @@ test.describe( 'Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( 'text=Skip setup store details' );
+		await page.click( 'button:has-text("Skip")' );
 		await page.click( 'text=No thanks' );
 		await page.waitForLoadState( 'networkidle' );
 	} );

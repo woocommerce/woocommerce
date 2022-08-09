@@ -67,7 +67,7 @@ export const Layout = ( {
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
-	const isDashboardShown = ! query.task;
+	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =

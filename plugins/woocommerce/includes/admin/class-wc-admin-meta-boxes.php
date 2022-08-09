@@ -8,7 +8,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Orders\Edit;
+use Automattic\WooCommerce\Internal\Admin\Orders\Edit as OrderEdit;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -47,20 +47,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( $this, 'add_product_boxes_sort_order' ), 40 );
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
-		/**
-		 * Save Order Meta Boxes.
-		 *
-		 * In order:
-		 *      Save the order items.
-		 *      Save the order totals.
-		 *      Save the order downloads.
-		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
-		 *      Save actions - sends out other emails. Last to show latest data.
-		 */
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
+		OrderEdit::add_save_meta_boxes();
 
 		// Save Product Meta Boxes.
 		add_action( 'woocommerce_process_product_meta', 'WC_Meta_Box_Product_Data::save', 10, 2 );
@@ -149,7 +136,7 @@ class WC_Admin_Meta_Boxes {
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			$order_type_object = get_post_type_object( $type );
-			Automattic\WooCommerce\Internal\Admin\Orders\Edit::add_order_meta_boxes( $type, $order_type_object->labels->singular_name );
+			OrderEdit::add_order_meta_boxes( $type, $order_type_object->labels->singular_name );
 		}
 
 		// Coupons.

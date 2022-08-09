@@ -83,4 +83,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm -- turbo run test --filter=woocommerce
+        run: pnpm run test --filter="woocommerce" --color
