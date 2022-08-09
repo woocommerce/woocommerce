@@ -43,7 +43,11 @@ export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 	const [ mainItem, ...menuItems ] = children;
 	return (
 		<ButtonGroup
-			className={ classNames( 'woocommerce-split-dropdown', className ) }
+			className={ classNames(
+				'woocommerce-split-dropdown',
+				'woocommerce-split-dropdown__container',
+				className
+			) }
 		>
 			{ cloneElement( mainItem, mainItemProps ) }
 			<Dropdown
