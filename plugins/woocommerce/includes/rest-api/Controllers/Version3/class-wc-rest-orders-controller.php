@@ -28,65 +28,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	protected $namespace = 'wc/v3';
 
 	/**
-	 * Meta keys that are not really considered metadata and thus shouldn't appear in the response.
-	 *
-	 * @var array
-	 */
-	protected $hidden_meta_keys = array(
-		'_customer_user',
-		'_order_key',
-		'_order_currency',
-		'_billing_first_name',
-		'_billing_last_name',
-		'_billing_company',
-		'_billing_address_1',
-		'_billing_address_2',
-		'_billing_city',
-		'_billing_state',
-		'_billing_postcode',
-		'_billing_country',
-		'_billing_email',
-		'_billing_phone',
-		'_shipping_first_name',
-		'_shipping_last_name',
-		'_shipping_company',
-		'_shipping_address_1',
-		'_shipping_address_2',
-		'_shipping_city',
-		'_shipping_state',
-		'_shipping_postcode',
-		'_shipping_country',
-		'_shipping_phone',
-		'_completed_date',
-		'_paid_date',
-		'_edit_lock',
-		'_edit_last',
-		'_cart_discount',
-		'_cart_discount_tax',
-		'_order_shipping',
-		'_order_shipping_tax',
-		'_order_tax',
-		'_order_total',
-		'_payment_method',
-		'_payment_method_title',
-		'_transaction_id',
-		'_customer_ip_address',
-		'_customer_user_agent',
-		'_created_via',
-		'_order_version',
-		'_prices_include_tax',
-		'_date_completed',
-		'_date_paid',
-		'_payment_tokens',
-		'_billing_address_index',
-		'_shipping_address_index',
-		'_recorded_sales',
-		'_recorded_coupon_usage_counts',
-		'_download_permissions_granted',
-		'_order_stock_reduced',
-	);
-
-	/**
 	 * Calculate coupons.
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
@@ -299,14 +240,19 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $order ) {
-		$item_data = parent::get_formatted_item_data( $order );
+		$item_data       = parent::get_formatted_item_data( $order );
+		$cpt_hidden_keys = array();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$cpt_hidden_keys = (new \WC_Order_Data_Store_CPT())->get_internal_meta_keys();
+		}
 
 		// XXX: This might be removed once we finalize the design for internal keys vs meta vs props in COT.
 		if ( ! empty( $item_data['meta_data'] ) ) {
 			$item_data['meta_data'] = array_filter(
 				$item_data['meta_data'],
-				function( $meta ) {
-					return ! in_array( $meta->key, $this->hidden_meta_keys, true );
+				function( $meta ) use ( $cpt_hidden_keys ) {
+					return ! in_array( $meta->key, $cpt_hidden_keys, true );
 				}
 			);
 		}
