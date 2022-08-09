@@ -28,7 +28,6 @@ class ListTable extends WP_List_Table {
 	private $has_filter = false;
 
 	/**
-
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -50,7 +49,6 @@ class ListTable extends WP_List_Table {
 	 */
 	public function setup(): void {
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
-
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
@@ -211,34 +209,12 @@ class ListTable extends WP_List_Table {
 		$field     = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
 		$direction = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? '' ) ) );
 
-		switch ( $direction ) {
-			case 'ASC':
-			case 'DESC':
-				$direction = strtoupper( $direction );
-				break;
-
-			default:
-				return;
-		}
-
 		if ( ! in_array( $field, $sortable, true ) ) {
 			return;
 		}
 
-		switch ( $field ) {
-			// @todo Revise and replace once work on https://github.com/woocommerce/woocommerce/issues/33613 completes.
-			//       This approach to sorting by order total works with the legacy data store, but will not work well
-			//       with COT (however, we can do something clean and efficient once query support is added by #33613).
-			case 'total':
-				$this->order_query_args['meta_key'] = '_order_total';
-				$this->order_query_args['orderby']  = 'meta_value_num';
-				break;
-
-			default:
-				$this->order_query_args['orderby'] = $field;
-		}
-
-		$this->order_query_args['order'] = $direction;
+		$this->order_query_args['orderby'] = $field;
+		$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
 	}
 
 	/**
@@ -260,6 +236,7 @@ class ListTable extends WP_List_Table {
 
 		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
 		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
+		$this->has_filter                       = true;
 	}
 
 	/**
@@ -274,8 +251,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$this->order_query_args['customer'] = $customer;
-		$this->order_query_args['orderby'] = $field;
-		$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
+		$this->has_filter                   = true;
 	}
 
 	/**
@@ -308,7 +284,6 @@ class ListTable extends WP_List_Table {
 		return $view_links;
 	}
 
-	// phpcs:disable Generic.Commenting.Todo.CommentFound
 	/**
 	 * Count orders by status.
 	 *
@@ -774,8 +749,6 @@ class ListTable extends WP_List_Table {
 		echo '<input type="hidden" name="page" value="wc-orders" >';
 
 		$state_params = array(
-			'_customer_user',
-			'm',
 			'paged',
 			'status',
 		);
@@ -785,7 +758,7 @@ class ListTable extends WP_List_Table {
 				continue;
 			}
 
-			echo '<input type="hidden" name="status" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) ) . '" >';
+			echo '<input type="hidden" name="' . esc_attr( $param ) . '" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) ) . '" >';
 		}
 	}
 

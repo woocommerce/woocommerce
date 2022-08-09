@@ -171,14 +171,16 @@ class PageController {
 	}
 
 	/**
-	 * Perform a redirect to remove the `_wp_http_referer` string if present (see also wp-admin/edit.php where a similar
-	 * process takes place), otherwise the size of this field builds to an unmanageable length over time.
+	 * Perform a redirect to remove the `_wp_http_referer` and `_wpnonce` strings if present in the URL (see also
+	 * wp-admin/edit.php where a similar process takes place), otherwise the size of this field builds to an
+	 * unmanageable length over time.
 	 */
-	private function strip_http_referer() {
-		$referer_url = esc_url_raw( wp_unslash( $_SERVER['_wp_http_referer'] ?? '' ) );
+	private function strip_http_referer(): void {
+		$current_url  = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		$stripped_url = remove_query_arg( array( '_wp_http_referer', '_wpnonce' ), $current_url );
 
-		if ( ! empty( $referer_url ) ) {
-			wp_safe_redirect( remove_query_arg( array( '_wp_http_referer', '_wpnonce' ), $referer_url ) );
+		if ( $stripped_url !== $current_url ) {
+			wp_safe_redirect( $stripped_url );
 			exit;
 		}
 	}
