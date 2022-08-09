@@ -158,10 +158,15 @@ export const ProductFormActions: React.FC = () => {
 						<>
 							<MenuGroup>
 								<MenuItem onClick={ onPublishAndDuplicate }>
-									{ __(
-										'Publish & duplicate',
-										'woocommerce'
-									) }
+									{ isPublished
+										? __(
+												'Update & duplicate',
+												'woocommerce'
+										  )
+										: __(
+												'Publish & duplicate',
+												'woocommerce'
+										  ) }
 								</MenuItem>
 								<MenuItem onClick={ onCopyToNewDraft }>
 									{ __(

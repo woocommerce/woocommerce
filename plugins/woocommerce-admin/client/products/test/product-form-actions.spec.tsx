@@ -334,7 +334,7 @@ describe( 'ProductFormActions', () => {
 			);
 		} );
 
-		it( 'should trigger updateProductWithStatus and copyProductWithStatus when Publish & duplicate is clicked', async () => {
+		it( 'should trigger updateProductWithStatus and copyProductWithStatus when Update & duplicate is clicked', async () => {
 			const product: Partial< Product > = {
 				id: 5,
 				name: 'Name',
@@ -351,9 +351,8 @@ describe( 'ProductFormActions', () => {
 				</Form>
 			);
 			queryByLabelText( 'Publish options' )?.click();
-			const publishAndDuplicateButton = queryByText(
-				'Publish & duplicate'
-			);
+			const publishAndDuplicateButton =
+				queryByText( 'Update & duplicate' );
 			publishAndDuplicateButton?.click();
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'product_publish_and_copy',
