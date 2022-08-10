@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { CheckboxControl, TextControl } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
