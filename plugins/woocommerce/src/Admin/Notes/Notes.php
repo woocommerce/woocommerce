@@ -41,7 +41,7 @@ class Notes {
 			try {
 				$note = new Note( $raw_note );
 				/**
-				 * Filter the note from db. This is used to modify the note before it is returned when the user's locale does not match the note's locale.
+				 * Filter the note from db. This is used to modify the note before it is returned.
 				 *
 				 * @since 6.9.0
 				 * @param Note $note The note object from the database.
