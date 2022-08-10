@@ -48,23 +48,15 @@ jobs:
           script: |
             let run = false;
 
-            if ( context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null ) {
-              run = true;
-            }
+            const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
+ 
+            const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null;
+ 
+            const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null;
 
-            if ( context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null  ) {
-              run = true;
-            }
+            const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
-            if ( context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null ) {
-              run = true;
-            }
-
-            if ( context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' ) ) {
-              run = false;
-            }
-
-            if ( run ) {
+            if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
               console.log( "::set-output name=run::true" );
             } else {
               console.log( "::set-output name=run::false" );
