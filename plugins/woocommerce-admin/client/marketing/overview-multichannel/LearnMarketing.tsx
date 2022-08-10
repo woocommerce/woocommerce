@@ -176,7 +176,7 @@ const LearnMarketing = () => {
 
 	return (
 		<CollapsibleCard
-			initialCollapsed={ false }
+			initialCollapsed
 			className="woocommerce-marketing-learn-marketing-card"
 			header={ __( 'Learn about marketing a store', 'woocommerce' ) }
 			footer={ renderFooter() }
