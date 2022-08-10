@@ -77,16 +77,19 @@ const perPage = 2;
 
 const LearnMarketing = () => {
 	const [ page, setPage ] = useState( 1 );
-	const { isLoading, error, posts } = useSelect( ( select ) => {
-		const { getBlogPosts, getBlogPostsError, isResolving } =
-			select( STORE_KEY );
+	const { isLoading, error, posts } = useSelect(
+		( select ) => {
+			const { getBlogPosts, getBlogPostsError, isResolving } =
+				select( STORE_KEY );
 
-		return {
-			posts: getBlogPosts( blogPostCategory ),
-			isLoading: isResolving( 'getBlogPosts', [ blogPostCategory ] ),
-			error: getBlogPostsError( blogPostCategory ),
-		};
-	}, [] );
+			return {
+				posts: getBlogPosts( blogPostCategory ),
+				isLoading: isResolving( 'getBlogPosts', [ blogPostCategory ] ),
+				error: getBlogPostsError( blogPostCategory ),
+			};
+		},
+		[ blogPostCategory ]
+	);
 
 	/**
 	 * Renders card footer.
