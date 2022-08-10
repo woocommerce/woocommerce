@@ -13,6 +13,8 @@ export type ItemType = {
 	label: string;
 };
 
+export type SelectedType = ItemType | null;
+
 export type Props = {
 	[ key: string ]: string;
 };

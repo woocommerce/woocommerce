@@ -7,7 +7,6 @@ import { createElement, ReactElement } from 'react';
  * Internal dependencies
  */
 import { Props } from './types';
-import './menu.scss';
 
 type MenuProps = {
 	children?: ReactElement;
@@ -21,7 +20,7 @@ export const Menu = ( { children, menuProps, isOpen }: MenuProps ) => {
 	}
 
 	return (
-		<ul { ...menuProps } className="woocommerce-search-control__menu">
+		<ul { ...menuProps } className="woocommerce-select-control__menu">
 			{ children }
 		</ul>
 	);

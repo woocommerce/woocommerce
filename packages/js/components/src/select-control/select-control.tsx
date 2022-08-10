@@ -18,9 +18,8 @@ import {
 	itemToString as defaultItemToString,
 	getFilteredItems as defaultGetFilteredItems,
 } from './utils';
-import './style.scss';
 
-type SearchControlProps = {
+type SelectControlProps = {
 	children?: ChildrenType;
 	items: ItemType[];
 	label: string;
@@ -34,11 +33,11 @@ type SearchControlProps = {
 	) => ItemType[];
 	onInputChange?: ( value: string | undefined ) => void;
 	onRemove?: ( item: ItemType ) => void;
-	onSelect?: ( selected: ItemType | null | undefined ) => void;
-	selected: ItemType | ItemType[];
+	onSelect?: ( selected: ItemType ) => void;
+	selected: ItemType | ItemType[] | null;
 };
 
-export const SearchControl = ( {
+export const SelectControl = ( {
 	children = ( {
 		items,
 		highlightedIndex,
@@ -73,11 +72,14 @@ export const SearchControl = ( {
 	onRemove = () => null,
 	onSelect = () => null,
 	selected,
-}: SearchControlProps ) => {
+}: SelectControlProps ) => {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
 	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
-	const selectedItems = Array.isArray( selected ) ? selected : [ selected ];
+	let selectedItems = selected === null ? [] : selected;
+	selectedItems = Array.isArray( selectedItems )
+		? selectedItems
+		: [ selectedItems ].filter( Boolean );
 	const filteredItems = getFilteredItems( items, inputValue, selectedItems );
 
 	const {
@@ -119,7 +121,7 @@ export const SearchControl = ( {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-search-control', {
+			className={ classnames( 'woocommerce-select-control', {
 				'is-focused': isFocused,
 			} ) }
 		>
@@ -127,7 +129,7 @@ export const SearchControl = ( {
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div className="woocommerce-search-control__combo-box-wrapper">
+			<div className="woocommerce-select-control__combo-box-wrapper">
 				{ hasMultiple && (
 					<SelectedItems
 						items={ selectedItems }
@@ -140,7 +142,7 @@ export const SearchControl = ( {
 					comboBoxProps={ getComboboxProps() }
 					inputProps={ getInputProps( {
 						...getDropdownProps( { preventKeyAction: isOpen } ),
-						className: 'woocommerce-search-control__input',
+						className: 'woocommerce-select-control__input',
 						onFocus: () => setIsFocused( true ),
 						onBlur: () => setIsFocused( false ),
 					} ) }

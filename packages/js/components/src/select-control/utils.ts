@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { ItemType } from './types';
+import { ItemType, SelectedType } from './types';
 
 export const itemToString = ( item: ItemType | null ) => {
 	return item ? item.label : '';

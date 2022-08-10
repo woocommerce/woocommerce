@@ -1,7 +1,11 @@
-.woocommerce-search-control {
+@import './combo-box.scss';
+@import './menu.scss';
+@import './menu-item.scss';
+
+.woocommerce-select-control {
     position: relative;
 
-    .woocommerce-search-control__combo-box-wrapper {
+    .woocommerce-select-control__combo-box-wrapper {
         border: 1px solid $studio-gray-20;
         border-radius: 3px;
         background: $studio-white;
@@ -12,12 +16,12 @@
         padding-right: $gap-small;
     }
 
-    &.is-focused .woocommerce-search-control__combo-box-wrapper {
+    &.is-focused .woocommerce-select-control__combo-box-wrapper {
         box-shadow: 0 0 0 1px var(--wp-admin-theme-color);
         border-color: var(--wp-admin-theme-color);
     }
 
-    .woocommerce-search-control__input {
+    .woocommerce-select-control__input {
         border: 0;
         box-shadow: none;
 

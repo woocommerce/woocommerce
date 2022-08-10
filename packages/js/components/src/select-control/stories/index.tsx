@@ -8,9 +8,9 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ItemType } from '../types';
+import { ItemType, SelectedType } from '../types';
 import { MenuItem } from '../menu-item';
-import { SearchControl } from '../';
+import { SelectControl } from '../';
 import { Menu } from '../menu';
 
 const sampleItems = [
@@ -22,16 +22,16 @@ const sampleItems = [
 ];
 
 export const Single: React.FC = () => {
-	const [ selected, setSelected ] = useState< ItemType >( null );
+	const [ selected, setSelected ] = useState< SelectedType >( null );
 
 	return (
 		<>
 			Selected: { JSON.stringify( selected ) }
-			<SearchControl
+			<SelectControl
 				items={ sampleItems }
 				label="Single value"
 				selected={ selected }
-				onSelect={ ( item ) => setSelected( item ) }
+				onSelect={ ( item ) => item && setSelected( item ) }
 				onRemove={ () => setSelected( null ) }
 			/>
 		</>
@@ -43,12 +43,15 @@ export const Multiple: React.FC = () => {
 
 	return (
 		<>
-			<SearchControl
+			<SelectControl
 				hasMultiple
 				items={ sampleItems }
 				label="Multiple values"
 				selected={ selected }
-				onSelect={ ( item ) => setSelected( [ ...selected, item ] ) }
+				onSelect={ ( item ) =>
+					Array.isArray( selected ) &&
+					setSelected( [ ...selected, item ] )
+				}
 				onRemove={ ( item ) =>
 					setSelected( selected.filter( ( i ) => i !== item ) )
 				}
@@ -78,7 +81,7 @@ export const FuzzyMatching: React.FC = () => {
 	};
 
 	return (
-		<SearchControl
+		<SelectControl
 			hasMultiple
 			getFilteredItems={ getFilteredItems }
 			items={ sampleItems }
@@ -93,11 +96,11 @@ export const FuzzyMatching: React.FC = () => {
 };
 
 export const Async: React.FC = () => {
-	const [ selectedItem, setSelectedItem ] = useState< ItemType >( null );
+	const [ selectedItem, setSelectedItem ] = useState< SelectedType >( null );
 	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( [] );
 	const [ isFetching, setIsFetching ] = useState( false );
 
-	const fetchItems = ( value: string ) => {
+	const fetchItems = ( value: string | undefined ) => {
 		setIsFetching( true );
 		setTimeout( () => {
 			const results = sampleItems.sort( () => 0.5 - Math.random() );
@@ -108,7 +111,7 @@ export const Async: React.FC = () => {
 
 	return (
 		<>
-			<SearchControl
+			<SelectControl
 				label="Async"
 				items={ fetchedItems }
 				onInputChange={ fetchItems }
@@ -147,13 +150,13 @@ export const Async: React.FC = () => {
 						</Menu>
 					);
 				} }
-			</SearchControl>
+			</SelectControl>
 		</>
 	);
 };
 
 export const CustomRender: React.FC = () => {
-	const [ selected, setSelected ] = useState( [] );
+	const [ selected, setSelected ] = useState< ItemType[] >( [] );
 
 	const onRemove = ( item ) => {
 		setSelected( selected.filter( ( i ) => i !== item ) );
@@ -170,7 +173,7 @@ export const CustomRender: React.FC = () => {
 
 	return (
 		<>
-			<SearchControl
+			<SelectControl
 				hasMultiple
 				label="Custom render"
 				items={ sampleItems }
@@ -227,12 +230,12 @@ export const CustomRender: React.FC = () => {
 						</Menu>
 					);
 				} }
-			</SearchControl>
+			</SelectControl>
 		</>
 	);
 };
 
 export default {
-	title: 'WooCommerce Admin/components/SearchControl',
-	component: SearchControl,
+	title: 'WooCommerce Admin/components/SelectControl',
+	component: SelectControl,
 };
