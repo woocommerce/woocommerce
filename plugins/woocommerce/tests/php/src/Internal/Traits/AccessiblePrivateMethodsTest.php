@@ -337,19 +337,29 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 
 			public $action_argument = null;
 
-			public $static_action_argument = null;
+			public static $static_action_argument = null;
 
 			public function __construct() {
-				self::add_action( 'filter_handled_privately', array( $this, 'handle_filter' ) );
+				self::add_action( 'action_handled_privately', array( $this, 'handle_action' ) );
+				self::add_filter( 'filter_handled_privately', array( $this, 'handle_filter' ) );
 			}
 
 			//phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag
 			final public static function init() {
-				self::add_action( 'static_filter_handled_privately', array( __CLASS__, 'handle_static_filter' ) );
+				self::add_action( 'static_action_handled_privately', array( __CLASS__, 'handle_static_action' ) );
+				self::add_filter( 'static_filter_handled_privately', array( __CLASS__, 'handle_static_filter' ) );
+			}
+
+			private function handle_action( $argument ) {
+				$this->action_argument = $argument;
 			}
 
 			private function handle_filter( $argument ) {
 				return 'Filter argument: ' . $argument;
+			}
+
+			private static function handle_static_action( $argument ) {
+				self::$static_action_argument = $argument;
 			}
 
 			private static function handle_static_filter( $argument ) {
@@ -368,7 +378,15 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 		$filter_result = apply_filters( 'static_filter_handled_privately', 'bar' );
 		$this->assertEquals( 'Static filter argument: bar', $filter_result );
 
+		do_action( 'action_handled_privately', 'foo2' );
+		$this->assertEquals( 'foo2', $sut->action_argument );
+
+		do_action( 'static_action_handled_privately', 'bar2' );
+		$this->assertEquals( 'bar2', $sut::$static_action_argument );
+
+		remove_action( 'action_handled_privately', array( $sut, 'handle_action' ) );
 		remove_filter( 'filter_handled_privately', array( $sut, 'handle_filter' ) );
+		remove_action( 'static_action_handled_privately', array( get_class( $sut ), 'handle_static_action' ) );
 		remove_filter( 'static_filter_handled_privately', array( get_class( $sut ), 'handle_static_filter' ) );
 
 		$filter_result = apply_filters( 'filter_handled_privately', 'fizz' );
@@ -376,6 +394,12 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 
 		$filter_result = apply_filters( 'static_filter_handled_privately', 'buzz' );
 		$this->assertEquals( 'buzz', $filter_result );
+
+		do_action( 'action_handled_privately', 'fizz2' );
+		$this->assertEquals( 'foo2', $sut->action_argument );
+
+		do_action( 'static_action_handled_privately', 'buzz2' );
+		$this->assertEquals( 'bar2', $sut::$static_action_argument );
 
 		//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
