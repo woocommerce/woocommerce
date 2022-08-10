@@ -508,7 +508,7 @@ class WC_Query {
 		self::$product_query = $q;
 
 		// Additonal hooks to change WP Query.
-		$this->add_filter( 'posts_clauses', 'product_query_post_clauses', 10, 2 );
+		self::add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
