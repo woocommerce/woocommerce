@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { createElement } from 'react';
+import { Icon, search } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -20,6 +21,10 @@ export const ComboBox = ( { comboBoxProps, inputProps }: ComboBoxProps ) => {
 			className="woocommerce-select-control__combox-box"
 		>
 			<input { ...inputProps } />
+			<Icon
+				className="woocommerce-select-control__combox-box-icon"
+				icon={ search }
+			/>
 		</div>
 	);
 };
