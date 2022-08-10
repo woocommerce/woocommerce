@@ -83,10 +83,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 	public function test_read_data_source() {
 		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
 		$data               = $data_source_poller->get_specs_from_data_sources();
-		$locale             = get_locale();
-		$this->assertArrayHasKey( $locale, $data );
-
-		$data = $data[ $locale ];
 		$this->assertArrayHasKey( 'mock-gateway1', $data );
 		$this->assertArrayHasKey( 'mock-gateway2', $data );
 		$this->assertArrayNotHasKey( 'mock-gateway3', $data );
@@ -108,10 +104,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 
 		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
 		$data               = $data_source_poller->get_specs_from_data_sources();
-		$locale             = get_locale();
-		$this->assertArrayHasKey( $locale, $data );
-
-		$data = $data[ $locale ];
 		$this->assertEmpty( $data );
 	}
 
@@ -132,10 +124,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 
 		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
 		$data               = $data_source_poller->get_specs_from_data_sources();
-		$locale             = get_locale();
-		$this->assertArrayHasKey( $locale, $data );
-
-		$data = $data[ $locale ];
 		$this->assertArrayHasKey( 'mock-gateway1', $data );
 		$this->assertArrayHasKey( 'mock-gateway2', $data );
 		$this->assertArrayHasKey( 'mock-gateway3', $data );
@@ -170,16 +158,14 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 
 		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
 		$data               = $data_source_poller->get_specs_from_data_sources();
-		$locale             = get_locale();
+		$this->assertCount( 2, $data );
+
+		$data   = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		$locale = get_locale();
 		$this->assertArrayHasKey( $locale, $data );
 
 		$data = $data[ $locale ];
 		$this->assertCount( 2, $data );
 
-		$data = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
-		$this->assertArrayHasKey( $locale, $data );
-
-		$data = $data[ $locale ];
-		$this->assertCount( 2, $data );
 	}
 }
