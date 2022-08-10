@@ -88,10 +88,24 @@ class WC_CLI_COM_Command {
 	}
 
 	/**
+	 * Connects to WooCommerce.com with application-password.
+	 *
+	 * [--password]
+	 * : If set, password won't be prompt.
+	 *
+	 * [--force]
+	 * : If set, site will be disconnected and a new connection will be forced.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Connect to WCCOM using password.
 	 *     $ wp wc com connect
+	 *
+	 *     # force connecting to WCCOM even if site is already connected.
+	 *     $ wp wc com connect --force
+	 *
+	 *     # Pass password to comman.
+	 *     $ wp wc com connect --password=PASSWORD
 	 *
 	 * @param array $args Positional arguments to include when calling the command.
 	 * @param array $assoc_args Associative arguments to include when calling the command.
@@ -100,14 +114,23 @@ class WC_CLI_COM_Command {
 	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
 	 */
 	public static function connect( array $args, array $assoc_args ) {
-		if ( WC_Helper::is_site_connected() ) {
-			WP_CLI::error( 'Your store is already connected.' );
+		$password = \WP_CLI\Utils\get_flag_value( $assoc_args, 'password' );
+		$force    = \WP_CLI\Utils\get_flag_value( $assoc_args, 'force', false );
 
-			return;
+		if ( WC_Helper::is_site_connected() ) {
+			if ( $force ) {
+				WC_Helper::disconnect();
+			} else {
+				WP_CLI::error( 'Your store is already connected.' );
+
+				return;
+			}
 		}
 
 		// @todo add URL to application password section
-		$password = self::ask( 'Connection password:' );
+		if ( empty( $password ) ) {
+			$password = self::ask( 'Connection password:' );
+		}
 		$password = sanitize_text_field( $password );
 		if ( empty( $password ) ) {
 			WP_CLI::error( 'Invalid password.' );
