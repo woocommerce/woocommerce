@@ -36,11 +36,6 @@ class WcPayWelcomePage {
 			return;
 		}
 
-		// Not in WPCOM starter plan.
-		if ( $this->is_wpcom_start_plan() ) {
-			return;
-		}
-
 		// Suggestions may be disabled via a setting.
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return;
@@ -115,19 +110,6 @@ class WcPayWelcomePage {
 	private function has_wcpay_account(): bool {
 		$account_data = get_option( 'wcpay_account_data' );
 		return isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] );
-	}
-
-	/**
-	 * Whether the site is on a WPCOM starter plan.
-	 *
-	 * @return boolean
-	 */
-	private function is_wpcom_start_plan(): bool {
-		if ( function_exists( 'wpcom_site_has_feature' ) ) {
-			return wpcom_site_has_feature( \WPCOM_Features::STARTER_PLAN );
-		}
-
-		return false;
 	}
 
 	/**
