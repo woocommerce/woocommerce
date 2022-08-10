@@ -37,7 +37,7 @@ class WcPayWelcomePage {
 		}
 
 		// Suggestions may be disabled via a setting.
-		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return;
 		}
 
@@ -47,7 +47,7 @@ class WcPayWelcomePage {
 		}
 
 		// Manually dismissed.
-		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+		if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
 			return;
 		}
 
@@ -78,7 +78,7 @@ class WcPayWelcomePage {
 		// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
 		// We need to register this menu via add_menu_page so that it doesn't become a child of
 		// WooCommerce menu.
-		if ( 'yes' === get_option( 'woocommerce_navigation_enabled', 'no' ) ) {
+		if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
 			$menu_with_nav_data = array(
 				__( 'Payments', 'woocommerce' ),
 				__( 'Payments', 'woocommerce' ),
@@ -119,7 +119,7 @@ class WcPayWelcomePage {
 	 */
 	private function should_add_the_menu() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
 			'woocommerce',
