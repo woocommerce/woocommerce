@@ -14,6 +14,15 @@ on:
         description: The pull request number.
         default: ''
         required: true
+      skipSlackPing:
+        description: "Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)"
+        type: boolean
+        required: false
+        default: false
+      slackChannelOverride:
+        description: "Slack Channel Override: The channel ID to send the Slack ping about the code freeze violation"
+        required: false
+        default: ''
 
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -294,22 +303,22 @@ jobs:
             console.log( `::set-output name=deletion-pr::${ pr.data.html_url }` )
 
       - name: Notify Slack on failure
-        if: ${{ failure() }}
+        if: ${{ failure() && inputs.skipSlackPing != true }}
         uses: archive/github-actions-slack@v2.0.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
             :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
 
             An attempt to cherry pick PR(s) into outgoing release '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
 
       - name: Notify Slack on success
-        if: ${{ success() }}
+        if: ${{ success() && inputs.skipSlackPing != true }}
         uses: archive/github-actions-slack@v2.0.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
             :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
             
