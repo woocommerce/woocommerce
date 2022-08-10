@@ -15,9 +15,9 @@ import EnrichedLabel from '../fields/enriched-label';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
-export const ProductDetailsSection: React.FC = ( item: string ) => {
+export const ProductDetailsSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
-	const getCheckboxProps = () => {
+	const getCheckboxProps = ( item: string ) => {
 		const { checked, className, onChange, onBlur } =
 			getInputProps< boolean >( item );
 		return {
@@ -54,7 +54,7 @@ export const ProductDetailsSection: React.FC = ( item: string ) => {
 						slug={ PRODUCT_DETAILS_SLUG }
 					/>
 				}
-				{ ...getCheckboxProps() }
+				{ ...getCheckboxProps( 'featured' ) }
 			/>
 		</ProductSectionLayout>
 	);
