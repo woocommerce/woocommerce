@@ -25,12 +25,12 @@ class SpecRunner {
 
 		// Create or update the note.
 		$existing_note_ids = $data_store->get_notes_with_name( $spec->slug );
-		if ( 0 === count( $existing_note_ids ) ) {
+		if ( count( $existing_note_ids ) === 0 ) {
 			$note = new Note();
 			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 		} else {
 			$note = Notes::get_note( $existing_note_ids[0] );
-			if ( false === $note ) {
+			if ( $note === false ) {
 				return;
 			}
 		}
@@ -52,7 +52,7 @@ class SpecRunner {
 		// Get the matching locale or fall back to en-US.
 		$locale = self::get_locale( $spec->locales );
 
-		if ( null === $locale ) {
+		if ( $locale === null ) {
 			return;
 		}
 
@@ -114,7 +114,7 @@ class SpecRunner {
 			)
 		);
 
-		if ( 0 !== count( $matching_wp_locales ) ) {
+		if ( count( $matching_wp_locales ) !== 0 ) {
 			return $matching_wp_locales[0];
 		}
 
@@ -123,12 +123,12 @@ class SpecRunner {
 			array_filter(
 				$locales,
 				function( $l ) {
-					return 'en_US' === $l->locale;
+					return $l->locale === 'en_US';
 				}
 			)
 		);
 
-		if ( 0 !== count( $en_us_locales ) ) {
+		if ( count( $en_us_locales ) !== 0 ) {
 			return $en_us_locales[0];
 		}
 
@@ -154,7 +154,7 @@ class SpecRunner {
 			)
 		);
 
-		if ( 0 !== count( $matching_wp_locales ) ) {
+		if ( count( $matching_wp_locales ) !== 0 ) {
 			return $matching_wp_locales[0];
 		}
 
@@ -163,12 +163,12 @@ class SpecRunner {
 			array_filter(
 				$action_locales,
 				function( $l ) {
-					return 'en_US' === $l->locale;
+					return $l->locale === 'en_US';
 				}
 			)
 		);
 
-		if ( 0 !== count( $en_us_locales ) ) {
+		if ( count( $en_us_locales ) !== 0 ) {
 			return $en_us_locales[0];
 		}
 
@@ -192,7 +192,7 @@ class SpecRunner {
 
 			$note->add_action(
 				$action->name,
-				( null === $action_locale || ! isset( $action_locale->label ) )
+				( $action_locale === null || ! isset( $action_locale->label ) )
 					? ''
 					: $action_locale->label,
 				$url,
