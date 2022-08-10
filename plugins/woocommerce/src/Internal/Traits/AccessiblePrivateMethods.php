@@ -123,7 +123,7 @@ trait AccessiblePrivateMethods {
 		// Note that an "is_callable" check would be useless here:
 		// "is_callable" always returns true if the class implements __call.
 		if ( method_exists( $this, $method_name ) ) {
-			ArrayUtil::push_once( $this->_accessible_private_methods, $method_name );
+			$this->_accessible_private_methods[ $method_name ] = $method_name;
 			return true;
 		}
 
@@ -138,7 +138,7 @@ trait AccessiblePrivateMethods {
 	 */
 	protected static function mark_static_method_as_accessible( string $method_name ): bool {
 		if ( method_exists( __CLASS__, $method_name ) ) {
-			ArrayUtil::push_once( static::$_accessible_static_private_methods, $method_name );
+			static::$_accessible_static_private_methods[ $method_name ] = $method_name;
 			return true;
 		}
 
@@ -154,7 +154,7 @@ trait AccessiblePrivateMethods {
 	 * @throws \Error The called instance method doesn't exist or is private/protected and not marked as externally accessible.
 	 */
 	public function __call( $name, $arguments ) {
-		if ( in_array( $name, $this->_accessible_private_methods, true ) ) {
+		if ( isset( $this->_accessible_private_methods[ $name ] ) ) {
 			return call_user_func_array( array( $this, $name ), $arguments );
 		} elseif ( is_callable( array( 'parent', '__call' ) ) ) {
 			return parent::__call( $name, $arguments );
@@ -174,7 +174,7 @@ trait AccessiblePrivateMethods {
 	 * @throws \Error The called static method doesn't exist or is private/protected and not marked as externally accessible.
 	 */
 	public static function __callStatic( $name, $arguments ) {
-		if ( in_array( $name, static::$_accessible_static_private_methods, true ) ) {
+		if ( isset( static::$_accessible_static_private_methods[ $name ] ) ) {
 			return call_user_func_array( array( __CLASS__, $name ), $arguments );
 		} elseif ( is_callable( array( 'parent', '__callStatic' ) ) ) {
 			return parent::__callStatic( $name, $arguments );
