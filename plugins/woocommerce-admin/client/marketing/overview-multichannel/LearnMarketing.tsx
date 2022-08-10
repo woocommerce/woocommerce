@@ -88,6 +88,13 @@ const LearnMarketing = () => {
 		};
 	}, [] );
 
+	/**
+	 * Renders card footer.
+	 *
+	 * - If loading is in progress, it returns a loading placeholder in the card footer.
+	 * - If there is an error or there are no posts, there will be no card footer.
+	 * - Returns a pagination component in the card footer for paging through the posts.
+	 */
 	const renderFooter = () => {
 		if ( isLoading ) {
 			return (
@@ -113,6 +120,14 @@ const LearnMarketing = () => {
 		);
 	};
 
+	/**
+	 * Renders card body, which should display two posts in one page.
+	 *
+	 * - If loading is in progress, it returns two placeholder post tiles.
+	 * - If there is an error, it returns an `EmptyContent` component with error message.
+	 * - If there are no posts, it returns an `EmptyContent` component with "No posts yet" message.
+	 * - Else, it returns two post tiles.
+	 */
 	const renderBody = () => {
 		if ( isLoading ) {
 			return (
