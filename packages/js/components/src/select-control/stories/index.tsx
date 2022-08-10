@@ -118,6 +118,7 @@ export const Async: React.FC = () => {
 				selected={ selectedItem }
 				onSelect={ ( item ) => setSelectedItem( item ) }
 				onRemove={ () => setSelectedItem( null ) }
+				placeholder="Start typing..."
 			>
 				{ ( {
 					items,

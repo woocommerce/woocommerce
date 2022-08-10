@@ -34,6 +34,7 @@ type SelectControlProps = {
 	onInputChange?: ( value: string | undefined ) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
+	placeholder?: string;
 	selected: ItemType | ItemType[] | null;
 };
 
@@ -71,6 +72,7 @@ export const SelectControl = ( {
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
+	placeholder,
 	selected,
 }: SelectControlProps ) => {
 	const [ isFocused, setIsFocused ] = useState( false );
@@ -145,6 +147,7 @@ export const SelectControl = ( {
 						className: 'woocommerce-select-control__input',
 						onFocus: () => setIsFocused( true ),
 						onBlur: () => setIsFocused( false ),
+						placeholder,
 					} ) }
 				/>
 			</div>
