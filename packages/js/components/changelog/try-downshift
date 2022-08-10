@@ -1,4 +1,4 @@
-Significance: minor
+Significance: major
 Type: add
 
-Add SearchControl component
+Create new SelectControl component and deprecate the previous SelectControl

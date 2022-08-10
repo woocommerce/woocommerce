@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Update the selectors for the deprecated SelectControl component
