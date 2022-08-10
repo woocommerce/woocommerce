@@ -1713,7 +1713,7 @@ class WC_Helper {
 			return new WP_Error( 'connect-with-password-' . $code, $message );
 		}
 
-		$access_data = json_decode( wp_remote_retrieve_body( $request ) );
+		$access_data = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( empty( $access_data['access_token'] ) || empty( $access_data['access_token_secret'] ) ) {
 			$message = sprintf( 'Call to /connect returned an invalid body: %s', wp_remote_retrieve_body( $request ) );
 			self::log( $message );
