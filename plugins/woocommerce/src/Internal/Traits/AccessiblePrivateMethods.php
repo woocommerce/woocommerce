@@ -117,26 +117,32 @@ trait AccessiblePrivateMethods {
 	 * Register a private or protected instance method of this class as externally accessible.
 	 *
 	 * @param string $method_name Method name.
-	 * @return void
+	 * @return bool True if the method has been marked as externally accessible, false if the method doesn't exist.
 	 */
-	protected function mark_method_as_accessible( string $method_name ): void {
+	protected function mark_method_as_accessible( string $method_name ): bool {
 		// Note that an "is_callable" check would be useless here:
 		// "is_callable" always returns true if the class implements __call.
 		if ( method_exists( $this, $method_name ) ) {
 			ArrayUtil::push_once( $this->_accessible_private_methods, $method_name );
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
 	 * Register a private or protected static method of this class as externally accessible.
 	 *
 	 * @param string $method_name Method name.
-	 * @return void
+	 * @return bool True if the method has been marked as externally accessible, false if the method doesn't exist.
 	 */
-	protected static function mark_static_method_as_accessible( string $method_name ): void {
+	protected static function mark_static_method_as_accessible( string $method_name ): bool {
 		if ( method_exists( __CLASS__, $method_name ) ) {
 			ArrayUtil::push_once( static::$_accessible_static_private_methods, $method_name );
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
