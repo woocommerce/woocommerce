@@ -50,6 +50,7 @@ use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommerceSubscriptions;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use \Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
+use \Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Events Class.
@@ -174,8 +175,8 @@ class Events {
 	 * @param Note $note_from_db The note object from the database.
 	 */
 	public function get_note_from_db( $note_from_db ) {
-		if ( get_user_locale() === $note_from_db->get_locale() ) {
-			return;
+		if ( ! $note_from_db instanceof Note || get_user_locale() === $note_from_db->get_locale() ) {
+			return $note_from_db;
 		}
 
 		$note_classes = array_merge( self::$note_classes_to_added_or_updated, self::$other_note_classes );
