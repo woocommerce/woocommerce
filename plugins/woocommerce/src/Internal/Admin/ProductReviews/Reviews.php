@@ -41,16 +41,16 @@ class Reviews {
 	 */
 	public function __construct() {
 
-		$this->add_action( 'admin_menu', 'add_reviews_page' );
-		$this->add_action( 'admin_enqueue_scripts', 'load_javascript' );
+		self::add_action( 'admin_menu', [ $this, 'add_reviews_page' ] );
+		self::add_action( 'admin_enqueue_scripts', [ $this, 'load_javascript' ] );
 
 		// These ajax callbacks need a low priority to ensure they run before their WordPress core counterparts.
-		$this->add_action( 'wp_ajax_edit-comment', 'handle_edit_review', -1 );
-		$this->add_action( 'wp_ajax_replyto-comment', 'handle_reply_to_review', -1 );
+		self::add_action( 'wp_ajax_edit-comment', [ $this, 'handle_edit_review' ], -1 );
+		self::add_action( 'wp_ajax_replyto-comment', [ $this, 'handle_reply_to_review' ], -1 );
 
-		$this->add_filter( 'parent_file', 'edit_review_parent_file' );
-		$this->add_filter( 'gettext', 'edit_comments_screen_text', 10, 2 );
-		$this->add_action( 'admin_notices', 'display_notices' );
+		self::add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
+		self::add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
+		self::add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Reviews {
 		 * @param string $capability The capability (defaults to `moderate_comments` for viewing and `edit_products` for editing).
 		 * @param string $context    The context for which the capability is needed.
 		 */
-		return (string) apply_filters( 'woocommerce_product_reviews_page_capability', 'view' === $context ? 'moderate_comments' : 'edit_products', $context );
+		return (string) apply_filters( 'woocommerce_product_reviews_page_capability', $context === 'view' ? 'moderate_comments' : 'edit_products', $context );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class Reviews {
 	public function is_reviews_page() : bool {
 		global $current_screen;
 
-		return isset( $current_screen->base ) && 'product_page_' . static::MENU_SLUG === $current_screen->base;
+		return isset( $current_screen->base ) && $current_screen->base === 'product_page_' . static::MENU_SLUG;
 	}
 
 	/**
@@ -146,7 +146,7 @@ class Reviews {
 	 */
 	protected function is_review_or_reply( $object ) : bool {
 
-		$is_review_or_reply = $object instanceof WP_Comment && in_array( $object->comment_type, [ 'review', 'comment' ], true ) && 'product' === get_post_type( $object->comment_post_ID );
+		$is_review_or_reply = $object instanceof WP_Comment && in_array( $object->comment_type, [ 'review', 'comment' ], true ) && get_post_type( $object->comment_post_ID ) === 'product';
 
 		/**
 		 * Filters whether the object is a review or a reply to a review.
@@ -250,12 +250,12 @@ class Reviews {
 		}
 
 		// Inline Review replies will use the `detail` mode. If that's not what we have, then let WordPress core take over.
-		if ( isset( $_REQUEST['mode'] ) && 'dashboard' === $_REQUEST['mode'] ) {
+		if ( isset( $_REQUEST['mode'] ) && $_REQUEST['mode'] === 'dashboard' ) {
 			return;
 		}
 
 		// If this is not a a reply to a review, bail silently to let WordPress core take over.
-		if ( 'product' !== get_post_type( $post ) ) {
+		if ( get_post_type( $post ) !== 'product' ) {
 			return;
 		}
 
@@ -296,7 +296,7 @@ class Reviews {
 			wp_die( esc_html__( 'Sorry, you must be logged in to reply to a review.', 'woocommerce' ) );
 		}
 
-		if ( '' === $comment_content ) {
+		if ( $comment_content === '' ) {
 			wp_die( esc_html__( 'Error: Please type your reply text.', 'woocommerce' ) );
 		}
 
@@ -313,7 +313,7 @@ class Reviews {
 		if ( ! empty( $_POST['approve_parent'] ) ) {
 			$parent = get_comment( $comment_parent );
 
-			if ( $parent && '0' === $parent->comment_approved && $parent->comment_post_ID == $comment_post_ID ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+			if ( $parent && $parent->comment_approved === '0' && $parent->comment_post_ID === $comment_post_ID ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 				if ( ! current_user_can( 'edit_comment', $parent->comment_ID ) ) {
 					wp_die( -1 );
 				}
@@ -489,7 +489,7 @@ class Reviews {
 	protected function edit_review_parent_file( $parent_file ) {
 		global $submenu_file, $current_screen;
 
-		if ( isset( $current_screen->id, $_GET['c'] ) && 'comment' === $current_screen->id ) {
+		if ( isset( $current_screen->id, $_GET['c'] ) && $current_screen->id === 'comment' ) {
 
 			$comment_id = absint( $_GET['c'] );
 			$comment    = get_comment( $comment_id );
@@ -498,7 +498,7 @@ class Reviews {
 				$comment = get_comment( $comment->comment_parent );
 			}
 
-			if ( isset( $comment->comment_post_ID ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
+			if ( isset( $comment->comment_post_ID ) && get_post_type( $comment->comment_post_ID ) === 'product' ) {
 				$parent_file  = 'edit.php?post_type=product';
 				$submenu_file = 'product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
@@ -523,7 +523,7 @@ class Reviews {
 		}
 
 		// Try to get comment from query params when not in context already.
-		if ( ! $comment && isset( $_GET['action'], $_GET['c'] ) && 'editcomment' === $_GET['action'] ) {
+		if ( ! $comment && isset( $_GET['action'], $_GET['c'] ) && $_GET['action'] === 'editcomment' ) {
 			$comment_id = absint( $_GET['c'] );
 			$comment    = get_comment( $comment_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
@@ -536,12 +536,12 @@ class Reviews {
 		}
 
 		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
-		if ( isset( $comment->comment_post_ID ) && 'product' === get_post_type( $comment->comment_post_ID ) ) {
-			if ( 'Edit Comment' === $text ) {
+		if ( isset( $comment->comment_post_ID ) && get_post_type( $comment->comment_post_ID ) === 'product' ) {
+			if ( $text === 'Edit Comment' ) {
 				$translation = $is_reply
 					? __( 'Edit Review Reply', 'woocommerce' )
 					: __( 'Edit Review', 'woocommerce' );
-			} elseif ( 'Moderate Comment' === $text ) {
+			} elseif ( $text === 'Moderate Comment' ) {
 				$translation = $is_reply
 					? __( 'Moderate Review Reply', 'woocommerce' )
 					: __( 'Moderate Review', 'woocommerce' );

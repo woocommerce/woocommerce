@@ -49,10 +49,10 @@ class LookupDataStore {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		$this->add_action( 'woocommerce_run_product_attribute_lookup_update_callback', 'run_update_callback', 10, 2 );
-		$this->add_filter( 'woocommerce_get_sections_products', 'add_advanced_section_to_product_settings', 100, 1 );
-		$this->add_action( 'woocommerce_rest_insert_product', 'on_product_created_or_updated_via_rest_api', 100, 2 );
-		$this->add_filter( 'woocommerce_get_settings_products', 'add_product_attributes_lookup_table_settings', 100, 2 );
+		self::add_action( 'woocommerce_run_product_attribute_lookup_update_callback', array( $this, 'run_update_callback' ), 10, 2 );
+		self::add_filter( 'woocommerce_get_sections_products', array( $this, 'add_advanced_section_to_product_settings' ), 100, 1 );
+		self::add_action( 'woocommerce_rest_insert_product', array( $this, 'on_product_created_or_updated_via_rest_api' ), 100, 2 );
+		self::add_filter( 'woocommerce_get_settings_products', array( $this, 'add_product_attributes_lookup_table_settings' ), 100, 2 );
 	}
 
 	/**
@@ -96,7 +96,7 @@ class LookupDataStore {
 		}
 
 		$action = $this->get_update_action( $changeset );
-		if ( self::ACTION_NONE !== $action ) {
+		if ( $action !== self::ACTION_NONE ) {
 			$this->maybe_schedule_update( $product->get_id(), $action );
 		}
 	}
@@ -112,7 +112,7 @@ class LookupDataStore {
 	 * @param int $action The action to perform, one of the ACTION_ constants.
 	 */
 	private function maybe_schedule_update( int $product_id, int $action ) {
-		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_direct_updates' ) ) {
+		if ( get_option( 'woocommerce_attribute_lookup_direct_updates' ) === 'yes' ) {
 			$this->run_update_callback( $product_id, $action );
 			return;
 		}
@@ -192,7 +192,7 @@ class LookupDataStore {
 
 		if ( in_array( 'catalog_visibility', $keys, true ) ) {
 			$new_visibility = $changeset['catalog_visibility'];
-			if ( 'visible' === $new_visibility || 'catalog' === $new_visibility ) {
+			if ( $new_visibility === 'visible' || $new_visibility === 'catalog' ) {
 				return self::ACTION_INSERT;
 			} else {
 				return self::ACTION_DELETE;
@@ -587,7 +587,7 @@ class LookupDataStore {
 	 * @return bool True if a lookup table regeneration is already in progress.
 	 */
 	public function regeneration_is_in_progress() {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null );
+		return get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null ) === 'yes';
 	}
 
 	/**
@@ -625,7 +625,7 @@ class LookupDataStore {
 	 * @return bool True if the last lookup table regeneration process was aborted.
 	 */
 	public function regeneration_was_aborted(): bool {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
+		return get_option( 'woocommerce_attribute_lookup_regeneration_aborted' ) === 'yes';
 	}
 
 	/**
@@ -662,7 +662,7 @@ class LookupDataStore {
 	 * @return array New settings configuration array.
 	 */
 	private function add_product_attributes_lookup_table_settings( array $settings, string $section_id ): array {
-		if ( 'advanced' === $section_id && $this->check_lookup_table_exists() ) {
+		if ( $section_id === 'advanced' && $this->check_lookup_table_exists() ) {
 			$title_item = array(
 				'title' => __( 'Product attributes lookup table', 'woocommerce' ),
 				'type'  => 'title',

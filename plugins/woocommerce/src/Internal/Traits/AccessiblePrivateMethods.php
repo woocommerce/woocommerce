@@ -6,8 +6,8 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
  * This trait allows making private methods of a class accessible from outside.
- * This is useful to define hook handlers with the [$this, 'method'] syntax without having to
- * make the method public (and thus having to keep it forever for backwards compatibility).
+ * This is useful to define hook handlers with the [$this, 'method'] or [__CLASS__, 'method'] syntax
+ * without having to make the method public (and thus having to keep it forever for backwards compatibility).
  *
  * Example:
  *
@@ -15,22 +15,26 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
  *   use AccessiblePrivateMethods;
  *
  *   public function __construct() {
- *     $this->add_action('some_action', [$this, 'handle_some_action']);
+ *     self::add_action('some_action', [$this, 'handle_some_action']);
+ *   }
+ *
+ *   public static function init() {
+ *     self::add_filter('some_filter', [__CLASS__, 'handle_some_filter']);
  *   }
  *
  *   private function handle_some_action() {
  *   }
+ *
+ *   private static function handle_some_filter() {
+ *   }
  * }
  *
- * Additionally, 'add_action' and 'add_filter' accept the name of a method in the containing class,
- * so the following is equivalent to the above example:
+ * For this to work the callback must be an array and the first element of the array must be either '$this', '__CLASS__',
+ * or another instance of the same class; otherwise the method won't be marked as accessible
+ * (but the corresponding WordPress 'add_action' and 'add_filter' functions will still be called).
  *
- * $this->add_action('some_action', 'handle_some_action');
- *
- * Static methods are supported as well, but in this case the trait methods to use are
- * 'add_static_ation' and 'add_static_filter':
- *
- * self::add_static action('some_action', [__CLASS__, 'handle_some_action']);
+ * No special procedure is needed to remove hooks set up with these methods, the regular 'remove_action'
+ * and 'remove_filter' functions provided by WordPress can be used as usual.
  */
 trait AccessiblePrivateMethods {
 
@@ -65,27 +69,9 @@ trait AccessiblePrivateMethods {
 	 *                                  in the order in which they were added to the action. Default 10.
 	 * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
 	 */
-	protected function add_action( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
-		$this->add_filter( $hook_name, $callback, $priority, $accepted_args );
-	}
-
-	/**
-	 * Register a WordPress action.
-	 * If the callback refers to a private or protected static method in this class, the method is marked as externally accessible.
-	 *
-	 * $callback can be a standard callable, or a string representing the name of a method in this class.
-	 *
-	 * @param string   $hook_name       The name of the action to add the callback to.
-	 * @param callable $callback        The callback to be run when the action is called.
-	 * @param int      $priority        Optional. Used to specify the order in which the functions
-	 *                                  associated with a particular action are executed.
-	 *                                  Lower numbers correspond with earlier execution,
-	 *                                  and functions with the same priority are executed
-	 *                                  in the order in which they were added to the action. Default 10.
-	 * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
-	 */
-	protected static function add_static_action( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
-		static::add_static_filter( $hook_name, $callback, $priority, $accepted_args );
+	protected static function add_action( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		self::process_callback_before_hooking( $callback );
+		add_action( $hook_name, $callback, $priority, $accepted_args );
 	}
 
 	/**
@@ -103,39 +89,28 @@ trait AccessiblePrivateMethods {
 	 *                                  in the order in which they were added to the action. Default 10.
 	 * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
 	 */
-	protected function add_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
-		if ( is_string( $callback ) && method_exists( $this, $callback ) ) {
-			ArrayUtil::push_once( $this->_accessible_private_methods, $callback );
-			$callback = array( $this, $callback );
-		} elseif ( is_array( $callback ) && count( $callback ) >= 2 && $callback[0] === $this ) {
-			$this->mark_method_as_accessible( $callback[1] );
-		}
+	protected static function add_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		self::process_callback_before_hooking( $callback );
 		add_filter( $hook_name, $callback, $priority, $accepted_args );
 	}
 
 	/**
-	 * Register a WordPress filter.
-	 * If the callback refers to a private or protected static method in this class, the method is marked as externally accessible.
+	 * Do the required processing to a callback before invoking the WordPress' 'add_action' or 'add_filter' method.
 	 *
-	 * $callback can be a standard callable, or a string representing the name of a method in this class.
-	 *
-	 * @param string   $hook_name       The name of the action to add the callback to.
-	 * @param callable $callback        The callback to be run when the action is called.
-	 * @param int      $priority        Optional. Used to specify the order in which the functions
-	 *                                  associated with a particular action are executed.
-	 *                                  Lower numbers correspond with earlier execution,
-	 *                                  and functions with the same priority are executed
-	 *                                  in the order in which they were added to the action. Default 10.
-	 * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
+	 * @param callable $callback The callback to process.
+	 * @return void
 	 */
-	protected static function add_static_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
-		if ( is_string( $callback ) && method_exists( __CLASS__, $callback ) ) {
-			ArrayUtil::push_once( static::$_accessible_static_private_methods, $callback );
-			$callback = array( __CLASS__, $callback );
-		} elseif ( is_array( $callback ) && count( $callback ) >= 2 && __CLASS__ === $callback[0] ) {
-			static::mark_static_method_as_accessible( $callback[1] );
+	protected static function process_callback_before_hooking( $callback ): void {
+		if ( ! is_array( $callback ) || count( $callback ) < 2 ) {
+			return;
 		}
-		add_filter( $hook_name, $callback, $priority, $accepted_args );
+
+		$first_item = $callback[0];
+		if ( $first_item === __CLASS__ ) {
+			static::mark_static_method_as_accessible( $callback[1] );
+		} elseif ( is_object( $first_item ) && get_class( $first_item ) === __CLASS__ ) {
+			$first_item->mark_method_as_accessible( $callback[1] );
+		}
 	}
 
 	/**
@@ -163,7 +138,6 @@ trait AccessiblePrivateMethods {
 			ArrayUtil::push_once( static::$_accessible_static_private_methods, $method_name );
 		}
 	}
-
 
 	/**
 	 * Undefined/unaccessible instance method call handler.

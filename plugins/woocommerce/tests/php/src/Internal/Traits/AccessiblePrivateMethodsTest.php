@@ -226,37 +226,25 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 	 *           [false]
 	 *
 	 * @testdox New add_(static_)action and add_(static_)filter methods can be used to register private and protected class methods as hook callbacks.
-	 *
-	 * @param bool $use_string_syntax True to set hooks passing the method name, false to use the standard [$this, 'method_name'] syntax.
 	 */
-	public function test_private_and_protected_hook_handler_methods_can_be_made_accessible( bool $use_string_syntax ) {
+	public function test_private_and_protected_hook_handler_methods_can_be_made_accessible() {
 		//phpcs:disable Squiz.Commenting
-		$sut = new class($use_string_syntax) {
+		$sut = new class() {
 			use AccessiblePrivateMethods;
 
 			public $action_argument = null;
 
 			public static $static_action_argument = null;
 
-			public function __construct( bool $use_string_syntax ) {
-				if ( $use_string_syntax ) {
-					$this->add_action( 'action_handled_privately', 'handle_action' );
-					$this->add_action( 'filter_handled_privately', 'handle_filter' );
-				} else {
-					$this->add_action( 'action_handled_privately', array( $this, 'handle_action' ) );
-					$this->add_action( 'filter_handled_privately', array( $this, 'handle_filter' ) );
-				}
+			public function __construct() {
+				self::add_action( 'action_handled_privately', array( $this, 'handle_action' ) );
+				self::add_filter( 'filter_handled_privately', array( $this, 'handle_filter' ) );
 			}
 
 			//phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag
-			final public static function init( bool $use_string_syntax ) {
-				if ( $use_string_syntax ) {
-					self::add_static_action( 'static_action_handled_privately', 'handle_static_action' );
-					self::add_static_action( 'static_filter_handled_privately', 'handle_static_filter' );
-				} else {
-					self::add_static_action( 'static_action_handled_privately', array( __CLASS__, 'handle_static_action' ) );
-					self::add_static_action( 'static_filter_handled_privately', array( __CLASS__, 'handle_static_filter' ) );
-				}
+			final public static function init() {
+				self::add_action( 'static_action_handled_privately', array( __CLASS__, 'handle_static_action' ) );
+				self::add_filter( 'static_filter_handled_privately', array( __CLASS__, 'handle_static_filter' ) );
 			}
 
 			private function handle_action( $argument ) {
@@ -277,7 +265,7 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 		};
 		//phpcs:enable Squiz.Commenting
 
-		$sut::init( $use_string_syntax );
+		$sut::init();
 
 		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
@@ -297,7 +285,7 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Trying to make a public method accessible with mark_method_as_accessible does nothing.
+	 * @testdox add_action and add_filter methods can be used to register public class methods as hook callbacks, although that's not needed.
 	 */
 	public function test_accessibilizing_public_method_does_nothing() {
 		//phpcs:disable Squiz.Commenting
@@ -309,12 +297,12 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 			public static $static_action_argument = null;
 
 			public function __construct() {
-				$this->add_action( 'action_handled_publicly', array( $this, 'handle_action_publicly' ) );
+				self::add_action( 'action_handled_publicly', array( $this, 'handle_action_publicly' ) );
 			}
 
 			//phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag
 			final public static function init() {
-				self::add_static_action( 'static_action_handled_publicly', array( __CLASS__, 'handle_static_action_publicly' ) );
+				self::add_action( 'static_action_handled_publicly', array( __CLASS__, 'handle_static_action_publicly' ) );
 			}
 
 			public function handle_action_publicly( $argument ) {
@@ -352,12 +340,12 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 			public $static_action_argument = null;
 
 			public function __construct() {
-				$this->add_action( 'filter_handled_privately', array( $this, 'handle_filter' ) );
+				self::add_action( 'filter_handled_privately', array( $this, 'handle_filter' ) );
 			}
 
 			//phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag
 			final public static function init() {
-				self::add_static_action( 'static_filter_handled_privately', array( __CLASS__, 'handle_static_filter' ) );
+				self::add_action( 'static_filter_handled_privately', array( __CLASS__, 'handle_static_filter' ) );
 			}
 
 			private function handle_filter( $argument ) {
@@ -436,4 +424,5 @@ class BaseClass {
 	}
 	//phpcs:enable Squiz.Commenting.FunctionComment.Missing
 }
+
 //phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch

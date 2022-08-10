@@ -86,15 +86,15 @@ class CustomOrdersTableController {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		$this->add_filter( 'woocommerce_order_data_store', 'get_data_store_instance', 999, 1 );
-		$this->add_filter( 'woocommerce_debug_tools', 'add_initiate_regeneration_entry_to_tools_array', 999, 1 );
-		$this->add_filter( 'woocommerce_get_sections_advanced', 'get_settings_sections', 999, 1 );
-		$this->add_filter( 'woocommerce_get_settings_advanced', 'get_settings', 999, 2 );
-		$this->add_filter( 'updated_option', 'process_updated_option', 999, 3 );
-		$this->add_filter( 'pre_update_option', 'process_pre_update_option', 999, 3 );
-		$this->add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, 'process_sync_finished' );
-		$this->add_action( 'woocommerce_update_options_advanced_custom_data_stores', 'process_options_updated' );
-		$this->add_action( 'woocommerce_after_register_post_type', 'register_post_type_for_order_placeholders' );
+		self::add_filter( 'woocommerce_order_data_store', array( $this, 'get_data_store_instance' ), 999, 1 );
+		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
+		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'get_settings_sections' ), 999, 1 );
+		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'get_settings' ), 999, 2 );
+		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
+		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
+		self::add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, array( $this, 'process_sync_finished' ) );
+		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ) );
+		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ) );
 	}
 
 	/**
@@ -141,7 +141,7 @@ class CustomOrdersTableController {
 	 * @return bool True if the custom orders table usage is enabled
 	 */
 	public function custom_orders_table_usage_is_enabled(): bool {
-		return 'yes' === get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+		return get_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) === 'yes';
 	}
 
 	/**
@@ -209,7 +209,7 @@ class CustomOrdersTableController {
 	 */
 	private function create_custom_orders_tables() {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) === false ) {
 			throw new \Exception( 'Invalid nonce' );
 		}
 
@@ -260,7 +260,7 @@ class CustomOrdersTableController {
 	 * @return array The updated settings array.
 	 */
 	private function get_settings( array $settings, string $section_id ): array {
-		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
+		if ( ! $this->is_feature_visible() || $section_id !== 'custom_data_stores' ) {
 			return $settings;
 		}
 
@@ -278,7 +278,7 @@ class CustomOrdersTableController {
 			);
 
 			$sync_status     = $this->data_synchronizer->get_sync_status();
-			$sync_is_pending = 0 !== $sync_status['current_pending_count'];
+			$sync_is_pending = $sync_status['current_pending_count'] !== 0;
 
 			$settings[] = array(
 				'title'         => __( 'Data store for orders', 'woocommerce' ),
@@ -397,7 +397,7 @@ class CustomOrdersTableController {
 	 * @param mixed  $value New value of the setting.
 	 */
 	private function process_updated_option( $option, $old_value, $value ) {
-		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
+		if ( $option === DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION && $value === 'no' ) {
 			$this->data_synchronizer->cleanup_synchronization_state();
 		}
 	}
@@ -413,7 +413,7 @@ class CustomOrdersTableController {
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
 	private function process_pre_update_option( $value, $option, $old_value ) {
-		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
+		if ( $option !== self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION || $value === $old_value || $old_value === false ) {
 			return $value;
 		}
 
@@ -453,7 +453,7 @@ class CustomOrdersTableController {
 	 * @return bool
 	 */
 	private function auto_flip_authoritative_table_enabled(): bool {
-		return 'yes' === get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
+		return get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION ) === 'yes';
 	}
 
 	/**

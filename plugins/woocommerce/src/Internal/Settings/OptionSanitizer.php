@@ -31,9 +31,9 @@ class OptionSanitizer {
 		);
 
 		foreach ( $color_options as $option_name ) {
-			$this->add_filter(
+			self::add_filter(
 				"woocommerce_admin_settings_sanitize_option_{$option_name}",
-				'sanitize_color_option',
+				array( $this, 'sanitize_color_option' ),
 				10,
 				2
 			);
