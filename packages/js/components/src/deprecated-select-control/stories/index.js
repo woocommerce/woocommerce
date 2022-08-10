@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SelectControl } from '@woocommerce/components';
+import { DeprecatedSelectControl } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
 
 const options = [
@@ -48,7 +48,7 @@ const options = [
 	},
 ];
 
-const SelectControlExample = () => {
+const DeprecatedSelectControlExample = () => {
 	const [ state, setState ] = useState( {
 		simpleSelected: [],
 		simpleMultipleSelected: [],
@@ -71,7 +71,7 @@ const SelectControlExample = () => {
 
 	return (
 		<div>
-			<SelectControl
+			<DeprecatedSelectControl
 				label="Simple single value"
 				onChange={ ( selected ) =>
 					setState( { ...state, simpleSelected: selected } )
@@ -81,7 +81,7 @@ const SelectControlExample = () => {
 				selected={ simpleSelected }
 			/>
 			<br />
-			<SelectControl
+			<DeprecatedSelectControl
 				label="Multiple values"
 				multiple
 				onChange={ ( selected ) =>
@@ -92,7 +92,7 @@ const SelectControlExample = () => {
 				selected={ simpleMultipleSelected }
 			/>
 			<br />
-			<SelectControl
+			<DeprecatedSelectControl
 				label="Show all options with default selected"
 				onChange={ ( selected ) =>
 					setState( {
@@ -108,7 +108,7 @@ const SelectControlExample = () => {
 				excludeSelectedOptions={ false }
 			/>
 			<br />
-			<SelectControl
+			<DeprecatedSelectControl
 				label="Single value searchable"
 				isSearchable
 				onChange={ ( selected ) =>
@@ -119,7 +119,7 @@ const SelectControlExample = () => {
 				selected={ singleSelected }
 			/>
 			<br />
-			<SelectControl
+			<DeprecatedSelectControl
 				label="Single value searchable with options on refocus"
 				isSearchable
 				onChange={ ( selected ) =>
@@ -131,7 +131,7 @@ const SelectControlExample = () => {
 				showAllOnFocus
 			/>
 			<br />
-			<SelectControl
+			<DeprecatedSelectControl
 				label="Inline tags searchable"
 				isSearchable
 				multiple
@@ -144,7 +144,7 @@ const SelectControlExample = () => {
 				selected={ inlineSelected }
 			/>
 			<br />
-			<SelectControl
+			<DeprecatedSelectControl
 				hideBeforeSearch
 				isSearchable
 				label="Hidden options before search"
@@ -161,9 +161,9 @@ const SelectControlExample = () => {
 	);
 };
 
-export const Basic = () => <SelectControlExample />;
+export const Basic = () => <DeprecatedSelectControlExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/SelectControl',
-	component: SelectControl,
+	title: 'WooCommerce Admin/components/DeprecatedSelectControl',
+	component: DeprecatedSelectControl,
 };

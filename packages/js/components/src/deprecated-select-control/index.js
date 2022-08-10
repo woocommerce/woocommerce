@@ -22,7 +22,7 @@ const initialState = { isExpanded: false, isFocused: false, query: '' };
  * A search box which filters options while typing,
  * allowing a user to select from an option from a filtered list.
  */
-export class SelectControl extends Component {
+export class DeprecatedSelectControl extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -398,7 +398,7 @@ export class SelectControl extends Component {
 	}
 }
 
-SelectControl.propTypes = {
+DeprecatedSelectControl.propTypes = {
 	/**
 	 * Name to use for the autofill field, not used if no string is passed.
 	 */
@@ -542,7 +542,7 @@ SelectControl.propTypes = {
 	autoComplete: PropTypes.string,
 };
 
-SelectControl.defaultProps = {
+DeprecatedSelectControl.defaultProps = {
 	autofill: null,
 	excludeSelectedOptions: true,
 	getSearchExpression: identity,
@@ -567,4 +567,4 @@ export default compose( [
 	withSpokenMessages,
 	withInstanceId,
 	withFocusOutside, // this MUST be the innermost HOC as it calls handleFocusOutside
-] )( SelectControl );
+] )( DeprecatedSelectControl );

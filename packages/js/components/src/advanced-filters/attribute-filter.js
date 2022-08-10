@@ -18,7 +18,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import Search from '../search';
-import SelectControl from '../select-control';
+import DeprecatedSelectControl from '../deprecated-select-control';
 import { textContent } from './utils';
 
 const getScreenReaderText = ( {
@@ -221,7 +221,7 @@ const AttributeFilter = ( props ) => {
 											<span className="woocommerce-filters-advanced__attribute-field-separator">
 												=
 											</span>
-											<SelectControl
+											<DeprecatedSelectControl
 												className="woocommerce-filters-advanced__input woocommerce-search"
 												placeholder={ __(
 													'Attribute value',

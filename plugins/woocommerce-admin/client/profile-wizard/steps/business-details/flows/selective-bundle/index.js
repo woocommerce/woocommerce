@@ -16,7 +16,11 @@ import {
 	Spinner,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { SelectControl, Form, TextControl } from '@woocommerce/components';
+import {
+	DeprecatedSelectControl,
+	Form,
+	TextControl,
+} from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
@@ -497,7 +501,7 @@ class BusinessDetails extends Component {
 							</div>
 							<Card>
 								<CardBody>
-									<SelectControl
+									<DeprecatedSelectControl
 										excludeSelectedOptions={ false }
 										label={ __(
 											'How many products do you plan to display?',
@@ -511,7 +515,7 @@ class BusinessDetails extends Component {
 										) }
 									/>
 
-									<SelectControl
+									<DeprecatedSelectControl
 										excludeSelectedOptions={ false }
 										label={ __(
 											'Currently selling elsewhere?',
@@ -528,7 +532,7 @@ class BusinessDetails extends Component {
 									{ isSellingElsewhere(
 										values.selling_venues
 									) && (
-										<SelectControl
+										<DeprecatedSelectControl
 											excludeSelectedOptions={ false }
 											label={ __(
 												'How many employees do you have?',
@@ -546,7 +550,7 @@ class BusinessDetails extends Component {
 									{ isSellingElsewhere(
 										values.selling_venues
 									) && (
-										<SelectControl
+										<DeprecatedSelectControl
 											excludeSelectedOptions={ false }
 											label={ __(
 												"What's your current annual revenue?",
@@ -571,7 +575,7 @@ class BusinessDetails extends Component {
 									) && (
 										<>
 											<div className="business-competitors">
-												<SelectControl
+												<DeprecatedSelectControl
 													excludeSelectedOptions={
 														false
 													}
