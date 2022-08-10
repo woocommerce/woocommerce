@@ -15,8 +15,22 @@ import EnrichedLabel from '../fields/enriched-label';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
-export const ProductDetailsSection: React.FC = () => {
+export const ProductDetailsSection: React.FC = ( item: string ) => {
 	const { getInputProps } = useFormContext< Product >();
+	const getCheckboxProps = () => {
+		const { checked, className, onChange, onBlur } =
+			getInputProps< boolean >( item );
+		return {
+			checked,
+			className: classnames(
+				'woocommerce-add-product__checkbox',
+				className
+			),
+			onChange,
+			onBlur,
+		};
+	};
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Product details', 'woocommerce' ) }
@@ -40,11 +54,7 @@ export const ProductDetailsSection: React.FC = () => {
 						slug={ PRODUCT_DETAILS_SLUG }
 					/>
 				}
-				{ ...getInputProps< string >( 'featured' ) }
-				className={ classnames(
-					'woocommerce-add-product__checkbox',
-					getInputProps< string >( 'featured' ).className
-				) }
+				{ ...getCheckboxProps() }
 			/>
 		</ProductSectionLayout>
 	);
