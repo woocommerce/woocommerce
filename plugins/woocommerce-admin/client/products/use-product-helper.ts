@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import {
 	Product,
 	ProductsStoreActions,
@@ -43,6 +43,11 @@ export function useProductHelper() {
 		PRODUCTS_STORE_NAME
 	) as ProductsStoreActions;
 	const { createNotice } = useDispatch( 'core/notices' );
+	const [ isDeleting, setIsDeleting ] = useState( false );
+	const [ updating, setUpdating ] = useState( {
+		draft: false,
+		publish: false,
+	} );
 
 	/**
 	 * Create product with status.
@@ -60,6 +65,10 @@ export function useProductHelper() {
 			skipNotice = false,
 			skipRedirect = false
 		) => {
+			setUpdating( {
+				...updating,
+				[ status ]: true,
+			} );
 			createProduct( {
 				...product,
 				status,
@@ -93,6 +102,10 @@ export function useProductHelper() {
 							}
 						);
 					}
+					setUpdating( {
+						...updating,
+						[ status ]: false,
+					} );
 				},
 				() => {
 					createNotice(
@@ -101,10 +114,14 @@ export function useProductHelper() {
 							? __( 'Failed to publish product.', 'woocommerce' )
 							: __( 'Failed to create product.', 'woocommerce' )
 					);
+					setUpdating( {
+						...updating,
+						[ status ]: false,
+					} );
 				}
 			);
 		},
-		[]
+		[ updating ]
 	);
 
 	/**
@@ -121,6 +138,10 @@ export function useProductHelper() {
 			status: ProductStatus,
 			skipNotice = false
 		) => {
+			setUpdating( {
+				...updating,
+				[ status ]: true,
+			} );
 			return updateProduct( product.id, {
 				...product,
 				status,
@@ -147,16 +168,24 @@ export function useProductHelper() {
 							}
 						);
 					}
+					setUpdating( {
+						...updating,
+						[ status ]: false,
+					} );
 				},
 				() => {
 					createNotice(
 						'error',
 						__( 'Failed to update product.', 'woocommerce' )
 					);
+					setUpdating( {
+						...updating,
+						[ status ]: false,
+					} );
 				}
 			);
 		},
-		[]
+		[ updating ]
 	);
 
 	/**
@@ -188,6 +217,7 @@ export function useProductHelper() {
 	 */
 	const deleteProductAndRedirect = useCallback(
 		( id: number, redirectUrl = 'edit.php?post_type=product' ) => {
+			setIsDeleting( true );
 			return deleteProduct( id ).then( () => {
 				createNotice(
 					'success',
@@ -199,6 +229,7 @@ export function useProductHelper() {
 				navigateTo( {
 					url: redirectUrl,
 				} );
+				setIsDeleting( false );
 			} );
 		},
 		[]
@@ -209,5 +240,8 @@ export function useProductHelper() {
 		updateProductWithStatus,
 		copyProductWithStatus,
 		deleteProductAndRedirect,
+		isUpdatingDraft: updating.draft,
+		isUpdatingPublished: updating.publish,
+		isDeleting,
 	};
 }

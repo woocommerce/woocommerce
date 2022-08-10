@@ -9,14 +9,9 @@ import {
 	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
-import { chevronDown } from '@wordpress/icons';
+import { chevronDown, check, Icon } from '@wordpress/icons';
 import { useFormContext } from '@woocommerce/components';
-import {
-	Product,
-	PRODUCTS_STORE_NAME,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -31,17 +26,11 @@ export const ProductFormActions: React.FC = () => {
 		updateProductWithStatus,
 		deleteProductAndRedirect,
 		copyProductWithStatus,
+		isUpdatingDraft,
+		isUpdatingPublished,
+		isDeleting,
 	} = useProductHelper();
 	const { isDirty, values } = useFormContext< Product >();
-	const { isPendingAction } = useSelect( ( select: WCDataSelector ) => {
-		const { isPending } = select( PRODUCTS_STORE_NAME );
-		return {
-			isPendingAction:
-				isPending( 'createProduct' ) ||
-				isPending( 'deleteProduct', values.id ) ||
-				isPending( 'updateProduct', values.id ),
-		};
-	} );
 
 	const getProductDataForTracks = () => {
 		return {
@@ -65,7 +54,7 @@ export const ProductFormActions: React.FC = () => {
 		}
 	};
 
-	const onPublish = () => {
+	const onPublish = async () => {
 		recordEvent( 'product_update', {
 			new_product_page: true,
 			...getProductDataForTracks(),
@@ -118,9 +107,21 @@ export const ProductFormActions: React.FC = () => {
 			{ values.status !== 'publish' ? (
 				<Button
 					onClick={ onSaveDraft }
-					disabled={ ! isDirty && !! values.id }
+					disabled={
+						( ! isDirty && !! values.id ) ||
+						isUpdatingDraft ||
+						isUpdatingPublished ||
+						isDeleting
+					}
 				>
-					{ __( 'Save draft', 'woocommerce' ) }
+					{ ! isDirty && values.id && <Icon icon={ check } /> }
+					{ isUpdatingDraft ? __( 'Saving', 'woocommerce' ) : null }
+					{ ( isDirty || ! values.id ) && ! isUpdatingDraft
+						? __( 'Save draft', 'woocommerce' )
+						: null }
+					{ ! isDirty && values.id && ! isUpdatingDraft
+						? __( 'Saved', 'woocommerce' )
+						: null }
 				</Button>
 			) : null }
 			<Button
@@ -140,12 +141,23 @@ export const ProductFormActions: React.FC = () => {
 				<Button
 					onClick={ onPublish }
 					variant="primary"
-					isBusy={ isPendingAction }
-					disabled={ ! isDirty && !! isPublished }
+					isBusy={ isUpdatingPublished }
+					disabled={
+						( ! isDirty && !! isPublished ) ||
+						isUpdatingDraft ||
+						isUpdatingPublished ||
+						isDeleting
+					}
 				>
-					{ isPublished
+					{ isUpdatingPublished
+						? __( 'Updating', 'woocommerce' )
+						: null }
+					{ isPublished && ! isUpdatingPublished
 						? __( 'Update', 'woocommerce' )
-						: __( 'Publish', 'woocommerce' ) }
+						: null }
+					{ ! isPublished && ! isUpdatingPublished
+						? __( 'Publish', 'woocommerce' )
+						: null }
 				</Button>
 				<DropdownMenu
 					className="woocommerce-product-form-actions__publish-dropdown"
