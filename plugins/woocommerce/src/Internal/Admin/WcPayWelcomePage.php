@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayme
  */
 class WcPayWelcomePage {
 
-	const EXPERIMENT_NAME_BASE = 'woocommerce_payments_menu_promo_nz_ie_:yyyy_:mm';
+	const EXPERIMENT_NAME = 'woocommerce_payments_menu_promo_us_2022';
 
 	/**
 	 * WCPayWelcomePage constructor.
@@ -26,8 +26,8 @@ class WcPayWelcomePage {
 	public function register_payments_welcome_page() {
 		global $menu;
 
-		// WC Payment must not be active.
-		if ( is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
+		// WC Payment must not be installed.
+		if ( ! WooCommercePayments::is_installed() ) {
 			return;
 		}
 
@@ -38,11 +38,6 @@ class WcPayWelcomePage {
 
 		// Not in WPCOM starter plan.
 		if ( $this->is_wpcom_start_plan() ) {
-			return;
-		}
-
-		// Store is in a supported country.
-		if ( ! WooCommercePayments::is_supported() ) {
 			return;
 		}
 
@@ -58,6 +53,11 @@ class WcPayWelcomePage {
 
 		// Manually dismissed.
 		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+			return;
+		}
+
+		// Users must be in the experiment.
+		if ( ! $this->should_add_the_menu() ) {
 			return;
 		}
 
@@ -129,4 +129,22 @@ class WcPayWelcomePage {
 
 		return false;
 	}
+
+	/**
+	 * Checks if user is in the experiment.
+	 *
+	 * @return bool Whether the user is in the treatment group.
+	 */
+	private function should_add_the_menu() {
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking
+		);
+
+		return $abtest->get_variation( self::EXPERIMENT_NAME ) === 'treatment';
+	}
+
 }
