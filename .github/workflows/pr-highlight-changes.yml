@@ -12,7 +12,7 @@ jobs:
             - name: Install prerequisites
               run: |
                   npm install -g pnpm@^6.24.2
-                  npm -g i @wordpress/env
+                  npm -g i @wordpress/env@5.0.0
                   pnpm install
             - name: Run analyzer
               id: run
