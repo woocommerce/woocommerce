@@ -105,7 +105,7 @@ class Control extends Component {
 		}
 
 		return (
-			<div className="woocommerce-select-control__control-value">
+			<div className="woocommerce-deprecated-select-control__control-value">
 				{ selected[ 0 ].label }
 			</div>
 		);
@@ -131,8 +131,8 @@ class Control extends Component {
 		return (
 			<input
 				autoComplete={ autoComplete || 'off' }
-				className="woocommerce-select-control__control-input"
-				id={ `woocommerce-select-control-${ instanceId }__control-input` }
+				className="woocommerce-deprecated-select-control__control-input"
+				id={ `woocommerce-deprecated-select-control-${ instanceId }__control-input` }
 				ref={ this.input }
 				type={ isSearchable ? searchInputType : 'button' }
 				value={ this.getInputValue() }
@@ -206,7 +206,7 @@ class Control extends Component {
 			<div
 				className={ classnames(
 					'components-base-control',
-					'woocommerce-select-control__control',
+					'woocommerce-deprecated-select-control__control',
 					className,
 					{
 						empty: ! query || query.length === 0,
@@ -229,7 +229,7 @@ class Control extends Component {
 			>
 				{ isSearchable && (
 					<Icon
-						className="woocommerce-select-control__control-icon"
+						className="woocommerce-deprecated-select-control__control-icon"
 						icon={ search }
 					/>
 				) }
@@ -238,7 +238,7 @@ class Control extends Component {
 				<div className="components-base-control__field">
 					{ !! label && (
 						<label
-							htmlFor={ `woocommerce-select-control-${ instanceId }__control-input` }
+							htmlFor={ `woocommerce-deprecated-select-control-${ instanceId }__control-input` }
 							className="components-base-control__label"
 						>
 							{ label }
@@ -258,7 +258,7 @@ class Control extends Component {
 					) }
 					{ !! help && (
 						<p
-							id={ `woocommerce-select-control-${ instanceId }__help` }
+							id={ `woocommerce-deprecated-select-control-${ instanceId }__help` }
 							className="components-base-control__help"
 						>
 							{ help }

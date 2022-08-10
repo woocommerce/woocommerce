@@ -1,7 +1,7 @@
-.woocommerce-search.woocommerce-select-control {
+.woocommerce-search.woocommerce-deprecated-select-control {
 	position: relative;
 
-	.woocommerce-select-control__control-icon {
+	.woocommerce-deprecated-select-control__control-icon {
 		position: absolute;
 		top: 50%;
 		left: 10px;
@@ -16,7 +16,7 @@
 		}
 	}
 
-	.woocommerce-select-control__control {
+	.woocommerce-deprecated-select-control__control {
 		height: auto;
 		border: 1px solid $gray-400;
 		font-size: 13px;
@@ -31,7 +31,7 @@
 		}
 	}
 
-	.components-base-control .woocommerce-select-control__control-input {
+	.components-base-control .woocommerce-deprecated-select-control__control-input {
 		margin: 0;
 		font-size: 13px;
 		min-height: auto;
@@ -60,7 +60,7 @@
 		display: none;
 	}
 
-	.components-base-control .woocommerce-select-control__tags {
+	.components-base-control .woocommerce-deprecated-select-control__tags {
 		margin: 0;
 	}
 
@@ -68,17 +68,17 @@
 		max-height: 24px;
 	}
 
-	.woocommerce-select-control__listbox {
+	.woocommerce-deprecated-select-control__listbox {
 		border: 1px solid $gray-400;
 		top: 38px;
 	}
 
-	&.is-static-results .woocommerce-select-control__listbox {
+	&.is-static-results .woocommerce-deprecated-select-control__listbox {
 		position: static;
 	}
 
 	// This a single `button` in the autocomplete popover
-	.woocommerce-select-control__option {
+	.woocommerce-deprecated-select-control__option {
 		margin-bottom: 0;
 		display: flex;
 		flex-direction: row;

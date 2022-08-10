@@ -14,9 +14,11 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
 		// Type the requested country/region
-		await page.click( '#woocommerce-select-control-0__control-input' );
+		await page.click(
+			'#woocommerce-deprecated-select-control-0__control-input'
+		);
 		await page.fill(
-			'#woocommerce-select-control-0__control-input',
+			'#woocommerce-deprecated-select-control-0__control-input',
 			'United States (US) — California'
 		);
 		await page.click( 'button >> text=United States (US) — California' );
@@ -103,15 +105,25 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 		expect( pageHeading ).toContain( 'Tell us about your business' );
 		// Select 1 - 10 for products
-		await page.click( '#woocommerce-select-control-0__control-input', {
-			force: true,
-		} );
-		await page.click( '#woocommerce-select-control__option-0-1-10' );
+		await page.click(
+			'#woocommerce-deprecated-select-control-0__control-input',
+			{
+				force: true,
+			}
+		);
+		await page.click(
+			'#woocommerce-deprecated-select-control__option-0-1-10'
+		);
 		// Select No for selling elsewhere
-		await page.click( '#woocommerce-select-control-1__control-input', {
-			force: true,
-		} );
-		await page.click( '#woocommerce-select-control__option-1-no' );
+		await page.click(
+			'#woocommerce-deprecated-select-control-1__control-input',
+			{
+				force: true,
+			}
+		);
+		await page.click(
+			'#woocommerce-deprecated-select-control__option-1-no'
+		);
 		await page.click( 'button >> text=Continue' );
 	} );
 
@@ -167,9 +179,11 @@ test.describe(
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 			);
-			await page.click( '#woocommerce-select-control-0__control-input' );
+			await page.click(
+				'#woocommerce-deprecated-select-control-0__control-input'
+			);
 			await page.fill(
-				'#woocommerce-select-control-0__control-input',
+				'#woocommerce-deprecated-select-control-0__control-input',
 				'Malta'
 			);
 			await page.click( 'button >> text=Malta' );
@@ -275,9 +289,11 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
+		await page.fill( '#inspector-text-control-0', 'addr 1' );
+		await page.fill( '#inspector-text-control-1', 'addr 2' );
 		await page.click( '#woocommerce-select-control-0__control-input' );
 		await page.fill(
-			'#woocommerce-select-control-0__control-input',
+			'#woocommerce-deprecated-select-control-0__control-input',
 			'United States (US) — California'
 		);
 		await page.click( 'button >> text=United States (US) — California' );

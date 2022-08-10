@@ -262,7 +262,7 @@ export function useGetCountryStateAutofill(
 				value={ autofillCountry }
 				name="country"
 				type="text"
-				className="woocommerce-select-control__autofill-input"
+				className="woocommerce-deprecated-select-control__autofill-input"
 				tabIndex={ -1 }
 				autoComplete="country"
 			/>
@@ -272,7 +272,7 @@ export function useGetCountryStateAutofill(
 				value={ autofillState }
 				name="state"
 				type="text"
-				className="woocommerce-select-control__autofill-input"
+				className="woocommerce-deprecated-select-control__autofill-input"
 				tabIndex={ -1 }
 				autoComplete="address-level1"
 			/>

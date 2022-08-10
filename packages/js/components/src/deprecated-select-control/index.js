@@ -329,16 +329,16 @@ export class DeprecatedSelectControl extends Component {
 		const hasMultiple = this.hasMultiple();
 		const { key: selectedKey = '' } = options[ selectedIndex ] || {};
 		const listboxId = isExpanded
-			? `woocommerce-select-control__listbox-${ instanceId }`
+			? `woocommerce-deprecated-select-control__listbox-${ instanceId }`
 			: null;
 		const activeId = isExpanded
-			? `woocommerce-select-control__option-${ instanceId }-${ selectedKey }`
+			? `woocommerce-deprecated-select-control__option-${ instanceId }-${ selectedKey }`
 			: null;
 
 		return (
 			<div
 				className={ classnames(
-					'woocommerce-select-control',
+					'woocommerce-deprecated-select-control',
 					className,
 					{
 						'has-inline-tags': hasMultiple && inlineTags,
@@ -353,7 +353,7 @@ export class DeprecatedSelectControl extends Component {
 						onChange={ this.onAutofillChange }
 						name={ autofill }
 						type="text"
-						className="woocommerce-select-control__autofill-input"
+						className="woocommerce-deprecated-select-control__autofill-input"
 						tabIndex="-1"
 					/>
 				) }

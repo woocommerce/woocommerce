@@ -9,7 +9,8 @@ export class DropdownField extends BaseElement {
 		const currentVal = await getInputValue( this.selector + ' input' );
 		if ( currentVal !== value ) {
 			await this.page.click(
-				this.selector + ' .woocommerce-select-control__control'
+				this.selector +
+					' .woocommerce-deprecated-select-control__control'
 			);
 			const button = await getElementByText(
 				'button',
