@@ -23,7 +23,6 @@ type SelectControlProps = {
 	children?: ChildrenType;
 	items: ItemType[];
 	label: string;
-	hasMultiple?: boolean;
 	initialSelectedItems?: ItemType[];
 	itemToString?: ( item: ItemType | null ) => string;
 	getFilteredItems?: (
@@ -31,6 +30,7 @@ type SelectControlProps = {
 		inputValue: string,
 		selectedItems: ItemType[]
 	) => ItemType[];
+	multiple?: boolean;
 	onInputChange?: ( value: string | undefined ) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
@@ -63,7 +63,7 @@ export const SelectControl = ( {
 			</Menu>
 		);
 	},
-	hasMultiple = false,
+	multiple = false,
 	items,
 	label,
 	itemToString = defaultItemToString,
@@ -108,7 +108,7 @@ export const SelectControl = ( {
 					if ( selectedItem ) {
 						onSelect( selectedItem );
 						setInputValue(
-							hasMultiple ? '' : itemToString( selectedItem )
+							multiple ? '' : itemToString( selectedItem )
 						);
 					}
 
@@ -130,7 +130,7 @@ export const SelectControl = ( {
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<div className="woocommerce-select-control__combo-box-wrapper">
-				{ hasMultiple && (
+				{ multiple && (
 					<SelectedItems
 						items={ selectedItems }
 						itemToString={ itemToString }

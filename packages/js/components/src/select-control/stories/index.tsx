@@ -44,7 +44,7 @@ export const Multiple: React.FC = () => {
 	return (
 		<>
 			<SelectControl
-				hasMultiple
+				multiple
 				items={ sampleItems }
 				label="Multiple values"
 				selected={ selected }
@@ -82,7 +82,7 @@ export const FuzzyMatching: React.FC = () => {
 
 	return (
 		<SelectControl
-			hasMultiple
+			multiple
 			getFilteredItems={ getFilteredItems }
 			items={ sampleItems }
 			label="Fuzzy matching"
@@ -174,7 +174,7 @@ export const CustomRender: React.FC = () => {
 	return (
 		<>
 			<SelectControl
-				hasMultiple
+				multiple
 				label="Custom render"
 				items={ sampleItems }
 				getFilteredItems={ ( allItems ) => allItems }
