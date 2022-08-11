@@ -7,7 +7,9 @@ import { createContext, useContext } from '@wordpress/element';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FormContext< Values extends Record< string, any > > = {
 	values: Values;
-	errors: Record< string, string >;
+	errors: {
+		[ P in keyof Values ]?: string;
+	};
 	isDirty: boolean;
 	touched: { [ P in keyof Values ]?: boolean | undefined };
 	changedFields: { [ P in keyof Values ]?: boolean | undefined };
@@ -26,9 +28,10 @@ export type FormContext< Values extends Record< string, any > > = {
 		onChange: ( value: ChangeEvent< HTMLInputElement > | Value ) => void;
 		onBlur: () => void;
 		className: string | undefined;
-		help: string | null;
+		help: string | null | undefined;
 	};
 	isValidForm: boolean;
+	resetForm: ( initialValues: Values ) => void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

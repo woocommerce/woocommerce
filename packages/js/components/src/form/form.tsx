@@ -7,9 +7,11 @@ import {
 	createElement,
 	useCallback,
 	useEffect,
+	forwardRef,
+	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
-import { ChangeEvent, PropsWithChildren } from 'react';
+import { ChangeEvent, PropsWithChildren, useRef } from 'react';
 
 /**
  * Internal dependencies
@@ -20,15 +22,15 @@ type FormProps< Values > = {
 	/**
 	 * Object of all initial errors to store in state.
 	 */
-	errors: { [ P in keyof Values ]?: string };
+	errors?: { [ P in keyof Values ]?: string };
 	/**
 	 * Object key:value pair list of all initial field values.
 	 */
-	initialValues: Values;
+	initialValues?: Values;
 	/**
 	 * This prop helps determine whether or not a field has received focus
 	 */
-	touched: Record< keyof Values, boolean >;
+	touched?: Record< keyof Values, boolean >;
 	/**
 	 * Function to call when a form is submitted with valid fields.
 	 *
@@ -67,21 +69,33 @@ function isChangeEvent< T >(
 	return ( value as ChangeEvent< HTMLInputElement > ).target !== undefined;
 }
 
+export type FormRef< Values > = {
+	resetForm: ( initialValues: Values ) => void;
+};
+
 /**
  * A form component to handle form state and provide input helper props.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function Form< Values extends Record< string, any > >(
-	props: PropsWithChildren< FormProps< Values > >
+function FormComponent< Values extends Record< string, any > >(
+	{
+		onSubmit = () => {},
+		onChange = () => {},
+		initialValues = {} as Values,
+		...props
+	}: PropsWithChildren< FormProps< Values > >,
+	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
-	const [ values, setValues ] = useState< Values >( props.initialValues );
-	const [ errors, setErrors ] = useState< Record< string, string > >( {} );
+	const [ values, setValues ] = useState< Values >( initialValues );
+	const [ errors, setErrors ] = useState< {
+		[ P in keyof Values ]?: string;
+	} >( props.errors || {} );
 	const [ changedFields, setChangedFields ] = useState< {
 		[ P in keyof Values ]?: boolean;
 	} >( {} );
 	const [ touched, setTouched ] = useState< {
 		[ P in keyof Values ]?: boolean;
-	} >( {} );
+	} >( props.touched || {} );
 
 	const validate = useCallback(
 		( newValues: Values, onValidate = () => {} ) => {
@@ -96,14 +110,16 @@ function Form< Values extends Record< string, any > >(
 		validate( values );
 	}, [] );
 
-	useEffect( () => {
-		if ( values !== props.initialValues ) {
-			setValues( props.initialValues );
-			setChangedFields( {} );
-			setTouched( {} );
-			setErrors( {} );
-		}
-	}, [ props.initialValues ] );
+	const resetForm = ( newInitialValues: Values ) => {
+		setValues( newInitialValues || {} );
+		setChangedFields( {} );
+		setTouched( {} );
+		setErrors( {} );
+	};
+
+	useImperativeHandle( ref, () => ( {
+		resetForm,
+	} ) );
 
 	const isValidForm = async () => {
 		await validate( values );
@@ -114,16 +130,13 @@ function Form< Values extends Record< string, any > >(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: string, value: any ) => {
 			setValues( { ...values, [ name ]: value } );
-			if (
-				props.initialValues[ name ] !== value &&
-				! changedFields[ name ]
-			) {
+			if ( initialValues[ name ] !== value && ! changedFields[ name ] ) {
 				setChangedFields( {
 					...changedFields,
 					[ name ]: true,
 				} );
 			} else if (
-				props.initialValues[ name ] === value &&
+				initialValues[ name ] === value &&
 				changedFields[ name ]
 			) {
 				setChangedFields( {
@@ -132,7 +145,7 @@ function Form< Values extends Record< string, any > >(
 				} );
 			}
 			validate( { ...values, [ name ]: value }, () => {
-				const { onChange, onChangeCallback } = props;
+				const { onChangeCallback } = props;
 
 				// Note that onChange is a no-op by default so this will never be null
 				const callback = onChangeCallback || onChange;
@@ -155,7 +168,7 @@ function Form< Values extends Record< string, any > >(
 				}
 			} );
 		},
-		[ values, validate, props.onChange, props.onChangeCallback ]
+		[ values, validate, onChange, props.onChangeCallback ]
 	);
 
 	const handleChange = useCallback(
@@ -188,7 +201,7 @@ function Form< Values extends Record< string, any > >(
 	);
 
 	const handleSubmit = async () => {
-		const { onSubmitCallback, onSubmit } = props;
+		const { onSubmitCallback } = props;
 		const touchedFields: { [ P in keyof Values ]?: boolean } = {};
 		Object.keys( values ).map(
 			( name: keyof Values ) => ( touchedFields[ name ] = true )
@@ -224,7 +237,7 @@ function Form< Values extends Record< string, any > >(
 		) => void;
 		onBlur: () => void;
 		className: string | undefined;
-		help: string | null;
+		help: string | null | undefined;
 	} {
 		return {
 			value: values[ name ],
@@ -270,6 +283,7 @@ function Form< Values extends Record< string, any > >(
 					handleSubmit,
 					getInputProps,
 					isValidForm: ! Object.keys( errors ).length,
+					resetForm,
 				} }
 			>
 				{ cloneElement( element ) }
@@ -289,6 +303,7 @@ function Form< Values extends Record< string, any > >(
 				handleSubmit,
 				getInputProps,
 				isValidForm: ! Object.keys( errors ).length,
+				resetForm,
 			} }
 		>
 			{ props.children }
@@ -296,15 +311,14 @@ function Form< Values extends Record< string, any > >(
 	);
 }
 
-Form.defaultProps = {
-	errors: {},
-	initialValues: {},
-	onSubmitCallback: null,
-	onSubmit: () => {},
-	onChangeCallback: null,
-	onChange: () => {},
-	touched: {},
-	validate: () => {},
-};
+const Form = forwardRef( FormComponent ) as <
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Values extends Record< string, any >
+>(
+	props: PropsWithChildren< FormProps< Values > > & {
+		ref?: React.ForwardedRef< FormRef< Values > >;
+	},
+	ref: React.Ref< FormRef< Values > >
+) => React.ReactElement | null;
 
 export { Form };
