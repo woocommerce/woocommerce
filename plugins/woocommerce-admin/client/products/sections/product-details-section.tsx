@@ -36,6 +36,23 @@ export const ProductDetailsSection: React.FC = () => {
 			onBlur,
 		};
 	};
+	const getTextControlProps = ( item: string ) => {
+		const {
+			className,
+			onBlur,
+			onChange,
+			value = '',
+		} = getInputProps< string >( item );
+		return {
+			value,
+			className: classnames(
+				'woocommerce-add-product__checkbox',
+				className
+			),
+			onChange,
+			onBlur,
+		};
+	};
 
 	return (
 		<ProductSectionLayout
@@ -49,7 +66,7 @@ export const ProductDetailsSection: React.FC = () => {
 				label={ __( 'Name', 'woocommerce' ) }
 				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-				{ ...getInputProps< string >( 'name' ) }
+				{ ...getTextControlProps( 'name' ) }
 			/>
 			<CheckboxControl
 				label={
