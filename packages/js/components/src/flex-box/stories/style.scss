@@ -1,0 +1,27 @@
+.storybook__flex-box.woocommerce-flex-box {
+    span {
+        padding: 1em;
+    }
+    span.icon {
+        flex-grow: 0;
+        flex-shrink: 0;
+        padding: 0 1em;
+        background-color: #9999FF;
+        cursor: pointer;
+    }
+    span.red {
+        background-color: #FF0000;
+        color: #FFFFFF;
+    }
+    span.yellow {
+        background-color: #FFFF00;
+        color: #000000;
+    }
+    span.green {
+        background-color: #008800;
+        color: #FFFFFF;
+    }
+    .grow-big {
+        flex-grow: 5;
+    }
+}
