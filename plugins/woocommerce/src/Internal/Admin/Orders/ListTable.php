@@ -317,8 +317,6 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Count orders by status.
 	 *
-	 * @todo review and replace (probably not ideal to do this work here).
-	 *
 	 * @param string $status The order status we are interested in.
 	 *
 	 * @return int
@@ -379,11 +377,11 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Render the months filter dropdown.
 	 *
-	 * @todo [review] we may prefer to move this logic outside of the ListTable class
-	 *
 	 * @return void
 	 */
 	private function months_filter() {
+		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
+
 		global $wp_locale;
 		global $wpdb;
 
@@ -834,10 +832,10 @@ class ListTable extends WP_List_Table {
 		$report_action = '';
 		$changed       = 0;
 
-		if ( 'remove_personal_data' === $action ) {
+		if ( $action === 'remove_personal_data' ) {
 			$report_action = 'removed_personal_data';
 			$changed       = $this->do_bulk_action_remove_personal_data( $ids );
-		} elseif ( false !== strpos( $action, 'mark_' ) ) {
+		} elseif ( strpos( $action, 'mark_' ) !== false ) {
 			$order_statuses = wc_get_order_statuses();
 			$new_status     = substr( $action, 5 );
 			$report_action  = 'marked_' . $new_status;
@@ -935,7 +933,7 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+		if ( $bulk_action === 'removed_personal_data' ) { // WPCS: input var ok, CSRF ok.
 			/* translators: %s: orders count */
 			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
