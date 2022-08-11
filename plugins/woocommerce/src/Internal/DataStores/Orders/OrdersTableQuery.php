@@ -12,6 +12,12 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * This class provides a `WP_Query`-like interface to custom order tables.
+ *
+ * @property-read int   $found_orders  Number of found orders.
+ * @property-read int   $found_posts   Alias of the `$found_orders` property.
+ * @property-read int   $max_num_pages Max number of pages matching the current query.
+ * @property-read array $orders        Order objects, or order IDs.
+ * @property-read array $posts         Alias of the $orders property.
  */
 class OrdersTableQuery {
 
@@ -26,7 +32,9 @@ class OrdersTableQuery {
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 
 	/**
-	 * Highest possible unsigned bigint (which is the type of the `id` column.
+	 * Highest possible unsigned bigint value (unsigned bigints being the type of the `id` column).
+	 *
+	 * This is deliberately held as a string, rather than a numeric type, for inclusion within queries.
 	 */
 	private const MYSQL_MAX_UNSIGNED_BIGINT = '18446744073709551615';
 
