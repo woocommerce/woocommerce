@@ -13,12 +13,12 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import { useTypographyProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import QuantityBadge from './quantity-badge';
-import { useTypographyProps } from '../../hooks/style-attributes';
 
 interface Attributes {
 	addToCartBehaviour: string;

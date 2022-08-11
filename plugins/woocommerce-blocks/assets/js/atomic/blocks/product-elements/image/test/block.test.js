@@ -9,7 +9,7 @@ import { ProductDataContextProvider } from '@woocommerce/shared-context';
  */
 import { Block } from '../block';
 
-jest.mock( '../../../../../hooks/style-attributes', () => ( {
+jest.mock( '@woocommerce/base-hooks', () => ( {
 	__esModule: true,
 	useBorderProps: jest.fn( () => ( {
 		className: '',

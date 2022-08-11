@@ -10,6 +10,11 @@ import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
+import {
+	useBorderProps,
+	useSpacingProps,
+	useTypographyProps,
+} from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 
@@ -18,11 +23,6 @@ import { useStoreEvents } from '@woocommerce/base-context/hooks';
  */
 import ProductSaleBadge from './../sale-badge/block';
 import './style.scss';
-import {
-	useBorderProps,
-	useSpacingProps,
-	useTypographyProps,
-} from '../../../../hooks/style-attributes';
 
 /**
  * Product Image Block Component.
