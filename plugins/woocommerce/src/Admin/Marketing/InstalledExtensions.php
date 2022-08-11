@@ -148,7 +148,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook.svg';
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook-icon.svg';
 
 		if ( $data['status'] === 'activated' && function_exists( 'facebook_for_woocommerce' ) ) {
 			$integration = facebook_for_woocommerce()->get_integration();
