@@ -280,8 +280,6 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_views() {
-		global $wp_post_statuses;
-
 		$view_counts = array();
 		$view_links  = array();
 		$statuses    = wc_get_order_statuses();
@@ -289,9 +287,7 @@ class ListTable extends WP_List_Table {
 
 		// Add 'draft' and 'trash' to list.
 		foreach ( array( 'draft', 'trash' ) as $wp_status ) {
-			if ( isset( $wp_post_statuses[ $wp_status ] ) ) {
-				$statuses[ $wp_status ] = $wp_post_statuses[ $wp_status ]->label;
-			}
+			$statuses[ $wp_status ] = ( get_post_status_object( $wp_status ) )->label;
 		}
 
 		$statuses_in_list = array_intersect( array_keys( $statuses ), get_post_stati( array( 'show_in_admin_status_list' => true ) ) );
