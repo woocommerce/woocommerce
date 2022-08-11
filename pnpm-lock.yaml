@@ -1386,7 +1386,6 @@ importers:
       '@wordpress/dom': ^3.3.2
       '@wordpress/dom-ready': ^3.3.1
       '@wordpress/element': ^4.1.1
-      '@wordpress/eslint-plugin': ^11.0.0
       '@wordpress/hooks': ^3.5.0
       '@wordpress/html-entities': ^3.3.1
       '@wordpress/i18n': ^4.3.1
@@ -1581,7 +1580,6 @@ importers:
       '@wordpress/babel-preset-default': 6.6.1
       '@wordpress/browserslist-config': 4.1.2
       '@wordpress/custom-templated-path-webpack-plugin': 2.1.2_webpack@5.70.0
-      '@wordpress/eslint-plugin': 11.0.1_7491b734ebe0601c0a3f15e4d741ce04
       '@wordpress/jest-preset-default': 8.1.1_591b21f22e79f442e7df48b63364953c
       '@wordpress/postcss-plugins-preset': 1.6.0
       '@wordpress/postcss-themes': 1.0.5
