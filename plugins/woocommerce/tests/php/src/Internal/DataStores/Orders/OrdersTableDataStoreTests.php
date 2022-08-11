@@ -791,6 +791,54 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test pagination works for COT queries.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_pagination(): void {
+		$test_orders = array();
+		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
+
+		for ( $i = 0; $i < 30; $i++ ) {
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+			$test_orders[] = $order->get_id();
+		}
+
+		$query = new OrdersTableQuery();
+		$this->assertCount( 30, $query->orders, 'If no limits are specified, we fetch all available orders.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => -1 ) );
+		$this->assertCount( 30, $query->orders, 'A limit of -1 is equivalent to requesting all available orders.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => -10 ) );
+		$this->assertCount( 30, $query->orders, 'An invalid limit is treated as a request for all available orders.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'  => -1,
+				'offset' => 18,
+			)
+		);
+		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
+		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
+		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'  => 5,
+				'paged'  => 2,
+				'return' => 'ids',
+			)
+		);
+		$this->assertCount( 5, $query->orders, 'Pagination works with specified limit.' );
+		$this->assertEquals( array_slice( $test_orders, 5, 5 ), $query->orders, 'The expected dataset is supplied when paginating through orders.' );
+	}
+
+	/**
 	 * Helper function to delete all meta for post.
 	 *
 	 * @param int $post_id Post ID to delete data for.
