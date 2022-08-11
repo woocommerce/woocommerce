@@ -194,17 +194,11 @@ class RemoteInboxNotificationsEngine {
 		if ( ! $note_from_db instanceof Note || get_user_locale() === $note_from_db->get_locale() ) {
 			return $note_from_db;
 		}
-
 		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
-		if ( $specs === false || count( $specs ) === 0 ) {
-			return $note_from_db;
-		}
-
 		foreach ( $specs as $spec ) {
 			if ( $spec->slug !== $note_from_db->get_name() ) {
 				continue;
 			}
-
 			$locale = SpecRunner::get_locale( $spec->locales, true );
 			if ( $locale === null ) {
 				// No locale found, so don't update the note.
