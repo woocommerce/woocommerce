@@ -15,6 +15,7 @@ import { useMemo, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -92,7 +93,7 @@ export const getMarketingExtensionLists = (
 };
 
 export type MarketingProps = {
-	onComplete: ( bool?: boolean ) => void;
+	onComplete: ( option?: { redirectPath: string } ) => void;
 };
 
 const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
@@ -144,7 +145,9 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 
 				createNoticesFromResponse( response );
 				setCurrentPlugin( null );
-				onComplete();
+				onComplete( {
+					redirectPath: getNewPath( { task: 'marketing' } ),
+				} );
 			} )
 			.catch( ( response: { errors: Record< string, string > } ) => {
 				createNoticesFromResponse( response );
