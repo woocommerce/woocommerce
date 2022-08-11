@@ -94,24 +94,26 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 This only needs to be done if this release is the last release of the feature plugin before code freeze in the WooCommerce core cycle. If this condition doesn't exist you can skip this section.
 
 * [ ] Remind whoever is porter this week to audit our codebase to ensure this [experimental interface document](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/blocks/feature-flags-and-experimental-interfaces.md) is up to date. See Pca54o-rM-p2 for more details.
-* [ ] Create a pull request for updating the package in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/747cb6b7184ba9fdc875ab104da5839cfda8b4be/plugins/woocommerce/composer.json) for the Woo Blocks package to the version being pulled in.
-  * The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627). 
-     * In the PR description you will link to all the important things that have already been prepared since the version you replaced. Note, you need to make sure you link to all the related documents for the plugin releases since the last package version bump in Woo Core.
-     * The PR's changelog should be aggregated from all the releases included in the package bump. This changelog will be used in the release notes for the WooCommerce release. That's why it should only list the PRs that have WooCoomerce Core in the WooCommerce Visibility section of their description. Don't include changes available in the feature plugin or development builds.
-      * Update the `plugins/woocommerce/composer.json` file and then run `composer update`. 
-
-      * Since WooCommerce Blocks 7.4.0, the changelog entry for WooCommerce core must include the fields `Significance` and `Type`. In our case, we're using the following definition as seen on [plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.0](https://github.com/woocommerce/woocommerce/pull/32627/commits/99bf4afd262280ad4e45386ce4ad00ce3425af93) file:
-      ```
-      // We’ll always use minor, or patch when including a patch release
-      Significance: minor
-      Type: update
-
-      Woo Blocks 7.3.0 & 7.4.0
-      ```
-  * Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should include ensuring any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
-  * Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
-  * Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
-  * After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
+* [ ] Create a pull request for updating the package in the [WooCommerce Core Repository](https://github.com/woocommerce/woocommerce/) that [bumps the package version](https://github.com/woocommerce/woocommerce/blob/747cb6b7184ba9fdc875ab104da5839cfda8b4be/plugins/woocommerce/composer.json) for the Woo Blocks package to the version you are releasing.
+    - The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627).
+        -   [ ] Increase the version of `woocommerce/woocommerce-blocks` in the `plugins/woocommerce/composer.json` file
+        -   [ ] Run `composer update woocommerce/woocommerce-blocks` and make sure `composer-lock.json` was updated
+        -   [ ] Add a new file similar to this one [plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.1](https://github.com/woocommerce/woocommerce/blob/5040a10d01896bcf40fd0ac538f2b7bc584ffe0a/plugins/woocommerce/changelog/update-woocommerce-blocks-7.4.1) with a similar content as below. For the Significance entry we’ll always use `minor`, or `patch` when including a patch release
+                
+                ```
+                Significance: minor
+                Type: update
+    
+                Update WooCommerce Blocks to 7.4.1
+                ```
+                
+    - The PR description can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627).
+        - It lists all the WooCommerce Blocks versions that are being included since the last version that you edited in `plugins/woocommerce/composer.json`. Each version should have a link for the `Release PR`, `Testing instructions` and `Release post` (if available).
+        - The changelog should be aggregated from all the releases included in the package bump and grouped per type: `Enhancements`, `Bug Fixes`, `Various` etc. This changelog will be used in the release notes for the WooCommerce release. That's why it should only list the PRs that have WooCoomerce Core in the WooCommerce Visibility section of their description. Don't include changes available in the feature plugin or development builds.
+    - Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should ensure any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
+    - Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
+    - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed, etc.
+    - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
 * [ ] Make sure you join the `#woo-core-releases` Slack channel to represent Woo Blocks for the release of WooCommerce core this version is included in.
 * [ ] Search the release thread of the WooCommerce core version in WooCommerce P2 (example: p6q8Tx-2gl-p2).
   * [ ] Subscribe to it, so you are aware of any news/changes.
