@@ -28,7 +28,7 @@ export const ProductDetailsSection: React.FC = () => {
 				className
 			),
 			onChange: ( isChecked: boolean ) => {
-				recordEvent( `woocommerce-add-product__checkbox-${ item }`, {
+				recordEvent( `add_product_checkbox_${ item }`, {
 					checked: isChecked,
 				} );
 				return onChange( isChecked );
