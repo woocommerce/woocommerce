@@ -280,12 +280,23 @@ class ListTable extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_views() {
+		global $wp_post_statuses;
+
 		$view_counts = array();
 		$view_links  = array();
 		$statuses    = wc_get_order_statuses();
 		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
 
-		foreach ( $statuses as $slug => $name ) {
+		// Add 'draft' and 'trash' to list.
+		foreach ( array( 'draft', 'trash' ) as $wp_status ) {
+			if ( isset( $wp_post_statuses[ $wp_status ] ) ) {
+				$statuses[ $wp_status ] = $wp_post_statuses[ $wp_status ]->label;
+			}
+		}
+
+		$statuses_in_list = array_intersect( array_keys( $statuses ), get_post_stati( array( 'show_in_admin_status_list' => true ) ) );
+
+		foreach ( $statuses_in_list as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
 
 			if ( $total_in_status > 0 ) {
@@ -294,7 +305,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$all_count         = array_sum( $view_counts );
-		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, $current === 'all' );
+		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, $current === '' || $current === 'all' );
 
 		foreach ( $view_counts as $slug => $count ) {
 			$view_links[ $slug ] = $this->get_view_link( $slug, $statuses[ $slug ], $count, $slug === $current );
