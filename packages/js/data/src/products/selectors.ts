@@ -13,6 +13,15 @@ import {
 import { WPDataSelector, WPDataSelectors } from '../types';
 import { ProductState } from './reducer';
 import { PartialProduct, ProductQuery } from './types';
+import { ActionDispatchers } from './actions';
+
+export const getProduct = (
+	state: ProductState,
+	productId: number,
+	defaultValue = undefined
+) => {
+	return state.data[ productId ] || defaultValue;
+};
 
 export const getProducts = createSelector(
 	( state: ProductState, query: ProductQuery, defaultValue = undefined ) => {
@@ -98,9 +107,24 @@ export const getDeleteProductError = ( state: ProductState, id: number ) => {
 	return state.errors[ `delete/${ id }` ];
 };
 
+export const isPending = (
+	state: ProductState,
+	action: keyof ActionDispatchers,
+	productId?: number
+) => {
+	if ( productId !== undefined && action !== 'createProduct' ) {
+		return state.pending[ action ]?.[ productId ] || false;
+	} else if ( action === 'createProduct' ) {
+		return state.pending[ action ] || false;
+	}
+	return false;
+};
+
 export type ProductsSelectors = {
 	getCreateProductError: WPDataSelector< typeof getCreateProductError >;
+	getProduct: WPDataSelector< typeof getProduct >;
 	getProducts: WPDataSelector< typeof getProducts >;
 	getProductsTotalCount: WPDataSelector< typeof getProductsTotalCount >;
 	getProductsError: WPDataSelector< typeof getProductsError >;
+	isPending: WPDataSelector< typeof isPending >;
 } & WPDataSelectors;

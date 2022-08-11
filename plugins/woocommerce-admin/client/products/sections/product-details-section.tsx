@@ -3,6 +3,8 @@
  */
 import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useFormContext } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -10,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 
 export const ProductDetailsSection: React.FC = () => {
+	const formContext = useFormContext< Product >();
 	return (
 		<ProductSectionLayout
 			title={ __( 'Product details', 'woocommerce' ) }
@@ -21,8 +24,7 @@ export const ProductDetailsSection: React.FC = () => {
 			<TextControl
 				label={ __( 'Name', 'woocommerce' ) }
 				name="name"
-				value={ '' }
-				onChange={ () => {} }
+				{ ...formContext.getInputProps< string >( 'name' ) }
 			/>
 		</ProductSectionLayout>
 	);
