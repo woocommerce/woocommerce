@@ -24,10 +24,6 @@ on:
         required: false
         default: ''
 
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
     GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
