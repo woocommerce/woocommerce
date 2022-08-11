@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -26,7 +27,13 @@ export const ProductDetailsSection: React.FC = () => {
 				'woocommerce-add-product__checkbox',
 				className
 			),
-			onChange,
+			onChange: ( isChecked: boolean ) => {
+				recordEvent(
+					`woocommerce-add-product__checkbox-${ item }-toggled`,
+					{ checked: isChecked }
+				);
+				return onChange( isChecked );
+			},
 			onBlur,
 		};
 	};
