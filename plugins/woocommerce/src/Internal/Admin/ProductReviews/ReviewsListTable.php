@@ -95,6 +95,7 @@ class ReviewsListTable extends WP_List_Table {
 		// Include the offset argument.
 		$args = wp_parse_args( $this->get_offset_arguments(), $args );
 
+		$args = apply_filters( 'woocommerce_product_reviews_comment_args' ,$args );
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
@@ -1332,6 +1333,7 @@ class ReviewsListTable extends WP_List_Table {
 			'comment' => __( 'Replies', 'woocommerce' ),
 			'review'  => __( 'Reviews', 'woocommerce' ),
 		];
+		$item_types = apply_filters( 'woocommerce_product_reviews_item_types' , $item_types );
 
 		?>
 		<label class="screen-reader-text" for="filter-by-review-type"><?php esc_html_e( 'Filter by review type', 'woocommerce' ); ?></label>

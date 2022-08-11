@@ -504,7 +504,7 @@ class Reviews {
 	protected function get_pending_count_bubble() : string {
 		$count = (int) get_comments(
 			[
-				'type__in'  => [ 'review', 'comment' ],
+				'type__in'  =>  apply_filters( 'woocommerce_product_reviews_count_item_types', [ 'review', 'comment' ] ),
 				'status'    => '0',
 				'post_type' => 'product',
 				'count'     => true,
