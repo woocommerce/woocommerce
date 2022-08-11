@@ -12,16 +12,8 @@ import classNames from 'classnames';
 export type SplitDropdownProps = {
 	className?: string | null;
 	disabled?: boolean;
-	icon?: string | typeof Icon;
-	iconPosition?: string;
-	iconSize?: number;
-	showTooltip?: boolean;
-	//tooltipPosition?: string;
-	label?: string;
-	text?: string;
-	variant?: string;
 	children: JSX.Element | JSX.Element[];
-};
+} & Pick< Button.ButtonProps, 'variant' >;
 
 export const SplitDropdown: React.FC< SplitDropdownProps > = ( {
 	className = null,
