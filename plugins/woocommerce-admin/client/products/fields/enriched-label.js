@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Popover } from '@wordpress/components';
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -23,7 +23,7 @@ export default function EnrichedLabel( {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( '' );
 
 	return (
-		<Fragment>
+		<>
 			<span className="woocommerce-add-product__enriched-label">
 				{ label }
 			</span>
@@ -74,6 +74,6 @@ export default function EnrichedLabel( {
 					) }
 				</div>
 			) }
-		</Fragment>
+		</>
 	);
 }
