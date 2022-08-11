@@ -20,7 +20,7 @@ export default function EnrichedLabel( {
 	moreUrl,
 	slug,
 } ) {
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( '' );
+	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
 	return (
 		<>
