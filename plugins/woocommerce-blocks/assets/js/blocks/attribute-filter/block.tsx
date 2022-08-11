@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
+import {
+	usePrevious,
+	useShallowEqual,
+	useBorderProps,
+} from '@woocommerce/base-hooks';
 import {
 	useCollection,
 	useQueryStateByKey,
@@ -40,7 +44,6 @@ import classNames from 'classnames';
 import { getAttributeFromID } from '../../utils/attributes';
 import { updateAttributeFilter } from '../../utils/attributes-query';
 import { previewAttributeObject, previewOptions } from './preview';
-import { useBorderProps } from '../../hooks/style-attributes';
 import './style.scss';
 import {
 	formatParams,
