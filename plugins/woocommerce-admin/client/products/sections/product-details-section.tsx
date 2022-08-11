@@ -54,8 +54,11 @@ export const ProductDetailsSection: React.FC = () => {
 			<CheckboxControl
 				label={
 					<EnrichedLabel
-						label="Feature this product"
-						helpDescription="Include this product in a featured section on your website with a widget or shortcode."
+						label={ __( 'Feature this product', 'woocommerce' ) }
+						helpDescription={ __(
+							'Include this product in a featured section on your website with a widget or shortcode.',
+							'woocommerce'
+						) }
 						moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
 						slug={ PRODUCT_DETAILS_SLUG }
 					/>
