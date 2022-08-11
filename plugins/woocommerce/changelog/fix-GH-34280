@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix qty input not showing when min_qty = max_qty
