@@ -12,7 +12,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import EnrichedLabel from '../fields/enriched-label';
+import { EnrichedLabel } from '../fields/enriched-label';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 

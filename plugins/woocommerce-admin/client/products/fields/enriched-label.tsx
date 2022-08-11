@@ -14,12 +14,19 @@ import { Icon, help } from '@wordpress/icons';
  */
 import './enriched-label.scss';
 
-export default function EnrichedLabel( {
+type EnrichedLabelProps = {
+	helpDescription: string;
+	label: string;
+	moreUrl: string;
+	slug: string;
+};
+
+export const EnrichedLabel: React.FC< EnrichedLabelProps > = ( {
 	helpDescription,
 	label,
 	moreUrl,
 	slug,
-} ) {
+} ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
 	return (
@@ -66,7 +73,7 @@ export default function EnrichedLabel( {
 											) }
 										</Link>
 									) : (
-										''
+										<div />
 									),
 								},
 							} ) }
@@ -76,4 +83,4 @@ export default function EnrichedLabel( {
 			) }
 		</>
 	);
-}
+};
