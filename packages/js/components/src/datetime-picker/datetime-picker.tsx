@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useState, useEffect } from '@wordpress/element';
 import {
 	Dropdown,
-	DateTimePicker as WpDatePicker,
+	DateTimePicker as WpDateTimePicker,
 } from '@wordpress/components';
 import moment from 'moment';
 import { sprintf, __ } from '@wordpress/i18n';
@@ -15,17 +15,41 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { default as DateInput } from '../calendar/input';
 
 export type DateTimeProps = {
-	dateTimeFormat: string;
-	disabled: boolean;
+	onChange: ( date: string ) => void;
+	dateTimeFormat?: string;
+	error?: string;
+	disabled?: boolean;
+	currentDate?: string;
+	is12Hour?: boolean;
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const DateTimePicker: React.FC< DateTimeProps > = ( {
-	dateTimeFormat,
+	onChange,
+	is12Hour = true,
+	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
-	...props
+	error = '',
+	currentDate = new Date().toISOString(),
 }: DateTimeProps ) => {
-	const [ pickerDate, setPickerDate ] = useState( new Date().toISOString() );
-	const [ error, setError ] = useState( null );
+	const [ pickerDate, setPickerDate ] = useState( currentDate );
+	const [ inputDate, setInputDate ] = useState(
+		moment( currentDate ).format( dateTimeFormat )
+	);
+	const [ inputError, setInputError ] = useState( error );
+
+	useEffect( () => {
+		if ( ! moment( inputDate ).isValid() ) {
+			setInputError( 'Invalid date' );
+			return;
+		}
+
+		setInputError( '' );
+		setPickerDate( moment( inputDate ).toISOString() );
+	}, [ inputDate ] );
+
+	useEffect( () => {
+		setInputDate( moment( pickerDate ).format( dateTimeFormat ) );
+	}, [ pickerDate, dateTimeFormat ] );
 
 	return (
 		<Dropdown
@@ -34,8 +58,10 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<DateInput
 					disabled={ disabled }
-					value={ moment( pickerDate ).format( dateTimeFormat ) }
-					onChange={ () => console.debug( 'onChange()' ) }
+					value={ inputDate }
+					onChange={ ( { target } ) => {
+						setInputDate( target.value );
+					} }
 					onBlur={ ( event ) => {
 						if ( ! isOpen ) {
 							return;
@@ -59,7 +85,7 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 					} }
 					dateFormat={ dateTimeFormat }
 					label={ __( 'Choose a date', 'woocommerce' ) }
-					error={ error }
+					error={ inputError }
 					describedBy={ sprintf(
 						__(
 							'Date input describing a selected date in format %s',
@@ -68,20 +94,24 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 						dateTimeFormat
 					) }
 					onFocus={ () => {
-						if ( ! isOpen ) {
-							onToggle();
+						if ( isOpen ) {
+							return;
 						}
+
+						onToggle();
 					} }
 					aria-expanded={ isOpen }
 					errorPosition="top center"
-					{ ...props }
 				/>
 			) }
-			renderContent={ ( { onToggle } ) => (
-				<WpDatePicker
+			renderContent={ () => (
+				<WpDateTimePicker
 					currentDate={ pickerDate }
-					onChange={ ( newDate ) => setPickerDate( newDate ) }
-					is12Hour={ true }
+					onChange={ ( newDate ) => {
+						setPickerDate( newDate );
+						onChange( typeof newDate );
+					} }
+					is12Hour={ is12Hour }
 				/>
 			) }
 		/>
