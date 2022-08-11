@@ -4,6 +4,7 @@
 import { renderParentBlock } from '@woocommerce/atomic-utils';
 import Drawer from '@woocommerce/base-components/drawer';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { useTypographyProps } from '@woocommerce/base-hooks';
 import { translateJQueryEventToNative } from '@woocommerce/base-utils';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 import {
@@ -27,6 +28,7 @@ import {
 } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import classnames from 'classnames';
+
 /**
  * Internal dependencies
  */
@@ -34,7 +36,6 @@ import QuantityBadge from './quantity-badge';
 import { MiniCartContentsBlock } from './mini-cart-contents/block';
 import './style.scss';
 import { blockName } from './mini-cart-contents/attributes';
-import { useTypographyProps } from '../../hooks/style-attributes';
 
 interface Props {
 	isInitiallyOpen?: boolean;

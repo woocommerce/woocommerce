@@ -8,6 +8,12 @@ import {
 	useStoreEvents,
 	useStoreAddToCart,
 } from '@woocommerce/base-context/hooks';
+import {
+	useBorderProps,
+	useColorProps,
+	useTypographyProps,
+	useSpacingProps,
+} from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
 import { CART_URL } from '@woocommerce/block-settings';
 import { getSetting } from '@woocommerce/settings';
@@ -21,12 +27,6 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
  * Internal dependencies
  */
 import './style.scss';
-import {
-	useBorderProps,
-	useColorProps,
-	useTypographyProps,
-	useSpacingProps,
-} from '../../../../hooks/style-attributes';
 
 /**
  * Product Button Block Component.
