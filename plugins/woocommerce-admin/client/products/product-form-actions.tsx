@@ -30,7 +30,7 @@ export const ProductFormActions: React.FC = () => {
 		isUpdatingPublished,
 		isDeleting,
 	} = useProductHelper();
-	const { isDirty, values } = useFormContext< Product >();
+	const { isDirty, values, resetForm } = useFormContext< Product >();
 
 	const getProductDataForTracks = () => {
 		return {
@@ -42,7 +42,7 @@ export const ProductFormActions: React.FC = () => {
 		};
 	};
 
-	const onSaveDraft = () => {
+	const onSaveDraft = async () => {
 		recordEvent( 'product_edit', {
 			new_product_page: true,
 			...getProductDataForTracks(),
@@ -50,7 +50,10 @@ export const ProductFormActions: React.FC = () => {
 		if ( ! values.id ) {
 			createProductWithStatus( values, 'draft' );
 		} else {
-			updateProductWithStatus( values, 'draft' );
+			const product = await updateProductWithStatus( values, 'draft' );
+			if ( product && product.id ) {
+				resetForm( product );
+			}
 		}
 	};
 
@@ -62,7 +65,10 @@ export const ProductFormActions: React.FC = () => {
 		if ( ! values.id ) {
 			createProductWithStatus( values, 'publish' );
 		} else {
-			updateProductWithStatus( values, 'publish' );
+			const product = await updateProductWithStatus( values, 'publish' );
+			if ( product && product.id ) {
+				resetForm( product );
+			}
 		}
 	};
 
@@ -104,26 +110,36 @@ export const ProductFormActions: React.FC = () => {
 
 	return (
 		<div className="woocommerce-product-form-actions">
-			{ values.status !== 'publish' ? (
-				<Button
-					onClick={ onSaveDraft }
-					disabled={
-						( ! isDirty && !! values.id ) ||
-						isUpdatingDraft ||
-						isUpdatingPublished ||
-						isDeleting
-					}
-				>
-					{ ! isDirty && values.id && <Icon icon={ check } /> }
-					{ isUpdatingDraft ? __( 'Saving', 'woocommerce' ) : null }
-					{ ( isDirty || ! values.id ) && ! isUpdatingDraft
-						? __( 'Save draft', 'woocommerce' )
-						: null }
-					{ ! isDirty && values.id && ! isUpdatingDraft
-						? __( 'Saved', 'woocommerce' )
-						: null }
-				</Button>
-			) : null }
+			<Button
+				onClick={ onSaveDraft }
+				disabled={
+					( ! isDirty &&
+						!! values.id &&
+						values.status !== 'publish' ) ||
+					isUpdatingDraft ||
+					isUpdatingPublished ||
+					isDeleting
+				}
+			>
+				{ ! isDirty && values.id && values.status !== 'publish' && (
+					<Icon icon={ check } />
+				) }
+				{ isUpdatingDraft ? __( 'Saving', 'woocommerce' ) : null }
+				{ ( isDirty || ! values.id ) &&
+				! isUpdatingDraft &&
+				values.status !== 'publish'
+					? __( 'Save draft', 'woocommerce' )
+					: null }
+				{ values.status === 'publish' && ! isUpdatingDraft
+					? __( 'Switch to draft', 'woocommerce' )
+					: null }
+				{ ! isDirty &&
+				values.id &&
+				! isUpdatingDraft &&
+				values.status !== 'publish'
+					? __( 'Saved', 'woocommerce' )
+					: null }
+			</Button>
 			<Button
 				onClick={ () =>
 					recordEvent( 'product_preview_changes', {

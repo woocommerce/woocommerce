@@ -137,7 +137,7 @@ export function useProductHelper() {
 			product: Product,
 			status: ProductStatus,
 			skipNotice = false
-		) => {
+		): Promise< Product > => {
 			setUpdating( {
 				...updating,
 				[ status ]: true,
@@ -172,8 +172,9 @@ export function useProductHelper() {
 						...updating,
 						[ status ]: false,
 					} );
+					return updatedProduct;
 				},
-				() => {
+				( error ) => {
 					createNotice(
 						'error',
 						__( 'Failed to update product.', 'woocommerce' )
@@ -182,6 +183,7 @@ export function useProductHelper() {
 						...updating,
 						[ status ]: false,
 					} );
+					return error;
 				}
 			);
 		},
