@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * Class WCPayWelcomePage
@@ -31,6 +32,16 @@ class WcPayWelcomePage {
 			return;
 		}
 
+		// Live store for at least 90 days.
+		if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS * 90 ) ) {
+			return;
+		}
+
+		// Must be a US based business.
+		if ( ! WC()->countries->get_base_country() !== 'US' ) {
+			return;
+		}
+
 		// No existing WCPay account.
 		if ( $this->has_wcpay_account() ) {
 			return;
@@ -52,7 +63,7 @@ class WcPayWelcomePage {
 		}
 
 		// Users must be in the experiment.
-		if ( ! $this->should_add_the_menu() ) {
+		if ( ! $this->is_user_in_treatment_mode() ) {
 			return;
 		}
 
@@ -117,7 +128,7 @@ class WcPayWelcomePage {
 	 *
 	 * @return bool Whether the user is in the treatment group.
 	 */
-	private function should_add_the_menu() {
+	private function is_user_in_treatment_mode() {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
 		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
