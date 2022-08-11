@@ -173,10 +173,10 @@ class ListTable extends WP_List_Table {
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'any' ) ),
 			'type'     => 'shop_order',
 		);
 
+		$this->set_status_args();
 		$this->set_order_args();
 		$this->set_date_args();
 		$this->set_customer_args();
@@ -251,6 +251,26 @@ class ListTable extends WP_List_Table {
 
 		$this->order_query_args['customer'] = $customer;
 		$this->has_filter                   = true;
+	}
+
+	/**
+	 * Implements filtering of orders by status.
+	 */
+	private function set_status_args() {
+		$status         = trim( sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) );
+		$query_statuses = array();
+
+		if ( empty( $status ) || $status === 'all' ) {
+			$query_statuses = array_intersect(
+				array_keys( wc_get_order_statuses() ),
+				get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
+			);
+		} else {
+			$query_statuses[] = $status;
+			$this->has_filter = true;
+		}
+
+		$this->order_query_args['status'] = $query_statuses;
 	}
 
 	/**
