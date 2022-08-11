@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, useEffect, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -241,7 +241,7 @@ const getTourConfig = ( {
 	};
 };
 
-const ProductTour = () => {
+export const ProductTour = () => {
 	const [ showTour, setShowTour ] = useState< boolean >( false );
 	const { setIsLoaded, hasUpdatedInfo } = useProductStepChange();
 
@@ -333,7 +333,3 @@ const ProductTour = () => {
 		</>
 	);
 };
-
-const root = document.createElement( 'div' );
-root.setAttribute( 'id', 'product-tour-root' );
-render( <ProductTour />, document.body.appendChild( root ) );
