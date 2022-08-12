@@ -179,9 +179,6 @@
 		border-bottom: 1px solid #e2e4e7;
 		border-radius: 0;
 		box-shadow: none;
-		.components-card__body {
-			padding: 24px;
-		}
 	}
 
 	.gift-icon {
@@ -195,6 +192,11 @@
 		display: flex;
 		color: $studio-gray-30;
 		text-transform: uppercase;
+	}
+
+	.components-card__body {
+		padding: $gap-large;
+		display: flex;
 	}
 
 	.limited-time-offer {
@@ -213,15 +215,13 @@
 		}
 	}
 
-	@include breakpoint('>600px') {
-		.components-card__body {
-			background: url(./wcpay-offer.svg) no-repeat right;
-			background-size: 240px auto;
-		}
+	.banner-offer-icon {
+		width: 240px;
+	}
 
-		.limited-time-offer {
-			// max-width: 300px;
-			max-width: calc(100% - 240px);
+	@include breakpoint('<600px') {
+		.banner-offer-icon {
+			display: none;
 		}
 	}
 }

@@ -8,6 +8,7 @@ import { Card, CardBody } from '@wordpress/components';
  */
 import strings from './strings';
 import GiftIcon from './gift';
+import WCPayOfferIcon from './wcpay-offer.svg';
 
 const Banner = () => {
 	return (
@@ -22,6 +23,11 @@ const Banner = () => {
 					<p>{ strings.discountCopy }</p>
 					<p>{ strings.termsAndConditions }</p>
 				</div>
+				<img
+					className="banner-offer-icon"
+					src={ WCPayOfferIcon }
+					alt="WCPay Offer icon"
+				/>
 			</CardBody>
 		</Card>
 	);
