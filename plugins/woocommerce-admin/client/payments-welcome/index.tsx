@@ -86,9 +86,9 @@ export const PaymentMethods = () => (
 );
 
 const TermsOfService = () => (
-	<span className="wcpay-connect-account-page-terms-of-service">
+	<p className="wcpay-connect-account-page-terms-of-service">
 		{ strings.terms }
-	</span>
+	</p>
 );
 
 const ConnectPageError = ( { errorMessage }: { errorMessage: string } ) => {
@@ -209,9 +209,9 @@ const ConnectPageOnboarding = ( {
 						{ strings.onboarding.description } <LearnMore />
 					</p>
 
-					<h3 className="accepted-payment-methods">
+					<p className="accepted-payment-methods">
 						{ strings.paymentMethodsHeading }
-					</h3>
+					</p>
 
 					<PaymentMethods />
 				</div>

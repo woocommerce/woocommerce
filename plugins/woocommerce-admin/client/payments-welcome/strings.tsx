@@ -12,21 +12,30 @@ export default {
 	heading: __( 'WooCommerce Payments', 'woocommerce' ),
 	bannerHeading: __( 'Payments, made simple', 'woocommerce' ),
 	// eslint-disable-next-line @wordpress/i18n-translator-comments
-	bannerCopy: __(
-		'Get a 50% discount on your WooCommerce Payments processing fees for up to six months.',
-		'woocommerce'
+	bannerCopy: createInterpolateElement(
+		__(
+			'<b>20% off payment processing</b><br/>on up to $1,000,000 USD in payments or over the next 6 months, whichever comes first.*',
+			'woocommerce'
+		),
+		{
+			b: <b />,
+			br: <br />,
+		}
 	),
 	discountCopy: __(
-		'Once setup is complete, the discount will be applied to payments processed via WooCommerce Payments.',
+		'Discount will be applied to payments processed via WooCommerce Payments upon completion of installation, setup, and onboarding of WooCommerce Payments.',
 		'woocommerce'
 	),
 	termsAndConditions: createInterpolateElement(
-		__( '<a>Terms & Conditions</a>', 'woocommerce' ),
+		__(
+			'*See <a>Terms and Conditions</a> for more details.',
+			'woocommerce'
+		),
 		{
 			a: (
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
 				<a
-					href="https://woocommerce.com/terms-conditions/woocommerce-payments-promotion/"
+					href="https://woocommerce.com/terms-conditions/woocommerce-payments-promotion-2022/"
 					target="_blank"
 					rel="noopener noreferrer"
 				/>
@@ -172,15 +181,22 @@ export default {
 			'woocommerce'
 		),
 
-		// eslint-disable-next-line @wordpress/i18n-translator-comments
-		question4Answer1: __(
-			'Stores accepted into the promotional program will receive a 50% discount on WooCommerce Payments processing fees (excluding currency conversion fees) for the first $125,000 in payments, or up to six months, whichever comes first. Simply install the extension and if eligible you’ll be entered into the promotional offer.',
-			'woocommerce'
-		),
-
-		question4Answer2: __(
-			'To be eligible for this promotional offer, your store must: (1) meet the WooCommerce Payments usage requirements; (2) be located in a country where WooCommerce Payments operates; (3) not have processed payments through WooCommerce Payments before; and (4) be accepted into the promotional program.',
-			'woocommerce'
+		question4Answer1: createInterpolateElement(
+			// eslint-disable-next-line @wordpress/i18n-translator-comments
+			__(
+				'Stores accepted into the promotional program will receive a 20% discount on total payment processing costs on the first $1,000,000 USD of payment processing volume conducted using WooCommerce Payments, for up to 6 months from the date your store is accepted into the program. Learn more about eligibility for the promotional program and its terms and conditions <a>here</a>.',
+				'woocommerce'
+			),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content
+					<a
+						href="https://woocommerce.com/terms-conditions/woocommerce-payments-promotion-2022/"
+						target="_blank"
+						rel="noopener noreferrer"
+					/>
+				),
+			}
 		),
 
 		question5: __(

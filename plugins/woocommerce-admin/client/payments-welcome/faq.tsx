@@ -39,7 +39,6 @@ const FrequentlyAskedQuestions: React.FC = () => {
 
 				<PanelBody title={ strings.faq.question4 }>
 					<p>{ strings.faq.question4Answer1 }</p>
-					<p>{ strings.faq.question4Answer2 }</p>
 				</PanelBody>
 
 				<PanelBody title={ strings.faq.question5 }>

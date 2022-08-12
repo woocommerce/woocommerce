@@ -19,9 +19,8 @@ const Banner = () => {
 						{ strings.limitedTimeOffer }
 					</div>
 					<h1 className="offer-copy">{ strings.bannerCopy }</h1>
-					<div className="discount-copy">
-						{ strings.discountCopy } { strings.termsAndConditions }
-					</div>
+					<p>{ strings.discountCopy }</p>
+					<p>{ strings.termsAndConditions }</p>
 				</div>
 			</CardBody>
 		</Card>
