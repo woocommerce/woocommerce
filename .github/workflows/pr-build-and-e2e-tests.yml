@@ -37,8 +37,10 @@ jobs:
             - name: Run Playwright E2E tests.
               timeout-minutes: 60
               id: run_playwright_e2e_tests
+              env:
+                USE_WP_ENV: 1
               working-directory: plugins/woocommerce
-              run: pnpx playwright test --config=e2e/playwright.config.js
+              run: pnpx playwright test --config=tests/e2e/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
