@@ -3,7 +3,7 @@
  */
 import { CheckboxControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useFormContext } from '@woocommerce/components';
+import { EnrichedLabel, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
 import { recordEvent } from '@woocommerce/tracks';
@@ -12,7 +12,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { EnrichedLabel } from '../fields/enriched-label';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
@@ -77,7 +76,11 @@ export const ProductDetailsSection: React.FC = () => {
 							'woocommerce'
 						) }
 						moreUrl="https://woocommerce.com/document/woocommerce-shortcodes/#products"
-						slug={ PRODUCT_DETAILS_SLUG }
+						tooltipLinkCallback={ () =>
+							recordEvent( 'add_product_learn_more', {
+								category: PRODUCT_DETAILS_SLUG,
+							} )
+						}
 					/>
 				}
 				{ ...getCheckboxProps( 'featured' ) }

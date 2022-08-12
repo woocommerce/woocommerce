@@ -1,0 +1,15 @@
+.woocommerce-enriched-label__text {
+	vertical-align: top;
+}
+.woocommerce-enriched-label__help-wrapper {
+	display: inline;
+	.components-popover {
+		.components-popover__content {
+			min-width: 360px;
+			> div {
+				padding: $gap $gap-large;
+				font-size: 16px;
+			}
+		}
+	}
+}

@@ -3,40 +3,36 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Popover } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { createElement, Fragment, useState } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
-import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import { Icon, help } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import './enriched-label.scss';
+import Link from '../link';
 
 type EnrichedLabelProps = {
 	helpDescription: string;
 	label: string;
 	moreUrl: string;
-	slug: string;
+	tooltipLinkCallback: () => void;
 };
 
 export const EnrichedLabel: React.FC< EnrichedLabelProps > = ( {
 	helpDescription,
 	label,
 	moreUrl,
-	slug,
+	tooltipLinkCallback,
 } ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
 	return (
 		<>
-			<span className="woocommerce-add-product__enriched-label">
-				{ label }
-			</span>
+			<span className="woocommerce-enriched-label__text">{ label }</span>
 			{ helpDescription && (
 				<div
-					className="woocommerce-add-product__help-wrapper"
+					className="woocommerce-enriched-label__help-wrapper"
 					onMouseLeave={ () => setIsPopoverVisible( false ) }
 				>
 					<Button
@@ -58,14 +54,7 @@ export const EnrichedLabel: React.FC< EnrichedLabelProps > = ( {
 											href={ moreUrl }
 											target="_blank"
 											type="external"
-											onClick={ () =>
-												recordEvent(
-													'add_product_learn_more',
-													{
-														category: slug,
-													}
-												)
-											}
+											onClick={ tooltipLinkCallback }
 										>
 											{ __(
 												'Learn more',
