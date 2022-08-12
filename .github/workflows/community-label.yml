@@ -1,0 +1,112 @@
+name: Add Community Label
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-20.04
+    outputs:
+      issueId: ${{ steps.check.outputs.issueId }}
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Check if user is a community contributor
+        id: check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const types = [ 'issue', 'pull_request' ];
+            const orgs = [ 'automattic', 'woocommerce' ];
+
+            let found = null; // null indicates we haven't done any checks.
+            let type, org, result;
+
+            for ( var typeIndex in types ) {
+              type = types[ typeIndex ];
+
+              if ( ! context.payload[ type ] || ! context.payload[ type ].user || ! context.payload[ type ].user.login ) {
+                // If we don't have the context for this type, move on to checking the next type.
+                console.log( 'No payload found for %s, continuing...', type );
+                continue;
+              }
+
+              if ( context.payload[ type ].user.type && context.payload[ type ].user.type === 'Bot' ) {
+                // Treat bots as non-community contributors.
+                console.log( 'User %s is a bot user. Skipping...', payload[ type ].user.login );
+                found = true;
+                break;
+              }
+
+              for ( var orgIndex in orgs ) {
+                org = orgs[ orgIndex ];
+
+                try {
+                  // First attempt to check memberships.
+                  result = await github.request( 'GET /orgs/{org}/memberships/{username}', {
+                    org,
+                    username: context.payload[ type ].user.login,
+                  } );
+                } catch ( error ) {
+                  if ( error.status === 404 ) {
+                    // This means the user wasn't found in the organization.
+                    found = false;
+                    continue;
+                  }
+
+                  // For any other error, we should also try checking public memberships.
+                  try {
+                    result = await github.request( 'GET /orgs/{org}/public_members/{username}', {
+                      org,
+                      username: context.payload[ type ].user.login,
+                    } );
+                  } catch ( error ) {
+                    if ( error.status === 404 ) {
+                      // This means the user wasn't found in the organization.
+                      found = false;
+                      continue;
+                    }
+                  }
+                }
+
+                if ( result && result.status === 204 ) {
+                  // User in in one of the orgs, and we don't need to check the rest.
+                  console.log( 'The user %s was found in the organization %s', context.payload[ type ].user.login, org );
+                  found = true;
+                  console.log()
+                  break;
+                }
+              }
+              if ( found ) {
+                break;
+              }
+            }
+
+            // We should only label this as a community PR if we didn't find the user in either org AND we did a check.
+            const run = ( found === false );
+            console.log( '::set-output name=run::%s', run ? 'true' : 'false' );
+            console.log( 'Label job run: %s', run ? 'true' : 'false' );
+
+  label_community:
+    name: Label Community Issues and PRs
+    runs-on: ubuntu-20.04
+    needs: verify
+    if: needs.verify.outputs.run == 'true'
+    steps:
+      - name: label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [ 'type: community contribution' ]
+            } );
