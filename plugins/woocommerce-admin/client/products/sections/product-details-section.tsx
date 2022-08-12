@@ -88,20 +88,23 @@ export const ProductDetailsSection: React.FC = () => {
 				}
 				{ ...getCheckboxProps( 'featured' ) }
 			/>
-			{ formContext.values.permalink && (
-				<div className="product-details-section__product-link">
-					{ __( 'Product link', 'woocommerce' ) }:&nbsp;
-					<a href={ formContext.values.permalink }>
-						{ formContext.values.permalink }
-					</a>
-					<Button
-						variant="link"
-						onClick={ () => setShowProductLinkEditModal( true ) }
-					>
-						{ __( 'Edit', 'woocommerce' ) }
-					</Button>
-				</div>
-			) }
+			{ formContext.values.permalink &&
+				formContext.values.status === 'publish' && (
+					<div className="product-details-section__product-link">
+						{ __( 'Product link', 'woocommerce' ) }:&nbsp;
+						<a href={ formContext.values.permalink }>
+							{ formContext.values.permalink }
+						</a>
+						<Button
+							variant="link"
+							onClick={ () =>
+								setShowProductLinkEditModal( true )
+							}
+						>
+							{ __( 'Edit', 'woocommerce' ) }
+						</Button>
+					</div>
+				) }
 			{ showProductLinkEditModal && (
 				<EditProductLinkModal
 					product={ formContext.values }
