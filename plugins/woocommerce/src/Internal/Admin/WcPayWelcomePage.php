@@ -38,7 +38,7 @@ class WcPayWelcomePage {
 		}
 
 		// Must be a US based business.
-		if ( ! WC()->countries->get_base_country() !== 'US' ) {
+		if ( WC()->countries->get_base_country() !== 'US' ) {
 			return;
 		}
 
