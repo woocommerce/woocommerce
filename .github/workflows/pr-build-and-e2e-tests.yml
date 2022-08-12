@@ -66,15 +66,6 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-            - name: Archive Puppeteer E2E test screenshots
-              uses: actions/upload-artifact@v3
-              if: always()
-              with:
-                  name: E2E Screenshots
-                  path: plugins/woocommerce/tests/e2e/screenshots
-                  if-no-files-found: ignore
-                  retention-days: 5
-
     api-tests-run:
         name: Runs API tests.
         runs-on: ubuntu-20.04
