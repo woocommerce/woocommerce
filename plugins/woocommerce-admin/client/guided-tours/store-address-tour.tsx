@@ -10,7 +10,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { EmbeddedBodyProps } from './embedded-body-props';
+import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 
 const REVIEWED_STORE_LOCATION_SETTINGS_OPTION =
 	'woocommerce_admin_reviewed_store_location_settings';
