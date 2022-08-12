@@ -1,0 +1,27 @@
+.woocommerce_marketing_plugin_card_body {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+
+	&__icon {
+		flex-shrink: 0;
+	}
+
+	&__details {
+		flex-grow: 1;
+
+		&-name {
+			font-size: 14px;
+			font-weight: 600;
+			line-height: 20px;
+			margin-bottom: 4px;
+		}
+
+		&-description {
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 16px;
+			color: $gray-700;
+		}
+	}
+}
