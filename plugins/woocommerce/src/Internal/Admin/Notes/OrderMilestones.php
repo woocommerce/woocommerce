@@ -296,7 +296,6 @@ class OrderMilestones {
 	 * @return Note
 	 */
 	public static function get_note_by_milestone( $current_milestone ) {
-		// Add the milestone note.
 		$note = new Note();
 		$note->set_title( self::get_note_title_for_milestone( $current_milestone ) );
 		$note->set_content( self::get_note_content_for_milestone( $current_milestone ) );
@@ -319,8 +318,9 @@ class OrderMilestones {
 			return false;
 		}
 
-		$current_milestone = $this->get_current_milestone();
 		$last_milestone    = $this->get_last_milestone();
+		$current_milestone = $this->get_current_milestone();
+
 		if ( $current_milestone <= $last_milestone ) {
 			return false;
 		}
