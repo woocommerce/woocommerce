@@ -126,14 +126,16 @@ export function useProductHelper() {
 	/**
 	 * Update product with status.
 	 *
-	 * @param {Product} product the product to be updated (should contain product id).
+	 * @param {number} productId the product id to be updated.
+	 * @param {Product} product the product to be updated.
 	 * @param {string}  status the product status.
 	 * @param {boolean} skipNotice if the notice should be skipped (default: false).
 	 * @return {Promise<Product>} Returns a promise with the updated product.
 	 */
 	const updateProductWithStatus = useCallback(
 		async (
-			product: Product,
+			productId: number,
+			product: Partial< Product >,
 			status: ProductStatus,
 			skipNotice = false
 		): Promise< Product > => {
@@ -141,7 +143,7 @@ export function useProductHelper() {
 				...updating,
 				[ status ]: true,
 			} );
-			return updateProduct( product.id, {
+			return updateProduct( productId, {
 				...product,
 				status,
 			} ).then(

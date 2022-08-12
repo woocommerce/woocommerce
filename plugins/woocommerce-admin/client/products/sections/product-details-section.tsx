@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { CheckboxControl, TextControl } from '@wordpress/components';
+import { CheckboxControl, Button, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import { EnrichedLabel, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
@@ -11,7 +12,9 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import './product-details-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
+import { EditProductLinkModal } from '../shared/edit-product-link-modal';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
@@ -85,6 +88,27 @@ export const ProductDetailsSection: React.FC = () => {
 				}
 				{ ...getCheckboxProps( 'featured' ) }
 			/>
+			{ formContext.values.permalink && (
+				<div className="product-details-section__product-link">
+					{ __( 'Product link', 'woocommerce' ) }:&nbsp;
+					<a href={ formContext.values.permalink }>
+						{ formContext.values.permalink }
+					</a>
+					<Button
+						variant="link"
+						onClick={ () => setShowProductLinkEditModal( true ) }
+					>
+						{ __( 'Edit', 'woocommerce' ) }
+					</Button>
+				</div>
+			) }
+			{ showProductLinkEditModal && (
+				<EditProductLinkModal
+					product={ formContext.values }
+					onCancel={ () => setShowProductLinkEditModal( false ) }
+					onSaved={ () => setShowProductLinkEditModal( false ) }
+				/>
+			) }
 		</ProductSectionLayout>
 	);
 };
