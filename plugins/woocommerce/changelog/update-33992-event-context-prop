@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update context prop of wcadmin_tasklist_click/view event
