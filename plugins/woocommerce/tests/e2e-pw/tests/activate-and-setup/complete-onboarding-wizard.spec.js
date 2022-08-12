@@ -291,7 +291,9 @@ test.describe( 'Store owner can go through setup Task List', () => {
 		);
 		await page.fill( '#inspector-text-control-0', 'addr 1' );
 		await page.fill( '#inspector-text-control-1', 'addr 2' );
-		await page.click( '#woocommerce-select-control-0__control-input' );
+		await page.click(
+			'#woocommerce-deprecated-select-control-0__control-input'
+		);
 		await page.fill(
 			'#woocommerce-deprecated-select-control-0__control-input',
 			'United States (US) — California'
