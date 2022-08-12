@@ -38,7 +38,7 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
-					self::get_plugin( 'facebook-for-woocommerce:alt' ),
+					self::get_plugin( 'facebook-for-woocommerce' ),
 				],
 			],
 			[
@@ -56,7 +56,7 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
 					self::get_plugin( 'tiktok-for-business' ),
-					self::get_plugin( 'facebook-for-woocommerce' ),
+					self::get_plugin( 'facebook-for-woocommerce:alt' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
 				],
 			],
@@ -106,14 +106,14 @@ class DefaultFreeExtensions {
 			],
 			'facebook-for-woocommerce'          => [
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
+				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
 				'is_built_by_wc' => false,
 			],
 			'facebook-for-woocommerce:alt'      => [
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
+				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
 				'is_built_by_wc' => false,
