@@ -38,6 +38,7 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
+					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 				],
 			],
 			[
@@ -105,6 +106,13 @@ class DefaultFreeExtensions {
 			'pinterest-for-woocommerce'         => [
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => true,
+			],
+			'pinterest-for-woocommerce:alt'     => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Connect your WooCommerce store to make your entire catalog browsable', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
 				'is_built_by_wc' => true,
