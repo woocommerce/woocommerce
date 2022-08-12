@@ -44,9 +44,9 @@ To run the test again, re-create the environment to start with a fresh state:
 Other ways of running tests:
 
 - `pnpm env:test --filter=woocommerce` (headless)
-- `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e/playwright.config.js --headed` (headed)
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e/playwright.config.js --debug` (debug)
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e/playwright.config.js ./e2e/tests/activate-and-setup/basic-setup.spec.js` (running a single test)
+- `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --headed` (headed)
+- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --debug` (debug)
+- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (running a single test)
 
 To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
 
