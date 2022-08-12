@@ -87,41 +87,38 @@ class LoginQR extends \WC_REST_Data_Controller {
 	/**
 	 * Sends request to generate magic link email.
 	 *
-	 * @return array
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function send_magic_link() {
 		// Attempt to get email from Jetpack.
 		if ( class_exists( Jetpack_Connection_Manager::class ) ) {
 			$jetpack_connection_manager = new Jetpack_Connection_Manager();
 			if ( $jetpack_connection_manager->is_active() ) {
-				$jetpack_user = $jetpack_connection_manager->get_connected_user_data();
+				if ( class_exists( 'Jetpack_IXR_Client' ) ) {
+					$xml = new \Jetpack_IXR_Client(
+						array(
+							'user_id' => get_current_user_id(),
+						)
+					);
 
-				$params = [
-					// This is currently not sending the right magic link email.
-					// Change client_id and client_secret to Woo since this is generating WordPress magic link instead.
-					'client_id'     => 39911,
-					'client_secret' => 'cOaYKdrkgXz8xY7aysv4fU6wL6sK5J8a6ojReEIAPwggsznj4Cb6mW0nffTxtYT8',
-					'email'         => $jetpack_user['email'],
-					'scheme'        => 'woocommerce',
-				];
+					$xml->query( 'jetpack.sendMobileMagicLink', array( 'app' => 'woocommerce' ) );
+					if ( $xml->isError() ) {
+						return new \WP_Error(
+							'error_sending_mobile_magic_link',
+							sprintf(
+								'%s: %s',
+								$xml->getErrorCode(),
+								$xml->getErrorMessage()
+							)
+						);
+					}
 
-				$raw_response = wp_remote_post(
-					'https://public-api.wordpress.com/rest/v1.3/auth/send-login-email',
-					array(
-						'timeout'     => 30,
-						'redirection' => 5,
-						'body'        => wp_json_encode( $params ),
-					)
-				);
-
-				$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
-
-				$response_code = wp_remote_retrieve_response_code( $raw_response );
-				if ( 200 !== $response_code ) {
-					return new \WP_Error( $response['error'], $response['message'] );
+					return rest_ensure_response(
+						array(
+							'code' => 'success',
+						)
+					);
 				}
-
-				return rest_ensure_response( [ 'code' => 'success' ] );
 			}
 		}
 
