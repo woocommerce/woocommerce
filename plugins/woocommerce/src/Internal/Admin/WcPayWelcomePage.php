@@ -28,7 +28,7 @@ class WcPayWelcomePage {
 		global $menu;
 
 		// WC Payment must not be installed.
-		if ( ! WooCommercePayments::is_installed() ) {
+		if ( WooCommercePayments::is_installed() ) {
 			return;
 		}
 
