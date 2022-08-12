@@ -1,21 +1,19 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, listView } from '@wordpress/icons';
-
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+
 /**
  * Internal dependencies
  */
 import './editor.scss';
+import metadata from './block.json';
 import './style.scss';
-import Block from './block.js';
+import { Edit } from './edit';
 
-registerBlockType( 'woocommerce/product-categories', {
-	apiVersion: 2,
-	title: __( 'Product Categories List', 'woo-gutenberg-products-block' ),
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
@@ -24,12 +22,6 @@ registerBlockType( 'woocommerce/product-categories', {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Show all product categories as a list or dropdown.',
-		'woo-gutenberg-products-block'
-	),
 	supports: {
 		align: [ 'wide', 'full' ],
 		html: false,
@@ -43,60 +35,6 @@ registerBlockType( 'woocommerce/product-categories', {
 				lineHeight: true,
 			},
 		} ),
-	},
-	example: {
-		attributes: {
-			hasCount: true,
-			hasImage: false,
-		},
-	},
-	attributes: {
-		/**
-		 * Alignment of the block.
-		 */
-		align: {
-			type: 'string',
-		},
-
-		/**
-		 * Whether to show the product count in each category.
-		 */
-		hasCount: {
-			type: 'boolean',
-			default: true,
-		},
-
-		/**
-		 * Whether to show the category image in each category.
-		 */
-		hasImage: {
-			type: 'boolean',
-			default: false,
-		},
-
-		/**
-		 * Whether to show empty categories in the list.
-		 */
-		hasEmpty: {
-			type: 'boolean',
-			default: false,
-		},
-
-		/**
-		 * Whether to display product categories as a dropdown (true) or list (false).
-		 */
-		isDropdown: {
-			type: 'boolean',
-			default: false,
-		},
-
-		/**
-		 * Whether the product categories should display with hierarchy.
-		 */
-		isHierarchical: {
-			type: 'boolean',
-			default: true,
-		},
 	},
 
 	transforms: {
@@ -197,14 +135,7 @@ registerBlockType( 'woocommerce/product-categories', {
 		},
 	],
 
-	/**
-	 * Renders and manages the block.
-	 *
-	 * @param {Object} props Props to pass to block.
-	 */
-	edit( props ) {
-		return <Block { ...props } />;
-	},
+	edit: Edit,
 
 	/**
 	 * Save nothing; rendered by server.
