@@ -1,0 +1,13 @@
+.wc-blocks-sidebar-compatibility-notice {
+	border-top: 1px solid $gray-200;
+}
+
+.wc-blocks-sidebar-compatibility-notice__notice.components-notice.is-dismissible {
+	margin: 0;
+	padding: $gap;
+	padding-right: $gap-small;
+
+	.components-notice__content {
+		margin-right: 0;
+	}
+}
