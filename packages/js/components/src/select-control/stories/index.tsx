@@ -128,26 +128,22 @@ export const Async: React.FC = () => {
 					getMenuProps,
 				} ) => {
 					return (
-						<Menu isOpen={ isOpen } menuProps={ getMenuProps() }>
-							<>
-								{ isFetching ? (
-									<Spinner />
-								) : (
-									items.map( ( item, index: number ) => (
-										<MenuItem
-											key={ `${ item.value }${ index }` }
-											index={ index }
-											isActive={
-												highlightedIndex === index
-											}
-											item={ item }
-											getItemProps={ getItemProps }
-										>
-											{ item.label }
-										</MenuItem>
-									) )
-								) }
-							</>
+						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
+							{ isFetching ? (
+								<Spinner />
+							) : (
+								items.map( ( item, index: number ) => (
+									<MenuItem
+										key={ `${ item.value }${ index }` }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ getItemProps }
+									>
+										{ item.label }
+									</MenuItem>
+								) )
+							) }
 						</Menu>
 					);
 				} }
@@ -190,44 +186,39 @@ export const CustomRender: React.FC = () => {
 					getMenuProps,
 				} ) => {
 					return (
-						<Menu isOpen={ true } menuProps={ getMenuProps() }>
-							<>
-								{ items.map( ( item, index: number ) => {
-									const isSelected =
-										selected.includes( item );
+						<Menu isOpen={ true } getMenuProps={ getMenuProps }>
+							{ items.map( ( item, index: number ) => {
+								const isSelected = selected.includes( item );
 
-									return (
-										<MenuItem
-											key={ `${ item.value }${ index }` }
-											index={ index }
-											isActive={
-												highlightedIndex === index
-											}
-											item={ item }
-											getItemProps={ getItemProps }
-										>
-											<>
-												<CheckboxControl
-													onChange={ () => null }
-													checked={ isSelected }
-													label={
-														<span
-															style={ {
-																fontWeight:
-																	isSelected
-																		? 'bold'
-																		: 'normal',
-															} }
-														>
-															{ item.label }
-														</span>
-													}
-												/>
-											</>
-										</MenuItem>
-									);
-								} ) }
-							</>
+								return (
+									<MenuItem
+										key={ `${ item.value }${ index }` }
+										index={ index }
+										isActive={ highlightedIndex === index }
+										item={ item }
+										getItemProps={ getItemProps }
+									>
+										<>
+											<CheckboxControl
+												onChange={ () => null }
+												checked={ isSelected }
+												label={
+													<span
+														style={ {
+															fontWeight:
+																isSelected
+																	? 'bold'
+																	: 'normal',
+														} }
+													>
+														{ item.label }
+													</span>
+												}
+											/>
+										</>
+									</MenuItem>
+								);
+							} ) }
 						</Menu>
 					);
 				} }

@@ -25,17 +25,19 @@ export type getItemPropsType = (
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => any;
 
+export type getMenuPropsType = (
+	options?: UseComboboxGetMenuPropsOptions,
+	otherOptions?: GetPropsCommonOptions
+	// These are the types provided by Downshift.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => any;
+
 export type ChildrenProps = {
 	items: ItemType[];
 	isOpen: boolean;
 	highlightedIndex: number;
 	getItemProps: getItemPropsType;
-	getMenuProps: (
-		options?: UseComboboxGetMenuPropsOptions,
-		otherOptions?: GetPropsCommonOptions
-		// These are the types provided by Downshift.
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	) => any;
+	getMenuProps: getMenuPropsType;
 };
 
 export type ChildrenType = ( {

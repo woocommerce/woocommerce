@@ -2,8 +2,16 @@
     position: absolute;
     width: 100%;
     top: 100%;
-    background: $studio-white;
-    border: 1px solid $studio-gray-5;
-    border-radius: 3px;
     box-sizing: border-box;
+    display: none;
+
+    &.is-open {
+        display: block;
+    }
+
+    .woocommerce-select-control__menu-inner {
+        background: $studio-white;
+        border: 1px solid $studio-gray-5;
+        border-radius: 3px;
+    }
 }

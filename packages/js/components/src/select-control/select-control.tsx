@@ -47,20 +47,18 @@ export const SelectControl = ( {
 		isOpen,
 	} ) => {
 		return (
-			<Menu menuProps={ getMenuProps() } isOpen={ isOpen }>
-				<>
-					{ items.map( ( item, index: number ) => (
-						<MenuItem
-							key={ `${ item.value }${ index }` }
-							index={ index }
-							isActive={ highlightedIndex === index }
-							item={ item }
-							getItemProps={ getItemProps }
-						>
-							{ item.label }
-						</MenuItem>
-					) ) }
-				</>
+			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
+				{ items.map( ( item, index: number ) => (
+					<MenuItem
+						key={ `${ item.value }${ index }` }
+						index={ index }
+						isActive={ highlightedIndex === index }
+						item={ item }
+						getItemProps={ getItemProps }
+					>
+						{ item.label }
+					</MenuItem>
+				) ) }
 			</Menu>
 		);
 	},

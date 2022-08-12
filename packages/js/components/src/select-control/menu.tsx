@@ -1,27 +1,34 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { createElement, ReactElement } from 'react';
 
 /**
  * Internal dependencies
  */
-import { Props } from './types';
+import { getMenuPropsType } from './types';
 
 type MenuProps = {
-	children?: ReactElement;
-	menuProps: Props;
+	children?: JSX.Element | JSX.Element[];
+	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 };
 
-export const Menu = ( { children, menuProps, isOpen }: MenuProps ) => {
-	if ( ! isOpen ) {
-		return null;
-	}
-
+export const Menu = ( { children, getMenuProps, isOpen }: MenuProps ) => {
 	return (
-		<ul { ...menuProps } className="woocommerce-select-control__menu">
-			{ children }
+		<ul
+			{ ...getMenuProps() }
+			className={ classnames( 'woocommerce-select-control__menu', {
+				'is-open': isOpen,
+			} ) }
+		>
+			{ isOpen &&
+				( ! Array.isArray( children ) || !! children.length ) && (
+					<div className="woocommerce-select-control__menu-inner">
+						{ children }
+					</div>
+				) }
 		</ul>
 	);
 };
