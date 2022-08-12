@@ -107,12 +107,20 @@ export function useProductHelper() {
 					}
 				},
 				() => {
-					createNotice(
-						'error',
-						status === 'publish'
-							? __( 'Failed to publish product.', 'woocommerce' )
-							: __( 'Failed to create product.', 'woocommerce' )
-					);
+					if ( ! skipNotice ) {
+						createNotice(
+							'error',
+							status === 'publish'
+								? __(
+										'Failed to publish product.',
+										'woocommerce'
+								  )
+								: __(
+										'Failed to create product.',
+										'woocommerce'
+								  )
+						);
+					}
 					setUpdating( {
 						...updating,
 						[ status ]: false,
@@ -176,10 +184,12 @@ export function useProductHelper() {
 					return updatedProduct;
 				},
 				( error ) => {
-					createNotice(
-						'error',
-						__( 'Failed to update product.', 'woocommerce' )
-					);
+					if ( ! skipNotice ) {
+						createNotice(
+							'error',
+							__( 'Failed to update product.', 'woocommerce' )
+						);
+					}
 					setUpdating( {
 						...updating,
 						[ status ]: false,
