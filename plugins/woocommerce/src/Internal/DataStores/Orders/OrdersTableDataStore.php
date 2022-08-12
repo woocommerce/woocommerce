@@ -1185,7 +1185,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
 		if ( ! $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( gmdate( 'Y-m-d H:i:s e' ) );
+			$order->set_date_created( time() );
 		}
 
 		$this->update_post_meta( $order );
@@ -1224,7 +1224,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		}
 
 		if ( null === $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( gmdate( 'Y-m-d H:i:s e' ) );
+			$order->set_date_created( time() );
 		}
 
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
@@ -1233,7 +1233,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$changes = $order->get_changes();
 
 		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( gmdate( 'Y-m-d H:i:s e' ) );
+			$order->set_date_modified( time() );
 		}
 
 		$this->update_post_meta( $order );
