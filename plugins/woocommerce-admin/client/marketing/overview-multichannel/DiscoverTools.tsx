@@ -19,6 +19,12 @@ import {
 import { STORE_KEY } from '~/marketing/data/constants';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 
+const tagNameMap = {
+	'built-by-woocommerce': __( 'Built by WooCommerce', 'woocommerce' ),
+} as const;
+
+type TagType = keyof typeof tagNameMap;
+
 export type Plugin = {
 	title: string;
 	description: string;
@@ -28,7 +34,7 @@ export type Plugin = {
 	plugin: string;
 	categories: Array< string >;
 	subcategories: Array< string >;
-	tags: Array< string >;
+	tags?: Array< TagType >;
 };
 
 const category = 'marketing';
@@ -98,6 +104,9 @@ export const DiscoverTools = () => {
 												/>
 											}
 											name={ el.title }
+											tags={ el.tags?.map(
+												( t ) => tagNameMap[ t ]
+											) }
 											description={ el.description }
 											button={
 												<Button

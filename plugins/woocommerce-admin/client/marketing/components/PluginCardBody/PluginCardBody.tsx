@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { Pill } from '@woocommerce/components';
+
+/**
  * Internal dependencies
  */
 import { CardBody } from '../index';
@@ -7,6 +12,7 @@ import './PluginCardBody.scss';
 type PluginCardBodyProps = {
 	icon: JSX.Element;
 	name: string;
+	tags?: Array< string >;
 	description: string;
 	button: JSX.Element | null;
 };
@@ -17,6 +23,7 @@ type PluginCardBodyProps = {
 export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
 	icon,
 	name,
+	tags,
 	description,
 	button,
 } ) => {
@@ -28,6 +35,9 @@ export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
 			<div className="woocommerce_marketing_plugin_card_body__details">
 				<div className="woocommerce_marketing_plugin_card_body__details-name">
 					{ name }
+					{ tags?.map( ( el ) => {
+						return <Pill key={ el }>{ el }</Pill>;
+					} ) }
 				</div>
 				<div className="woocommerce_marketing_plugin_card_body__details-description">
 					{ description }

@@ -11,10 +11,18 @@
 		flex-grow: 1;
 
 		&-name {
+			display: flex;
+			gap: 2px 8px;
+			flex-wrap: wrap;
 			font-size: 14px;
 			font-weight: 600;
 			line-height: 20px;
 			margin-bottom: 4px;
+
+			.woocommerce-pill {
+				padding: 2px 8px;
+				color: $gray-700;
+			}
 		}
 
 		&-description {
