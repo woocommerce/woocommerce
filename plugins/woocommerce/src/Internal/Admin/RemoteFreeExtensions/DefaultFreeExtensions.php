@@ -113,7 +113,7 @@ class DefaultFreeExtensions {
 			],
 			'facebook-for-woocommerce:alt'      => [
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="#">Facebook for WooCommerce</a>', 'woocommerce' ),
+				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
 				'is_built_by_wc' => false,
