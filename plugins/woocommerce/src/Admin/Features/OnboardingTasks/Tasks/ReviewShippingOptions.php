@@ -23,7 +23,7 @@ class ReviewShippingOptions extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Review Shipping Options', 'woocommerce' );
+		return __( 'Review shipping options', 'woocommerce' );
 	}
 
 	/**
