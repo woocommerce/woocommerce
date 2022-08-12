@@ -25,3 +25,9 @@
 		height: 100%;
 	}
 }
+
+.woocommerce-enriched-label__checkbox {
+	& > * {
+		margin-bottom: 0;
+	}
+}
