@@ -111,7 +111,7 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 					<Button
-						isSecondary
+						isPrimary
 						isBusy={ isUpdatingDraft || isUpdatingPublished }
 						disabled={
 							isUpdatingDraft ||
