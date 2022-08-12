@@ -12,6 +12,12 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * This class provides a `WP_Query`-like interface to custom order tables.
+ *
+ * @property-read int   $found_orders  Number of found orders.
+ * @property-read int   $found_posts   Alias of the `$found_orders` property.
+ * @property-read int   $max_num_pages Max number of pages matching the current query.
+ * @property-read array $orders        Order objects, or order IDs.
+ * @property-read array $posts         Alias of the $orders property.
  */
 class OrdersTableQuery {
 
@@ -24,6 +30,13 @@ class OrdersTableQuery {
 	 * Regex used to catch "shorthand" comparisons in date-related query args.
 	 */
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
+
+	/**
+	 * Highest possible unsigned bigint value (unsigned bigints being the type of the `id` column).
+	 *
+	 * This is deliberately held as a string, rather than a numeric type, for inclusion within queries.
+	 */
+	private const MYSQL_MAX_UNSIGNED_BIGINT = '18446744073709551615';
 
 	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
@@ -562,7 +575,13 @@ class OrdersTableQuery {
 		$orderby = $this->orderby ? ( 'ORDER BY ' . implode( ', ', $this->orderby ) ) : '';
 
 		// LIMITS.
-		$limits = $this->limits ? 'LIMIT ' . implode( ',', $this->limits ) : '';
+		$limits = '';
+
+		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
+			list( $offset, $row_count ) = $this->limits;
+			$row_count                  = $row_count === -1 ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
+			$limits                     = 'LIMIT ' . (int) $offset . ', ' . $row_count;
+		}
 
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
@@ -876,15 +895,20 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function process_limit(): void {
-		$limit  = ( $this->arg_isset( 'limit' ) ? absint( $this->args['limit'] ) : false );
-		$page   = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
-		$offset = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
+		$row_count = ( $this->arg_isset( 'limit' ) ? (int) $this->args['limit'] : false );
+		$page      = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
+		$offset    = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
 
-		if ( ! $limit ) {
+		// Bool false indicates no limit was specified; less than -1 means an invalid value was passed (such as -3).
+		if ( $row_count === false || $row_count < -1 ) {
 			return;
 		}
 
-		$this->limits = array( $offset ? $offset : absint( ( $page - 1 ) * $limit ), $limit );
+		if ( $offset === false && $row_count > -1 ) {
+			$offset = (int) ( ( $page - 1 ) * $row_count );
+		}
+
+		$this->limits = array( $offset, $row_count );
 	}
 
 	/**
