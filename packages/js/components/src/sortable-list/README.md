@@ -19,7 +19,7 @@ This component accepts any valid JSX elements as children.  Adding a `key` to el
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-`children` | JSX.Element | JSX.Element[] | `undefined` | The draggable items in the list
+`children` | JSX.Element \| JSX.Element[] | `undefined` | The draggable items in the list
 `onDragEnd` | Function | `() => null` | A callback when an item is no longer being dragged
 `onDragOver` | Function | `() => null` | A callback when an item is being dragged over by another item
 `onDragStart` | Function | `() => null` | A callback when an item starts being dragged
