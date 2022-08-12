@@ -9,11 +9,7 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
-import {
-	CheckoutProvider,
-	EditorProvider,
-	useEditorContext,
-} from '@woocommerce/base-context';
+import { CheckoutProvider, EditorProvider } from '@woocommerce/base-context';
 import {
 	previewCart,
 	previewSavedPaymentMethods,
@@ -21,15 +17,10 @@ import {
 import {
 	PanelBody,
 	ToggleControl,
-	Notice,
 	CheckboxControl,
 } from '@wordpress/components';
-import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
-import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
-import { createInterpolateElement } from '@wordpress/element';
-import { getAdminLink } from '@woocommerce/settings';
-import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import type { TemplateArray } from '@wordpress/blocks';
+import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 
 /**
  * Internal dependencies
@@ -38,6 +29,7 @@ import './inner-blocks';
 import './styles/editor.scss';
 import {
 	addClassToBody,
+	BlockSettings,
 	useBlockPropsWithLocking,
 } from '../cart-checkout-shared';
 import { CheckoutBlockContext, CheckoutBlockControlsContext } from './context';
@@ -51,67 +43,6 @@ const ALLOWED_BLOCKS: string[] = [
 	'woocommerce/checkout-fields-block',
 	'woocommerce/checkout-totals-block',
 ];
-
-const BlockSettings = ( {
-	attributes,
-	setAttributes,
-}: {
-	attributes: Attributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
-} ): JSX.Element => {
-	const { hasDarkControls } = attributes;
-	const { currentPostId } = useEditorContext();
-
-	return (
-		<InspectorControls>
-			{ currentPostId !== CHECKOUT_PAGE_ID && (
-				<Notice
-					className="wc-block-checkout__page-notice"
-					isDismissible={ false }
-					status="warning"
-				>
-					{ createInterpolateElement(
-						__(
-							'If you would like to use this block as your default checkout you must update your <a>page settings in WooCommerce</a>.',
-							'woo-gutenberg-products-block'
-						),
-						{
-							a: (
-								// eslint-disable-next-line jsx-a11y/anchor-has-content
-								<a
-									href={ getAdminLink(
-										'admin.php?page=wc-settings&tab=advanced'
-									) }
-									target="_blank"
-									rel="noopener noreferrer"
-								/>
-							),
-						}
-					) }
-				</Notice>
-			) }
-			<PanelBody title={ __( 'Style', 'woo-gutenberg-products-block' ) }>
-				<ToggleControl
-					label={ __(
-						'Dark mode inputs',
-						'woo-gutenberg-products-block'
-					) }
-					help={ __(
-						'Inputs styled specifically for use on dark background colors.',
-						'woo-gutenberg-products-block'
-					) }
-					checked={ hasDarkControls }
-					onChange={ () =>
-						setAttributes( {
-							hasDarkControls: ! hasDarkControls,
-						} )
-					}
-				/>
-			</PanelBody>
-			<CartCheckoutFeedbackPrompt />
-		</InspectorControls>
-	);
-};
 
 export const Edit = ( {
 	attributes,
@@ -166,6 +97,7 @@ export const Edit = ( {
 					}
 				/>
 			</PanelBody>
+			<CartCheckoutFeedbackPrompt />
 		</InspectorControls>
 	);
 
@@ -225,18 +157,21 @@ export const Edit = ( {
 					/>
 				) }
 			</PanelBody>
+			<CartCheckoutFeedbackPrompt />
 		</InspectorControls>
 	);
 	const blockProps = useBlockPropsWithLocking();
 	return (
 		<div { ...blockProps }>
-			<EditorProvider
-				previewData={ { previewCart, previewSavedPaymentMethods } }
-			>
+			<InspectorControls>
 				<BlockSettings
 					attributes={ attributes }
 					setAttributes={ setAttributes }
 				/>
+			</InspectorControls>
+			<EditorProvider
+				previewData={ { previewCart, previewSavedPaymentMethods } }
+			>
 				<CheckoutProvider>
 					<SidebarLayout
 						className={ classnames( 'wc-block-checkout', {
@@ -274,7 +209,6 @@ export const Edit = ( {
 					</SidebarLayout>
 				</CheckoutProvider>
 			</EditorProvider>
-			<CartCheckoutCompatibilityNotice blockName="checkout" />
 		</div>
 	);
 };

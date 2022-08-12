@@ -1,0 +1,11 @@
+.wc-default-page-notice.is-dismissible {
+	margin: 0;
+	padding-right: 16px;
+	.components-notice__dismiss {
+		min-width: 24px;
+	}
+	svg {
+		width: 16px;
+		height: 16px;
+	}
+}

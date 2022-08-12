@@ -10,7 +10,7 @@ export const useCompatibilityNotice = (
 	blockName: string
 ): [ boolean, () => void ] => {
 	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState(
-		`wc-blocks_dismissed_compatibility_notices`,
+		`wc-blocks_dismissed_sidebar_compatibility_notices`,
 		initialDismissedNotices
 	);
 	const [ isVisible, setIsVisible ] = useState( false );
