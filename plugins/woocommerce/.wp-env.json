@@ -11,7 +11,10 @@
 	"env": {
 		"development": {},
 		"tests": {
-		  	"port": 8086
+		  	"port": 8086,
+			"config": {
+				"ALTERNATE_WP_CRON": false
+			}
 		}
 	}
 }
