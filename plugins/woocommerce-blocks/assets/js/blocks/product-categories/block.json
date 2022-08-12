@@ -1,0 +1,41 @@
+{
+  "name": "woocommerce/product-categories",
+  "title": "Product Categories List",
+  "category": "woocommerce",
+  "description": "Show all product categories as a list or dropdown.",
+  "keywords": [ "WooCommerce" ],
+  "attributes": {
+    "align": {
+      "type": "string"
+    },
+    "hasCount": {
+      "type": "boolean",
+      "default": true
+    },
+    "hasImage": {
+      "type": "boolean",
+      "default": false
+    },
+    "hasEmpty": {
+      "type": "boolean",
+      "default": false
+    },
+    "isDropdown": {
+      "type": "boolean",
+      "default": false
+    },
+    "isHierarchical": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "example": {
+    "attributes": {
+      "hasCount": true,
+      "hasImage": false
+    }
+  },
+  "textdomain": "woo-gutenberg-products-block",
+  "apiVersion": 2,
+  "$schema": "https://schemas.wp.org/trunk/block.json"
+}
