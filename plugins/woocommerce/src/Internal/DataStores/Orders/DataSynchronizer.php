@@ -152,7 +152,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function get_current_orders_pending_sync_count(): int {
 		global $wpdb;
 
-		$orders_table                = $wpdb->prefix . 'wc_orders';
+		$orders_table                = $this->data_store::get_orders_table_name();
 		$order_post_types            = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
@@ -230,7 +230,7 @@ SELECT(
 			throw new \Exception( '$limit must be at least 1' );
 		}
 
-		$orders_table                 = $wpdb->prefix . 'wc_orders';
+		$orders_table                 = $this->data_store::get_orders_table_name();
 		$order_post_types             = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholders = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
