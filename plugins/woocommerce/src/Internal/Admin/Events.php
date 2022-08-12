@@ -83,7 +83,7 @@ class Events {
 	/**
 	 * Daily events to run.
 	 *
-	 * Note: Order_Milestones::other_milestones is hooked to this as well.
+	 * Note: Order_Milestones::possibly_add_note is hooked to this as well.
 	 */
 	public function do_wc_admin_daily() {
 		$this->possibly_add_notes();
