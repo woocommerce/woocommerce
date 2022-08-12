@@ -74,14 +74,6 @@ export function useProductHelper() {
 				status,
 			} ).then(
 				( newProduct ) => {
-					if ( ! skipRedirect ) {
-						navigateTo( {
-							url:
-								'admin.php?page=wc-admin&path=/product/' +
-								newProduct.id,
-						} );
-					}
-
 					if ( ! skipNotice ) {
 						createNotice(
 							'success',
@@ -106,6 +98,13 @@ export function useProductHelper() {
 						...updating,
 						[ status ]: false,
 					} );
+					if ( ! skipRedirect ) {
+						navigateTo( {
+							url:
+								'admin.php?page=wc-admin&path=/product/' +
+								newProduct.id,
+						} );
+					}
 				},
 				() => {
 					createNotice(
