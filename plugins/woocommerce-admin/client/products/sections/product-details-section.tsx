@@ -19,7 +19,10 @@ import { EditProductLinkModal } from '../shared/edit-product-link-modal';
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
 export const ProductDetailsSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const { getInputProps, values } = useFormContext< Product >();
+	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
+		useState( false );
+
 	const getCheckboxProps = ( item: string ) => {
 		const { checked, className, onChange, onBlur } =
 			getInputProps< boolean >( item );
@@ -70,6 +73,18 @@ export const ProductDetailsSection: React.FC = () => {
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 				{ ...getTextControlProps( 'name' ) }
 			/>
+			{ values.permalink && values.status === 'publish' && (
+				<div className="product-details-section__product-link">
+					{ __( 'Product link', 'woocommerce' ) }:&nbsp;
+					<a href={ values.permalink }>{ values.permalink }</a>
+					<Button
+						variant="link"
+						onClick={ () => setShowProductLinkEditModal( true ) }
+					>
+						{ __( 'Edit', 'woocommerce' ) }
+					</Button>
+				</div>
+			) }
 			<CheckboxControl
 				label={
 					<EnrichedLabel
@@ -88,26 +103,9 @@ export const ProductDetailsSection: React.FC = () => {
 				}
 				{ ...getCheckboxProps( 'featured' ) }
 			/>
-			{ formContext.values.permalink &&
-				formContext.values.status === 'publish' && (
-					<div className="product-details-section__product-link">
-						{ __( 'Product link', 'woocommerce' ) }:&nbsp;
-						<a href={ formContext.values.permalink }>
-							{ formContext.values.permalink }
-						</a>
-						<Button
-							variant="link"
-							onClick={ () =>
-								setShowProductLinkEditModal( true )
-							}
-						>
-							{ __( 'Edit', 'woocommerce' ) }
-						</Button>
-					</div>
-				) }
 			{ showProductLinkEditModal && (
 				<EditProductLinkModal
-					product={ formContext.values }
+					product={ values }
 					onCancel={ () => setShowProductLinkEditModal( false ) }
 					onSaved={ () => setShowProductLinkEditModal( false ) }
 				/>
