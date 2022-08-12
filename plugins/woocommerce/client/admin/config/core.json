@@ -1,6 +1,6 @@
 {
 	"features": {
-		"activity-panels": true,
+		"activity-panels": false,
 		"analytics": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
