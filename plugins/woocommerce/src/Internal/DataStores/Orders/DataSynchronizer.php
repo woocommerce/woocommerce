@@ -139,12 +139,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	/**
 	 * Calculate how many orders need to be synchronized currently.
-	 *
-	 * If an option whose name is given by self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION exists,
-	 * then the value of that option is returned. This is temporary, to ease testing the feature
-	 * while it is in development.
-	 *
-	 * Otherwise a database query is performed to get how many orders match one of the following:
+	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
