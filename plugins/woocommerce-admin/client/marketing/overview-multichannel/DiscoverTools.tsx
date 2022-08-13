@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { Pill } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -104,9 +105,11 @@ export const DiscoverTools = () => {
 												/>
 											}
 											name={ el.title }
-											tags={ el.tags?.map(
-												( t ) => tagNameMap[ t ]
-											) }
+											pills={ el.tags?.map( ( t ) => (
+												<Pill key={ t }>
+													{ tagNameMap[ t ] }
+												</Pill>
+											) ) }
 											description={ el.description }
 											button={
 												<Button

@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { Pill } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { CardBody } from '../index';
@@ -12,7 +7,12 @@ import './PluginCardBody.scss';
 type PluginCardBodyProps = {
 	icon: JSX.Element;
 	name: string;
-	tags?: Array< string >;
+
+	/**
+	 * WooCommerce's Pill component to be rendered beside the name.
+	 */
+	pills?: Array< JSX.Element >;
+
 	description: string;
 	button: JSX.Element | null;
 };
@@ -23,7 +23,7 @@ type PluginCardBodyProps = {
 export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
 	icon,
 	name,
-	tags,
+	pills,
 	description,
 	button,
 } ) => {
@@ -35,9 +35,7 @@ export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
 			<div className="woocommerce_marketing_plugin_card_body__details">
 				<div className="woocommerce_marketing_plugin_card_body__details-name">
 					{ name }
-					{ tags?.map( ( el ) => {
-						return <Pill key={ el }>{ el }</Pill>;
-					} ) }
+					{ pills }
 				</div>
 				<div className="woocommerce_marketing_plugin_card_body__details-description">
 					{ description }
