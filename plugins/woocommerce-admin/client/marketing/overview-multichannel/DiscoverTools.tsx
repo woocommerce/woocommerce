@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Pill, EmptyContent, Spinner } from '@woocommerce/components';
+import { flatMapDeep, intersection, uniq } from 'lodash';
 
 /**
  * Internal dependencies
@@ -22,13 +23,20 @@ import { STORE_KEY } from '~/marketing/data/constants';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import './DiscoverTools.scss';
 
+const category = 'marketing';
+const subcategoryTitleMap = {
+	email: __( 'Email', 'woocommerce' ),
+	automations: __( 'Automations', 'woocommerce' ),
+	'sales-channels': __( 'Sales channels', 'woocommerce' ),
+	crm: __( 'CRM', 'woocommerce' ),
+} as const;
 const tagNameMap = {
 	'built-by-woocommerce': __( 'Built by WooCommerce', 'woocommerce' ),
 } as const;
 
+type SubcategoryType = keyof typeof subcategoryTitleMap;
 type TagType = keyof typeof tagNameMap;
-
-export type Plugin = {
+type Plugin = {
 	title: string;
 	description: string;
 	url: string;
@@ -36,33 +44,40 @@ export type Plugin = {
 	product: string;
 	plugin: string;
 	categories: Array< string >;
-	subcategories: Array< string >;
+	subcategories: Array< SubcategoryType >;
 	tags?: Array< TagType >;
 };
 
-const category = 'marketing';
-const tabs = Object.freeze( [
-	{
-		name: 'email',
-		title: __( 'Email', 'woocommerce' ),
-	},
-	{
-		name: 'automations',
-		title: __( 'Automations', 'woocommerce' ),
-	},
-	{
-		name: 'sales-channels',
-		title: __( 'Sales channels', 'woocommerce' ),
-	},
-	{
-		name: 'crm',
-		title: __( 'CRM', 'woocommerce' ),
-	},
-] );
-
 type SelectResult = {
 	isLoading: boolean;
-	plugins: Array< Plugin >;
+	plugins: Plugin[];
+};
+
+/**
+ * Return tabs (`{ name, title }`) for the TabPanel.
+ *
+ * Subcategories that have no plugins
+ * will not be displayed as a tab in the UI.
+ * This is done by doing the following:
+ *
+ * 1. Get an array of unique subcategories from the list of plugins.
+ * 2. Get the intersection of the array and the list of known subcategories.
+ * 3. Return the tabs from the intersection.
+ */
+const getTabs = ( plugins: Plugin[] ) => {
+	const pluginSubcategories = uniq(
+		flatMapDeep( plugins, ( p ) => p.subcategories )
+	);
+	const knownSubcategories = Object.keys( subcategoryTitleMap ) as Array<
+		keyof typeof subcategoryTitleMap
+	>;
+
+	return intersection( pluginSubcategories, knownSubcategories ).map(
+		( subcategory ) => ( {
+			name: subcategory,
+			title: subcategoryTitleMap[ subcategory ],
+		} )
+	);
 };
 
 export const DiscoverTools = () => {
@@ -111,10 +126,12 @@ export const DiscoverTools = () => {
 		}
 
 		return (
-			<TabPanel tabs={ tabs }>
+			<TabPanel tabs={ getTabs( plugins ) }>
 				{ ( tab ) => {
-					const filteredPlugins = plugins.filter( ( el: Plugin ) =>
-						el.subcategories?.includes( tab.name )
+					const filteredPlugins = plugins.filter( ( el ) =>
+						el.subcategories?.includes(
+							tab.name as keyof typeof subcategoryTitleMap
+						)
 					);
 
 					return (
