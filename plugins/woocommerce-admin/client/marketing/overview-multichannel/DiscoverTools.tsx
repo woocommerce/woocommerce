@@ -6,7 +6,7 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { Pill } from '@woocommerce/components';
+import { Pill, EmptyContent, Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -14,11 +14,13 @@ import { Pill } from '@woocommerce/components';
 import {
 	CollapsibleCard,
 	CardDivider,
+	CardBody,
 	ProductIcon,
 	PluginCardBody,
 } from '~/marketing/components';
 import { STORE_KEY } from '~/marketing/data/constants';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
+import './DiscoverTools.scss';
 
 const tagNameMap = {
 	'built-by-woocommerce': __( 'Built by WooCommerce', 'woocommerce' ),
@@ -76,21 +78,44 @@ export const DiscoverTools = () => {
 		[ category ]
 	);
 
-	// TODO: handle loading state.
+	/**
+	 * Renders card body.
+	 *
+	 * - If loading is in progress, it renders a loading indicator.
+	 * - If there are zero plugins, it renders an empty content.
+	 * - Otherwise, it renders a TabPanel with all the plugins.
+	 */
+	const getCardBody = () => {
+		if ( isLoading ) {
+			return (
+				<CardBody>
+					<Spinner />
+				</CardBody>
+			);
+		}
 
-	return (
-		<CollapsibleCard
-			initialCollapsed
-			className="woocommerce-marketing-discover-tools-card"
-			header={ __( 'Discover more marketing tools', 'woocommerce' ) }
-		>
+		if ( plugins.length === 0 ) {
+			return (
+				<EmptyContent
+					title={ __(
+						'Looks like you already have all the tools you need.',
+						'woocommerce'
+					) }
+					message={ __(
+						'Go on and grow your store now.',
+						'woocommerce'
+					) }
+					illustration=""
+				/>
+			);
+		}
+
+		return (
 			<TabPanel tabs={ tabs }>
 				{ ( tab ) => {
 					const filteredPlugins = plugins.filter( ( el: Plugin ) =>
 						el.subcategories?.includes( tab.name )
 					);
-
-					// TODO: handle filteredPlugins.length === 0.
 
 					return (
 						<>
@@ -142,6 +167,16 @@ export const DiscoverTools = () => {
 					);
 				} }
 			</TabPanel>
+		);
+	};
+
+	return (
+		<CollapsibleCard
+			initialCollapsed
+			className="woocommerce-marketing-discover-tools-card"
+			header={ __( 'Discover more marketing tools', 'woocommerce' ) }
+		>
+			{ getCardBody() }
 		</CollapsibleCard>
 	);
 };
