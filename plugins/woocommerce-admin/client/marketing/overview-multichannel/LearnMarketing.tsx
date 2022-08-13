@@ -10,8 +10,8 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { CollapsibleCard, ReadBlogMessage } from '../components';
-import { STORE_KEY } from '../data/constants';
+import { CollapsibleCard, ReadBlogMessage } from '~/marketing/components';
+import { STORE_KEY } from '~/marketing/data/constants';
 import './LearnMarketing.scss';
 
 type Post = {
@@ -75,7 +75,7 @@ const PostTile: React.FC< PostTileProps > = ( { post } ) => {
 const blogPostCategory = 'marketing';
 const perPage = 2;
 
-const LearnMarketing = () => {
+export const LearnMarketing = () => {
 	const [ page, setPage ] = useState( 1 );
 	const { isLoading, error, posts } = useSelect(
 		( select ) => {
@@ -187,5 +187,3 @@ const LearnMarketing = () => {
 		</CollapsibleCard>
 	);
 };
-
-export default LearnMarketing;

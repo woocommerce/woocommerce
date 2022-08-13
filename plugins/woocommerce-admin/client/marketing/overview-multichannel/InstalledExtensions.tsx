@@ -14,11 +14,11 @@ import {
 	CardDivider,
 	ProductIcon,
 	PluginCardBody,
-} from '../components';
+} from '~/marketing/components';
 import { Plugin } from './types';
 import { usePlugins } from './usePlugins';
 
-const InstalledExtensions = () => {
+export const InstalledExtensions = () => {
 	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
 		usePlugins();
 
@@ -101,5 +101,3 @@ const InstalledExtensions = () => {
 		</CollapsibleCard>
 	);
 };
-
-export default InstalledExtensions;

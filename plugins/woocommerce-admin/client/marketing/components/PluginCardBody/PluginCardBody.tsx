@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { CardBody } from '../index';
+import { CardBody } from '~/marketing/components';
 import './PluginCardBody.scss';
 
 type PluginCardBodyProps = {
