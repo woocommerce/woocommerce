@@ -21,6 +21,7 @@ class WC_CLI_COM_Command {
 	 */
 	public static function register_commands() {
 		WP_CLI::add_command( 'wc com extension list', array( 'WC_CLI_COM_Command', 'list_extensions' ) );
+		WP_CLI::add_command( 'wc com disconnect', array( 'WC_CLI_COM_Command', 'disconnect' ) );
 	}
 
 	/**
@@ -84,5 +85,35 @@ class WC_CLI_COM_Command {
 		);
 
 		$formatter->display_items( $data );
+	}
+
+	/**
+	 * ## OPTIONS
+	 *
+	 * [--yes]
+	 * : Do not prompt for confirmation.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Disconnect from site.
+	 *     $ wp wc com disconnect
+	 *
+	 *     # Disconnect without prompt for confirmation.
+	 *     $ wp wc com disconnect --yes
+	 *
+	 * @param array $args Positional arguments to include when calling the command.
+	 * @param array $assoc_args Associative arguments to include when calling the command.
+
+	 * @return void
+	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
+	 */
+	public static function disconnect( array $args, array $assoc_args ) {
+		if ( ! WC_Helper::is_site_connected() ) {
+			WP_CLI::error( 'Your store is not connected to WooCommerce.com. Run `wp wc com connect` command.' );
+		}
+
+		WP_CLI::confirm( 'Are you sure you want to disconnect your store from WooCommerce.com?', $assoc_args );
+		WC_Helper::disconnect();
+		WP_CLI::success( 'You have successfully disconnected your store from WooCommerce.com' );
 	}
 }
