@@ -17,7 +17,6 @@ import { default as DateInput } from '../calendar/input';
 export type DateTimeProps = {
 	onChange: ( date: string ) => void;
 	dateTimeFormat?: string;
-	error?: string;
 	disabled?: boolean;
 	currentDate?: string;
 	is12Hour?: boolean;
@@ -28,14 +27,13 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 	is12Hour = true,
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
-	error = '',
 	currentDate = new Date().toISOString(),
 }: DateTimeProps ) => {
 	const [ pickerDate, setPickerDate ] = useState( currentDate );
 	const [ inputDate, setInputDate ] = useState(
 		moment( currentDate ).format( dateTimeFormat )
 	);
-	const [ inputError, setInputError ] = useState( error );
+	const [ inputError, setInputError ] = useState( '' );
 
 	useEffect( () => {
 		if ( ! moment( inputDate ).isValid() ) {
@@ -87,6 +85,7 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 					label={ __( 'Choose a date', 'woocommerce' ) }
 					error={ inputError }
 					describedBy={ sprintf(
+						/* translators: A datetime format */
 						__(
 							'Date input describing a selected date in format %s',
 							'woocommerce'
