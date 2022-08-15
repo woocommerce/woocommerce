@@ -94,10 +94,27 @@ jobs:
             } else {
               console.log( "::set-output name=pr::${{ github.event.pull_request.number }}" )
             }
+  check-release-branch-exists:
+    name: Check for existence of release branch
+    runs-on: ubuntu-20.04
+    needs: prep
+    steps:
+      - name: Check for release branch
+        id: release-breanch-check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
+            await github.request( 'GET /repos/{owner}/{repo}/branches/{branch}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: '${{ needs.prep.outputs.release }}',
+            } );
   cherry-pick-run:
     name: Run cherry pick tool
     runs-on: ubuntu-20.04
-    needs: prep
+    needs: [ prep, check-release-branch-exists ]
+    if: success()
     steps:
       - name: Checkout release branch
         uses: actions/checkout@v3
