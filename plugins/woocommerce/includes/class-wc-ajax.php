@@ -1905,7 +1905,11 @@ class WC_AJAX {
 			}
 			$index ++;
 			$menu_orders[ $id ] = $index;
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) );
+
+			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
+				// We only need to clean the cache if the menu order was actually modified.
+				clean_post_cache( $id );
+			}
 
 			/**
 			 * When a single product has gotten it's ordering updated.
@@ -1923,7 +1927,10 @@ class WC_AJAX {
 			$menu_orders[ $sorting_id ] = 0;
 		}
 
-		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
+		if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) ) ) {
+			// We only need to clean the cache if the menu order was actually modified.
+			clean_post_cache( $sorting_id );
+		}
 
 		WC_Post_Data::delete_product_query_transients();
 
