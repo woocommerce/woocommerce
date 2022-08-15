@@ -80,6 +80,38 @@ const getTabs = ( plugins: Plugin[] ) => {
 	);
 };
 
+const renderPluginCardBodies = ( plugins: Plugin[] ) => {
+	return plugins.map( ( el, idx ) => {
+		return (
+			<Fragment key={ el.product }>
+				<PluginCardBody
+					icon={ <ProductIcon product={ el.product } /> }
+					name={ el.title }
+					pills={ el.tags?.map( ( t ) => (
+						<Pill key={ t }>{ tagNameMap[ t ] }</Pill>
+					) ) }
+					description={ el.description }
+					button={
+						<Button
+							variant="secondary"
+							href={ getInAppPurchaseUrl( el.url ) }
+							onClick={ () => {
+								recordEvent(
+									'marketing_recommended_extension',
+									{ name: el.title }
+								);
+							} }
+						>
+							{ __( 'Get started', 'woocommerce' ) }
+						</Button>
+					}
+				/>
+				{ idx !== plugins.length - 1 && <CardDivider /> }
+			</Fragment>
+		);
+	} );
+};
+
 export const DiscoverTools = () => {
 	const { isLoading, plugins } = useSelect< SelectResult >(
 		( select ) => {
@@ -98,9 +130,12 @@ export const DiscoverTools = () => {
 	 *
 	 * - If loading is in progress, it renders a loading indicator.
 	 * - If there are zero plugins, it renders an empty content.
+	 * - If the plugins do not have subcategories field, it renders the list of plugins without TabPanel.
+	 *     - This is a temporary safety measure to make sure the list of plugins are displayed,
+	 * 	     in case the subcategories changes in the woocommerce.com API are not shipped yet.
 	 * - Otherwise, it renders a TabPanel with all the plugins.
 	 */
-	const getCardBody = () => {
+	const renderCardContent = () => {
 		if ( isLoading ) {
 			return (
 				<CardBody>
@@ -125,6 +160,10 @@ export const DiscoverTools = () => {
 			);
 		}
 
+		if ( ! plugins[ 0 ].subcategories ) {
+			return renderPluginCardBodies( plugins );
+		}
+
 		return (
 			<TabPanel tabs={ getTabs( plugins ) }>
 				{ ( tab ) => {
@@ -137,49 +176,7 @@ export const DiscoverTools = () => {
 					return (
 						<>
 							<CardDivider />
-							{ filteredPlugins.map( ( el, idx ) => {
-								return (
-									<Fragment key={ el.product }>
-										<PluginCardBody
-											icon={
-												<ProductIcon
-													product={ el.product }
-												/>
-											}
-											name={ el.title }
-											pills={ el.tags?.map( ( t ) => (
-												<Pill key={ t }>
-													{ tagNameMap[ t ] }
-												</Pill>
-											) ) }
-											description={ el.description }
-											button={
-												<Button
-													variant="secondary"
-													href={ getInAppPurchaseUrl(
-														el.url
-													) }
-													onClick={ () => {
-														recordEvent(
-															'marketing_recommended_extension',
-															{ name: el.title }
-														);
-													} }
-												>
-													{ __(
-														'Get started',
-														'woocommerce'
-													) }
-												</Button>
-											}
-										/>
-										{ idx !==
-											filteredPlugins.length - 1 && (
-											<CardDivider />
-										) }
-									</Fragment>
-								);
-							} ) }
+							{ renderPluginCardBodies( filteredPlugins ) }
 						</>
 					);
 				} }
@@ -193,7 +190,7 @@ export const DiscoverTools = () => {
 			className="woocommerce-marketing-discover-tools-card"
 			header={ __( 'Discover more marketing tools', 'woocommerce' ) }
 		>
-			{ getCardBody() }
+			{ renderCardContent() }
 		</CollapsibleCard>
 	);
 };
