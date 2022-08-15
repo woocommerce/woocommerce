@@ -3,7 +3,6 @@
  */
 import { waitFor, render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { loadExperimentAssignment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -15,13 +14,6 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 jest.mock( '@woocommerce/explat' );
-
-const whenExperimentAssigned = (
-	experimentVariation: 'treatment' | 'control'
-) =>
-	( loadExperimentAssignment as jest.Mock ).mockImplementation( () => {
-		return Promise.resolve( { variationName: experimentVariation } );
-	} );
 
 const paymentsBannerShouldBe = async ( status: 'hidden' | 'visible' ) => {
 	const { container } = render( <PaymentsBannerWrapper /> );
@@ -65,8 +57,6 @@ describe( 'Payment Settings Banner', () => {
 
 		whenWcPay( { supported: true, activated: false, installed: true } );
 
-		whenExperimentAssigned( 'treatment' );
-
 		await paymentsBannerShouldBe( 'visible' );
 	} );
 
@@ -74,8 +64,6 @@ describe( 'Payment Settings Banner', () => {
 		expect.assertions( 1 );
 
 		whenWcPay( { supported: true, activated: false, installed: true } );
-
-		whenExperimentAssigned( 'control' );
 
 		await paymentsBannerShouldBe( 'hidden' );
 	} );
@@ -85,8 +73,6 @@ describe( 'Payment Settings Banner', () => {
 
 		whenWcPay( { supported: false, activated: false, installed: false } );
 
-		whenExperimentAssigned( 'treatment' );
-
 		await paymentsBannerShouldBe( 'hidden' );
 	} );
 
@@ -94,8 +80,6 @@ describe( 'Payment Settings Banner', () => {
 		expect.assertions( 1 );
 
 		whenWcPay( { supported: true, activated: true, installed: true } );
-
-		whenExperimentAssigned( 'treatment' );
 
 		await paymentsBannerShouldBe( 'hidden' );
 	} );

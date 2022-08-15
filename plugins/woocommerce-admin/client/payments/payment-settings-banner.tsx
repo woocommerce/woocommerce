@@ -15,7 +15,7 @@ import {
  */
 import './payment-recommendations.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { usePaymentExperiment } from './use-payments-experiment';
+import { usePaymentsBanner } from './use-payments-banner';
 
 const WCPaySettingBanner = () => {
 	const WC_PAY_SETUP_URL = getAdminLink(
@@ -53,13 +53,9 @@ const DefaultPaymentMethodsHeaderText = () => (
 );
 
 export const PaymentsBannerWrapper = () => {
-	const { isLoadingExperiment, experimentAssignment } =
-		usePaymentExperiment();
+	const { hasFinishedResolution, shouldShowBanner } = usePaymentsBanner();
 
-	if (
-		! isLoadingExperiment &&
-		experimentAssignment?.variationName === 'treatment'
-	) {
+	if ( hasFinishedResolution && shouldShowBanner ) {
 		return <WCPaySettingBanner />;
 	}
 	return <DefaultPaymentMethodsHeaderText />;
