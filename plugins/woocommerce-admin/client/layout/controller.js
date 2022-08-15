@@ -24,6 +24,12 @@ import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
 
+const EditProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
+	)
+);
+
 const AddProductPage = lazy( () =>
 	import(
 		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
@@ -173,10 +179,24 @@ export const getPages = () => {
 			path: '/add-product',
 			breadcrumbs: [
 				[ '/add-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Add New', 'woocommerce' ),
+				__( 'Add New Product', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: EditProductPage,
+			path: '/product/:productId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',

@@ -83,12 +83,14 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 	return (
 		<div className="woocommerce-tour-kit-step-navigation">
 			<div className="woocommerce-tour-kit-step-navigation__step">
-				{ sprintf(
-					/* translators: current progress in tour, eg: "Step 2 of 4" */
-					__( 'Step %1$d of %2$d', 'woocommerce' ),
-					currentStepIndex + 1,
-					steps.length
-				) }
+				{ steps.length > 1
+					? sprintf(
+							/* translators: current progress in tour, eg: "Step 2 of 4" */
+							__( 'Step %1$d of %2$d', 'woocommerce' ),
+							currentStepIndex + 1,
+							steps.length
+					  )
+					: null }
 			</div>
 			{ renderButtons() }
 		</div>

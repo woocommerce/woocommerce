@@ -18,8 +18,6 @@ tests/cli/vendor
 /tests/bin/tmp
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
-/tests/e2e/config/default.json
-/tests/e2e/docker
 /tests/e2e/screenshots
 /tests/e2e/plugins
 .phpunit.result.cache

@@ -10,10 +10,6 @@ import { SlotFillProvider } from '@wordpress/components';
 import { ProductFieldLayout } from '../product-field-layout';
 import { WooProductFieldItem } from '../woo-product-field-item';
 
-const SampleInputField: React.FC< { name: string } > = ( { name } ) => {
-	return <div>smaple-input-field-{ name }</div>;
-};
-
 describe( 'ProductFieldLayout', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
