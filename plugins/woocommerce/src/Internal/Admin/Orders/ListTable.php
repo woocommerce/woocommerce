@@ -260,7 +260,7 @@ class ListTable extends WP_List_Table {
 		$status         = trim( sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) );
 		$query_statuses = array();
 
-		if ( empty( $status ) || $status === 'all' ) {
+		if ( empty( $status ) || 'all' === $status ) {
 			$query_statuses = array_intersect(
 				array_keys( wc_get_order_statuses() ),
 				get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
@@ -301,7 +301,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$all_count         = array_sum( $view_counts );
-		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, $current === '' || $current === 'all' );
+		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, '' === $current || 'all' === $current );
 
 		foreach ( $view_counts as $slug => $count ) {
 			$view_links[ $slug ] = $this->get_view_link( $slug, $statuses[ $slug ], $count, $slug === $current );
@@ -828,10 +828,10 @@ class ListTable extends WP_List_Table {
 		$report_action = '';
 		$changed       = 0;
 
-		if ( $action === 'remove_personal_data' ) {
+		if ( 'remove_personal_data' === $action ) {
 			$report_action = 'removed_personal_data';
 			$changed       = $this->do_bulk_action_remove_personal_data( $ids );
-		} elseif ( strpos( $action, 'mark_' ) !== false ) {
+		} elseif ( false !== strpos( $action, 'mark_' ) ) {
 			$order_statuses = wc_get_order_statuses();
 			$new_status     = substr( $action, 5 );
 			$report_action  = 'marked_' . $new_status;
@@ -929,7 +929,7 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		if ( $bulk_action === 'removed_personal_data' ) { // WPCS: input var ok, CSRF ok.
+		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
 			/* translators: %s: orders count */
 			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
