@@ -28,6 +28,7 @@ import {
 	useForcedLayout,
 	BlockSettings,
 } from '../cart-checkout-shared';
+import '../cart-checkout-shared/sidebar-notices';
 import { CartBlockContext } from './context';
 
 // This is adds a class to body to signal if the selected block is locked
