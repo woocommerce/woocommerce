@@ -16,7 +16,6 @@ import {
 	CollapsibleCard,
 	CardDivider,
 	CardBody,
-	ProductIcon,
 	PluginCardBody,
 } from '~/marketing/components';
 import { STORE_KEY } from '~/marketing/data/constants';
@@ -85,7 +84,7 @@ const renderPluginCardBodies = ( plugins: Plugin[] ) => {
 		return (
 			<Fragment key={ el.product }>
 				<PluginCardBody
-					icon={ <ProductIcon product={ el.product } /> }
+					icon={ <img src={ el.icon } alt={ el.title } /> }
 					name={ el.title }
 					pills={ el.tags?.map( ( t ) => (
 						<Pill key={ t }>{ tagNameMap[ t ] }</Pill>

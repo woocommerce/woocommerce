@@ -5,6 +5,12 @@
 
 	&__icon {
 		flex-shrink: 0;
+
+		img {
+			display: block;
+			width: 36px;
+			height: 36px;
+		}
 	}
 
 	&__details {
