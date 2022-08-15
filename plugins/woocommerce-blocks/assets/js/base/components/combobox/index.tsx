@@ -54,9 +54,8 @@ const Combobox = ( {
 	instanceId = '0',
 	autoComplete = 'off',
 }: ComboboxProps ): JSX.Element => {
-	const { setValidationErrors, clearValidationError } = useDispatch(
-		VALIDATION_STORE_KEY
-	);
+	const { setValidationErrors, clearValidationError } =
+		useDispatch( VALIDATION_STORE_KEY );
 	const getValidationError = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return store.getValidationError();

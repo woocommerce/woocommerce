@@ -16,9 +16,8 @@ describe( 'Validation selectors', () => {
 				hidden: false,
 			},
 		};
-		const validationError = getValidationError( state )(
-			'validationError'
-		);
+		const validationError =
+			getValidationError( state )( 'validationError' );
 		expect( validationError ).toEqual( {
 			message: 'This is a test message',
 			hidden: false,
@@ -32,9 +31,8 @@ describe( 'Validation selectors', () => {
 				hidden: false,
 			},
 		};
-		const validationErrorID = getValidationErrorId( state )(
-			'validationError'
-		);
+		const validationErrorID =
+			getValidationErrorId( state )( 'validationError' );
 		expect( validationErrorID ).toEqual( `validate-error-validationError` );
 	} );
 
@@ -48,9 +46,8 @@ describe( 'Validation selectors', () => {
 		const validationErrors = hasValidationErrors( state );
 		expect( validationErrors ).toEqual( true );
 		const stateWithNoErrors: Record< string, FieldValidationStatus > = {};
-		const stateWithNoErrorsCheckResult = hasValidationErrors(
-			stateWithNoErrors
-		);
+		const stateWithNoErrorsCheckResult =
+			hasValidationErrors( stateWithNoErrors );
 		expect( stateWithNoErrorsCheckResult ).toEqual( false );
 	} );
 } );
