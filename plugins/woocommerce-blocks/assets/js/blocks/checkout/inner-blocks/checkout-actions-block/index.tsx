@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, button } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import attributes from './attributes';
 import { Edit, Save } from './edit';
 
-registerFeaturePluginBlockType( 'woocommerce/checkout-actions-block', {
+registerBlockType( 'woocommerce/checkout-actions-block', {
 	icon: {
 		src: (
 			<Icon

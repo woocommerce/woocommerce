@@ -3,7 +3,7 @@
  */
 import { totals } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -11,7 +11,7 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import { Edit, Save } from './edit';
 import attributes from './attributes';
 
-registerFeaturePluginBlockType( 'woocommerce/checkout-order-summary-block', {
+registerBlockType( 'woocommerce/checkout-order-summary-block', {
 	icon: {
 		src: (
 			<Icon

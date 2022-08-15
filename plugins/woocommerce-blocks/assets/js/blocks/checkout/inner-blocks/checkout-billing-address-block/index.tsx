@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, mapMarker } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import { Edit, Save } from './edit';
 import attributes from './attributes';
 
-registerFeaturePluginBlockType( 'woocommerce/checkout-billing-address-block', {
+registerBlockType( 'woocommerce/checkout-billing-address-block', {
 	icon: {
 		src: (
 			<Icon

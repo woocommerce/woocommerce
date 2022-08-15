@@ -101,11 +101,11 @@ class FeatureGating {
 		return $this->flag >= self::FEATURE_PLUGIN_FLAG;
 	}
 
-		/**
-		 * Returns the current environment value.
-		 *
-		 * @return string
-		 */
+	/**
+	 * Returns the current environment value.
+	 *
+	 * @return string
+	 */
 	public function get_environment() {
 		return $this->environment;
 	}

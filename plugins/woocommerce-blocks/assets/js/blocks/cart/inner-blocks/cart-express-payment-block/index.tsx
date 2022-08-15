@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { Icon, payment } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
 
-registerFeaturePluginBlockType( 'woocommerce/cart-express-payment-block', {
+registerBlockType( 'woocommerce/cart-express-payment-block', {
 	icon: {
 		src: (
 			<Icon
