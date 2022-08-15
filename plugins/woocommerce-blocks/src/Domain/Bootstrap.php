@@ -96,7 +96,9 @@ class Bootstrap {
 		add_action(
 			'admin_init',
 			function() {
-				InboxNotifications::create_surface_cart_checkout_blocks_notification();
+				// Delete this notification because the blocks are included in WC Core now. This will handle any sites
+				// with lingering notices.
+				InboxNotifications::delete_surface_cart_checkout_blocks_notification();
 			},
 			10,
 			0
@@ -121,9 +123,8 @@ class Bootstrap {
 		$this->container->get( ProductAttributeTemplate::class );
 		$this->container->get( ClassicTemplatesCompatibility::class );
 		$this->container->get( BlockPatterns::class );
-		if ( $this->package->feature()->is_feature_plugin_build() ) {
-			$this->container->get( PaymentsApi::class );
-		}
+		$this->container->get( PaymentsApi::class );
+
 	}
 
 	/**
@@ -289,16 +290,14 @@ class Bootstrap {
 				return new GoogleAnalytics( $asset_api );
 			}
 		);
-		if ( $this->package->feature()->is_feature_plugin_build() ) {
-			$this->container->register(
-				PaymentsApi::class,
-				function ( Container $container ) {
-					$payment_method_registry = $container->get( PaymentMethodRegistry::class );
-					$asset_data_registry     = $container->get( AssetDataRegistry::class );
-					return new PaymentsApi( $payment_method_registry, $asset_data_registry );
-				}
-			);
-		}
+		$this->container->register(
+			PaymentsApi::class,
+			function ( Container $container ) {
+				$payment_method_registry = $container->get( PaymentMethodRegistry::class );
+				$asset_data_registry     = $container->get( AssetDataRegistry::class );
+				return new PaymentsApi( $payment_method_registry, $asset_data_registry );
+			}
+		);
 		$this->container->register(
 			StoreApi::class,
 			function () {

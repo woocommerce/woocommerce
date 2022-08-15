@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { Icon, customPostType } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
 
-registerFeaturePluginBlockType( 'woocommerce/checkout-terms-block', {
+registerBlockType( 'woocommerce/checkout-terms-block', {
 	icon: {
 		src: (
 			<Icon

@@ -3,14 +3,14 @@
  */
 import { totals } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
 
-registerFeaturePluginBlockType( 'woocommerce/cart-order-summary-block', {
+registerBlockType( 'woocommerce/cart-order-summary-block', {
 	icon: {
 		src: (
 			<Icon
