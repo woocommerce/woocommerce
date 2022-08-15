@@ -109,7 +109,7 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 					currentDate={ pickerDate }
 					onChange={ ( newDate ) => {
 						setPickerDate( newDate );
-						onChange( typeof newDate );
+						onChange( newDate );
 					} }
 					is12Hour={ is12Hour }
 				/>
