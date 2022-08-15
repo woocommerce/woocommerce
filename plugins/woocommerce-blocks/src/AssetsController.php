@@ -86,7 +86,7 @@ final class AssetsController {
 	 * @return array URLs to print for resource hints.
 	 */
 	public function add_resource_hints( $urls, $relation_type ) {
-		if ( ! Package::feature()->is_feature_plugin_build() || ! in_array( $relation_type, [ 'prefetch', 'prerender' ], true ) ) {
+		if ( ! in_array( $relation_type, [ 'prefetch', 'prerender' ], true ) ) {
 			return $urls;
 		}
 

@@ -25,22 +25,9 @@ class CreateAccount {
 	}
 
 	/**
-	 * Feature gating. This feature is only enabled when using the feature plugin/checkout block.
-	 *
-	 * @return boolean
-	 */
-	private function is_feature_enabled() {
-		return $this->package->feature()->is_feature_plugin_build();
-	}
-
-	/**
 	 * Init - register handlers for WooCommerce core email hooks.
 	 */
 	public function init() {
-		if ( ! self::is_feature_enabled() ) {
-			return;
-		}
-
 		// Override core email handlers to add our new improved "new account" email.
 		add_action(
 			'woocommerce_email',
@@ -78,9 +65,6 @@ class CreateAccount {
 	 * @param array $new_customer_data Assoc array of data for the new account.
 	 */
 	public function customer_new_account( $customer_id = 0, array $new_customer_data = array() ) {
-		if ( ! self::is_feature_enabled() || ! $customer_id ) {
-			return;
-		}
 		$new_account_email = new CustomerNewAccount( $this->package );
 		$new_account_email->trigger( $customer_id, $new_customer_data );
 	}

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 import { Icon, payment } from '@wordpress/icons';
 
 /**
@@ -9,18 +9,15 @@ import { Icon, payment } from '@wordpress/icons';
  */
 import { Edit, Save } from './edit';
 
-registerFeaturePluginBlockType(
-	'woocommerce/cart-accepted-payment-methods-block',
-	{
-		icon: {
-			src: (
-				<Icon
-					icon={ payment }
-					className="wc-block-editor-components-block-icon"
-				/>
-			),
-		},
-		edit: Edit,
-		save: Save,
-	}
-);
+registerBlockType( 'woocommerce/cart-accepted-payment-methods-block', {
+	icon: {
+		src: (
+			<Icon
+				icon={ payment }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	edit: Edit,
+	save: Save,
+} );
