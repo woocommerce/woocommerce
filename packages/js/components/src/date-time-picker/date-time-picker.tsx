@@ -39,7 +39,7 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 
 	useEffect( () => {
 		if ( ! moment( inputDate ).isValid() ) {
-			setInputError( 'Invalid date' );
+			setInputError( __( 'Invalid date', 'woocommerce' ) );
 			return;
 		}
 
