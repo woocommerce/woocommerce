@@ -664,9 +664,18 @@ WHERE
 		// phpcs:enable
 	}
 
+	/**
+	 * Return count of orders with a specific status.
+	 *
+	 * @param  string $status Order status. Function wc_get_order_statuses() returns a list of valid statuses.
+	 * @return int
+	 */
 	public function get_order_count( $status ) {
-		// TODO: Implement get_order_count() method.
-		return 0;
+		global $wpdb;
+
+		$orders_table = self::get_orders_table_name();
+
+		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$orders_table} WHERE type = %s AND status = %s", 'shop_order', $status ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	public function get_unpaid_orders( $date ) {
