@@ -240,11 +240,20 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function delete( &$download, $args = array() ) {
 		global $wpdb;
 
+		$download_id = $download->get_id();
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 				WHERE permission_id = %d",
-				$download->get_id()
+				$download_id
+			)
+		);
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id = %d",
+				$download_id
 			)
 		);
 
@@ -265,6 +274,14 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 				$id
 			)
 		);
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id = %d",
+				$id
+			)
+		);
 	}
 
 	/**
@@ -274,6 +291,18 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_order_id( $id ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id IN (
+				    SELECT permission_id
+				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				    WHERE order_id = %d
+				)",
+				$id
+			)
+		);
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -290,6 +319,18 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_download_id( $id ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id IN (
+				    SELECT permission_id
+				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				    WHERE download_id = %d
+				)",
+				$id
+			)
+		);
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -308,6 +349,18 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_user_id( $id ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id IN (
+				    SELECT permission_id
+				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				    WHERE user_id = %d
+				)",
+				$id
+			)
+		);
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -326,6 +379,18 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_user_email( $email ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id IN (
+				    SELECT permission_id
+				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+				    WHERE user_email = %d
+				)",
+				$email
+			)
+		);
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
