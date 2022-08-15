@@ -1,9 +1,9 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const path = require( 'path' );
-const filePath = path.resolve( 'e2e/test-data/sample_products.csv' );
+const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(
-	'e2e/test-data/sample_products_override.csv'
+	'tests/e2e-pw/test-data/sample_products_override.csv'
 );
 
 const productIds = [];

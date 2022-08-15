@@ -44,9 +44,9 @@ To run the test again, re-create the environment to start with a fresh state:
 Other ways of running tests:
 
 - `pnpm env:test --filter=woocommerce` (headless)
-- `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=e2e/playwright.config.js --headed` (headed)
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=e2e/playwright.config.js --debug` (debug)
-- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=e2e/playwright.config.js ./e2e/tests/activate-and-setup/basic-setup.spec.js` (running a single test)
+- `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --headed` (headed)
+- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --debug` (debug)
+- `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (running a single test)
 
 To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
 
@@ -85,11 +85,11 @@ The test environment uses the following test variables:
 }
 ```
 
-If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
+If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
 
 **Modiify the port wp-env**
 
-Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/e2e/playwright.config.js).
+Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js).
 
 **Modiify port for e2e-environment**
 
