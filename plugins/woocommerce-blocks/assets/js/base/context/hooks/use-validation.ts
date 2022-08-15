@@ -13,11 +13,8 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
  * Custom hook for setting for adding errors to the validation system.
  */
 export const useValidation = (): ValidationData => {
-	const {
-		clearValidationError,
-		hideValidationError,
-		setValidationErrors,
-	} = useDispatch( VALIDATION_STORE_KEY );
+	const { clearValidationError, hideValidationError, setValidationErrors } =
+		useDispatch( VALIDATION_STORE_KEY );
 	const { hasValidationErrors, getValidationError } = useSelect(
 		( select ) => {
 			const store = select( VALIDATION_STORE_KEY );
