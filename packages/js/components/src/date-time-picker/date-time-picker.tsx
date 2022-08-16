@@ -43,6 +43,7 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 
 		setInputString( dateTime.format( dateTimeFormat ) );
 		setInputError( '' );
+		onChange( dateTime.toISOString() );
 	}, [ dateTime ] );
 
 	return (
@@ -108,7 +109,6 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 					currentDate={ dateTime.toISOString() }
 					onChange={ ( newDate ) => {
 						setDateTime( moment( newDate ) );
-						onChange( newDate );
 					} }
 					is12Hour={ is12Hour }
 				/>
