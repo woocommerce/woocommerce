@@ -4,6 +4,18 @@
   "category": "woocommerce",
   "description": "Show all product categories as a list or dropdown.",
   "keywords": [ "WooCommerce" ],
+  "supports": {
+    "align": [ "wide", "full" ],
+    "html": false,
+    "color": {
+      "background": false,
+      "link": true
+    },
+    "typography": {
+      "fontSize": true,
+      "lineHeight": true
+    }
+  },
   "attributes": {
     "align": {
       "type": "string"
