@@ -413,7 +413,7 @@ return array(
 		'DO-08' => __( 'El Seibo', 'woocommerce' ),
 		'DO-37' => __( 'El Valle', 'woocommerce' ),
 		'DO-07' => __( 'Elías Piña', 'woocommerce' ),
-		'DO-38' => __( 'Enriquillo', 'woocommerce' ),		
+		'DO-38' => __( 'Enriquillo', 'woocommerce' ),
 		'DO-09' => __( 'Espaillat', 'woocommerce' ),
 		'DO-30' => __( 'Hato Mayor', 'woocommerce' ),
 		'DO-19' => __( 'Hermanas Mirabal', 'woocommerce' ),
@@ -1082,6 +1082,7 @@ return array(
 		'KE47' => __( 'West Pokot', 'woocommerce' ),
 	),
 	'KR' => array(),
+	'XK' => array(),
 	'KW' => array(),
 	'LA' => array( // Laotian provinces.
 		'AT' => __( 'Attapeu', 'woocommerce' ),
