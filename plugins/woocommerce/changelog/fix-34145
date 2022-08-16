@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor 'show_in_admin_all_list' and 'show_in_admin_status_list' in COT orders list table.

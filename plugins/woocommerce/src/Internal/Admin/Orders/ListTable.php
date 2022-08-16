@@ -173,10 +173,10 @@ class ListTable extends WP_List_Table {
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'any' ) ),
 			'type'     => 'shop_order',
 		);
 
+		$this->set_status_args();
 		$this->set_order_args();
 		$this->set_date_args();
 		$this->set_customer_args();
@@ -254,6 +254,26 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Implements filtering of orders by status.
+	 */
+	private function set_status_args() {
+		$status         = trim( sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) );
+		$query_statuses = array();
+
+		if ( empty( $status ) || 'all' === $status ) {
+			$query_statuses = array_intersect(
+				array_keys( wc_get_order_statuses() ),
+				get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
+			);
+		} else {
+			$query_statuses[] = $status;
+			$this->has_filter = true;
+		}
+
+		$this->order_query_args['status'] = $query_statuses;
+	}
+
+	/**
 	 * Get the list of views for this table (all orders, completed orders, etc, each with a count of the number of
 	 * corresponding orders).
 	 *
@@ -265,7 +285,14 @@ class ListTable extends WP_List_Table {
 		$statuses    = wc_get_order_statuses();
 		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
 
-		foreach ( $statuses as $slug => $name ) {
+		// Add 'draft' and 'trash' to list.
+		foreach ( array( 'draft', 'trash' ) as $wp_status ) {
+			$statuses[ $wp_status ] = ( get_post_status_object( $wp_status ) )->label;
+		}
+
+		$statuses_in_list = array_intersect( array_keys( $statuses ), get_post_stati( array( 'show_in_admin_status_list' => true ) ) );
+
+		foreach ( $statuses_in_list as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
 
 			if ( $total_in_status > 0 ) {
@@ -274,7 +301,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$all_count         = array_sum( $view_counts );
-		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, $current === 'all' );
+		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, '' === $current || 'all' === $current );
 
 		foreach ( $view_counts as $slug => $count ) {
 			$view_links[ $slug ] = $this->get_view_link( $slug, $statuses[ $slug ], $count, $slug === $current );
@@ -285,8 +312,6 @@ class ListTable extends WP_List_Table {
 
 	/**
 	 * Count orders by status.
-	 *
-	 * @todo review and replace (probably not ideal to do this work here).
 	 *
 	 * @param string $status The order status we are interested in.
 	 *
@@ -348,11 +373,11 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Render the months filter dropdown.
 	 *
-	 * @todo [review] we may prefer to move this logic outside of the ListTable class
-	 *
 	 * @return void
 	 */
 	private function months_filter() {
+		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
+
 		global $wp_locale;
 		global $wpdb;
 
@@ -612,10 +637,17 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		if ( $tooltip ) {
-			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), wp_kses_post( $tooltip ), esc_html( wc_get_order_status_name( $order->get_status() ) ) );
+		// Gracefully handle legacy statuses.
+		if ( in_array( $order->get_status(), array( 'trash', 'draft' ), true ) ) {
+			$status_name = ( get_post_status_object( $order->get_status() ) )->label;
 		} else {
-			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), esc_html( wc_get_order_status_name( $order->get_status() ) ) );
+			$status_name = wc_get_order_status_name( $order->get_status() );
+		}
+
+		if ( $tooltip ) {
+			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), wp_kses_post( $tooltip ), esc_html( $status_name ) );
+		} else {
+			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), esc_html( $status_name ) );
 		}
 	}
 
