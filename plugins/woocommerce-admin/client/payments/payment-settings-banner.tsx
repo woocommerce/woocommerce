@@ -9,6 +9,7 @@ import {
 	WCPayBannerBody,
 	WCPayBannerFooter,
 } from '@woocommerce/onboarding';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -16,6 +17,10 @@ import {
 import './payment-recommendations.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { usePaymentsBanner } from './use-payments-banner';
+
+const recordTrack = () => {
+	recordEvent( 'settings_payments_banner_connect_click' );
+};
 
 const WCPaySettingBanner = () => {
 	const WC_PAY_SETUP_URL = getAdminLink(
@@ -28,7 +33,11 @@ const WCPaySettingBanner = () => {
 			<WCPayBannerBody
 				textPosition="right"
 				actionButton={
-					<Button href={ WC_PAY_SETUP_URL } isPrimary>
+					<Button
+						href={ WC_PAY_SETUP_URL }
+						isPrimary
+						onClick={ recordTrack }
+					>
 						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
 				}
