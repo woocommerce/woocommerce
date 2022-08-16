@@ -2029,7 +2029,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 		} else {
-			$row_price        = $price * $quantity;
+			$row_price        = (float) $price * (float) $quantity;
 			$product_subtotal = wc_price( $row_price );
 		}
 
