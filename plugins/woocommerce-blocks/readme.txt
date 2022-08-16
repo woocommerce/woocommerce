@@ -91,13 +91,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 #### Enhancements
 
 - Add feedback box to the Cart & Checkout Inner Blocks in the inspector. ([6881](https://github.com/woocommerce/woocommerce-blocks/pull/6881))
+- Refactor style-attributes hooks to add as global custom imports and remove relative import paths. ([6870](https://github.com/woocommerce/woocommerce-blocks/pull/6870))
 - Add notice to Cart and Checkout blocks' inspector controls which links to the list of compatible plugins. ([6869](https://github.com/woocommerce/woocommerce-blocks/pull/6869))
 - Add the ability to register patterns by adding them under the "patterns" folder and add the new "WooCommerce Filters" pattern. ([6861](https://github.com/woocommerce/woocommerce-blocks/pull/6861))
 - Enable the Cart and Checkout blocks when WooCommerce Blocks is bundled in WooCommerce Core. ([6805](https://github.com/woocommerce/woocommerce-blocks/pull/6805))
 
 #### Bug Fixes
 
-- Refactor style-attributes hooks to add as global custom imports and remove relative import paths. ([6870](https://github.com/woocommerce/woocommerce-blocks/pull/6870))
 - Refactor Product Categories block to use block.json. ([6875](https://github.com/woocommerce/woocommerce-blocks/pull/6875))
 - Fix: Update billing address when shipping address gets change in shipping calculator at Cart block. ([6823](https://github.com/woocommerce/woocommerce-blocks/pull/6823))
 - Fix: Add font-weight controls to the Mini Cart block text. ([6760](https://github.com/woocommerce/woocommerce-blocks/pull/6760))
