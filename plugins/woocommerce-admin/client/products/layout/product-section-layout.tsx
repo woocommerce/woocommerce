@@ -11,7 +11,7 @@ import { ProductFieldLayout } from './product-field-layout';
 
 type ProductSectionLayoutProps = {
 	title: string;
-	description: string;
+	description: string | React.ReactNode;
 };
 
 export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {

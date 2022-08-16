@@ -18,6 +18,13 @@
 		}
 	}
 
+	&__header {
+		p > span {
+			display: block;
+			margin-bottom: $gap-smaller;
+		}
+	}
+
 	.product-field-layout:not(:first-child) {
 		margin-top: $gap;
 	}

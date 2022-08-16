@@ -3,6 +3,12 @@
 	.woocommerce-product-form-actions {
 		margin-top: $gap-largest + $gap-smaller;
 	}
+	.woocommerce-add-product__checkbox,
+	.components-toggle-control {
+		& > * {
+			margin-bottom: 0;
+		}
+	}
 }
 
 .woocommerce-edit-product {
@@ -26,8 +32,3 @@
 	}
 }
 
-.woocommerce-enriched-label__checkbox {
-	& > * {
-		margin-bottom: 0;
-	}
-}

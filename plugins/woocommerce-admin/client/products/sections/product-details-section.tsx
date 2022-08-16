@@ -12,7 +12,6 @@ import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
-import classnames from 'classnames';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -21,6 +20,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import './product-details-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
+import { getCheckboxProps, getTextControlProps } from './utils';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
@@ -42,42 +42,6 @@ export const ProductDetailsSection: React.FC = () => {
 		}
 	);
 
-	const getCheckboxProps = ( item: string ) => {
-		const { checked, className, onChange, onBlur } =
-			getInputProps< boolean >( item );
-		return {
-			checked,
-			className: classnames(
-				'woocommerce-add-product__checkbox',
-				className
-			),
-			onChange: ( isChecked: boolean ) => {
-				recordEvent( `add_product_checkbox_${ item }`, {
-					checked: isChecked,
-				} );
-				return onChange( isChecked );
-			},
-			onBlur,
-		};
-	};
-	const getTextControlProps = ( item: string ) => {
-		const {
-			className,
-			onBlur,
-			onChange,
-			value = '',
-		} = getInputProps< string >( item );
-		return {
-			value,
-			className: classnames(
-				'woocommerce-add-product__checkbox',
-				className
-			),
-			onChange,
-			onBlur,
-		};
-	};
-
 	return (
 		<ProductSectionLayout
 			title={ __( 'Product details', 'woocommerce' ) }
@@ -90,7 +54,7 @@ export const ProductDetailsSection: React.FC = () => {
 				label={ __( 'Name', 'woocommerce' ) }
 				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-				{ ...getTextControlProps( 'name' ) }
+				{ ...getTextControlProps( getInputProps( 'name' ) ) }
 			/>
 			{ values.id && permalinkPrefix && (
 				<div className="product-details-section__product-link">
@@ -128,7 +92,10 @@ export const ProductDetailsSection: React.FC = () => {
 						}
 					/>
 				}
-				{ ...getCheckboxProps( 'featured' ) }
+				{ ...getCheckboxProps( {
+					...getInputProps( 'featured' ),
+					name: 'featured',
+				} ) }
 			/>
 			{ showProductLinkEditModal && (
 				<EditProductLinkModal
