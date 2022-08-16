@@ -2519,9 +2519,8 @@ function wc_get_server_database_version() {
 		);
 	}
 
-	// phpcs:disable WordPress.DB.RestrictedFunctions
+	// phpcs:ignore WordPress.DB.RestrictedFunctions
 	$server_info = mysqli_get_server_info( $wpdb->dbh );
-	// phpcs:enable WordPress.DB.RestrictedFunctions
 
 	return array(
 		'string' => $server_info,
