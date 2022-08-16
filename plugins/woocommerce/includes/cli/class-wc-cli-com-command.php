@@ -180,7 +180,7 @@ class WC_CLI_COM_Command {
 	/**
 	 * We are asking a question and returning an answer as a string.
 	 *
-	 * @param  string $question The question being prompt
+	 * @param  string $question The question being prompt.
 	 *
 	 * @return string
 	 */

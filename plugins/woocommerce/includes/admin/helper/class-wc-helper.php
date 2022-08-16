@@ -1682,7 +1682,7 @@ class WC_Helper {
 	/**
 	 * Allows to connect with WCCOM using application password. used it to connect via CLI
 	 *
-	 * @param string $password The application password
+	 * @param string $password The application password.
 	 *
 	 * @return void|WP_Error
 	 */
@@ -1701,12 +1701,12 @@ class WC_Helper {
 
 		$code = wp_remote_retrieve_response_code( $request );
 
-		if ( 403 === $code ) {
+		if ( $code === 403 ) {
 			$message = 'Invalid password';
 			self::log( $message );
 
 			return new WP_Error( 'connect-with-password-invalid-password', $message );
-		} elseif ( 200 !== $code ) {
+		} elseif ( $code !== 200 ) {
 			$message = sprintf( 'Call to /connect returned a non-200 response code (%d)', $code );
 			self::log( $message );
 
@@ -1729,7 +1729,7 @@ class WC_Helper {
 	 *
 	 * @param string $access_token The access token.
 	 * @param string $access_token_secret The secret access token.
-	 * @param int $site_id The site id returned by the API.
+	 * @param int    $site_id The site id returned by the API.
 	 *
 	 * @return void
 	 */
