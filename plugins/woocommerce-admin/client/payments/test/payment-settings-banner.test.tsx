@@ -62,14 +62,6 @@ describe( 'Payment Settings Banner', () => {
 		await paymentsBannerShouldBe( 'visible' );
 	} );
 
-	it( 'should not render the banner if treatment is control', async () => {
-		expect.assertions( 1 );
-
-		whenWcPay( { supported: true, activated: false, installed: true } );
-
-		await paymentsBannerShouldBe( 'hidden' );
-	} );
-
 	it( 'should not render anything if woocommerce payments is not supported', async () => {
 		expect.assertions( 1 );
 
@@ -93,8 +85,7 @@ describe( 'Payment Settings Banner', () => {
 		fireEvent.click( getByText( 'Get started' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'settings_payments_banner_connect_click',
-			{}
+			'settings_payments_banner_connect_click'
 		);
 	} );
 } );
