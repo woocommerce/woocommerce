@@ -18,7 +18,7 @@ export type DateTimeProps = {
 	onChange: ( date: string ) => void;
 	dateTimeFormat?: string;
 	disabled?: boolean;
-	currentDate?: string;
+	initialDate?: string;
 	is12Hour?: boolean;
 } & React.HTMLAttributes< HTMLDivElement >;
 
@@ -27,11 +27,11 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 	is12Hour = true,
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
-	currentDate = new Date().toISOString(),
+	initialDate = new Date().toISOString(),
 }: DateTimeProps ) => {
-	const [ pickerDate, setPickerDate ] = useState( currentDate );
+	const [ pickerDate, setPickerDate ] = useState( initialDate );
 	const [ inputDate, setInputDate ] = useState(
-		moment( currentDate ).format( dateTimeFormat )
+		moment( initialDate ).format( dateTimeFormat )
 	);
 	const [ inputError, setInputError ] = useState( '' );
 
@@ -105,7 +105,7 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 			) }
 			renderContent={ () => (
 				<WpDateTimePicker
-					currentDate={ pickerDate }
+					initialDate={ pickerDate }
 					onChange={ ( newDate ) => {
 						setPickerDate( newDate );
 						onChange( newDate );
