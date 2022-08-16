@@ -17,7 +17,7 @@ type MenuProps = {
 
 export const Menu = ( { children, getMenuProps, isOpen }: MenuProps ) => {
 	return (
-		<ul
+		<div
 			{ ...getMenuProps() }
 			className={ classnames( 'woocommerce-select-control__menu', {
 				'is-open': isOpen,
@@ -25,10 +25,10 @@ export const Menu = ( { children, getMenuProps, isOpen }: MenuProps ) => {
 		>
 			{ isOpen &&
 				( ! Array.isArray( children ) || !! children.length ) && (
-					<div className="woocommerce-select-control__menu-inner">
+					<ul className="woocommerce-select-control__menu-inner">
 						{ children }
-					</div>
+					</ul>
 				) }
-		</ul>
+		</div>
 	);
 };
