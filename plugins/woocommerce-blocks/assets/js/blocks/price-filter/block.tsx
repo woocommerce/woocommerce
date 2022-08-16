@@ -318,6 +318,7 @@ const PriceFilterBlock = ( {
 					maxPrice={ maxPrice }
 					currency={ currency }
 					showInputFields={ attributes.showInputFields }
+					inlineInput={ attributes.inlineInput }
 					showFilterButton={ attributes.showFilterButton }
 					onChange={ onChange }
 					onSubmit={ () => onSubmit( minPrice, maxPrice ) }

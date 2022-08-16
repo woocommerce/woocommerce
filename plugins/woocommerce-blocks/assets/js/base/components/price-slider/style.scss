@@ -2,17 +2,18 @@
 @mixin thumb {
 	background-color: transparent;
 	background-position: 0 0;
-	width: 28px;
-	height: 23px;
-	border: 0;
+	box-sizing: content-box;
+	width: 12px;
+	height: 12px;
+	border: 2px solid $gray-900;
+	border-radius: 100%;
 	padding: 0;
 	margin: 0;
 	vertical-align: top;
 	cursor: pointer;
 	z-index: 20;
 	pointer-events: auto;
-	background-image: url("data:image/svg+xml,%3Csvg width='56' height='46' viewBox='0 0 56 46' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M25.3176 9.9423L16.9013 3.7991C15.1953 2.5706 13.2618 1.9003 11.2146 2.0121H11.1009C6.21029 2.3471 2.11589 6.3681 2.00219 11.2827C1.88849 16.644 6.21019 21 11.6696 21H11.7833C13.603 21 15.4228 20.3298 16.9013 19.213L25.3176 12.958C26.2275 12.0645 26.2275 10.7242 25.3176 9.9423V9.9423Z' fill='white' stroke='%23757575'/%3E%3Cpath d='M13 7V16M10 7V16V7Z' stroke='%23B8B8B8'/%3E%3Cpath d='M25.3176 9.94227L16.9013 3.79907C15.1953 2.57057 13.2618 1.90027 11.2146 2.01207H11.1009C6.21029 2.34707 2.11589 6.36807 2.00219 11.2827C1.88849 16.644 6.21019 21 11.6696 21H11.7833C13.603 21 15.4228 20.3298 16.9013 19.213L25.3176 12.958C26.2275 12.0645 26.2275 10.7242 25.3176 9.94227V9.94227Z' fill='white' stroke='%23757575'/%3E%3Cpath d='M13 7V16M10 7V16V7Z' stroke='%23B8B8B8'/%3E%3Cpath d='M25.3176 32.9423L16.9013 26.7991C15.1953 25.5706 13.2618 24.9003 11.2146 25.0121H11.1009C6.21029 25.347 2.11589 29.368 2.00219 34.2827C1.88849 39.644 6.21019 44 11.6696 44H11.7833C13.603 44 15.4228 43.3298 16.9013 42.213L25.3176 35.958C26.2275 35.0645 26.2275 33.7242 25.3176 32.9423V32.9423Z' fill='%23F8F3F7' stroke='white' stroke-opacity='0.75' stroke-width='3'/%3E%3Cpath d='M25.3176 32.9423L16.9013 26.7991C15.1953 25.5706 13.2618 24.9003 11.2146 25.0121H11.1009C6.21029 25.347 2.11589 29.368 2.00219 34.2827C1.88849 39.644 6.21019 44 11.6696 44H11.7833C13.603 44 15.4228 43.3298 16.9013 42.213L25.3176 35.958C26.2275 35.0645 26.2275 33.7242 25.3176 32.9423V32.9423Z' stroke='%23757575'/%3E%3Cpath d='M13 30V39M10 30V39V30Z' stroke='%23757575'/%3E%3Cpath d='M30.6824 9.94227L39.0987 3.79907C40.8047 2.57057 42.7382 1.90027 44.7854 2.01207H44.8991C49.7897 2.34707 53.8841 6.36807 53.9978 11.2827C54.1115 16.644 49.7898 21 44.3304 21H44.2167C42.397 21 40.5772 20.3298 39.0987 19.213L30.6824 12.958C29.7725 12.0645 29.7725 10.7242 30.6824 9.94227V9.94227Z' fill='white' stroke='%23757575'/%3E%3Cpath d='M43 6.99997V16M46 6.99997V16V6.99997Z' stroke='%23B8B8B8'/%3E%3Cpath d='M30.6824 32.9423L39.0987 26.7991C40.8047 25.5706 42.7382 24.9003 44.7854 25.0121H44.8991C49.7897 25.347 53.8841 29.368 53.9978 34.2827C54.1115 39.644 49.7898 44 44.3304 44H44.2167C42.397 44 40.5772 43.3298 39.0987 42.213L30.6824 35.958C29.7725 35.0645 29.7725 33.7242 30.6824 32.9423V32.9423Z' fill='%23F8F3F7' stroke='white' stroke-opacity='0.75' stroke-width='3'/%3E%3Cpath d='M30.6824 32.9423L39.0987 26.7991C40.8047 25.5706 42.7382 24.9003 44.7854 25.0121H44.8991C49.7897 25.347 53.8841 29.368 53.9978 34.2827C54.1115 39.644 49.7898 44 44.3304 44H44.2167C42.397 44 40.5772 43.3298 39.0987 42.213L30.6824 35.958C29.7725 35.0645 29.7725 33.7242 30.6824 32.9423V32.9423Z' stroke='%23757575'/%3E%3Cpath d='M43 30V39M46 30V39V30Z' stroke='%23757575'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='56' height='46' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A");
-
+	background: $white;
 	transition: transform .2s ease-in-out;
 	-webkit-appearance: none;
 	-moz-appearance: none;
@@ -23,8 +24,7 @@
 	}
 }
 @mixin thumbFocus {
-	background-position-y: -23px;
-	transform: scale(1.1);
+	background: $gray-900;
 }
 /* stylelint-enable */
 @mixin track {
@@ -52,23 +52,16 @@
 .wc-block-components-price-slider {
 	margin-bottom: $gap-large;
 
-	&.wc-block-components-price-slider--has-filter-button {
-		.wc-block-components-price-slider__controls {
-			justify-content: flex-end;
-
-			.wc-block-components-price-slider__amount.wc-block-components-price-slider__amount--max {
-				margin-left: 0;
-				margin-right: 10px;
-			}
-		}
-	}
-
 	&.is-loading.is-disabled {
 		.wc-block-components-price-slider__range-input-wrapper,
-		.wc-block-components-price-slider__amount,
-		.wc-block-components-price-slider__button {
+		.wc-block-components-filter-reset-button,
+		.wc-block-components-filter-submit-button {
 			@include placeholder();
 			box-shadow: none;
+		}
+
+		.wc-block-components-price-slider__amount {
+			display: none;
 		}
 	}
 
@@ -83,44 +76,63 @@
 
 .wc-block-components-price-slider__range-input-wrapper {
 	@include reset;
-	height: 9px;
+	background: $gray-300;
+	border-radius: 4px;
 	clear: both;
-	position: relative;
-	box-shadow: 0 0 0 1px inset rgba(0, 0, 0, 0.1);
-	background: #e1e1e1;
+	flex-grow: 1;
+	height: 4px;
 	margin: 15px 0;
+	position: relative;
 }
 
 .wc-block-components-price-slider__range-input-progress {
-	height: 9px;
-	width: 100%;
-	position: absolute;
+	height: 4px;
 	left: 0;
+	position: absolute;
 	top: 0;
+	width: 100%;
 	--track-background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
-	--range-color: #{$studio-woocommerce-purple-30};
+	--range-color: #{$gray-900};
 	/*rtl:ignore*/
 	background: var(--track-background);
 }
 
 .wc-block-components-price-slider__controls {
+	align-items: center;
 	display: flex;
+	gap: $gap-smaller;
+	justify-content: space-between;
+	margin: $gap-large 0;
 
 	.wc-block-components-price-slider__amount {
 		margin: 0;
 		border-radius: 4px;
+		border-width: 1px;
 		width: auto;
 		max-width: 100px;
 		min-width: 0;
-
-		&.wc-block-components-price-slider__amount--min {
-			margin-right: 10px;
-		}
-		&.wc-block-components-price-slider__amount--max {
-			margin-left: auto;
-		}
+		padding: $gap-smaller;
 	}
 }
+
+.wc-block-components-price-slider__range-text {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	margin: $gap-large 0;
+}
+
+.wc-block-components-price-slider__actions {
+	align-items: center;
+	display: flex;
+	gap: $gap;
+	justify-content: flex-end;
+
+	.wc-block-components-filter-submit-button {
+		margin-left: 0;
+	}
+}
+
 .wc-block-components-price-slider__range-input {
 	@include reset;
 	width: 100%;
@@ -138,7 +150,7 @@
 	}
 	&::-webkit-slider-thumb {
 		@include thumb;
-		margin: -6px 0 0 0;
+		margin: -5px 0 0 0;
 	}
 	&::-webkit-slider-progress {
 		@include reset;
@@ -182,7 +194,7 @@
 		}
 		&::-moz-range-thumb {
 			background-position-x: left;
-			transform: translate(-2px, 4px);
+			transform: translate(-2px, 2px);
 		}
 		&::-ms-thumb {
 			background-position-x: left;
@@ -198,7 +210,7 @@
 		}
 		&::-moz-range-thumb {
 			background-position-x: right;
-			transform: translate(2px, 4px);
+			transform: translate(2px, 2px);
 		}
 		&::-ms-thumb {
 			background-position-x: right;

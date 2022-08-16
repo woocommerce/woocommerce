@@ -2,7 +2,7 @@
 
 ## Price slider accent color
 
-The Filter Products by Price block includes a price slider which uses an accent color to show the selected range.
+The Filter by Price block includes a price slider which uses an accent color to show the selected range.
 
 ![Price filter screenshot](https://user-images.githubusercontent.com/3616980/96570001-2053f900-12ca-11eb-8a75-8a54f243bda3.png)
 

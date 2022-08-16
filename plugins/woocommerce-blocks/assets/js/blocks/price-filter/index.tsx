@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import classNames from 'classnames';
 import { Icon, currencyDollar } from '@wordpress/icons';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -16,9 +15,9 @@ import metadata from './block.json';
 import { blockAttributes } from './attributes';
 
 registerBlockType( metadata, {
-	title: __( 'Filter Products by Price', 'woo-gutenberg-products-block' ),
+	title: __( 'Filter by Price', 'woo-gutenberg-products-block' ),
 	description: __(
-		'Allow customers to filter the products by choosing a lower or upper price limit. Works in combination with the All Products block.',
+		'Allow customers to filter products by price range.',
 		'woo-gutenberg-products-block'
 	),
 	icon: {
@@ -28,16 +27,6 @@ registerBlockType( metadata, {
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
-	},
-	supports: {
-		...metadata.supports,
-		...( isFeaturePluginBuild() && {
-			__experimentalBorder: {
-				radius: true,
-				color: true,
-				width: false,
-			},
-		} ),
 	},
 	attributes: {
 		...metadata.attributes,
@@ -62,6 +51,7 @@ registerBlockType( metadata, {
 								'woo-gutenberg-products-block'
 							),
 						headingLevel: 3,
+						inlineInput: true,
 					} ),
 			},
 		],
