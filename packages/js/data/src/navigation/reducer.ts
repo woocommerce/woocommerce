@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-
 import type { Reducer } from 'redux';
 
 /**
