@@ -145,6 +145,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getMenuProps,
 		getInputProps,
 		getComboboxProps,
+		getToggleButtonProps,
 		highlightedIndex,
 		getItemProps,
 		selectItem,

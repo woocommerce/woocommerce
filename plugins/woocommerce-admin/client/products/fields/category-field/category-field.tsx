@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
+import { Popover } from '@wordpress/components';
 import {
 	selectControlStateChangeTypes,
 	Spinner,
@@ -17,6 +18,8 @@ import { debounce } from 'lodash';
 import './category-field.scss';
 import { CategoryFieldItem, CategoryTreeItem } from './category-field-item';
 import { useCategorySearch } from './use-category-search';
+import { CategoryFieldAddNewItem } from './category-field-add-new-item';
+import { CreateCategoryModal } from './create-category-modal';
 
 type CategoryFieldProps = {
 	label: string;
@@ -69,8 +72,11 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		searchCategories,
 		getFilteredItems,
 	} = useCategorySearch();
+	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
+	const [ searchValue, setSearchValue ] = useState( '' );
 
 	const onInputChange = ( searchString?: string ) => {
+		setSearchValue( searchString || '' );
 		searchCategories( searchString || '' );
 	};
 
@@ -97,7 +103,28 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	};
 
 	const selectedIds = value.map( ( item ) => item.id );
-	const selectControlItems = categoriesSelectList;
+	let selectControlItems = categoriesSelectList;
+
+	// Add the add new button if search value does not exist.
+	if (
+		searchValue.length > 0 &&
+		categoriesSelectList.length > 0 &&
+		! categoriesSelectList.find(
+			( cat ) =>
+				cat.label.toLowerCase() === searchValue.toLowerCase() &&
+				cat.value !== 'add-new'
+		)
+	) {
+		if (
+			! categoriesSelectList.find( ( cat ) => cat.value === 'add-new' )
+		) {
+			selectControlItems.push( { value: 'add-new', label: searchValue } );
+		}
+	} else {
+		selectControlItems = categoriesSelectList.filter(
+			( cat ) => cat.value !== 'add-new'
+		);
+	}
 
 	return (
 		<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
@@ -169,23 +196,59 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									</li>
 								) }
 								{ isOpen &&
-									rootItems.map( ( item ) => (
-										<CategoryFieldItem
-											key={ `${ item.id }` }
-											item={
-												categoryTreeKeyValues[ item.id ]
-											}
-											highlightedIndex={
-												highlightedIndex
-											}
-											selectedIds={ selectedIds }
-											onSelect={ selectItem }
-											items={ items }
-											getItemProps={ getItemProps }
-										/>
-									) ) }
+									rootItems.map( ( item ) => {
+										return item.id === 'add-new' ? (
+											<CategoryFieldAddNewItem
+												key={ item.id }
+												highlighted={
+													highlightedIndex ===
+													items.indexOf( item )
+												}
+												item={ item }
+												onClick={ ( e ) => {
+													// getToggleButtonProps().onClick(
+													// 	e
+													// );
+													setShowCreateNewModal(
+														true
+													);
+												} }
+											/>
+										) : (
+											<CategoryFieldItem
+												key={ `${ item.id }` }
+												item={
+													categoryTreeKeyValues[
+														item.id
+													]
+												}
+												highlightedIndex={
+													highlightedIndex
+												}
+												selectedIds={ selectedIds }
+												onSelect={ selectItem }
+												items={ items }
+												getItemProps={ getItemProps }
+											/>
+										);
+									} ) }
 							</>
 						</Menu>
+						{ showCreateNewModal && (
+							<CreateCategoryModal
+								initialCategoryName={ searchValue }
+								onCancel={ () =>
+									setShowCreateNewModal( false )
+								}
+								onCreated={ ( newCategory ) => {
+									onSelect( newCategory, true );
+									setInputValue( '' );
+									setShowCreateNewModal( false );
+									onInputChange( '' );
+								} }
+							/>
+						) }
+						<Popover.Slot />
 					</>
 				);
 			} }
