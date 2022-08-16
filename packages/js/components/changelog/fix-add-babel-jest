@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Added babel-jest to allow jest to process esm dependencies during test runs
