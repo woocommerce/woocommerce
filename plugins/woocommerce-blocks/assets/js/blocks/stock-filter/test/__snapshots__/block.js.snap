@@ -95,13 +95,13 @@ exports[`Testing stock filter renders the stock filter block with the filter but
       </li>
     </ul>
     <button
-      class="wc-block-filter-submit-button wc-block-components-filter-submit-button wc-block-stock-filter__button"
+      class="wp-block-button__link wc-block-filter-submit-button wc-block-components-filter-submit-button wc-block-stock-filter__button"
       type="submit"
     >
       <span
         aria-hidden="true"
       >
-        Go
+        Apply
       </span>
       <span
         class="screen-reader-text"

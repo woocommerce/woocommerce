@@ -24,12 +24,13 @@ import {
 import { clickLink } from '../../../utils';
 
 const block = {
-	name: 'Filter Products by Price',
+	name: 'Filter by Price',
 	slug: 'woocommerce/price-filter',
 	class: '.wc-block-price-filter',
 	selectors: {
 		editor: {
-			filterButtonToggle: "//label[text()='Filter button']",
+			filterButtonToggle:
+				'//label[text()="Show \'Apply filters\' button"]',
 		},
 		frontend: {
 			priceMaxAmount: '.wc-block-price-filter__amount--max',
