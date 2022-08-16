@@ -32,6 +32,7 @@ import {
 	BlockSettings,
 	useBlockPropsWithLocking,
 } from '../cart-checkout-shared';
+import '../cart-checkout-shared/sidebar-notices';
 import { CheckoutBlockContext, CheckoutBlockControlsContext } from './context';
 import type { Attributes } from './types';
 
