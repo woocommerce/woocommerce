@@ -3,7 +3,6 @@
  */
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, listView } from '@wordpress/icons';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -22,21 +21,6 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	supports: {
-		align: [ 'wide', 'full' ],
-		html: false,
-		...( isFeaturePluginBuild() && {
-			color: {
-				background: false,
-				link: true,
-			},
-			typography: {
-				fontSize: true,
-				lineHeight: true,
-			},
-		} ),
-	},
-
 	transforms: {
 		from: [
 			{
