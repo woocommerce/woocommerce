@@ -5,14 +5,14 @@ import { __, sprintf } from '@wordpress/i18n';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 
 const termsPageLink = TERMS_URL
-	? `<a href="${ TERMS_URL }">${ __(
+	? `<a href="${ TERMS_URL }" target="_blank">${ __(
 			'Terms and Conditions',
 			'woo-gutenberg-products-block'
 	  ) }</a>`
 	: __( 'Terms and Conditions', 'woo-gutenberg-products-block' );
 
 const privacyPageLink = PRIVACY_URL
-	? `<a href="${ PRIVACY_URL }">${ __(
+	? `<a href="${ PRIVACY_URL }" target="_blank">${ __(
 			'Privacy Policy',
 			'woo-gutenberg-products-block'
 	  ) }</a>`
