@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { waitFor, render } from '@testing-library/react';
+import { waitFor, render, fireEvent } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,6 +15,7 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 jest.mock( '@woocommerce/explat' );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const paymentsBannerShouldBe = async ( status: 'hidden' | 'visible' ) => {
 	const { container } = render( <PaymentsBannerWrapper /> );
@@ -82,5 +84,17 @@ describe( 'Payment Settings Banner', () => {
 		whenWcPay( { supported: true, activated: true, installed: true } );
 
 		await paymentsBannerShouldBe( 'hidden' );
+	} );
+
+	it( 'should record track when clicking the action button', async () => {
+		whenWcPay( { supported: true, activated: false, installed: true } );
+
+		const { getByText } = render( <PaymentsBannerWrapper /> );
+		fireEvent.click( getByText( 'Get started' ) );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_payments_banner_connect_click',
+			{}
+		);
 	} );
 } );
