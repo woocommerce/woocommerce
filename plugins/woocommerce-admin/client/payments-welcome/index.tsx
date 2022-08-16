@@ -52,7 +52,7 @@ interface activatePromoResponse {
 	success: boolean;
 }
 
-const PROMO_NAME = 'wcpay-promo-2022-us-incentive-25-off';
+const PROMO_NAME = 'wcpay-promo-2022-us-incentive-20-off';
 
 const LearnMore = () => {
 	const handleClick = () => {
