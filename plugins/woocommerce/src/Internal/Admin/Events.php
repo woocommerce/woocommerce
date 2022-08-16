@@ -131,7 +131,7 @@ class Events {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( null === static::$instance ) {
+		if ( static::$instance === null ) {
 			static::$instance = new static();
 		}
 		return static::$instance;
@@ -182,9 +182,10 @@ class Events {
 		$note_classes = array_merge( self::$note_classes_to_added_or_updated, self::$other_note_classes );
 		foreach ( $note_classes as $note_class ) {
 			if ( defined( "$note_class::NOTE_NAME" ) && $note_class::NOTE_NAME === $note_from_db->get_name() ) {
-				if ( method_exists( $note_class, 'get_note' ) ) {
-					$note_from_class = $note_class::get_note();
-					$note            = clone $note_from_db;
+				$note_from_class = method_exists( $note_class, 'get_note' ) ? $note_class::get_note() : null;
+
+				if ( $note_from_class instanceof Note ) {
+					$note = clone $note_from_db;
 					$note->set_title( $note_from_class->get_title() );
 					$note->set_content( $note_from_class->get_content() );
 					$note->set_actions( $note_from_class->get_actions() );
@@ -237,7 +238,7 @@ class Events {
 		}
 
 		// Check if the site has opted out of marketplace suggestions.
-		if ( 'yes' !== get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) !== 'yes' ) {
 			return false;
 		}
 
@@ -252,7 +253,7 @@ class Events {
 	 */
 	protected function is_merchant_email_notifications_enabled() {
 		// Check if the feature flag is disabled.
-		if ( 'yes' !== get_option( 'woocommerce_merchant_email_notifications', 'no' ) ) {
+		if ( get_option( 'woocommerce_merchant_email_notifications', 'no' ) !== 'yes' ) {
 			return false;
 		}
 
