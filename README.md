@@ -23,10 +23,10 @@ nvm use
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
 pnpm install
 # Build all of the plugins, packages, and tools in the monorepo
-pnpm -- turbo run build
+pnpm run build
 ```
 
-At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm -- turbo run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
+At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
 
 Check out [our development guide](DEVELOPMENT.md) if you would like a more comprehensive look at working in our repository.
 
@@ -44,9 +44,9 @@ To disclose a security issue to our team, [please submit a report via HackerOne 
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
 
 * If you have a problem, you may want to start with the [self help guide](https://docs.woocommerce.com/document/woocommerce-self-service-guide/).
-* The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/ ) for customers who have purchased themes or extensions.
+* The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/) for customers who have purchased themes or extensions.
 * [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
-* The WooCommerce Help and Share Facebook group.
+* [The Official WooCommerce Facebook Group](https://www.facebook.com/groups/advanced.woocommerce).
 * For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
 
 Support requests in issues on this repository will be closed on sight.

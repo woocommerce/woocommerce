@@ -150,7 +150,7 @@ describe( 'Products', () => {
 		expect( queryByText( 'Subscription product' ) ).toBeInTheDocument();
 	} );
 
-	it( 'clicking on suggested product should fire event tasklist_product_template_selection with is_suggested:true and task_completion_time', () => {
+	it( 'clicking on suggested product should fire event tasklist_add_product with method: product_template, tasklist_product_template_selection with is_suggested:true and task_completion_time', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
 			profile: {
 				product_types: [ 'downloads' ],
@@ -166,17 +166,22 @@ describe( 'Products', () => {
 
 		expect( recordEvent ).toHaveBeenNthCalledWith(
 			1,
+			'tasklist_add_product',
+			{ method: 'product_template' }
+		);
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			2,
 			'tasklist_product_template_selection',
 			{ is_suggested: true, product_type: 'digital' }
 		);
 		expect( recordEvent ).toHaveBeenNthCalledWith(
-			2,
+			3,
 			'task_completion_time',
 			{ task_name: 'products', time: '0-2s' }
 		);
 	} );
 
-	it( 'clicking on not-suggested product should fire event tasklist_product_template_selection with is_suggested:false and task_completion_time', async () => {
+	it( 'clicking on not-suggested product should fire event tasklist_add_product with method: product_template, tasklist_product_template_selection with is_suggested:false and task_completion_time', async () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
 			profile: {
 				product_types: [ 'downloads' ],
@@ -207,11 +212,16 @@ describe( 'Products', () => {
 		);
 		expect( recordEvent ).toHaveBeenNthCalledWith(
 			2,
+			'tasklist_add_product',
+			{ method: 'product_template' }
+		);
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			3,
 			'tasklist_product_template_selection',
 			{ is_suggested: false, product_type: 'grouped' }
 		);
 		expect( recordEvent ).toHaveBeenNthCalledWith(
-			3,
+			4,
 			'task_completion_time',
 			{ task_name: 'products', time: '0-2s' }
 		);

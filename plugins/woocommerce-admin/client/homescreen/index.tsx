@@ -9,7 +9,7 @@ import {
 	withOnboardingHydration,
 	WCDataSelector,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory, getNewPath, useQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
@@ -18,7 +18,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 type HomescreenProps = ReturnType< typeof withSelectHandler > & {
 	hasFinishedResolution: boolean;
-	query: Record< string, string >;
 };
 
 const Homescreen = ( {
@@ -27,12 +26,12 @@ const Homescreen = ( {
 		skipped: profilerSkipped,
 	} = {},
 	hasFinishedResolution,
-	query,
 }: HomescreenProps ) => {
 	if ( hasFinishedResolution && ! profilerCompleted && ! profilerSkipped ) {
 		getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
 	}
 
+	const query = useQuery();
 	// @ts-expect-error Layout is a pure JS component
 	return <Layout query={ query } />;
 };

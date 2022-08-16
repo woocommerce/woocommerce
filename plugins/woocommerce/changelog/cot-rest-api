@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Address compatibility between custom order tables and REST API /orders endpoints.

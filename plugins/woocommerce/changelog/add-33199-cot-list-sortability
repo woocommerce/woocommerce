@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add support for sorting columns in the COT admin list UI.

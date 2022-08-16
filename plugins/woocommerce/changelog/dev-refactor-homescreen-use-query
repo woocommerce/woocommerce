@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Refactored homescreen component to use useQuery hook

@@ -197,6 +197,54 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Test update when row in one of the associated tables is missing.
+	 */
+	public function test_cot_datastore_update_when_incomplete_record() {
+		global $wpdb;
+		static $props_to_update = array(
+			'billing_first_name' => 'John',
+			'billing_last_name'  => 'Doe',
+			'shipping_phone'     => '555-55-55',
+			'status'             => 'on-hold',
+			'cart_hash'          => 'YET-ANOTHER-CART-HASH',
+		);
+
+		// Set up order.
+		$post_order = OrderHelper::create_order();
+		$this->migrator->migrate_orders( array( $post_order->get_id() ) );
+
+		// Read order using the COT datastore.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $post_order->get_id() );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+
+		// Make some changes to the order and save.
+		$order->set_props( $props_to_update );
+
+		// Let's delete a row from one of the table.
+		$wpdb->delete( $this->sut::get_addresses_table_name(), array( 'order_id' => $order->get_id() ), array( '%d' ) );
+
+		// Try to update as if nothing happened.
+		// Make some changes to the order and save.
+		$order->set_props( $props_to_update );
+
+		$order->save();
+		// Re-read order and make sure changes were persisted.
+		wp_cache_flush();
+		$order = new WC_Order();
+		$order->set_id( $post_order->get_id() );
+		$this->switch_data_store( $order, $this->sut );
+		$this->sut->read( $order );
+
+		foreach ( $props_to_update as $prop => $value ) {
+			$this->assertEquals( $order->{"get_$prop"}( 'edit' ), $value );
+		}
+
+	}
+
+	/**
 	 * Tests create() on the COT datastore.
 	 */
 	public function test_cot_datastore_create() {
@@ -580,6 +628,214 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( 0, $query->found_orders );
 
+	}
+
+	/**
+	 * Tests queries involving 'date_query'.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_date_query() {
+		// Hardcode a day so that we don't go over to a different month or year by adding/substracting hours and days.
+		$now    = strtotime( '2022-06-04 10:00:00' );
+		$deltas = array(
+			-DAY_IN_SECONDS,
+			-HOUR_IN_SECONDS,
+			0,
+			HOUR_IN_SECONDS,
+			DAY_IN_SECONDS,
+			YEAR_IN_SECONDS,
+		);
+
+		foreach ( $deltas as $delta ) {
+			$time = $now + $delta;
+
+			$order = new \WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time + HOUR_IN_SECONDS );
+			$order->set_date_completed( $time + ( 2 * HOUR_IN_SECONDS ) );
+			$order->save();
+		}
+
+		// Orders exactly created at $now.
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => $now,
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+
+		// Orders created since $now (inclusive).
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => '>=' . $now,
+			)
+		);
+		$this->assertCount( 4, $query->orders );
+
+		// Orders created before $now (inclusive).
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => '<=' . $now,
+			)
+		);
+		$this->assertCount( 3, $query->orders );
+
+		// Orders created before $now (non-inclusive).
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => '<' . $now,
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+
+		// Orders created exactly between the day before yesterday and yesterday.
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => ( $now - ( 2 * DAY_IN_SECONDS ) ) . '...' . ( $now - DAY_IN_SECONDS ),
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+
+		// Orders created today. Tests 'day' precision strings.
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => gmdate( 'Y-m-d', $now ),
+			)
+		);
+		$this->assertCount( 3, $query->orders );
+
+		// Orders created after today. Tests 'day' precision strings.
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => '>' . gmdate( 'Y-m-d', $now ),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+
+		// Orders created next year. Tests top-level date_query args.
+		$query = new OrdersTableQuery(
+			array(
+				'year' => gmdate( 'Y', $now + YEAR_IN_SECONDS ),
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+
+		// Orders created today, paid between 11:00 and 13:00.
+		$query = new OrdersTableQuery(
+			array(
+				'date_created_gmt' => gmdate( 'Y-m-d', $now ),
+				'date_paid_gmt'    => strtotime( gmdate( 'Y-m-d 11:00:00', $now ) ) . '...' . strtotime( gmdate( 'Y-m-d 13:00:00', $now ) ),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+
+		// Orders completed after 11:00 AM on any date. Tests meta_query directly.
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'date_completed_gmt',
+						'hour'    => 11,
+						'compare' => '>',
+					),
+				),
+			)
+		);
+		$this->assertCount( 5, $query->orders );
+
+		// Orders completed last year. Should return none.
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'date_completed_gmt',
+						'year'    => gmdate( 'Y', $now - YEAR_IN_SECONDS ),
+						'compare' => '<',
+					),
+				),
+			)
+		);
+		$this->assertCount( 0, $query->orders );
+
+		// Orders created between a month ago and 2 years in the future. That is, all orders.
+		$a_month_ago     = $now - MONTH_IN_SECONDS;
+		$two_years_later = $now + ( 2 * YEAR_IN_SECONDS );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'after'  => array(
+							'year'   => gmdate( 'Y', $a_month_ago ),
+							'month'  => gmdate( 'm', $a_month_ago ),
+							'day'    => gmdate( 'd', $a_month_ago ),
+							'hour'   => gmdate( 'H', $a_month_ago ),
+							'minute' => gmdate( 'i', $a_month_ago ),
+							'second' => gmdate( 's', $a_month_ago ),
+						),
+						'before' => array(
+							'year'   => gmdate( 'Y', $two_years_later ),
+							'month'  => gmdate( 'm', $two_years_later ),
+							'day'    => gmdate( 'd', $two_years_later ),
+							'hour'   => gmdate( 'H', $two_years_later ),
+							'minute' => gmdate( 'i', $two_years_later ),
+							'second' => gmdate( 's', $two_years_later ),
+						),
+					),
+				),
+			)
+		);
+		$this->assertCount( 6, $query->orders );
+	}
+
+	/**
+	 * @testdox Test pagination works for COT queries.
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_pagination(): void {
+		$test_orders = array();
+		$this->assertEquals( 0, ( new OrdersTableQuery() )->found_orders, 'We initially have zero orders within our custom order tables.' );
+
+		for ( $i = 0; $i < 30; $i++ ) {
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+			$test_orders[] = $order->get_id();
+		}
+
+		$query = new OrdersTableQuery();
+		$this->assertCount( 30, $query->orders, 'If no limits are specified, we fetch all available orders.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => -1 ) );
+		$this->assertCount( 30, $query->orders, 'A limit of -1 is equivalent to requesting all available orders.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => -10 ) );
+		$this->assertCount( 30, $query->orders, 'An invalid limit is treated as a request for all available orders.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'  => -1,
+				'offset' => 18,
+			)
+		);
+		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
+		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+
+		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
+		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'  => 5,
+				'paged'  => 2,
+				'return' => 'ids',
+			)
+		);
+		$this->assertCount( 5, $query->orders, 'Pagination works with specified limit.' );
+		$this->assertEquals( array_slice( $test_orders, 5, 5 ), $query->orders, 'The expected dataset is supplied when paginating through orders.' );
 	}
 
 	/**

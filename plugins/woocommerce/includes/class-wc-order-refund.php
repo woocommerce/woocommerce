@@ -194,7 +194,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 			return false;
 		}
 
-		$result = get_post( $id );
+		$result = wc_get_order( $id );
 
 		if ( $result ) {
 			$this->populate( $result );

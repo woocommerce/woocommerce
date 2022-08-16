@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add util methods to check whether tables are in sync and orders are migrated.
