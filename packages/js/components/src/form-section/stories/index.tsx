@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { createElement } from '@wordpress/element';
-import { TextControl } from '@wordpress/components';
+import { Card, CardBody, TextControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -16,16 +16,30 @@ export const Basic: React.FC = () => {
 			title="My form section"
 			description="Some text to describe what this section covers"
 		>
-			<TextControl
-				label="My first field"
-				onChange={ () => {} }
-				value=""
-			/>
-			<TextControl
-				label="My second field"
-				onChange={ () => {} }
-				value=""
-			/>
+			<Card>
+				<CardBody>
+					<TextControl
+						label="My first field"
+						onChange={ () => {} }
+						value=""
+					/>
+					<TextControl
+						label="My second field"
+						onChange={ () => {} }
+						value=""
+					/>
+				</CardBody>
+			</Card>
+
+			<Card>
+				<CardBody>
+					<TextControl
+						label="My third field"
+						onChange={ () => {} }
+						value=""
+					/>
+				</CardBody>
+			</Card>
 		</FormSection>
 	);
 };

@@ -17,9 +17,9 @@ export const FormSection: React.FC< FormSectionProps > = ( {
 		<div className="woocommerce-form-section">
 			<div className="woocommerce-form-section__header">
 				<h3 className="woocommerce-form-section__title">{ title }</h3>
-				<div>
-					<p>{ description }</p>
-				</div>
+				<p className="woocommerce-form-section__description">
+					{ description }
+				</p>
 			</div>
 			<div className="woocommerce-form-section__content">
 				{ children }
