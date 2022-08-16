@@ -6,6 +6,7 @@ import { Schema } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { ProductCategory } from '../product-categories/types';
 import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
@@ -89,7 +90,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	attributes: ProductAttribute[];
 	dimensions: ProductDimensions;
 	weight: string;
-	categories: ProductCategory[];
+	categories: Pick< ProductCategory, 'id' | 'name' | 'slug' >[];
 };
 
 export const productReadOnlyProperties = [
