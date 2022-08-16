@@ -18,7 +18,7 @@ export type DateTimeProps = {
 	onChange: ( date: string ) => void;
 	dateTimeFormat?: string;
 	disabled?: boolean;
-	initialDate?: string;
+	currentDate?: string;
 	is12Hour?: boolean;
 } & React.HTMLAttributes< HTMLDivElement >;
 
@@ -27,27 +27,23 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 	is12Hour = true,
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
-	initialDate = new Date().toISOString(),
+	currentDate = new Date().toISOString(),
 }: DateTimeProps ) => {
-	const [ pickerDate, setPickerDate ] = useState( initialDate );
-	const [ inputDate, setInputDate ] = useState(
-		moment( initialDate ).format( dateTimeFormat )
+	const [ dateTime, setDateTime ] = useState( moment( currentDate ) );
+	const [ inputString, setInputString ] = useState(
+		dateTime.format( dateTimeFormat )
 	);
 	const [ inputError, setInputError ] = useState( '' );
 
 	useEffect( () => {
-		if ( ! moment( inputDate ).isValid() ) {
+		if ( ! moment( dateTime ).isValid() ) {
 			setInputError( __( 'Invalid date', 'woocommerce' ) );
 			return;
 		}
 
+		setInputString( dateTime.format( dateTimeFormat ) );
 		setInputError( '' );
-		setPickerDate( moment( inputDate ).toISOString() );
-	}, [ inputDate ] );
-
-	useEffect( () => {
-		setInputDate( moment( pickerDate ).format( dateTimeFormat ) );
-	}, [ pickerDate, dateTimeFormat ] );
+	}, [ dateTime ] );
 
 	return (
 		<Dropdown
@@ -56,14 +52,18 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<DateInput
 					disabled={ disabled }
-					value={ inputDate }
-					onChange={ ( { target } ) => {
-						setInputDate( target.value );
-					} }
+					value={ inputString }
+					onChange={ ( { target } ) =>
+						setInputString( target.value )
+					}
 					onBlur={ ( event ) => {
 						if ( ! isOpen ) {
 							return;
 						}
+
+						setDateTime(
+							moment( event.target.value, dateTimeFormat )
+						);
 
 						const relatedTargetParent =
 							event.relatedTarget?.closest(
@@ -105,9 +105,9 @@ export const DateTimePicker: React.FC< DateTimeProps > = ( {
 			) }
 			renderContent={ () => (
 				<WpDateTimePicker
-					initialDate={ pickerDate }
+					currentDate={ dateTime.toISOString() }
 					onChange={ ( newDate ) => {
-						setPickerDate( newDate );
+						setDateTime( moment( newDate ) );
 						onChange( newDate );
 					} }
 					is12Hour={ is12Hour }
