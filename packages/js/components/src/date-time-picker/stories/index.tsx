@@ -18,6 +18,20 @@ export const Basic: React.FC = () => {
 	);
 };
 
+export const Disabled: React.FC = () => {
+	return <DateTimePicker disabled onChange={ () => null } />;
+};
+
+export const DateFormat: React.FC = () => {
+	return (
+		<DateTimePicker onChange={ () => null } dateTimeFormat="DD.MM.YYYY" />
+	);
+};
+
+export const TwentyFourHour: React.FC = () => {
+	return <DateTimePicker is12Hour={ false } onChange={ () => null } />;
+};
+
 export default {
 	title: 'WooCommerce Admin/components/DateTimePicker',
 	component: DateTimePicker,
