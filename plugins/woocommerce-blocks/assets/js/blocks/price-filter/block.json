@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/price-filter",
 	"version": "1.0.0",
-	"title": "Filter Products by Price",
-	"description": "Allow customers to filter the products by choosing a lower or upper price limit. Works in combination with the All Products block.",
+	"title": "Filter by Price",
+	"description": "Allow customers to filter products by price range.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
@@ -24,6 +24,10 @@
 			"default": ""
 		},
 		"showInputFields": {
+			"type": "boolean",
+			"default": true
+		},
+		"inlineInput": {
 			"type": "boolean",
 			"default": true
 		},
