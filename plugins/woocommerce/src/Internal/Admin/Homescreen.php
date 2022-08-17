@@ -86,7 +86,14 @@ class Homescreen {
 
 		// Abort if we already created the shipping options.
 		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
-		if ( 'yes' === $already_created ) {
+		if ( $already_created === 'yes' ) {
+			return $settings;
+		}
+
+		$zone_count = count( \WC_Data_Store::load( 'shipping-zone' )->get_zones() );
+		if ( $zone_count ) {
+			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+			update_option( 'woocommerce_admin_reviewed_default_shipping_zones', 'yes' );
 			return $settings;
 		}
 
