@@ -126,22 +126,22 @@ export type RevenueTypeSlug =
 	| 'more-than-250000';
 
 export type ProfileItems = {
-	business_extensions: [] | null;
-	completed: boolean | null;
-	industry: Industry[] | null;
-	number_employees: string | null;
-	other_platform: OtherPlatformSlug | null;
-	other_platform_name: string | null;
-	product_count: ProductCount | null;
-	product_types: ProductTypeSlug[] | null;
-	revenue: RevenueTypeSlug | null;
-	selling_venues: string | null;
-	setup_client: boolean | null;
-	skipped: boolean | null;
-	theme: string | null;
-	wccom_connected: boolean | null;
-	is_agree_marketing: boolean | null;
-	store_email: string | null;
+	business_extensions?: [] | null;
+	completed?: boolean | null;
+	industry?: Industry[] | null;
+	number_employees?: string | null;
+	other_platform?: OtherPlatformSlug | null;
+	other_platform_name?: string | null;
+	product_count?: ProductCount | null;
+	product_types?: ProductTypeSlug[] | null;
+	revenue?: RevenueTypeSlug | null;
+	selling_venues?: string | null;
+	setup_client?: boolean | null;
+	skipped?: boolean | null;
+	theme?: string | null;
+	wccom_connected?: boolean | null;
+	is_agree_marketing?: boolean | null;
+	store_email?: string | null;
 };
 
 export type FieldLocale = {

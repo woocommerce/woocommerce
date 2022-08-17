@@ -1,0 +1,19 @@
+.woocommerce-split-dropdown {
+    display: inline-flex;
+
+    .woocommerce-split-dropdown__toggle {
+        padding-left: 4px;
+        padding-right: 4px;
+        margin-left: -1px;
+    }
+
+    .components-popover__content {
+        .components-button {
+            white-space: no-wrap;
+        }
+    }
+
+    .components-dropdown > .components-button {
+        border-radius: 0 2px 2px 0;
+    }
+}

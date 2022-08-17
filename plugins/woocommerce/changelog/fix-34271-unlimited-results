@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure COT order queries respect unlimited ('-1') as a pagination limit.

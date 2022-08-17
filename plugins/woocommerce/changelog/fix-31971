@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix inconsistent order total on checkout vs manual order page when the shop is configured for tax-inclusive prices and a coupon is applied
