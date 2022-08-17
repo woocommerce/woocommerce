@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { DragEvent, DragEventHandler, LegacyRef, ReactNode } from 'react';
+import { DragEvent, DragEventHandler } from 'react';
 import classnames from 'classnames';
 import { cloneElement, createElement, Fragment } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
@@ -9,7 +9,6 @@ import { Draggable } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { Handle } from './handle';
 import { SortableListChild } from './types';
 
 export type ListItemProps = {
@@ -20,7 +19,6 @@ export type ListItemProps = {
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
-	shouldRenderHandle?: boolean;
 	style?: React.CSSProperties;
 };
 
@@ -32,7 +30,6 @@ export const ListItem = ( {
 	onDragStart = () => null,
 	onDragEnd = () => null,
 	onDragOver = () => null,
-	shouldRenderHandle = true,
 	style,
 }: ListItemProps ) => {
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
@@ -62,15 +59,9 @@ export const ListItem = ( {
 				{ ( { onDraggableStart, onDraggableEnd } ) => {
 					return (
 						<>
-							{ shouldRenderHandle && (
-								<Handle
-									onDragEnd={ onDraggableEnd }
-									onDragStart={ onDraggableStart }
-								/>
-							) }
 							{ cloneElement( children, {
-								onDraggableStart,
-								onDraggableEnd,
+								onDragStart: onDraggableStart,
+								onDragEnd: onDraggableEnd,
 							} ) }
 						</>
 					);
