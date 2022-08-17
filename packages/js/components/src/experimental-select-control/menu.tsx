@@ -19,13 +19,16 @@ export const Menu = ( { children, getMenuProps, isOpen }: MenuProps ) => {
 	return (
 		<div
 			{ ...getMenuProps() }
-			className={ classnames( 'woocommerce-select-control__menu', {
-				'is-open': isOpen,
-			} ) }
+			className={ classnames(
+				'woocommerce-experimental-select-control__menu',
+				{
+					'is-open': isOpen,
+				}
+			) }
 		>
 			{ isOpen &&
 				( ! Array.isArray( children ) || !! children.length ) && (
-					<ul className="woocommerce-select-control__menu-inner">
+					<ul className="woocommerce-experimental-select-control__menu-inner">
 						{ children }
 					</ul>
 				) }

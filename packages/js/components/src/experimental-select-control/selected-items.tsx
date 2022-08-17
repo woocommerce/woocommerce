@@ -27,11 +27,11 @@ export const SelectedItems = ( {
 	onRemove,
 }: SelectedItemsProps ) => {
 	return (
-		<div className="woocommerce-select-control__selected-items">
+		<div className="woocommerce-experimental-select-control__selected-items">
 			{ items.map( ( item, index ) => (
 				<span
 					key={ `selected-item-${ index }` }
-					className="woocommerce-select-control__selected-item"
+					className="woocommerce-experimental-select-control__selected-item"
 					{ ...getSelectedItemProps( {
 						selectedItem: item,
 						index,

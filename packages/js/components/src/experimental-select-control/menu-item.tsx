@@ -27,7 +27,7 @@ export const MenuItem = ( {
 		<li
 			style={ isActive ? { backgroundColor: '#bde4ff' } : {} }
 			{ ...getItemProps( { item, index } ) }
-			className="woocommerce-select-control__menu-item"
+			className="woocommerce-experimental-select-control__menu-item"
 		>
 			{ children }
 		</li>

@@ -121,7 +121,7 @@ export const SelectControl = ( {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-select-control', {
+			className={ classnames( 'woocommerce-experimental-select-control', {
 				'is-focused': isFocused,
 			} ) }
 		>
@@ -129,7 +129,7 @@ export const SelectControl = ( {
 			{ /* eslint-disable jsx-a11y/label-has-for */ }
 			<label { ...getLabelProps() }>{ label }</label>
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
-			<div className="woocommerce-select-control__combo-box-wrapper">
+			<div className="woocommerce-experimental-select-control__combo-box-wrapper">
 				{ multiple && (
 					<SelectedItems
 						items={ selectedItems }
@@ -142,7 +142,8 @@ export const SelectControl = ( {
 					comboBoxProps={ getComboboxProps() }
 					inputProps={ getInputProps( {
 						...getDropdownProps( { preventKeyAction: isOpen } ),
-						className: 'woocommerce-select-control__input',
+						className:
+							'woocommerce-experimental-select-control__input',
 						onFocus: () => setIsFocused( true ),
 						onBlur: () => setIsFocused( false ),
 						placeholder,

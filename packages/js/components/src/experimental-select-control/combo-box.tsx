@@ -18,11 +18,11 @@ export const ComboBox = ( { comboBoxProps, inputProps }: ComboBoxProps ) => {
 	return (
 		<div
 			{ ...comboBoxProps }
-			className="woocommerce-select-control__combox-box"
+			className="woocommerce-experimental-select-control__combox-box"
 		>
 			<input { ...inputProps } />
 			<Icon
-				className="woocommerce-select-control__combox-box-icon"
+				className="woocommerce-experimental-select-control__combox-box-icon"
 				icon={ search }
 			/>
 		</div>
