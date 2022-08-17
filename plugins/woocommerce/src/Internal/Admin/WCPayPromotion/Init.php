@@ -24,8 +24,6 @@ class Init {
 	public function __construct() {
 		include_once __DIR__ . '/WCPaymentGatewayPreInstallWCPayPromotion.php';
 
-		add_action( 'change_locale', array( __CLASS__, 'delete_specs_transient' ) );
-
 		$is_payments_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! wp_is_json_request() && ! $is_payments_page ) {
 			return;
