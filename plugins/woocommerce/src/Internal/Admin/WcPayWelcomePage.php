@@ -52,9 +52,12 @@ class WcPayWelcomePage {
 			return;
 		}
 
-		// User can disabled all suggestions via filter.
 		/**
 		 * Filter allow marketplace suggestions.
+		 *
+		 * User can disabled all suggestions via filter.
+		 *
+		 * @since 3.6.0
 		 */
 		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
 			return;
