@@ -11,14 +11,18 @@ import { DragEvent } from 'react';
  * @param  arr       The array to copy.
  * @return array
  */
-export const moveIndex = <T>(fromIndex: number, toIndex: number, arr: T[]) => {
-	const newArr = [...arr];
-	const item = arr[fromIndex];
-	newArr.splice(fromIndex, 1);
+export const moveIndex = < T >(
+	fromIndex: number,
+	toIndex: number,
+	arr: T[]
+) => {
+	const newArr = [ ...arr ];
+	const item = arr[ fromIndex ];
+	newArr.splice( fromIndex, 1 );
 
 	// Splicing the array reduces the array size by 1 after removal.
 	// Lower index items affect the position of where the item should be inserted.
-	newArr.splice(fromIndex < toIndex ? toIndex - 1 : toIndex, 0, item);
+	newArr.splice( fromIndex < toIndex ? toIndex - 1 : toIndex, 0, item );
 	return newArr;
 };
 
@@ -28,7 +32,7 @@ export const moveIndex = <T>(fromIndex: number, toIndex: number, arr: T[]) => {
  * @param  event Drag event.
  * @return boolean
  */
-export const isUpperHalf = (event: DragEvent<HTMLLIElement>) => {
+export const isUpperHalf = ( event: DragEvent< HTMLLIElement > ) => {
 	const target = event.target as HTMLElement;
 	const middle = target.offsetHeight / 2;
 	const rect = target.getBoundingClientRect();

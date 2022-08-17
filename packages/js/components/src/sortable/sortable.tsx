@@ -3,23 +3,18 @@
  */
 import { DragEvent, DragEventHandler } from 'react';
 import classnames from 'classnames';
-import {
-	createElement,
-	useCallback,
-	useEffect,
-	useState,
-} from '@wordpress/element';
-import { throttle } from 'lodash';
+import { createElement, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { SortableItem } from './sortable-item';
-import { isUpperHalf, moveIndex } from './utils';
+import { moveIndex } from './utils';
 import { SortableChild } from './types';
 
 export type SortableProps = {
 	children: SortableChild | SortableChild[] | null | undefined;
+	isHorizontal?: boolean;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
@@ -28,6 +23,7 @@ export type SortableProps = {
 
 export const Sortable = ( {
 	children,
+	isHorizontal = false,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	onDragStart = () => null,
@@ -35,7 +31,6 @@ export const Sortable = ( {
 }: SortableProps ) => {
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
-	const [ dragHeight, setDragHeight ] = useState< number >( 0 );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
 	useEffect( () => {
@@ -49,12 +44,6 @@ export const Sortable = ( {
 		event: DragEvent< HTMLDivElement >,
 		index: number
 	) => {
-		const target = event.target as HTMLElement;
-		const listItem = target.closest(
-			'.woocommerce-sortable__item'
-		) as HTMLElement;
-
-		setDragHeight( listItem.offsetHeight );
 		setDropIndex( index );
 		setDragIndex( index );
 		onDragStart( event );
@@ -79,52 +68,28 @@ export const Sortable = ( {
 		onDragEnd( event );
 	};
 
-	const handleDragOver = (
-		event: DragEvent< HTMLLIElement >,
-		index: number
-	) => {
-		if ( dragIndex === null ) {
-			return;
-		}
-
-		const targetIndex = isUpperHalf( event ) ? index : index + 1;
-		setDropIndex( targetIndex );
-		onDragOver( event );
-	};
-
-	const throttledHandleDragOver = useCallback(
-		throttle( handleDragOver, 16 ),
-		[ dragIndex ]
-	);
-
 	return (
 		<ul
 			className={ classnames( 'woocommerce-sortable', {
 				'is-dragging': dragIndex !== null,
+				'is-horizontal': isHorizontal,
 			} ) }
 		>
 			{ items.map( ( child, index ) => (
 				<SortableItem
 					key={ index }
 					id={ index }
+					index={ index }
 					isDragging={ index === dragIndex }
-					isDraggingOver={ index === dropIndex }
 					onDragEnd={ ( event ) => handleDragEnd( event, index ) }
 					onDragStart={ ( event ) => handleDragStart( event, index ) }
-					onDragOver={ ( event ) =>
-						throttledHandleDragOver( event, index )
-					}
-					style={
-						dropIndex !== null && dropIndex <= index
-							? {
-									transform: `translate(0, ${ dragHeight }px)`,
-							  }
-							: {}
-					}
+					onDragOver={ onDragOver }
+					setDropIndex={ setDropIndex }
 				>
 					{ child }
 				</SortableItem>
 			) ) }
+			{  }
 		</ul>
 	);
 };
