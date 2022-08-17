@@ -19,7 +19,7 @@ import { isUpperHalf, moveIndex } from './utils';
 import { SortableListChild } from './types';
 
 export type SortableListProps = {
-	children: SortableListChild | SortableListChild[];
+	children: SortableListChild | SortableListChild[] | null | undefined;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
@@ -41,6 +41,9 @@ export const SortableList = ( {
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
 	useEffect( () => {
+		if ( ! children ) {
+			return;
+		}
 		setItems( Array.isArray( children ) ? children : [ children ] );
 	}, [ children ] );
 

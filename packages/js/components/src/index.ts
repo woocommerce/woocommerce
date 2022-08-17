@@ -16,6 +16,7 @@ export { Form, useFormContext } from './form';
 export type { FormContext, FormRef } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
+export { ImageGallery } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
 export { default as Link } from './link';
 export { default as List } from './list';
