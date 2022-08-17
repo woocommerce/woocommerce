@@ -85,14 +85,15 @@ class Homescreen {
 		}
 
 		// Abort if we already created the shipping options.
-		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
-		if ( 'yes' === $already_created ) {
+		$already_created               = get_option( 'woocommerce_admin_created_default_shipping_zones' );
+		$skipped_default_shipping_zone = get_option( 'woocommerce_admin_skipped_creating_default_shipping_zones' );
+		if ( $already_created === 'yes' || $skipped_default_shipping_zone === 'yes' ) {
 			return $settings;
 		}
 
 		$zone_count = count( \WC_Data_Store::load( 'shipping-zone' )->get_zones() );
 		if ( $zone_count ) {
-			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+			update_option( 'woocommerce_admin_skipped_creating_default_shipping_zones', 'yes' );
 			return $settings;
 		}
 
