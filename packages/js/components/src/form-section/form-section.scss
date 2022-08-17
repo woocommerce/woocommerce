@@ -5,10 +5,14 @@
 
     &__title {
         margin-bottom: $gap-small;
+        display: flex;
+        align-items: center;
     }
 
     &__description {
-        margin-top: 0;
+        &>*:first-child {
+            margin-top: 0;
+        }
     }
 
 	&__content {
