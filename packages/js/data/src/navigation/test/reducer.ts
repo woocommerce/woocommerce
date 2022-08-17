@@ -14,6 +14,7 @@ const defaultState = {
 
 describe( 'navigation reducer', () => {
 	it( 'should return a default state', () => {
+		// @ts-expect-error -- we're testing the reducer's default state.
 		const state = reducer( undefined, {} );
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );
@@ -27,16 +28,25 @@ describe( 'navigation reducer', () => {
 					id: 'menu-item-1',
 					title: 'Menu Item 1',
 					menuId: 'primary',
+					url: 'https://example.com/menu-item-1',
+					migrate: true,
+					order: 1,
 				},
 				{
 					id: 'menu-item-2',
 					title: 'Menu Item 2',
 					menuId: 'primary',
+					url: 'https://example.com/menu-item-2',
+					migrate: true,
+					order: 2,
 				},
 				{
 					id: 'menu-item-3',
 					title: 'Menu Item 3',
 					menuId: 'secondary',
+					url: 'https://example.com/menu-item-3',
+					migrate: true,
+					order: 3,
 				},
 			],
 		} );
@@ -55,8 +65,15 @@ describe( 'navigation reducer', () => {
 						id: 'menu-item-1',
 						title: 'Menu Item 1',
 						menuId: 'primary',
+						url: 'https://example.com/menu-item-1',
+						migrate: true,
+						order: 1,
 					},
 				],
+				error: null,
+				favorites: [],
+				requesting: {},
+				persistedQuery: {},
 			},
 			{
 				type: TYPES.ADD_MENU_ITEMS,
@@ -65,6 +82,9 @@ describe( 'navigation reducer', () => {
 						id: 'menu-item-2',
 						title: 'Menu Item 2',
 						menuId: 'primary',
+						url: 'https://example.com/menu-item-2',
+						migrate: true,
+						order: 2,
 					},
 				],
 			}

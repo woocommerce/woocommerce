@@ -1,9 +1,16 @@
 /**
+ * External dependencies
+ */
+import type { Reducer } from 'redux';
+
+/**
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { Action } from './actions';
+import { NavigationState } from './types';
 
-const reducer = (
+const reducer: Reducer< NavigationState, Action > = (
 	state = {
 		error: null,
 		menuItems: [],
@@ -11,25 +18,25 @@ const reducer = (
 		requesting: {},
 		persistedQuery: {},
 	},
-	{ type, error, favorite, favorites, menuItems, persistedQuery }
+	action
 ) => {
-	switch ( type ) {
+	switch ( action.type ) {
 		case TYPES.SET_MENU_ITEMS:
 			state = {
 				...state,
-				menuItems,
+				menuItems: action.menuItems,
 			};
 			break;
 		case TYPES.ADD_MENU_ITEMS:
 			state = {
 				...state,
-				menuItems: [ ...state.menuItems, ...menuItems ],
+				menuItems: [ ...state.menuItems, ...action.menuItems ],
 			};
 			break;
 		case TYPES.ON_HISTORY_CHANGE:
 			state = {
 				...state,
-				persistedQuery,
+				persistedQuery: action.persistedQuery,
 			};
 			break;
 		case TYPES.GET_FAVORITES_FAILURE:
@@ -53,7 +60,7 @@ const reducer = (
 		case TYPES.GET_FAVORITES_SUCCESS:
 			state = {
 				...state,
-				favorites,
+				favorites: action.favorites,
 				requesting: {
 					...state.requesting,
 					getFavorites: false,
@@ -63,7 +70,7 @@ const reducer = (
 		case TYPES.ADD_FAVORITE_FAILURE:
 			state = {
 				...state,
-				error,
+				error: action.error,
 				requesting: {
 					...state.requesting,
 					addFavorite: false,
@@ -80,15 +87,15 @@ const reducer = (
 			};
 			break;
 		case TYPES.ADD_FAVORITE_SUCCESS:
-			const newFavorites = ! state.favorites.includes( favorite )
-				? [ ...state.favorites, favorite ]
+			const newFavorites = ! state.favorites.includes( action.favorite )
+				? [ ...state.favorites, action.favorite ]
 				: state.favorites;
 
 			state = {
 				...state,
 				favorites: newFavorites,
 				menuItems: state.menuItems.map( ( item ) => {
-					if ( item.id === favorite ) {
+					if ( item.id === action.favorite ) {
 						return {
 							...item,
 							menuId: 'favorites',
@@ -107,7 +114,7 @@ const reducer = (
 				...state,
 				requesting: {
 					...state.requesting,
-					error,
+					error: action.error,
 					removeFavorite: false,
 				},
 			};
@@ -123,14 +130,14 @@ const reducer = (
 			break;
 		case TYPES.REMOVE_FAVORITE_SUCCESS:
 			const filteredFavorites = state.favorites.filter(
-				( f ) => f !== favorite
+				( f ) => f !== action.favorite
 			);
 
 			state = {
 				...state,
 				favorites: filteredFavorites,
 				menuItems: state.menuItems.map( ( item ) => {
-					if ( item.id === favorite ) {
+					if ( item.id === action.favorite ) {
 						return {
 							...item,
 							menuId: 'plugins',
@@ -148,4 +155,5 @@ const reducer = (
 	return state;
 };
 
+export type State = ReturnType< typeof reducer >;
 export default reducer;
