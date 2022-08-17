@@ -8,6 +8,10 @@ const shippingZone = getShippingZoneExample();
 
 /**
  * Tests for the WooCommerce Shipping zones API.
+ *
+ * @group api
+ * @group shipping-zones
+ *
  */
 describe( 'Shipping zones API tests', () => {
 	it( 'cannot delete the default shipping zone "Locations not covered by your other zones"', async () => {
