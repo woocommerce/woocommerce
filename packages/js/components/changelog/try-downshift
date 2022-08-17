@@ -1,4 +1,4 @@
 Significance: major
 Type: add
 
-Create new SelectControl component and deprecate the previous SelectControl
+Create new experimental SelectControl component
