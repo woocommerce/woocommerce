@@ -9,17 +9,20 @@ import { createElement, useRef } from '@wordpress/element';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
+import { MenuItem } from './types';
 
 /**
  * Higher-order component used to hydrate navigation data.
  *
- * @param {Object} data Data object with menu items and site information.
+ * @param {Object}     data           Data object with menu items and site information.
+ * @param {MenuItem[]} data.menuItems Menu items to hydrate.
  */
-export const withNavigationHydration = ( data ) =>
-	createHigherOrderComponent(
+export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
+	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const dataRef = useRef( data );
 
+			// @ts-expect-error // @ts-expect-error registry is not defined in the wp.data typings
 			useSelect( ( select, registry ) => {
 				if ( ! dataRef.current ) {
 					return;

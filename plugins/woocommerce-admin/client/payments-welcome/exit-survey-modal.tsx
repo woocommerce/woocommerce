@@ -41,6 +41,9 @@ function ExitSurveyModal( {
 	};
 
 	const removeWCPayMenu = () => {
+		recordEvent( 'wcpay_exit_survey', {
+			just_remove: true /* eslint-disable-line camelcase */,
+		} );
 		apiFetch( {
 			path: 'wc-admin/options',
 			method: 'POST',
@@ -56,12 +59,14 @@ function ExitSurveyModal( {
 
 	const sendFeedback = () => {
 		recordEvent( 'wcpay_exit_survey', {
+			/* eslint-disable camelcase */
 			happy: isHappyChecked ? 'Yes' : 'No',
 			install: isInstallChecked ? 'Yes' : 'No',
-			moreInfo: isMoreInfoChecked ? 'Yes' : 'No',
-			anotherTime: isAnotherTimeChecked ? 'Yes' : 'No',
-			somethingElse: isSomethingElseChecked ? 'Yes' : 'No',
+			more_info: isMoreInfoChecked ? 'Yes' : 'No',
+			another_time: isAnotherTimeChecked ? 'Yes' : 'No',
+			something_else: isSomethingElseChecked ? 'Yes' : 'No',
 			comments,
+			/* eslint-enable camelcase */
 		} );
 
 		removeWCPayMenu();

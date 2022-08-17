@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add `wc com connect` command to allow stores to connect to WCCOM via CLI

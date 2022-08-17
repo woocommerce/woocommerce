@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add i18n support for data source poller

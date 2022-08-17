@@ -3,9 +3,14 @@
  */
 import { applyFilters } from '@wordpress/hooks';
 
-const MENU_ITEMS_HOOK = 'woocommerce_navigation_menu_items';
+/**
+ * Internal dependencies
+ */
+import { NavigationState } from './types';
 
-export const getMenuItems = ( state ) => {
+const MENU_ITEMS_HOOK = 'woocommerce_navigation_menu_items' as const;
+
+export const getMenuItems = ( state: NavigationState ) => {
 	/**
 	 * Navigation Menu Items.
 	 *
@@ -15,14 +20,17 @@ export const getMenuItems = ( state ) => {
 	return applyFilters( MENU_ITEMS_HOOK, state.menuItems );
 };
 
-export const getFavorites = ( state ) => {
+export const getFavorites = ( state: NavigationState ) => {
 	return state.favorites || [];
 };
 
-export const isNavigationRequesting = ( state, selector ) => {
+export const isNavigationRequesting = (
+	state: NavigationState,
+	selector: string
+) => {
 	return state.requesting[ selector ] || false;
 };
 
-export const getPersistedQuery = ( state ) => {
+export const getPersistedQuery = ( state: NavigationState ) => {
 	return state.persistedQuery || {};
 };

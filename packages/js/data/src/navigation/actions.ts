@@ -9,50 +9,51 @@ import { getPersistedQuery } from '@woocommerce/navigation';
  */
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
+import { MenuItem } from './types';
 
-export function setMenuItems( menuItems ) {
+export function setMenuItems( menuItems: MenuItem[] ) {
 	return {
 		type: TYPES.SET_MENU_ITEMS,
 		menuItems,
 	};
 }
 
-export function addMenuItems( menuItems ) {
+export function addMenuItems( menuItems: MenuItem[] ) {
 	return {
 		type: TYPES.ADD_MENU_ITEMS,
 		menuItems,
 	};
 }
 
-export function getFavoritesFailure( error ) {
+export function getFavoritesFailure( error: unknown ) {
 	return {
 		type: TYPES.GET_FAVORITES_FAILURE,
 		error,
 	};
 }
 
-export function getFavoritesRequest( favorites ) {
+export function getFavoritesRequest( favorites?: string[] ) {
 	return {
 		type: TYPES.GET_FAVORITES_REQUEST,
 		favorites,
 	};
 }
 
-export function getFavoritesSuccess( favorites ) {
+export function getFavoritesSuccess( favorites: string[] ) {
 	return {
 		type: TYPES.GET_FAVORITES_SUCCESS,
 		favorites,
 	};
 }
 
-export function addFavoriteRequest( favorite ) {
+export function addFavoriteRequest( favorite: string ) {
 	return {
 		type: TYPES.ADD_FAVORITE_REQUEST,
 		favorite,
 	};
 }
 
-export function addFavoriteFailure( favorite, error ) {
+export function addFavoriteFailure( favorite: string, error: unknown ) {
 	return {
 		type: TYPES.ADD_FAVORITE_FAILURE,
 		favorite,
@@ -60,21 +61,21 @@ export function addFavoriteFailure( favorite, error ) {
 	};
 }
 
-export function addFavoriteSuccess( favorite ) {
+export function addFavoriteSuccess( favorite: string ) {
 	return {
 		type: TYPES.ADD_FAVORITE_SUCCESS,
 		favorite,
 	};
 }
 
-export function removeFavoriteRequest( favorite ) {
+export function removeFavoriteRequest( favorite: string ) {
 	return {
 		type: TYPES.REMOVE_FAVORITE_REQUEST,
 		favorite,
 	};
 }
 
-export function removeFavoriteFailure( favorite, error ) {
+export function removeFavoriteFailure( favorite: string, error: unknown ) {
 	return {
 		type: TYPES.REMOVE_FAVORITE_FAILURE,
 		favorite,
@@ -82,16 +83,11 @@ export function removeFavoriteFailure( favorite, error ) {
 	};
 }
 
-export function removeFavoriteSuccess( favorite, error ) {
+export function removeFavoriteSuccess( favorite: string ) {
 	return {
 		type: TYPES.REMOVE_FAVORITE_SUCCESS,
 		favorite,
-		error,
 	};
-}
-
-export function* onLoad() {
-	yield onHistoryChange();
 }
 
 export function* onHistoryChange() {
@@ -107,11 +103,15 @@ export function* onHistoryChange() {
 	};
 }
 
-export function* addFavorite( favorite ) {
+export function* onLoad() {
+	yield onHistoryChange();
+}
+
+export function* addFavorite( favorite: string ) {
 	yield addFavoriteRequest( favorite );
 
 	try {
-		const results = yield apiFetch( {
+		const results: string[] = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/navigation/favorites/me`,
 			method: 'POST',
 			data: {
@@ -131,11 +131,11 @@ export function* addFavorite( favorite ) {
 	}
 }
 
-export function* removeFavorite( favorite ) {
+export function* removeFavorite( favorite: string ) {
 	yield removeFavoriteRequest( favorite );
 
 	try {
-		const results = yield apiFetch( {
+		const results: string[] = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/navigation/favorites/me`,
 			method: 'DELETE',
 			data: {
@@ -154,3 +154,21 @@ export function* removeFavorite( favorite ) {
 		throw new Error();
 	}
 }
+
+export type Action = ReturnType<
+	| typeof setMenuItems
+	| typeof addMenuItems
+	| typeof getFavoritesFailure
+	| typeof getFavoritesRequest
+	| typeof getFavoritesSuccess
+	| typeof addFavoriteRequest
+	| typeof addFavoriteFailure
+	| typeof addFavoriteSuccess
+	| typeof removeFavoriteRequest
+	| typeof removeFavoriteFailure
+	| typeof removeFavoriteSuccess
+	| ( () => {
+			type: typeof TYPES.ON_HISTORY_CHANGE;
+			persistedQuery: ReturnType< typeof getPersistedQuery >;
+	  } )
+>;
