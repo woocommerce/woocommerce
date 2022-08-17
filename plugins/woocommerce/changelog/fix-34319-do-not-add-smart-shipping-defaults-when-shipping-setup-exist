@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Do not create default shipping zones when a shipping zone already exists
