@@ -160,11 +160,16 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 6.8.0 2022-08-09 =
+= 6.8.1 2022-xx-xx =
 
 **WooCommerce**
 
 * Fix - Do not create default shipping zones when a shipping zone already exists [#34351](https://github.com/woocommerce/woocommerce/pull/34351)
+
+= 6.8.0 2022-08-09 =
+
+**WooCommerce**
+
 * Fix - Fix shipping zone transient not cleared when adding via smart defaults [#34099](https://github.com/woocommerce/woocommerce/pull/34099)
 * Fix - Fix incorrect name in Review Shipping Task tracks event [#34045](https://github.com/woocommerce/woocommerce/pull/34045)
 * Fix - Fix shipping zone fails to create after installing jetpack and wcs [#34074](https://github.com/woocommerce/woocommerce/pull/34074)
