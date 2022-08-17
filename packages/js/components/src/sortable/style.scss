@@ -1,0 +1,12 @@
+.woocommerce-sortable {
+    &.is-dragging .woocommerce-sortable__item {
+        transition: transform 0.1s ease-in;
+    }
+}
+
+.woocommerce-sortable__item {
+    margin: 0;
+    &.is-dragging {
+        display: none;
+    }
+}

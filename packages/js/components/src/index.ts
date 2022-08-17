@@ -39,7 +39,7 @@ export { default as SectionHeader } from './section-header';
 export { default as SegmentedSelection } from './segmented-selection';
 export { default as SelectControl } from './select-control';
 export { default as ScrollTo } from './scroll-to';
-export { SortableList } from './sortable-list';
+export { Sortable } from './sortable';
 export { default as Spinner } from './spinner';
 export { default as Stepper } from './stepper';
 export { default as SummaryList } from './summary';

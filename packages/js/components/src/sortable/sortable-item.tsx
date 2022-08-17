@@ -9,11 +9,11 @@ import { Draggable } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { SortableListChild } from './types';
+import { SortableChild } from './types';
 
-export type ListItemProps = {
+export type SortableItemProps = {
 	id: string | number;
-	children: SortableListChild;
+	children: SortableChild;
 	isDragging?: boolean;
 	isDraggingOver?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
@@ -22,7 +22,7 @@ export type ListItemProps = {
 	style?: React.CSSProperties;
 };
 
-export const ListItem = ( {
+export const SortableItem = ( {
 	id,
 	children,
 	isDragging = false,
@@ -31,7 +31,7 @@ export const ListItem = ( {
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	style,
-}: ListItemProps ) => {
+}: SortableItemProps ) => {
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
 		onDragStart( event );
 	};
@@ -42,16 +42,16 @@ export const ListItem = ( {
 
 	return (
 		<li
-			className={ classnames( 'woocommerce-sortable-list__item', {
+			className={ classnames( 'woocommerce-sortable__item', {
 				'is-dragging': isDragging,
 				'is-dragging-over': isDraggingOver,
 			} ) }
-			id={ `woocommerce-sortable-list__item-${ id }` }
+			id={ `woocommerce-sortable__item-${ id }` }
 			onDragOver={ onDragOver }
 			style={ style }
 		>
 			<Draggable
-				elementId={ `woocommerce-sortable-list__item-${ id }` }
+				elementId={ `woocommerce-sortable__item-${ id }` }
 				transferData={ {} }
 				onDragStart={ handleDragStart as () => void }
 				onDragEnd={ handleDragEnd as () => void }

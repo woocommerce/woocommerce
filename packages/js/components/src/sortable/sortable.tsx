@@ -14,26 +14,26 @@ import { throttle } from 'lodash';
 /**
  * Internal dependencies
  */
-import { ListItem } from './list-item';
+import { SortableItem } from './sortable-item';
 import { isUpperHalf, moveIndex } from './utils';
-import { SortableListChild } from './types';
+import { SortableChild } from './types';
 
-export type SortableListProps = {
-	children: SortableListChild | SortableListChild[] | null | undefined;
+export type SortableProps = {
+	children: SortableChild | SortableChild[] | null | undefined;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
-	onOrderChange?: ( items: SortableListChild[] ) => void;
+	onOrderChange?: ( items: SortableChild[] ) => void;
 };
 
-export const SortableList = ( {
+export const Sortable = ( {
 	children,
 	onDragEnd = () => null,
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
-}: SortableListProps ) => {
-	const [ items, setItems ] = useState< SortableListChild[] >( [] );
+}: SortableProps ) => {
+	const [ items, setItems ] = useState< SortableChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
 	const [ dragHeight, setDragHeight ] = useState< number >( 0 );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
@@ -51,7 +51,7 @@ export const SortableList = ( {
 	) => {
 		const target = event.target as HTMLElement;
 		const listItem = target.closest(
-			'.woocommerce-sortable-list__item'
+			'.woocommerce-sortable__item'
 		) as HTMLElement;
 
 		setDragHeight( listItem.offsetHeight );
@@ -99,12 +99,12 @@ export const SortableList = ( {
 
 	return (
 		<ul
-			className={ classnames( 'woocommerce-sortable-list', {
+			className={ classnames( 'woocommerce-sortable', {
 				'is-dragging': dragIndex !== null,
 			} ) }
 		>
 			{ items.map( ( child, index ) => (
-				<ListItem
+				<SortableItem
 					key={ index }
 					id={ index }
 					isDragging={ index === dragIndex }
@@ -123,7 +123,7 @@ export const SortableList = ( {
 					}
 				>
 					{ child }
-				</ListItem>
+				</SortableItem>
 			) ) }
 		</ul>
 	);

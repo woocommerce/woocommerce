@@ -7,7 +7,7 @@ import { DragEventHandler } from 'react';
 /**
  * Internal dependencies
  */
-import { SortableList } from '../sortable-list';
+import { Sortable } from '../sortable';
 
 export type ImageGalleryProps = {
 	children: JSX.Element | JSX.Element[];
@@ -32,11 +32,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 }: ImageGalleryProps ) => {
 	return (
 		<div className="woocommerce-image-gallery">
-			<SortableList>
+			<Sortable>
 				{ Children.map( children, ( child ) => (
 					<CustomListItem>{ child }</CustomListItem>
 				) ) }
-			</SortableList>
+			</Sortable>
 		</div>
 	);
 };
