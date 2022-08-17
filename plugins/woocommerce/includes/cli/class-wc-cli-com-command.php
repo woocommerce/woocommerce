@@ -158,6 +158,7 @@ class WC_CLI_COM_Command {
 			}
 		}
 
+		// phpcs:ignore
 		// @todo add URL to application password section
 		if ( empty( $password ) ) {
 			$password = self::ask( 'Connection password:' );

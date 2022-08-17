@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added phpcs:ignore to silence phpstan
