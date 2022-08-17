@@ -90,6 +90,12 @@ class Homescreen {
 			return $settings;
 		}
 
+		$zone_count = count( \WC_Data_Store::load( 'shipping-zone' )->get_zones() );
+		if ( $zone_count ) {
+			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
+			return $settings;
+		}
+
 		$user_skipped_obw = $settings['onboarding']['profile']['skipped'] ?? false;
 		$store_address    = $settings['preloadSettings']['general']['woocommerce_store_address'] ?? '';
 		$product_types    = $settings['onboarding']['profile']['product_types'] ?? array();
