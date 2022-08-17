@@ -127,12 +127,12 @@ export default {
 		question1: __( 'What is WooCommerce Payments?', 'woocommerce' ),
 
 		question1Answer1: __(
-			'Run your business and manage your payments all in one place with the only solution built and supported by WooCommerce. Collect payments, handle disputes, and track revenue from inside your store’s dashboard with WooCommerce Payments. WooCommerce Payments is an integrated payment solution, built by WooCommerce, for WooCommerce.',
+			'Run your business and manage your payments all in one place with the only solution built and supported by WooCommerce.',
 			'woocommerce'
 		),
 
 		question1Answer2: __(
-			'You can securely accept credit and debit card payments, Apple Pay, local payment methods, recurring revenue, accelerated checkout, and more - in over 100+ currencies with WooCommerce Payments.',
+			'Collect payments, handle disputes, and track revenue from inside your store’s dashboard. You can also securely accept credit and debit card payments, Apple Pay, local payment methods, recurring revenue, accelerated checkout, and more – in over 100+ currencies with WooCommerce Payments.',
 			'woocommerce'
 		),
 
@@ -152,27 +152,27 @@ export default {
 		),
 
 		question3Answer1: __(
-			"Native dashboard: track cash flow from the same WordPress dashboard you're already using to manage product catalogue, inventory, orders, fulfilment, and otherwise run your online storefront.",
+			"Native dashboard: track cash flow from the same WordPress dashboard you're already using to manage product catalog, inventory, orders, fulfillment, and otherwise run your online storefront.",
 			'woocommerce'
 		),
 
 		question3Answer2: __(
-			'In-person payments: the only payment method that helps you sell online and offline with the official WooCommerce mobile app instead of a paid POS solution (US and Canada only).',
+			'In-person payments: WooCommerce Payments enables you to sell online and offline with the official WooCommerce mobile app instead of a paid POS solution (US and Canada only).',
 			'woocommerce'
 		),
 
 		question3Answer3: __(
-			'Subscription functionality: offer customers a recurring option for your inventory without purchasing an additional extension. (US only).',
+			'Subscription functionality: offer customers a recurring option for your inventory without purchasing an additional extension (US only).',
 			'woocommerce'
 		),
 
 		question3Answer4: __(
-			'Native multi-currency: multi-currency support built right in. Increase sales by making it easier for customers outside your country to purchase from your store, without another extension.',
+			'Native multi-currency: multi-currency support built right in. Increase sales by making it easier for customers outside your country to purchase from your store, in local currencies, without another extension.',
 			'woocommerce'
 		),
 
 		question3Answer5: __(
-			'Give your buyers more ways to pay: Maximize checkout conversion by providing buyers the payment methods that are most popular and relevant to them. WooCommerce Payments gives your store more flexibility and your customers more purchasing power – including access to installment and buy now, pay later options.',
+			'Maximize checkout conversion by providing buyers the payment methods that are most popular and relevant to them including credit & debit cards, Apple Pay, Google Pay, and local options based on their country. WooCommerce Payments gives your store more flexibility and your customers more purchasing power – including compatibility with extensions to add options like PayPal, Amazon Pay, as well as installment and buy now, pay later options like Affirm, Klarna, and Afterpay.',
 			'woocommerce'
 		),
 
@@ -205,7 +205,7 @@ export default {
 		),
 
 		question5Answer1: __(
-			'WooCommerce Payments uses a pay-as-you-go pricing model. You pay only for activity on the account. No setup fee or monthly fee. Fees differ based on the country of your account and country of your customer’s card.',
+			'WooCommerce Payments uses a pay-as-you-go pricing model. You pay only for activity on the account. No setup fee or monthly fee. Fees differ based on the country of your account, the form of payment the buyer chooses, and the country of your customers card.',
 			'woocommerce'
 		),
 
