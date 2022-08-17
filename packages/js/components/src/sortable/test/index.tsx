@@ -7,15 +7,15 @@ import React, { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { SortableList } from '../sortable-list';
+import { Sortable } from '../sortable';
 
-describe( 'SortableList', () => {
+describe( 'Sortable', () => {
 	it( 'should render the list items', () => {
 		const { queryByText } = render(
-			<SortableList>
+			<Sortable>
 				<div>Item 1</div>
 				<div>Item 2</div>
-			</SortableList>
+			</Sortable>
 		);
 		expect( queryByText( 'Item 1' ) ).toBeInTheDocument();
 		expect( queryByText( 'Item 2' ) ).toBeInTheDocument();

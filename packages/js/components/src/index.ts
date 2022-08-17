@@ -43,7 +43,7 @@ export { default as SelectControl } from './select-control';
 export { SelectControl as __experimentalSelectControl } from './experimental-select-control';
 export { MenuItem as __experimentalSelectControlMenuItem } from './experimental-select-control/menu-item';
 export { default as ScrollTo } from './scroll-to';
-export { SortableList } from './sortable-list';
+export { Sortable } from './sortable';
 export { default as Spinner } from './spinner';
 export { default as Stepper } from './stepper';
 export { default as SummaryList } from './summary';

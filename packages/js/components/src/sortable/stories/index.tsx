@@ -8,12 +8,12 @@ import { Icon, wordpress } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { SortableList } from '..';
+import { Sortable } from '..';
 import { Handle, ListItem } from '../../list-item';
 
 export const Basic = () => {
 	return (
-		<SortableList
+		<Sortable
 			onOrderChange={ ( items ) =>
 				// eslint-disable-next-line no-alert
 				alert( 'Order changed: ' + items.map( ( item ) => item.key ) )
@@ -24,7 +24,7 @@ export const Basic = () => {
 			<ListItem key={ 'item-3' }>Item 3</ListItem>
 			<ListItem key={ 'item-4' }>Item 4</ListItem>
 			<ListItem key={ 'item-5' }>Item 5</ListItem>
-		</SortableList>
+		</Sortable>
 	);
 };
 
@@ -49,17 +49,17 @@ export const CustomHandle = () => {
 		);
 	};
 	return (
-		<SortableList>
+		<Sortable>
 			<CustomListItem key="item-1">Item 1</CustomListItem>
 			<CustomListItem key="item-2">Item 2</CustomListItem>
 			<CustomListItem key="item-3">Item 3</CustomListItem>
 			<CustomListItem key="item-4">Item 4</CustomListItem>
 			<CustomListItem key="item-5">Item 5</CustomListItem>
-		</SortableList>
+		</Sortable>
 	);
 };
 
 export default {
-	title: 'WooCommerce Admin/components/SortableList',
-	component: SortableList,
+	title: 'WooCommerce Admin/components/Sortable',
+	component: Sortable,
 };
