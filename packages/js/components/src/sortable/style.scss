@@ -1,3 +1,5 @@
+$place-holder-size: 5px;
+
 .woocommerce-sortable {
     &.is-dragging .woocommerce-sortable__item {
         transition: transform 0.1s ease-in;
@@ -6,7 +8,28 @@
 
 .woocommerce-sortable__item {
     margin: 0;
+    position: relative;
+
     &.is-dragging {
         display: none;
+    }
+
+    &:before {
+        content: '';
+        display: none;
+        width: 100%;
+        height: $place-holder-size;
+        background: $studio-wordpress-blue;
+        position: absolute;
+        top: calc($place-holder-size / -2);
+    }
+
+    &.is-dragging-over:before {
+        display: block;
+    }
+
+    &.is-dragging-over-after:before {
+        top: auto;
+        bottom: calc($place-holder-size / -2);
     }
 }
