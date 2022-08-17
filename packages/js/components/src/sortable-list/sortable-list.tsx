@@ -24,7 +24,6 @@ export type SortableListProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableListChild[] ) => void;
-	shouldRenderHandles?: boolean;
 };
 
 export const SortableList = ( {
@@ -33,7 +32,6 @@ export const SortableList = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
-	shouldRenderHandles = true,
 }: SortableListProps ) => {
 	const [ items, setItems ] = useState< SortableListChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
@@ -108,7 +106,6 @@ export const SortableList = ( {
 			{ items.map( ( child, index ) => (
 				<ListItem
 					key={ index }
-					shouldRenderHandle={ shouldRenderHandles }
 					id={ index }
 					isDragging={ index === dragIndex }
 					isDraggingOver={ index === dropIndex }

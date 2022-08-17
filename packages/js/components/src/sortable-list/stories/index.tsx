@@ -9,7 +9,7 @@ import { Icon, wordpress } from '@wordpress/icons';
  * Internal dependencies
  */
 import { SortableList } from '..';
-import { Handle } from '../handle';
+import { Handle, ListItem } from '../../list-item';
 
 export const Basic = () => {
 	return (
@@ -19,11 +19,11 @@ export const Basic = () => {
 				alert( 'Order changed: ' + items.map( ( item ) => item.key ) )
 			}
 		>
-			<Fragment key={ 'item-1' }>Item 1</Fragment>
-			<Fragment key={ 'item-2' }>Item 2</Fragment>
-			<Fragment key={ 'item-3' }>Item 3</Fragment>
-			<Fragment key={ 'item-4' }>Item 4</Fragment>
-			<Fragment key={ 'item-5' }>Item 5</Fragment>
+			<ListItem key={ 'item-1' }>Item 1</ListItem>
+			<ListItem key={ 'item-2' }>Item 2</ListItem>
+			<ListItem key={ 'item-3' }>Item 3</ListItem>
+			<ListItem key={ 'item-4' }>Item 4</ListItem>
+			<ListItem key={ 'item-5' }>Item 5</ListItem>
 		</SortableList>
 	);
 };
@@ -31,20 +31,17 @@ export const Basic = () => {
 export const CustomHandle = () => {
 	type CustomListItemProps = {
 		children: React.ReactNode;
-		onDraggableEnd?: DragEventHandler< Element >;
-		onDraggableStart?: DragEventHandler< Element >;
+		onDragEnd?: DragEventHandler< Element >;
+		onDragStart?: DragEventHandler< Element >;
 	};
 	const CustomListItem = ( {
 		children,
-		onDraggableStart,
-		onDraggableEnd,
+		onDragStart,
+		onDragEnd,
 	}: CustomListItemProps ) => {
 		return (
 			<>
-				<Handle
-					onDragEnd={ onDraggableEnd }
-					onDragStart={ onDraggableStart }
-				>
+				<Handle onDragEnd={ onDragEnd } onDragStart={ onDragStart }>
 					<Icon icon={ wordpress } size={ 16 } />
 				</Handle>
 				{ children }
@@ -52,7 +49,7 @@ export const CustomHandle = () => {
 		);
 	};
 	return (
-		<SortableList shouldRenderHandles={ false }>
+		<SortableList>
 			<CustomListItem key="item-1">Item 1</CustomListItem>
 			<CustomListItem key="item-2">Item 2</CustomListItem>
 			<CustomListItem key="item-3">Item 3</CustomListItem>
