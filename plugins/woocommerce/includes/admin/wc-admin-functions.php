@@ -100,7 +100,7 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page with the specified page content (typically a shortcode).
-		$shortcode = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
+		$shortcode        = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", "%{$shortcode}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug.
@@ -365,7 +365,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			$item->save();
 
-			if ( in_array( $order->get_status(), array( 'processing', 'completed', 'on-hold' ) ) ) {
+			if ( in_array( $order->get_status(), array( 'processing', 'completed', 'on-hold' ), true ) ) {
 				$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 				if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 					$qty_change_order_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';
