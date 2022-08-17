@@ -228,6 +228,6 @@ export const CustomRender: React.FC = () => {
 };
 
 export default {
-	title: 'WooCommerce Admin/components/SelectControl',
+	title: 'WooCommerce Admin/experimental/SelectControl',
 	component: SelectControl,
 };

@@ -68,11 +68,11 @@ Object {
               >
                 <div>
                   <div
-                    class="woocommerce-deprecated-select-control is-searchable"
+                    class="woocommerce-select-control is-searchable"
                   >
                     <input
                       autocomplete="country"
-                      class="woocommerce-deprecated-select-control__autofill-input"
+                      class="woocommerce-select-control__autofill-input"
                       name="country"
                       tabindex="-1"
                       type="text"
@@ -80,18 +80,18 @@ Object {
                     />
                     <input
                       autocomplete="address-level1"
-                      class="woocommerce-deprecated-select-control__autofill-input"
+                      class="woocommerce-select-control__autofill-input"
                       name="state"
                       tabindex="-1"
                       type="text"
                       value=""
                     />
                     <div
-                      class="components-base-control woocommerce-deprecated-select-control__control empty"
+                      class="components-base-control woocommerce-select-control__control empty"
                     >
                       <svg
                         aria-hidden="true"
-                        class="woocommerce-deprecated-select-control__control-icon"
+                        class="woocommerce-select-control__control-icon"
                         focusable="false"
                         height="24"
                         viewBox="0 0 24 24"
@@ -107,7 +107,7 @@ Object {
                       >
                         <label
                           class="components-base-control__label"
-                          for="woocommerce-deprecated-select-control-0__control-input"
+                          for="woocommerce-select-control-0__control-input"
                         >
                           Country / Region *
                         </label>
@@ -116,8 +116,8 @@ Object {
                           aria-expanded="false"
                           aria-haspopup="true"
                           autocomplete="new-password"
-                          class="woocommerce-deprecated-select-control__control-input"
-                          id="woocommerce-deprecated-select-control-0__control-input"
+                          class="woocommerce-select-control__control-input"
+                          id="woocommerce-select-control-0__control-input"
                           placeholder=""
                           role="combobox"
                           type="search"
@@ -381,11 +381,11 @@ Object {
             >
               <div>
                 <div
-                  class="woocommerce-deprecated-select-control is-searchable"
+                  class="woocommerce-select-control is-searchable"
                 >
                   <input
                     autocomplete="country"
-                    class="woocommerce-deprecated-select-control__autofill-input"
+                    class="woocommerce-select-control__autofill-input"
                     name="country"
                     tabindex="-1"
                     type="text"
@@ -393,18 +393,18 @@ Object {
                   />
                   <input
                     autocomplete="address-level1"
-                    class="woocommerce-deprecated-select-control__autofill-input"
+                    class="woocommerce-select-control__autofill-input"
                     name="state"
                     tabindex="-1"
                     type="text"
                     value=""
                   />
                   <div
-                    class="components-base-control woocommerce-deprecated-select-control__control empty"
+                    class="components-base-control woocommerce-select-control__control empty"
                   >
                     <svg
                       aria-hidden="true"
-                      class="woocommerce-deprecated-select-control__control-icon"
+                      class="woocommerce-select-control__control-icon"
                       focusable="false"
                       height="24"
                       viewBox="0 0 24 24"
@@ -420,7 +420,7 @@ Object {
                     >
                       <label
                         class="components-base-control__label"
-                        for="woocommerce-deprecated-select-control-0__control-input"
+                        for="woocommerce-select-control-0__control-input"
                       >
                         Country / Region *
                       </label>
@@ -429,8 +429,8 @@ Object {
                         aria-expanded="false"
                         aria-haspopup="true"
                         autocomplete="new-password"
-                        class="woocommerce-deprecated-select-control__control-input"
-                        id="woocommerce-deprecated-select-control-0__control-input"
+                        class="woocommerce-select-control__control-input"
+                        id="woocommerce-select-control-0__control-input"
                         placeholder=""
                         role="combobox"
                         type="search"

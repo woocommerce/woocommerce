@@ -6,7 +6,7 @@ import { createElement, useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DeprecatedSelectControl } from '../../index';
+import { SelectControl } from '../../index';
 import { ControlProps } from '../types';
 
 type SelectControlOption = {
@@ -34,7 +34,7 @@ export const SelectField: React.FC< ControlProps > = ( {
 	);
 
 	return (
-		<DeprecatedSelectControl
+		<SelectControl
 			title={ description }
 			label={ label }
 			options={ transformedOptions }

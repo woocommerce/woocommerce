@@ -9,7 +9,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import DeprecatedSelectControl from '../deprecated-select-control';
+import SelectControl from '../select-control';
 import {
 	attributes,
 	countries,
@@ -170,7 +170,7 @@ export class Search extends Component {
 
 		return (
 			<div>
-				<DeprecatedSelectControl
+				<SelectControl
 					className={ classnames( 'woocommerce-search', className, {
 						'is-static-results': staticResults,
 					} ) }

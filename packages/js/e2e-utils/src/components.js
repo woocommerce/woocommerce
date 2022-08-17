@@ -85,7 +85,7 @@ const completeOnboardingWizard = async () => {
 
 	// Fill country and state where the store is located
 	await expect( page ).toFill(
-		'.woocommerce-deprecated-select-control__control-input',
+		'.woocommerce-select-control__control-input',
 		config.get( 'addresses.admin.store.countryandstate' )
 	);
 
@@ -182,20 +182,20 @@ const completeOnboardingWizard = async () => {
 	await page.waitFor( 2000 );
 
 	// Query for the <SelectControl>s
-	const selectControls = await page.$$( '.woocommerce-deprecated-select-control' );
+	const selectControls = await page.$$( '.woocommerce-select-control' );
 	expect( selectControls ).toHaveLength( 2 );
 
 	// Fill the number of products you plan to sell
 	await selectControls[ 0 ].click();
-	await page.waitForSelector( '.woocommerce-deprecated-select-control__control' );
-	await expect( page ).toClick( '.woocommerce-deprecated-select-control__option', {
+	await page.waitForSelector( '.woocommerce-select-control__control' );
+	await expect( page ).toClick( '.woocommerce-select-control__option', {
 		text: config.get( 'onboardingwizard.numberofproducts' ),
 	} );
 
 	// Fill currently selling elsewhere
 	await selectControls[ 1 ].click();
-	await page.waitForSelector( '.woocommerce-deprecated-select-control__control' );
-	await expect( page ).toClick( '.woocommerce-deprecated-select-control__option', {
+	await page.waitForSelector( '.woocommerce-select-control__control' );
+	await expect( page ).toClick( '.woocommerce-select-control__option', {
 		text: config.get( 'onboardingwizard.sellingelsewhere' ),
 	} );
 

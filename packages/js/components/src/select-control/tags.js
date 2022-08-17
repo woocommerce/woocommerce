@@ -47,7 +47,7 @@ class Tags extends Component {
 
 		return (
 			<Fragment>
-				<div className="woocommerce-deprecated-select-control__tags">
+				<div className="woocommerce-select-control__tags">
 					{ selected.map( ( item, i ) => {
 						if ( ! item.label ) {
 							return null;
@@ -71,7 +71,7 @@ class Tags extends Component {
 				</div>
 				{ showClearButton && (
 					<Button
-						className="woocommerce-deprecated-select-control__clear"
+						className="woocommerce-select-control__clear"
 						isLink
 						onClick={ this.removeAll }
 					>

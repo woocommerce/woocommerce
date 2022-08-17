@@ -157,7 +157,7 @@ class List extends Component {
 		const { instanceId, listboxId, options, selectedIndex, staticList } =
 			this.props;
 		const listboxClasses = classnames(
-			'woocommerce-deprecated-select-control__listbox',
+			'woocommerce-select-control__listbox',
 			{
 				'is-static': staticList,
 			}
@@ -175,12 +175,12 @@ class List extends Component {
 					<Button
 						ref={ this.getOptionRef( index ) }
 						key={ option.key }
-						id={ `woocommerce-deprecated-select-control__option-${ instanceId }-${ option.key }` }
+						id={ `woocommerce-select-control__option-${ instanceId }-${ option.key }` }
 						role="option"
 						aria-selected={ index === selectedIndex }
 						disabled={ option.isDisabled }
 						className={ classnames(
-							'woocommerce-deprecated-select-control__option',
+							'woocommerce-select-control__option',
 							{
 								'is-selected': index === selectedIndex,
 							}

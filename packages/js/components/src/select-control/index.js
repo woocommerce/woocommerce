@@ -22,7 +22,7 @@ const initialState = { isExpanded: false, isFocused: false, query: '' };
  * A search box which filters options while typing,
  * allowing a user to select from an option from a filtered list.
  */
-export class DeprecatedSelectControl extends Component {
+export class SelectControl extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -329,16 +329,16 @@ export class DeprecatedSelectControl extends Component {
 		const hasMultiple = this.hasMultiple();
 		const { key: selectedKey = '' } = options[ selectedIndex ] || {};
 		const listboxId = isExpanded
-			? `woocommerce-deprecated-select-control__listbox-${ instanceId }`
+			? `woocommerce-select-control__listbox-${ instanceId }`
 			: null;
 		const activeId = isExpanded
-			? `woocommerce-deprecated-select-control__option-${ instanceId }-${ selectedKey }`
+			? `woocommerce-select-control__option-${ instanceId }-${ selectedKey }`
 			: null;
 
 		return (
 			<div
 				className={ classnames(
-					'woocommerce-deprecated-select-control',
+					'woocommerce-select-control',
 					className,
 					{
 						'has-inline-tags': hasMultiple && inlineTags,
@@ -353,7 +353,7 @@ export class DeprecatedSelectControl extends Component {
 						onChange={ this.onAutofillChange }
 						name={ autofill }
 						type="text"
-						className="woocommerce-deprecated-select-control__autofill-input"
+						className="woocommerce-select-control__autofill-input"
 						tabIndex="-1"
 					/>
 				) }
@@ -398,7 +398,7 @@ export class DeprecatedSelectControl extends Component {
 	}
 }
 
-DeprecatedSelectControl.propTypes = {
+SelectControl.propTypes = {
 	/**
 	 * Name to use for the autofill field, not used if no string is passed.
 	 */
@@ -542,7 +542,7 @@ DeprecatedSelectControl.propTypes = {
 	autoComplete: PropTypes.string,
 };
 
-DeprecatedSelectControl.defaultProps = {
+SelectControl.defaultProps = {
 	autofill: null,
 	excludeSelectedOptions: true,
 	getSearchExpression: identity,
@@ -567,4 +567,4 @@ export default compose( [
 	withSpokenMessages,
 	withInstanceId,
 	withFocusOutside, // this MUST be the innermost HOC as it calls handleFocusOutside
-] )( DeprecatedSelectControl );
+] )( SelectControl );

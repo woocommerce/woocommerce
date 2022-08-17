@@ -6,7 +6,7 @@ import { COUNTRIES_STORE_NAME, Country, Locale } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp, has } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
-import { DeprecatedSelectControl, TextControl } from '@woocommerce/components';
+import { SelectControl, TextControl } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
@@ -262,7 +262,7 @@ export function useGetCountryStateAutofill(
 				value={ autofillCountry }
 				name="country"
 				type="text"
-				className="woocommerce-deprecated-select-control__autofill-input"
+				className="woocommerce-select-control__autofill-input"
 				tabIndex={ -1 }
 				autoComplete="country"
 			/>
@@ -272,7 +272,7 @@ export function useGetCountryStateAutofill(
 				value={ autofillState }
 				name="state"
 				type="text"
-				className="woocommerce-deprecated-select-control__autofill-input"
+				className="woocommerce-select-control__autofill-input"
 				tabIndex={ -1 }
 				autoComplete="address-level1"
 			/>
@@ -353,7 +353,7 @@ export function StoreAddress( {
 
 	return (
 		<div className="woocommerce-store-address-fields">
-			<DeprecatedSelectControl
+			<SelectControl
 				label={ __( 'Country / Region *', 'woocommerce' ) }
 				required
 				autoComplete="new-password" // disable autocomplete and autofill
@@ -365,7 +365,7 @@ export function StoreAddress( {
 				controlClassName={ getInputProps( 'countryState' ).className }
 			>
 				{ countryStateAutofill }
-			</DeprecatedSelectControl>
+			</SelectControl>
 
 			{ ! locale?.address_1?.hidden && (
 				<TextControl
