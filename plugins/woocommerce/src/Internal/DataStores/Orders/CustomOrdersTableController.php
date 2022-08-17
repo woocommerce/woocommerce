@@ -479,10 +479,13 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
+		/**
+		 * Commenting out for better testability.
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
+		 */
 
 		return $value;
 	}
