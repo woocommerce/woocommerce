@@ -26,8 +26,9 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 				if ( $value ) {
 					return $value;
 				}
-				$specs = json_decode(
-					'[{
+				$specs = array(
+					'zh_TW' => json_decode(
+						'[{
 						"slug": "test",
 						"status": "unactioned",
 						"type": "info",
@@ -49,6 +50,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 							"status": "unactioned"
 						}]
 					}]'
+					),
 				);
 
 				return $specs;
