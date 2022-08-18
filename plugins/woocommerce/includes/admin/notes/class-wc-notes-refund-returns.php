@@ -85,7 +85,7 @@ class WC_Notes_Refund_Returns {
 	 * @return Note $note The note object.
 	 */
 	public static function get_note_from_db( $note_from_db ) {
-		if ( ! $note_from_db instanceof Note ) {
+		if ( ! $note_from_db instanceof Note || get_user_locale() === $note_from_db->get_locale() ) {
 			return $note_from_db;
 		}
 
