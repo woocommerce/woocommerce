@@ -154,25 +154,7 @@ class Init {
 			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'navigation-opt-out' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'wc-admin-navigation-opt-out',
-			WCAdminAssets::get_url( 'wp-admin-scripts/navigation-opt-out', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WCAdminAssets::get_file_version( 'js' ),
-			true
-		);
-
-		wp_localize_script(
-			'wc-admin-navigation-opt-out',
-			'surveyData',
-			array(
-				'url' => Survey::get_url( '/new-navigation-opt-out' ),
-			)
-		);
-
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'navigation-opt-out', true );
 		delete_option( 'woocommerce_navigation_show_opt_out' );
 	}
 }

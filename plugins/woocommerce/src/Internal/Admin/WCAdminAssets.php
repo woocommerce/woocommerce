@@ -379,4 +379,27 @@ class WCAdminAssets {
 			}
 		}
 	}
+
+	/**
+	 * Loads the a script
+	 *
+	 * @param string $script_path_name The script path name.
+	 * @param string $script_name Filename of the script to load.
+	 * @param string $need_translation Whether the script need translations.
+	 */
+	public static function register_script( $script_path_name, $script_name, $need_translation = false ) {
+		$script_assets_filename = self::get_script_asset_filename( $script_path_name, $script_name );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'wc-admin-' . $script_name,
+			self::get_url( $script_path_name . '/' . $script_name, 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			self::get_file_version( 'js' ),
+			true
+		);
+		if ( $need_translation ) {
+			wp_set_script_translations( 'wc-admin-' . $script_name, 'woocommerce' );
+		}
+	}
 }

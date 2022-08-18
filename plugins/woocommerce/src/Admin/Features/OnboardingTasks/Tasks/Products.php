@@ -109,16 +109,7 @@ class Products extends Task {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'onboarding-product-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-product-notice', true );
 
 		// Clear the active task transient to only show notice once per active session.
 		delete_transient( self::ACTIVE_TASK_TRANSIENT );
@@ -140,16 +131,7 @@ class Products extends Task {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-import-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'onboarding-product-import-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-product-import-notice', true );
 	}
 
 	/**
@@ -176,16 +158,7 @@ class Products extends Task {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'onboarding-load-sample-products-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-load-sample-products-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-load-sample-products-notice', true );
 	}
 
 	/**
