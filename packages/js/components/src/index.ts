@@ -37,6 +37,8 @@ export { default as SearchListItem } from './search-list-control/item';
 export { default as SectionHeader } from './section-header';
 export { default as SegmentedSelection } from './segmented-selection';
 export { default as SelectControl } from './select-control';
+export { SelectControl as __experimentalSelectControl } from './experimental-select-control';
+export { MenuItem as __experimentalSelectControlMenuItem } from './experimental-select-control/menu-item';
 export { default as ScrollTo } from './scroll-to';
 export { SortableList } from './sortable-list';
 export { default as Spinner } from './spinner';
