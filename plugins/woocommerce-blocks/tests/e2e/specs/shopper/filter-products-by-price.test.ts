@@ -56,7 +56,6 @@ const setMaxPrice = async () => {
 	await page.keyboard.down( 'Shift' );
 	await page.keyboard.press( 'Home' );
 	await page.keyboard.up( 'Shift' );
-	await page.keyboard.press( 'Backspace' );
 	await page.keyboard.type( '1.99' );
 	await page.keyboard.press( 'Tab' );
 };
