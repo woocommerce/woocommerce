@@ -143,6 +143,9 @@ class Events {
 	public function init() {
 		add_action( 'wc_admin_daily', array( $this, 'do_wc_admin_daily' ) );
 		add_filter( 'woocommerce_get_note_from_db', array( $this, 'get_note_from_db' ), 10, 1 );
+
+		// Initialize the WC_Notes_Refund_Returns Note to attach hook.
+		\WC_Notes_Refund_Returns::init();
 	}
 
 	/**
