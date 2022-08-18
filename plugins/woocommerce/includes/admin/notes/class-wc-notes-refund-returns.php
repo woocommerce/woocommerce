@@ -28,7 +28,6 @@ class WC_Notes_Refund_Returns {
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
 	}
 
-
 	/**
 	 * Maybe add a note to the inbox.
 	 *
