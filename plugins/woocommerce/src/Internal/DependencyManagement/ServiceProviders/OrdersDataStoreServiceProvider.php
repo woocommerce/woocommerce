@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caching\TransientsEngine;
 use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
@@ -32,6 +34,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		OrdersTableDataStore::class,
 		CLIRunner::class,
 		OrdersTableDataStoreMeta::class,
+		OrderCache::class,
 	);
 
 	/**
@@ -42,8 +45,9 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 
 		$this->share( OrdersTableDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class ) );
 		$this->share( DataSynchronizer::class )->addArguments( array( OrdersTableDataStore::class, DatabaseUtil::class, PostsToOrdersMigrationController::class ) );
-		$this->share( CustomOrdersTableController::class )->addArguments( array( OrdersTableDataStore::class, DataSynchronizer::class, BatchProcessingController::class ) );
+		$this->share( CustomOrdersTableController::class )->addArguments( array( OrdersTableDataStore::class, DataSynchronizer::class, BatchProcessingController::class, OrderCache::class ) );
 		$this->share( OrdersTableDataStore::class );
+		$this->share( OrderCache::class )->addArgument( TransientsEngine::class );
 		if ( Constants::is_defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->share( CLIRunner::class )->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class, PostsToOrdersMigrationController::class ) );
 		}
