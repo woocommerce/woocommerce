@@ -21,12 +21,12 @@ export const Basic: React.FC = () => {
 				<CardBody>
 					<TextControl
 						label="My first field"
-						onChange={() => {}}
+						onChange={ () => {} }
 						value=""
 					/>
 					<TextControl
 						label="My second field"
-						onChange={() => {}}
+						onChange={ () => {} }
 						value=""
 					/>
 				</CardBody>
@@ -36,7 +36,7 @@ export const Basic: React.FC = () => {
 				<CardBody>
 					<TextControl
 						label="My third field"
-						onChange={() => {}}
+						onChange={ () => {} }
 						value=""
 					/>
 				</CardBody>
@@ -64,12 +64,12 @@ export const CustomElements: React.FC = () => {
 				<CardBody>
 					<TextControl
 						label="My first field"
-						onChange={() => {}}
+						onChange={ () => {} }
 						value=""
 					/>
 					<TextControl
 						label="My second field"
-						onChange={() => {}}
+						onChange={ () => {} }
 						value=""
 					/>
 				</CardBody>
