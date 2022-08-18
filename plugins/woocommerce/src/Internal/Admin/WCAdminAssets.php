@@ -381,7 +381,7 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Loads the a script
+	 * Loads a script
 	 *
 	 * @param string $script_path_name The script path name.
 	 * @param string $script_name Filename of the script to load.
