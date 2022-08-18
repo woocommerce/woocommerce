@@ -1,4 +1,4 @@
-DateTimePicker
+DateTimePickerControl
 ===
 
 Add a component to allow selecting of a date and time via a calendar selection or by manual input.
@@ -6,7 +6,7 @@ Add a component to allow selecting of a date and time via a calendar selection o
 ## Usage
 
 ```jsx
-<DateTimePicker
+<DateTimePickerControl
 	onChange={ ( date ) => console.log( date ) }
 	dateFormat="DD-MM-YYYY H:MM"
 />

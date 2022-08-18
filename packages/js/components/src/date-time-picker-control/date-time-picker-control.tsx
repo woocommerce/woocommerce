@@ -14,7 +14,7 @@ import { sprintf, __ } from '@wordpress/i18n';
  */
 import { default as DateInput } from '../calendar/input';
 
-export type DateTimeProps = {
+export type DateTimePickerControlProps = {
 	currentDate?: string | null;
 	dateTimeFormat?: string;
 	disabled?: boolean;
@@ -22,14 +22,16 @@ export type DateTimeProps = {
 	onChange: ( date: string ) => void;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const DateTimePicker: React.FC< DateTimeProps > = ( {
+export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
 	is12Hour = true,
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
 	onChange,
-}: DateTimeProps ) => {
-	const [ dateTime, setDateTime ] = useState( moment( currentDate || new Date().toISOString() ) );
+}: DateTimePickerControlProps ) => {
+	const [ dateTime, setDateTime ] = useState(
+		moment( currentDate || new Date().toISOString() )
+	);
 	const [ inputString, setInputString ] = useState(
 		dateTime.format( dateTimeFormat )
 	);
