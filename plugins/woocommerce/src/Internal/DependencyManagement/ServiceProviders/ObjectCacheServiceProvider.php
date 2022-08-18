@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Caching\TransientsEngine;
 use Automattic\WooCommerce\Caching\WpCacheEngine;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
@@ -17,6 +18,7 @@ class ObjectCacheServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		WpCacheEngine::class,
+		TransientsEngine::class,
 	);
 
 	/**
@@ -24,5 +26,6 @@ class ObjectCacheServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( WpCacheEngine::class );
+		$this->share( TransientsEngine::class );
 	}
 }
