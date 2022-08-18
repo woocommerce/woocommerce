@@ -185,15 +185,22 @@ abstract class ObjectCache {
 
 		$this->verify_expiration_value( $expiration );
 
-		$id = $this->get_id_from_object_if_null( $object, $id );
-
 		$errors = $this->validate( $object );
-		if ( $errors !== null && count( $errors ) === 1 ) {
-			throw new CacheException( 'Object validation/serialization failed: ' . $errors[0], $this, $id, $errors );
-		} elseif ( ! empty( $errors ) ) {
-			throw new CacheException( 'Object validation/serialization failed', $this, $id, $errors );
+		if ( ! is_null( $errors ) ) {
+			try {
+				$id = $this->get_id_from_object_if_null( $object, $id );
+			} catch ( \Throwable $ex ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Nothing else to do, we won't be able to add any significant object id to the CacheException and that's it.
+			}
+
+			if ( count( $errors ) === 1 ) {
+				throw new CacheException( 'Object validation/serialization failed: ' . $errors[0], $this, $id, $errors );
+			} elseif ( ! empty( $errors ) ) {
+				throw new CacheException( 'Object validation/serialization failed', $this, $id, $errors );
+			}
 		}
 
+		$id   = $this->get_id_from_object_if_null( $object, $id );
 		$data = $this->serialize( $object );
 
 		/**
