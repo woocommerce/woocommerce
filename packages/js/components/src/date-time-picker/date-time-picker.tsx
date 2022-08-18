@@ -15,7 +15,7 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { default as DateInput } from '../calendar/input';
 
 export type DateTimeProps = {
-	currentDate?: string;
+	currentDate?: string | null;
 	dateTimeFormat?: string;
 	disabled?: boolean;
 	is12Hour?: boolean;
@@ -23,17 +23,21 @@ export type DateTimeProps = {
 } & React.HTMLAttributes< HTMLDivElement >;
 
 export const DateTimePicker: React.FC< DateTimeProps > = ( {
-	currentDate = new Date().toISOString(),
+	currentDate,
 	is12Hour = true,
 	dateTimeFormat = is12Hour ? 'MM/DD/YYYY h:mm a' : 'MM/DD/YYYY H:MM',
 	disabled = false,
 	onChange,
 }: DateTimeProps ) => {
-	const [ dateTime, setDateTime ] = useState( moment( currentDate ) );
+	const [ dateTime, setDateTime ] = useState( moment( currentDate || new Date().toISOString() ) );
 	const [ inputString, setInputString ] = useState(
 		dateTime.format( dateTimeFormat )
 	);
 	const [ inputError, setInputError ] = useState( '' );
+
+	useEffect( () => {
+		setDateTime( moment( currentDate ) );
+	}, [ currentDate ] );
 
 	useEffect( () => {
 		if ( ! moment( dateTime ).isValid() ) {
