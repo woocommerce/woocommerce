@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix failing "Prepare test summary" job.
