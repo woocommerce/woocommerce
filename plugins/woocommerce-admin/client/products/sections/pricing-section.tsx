@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { EnrichedLabel, Link, useFormContext } from '@woocommerce/components';
-import { useContext } from '@wordpress/element';
+import { Link, useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { useContext } from '@wordpress/element';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
@@ -15,14 +15,9 @@ import {
  * Internal dependencies
  */
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { getTextControlProps } from './utils';
+import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
-import {
-	CurrencyContext,
-	getFilteredCurrencyInstance,
-} from '../../lib/currency-context';
-
-const PRICING_SLUG = 'pricing';
+import { CurrencyContext } from '../../lib/currency-context';
 
 export const PricingSection: React.FC = () => {
 	const { getInputProps } = useFormContext< Product >();
@@ -52,13 +47,14 @@ export const PricingSection: React.FC = () => {
 			}
 		>
 			<InputControl
-				type="number"
-				prefix="$"
 				label={ __( 'List price', 'woocommerce' ) }
 				placeholder={ __( '10.59', 'woocommerce' ) }
-				{ ...getTextControlProps( getInputProps( 'regular_price' ) ) }
+				{ ...getInputControlProps( {
+					...getInputProps( 'regular_price' ),
+					context,
+				} ) }
 			/>
-			<span>
+			<span className="woocommerce-product-form__secondary-text">
 				Per your&nbsp;
 				<Link
 					href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=tax` }
@@ -72,13 +68,24 @@ export const PricingSection: React.FC = () => {
 				</Link>
 				, tax is <strong>included</strong> in the price.
 			</span>
-			<InputControl
-				type="number"
-				prefix="$"
-				label={ __( 'Sale price (optional)', 'woocommerce' ) }
-				placeholder={ __( '10.59', 'woocommerce' ) }
-				{ ...getTextControlProps( getInputProps( 'sale_price' ) ) }
-			/>
+
+			<div className="woocommerce-product-form__custom-label-input">
+				<label htmlFor="sale_price">
+					Sale price&nbsp;
+					<span className="woocommerce-product-form__optional-input">
+						(optional)
+					</span>
+				</label>
+				<InputControl
+					hideLabelFromVision={ true }
+					id="sale_price"
+					placeholder={ __( '8.59', 'woocommerce' ) }
+					{ ...getInputControlProps( {
+						...getInputProps( 'sale_price' ),
+						context,
+					} ) }
+				/>
+			</div>
 		</ProductSectionLayout>
 	);
 };

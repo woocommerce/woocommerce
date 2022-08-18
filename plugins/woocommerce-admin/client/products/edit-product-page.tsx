@@ -20,6 +20,7 @@ import { useParams } from 'react-router-dom';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
+import { PricingSection } from './sections/pricing-section';
 import './product-page.scss';
 
 const EditProductPage: React.FC = () => {
@@ -121,6 +122,7 @@ const EditProductPage: React.FC = () => {
 					>
 						<ProductFormLayout>
 							<ProductDetailsSection />
+							<PricingSection />
 
 							<ProductFormActions />
 						</ProductFormLayout>
