@@ -261,7 +261,7 @@ const getMainConfig = ( options = {} ) => {
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
-						from: './assets/js/blocks/**/block.json',
+						from: './assets/js/**/block.json',
 						to( { absoluteFilename } ) {
 							/**
 							 * Getting the block name from the JSON metadata is less error prone
