@@ -16,11 +16,7 @@ import {
 	Spinner,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import {
-	Form,
-	TextControl,
-	SelectControl,
-} from '@woocommerce/components';
+import { Form, TextControl, SelectControl } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
