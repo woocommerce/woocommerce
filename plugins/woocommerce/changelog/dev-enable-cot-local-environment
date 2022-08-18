@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added a new package script to set up the local environment with COT enabled.
