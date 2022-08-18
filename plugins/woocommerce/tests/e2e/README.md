@@ -381,3 +381,4 @@ The [WooCommerce E2E Tests Boilerplate repo](https://github.com/woocommerce/wooc
 The test sequencer (`pnpm run e2e --filter=woocommerce`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).
+Dummy commit.
