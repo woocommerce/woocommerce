@@ -1,0 +1,15 @@
+.woo-mobile-app-page {
+	margin: 0 auto;
+
+	&.is-narrow {
+		max-width: 680px;
+	}
+}
+
+.woo-mobile-app-illustration-wrapper {
+	margin-right: -24px;
+}
+
+.woo-mobile-app-page-blurb {
+	max-width: 100%;
+}

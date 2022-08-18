@@ -16,12 +16,15 @@ import {
 } from '@woocommerce/data';
 import { compose } from 'redux';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import ActivityHeader from '../activity-header';
 import { getCountryCode } from '~/dashboard/utils';
+
+import WooMobileAppIllustration from '../../woo-mobile-app-welcome/images/woo-mobile-app-illustration-thumb.png';
 
 export const SETUP_TASK_HELP_ITEMS_FILTER =
 	'woocommerce_admin_setup_task_help_items';
@@ -366,6 +369,45 @@ export const HelpPanel = ( props ) => {
 				<List
 					items={ listItems }
 					className="woocommerce-quick-links__list"
+				/>
+			</Section>
+			<Section className="woocommerce-layout__activity-panel-spacer" />
+			<Section className="woocommerce-layout__activity-panel-footer">
+				<List
+					className="woocommerce-quick-links__footer woocommerce-quick-links__list"
+					items={ [
+						{
+							title: (
+								<div className="woocommerce-quick-links__footer-mobile-app-list-item">
+									<Text
+										as="div"
+										variant="button"
+										weight="600"
+										size="14"
+										lineHeight="20px"
+										className="woocommerce-quick-links__footer-mobile-app-list-item-title"
+									>
+										{ __(
+											'Run your store from anywhere with the WooCommerce Mobile App',
+											'woocommerce'
+										) }
+									</Text>
+									<div className="woocommerce-quick-links__footer-mobile-app-list-item-icon">
+										<img
+											src={ WooMobileAppIllustration }
+											alt="WooCommerce Mobile App Thumbnail"
+											height="100px"
+										></img>
+									</div>
+								</div>
+							),
+							href: getAdminLink(
+								'./admin.php?page=wc-admin&path=%2Fwoo-mobile-app-welcome'
+							),
+							linkType: 'wp-admin',
+							target: '_self',
+						},
+					] }
 				/>
 			</Section>
 		</Fragment>

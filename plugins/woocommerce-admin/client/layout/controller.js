@@ -68,6 +68,12 @@ const WCPaymentsWelcomePage = lazy( () =>
 	)
 );
 
+const WooMobileAppWelcomePage = lazy( () =>
+	import(
+		/* webpackChunkName: "woo-mobile-app-welcome-page" */ '../woo-mobile-app-welcome'
+	)
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = () => {
@@ -86,6 +92,25 @@ export const getPages = () => {
 		},
 		capability: 'manage_woocommerce',
 	} );
+
+	if ( window.wcAdminFeatures[ 'woo-mobile-welcome' ] ) {
+		pages.push( {
+			container: WooMobileAppWelcomePage,
+			path: '/woo-mobile-app-welcome',
+			breadcrumbs: [
+				[
+					'/woo-mobile-app-welcome',
+					__( 'WooCommerce Mobile App', 'woocommerce' ),
+				],
+				__( 'WooCommerce Mobile App', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-woo-mobile-welcome-page',
+			},
+			wpOpenMenu: 'toplevel_page_woocommerce-woo-mobile-welcome-page',
+			capability: 'manage_woocommerce',
+		} );
+	}
 
 	if ( window.wcAdminFeatures.analytics ) {
 		pages.push( {

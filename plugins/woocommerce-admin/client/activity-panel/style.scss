@@ -5,6 +5,12 @@
 	height: $header-height;
 }
 
+.woocommerce-layout__activity-panel-content {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
 .woocommerce-layout__activity-panel-tabs {
 	width: 100%;
 	display: flex;
@@ -251,4 +257,26 @@
 
 .woocommerce-layout__notice-list-hide {
 	display: none;
+}
+
+.woocommerce-layout__activity-panel-spacer {
+	flex-grow: 1;
+}
+
+.woocommerce-quick-links__footer-mobile-app-list-item {
+	display: flex;
+}
+
+.woocommerce-quick-links__footer > li.woocommerce-list__item {
+	&:hover {
+		background-color: $studio-white;
+	}
+}
+
+.woocommerce-quick-links__footer-mobile-app-list-item-title {
+	align-self: center;
+}
+
+.woocommerce-quick-links__footer-mobile-app-list-item-icon {
+	margin-right: -40px;
 }
