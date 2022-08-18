@@ -18,6 +18,8 @@ describe( 'EditProductLinkModal', () => {
 	it( 'should show a field with the permalink as label', () => {
 		const { queryByText } = render(
 			<EditProductLinkModal
+				permalinkPrefix={ 'wootesting.com/product/' }
+				permalinkSuffix={ '' }
 				product={
 					{
 						slug: 'test',
@@ -36,6 +38,8 @@ describe( 'EditProductLinkModal', () => {
 	it( 'should update the permalink label as the slug is being updated', () => {
 		const { queryByText, getByLabelText } = render(
 			<EditProductLinkModal
+				permalinkPrefix={ 'wootesting.com/product/' }
+				permalinkSuffix={ '' }
 				product={
 					{
 						slug: 'test',
@@ -59,6 +63,8 @@ describe( 'EditProductLinkModal', () => {
 	it( 'should only update the end of the permalink incase the slug matches other parts of the url', () => {
 		const { queryByText, getByLabelText } = render(
 			<EditProductLinkModal
+				permalinkPrefix={ 'wootesting.com/product/' }
+				permalinkSuffix={ '' }
 				product={
 					{
 						slug: 'product',

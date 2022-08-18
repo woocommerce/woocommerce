@@ -2,10 +2,16 @@
  * External dependencies
  */
 import { CheckboxControl, Button, TextControl } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { cleanForSlug } from '@wordpress/url';
 import { EnrichedLabel, useFormContext } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import {
+	Product,
+	PRODUCTS_STORE_NAME,
+	WCDataSelector,
+} from '@woocommerce/data';
 import classnames from 'classnames';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -22,6 +28,19 @@ export const ProductDetailsSection: React.FC = () => {
 	const { getInputProps, values } = useFormContext< Product >();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
+	const { permalinkPrefix, permalinkSuffix } = useSelect(
+		( select: WCDataSelector ) => {
+			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
+			if ( values.id ) {
+				const parts = getPermalinkParts( values.id );
+				return {
+					permalinkPrefix: parts?.prefix,
+					permalinkSuffix: parts?.suffix,
+				};
+			}
+			return {};
+		}
+	);
 
 	const getCheckboxProps = ( item: string ) => {
 		const { checked, className, onChange, onBlur } =
@@ -73,10 +92,18 @@ export const ProductDetailsSection: React.FC = () => {
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 				{ ...getTextControlProps( 'name' ) }
 			/>
-			{ values.permalink && values.status === 'publish' && (
+			{ values.id && permalinkPrefix && (
 				<div className="product-details-section__product-link">
 					{ __( 'Product link', 'woocommerce' ) }:&nbsp;
-					<a href={ values.permalink }>{ values.permalink }</a>
+					<a
+						href={ values.permalink }
+						target="_blank"
+						rel="noreferrer"
+					>
+						{ permalinkPrefix }
+						{ values.slug || cleanForSlug( values.name ) }
+						{ permalinkSuffix }
+					</a>
 					<Button
 						variant="link"
 						onClick={ () => setShowProductLinkEditModal( true ) }
@@ -105,6 +132,8 @@ export const ProductDetailsSection: React.FC = () => {
 			/>
 			{ showProductLinkEditModal && (
 				<EditProductLinkModal
+					permalinkPrefix={ permalinkPrefix || '' }
+					permalinkSuffix={ permalinkSuffix || '' }
 					product={ values }
 					onCancel={ () => setShowProductLinkEditModal( false ) }
 					onSaved={ () => setShowProductLinkEditModal( false ) }

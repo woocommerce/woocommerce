@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Modal, TextControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import { cleanForSlug } from '@wordpress/url';
 import { Product } from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
 import { useFormContext } from '@woocommerce/components';
@@ -18,19 +19,25 @@ import { useProductHelper } from '../../use-product-helper';
 
 type EditProductLinkModalProps = {
 	product: Product;
+	permalinkPrefix: string;
+	permalinkSuffix: string;
 	onCancel: () => void;
 	onSaved: () => void;
 };
 
 export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	product,
+	permalinkPrefix,
+	permalinkSuffix,
 	onCancel,
 	onSaved,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateProductWithStatus, isUpdatingDraft, isUpdatingPublished } =
 		useProductHelper();
-	const [ slug, setSlug ] = useState( product.slug );
+	const [ slug, setSlug ] = useState(
+		product.slug || cleanForSlug( product.name )
+	);
 	const { resetForm, changedFields, touched, errors } =
 		useFormContext< Product >();
 
@@ -61,12 +68,10 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 				errors
 			);
 			createNotice(
-				updatedProduct.slug ===
-					slug.toLowerCase().replaceAll( ' ', '-' )
+				updatedProduct.slug === cleanForSlug( slug )
 					? 'success'
 					: 'info',
-				updatedProduct.slug ===
-					slug.toLowerCase().replaceAll( ' ', '-' )
+				updatedProduct.slug === cleanForSlug( slug )
 					? __( 'Product link successfully updated.', 'woocommerce' )
 					: __(
 							'Product link already existed, updated to ',
@@ -82,10 +87,8 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 		onSaved();
 	};
 
-	const newProductLinkLabel = product.permalink.replace(
-		new RegExp( `(.*)${ product.slug }(.*)` ),
-		`$1${ slug.toLowerCase().replaceAll( ' ', '-' ) }$2`
-	);
+	const newProductLinkLabel =
+		permalinkPrefix + cleanForSlug( slug ) + permalinkSuffix;
 
 	return (
 		<Modal
