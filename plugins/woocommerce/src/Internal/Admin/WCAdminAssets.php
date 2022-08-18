@@ -385,7 +385,7 @@ class WCAdminAssets {
 	 *
 	 * @param string $script_path_name The script path name.
 	 * @param string $script_name Filename of the script to load.
-	 * @param string $need_translation Whether the script need translations.
+	 * @param bool   $need_translation Whether the script need translations.
 	 */
 	public static function register_script( $script_path_name, $script_name, $need_translation = false ) {
 		$script_assets_filename = self::get_script_asset_filename( $script_path_name, $script_name );
