@@ -961,6 +961,8 @@ class OrdersTableQuery {
 			case 'posts':
 			case 'orders':
 				return $this->results;
+			case 'request':
+				return $this->sql;
 			default:
 				break;
 		}
