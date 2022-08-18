@@ -155,6 +155,13 @@ class Init {
 		);
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'navigation-opt-out', true );
+		wp_localize_script(
+			'wc-admin-navigation-opt-out',
+			'surveyData',
+			array(
+				'url' => Survey::get_url( '/new-navigation-opt-out' ),
+			)
+		);
 		delete_option( 'woocommerce_navigation_show_opt_out' );
 	}
 }
