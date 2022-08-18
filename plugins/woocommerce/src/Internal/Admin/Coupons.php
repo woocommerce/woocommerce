@@ -103,7 +103,7 @@ class Coupons {
 	public function fix_coupon_menu_highlight() {
 		global $parent_file, $post_type;
 
-		if ( 'shop_coupon' === $post_type ) {
+		if ( $post_type === 'shop_coupon' ) {
 			$parent_file = 'woocommerce-marketing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		}
 	}
@@ -113,7 +113,7 @@ class Coupons {
 	 */
 	public function maybe_add_marketing_coupon_script() {
 		$curent_screen = PageController::get_instance()->get_current_page();
-		if ( ! isset( $curent_screen['id'] ) || 'woocommerce-coupons' !== $curent_screen['id'] ) {
+		if ( ! isset( $curent_screen['id'] ) || $curent_screen['id'] !== 'woocommerce-coupons' ) {
 			return;
 		}
 

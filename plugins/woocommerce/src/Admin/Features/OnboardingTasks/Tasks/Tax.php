@@ -30,7 +30,7 @@ class Tax extends Task {
 		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
-		if ( 'wc-settings' !== $page || 'tax' !== $tab ) {
+		if ( $page !== 'wc-settings' || $tab !== 'tax' ) {
 			return;
 		}
 
@@ -59,7 +59,7 @@ class Tax extends Task {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
 			return __( 'Get taxes out of your mind', 'woocommerce' );
 		}
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added tax rates', 'woocommerce' );
 			}
@@ -116,7 +116,7 @@ class Tax extends Task {
 	public function is_complete() {
 		return get_option( 'wc_connect_taxes_enabled' ) ||
 			count( TaxDataStore::get_taxes( array() ) ) > 0 ||
-			false !== get_option( 'woocommerce_no_sales_tax' );
+			get_option( 'woocommerce_no_sales_tax' ) !== false;
 	}
 
 	/**

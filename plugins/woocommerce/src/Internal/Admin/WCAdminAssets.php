@@ -51,7 +51,7 @@ class WCAdminAssets {
 	 * @return string Folder path of asset.
 	 */
 	public static function get_path( $ext ) {
-		return ( 'css' === $ext ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
 	}
 
 	/**
@@ -81,7 +81,7 @@ class WCAdminAssets {
 		$suffix = '';
 
 		// Potentially enqueue minified JavaScript.
-		if ( 'js' === $ext ) {
+		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
 			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
 		}
@@ -168,9 +168,9 @@ class WCAdminAssets {
 	 * @param array  $allowlist Optional. List of allowed dependency handles.
 	 */
 	private function output_header_preload_tags_for_type( $type, $allowlist = array() ) {
-		if ( 'script' === $type ) {
+		if ( $type === 'script' ) {
 			$dependencies_of_type = wp_scripts();
-		} elseif ( 'style' === $type ) {
+		} elseif ( $type === 'style' ) {
 			$dependencies_of_type = wp_styles();
 		} else {
 			return;
@@ -179,7 +179,7 @@ class WCAdminAssets {
 		foreach ( $dependencies_of_type->queue as $dependency_handle ) {
 			$dependency = $dependencies_of_type->query( $dependency_handle, 'registered' );
 
-			if ( false === $dependency ) {
+			if ( $dependency === false ) {
 				continue;
 			}
 
