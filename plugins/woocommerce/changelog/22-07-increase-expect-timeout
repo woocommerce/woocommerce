@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Increase expect timeout to reduce e2e flakiness in CI
