@@ -5,7 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -69,6 +71,13 @@ class CustomOrdersTableController {
 	 * @var bool
 	 */
 	private $is_feature_visible;
+
+	/**
+	 * The orders cache object to use.
+	 *
+	 * @var OrderCache
+	 */
+	private $order_cache;
 
 	/**
 	 * Class constructor.
@@ -157,6 +166,24 @@ class CustomOrdersTableController {
 				$this->register_post_type_for_order_placeholders();
 			}
 		);
+
+		add_action(
+			'woocommerce_delete_order',
+			function( $order_id ) {
+				$this->after_order_deleted_or_trashed( $order_id );
+			},
+			10,
+			1
+		);
+
+		add_action(
+			'woocommerce_trash_order',
+			function( $order_id ) {
+				$this->after_order_deleted_or_trashed( $order_id );
+			},
+			10,
+			1
+		);
 	}
 
 	/**
@@ -166,11 +193,13 @@ class CustomOrdersTableController {
 	 * @param OrdersTableDataStore      $data_store The data store to use.
 	 * @param DataSynchronizer          $data_synchronizer The data synchronizer to use.
 	 * @param BatchProcessingController $batch_processing_controller The batch processing controller to use.
+	 * @param OrderCache                $order_cache The order cache engine to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, BatchProcessingController $batch_processing_controller ) {
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, BatchProcessingController $batch_processing_controller, OrderCache $order_cache ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
+		$this->order_cache                 = $order_cache;
 	}
 
 	/**
@@ -479,6 +508,8 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
+		$this->order_cache->flush();
+
 		// TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently disabled to ease testing).
 
 		/*
@@ -570,5 +601,16 @@ class CustomOrdersTableController {
 				'exclude_from_order_sales_reports' => true,
 			)
 		);
+	}
+
+	/**
+	 * Handle the order deleted/trashed hooks.
+	 *
+	 * @param int $order_id The id of the order deleted or trashed.
+	 */
+	private function after_order_deleted_or_trashed( int $order_id ): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->order_cache->remove( $order_id );
+		}
 	}
 }

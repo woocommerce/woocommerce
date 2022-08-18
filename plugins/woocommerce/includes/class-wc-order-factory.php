@@ -8,6 +8,9 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -28,13 +31,26 @@ class WC_Order_Factory {
 			return false;
 		}
 
+		$using_cot = OrderUtil::custom_orders_table_usage_is_enabled();
+		if ( $using_cot ) {
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order       = $order_cache->get( $order_id );
+			if ( ! is_null( $order ) ) {
+				return $order;
+			}
+		}
+
 		$classname = self::get_class_name_for_order_id( $order_id );
 		if ( ! $classname ) {
 			return false;
 		}
 
 		try {
-			return new $classname( $order_id );
+			$order = new $classname( $order_id );
+			if ( $using_cot ) {
+				$order_cache->set( $order, $order_id );
+			}
+			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
@@ -53,6 +69,22 @@ class WC_Order_Factory {
 	public static function get_orders( $order_ids = array(), $skip_invalid = false ) {
 		$result    = array();
 		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
+
+		$already_cached_orders = array();
+		$using_cot             = OrderUtil::custom_orders_table_usage_is_enabled();
+		if ( $using_cot ) {
+			$uncached_order_ids = array();
+			$order_cache        = wc_get_container()->get( OrderCache::class );
+			foreach ( $order_ids as $order_id ) {
+				$cached_order = $order_cache->get( absint( $order_id ) );
+				if ( is_null( $cached_order ) ) {
+					$uncached_order_ids[] = $order_id;
+				} else {
+					$already_cached_orders[] = $cached_order;
+				}
+			}
+			$order_ids = $uncached_order_ids;
+		}
 
 		foreach ( $order_ids as $order_id ) {
 			$classname = self::get_class_name_for_order_id( $order_id );
@@ -87,7 +119,14 @@ class WC_Order_Factory {
 			}
 		}
 
-		return $result;
+		if ( $using_cot ) {
+			foreach ( $result as $order ) {
+				$order_cache->set( $order );
+			}
+			return array_merge( $already_cached_orders, $result );
+		} else {
+			return $result;
+		}
 	}
 
 	/**
