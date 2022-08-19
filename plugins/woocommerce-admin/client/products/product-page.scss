@@ -19,12 +19,11 @@
 	}
 	.woocommerce-product-form {
 		&__custom-label-input {
+			display: flex;
+			flex-direction: column;
 			label {
 				display: block;
 				margin-bottom: $gap-smaller;
-			}
-			.components-input-control {
-				height: 65%;
 			}
 		}
 		&__optional-input {
