@@ -110,11 +110,16 @@ function FormComponent< Values extends Record< string, any > >(
 		validate( values );
 	}, [] );
 
-	const resetForm = ( newInitialValues: Values ) => {
+	const resetForm = (
+		newInitialValues: Values,
+		newChangedFields = {},
+		newTouchedFields = {},
+		newErrors = {}
+	) => {
 		setValues( newInitialValues || {} );
-		setChangedFields( {} );
-		setTouched( {} );
-		setErrors( {} );
+		setChangedFields( newChangedFields );
+		setTouched( newTouchedFields );
+		setErrors( newErrors );
 	};
 
 	useImperativeHandle( ref, () => ( {
