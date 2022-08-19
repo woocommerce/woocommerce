@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure changes to product order are reflected even when advanced post caching is in effect.

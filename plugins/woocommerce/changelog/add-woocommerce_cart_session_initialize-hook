@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the woocommerce_cart_session_initialize-hook
