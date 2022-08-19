@@ -1,0 +1,10 @@
+{
+	"dev": true,
+	"filter": "^(?:react|react-dom)$",
+	"indent": "\t",
+	"overrides": true,
+	"peer": true,
+	"pnpmOverrides": true,
+	"prod": true,
+	"workspace": true
+}
