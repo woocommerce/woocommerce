@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Alter the PHPCS settings to disallow Yoda conditions (except in "includes")
