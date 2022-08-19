@@ -510,7 +510,13 @@ class Reviews {
 				'count'     => true,
 			]
 		);
-
+		
+		/**
+		 * Provides an opportunity to alter the pending comment count used within
+		 * the product reviews admin list table.
+		 *
+		 * @param array $count Current count of comments pending review.
+		 */
 		$count = apply_filters( 'woocommerce_product_reviews_pending_count', $count );
 
 		if ( empty( $count ) ) {
