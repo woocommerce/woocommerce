@@ -29,7 +29,8 @@ const block = {
 	class: '.wc-block-stock-filter',
 	selectors: {
 		editor: {
-			filterButtonToggle: "//label[text()='Filter button']",
+			filterButtonToggle:
+				'//label[text()="Show \'Apply filters\' button"]',
 		},
 		frontend: {
 			productsList: '.wc-block-grid__products > li',

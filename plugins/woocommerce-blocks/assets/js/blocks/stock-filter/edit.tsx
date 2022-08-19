@@ -61,31 +61,13 @@ const Edit = ( {
 							} )
 						}
 					/>
-					<p>
-						{ __(
-							'Heading Level',
-							'woo-gutenberg-products-block'
-						) }
-					</p>
-					<HeadingToolbar
-						isCollapsed={ false }
-						minLevel={ 2 }
-						maxLevel={ 7 }
-						selectedLevel={ headingLevel }
-						onChange={ ( newLevel: number ) =>
-							setAttributes( { headingLevel: newLevel } )
-						}
-					/>
 				</PanelBody>
 				<PanelBody
-					title={ __(
-						'Block Settings',
-						'woo-gutenberg-products-block'
-					) }
+					title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
 				>
 					<ToggleControl
 						label={ __(
-							'Filter button',
+							"Show 'Apply filters' button",
 							'woo-gutenberg-products-block'
 						) }
 						help={
@@ -104,6 +86,20 @@ const Edit = ( {
 							setAttributes( {
 								showFilterButton: value,
 							} )
+						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Typography', 'woo-gutenberg-products-block' ) }
+				>
+					<p> { __( 'Size', 'woo-gutenberg-products-block' ) } </p>
+					<HeadingToolbar
+						isCollapsed={ false }
+						minLevel={ 2 }
+						maxLevel={ 7 }
+						selectedLevel={ headingLevel }
+						onChange={ ( newLevel: number ) =>
+							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
 				</PanelBody>
