@@ -566,9 +566,6 @@ class OrdersTableQuery {
 
 		$orders_table = $this->tables['orders'];
 
-		// DISTINCT.
-		$distinct = '';
-
 		// SELECT [fields].
 		$this->fields = "{$orders_table}.id";
 		$fields       = $this->fields;
@@ -604,7 +601,7 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
-		$this->sql = "SELECT $found_rows $distinct $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->sql = "SELECT $found_rows DISTINCT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 	}
 
 	/**
