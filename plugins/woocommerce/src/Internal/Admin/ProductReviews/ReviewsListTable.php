@@ -95,7 +95,13 @@ class ReviewsListTable extends WP_List_Table {
 		// Include the offset argument.
 		$args = wp_parse_args( $this->get_offset_arguments(), $args );
 
-		$args = apply_filters( 'woocommerce_product_reviews_comment_args' ,$args );
+		/**
+		 * Provides an opportunity to alter the comment query arguments used within
+		 * the product reviews admin list table.
+		 *
+		 * @param array $args Comment query args.
+		 */
+		$args = (array) apply_filters( 'woocommerce_product_reviews_list_table_prepare_items_args', $args );
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
