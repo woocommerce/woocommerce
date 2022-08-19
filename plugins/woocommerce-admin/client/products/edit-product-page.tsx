@@ -8,8 +8,6 @@ import { useSelect } from '@wordpress/data';
 import { Form, Spinner, FormRef } from '@woocommerce/components';
 import {
 	PartialProduct,
-	ProductStatus,
-	ProductType,
 	Product,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
@@ -24,32 +22,7 @@ import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { PricingSection } from './sections/pricing-section';
 import './product-page.scss';
-
-export const validate = (
-	values: Partial< Product< ProductStatus, ProductType > >
-) => {
-	const errors: {
-		[ key: string ]: string;
-	} = {};
-	if ( ! values.name?.length ) {
-		errors.name = __( 'This field is required', 'woocommerce' );
-	}
-
-	if ( values.regular_price && ! /^[0-9.,]+$/.test( values.regular_price ) ) {
-		errors.regular_price = __(
-			'Please enter with one monetary decimal point without thousand separators and currency symbols.',
-			'woocommerce'
-		);
-	}
-
-	if ( values.sale_price && ! /^[0-9.,]+$/.test( values.sale_price ) ) {
-		errors.sale_price = __(
-			'Please enter with one monetary decimal point without thousand separators and currency symbols.',
-			'woocommerce'
-		);
-	}
-	return errors;
-};
+import { validate } from './product-validation';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();

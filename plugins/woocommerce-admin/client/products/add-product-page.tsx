@@ -14,7 +14,7 @@ import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
 import { PricingSection } from './sections/pricing-section';
 import './product-page.scss';
-import { validate } from './edit-product-page';
+import { validate } from './product-validation';
 
 const AddProductPage: React.FC = () => {
 	useEffect( () => {
