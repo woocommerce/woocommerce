@@ -161,12 +161,14 @@ class WC_CLI_COM_Command {
 		}
 
 		if ( empty( $password ) ) {
+			// translators: %s is the URL for the application-password section in WooCommerce.com.
 			WP_CLI::log( sprintf( __( 'If you don\'t have an application password (not your account password), generate a password from %s', 'woocommerce' ), esc_url( self::APPLICATION_PASSWORD_SECTION_URL ) ) );
 			$password = self::ask( __( 'Connection password:', 'woocommerce' ) );
 		}
 		$password = sanitize_text_field( $password );
 		if ( empty( $password ) ) {
-			WP_CLI::error( sprintf( __( 'Invalid password. Generate a new one from %s.', esc_url( self::APPLICATION_PASSWORD_SECTION_URL ) ), 'woocommerce' ) );
+			// translators: %s is the URL for the application-password section in WooCommerce.com.
+			WP_CLI::error( sprintf( __( 'Invalid password. Generate a new one from %s.', 'woocommerce' ), esc_url( self::APPLICATION_PASSWORD_SECTION_URL ) ) );
 		}
 
 		$auth = WC_Helper::connect_with_password( $password );
