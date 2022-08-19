@@ -1335,12 +1335,12 @@ class ReviewsListTable extends WP_List_Table {
 	protected function review_type_dropdown( $current_type ) : void {
 
 		$item_types = apply_filters( 
-			'woocommerce_product_reviews_item_types',
-			[
+			'woocommerce_product_reviews_list_table_item_types',
+			array(
 				'all'     => __( 'All types', 'woocommerce' ),
 				'comment' => __( 'Replies', 'woocommerce' ),
 				'review'  => __( 'Reviews', 'woocommerce' ),
-			]
+			)
 		);
 
 		?>
