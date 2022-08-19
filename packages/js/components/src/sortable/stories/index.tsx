@@ -15,8 +15,10 @@ export const Basic = () => {
 	return (
 		<Sortable
 			onOrderChange={ ( items ) =>
-				// eslint-disable-next-line no-alert
-				alert( 'Order changed: ' + items.map( ( item ) => item.key ) )
+				// eslint-disable-next-line no-console
+				console.log(
+					'Order changed: ' + items.map( ( item ) => item.key )
+				)
 			}
 		>
 			<ListItem key={ 'item-1' }>Item 1</ListItem>

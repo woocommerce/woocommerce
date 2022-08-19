@@ -30,7 +30,7 @@ export type SortableItemProps = {
 	setDropIndex: ( index: number | null ) => void;
 };
 
-const THROTTLE_TIME = 30;
+const THROTTLE_TIME = 16;
 
 export const SortableItem = ( {
 	id,
@@ -88,7 +88,10 @@ export const SortableItem = ( {
 				'is-dragging-over-after': isDraggingOver && ! isBefore,
 			} ) }
 			id={ `woocommerce-sortable__item-${ id }` }
-			onDragOver={ throttledHandleDragOver }
+			onDragOver={ ( event ) => {
+				event?.preventDefault();
+				throttledHandleDragOver( event );
+			} }
 			onDragLeave={ handleDragLeave }
 		>
 			<Draggable
