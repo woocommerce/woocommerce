@@ -23,8 +23,6 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
-php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
-
 pnpm exec syncpack -- list-mismatches
 
 if [ $? -ne 0 ]; then
@@ -32,3 +30,5 @@ if [ $? -ne 0 ]; then
 	echo "This can usually be accomplished automatically by running \`pnpm exec syncpack -- fix-mismatches\`."
 	exit 1
 fi
+
+php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH
