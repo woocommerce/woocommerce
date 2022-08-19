@@ -1,13 +1,19 @@
 {
 	"name": "woocommerce/stock-filter",
 	"version": "1.0.0",
-	"title": "Filter Products by Stock",
-	"description": "Allow customers to filter the grid by products stock status. Works in combination with the All Products block.",
+	"title": "Filter by Stock",
+	"description": "Allow customers to filter the grid by products stock status.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"html": false,
-		"multiple": false
+		"multiple": false,
+		"color": {
+		  "link": true,
+		  "__experimentalDefaultControls": {
+			"text": true
+		  }
+		}
 	},
 	"example": {
 		"attributes": {
