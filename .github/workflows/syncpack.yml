@@ -1,0 +1,25 @@
+name: Syncronize Dependencies with syncpack
+on:
+  # Run whenever a pull request is updated
+  pull_request:
+    branches:
+      - trunk
+jobs:
+  syncpack:
+    runs-on: ubuntu-latest
+    name: syncpack
+    steps:
+      # Check out the branch so we can read/write its files
+      - uses: actions/checkout@v3
+      # Use Node.js as syncpack is written in that
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - uses: ./.github/actions/syncpack
+        with:
+          package-manager-version: '6.24.2'
+          package-manager: 'pnpm'
+          format-mismatches: 'ignore'
+          lockfile-mismatches: 'ignore'
+          semver-range-mismatches: 'ignore'
+          version-mismatches: 'lint'
