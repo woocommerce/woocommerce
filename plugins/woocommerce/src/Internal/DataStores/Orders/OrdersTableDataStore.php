@@ -637,7 +637,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		 * This hook is used for Custom Order Table queries. For Custom Post Type order searches, the corresponding hook
 		 * is `woocommerce_shop_order_search_results`.
 		 *
-		 * @since TBD
+		 * @since 7.0.0
 		 *
 		 * @param int[]  $order_ids Search results as an array of order IDs.
 		 * @param string $term      The search term.
