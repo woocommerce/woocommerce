@@ -82,10 +82,10 @@ class OrdersTableSearchQuery {
 	private function generate_where(): string {
 		$where             = '';
 		$meta_fields       = $this->get_meta_fields_to_be_searched();
-		$possible_order_id = (string) absint( $this->search_term );
+		$possible_order_id = (string) absint( $this->query->get( 's' ) );
 
 		// Support the passing of an order ID as the search term.
-		if ( $this->search_term === $possible_order_id ) {
+		if ( (string) $this->query->get( 's' ) === $possible_order_id ) {
 			$where = $this->query->get_table_name( 'orders' ) . '.id = ' . $possible_order_id . ' OR ';
 		}
 
