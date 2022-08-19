@@ -86,11 +86,17 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$post_order_id = OrderHelper::create_complex_wp_post_order();
 		$this->migrator->migrate_orders( array( $post_order_id ) );
 
-		$post_data      = get_post( $post_order_id, ARRAY_A );
-		$post_meta_data = get_post_meta( $post_order_id );
-		// TODO: Remove `_recorded_sales` from exempted keys after https://github.com/woocommerce/woocommerce/issues/32843.
-		$exempted_keys         = array( 'post_modified', 'post_modified_gmt', '_recorded_sales' );
-		$convert_to_float_keys = array( '_cart_discount_tax', '_order_shipping', '_order_shipping_tax', '_order_tax', '_cart_discount', 'cart_tax' );
+		$post_data             = get_post( $post_order_id, ARRAY_A );
+		$post_meta_data        = get_post_meta( $post_order_id );
+		$exempted_keys         = array( 'post_modified', 'post_modified_gmt' );
+		$convert_to_float_keys = array(
+			'_cart_discount_tax',
+			'_order_shipping',
+			'_order_shipping_tax',
+			'_order_tax',
+			'_cart_discount',
+			'cart_tax',
+		);
 		$exempted_keys         = array_flip( array_merge( $exempted_keys, $convert_to_float_keys ) );
 
 		$post_data_float      = array_intersect_key( $post_data, array_flip( $convert_to_float_keys ) );
@@ -855,10 +861,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @param WC_Data_Store $data_store Data store object to switch order to.
 	 */
 	private function switch_data_store( $order, $data_store ) {
-		$update_data_store_func = function ( $data_store ) {
-			$this->data_store = $data_store;
-		};
-		$update_data_store_func->call( $order, $data_store );
+		OrderHelper::switch_data_store( $order, $data_store );
 	}
 
 	/**
@@ -866,58 +869,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @return \WC_Order
 	 */
 	private function create_complex_cot_order() {
-		$order = new WC_Order();
-		$this->switch_data_store( $order, $this->sut );
-
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-
-		$order->set_status( 'pending' );
-		$order->set_created_via( 'unit-tests' );
-		$order->set_currency( 'COP' );
-		$order->set_customer_ip_address( '127.0.0.1' );
-
-		$item = new WC_Order_Item_Product();
-		$item->set_props(
-			array(
-				'product'  => $product,
-				'quantity' => 2,
-				'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 2 ) ),
-				'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => 2 ) ),
-			)
-		);
-
-		$order->add_item( $item );
-
-		$order->set_billing_first_name( 'Jeroen' );
-		$order->set_billing_last_name( 'Sormani' );
-		$order->set_billing_company( 'WooCompany' );
-		$order->set_billing_address_1( 'WooAddress' );
-		$order->set_billing_address_2( '' );
-		$order->set_billing_city( 'WooCity' );
-		$order->set_billing_state( 'NY' );
-		$order->set_billing_postcode( '123456' );
-		$order->set_billing_country( 'US' );
-		$order->set_billing_email( 'admin@example.org' );
-		$order->set_billing_phone( '555-32123' );
-
-		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$order->set_payment_method( $payment_gateways['bacs'] );
-
-		$order->set_shipping_total( 5.0 );
-		$order->set_discount_total( 0.0 );
-		$order->set_discount_tax( 0.0 );
-		$order->set_cart_tax( 0.0 );
-		$order->set_shipping_tax( 0.0 );
-		$order->set_total( 25.0 );
-		$order->save();
-
-		$order->get_data_store()->set_stock_reduced( $order, true, false );
-
-		$order->update_meta_data( 'my_meta', rand( 0, 255 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rand_rand
-
-		$order->save();
-
-		return $order;
+		return OrderHelper::create_complex_data_store_order( $this->sut );
 	}
 
 }
