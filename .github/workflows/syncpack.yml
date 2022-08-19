@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - uses: ./.github/actions/syncpack
+      - uses: JamieMason/syncpack-github-action@0.2.1
         with:
           package-manager-version: '6.24.2'
           package-manager: 'pnpm'
