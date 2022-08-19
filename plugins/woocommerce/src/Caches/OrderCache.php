@@ -2,31 +2,12 @@
 
 namespace Automattic\WooCommerce\Caches;
 
-use Automattic\WooCommerce\Caching\CacheEngine;
 use Automattic\WooCommerce\Caching\ObjectCache;
-use Automattic\WooCommerce\Caching\TransientsEngine;
 
 /**
  * A class to cache order objects.
  */
 class OrderCache extends ObjectCache {
-
-	/**
-	 * The cache engine to use.
-	 *
-	 * @var CacheEngine
-	 */
-	private $cache_engine;
-
-	/**
-	 * Initializes the class.
-	 *
-	 * @internal
-	 * @param TransientsEngine $cache_engine The cache engine to use.
-	 */
-	final public function init( TransientsEngine $cache_engine ) {
-		$this->cache_engine = $cache_engine;
-	}
 
 	/**
 	 * Get the identifier for the type of the cached objects.
@@ -45,15 +26,6 @@ class OrderCache extends ObjectCache {
 	 */
 	protected function get_object_id( $object ) {
 		return $object->get_id();
-	}
-
-	/**
-	 * Get the cache engine to use.
-	 *
-	 * @return CacheEngine
-	 */
-	protected function get_cache_engine_instance(): CacheEngine {
-		return $this->cache_engine;
 	}
 
 	/**
