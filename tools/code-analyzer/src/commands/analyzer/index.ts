@@ -27,6 +27,7 @@ import {
 import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
 import { execSync } from 'child_process';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
+import simpleGit from 'simple-git';
 
 /**
  * Analyzer class
@@ -111,7 +112,12 @@ export default class Analyzer extends Command {
 		);
 		CliUx.ux.action.stop();
 
-		const pluginData = this.getPluginData( tmpRepoPath, flags.plugin );
+		const pluginData = await this.getPluginData(
+			tmpRepoPath,
+			flags.plugin,
+			args.compare
+		);
+
 		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
@@ -157,7 +163,15 @@ export default class Analyzer extends Command {
 	 * @param {string} plugin Plugin slug.
 	 * @return {string[]} Promise.
 	 */
-	private getPluginData( tmpRepoPath: string, plugin: string ): string[] {
+	private async getPluginData(
+		tmpRepoPath: string,
+		plugin: string,
+		hashOrBranch: string
+	): Promise< string[] > {
+		const git = simpleGit( { baseDir: tmpRepoPath } );
+
+		await git.checkout( [ hashOrBranch ] );
+
 		/**
 		 * List of plugins from our monorepo.
 		 */
