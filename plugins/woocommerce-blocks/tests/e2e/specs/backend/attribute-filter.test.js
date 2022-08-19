@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/blocks-test-utils';
 
 const block = {
-	name: 'Filter Products by Attribute',
+	name: 'Filter by Attribute',
 	slug: 'woocommerce/attribute-filter',
 	class: '.wc-block-attribute-filter',
 };
@@ -79,29 +79,37 @@ describe( `${ block.name } Block`, () => {
 			await expect( page ).toMatchElement(
 				'.wc-filter-element-label-list-count'
 			);
-			await expect( page ).toClick( 'label', { text: 'Product count' } );
+			await expect( page ).toClick( 'label', {
+				text: 'Include product count',
+			} );
 			await expect( page ).not.toMatchElement(
 				'.wc-filter-element-label-list-count'
 			);
 			// reset
-			await expect( page ).toClick( 'label', { text: 'Product count' } );
+			await expect( page ).toClick( 'label', {
+				text: 'Include product count',
+			} );
 		} );
 
 		it( 'can toggle go button', async () => {
 			await expect( page ).not.toMatchElement(
 				'.wc-block-filter-submit-button'
 			);
-			await expect( page ).toClick( 'label', { text: 'Filter button' } );
+			await expect( page ).toClick( 'label', {
+				text: "Show 'Apply filters' button",
+			} );
 			await expect( page ).toMatchElement(
 				'.wc-block-filter-submit-button'
 			);
 			// reset
-			await expect( page ).toClick( 'label', { text: 'Filter button' } );
+			await expect( page ).toClick( 'label', {
+				text: "Show 'Apply filters' button",
+			} );
 		} );
 
 		it( 'can switch attribute', async () => {
 			await expect( page ).toClick( 'button', {
-				text: 'Filter Products by Attribute',
+				text: 'Content Settings',
 			} );
 
 			await expect( page ).toClick(

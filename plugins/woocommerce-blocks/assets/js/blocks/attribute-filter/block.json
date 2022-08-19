@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/attribute-filter",
 	"version": "1.0.0",
-	"title": "Filter Products by Attribute",
-	"description": "Allow customers to filter the grid by product attribute, such as color. Works in combination with the All Products block.",
+	"title": "Filter by Attribute",
+	"description": "Allow customers to filter the grid by product attribute, such as color.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
