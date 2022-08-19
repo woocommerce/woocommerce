@@ -279,7 +279,7 @@ importers:
       moment-timezone: ^0.5.34
       postcss-loader: ^3.0.0
       prop-types: ^15.8.1
-      react: ^17.0.0
+      react: ^17.0.2
       react-dates: ^21.8.0
       react-transition-group: ^4.4.2
       rimraf: ^3.0.2
