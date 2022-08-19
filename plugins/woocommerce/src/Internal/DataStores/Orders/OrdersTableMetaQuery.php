@@ -148,10 +148,6 @@ class OrdersTableMetaQuery {
 	private function sanitize_meta_query( array $q ): array {
 		$sanitized = array();
 
-		if ( ! is_array( $q ) ) {
-			return array();
-		}
-
 		foreach ( $q as $key => $arg ) {
 			if ( 'relation' === $key ) {
 				$relation = $arg;
