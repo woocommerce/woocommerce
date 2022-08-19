@@ -51,3 +51,19 @@
 	}
 
 }
+
+.wc-block-attribute-filter__multiple-toggle,
+.wc-block-attribute-filter__conditions-toggle,
+.wc-block-attribute-filter__display-toggle {
+	width: 100%;
+}
+
+.woocommerce-product-attributes {
+	.woocommerce-search-list__search {
+		.components-base-control__label {
+			@include reset-typography();
+			@include font-size(regular);
+			color: $gray-700;
+		}
+	}
+}
