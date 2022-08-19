@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Pill, EmptyContent, Spinner } from '@woocommerce/components';
-import { flatMapDeep, intersection, uniq } from 'lodash';
+import { flatMapDeep, uniqBy } from 'lodash';
 
 /**
  * Internal dependencies
@@ -23,18 +23,17 @@ import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import './DiscoverTools.scss';
 
 const category = 'marketing';
-const subcategoryTitleMap = {
-	email: __( 'Email', 'woocommerce' ),
-	automations: __( 'Automations', 'woocommerce' ),
-	'sales-channels': __( 'Sales channels', 'woocommerce' ),
-	crm: __( 'CRM', 'woocommerce' ),
-} as const;
-const tagNameMap = {
-	'built-by-woocommerce': __( 'Built by WooCommerce', 'woocommerce' ),
-} as const;
 
-type SubcategoryType = keyof typeof subcategoryTitleMap;
-type TagType = keyof typeof tagNameMap;
+type SubcategoryType = {
+	slug: string;
+	name: string;
+};
+
+type TagType = {
+	slug: string;
+	name: string;
+};
+
 type Plugin = {
 	title: string;
 	description: string;
@@ -60,23 +59,18 @@ type SelectResult = {
  * This is done by doing the following:
  *
  * 1. Get an array of unique subcategories from the list of plugins.
- * 2. Get the intersection of the array and the list of known subcategories.
- * 3. Return the tabs from the intersection.
+ * 2. Map the subcategories schema into tabs schema.
  */
 const getTabs = ( plugins: Plugin[] ) => {
-	const pluginSubcategories = uniq(
-		flatMapDeep( plugins, ( p ) => p.subcategories )
+	const pluginSubcategories = uniqBy(
+		flatMapDeep( plugins, ( p ) => p.subcategories ),
+		( subcategory ) => subcategory.slug
 	);
-	const knownSubcategories = Object.keys( subcategoryTitleMap ) as Array<
-		keyof typeof subcategoryTitleMap
-	>;
 
-	return intersection( pluginSubcategories, knownSubcategories ).map(
-		( subcategory ) => ( {
-			name: subcategory,
-			title: subcategoryTitleMap[ subcategory ],
-		} )
-	);
+	return pluginSubcategories.map( ( subcategory ) => ( {
+		name: subcategory.slug,
+		title: subcategory.name,
+	} ) );
 };
 
 const renderPluginCardBodies = ( plugins: Plugin[] ) => {
@@ -86,8 +80,8 @@ const renderPluginCardBodies = ( plugins: Plugin[] ) => {
 				<PluginCardBody
 					icon={ <img src={ el.icon } alt={ el.title } /> }
 					name={ el.title }
-					pills={ el.tags?.map( ( t ) => (
-						<Pill key={ t }>{ tagNameMap[ t ] }</Pill>
+					pills={ el.tags?.map( ( tag ) => (
+						<Pill key={ tag.slug }>{ tag.name }</Pill>
 					) ) }
 					description={ el.description }
 					button={
@@ -159,16 +153,12 @@ export const DiscoverTools = () => {
 			);
 		}
 
-		if ( ! plugins[ 0 ].subcategories ) {
-			return renderPluginCardBodies( plugins );
-		}
-
 		return (
 			<TabPanel tabs={ getTabs( plugins ) }>
 				{ ( tab ) => {
 					const filteredPlugins = plugins.filter( ( el ) =>
-						el.subcategories?.includes(
-							tab.name as keyof typeof subcategoryTitleMap
+						el.subcategories?.some(
+							( subcategory ) => subcategory.slug === tab.name
 						)
 					);
 
