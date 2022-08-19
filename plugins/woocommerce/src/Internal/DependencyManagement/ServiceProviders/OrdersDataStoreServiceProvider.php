@@ -53,8 +53,6 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				BatchProcessingController::class,
 			)
 		);
-		$this->share( OrdersTableDataStore::class );
-		$this->share( OrdersTableRefundDataStore::class );
 		if ( Constants::is_defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->share( CLIRunner::class )->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class, PostsToOrdersMigrationController::class ) );
 		}

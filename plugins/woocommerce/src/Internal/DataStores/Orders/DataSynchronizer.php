@@ -135,12 +135,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	/**
 	 * Calculate how many orders need to be synchronized currently.
-	 *
-	 * If an option whose name is given by self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION exists,
-	 * then the value of that option is returned. This is temporary, to ease testing the feature
-	 * while it is in development.
-	 *
-	 * Otherwise a database query is performed to get how many orders match one of the following:
+	 * A database query is performed to get how many orders match one of the following:
 	 *
 	 * - Existing in the authoritative table but not in the backup table.
 	 * - Existing in both tables, but they have a different update date.
@@ -148,7 +143,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public function get_current_orders_pending_sync_count(): int {
 		global $wpdb;
 
-		$orders_table                = $wpdb->prefix . 'wc_orders';
+		$orders_table                = $this->data_store::get_orders_table_name();
 		$order_post_types            = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
@@ -226,7 +221,7 @@ SELECT(
 			throw new \Exception( '$limit must be at least 1' );
 		}
 
-		$orders_table                 = $wpdb->prefix . 'wc_orders';
+		$orders_table                 = $this->data_store::get_orders_table_name();
 		$order_post_types             = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholders = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 

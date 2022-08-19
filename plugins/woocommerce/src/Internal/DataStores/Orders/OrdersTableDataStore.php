@@ -1310,6 +1310,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 
+		// Fetch changes.
 		$changes = $order->get_changes();
 		$this->persist_updates( $order );
 
