@@ -50,7 +50,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'filter button can be toggled', async () => {
-			const toggleLabel = await findLabelWithText( 'Filter button' );
+			const toggleLabel = await findLabelWithText( 'Apply filters' );
 			await expect( toggleLabel ).toToggleElement(
 				`${ block.class } .wc-block-filter-submit-button`
 			);

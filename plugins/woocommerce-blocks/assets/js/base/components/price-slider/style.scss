@@ -128,7 +128,9 @@
 	gap: $gap;
 	justify-content: flex-end;
 
-	.wc-block-components-filter-submit-button {
+	// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
+	button[type="submit"]:not(.wp-block-search__button).wc-block-components-filter-submit-button {
+		margin-top: 0;
 		margin-left: 0;
 	}
 }
