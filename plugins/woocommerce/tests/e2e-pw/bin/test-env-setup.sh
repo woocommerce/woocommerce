@@ -20,3 +20,24 @@ wp-env run tests-cli "wp user create customer customer@woocommercecoree2etestsui
 
 echo -e 'Update Blog Name \n'
 wp-env run tests-cli 'wp option update blogname "WooCommerce Core E2E Test Suite"'
+
+# Enable additional WooCommerce features based on command options
+while :; do
+	case $1 in
+		-c|--cot)	# Enable the COT feature
+			echo 'Enable the COT feature'
+			wp-env run tests-cli "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/9d5f174ebf8eec8e0ce5417d00728524c7f3b6b3.zip --activate"
+			;;
+		--)			# End of all options
+			shift
+			break
+			;;
+		-?*)
+			echo "WARN: Unknown option (ignored):" $1 >&2
+			;;
+		*)			# No more options, so break out of the loop
+			break
+	esac
+
+	shift
+done

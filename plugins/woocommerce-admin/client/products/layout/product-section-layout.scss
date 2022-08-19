@@ -8,7 +8,6 @@
 		flex-direction: column;
 		align-items: flex-start;
 		padding: $gap-large;
-		gap: $gap-smaller;
 
 		background: $white;
 		border: 1px solid $gray-400;
@@ -17,5 +16,9 @@
 		> * {
 			width: 100%;
 		}
+	}
+
+	.product-field-layout:not(:first-child) {
+		margin-top: $gap;
 	}
 }

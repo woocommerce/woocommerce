@@ -6,6 +6,7 @@ import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -36,6 +37,11 @@ const useShowStoreLocationTour = () => {
 		isLoading,
 		show: ! isLoading && ! hasReviewedStoreLocationSettings,
 	};
+};
+
+const isFieldFilled = ( fieldSelector: string ) => {
+	const field = document.querySelector< HTMLInputElement >( fieldSelector );
+	return !! field && field.value.length > 0;
 };
 
 const StoreAddressTourOverlay = () => {
@@ -77,7 +83,19 @@ const StoreAddressTourOverlay = () => {
 				},
 			},
 		},
-		closeHandler: () => {
+		closeHandler: ( _steps, _currentStepIndex, source ) => {
+			const fields_filled = {
+				address_1: isFieldFilled( 'input#woocommerce_store_address' ),
+				address_2: isFieldFilled( 'input#woocommerce_store_address_2' ),
+				city: isFieldFilled( 'input#woocommerce_store_city' ),
+				postcode: isFieldFilled( 'input#woocommerce_store_postcode' ),
+			};
+
+			recordEvent( 'settings_store_address_tour_dismiss', {
+				source, // 'close-btn' | 'done-btn'
+				fields_filled,
+			} );
+
 			updateOptions( {
 				[ REVIEWED_STORE_LOCATION_SETTINGS_OPTION ]: 'yes',
 			} );

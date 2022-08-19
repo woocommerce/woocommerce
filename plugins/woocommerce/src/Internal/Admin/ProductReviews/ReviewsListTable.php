@@ -95,6 +95,15 @@ class ReviewsListTable extends WP_List_Table {
 		// Include the offset argument.
 		$args = wp_parse_args( $this->get_offset_arguments(), $args );
 
+		/**
+		 * Provides an opportunity to alter the comment query arguments used within
+		 * the product reviews admin list table.
+		 *
+		 * @since 7.0.0
+		 *
+		 * @param array $args Comment query args.
+		 */
+		$args     = (array) apply_filters( 'woocommerce_product_reviews_list_table_prepare_items_args', $args );
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
@@ -1326,12 +1335,22 @@ class ReviewsListTable extends WP_List_Table {
 	 * @return void
 	 */
 	protected function review_type_dropdown( $current_type ) : void {
-
-		$item_types = [
-			'all'     => __( 'All types', 'woocommerce' ),
-			'comment' => __( 'Replies', 'woocommerce' ),
-			'review'  => __( 'Reviews', 'woocommerce' ),
-		];
+		/**
+		 * Sets the possible options used in the Product Reviews List Table's filter-by-review-type
+		 * selector.
+		 *
+		 * @since 7.0.0
+		 *
+		 * @param array Map of possible review types.
+		 */
+		$item_types = apply_filters(
+			'woocommerce_product_reviews_list_table_item_types',
+			array(
+				'all'     => __( 'All types', 'woocommerce' ),
+				'comment' => __( 'Replies', 'woocommerce' ),
+				'review'  => __( 'Reviews', 'woocommerce' ),
+			)
+		);
 
 		?>
 		<label class="screen-reader-text" for="filter-by-review-type"><?php esc_html_e( 'Filter by review type', 'woocommerce' ); ?></label>

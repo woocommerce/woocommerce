@@ -34,6 +34,7 @@
 		"docker:up": "pnpm exec wc-e2e docker:up",
 		"env:dev": "pnpm wp-env start",
 		"env:test": "pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh",
+		"env:test:cot": "pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh --cot",
 		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
 		"env:down": "pnpm wp-env stop",
 		"env:destroy": "pnpm wp-env destroy",
