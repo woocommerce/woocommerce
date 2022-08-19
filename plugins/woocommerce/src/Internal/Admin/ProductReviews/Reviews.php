@@ -510,10 +510,12 @@ class Reviews {
 				'count'     => true,
 			]
 		);
-		
+
 		/**
 		 * Provides an opportunity to alter the pending comment count used within
 		 * the product reviews admin list table.
+		 *
+		 * @since 7.0.0
 		 *
 		 * @param array $count Current count of comments pending review.
 		 */
