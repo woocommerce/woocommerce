@@ -4,6 +4,11 @@
 import classnames from 'classnames';
 import { recordEvent } from '@woocommerce/tracks';
 
+/**
+ * Internal dependencies
+ */
+import { NUMBERS_AND_ALLOWED_CHARS } from '../constants';
+
 type gettersProps = {
 	context?: {
 		formatCurrency: ( number: number | string ) => string;
@@ -73,16 +78,24 @@ export const getInputControlProps = ( {
 		return;
 	}
 	const { formatCurrency, getCurrencyConfig } = context;
-	const { symbol, symbolPosition } = getCurrencyConfig();
+	const { decimalSeparator, symbol, symbolPosition, thousandSeparator } =
+		getCurrencyConfig();
 	const currencyPosition = symbolPosition.includes( 'left' )
 		? 'prefix'
 		: 'suffix';
 
-	// Since we are showing the currency symbol in the input, we need to remove it from the value.
+	// Cleans the value to show.
+	const regex = new RegExp(
+		NUMBERS_AND_ALLOWED_CHARS.replace( '%s1', decimalSeparator ).replace(
+			'%s2',
+			thousandSeparator
+		),
+		'g'
+	);
 	const currencyString =
 		value === undefined
 			? value
-			: formatCurrency( value ).replace( /[^0-9.,]/g, '' );
+			: formatCurrency( value ).replace( regex, '' );
 	return {
 		value: currencyString,
 		[ currencyPosition ]: symbol,

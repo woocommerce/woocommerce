@@ -18,10 +18,33 @@ import { ProductSectionLayout } from '../layout/product-section-layout';
 import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
 import { CurrencyContext } from '../../lib/currency-context';
+import {
+	NUMBERS_AND_DECIMAL_SEPARATOR,
+	ONLY_ONE_DECIMAL_SEPARATOR,
+} from '../constants';
 
 export const PricingSection: React.FC = () => {
-	const { getInputProps } = useFormContext< Product >();
+	const { getInputProps, setValue } = useFormContext< Product >();
 	const context = useContext( CurrencyContext );
+	const { getCurrencyConfig } = context;
+	const { decimalSeparator } = getCurrencyConfig();
+	const priceValidation = ( value: string, name: string ) => {
+		// Build regex to strip out everything except digits, decimal point and minus sign:
+		const regex = new RegExp(
+			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
+			'g'
+		);
+		const decimalRegex = new RegExp(
+			ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
+			'g'
+		);
+		const cleanValue = value
+			.replace( regex, '' )
+			.replace( decimalRegex, '' );
+		setValue( name, cleanValue );
+		return cleanValue;
+	};
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Pricing', 'woocommerce' ) }
@@ -53,6 +76,9 @@ export const PricingSection: React.FC = () => {
 					...getInputProps( 'regular_price' ),
 					context,
 				} ) }
+				onChange={ ( value: string ) =>
+					priceValidation( value, 'regular_price' )
+				}
 			/>
 			<span className="woocommerce-product-form__secondary-text">
 				Per your&nbsp;
@@ -84,6 +110,9 @@ export const PricingSection: React.FC = () => {
 						...getInputProps( 'sale_price' ),
 						context,
 					} ) }
+					onChange={ ( value: string ) =>
+						priceValidation( value, 'sale_price' )
+					}
 				/>
 			</div>
 		</ProductSectionLayout>
