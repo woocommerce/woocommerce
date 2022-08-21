@@ -103,7 +103,7 @@ class Coupons {
 	public function fix_coupon_menu_highlight() {
 		global $parent_file, $post_type;
 
-		if ( 'shop_coupon' === $post_type ) {
+		if ( $post_type === 'shop_coupon' ) {
 			$parent_file = 'woocommerce-marketing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		}
 	}
@@ -113,7 +113,7 @@ class Coupons {
 	 */
 	public function maybe_add_marketing_coupon_script() {
 		$curent_screen = PageController::get_instance()->get_current_page();
-		if ( ! isset( $curent_screen['id'] ) || 'woocommerce-coupons' !== $curent_screen['id'] ) {
+		if ( ! isset( $curent_screen['id'] ) || $curent_screen['id'] !== 'woocommerce-coupons' ) {
 			return;
 		}
 
@@ -126,15 +126,6 @@ class Coupons {
 			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'marketing-coupons' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'wc-admin-marketing-coupons',
-			WCAdminAssets::get_url( 'wp-admin-scripts/marketing-coupons', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WCAdminAssets::get_file_version( 'js' ),
-			true
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'marketing-coupons', true );
 	}
 }
