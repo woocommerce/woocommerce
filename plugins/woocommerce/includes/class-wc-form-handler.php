@@ -346,6 +346,8 @@ class WC_Form_Handler {
 			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
 
 			do_action( 'woocommerce_save_account_details', $user->ID );
+			
+			do_action( 'password_reset', $user, $pass1 );
 
 			wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
 			exit;
