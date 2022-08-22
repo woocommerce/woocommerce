@@ -33,7 +33,6 @@ import { useCheckoutEventsContext } from './checkout-events';
 import { useShippingDataContext } from './shipping';
 import { useCustomerDataContext } from './customer';
 import { useStoreCart } from '../../hooks/cart/use-store-cart';
-import { useStoreNoticesContext } from '../store-notices';
 
 /**
  * CheckoutProcessor component.
@@ -71,7 +70,6 @@ const CheckoutProcessor = () => {
 	const { shippingErrorStatus } = useShippingDataContext();
 	const { billingAddress, shippingAddress } = useCustomerDataContext();
 	const { cartNeedsPayment, cartNeedsShipping, receiveCart } = useStoreCart();
-	const { setIsSuppressed } = useStoreNoticesContext();
 	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 
 	const {
@@ -117,11 +115,6 @@ const CheckoutProcessor = () => {
 		! checkoutWillHaveError &&
 		( currentPaymentStatus.isSuccessful || ! cartNeedsPayment ) &&
 		checkoutIsProcessing;
-
-	// If express payment method is active, let's suppress notices
-	useEffect( () => {
-		setIsSuppressed( isExpressPaymentMethodActive );
-	}, [ isExpressPaymentMethodActive, setIsSuppressed ] );
 
 	// Determine if checkout has an error.
 	useEffect( () => {
