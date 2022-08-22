@@ -18,7 +18,7 @@ export default class MajorMinor extends Command {
 	/**
 	 * CLI description
 	 */
-	static description = 'Determine major/minor version of WooCommerce plugin';
+	static description = 'Determine major/minor version of a plugin';
 
 	/**
 	 * CLI arguments
@@ -29,6 +29,11 @@ export default class MajorMinor extends Command {
 			description: 'GitHub branch to use to determine version',
 			required: true,
 		},
+		{
+			name: 'pathToMainFile',
+			description: "Path to plugin's main PHP file",
+			required: true,
+		},
 	];
 
 	/**
@@ -36,13 +41,17 @@ export default class MajorMinor extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args } = await this.parse( MajorMinor );
-		const { branch } = args;
+		const { branch, pathToMainFile } = args;
 		const repo = process.cwd();
 
 		CliUx.ux.action.start( `Making a temporary clone of '${ branch }'` );
 
 		const tmpRepoPath = await cloneRepo( repo );
-		const version = await this.getPluginData( tmpRepoPath, branch );
+		const version = await this.getPluginData(
+			tmpRepoPath,
+			pathToMainFile,
+			branch
+		);
 
 		// Clean up the temporary repo.
 		rmSync( tmpRepoPath, { force: true, recursive: true } );
@@ -54,34 +63,30 @@ export default class MajorMinor extends Command {
 	/**
 	 * Get plugin data
 	 *
-	 * @param {string} tmpRepoPath  - Path to repo.
-	 * @param {string} hashOrBranch - Hash or branch to checkout.
+	 * @param {string} tmpRepoPath    - Path to repo.
+	 * @param {string} pathToMainFile - Path to plugin's main PHP file.
+	 * @param {string} hashOrBranch   - Hash or branch to checkout.
 	 * @return {Promise<string>} - Promise containing version as string.
 	 */
 	private async getPluginData(
 		tmpRepoPath: string,
+		pathToMainFile: string,
 		hashOrBranch: string
 	): Promise< string > {
 		const git = simpleGit( { baseDir: tmpRepoPath } );
 		await git.checkout( [ hashOrBranch ] );
 
-		const pluginData = {
-			name: 'WooCommerce',
-			mainFile: join(
-				tmpRepoPath,
-				'plugins',
-				'woocommerce',
-				'woocommerce.php'
-			),
-		};
+		const mainFile = join( tmpRepoPath, pathToMainFile );
 
-		CliUx.ux.action.start( `Getting ${ pluginData.name } version` );
+		CliUx.ux.action.start( `Getting version from ${ pathToMainFile }` );
 
-		const content = readFileSync( pluginData.mainFile ).toString();
+		const content = readFileSync( mainFile ).toString();
 		const rawVer = content.match( /^\s+\*\s+Version:\s+(.*)/m );
 
 		if ( ! rawVer ) {
-			this.error( 'Failed to find plugin version!' );
+			this.error(
+				'Failed to find plugin version! Make sure the file contains a version in the format `Version: ...`'
+			);
 		}
 		const version = rawVer[ 1 ].replace( /\-.*/, '' );
 
