@@ -338,7 +338,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'post_status'   => $this->get_post_status( $order ),
 				'post_parent'   => $order->get_parent_id(),
-				'post_excerpt'  => $this->get_post_excerpt( $order ),
+				'post_excerpt'  => method_exists( $order, 'get_customer_note' ) ? $order->get_customer_note() : '',
 				'post_type'     => 'shop_order',
 			)
 		);

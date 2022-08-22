@@ -79,5 +79,10 @@
 		"@wordpress/babel-preset-default": "^6.4.1",
 		"lodash": "^4.17.21",
 		"wp-textdomain": "1.0.1"
+	},
+	"pnpm": {
+		"overrides": {
+			"@wordpress/element": "4.8.0"
+		}
 	}
 }

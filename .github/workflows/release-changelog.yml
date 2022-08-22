@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Install PNPM
         run: npm install -g pnpm@^6.24.2

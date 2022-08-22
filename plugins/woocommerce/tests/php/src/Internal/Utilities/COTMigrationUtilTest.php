@@ -3,6 +3,8 @@
  * Tests for COTMigration utility.
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
@@ -63,6 +65,40 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $order1->get_id(), $this->sut->get_post_or_order_id( $order1 ) );
 		$this->assertEquals( $order2->get_id(), $this->sut->get_post_or_order_id( $post_from_order2 ) );
+	}
+
+	/**
+	 * @testDox `is_custom_order_tables_in_sync` should return true when Custom Order Tables are in sync.
+	 */
+	public function test_is_custom_order_tables_in_sync_is_true() {
+		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
+			->setMethods( array( 'get_sync_status', 'data_sync_is_enabled' ) )
+			->getMock();
+
+		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
+		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( true );
+
+		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->sut      = new COTMigrationUtil();
+		$this->sut->init( $cot_controller, $data_sync_mock );
+		$this->assertTrue( $this->sut->is_custom_order_tables_in_sync() );
+	}
+
+	/**
+	 * @testDox `is_custom_order_tables_in_sync` should return false when Custom Order Tables are not in sync.
+	 */
+	public function test_is_custom_order_tables_in_sync_is_false() {
+		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
+							->setMethods( array( 'get_sync_status', 'data_sync_is_enabled' ) )
+							->getMock();
+
+		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
+		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( false );
+
+		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->sut      = new COTMigrationUtil();
+		$this->sut->init( $cot_controller, $data_sync_mock );
+		$this->assertFalse( $this->sut->is_custom_order_tables_in_sync() );
 	}
 
 }

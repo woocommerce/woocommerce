@@ -10,25 +10,51 @@ export default {
 	nothanks: __( 'No thanks', 'woocommerce' ),
 	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
 	heading: __( 'WooCommerce Payments', 'woocommerce' ),
-	bannerHeading: __( 'Save big with WooCommerce Payments', 'woocommerce' ),
-	bannerCopy: __(
-		'No card transaction fees for up to 3 months (or $25,000 in payments)',
-		'woocommerce'
+	bannerHeading: __( 'Payments, made simple', 'woocommerce' ),
+	// eslint-disable-next-line @wordpress/i18n-translator-comments
+	bannerCopy: createInterpolateElement(
+		__(
+			'<b>20% off payment processing</b><br/>on up to $1,000,000 USD in payments or over the next 6 months, whichever comes first.*',
+			'woocommerce'
+		),
+		{
+			b: <b />,
+			br: <br />,
+		}
 	),
 	discountCopy: __(
-		'Discount will be applied upon install and completed setup of WooCommerce Payments',
+		'Discount will be applied to payments processed via WooCommerce Payments upon completion of installation, setup, and onboarding of WooCommerce Payments.',
 		'woocommerce'
+	),
+	termsAndConditions: createInterpolateElement(
+		__(
+			'*See <a>Terms and Conditions</a> for more details.',
+			'woocommerce'
+		),
+		{
+			a: (
+				// eslint-disable-next-line jsx-a11y/anchor-has-content
+				<a
+					href="https://woocommerce.com/terms-conditions/woocommerce-payments-promotion-2022/"
+					target="_blank"
+					rel="noopener noreferrer"
+				/>
+			),
+		}
 	),
 	learnMore: __( 'Learn more', 'woocommerce' ),
 
 	onboarding: {
 		description: __(
-			"Save up to $800 in fees by managing transactions with WooCommerce Payments. With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store's dashboard - with no setup costs or monthly fees.",
+			'Run your business and manage your payments all in one place with the only solution built and supported by WooCommerce. With WooCommerce Payments you can collect payments, handle disputes, and track revenue from inside your store’s dashboard – with no setup costs or monthly fees.',
 			'woocommerce'
 		),
 	},
 
-	paymentMethodsHeading: __( 'Accepted payment methods', 'woocommerce' ),
+	paymentMethodsHeading: __(
+		'Give your buyers more ways to pay',
+		'woocommerce'
+	),
 	surveyTitle: __( 'Remove WooCommerce Payments', 'woocommerce' ),
 
 	surveyIntro: createInterpolateElement(
@@ -101,12 +127,12 @@ export default {
 		question1: __( 'What is WooCommerce Payments?', 'woocommerce' ),
 
 		question1Answer1: __(
-			'WooCommerce Payments is an integrated payment solution, built by WooCommerce, for WooCommerce. Use WooCommerce Payments to manage your payments, track cash flow, and manage revenue from your dashboard.',
+			'Run your business and manage your payments all in one place with the only solution built and supported by WooCommerce.',
 			'woocommerce'
 		),
 
 		question1Answer2: __(
-			'You can securely accept credit and debit card payments, Apple Pay, bank transfers, recurring revenue, accelerated checkout, and more - in over 100+ currencies with WooCommerce Payments.',
+			'Collect payments, handle disputes, and track revenue from inside your store’s dashboard. You can also securely accept credit and debit card payments, Apple Pay, local payment methods, recurring revenue, accelerated checkout, and more – in over 100+ currencies with WooCommerce Payments.',
 			'woocommerce'
 		),
 
@@ -126,22 +152,27 @@ export default {
 		),
 
 		question3Answer1: __(
-			"Native dashboard: track cash flow from the same WordPress dashboard you're already using to manage product catalogue, inventory, orders, fulfilment, and otherwise run your online storefront.",
+			"Native dashboard: track cash flow from the same WordPress dashboard you're already using to manage product catalog, inventory, orders, fulfillment, and otherwise run your online storefront.",
 			'woocommerce'
 		),
 
 		question3Answer2: __(
-			'In-person payments: the only payment method that helps you sell online and offline with the official WooCommerce mobile app instead of a paid POS solution.',
+			'In-person payments: WooCommerce Payments enables you to sell online and offline with the official WooCommerce mobile app instead of a paid POS solution (US and Canada only).',
 			'woocommerce'
 		),
 
 		question3Answer3: __(
-			'Subscription functionality: offer customers a recurring option for your inventory without purchasing an additional extension.',
+			'Subscription functionality: offer customers a recurring option for your inventory without purchasing an additional extension (US only).',
 			'woocommerce'
 		),
 
 		question3Answer4: __(
-			'Native multi-currency: increase sales by making it easier for customers outside your country to purchase from your store, without an extension.',
+			'Native multi-currency: multi-currency support built right in. Increase sales by making it easier for customers outside your country to purchase from your store, in local currencies, without another extension.',
+			'woocommerce'
+		),
+
+		question3Answer5: __(
+			'Maximize checkout conversion by providing buyers the payment methods that are most popular and relevant to them including credit & debit cards, Apple Pay, Google Pay, and local options based on their country. WooCommerce Payments gives your store more flexibility and your customers more purchasing power – including compatibility with extensions to add options like PayPal, Amazon Pay, as well as installment and buy now, pay later options like Affirm, Klarna, and Afterpay.',
 			'woocommerce'
 		),
 
@@ -150,15 +181,22 @@ export default {
 			'woocommerce'
 		),
 
-		// eslint-disable-next-line @wordpress/i18n-translator-comments
-		question4Answer1: __(
-			'Stores accepted into the promotional program will receive a 100% discount on transaction fees (excluding currency conversion fees) for the first $25,000 in payments, or 3 months, whichever comes first. Simply install the extension and if eligible you’ll be entered into the promotional offer.',
-			'woocommerce'
-		),
-
-		question4Answer2: __(
-			'To be eligible for this promotional offer, your store must: (1) meet the WooCommerce Payments usage requirements; (2) be a U.S.-based business; (3) not have processed payments through WooCommerce Payments before; and (4) be accepted into the promotional program.',
-			'woocommerce'
+		question4Answer1: createInterpolateElement(
+			// eslint-disable-next-line @wordpress/i18n-translator-comments
+			__(
+				'Stores accepted into the promotional program will receive a 20% discount on total payment processing costs on the first $1,000,000 USD of payment processing volume conducted using WooCommerce Payments, for up to 6 months from the date your store is accepted into the program. Learn more about eligibility for the promotional program and its terms and conditions <a>here</a>.',
+				'woocommerce'
+			),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content
+					<a
+						href="https://woocommerce.com/terms-conditions/woocommerce-payments-promotion-2022/"
+						target="_blank"
+						rel="noopener noreferrer"
+					/>
+				),
+			}
 		),
 
 		question5: __(
@@ -167,43 +205,11 @@ export default {
 		),
 
 		question5Answer1: __(
-			'WooCommerce Payments uses a pay-as-you-go pricing model. You pay only for activity on the account. No setup fee or monthly fee. Fees differ based on the country of your account and country of your customer’s card.',
+			'WooCommerce Payments uses a pay-as-you-go pricing model. You pay only for activity on the account. No setup fee or monthly fee. Fees differ based on the country of your account, the form of payment the buyer chooses, and the country of your customers card.',
 			'woocommerce'
 		),
 
 		question5Answer2: createInterpolateElement(
-			__( '<a>View all fees</a>', 'woocommerce' ),
-			{
-				a: (
-					// eslint-disable-next-line jsx-a11y/anchor-has-content
-					<a
-						href="https://docs.woocommerce.com/document/payments/faq/fees/"
-						target="_blank"
-						rel="noopener noreferrer"
-					/>
-				),
-			}
-		),
-
-		question5Answer7: createInterpolateElement(
-			// eslint-disable-next-line @wordpress/i18n-translator-comments
-			__(
-				'1.5% fee on the payout amount for <a>instant deposits</a>',
-				'woocommerce'
-			),
-			{
-				a: (
-					// eslint-disable-next-line jsx-a11y/anchor-has-content
-					<a
-						href="https://docs.woocommerce.com/document/payments/instant-deposits/"
-						target="_blank"
-						rel="noopener noreferrer"
-					/>
-				),
-			}
-		),
-
-		question5Answer8: createInterpolateElement(
 			__( '<a>View all fees</a>', 'woocommerce' ),
 			{
 				a: (
@@ -224,14 +230,14 @@ export default {
 
 		question6Answer1: createInterpolateElement(
 			__(
-				'For most accounts, <a>WooCommerce Payments</a> automatically pays out your available account balance into your nominated account daily after a standard pending period.',
+				'For most accounts, WooCommerce Payments <a>automatically pays out</a> your available account balance into your nominated account daily after a standard pending period.',
 				'woocommerce'
 			),
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-has-content
 					<a
-						href="https://woocommerce.com/payments/"
+						href="https://woocommerce.com/document/payments/faq/deposit-schedule/"
 						target="_blank"
 						rel="noopener noreferrer"
 					/>
@@ -252,20 +258,6 @@ export default {
 		question6Answer4: __(
 			'Most banks will reflect the deposit in your account as soon as they receive the transfer from WooCommerce Payments. Some may take a few extra days to make the balance available to you.',
 			'woocommerce'
-		),
-
-		question6Answer5: createInterpolateElement(
-			__( '<a>All deposits details</a>', 'woocommerce' ),
-			{
-				a: (
-					// eslint-disable-next-line jsx-a11y/anchor-has-content
-					<a
-						href="https://docs.woocommerce.com/document/payments/faq/deposit-schedule/"
-						target="_blank"
-						rel="noopener noreferrer"
-					/>
-				),
-			}
 		),
 
 		question7: __(
@@ -342,11 +334,19 @@ export default {
 
 		question8Answer1: createInterpolateElement(
 			__(
-				'WooCommerce Payments supports charging automatic recurring payments via the <a>WooCommerce Subscriptions</a> plugin.',
+				'WooCommerce Payments supports charging automatic recurring payments via <a1>built-in subscription functionality</a1> for some stores or the <a2>WooCommerce Subscriptions</a2> plugin for all other stores.',
 				'woocommerce'
 			),
 			{
-				a: (
+				a1: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content
+					<a
+						href="https://woocommerce.com/document/payments/subscriptions/"
+						target="_blank"
+						rel="noopener noreferrer"
+					/>
+				),
+				a2: (
 					// eslint-disable-next-line jsx-a11y/anchor-has-content
 					<a
 						href="https://woocommerce.com/products/woocommerce-subscriptions/"
@@ -357,38 +357,16 @@ export default {
 			}
 		),
 
-		question8Answer2: __(
-			'WooCommerce Payments offers full compatibility with WooCommerce Subscriptions’ features, including:',
-			'woocommerce'
-		),
-
-		question8Answer3: __( 'Subscription suspension', 'woocommerce' ),
-
-		question8Answer4: __( 'Subscription cancellation', 'woocommerce' ),
-
-		question8Answer5: __( 'Subscription reactivation', 'woocommerce' ),
-
-		question8Answer6: __( 'Multiple subscriptions', 'woocommerce' ),
-
-		question8Answer7: __( 'Recurring total changes', 'woocommerce' ),
-
-		question8Answer8: __( 'Payment date changes', 'woocommerce' ),
-
-		question8Answer9: __(
-			'Customer & Store Manager payment method changes',
-			'woocommerce'
-		),
-
-		question8Answer10: createInterpolateElement(
+		question8Answer2: createInterpolateElement(
 			__(
-				'For more details on the subscription features that WooCommerce Payments offers, refer to the <a>subscription section of the WooCommerce Payments start up guide</a>.',
+				'For more details on which subscription offering is right for your store, refer to the <a>guide comparing subscription options</a>.',
 				'woocommerce'
 			),
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-has-content
 					<a
-						href="https://docs.woocommerce.com/document/payments/#subscriptions"
+						href="https://woocommerce.com/document/payments/subscriptions/comparison/"
 						target="_blank"
 						rel="noopener noreferrer"
 					/>

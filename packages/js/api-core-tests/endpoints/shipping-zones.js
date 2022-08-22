@@ -50,6 +50,17 @@ const shippingZonesApi = {
 				updatedShippingZone
 			),
 	},
+	updateRegion: {
+		name: 'Update a shipping zone region',
+		method: 'PUT',
+		path: 'shipping/zones/<id>/locations',
+		responseCode: 200,
+		shippingZone: async ( shippingZoneId, shippingZoneRegion ) =>
+			putRequest(
+				`shipping/zones/${ shippingZoneId }/locations`,
+				shippingZoneRegion
+			),
+	},
 	delete: {
 		name: 'Delete a shipping zone',
 		method: 'DELETE',

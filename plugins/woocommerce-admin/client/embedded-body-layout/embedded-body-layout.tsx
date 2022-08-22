@@ -10,7 +10,7 @@ import QueryString, { parse } from 'qs';
 import { PaymentRecommendations } from '../payments';
 import { ShippingRecommendations } from '../shipping';
 import { EmbeddedBodyProps } from './embedded-body-props';
-import { StoreAddressTour } from './StoreAddressTour';
+import { StoreAddressTour } from '../guided-tours/store-address-tour';
 import './style.scss';
 
 type QueryParams = EmbeddedBodyProps;

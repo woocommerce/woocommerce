@@ -104,14 +104,17 @@ abstract class DataSourcePoller {
 	 * @return array list of specs.
 	 */
 	public function get_specs_from_data_sources() {
-		$specs = get_transient( $this->args['transient_name'] );
+		$locale      = get_user_locale();
+		$specs_group = get_transient( $this->args['transient_name'] ) ?? array();
+		$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : array();
 
-		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+		if ( ! is_array( $specs ) || empty( $specs ) ) {
 			$this->read_specs_from_data_sources();
-			$specs = get_transient( $this->args['transient_name'] );
+			$specs_group = get_transient( $this->args['transient_name'] );
+			$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : array();
 		}
 		$specs = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
-		return false !== $specs ? $specs : array();
+		return $specs !== false ? $specs : array();
 	}
 
 	/**
@@ -130,14 +133,16 @@ abstract class DataSourcePoller {
 			$this->merge_specs( $specs_from_data_source, $specs, $url );
 		}
 
+		$specs_group            = get_transient( $this->args['transient_name'] ) ?? array();
+		$locale                 = get_user_locale();
+		$specs_group[ $locale ] = $specs;
 		// Persist the specs as a transient.
 		set_transient(
 			$this->args['transient_name'],
-			$specs,
+			$specs_group,
 			$this->args['transient_expiry']
 		);
-
-		return 0 !== count( $specs );
+		return count( $specs ) !== 0;
 	}
 
 	/**
@@ -161,7 +166,7 @@ abstract class DataSourcePoller {
 		$logger         = self::get_logger();
 		$response       = wp_remote_get(
 			add_query_arg(
-				'_locale',
+				'locale',
 				get_user_locale(),
 				$url
 			)
@@ -181,7 +186,7 @@ abstract class DataSourcePoller {
 		$body  = $response['body'];
 		$specs = json_decode( $body );
 
-		if ( null === $specs ) {
+		if ( $specs === null ) {
 			$logger->error(
 				'Empty response in data feed',
 				$logger_context

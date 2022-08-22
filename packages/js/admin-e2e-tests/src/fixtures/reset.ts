@@ -21,6 +21,7 @@ const skippedPlugins = [
 	'woocommerce-reset',
 	'basic-auth',
 	'wp-mail-logging',
+	'woocommerce-enable-cot',
 	pluginNameSlug,
 ];
 

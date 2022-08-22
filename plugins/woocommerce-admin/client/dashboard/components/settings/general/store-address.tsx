@@ -354,7 +354,7 @@ export function StoreAddress( {
 	return (
 		<div className="woocommerce-store-address-fields">
 			<SelectControl
-				label={ __( 'Country / Region *', 'woocommerce' ) }
+				label={ __( 'Country / Region', 'woocommerce' ) + ' *' }
 				required
 				autoComplete="new-password" // disable autocomplete and autofill
 				options={ countryStateOptions }

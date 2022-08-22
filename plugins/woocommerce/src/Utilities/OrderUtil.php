@@ -35,6 +35,15 @@ final class OrderUtil {
 	}
 
 	/**
+	 * Checks if posts and order custom table sync is enabled and there are no pending orders.
+	 *
+	 * @return bool
+	 */
+	public static function is_custom_order_tables_in_sync() : bool {
+		return wc_get_container()->get( COTMigrationUtil::class )->is_custom_order_tables_in_sync();
+	}
+
+	/**
 	 * Gets value of a meta key from WC_Data object if passed, otherwise from the post object.
 	 * This helper function support backward compatibility for meta box functions, when moving from posts based store to custom tables.
 	 *

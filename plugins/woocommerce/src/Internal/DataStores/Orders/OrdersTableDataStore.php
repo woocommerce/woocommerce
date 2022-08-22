@@ -1233,7 +1233,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$changes = $order->get_changes();
 
 		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( gmdate( 'Y-m-d H:i:s' ) );
+			$order->set_date_modified( time() );
 		}
 
 		$this->update_post_meta( $order );

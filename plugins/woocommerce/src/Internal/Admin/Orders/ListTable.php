@@ -20,6 +20,13 @@ class ListTable extends WP_List_Table {
 	private $order_query_args = array();
 
 	/**
+	 * Tracks if a filter (ie, date or customer filter) has been applied.
+	 *
+	 * @var bool
+	 */
+	private $has_filter = false;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -41,7 +48,6 @@ class ListTable extends WP_List_Table {
 	 */
 	public function setup(): void {
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
-
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
@@ -73,7 +79,7 @@ class ListTable extends WP_List_Table {
 	 * @return mixed
 	 */
 	public function set_items_per_page( $default, string $option, int $value ) {
-		return 'edit_orders_per_page' === $option ? absint( $value ) : $default;
+		return $option === 'edit_orders_per_page' ? absint( $value ) : $default;
 	}
 
 	/**
@@ -93,7 +99,7 @@ class ListTable extends WP_List_Table {
 				<hr class='wp-header-end'>
 		";
 
-		if ( $this->has_items() ) {
+		if ( $this->has_items() || $this->has_filter ) {
 			$this->views();
 
 			echo '<form id="wc-orders-filter" method="get" action="' . esc_url( get_admin_url( null, 'admin.php' ) ) . '">';
@@ -167,11 +173,13 @@ class ListTable extends WP_List_Table {
 			'limit'    => $limit,
 			'page'     => $this->get_pagenum(),
 			'paginate' => true,
-			'status'   => sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? 'any' ) ),
 			'type'     => 'shop_order',
 		);
 
+		$this->set_status_args();
 		$this->set_order_args();
+		$this->set_date_args();
+		$this->set_customer_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -209,6 +217,63 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Implements date (month-based) filtering.
+	 */
+	private function set_date_args() {
+		$year_month = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
+
+		if ( empty( $year_month ) || ! preg_match( '/^[0-9]{6}$/', $year_month ) ) {
+			return;
+		}
+
+		$year  = (int) substr( $year_month, 0, 4 );
+		$month = (int) substr( $year_month, 4, 2 );
+
+		if ( $month < 0 || $month > 12 ) {
+			return;
+		}
+
+		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
+		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
+		$this->has_filter                       = true;
+	}
+
+	/**
+	 * Implements filtering of orders by customer.
+	 */
+	private function set_customer_args() {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$customer = (int) wp_unslash( $_GET['_customer_user'] ?? '' );
+
+		if ( $customer < 1 ) {
+			return;
+		}
+
+		$this->order_query_args['customer'] = $customer;
+		$this->has_filter                   = true;
+	}
+
+	/**
+	 * Implements filtering of orders by status.
+	 */
+	private function set_status_args() {
+		$status         = trim( sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) );
+		$query_statuses = array();
+
+		if ( empty( $status ) || 'all' === $status ) {
+			$query_statuses = array_intersect(
+				array_keys( wc_get_order_statuses() ),
+				get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
+			);
+		} else {
+			$query_statuses[] = $status;
+			$this->has_filter = true;
+		}
+
+		$this->order_query_args['status'] = $query_statuses;
+	}
+
+	/**
 	 * Get the list of views for this table (all orders, completed orders, etc, each with a count of the number of
 	 * corresponding orders).
 	 *
@@ -220,7 +285,14 @@ class ListTable extends WP_List_Table {
 		$statuses    = wc_get_order_statuses();
 		$current     = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['status'] ?? '' ) ) : 'all';
 
-		foreach ( $statuses as $slug => $name ) {
+		// Add 'draft' and 'trash' to list.
+		foreach ( array( 'draft', 'trash' ) as $wp_status ) {
+			$statuses[ $wp_status ] = ( get_post_status_object( $wp_status ) )->label;
+		}
+
+		$statuses_in_list = array_intersect( array_keys( $statuses ), get_post_stati( array( 'show_in_admin_status_list' => true ) ) );
+
+		foreach ( $statuses_in_list as $slug ) {
 			$total_in_status = $this->count_orders_by_status( $slug );
 
 			if ( $total_in_status > 0 ) {
@@ -229,7 +301,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$all_count         = array_sum( $view_counts );
-		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, 'all' === $current );
+		$view_links['all'] = $this->get_view_link( 'all', __( 'All', 'woocommerce' ), $all_count, '' === $current || 'all' === $current );
 
 		foreach ( $view_counts as $slug => $count ) {
 			$view_links[ $slug ] = $this->get_view_link( $slug, $statuses[ $slug ], $count, $slug === $current );
@@ -238,11 +310,8 @@ class ListTable extends WP_List_Table {
 		return $view_links;
 	}
 
-	// phpcs:disable Generic.Commenting.Todo.CommentFound
 	/**
 	 * Count orders by status.
-	 *
-	 * @todo review and replace (probably not ideal to do this work here).
 	 *
 	 * @param string $status The order status we are interested in.
 	 *
@@ -287,7 +356,7 @@ class ListTable extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		echo '<div class="alignleft actions">';
 
-		if ( 'top' === $which ) {
+		if ( $which === 'top' ) {
 			$this->months_filter();
 			$this->customers_filter();
 
@@ -304,11 +373,11 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Render the months filter dropdown.
 	 *
-	 * @todo [review] we may prefer to move this logic outside of the ListTable class
-	 *
 	 * @return void
 	 */
 	private function months_filter() {
+		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
+
 		global $wp_locale;
 		global $wpdb;
 
@@ -557,7 +626,7 @@ class ListTable extends WP_List_Table {
 
 			$latest_note = current( $latest_notes );
 
-			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
+			if ( isset( $latest_note->content ) && $approved_comments_count === 1 ) {
 				$tooltip = wc_sanitize_tooltip( $latest_note->content );
 			} elseif ( isset( $latest_note->content ) ) {
 				/* translators: %d: notes count */
@@ -568,10 +637,17 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		if ( $tooltip ) {
-			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), wp_kses_post( $tooltip ), esc_html( wc_get_order_status_name( $order->get_status() ) ) );
+		// Gracefully handle legacy statuses.
+		if ( in_array( $order->get_status(), array( 'trash', 'draft' ), true ) ) {
+			$status_name = ( get_post_status_object( $order->get_status() ) )->label;
 		} else {
-			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), esc_html( wc_get_order_status_name( $order->get_status() ) ) );
+			$status_name = wc_get_order_status_name( $order->get_status() );
+		}
+
+		if ( $tooltip ) {
+			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), wp_kses_post( $tooltip ), esc_html( $status_name ) );
+		} else {
+			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), esc_html( $status_name ) );
 		}
 	}
 
@@ -704,8 +780,6 @@ class ListTable extends WP_List_Table {
 		echo '<input type="hidden" name="page" value="wc-orders" >';
 
 		$state_params = array(
-			'_customer_user',
-			'm',
 			'paged',
 			'status',
 		);
@@ -715,7 +789,7 @@ class ListTable extends WP_List_Table {
 				continue;
 			}
 
-			echo '<input type="hidden" name="status" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) ) . '" >';
+			echo '<input type="hidden" name="' . esc_attr( $param ) . '" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) ) . '" >';
 		}
 	}
 
