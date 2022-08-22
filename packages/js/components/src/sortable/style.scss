@@ -7,23 +7,17 @@ $place-holder-size: 5px;
     &.is-dragging {
         display: none;
     }
+}
 
-    &:before {
-        content: '';
-        display: none;
-        width: 100%;
-        height: $place-holder-size;
-        background: $studio-wordpress-blue;
-        position: absolute;
-        top: calc($place-holder-size / -2);
-    }
+.woocommerce-sortable__placeholder {
+    display: none;
+    height: $place-holder-size;
+    width: 100%;
+    background: $studio-wordpress-blue-50;
+    border-radius: 5px;
+    margin: 0;
 
-    &.is-dragging-over:before {
+    &.is-over {
         display: block;
-    }
-
-    &.is-dragging-over-after:before {
-        top: auto;
-        bottom: calc($place-holder-size / -2);
     }
 }
