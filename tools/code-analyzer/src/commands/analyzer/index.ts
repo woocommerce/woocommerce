@@ -51,6 +51,7 @@ export default class Analyzer extends Command {
 			name: 'sinceVersion',
 			description:
 				'Specify the version used to determine which changes are included (version listed in @since code doc).',
+			required: true,
 		},
 	];
 
