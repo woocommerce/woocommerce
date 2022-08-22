@@ -214,13 +214,6 @@
  */
 
 /**
- * @typedef NoticeContext
- *
- * @property {function(boolean):void} setIsSuppressed Consumers can use this setter to suppress notices.
- * @property {boolean}                isSuppressed    Whether notices should be hidden/suppressed.
- */
-
-/**
  * @typedef {Object} ContainerWidthContext
  *
  * @property {boolean} hasContainerWidth  True once the class name has been derived.
