@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { createReduxStore, register } from '@wordpress/data';
+import {
+	createReduxStore,
+	register,
+	subscribe,
+	select as wpDataSelect,
+	dispatch as wpDataDispatch,
+} from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -11,6 +17,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer from './reducers';
 import { DispatchFromMap, SelectFromMap } from '../mapped-types';
+import { checkPaymentMethodsCanPay } from '../payment-methods/check-payment-methods';
 
 export const config = {
 	reducer,
@@ -24,6 +31,22 @@ export const config = {
 
 const store = createReduxStore( STORE_KEY, config );
 register( store );
+
+const isEditor = !! wpDataSelect( 'core/editor' );
+
+if ( isEditor ) {
+	subscribe( async () => {
+		await checkPaymentMethodsCanPay();
+		await checkPaymentMethodsCanPay( true );
+	} );
+
+	const unsubscribeInitializePaymentMethodDataStore = subscribe( async () => {
+		wpDataDispatch(
+			'wc/store/payment-methods'
+		).initializePaymentMethodDataStore();
+		unsubscribeInitializePaymentMethodDataStore();
+	} );
+}
 
 export const CHECKOUT_STORE_KEY = STORE_KEY;
 declare module '@wordpress/data' {

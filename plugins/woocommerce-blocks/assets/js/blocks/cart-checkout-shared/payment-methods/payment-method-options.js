@@ -6,10 +6,7 @@ import {
 	useStoreEvents,
 } from '@woocommerce/base-context/hooks';
 import { cloneElement, useCallback } from '@wordpress/element';
-import {
-	useEditorContext,
-	usePaymentMethodDataContext,
-} from '@woocommerce/base-context';
+import { useEditorContext } from '@woocommerce/base-context';
 import classNames from 'classnames';
 import RadioControlAccordion from '@woocommerce/base-components/radio-control-accordion';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -28,30 +25,26 @@ import { STORE_KEY as PAYMENT_METHOD_DATA_STORE_KEY } from '../../../data/paymen
  * @return {*} The rendered component.
  */
 const PaymentMethodOptions = () => {
-	const { savedPaymentMethods } = usePaymentMethodDataContext(); //TODO: Move this state from the context file
-
 	const {
 		activeSavedToken,
 		activePaymentMethod,
 		isExpressPaymentMethodActive,
+		savedPaymentMethods,
+		availablePaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
 		return {
 			activeSavedToken: store.getActiveSavedToken(),
 			activePaymentMethod: store.getActivePaymentMethod(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
+			savedPaymentMethods: store.getSavedPaymentMethods(),
+			availablePaymentMethods: store.getAvailablePaymentMethods(),
 		};
 	} );
 	const { setActivePaymentMethod } = useDispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
 	const paymentMethods = getPaymentMethods();
-	const { availablePaymentMethods } = useSelect( ( select ) => {
-		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
-		return {
-			availablePaymentMethods: store.getAvailablePaymentMethods(),
-		};
-	} );
 	const { ...paymentMethodInterface } = usePaymentMethodInterface();
 	const { removeNotice } = useDispatch( 'core/notices' );
 	const { dispatchCheckoutEvent } = useStoreEvents();

@@ -25,12 +25,7 @@ import { noticeContexts } from '../../base/context/event-emit';
 
 export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const isEditor = !! select( 'core/editor' );
-	const cartTotalsLoaded =
-		select( CART_STORE_KEY ).hasFinishedResolution( 'getCartTotals' );
-	// The cart hasn't finished resolving yet. The "cartTotalsLoaded" is always "false" in the editor mode
-	if ( ! cartTotalsLoaded && ! isEditor ) {
-		return false;
-	}
+
 	let availablePaymentMethods = {};
 	const paymentMethods = express
 		? getExpressPaymentMethods()
@@ -41,9 +36,10 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			| PaymentMethodConfigInstance
 			| ExpressPaymentMethodConfigInstance
 	) => {
+		const { name } = paymentMethod;
 		availablePaymentMethods = {
 			...availablePaymentMethods,
-			[ paymentMethod.name ]: paymentMethod,
+			[ paymentMethod.name ]: { name },
 		};
 	};
 
@@ -113,7 +109,6 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 					context: noticeContext,
 					id: `wc-${ paymentMethod.paymentMethodId }-registration-error`,
 				} );
-				return false;
 			}
 		}
 	}
@@ -135,26 +130,12 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		return true;
 	}
 
-	const {
-		setAvailablePaymentMethods,
-		setAvailableExpressPaymentMethods,
-		setPaymentMethodsInitialized,
-		setExpressPaymentMethodsInitialized,
-	} = dispatch( PAYMENT_METHOD_DATA_STORE_KEY );
+	const { setAvailablePaymentMethods, setAvailableExpressPaymentMethods } =
+		dispatch( PAYMENT_METHOD_DATA_STORE_KEY );
 	if ( express ) {
 		setAvailableExpressPaymentMethods( availablePaymentMethods );
-
-		// Note: Some 4rd party payment methods use the `canMakePayment` callback to initialize / setup.
-		// That's why we track "is initialized" state here.
-		setExpressPaymentMethodsInitialized( true );
-
 		return true;
 	}
 	setAvailablePaymentMethods( availablePaymentMethods );
-
-	// Note: Some 4rd party payment methods use the `canMakePayment` callback to initialize / setup.
-	// That's why we track "is initialized" state here.
-	setPaymentMethodsInitialized( true );
-
 	return true;
 };

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { select as wpDataSelect } from '@wordpress/data';
 import {
 	PaymentMethods,
 	ExpressPaymentMethods,
@@ -14,7 +13,6 @@ import { ACTION_TYPES } from './action-types';
 import { checkPaymentMethodsCanPay } from './check-payment-methods';
 import { setDefaultPaymentMethod } from './set-default-payment-method';
 import { PaymentStatus } from './types';
-import { CART_STORE_KEY } from '../cart';
 
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
@@ -81,6 +79,8 @@ export const setAvailablePaymentMethods = (
 ) => {
 	return async ( { dispatch } ) => {
 		// If the currently selected method is not in this new list, then we need to select a new one, or select a default.
+
+		// TODO See if we can stop this being dispatched if the currently selected method is still available.
 		await setDefaultPaymentMethod( paymentMethods );
 		dispatch( {
 			type: ACTION_TYPES.SET_AVAILABLE_PAYMENT_METHODS,
@@ -118,36 +118,13 @@ export const removeRegisteredExpressPaymentMethod = ( name: string ) => ( {
 	name,
 } );
 
-/**
- * Checks the payment methods held in the registry can make a payment
- * and updates the available payment methods in the store.
- */
-export function updateAvailablePaymentMethods() {
+export function initializePaymentMethodDataStore() {
 	return async ( { dispatch } ) => {
-		const registered = await checkPaymentMethodsCanPay();
-		const cartTotalsLoaded =
-			wpDataSelect( CART_STORE_KEY ).hasFinishedResolution(
-				'getCartTotals'
-			);
-		if ( registered && cartTotalsLoaded ) {
-			dispatch( setPaymentMethodsInitialized( true ) );
-		}
-	};
-}
-
-/**
- * Checks the express payment methods held in the registry can make a payment
- * and updates the available express payment methods in the store.
- */
-export function updateAvailableExpressPaymentMethods() {
-	return async ( { dispatch } ) => {
-		const registered = await checkPaymentMethodsCanPay( true );
-		const cartTotalsLoaded =
-			wpDataSelect( CART_STORE_KEY ).hasFinishedResolution(
-				'getCartTotals'
-			);
-		if ( registered && cartTotalsLoaded ) {
+		const expressRegistered = await checkPaymentMethodsCanPay( true );
+		const registered = await checkPaymentMethodsCanPay( false );
+		if ( registered && expressRegistered ) {
 			dispatch( setExpressPaymentMethodsInitialized( true ) );
+			dispatch( setPaymentMethodsInitialized( true ) );
 		}
 	};
 }
