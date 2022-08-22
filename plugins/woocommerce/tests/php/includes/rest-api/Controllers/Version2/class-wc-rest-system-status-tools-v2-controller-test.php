@@ -86,7 +86,8 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	private function cleanup_data_for_expired_download_permissions_test() {
-		$this->downloads[1]->delete();
+		$download = new WC_Customer_Download( $this->downloads[1] );
+		$download->delete();
 	}
 
 	/**
