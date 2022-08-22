@@ -45,7 +45,7 @@
 		"<rootDir>/node_modules/",
 		"<rootDir>/vendor/"
 	],
-	"transformIgnorePatterns": [ "/node_modules/(?!(simple-html-tokenizer|@wordpress\/redux-routine)/)/" ],
+	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
 	"testEnvironment": "jsdom",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
