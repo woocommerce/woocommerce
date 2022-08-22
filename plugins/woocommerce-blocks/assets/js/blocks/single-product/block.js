@@ -7,10 +7,7 @@ import {
 	InnerBlockLayoutContextProvider,
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
-import {
-	StoreNoticesProvider,
-	StoreNoticesContainer,
-} from '@woocommerce/base-context';
+import { StoreNoticesContainer } from '@woocommerce/base-context';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 
 /**
@@ -49,9 +46,7 @@ const Block = ( { isLoading, product, children } ) => {
 				product={ product }
 				isLoading={ isLoading }
 			>
-				<StoreNoticesProvider>
-					<StoreNoticesContainer context={ noticeContext } />
-				</StoreNoticesProvider>
+				<StoreNoticesContainer context={ noticeContext } />
 				<div className={ className }>{ children }</div>
 			</ProductDataContextProvider>
 		</InnerBlockLayoutContextProvider>

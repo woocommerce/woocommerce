@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { StoreNoticesProvider } from '@woocommerce/base-context';
 import { renderFrontend } from '@woocommerce/base-utils';
 
 /**
@@ -15,11 +14,7 @@ import Block from './block';
  * @param {*} props
  */
 const AllProductsFrontend = ( props ) => {
-	return (
-		<StoreNoticesProvider context="wc/all-products">
-			<Block { ...props } />
-		</StoreNoticesProvider>
-	);
+	return <Block { ...props } />;
 };
 
 const getProps = ( el ) => ( {
