@@ -17,7 +17,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 }: ImageGalleryProps ) => {
 	return (
 		<div className="woocommerce-image-gallery">
-			<Sortable>
+			<Sortable isHorizontal>
 				{ Children.map( children, ( child ) => (
 					<SortableHandle>{ child }</SortableHandle>
 				) ) }

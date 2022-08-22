@@ -6,7 +6,7 @@ import { DragEvent } from 'react';
 /**
  * Internal dependencies
  */
-import { moveIndex, isUpperHalf } from '../utils';
+import { moveIndex, isBefore } from '../utils';
 
 describe( 'utils', () => {
 	it( 'should move the from index to a higher index', () => {
@@ -37,9 +37,7 @@ describe( 'utils', () => {
 				} ),
 			},
 		} as unknown;
-		expect(
-			isUpperHalf( event as DragEvent< HTMLLIElement > )
-		).toBeTruthy();
+		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeTruthy();
 	} );
 
 	it( 'should return true when the element is placed lower in the page', () => {
@@ -52,9 +50,7 @@ describe( 'utils', () => {
 				} ),
 			},
 		} as unknown;
-		expect(
-			isUpperHalf( event as DragEvent< HTMLLIElement > )
-		).toBeTruthy();
+		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeTruthy();
 	} );
 
 	it( 'should return false when the cursor is more than half way down', () => {
@@ -67,9 +63,7 @@ describe( 'utils', () => {
 				} ),
 			},
 		} as unknown;
-		expect(
-			isUpperHalf( event as DragEvent< HTMLLIElement > )
-		).toBeFalsy();
+		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeFalsy();
 	} );
 
 	it( 'should return false when the element is lower in the page', () => {
@@ -82,8 +76,6 @@ describe( 'utils', () => {
 				} ),
 			},
 		} as unknown;
-		expect(
-			isUpperHalf( event as DragEvent< HTMLLIElement > )
-		).toBeFalsy();
+		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeFalsy();
 	} );
 } );
