@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command } from '@oclif/core';
+import { CliUx, Command, Flags } from '@oclif/core';
 import { join } from 'path';
 import { readFileSync, rmSync } from 'fs';
 import simpleGit from 'simple-git';
@@ -37,16 +37,27 @@ export default class MajorMinor extends Command {
 	];
 
 	/**
+	 * CLI flags.
+	 */
+	static flags = {
+		source: Flags.string( {
+			char: 's',
+			description: 'Git repo url or local path to a git repo.',
+			default: process.cwd(),
+		} ),
+	};
+
+	/**
 	 * This method is called to execute the command
 	 */
 	async run(): Promise< void > {
-		const { args } = await this.parse( MajorMinor );
+		const { args, flags } = await this.parse( MajorMinor );
+		const { source } = flags;
 		const { branch, pathToMainFile } = args;
-		const repo = process.cwd();
 
 		CliUx.ux.action.start( `Making a temporary clone of '${ branch }'` );
 
-		const tmpRepoPath = await cloneRepo( repo );
+		const tmpRepoPath = await cloneRepo( source );
 		const version = await this.getPluginData(
 			tmpRepoPath,
 			pathToMainFile,
