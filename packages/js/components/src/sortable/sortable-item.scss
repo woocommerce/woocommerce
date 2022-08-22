@@ -1,0 +1,8 @@
+.woocommerce-sortable__item {
+    margin: 0;
+    position: relative;
+
+    &.is-dragging {
+        display: none;
+    }
+}

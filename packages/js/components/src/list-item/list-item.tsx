@@ -8,7 +8,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Handle } from './handle';
+import { SortableHandle } from '../sortable';
 
 export type ListItemProps = {
 	children: JSX.Element | JSX.Element[] | string;
@@ -26,7 +26,10 @@ export const ListItem = ( {
 	return (
 		<div className={ classnames( 'woocommerce-list-item' ) }>
 			{ isDraggable && (
-				<Handle onDragEnd={ onDragEnd } onDragStart={ onDragStart } />
+				<SortableHandle
+					onDragEnd={ onDragEnd }
+					onDragStart={ onDragStart }
+				/>
 			) }
 			{ children }
 		</div>

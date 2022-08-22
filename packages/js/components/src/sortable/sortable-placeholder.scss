@@ -1,0 +1,14 @@
+$place-holder-size: 3px;
+
+.woocommerce-sortable__placeholder {
+    display: none;
+    height: $place-holder-size;
+    width: 100%;
+    background: #007CBA;
+    border-radius: 24px;
+    margin: 0;
+
+    &.is-over {
+        display: block;
+    }
+}

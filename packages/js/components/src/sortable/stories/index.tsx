@@ -8,8 +8,8 @@ import { Icon, wordpress } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { Sortable } from '..';
-import { Handle, ListItem } from '../../list-item';
+import { Sortable, SortableHandle } from '..';
+import { ListItem } from '../../list-item';
 
 export const Basic = () => {
 	return (
@@ -43,9 +43,12 @@ export const CustomHandle = () => {
 	}: CustomListItemProps ) => {
 		return (
 			<>
-				<Handle onDragEnd={ onDragEnd } onDragStart={ onDragStart }>
+				<SortableHandle
+					onDragEnd={ onDragEnd }
+					onDragStart={ onDragStart }
+				>
 					<Icon icon={ wordpress } size={ 16 } />
-				</Handle>
+				</SortableHandle>
 				{ children }
 			</>
 		);
