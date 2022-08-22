@@ -23,8 +23,8 @@ describe( 'paymentMethodDataReducer', () => {
 			isSuccessful: false,
 			isDoingExpressPayment: false,
 		},
-		registeredPaymentMethods: [],
-		registeredExpressPaymentMethods: [],
+		availablePaymentMethods: {},
+		availableExpressPaymentMethods: {},
 		paymentMethodData: {},
 		paymentMethodsInitialized: false,
 		expressPaymentMethodsInitialized: false,
@@ -35,10 +35,10 @@ describe( 'paymentMethodDataReducer', () => {
 		activeSavedToken: '',
 	} );
 
-	it( 'sets state as expected when adding a registered payment method', () => {
+	it( 'sets state as expected when adding a payment method', () => {
 		const nextState = reducer( originalState, {
-			type: ACTION_TYPES.ADD_REGISTERED_PAYMENT_METHOD,
-			name: 'my-new-method',
+			type: ACTION_TYPES.SET_AVAILABLE_PAYMENT_METHODS,
+			paymentMethods: { 'my-new-method': { express: false } },
 		} );
 		expect( nextState ).toEqual( {
 			paymentStatuses: PAYMENT_METHOD_STATUS,
@@ -52,8 +52,8 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 				isDoingExpressPayment: false,
 			},
-			registeredPaymentMethods: [ 'my-new-method' ],
-			registeredExpressPaymentMethods: [],
+			availablePaymentMethods: { 'my-new-method': { express: false } },
+			availableExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -65,7 +65,7 @@ describe( 'paymentMethodDataReducer', () => {
 		} );
 	} );
 
-	it( 'sets state as expected when removing a registered payment method', () => {
+	it( 'sets state as expected when removing a payment method', () => {
 		const stateWithRegisteredMethod = deepFreeze( {
 			paymentStatuses: PAYMENT_METHOD_STATUS,
 			currentStatus: {
@@ -78,8 +78,8 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 				isDoingExpressPayment: false,
 			},
-			registeredPaymentMethods: [ 'my-new-method' ],
-			registeredExpressPaymentMethods: [],
+			availablePaymentMethods: { 'my-new-method': { express: false } },
+			availableExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -90,7 +90,7 @@ describe( 'paymentMethodDataReducer', () => {
 			activeSavedToken: '',
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
-			type: ACTION_TYPES.REMOVE_REGISTERED_PAYMENT_METHOD,
+			type: ACTION_TYPES.REMOVE_AVAILABLE_PAYMENT_METHOD,
 			name: 'my-new-method',
 		} );
 		expect( nextState ).toEqual( {
@@ -105,8 +105,8 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 				isDoingExpressPayment: false,
 			},
-			registeredPaymentMethods: [],
-			registeredExpressPaymentMethods: [],
+			availablePaymentMethods: {},
+			availableExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -118,10 +118,10 @@ describe( 'paymentMethodDataReducer', () => {
 		} );
 	} );
 
-	it( 'sets state as expected when adding a registered express payment method', () => {
+	it( 'sets state as expected when adding an express payment method', () => {
 		const nextState = reducer( originalState, {
-			type: ACTION_TYPES.ADD_REGISTERED_EXPRESS_PAYMENT_METHOD,
-			name: 'my-new-method',
+			type: ACTION_TYPES.SET_AVAILABLE_EXPRESS_PAYMENT_METHODS,
+			paymentMethods: { 'my-new-method': { express: true } },
 		} );
 		expect( nextState ).toEqual( {
 			paymentStatuses: PAYMENT_METHOD_STATUS,
@@ -135,8 +135,10 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 				isDoingExpressPayment: false,
 			},
-			registeredPaymentMethods: [],
-			registeredExpressPaymentMethods: [ 'my-new-method' ],
+			availablePaymentMethods: {},
+			availableExpressPaymentMethods: {
+				'my-new-method': { express: true },
+			},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -148,7 +150,7 @@ describe( 'paymentMethodDataReducer', () => {
 		} );
 	} );
 
-	it( 'sets state as expected when removing a registered express payment method', () => {
+	it( 'sets state as expected when removing an express payment method', () => {
 		const stateWithRegisteredMethod = deepFreeze( {
 			paymentStatuses: PAYMENT_METHOD_STATUS,
 			currentStatus: {
@@ -161,8 +163,8 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 				isDoingExpressPayment: false,
 			},
-			registeredPaymentMethods: [],
-			registeredExpressPaymentMethods: [ 'my-new-method' ],
+			availablePaymentMethods: {},
+			availableExpressPaymentMethods: [ 'my-new-method' ],
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -173,7 +175,7 @@ describe( 'paymentMethodDataReducer', () => {
 			activeSavedToken: '',
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
-			type: ACTION_TYPES.REMOVE_REGISTERED_EXPRESS_PAYMENT_METHOD,
+			type: ACTION_TYPES.REMOVE_AVAILABLE_EXPRESS_PAYMENT_METHOD,
 			name: 'my-new-method',
 		} );
 		expect( nextState ).toEqual( {
@@ -188,8 +190,8 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 				isDoingExpressPayment: false,
 			},
-			registeredPaymentMethods: [],
-			registeredExpressPaymentMethods: [],
+			availablePaymentMethods: {},
+			availableExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
