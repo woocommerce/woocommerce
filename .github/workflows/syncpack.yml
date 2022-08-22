@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - trunk
+    paths:
+      - '**/package.json'
 jobs:
   syncpack:
     runs-on: ubuntu-latest
