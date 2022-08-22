@@ -48,11 +48,7 @@ export const registerPaymentMethod = (
 		paymentMethodConfig = new PaymentMethodConfig( options );
 	}
 	if ( paymentMethodConfig instanceof PaymentMethodConfig ) {
-		const { updateAvailablePaymentMethods } = dispatch(
-			PAYMENT_METHOD_DATA_STORE_KEY
-		);
 		paymentMethods[ paymentMethodConfig.name ] = paymentMethodConfig;
-		updateAvailablePaymentMethods();
 	}
 };
 
@@ -78,11 +74,7 @@ export const registerExpressPaymentMethod = (
 		paymentMethodConfig = new ExpressPaymentMethodConfig( options );
 	}
 	if ( paymentMethodConfig instanceof ExpressPaymentMethodConfig ) {
-		const { updateAvailableExpressPaymentMethods } = dispatch(
-			PAYMENT_METHOD_DATA_STORE_KEY
-		);
 		expressPaymentMethods[ paymentMethodConfig.name ] = paymentMethodConfig;
-		updateAvailableExpressPaymentMethods();
 	}
 };
 

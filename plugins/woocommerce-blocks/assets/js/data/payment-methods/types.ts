@@ -85,9 +85,7 @@ export type PaymentMethodCurrentStatusType = {
 	isDoingExpressPayment: boolean;
 };
 
-export type PaymentMethodDataContextType = {
-	// Returns the customer payment for the customer if it exists.
-	savedPaymentMethods: SavedPaymentMethods;
+export type PaymentMethodEventsContextType = {
 	// Event registration callback for registering observers for the payment processing event.
 	onPaymentProcessing: ReturnType< typeof emitterCallback >;
 };

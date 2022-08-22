@@ -1,4 +1,4 @@
 export {
 	PaymentMethodDataProvider,
-	usePaymentMethodDataContext,
-} from './payment-method-data-context';
+	usePaymentMethodEventsContext,
+} from './payment-method-events-context';

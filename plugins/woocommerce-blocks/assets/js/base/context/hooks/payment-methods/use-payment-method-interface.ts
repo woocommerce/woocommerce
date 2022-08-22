@@ -24,7 +24,7 @@ import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
 import { noticeContexts, responseTypes } from '../../event-emit';
 import { useCheckoutEventsContext } from '../../providers/cart-checkout/checkout-events';
-import { usePaymentMethodDataContext } from '../../providers/cart-checkout/payment-methods';
+import { usePaymentMethodEventsContext } from '../../providers/cart-checkout/payment-methods';
 import { useShippingDataContext } from '../../providers/cart-checkout/shipping';
 import { useCustomerDataContext } from '../../providers/cart-checkout/customer';
 import { prepareTotalItems } from './utils';
@@ -69,7 +69,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		PAYMENT_METHOD_DATA_STORE_KEY
 	);
 
-	const { onPaymentProcessing } = usePaymentMethodDataContext();
+	const { onPaymentProcessing } = usePaymentMethodEventsContext();
 	const {
 		shippingErrorStatus,
 		shippingErrorTypes,

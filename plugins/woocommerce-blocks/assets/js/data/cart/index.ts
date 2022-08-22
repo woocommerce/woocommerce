@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import {
+	dispatch as wpDataDispatch,
+	registerStore,
+	select as wpDataSelect,
+} from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
 
 /**
@@ -32,6 +36,19 @@ registeredStore.subscribe( async () => {
 	await checkPaymentMethodsCanPay();
 	await checkPaymentMethodsCanPay( true );
 } );
+
+const unsubscribeInitializePaymentMethodDataStore = registeredStore.subscribe(
+	async () => {
+		const cartLoaded =
+			wpDataSelect( STORE_KEY ).hasFinishedResolution( 'getCartTotals' );
+		if ( cartLoaded ) {
+			wpDataDispatch(
+				'wc/store/payment-methods'
+			).initializePaymentMethodDataStore();
+			unsubscribeInitializePaymentMethodDataStore();
+		}
+	}
+);
 
 export const CART_STORE_KEY = STORE_KEY;
 

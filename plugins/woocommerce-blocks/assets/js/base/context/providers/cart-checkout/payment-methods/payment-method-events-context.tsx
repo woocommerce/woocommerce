@@ -7,7 +7,6 @@ import {
 	useReducer,
 	useRef,
 	useEffect,
-	useMemo,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -19,20 +18,17 @@ import {
 /**
  * Internal dependencies
  */
-import type {
-	SavedPaymentMethods,
-	PaymentMethodDataContextType,
-} from '../../../../../data/payment-methods/types';
+import type { PaymentMethodEventsContextType } from '../../../../../data/payment-methods/types';
 import { DEFAULT_PAYMENT_METHOD_DATA } from './constants';
-import { useEditorContext } from '../../editor-context';
 import { useEventEmitters, reducer as emitReducer } from './event-emit';
 import { useCustomerData } from '../../../hooks/use-customer-data';
 
-const PaymentMethodDataContext = createContext( DEFAULT_PAYMENT_METHOD_DATA );
+const PaymentMethodEventsContext = createContext( DEFAULT_PAYMENT_METHOD_DATA );
 
-export const usePaymentMethodDataContext = (): PaymentMethodDataContextType => {
-	return useContext( PaymentMethodDataContext );
-};
+export const usePaymentMethodEventsContext =
+	(): PaymentMethodEventsContextType => {
+		return useContext( PaymentMethodEventsContext );
+	};
 
 /**
  * PaymentMethodDataProvider is automatically included in the CheckoutDataProvider.
@@ -61,11 +57,7 @@ export const PaymentMethodDataProvider = ( {
 			isCalculating: store.isCalculating(),
 		};
 	} );
-	const {
-		currentStatus,
-		activeSavedPaymentMethods,
-		paymentMethodsInitialized,
-	} = useSelect( ( select ) => {
+	const { currentStatus } = useSelect( ( select ) => {
 		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
 
 		return {
@@ -74,7 +66,7 @@ export const PaymentMethodDataProvider = ( {
 			paymentMethodsInitialized: store.paymentMethodsInitialized(),
 		};
 	} );
-	const { isEditor, getPreviewData } = useEditorContext();
+
 	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
@@ -92,20 +84,6 @@ export const PaymentMethodDataProvider = ( {
 		emitProcessingEvent: emitPaymentProcessingEvent,
 	} = useDispatch( PAYMENT_METHOD_DATA_STORE_KEY );
 	const { setBillingAddress, setShippingAddress } = useCustomerData();
-
-	const savedPaymentMethods = useMemo( (): SavedPaymentMethods => {
-		if ( isEditor ) {
-			return getPreviewData(
-				'previewSavedPaymentMethods'
-			) as SavedPaymentMethods;
-		}
-		return paymentMethodsInitialized ? activeSavedPaymentMethods : {};
-	}, [
-		isEditor,
-		getPreviewData,
-		paymentMethodsInitialized,
-		activeSavedPaymentMethods,
-	] );
 
 	// flip payment to processing if checkout processing is complete, there are no errors, and payment status is started.
 	useEffect( () => {
@@ -163,14 +141,13 @@ export const PaymentMethodDataProvider = ( {
 		emitPaymentProcessingEvent,
 	] );
 
-	const paymentContextData: PaymentMethodDataContextType = {
+	const paymentContextData: PaymentMethodEventsContextType = {
 		onPaymentProcessing,
-		savedPaymentMethods,
 	};
 
 	return (
-		<PaymentMethodDataContext.Provider value={ paymentContextData }>
+		<PaymentMethodEventsContext.Provider value={ paymentContextData }>
 			{ children }
-		</PaymentMethodDataContext.Provider>
+		</PaymentMethodEventsContext.Provider>
 	);
 };

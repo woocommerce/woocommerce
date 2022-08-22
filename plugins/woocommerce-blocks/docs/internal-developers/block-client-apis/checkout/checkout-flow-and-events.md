@@ -113,7 +113,7 @@ The possible _internal_ statuses that may be set are:
 -   `FAILED`: This status is set after an observer hooked into the payment processing event returns a fail response. This in turn will end up causing the checkout `hasError` flag to be set to true.
 -   `ERROR`: This status is set after an observer hooked into the payment processing event returns an error response. This in turn will end up causing the checkout `hasError` flag to be set to true.
 
-The provider exposes the current status of the payment method data context via the `currentStatus` object. You can retrieve this via the `usePaymentMethodDataContext` hook.
+The provider exposes the current status of the payment method data context via the `currentStatus` object. You can retrieve this via the `usePaymentMethodEventsContext` hook.
 
 The `currentStatus` object has the following properties:
 
@@ -304,16 +304,16 @@ If the response object doesn't match any of the above conditions, then the fallb
 
 When the payment status is set to `SUCCESS` and the checkout status is `PROCESSING`, the `CheckoutProcessor` component will trigger the request to the server for processing the order.
 
-This event emitter subscriber can be obtained via the checkout context using the `usePaymentMethodDataContext` hook or to payment method extensions as a prop on their registered component:
+This event emitter subscriber can be obtained via the checkout context using the `usePaymentMethodEventsContext` hook or to payment method extensions as a prop on their registered component:
 
 _For internal development:_
 
 ```jsx
-import { usePaymentMethodDataContext } from '@woocommerce/base-contexts';
+import { usePaymentMethodEventsContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onPaymentProcessing } = usePaymentMethodDataContext();
+	const { onPaymentProcessing } = usePaymentMethodEventsContext();
 	useEffect( () => {
 		const unsubscribe = onPaymentProcessing( () => true );
 		return unsubscribe;
