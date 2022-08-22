@@ -6,8 +6,7 @@ import { Children, createElement, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Handle } from '../list-item';
-import { Sortable } from '../sortable';
+import { Sortable, SortableHandle } from '../sortable';
 
 export type ImageGalleryProps = {
 	children: JSX.Element | JSX.Element[];
@@ -20,7 +19,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		<div className="woocommerce-image-gallery">
 			<Sortable>
 				{ Children.map( children, ( child ) => (
-					<Handle>{ child }</Handle>
+					<SortableHandle>{ child }</SortableHandle>
 				) ) }
 			</Sortable>
 		</div>

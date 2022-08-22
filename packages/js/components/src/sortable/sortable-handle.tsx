@@ -10,19 +10,19 @@ import { DragEventHandler } from 'react';
  */
 import { DraggableIcon } from './draggable-icon';
 
-type HandleProps = {
+type SortableHandleProps = {
 	children?: React.ReactNode;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
 };
 
-export const Handle = ( {
+export const SortableHandle = ( {
 	children,
 	onDragStart = () => null,
 	onDragEnd = () => null,
-}: HandleProps ) => (
+}: SortableHandleProps ) => (
 	<span
-		className="woocommerce-list-item__handle"
+		className="woocommerce-sortable__handle"
 		draggable
 		onDragStart={ onDragStart }
 		onDragEnd={ onDragEnd }
