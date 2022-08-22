@@ -24,4 +24,3 @@ Name | Type | Default | Description
 `onDragOver` | Function | `() => null` | A callback when an item is being dragged over by another item
 `onDragStart` | Function | `() => null` | A callback when an item starts being dragged
 `onOrderChange` | Function | `() => null` | A callback when the order of the items has been updated
-`shouldRenderHandles` | Boolean | `true` | Whether or not the default handles should be added with the list item

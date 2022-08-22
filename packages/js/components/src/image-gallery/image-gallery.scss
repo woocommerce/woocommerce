@@ -1,6 +1,42 @@
 .woocommerce-image-gallery {
+    img {
+        display: block;
+    }
+
     .woocommerce-sortable {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: min-content min-content;
+        grid-gap: $gap;
+    }
+
+    .woocommerce-sortable__handle {
+        display: block;
+        margin: 0;
+    }
+
+    .woocommerce-sortable__item {
+        &.is-dragging-over-before:before,
+        &.is-dragging-over-after:after {
+            content: '';
+            display: block;
+            height: 100%;
+            width: 3px;
+            background: #007CBA;
+            border-radius: 24px;
+            position: absolute;
+            left: calc( $gap / -2 - 1px );
+            top: 0;
+        }
+
+
+        &.is-dragging-over-after:after {
+            display: none;
+            left: auto;
+            right: calc( $gap / -2 - 1px );
+        }
+
+        &.is-dragging-over-after:nth-last-child(2):after {
+            display: block;
+        }
     }
 }

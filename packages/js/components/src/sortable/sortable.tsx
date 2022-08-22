@@ -27,6 +27,7 @@ export type SortableProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
+	shouldRenderPlaceholders?: boolean;
 };
 
 const THROTTLE_TIME = 16;
@@ -38,6 +39,7 @@ export const Sortable = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
+	shouldRenderPlaceholders = false,
 }: SortableProps ) => {
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
@@ -94,6 +96,38 @@ export const Sortable = ( {
 		[]
 	);
 
+	const isDraggingOverBefore = ( index: number ) => {
+		if ( index === dragIndex ) {
+			return false;
+		}
+
+		if ( dropIndex === index ) {
+			return true;
+		}
+
+		if ( dragIndex === index - 1 && index - 1 === dropIndex ) {
+			return true;
+		}
+
+		return false;
+	};
+
+	const isDraggingOverAfter = ( index: number ) => {
+		if ( index === dragIndex ) {
+			return false;
+		}
+
+		if ( dropIndex === index + 1 ) {
+			return true;
+		}
+
+		if ( dragIndex === index + 1 && index + 2 === dropIndex ) {
+			return true;
+		}
+
+		return false;
+	};
+
 	return (
 		<ul
 			className={ classnames( 'woocommerce-sortable', {
@@ -101,27 +135,43 @@ export const Sortable = ( {
 				'is-horizontal': isHorizontal,
 			} ) }
 		>
-			{ items.map( ( child, index ) => (
-				<Fragment key={ index }>
-					<SortablePlaceholder isOver={ dropIndex === index } />
-					<SortableItem
-						id={ index }
-						index={ index }
-						isDragging={ index === dragIndex }
-						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
-						onDragStart={ ( event ) =>
-							handleDragStart( event, index )
-						}
-						onDragOver={ ( event ) => {
-							event.preventDefault();
-							throttledHandleDragOver( event, index );
-						} }
-					>
-						{ child }
-					</SortableItem>
-				</Fragment>
-			) ) }
-			<SortablePlaceholder isOver={ dropIndex === items.length } />
+			{ items.map( ( child, index ) => {
+				const isDragging = index === dragIndex;
+				const itemClasses = classnames( {
+					'is-dragging-over-after': isDraggingOverAfter( index ),
+					'is-dragging-over-before': isDraggingOverBefore( index ),
+				} );
+				return (
+					<Fragment key={ index }>
+						{ shouldRenderPlaceholders && (
+							<SortablePlaceholder
+								isOver={ dropIndex === index }
+							/>
+						) }
+						<SortableItem
+							className={ itemClasses }
+							id={ index }
+							index={ index }
+							isDragging={ isDragging }
+							onDragEnd={ ( event ) =>
+								handleDragEnd( event, index )
+							}
+							onDragStart={ ( event ) =>
+								handleDragStart( event, index )
+							}
+							onDragOver={ ( event ) => {
+								event.preventDefault();
+								throttledHandleDragOver( event, index );
+							} }
+						>
+							{ child }
+						</SortableItem>
+					</Fragment>
+				);
+			} ) }
+			{ shouldRenderPlaceholders && (
+				<SortablePlaceholder isOver={ dropIndex === items.length } />
+			) }
 		</ul>
 	);
 };
