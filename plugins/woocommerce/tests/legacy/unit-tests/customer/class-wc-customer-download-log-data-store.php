@@ -98,6 +98,7 @@ class WC_Tests_Customer_Download_Log_Data_Store extends WC_Unit_Test_Case {
 		/** Check that the download permission is gone, too.
 		 *
 		 * I could try to instantiate WC_Customer_Download( $permission ) here as well,
+		 * or use the WC_Customer_Download::read(),
 		 * but the thrown exception is ambiguous, so opted for a direct query here.
 		 */
 		$this->assertEquals( 0, $wpdb->query( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE permission_id = %d", $p_id ) ) );
