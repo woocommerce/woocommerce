@@ -13,7 +13,6 @@
 		"build_step": "pnpm run build:zip"
 	},
 	"scripts": {
-		"turbo:build": "WC_ADMIN_PHASE=core pnpm run build:feature-config",
 		"e2e": "pnpm exec wc-e2e test:e2e",
 		"turbo:test": "pnpm test:unit",
 		"preinstall": "npx only-allow pnpm",
