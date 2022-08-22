@@ -51,7 +51,7 @@ registerBlockType( metadata, {
 								'woo-gutenberg-products-block'
 							),
 						headingLevel: 3,
-						inlineInput: true,
+						inlineInput: false,
 					} ),
 			},
 		],
