@@ -11,4 +11,9 @@ $place-holder-size: 3px;
     &.is-over {
         display: block;
     }
+
+    .is-horizontal & {
+        height: 100%;
+        width: $place-holder-size;
+    }
 }

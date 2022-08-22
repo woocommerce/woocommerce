@@ -27,13 +27,25 @@ export const moveIndex = < T >(
 };
 
 /**
- * Check whether the mouse is over the lower or upper half of the event target.
+ * Check whether the mouse is over the first half of the event target.
  *
- * @param  event Drag event.
+ * @param  event        Drag event.
+ * @param  isHorizontal Check horizontally or vertically.
  * @return boolean
  */
-export const isUpperHalf = ( event: DragEvent< HTMLLIElement > ) => {
+export const isBefore = (
+	event: DragEvent< HTMLLIElement >,
+	isHorizontal = false
+) => {
 	const target = event.target as HTMLElement;
+
+	if ( isHorizontal ) {
+		const middle = target.offsetWidth / 2;
+		const rect = target.getBoundingClientRect();
+		const relativeX = event.clientX - rect.left;
+		return relativeX < middle;
+	}
+
 	const middle = target.offsetHeight / 2;
 	const rect = target.getBoundingClientRect();
 	const relativeY = event.clientY - rect.top;

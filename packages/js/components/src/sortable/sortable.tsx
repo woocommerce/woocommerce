@@ -15,7 +15,7 @@ import { throttle } from 'lodash';
 /**
  * Internal dependencies
  */
-import { isUpperHalf, moveIndex } from './utils';
+import { isBefore, moveIndex } from './utils';
 import { SortableItem } from './sortable-item';
 import { SortablePlaceholder } from './sortable-placeholder';
 import { SortableChild } from './types';
@@ -84,7 +84,7 @@ export const Sortable = ( {
 		event: DragEvent< HTMLLIElement >,
 		index: number
 	) => {
-		const targetIndex = isUpperHalf( event ) ? index : index + 1;
+		const targetIndex = isBefore( event, isHorizontal ) ? index : index + 1;
 		setDropIndex( targetIndex );
 		onDragOver( event );
 	};
