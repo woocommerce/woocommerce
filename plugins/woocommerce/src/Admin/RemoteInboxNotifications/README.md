@@ -1,4 +1,4 @@
-  # Remote Inbox Notifications
+# Remote Inbox Notifications
 
 This is a remote inbox notifications engine in WooCommerce admin, which polls some JSON feeds (see `DataSourcePoller.php`) containing specifications of remote inbox notifications, including rules that, when satisfied, display the notification in the WooCommerce Admin screens.
 
@@ -45,7 +45,7 @@ Valid values for `type` are:
 
 - `error`: used for presenting error conditions
 - `warning`: used for presenting warning conditions.
-- `update`: i.e. used when a new version is available.
+- `update`: used when a new version is available.
 - `info`: used for presenting informational messages.
 - `marketing`: used for adding marketing messages.
 - `survey`: used for adding survey messages.
@@ -61,10 +61,10 @@ The `status` is the *initial* note status to be set when the rules are satisfied
 
 The status will usually be `unactioned`, as this will get the note to appear.
 
-We have other statuses that are used internally:
+There are other note statuses but we just use them **internally**:
 
 - `pending`: the note is pending - hidden but not actioned. When the spec/rules are invalid, the note status will be set to pending.
-- `sent by email to the user.
+- `sent`: the note has been sent by email to the user.
 
 ### Locale
 The note locales contain the title and content of the note. Having this broken up by locale allows different translations of the note to be used. The default locale used if none of the locales match the WordPress locale is `en_US`.
