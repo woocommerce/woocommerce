@@ -194,7 +194,7 @@ class Marketing {
 		$plugins = get_transient( self::RECOMMENDED_PLUGINS_TRANSIENT );
 
 		if ( false === $plugins ) {
-			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.1/recommendations.json' );
+			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.2/recommendations.json' );
 			$plugins = [];
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
