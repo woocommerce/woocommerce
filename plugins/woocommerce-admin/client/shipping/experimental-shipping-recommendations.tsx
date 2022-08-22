@@ -16,6 +16,7 @@ import { getCountryCode } from '~/dashboard/utils';
 import WooCommerceServicesItem from './experimental-woocommerce-services-item';
 import { ShippingRecommendationsList } from './shipping-recommendations';
 import './shipping-recommendations.scss';
+import { ShippingTour } from '../guided-tours/shipping-tour';
 
 const ShippingRecommendations: React.FC = () => {
 	const {
@@ -52,21 +53,37 @@ const ShippingRecommendations: React.FC = () => {
 		activePlugins.includes( 'woocommerce-services' ) &&
 		isJetpackConnected
 	) {
-		return null;
+		return (
+			<ShippingTour
+				showShippingRecommendationsStep={ false }
+				showWcsSectionPresent={ true }
+			/>
+		);
 	}
 
 	if ( countryCode !== 'US' || isSellingDigitalProductsOnly ) {
-		return null;
+		return (
+			<ShippingTour
+				showShippingRecommendationsStep={ false }
+				showWcsSectionPresent={ false }
+			/>
+		);
 	}
 
 	return (
-		<ShippingRecommendationsList>
-			<WooCommerceServicesItem
-				isWCSInstalled={ installedPlugins.includes(
-					'woocommerce-services'
-				) }
+		<>
+			<ShippingTour
+				showShippingRecommendationsStep={ true }
+				showWcsSectionPresent={ false }
 			/>
-		</ShippingRecommendationsList>
+			<ShippingRecommendationsList>
+				<WooCommerceServicesItem
+					isWCSInstalled={ installedPlugins.includes(
+						'woocommerce-services'
+					) }
+				/>
+			</ShippingRecommendationsList>
+		</>
 	);
 };
 
