@@ -15,6 +15,7 @@ export type SortableItemProps = {
 	id: string | number;
 	index: number;
 	children: SortableChild;
+	className: string;
 	isDragging?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
@@ -24,6 +25,7 @@ export type SortableItemProps = {
 export const SortableItem = ( {
 	id,
 	children,
+	className,
 	isDragging = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
@@ -40,7 +42,7 @@ export const SortableItem = ( {
 
 	return (
 		<li
-			className={ classnames( 'woocommerce-sortable__item', {
+			className={ classnames( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
 			} ) }
 			id={ `woocommerce-sortable__item-${ id }` }
