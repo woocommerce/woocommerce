@@ -24,7 +24,7 @@
 		"@woocommerce/experimental": "workspace:*",
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/compose": "^5.1.2",
-		"@wordpress/data": "^6.3.0",
+		"@wordpress/data": "^6.15.0",
 		"@wordpress/element": "^4.1.1",
 		"@wordpress/i18n": "^4.3.1",
 		"@wordpress/notices": "^3.3.2",
