@@ -2442,11 +2442,11 @@ function wc_update_670_purge_comments_count_cache() {
 	WC_Comments::delete_comments_count_cache();
 }
 /**
- * Remove unnecessary foreign keys
+ * Remove unnecessary foreign keys.
  *
  * @return void
  */
-function wc_update_690_remove_download_log_fk() {
+function wc_update_700_remove_download_log_fk() {
 	global $wpdb;
 
 	$results = $wpdb->get_results(
