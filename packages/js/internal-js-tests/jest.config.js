@@ -45,15 +45,10 @@ module.exports = {
 		'/build/',
 	],
 	transform: {
+		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
 		'^.+\\.[jt]sx?$': 'ts-jest',
 	},
 	testEnvironment: 'jest-environment-jsdom',
 	timers: 'modern',
 	verbose: true,
-	globals: {
-		'ts-jest': {
-			// Enable Babel processing to transform ESM such as is-plain-obj.
-			babelConfig: require( './babel.config.js' ),
-		},
-	},
 };
