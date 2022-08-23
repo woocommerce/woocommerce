@@ -23,7 +23,7 @@ class ReviewShippingOptions extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Review Shipping Options', 'woocommerce' );
+		return __( 'Review shipping options', 'woocommerce' );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class ReviewShippingOptions extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return 'yes' === get_option( 'woocommerce_admin_reviewed_default_shipping_zones' );
+		return get_option( 'woocommerce_admin_reviewed_default_shipping_zones' ) === 'yes';
 	}
 
 	/**
@@ -59,7 +59,7 @@ class ReviewShippingOptions extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return 'yes' === get_option( 'woocommerce_admin_created_default_shipping_zones' );
+		return get_option( 'woocommerce_admin_created_default_shipping_zones' ) === 'yes';
 	}
 
 	/**

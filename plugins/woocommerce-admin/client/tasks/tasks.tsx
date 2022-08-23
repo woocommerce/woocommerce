@@ -99,6 +99,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
+	if ( currentTask ) {
+		return (
+			<div className="woocommerce-task-dashboard__container">
+				<Task query={ query } task={ currentTask } />
+			</div>
+		);
+	}
+
 	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
 	const TaskListPlaceholderComponent =
 		taskListIds[ 0 ] === 'setup'
@@ -107,14 +115,6 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 	if ( isResolving ) {
 		return <TaskListPlaceholderComponent query={ query } />;
-	}
-
-	if ( currentTask ) {
-		return (
-			<div className="woocommerce-task-dashboard__container">
-				<Task query={ query } task={ currentTask } />
-			</div>
-		);
 	}
 
 	return (

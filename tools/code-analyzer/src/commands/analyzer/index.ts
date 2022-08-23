@@ -47,6 +47,12 @@ export default class Analyzer extends Command {
 				'GitHub branch or commit hash to compare against the base branch/commit.',
 			required: true,
 		},
+		{
+			name: 'sinceVersion',
+			description:
+				'Specify the version used to determine which changes are included (version listed in @since code doc).',
+			required: true,
+		},
 	];
 
 	/**
@@ -94,6 +100,9 @@ export default class Analyzer extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( Analyzer );
 
+		const { compare, sinceVersion } = args;
+		const { base } = flags;
+
 		CliUx.ux.action.start(
 			`Making a temporary clone of '${ flags.source }'`
 		);
@@ -106,13 +115,10 @@ export default class Analyzer extends Command {
 		const diff = await generateDiff(
 			tmpRepoPath,
 			flags.base,
-			args.compare,
+			compare,
 			this.error
 		);
 		CliUx.ux.action.stop();
-
-		const pluginData = this.getPluginData( tmpRepoPath, flags.plugin );
-		this.log( `${ pluginData[ 1 ] } Version: ${ pluginData[ 0 ] }` );
 
 		// Run schema diffs only in the monorepo.
 		if ( flags[ 'is-woocommerce' ] ) {
@@ -128,84 +134,27 @@ export default class Analyzer extends Command {
 
 			CliUx.ux.action.stop();
 			CliUx.ux.action.start(
-				`Comparing WooCommerce DB schemas of '${ flags.base }' and '${ args.compare }'`
+				`Comparing WooCommerce DB schemas of '${ base }' and '${ compare }'`
 			);
 
 			const schemaDiff = await generateSchemaDiff(
 				tmpRepoPath,
-				args.compare,
-				flags.base,
+				compare,
+				base,
 				( e: string ): void => this.error( e )
 			);
 
 			CliUx.ux.action.stop();
 
-			await this.scanChanges( diff, pluginData[ 0 ], flags, schemaDiff );
+			await this.scanChanges( diff, sinceVersion, flags, schemaDiff );
 		} else {
-			await this.scanChanges( diff, pluginData[ 0 ], flags );
+			await this.scanChanges( diff, sinceVersion, flags );
 		}
 
 		// Clean up the temporary repo.
 		CliUx.ux.action.start( 'Cleaning up temporary files' );
 		rmSync( tmpRepoPath, { force: true, recursive: true } );
 		CliUx.ux.action.stop();
-	}
-
-	/**
-	 * Get plugin data
-	 *
-	 * @param {string} plugin Plugin slug.
-	 * @return {string[]} Promise.
-	 */
-	private getPluginData( tmpRepoPath: string, plugin: string ): string[] {
-		/**
-		 * List of plugins from our monorepo.
-		 */
-		const plugins = <any>{
-			core: {
-				name: 'WooCommerce',
-				mainFile: join(
-					tmpRepoPath,
-					'plugins',
-					'woocommerce',
-					'woocommerce.php'
-				),
-			},
-			admin: {
-				name: 'WooCommerce Admin',
-				mainFile: join(
-					tmpRepoPath,
-					'plugins',
-					'woocommerce-admin',
-					'woocommerce-admin.php'
-				),
-			},
-			beta: {
-				name: 'WooCommerce Beta Tester',
-				mainFile: join(
-					tmpRepoPath,
-					'plugins',
-					'woocommerce-beta-tester',
-					'woocommerce-beta-tester.php'
-				),
-			},
-		};
-
-		const pluginData = plugins[ plugin ];
-
-		CliUx.ux.action.start( `Getting ${ pluginData.name } version` );
-
-		const content = readFileSync( pluginData.mainFile ).toString();
-		const rawVer = content.match( /^\s+\*\s+Version:\s+(.*)/m );
-
-		if ( ! rawVer ) {
-			this.error( 'Failed to find plugin version!' );
-		}
-		const version = rawVer[ 1 ].replace( /\-.*/, '' );
-
-		CliUx.ux.action.stop();
-
-		return [ version, pluginData.name, pluginData.mainFile ];
 	}
 
 	/**

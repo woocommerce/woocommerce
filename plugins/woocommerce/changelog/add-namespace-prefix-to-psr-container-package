@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add a namespace to all the classes of the Psr\Container package

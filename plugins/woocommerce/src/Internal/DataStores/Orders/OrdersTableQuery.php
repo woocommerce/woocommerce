@@ -12,6 +12,12 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * This class provides a `WP_Query`-like interface to custom order tables.
+ *
+ * @property-read int   $found_orders  Number of found orders.
+ * @property-read int   $found_posts   Alias of the `$found_orders` property.
+ * @property-read int   $max_num_pages Max number of pages matching the current query.
+ * @property-read array $orders        Order objects, or order IDs.
+ * @property-read array $posts         Alias of the $orders property.
  */
 class OrdersTableQuery {
 
@@ -24,6 +30,13 @@ class OrdersTableQuery {
 	 * Regex used to catch "shorthand" comparisons in date-related query args.
 	 */
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
+
+	/**
+	 * Highest possible unsigned bigint value (unsigned bigints being the type of the `id` column).
+	 *
+	 * This is deliberately held as a string, rather than a numeric type, for inclusion within queries.
+	 */
+	private const MYSQL_MAX_UNSIGNED_BIGINT = '18446744073709551615';
 
 	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
@@ -124,6 +137,13 @@ class OrdersTableQuery {
 	private $meta_query = null;
 
 	/**
+	 * Search query parser.
+	 *
+	 * @var OrdersTableSearchQuery?
+	 */
+	private $search_query = null;
+
+	/**
 	 * Date query parser.
 	 *
 	 * @var WP_Date_Query
@@ -137,6 +157,8 @@ class OrdersTableQuery {
 	 * @param array $args Array of query vars.
 	 */
 	public function __construct( $args = array() ) {
+		global $wpdb;
+
 		$datastore = wc_get_container()->get( OrdersTableDataStore::class );
 
 		// TODO: maybe OrdersTableDataStore::get_all_table_names() could return these keys/indices instead.
@@ -145,6 +167,7 @@ class OrdersTableQuery {
 			'addresses'        => $datastore::get_addresses_table_name(),
 			'operational_data' => $datastore::get_operational_data_table_name(),
 			'meta'             => $datastore::get_meta_table_name(),
+			'items'            => $wpdb->prefix . 'woocommerce_order_items',
 		);
 		$this->mappings = $datastore->get_all_order_column_mappings();
 
@@ -510,6 +533,14 @@ class OrdersTableQuery {
 		$this->process_operational_data_table_query_args();
 		$this->process_addresses_table_query_args();
 
+		// Search queries.
+		if ( ! empty( $this->args['s'] ) ) {
+			$this->search_query = new OrdersTableSearchQuery( $this );
+			$sql                = $this->search_query->get_sql_clauses();
+			$this->join         = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
+			$this->where        = $sql['where'] ? array_merge( $this->where, $sql['where'] ) : $this->where;
+		}
+
 		// Meta queries.
 		if ( ! empty( $this->args['meta_query'] ) ) {
 			$this->meta_query = new OrdersTableMetaQuery( $this );
@@ -535,9 +566,6 @@ class OrdersTableQuery {
 
 		$orders_table = $this->tables['orders'];
 
-		// DISTINCT.
-		$distinct = '';
-
 		// SELECT [fields].
 		$this->fields = "{$orders_table}.id";
 		$fields       = $this->fields;
@@ -562,12 +590,18 @@ class OrdersTableQuery {
 		$orderby = $this->orderby ? ( 'ORDER BY ' . implode( ', ', $this->orderby ) ) : '';
 
 		// LIMITS.
-		$limits = $this->limits ? 'LIMIT ' . implode( ',', $this->limits ) : '';
+		$limits = '';
+
+		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
+			list( $offset, $row_count ) = $this->limits;
+			$row_count                  = $row_count === -1 ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
+			$limits                     = 'LIMIT ' . (int) $offset . ', ' . $row_count;
+		}
 
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
-		$this->sql = "SELECT $found_rows $distinct $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->sql = "SELECT $found_rows DISTINCT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 	}
 
 	/**
@@ -876,15 +910,20 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function process_limit(): void {
-		$limit  = ( $this->arg_isset( 'limit' ) ? absint( $this->args['limit'] ) : false );
-		$page   = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
-		$offset = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
+		$row_count = ( $this->arg_isset( 'limit' ) ? (int) $this->args['limit'] : false );
+		$page      = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
+		$offset    = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
 
-		if ( ! $limit ) {
+		// Bool false indicates no limit was specified; less than -1 means an invalid value was passed (such as -3).
+		if ( $row_count === false || $row_count < -1 ) {
 			return;
 		}
 
-		$this->limits = array( $offset ? $offset : absint( ( $page - 1 ) * $limit ), $limit );
+		if ( $offset === false && $row_count > -1 ) {
+			$offset = (int) ( ( $page - 1 ) * $row_count );
+		}
+
+		$this->limits = array( $offset, $row_count );
 	}
 
 	/**
@@ -937,6 +976,8 @@ class OrdersTableQuery {
 			case 'posts':
 			case 'orders':
 				return $this->results;
+			case 'request':
+				return $this->sql;
 			default:
 				break;
 		}

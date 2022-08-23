@@ -1,0 +1,15 @@
+.woocommerce-experimental-select-control__combox-box {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+
+    input {
+        width: 100%;
+        padding: $gap-smaller 0;
+    }
+}
+
+.woocommerce-experimental-select-control__combox-box-icon {
+    padding-left: 10px;
+    margin-right: -2px;
+}
