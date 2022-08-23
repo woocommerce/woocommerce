@@ -28,18 +28,17 @@ import PaymentMethodErrorBoundary from './payment-method-error-boundary';
  */
 const PaymentMethodCard = ( { children, showSaveOption } ) => {
 	const { isEditor } = useEditorContext();
-	const { shouldSavePaymentMethod } = useSelect( ( select ) => {
-		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+	const { shouldSavePaymentMethod, customerId } = useSelect( ( select ) => {
+		const paymentMethodStore = select( PAYMENT_METHOD_DATA_STORE_KEY );
+		const checkoutStore = select( CHECKOUT_STORE_KEY );
 		return {
-			shouldSavePaymentMethod: store.shouldSavePaymentMethod(),
+			shouldSavePaymentMethod:
+				paymentMethodStore.shouldSavePaymentMethod(),
+			customerId: checkoutStore.getCustomerId(),
 		};
 	} );
 	const { setShouldSavePaymentMethod } = useDispatch(
 		PAYMENT_METHOD_DATA_STORE_KEY
-	);
-
-	const customerId = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getCustomerId()
 	);
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
