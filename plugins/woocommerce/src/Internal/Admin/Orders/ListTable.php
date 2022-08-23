@@ -282,6 +282,7 @@ class ListTable extends WP_List_Table {
 
 		if ( ! empty( $search_term ) ) {
 			$this->order_query_args['s'] = $search_term;
+			$this->has_filter            = true;
 		}
 	}
 
