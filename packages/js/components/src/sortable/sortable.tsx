@@ -14,7 +14,13 @@ import { throttle } from 'lodash';
 /**
  * Internal dependencies
  */
-import { isBefore, moveIndex } from './utils';
+import {
+	isBefore,
+	isDraggingOverAfter,
+	isDraggingOverBefore,
+	isLastDroppable,
+	moveIndex,
+} from './utils';
 import { SortableItem } from './sortable-item';
 import { SortableChild } from './types';
 
@@ -92,54 +98,6 @@ export const Sortable = ( {
 		[]
 	);
 
-	const isDraggingOverBefore = ( index: number ) => {
-		if ( index === dragIndex ) {
-			return false;
-		}
-
-		if ( dropIndex === index ) {
-			return true;
-		}
-
-		if ( dragIndex === index - 1 && index - 1 === dropIndex ) {
-			return true;
-		}
-
-		return false;
-	};
-
-	const isDraggingOverAfter = ( index: number ) => {
-		if ( index === dragIndex ) {
-			return false;
-		}
-
-		if ( dropIndex === index + 1 ) {
-			return true;
-		}
-
-		if ( dragIndex === index + 1 && index + 2 === dropIndex ) {
-			return true;
-		}
-
-		return false;
-	};
-
-	const isLastDroppable = ( index: number ) => {
-		if ( dragIndex === index ) {
-			return false;
-		}
-
-		if ( index === items.length - 1 ) {
-			return true;
-		}
-
-		if ( dragIndex === items.length - 1 && index === items.length - 2 ) {
-			return true;
-		}
-
-		return false;
-	};
-
 	return (
 		<ul
 			className={ classnames( 'woocommerce-sortable', {
@@ -150,9 +108,21 @@ export const Sortable = ( {
 			{ items.map( ( child, index ) => {
 				const isDragging = index === dragIndex;
 				const itemClasses = classnames( {
-					'is-dragging-over-after': isDraggingOverAfter( index ),
-					'is-dragging-over-before': isDraggingOverBefore( index ),
-					'is-last-droppable': isLastDroppable( index ),
+					'is-dragging-over-after': isDraggingOverAfter(
+						index,
+						dragIndex,
+						dropIndex
+					),
+					'is-dragging-over-before': isDraggingOverBefore(
+						index,
+						dragIndex,
+						dropIndex
+					),
+					'is-last-droppable': isLastDroppable(
+						index,
+						dragIndex,
+						items.length
+					),
 				} );
 				return (
 					<SortableItem
