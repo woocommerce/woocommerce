@@ -102,14 +102,14 @@
 	display: flex;
 	gap: $gap-smaller;
 	justify-content: space-between;
-	margin: $gap-large 0;
+	margin: $gap 0;
 
 	.wc-block-components-price-slider__amount {
 		margin: 0;
 		border-radius: 4px;
 		border-width: 1px;
 		width: auto;
-		max-width: 100px;
+		max-width: 80px;
 		min-width: 0;
 		padding: $gap-smaller;
 	}

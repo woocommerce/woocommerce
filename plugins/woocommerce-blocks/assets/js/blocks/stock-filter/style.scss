@@ -21,10 +21,6 @@
 		opacity: 0.6;
 	}
 
-	.wc-block-stock-filter__button {
-		margin-top: $gap-smaller;
-	}
-
 	.wc-block-stock-filter__actions {
 		align-items: center;
 		display: flex;
@@ -38,4 +34,11 @@
 			margin-top: 0;
 		}
 	}
+}
+
+.editor-styles-wrapper .wc-block-stock-filter .wc-block-stock-filter__button,
+.wc-block-stock-filter .wc-block-stock-filter__button {
+	margin-top: em($gap-smaller);
+	padding: em($gap-smaller) em($gap);
+	@include font-size(small);
 }
