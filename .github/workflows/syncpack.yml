@@ -11,17 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     name: syncpack
     steps:
-      # Check out the branch so we can read/write its files
-      - uses: actions/checkout@v3
-      # Use Node.js as syncpack is written in that
-      - uses: actions/setup-node@v3
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      
+      - name: 'Setup node'
+        uses: actions/setup-node@v3
         with:
           node-version: 16
-      - uses: JamieMason/syncpack-github-action@0.2.1
-        with:
-          package-manager-version: '6.24.2'
-          package-manager: 'pnpm'
-          format-mismatches: 'ignore'
-          lockfile-mismatches: 'ignore'
-          semver-range-mismatches: 'ignore'
-          version-mismatches: 'lint'
+
+      - name: 'Install Syncpack'
+        run: npm install -g syncpack@^8.2.4
+        
+      - name: 'List Mismatches'
+        run: syncpack list-mismatches
+        
+      - name: 'Explain Remedy'
+        if: failure()
+        run: |
+          echo "Dependency version mismatch detected. This can usually be fixed automatically by running: \`pnpm run sync-dependencies\`"
+          exit 1
