@@ -8,7 +8,7 @@ import { lazy, Suspense } from '@wordpress/element';
  */
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
-import { ShippingTour } from './shipping-tour';
+import { ShippingTour } from '../guided-tours/shipping-tour';
 
 const ShippingRecommendationsLoader = lazy( () => {
 	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {

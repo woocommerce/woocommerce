@@ -39,7 +39,14 @@ class Notes {
 		$notes      = array();
 		foreach ( (array) $raw_notes as $raw_note ) {
 			try {
-				$note                               = new Note( $raw_note );
+				$note = new Note( $raw_note );
+				/**
+				 * Filter the note from db. This is used to modify the note before it is returned.
+				 *
+				 * @since 6.9.0
+				 * @param Note $note The note object from the database.
+				 */
+				$note                               = apply_filters( 'woocommerce_get_note_from_db', $note );
 				$note_id                            = $note->get_id();
 				$notes[ $note_id ]                  = $note->get_data();
 				$notes[ $note_id ]['name']          = $note->get_name( $context );

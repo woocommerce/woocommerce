@@ -1,0 +1,37 @@
+$gutenberg-blue: #007cba;
+$gutenberg-blue-darker: #0063a1;
+
+.woocommerce-product-form-actions {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-end;
+
+	> .components-button {
+		margin-right: $gap-smaller;
+	}
+
+	.components-button:not(.is-primary):not(.is-destructive) {
+		color: $gutenberg-blue;
+
+		&:hover {
+			color: $gutenberg-blue-darker;
+		}
+	}
+
+	&__publish-button-group {
+		display: flex;
+
+		> :not(:last-child) {
+			margin-right: 1px;
+		}
+
+		.components-button.is-primary {
+			box-shadow: none;
+		}
+
+		.components-menu-group .components-button {
+			box-shadow: none;
+		}
+	}
+}
