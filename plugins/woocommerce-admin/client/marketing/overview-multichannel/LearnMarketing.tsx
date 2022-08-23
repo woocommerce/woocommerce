@@ -72,8 +72,8 @@ const PostTile: React.FC< PostTileProps > = ( { post } ) => {
 	);
 };
 
-const blogPostCategory = 'marketing';
-const perPage = 2;
+const BLOG_POST_CATEGORY = 'marketing';
+const PER_PAGE = 2;
 
 const LearnMarketing = () => {
 	const [ page, setPage ] = useState( 1 );
@@ -83,12 +83,14 @@ const LearnMarketing = () => {
 				select( STORE_KEY );
 
 			return {
-				posts: getBlogPosts( blogPostCategory ),
-				isLoading: isResolving( 'getBlogPosts', [ blogPostCategory ] ),
-				error: getBlogPostsError( blogPostCategory ),
+				posts: getBlogPosts( BLOG_POST_CATEGORY ),
+				isLoading: isResolving( 'getBlogPosts', [
+					BLOG_POST_CATEGORY,
+				] ),
+				error: getBlogPostsError( BLOG_POST_CATEGORY ),
 			};
 		},
-		[ blogPostCategory ]
+		[ BLOG_POST_CATEGORY ]
 	);
 
 	/**
@@ -114,7 +116,7 @@ const LearnMarketing = () => {
 				showPagePicker={ false }
 				showPerPagePicker={ false }
 				page={ page }
-				perPage={ perPage }
+				perPage={ PER_PAGE }
 				total={ posts && posts.length }
 				onPageChange={ ( newPage: number ) => {
 					setPage( newPage );
@@ -168,8 +170,8 @@ const LearnMarketing = () => {
 
 		return (
 			<>
-				<PostTile post={ posts[ ( page - 1 ) * perPage ] } />
-				<PostTile post={ posts[ ( page - 1 ) * perPage + 1 ] } />
+				<PostTile post={ posts[ ( page - 1 ) * PER_PAGE ] } />
+				<PostTile post={ posts[ ( page - 1 ) * PER_PAGE + 1 ] } />
 			</>
 		);
 	};
