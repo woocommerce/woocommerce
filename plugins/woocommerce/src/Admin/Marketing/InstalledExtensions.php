@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Admin\Marketing;
 
-use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
@@ -21,17 +20,32 @@ class InstalledExtensions {
 	public static function get_data() {
 		$data = [];
 
-		$automatewoo = self::get_automatewoo_extension_data();
-		$mailchimp   = self::get_mailchimp_extension_data();
+		$automatewoo   = self::get_automatewoo_extension_data();
+		$aw_referral   = self::get_aw_referral_extension_data();
+		$aw_birthdays  = self::get_aw_birthdays_extension_data();
+		$mailchimp     = self::get_mailchimp_extension_data();
 		$facebook    = self::get_facebook_extension_data();
-		$pinterest   = self::get_pinterest_extension_data();
-		$google      = self::get_google_extension_data();
-		$hubspot     = self::get_hubspot_extension_data();
-		$amazon_ebay = self::get_amazon_ebay_extension_data();
-		$mailpoet    = self::get_mailpoet_extension_data();
+		$pinterest     = self::get_pinterest_extension_data();
+		$google        = self::get_google_extension_data();
+		$hubspot       = self::get_hubspot_extension_data();
+		$amazon_ebay   = self::get_amazon_ebay_extension_data();
+		$mailpoet      = self::get_mailpoet_extension_data();
+		$creative_mail = self::get_creative_mail_extension_data();
+		$tiktok        = self::get_tiktok_extension_data();
+		$jetpack_crm   = self::get_jetpack_crm_extension_data();
+		$zapier        = self::get_zapier_extension_data();
+		$salesforce    = self::get_salesforce_extension_data();
 
 		if ( $automatewoo ) {
 			$data[] = $automatewoo;
+		}
+
+		if ( $aw_referral ) {
+			$data[] = $aw_referral;
+		}
+
+		if ( $aw_birthdays ) {
+			$data[] = $aw_birthdays;
 		}
 
 		if ( $mailchimp ) {
@@ -60,6 +74,26 @@ class InstalledExtensions {
 
 		if ( $mailpoet ) {
 			$data[] = $mailpoet;
+		}
+
+		if ( $creative_mail ) {
+			$data[] = $creative_mail;
+		}
+
+		if ( $tiktok ) {
+			$data[] = $tiktok;
+		}
+
+		if ( $jetpack_crm ) {
+			$data[] = $jetpack_crm;
+		}
+
+		if ( $zapier ) {
+			$data[] = $zapier;
+		}
+
+		if ( $salesforce ) {
+			$data[] = $salesforce;
 		}
 
 		return $data;
@@ -103,6 +137,54 @@ class InstalledExtensions {
 			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings' );
 			$data['docsUrl']     = 'https://automatewoo.com/docs/';
 			$data['status']      = 'configured'; // Currently no configuration step.
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get AutomateWoo Refer a Friend extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_aw_referral_extension_data() {
+		$slug = 'automatewoo-referrals';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/automatewoo.svg';
+
+		if ( 'activated' === $data['status'] && function_exists( 'AW_Referrals' ) ) {
+			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings&tab=referrals' );
+			$data['docsUrl']     = 'https://automatewoo.com/docs/refer-a-friend/';
+			$data['status']      = 'configured';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get AutomateWoo Birthdays extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_aw_birthdays_extension_data() {
+		$slug = 'automatewoo-birthdays';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/automatewoo.svg';
+
+		if ( 'activated' === $data['status'] && function_exists( 'AW_Birthdays' ) ) {
+			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings&tab=birthdays' );
+			$data['docsUrl']     = 'https://automatewoo.com/docs/getting-started-with-birthdays/';
+			$data['status']      = 'configured';
 		}
 
 		return $data;
@@ -314,6 +396,142 @@ class InstalledExtensions {
 
 			$data['docsUrl']    = 'https://kb.mailpoet.com/';
 			$data['supportUrl'] = 'https://www.mailpoet.com/support/';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Creative Mail for WooCommerce extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_creative_mail_extension_data() {
+		$slug = 'creative-mail-by-constant-contact';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/creative-mail-by-constant-contact.png';
+
+		if ( 'activated' === $data['status'] && class_exists( '\CreativeMail\Helpers\OptionsHelper' ) ) {
+			if ( ! method_exists( '\CreativeMail\Helpers\OptionsHelper', 'get_instance_id' ) || \CreativeMail\Helpers\OptionsHelper::get_instance_id() !== null ) {
+				$data['status']      = 'configured';
+				$data['settingsUrl'] = admin_url( 'admin.php?page=creativemail_settings' );
+			} else {
+				$data['settingsUrl'] = admin_url( 'admin.php?page=creativemail' );
+			}
+
+			$data['docsUrl']    = 'https://app.creativemail.com/kb/help/WooCommerce';
+			$data['supportUrl'] = 'https://app.creativemail.com/kb/help/';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get TikTok for WooCommerce extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_tiktok_extension_data() {
+		$slug = 'tiktok-for-business';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/tiktok.jpg';
+
+		if ( 'activated' === $data['status'] ) {
+			if ( false !== get_option( 'tt4b_access_token' ) ) {
+				$data['status'] = 'configured';
+			}
+
+			$data['settingsUrl'] = admin_url( 'admin.php?page=tiktok' );
+			$data['docsUrl']     = 'https://woocommerce.com/document/tiktok-for-woocommerce/';
+			$data['supportUrl']  = 'https://ads.tiktok.com/athena/user-feedback/?identify_key=6a1e079024806640c5e1e695d13db80949525168a052299b4970f9c99cb5ac78';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Jetpack CRM for WooCommerce extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_jetpack_crm_extension_data() {
+		$slug = 'zero-bs-crm';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/jetpack-crm.png';
+
+		if ( 'activated' === $data['status'] ) {
+			$data['status']      = 'configured';
+			$data['settingsUrl'] = admin_url( 'admin.php?page=zerobscrm-plugin-settings' );
+			$data['docsUrl']     = 'https://kb.jetpackcrm.com/';
+			$data['supportUrl']  = 'https://kb.jetpackcrm.com/crm-support/';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get WooCommerce Zapier extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_zapier_extension_data() {
+		$slug = 'woocommerce-zapier';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/zapier.png';
+
+		if ( 'activated' === $data['status'] ) {
+			$data['status']      = 'configured';
+			$data['settingsUrl'] = admin_url( 'admin.php?page=wc-settings&tab=wc_zapier' );
+			$data['docsUrl']     = 'https://docs.om4.io/woocommerce-zapier/';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Salesforce extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_salesforce_extension_data() {
+		$slug = 'integration-with-salesforce';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/salesforce.jpg';
+
+
+		if ( 'activated' === $data['status'] && class_exists( '\Integration_With_Salesforce_Admin' ) ) {
+			if ( ! method_exists( '\Integration_With_Salesforce_Admin', 'get_connection_status' ) || \Integration_With_Salesforce_Admin::get_connection_status() ) {
+				$data['status'] = 'configured';
+			}
+
+			$data['settingsUrl'] = admin_url( 'admin.php?page=integration-with-salesforce' );
+			$data['docsUrl']     = 'https://woocommerce.com/document/salesforce-integration/';
+			$data['supportUrl']  = 'https://wpswings.com/submit-query/?utm_source=wpswings-salesforce-woo&utm_medium=woo-backend&utm_campaign=submit-query';
 		}
 
 		return $data;
