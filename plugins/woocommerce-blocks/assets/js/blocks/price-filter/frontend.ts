@@ -14,7 +14,7 @@ const getProps = ( el: HTMLElement ) => {
 	return {
 		attributes: {
 			showInputFields: el.dataset.showinputfields === 'true',
-			inlineInput: el.dataset.inlineInput !== 'false',
+			inlineInput: el.dataset.inlineInput === 'true',
 			showFilterButton: el.dataset.showfilterbutton === 'true',
 			heading: el.dataset.heading || blockAttributes.heading.default,
 			headingLevel: el.dataset.headingLevel
