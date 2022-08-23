@@ -6,5 +6,13 @@
 	"peer": true,
 	"pnpmOverrides": true,
 	"prod": true,
-	"workspace": true
+	"semverRange": "^",
+	"workspace": true,
+	"versionGroups": [
+		{
+			"dependencies": [ "react", "react-dom" ],
+			"packages": [ "**" ],
+			"pinVersion": "^17.0.2"
+		}
+	]
 }
