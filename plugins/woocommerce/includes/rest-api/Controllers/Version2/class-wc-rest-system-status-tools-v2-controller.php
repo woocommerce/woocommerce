@@ -481,7 +481,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$wpdb->prepare(
 						"DELETE FROM {$wpdb->prefix}wc_download_log
 						WHERE permission_id IN (
-								    SELECT FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+								    SELECT permission_id FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 									WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )
 								    )",
 						current_time( 'Y-m-d' )
