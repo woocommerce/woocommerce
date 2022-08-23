@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import InstalledExtensions from './InstalledExtensions';
-import LearnMarketing from './LearnMarketing';
+import { LearnMarketing } from './LearnMarketing';
 import '../data';
 import './MarketingOverviewMultichannel.scss';
 
