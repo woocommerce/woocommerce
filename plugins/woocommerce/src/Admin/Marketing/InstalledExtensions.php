@@ -27,7 +27,6 @@ class InstalledExtensions {
 		$facebook    = self::get_facebook_extension_data();
 		$pinterest     = self::get_pinterest_extension_data();
 		$google        = self::get_google_extension_data();
-		$hubspot       = self::get_hubspot_extension_data();
 		$amazon_ebay   = self::get_amazon_ebay_extension_data();
 		$mailpoet      = self::get_mailpoet_extension_data();
 		$creative_mail = self::get_creative_mail_extension_data();
@@ -62,10 +61,6 @@ class InstalledExtensions {
 
 		if ( $google ) {
 			$data[] = $google;
-		}
-
-		if ( $hubspot ) {
-			$data[] = $hubspot;
 		}
 
 		if ( $amazon_ebay ) {
@@ -304,35 +299,6 @@ class InstalledExtensions {
 			}
 
 			$data['docsUrl'] = 'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product';
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Get Hubspot extension data.
-	 *
-	 * @return array|bool
-	 */
-	protected static function get_hubspot_extension_data() {
-		$slug = 'hubspot-for-woocommerce';
-
-		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
-			return false;
-		}
-
-		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/hubspot.svg';
-
-		if ( 'activated' === $data['status'] && class_exists( '\Hubwoo' ) ) {
-
-			// Use same check as HubWoo admin.
-			if ( \Hubwoo::is_setup_completed() ) {
-				$data['status'] = 'configured';
-			}
-
-			$data['settingsUrl'] = admin_url( 'admin.php?page=hubwoo' );
-			$data['docsUrl']     = 'https://docs.makewebbetter.com/hubspot-integration-for-woocommerce/';
 		}
 
 		return $data;
