@@ -438,3 +438,18 @@ export const openBlockEditorSettings = async ( { isFSEEditor = false } ) => {
 export const waitForAllProductsBlockLoaded = async () => {
 	await page.waitForSelector( SELECTORS.allProductsBlock.productsList );
 };
+
+/**
+ * Execute or skip the test suite base on the provided condition.
+ *
+ * @param {boolean} condition Condition to execute test suite.
+ */
+export const describeOrSkip = ( condition ) =>
+	condition ? describe : describe.skip;
+
+/**
+ * Execute or skip the test base on the provided condition.
+ *
+ * @param {boolean} condition Condition to execute test.
+ */
+export const itOrSkip = ( condition ) => ( condition ? it : it.skip );
