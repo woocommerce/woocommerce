@@ -135,12 +135,9 @@ const LearnMarketing = () => {
 	 */
 	const renderBody = () => {
 		if ( isLoading ) {
-			return (
-				<>
-					<PlaceholderPostTile />
-					<PlaceholderPostTile />
-				</>
-			);
+			return [ ...Array( PER_PAGE ).keys() ].map( ( key ) => {
+				return <PlaceholderPostTile key={ key } />;
+			} );
 		}
 
 		if ( error ) {
@@ -168,12 +165,11 @@ const LearnMarketing = () => {
 			);
 		}
 
-		return (
-			<>
-				<PostTile post={ posts[ ( page - 1 ) * PER_PAGE ] } />
-				<PostTile post={ posts[ ( page - 1 ) * PER_PAGE + 1 ] } />
-			</>
-		);
+		return posts
+			.slice( ( page - 1 ) * PER_PAGE, page * PER_PAGE )
+			.map( ( post: Post, index: number ) => {
+				return <PostTile key={ index } post={ post } />;
+			} );
 	};
 
 	return (
