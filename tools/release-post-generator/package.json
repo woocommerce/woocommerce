@@ -1,0 +1,22 @@
+{
+	"name": "release-posts",
+	"version": "0.0.1",
+	"description": "Automate release post generation for Wordpress plugins",
+	"main": " ",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "GPL-2.0-or-later",
+	"devDependencies": {
+		"@tsconfig/node16": "^1.0.3",
+		"typescript": "^4.7.4"
+	},
+	"dependencies": {
+		"@commander-js/extra-typings": "^0.1.0",
+		"code-analyzer": "workspace:*",
+		"commander": "9.4.0",
+		"ejs": "^3.1.8",
+		"ts-node": "^10.9.1"
+	}
+}
