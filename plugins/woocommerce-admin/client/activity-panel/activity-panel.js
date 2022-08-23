@@ -170,7 +170,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const setupList = getTaskList( activeSetupList );
 
-		const isSetupTaskListHidden = setupList ? setupList.isHidden : true;
+		const isSetupTaskListHidden = setupList?.isHidden ?? true;
 		const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
 		const extendedTaskList = getTaskList( 'extended' );
 
