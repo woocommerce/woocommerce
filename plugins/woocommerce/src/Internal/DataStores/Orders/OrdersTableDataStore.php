@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use WC_Data;
+use WC_Order;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1246,10 +1248,10 @@ LEFT JOIN {$operational_data_clauses['join']}
 	/**
 	 * Trashes an order.
 	 *
-	 * @param \WC_Order $order The order object
+	 * @param WC_Order $order The order object
 	 * @return void
 	 */
-	public function trash_order( &$order ) {
+	public function trash_order( $order ) {
 		global $wpdb;
 
 		if ( 'trash' === $order->get_status( 'edit' ) ) {
@@ -1281,6 +1283,83 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		$order->set_status( 'trash' );
 	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @param WC_Order $order The order to be untrashed.
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash_order( WC_Order $order ): bool {
+		$id     = $order->get_id();
+		$status = $order->get_status();
+
+		if ( 'trash' !== $status ) {
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: order status */
+					__( 'Order %1$d cannot be restored from the trash: it has already been restored to status "%2$s".', 'woocommerce' ),
+					$id,
+					$status
+				)
+			);
+			return false;
+		}
+
+		$previous_status           = $order->get_meta( '_wp_trash_meta_status' );
+		$valid_statuses            = wc_get_order_statuses();
+		$previous_state_is_invalid = ! array_key_exists( 'wc-' . $previous_status, $valid_statuses );
+		$pending_is_valid_status   = array_key_exists( 'wc-pending', $valid_statuses );
+
+		if ( $previous_state_is_invalid && $pending_is_valid_status ) {
+			// If the previous status is no longer valid, let's try to restore it to "pending" instead.
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: order status */
+					__( 'The previous status of order %1$d ("%2$s") is invalid. It has been restored to "pending" status instead.', 'woocommerce' ),
+					$id,
+					$previous_status
+				)
+			);
+
+			$previous_status = 'pending';
+		} elseif ( $previous_state_is_invalid ) {
+			// If we cannot restore to pending, we should probably stand back and let the merchant intervene some other way.
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: order status */
+					__( 'The previous status of order %1$d ("%2$s") is invalid. It could not be restored.', 'woocommerce' ),
+					$id,
+					$previous_status
+				)
+			);
+
+			return false;
+		}
+
+		$order->set_status( $previous_status );
+		$order->save();
+
+		// Was the status successfully restored? Let's clean up the meta and indicate success...
+		if ( $previous_status === $order->get_status() ) {
+			$order->delete_meta_data( '_wp_trash_meta_status' );
+			$order->delete_meta_data( '_wp_trash_meta_time' );
+			return true;
+		}
+
+		// ...Or log a warning and bail.
+		wc_get_logger()->warning(
+			sprintf(
+				/* translators: 1: order ID, 2: order status */
+				__( 'Something went wrong when trying to restore order %d from the trash. It could not be restored.', 'woocommerce' ),
+				$id
+			)
+		);
+
+		return false;
+	}
+
 
 	/**
 	 * Deletes order data from custom order tables.
