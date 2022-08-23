@@ -47,7 +47,7 @@ export const LearnMarketing = () => {
 	const renderFooter = () => {
 		if ( isLoading ) {
 			return (
-				<div className="woocommerce-marketing-learn-marketing-card__footer--placeholder"></div>
+				<div className="woocommerce-marketing-learn-marketing-card__footer--placeholder" />
 			);
 		}
 
