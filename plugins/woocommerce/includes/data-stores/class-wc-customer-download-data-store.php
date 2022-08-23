@@ -326,7 +326,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 				WHERE permission_id IN (
 				    SELECT permission_id
 				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				    WHERE download_id = %d
+				    WHERE download_id = %s
 				)",
 				$id
 			)
@@ -386,7 +386,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 				WHERE permission_id IN (
 				    SELECT permission_id
 				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				    WHERE user_email = %d
+				    WHERE user_email = %s
 				)",
 				$email
 			)
