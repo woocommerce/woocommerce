@@ -48,7 +48,7 @@ $place-holder-size: 3px;
         display: block;
     }
 
-    &.is-dragging-over-after:nth-last-child(2):after {
+    &.is-dragging-over-after.is-last-droppable:after {
         display: block;
     }
 }
