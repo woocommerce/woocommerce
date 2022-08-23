@@ -131,8 +131,21 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'sent_to_admin'      => true,
 					'plain_text'         => false,
 					'email'              => $this,
+					'mobile_footer'      => $this->get_mobile_footer(),
 				)
 			);
+		}
+
+		/**
+		 * Prepares additional footer element containing mobile deep links
+		 *
+		 * @return string|null
+		 */
+		private function get_mobile_footer(): ?string {
+			include_once WC_ABSPATH . 'includes/emails/mobile/class-mobilefooterhandler.php';
+			$order_id = ( $this->object )->id;
+
+			return MobileFooterHandler::prepare_mobile_footer( $order_id );
 		}
 
 		/**
