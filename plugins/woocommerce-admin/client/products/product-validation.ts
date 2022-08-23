@@ -14,6 +14,13 @@ export const validate = (
 		errors.name = __( 'This field is required.', 'woocommerce' );
 	}
 
+	if ( values.name && values.name.length > 120 ) {
+		errors.name = __(
+			'Please enter a product name shorter than 120 characters.',
+			'woocommerce'
+		);
+	}
+
 	if ( values.regular_price && ! /^[0-9.,]+$/.test( values.regular_price ) ) {
 		errors.regular_price = __(
 			'Please enter with one monetary decimal point without thousand separators and currency symbols.',
