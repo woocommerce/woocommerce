@@ -44,7 +44,7 @@ export const PricingSection: React.FC = () => {
 	const { getCurrencyConfig } = context;
 	const { decimalSeparator } = getCurrencyConfig();
 	const priceValidation = ( value: string, name: string ) => {
-		// Build regex to strip out everything except digits, decimal point and minus sign:
+		// Build regex to strip out everything except digits, decimal point and minus sign.
 		const regex = new RegExp(
 			NUMBERS_AND_DECIMAL_SEPARATOR.replace( '%s', decimalSeparator ),
 			'g'
