@@ -4,7 +4,6 @@
 import classnames from 'classnames';
 import {
 	createElement,
-	Fragment,
 	useCallback,
 	useEffect,
 	useState,
@@ -17,7 +16,6 @@ import { throttle } from 'lodash';
  */
 import { isBefore, moveIndex } from './utils';
 import { SortableItem } from './sortable-item';
-import { SortablePlaceholder } from './sortable-placeholder';
 import { SortableChild } from './types';
 
 export type SortableProps = {
@@ -27,7 +25,6 @@ export type SortableProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
-	shouldRenderPlaceholders?: boolean;
 };
 
 const THROTTLE_TIME = 16;
@@ -39,7 +36,6 @@ export const Sortable = ( {
 	onDragOver = () => null,
 	onDragStart = () => null,
 	onOrderChange = () => null,
-	shouldRenderPlaceholders = false,
 }: SortableProps ) => {
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
@@ -142,36 +138,25 @@ export const Sortable = ( {
 					'is-dragging-over-before': isDraggingOverBefore( index ),
 				} );
 				return (
-					<Fragment key={ index }>
-						{ shouldRenderPlaceholders && (
-							<SortablePlaceholder
-								isOver={ dropIndex === index }
-							/>
-						) }
-						<SortableItem
-							className={ itemClasses }
-							id={ index }
-							index={ index }
-							isDragging={ isDragging }
-							onDragEnd={ ( event ) =>
-								handleDragEnd( event, index )
-							}
-							onDragStart={ ( event ) =>
-								handleDragStart( event, index )
-							}
-							onDragOver={ ( event ) => {
-								event.preventDefault();
-								throttledHandleDragOver( event, index );
-							} }
-						>
-							{ child }
-						</SortableItem>
-					</Fragment>
+					<SortableItem
+						key={ index }
+						className={ itemClasses }
+						id={ index }
+						index={ index }
+						isDragging={ isDragging }
+						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
+						onDragStart={ ( event ) =>
+							handleDragStart( event, index )
+						}
+						onDragOver={ ( event ) => {
+							event.preventDefault();
+							throttledHandleDragOver( event, index );
+						} }
+					>
+						{ child }
+					</SortableItem>
 				);
 			} ) }
-			{ shouldRenderPlaceholders && (
-				<SortablePlaceholder isOver={ dropIndex === items.length } />
-			) }
 		</ul>
 	);
 };

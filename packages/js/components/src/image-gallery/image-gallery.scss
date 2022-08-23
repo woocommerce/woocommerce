@@ -15,28 +15,12 @@
     }
 
     .woocommerce-sortable__item {
-        &.is-dragging-over-before:before,
-        &.is-dragging-over-after:after {
-            content: '';
-            display: block;
-            height: 100%;
-            width: 3px;
-            background: #007CBA;
-            border-radius: 24px;
-            position: absolute;
+        &.is-dragging-over-before:before {
             left: calc( $gap / -2 - 1px );
-            top: 0;
         }
-
 
         &.is-dragging-over-after:after {
-            display: none;
-            left: auto;
             right: calc( $gap / -2 - 1px );
-        }
-
-        &.is-dragging-over-after:nth-last-child(2):after {
-            display: block;
         }
     }
 }
