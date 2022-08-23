@@ -124,6 +124,22 @@ export const Sortable = ( {
 		return false;
 	};
 
+	const isLastDroppable = ( index: number ) => {
+		if ( dragIndex === index ) {
+			return false;
+		}
+
+		if ( index === items.length - 1 ) {
+			return true;
+		}
+
+		if ( dragIndex === items.length - 1 && index === items.length - 2 ) {
+			return true;
+		}
+
+		return false;
+	};
+
 	return (
 		<ul
 			className={ classnames( 'woocommerce-sortable', {
@@ -136,6 +152,7 @@ export const Sortable = ( {
 				const itemClasses = classnames( {
 					'is-dragging-over-after': isDraggingOverAfter( index ),
 					'is-dragging-over-before': isDraggingOverBefore( index ),
+					'is-last-droppable': isLastDroppable( index ),
 				} );
 				return (
 					<SortableItem
