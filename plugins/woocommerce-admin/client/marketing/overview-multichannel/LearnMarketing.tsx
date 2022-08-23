@@ -107,7 +107,7 @@ const LearnMarketing = () => {
 			);
 		}
 
-		if ( error || posts.length === 0 ) {
+		if ( error || ! posts || posts.length === 0 ) {
 			return null;
 		}
 
@@ -117,7 +117,7 @@ const LearnMarketing = () => {
 				showPerPagePicker={ false }
 				page={ page }
 				perPage={ PER_PAGE }
-				total={ posts && posts.length }
+				total={ posts.length }
 				onPageChange={ ( newPage: number ) => {
 					setPage( newPage );
 				} }
