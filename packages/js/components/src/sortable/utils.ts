@@ -51,3 +51,63 @@ export const isBefore = (
 	const relativeY = event.clientY - rect.top;
 	return relativeY < middle;
 };
+
+export const isDraggingOverBefore = (
+	index: number,
+	dragIndex: number | null,
+	dropIndex: number | null
+) => {
+	if ( index === dragIndex ) {
+		return false;
+	}
+
+	if ( dropIndex === index ) {
+		return true;
+	}
+
+	if ( dragIndex === index - 1 && index - 1 === dropIndex ) {
+		return true;
+	}
+
+	return false;
+};
+
+export const isDraggingOverAfter = (
+	index: number,
+	dragIndex: number | null,
+	dropIndex: number | null
+) => {
+	if ( index === dragIndex ) {
+		return false;
+	}
+
+	if ( dropIndex === index + 1 ) {
+		return true;
+	}
+
+	if ( dragIndex === index + 1 && index + 2 === dropIndex ) {
+		return true;
+	}
+
+	return false;
+};
+
+export const isLastDroppable = (
+	index: number,
+	dragIndex: number | null,
+	itemCount: number
+) => {
+	if ( dragIndex === index ) {
+		return false;
+	}
+
+	if ( index === itemCount - 1 ) {
+		return true;
+	}
+
+	if ( dragIndex === itemCount - 1 && index === itemCount - 2 ) {
+		return true;
+	}
+
+	return false;
+};
