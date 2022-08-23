@@ -61,18 +61,4 @@ jobs:
           token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
           ref: refs/heads/trunk
           inputs: '{ "release_id": "${{ github.event.release.id }}" }'
-  send-release-notification:
-    if: github.event.release.prerelease == true && github.event.release.draft == false && github.event.release.tag_name != 'nightly' 
-    name: Send Release Notification
-    needs: build
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Invoke Pre-Release Event
-        uses: aurelien-baudet/workflow-dispatch@v2
-        with:
-          workflow: ${{ secrets.CD_RELEASE_NOTIFICATION_WORKFLOW }}
-          repo: ${{ secrets.CD_NOTIFICATION_REPO }}
-          token: ${{ secrets.CD_GH_TOKEN }}
-          ref: refs/heads/trunk
-          inputs: '{ "tag_name": "${{ github.event.release.tag_name }}" }'
 

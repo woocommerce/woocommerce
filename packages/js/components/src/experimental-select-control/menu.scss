@@ -1,0 +1,17 @@
+.woocommerce-experimental-select-control__menu {
+    position: absolute;
+    width: 100%;
+    top: 100%;
+    box-sizing: border-box;
+    display: none;
+
+    &.is-open {
+        display: block;
+    }
+
+    .woocommerce-experimental-select-control__menu-inner {
+        background: $studio-white;
+        border: 1px solid $studio-gray-5;
+        border-radius: 3px;
+    }
+}

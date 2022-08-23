@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
 										method: 'import',
 									} );
 									recordCompletionTime();
-									window.location = getAdminLink(
+									window.location.href = getAdminLink(
 										'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
 									);
 									return false;

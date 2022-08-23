@@ -46,13 +46,13 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 				className
 			) }
 		>
-			<CardHeader>
+			<CardHeader onClick={ handleClick }>
 				<div>{ header }</div>
 				<Button
 					isSmall
 					icon={ collapsed ? chevronDown : chevronUp }
 					onClick={ handleClick }
-				></Button>
+				/>
 			</CardHeader>
 			{ ! collapsed && (
 				<>

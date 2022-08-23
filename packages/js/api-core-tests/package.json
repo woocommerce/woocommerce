@@ -24,7 +24,7 @@
 	"dependencies": {
 		"allure-commandline": "^2.17.2",
 		"dotenv": "^10.0.0",
-		"jest": "^25.1.0",
+		"jest": "^27.5.1",
 		"jest-allure": "^0.1.3",
 		"jest-runner-groups": "^2.1.0",
 		"postman-collection": "^4.1.0",

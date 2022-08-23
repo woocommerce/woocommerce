@@ -18,8 +18,9 @@
 	}
 
 	.wcpay-connect-account-page-terms-of-service {
-		display: block;
-		margin: 0.5em 0;
+		color: #40464d;
+		font-size: 12px;
+		margin: 0;
 	}
 
 	.connect-account {
@@ -111,13 +112,13 @@
 		}
 
 		.connect-account__card {
-			> .components-card__header {
+			.components-card__header {
 				align-items: baseline;
 			}
 
 			// Phone-ish sizes.
 			@media (max-width: 680px) {
-				> .components-card__header {
+				.components-card__header {
 					flex-direction: column;
 				}
 
@@ -139,23 +140,16 @@
 				}
 			}
 
-			// Applies for gutenberg
-			.components-card-body {
-				.onboarding-description {
-					margin-top: 0.5em;
-				}
-				.connect-account__action {
-					// margin-bottom: 0.5em;
-				}
-			}
-
 			.onboarding-description {
 				font-size: 16px;
-				color: #555;
+				color: $studio-gray-70;
+				margin: 0;
 			}
 
 			.accepted-payment-methods {
 				font-size: 12px;
+				font-weight: bold;
+				margin: $gap-large 0 $gap-smaller;
 			}
 		}
 
@@ -167,15 +161,15 @@
 				margin-right: 10px !important;
 			}
 			button.btn-install {
-				padding: 0 35px 0 35px;
+				padding: 0 30px 0 30px;
 				border-radius: 3px;
 			}
 		}
 	}
 
 	.banner-heading-copy {
-		font-size: 26px;
-		line-height: 34px;
+		font-size: 24px;
+		line-height: 32px;
 	}
 }
 
@@ -185,35 +179,50 @@
 		border-bottom: 1px solid #e2e4e7;
 		border-radius: 0;
 		box-shadow: none;
-		.components-card__body {
-			padding: 24px;
-		}
 	}
 
-	.limited-time-offer {
-		.flag-icon {
-			display: inline-block;
-			width: 14px;
-			height: 14px;
-			margin-right: 8px;
-		}
+	.gift-icon {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		margin-right: $gap-smaller;
 	}
 
-
-	.offer-copy {
-		font-size: 16px;
-		line-height: 24px;
-		width: 380px;
-		font-weight: normal;
-	}
-
-	.discount-copy {
-		width: 380px;
-		margin-top: 6px;
+	.offer-header {
+		display: flex;
+		color: $studio-gray-30;
+		text-transform: uppercase;
 	}
 
 	.components-card__body {
-		background: url(./wcpay-banner.png) no-repeat right;
+		padding: $gap-large;
+		display: flex;
+	}
+
+	.limited-time-offer {
+		h1 {
+			font-size: 16px;
+			line-height: 21px;
+			font-weight: 400;
+			color: $gray-900;
+		}
+
+		p {
+			font-size: 10px;
+			line-height: 12px;
+			margin: $gap-smaller 0 0;
+			color: $gray-600;
+		}
+	}
+
+	.banner-offer-icon {
+		width: 240px;
+	}
+
+	@include breakpoint('<600px') {
+		.banner-offer-icon {
+			display: none;
+		}
 	}
 }
 
