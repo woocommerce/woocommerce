@@ -5,6 +5,8 @@ import { useShallowEqual } from '@woocommerce/base-hooks';
 import type {
 	PaymentMethods,
 	ExpressPaymentMethods,
+	PaymentMethodConfigInstance,
+	ExpressPaymentMethodConfigInstance,
 } from '@woocommerce/type-defs/payments';
 import {
 	getPaymentMethods,
@@ -25,19 +27,56 @@ interface ExpressPaymentMethodState {
 const usePaymentMethodState = (
 	express = false
 ): PaymentMethodState | ExpressPaymentMethodState => {
-	const { paymentMethodsInitialized, expressPaymentMethodsInitialized } =
-		useSelect( ( select ) => {
-			const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
+	const {
+		paymentMethodsInitialized,
+		expressPaymentMethodsInitialized,
+		availablePaymentMethods,
+		availableExpressPaymentMethods,
+	} = useSelect( ( select ) => {
+		const store = select( PAYMENT_METHOD_DATA_STORE_KEY );
 
-			return {
-				paymentMethodsInitialized: store.paymentMethodsInitialized(),
-				expressPaymentMethodsInitialized:
-					store.expressPaymentMethodsInitialized(),
-			};
-		} );
+		return {
+			paymentMethodsInitialized: store.paymentMethodsInitialized(),
+			expressPaymentMethodsInitialized:
+				store.expressPaymentMethodsInitialized(),
+			availableExpressPaymentMethods:
+				store.getAvailableExpressPaymentMethods(),
+			availablePaymentMethods: store.getAvailablePaymentMethods(),
+		};
+	} );
 
-	const paymentMethods = getPaymentMethods();
-	const expressPaymentMethods = getExpressPaymentMethods();
+	const availablePaymentMethodNames = Object.values(
+		availablePaymentMethods
+	).map( ( { name } ) => name );
+	const availableExpressPaymentMethodNames = Object.values(
+		availableExpressPaymentMethods
+	).map( ( { name } ) => name );
+
+	const registeredPaymentMethods = getPaymentMethods();
+	const registeredExpressPaymentMethods = getExpressPaymentMethods();
+
+	// Remove everything from registeredPaymentMethods that is not in availablePaymentMethodNames.
+	const paymentMethods = Object.keys( registeredPaymentMethods ).reduce(
+		( acc: Record< string, PaymentMethodConfigInstance >, key ) => {
+			if ( availablePaymentMethodNames.includes( key ) ) {
+				acc[ key ] = registeredPaymentMethods[ key ];
+			}
+			return acc;
+		},
+		{}
+	);
+	// Remove everything from registeredExpressPaymentMethods that is not in availableExpressPaymentMethodNames.
+	const expressPaymentMethods = Object.keys(
+		registeredExpressPaymentMethods
+	).reduce(
+		( acc: Record< string, ExpressPaymentMethodConfigInstance >, key ) => {
+			if ( availableExpressPaymentMethodNames.includes( key ) ) {
+				acc[ key ] = registeredExpressPaymentMethods[ key ];
+			}
+			return acc;
+		},
+		{}
+	);
 
 	const currentPaymentMethods = useShallowEqual( paymentMethods );
 	const currentExpressPaymentMethods = useShallowEqual(
