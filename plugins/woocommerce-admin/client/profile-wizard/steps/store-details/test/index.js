@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -30,6 +30,13 @@ const testProps = {
 	},
 	getLocale: jest.fn(),
 	isLoading: false,
+	createNotice: jest.fn(),
+	profileItems: {},
+	updateAndPersistSettingsForGroup: jest.fn(),
+	goToNextStep: jest.fn(),
+	errorsRef: {
+		current: {},
+	},
 };
 
 jest.mock( '@wordpress/data', () => {
@@ -82,6 +89,28 @@ describe( 'StoreDetails', () => {
 		expect(
 			getByRole( 'button', { name: 'Continue' } )
 		).not.toBeDisabled();
+	} );
+
+	test( 'should call updateProfileItems when continue button is clicked given the allowTracking is true', async () => {
+		const updateProfileItems = jest.fn();
+		const { getByText } = render(
+			<StoreDetails
+				{ ...{
+					...testProps,
+					initialValues: {
+						...testProps.initialValues,
+						countryState: 'US',
+					},
+				} }
+				updateProfileItems={ updateProfileItems }
+				allowTracking={ true }
+			/>
+		);
+		const continueButton = getByText( 'Continue' );
+		userEvent.click( continueButton );
+		await waitFor( () => {
+			expect( updateProfileItems ).toHaveBeenCalled();
+		} );
 	} );
 
 	describe( 'Email validation test cases', () => {
