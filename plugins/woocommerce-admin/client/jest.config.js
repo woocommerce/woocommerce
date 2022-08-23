@@ -12,6 +12,10 @@ module.exports = {
 				],
 			},
 			tsconfig: '<rootDir>/tsconfig.test.json',
+
+			// Enable Babel processing to transform ESM such as is-plain-obj.
+			// @ts-ignore
+			babelConfig: require( '../babel.config.js' ),
 		},
 	},
 };
