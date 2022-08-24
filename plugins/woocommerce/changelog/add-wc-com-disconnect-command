@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Adds `wc com disconnect` command to allow store being disconnected from WooCommerce.com via CLI

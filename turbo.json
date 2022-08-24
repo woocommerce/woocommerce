@@ -2,8 +2,11 @@
 	"$schema": "https://turborepo.org/schema.json",
 	"baseBranch": "origin/trunk",
 	"pipeline": {
+		"build:feature-config": {
+			"cache": false
+		},
 		"turbo:build": {
-			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"inputs": [
 				"src/*.js",
 				"src/**/*.js",
@@ -30,6 +33,7 @@
 
 		"woocommerce#turbo:build": {
 			"dependsOn": [
+				"build:feature-config",
 				"^turbo:build",
 				"woocommerce/client/admin#turbo:build",
 				"woocommerce/client/legacy#turbo:build"
@@ -45,7 +49,7 @@
 		},
 
 		"woocommerce/client/admin#turbo:build": {
-			"dependsOn": [ "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
 			"outputs": [],
 			"inputs": [
 				"client/*.js",
@@ -63,7 +67,7 @@
 		},
 
 		"turbo:test": {
-			"dependsOn": [ "turbo:build" ],
+			"dependsOn": [ "build:feature-config", "turbo:build" ],
 			"inputs": [
 				"src/*.js",
 				"src/**/*.js",

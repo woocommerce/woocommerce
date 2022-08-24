@@ -28,14 +28,32 @@ const EditProductPage: React.FC = () => {
 	const formRef = useRef< FormRef< Partial< Product > > >( null );
 	const { product, isLoading, isPendingAction } = useSelect(
 		( select: WCDataSelector ) => {
-			const { getProduct, hasFinishedResolution, isPending } =
-				select( PRODUCTS_STORE_NAME );
+			const {
+				getProduct,
+				hasFinishedResolution,
+				isPending,
+				getPermalinkParts,
+			} = select( PRODUCTS_STORE_NAME );
 			if ( productId ) {
+				const retrievedProduct = getProduct(
+					parseInt( productId, 10 ),
+					undefined
+				);
+				const permalinkParts = getPermalinkParts(
+					parseInt( productId, 10 )
+				);
 				return {
-					product: getProduct( parseInt( productId, 10 ), undefined ),
-					isLoading: ! hasFinishedResolution( 'getProduct', [
-						parseInt( productId, 10 ),
-					] ),
+					product:
+						permalinkParts && retrievedProduct
+							? retrievedProduct
+							: undefined,
+					isLoading:
+						! hasFinishedResolution( 'getProduct', [
+							parseInt( productId, 10 ),
+						] ) ||
+						! hasFinishedResolution( 'getPermalinkParts', [
+							parseInt( productId, 10 ),
+						] ),
 					isPendingAction:
 						isPending( 'createProduct' ) ||
 						isPending(

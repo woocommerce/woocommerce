@@ -8,6 +8,7 @@ export { default as Date } from './date';
 export { default as DateRangeFilterPicker } from './date-range-filter-picker';
 export { default as DateRange } from './calendar/date-range';
 export { default as DatePicker } from './calendar/date-picker';
+export { DateTimePickerControl } from './date-time-picker-control';
 export { default as DropdownButton } from './dropdown-button';
 export { default as EllipsisMenu } from './ellipsis-menu';
 export { default as EmptyContent } from './empty-content';

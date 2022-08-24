@@ -13,10 +13,12 @@ jobs:
               run: |
                   npm install -g pnpm@^6.24.2
                   npm -g i @wordpress/env@5.1.0
-                  pnpm install
+                  pnpm install --filter code-analyzer
             - name: Run analyzer
               id: run
-              run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF"
+              run: |
+                version=$(./tools/code-analyzer/bin/dev major_minor "${{ github.head_ref || github.ref_name }}" "plugins/woocommerce/woocommerce.php")
+                ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF" $version
             - name: Print results
               id: results
               run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}${{ steps.run.outputs.schema }}${{ steps.run.outputs.database }}"

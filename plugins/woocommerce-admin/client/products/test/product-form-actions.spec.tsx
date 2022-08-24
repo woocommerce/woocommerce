@@ -177,6 +177,7 @@ describe( 'ProductFormActions', () => {
 			);
 			queryByText( 'Save draft' )?.click();
 			expect( updateProductWithStatus ).toHaveBeenCalledWith(
+				product.id,
 				{ ...product, name: 'Name Update' },
 				'draft'
 			);
@@ -219,6 +220,7 @@ describe( 'ProductFormActions', () => {
 				manage_stock: true,
 			} );
 			expect( updateProductWithStatus ).toHaveBeenCalledWith(
+				product.id,
 				product,
 				'publish'
 			);
@@ -367,6 +369,7 @@ describe( 'ProductFormActions', () => {
 			);
 			updateProductWithStatus.mockReturnValue( Promise.resolve() );
 			expect( updateProductWithStatus ).toHaveBeenCalledWith(
+				product.id,
 				product,
 				'publish'
 			);
@@ -404,6 +407,7 @@ describe( 'ProductFormActions', () => {
 			} );
 			updateProductWithStatus.mockReturnValue( Promise.resolve() );
 			expect( updateProductWithStatus ).toHaveBeenCalledWith(
+				product.id,
 				product,
 				'publish'
 			);

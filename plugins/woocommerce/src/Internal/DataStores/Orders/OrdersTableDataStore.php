@@ -655,9 +655,28 @@ WHERE
 		return array();
 	}
 
+	/**
+	 * Search order data for a term and return matching order IDs.
+	 *
+	 * @param string $term Search term.
+	 *
+	 * @return int[] Array of order IDs.
+	 */
 	public function search_orders( $term ) {
-		// TODO: Implement search_orders() method.
-		return array();
+		$order_ids = wc_get_orders( array( 's' => $term ) );
+
+		/**
+		 * Provides an opportunity to modify the list of order IDs obtained during an order search.
+		 *
+		 * This hook is used for Custom Order Table queries. For Custom Post Type order searches, the corresponding hook
+		 * is `woocommerce_shop_order_search_results`.
+		 *
+		 * @since 7.0.0
+		 *
+		 * @param int[]  $order_ids Search results as an array of order IDs.
+		 * @param string $term      The search term.
+		 */
+		return array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
