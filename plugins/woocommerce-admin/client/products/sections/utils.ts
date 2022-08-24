@@ -42,9 +42,9 @@ export const getCheckboxProps = ( {
 }: gettersProps ) => {
 	return {
 		checked,
-		className: classnames( 'woocommerce-add-product__checkbox', className ),
+		className: classnames( 'woocommerce-product__checkbox', className ),
 		onChange: ( isChecked: boolean ) => {
-			recordEvent( `add_product_checkbox_${ name }`, {
+			recordEvent( `product_checkbox_${ name }`, {
 				checked: isChecked,
 			} );
 			return onChange( isChecked );
@@ -61,7 +61,7 @@ export const getTextControlProps = ( {
 }: gettersProps ) => {
 	return {
 		value,
-		className: classnames( 'woocommerce-add-product__text', className ),
+		className: classnames( 'woocommerce-product__text', className ),
 		onChange,
 		onBlur,
 	};
@@ -99,7 +99,7 @@ export const getInputControlProps = ( {
 	return {
 		value: currencyString,
 		[ currencyPosition ]: symbol,
-		className: classnames( 'woocommerce-add-product__input', className ),
+		className: classnames( 'woocommerce-product__input', className ),
 		onChange,
 		onBlur,
 	};
