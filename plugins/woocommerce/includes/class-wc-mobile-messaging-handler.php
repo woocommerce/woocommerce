@@ -8,9 +8,9 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * MobileFooterHandler
+ * WC_Mobile_Messaging_Handler
  */
-class MobileFooterHandler {
+class WC_Mobile_Messaging_Handler {
 
 	const OPEN_ORDER_INTERVAL_DAYS = 7;
 
