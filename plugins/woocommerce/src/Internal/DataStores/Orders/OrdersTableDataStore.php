@@ -679,6 +679,18 @@ WHERE
 	}
 
 	/**
+	 * Get all orders matching the passed in args.
+	 *
+	 * @deprecated 3.1.0 - Use {@see wc_get_orders} instead.
+	 * @param  array $args List of args passed to wc_get_orders().
+	 * @return array|object
+	 */
+	public function get_orders( $args = array() ) {
+		wc_deprecated_function( __FUNCTION__, '3.1.0', 'Use wc_get_orders instead.' );
+		return wc_get_orders( $args );
+	}
+
+	/**
 	 * Get unpaid orders after a certain date,
 	 *
 	 * @param  int $date Timestamp.
@@ -729,18 +741,6 @@ WHERE
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
-
-	/**
-	 * Deprecated method for backward compatibility.
-	 *
-	 * @param array $args Args, same as wc_get_orders.
-	 *
-	 * @return array|\stdClass|\WC_Order[] Array of orders.
-	 */
-	public function get_orders( $args = array() ) {
-		wc_deprecated_function( 'OrdersTableDataStore::get_orders', '3.1.0', 'Use wc_get_orders instead.' );
-		return wc_get_orders( $args );
-	}
 
 	/**
 	 * Get order type from DB.
