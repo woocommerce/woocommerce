@@ -1,7 +1,7 @@
 <?php
 /**
  * Order refund data store. Refunds are based on orders (essentially negative orders) but there is slight difference in how we save them.
- * For example, order save hooks etc can't be fired when saving refund, so we need to do it a seperate datastore..
+ * For example, order save hooks etc can't be fired when saving refund, so we need to do it a separate datastore.
  */
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
