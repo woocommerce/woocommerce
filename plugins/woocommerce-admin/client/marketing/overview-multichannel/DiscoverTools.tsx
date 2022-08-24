@@ -5,6 +5,7 @@ import { Fragment } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
+import { Icon, trendingUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { Pill, EmptyContent, Spinner } from '@woocommerce/components';
 import { flatMapDeep, uniqBy } from 'lodash';
@@ -139,17 +140,27 @@ export const DiscoverTools = () => {
 
 		if ( plugins.length === 0 ) {
 			return (
-				<EmptyContent
-					title={ __(
-						'Looks like you already have all the tools you need.',
-						'woocommerce'
-					) }
-					message={ __(
-						'Go on and grow your store now.',
-						'woocommerce'
-					) }
-					illustration=""
-				/>
+				<CardBody className="woocommerce-marketing-discover-tools-card-body-empty-content">
+					<Icon icon={ trendingUp } size={ 32 } />
+					<div>
+						{ __(
+							'Continue to reach the right audiences and promote your products in ways that matter to them with our range of marketing solutions.',
+							'woocommerce'
+						) }
+					</div>
+					<Button
+						variant="tertiary"
+						href="https://woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/"
+						onClick={ () => {
+							recordEvent( 'marketing_explore_more_extensions' );
+						} }
+					>
+						{ __(
+							'Explore more marketing extensions',
+							'woocommerce'
+						) }
+					</Button>
+				</CardBody>
 			);
 		}
 
