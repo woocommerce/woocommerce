@@ -7,6 +7,7 @@ import { Product, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
@@ -60,6 +61,43 @@ export const PricingSection: React.FC = () => {
 		return cleanValue;
 	};
 
+	const taxSettingsText =
+		'Per your {{link}}store settings{{/link}}, tax is {{strong}}%sincluded{{/strong}} in the price.';
+	const addNot = pricesIncludeTax ? '' : 'not ';
+	taxSettingsText.replace( taxSettingsText, addNot );
+
+	const taxSettingsElement = interpolateComponents( {
+		mixedString: __(
+			'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
+			'woocommerce'
+		),
+		components: {
+			link: (
+				<Link
+					href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=tax` }
+					target="_blank"
+					type="external"
+					onClick={ () => {
+						recordEvent( 'product_pricing_list_price_help' );
+					} }
+				>
+					<></>
+				</Link>
+			),
+			strong: <strong />,
+		},
+	} );
+
+	const salePriceTitle = interpolateComponents( {
+		mixedString: __(
+			'Sale price {{span}}(optional){{/span}}',
+			'woocommerce'
+		),
+		components: {
+			span: <span className="woocommerce-product-form__optional-input" />,
+		},
+	} );
+
 	return (
 		<ProductSectionLayout
 			title={ __( 'Pricing', 'woocommerce' ) }
@@ -84,47 +122,27 @@ export const PricingSection: React.FC = () => {
 				</>
 			}
 		>
-			<InputControl
-				label={ __( 'List price', 'woocommerce' ) }
-				placeholder={ __( '10.59', 'woocommerce' ) }
-				{ ...getInputControlProps( {
-					...getInputProps( 'regular_price' ),
-					context,
-				} ) }
-				onChange={ ( value: string ) =>
-					priceValidation( value, 'regular_price' )
-				}
-			/>
-			{ ! isTaxSettingsResolving && (
-				<span className="woocommerce-product-form__secondary-text">
-					Per your&nbsp;
-					<Link
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=tax` }
-						target="_blank"
-						type="external"
-						onClick={ () => {
-							recordEvent(
-								'add_product_pricing_list_price_help'
-							);
-						} }
-					>
-						store settings
-					</Link>
-					, tax is&nbsp;
-					<strong>
-						{ pricesIncludeTax && <span>not </span> }included&nbsp;
-					</strong>
-					in the price.
-				</span>
-			) }
+			<div className="woocommerce-product-form__custom-label-input">
+				<InputControl
+					label={ __( 'List price', 'woocommerce' ) }
+					placeholder={ __( '10.59', 'woocommerce' ) }
+					{ ...getInputControlProps( {
+						...getInputProps( 'regular_price' ),
+						context,
+					} ) }
+					onChange={ ( value: string ) =>
+						priceValidation( value, 'regular_price' )
+					}
+				/>
+				{ ! isTaxSettingsResolving && (
+					<span className="woocommerce-product-form__secondary-text">
+						{ taxSettingsElement }
+					</span>
+				) }
+			</div>
 
 			<div className="woocommerce-product-form__custom-label-input">
-				<label htmlFor="sale_price">
-					Sale price&nbsp;
-					<span className="woocommerce-product-form__optional-input">
-						(optional)
-					</span>
-				</label>
+				<label htmlFor="sale_price">{ salePriceTitle }</label>
 				<InputControl
 					hideLabelFromVision={ true }
 					id="sale_price"
