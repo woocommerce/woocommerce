@@ -57,6 +57,22 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Handles output for the default column.
+	 *
+	 * @param \WC_Order $order       Current WooCommerce order object.
+	 * @param string    $column_name Identifier for the custom column.
+	 */
+	public function column_default( $order, $column_name ) {
+		/**
+		 * Fires for each custom column in the Custom Order Table in the administrative screen.
+		 *
+		 * @param string    $column_name Identifier for the custom column.
+		 * @param \WC_Order $order       Current WooCommerce order object.
+		 */
+		do_action( "manage_{$this->screen->id}_custom_column", $column_name, $order );
+	}
+
+	/**
 	 * Sets up an items-per-page control.
 	 */
 	private function items_per_page(): void {
