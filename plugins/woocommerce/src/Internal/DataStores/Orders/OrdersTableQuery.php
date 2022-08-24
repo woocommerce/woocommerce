@@ -712,9 +712,6 @@ class OrdersTableQuery {
 	private function process_orders_table_query_args(): void {
 		$this->sanitize_status();
 
-		// TODO: not yet implemented.
-		unset( $this->args['type'] );
-
 		$fields = array_filter(
 			array(
 				'id',
