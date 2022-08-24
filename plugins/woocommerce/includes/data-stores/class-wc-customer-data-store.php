@@ -109,7 +109,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @throws WC_Data_Exception If unable to create new customer.
 	 */
 	public function create( &$customer ) {
-		$id = wc_create_new_customer( $customer->get_email(), $customer->get_username(), $customer->get_password() );
+		$id = wc_create_new_customer(
+			$customer->get_email(),
+			$customer->get_username(),
+			$customer->get_password(),
+			array(
+				'first_name' => $customer->get_first_name(),
+				'last_name' => $customer->get_last_name()
+			)
+		);
 
 		if ( is_wp_error( $id ) ) {
 			throw new WC_Data_Exception( $id->get_error_code(), $id->get_error_message() );
