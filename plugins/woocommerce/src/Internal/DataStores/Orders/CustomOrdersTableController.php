@@ -181,14 +181,14 @@ class CustomOrdersTableController {
 	 * @internal
 	 * @param OrdersTableDataStore       $data_store The data store to use.
 	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
-	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
+	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 */
 	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, OrdersTableRefundDataStore $refund_data_store, BatchProcessingController $batch_processing_controller ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
-		$this->refund_data_store = $refund_data_store;
+		$this->refund_data_store           = $refund_data_store;
 	}
 
 	/**
