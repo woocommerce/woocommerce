@@ -262,6 +262,9 @@
 		"*.php": [
 			"php -d display_errors=1 -l",
 			"composer run-script phpcs"
+		],
+		"*.md": [
+			"npm run lint:md:docs"
 		]
 	},
 	"changelog": {

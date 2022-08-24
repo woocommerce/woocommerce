@@ -3,17 +3,17 @@
 ## Table of Contents <!-- omit in toc -->
 
 - [`wc/store/checkout`](#wcstorecheckout)
-  - [Passed Parameters](#passed-parameters)
-  - [Key](#key)
+    - [Passed Parameters](#passed-parameters)
+    - [Key](#key)
 - [`wc/store/cart`](#wcstorecart)
-  - [Passed Parameters](#passed-parameters-1)
-  - [Key](#key-1)
+    - [Passed Parameters](#passed-parameters-1)
+    - [Key](#key-1)
 - [`wc/store/cart/items`](#wcstorecartitems)
-  - [Passed Parameters](#passed-parameters-2)
-  - [Key](#key-2)
+    - [Passed Parameters](#passed-parameters-2)
+    - [Key](#key-2)
 - [`wc/store/products`](#wcstoreproducts)
-  - [Passed Parameters](#passed-parameters-3)
-  - [Key](#key-3)
+    - [Passed Parameters](#passed-parameters-3)
+    - [Key](#key-3)
 
 To see how to add your data to Store API using ExtendSchema, [check this document](./extend-rest-api-add-data.md). This is a list of available endpoints that you can extend. If you want to add a new endpoint, [check this document](./extend-rest-api-new-endpoint.md).
 
