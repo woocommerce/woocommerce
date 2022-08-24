@@ -187,7 +187,9 @@ export default class Analyzer extends Command {
 		} | void
 	) {
 		const { output, file } = flags;
-		CliUx.ux.action.start( 'Generating changes' );
+		CliUx.ux.action.start(
+			`Generating a list of changes since ${ version }.`
+		);
 
 		const templates = this.scanTemplates( content, version );
 		const hooks = this.scanHooks( content, version, output );
