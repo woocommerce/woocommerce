@@ -112,6 +112,10 @@
 		max-width: 80px;
 		min-width: 0;
 		padding: $gap-smaller;
+
+		.wc-block-components-price-slider--is-input-inline & {
+			max-width: 60px;
+		}
 	}
 }
 

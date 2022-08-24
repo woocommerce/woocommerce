@@ -39,7 +39,7 @@ const block = {
 			submitButton: '.wc-block-components-filter-submit-button',
 		},
 	},
-	urlSearchParamWhenFilterIsApplied: '?max_price=1.99',
+	urlSearchParamWhenFilterIsApplied: '?max_price=2',
 	foundProduct: '32GB USB Stick',
 };
 
@@ -56,7 +56,7 @@ const setMaxPrice = async () => {
 	await page.keyboard.down( 'Shift' );
 	await page.keyboard.press( 'Home' );
 	await page.keyboard.up( 'Shift' );
-	await page.keyboard.type( '1.99' );
+	await page.keyboard.type( '2' );
 	await page.keyboard.press( 'Tab' );
 };
 
