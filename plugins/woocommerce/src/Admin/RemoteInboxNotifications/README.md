@@ -43,22 +43,28 @@ The slug *must* be unique across all notes (not just the notes that are being im
 
 Valid values for `type` are:
 
-- `error`
-- `warning`
-- `update`
-- `info`
-- `marketing`
-- `survey`
+- `error`: used for presenting error conditions
+- `warning`: used for presenting warning conditions.
+- `update`: used when a new version is available.
+- `info`: used for presenting informational messages.
+- `marketing`: used for adding marketing messages.
+- `survey`: used for adding survey messages.
+- `email`: used for adding notes that will be sent by email.
 
-`info`, `marketing`, and `survey` types will appear in the inbox. Other types appear in the head of the page.
+`info`, `marketing`, and `survey` types will appear in the inbox. `email` type will be sent by email. Other types appear in the head of the page.
 
 The `status` is the *initial* note status to be set when the rules are satisfied. Valid values for `status` are:
 
-- `unactioned`
-- `actioned`
-- `snoozed`
+- `unactioned`: the note has not yet been actioned by a user.
+- `actioned`: the note has had its action completed by a user.
+- `snoozed`: the note has been snoozed by a user.
 
 The status will usually be `unactioned`, as this will get the note to appear.
+
+There are other note statuses but we just use them **internally**:
+
+- `pending`: the note is pending - hidden but not actioned. When the spec/rules are invalid, the note status will be set to pending.
+- `sent`: the note has been sent by email to the user.
 
 ### Locale
 The note locales contain the title and content of the note. Having this broken up by locale allows different translations of the note to be used. The default locale used if none of the locales match the WordPress locale is `en_US`.

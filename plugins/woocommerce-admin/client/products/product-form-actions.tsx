@@ -50,7 +50,11 @@ export const ProductFormActions: React.FC = () => {
 		if ( ! values.id ) {
 			createProductWithStatus( values, 'draft' );
 		} else {
-			const product = await updateProductWithStatus( values, 'draft' );
+			const product = await updateProductWithStatus(
+				values.id,
+				values,
+				'draft'
+			);
 			if ( product && product.id ) {
 				resetForm( product );
 			}
@@ -65,7 +69,11 @@ export const ProductFormActions: React.FC = () => {
 		if ( ! values.id ) {
 			createProductWithStatus( values, 'publish' );
 		} else {
-			const product = await updateProductWithStatus( values, 'publish' );
+			const product = await updateProductWithStatus(
+				values.id,
+				values,
+				'publish'
+			);
 			if ( product && product.id ) {
 				resetForm( product );
 			}
@@ -78,7 +86,7 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
-			await updateProductWithStatus( values, 'publish' );
+			await updateProductWithStatus( values.id, values, 'publish' );
 		} else {
 			await createProductWithStatus( values, 'publish', false, true );
 		}
@@ -91,7 +99,11 @@ export const ProductFormActions: React.FC = () => {
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
-			await updateProductWithStatus( values, values.status || 'draft' );
+			await updateProductWithStatus(
+				values.id,
+				values,
+				values.status || 'draft'
+			);
 		}
 		await copyProductWithStatus( values );
 	};

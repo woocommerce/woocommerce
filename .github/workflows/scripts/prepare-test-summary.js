@@ -2,10 +2,8 @@
  * Script to generate the test results summary to be posted as a GitHub Job Summary and as a PR comment.
  */
 const {
-	E2E_PLAYWRIGHT,
 	API_SUMMARY_PATH,
 	E2E_PW_SUMMARY_PATH,
-	E2E_PPTR_SUMMARY_PATH,
 	SHA,
 	PR_NUMBER,
 } = process.env;
@@ -64,35 +62,7 @@ const getAPIStatsArr = () => {
  * @returns Array of E2E test result stats.
  */
 const getE2EStatsArr = () => {
-	if ( E2E_PLAYWRIGHT === 'true' ) {
-		return getAllureSummaryStats( E2E_PW_SUMMARY_PATH, 'E2E Tests' );
-	} else {
-		const summary = require( E2E_PPTR_SUMMARY_PATH );
-		const {
-			numPassedTests: passed,
-			numFailedTests: failed,
-			numTotalTests: total,
-			numPendingTests: skipped,
-			numRuntimeErrorTestSuites: broken,
-			numTodoTests: unknown,
-			startTime,
-			testResults,
-		} = summary;
-		const endTime = testResults[ testResults.length - 1 ].endTime;
-		const duration = endTime - startTime;
-		const durationFormatted = getFormattedDuration( duration );
-
-		return [
-			'E2E Tests',
-			passed.toString(),
-			failed.toString(),
-			broken.toString(),
-			skipped.toString(),
-			unknown.toString(),
-			total.toString(),
-			durationFormatted,
-		];
-	}
+	return getAllureSummaryStats( E2E_PW_SUMMARY_PATH, 'E2E Tests' );
 };
 
 /**

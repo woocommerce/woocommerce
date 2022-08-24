@@ -42,7 +42,7 @@ class Appearance extends Task {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
 			return __( 'Make your store stand out with unique design', 'woocommerce' );
 		}
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You personalized your store', 'woocommerce' );
 			}
@@ -109,7 +109,7 @@ class Appearance extends Task {
 	public function possibly_add_return_notice_script( $hook ) {
 		global $post;
 
-		if ( 'post.php' !== $hook || 'page' !== $post->post_type ) {
+		if ( $hook !== 'post.php' || $post->post_type !== 'page' ) {
 			return;
 		}
 
@@ -117,23 +117,14 @@ class Appearance extends Task {
 			return;
 		}
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-homepage-notice' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'onboarding-homepage-notice',
-			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-homepage-notice', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_VERSION,
-			true
-		);
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'onboarding-homepage-notice', true );
 	}
 
 	/**
 	 * Check if the site has a homepage set up.
 	 */
 	public static function has_homepage() {
-		if ( 'classic' === get_option( 'classic-editor-replace' ) ) {
+		if ( get_option( 'classic-editor-replace' ) === 'classic' ) {
 			return true;
 		}
 
@@ -144,7 +135,7 @@ class Appearance extends Task {
 		}
 
 		$post      = get_post( $homepage_id );
-		$completed = $post && 'publish' === $post->post_status;
+		$completed = $post && $post->post_status === 'publish';
 
 		return $completed;
 	}

@@ -109,9 +109,9 @@ export class StoreDetails extends Component {
 		);
 	}
 
-	onSubmit() {
+	onSubmit( values ) {
 		if ( this.props.allowTracking ) {
-			this.props.goToNextStep();
+			this.onContinue( values ).then( () => this.props.goToNextStep() );
 		} else {
 			this.setState( {
 				showUsageModal: true,

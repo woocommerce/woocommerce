@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add support for an atomic `meta_query` arg in COT's order query code.

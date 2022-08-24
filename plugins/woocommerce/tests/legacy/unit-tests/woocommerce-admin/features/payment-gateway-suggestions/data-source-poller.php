@@ -5,7 +5,6 @@
  * @package WooCommerce\Admin\Tests\PaymentGatewaySuggestions
  */
 
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
 use Automattic\WooCommerce\Admin\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
 
@@ -33,7 +32,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 			function( $pre, $parsed_args, $url ) {
 				$locale = get_locale();
 
-				if ( 'payment-gateway-suggestions-data-source.json?_locale=' . $locale === $url ) {
+				if ( $url === 'payment-gateway-suggestions-data-source.json?locale=' . $locale ) {
 					return array(
 						'body' => wp_json_encode(
 							array(
@@ -51,7 +50,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 					);
 				}
 
-				if ( 'payment-gateway-suggestions-data-source2.json?_locale=' . $locale === $url ) {
+				if ( $url === 'payment-gateway-suggestions-data-source2.json?locale=' . $locale ) {
 					return array(
 						'body' => wp_json_encode(
 							array(
@@ -161,7 +160,12 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 		$data               = $data_source_poller->get_specs_from_data_sources();
 		$this->assertCount( 2, $data );
 
-		$data = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		$data   = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		$locale = get_locale();
+		$this->assertArrayHasKey( $locale, $data );
+
+		$data = $data[ $locale ];
 		$this->assertCount( 2, $data );
+
 	}
 }

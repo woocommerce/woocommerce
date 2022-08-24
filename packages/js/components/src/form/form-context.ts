@@ -31,7 +31,12 @@ export type FormContext< Values extends Record< string, any > > = {
 		help: string | null | undefined;
 	};
 	isValidForm: boolean;
-	resetForm: ( initialValues: Values ) => void;
+	resetForm: (
+		initialValues: Values,
+		changedFields?: { [ P in keyof Values ]?: boolean | undefined },
+		touchedFields?: { [ P in keyof Values ]?: boolean | undefined },
+		errors?: { [ P in keyof Values ]?: string }
+	) => void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
