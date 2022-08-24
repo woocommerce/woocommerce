@@ -678,9 +678,30 @@ WHERE
 		return absint( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$orders_table} WHERE type = %s AND status = %s", 'shop_order', $status ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
+	/**
+	 * Get unpaid orders after a certain date,
+	 *
+	 * @param  int $date Timestamp.
+	 * @return array
+	 */
 	public function get_unpaid_orders( $date ) {
-		// TODO: Implement get_unpaid_orders() method.
-		return array();
+		global $wpdb;
+
+		$orders_table    = self::get_orders_table_name();
+		$order_types_sql = "('" . implode( "','", wc_get_order_types() ) . "')";
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM {$orders_table} WHERE
+				{$orders_table}.type IN {$order_types_sql}
+				AND {$orders_table}.status = %s
+				AND {$orders_table}.date_updated_gmt < %s",
+				'wc-pending',
+				gmdate( 'Y-m-d H:i:s', absint( $date ) )
+			)
+		);
+		// phpcs:enable
 	}
 
 	/**
