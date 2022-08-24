@@ -180,6 +180,7 @@ class ListTable extends WP_List_Table {
 		$this->set_order_args();
 		$this->set_date_args();
 		$this->set_customer_args();
+		$this->set_search_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -271,6 +272,18 @@ class ListTable extends WP_List_Table {
 		}
 
 		$this->order_query_args['status'] = $query_statuses;
+	}
+
+	/**
+	 * Implements order search.
+	 */
+	private function set_search_args(): void {
+		$search_term = trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ?? '' ) ) );
+
+		if ( ! empty( $search_term ) ) {
+			$this->order_query_args['s'] = $search_term;
+			$this->has_filter            = true;
+		}
 	}
 
 	/**

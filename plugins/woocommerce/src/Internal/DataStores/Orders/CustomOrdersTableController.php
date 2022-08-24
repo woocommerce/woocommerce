@@ -50,6 +50,13 @@ class CustomOrdersTableController {
 	private $data_store;
 
 	/**
+	 * Refunds data store object to use.
+	 *
+	 * @var OrdersTableRefundDataStore
+	 */
+	private $refund_data_store;
+
+	/**
 	 * The data synchronizer object to use.
 	 *
 	 * @var DataSynchronizer
@@ -86,7 +93,16 @@ class CustomOrdersTableController {
 		add_filter(
 			'woocommerce_order_data_store',
 			function ( $default_data_store ) {
-				return $this->get_data_store_instance( $default_data_store );
+				return $this->get_data_store_instance( $default_data_store, 'order' );
+			},
+			999,
+			1
+		);
+
+		add_filter(
+			'woocommerce_order-refund_data_store',
+			function ( $default_data_store ) {
+				return $this->get_data_store_instance( $default_data_store, 'order_refund' );
 			},
 			999,
 			1
@@ -163,14 +179,16 @@ class CustomOrdersTableController {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 * @param OrdersTableDataStore      $data_store The data store to use.
-	 * @param DataSynchronizer          $data_synchronizer The data synchronizer to use.
-	 * @param BatchProcessingController $batch_processing_controller The batch processing controller to use.
+	 * @param OrdersTableDataStore       $data_store The data store to use.
+	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
+	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
+	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, BatchProcessingController $batch_processing_controller ) {
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, OrdersTableRefundDataStore $refund_data_store, BatchProcessingController $batch_processing_controller ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
+		$this->refund_data_store           = $refund_data_store;
 	}
 
 	/**
@@ -210,11 +228,18 @@ class CustomOrdersTableController {
 	 * Gets the instance of the orders data store to use.
 	 *
 	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
+	 * @param string                                 $type              The type of the data store to get.
+	 *
 	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
-	private function get_data_store_instance( $default_data_store ) {
+	private function get_data_store_instance( $default_data_store, string $type ) {
 		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() ) {
-			return $this->data_store;
+			switch ( $type ) {
+				case 'order_refund':
+					return $this->refund_data_store;
+				default:
+					return $this->data_store;
+			}
 		} else {
 			return $default_data_store;
 		}

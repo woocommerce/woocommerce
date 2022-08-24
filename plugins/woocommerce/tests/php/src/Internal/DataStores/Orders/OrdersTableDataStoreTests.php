@@ -872,4 +872,47 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		return OrderHelper::create_complex_data_store_order( $this->sut );
 	}
 
+	/**
+	 * Ensure search works as expected.
+	 */
+	public function test_cot_query_search(): void {
+		$order_1 = new WC_Order();
+		$order_1->set_billing_city( 'Fort Quality' );
+		$this->switch_data_store( $order_1, $this->sut );
+		$order_1->save();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Quality Chocolates' );
+		$product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->save();
+
+		$order_2 = new WC_Order();
+		$order_2->add_item( $item );
+		$this->switch_data_store( $order_2, $this->sut );
+		$order_2->save();
+
+		$order_3 = new WC_Order();
+		$order_3->set_billing_address_1( $order_1->get_id() . ' Functional Street' );
+		$this->switch_data_store( $order_3, $this->sut );
+		$order_3->save();
+
+		// Order 1's ID happens to be the same number used in Order 3's billing street address.
+		$query = new OrdersTableQuery( array( 's' => $order_1->get_id() ) );
+		$this->assertEquals(
+			array( $order_1->get_id(), $order_3->get_id() ),
+			$query->orders,
+			'Search terms match against IDs as well as address data.'
+		);
+
+		// Order 1's billing address references "Quality" and so does one of Order 2's order items.
+		$query = new OrdersTableQuery( array( 's' => 'Quality' ) );
+		$this->assertEquals(
+			array( $order_1->get_id(), $order_2->get_id() ),
+			$query->orders,
+			'Search terms match against address data as well as order item names.'
+		);
+	}
 }

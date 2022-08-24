@@ -71,8 +71,8 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"peerDependencies": {
-		"react": "^17.0.0",
-		"react-dom": "^17.0.0"
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	},
 	"scripts": {
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
