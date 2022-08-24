@@ -23,14 +23,14 @@ export const validate = (
 
 	if ( values.regular_price && ! /^[0-9.,]+$/.test( values.regular_price ) ) {
 		errors.regular_price = __(
-			'Please enter with one monetary decimal point without thousand separators and currency symbols.',
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.',
 			'woocommerce'
 		);
 	}
 
 	if ( values.sale_price && ! /^[0-9.,]+$/.test( values.sale_price ) ) {
 		errors.sale_price = __(
-			'Please enter with one monetary decimal point without thousand separators and currency symbols.',
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.',
 			'woocommerce'
 		);
 	}

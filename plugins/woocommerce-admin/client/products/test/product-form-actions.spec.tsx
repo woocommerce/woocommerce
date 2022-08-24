@@ -423,9 +423,9 @@ describe( 'Validations', () => {
 	it( 'should not allow an empty product name', () => {
 		const nameErrorMessage = 'This field is required.';
 		const priceErrorMessage =
-			'Please enter with one monetary decimal point without thousand separators and currency symbols.';
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
 		const salePriceErrorMessage =
-			'Please enter with one monetary decimal point without thousand separators and currency symbols.';
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
 		const productWithoutName: Partial< Product > = {
 			name: '',
 		};
