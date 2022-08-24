@@ -84,7 +84,7 @@ class WC_Site_Tracking {
 			window.wcTracks.validateEvent = function( eventName, props ) {
 				let isValid = true;
 				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
-					if ( <?php echo esc_attr( 'production' !== $environment_type ); ?> ) {
+					if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {
 						/* eslint-disable no-console */
 						console.error(
 							`A valid event name must be specified. The event name: "${ eventName }" is not valid.`
@@ -95,7 +95,7 @@ class WC_Site_Tracking {
 				}
 				for ( const prop of Object.keys( props ) ) {
 					if ( ! <?php echo esc_js( WC_Tracks_Event::PROP_NAME_REGEX ); ?>.test( prop ) ) {
-						if ( <?php echo esc_attr( 'production' !== $environment_type ); ?> ) {
+						if ( <?php echo $environment_type !== 'production' ? 'true' : 'false'; ?> ) {
 							/* eslint-disable no-console */
 							console.error(
 								`A valid prop name must be specified. The property name: "${ prop }" is not valid.`
