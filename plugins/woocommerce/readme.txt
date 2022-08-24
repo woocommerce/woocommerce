@@ -203,6 +203,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Payments badge and page to show new WCPay promotion (US only) [#34251](https://github.com/woocommerce/woocommerce/pull/34251)
 * Add - Product creation experience: add more context about product data #33755 [#33755](https://github.com/woocommerce/woocommerce/pull/33755)
 * Add - Refactor and add unit tests for "Orders Milestones" note [#34295](https://github.com/woocommerce/woocommerce/pull/34295)
+* Update -   Update WooCommerce Blocks to 8.3.1 [#34359](https://github.com/woocommerce/woocommerce/pull/34359)
 * Update - Add Facebook to free extensions list and marketing task [#34303](https://github.com/woocommerce/woocommerce/pull/34303)
 * Update - Clean up setup_experiment_1 and setup_experiment_2 codes [#34084](https://github.com/woocommerce/woocommerce/pull/34084)
 * Update - Deploy payments settings banner and add tracks [#34326](https://github.com/woocommerce/woocommerce/pull/34326)
