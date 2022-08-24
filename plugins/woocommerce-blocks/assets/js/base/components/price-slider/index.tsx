@@ -8,6 +8,7 @@ import {
 	useCallback,
 	useMemo,
 	useRef,
+	useLayoutEffect,
 } from '@wordpress/element';
 import classnames from 'classnames';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
@@ -97,6 +98,9 @@ const PriceSlider = ( {
 	const [ minPriceInput, setMinPriceInput ] = useState( minPrice );
 	const [ maxPriceInput, setMaxPriceInput ] = useState( maxPrice );
 
+	const wrapper = useRef< HTMLInputElement >( null );
+	const [ wrapperWidth, setWrapperWidth ] = useState( 0 );
+
 	useEffect( () => {
 		setMinPriceInput( minPrice );
 	}, [ minPrice ] );
@@ -104,6 +108,12 @@ const PriceSlider = ( {
 	useEffect( () => {
 		setMaxPriceInput( maxPrice );
 	}, [ maxPrice ] );
+
+	useLayoutEffect( () => {
+		if ( inlineInput && wrapper.current ) {
+			setWrapperWidth( wrapper.current?.offsetWidth );
+		}
+	}, [ inlineInput, setWrapperWidth ] );
 
 	/**
 	 * Checks if the min and max constraints are valid.
@@ -292,7 +302,9 @@ const PriceSlider = ( {
 		showFilterButton &&
 			'wc-block-components-price-slider--has-filter-button',
 		isLoading && 'is-loading',
-		! hasValidConstraints && 'is-disabled'
+		! hasValidConstraints && 'is-disabled',
+		( inlineInput || wrapperWidth <= 300 ) &&
+			'wc-block-components-price-slider--is-input-inline'
 	);
 
 	const activeElement = isObject( minRange.current )
@@ -309,6 +321,8 @@ const PriceSlider = ( {
 	const ariaReadableMaxPrice = String(
 		maxPriceInput / 10 ** currency.minorUnit
 	);
+
+	const inlineInputAvailable = inlineInput && wrapperWidth > 300;
 
 	const slider = (
 		<div
@@ -370,8 +384,8 @@ const PriceSlider = ( {
 	);
 
 	return (
-		<div className={ classes }>
-			{ ( ! inlineInput || ! showInputFields ) && slider }
+		<div className={ classes } ref={ wrapper }>
+			{ ( ! inlineInputAvailable || ! showInputFields ) && slider }
 			{ showInputFields && (
 				<div className="wc-block-price-filter__controls wc-block-components-price-slider__controls">
 					<FormattedMonetaryAmount
@@ -398,7 +412,7 @@ const PriceSlider = ( {
 						disabled={ isLoading || ! hasValidConstraints }
 						value={ minPriceInput }
 					/>
-					{ inlineInput && slider }
+					{ inlineInputAvailable && slider }
 					<FormattedMonetaryAmount
 						currency={ currency }
 						displayType="input"
