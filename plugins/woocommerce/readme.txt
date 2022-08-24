@@ -252,5 +252,26 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Reduce the amount of terms shown in attributes page [#33962](https://github.com/woocommerce/woocommerce/pull/33962)
 * Enhancement - Use method_exists instead of throwing in AbstractServiceProvider::reflect_class_or_callable [#33960](https://github.com/woocommerce/woocommerce/pull/33960)
 
+**WooCommerce Blocks 8.1.0 & 8.2.0 & 8.2.1**
+
+* Enhancement - Enable the Cart and Checkout blocks when WooCommerce Blocks is bundled in WooCommerce Core.([6805](https://github.com/woocommerce/woocommerce-blocks/pull/6805))
+* Enhancement - Refactor style-attributes hooks to add as global custom imports and remove relative import paths.([6870](https://github.com/woocommerce/woocommerce-blocks/pull/6870))
+* Enhancement - Add the ability to register patterns by adding them under the "patterns" folder and add the new "WooCommerce Filters" pattern.([6861](https://github.com/woocommerce/woocommerce-blocks/pull/6861))
+* Enhancement - Update: New block icon for the Mini Cart block.([6784](https://github.com/woocommerce/woocommerce-blocks/pull/6784))
+* Enhancement - Update WooCommerce block template descriptions.([6667](https://github.com/woocommerce/woocommerce-blocks/pull/6667))
+* Enhancement - Add filter URL support to filter blocks when filtering for All Products block.([6642](https://github.com/woocommerce/woocommerce-blocks/pull/6642))
+* Enhancement - Add: Allow choosing between single and multiple sections.([6620](https://github.com/woocommerce/woocommerce-blocks/pull/6620))
+* Enhancement - Cart endpoint for Store API (/wc/store/cart) now features cross-sell items based on cart contents.([6635](https://github.com/woocommerce/woocommerce-blocks/pull/6635))
+* Fix - Refactor Product Categories block to use block.json.([6875](https://github.com/woocommerce/woocommerce-blocks/pull/6875))
+* Fix - Add font-weight controls to the Mini Cart block text.([6760](https://github.com/woocommerce/woocommerce-blocks/pull/6760))
+* Fix - Fix proceed to checkout button not working for custom links.([6804](https://github.com/woocommerce/woocommerce-blocks/pull/6804))
+* Fix - Mini Cart block: Remove the compatibility notice.([6803](https://github.com/woocommerce/woocommerce-blocks/pull/6803))
+* Fix - Render the product attribute archive page using the archive-product template.([6776](https://github.com/woocommerce/woocommerce-blocks/pull/6776))
+* Fix - Select the correct inner button for the "Featured Item" button to update its URL.([6741](https://github.com/woocommerce/woocommerce-blocks/pull/6741))
+* Fix - Navigate through Mini Cart contents with keyboard.([6731](https://github.com/woocommerce/woocommerce-blocks/pull/6731))
+* Fix - Ensure add to cart notices are displayed on pages containing the Mini Cart block.([6728](https://github.com/woocommerce/woocommerce-blocks/pull/6728))
+* Fix - Fixes an issue where search lists would not preserve the case of the original item.([6551](https://github.com/woocommerce/woocommerce-blocks/pull/6551))
+* Fix - Prevent Featured Product block from breaking when product is out of stock + hidden from catalog.([6640](https://github.com/woocommerce/woocommerce-blocks/pull/6640))
+* Fix - Contrast improvement for checkout error messages when displayed over a theme's dark mode.([6292](https://github.com/woocommerce/woocommerce-blocks/pull/6292))
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
