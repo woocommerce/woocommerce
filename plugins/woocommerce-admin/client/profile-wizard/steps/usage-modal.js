@@ -101,6 +101,7 @@ class UsageModal extends Component {
 		if ( allowTracking ) {
 			onClose();
 			onContinue();
+			return null;
 		}
 
 		const {
