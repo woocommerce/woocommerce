@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { expect } from '@jest/globals';
 import config from 'config';
 import { ElementHandle } from 'puppeteer';
 

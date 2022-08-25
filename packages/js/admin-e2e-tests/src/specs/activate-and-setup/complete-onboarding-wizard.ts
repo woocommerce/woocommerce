@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { afterAll, beforeAll, describe, it, expect } from '@jest/globals';
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { verifyValueOfInputField } from '@woocommerce/e2e-utils';
 import config from 'config';
 /**

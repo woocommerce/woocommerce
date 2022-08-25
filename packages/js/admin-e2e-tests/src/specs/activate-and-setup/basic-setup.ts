@@ -5,7 +5,7 @@ import {
 	clearAndFillInput,
 	verifyValueOfInputField,
 } from '@woocommerce/e2e-utils';
-import { afterAll, beforeAll, describe, it, expect } from '@jest/globals';
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 /**
  * Internal dependencies
  */
