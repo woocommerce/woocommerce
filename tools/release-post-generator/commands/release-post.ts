@@ -4,14 +4,15 @@
 import Analyzer from 'code-analyzer/src/commands/analyzer';
 import semver from 'semver';
 import { promises } from 'fs';
+import { writeFile } from 'fs/promises';
 
 /**
  * Internal dependencies
  */
 import { program } from '../program';
 import { renderTemplate } from '../lib/render-template';
-import { writeFile } from 'fs/promises';
 import { processChanges } from '../lib/process-changes';
+import { createWpComDraftPost } from '../lib/draft-post';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
@@ -72,13 +73,31 @@ program
 			);
 
 			const changeset = processChanges( changes );
+			const title = `WooCommerce ${ currentVersion } Released`;
 
-			const htmlTemplate = await renderTemplate( 'release.ejs.html', {
+			const html = await renderTemplate( 'release.ejs.html', {
 				changes: changeset,
-				displayVersion: currentVersion,
+				title,
 			} );
 
-			await writeFile( 'changes.html', htmlTemplate );
+			if ( isOutputOnly ) {
+				console.log( 'Outputting only, generating HTML output' );
+
+				await writeFile( 'changes.html', html );
+				console.log(
+					`File generated at ${ process.cwd() }/changes.html`
+				);
+			} else {
+				console.log( 'Creating draft post...' );
+				const response = await createWpComDraftPost(
+					'96396764',
+					'authToken',
+					title,
+					html
+				);
+
+				console.log( response );
+			}
 		} else {
 			throw new Error(
 				`Could not find previous version for ${ currentVersion }`
