@@ -16,6 +16,10 @@ interface Param {
 	slug: Array< string >;
 }
 
+export function generateUniqueId() {
+	return Math.floor( Math.random() * Date.now() );
+}
+
 export const parseTaxonomyToGenerateURL = ( taxonomy: string ) =>
 	taxonomy.replace( 'pa_', '' );
 
