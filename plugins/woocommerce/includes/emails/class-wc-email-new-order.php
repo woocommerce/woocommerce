@@ -144,8 +144,12 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		private function get_mobile_footer(): ?string {
 			include_once WC_ABSPATH . 'includes/emails/mobile/class-wc-mobile-messaging-handler.php';
 			$order_id = ( $this->object )->id;
+			$now      = new DateTime();
 
-			return WC_Mobile_Messaging_Handler::prepare_mobile_footer( $order_id );
+			return WC_Mobile_Messaging_Handler::prepare_mobile_footer(
+				$order_id,
+				$now
+			);
 		}
 
 		/**

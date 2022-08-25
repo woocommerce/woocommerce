@@ -17,14 +17,17 @@ class WC_Mobile_Messaging_Handler {
 	/**
 	 * Prepares footer with deep link
 	 *
-	 * @param int $order_id of order to make a deep link for.
+	 * @param int      $order_id of order to make a deep link for.
+	 * @param DateTime $now current DateTime.
 	 *
 	 * @return string|null
 	 */
-	public static function prepare_mobile_footer( $order_id ): ?string {
+	public static function prepare_mobile_footer(
+		int $order_id,
+		DateTime $now
+	): ?string {
 		try {
 			$last_mobile_used = self::get_closer_mobile_usage_date();
-			$now              = new DateTime();
 
 			if ( $last_mobile_used->diff( $now )->days > self::OPEN_ORDER_INTERVAL_DAYS ) {
 				return null;
@@ -40,18 +43,35 @@ class WC_Mobile_Messaging_Handler {
 
 
 	/**
-	 * Returns the closest date of last usage of any mobile app platform
+	 * Returns the closest date of last usage of any mobile app platform.
 	 *
 	 * @return DateTime|null
 	 */
 	private static function get_closer_mobile_usage_date(): ?DateTime {
 		$mobile_usage = WC_Tracker::get_woocommerce_mobile_usage();
 
-		try {
-			$last_ios_used     = new DateTime( $mobile_usage['ios']['last_used'] );
-			$last_android_used = new DateTime( $mobile_usage['android']['last_used'] );
+		$last_ios_used     = self::get_last_used_or_null( 'ios', $mobile_usage );
+		$last_android_used = self::get_last_used_or_null( 'android', $mobile_usage );
 
-			return max( $last_android_used, $last_ios_used );
+		return max( $last_android_used, $last_ios_used );
+	}
+
+
+	/**
+	 * Returns last used date of specified mobile app platform.
+	 *
+	 * @param string $platform mobile platform to check.
+	 * @param array  $mobile_usage mobile apps usage data.
+	 *
+	 * @return DateTime|null last used date of specified mobile app
+	 */
+	private static function get_last_used_or_null( string $platform, array $mobile_usage ): ?DateTime {
+		try {
+			if ( array_key_exists( $platform, $mobile_usage ) ) {
+				return new DateTime( $mobile_usage[ $platform ]['last_used'] );
+			} else {
+				return null;
+			}
 		} catch ( Exception $e ) {
 			return null;
 		}
