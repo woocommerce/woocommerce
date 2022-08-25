@@ -81,9 +81,12 @@ class OnboardingProducts {
 		$woocommerce_products = get_transient( self::PRODUCT_DATA_TRANSIENT );
 		if ( false === $woocommerce_products ) {
 			$woocommerce_products = wp_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/search',
-				array(
-					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+				add_query_arg(
+					array(
+						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+						'locale' => get_user_locale()
+					),
+					'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
 				)
 			);
 			if ( is_wp_error( $woocommerce_products ) ) {
