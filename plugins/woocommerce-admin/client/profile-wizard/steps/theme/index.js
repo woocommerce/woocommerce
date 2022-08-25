@@ -15,6 +15,7 @@ import {
 	TabPanel,
 	Tooltip,
 } from '@wordpress/components';
+
 import { withDispatch, withSelect } from '@wordpress/data';
 import { H } from '@woocommerce/components';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
