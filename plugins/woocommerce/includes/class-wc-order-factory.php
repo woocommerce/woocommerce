@@ -86,20 +86,24 @@ class WC_Order_Factory {
 			$order_ids = $uncached_order_ids;
 		}
 
+		// We separate order list by class, since their datastore might be different.
+		$order_list_by_class = array();
+
 		foreach ( $order_ids as $order_id ) {
 			$classname = self::get_class_name_for_order_id( $order_id );
-
 			if ( ! $classname && ! $skip_invalid ) {
 				// translators: %d is an order ID.
 				throw new \Exception( sprintf( __( 'Could not find classname for order ID %d', 'woocommerce' ), $order_id ) );
 			}
-
+			if ( ! isset( $order_list_by_class[ $classname ] ) ) {
+				$order_list_by_class[ $classname ] = array();
+			}
 			try {
 				$obj = new $classname();
 				$obj->set_defaults();
 				$obj->set_id( $order_id );
 
-				$result[ $order_id ] = $obj;
+				$order_list_by_class[ $classname ][ $order_id ] = $obj;
 			} catch ( \Exception $e ) {
 				wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 
@@ -109,15 +113,24 @@ class WC_Order_Factory {
 			}
 		}
 
-		try {
-			WC_Data_Store::load( 'order' )->read_multiple( $result );
-		} catch ( \Exception $e ) {
-			wc_caught_exception( $e, __FUNCTION__, $order_ids );
+		foreach ( $order_list_by_class as $classname => $order_list ) {
+			$data_store = ( new $classname() )->get_data_store();
+			try {
+				$data_store->read_multiple( $order_list );
+			} catch ( \Exception $e ) {
+				wc_caught_exception( $e, __FUNCTION__, $order_ids );
 
-			if ( ! $skip_invalid ) {
-				throw $e;
+				if ( ! $skip_invalid ) {
+					throw $e;
+				}
+			}
+			foreach ( $order_list as $order ) {
+				$result[ $order->get_id() ] = $order;
 			}
 		}
+
+		// restore the sort order.
+		$result = array_values( array_replace( array_flip( $order_ids ), $result ) );
 
 		if ( $using_cot ) {
 			foreach ( $result as $order ) {

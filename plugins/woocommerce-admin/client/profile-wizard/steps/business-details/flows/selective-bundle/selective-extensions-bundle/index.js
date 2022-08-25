@@ -19,7 +19,6 @@ import './style.scss';
 import sanitizeHTML from '~/lib/sanitize-html';
 import { setAllPropsToValue } from '~/lib/collections';
 import { getCountryCode } from '../../../../../../dashboard/utils';
-import SkipButton from '../../../../skip-button';
 
 const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 
@@ -396,13 +395,6 @@ export const SelectiveExtensionsBundle = ( {
 				installExtensionOptions,
 				isInstallingActivating
 			) }
-			<SkipButton
-				onSkipped={ () => {
-					recordEvent(
-						'storeprofiler_store_business_details_free_features_skip'
-					);
-				} }
-			/>
 		</div>
 	);
 };
