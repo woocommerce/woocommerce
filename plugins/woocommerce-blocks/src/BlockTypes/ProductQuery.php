@@ -13,6 +13,13 @@ class ProductQuery extends AbstractBlock {
 	protected $block_name = 'product-query';
 
 	/**
+	 * The Block with its attributes before it gets rendered
+	 *
+	 * @var array
+	 */
+	protected $parsed_block;
+
+	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -31,23 +38,45 @@ class ProductQuery extends AbstractBlock {
 	}
 
 	/**
+	 * Remove the query block filter and parse the custom query
+	 *
+	 * This function is supposed to be called by the `gutenberg_build_query_vars_from_query_block`
+	 * filter. It de-registers the filter to make sure it runs only once and doesn't end
+	 * up hi-jacking future Query Loop blocks.
+	 *
+	 * It needs unfortunately to be `public` or otherwise the filter can't call it.
+	 *
+	 * @param WP_Query $query The WordPress Query.
+	 * @return array
+	 */
+	public function get_query_by_attributes_once( $query ) {
+		remove_filter(
+			'gutenberg_build_query_vars_from_query_block',
+			array( $this, 'get_query_by_attributes_once' ),
+			10
+		);
+
+		return $this->get_query_by_attributes( $query, $this->parsed_block );
+	}
+
+	/**
 	 * Update the query for the product query block.
 	 *
 	 * @param string|null $pre_render   The pre-rendered content. Default null.
 	 * @param array       $parsed_block The block being rendered.
 	 */
 	public function update_query( $pre_render, $parsed_block ) {
-		if ( 'core/query' !== $parsed_block['blockName'] ) {
+		if ( 'core/query' !== $parsed_block['blockName'] || ! isset( $parsed_block['attrs']['__woocommerceVariationProps'] ) ) {
 			return;
 		}
 
+		$this->parsed_block = $parsed_block;
+
 		add_filter(
 			'gutenberg_build_query_vars_from_query_block',
-			function( $query ) use ( $parsed_block ) {
-				return $this->get_query_by_attributes( $query, $parsed_block );
-			},
+			array( $this, 'get_query_by_attributes_once' ),
 			10,
-			3
+			1
 		);
 	}
 
