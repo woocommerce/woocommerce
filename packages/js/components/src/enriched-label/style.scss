@@ -1,8 +1,11 @@
 .woocommerce-enriched-label__text {
-	vertical-align: top;
+	align-self: center;
 }
 .woocommerce-enriched-label__help-wrapper {
-	display: inline;
+	.components-button {
+		padding: 0;
+		height: 28px;
+	}
 	.components-popover {
 		.components-popover__content {
 			min-width: 360px;
