@@ -848,14 +848,14 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Test the `get_order_count()` method.
 	 */
 	public function test_get_order_count(): void {
-		$no_orders_by_status = array(
+		$number_of_orders_by_status = array(
 			'wc-completed'  => 4,
 			'wc-processing' => 2,
 			'wc-pending'    => 4,
 		);
 
-		foreach ( $no_orders_by_status as $order_status => $no_orders ) {
-			foreach ( range( 1, $no_orders ) as $_ ) {
+		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
+			foreach ( range( 1, $number_of_orders ) as $_ ) {
 				$o = new \WC_Order();
 				$this->switch_data_store( $o, $this->sut );
 				$o->set_status( $order_status );
@@ -864,13 +864,13 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		}
 
 		// Count all orders.
-		$expected_count = array_sum( array_values( $no_orders_by_status ) );
+		$expected_count = array_sum( array_values( $number_of_orders_by_status ) );
 		$actual_count   = ( new OrdersTableQuery( array( 'limit' => '-1' ) ) )->found_orders;
 		$this->assertEquals( $expected_count, $actual_count );
 
 		// Count orders by status.
-		foreach ( $no_orders_by_status as $order_status => $no_orders ) {
-			$this->assertEquals( $no_orders, $this->sut->get_order_count( $order_status ) );
+		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
+			$this->assertEquals( $number_of_orders, $this->sut->get_order_count( $order_status ) );
 		}
 	}
 
