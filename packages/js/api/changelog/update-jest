@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Update `jest` and `ts-jest` to `^27` from `^25`.
+Update `jest@^27.5.1` and `ts-jest@^27` from `^25`.
