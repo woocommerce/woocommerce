@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom)$",
+	"filter": "^(?:react|react-dom|jest|jest-circus|jest-each|@jest/test-sequencer|@jest/globals)$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -13,6 +13,10 @@
 			"dependencies": [ "react", "react-dom" ],
 			"packages": [ "**" ],
 			"pinVersion": "^17.0.2"
+		},{
+			"dependencies": [ "jest", "jest-circus", "jest-each", "@jest/test-sequencer", "@jest/globals" ],
+			"packages": [ "**" ],
+			"pinVersion": "^27.5.1"
 		}
 	]
 }
