@@ -865,7 +865,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		// Count all orders.
 		$expected_count = array_sum( array_values( $no_orders_by_status ) );
-		$actual_count   = (new OrdersTableQuery( array( 'limit' => '-1' ) ))->found_orders;
+		$actual_count   = ( new OrdersTableQuery( array( 'limit' => '-1' ) ) )->found_orders;
 		$this->assertEquals( $expected_count, $actual_count );
 
 		// Count orders by status.

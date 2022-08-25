@@ -653,7 +653,7 @@ WHERE
 		$op_table     = self::get_operational_data_table_name();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return $wpdb->get_var(
+		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT {$orders_table}.id FROM {$orders_table}
 				INNER JOIN {$op_table} ON {$op_table}.order_id = {$orders_table}.id
@@ -686,7 +686,7 @@ WHERE
 	 * @return array|object
 	 */
 	public function get_orders( $args = array() ) {
-		wc_deprecated_function( __FUNCTION__, '3.1.0', 'Use wc_get_orders instead.' );
+		wc_deprecated_function( __METHOD__, '3.1.0', 'Use wc_get_orders instead.' );
 		return wc_get_orders( $args );
 	}
 
