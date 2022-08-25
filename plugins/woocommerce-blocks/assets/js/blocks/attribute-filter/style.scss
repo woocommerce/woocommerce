@@ -17,7 +17,6 @@
 	margin-bottom: $gap;
 	border-radius: inherit;
 	border-color: inherit;
-	z-index: 30;
 
 	&.style-dropdown {
 		position: relative;
@@ -32,17 +31,11 @@
 			line-height: 1;
 		}
 
-		> .wc-blocks-components-form-token-field-wrapper {
-			position: relative;
-			z-index: 2;
-		}
-
 		> svg {
 			position: absolute;
 			right: 20px;
 			top: 50%;
 			transform: translateY(-50%);
-			z-index: 1;
 		}
 	}
 
