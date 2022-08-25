@@ -422,13 +422,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'         => __( 'Content-Disposition', 'woocommerce' ),
-					'desc'          => __( 'Deliver downloadable files inline', 'woocommerce' ),
-					'id'            => 'woocommerce_downloads_deliver_inline',
-					'type'          => 'checkbox',
-					'default'       => false,
-					'desc_tip'      => __( 'Enable this option to have downloadable files open in browser, instead of being downloaded to customer\'s device.', 'woocommerce' ),
-					'autoload'      => false,
+					'title'    => __( 'Open in browser', 'woocommerce' ),
+					'desc'     => __( 'Open downloadable files in the browser, instead of saving them to the device.', 'woocommerce' ),
+					'id'       => 'woocommerce_downloads_deliver_inline',
+					'type'     => 'checkbox',
+					'default'  => false,
+					'desc_tip' => __( 'Enable this option to have downloadable files open in browser, instead of being downloaded to customer\'s device.', 'woocommerce' ),
+					'autoload' => false,
 				),
 
 				array(
