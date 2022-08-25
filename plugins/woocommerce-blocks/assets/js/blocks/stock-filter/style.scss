@@ -1,3 +1,14 @@
+.wp-block-woocommerce-stock-filter {
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		text-transform: inherit;
+	}
+}
+
 .wc-block-stock-filter {
 	margin-bottom: $gap-large;
 
@@ -26,7 +37,7 @@
 		display: flex;
 		gap: $gap;
 		justify-content: flex-end;
-		margin-top: $gap-large;
+		margin-top: $gap;
 
 		// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
 		button[type="submit"]:not(.wp-block-search__button).wc-block-components-filter-submit-button {
