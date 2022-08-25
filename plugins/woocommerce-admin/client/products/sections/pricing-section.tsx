@@ -16,6 +16,7 @@ import {
 /**
  * Internal dependencies
  */
+import './pricing-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { getInputControlProps } from './utils';
 import { ADMIN_URL } from '../../utils/admin-settings';
@@ -111,6 +112,7 @@ export const PricingSection: React.FC = () => {
 						) }
 					</span>
 					<Link
+						className="woocommerce-form-section__header-link"
 						href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/"
 						target="_blank"
 						type="external"

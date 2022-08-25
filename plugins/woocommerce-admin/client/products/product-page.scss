@@ -7,6 +7,7 @@
 	.components-toggle-control {
 		& > * {
 			margin-bottom: 0;
+			height: $gap-large + $gap-smallest;
 		}
 	}
 	.components-input-control {
@@ -32,7 +33,7 @@
 		&__secondary-text {
 			font-size: 12px;
 			color: $gray-700;
-			margin-bottom: $gap-smallest;
+			margin-top: $gap-smaller;
 		}
 	}
 }

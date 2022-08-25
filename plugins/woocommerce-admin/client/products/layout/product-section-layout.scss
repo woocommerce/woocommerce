@@ -1,9 +1,13 @@
-.product-category-layout {
+.woocommerce-form-section {
 	display: grid;
 	grid-template-columns: 32% auto;
 	gap: $gap-large;
 
-	&__fields {
+	a {
+		text-decoration: none;
+	}
+
+	&__content {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
@@ -14,6 +18,9 @@
 		border-radius: 2px;
 
 		> * {
+			&:not(:first-of-type) {
+				padding-top: $gap-large - $gap-smaller;
+			}
 			width: 100%;
 		}
 	}
@@ -25,7 +32,7 @@
 		}
 	}
 
-	.product-field-layout:not(:first-child) {
-		margin-top: $gap;
+	&:not(:first-child) {
+		margin-top: $gap-largest;
 	}
 }

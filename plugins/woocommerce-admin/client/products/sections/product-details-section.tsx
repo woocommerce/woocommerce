@@ -44,38 +44,42 @@ export const ProductDetailsSection: React.FC = () => {
 
 	return (
 		<ProductSectionLayout
-			title={ __( 'Product details', 'woocommerce' ) }
+			title={ __( 'Product info', 'woocommerce' ) }
 			description={ __(
 				'This info will be displayed on the product page, category pages, social media, and search results.',
 				'woocommerce'
 			) }
 		>
-			<TextControl
-				label={ __( 'Name', 'woocommerce' ) }
-				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
-				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-				{ ...getTextControlProps( getInputProps( 'name' ) ) }
-			/>
-			{ values.id && permalinkPrefix && (
-				<div className="product-details-section__product-link">
-					{ __( 'Product link', 'woocommerce' ) }:&nbsp;
-					<a
-						href={ values.permalink }
-						target="_blank"
-						rel="noreferrer"
-					>
-						{ permalinkPrefix }
-						{ values.slug || cleanForSlug( values.name ) }
-						{ permalinkSuffix }
-					</a>
-					<Button
-						variant="link"
-						onClick={ () => setShowProductLinkEditModal( true ) }
-					>
-						{ __( 'Edit', 'woocommerce' ) }
-					</Button>
-				</div>
-			) }
+			<div>
+				<TextControl
+					label={ __( 'Name', 'woocommerce' ) }
+					name={ `${ PRODUCT_DETAILS_SLUG }-name` }
+					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
+					{ ...getTextControlProps( getInputProps( 'name' ) ) }
+				/>
+				{ values.id && permalinkPrefix && (
+					<div className="product-details-section__product-link">
+						{ __( 'Product link', 'woocommerce' ) }:&nbsp;
+						<a
+							href={ values.permalink }
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ permalinkPrefix }
+							{ values.slug || cleanForSlug( values.name ) }
+							{ permalinkSuffix }
+						</a>
+						<Button
+							variant="link"
+							onClick={ () =>
+								setShowProductLinkEditModal( true )
+							}
+						>
+							{ __( 'Edit', 'woocommerce' ) }
+						</Button>
+					</div>
+				) }
+			</div>
 			<CheckboxControl
 				label={
 					<EnrichedLabel
@@ -95,6 +99,7 @@ export const ProductDetailsSection: React.FC = () => {
 				{ ...getCheckboxProps( {
 					...getInputProps( 'featured' ),
 					name: 'featured',
+					className: 'product-details-section__feature-checkbox',
 				} ) }
 			/>
 			{ showProductLinkEditModal && (
