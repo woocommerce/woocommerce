@@ -427,7 +427,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'       => 'woocommerce_downloads_deliver_inline',
 					'type'     => 'checkbox',
 					'default'  => false,
-					'desc_tip' => __( 'Customers can still save the file to their device, but by default file will be opened instead of being downloaded. (Does not work with redirects).', 'woocommerce' ),
+					'desc_tip' => __( 'Customers can still save the file to their device, but by default file will be opened instead of being downloaded (does not work with redirects).', 'woocommerce' ),
 					'autoload' => false,
 				),
 
