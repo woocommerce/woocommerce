@@ -2,6 +2,7 @@
 
 The following snippet explains how the WooCommerce Blocks repository is structured omitting irrelevant or obvious items with further explanations:
 
+```text
 │
 ├── LICENSE
 ├── README.md
@@ -184,6 +185,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── tests/utils
 │ Utilities for the test cases.
 │
+```
 
 ## Credits
 
