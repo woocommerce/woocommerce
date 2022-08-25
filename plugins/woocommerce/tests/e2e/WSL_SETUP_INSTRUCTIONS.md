@@ -7,7 +7,7 @@ You can set up a local development environment on Windows with [Windows Subsyste
 You should have the following already set up on your Windows computer:
 - **Docker Desktop for Windows** - https://docs.docker.com/docker-for-windows/install/
 - **WSL 2** - https://docs.microsoft.com/en-us/windows/wsl/install
-- **Ubuntu 20.04 set as default Linux distribution** - https://docs.microsoft.com/en-us/windows/wsl/wsl-config#list-installed-distributions
+- **Ubuntu 20.04 set as default Linux distribution** - https://docs.microsoft.com/en-us/windows/wsl/basic-commands#set-default-linux-distribution
 
 ## Setup Steps
 

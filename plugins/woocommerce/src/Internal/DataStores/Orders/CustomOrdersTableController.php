@@ -50,11 +50,25 @@ class CustomOrdersTableController {
 	private $data_store;
 
 	/**
+	 * Refunds data store object to use.
+	 *
+	 * @var OrdersTableRefundDataStore
+	 */
+	private $refund_data_store;
+
+	/**
 	 * The data synchronizer object to use.
 	 *
 	 * @var DataSynchronizer
 	 */
 	private $data_synchronizer;
+
+	/**
+	 * The batch processing controller to use.
+	 *
+	 * @var BatchProcessingController
+	 */
+	private $batch_processing_controller;
 
 	/**
 	 * Is the feature visible?
@@ -79,7 +93,16 @@ class CustomOrdersTableController {
 		add_filter(
 			'woocommerce_order_data_store',
 			function ( $default_data_store ) {
-				return $this->get_data_store_instance( $default_data_store );
+				return $this->get_data_store_instance( $default_data_store, 'order' );
+			},
+			999,
+			1
+		);
+
+		add_filter(
+			'woocommerce_order-refund_data_store',
+			function ( $default_data_store ) {
+				return $this->get_data_store_instance( $default_data_store, 'order_refund' );
 			},
 			999,
 			1
@@ -156,12 +179,16 @@ class CustomOrdersTableController {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 * @param OrdersTableDataStore $data_store The data store to use.
-	 * @param DataSynchronizer     $data_synchronizer The data synchronizer to use.
+	 * @param OrdersTableDataStore       $data_store The data store to use.
+	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
+	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
+	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer ) {
-		$this->data_store        = $data_store;
-		$this->data_synchronizer = $data_synchronizer;
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, OrdersTableRefundDataStore $refund_data_store, BatchProcessingController $batch_processing_controller ) {
+		$this->data_store                  = $data_store;
+		$this->data_synchronizer           = $data_synchronizer;
+		$this->batch_processing_controller = $batch_processing_controller;
+		$this->refund_data_store           = $refund_data_store;
 	}
 
 	/**
@@ -200,12 +227,19 @@ class CustomOrdersTableController {
 	/**
 	 * Gets the instance of the orders data store to use.
 	 *
-	 * @param WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
-	 * @return WC_Object_Data_Store_Interface|string The actual data store to use.
+	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
+	 * @param string                                 $type              The type of the data store to get.
+	 *
+	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
-	private function get_data_store_instance( $default_data_store ) {
+	private function get_data_store_instance( $default_data_store, string $type ) {
 		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() ) {
-			return $this->data_store;
+			switch ( $type ) {
+				case 'order_refund':
+					return $this->refund_data_store;
+				default:
+					return $this->data_store;
+			}
 		} else {
 			return $default_data_store;
 		}
@@ -316,7 +350,6 @@ class CustomOrdersTableController {
 		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
 			return $settings;
 		}
-		$updates_controller = wc_get_container()->get( BatchProcessingController::class );
 
 		if ( $this->data_synchronizer->check_orders_table_exists() ) {
 			$settings[] = array(
@@ -364,7 +397,7 @@ class CustomOrdersTableController {
 						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
 				}
 
-				if ( $updates_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
+				if ( $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
 					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
 				} else {
 					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
@@ -471,14 +504,13 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
-		// TODO: Re-enable the following code once the COT to posts table sync is implemented (it's currently disabled to ease testing).
-
-		/*
+		/**
+		 * Commenting out for better testability.
 		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
 		if ( $sync_is_pending ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
-		*/
+		 */
 
 		return $value;
 	}
@@ -521,13 +553,15 @@ class CustomOrdersTableController {
 			update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
 		}
 
-		// Enabling the sync implies starting it too, if needed.
+		// Enabling/disabling the sync implies starting/stopping it too, if needed.
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
-		// settings even without modifying them.
+		// settings even without modifying them (and the opposite: sync will be stopped if for
+		// some reason it was ongoing while it was disabled).
 		if ( $data_sync_is_enabled ) {
-			$update_controller = wc_get_container()->get( BatchProcessingController::class );
-			$update_controller->enqueue_processor( DataSynchronizer::class );
+			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		} else {
+			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
 		}
 	}
 

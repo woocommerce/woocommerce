@@ -92,16 +92,17 @@ export default class PackagePrepare extends Command {
 					if ( nextVersion ) {
 						this.bumpPackageVersion( name, nextVersion );
 					}
+					CliUx.ux.action.stop();
 				} else {
-					this.log( `Skipping ${ name }, no changelogs available.` );
+					CliUx.ux.action.stop(
+						`Skipping ${ name }. No changes available for a release.`
+					);
 				}
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
 				}
 			}
-
-			CliUx.ux.action.stop();
 		} );
 	}
 

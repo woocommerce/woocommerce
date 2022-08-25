@@ -57,6 +57,8 @@ jobs:
 
       - name: Install and Build
         uses: ./.github/actions/install-build
+        with:
+          composer_no_dev: 0
 
       - name: Build Admin feature config
         run: |
@@ -80,4 +82,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm -- turbo run test --filter=woocommerce
+        run: pnpm run test --filter=woocommerce --color

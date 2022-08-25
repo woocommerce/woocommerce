@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Support order searches as an integral part of how (COT) order queries work.

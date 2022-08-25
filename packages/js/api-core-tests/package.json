@@ -9,7 +9,7 @@
 		"e2e:hello": "jest --group=hello",
 		"make:collection": "node utils/api-collection/build-collection.js",
 		"report": "allure generate --clean && allure serve",
-		"lint": "node ./node_modules/require-turbo && eslint data endpoints tests utils --ext=js,ts,tsx",
+		"lint": "eslint data endpoints tests utils --ext=js,ts,tsx",
 		"lint:fix": "eslint data endpoints tests utils --ext=js,ts,tsx --fix"
 	},
 	"repository": {
@@ -24,7 +24,7 @@
 	"dependencies": {
 		"allure-commandline": "^2.17.2",
 		"dotenv": "^10.0.0",
-		"jest": "^25.1.0",
+		"jest": "^27.5.1",
 		"jest-allure": "^0.1.3",
 		"jest-runner-groups": "^2.1.0",
 		"postman-collection": "^4.1.0",
@@ -32,8 +32,7 @@
 	},
 	"devDependencies": {
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.12.0",
-		"require-turbo": "workspace:*"
+		"eslint": "^8.12.0"
 	},
 	"publishConfig": {
 		"access": "public"

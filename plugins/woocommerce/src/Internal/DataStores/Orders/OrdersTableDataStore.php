@@ -115,6 +115,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			'type' => 'string',
 			'name' => 'status',
 		),
+		'type'                 => array(
+			'type' => 'string',
+			'name' => 'type',
+		),
 		'currency'             => array(
 			'type' => 'string',
 			'name' => 'currency',
@@ -376,12 +380,45 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Helper function to get alias for op table, this is used in select query.
+	 *
+	 * @return string Alias.
+	 */
+	private function get_op_table_alias() : string {
+		return 'order_operational_data';
+	}
+
+	/**
+	 * Helper function to get alias for address table, this is used in select query.
+	 *
+	 * @param string $type Address type.
+	 *
+	 * @return string Alias.
+	 */
+	private function get_address_table_alias( string $type ) : string {
+		return "address_$type";
+	}
+
+	/**
+	 * Returns data store object to use backfilling.
+	 *
+	 * @return \Abstract_WC_Order_Data_Store_CPT
+	 */
+	protected function get_post_data_store_for_backfill() {
+		return new \WC_Order_Data_Store_CPT();
+	}
+
+	/**
 	 * Backfills order details in to WP_Post DB. Uses WC_Order_Data_store_CPT.
 	 *
 	 * @param \WC_Order $order Order object to backfill.
 	 */
 	public function backfill_post_record( $order ) {
-		$cpt_data_store = new \WC_Order_Data_Store_CPT();
+		$cpt_data_store = $this->get_post_data_store_for_backfill();
+		if ( is_null( $cpt_data_store ) || ! method_exists( $cpt_data_store, 'update_order_from_object' ) ) {
+			return;
+		}
+
 		$cpt_data_store->update_order_from_object( $order );
 		foreach ( $cpt_data_store->get_internal_data_store_key_getters() as $key => $getter_name ) {
 			if (
@@ -563,13 +600,35 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		return $this->set_stock_reduced( $order, $set, $save );
 	}
 
-	//phpcs:disable Squiz.Commenting, Generic.Commenting
-
-	// TODO: Add methods for other table names as appropriate.
+	/**
+	 * Get amount already refunded.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return float Refunded amount.
+	 */
 	public function get_total_refunded( $order ) {
-		// TODO: Implement get_total_refunded() method.
-		return 0;
+		global $wpdb;
+		$order_table = self::get_orders_table_name();
+		$total       = $wpdb->get_var(
+			$wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+				"
+SELECT SUM( total_amount ) FROM $order_table
+WHERE
+    type = %s AND
+    parent_order_id = %d
+;
+",
+				// phpcs:enable
+				'shop_order_refund',
+				$order->get_id()
+			)
+		);
+		return -1 * ( isset( $total ) ? $total : 0 );
 	}
+
+	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	public function get_total_tax_refunded( $order ) {
 		// TODO: Implement get_total_tax_refunded() method.
@@ -591,27 +650,72 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		return 0;
 	}
 
-	public function get_orders( $args = array() ) {
-		// TODO: Implement get_orders() method.
-		return array();
-	}
-
 	public function get_unpaid_orders( $date ) {
 		// TODO: Implement get_unpaid_orders() method.
 		return array();
 	}
 
+	/**
+	 * Search order data for a term and return matching order IDs.
+	 *
+	 * @param string $term Search term.
+	 *
+	 * @return int[] Array of order IDs.
+	 */
 	public function search_orders( $term ) {
-		// TODO: Implement search_orders() method.
-		return array();
-	}
+		$order_ids = wc_get_orders( array( 's' => $term ) );
 
-	public function get_order_type( $order_id ) {
-		// TODO: Implement get_order_type() method.
-		return 'shop_order';
+		/**
+		 * Provides an opportunity to modify the list of order IDs obtained during an order search.
+		 *
+		 * This hook is used for Custom Order Table queries. For Custom Post Type order searches, the corresponding hook
+		 * is `woocommerce_shop_order_search_results`.
+		 *
+		 * @since 7.0.0
+		 *
+		 * @param int[]  $order_ids Search results as an array of order IDs.
+		 * @param string $term      The search term.
+		 */
+		return array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
+
+	/**
+	 * Deprecated method for backward compatibility.
+	 *
+	 * @param array $args Args, same as wc_get_orders.
+	 *
+	 * @return array|\stdClass|\WC_Order[] Array of orders.
+	 */
+	public function get_orders( $args = array() ) {
+		wc_deprecated_function( 'OrdersTableDataStore::get_orders', '3.1.0', 'Use wc_get_orders instead.' );
+		return wc_get_orders( $args );
+	}
+
+	/**
+	 * Get order type from DB.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return string Order type.
+	 */
+	public function get_order_type( $order_id ) {
+		global $wpdb;
+		if ( $order_id instanceof \WC_Order ) {
+			return $order_id->get_type();
+		}
+		return $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $this->get_orders_table_name() is hardcoded.
+				"
+SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
+				",
+				// phpcs:enable
+				$order_id
+			)
+		);
+	}
 
 	/**
 	 * Method to read an order from custom tables.
@@ -632,7 +736,44 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		$order->read_meta_data();
+		$this->set_order_props_from_data( $order, $order_data );
+		$order->set_object_read( true );
+	}
 
+	/**
+	 * Reads multiple orders from custom tables in one pass.
+	 *
+	 * @since 6.9.0
+	 * @param array[\WC_Order] $orders Order objects.
+	 * @throws \Exception If passed an invalid order.
+	 */
+	public function read_multiple( &$orders ) {
+		$order_ids = array_keys( $orders );
+		$data      = $this->get_order_data_for_ids( $order_ids );
+
+		if ( count( $data ) !== count( $order_ids ) ) {
+			throw new \Exception( __( 'Invalid order IDs in call to read_multiple()', 'woocommerce' ) );
+		}
+
+		foreach ( $data as $order_data ) {
+			$order_id = absint( $order_data->id );
+			$order    = $orders[ $order_id ];
+
+			$order->set_defaults();
+			$order->set_id( $order_id );
+			$order->read_meta_data();
+			$this->set_order_props_from_data( $order, $order_data );
+			$order->set_object_read( true );
+		}
+	}
+
+	/**
+	 * Sets order properties based on a row from the database.
+	 *
+	 * @param \WC_Order $order      The order object.
+	 * @param object    $order_data A row of order data from the database.
+	 */
+	private function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) ) {
@@ -646,8 +787,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 				}
 			}
 		}
-
-		$order->set_object_read( true );
 	}
 
 	/**
@@ -671,7 +810,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return array|object|null DB Order objects or error.
 	 */
 	private function get_order_data_for_ids( $ids ) {
+		if ( ! $ids ) {
+			return array();
+		}
+
 		global $wpdb;
+		if ( empty( $ids ) ) {
+			return array();
+		}
 		$order_table_query = $this->get_order_table_select_statement();
 		$id_placeholder    = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
@@ -694,9 +840,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$order_table                  = $this::get_orders_table_name();
 		$order_table_alias            = 'wc_order';
 		$select_clause                = $this->generate_select_clause_for_props( $order_table_alias, $this->order_column_mapping );
-		$billing_address_table_alias  = 'address_billing';
-		$shipping_address_table_alias = 'address_shipping';
-		$op_data_table_alias          = 'order_operational_data';
+		$billing_address_table_alias  = $this->get_address_table_alias( 'billing' );
+		$shipping_address_table_alias = $this->get_address_table_alias( 'shipping' );
+		$op_data_table_alias          = $this->get_op_table_alias();
 		$billing_address_clauses      = $this->join_billing_address_table_to_order_query( $order_table_alias, $billing_address_table_alias );
 		$shipping_address_clauses     = $this->join_shipping_address_table_to_order_query( $order_table_alias, $shipping_address_table_alias );
 		$operational_data_clauses     = $this->join_operational_data_table_to_order_query( $order_table_alias, $op_data_table_alias );
@@ -836,7 +982,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 			// XXX: do we want to add some backwards compat for 'woocommerce_new_order_data'?
 			$post_id = wp_insert_post(
 				array(
-					'post_type'   => $data_sync->data_sync_is_enabled() ? 'shop_order' : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
 					'post_status' => 'draft',
 				)
 			);
@@ -887,7 +1033,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 	protected function get_db_rows_for_order( $order, $context = 'create', $only_changes = false ): array {
 		$result = array();
 
-		// wc_orders.
+		$existing_order_row = $order->get_id() ? $this->get_order_data_for_id( $order->get_id() ) : array();
+
 		$row = $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
 		if ( 'create' === $context && ! $row ) {
 			throw new \Exception( 'No data for new record.' ); // This shouldn't occur.
@@ -910,8 +1057,8 @@ LEFT JOIN {$operational_data_clauses['join']}
 				'table'        => self::get_operational_data_table_name(),
 				'data'         => array_merge( $row['data'], array( 'order_id' => $order->get_id() ) ),
 				'format'       => array_merge( $row['format'], array( 'order_id' => '%d' ) ),
-				'where'        => 'update' === $context ? array( 'order_id' => $order->get_id() ) : null,
-				'where_format' => 'update' === $context ? '%d' : null,
+				'where'        => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? array( 'order_id' => $order->get_id() ) : null,
+				'where_format' => isset( $existing_order_row->{"{$this->get_op_table_alias()}_id"} ) ? '%d' : null,
 			);
 		}
 
@@ -936,13 +1083,13 @@ LEFT JOIN {$operational_data_clauses['join']}
 							'address_type' => '%s',
 						)
 					),
-					'where'        => 'update' === $context
+					'where'        => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } )
 									? array(
 										'order_id'     => $order->get_id(),
 										'address_type' => $address_type,
 									)
 									: null,
-					'where_format' => 'update' === $context ? array( '%d', '%s' ) : null,
+					'where_format' => isset( $existing_order_row->{ $this->get_address_table_alias( $address_type ) . '_id' } ) ? array( '%d', '%s' ) : null,
 				);
 			}
 		}
@@ -981,6 +1128,12 @@ LEFT JOIN {$operational_data_clauses['join']}
 		foreach ( $this->get_internal_data_store_keys() as $key ) {
 			$changes[ $key ] = $this->{"get_$key"}( $order );
 		}
+		$changes['type'] = $order->get_type();
+
+		// Make sure 'status' is correct.
+		if ( array_key_exists( 'status', $column_mapping ) ) {
+			$changes['status'] = $this->get_post_status( $order );
+		}
 
 		$row        = array();
 		$row_format = array();
@@ -1010,13 +1163,13 @@ LEFT JOIN {$operational_data_clauses['join']}
 	/**
 	 * Method to delete an order from the database.
 	 *
-	 * @param WC_Order $order Order object.
-	 * @param array    $args Array of args to pass to the delete method.
+	 * @param \WC_Order $order Order object.
+	 * @param array     $args Array of args to pass to the delete method.
 	 *
 	 * @return void
 	 */
 	public function delete( &$order, $args = array() ) {
-		$order_id  = $order->get_id();
+		$order_id = $order->get_id();
 
 		if ( ! $order_id ) {
 			return;
@@ -1106,13 +1259,38 @@ LEFT JOIN {$operational_data_clauses['join']}
 	/**
 	 * Method to create an order in the database.
 	 *
-	 * @param \WC_Order $order
+	 * @param \WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
 		if ( '' === $order->get_order_key() ) {
 			$order->set_order_key( wc_generate_order_key() );
 		}
 
+		$this->persist_save( $order );
+
+		/**
+		 * Fires when a new order is created.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param int       Order ID.
+		 * @param \WC_Order Order object.
+		 */
+		do_action( 'woocommerce_new_order', $order->get_id(), $order );
+	}
+
+	/**
+	 * Helper method responsible for persisting new data to order table.
+	 *
+	 * This should not contain and specific meta or actions, so that it can be used other order types safely.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return void
+	 *
+	 * @throws \Exception When unable to save data.
+	 */
+	protected function persist_save( &$order ) {
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
@@ -1128,16 +1306,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$order->apply_changes();
 
 		$this->clear_caches( $order );
-
-		/**
-		 * Fires when a new order is created.
-		 *
-		 * @since 2.7.0
-		 *
-		 * @param int       Order ID.
-		 * @param \WC_Order Order object.
-		 */
-		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
 	/**
@@ -1163,17 +1331,7 @@ LEFT JOIN {$operational_data_clauses['join']}
 
 		// Fetch changes.
 		$changes = $order->get_changes();
-
-		if ( ! isset( $changes['date_modified'] ) ) {
-			$order->set_date_modified( gmdate( 'Y-m-d H:i:s' ) );
-		}
-
-		$this->update_post_meta( $order );
-
-		// Update with latest changes.
-		$changes = $order->get_changes();
-
-		$this->persist_order_to_db( $order );
+		$this->persist_updates( $order );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
@@ -1186,7 +1344,6 @@ LEFT JOIN {$operational_data_clauses['join']}
 			wc_update_user_last_active( $order->get_customer_id() );
 		}
 
-		$order->save_meta_data();
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
@@ -1194,10 +1351,41 @@ LEFT JOIN {$operational_data_clauses['join']}
 	}
 
 	/**
+	 * Helper method that is responsible for persisting order updates to the database.
+	 *
+	 * This is expected to be reused by other order types, and should not contain any specific metadata updates or actions.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return array $changes Array of changes.
+	 *
+	 * @throws \Exception When unable to persist order.
+	 */
+	protected function persist_updates( &$order ) {
+		// Fetch changes.
+		$changes = $order->get_changes();
+
+		if ( ! isset( $changes['date_modified'] ) ) {
+			$order->set_date_modified( time() );
+		}
+
+		$this->update_post_meta( $order );
+
+		// Update with latest changes.
+		$changes = $order->get_changes();
+
+		$this->persist_order_to_db( $order );
+		$order->save_meta_data();
+
+		return $changes;
+	}
+
+	/**
 	 * Helper method that updates post meta based on an order object.
 	 * Mostly used for backwards compatibility purposes in this datastore.
 	 *
 	 * @param \WC_Order $order Order object.
+	 *
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$order ) {
@@ -1233,7 +1421,51 @@ LEFT JOIN {$operational_data_clauses['join']}
 	}
 
 	public function query( $query_vars ) {
-		return array();
+		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
+			$query_vars['no_found_rows'] = true;
+		}
+
+		if ( isset( $query_vars['anonymized'] ) ) {
+			$query_vars['meta_query'] = $query_vars['meta_query'] ?? array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+
+			if ( $query_vars['anonymized'] ) {
+				$query_vars['meta_query'][] = array(
+					'key'   => '_anonymized',
+					'value' => 'yes',
+				);
+			} else {
+				$query_vars['meta_query'][] = array(
+					'key'     => '_anonymized',
+					'compare' => 'NOT EXISTS',
+				);
+			}
+		}
+
+		try {
+			$query = new OrdersTableQuery( $query_vars );
+		} catch ( \Exception $e ) {
+			$query = (object) array(
+				'orders'        => array(),
+				'found_orders'  => 0,
+				'max_num_pages' => 0,
+			);
+		}
+
+		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
+			$orders = $query->orders;
+		} else {
+			$orders = WC()->order_factory->get_orders( $query->orders );
+		}
+
+		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
+			return (object) array(
+				'orders'        => $orders,
+				'total'         => $query->found_orders,
+				'max_num_pages' => $query->max_num_pages,
+			);
+		}
+
+		return $orders;
 	}
 
 	public function get_order_item_type( $order, $order_item_id ) {
@@ -1262,6 +1494,7 @@ CREATE TABLE $orders_table_name (
 	id bigint(20) unsigned auto_increment,
 	status varchar(20) null,
 	currency varchar(10) null,
+	type varchar(20) null,
 	tax_amount decimal(26,8) null,
 	total_amount decimal(26,8) null,
 	customer_id bigint(20) unsigned null,
@@ -1295,7 +1528,7 @@ CREATE TABLE $addresses_table_name (
 	email varchar(320) null,
 	phone varchar(100) null,
 	KEY order_id (order_id),
-	KEY address_type_order_id (address_type, order_id)
+	UNIQUE KEY address_type_order_id (address_type, order_id)
 ) $collate;
 CREATE TABLE $operational_data_table_name (
 	id bigint(20) unsigned auto_increment primary key,
@@ -1316,8 +1549,8 @@ CREATE TABLE $operational_data_table_name (
 	discount_tax_amount decimal(26, 8) NULL,
 	discount_total_amount decimal(26, 8) NULL,
 	recorded_sales tinyint(1) NULL,
-	KEY order_id (order_id),
-	KEY order_key (order_key)
+	UNIQUE KEY order_id (order_id),
+	UNIQUE KEY order_key (order_key)
 ) $collate;
 CREATE TABLE $meta_table (
 	id bigint(20) unsigned auto_increment primary key,

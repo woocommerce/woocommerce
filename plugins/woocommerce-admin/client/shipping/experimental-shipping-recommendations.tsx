@@ -25,11 +25,7 @@ const ShippingRecommendations: React.FC = () => {
 		isJetpackConnected,
 		isSellingDigitalProductsOnly,
 	} = useSelect( ( select ) => {
-		const settings = select( SETTINGS_STORE_NAME ).getSettings< {
-			general?: {
-				woocommerce_default_country: string;
-			};
-		} >( 'general' );
+		const settings = select( SETTINGS_STORE_NAME ).getSettings( 'general' );
 
 		const {
 			getActivePlugins,

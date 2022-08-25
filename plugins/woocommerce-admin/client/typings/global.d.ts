@@ -15,6 +15,7 @@ declare global {
 			'minified-js': boolean;
 			'mobile-app-banner': boolean;
 			navigation: boolean;
+			'new-product-management-experience': boolean;
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
@@ -27,7 +28,6 @@ declare global {
 			'transient-notices': boolean;
 			'wc-pay-promotion': boolean;
 			'wc-pay-welcome-page': boolean;
-			'wc-pay-subscriptions-page': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 		};

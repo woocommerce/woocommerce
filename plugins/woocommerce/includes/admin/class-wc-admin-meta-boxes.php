@@ -8,6 +8,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Orders\Edit as OrderEdit;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -46,20 +47,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( $this, 'add_product_boxes_sort_order' ), 40 );
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
-		/**
-		 * Save Order Meta Boxes.
-		 *
-		 * In order:
-		 *      Save the order items.
-		 *      Save the order totals.
-		 *      Save the order downloads.
-		 *      Save order data - also updates status and sends out admin emails if needed. Last to show latest data.
-		 *      Save actions - sends out other emails. Last to show latest data.
-		 */
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Items::save', 10 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Downloads::save', 30, 2 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Data::save', 40 );
-		add_action( 'woocommerce_process_shop_order_meta', 'WC_Meta_Box_Order_Actions::save', 50, 2 );
+		OrderEdit::add_save_meta_boxes();
 
 		// Save Product Meta Boxes.
 		add_action( 'woocommerce_process_product_meta', 'WC_Meta_Box_Product_Data::save', 10, 2 );
@@ -148,14 +136,7 @@ class WC_Admin_Meta_Boxes {
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			$order_type_object = get_post_type_object( $type );
-			/* Translators: %s order type name. */
-			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
-			add_meta_box( 'woocommerce-order-items', __( 'Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
-			/* Translators: %s order type name. */
-			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
-			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
-			/* Translators: %s order type name. */
-			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
+			OrderEdit::add_order_meta_boxes( $type, $order_type_object->labels->singular_name );
 		}
 
 		// Coupons.
@@ -266,8 +247,24 @@ class WC_Admin_Meta_Boxes {
 
 		// Check the post type.
 		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ), true ) ) {
+			/**
+			 * Save meta for shop order.
+			 *
+			 * @param int $post_id Post ID.
+			 * @param object $post Post object.
+			 *
+			 * @since 2.1.0
+			 */
 			do_action( 'woocommerce_process_shop_order_meta', $post_id, $post );
 		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon' ), true ) ) {
+			/**
+			 * Save meta for product.
+			 *
+			 * @param int $post_id Post ID.
+			 * @param object $post Post object.
+			 *
+			 * @since 2.1.0
+			 */
 			do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 		}
 	}

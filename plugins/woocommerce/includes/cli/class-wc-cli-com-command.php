@@ -21,6 +21,8 @@ class WC_CLI_COM_Command {
 	 */
 	public static function register_commands() {
 		WP_CLI::add_command( 'wc com extension list', array( 'WC_CLI_COM_Command', 'list_extensions' ) );
+		WP_CLI::add_command( 'wc com disconnect', array( 'WC_CLI_COM_Command', 'disconnect' ) );
+		WP_CLI::add_command( 'wc com connect', array( 'WC_CLI_COM_Command', 'connect' ) );
 	}
 
 	/**
@@ -84,5 +86,111 @@ class WC_CLI_COM_Command {
 		);
 
 		$formatter->display_items( $data );
+	}
+
+	/**
+	 * ## OPTIONS
+	 *
+	 * [--yes]
+	 * : Do not prompt for confirmation.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Disconnect from site.
+	 *     $ wp wc com disconnect
+	 *
+	 *     # Disconnect without prompt for confirmation.
+	 *     $ wp wc com disconnect --yes
+	 *
+	 * @param array $args Positional arguments to include when calling the command.
+	 * @param array $assoc_args Associative arguments to include when calling the command.
+
+	 * @return void
+	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
+	 */
+	public static function disconnect( array $args, array $assoc_args ) {
+		if ( ! WC_Helper::is_site_connected() ) {
+			WP_CLI::error( 'Your store is not connected to WooCommerce.com. Run `wp wc com connect` command.' );
+		}
+
+		WP_CLI::confirm( 'Are you sure you want to disconnect your store from WooCommerce.com?', $assoc_args );
+		WC_Helper::disconnect();
+		WP_CLI::success( 'You have successfully disconnected your store from WooCommerce.com' );
+	}
+
+	/**
+	 * Connects to WooCommerce.com with application-password.
+	 *
+	 * [--password]
+	 * : If set, password won't be prompt.
+	 *
+	 * [--force]
+	 * : If set, site will be disconnected and a new connection will be forced.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Connect to WCCOM using password.
+	 *     $ wp wc com connect
+	 *
+	 *     # force connecting to WCCOM even if site is already connected.
+	 *     $ wp wc com connect --force
+	 *
+	 *     # Pass password to comman.
+	 *     $ wp wc com connect --password=PASSWORD
+	 *
+	 * @param array $args Positional arguments to include when calling the command.
+	 * @param array $assoc_args Associative arguments to include when calling the command.
+	 *
+	 * @return void
+	 * @throws \WP_CLI\ExitException If WP_CLI::$capture_exit is true.
+	 */
+	public static function connect( array $args, array $assoc_args ) {
+		$password = \WP_CLI\Utils\get_flag_value( $assoc_args, 'password' );
+		$force    = \WP_CLI\Utils\get_flag_value( $assoc_args, 'force', false );
+
+		if ( WC_Helper::is_site_connected() ) {
+			if ( $force ) {
+				WC_Helper::disconnect();
+			} else {
+				WP_CLI::error( 'Your store is already connected.' );
+
+				return;
+			}
+		}
+
+		// phpcs:ignore
+		// @todo add URL to application password section
+		if ( empty( $password ) ) {
+			$password = self::ask( 'Connection password:' );
+		}
+		$password = sanitize_text_field( $password );
+		if ( empty( $password ) ) {
+			WP_CLI::error( 'Invalid password.' );
+		}
+
+		$auth = WC_Helper::connect_with_password( $password );
+		if ( is_wp_error( $auth ) ) {
+			WP_CLI::error( $auth->get_error_message() );
+		}
+
+		if ( WC_Helper::is_site_connected() ) {
+			WP_CLI::success( 'Store connected successfully.' );
+		}
+	}
+
+	/**
+	 * We are asking a question and returning an answer as a string.
+	 *
+	 * @param  string $question The question being prompt.
+	 *
+	 * @return string
+	 */
+	protected static function ask( $question ) {
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+		// Adding space to question and showing it.
+		fwrite( STDOUT, $question . ' ' );
+
+		return trim( fgets( STDIN ) );
+		// phpcs:enable
 	}
 }

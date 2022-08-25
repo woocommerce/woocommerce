@@ -502,7 +502,7 @@ class WC_Emails {
 
 				$fields[ $key ] = array(
 					'label' => wptexturize( $key ),
-					'value' => wptexturize( get_post_meta( $order->get_id(), $field, true ) ),
+					'value' => wptexturize( $order->get_meta( $field ) ),
 				);
 			}
 		}
