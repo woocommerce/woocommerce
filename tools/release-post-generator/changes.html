@@ -1,0 +1,161 @@
+<!-- wp:paragraph -->
+<p>We are pleased to announce the release of WooCommerce 6.8.0. This release should be backwards compatible with the previous version.</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph -->
+<p>This release contains:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul>
+  <!-- TODO - contributor list -->
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>
+  As always, we recommend creating a backup of your site and making sure that your theme and any other plugins are compatible before updating. 
+  You can check out <a href="https://docs.woocommerce.com/document/how-to-update-woocommerce/" target="_blank">this update guide</a> for more information.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 id="what-s-new-in-%s">What's new in 6.8.0?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>WHAT'S NEW ITEMS</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>
+  These are just some of the changes that are included in WooCommerce 6.8.0. 
+  You can find the complete changelog for this release in the <a href="https://github.com/woocommerce/woocommerce/blob/release/6.8.0/changelog.txt" target="_blank">changelog.txt file</a>.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 id="actions-and-filters">Actions and Filters</h2>
+<!-- /wp:heading -->
+
+<!-- if there are hook changes -->
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th><strong>Filter</strong></th>
+          <th><strong>Description</strong></th>
+        </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/src/Caching/ObjectCache.php</td>
+            <td>**wc_object_cache_get_engine** introduced in 6.8.0</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/src/Internal/BatchProcessing/BatchProcessingController.php</td>
+            <td>**woocommerce_get_batch_processor** introduced in 6.8.0</td>
+          </tr>
+        
+        <!-- end each hook change-->
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+
+
+<!-- wp:heading -->
+<h2 id="database-changes">Database Changes</h2>
+<!-- /wp:heading -->
+
+
+  <!-- wp:heading -->
+  <h3 id="schema-updates">Schema Updates</h3>
+  <!-- /wp:heading -->
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th><strong>Class Name</strong></th>
+          <th><strong>Code Ref</strong></th>
+        </tr>
+        
+          <tr>
+            <td>OrdersTableDataStore</td>
+            <td>Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore-&gt;get_database_schema</td>
+          </tr>
+          
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+
+
+
+  <!-- wp:paragraph -->
+  <p>There are no database changes in this release.</p>
+  <!-- /wp:paragraph -->
+
+
+<!-- wp:heading -->
+<h2 id="template-changes">Template Changes</h2>
+<!-- /wp:heading -->
+
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <thead>
+        <th>
+          <strong>Template</strong>
+        </th>
+      </thead>
+      <tbody>
+        
+        <!-- for each template change (template / description) -->
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/cart/cart.php</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/cart/shipping-calculator.php</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/checkout/form-coupon.php</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/content-widget-price-filter.php</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/loop/no-products-found.php</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/myaccount/form-login.php</td>
+          </tr>
+        
+          <tr>
+            <td>/plugins/woocommerce/templates/single-product/add-to-cart/grouped.php</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </figure>
+
+
+<!-- wp:heading -->
+<h2 id="deprecations">Deprecations</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>There are no deprecations in this release.</p>
+<!-- /wp:paragraph -->
+
+<!-- TODO CONTRIBUTORS TEMPLATE -->
+

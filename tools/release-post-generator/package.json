@@ -17,6 +17,7 @@
 		"code-analyzer": "workspace:*",
 		"commander": "9.4.0",
 		"ejs": "^3.1.8",
+		"semver": "^7.3.2",
 		"ts-node": "^10.9.1"
 	}
 }

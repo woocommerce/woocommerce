@@ -1,0 +1,162 @@
+<!-- wp:paragraph -->
+<p>We are pleased to announce the release of WooCommerce <%= displayVersion %>. This release should be backwards compatible with the previous version.</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph -->
+<p>This release contains:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul>
+  <!-- TODO - contributor list -->
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>
+  As always, we recommend creating a backup of your site and making sure that your theme and any other plugins are compatible before updating. 
+  You can check out <a href="https://docs.woocommerce.com/document/how-to-update-woocommerce/" target="_blank">this update guide</a> for more information.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 id="what-s-new-in-%s">What's new in <%= displayVersion %>?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>WHAT'S NEW ITEMS</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>
+  These are just some of the changes that are included in WooCommerce <%= displayVersion %>. 
+  You can find the complete changelog for this release in the <a href="https://github.com/woocommerce/woocommerce/blob/release/<%= displayVersion %>/changelog.txt" target="_blank">changelog.txt file</a>.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 id="actions-and-filters">Actions and Filters</h2>
+<!-- /wp:heading -->
+
+<!-- if there are hook changes -->
+<% if (changes.hooks.length) { %>
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th><strong>Filter</strong></th>
+          <th><strong>Description</strong></th>
+        </tr>
+        <% changes.hooks.forEach(({name, description}) => { %>
+          <tr>
+            <td><%= name %></td>
+            <td><%= description %></td>
+          </tr>
+        <% }) %>
+        <!-- end each hook change-->
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+<% } else  { %>
+  <!-- wp:paragraph -->
+  <p>This release doesn\'t add any actions or filters.</p>
+  <!-- /wp:paragraph -->
+<% } %>
+
+<!-- wp:heading -->
+<h2 id="database-changes">Database Changes</h2>
+<!-- /wp:heading -->
+
+<% if (changes.schema.length) { %>
+  <!-- wp:heading -->
+  <h3 id="schema-updates">Schema Updates</h3>
+  <!-- /wp:heading -->
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th><strong>Class Name</strong></th>
+          <th><strong>Code Ref</strong></th>
+        </tr>
+        <% changes.schema.forEach(({className, codeRef}) => { %>
+          <tr>
+            <td><%= className %></td>
+            <td><%= codeRef %></td>
+          </tr>
+        <% }) %>  
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+<% } %>
+
+<% if (changes.db.length) { %>
+  <!-- wp:heading -->
+  <h3 id="db-updates">DB Updates</h3>
+  <!-- /wp:heading -->
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th>
+            <strong>Function Name</strong>
+          </th>
+        </tr>
+        <% changes.db.forEach(({functionName}) => { %>
+          <tr>
+            <td><%= functionName %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </figure>
+<% } else { %>
+  <!-- wp:paragraph -->
+  <p>There are no database changes in this release.</p>
+  <!-- /wp:paragraph -->
+<% } %>
+
+<!-- wp:heading -->
+<h2 id="template-changes">Template Changes</h2>
+<!-- /wp:heading -->
+
+<% if (changes.templates.length) { %>
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <thead>
+        <th>
+          <strong>Template</strong>
+        </th>
+      </thead>
+      <tbody>
+        
+        <!-- for each template change (template / description) -->
+        <% changes.templates.forEach((change) => { %>
+          <tr>
+            <td><%= change %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </figure>
+<% } else { %>
+  <!-- wp:paragraph -->
+  <p>There are no template changes in this release.</p>
+  <!-- /wp:paragraph -->
+<% } %>
+
+<!-- wp:heading -->
+<h2 id="deprecations">Deprecations</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>There are no deprecations in this release.</p>
+<!-- /wp:paragraph -->
+
+<!-- TODO CONTRIBUTORS TEMPLATE -->
+
