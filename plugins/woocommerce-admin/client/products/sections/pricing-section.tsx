@@ -56,7 +56,8 @@ export const PricingSection: React.FC = () => {
 		);
 		const cleanValue = value
 			.replace( regex, '' )
-			.replace( decimalRegex, '' );
+			.replace( decimalRegex, '' )
+			.replace( decimalSeparator, '.' );
 		setValue( name, cleanValue );
 		return cleanValue;
 	};
