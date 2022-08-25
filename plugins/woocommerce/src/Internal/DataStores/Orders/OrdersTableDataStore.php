@@ -691,7 +691,7 @@ WHERE
 	}
 
 	/**
-	 * Get unpaid orders after a certain date,
+	 * Get unpaid orders last updated before the specified date.
 	 *
 	 * @param  int $date Timestamp.
 	 * @return array
