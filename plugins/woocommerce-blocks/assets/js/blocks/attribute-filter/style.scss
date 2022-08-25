@@ -2,14 +2,25 @@
 	// We need to override it because by default the global styles applied the border-style: solid;
 	// Our goal is not to have a border on main wrapper DOM element
 	border-style: none !important;
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		text-transform: inherit;
+	}
 }
 
 .wc-block-attribute-filter {
-	margin-bottom: $gap-large;
+	margin-bottom: $gap;
 	border-radius: inherit;
 	border-color: inherit;
+	z-index: 30;
 
 	&.style-dropdown {
+		position: relative;
 		display: flex;
 		gap: $gap;
 		border-radius: inherit;
@@ -19,6 +30,19 @@
 		.wc-block-components-filter-submit-button {
 			height: 36px;
 			line-height: 1;
+		}
+
+		> .wc-blocks-components-form-token-field-wrapper {
+			position: relative;
+			z-index: 2;
+		}
+
+		> svg {
+			position: absolute;
+			right: 20px;
+			top: 50%;
+			transform: translateY(-50%);
+			z-index: 1;
 		}
 	}
 
@@ -44,12 +68,35 @@
 		width: 0;
 	}
 
-
 	.is-single .wc-block-attribute-filter-list-count,
 	.wc-blocks-components-form-token-field-wrapper .wc-block-attribute-filter-list-count {
 		opacity: 0.6;
 	}
 
+	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
+		border: 1px solid $gray-700;
+		border-radius: 4px;
+		padding: $gap-smaller;
+
+		.components-form-token-field__input::placeholder {
+			color: $black;
+		}
+
+		.components-form-token-field__suggestions-list {
+			border: 1px solid $gray-700;
+			border-radius: 4px;
+			margin-top: $gap-smaller;
+			max-height: 21em;
+
+			.components-form-token-field__suggestion {
+				color: $black;
+				border: 1px solid $gray-400;
+				border-radius: 4px;
+				margin: $gap-small;
+				padding: $gap-small;
+			}
+		}
+	}
 }
 
 .wc-block-attribute-filter__multiple-toggle,
@@ -68,7 +115,59 @@
 	}
 }
 
-.editor-styles-wrapper  .wc-block-attribute-filter__button.wc-block-attribute-filter__button,
+.wc-block-attribute-filter__actions {
+	align-items: center;
+	display: flex;
+	gap: $gap;
+	justify-content: flex-end;
+
+	.wc-block-components-filter-submit-button {
+		margin-left: 0;
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: auto;
+		}
+	}
+
+	.wc-block-filter-submit-button.wc-block-components-filter-submit-button.wc-block-attribute-filter__button {
+		margin-top: 0;
+	}
+}
+
+.editor-styles-wrapper .wc-block-components-checkbox {
+	margin-top: em($gap);
+}
+
+.wc-block-components-checkbox {
+	margin-top: em($gap);
+}
+
+.wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
+	.components-form-token-field__token-text {
+		background-color: $white;
+		border: 1px solid;
+		border-right: 0;
+		border-radius: 25px 0 0 25px;
+		padding: em($gap-smallest);
+		padding-left: em($gap-small);
+	}
+
+	.components-button.components-form-token-field__remove-token {
+		background-color: $white;
+		border: 1px solid;
+		border-left: 0;
+		border-radius: 0 25px 25px 0;
+		padding: 0 em($gap-smaller) 0 0;
+
+		&.has-icon svg {
+			background-color: $gray-200;
+			border-radius: 25px;
+		}
+	}
+}
+
+.editor-styles-wrapper .wc-block-attribute-filter__button.wc-block-attribute-filter__button,
 .wc-block-attribute-filter__button.wc-block-attribute-filter__button {
 	padding: em($gap-smaller) em($gap);
 	@include font-size(small);
