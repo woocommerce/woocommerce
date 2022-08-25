@@ -15,7 +15,7 @@ import { DropdownTypeaheadField } from '../elements/DropdownTypeaheadField';
 import { FormToggle } from '../elements/FormToggle';
 import { getElementByText, waitForTimeout } from '../utils/actions';
 
-const baseUrl = config.get( 'url' );
+const baseUrl = config.get( 'url' ) as string;
 
 // Represents a page that can be navigated to
 export abstract class BasePage {
