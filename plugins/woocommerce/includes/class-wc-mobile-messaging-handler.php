@@ -15,23 +15,25 @@ class WC_Mobile_Messaging_Handler {
 	const OPEN_ORDER_INTERVAL_DAYS = 7;
 
 	/**
-	 * Prepares footer with deep link
+	 * Prepares mobile messaging with a deep link
 	 *
 	 * @param int      $order_id of order to make a deep link for.
-	 * @param int      $blog_id  of blog to make a deep link for.
+	 * @param ?int     $blog_id  of blog to make a deep link for.
 	 * @param DateTime $now      current DateTime.
 	 *
 	 * @return string|null
 	 */
-	public static function prepare_mobile_footer(
+	public static function prepare_mobile_message(
 		int $order_id,
-		int $blog_id,
+		?int $blog_id,
 		DateTime $now
 	): ?string {
 		try {
 			$last_mobile_used = self::get_closer_mobile_usage_date();
 
 			if ( $last_mobile_used->diff( $now )->days > self::OPEN_ORDER_INTERVAL_DAYS ) {
+				return null;
+			} elseif ( $blog_id === null ) {
 				return null;
 			} else {
 				$url = add_query_arg(

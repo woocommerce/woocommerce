@@ -256,6 +256,25 @@ class WC_Email extends WC_Settings_API {
 
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_email_footer', array( $this, 'mobile_messaging' ), 9 ); // Run before the default email footer.
+	}
+
+	/**
+	 * Add mobile messaging.
+	 */
+	public function mobile_messaging() {
+		if ( ! $this instanceof WC_Email_New_Order ) {
+			return;
+		}
+
+		wc_get_template(
+			'emails/email-mobile-messaging.php',
+			array(
+				'order_id' => ( $this->object )->get_id(),
+				'blog_id'  => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+				'now'      => new DateTime(),
+			)
+		);
 	}
 
 	/**

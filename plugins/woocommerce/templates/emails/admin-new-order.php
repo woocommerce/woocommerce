@@ -52,10 +52,6 @@ if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
 
-if ( $mobile_footer ) {
-	echo wp_kses_post( wpautop( wptexturize( $mobile_footer ) ) );
-}
-
 /*
  * @hooked WC_Emails::email_footer() Output the email footer
  */
