@@ -8,6 +8,7 @@
 - [What are we testing?](#what-are-we-testing)
     - [Cart Block](#cart-block)
     - [Checkout Block](#checkout-block)
+    - [Data Stores](#data-stores)
 - [Testing Checklist](#testing-checklist)
 
 ## Introduction
@@ -71,6 +72,10 @@ the Cart and Checkout shortcodes.
 ### Checkout Block
 
 ![image](https://i.imgur.com/9KhYK2L.png)
+
+### Data Stores
+
+After moving a lot of functionality from React Context to data stores, we need to rigorously test some areas of the Cart and Checkout process. [This link contains some detailed testing instructions](./data-stores.md) for this.
 
 ## Testing Checklist
 
