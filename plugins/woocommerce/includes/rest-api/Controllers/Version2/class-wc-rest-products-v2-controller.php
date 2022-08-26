@@ -625,6 +625,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	protected function api_get_meta_data( $product, $context ) {
 		$meta_data = $product->get_meta_data();
 
+		if ( ! isset( $this->request ) || ! $this->request instanceof WP_REST_Request ) {
+			return $meta_data;
+		}
+
 		return $this->get_meta_data_for_response( $this->request, $meta_data );
 	}
 
