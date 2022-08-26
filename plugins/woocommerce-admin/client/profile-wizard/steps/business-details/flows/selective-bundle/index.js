@@ -401,6 +401,7 @@ class BusinessDetails extends Component {
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
 			setup_client: isSetupClient,
+			wp_version: getSetting( 'wpVersion' ),
 		} );
 		recordEvent( 'storeprofiler_step_complete', {
 			step: BUSINESS_DETAILS_TAB_NAME,
