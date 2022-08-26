@@ -33,7 +33,7 @@ class WC_Mobile_Messaging_Handler {
 					'blog_id'  => absint( $blog_id ),
 					'order_id' => absint( $order_id ),
 				),
-				'https://woocommerce.com/mobile'
+				'https://woocommerce.com/mobile/order'
 			);
 
 			return sprintf(
