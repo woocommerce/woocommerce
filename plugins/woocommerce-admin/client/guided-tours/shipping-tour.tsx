@@ -200,8 +200,7 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 
 export const ShippingTour: React.FC< {
 	showShippingRecommendationsStep: boolean;
-	showWcsSectionStep: boolean;
-} > = ( { showShippingRecommendationsStep, showWcsSectionStep } ) => {
+} > = ( { showShippingRecommendationsStep } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { show: showTour } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
@@ -279,7 +278,9 @@ export const ShippingTour: React.FC< {
 		},
 	};
 
-	if ( showWcsSectionStep ) {
+	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
+
+	if ( isWcsSectionPresent ) {
 		tourConfig.steps.push( {
 			referenceElements: {
 				desktop: WCS_LINK_SELECTOR,

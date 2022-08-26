@@ -53,29 +53,16 @@ const ShippingRecommendations: React.FC = () => {
 		activePlugins.includes( 'woocommerce-services' ) &&
 		isJetpackConnected
 	) {
-		return (
-			<ShippingTour
-				showShippingRecommendationsStep={ false }
-				showWcsSectionStep={ true }
-			/>
-		);
+		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
 	if ( countryCode !== 'US' || isSellingDigitalProductsOnly ) {
-		return (
-			<ShippingTour
-				showShippingRecommendationsStep={ false }
-				showWcsSectionStep={ false }
-			/>
-		);
+		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
 	return (
 		<>
-			<ShippingTour
-				showShippingRecommendationsStep={ true }
-				showWcsSectionStep={ false }
-			/>
+			<ShippingTour showShippingRecommendationsStep={ true } />
 			<ShippingRecommendationsList>
 				<WooCommerceServicesItem
 					isWCSInstalled={ installedPlugins.includes(
