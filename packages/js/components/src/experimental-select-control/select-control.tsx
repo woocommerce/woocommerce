@@ -84,7 +84,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
-	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
+	const {
+		addSelectedItem,
+		getSelectedItemProps,
+		getDropdownProps,
+		removeSelectedItem,
+	} = useMultipleSelection();
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
@@ -104,11 +109,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getComboboxProps,
 		highlightedIndex,
 		getItemProps,
+		selectItem,
+		selectedItem: singleSelectedItem,
 	} = useCombobox( {
 		inputValue,
 		items: filteredItems,
 		itemToString: getItemLabel,
-		selectedItem: null,
 		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
 				case useCombobox.stateChangeTypes.InputChange:
@@ -121,9 +127,18 @@ function SelectControl< ItemType = DefaultItemType >( {
 				case useCombobox.stateChangeTypes.InputBlur:
 					if ( selectedItem ) {
 						onSelect( selectedItem );
-						setInputValue(
-							multiple ? '' : getItemLabel( selectedItem )
-						);
+						if ( multiple ) {
+							addSelectedItem( selectedItem );
+							setInputValue( '' );
+							break;
+						}
+
+						selectItem( selectedItem );
+						setInputValue( getItemLabel( selectedItem ) );
+					}
+
+					if ( ! selectedItem && ! multiple ) {
+						setInputValue( getItemLabel( singleSelectedItem ) );
 					}
 
 					break;
@@ -132,6 +147,11 @@ function SelectControl< ItemType = DefaultItemType >( {
 			}
 		},
 	} );
+
+	const onRemoveItem = ( item: ItemType ) => {
+		removeSelectedItem( item );
+		onRemove( item );
+	};
 
 	return (
 		<div
@@ -150,7 +170,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 						getItemLabel={ getItemLabel }
 						getItemValue={ getItemValue }
 						getSelectedItemProps={ getSelectedItemProps }
-						onRemove={ onRemove }
+						onRemove={ onRemoveItem }
 					/>
 				) }
 				<ComboBox
