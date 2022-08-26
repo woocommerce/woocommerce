@@ -89,7 +89,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		getSelectedItemProps,
 		getDropdownProps,
 		removeSelectedItem,
-	} = useMultipleSelection();
+	} = useMultipleSelection( { itemToString } );
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
