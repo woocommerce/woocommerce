@@ -14,7 +14,7 @@
     - [Hide a snackbar notice containing a certain string](#hide-a-snackbar-notice-containing-a-certain-string)
 - [Troubleshooting](#troubleshooting)
 
-This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](../../packages/checkout/filter-registry/README.md) page.
+This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](../../../../packages/checkout/filter-registry/README.md) page.
 
 ## Cart Line Items
 
