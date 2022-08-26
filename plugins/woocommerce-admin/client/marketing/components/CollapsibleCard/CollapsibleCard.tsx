@@ -20,18 +20,20 @@ import './CollapsibleCard.scss';
 
 type CollapsibleCardProps = {
 	header: string;
-	className: string;
 	children: React.ReactNode;
+	className?: string;
 	footer?: React.ReactNode;
+	initialCollapsed?: boolean;
 };
 
 const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 	header,
-	footer,
 	children,
 	className,
+	footer,
+	initialCollapsed = false,
 } ) => {
-	const [ collapsed, setCollapsed ] = useState( false );
+	const [ collapsed, setCollapsed ] = useState( initialCollapsed );
 
 	const handleClick = () => {
 		setCollapsed( ! collapsed );
@@ -44,13 +46,13 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 				className
 			) }
 		>
-			<CardHeader>
+			<CardHeader onClick={ handleClick }>
 				<div>{ header }</div>
 				<Button
 					isSmall
 					icon={ collapsed ? chevronDown : chevronUp }
 					onClick={ handleClick }
-				></Button>
+				/>
 			</CardHeader>
 			{ ! collapsed && (
 				<>
