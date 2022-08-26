@@ -272,7 +272,6 @@ class WC_Email extends WC_Settings_API {
 			array(
 				'order_id' => ( $this->object )->get_id(),
 				'blog_id'  => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
-				'now'      => new DateTime(),
 			)
 		);
 	}

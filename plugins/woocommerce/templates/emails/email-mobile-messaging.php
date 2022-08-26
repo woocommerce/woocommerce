@@ -15,4 +15,4 @@
  * @version 6.9.0
  */
 
-echo wp_kses_post( WC_Mobile_Messaging_Handler::prepare_mobile_message( $order_id, $blog_id, $now ) );
+echo wp_kses_post( WC_Mobile_Messaging_Handler::prepare_mobile_message( $order_id, $blog_id ) );
