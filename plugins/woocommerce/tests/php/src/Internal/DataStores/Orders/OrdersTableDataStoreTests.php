@@ -305,22 +305,12 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		// Sync enabled implies a full post should be created.
-		add_filter(
-			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			function() {
-				return 'yes';
-			}
-		);
+		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), 'shop_order' ) ) );
 
 		// Sync disabled implies a placeholder post should be created.
-		add_filter(
-			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			function() {
-				return 'no';
-			}
-		);
+		$this->disable_cot_sync();
 		$order = $this->create_complex_cot_order();
 		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s", $order->get_id(), DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) ) );
 	}
@@ -925,6 +915,24 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * When there are direct writes to posts data, order should synced upon reading.
+	 */
+	public function test_read_multiple_with_direct_write() {
+		$this->enable_cot_sync();
+		$order       = $this->create_complex_cot_order();
+		$order_total = $order->get_total();
+		$post_object = get_post( $order->get_id() );
+		assert( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// simulate direct write.
+		update_post_meta( $post_object->ID, '_order_total', $order_total + 100 );
+
+		// Try on a refreshed order.
+		$refreshed_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $order_total + 100, $refreshed_order->get_total() );
+	}
+
+	/**
 	 * Helper function to delete all meta for post.
 	 *
 	 * @param int $post_id Post ID to delete data for.
@@ -995,4 +1003,33 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			'Search terms match against address data as well as order item names.'
 		);
 	}
+
+	/**
+	 * Helper function to enable COT <> Posts sync.
+	 */
+	private function enable_cot_sync() {
+		$hook_name = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		remove_all_actions( $hook_name );
+		add_filter(
+			$hook_name,
+			function () {
+				return 'yes';
+			}
+		);
+	}
+
+	/**
+	 * Helper function to disable COT <> Posts sync.
+	 */
+	private function disable_cot_sync() {
+		$hook_name = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		remove_all_actions( $hook_name );
+		add_filter(
+			$hook_name,
+			function () {
+				return 'no';
+			}
+		);
+	}
+
 }

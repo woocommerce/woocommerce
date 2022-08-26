@@ -367,6 +367,8 @@ class CustomOrdersTableController {
 			$sync_status     = $this->data_synchronizer->get_sync_status();
 			$sync_is_pending = 0 !== $sync_status['current_pending_count'];
 
+			$sync_is_pending = false;
+
 			$settings[] = array(
 				'title'         => __( 'Data store for orders', 'woocommerce' ),
 				'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,

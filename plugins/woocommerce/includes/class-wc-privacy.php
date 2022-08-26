@@ -180,7 +180,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query(
+		return (
 			apply_filters(
 				'woocommerce_trash_pending_orders_query_args',
 				array(

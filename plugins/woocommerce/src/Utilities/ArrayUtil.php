@@ -133,15 +133,14 @@ class ArrayUtil {
 	}
 
 	/**
-	 * Select one single value from all the items in an array of either arrays or objects based on a selector.
-	 * For arrays, the selector is a key name; for objects, the selector can be either a method name or a property name.
+	 * Helper function to generate a callback which can be executed on an array to select a value from each item.
 	 *
-	 * @param array  $items Items to apply the selection to.
-	 * @param string $selector_name Key, method or property name to use as a selector.
-	 * @param int    $selector_type Selector type, one of the SELECT_BY_* constants.
-	 * @return array The selected values.
+	 * @param string $selector_name Field/property/method name to select.
+	 * @param int    $selector_type Selector type.
+	 *
+	 * @return \Closure Callback to select the value.
 	 */
-	public static function select( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ) {
+	private static function get_selector_callback( string $selector_name, int $selector_type = self::SELECT_BY_AUTO ): \Closure {
 		if ( self::SELECT_BY_OBJECT_METHOD === $selector_type ) {
 			$callback = function( $item ) use ( $selector_name ) {
 				return $item->$selector_name();
@@ -165,8 +164,78 @@ class ArrayUtil {
 				}
 			};
 		}
+		return $callback;
+	}
 
+	/**
+	 * Select one single value from all the items in an array of either arrays or objects based on a selector.
+	 * For arrays, the selector is a key name; for objects, the selector can be either a method name or a property name.
+	 *
+	 * @param array  $items Items to apply the selection to.
+	 * @param string $selector_name Key, method or property name to use as a selector.
+	 * @param int    $selector_type Selector type, one of the SELECT_BY_* constants.
+	 * @return array The selected values.
+	 */
+	public static function select( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ): array {
+		$callback = self::get_selector_callback( $selector_name, $selector_type );
 		return array_map( $callback, $items );
+	}
+
+	/**
+	 * Returns a new assoc array with format [ $key1 => $item1, $key2 => $item2, ... ] where $key is the value of the selector and items are original items passed.
+	 *
+	 * @param array  $items Items to use for conversion.
+	 * @param string $selector_name Key, method or property name to use as a selector.
+	 * @param int    $selector_type Selector type, one of the SELECT_BY_* constants.
+	 *
+	 * @return array The converted assoc array.
+	 */
+	public static function select_array_to_assoc( array $items, string $selector_name, int $selector_type = self::SELECT_BY_AUTO ): array {
+		$selector_callback = self::get_selector_callback( $selector_name, $selector_type );
+		$result            = array();
+		foreach ( $items as $item ) {
+			$key = $selector_callback( $item );
+			if ( isset( $result[ $key ] ) ) {
+				$result[ $key ][] = $item;
+			} else {
+				$result[ $key ] = array( $item );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Computes difference between two assoc arrays recursively. Similar to PHP's native assoc_array_diff, but also supports nested arrays.
+	 *
+	 * @param array $array1 First array.
+	 * @param array $array2 Second array.
+	 * @param bool  $strict Whether to also match type of values.
+	 *
+	 * @return array The difference between the two arrays.
+	 */
+	public static function deep_assoc_array_diff( array $array1, array $array2, bool $strict = true ): array {
+		$diff = array();
+		foreach ( $array1 as $key => $value ) {
+			if ( is_array( $value ) ) {
+				if ( ! array_key_exists( $key, $array2 ) || ! is_array( $array2[ $key ] ) ) {
+					$diff[ $key ] = $value;
+				}
+				$new_diff = self::deep_assoc_array_diff( $value, $array2[ $key ], $strict );
+				if ( ! empty( $new_diff ) ) {
+					$diff[ $key ] = $new_diff;
+				}
+			} elseif ( $strict ) {
+				if ( ! array_key_exists( $key, $array2 ) || $value !== $array2[ $key ] ) {
+					$diff[ $key ] = $value;
+				}
+			} else {
+				// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison -- Intentional when $strict is false.
+				if ( ! array_key_exists( $key, $array2 ) || $value != $array2[ $key ] ) {
+					$diff[ $key ] = $value;
+				}
+			}
+		}
+		return $diff;
 	}
 }
 
