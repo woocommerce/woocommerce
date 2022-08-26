@@ -37,7 +37,11 @@ const reducer: Reducer< PaymentMethodDataState > = (
 			newState = {
 				...state,
 				currentStatus: {
-					...state.currentStatus,
+					// When the status is changed to pristine, we need to reset the currentStatus properties
+					// to their default initial values
+					...( action.status?.isPristine === true
+						? defaultPaymentMethodDataState.currentStatus
+						: state.currentStatus ),
 					...action.status,
 					isFinished:
 						action.status.hasError ||
