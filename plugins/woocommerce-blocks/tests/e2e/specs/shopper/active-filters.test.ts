@@ -84,7 +84,7 @@ const getActiveFilterTypeText = () =>
 const getActiveFilterNameText = () =>
 	page.$eval(
 		selectors.frontend.activeFilterName,
-		( el ) => ( el as HTMLElement ).childNodes[ 0 ].textContent
+		( el ) => ( el as HTMLElement ).childNodes[ 1 ].textContent
 	);
 
 describe( 'Shopper → Active Filters Block', () => {

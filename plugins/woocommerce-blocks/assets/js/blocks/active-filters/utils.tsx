@@ -103,7 +103,6 @@ export const renderRemovableListItem = ( {
 				/>
 			) : (
 				<span className="wc-block-active-filters__list-item-name">
-					{ prefixedName }
 					<button
 						className="wc-block-active-filters__list-item-remove"
 						onClick={ removeCallback }
@@ -141,9 +140,9 @@ export const renderRemovableListItem = ( {
 								fill="white"
 							/>
 						</svg>
-
 						<Label screenReaderLabel={ removeText } />
 					</button>
+					{ prefixedName }
 				</span>
 			) }
 		</li>

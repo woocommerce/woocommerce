@@ -21,6 +21,7 @@ import {
  */
 import Block from './block';
 import type { Attributes } from './types';
+import './editor.scss';
 
 const Edit = ( {
 	attributes,
@@ -37,7 +38,7 @@ const Edit = ( {
 			<InspectorControls key="inspector">
 				<PanelBody
 					title={ __(
-						'Block Settings',
+						'Display Settings',
 						'woo-gutenberg-products-block'
 					) }
 				>
@@ -52,6 +53,7 @@ const Edit = ( {
 								displayStyle: value,
 							} )
 						}
+						className="wc-block-active-filter__style-toggle"
 					>
 						<ToggleGroupControlOption
 							value="list"
