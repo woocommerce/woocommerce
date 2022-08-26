@@ -4,6 +4,7 @@ $author-image-size: 16px;
 .woocommerce-marketing-learn-marketing-card {
 	&__body {
 		display: flex;
+		flex-wrap: wrap;
 	}
 
 	&__post {
