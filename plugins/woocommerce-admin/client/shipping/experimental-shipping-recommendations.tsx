@@ -56,7 +56,7 @@ const ShippingRecommendations: React.FC = () => {
 		return (
 			<ShippingTour
 				showShippingRecommendationsStep={ false }
-				showWcsSectionPresent={ true }
+				showWcsSectionStep={ true }
 			/>
 		);
 	}
@@ -65,7 +65,7 @@ const ShippingRecommendations: React.FC = () => {
 		return (
 			<ShippingTour
 				showShippingRecommendationsStep={ false }
-				showWcsSectionPresent={ false }
+				showWcsSectionStep={ false }
 			/>
 		);
 	}
@@ -74,7 +74,7 @@ const ShippingRecommendations: React.FC = () => {
 		<>
 			<ShippingTour
 				showShippingRecommendationsStep={ true }
-				showWcsSectionPresent={ false }
+				showWcsSectionStep={ false }
 			/>
 			<ShippingRecommendationsList>
 				<WooCommerceServicesItem
