@@ -126,11 +126,16 @@ export default class Analyzer extends Command {
 
 			const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
 
-			// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
-			execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
-			execSync( 'pnpm run build:feature-config --filter=woocommerce', {
-				cwd: pluginPath,
-			} );
+			const build = () => {
+				// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
+				execSync( 'composer install', { cwd: pluginPath, stdio: [] } );
+				execSync(
+					'pnpm run build:feature-config --filter=woocommerce',
+					{
+						cwd: pluginPath,
+					}
+				);
+			};
 
 			CliUx.ux.action.stop();
 			CliUx.ux.action.start(
@@ -141,6 +146,7 @@ export default class Analyzer extends Command {
 				tmpRepoPath,
 				compare,
 				base,
+				build,
 				( e: string ): void => this.error( e )
 			);
 
