@@ -3,7 +3,7 @@
 	align-items: center;
 	border: 0;
 	display: inline-flex;
-	padding: em($gap-smallest * 0.5) 0.5em em($gap-smallest);
+	padding: em($gap-smallest) 0.5em;
 	margin: 0 0.365em 0.365em 0;
 	border-radius: 0;
 	line-height: 1;
@@ -14,8 +14,9 @@
 	&:hover,
 	&:focus,
 	&:active {
-		background: $gray-200;
-		color: $gray-900;
+		background: transparent;
+		color: inherit;
+		border: 1px solid;
 	}
 
 	&.wc-block-components-chip--radius-small {
@@ -30,24 +31,27 @@
 		padding-right: 0.75em;
 	}
 	.wc-block-components-chip__text {
+		@include font-size(smaller);
 		flex-grow: 1;
-	}
-	&.is-removable {
-		padding-right: 0.5em;
 	}
 	&.is-removable .wc-block-components-chip__text {
 		padding-right: 0.25em;
 	}
 	.wc-block-components-chip__remove {
 		@include font-size(smaller);
-		background: transparent;
+		background: $gray-200;
 		border: 0;
+		border-radius: 25px;
 		appearance: none;
 		padding: 0;
+		height: 16px;
+		width: 16px;
+		margin: 0;
 	}
 
 	.wc-block-components-chip__remove-icon {
 		vertical-align: middle;
+		fill: $gray-900;
 	}
 }
 
@@ -67,11 +71,15 @@ button.wc-block-components-chip:hover > .wc-block-components-chip__remove,
 button.wc-block-components-chip:focus > .wc-block-components-chip__remove,
 .wc-block-components-chip__remove:hover,
 .wc-block-components-chip__remove:focus {
-	fill: $alert-red;
+	background: $gray-600;
+
+	.wc-block-components-chip__remove-icon {
+		fill: #fff;
+	}
 }
 
 button.wc-block-components-chip:disabled > .wc-block-components-chip__remove,
 .wc-block-components-chip__remove:disabled {
-	fill: $gray-600;
+	fill: #fff;
 	cursor: not-allowed;
 }

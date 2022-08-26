@@ -14,9 +14,9 @@
 	overflow: hidden;
 
 	.wc-block-active-filters__clear-all {
-		@include font-size(regular);
-		float: right;
+		@include font-size(smaller);
 		border: none;
+		margin-top: 15px;
 		padding: 0;
 		text-decoration: underline;
 		cursor: pointer;
@@ -37,10 +37,9 @@
 		clear: both;
 
 		li {
-			margin: 0;
+			margin: 9px 0 0;
 			padding: 0;
 			list-style: none outside;
-			clear: both;
 
 			ul {
 				margin: 0;
@@ -54,10 +53,14 @@
 				}
 			}
 		}
+		> li:first-child {
+			margin: 0;
+		}
 	}
 
 	.wc-block-active-filters__list-item-type {
 		@include font-size(smaller);
+		font-weight: bold;
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
 		margin: $gap 0 0;
@@ -70,10 +73,11 @@
 	}
 
 	.wc-block-active-filters__list-item-name {
-		font-weight: bold;
-		display: block;
+		@include font-size(smaller);
+		display: flex;
+		align-items: center;
 		position: relative;
-		padding: 0 16px 0 0;
+		padding: 0;
 	}
 
 	.wc-block-active-filters__list-item-remove {
@@ -83,11 +87,17 @@
 		height: 16px;
 		width: 16px;
 		padding: 0;
-		position: absolute;
-		right: 0;
-		top: 50%;
-		margin: -8px 0 0 0;
+		margin: 0 16px 0 0;
 		color: currentColor;
+
+		&:hover {
+			color: $gray-600;
+		}
+
+		&:disabled {
+			color: $gray-200;
+			cursor: not-allowed;
+		}
 	}
 
 	.wc-block-active-filters__list--chips {
