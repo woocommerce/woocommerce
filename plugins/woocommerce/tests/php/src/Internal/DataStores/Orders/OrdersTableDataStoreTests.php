@@ -925,11 +925,15 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		assert( get_post_type( $post_object->ID ) === 'shop_order' );
 
 		// simulate direct write.
-		update_post_meta( $post_object->ID, '_order_total', $order_total + 100 );
+		update_post_meta( $post_object->ID, '_order_total', $order_total + 100 ); // core table.
+		update_post_meta( $post_object->ID, '_billing_first_name', 'John Doe Updated' ); // address table.
+		update_post_meta( $post_object->ID, '_created_via', 'Unit tests Updated' ); // op data table.
 
-		// Try on a refreshed order.
+		// Read a refreshed order.
 		$refreshed_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( $order_total + 100, $refreshed_order->get_total() );
+		$this->assertEquals( 'John Doe Updated', $refreshed_order->get_billing_first_name() );
+		$this->assertEquals( 'Unit tests Updated', $refreshed_order->get_created_via() );
 	}
 
 	/**
