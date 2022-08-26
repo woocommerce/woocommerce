@@ -1,18 +1,10 @@
 .woocommerce-form-section {
-	display: grid;
-	grid-template-columns: 32% auto;
-	gap: $gap-large;
-
 	a {
 		text-decoration: none;
 	}
 
 	&__content {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
 		padding: $gap-large;
-
 		background: $white;
 		border: 1px solid $gray-400;
 		border-radius: 2px;
