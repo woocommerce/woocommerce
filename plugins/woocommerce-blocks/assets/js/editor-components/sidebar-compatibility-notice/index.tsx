@@ -4,6 +4,7 @@
 import { Notice, ExternalLink } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -33,16 +34,14 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 	);
 
 	return (
-		<div
-			className="wc-blocks-sidebar-compatibility-notice"
-			style={ { display: isVisible ? 'block' : 'none' } }
+		<Notice
+			onRemove={ dismissNotice }
+			className={ classnames( [
+				'wc-blocks-sidebar-compatibility-notice',
+				{ 'is-hidden': ! isVisible },
+			] ) }
 		>
-			<Notice
-				onRemove={ dismissNotice }
-				className={ 'wc-blocks-sidebar-compatibility-notice__notice' }
-			>
-				{ noticeText }
-			</Notice>
-		</div>
+			{ noticeText }
+		</Notice>
 	);
 };
