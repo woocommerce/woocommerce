@@ -58,12 +58,14 @@ export const getTextControlProps = ( {
 	onBlur,
 	onChange,
 	value = '',
+	help,
 }: gettersProps ) => {
 	return {
 		value,
 		className: classnames( 'woocommerce-product__text', className ),
 		onChange,
 		onBlur,
+		help,
 	};
 };
 
@@ -73,6 +75,7 @@ export const getInputControlProps = ( {
 	onBlur,
 	onChange,
 	value = '',
+	help,
 }: gettersProps ) => {
 	if ( ! context ) {
 		return;
@@ -102,5 +105,6 @@ export const getInputControlProps = ( {
 		className: classnames( 'woocommerce-product__input', className ),
 		onChange,
 		onBlur,
+		help,
 	};
 };
