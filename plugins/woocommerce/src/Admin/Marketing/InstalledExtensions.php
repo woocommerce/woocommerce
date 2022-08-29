@@ -526,7 +526,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/vimeo.jpg';
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/vimeo.png';
 
 		if ( 'activated' === $data['status'] && class_exists( '\Tribe\Vimeo_WP\Vimeo\Vimeo_Auth' ) ) {
 			if ( method_exists( '\Tribe\Vimeo_WP\Vimeo\Vimeo_Auth', 'has_access_token' ) ) {
