@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Mobile_Messaging_Handler {
 
-	const OPEN_ORDER_INTERVAL_DAYS = 7;
+	const OPEN_ORDER_INTERVAL_DAYS = 30;
 
 	/**
 	 * Prepares mobile messaging with a deep link
@@ -31,9 +31,7 @@ class WC_Mobile_Messaging_Handler {
 		try {
 			$last_mobile_used = self::get_closer_mobile_usage_date();
 
-			if ( $last_mobile_used->diff( $now )->days > self::OPEN_ORDER_INTERVAL_DAYS ) {
-				return null;
-			} elseif ( $blog_id === null ) {
+			if ( $last_mobile_used->diff( $now )->days > self::OPEN_ORDER_INTERVAL_DAYS || $blog_id === null ) {
 				return null;
 			} else {
 				$url = add_query_arg(

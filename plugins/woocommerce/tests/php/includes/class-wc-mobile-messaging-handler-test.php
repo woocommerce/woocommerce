@@ -29,7 +29,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( self::ORDER_ID, self::BLOG_ID, $now );
 
 		$this->assertEquals(
-			'<a href="https://woocommerce.com/mobile?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '">Manage the order</a> in the mobile app.',
+			'<a href="https://woocommerce.com/mobile/order?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '">Manage the order</a> in the mobile app.',
 			$mobile_message
 		);
 	}
