@@ -26,7 +26,9 @@ jest.mock( '../product-field-layout', () => {
 	};
 } );
 
-const SampleInputField: React.FC< { name: string } > = ( { name } ) => {
+const SampleInputField: React.FC< { name: string; onChange: () => void } > = ( {
+	name,
+} ) => {
 	return <div>smaple-input-field-{ name }</div>;
 };
 
@@ -46,14 +48,14 @@ describe( 'ProductSectionLayout', () => {
 		expect( queryByText( 'This is a description' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should wrap children in ProductFieldLayout if prop contains name', () => {
+	it( 'should wrap children in ProductFieldLayout if prop contains onChange', () => {
 		const { queryByText, queryAllByText } = render(
 			<ProductSectionLayout
 				title="Title"
 				description="This is a description"
 			>
-				<SampleInputField name="name" />
-				<SampleInputField name="description" />
+				<SampleInputField name="name" onChange={ () => {} } />
+				<SampleInputField name="description" onChange={ () => {} } />
 			</ProductSectionLayout>
 		);
 
@@ -66,7 +68,7 @@ describe( 'ProductSectionLayout', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should not wrap children in ProductFieldLayout if prop does not contain name', () => {
+	it( 'should not wrap children in ProductFieldLayout if prop does not contain onChange', () => {
 		const { queryByText, queryAllByText } = render(
 			<ProductSectionLayout
 				title="Title"

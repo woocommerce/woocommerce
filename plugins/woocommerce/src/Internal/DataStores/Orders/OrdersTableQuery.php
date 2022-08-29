@@ -137,6 +137,13 @@ class OrdersTableQuery {
 	private $meta_query = null;
 
 	/**
+	 * Search query parser.
+	 *
+	 * @var OrdersTableSearchQuery?
+	 */
+	private $search_query = null;
+
+	/**
 	 * Date query parser.
 	 *
 	 * @var WP_Date_Query
@@ -150,6 +157,8 @@ class OrdersTableQuery {
 	 * @param array $args Array of query vars.
 	 */
 	public function __construct( $args = array() ) {
+		global $wpdb;
+
 		$datastore = wc_get_container()->get( OrdersTableDataStore::class );
 
 		// TODO: maybe OrdersTableDataStore::get_all_table_names() could return these keys/indices instead.
@@ -158,6 +167,7 @@ class OrdersTableQuery {
 			'addresses'        => $datastore::get_addresses_table_name(),
 			'operational_data' => $datastore::get_operational_data_table_name(),
 			'meta'             => $datastore::get_meta_table_name(),
+			'items'            => $wpdb->prefix . 'woocommerce_order_items',
 		);
 		$this->mappings = $datastore->get_all_order_column_mappings();
 
@@ -523,6 +533,14 @@ class OrdersTableQuery {
 		$this->process_operational_data_table_query_args();
 		$this->process_addresses_table_query_args();
 
+		// Search queries.
+		if ( ! empty( $this->args['s'] ) ) {
+			$this->search_query = new OrdersTableSearchQuery( $this );
+			$sql                = $this->search_query->get_sql_clauses();
+			$this->join         = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
+			$this->where        = $sql['where'] ? array_merge( $this->where, $sql['where'] ) : $this->where;
+		}
+
 		// Meta queries.
 		if ( ! empty( $this->args['meta_query'] ) ) {
 			$this->meta_query = new OrdersTableMetaQuery( $this );
@@ -547,9 +565,6 @@ class OrdersTableQuery {
 		$this->process_limit();
 
 		$orders_table = $this->tables['orders'];
-
-		// DISTINCT.
-		$distinct = '';
 
 		// SELECT [fields].
 		$this->fields = "{$orders_table}.id";
@@ -586,7 +601,7 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
-		$this->sql = "SELECT $found_rows $distinct $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->sql = "SELECT $found_rows DISTINCT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 	}
 
 	/**
@@ -696,9 +711,6 @@ class OrdersTableQuery {
 	 */
 	private function process_orders_table_query_args(): void {
 		$this->sanitize_status();
-
-		// TODO: not yet implemented.
-		unset( $this->args['type'] );
 
 		$fields = array_filter(
 			array(
@@ -961,6 +973,8 @@ class OrdersTableQuery {
 			case 'posts':
 			case 'orders':
 				return $this->results;
+			case 'request':
+				return $this->sql;
 			default:
 				break;
 		}

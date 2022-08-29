@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal error when bulk editing sale price to empty value in PHP 8

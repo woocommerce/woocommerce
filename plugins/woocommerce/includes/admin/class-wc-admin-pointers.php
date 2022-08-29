@@ -77,16 +77,7 @@ class WC_Admin_Pointers {
 			$labels          = $wp_post_types['product']->labels;
 			$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
 
-			$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-homepage-notice' );
-			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-			wp_enqueue_script(
-				'product-tutorial',
-				WCAdminAssets::get_url( 'wp-admin-scripts/product-tour', 'js' ),
-				array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-				WC_VERSION,
-				true
-			);
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'product-tour', true );
 			return;
 		}
 

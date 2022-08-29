@@ -1,8 +1,8 @@
-# WooCommerce Puppeteer End to End Tests (Deprecated)
+# WooCommerce Puppeteer End to End Tests
 
-**Deprecated. Please check the new E2E setup based on [Playwright + wp-env](./../../e2e).**
+**Please check the new E2E setup based on [Playwright + wp-env](./../../e2e).**
 
-This package uses `Puppeteer` as test runner and `e2e-environment` to spin up a test site. **It has been deprecated.** [Please check the new setup](./../../e2e), using `Playwright` as test runner and `wp-env` to spin up a test site.
+This package uses `Puppeteer` as test runner and `e2e-environment` to spin up a test site. [Please check the new setup](./../../e2e), using `Playwright` as test runner and `wp-env` to spin up a test site.
 
 ## Table of contents
 

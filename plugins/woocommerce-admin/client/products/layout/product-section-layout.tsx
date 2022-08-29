@@ -29,7 +29,7 @@ export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
 			</div>
 			<div className="product-category-layout__fields">
 				{ Children.map( children, ( child ) => {
-					if ( isValidElement( child ) && child.props.name ) {
+					if ( isValidElement( child ) && child.props.onChange ) {
 						return (
 							<ProductFieldLayout
 								fieldName={ child.props.name }

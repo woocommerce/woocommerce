@@ -1,5 +1,0 @@
-Significance: patch
-Type: add
-Comment: The changes in this PR are for Playwright tests which aren't bundled in woocommerce releases
-
-

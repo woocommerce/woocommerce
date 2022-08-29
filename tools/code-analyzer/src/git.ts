@@ -215,6 +215,7 @@ export const getSchema = async (
  * @param {string}   tmpRepoPath Path to repository used to generate schema diff.
  * @param {string}   compare     Branch/commit hash to compare against the base.
  * @param {string}   base        Base branch/commit hash.
+ * @param            build       Build to perform between checkouts.
  * @param {Function} error       error print method.
  * @return {Object|void}     diff object.
  */
@@ -222,6 +223,7 @@ export const generateSchemaDiff = async (
 	tmpRepoPath: string,
 	compare: string,
 	base: string,
+	build: () => void,
 	error: ( s: string ) => void
 ): Promise< {
 	[ key: string ]: {
@@ -241,6 +243,7 @@ export const generateSchemaDiff = async (
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( base, [ '--force' ] );
+	build();
 	const baseSchema = await getSchema(
 		tmpRepoPath,
 		( errorMessage: string ) => {
@@ -255,6 +258,7 @@ export const generateSchemaDiff = async (
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( compare, [ '--force' ] );
+	build();
 	const compareSchema = await getSchema(
 		tmpRepoPath,
 		( errorMessage: string ) => {

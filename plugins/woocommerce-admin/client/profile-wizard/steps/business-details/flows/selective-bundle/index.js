@@ -16,7 +16,7 @@ import {
 	Spinner,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { SelectControl, Form, TextControl } from '@woocommerce/components';
+import { Form, TextControl, SelectControl } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
@@ -42,7 +42,6 @@ import {
 } from './selective-extensions-bundle';
 import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
-import SkipButton from '../../../skip-button';
 
 const BUSINESS_DETAILS_TAB_NAME = 'business-details';
 const BUSINESS_FEATURES_TAB_NAME = 'business-features';
@@ -402,6 +401,7 @@ class BusinessDetails extends Component {
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
 			setup_client: isSetupClient,
+			wp_version: getSetting( 'wpVersion' ),
 		} );
 		recordEvent( 'storeprofiler_step_complete', {
 			step: BUSINESS_DETAILS_TAB_NAME,
@@ -650,13 +650,6 @@ class BusinessDetails extends Component {
 									) }
 								</CardFooter>
 							</Card>
-							<SkipButton
-								onSkipped={ () => {
-									recordEvent(
-										'storeprofiler_store_business_details_skip'
-									);
-								} }
-							/>
 						</>
 					);
 				} }

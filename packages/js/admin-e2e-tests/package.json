@@ -24,6 +24,7 @@
 	"dependencies": {
 		"@jest/globals": "^26.6.2",
 		"@types/jest": "^27.4.1",
+		"@woocommerce/e2e-utils": "workspace:*",
 		"config": "^3.3.7"
 	},
 	"peerDependencies": {
@@ -33,6 +34,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@types/config": "0.0.41",
 		"@types/expect-puppeteer": "^4.4.7",
 		"@types/puppeteer": "^5.4.5",
 		"@typescript-eslint/eslint-plugin": "^5.14.0",

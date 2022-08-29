@@ -29,7 +29,7 @@ class ProductIcon extends Component {
 					'woocommerce-admin-marketing-product-icon'
 				) }
 			>
-				<Icon icon={ iconComponent } />
+				<Icon icon={ iconComponent } size={ 36 } />
 			</div>
 		);
 	}

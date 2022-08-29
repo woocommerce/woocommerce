@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
+use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -1161,61 +1163,7 @@ class WC_AJAX {
 	 * @throws Exception If order or coupon is invalid.
 	 */
 	public static function add_coupon_discount() {
-		check_ajax_referer( 'order-item', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( -1 );
-		}
-
-		$response = array();
-
-		try {
-			$order_id           = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-			$order              = wc_get_order( $order_id );
-			$calculate_tax_args = array(
-				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
-			);
-
-			if ( ! $order ) {
-				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
-			}
-
-			if ( empty( $_POST['coupon'] ) ) {
-				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
-			}
-
-			// Add user ID and/or email so validation for coupon limits works.
-			$user_id_arg    = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
-			$user_email_arg = isset( $_POST['user_email'] ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : '';
-
-			if ( $user_id_arg ) {
-				$order->set_customer_id( $user_id_arg );
-			}
-			if ( $user_email_arg ) {
-				$order->set_billing_email( $user_email_arg );
-			}
-
-			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			if ( is_wp_error( $result ) ) {
-				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
-			}
-
-			$order->calculate_taxes( $calculate_tax_args );
-			$order->calculate_totals( false );
-
-			ob_start();
-			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
-			$response['html'] = ob_get_clean();
-		} catch ( Exception $e ) {
-			wp_send_json_error( array( 'error' => $e->getMessage() ) );
-		}
-
-		// wp_send_json_success must be outside the try block not to break phpunit tests.
-		wp_send_json_success( $response );
+		wc_get_container()->get( CouponsController::class )->add_coupon_discount_via_ajax();
 	}
 
 	/**
@@ -1418,33 +1366,7 @@ class WC_AJAX {
 	 * Calc line tax.
 	 */
 	public static function calc_line_taxes() {
-		check_ajax_referer( 'calc-totals', 'security' );
-
-		if ( ! current_user_can( 'edit_shop_orders' ) || ! isset( $_POST['order_id'], $_POST['items'] ) ) {
-			wp_die( -1 );
-		}
-
-		$order_id           = absint( $_POST['order_id'] );
-		$calculate_tax_args = array(
-			'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-			'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-			'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-			'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
-		);
-
-		// Parse the jQuery serialized items.
-		$items = array();
-		parse_str( wp_unslash( $_POST['items'] ), $items ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		// Save order items first.
-		wc_save_order_items( $order_id, $items );
-
-		// Grab the order and recalculate taxes.
-		$order = wc_get_order( $order_id );
-		$order->calculate_taxes( $calculate_tax_args );
-		$order->calculate_totals( false );
-		include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
-		wp_die();
+		wc_get_container()->get( TaxesController::class )->calc_line_taxes_via_ajax();
 	}
 
 	/**

@@ -30,6 +30,13 @@ const testProps = {
 	},
 	getLocale: jest.fn(),
 	isLoading: false,
+	createNotice: jest.fn(),
+	profileItems: {},
+	updateAndPersistSettingsForGroup: jest.fn(),
+	goToNextStep: jest.fn(),
+	errorsRef: {
+		current: {},
+	},
 };
 
 jest.mock( '@wordpress/data', () => {
