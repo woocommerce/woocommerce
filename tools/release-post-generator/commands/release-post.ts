@@ -14,6 +14,7 @@ import { renderTemplate } from '../lib/render-template';
 import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
+import { Logger } from '../lib/logger';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
@@ -74,6 +75,8 @@ program
 			);
 
 			const changeset = processChanges( changes );
+
+			Logger.startTask( 'Finding contributors' );
 			const title = `WooCommerce ${ currentVersion } Released`;
 
 			const contributors = await generateContributors(
@@ -88,12 +91,16 @@ program
 				displayVersion: currentVersion,
 			} );
 
+			Logger.endTask();
+
 			if ( isOutputOnly ) {
 				await writeFile( 'changes.html', html );
-				console.log(
+				Logger.notice(
 					`Output written to ${ process.cwd() }/changes.html`
 				);
 			} else {
+				Logger.startTask( 'Publishing draft release post' );
+
 				const response = await createWpComDraftPost(
 					'96396764',
 					'authToken',
@@ -101,7 +108,10 @@ program
 					html
 				);
 
-				console.log( response );
+				Logger.notice(
+					`Published draft release post at ${ response.URL }`
+				);
+				Logger.endTask();
 			}
 		} else {
 			throw new Error(

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Octokit } from '@octokit/rest';
+import shuffle from 'lodash.shuffle';
 
 export type ContributorData = {
 	totalCommits: number;
@@ -25,7 +26,7 @@ const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 };
 
 const octokit = new Octokit( {
-	auth: '',
+	auth: process.env.GITHUB_ACCESS_TOKEN,
 } );
 
 const PAGE_SIZE = 100;
@@ -84,9 +85,11 @@ export const getContributorData = async (
 
 	return {
 		totalCommits: total_commits,
-		contributors: filterUniqBy(
-			allAuthors as Array< Record< string, unknown > >,
-			'login'
+		contributors: shuffle(
+			filterUniqBy(
+				allAuthors as Array< Record< string, unknown > >,
+				'login'
+			)
 		),
 		org: orgName,
 		repo: repoName,
