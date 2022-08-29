@@ -1,0 +1,14 @@
+name: Cache Turbo Dependencies (Composite)
+description: Creates and restores turbo caches.
+
+runs:
+  using: "composite"
+  steps:
+    - name: Turbo dependency caching
+      uses: actions/cache@v3
+      id: cache-turbo
+      with:
+        path: |
+          '**/.turbo'
+          node_modules/.cache/turbo
+        key: turbo-cache

@@ -22,6 +22,8 @@ jobs:
                 workflow_name: pr-smoke-test
                 workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
+            - uses: ./.github/actions/cache-turbo
+
             - name: Install Jest
               run: pnpm install -g jest
 

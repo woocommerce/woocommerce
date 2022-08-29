@@ -42,6 +42,8 @@ jobs:
           workflow_name: pr-unit-tests
           workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
+      - uses: ./.github/actions/cache-turbo
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
