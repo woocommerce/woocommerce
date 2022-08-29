@@ -83,8 +83,8 @@ POST /wc/store/v1/checkout
 
 | Attribute          | Type   | Required | Description                                                         |
 | :----------------- | :----- | :------: | :------------------------------------------------------------------ |
-| `billing_address`  | array  |   Yes    | Array of updated billing address data for the customer.             |
-| `shipping_address` | array  |   Yes    | Array of updated shipping address data for the customer.            |
+| `billing_address`  | object |   Yes    | Object of updated billing address data for the customer.            |
+| `shipping_address` | object |   Yes    | Object of updated shipping address data for the customer.           |
 | `customer_note`    | string |    No    | Note added to the order by the customer during checkout.            |
 | `payment_method`   | string |   Yes    | The ID of the payment method being used to process the payment.     |
 | `payment_data`     | array  |    No    | Data to pass through to the payment method when processing payment. |
