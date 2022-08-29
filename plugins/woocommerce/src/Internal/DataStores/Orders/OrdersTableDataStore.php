@@ -835,8 +835,8 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			$order_post = $posts[ $order_id ][0];
 			if ( $data_sync_enabled ) {
+				$order_post = $posts[ $order_id ][0];
 				$this->maybe_sync_order( $order, $order_post );
 			}
 		}
