@@ -17,43 +17,65 @@ class WC_Mobile_Messaging_Handler {
 	/**
 	 * Prepares mobile messaging with a deep link
 	 *
-	 * @param int      $order_id of order to make a deep link for.
+	 * @param WC_Order $order order that mobile message is created for.
 	 * @param ?int     $blog_id  of blog to make a deep link for.
 	 * @param DateTime $now      current DateTime.
 	 *
 	 * @return string|null
 	 */
 	public static function prepare_mobile_message(
-		int $order_id,
+		WC_Order $order,
 		?int $blog_id,
 		DateTime $now
 	): ?string {
 		try {
 			$last_mobile_used = self::get_closer_mobile_usage_date();
 
-			if ( $last_mobile_used->diff( $now )->days > self::OPEN_ORDER_INTERVAL_DAYS || $blog_id === null ) {
-				return null;
+			$used_app_in_last_month = $last_mobile_used->diff( $now )->days <= self::OPEN_ORDER_INTERVAL_DAYS;
+			$has_jetpack            = $blog_id !== null;
+
+			if ( $used_app_in_last_month && $has_jetpack ) {
+				if ( self::is_store_in_person_payment_eligible() ) {
+					if ( self::is_order_in_person_payment_eligible( $order ) ) {
+						return self::accept_payment_message( $blog_id, $order->get_id() );
+					} else {
+						return self::manage_order_message( $blog_id, $order->get_id() );
+					}
+				} else {
+					return self::manage_order_message( $blog_id, $order->get_id() );
+				}
 			} else {
-				$url = add_query_arg(
-					array(
-						'blog_id'  => absint( $blog_id ),
-						'order_id' => absint( $order_id ),
-					),
-					'https://woocommerce.com/mobile/order'
-				);
-
-				return sprintf(
-					wp_kses_data(
-						/* translators: %s: Email link */
-						__( '<a href="%s">Manage the order</a> in the mobile app.', 'woocommerce' )
-					),
-					esc_url( $url )
-				);
-
+				return self::no_app_message();
 			}
 		} catch ( Exception $e ) {
 			return null;
 		}
+	}
+
+	/**
+	 * Returns if store is eligible to accept In-Person Payments
+	 *
+	 * @return true if store is eligible, false otherwise
+	 */
+	private static function is_store_in_person_payment_eligible(): bool {
+		return self::has_store_specified_country_currency( 'US', 'USD' ) || self::has_store_specified_country_currency( 'CA', 'CAD' );
+	}
+
+	/**
+	 * Returns if order is eligible to accept In-Person Payments
+	 *
+	 * @param WC_Order $order order that the conditions are checked for.
+	 *
+	 * @return true if order is eligible, false otherwise
+	 */
+	private static function is_order_in_person_payment_eligible( WC_Order $order ): bool {
+		return in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true ) &&
+			   in_array( $order->get_payment_method(), array( 'cod', 'woocommerce_payments', 'none' ), true ) && // phpcs:ignore WordPress.WhiteSpace.PrecisionAlignment.Found
+			   self::is_store_in_person_payment_eligible() && // phpcs:ignore WordPress.WhiteSpace.PrecisionAlignment.Found
+			   ! $order->is_paid() && // phpcs:ignore WordPress.WhiteSpace.PrecisionAlignment.Found
+			! empty(
+				$order->get_refunds()
+			);
 	}
 
 	/**
@@ -90,6 +112,96 @@ class WC_Mobile_Messaging_Handler {
 		} catch ( Exception $e ) {
 			return null;
 		}
+	}
+
+	/**
+	 * Checks if the store has specified country location and currency used.
+	 *
+	 * @param string $country country to compare store's country with.
+	 * @param string $currency currency to compare store's currency with.
+	 *
+	 * @return true if specified country and currency match the store's ones. false otherwise
+	 */
+	public static function has_store_specified_country_currency( string $country, string $currency ): bool {
+		return ( WC()->countries->get_base_country() === $country && get_woocommerce_currency() === $currency );
+	}
+
+
+	/**
+	 * Prepares message with a deep link to mobile payment.
+	 *
+	 * @param int $blog_id blog id to deep link to.
+	 * @param int $order_id order id to deep link to.
+	 *
+	 * @return string formatted message
+	 */
+	public static function accept_payment_message( int $blog_id, int $order_id ): string {
+		$deep_link_url = add_query_arg(
+			array(
+				'blog_id'  => absint( $blog_id ),
+				'order_id' => absint( $order_id ),
+			),
+			'https://woocommerce.com/mobile/payments'
+		);
+
+		return sprintf(
+			wp_kses_data(
+			/* translators: %s: Email link */
+				__(
+					'<a href="%1$s">Accept payments</a> with a card reader in our mobile app\.</br><a href="%2$s">Learn more about In-Person Payments\.</a>',
+					'woocommerce'
+				)
+			),
+			esc_url( $deep_link_url ),
+			esc_url( 'https://woocommerce.com/in-person-payments/' )
+		);
+	}
+
+	/**
+	 * Prepares message with a deep link to manage order details.
+	 *
+	 * @param int $blog_id blog id to deep link to.
+	 * @param int $order_id order id to deep link to.
+	 *
+	 * @return string formatted message
+	 */
+	public static function manage_order_message( int $blog_id, int $order_id ): string {
+		$deep_link_url = add_query_arg(
+			array(
+				'blog_id'  => absint( $blog_id ),
+				'order_id' => absint( $order_id ),
+			),
+			'https://woocommerce.com/mobile/order'
+		);
+
+		return sprintf(
+			wp_kses_data(
+			/* translators: %s: Email link */
+				__(
+					'<a href="%s">Manage the order</a> with the app.',
+					'woocommerce'
+				)
+			),
+			esc_url( $deep_link_url )
+		);
+	}
+
+	/**
+	 * Prepares message with a deep link to learn more about mobile app.
+	 *
+	 * @return string formatted message
+	 */
+	public static function no_app_message(): string {
+		return sprintf(
+			wp_kses_data(
+			/* translators: %s: Email link */
+				__(
+					'Process your orders on the go. <a href="%s">Get the app</a>.</a>',
+					'woocommerce'
+				)
+			),
+			esc_url( 'https://woocommerce.com/mobile/' )
+		);
 	}
 }
 
