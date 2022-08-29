@@ -2,15 +2,9 @@
  * External dependencies
  */
 import Analyzer from 'code-analyzer/src/commands/analyzer';
-import {
-	checkoutRef,
-	cloneRepo,
-	getCommitsInRange,
-	sparseCheckoutRepo,
-} from 'code-analyzer/src/git';
 import semver from 'semver';
 import { promises } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -19,27 +13,10 @@ import { program } from '../program';
 import { renderTemplate } from '../lib/render-template';
 import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
-import { join } from 'path';
 import { generateContributors } from '../lib/contributors';
-import { getContributors } from '../lib/github-api';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
-
-const OTHER_WATCHED_PACKAGES = [
-	{
-		packagist: 'woocommerce/woocommerce-blocks',
-		org: 'woocommerce',
-		repo: 'woocommerce-blocks',
-		versionPrefix: 'v',
-	},
-	{
-		packagist: 'woocommerce/action-scheduler',
-		org: 'woocommerce',
-		repo: 'action-scheduler',
-		versionPrefix: '',
-	},
-];
 
 // Define the release post command
 program

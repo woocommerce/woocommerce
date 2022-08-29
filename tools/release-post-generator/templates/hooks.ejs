@@ -1,0 +1,29 @@
+<!-- wp:heading -->
+<h2 id="actions-and-filters">Actions and Filters</h2>
+<!-- /wp:heading -->
+
+<% if (changes.hooks.length) { %>
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th><strong>Filter</strong></th>
+          <th><strong>Description</strong></th>
+        </tr>
+        <% changes.hooks.forEach(({name, description}) => { %>
+          <tr>
+            <td><%= name %></td>
+            <td><%= description %></td>
+          </tr>
+        <% }) %>
+        <!-- end each hook change-->
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+<% } else  { %>
+  <!-- wp:paragraph -->
+  <p>This release doesn\'t add any actions or filters.</p>
+  <!-- /wp:paragraph -->
+<% } %>

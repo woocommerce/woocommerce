@@ -17,7 +17,7 @@ const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 
 // Make auth optional since we're often accessing public data
 const octokit = new Octokit( {
-	auth: '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',
+	auth: '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',
 } );
 
 const PAGE_SIZE = 100;
@@ -74,5 +74,15 @@ export const getContributors = async (
 		);
 	}
 
-	return filterUniqBy( allAuthors, 'login' );
+	return {
+		totalCommits: total_commits,
+		contributors: filterUniqBy(
+			allAuthors as Array< Record< string, unknown > >,
+			'login'
+		),
+		org: orgName,
+		repo: repoName,
+		baseRef,
+		headRef,
+	};
 };

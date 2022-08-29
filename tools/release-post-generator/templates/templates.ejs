@@ -1,0 +1,29 @@
+<!-- wp:heading -->
+<h2 id="template-changes">Template Changes</h2>
+<!-- /wp:heading -->
+
+<% if (changes.templates.length) { %>
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <thead>
+        <th>
+          <strong>Template</strong>
+        </th>
+      </thead>
+      <tbody>
+        
+        <!-- for each template change (template / description) -->
+        <% changes.templates.forEach((change) => { %>
+          <tr>
+            <td><%= change %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </figure>
+<% } else { %>
+  <!-- wp:paragraph -->
+  <p>There are no template changes in this release.</p>
+  <!-- /wp:paragraph -->
+<% } %>

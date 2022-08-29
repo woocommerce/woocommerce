@@ -1,41 +1,43 @@
 <% const NUMBER_COLUMNS_TO_DISPLAY = 6 %>
-<% for ( const packageName in contributors ) { %>
-  <% const packageContributors = contributors[packageName] %>
-  
-  <% if (packageContributors.length) { %>
-    <h2><%= packageName.replace(' ', '-') %></h2>
-  <% } %>
-  <ul>
-    <% const lastContributor = packageContributors[packageContributors.length - 1] %>
-    <% let column = 1 %>
-    <% for ( const contributor of packageContributors ) { %>
-      <% if (NUMBER_COLUMNS_TO_DISPLAY % column === 1) { %>
-        <!-- wp:columns -->
-        <div class="wp-block-columns">
-      <% } %>   
-      <!-- wp:column -->      
-      <div class="wp-block-column">
-      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
-      <figure class="wp-block-image size-large">
-        <a href="https://github.com/<%= contributor.login %>" target="_blank">
-          <img src="<%= contributor.avatar_url %>" alt=""/>
-        </a>
-        <figcaption><%= contributor.login %></figcaption>
-      </figure>
-      <!-- /wp:image --></div><!-- /wp:column -->
-      <% if ( contributor.login !== lastContributor.login &&  packageContributors.length  % NUMBER_COLUMNS_TO_DISPLAY !== 0 ) { %>
-        <% const columnsToAdd = NUMBER_COLUMNS_TO_DISPLAY - ( packageContributors.length % NUMBER_COLUMNS_TO_DISPLAY ) %>
-        <% for ( let i = 0; i < columnsToAdd; i++ ) { %>
-					<!-- wp:column -->
-          <div class="wp-block-column"></div>
-          <!-- /wp:column -->
-				<% } %>
-      <% } %>
-      <% column ++ %>
-      <% if ( ( column % NUMBER_COLUMNS_TO_DISPLAY === 1 && ( column !== 1 )) || contributor.login === lastContributor.login ) { %>
-        </div>
-        <!-- /wp:columns -->
-      <% } %>
-    <% } %>  
-  </ul>  
+<% for ( const packageName in contributors ) { %>  
+  <% const packageContributors = contributors[packageName].contributors %>
+
+  <% if (packageContributors) { %> 
+    <% if (packageContributors.length) { %>
+      <h2><%= packageName.replace(' ', '-') %></h2>
+    <% } %>
+    <ul>
+      <% const lastContributor = packageContributors[packageContributors.length - 1] %>
+      <% let column = 1 %>
+      <% for ( const contributor of packageContributors ) { %>
+        <% if (NUMBER_COLUMNS_TO_DISPLAY % column === 1) { %>
+          <!-- wp:columns -->
+          <div class="wp-block-columns">
+        <% } %>   
+        <!-- wp:column -->      
+        <div class="wp-block-column">
+        <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+        <figure class="wp-block-image size-large">
+          <a href="https://github.com/<%= contributor.login %>" target="_blank">
+            <img src="<%= contributor.avatar_url %>" alt=""/>
+          </a>
+          <figcaption><%= contributor.login %></figcaption>
+        </figure>
+        <!-- /wp:image --></div><!-- /wp:column -->
+        <% if ( contributor.login !== lastContributor.login &&  packageContributors.length  % NUMBER_COLUMNS_TO_DISPLAY !== 0 ) { %>
+          <% const columnsToAdd = NUMBER_COLUMNS_TO_DISPLAY - ( packageContributors.length % NUMBER_COLUMNS_TO_DISPLAY ) %>
+          <% for ( let i = 0; i < columnsToAdd; i++ ) { %>
+            <!-- wp:column -->
+            <div class="wp-block-column"></div>
+            <!-- /wp:column -->
+          <% } %>
+        <% } %>
+        <% column ++ %>
+        <% if ( ( column % NUMBER_COLUMNS_TO_DISPLAY === 1 && ( column !== 1 )) || contributor.login === lastContributor.login ) { %>
+          </div>
+          <!-- /wp:columns -->
+        <% } %>
+      <% } %>  
+    </ul>
+  <% } %>  
 <% } %> 
