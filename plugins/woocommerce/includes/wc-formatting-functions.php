@@ -1272,9 +1272,9 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-	$price  = '<span class="screen-reader-text">' . __( 'Previous price:', 'woocommerce' ) . '</span>';
+	$price  = '<span class="screen-reader-text">' . esc_html__( 'Previous price:', 'woocommerce' ) . '</span>';
 	$price .= '<del>' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del>';
-	$price .= '<span class="screen-reader-text">' . __( 'Discounted price:', 'woocommerce' ) . '</span>';
+	$price .= '<span class="screen-reader-text">' . esc_html__( 'Discounted price:', 'woocommerce' ) . '</span>';
 	$price .= '<ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
 }
