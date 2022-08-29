@@ -92,63 +92,6 @@ export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 };
 
 /**
- * Get git commits between 2 commit refs
- *
- * @param {string} baseDir - Dir that the repo is in.
- * @param {string} base    - a ref to start from.
- * @param {string} head    - a ref to end at.
- * @return {Promise<CommitResult>} - the commits between the 2 refs.
- */
-export const getCommitsInRange = (
-	baseDir: string,
-	base: string,
-	head: string
-) => {
-	const git = simpleGit( { baseDir } );
-	return git.log( { from: base, to: head } );
-};
-
-const filterUniqBy = (
-	arr: Array< Record< string, unknown > >,
-	key: string
-) => {
-	const seen = new Set();
-	return arr.filter( ( item ) => {
-		const k = item[ key ];
-		if ( seen.has( k ) ) {
-			return false;
-		}
-		seen.add( k );
-		return true;
-	} );
-};
-
-export const getContributors = async (
-	baseDir: string,
-	base: string,
-	head: string
-) => {
-	const commits = await getCommitsInRange( baseDir, base, head );
-	const contributions = commits.all
-		.map(
-			// eslint-disable-next-line camelcase
-			( { author_name, author_email } ) => ( {
-				name: author_name,
-				email: author_email,
-			} )
-		)
-		// basic filtering out of known bots like renovate
-		.filter( ( { name, email } ) => {
-			return ! name.includes( 'bot' ) && ! email.includes( 'bot' );
-		} );
-
-	return filterUniqBy( contributions, 'email' ) as Array< {
-		name: string;
-		email: string;
-	} >;
-};
-
-/**
  * Determines if a string is a commit hash or not.
  *
  * @param {string} ref - the ref to check
