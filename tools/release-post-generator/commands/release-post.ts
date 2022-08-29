@@ -15,6 +15,7 @@ import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
 import { Logger } from '../lib/logger';
+import { getEnvVar } from '../lib/environment';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
@@ -103,7 +104,7 @@ program
 
 				const response = await createWpComDraftPost(
 					'96396764',
-					'authToken',
+					getEnvVar( 'WCCOM_TOKEN', true ),
 					title,
 					html
 				);

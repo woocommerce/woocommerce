@@ -12,5 +12,5 @@ export const getEnvVar = ( varName: string, isRequired = false ) => {
 		);
 	}
 
-	return value;
+	return value || '';
 };

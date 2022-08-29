@@ -25,7 +25,7 @@ export const createWpComDraftPost = async (
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${ getEnvVar( 'WCCOM_TOKEN', true ) }`,
+				Authorization: `Bearer ${ authToken }`,
 			},
 			body: JSON.stringify( {
 				title: postTitle,
