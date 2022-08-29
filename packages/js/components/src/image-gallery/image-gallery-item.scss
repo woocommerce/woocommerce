@@ -10,7 +10,7 @@
     }
 
     .woocommerce-pill {
-        background: #007CBA;
+        background: var(--wp-admin-theme-color);
         border: 0;
         color: $white;
         padding-top: 2px;

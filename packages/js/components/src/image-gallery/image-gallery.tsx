@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Children, createElement, Fragment } from '@wordpress/element';
+import { Children, createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
