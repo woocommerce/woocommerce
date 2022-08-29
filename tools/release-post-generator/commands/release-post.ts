@@ -38,12 +38,12 @@ program
 			: semver.parse( currentVersion );
 
 		if ( ! options.previousVersion && previousVersion ) {
+			// e.g 6.8.0 -> 6.7.0
 			previousVersion.minor -= 1;
 			previousVersion.format();
 		}
 
 		if ( previousVersion && previousVersion.major ) {
-			// e.g 6.8.0 -> 6.7.0
 			const isOutputOnly = !! options.outputOnly;
 
 			if ( ! VERSION_VALIDATION_REGEX.test( previousVersion.raw ) ) {
