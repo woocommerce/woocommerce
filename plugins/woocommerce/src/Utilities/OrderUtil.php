@@ -113,7 +113,7 @@ final class OrderUtil {
 	 */
 	public static function get_order_admin_edit_url( int $order_id ) : string {
 		return self::custom_orders_table_usage_is_enabled() ?
-			wc_get_container()->get( PageController::class )->get_edit_link( $order_id ) :
+			wc_get_container()->get( PageController::class )->get_edit_url( $order_id ) :
 			esc_url( admin_url( 'post.php?post=' . absint( $order_id ) . '&action=edit' ) );
 	}
 
