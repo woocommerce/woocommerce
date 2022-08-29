@@ -46,6 +46,12 @@ export { default as tiktokForBusiness } from './library/tiktok';
 // Zapier
 export { default as woocommerceZapier } from './library/zapier';
 
+// Vimeo
+export { default as vimeo } from './library/vimeo';
+
+// Trustpilot
+export { default as trustpilotReviews } from './library/trustpilot';
+
 // Coupons
 export { default as woocommerceStoreCredit } from './library/currency-dollar';
 export { default as woocommerceFreeGiftCoupons } from './library/gift';
