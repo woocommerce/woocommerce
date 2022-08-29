@@ -23,6 +23,9 @@ export const Menu = ( { children, getMenuProps, isOpen }: MenuProps ) => {
 				'woocommerce-experimental-select-control__menu',
 				{
 					'is-open': isOpen,
+					'has-results': Array.isArray( children )
+						? children.length
+						: Boolean( children ),
 				}
 			) }
 		>

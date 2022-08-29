@@ -8,7 +8,7 @@
     border: 1px solid $studio-gray-5;
     border-radius: 3px;
 
-    &.is-open {
+    &.is-open.has-results {
         display: block;
     }
 }
