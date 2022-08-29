@@ -34,6 +34,7 @@ class InstalledExtensions {
 		$jetpack_crm   = self::get_jetpack_crm_extension_data();
 		$zapier        = self::get_zapier_extension_data();
 		$salesforce    = self::get_salesforce_extension_data();
+		$vimeo         = self::get_vimeo_extension_data();
 
 		if ( $automatewoo ) {
 			$data[] = $automatewoo;
@@ -89,6 +90,10 @@ class InstalledExtensions {
 
 		if ( $salesforce ) {
 			$data[] = $salesforce;
+		}
+
+		if ( $vimeo ) {
+			$data[] = $vimeo;
 		}
 
 		return $data;
@@ -498,6 +503,39 @@ class InstalledExtensions {
 			$data['settingsUrl'] = admin_url( 'admin.php?page=integration-with-salesforce' );
 			$data['docsUrl']     = 'https://woocommerce.com/document/salesforce-integration/';
 			$data['supportUrl']  = 'https://wpswings.com/submit-query/?utm_source=wpswings-salesforce-woo&utm_medium=woo-backend&utm_campaign=submit-query';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Vimeo extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_vimeo_extension_data() {
+		$slug = 'vimeo';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/vimeo.jpg';
+
+		if ( 'activated' === $data['status'] && class_exists( '\Tribe\Vimeo_WP\Vimeo\Vimeo_Auth' ) ) {
+			if ( method_exists( '\Tribe\Vimeo_WP\Vimeo\Vimeo_Auth', 'has_access_token' ) ) {
+				$vimeo_auth = new \Tribe\Vimeo_WP\Vimeo\Vimeo_Auth();
+				if ( $vimeo_auth->has_access_token() ) {
+					$data['status'] = 'configured';
+				}
+			} else {
+				$data['status'] = 'configured';
+			}
+
+			$data['settingsUrl'] = admin_url( 'options-general.php?page=vimeo_settings' );
+			$data['docsUrl']     = 'https://woocommerce.com/document/vimeo/';
+			$data['supportUrl']  = 'https://vimeo.com/help/contact';
 		}
 
 		return $data;
