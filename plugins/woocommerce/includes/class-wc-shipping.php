@@ -255,6 +255,8 @@ class WC_Shipping {
 			return array();
 		}
 
+		do_action( 'woocommerce_before_calculate_shipping', $packages );
+
 		// Calculate costs for passed packages.
 		foreach ( $packages as $package_key => $package ) {
 			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
