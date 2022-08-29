@@ -35,6 +35,7 @@ class InstalledExtensions {
 		$zapier        = self::get_zapier_extension_data();
 		$salesforce    = self::get_salesforce_extension_data();
 		$vimeo         = self::get_vimeo_extension_data();
+		$trustpilot    = self::get_trustpilot_extension_data();
 
 		if ( $automatewoo ) {
 			$data[] = $automatewoo;
@@ -94,6 +95,10 @@ class InstalledExtensions {
 
 		if ( $vimeo ) {
 			$data[] = $vimeo;
+		}
+
+		if ( $trustpilot ) {
+			$data[] = $trustpilot;
 		}
 
 		return $data;
@@ -536,6 +541,31 @@ class InstalledExtensions {
 			$data['settingsUrl'] = admin_url( 'options-general.php?page=vimeo_settings' );
 			$data['docsUrl']     = 'https://woocommerce.com/document/vimeo/';
 			$data['supportUrl']  = 'https://vimeo.com/help/contact';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Trustpilot extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_trustpilot_extension_data() {
+		$slug = 'trustpilot-reviews';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/trustpilot.png';
+
+		if ( 'activated' === $data['status'] ) {
+			$data['status'] = 'configured';
+			$data['settingsUrl'] = admin_url( 'admin.php?page=woocommerce-trustpilot-settings-page' );
+			$data['docsUrl']     = 'https://woocommerce.com/document/trustpilot-reviews/';
+			$data['supportUrl']  = 'https://support.trustpilot.com/hc/en-us/requests/new';
 		}
 
 		return $data;
