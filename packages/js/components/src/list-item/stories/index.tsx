@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import React from 'react';
 
 /**
  * Internal dependencies
  */
 import { ListItem } from '..';
+import { Sortable } from '../../sortable';
 
 export const Basic = () => {
 	return (
@@ -23,17 +24,11 @@ export const Basic = () => {
 
 export const Draggable = () => {
 	return (
-		<>
-			<ListItem onDragStart={ () => null } onDragEnd={ () => null }>
-				Item 1
-			</ListItem>
-			<ListItem onDragStart={ () => null } onDragEnd={ () => null }>
-				Item 2
-			</ListItem>
-			<ListItem onDragStart={ () => null } onDragEnd={ () => null }>
-				Item 3
-			</ListItem>
-		</>
+		<Sortable>
+			<ListItem>Item 1</ListItem>
+			<ListItem>Item 2</ListItem>
+			<ListItem>Item 3</ListItem>
+		</Sortable>
 	);
 };
 

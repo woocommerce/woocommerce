@@ -1,4 +1,4 @@
-SortableList
+Sortable
 ===
 
 This component provides a wrapper to allow dragging and sorting of items.
@@ -8,11 +8,11 @@ This component provides a wrapper to allow dragging and sorting of items.
 This component accepts any valid JSX elements as children.  Adding a `key` to elements will provide a way to later identify the order of these elements in callbacks.
 
 ```jsx
-<SortableList onOrderChange={ ( items ) => console.log( 'Items have been reordered:', items ) }>
+<Sortable onOrderChange={ ( items ) => console.log( 'Items have been reordered:', items ) }>
     <div key="item-1">List item 1</div>
     <div key="item-2">List item 2</div>
     <div key="item-3">List item 3</div>
-</SortableList>
+</Sortable>
 ```
 
 ### Props
