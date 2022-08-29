@@ -874,13 +874,11 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 		$cpt_data_store = $this->get_cpt_data_store_instance();
 		$post_order->set_id( $post->ID );
 		$cpt_data_store->read( $post_order );
-		$diff = $this->diff_post_data_with_cot( $post_order, $order );
-		if ( empty( $diff ) ) {
+		if ( ! $this->is_post_different_from_order( $order, $post_order ) ) {
 			return;
 		}
 
-		$this->log_diff( $diff );
-
+		// If we are here, it means that the order and post are different. We need to sync them.
 		if ( $order->get_date_modified()->getTimestamp() > get_post_modified_time( 'U', true, $post ) ) {
 			$this->backfill_post_record( $order );
 		} else {
@@ -909,48 +907,93 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	}
 
 	/**
-	 * Helper function to compute diff between post and cot data for an order.
+	 * Computes whether post has been updated after last order. Tries to do it as efficiently as possible.
 	 *
-	 * @param \WC_Order $post_order Order object read from posts.
-	 * @param \WC_Order $order Order object read from COT.
+	 * @param \WC_Order $order Order object.
+	 * @param \WC_Order $post_order Order object read from posts table.
 	 *
-	 * @return array Difference between post and COT data.
+	 * @return bool True if post is different than order.
 	 */
-	private function diff_post_data_with_cot( \WC_Order $post_order, \WC_Order $order ): array {
-		$diff      = ArrayUtil::deep_assoc_array_diff( $order->get_base_data(), $post_order->get_base_data(), false );
-		$meta_diff = $this->diff_post_meta_data_with_cot( $post_order, $order );
+	private function is_post_different_from_order( $order, $post_order ): bool {
+		$diff = ArrayUtil::deep_compare_array_diff( $order->get_base_data(), $post_order->get_base_data(), false );
+		if ( ! empty( $diff ) ) {
+			return true;
+		}
 
-		$diff['meta_data'] = $meta_diff;
+		$meta_diff = $this->get_diff_meta_data_between_orders( $order, $post_order );
+		if ( ! empty( $meta_diff ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Migrate meta data from post to order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param \WC_Order $post_order Order object read from posts table.
+	 *
+	 * @return array List of meta data that was migrated.
+	 */
+	private function migrate_meta_data_from_post_order( \WC_Order &$order, \WC_Order $post_order ) {
+		$diff = $this->get_diff_meta_data_between_orders( $order, $post_order, true );
+		$order->save_meta_data();
 		return $diff;
 	}
 
 	/**
-	 * Helper funciton to compute diff between metadata of post and cot data for an order.
+	 * Helper function to compute diff between metadata of post and cot data for an order.
 	 *
-	 * @param \WC_Order $post_order Order object read from posts.
-	 * @param \WC_Order $order Order object read from COT.
+	 * Also provides an option to sync the metadata as well, since we are already computing the diff.
+	 *
+	 * @param \WC_Order $order1 Order object read from posts.
+	 * @param \WC_Order $order2 Order object read from COT.
+	 * @param bool      $sync   Whether to also sync the meta data.
 	 *
 	 * @return array Difference between post and COT meta data.
 	 */
-	private function diff_post_meta_data_with_cot( \WC_Order $post_order, \WC_Order $order ): array {
-		$order_meta_data        = ArrayUtil::select( $order->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-		$post_meta_data         = ArrayUtil::select( $post_order->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-		$order_meta_data_by_key = ArrayUtil::select_array_to_assoc( $order_meta_data, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
-		$post_meta_data_by_key  = ArrayUtil::select_array_to_assoc( $post_meta_data, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
+	private function get_diff_meta_data_between_orders( \WC_Order &$order1, \WC_Order $order2, $sync = false ): array {
+		$order1_meta        = ArrayUtil::select( $order1->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$order2_meta        = ArrayUtil::select( $order2->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$order1_meta_by_key = ArrayUtil::select_array_to_assoc( $order1_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
+		$order2_meta_by_key = ArrayUtil::select_array_to_assoc( $order2_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
 
 		$diff = array();
-		foreach ( $order_meta_data_by_key as $key => $value ) {
-			$order_values = ArrayUtil::select( $value, 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
-			if ( ! array_key_exists( $key, $post_meta_data_by_key ) ) {
-				$diff[ $key ] = $order_values;
+		foreach ( $order1_meta_by_key as $key => $value ) {
+			$order1_values = ArrayUtil::select( $value, 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
+			if ( ! array_key_exists( $key, $order2_meta_by_key ) ) {
+				$sync && $order1->delete_meta_data( $key );
+				$diff[ $key ] = $order1_values;
+				unset( $order2_meta_by_key[ $key ] );
 				continue;
 			}
 
-			$post_order_values = ArrayUtil::select( $post_meta_data_by_key[ $key ], 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
-			$new_diff          = ArrayUtil::deep_assoc_array_diff( $order_values, $post_order_values );
-			if ( ! empty( $diff ) ) {
+			$order2_values = ArrayUtil::select( $order2_meta_by_key[ $key ], 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
+			$new_diff      = ArrayUtil::deep_assoc_array_diff( $order1_values, $order2_values );
+			if ( ! empty( $new_diff ) ) {
+				if ( count( $order2_values ) > 1 ) {
+					$sync && $order1->delete_meta_data( $key );
+					foreach ( $order2_values as $post_order_value ) {
+						$sync && $order1->add_meta_data( $key, $post_order_value, false );
+					}
+				} else {
+					$sync && $order1->update_meta_data( $key, $order2_values[0] );
+				}
 				$diff[ $key ] = $new_diff;
+				unset( $order2_meta_by_key[ $key ] );
 			}
+		}
+
+		foreach ( $order2_meta_by_key as $key => $value ) {
+			if ( array_key_exists( $key, $order1_meta_by_key ) ) {
+				continue;
+			}
+			$order2_values = ArrayUtil::select( $value, 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
+			foreach ( $order2_values as $meta_value ) {
+				$sync && $order1->add_meta_data( $key, $meta_value );
+			}
+			$diff[ $key ] = $order2_values;
 		}
 		return $diff;
 	}
@@ -975,9 +1018,13 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 	 *
 	 * @return void
 	 */
-	private function migrate_post_record( \WC_Order &$order, \WC_Order $post_order ) {
-		$this->persist_save( $post_order, true );
-		$order = $post_order;
+	private function migrate_post_record( \WC_Order &$order, \WC_Order $post_order ): void {
+		$this->migrate_meta_data_from_post_order( $order, $post_order );
+		$post_order_base_data = $post_order->get_base_data();
+		foreach ( $post_order_base_data as $key => $value ) {
+			$this->set_order_prop( $order, $key, $value );
+		}
+		$this->persist_save( $order, true );
 	}
 
 	/**
@@ -992,21 +1039,28 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 				if ( ! isset( $prop_details['name'] ) ) {
 					continue;
 				}
-
-				$prop_value = $order_data->{$prop_details['name']};
-
-				if ( 'date' === $prop_details['type'] ) {
-					$prop_value = $this->string_to_timestamp( $prop_value );
-				}
-
-				$prop_setter_function_name = "set_{$prop_details['name']}";
-				if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
-					$order->{$prop_setter_function_name}( $prop_value );
-				} elseif ( is_callable( array( $this, $prop_setter_function_name ) ) ) {
-					$this->{$prop_setter_function_name}( $order, $prop_value, false );
-				}
+				$this->set_order_prop( $order, $prop_details['name'], $order_data->{$prop_details['name']} );
 			}
 		}
+	}
+
+	/**
+	 * Set order prop if a setter exists in either the order object or in the data store.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param string    $prop_name Property name.
+	 * @param mixed     $prop_value Property value.
+	 *
+	 * @return bool True if the property was set, false otherwise.
+	 */
+	private function set_order_prop( \WC_Order $order, string $prop_name, $prop_value ) {
+		$prop_setter_function_name = "set_{$prop_name}";
+		if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
+			return $order->{$prop_setter_function_name}( $prop_value );
+		} elseif ( is_callable( array( $this, $prop_setter_function_name ) ) ) {
+			return $this->{$prop_setter_function_name}( $order, $prop_value, false );
+		}
+		return false;
 	}
 
 	/**
@@ -1616,6 +1670,13 @@ FROM $order_meta_table
 		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
+	/**
+	 * Proxy to udpating order meta. Here for backward compatibility reasons.
+	 *
+	 * @param \WC_Order $order Order object.
+	 *
+	 * @return void
+	 */
 	protected function update_post_meta( &$order ) {
 		$this->update_order_meta( $order );
 	}
@@ -2020,14 +2081,8 @@ CREATE TABLE $meta_table (
 	 * @return array List of keys.
 	 */
 	protected function get_internal_data_store_keys() {
-		// XXX: Finalize design -- will these be turned into props?
-		return array(
-			'order_stock_reduced',
-			'download_permissions_granted',
-			'new_order_email_sent',
-			'recorded_sales',
-			'recorded_coupon_usage_counts',
-		);
+		// Add keys here that don't have getter/setter in the CPT store, but are internal anyway.
+		return array();
 	}
 
 }

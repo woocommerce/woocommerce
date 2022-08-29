@@ -921,6 +921,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->enable_cot_sync();
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
+		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
+		$order->add_meta_data( 'custom_meta_2', 'custom_value_2' );
+		$order->add_meta_data( 'custom_meta_3', 'custom_value_3' );
+		$order->save();
 		$post_object = get_post( $order->get_id() );
 		assert( get_post_type( $post_object->ID ) === 'shop_order' );
 
@@ -929,11 +933,53 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		update_post_meta( $post_object->ID, '_billing_first_name', 'John Doe Updated' ); // address table.
 		update_post_meta( $post_object->ID, '_created_via', 'Unit tests Updated' ); // op data table.
 
+		add_post_meta( $post_object->ID, 'custom_meta_4', 'custom_value_4' ); // new meta add.
+		update_post_meta( $post_object->ID, 'custom_meta_1', 'custom_value_1_updated' ); // existing meta update.
+		delete_post_meta( $post_object->ID, 'custom_meta_2' ); // existing meta delete.
+
 		// Read a refreshed order.
-		$refreshed_order = wc_get_order( $order->get_id() );
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
 		$this->assertEquals( $order_total + 100, $refreshed_order->get_total() );
 		$this->assertEquals( 'John Doe Updated', $refreshed_order->get_billing_first_name() );
 		$this->assertEquals( 'Unit tests Updated', $refreshed_order->get_created_via() );
+		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
+		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
+		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
+	}
+
+	/**
+	 * Meta data should be migrated from post order to cot order.
+	 *
+	 * @return void
+	 */
+	public function test_migrate_meta_data_from_post_order() {
+		$order1 = new WC_Order();
+		$order1->add_meta_data( 'common_meta_key_1', 'common_meta_value_1' );
+		$order1->add_meta_data( 'common_meta_key_2', 'common_meta_value_2' );
+		$order1->add_meta_data( 'common_meta_key_3', 'common_meta_value_3' );
+		$order1->add_meta_data( 'order1_meta_key_1', 'order1_meta_value_1' );
+		$order1->save();
+
+		$order2 = new WC_Order();
+		$order2->add_meta_data( 'common_meta_key_1', 'common_meta_value_1' );
+		$order2->add_meta_data( 'common_meta_key_2', 'common_meta_value_2_updated' );
+		$order2->add_meta_data( 'order2_meta_key_1', 'order2_meta_key_1' );
+
+		$diff_call_closure = function( $order1, $order2 ) {
+			return $this->migrate_meta_data_from_post_order( $order1, $order2 );
+		};
+
+		$diff = $diff_call_closure->call( $this->sut, $order1, $order2 );
+		$this->assertFalse( empty( $diff ) );
+
+		$this->assertEquals( 'common_meta_value_1', $order1->get_meta( 'common_meta_key_1' ) );
+		$this->assertEquals( 'common_meta_value_2_updated', $order1->get_meta( 'common_meta_key_2' ) );
+		$this->assertEquals( '', $order1->get_meta( 'common_meta_key_3' ) );
+		$this->assertEquals( '', $order1->get_meta( 'order1_meta_key_1' ) );
+		$this->assertEquals( 'order2_meta_key_1', $order1->get_meta( 'order2_meta_key_1' ) );
 	}
 
 	/**

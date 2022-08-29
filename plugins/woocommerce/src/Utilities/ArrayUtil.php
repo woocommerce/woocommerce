@@ -205,6 +205,19 @@ class ArrayUtil {
 	}
 
 	/**
+	 * Returns whether two assoc array are same. The comparison is done recursively by keys, and the functions returns on first difference found.
+	 *
+	 * @param array $array1 First array to compare.
+	 * @param array $array2 Second array to compare.
+	 * @param bool  $strict Whether to use strict comparison.
+	 *
+	 * @return bool Whether the arrays are same.
+	 */
+	public static function deep_compare_array_diff( array $array1, array $array2, bool $strict = true ) {
+		return self::deep_compute_or_compare_array_diff( $array1, $array2, true, $strict );
+	}
+
+	/**
 	 * Computes difference between two assoc arrays recursively. Similar to PHP's native assoc_array_diff, but also supports nested arrays.
 	 *
 	 * @param array $array1 First array.
@@ -214,23 +227,49 @@ class ArrayUtil {
 	 * @return array The difference between the two arrays.
 	 */
 	public static function deep_assoc_array_diff( array $array1, array $array2, bool $strict = true ): array {
+		return self::deep_compute_or_compare_array_diff( $array1, $array2, false, $strict );
+	}
+
+	/**
+	 * Helper method to compare to compute difference between two arrays. Comparison is done recursively.
+	 *
+	 * @param array $array1 First array.
+	 * @param array $array2 Second array.
+	 * @param bool  $compare Whether to compare the arrays. If true, then function will return false on first difference, in order to be slightly more efficient.
+	 * @param bool  $strict Whether to do string comparison.
+	 *
+	 * @return array|bool The difference between the two arrays, or if array are same, depending upon $compare param.
+	 */
+	private static function deep_compute_or_compare_array_diff( array $array1, array $array2, bool $compare, bool $strict = true ) {
 		$diff = array();
 		foreach ( $array1 as $key => $value ) {
 			if ( is_array( $value ) ) {
 				if ( ! array_key_exists( $key, $array2 ) || ! is_array( $array2[ $key ] ) ) {
+					if ( $compare ) {
+						return true;
+					}
 					$diff[ $key ] = $value;
 				}
 				$new_diff = self::deep_assoc_array_diff( $value, $array2[ $key ], $strict );
 				if ( ! empty( $new_diff ) ) {
+					if ( $compare ) {
+						return true;
+					}
 					$diff[ $key ] = $new_diff;
 				}
 			} elseif ( $strict ) {
 				if ( ! array_key_exists( $key, $array2 ) || $value !== $array2[ $key ] ) {
+					if ( $compare ) {
+						return true;
+					}
 					$diff[ $key ] = $value;
 				}
 			} else {
 				// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison -- Intentional when $strict is false.
 				if ( ! array_key_exists( $key, $array2 ) || $value != $array2[ $key ] ) {
+					if ( $compare ) {
+						return true;
+					}
 					$diff[ $key ] = $value;
 				}
 			}
