@@ -14,6 +14,7 @@ import { mkdir, rm } from 'fs/promises';
  * Internal dependencies
  */
 import { startWPEnv, stopWPEnv } from './utils';
+
 /**
  * Check if a string is a valid url.
  *
@@ -53,6 +54,14 @@ export const cloneRepo = async ( repoPath: string ) => {
 	return folderPath;
 };
 
+/**
+ * Do a minimal sparse checkout of a github repo.
+ *
+ * @param {string}        githubRepoUrl      -     the URL to the repo to checkout.
+ * @param {string}        path               - the path to checkout to.
+ * @param {Array<string>} filesOrDirectories - the files or directories to checkout.
+ * @return {Promise<string>}  the path to the cloned repo.
+ */
 export const sparseCheckoutRepo = async (
 	githubRepoUrl: string,
 	path: string,
@@ -73,6 +82,13 @@ export const sparseCheckoutRepo = async (
 	return folderPath;
 };
 
+/**
+ * checkoutRef - checkout a ref in a git repo.
+ *
+ * @param {string} pathToRepo - the path to the repo to checkout a ref from.
+ * @param {string} ref        - the ref to checkout.
+ * @return {Response<string>} - the simple-git response.
+ */
 export const checkoutRef = ( pathToRepo: string, ref: string ) => {
 	const git = simpleGit( { baseDir: pathToRepo } );
 	return git.checkout( ref );
