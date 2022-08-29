@@ -6,9 +6,11 @@
 		&::-webkit-slider-thumb {
 			pointer-events: none;
 		}
+
 		&::-moz-range-thumb {
 			pointer-events: none;
 		}
+
 		&::-ms-thumb {
 			pointer-events: none;
 		}
@@ -23,11 +25,6 @@
 	}
 }
 
-.components-base-control__label {
-	text-transform: uppercase;
-	@include font-size(small);
-}
-
 .wc-block-price-slider {
 	.components-placeholder__instructions {
 		border-bottom: 1px solid #e0e2e6;
@@ -35,13 +32,16 @@
 		padding-bottom: 1em;
 		margin-bottom: 2em;
 	}
+
 	.components-placeholder__label svg {
 		fill: currentColor;
 		margin-right: 1ch;
 	}
+
 	.components-placeholder__fieldset {
 		display: block; /* Disable flex box */
 	}
+
 	.wc-block-price-slider__add-product-button {
 		margin: 0 0 1em;
 		vertical-align: middle;
@@ -54,6 +54,7 @@
 			vertical-align: middle;
 		}
 	}
+
 	.wc-block-price-slider__read_more_button {
 		display: block;
 		margin-bottom: 1em;
