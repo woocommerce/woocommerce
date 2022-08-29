@@ -24,7 +24,7 @@ class InstalledExtensions {
 		$aw_referral   = self::get_aw_referral_extension_data();
 		$aw_birthdays  = self::get_aw_birthdays_extension_data();
 		$mailchimp     = self::get_mailchimp_extension_data();
-		$facebook    = self::get_facebook_extension_data();
+		$facebook      = self::get_facebook_extension_data();
 		$pinterest     = self::get_pinterest_extension_data();
 		$google        = self::get_google_extension_data();
 		$amazon_ebay   = self::get_amazon_ebay_extension_data();
