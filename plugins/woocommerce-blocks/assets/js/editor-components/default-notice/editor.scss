@@ -4,8 +4,15 @@
 	.components-notice__dismiss {
 		min-width: 24px;
 	}
+	.components-notice__content {
+		margin: 4px 0;
+	}
 	svg {
 		width: 16px;
 		height: 16px;
 	}
+}
+
+.wc-blocks-legacy-page-notice {
+	margin: 0;
 }
