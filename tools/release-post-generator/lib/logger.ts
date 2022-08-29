@@ -3,6 +3,7 @@
  */
 import ora, { Ora } from 'ora';
 import chalk from 'chalk';
+import { getEnvVar } from './environment';
 
 const { log, error, warn } = console;
 export class Logger {
@@ -12,7 +13,7 @@ export class Logger {
 			error: 3,
 			warn: 2,
 			silent: 1,
-		}[ process.env.LOGGER_LEVEL || 'warn' ] as number;
+		}[ getEnvVar( 'LOGGER_LEVEL' ) || 'warn' ] as number;
 	}
 
 	static error( message: string ) {

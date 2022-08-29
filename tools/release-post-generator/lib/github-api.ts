@@ -3,6 +3,7 @@
  */
 import { Octokit } from '@octokit/rest';
 import shuffle from 'lodash.shuffle';
+import { getEnvVar } from './environment';
 
 export type ContributorData = {
 	totalCommits: number;
@@ -25,10 +26,6 @@ const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 	} );
 };
 
-const octokit = new Octokit( {
-	auth: process.env.GITHUB_ACCESS_TOKEN,
-} );
-
 const PAGE_SIZE = 100;
 
 export const getContributorData = async (
@@ -37,6 +34,10 @@ export const getContributorData = async (
 	baseRef: string,
 	headRef: string
 ) => {
+	const octokit = new Octokit( {
+		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
+	} );
+
 	const {
 		data: { total_commits, commits },
 	} = await octokit.repos.compareCommitsWithBasehead( {

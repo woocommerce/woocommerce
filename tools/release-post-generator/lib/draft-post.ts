@@ -2,6 +2,7 @@
  * External dependencies
  */
 import fetch from 'node-fetch';
+import { getEnvVar } from './environment';
 
 /**
  * Create a draft of a post on wordpress.com
@@ -24,7 +25,7 @@ export const createWpComDraftPost = async (
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${ authToken }`,
+				Authorization: `Bearer ${ getEnvVar( 'WCCOM_TOKEN', true ) }`,
 			},
 			body: JSON.stringify( {
 				title: postTitle,
