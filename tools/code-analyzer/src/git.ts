@@ -84,7 +84,7 @@ export const checkoutRef = ( pathToRepo: string, ref: string ) => {
  * @param {string} baseDir - baseDir that the repo is in
  * @param {string} hashA   - either a git commit hash or a git branch
  * @param {string} hashB   - either a git commit hash or a git branch
- * @return {Promise<string>} - diff of the changfiles between the 2 hashes
+ * @return {Promise<string>} - diff of the changes between the 2 hashes
  */
 export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 	const git = simpleGit( { baseDir } );
