@@ -32,7 +32,7 @@ class WC_Mobile_Messaging_Handler {
 			$last_mobile_used = self::get_closer_mobile_usage_date();
 
 			$used_app_in_last_month = $last_mobile_used->diff( $now )->days <= self::OPEN_ORDER_INTERVAL_DAYS;
-			$has_jetpack            = $blog_id !== null;
+			$has_jetpack            = null !== $blog_id;
 
 			if ( $used_app_in_last_month && $has_jetpack ) {
 				if ( self::is_store_in_person_payment_eligible() ) {
