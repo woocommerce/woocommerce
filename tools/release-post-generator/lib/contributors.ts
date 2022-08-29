@@ -9,7 +9,7 @@ import semver from 'semver';
 /**
  * Internal dependencies
  */
-import { getContributors } from './github-api';
+import { ContributorData, getContributorData } from './github-api';
 
 const OTHER_WATCHED_PACKAGES = [
 	{
@@ -59,14 +59,14 @@ export const generateContributors = async (
 	const currentRequire = currentComposer.require;
 	const previousRequire = previousComposer.require;
 
-	const coreContributors = await getContributors(
+	const coreContributors = await getContributorData(
 		'woocommerce',
 		'woocommerce',
 		previousVersion,
 		currentVersion
 	);
 
-	const dependencyContributors: Record< string, unknown[] > = {};
+	const dependencyContributors: Record< string, ContributorData > = {};
 
 	for ( const pkg of OTHER_WATCHED_PACKAGES ) {
 		const currentPkgVersion = currentRequire[ pkg.packagist ];
@@ -76,12 +76,13 @@ export const generateContributors = async (
 			previousPkgVersion &&
 			semver.gt( currentPkgVersion, previousPkgVersion )
 		) {
-			dependencyContributors[ pkg.displayName ] = await getContributors(
-				pkg.org,
-				pkg.repo,
-				`${ pkg.versionPrefix }${ previousPkgVersion }`,
-				`${ pkg.versionPrefix }${ currentPkgVersion }`
-			);
+			dependencyContributors[ pkg.displayName ] =
+				await getContributorData(
+					pkg.org,
+					pkg.repo,
+					`${ pkg.versionPrefix }${ previousPkgVersion }`,
+					`${ pkg.versionPrefix }${ currentPkgVersion }`
+				);
 		}
 	}
 

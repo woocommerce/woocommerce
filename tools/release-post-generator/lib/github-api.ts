@@ -3,6 +3,15 @@
  */
 import { Octokit } from '@octokit/rest';
 
+export type ContributorData = {
+	totalCommits: number;
+	contributors: Record< string, unknown >[];
+	org: string;
+	repo: string;
+	baseRef: string;
+	headRef: string;
+};
+
 const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 	const seen = new Set();
 	return arr.filter( ( item ) => {
@@ -15,14 +24,13 @@ const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 	} );
 };
 
-// Make auth optional since we're often accessing public data
 const octokit = new Octokit( {
-	auth: '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',
+	auth: '',
 } );
 
 const PAGE_SIZE = 100;
 
-export const getContributors = async (
+export const getContributorData = async (
 	orgName: string,
 	repoName: string,
 	baseRef: string,
@@ -84,5 +92,5 @@ export const getContributors = async (
 		repo: repoName,
 		baseRef,
 		headRef,
-	};
+	} as ContributorData;
 };
