@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
 import { takeScreenshotFor } from '@woocommerce/e2e-environment';
 
 /**
@@ -14,11 +15,7 @@ import { HelpMenu } from '../../elements/HelpMenu';
 import { WcSettings } from '../../pages/WcSettings';
 import { resetWooCommerceState, unhideTaskList } from '../../fixtures';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
-
-const testAdminHomescreenTasklist = () => {
+export const testAdminHomescreenTasklist = () => {
 	describe( 'Homescreen task list', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -73,5 +70,3 @@ const testAdminHomescreenTasklist = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminHomescreenTasklist };

@@ -134,6 +134,7 @@ export default class Analyzer extends Command {
 						cwd: pluginPath,
 					}
 				);
+
 				CliUx.ux.action.stop();
 			};
 
