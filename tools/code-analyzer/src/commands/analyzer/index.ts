@@ -3,7 +3,7 @@
  */
 import { CliUx, Command, Flags } from '@oclif/core';
 import { join } from 'path';
-import { readFileSync, rmSync } from 'fs';
+import { rmSync } from 'fs';
 
 /**
  * Internal dependencies

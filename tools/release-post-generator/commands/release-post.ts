@@ -2,9 +2,15 @@
  * External dependencies
  */
 import Analyzer from 'code-analyzer/src/commands/analyzer';
+import {
+	checkoutRef,
+	cloneRepo,
+	getCommitsInRange,
+	sparseCheckoutRepo,
+} from 'code-analyzer/src/git';
 import semver from 'semver';
 import { promises } from 'fs';
-import { writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -13,9 +19,27 @@ import { program } from '../program';
 import { renderTemplate } from '../lib/render-template';
 import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
+import { join } from 'path';
+import { generateContributors } from '../lib/contributors';
+import { getContributors } from '../lib/github-api';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
+
+const OTHER_WATCHED_PACKAGES = [
+	{
+		packagist: 'woocommerce/woocommerce-blocks',
+		org: 'woocommerce',
+		repo: 'woocommerce-blocks',
+		versionPrefix: 'v',
+	},
+	{
+		packagist: 'woocommerce/action-scheduler',
+		org: 'woocommerce',
+		repo: 'action-scheduler',
+		versionPrefix: '',
+	},
+];
 
 // Define the release post command
 program
@@ -62,7 +86,7 @@ program
 				'-s',
 				'https://github.com/woocommerce/woocommerce.git',
 				'-b',
-				'trunk',
+				previousVersion.toString(),
 			] );
 
 			const changes = JSON.parse(
@@ -75,20 +99,24 @@ program
 			const changeset = processChanges( changes );
 			const title = `WooCommerce ${ currentVersion } Released`;
 
-			const html = await renderTemplate( 'release.ejs.html', {
-				changes: changeset,
+			const contributors = await generateContributors(
+				currentVersion,
+				previousVersion.toString()
+			);
+
+			const html = await renderTemplate( 'release.ejs', {
+				contributors,
 				title,
+				changes: changeset,
+				displayVersion: currentVersion,
 			} );
 
 			if ( isOutputOnly ) {
-				console.log( 'Outputting only, generating HTML output' );
-
 				await writeFile( 'changes.html', html );
 				console.log(
-					`File generated at ${ process.cwd() }/changes.html`
+					`Output written to ${ process.cwd() }/changes.html`
 				);
 			} else {
-				console.log( 'Creating draft post...' );
 				const response = await createWpComDraftPost(
 					'96396764',
 					'authToken',

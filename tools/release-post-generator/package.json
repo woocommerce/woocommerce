@@ -3,9 +3,7 @@
 	"version": "0.0.1",
 	"description": "Automate release post generation for Wordpress plugins",
 	"main": " ",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
+	"scripts": {},
 	"author": "",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
@@ -14,10 +12,11 @@
 	},
 	"dependencies": {
 		"@commander-js/extra-typings": "^0.1.0",
+		"@octokit/rest": "^19.0.4",
 		"code-analyzer": "workspace:*",
 		"commander": "9.4.0",
 		"ejs": "^3.1.8",
-		"node-fetch": "^3.2.6",
+		"node-fetch": "^2.6.7",
 		"semver": "^7.3.2",
 		"ts-node": "^10.9.1"
 	}

@@ -1,3 +1,7 @@
+<!-- wp:heading -->
+<h1>WooCommerce 6.8.0 Released</h1>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph -->
 <p>We are pleased to announce the release of WooCommerce 6.8.0. This release should be backwards compatible with the previous version.</p>
 <!-- /wp:paragraph -->
@@ -19,7 +23,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:heading -->
-<h2 id="what-s-new-in-%s">What's new in 6.8.0?</h2>
+<h2 id="what-s-new-in-6.8.0">What's new in 6.8.0?</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -39,59 +43,15 @@
 
 <!-- if there are hook changes -->
 
-  <!-- wp:table -->
-  <figure class="wp-block-table">
-    <table>
-      <tbody>
-        <tr>
-          <th><strong>Filter</strong></th>
-          <th><strong>Description</strong></th>
-        </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/src/Caching/ObjectCache.php</td>
-            <td>**wc_object_cache_get_engine** introduced in 6.8.0</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/src/Internal/BatchProcessing/BatchProcessingController.php</td>
-            <td>**woocommerce_get_batch_processor** introduced in 6.8.0</td>
-          </tr>
-        
-        <!-- end each hook change-->
-      </tbody>
-    </table>
-  </figure>
-  <!-- /wp:table -->
+  <!-- wp:paragraph -->
+  <p>This release doesn\'t add any actions or filters.</p>
+  <!-- /wp:paragraph -->
 
 
 <!-- wp:heading -->
 <h2 id="database-changes">Database Changes</h2>
 <!-- /wp:heading -->
 
-
-  <!-- wp:heading -->
-  <h3 id="schema-updates">Schema Updates</h3>
-  <!-- /wp:heading -->
-
-  <!-- wp:table -->
-  <figure class="wp-block-table">
-    <table>
-      <tbody>
-        <tr>
-          <th><strong>Class Name</strong></th>
-          <th><strong>Code Ref</strong></th>
-        </tr>
-        
-          <tr>
-            <td>OrdersTableDataStore</td>
-            <td>Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore-&gt;get_database_schema</td>
-          </tr>
-          
-      </tbody>
-    </table>
-  </figure>
-  <!-- /wp:table -->
 
 
 
@@ -105,49 +65,9 @@
 <!-- /wp:heading -->
 
 
-  <!-- wp:table -->
-  <figure class="wp-block-table">
-    <table>
-      <thead>
-        <th>
-          <strong>Template</strong>
-        </th>
-      </thead>
-      <tbody>
-        
-        <!-- for each template change (template / description) -->
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/cart/cart.php</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/cart/shipping-calculator.php</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/checkout/form-coupon.php</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/content-widget-price-filter.php</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/loop/no-products-found.php</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/myaccount/form-login.php</td>
-          </tr>
-        
-          <tr>
-            <td>/plugins/woocommerce/templates/single-product/add-to-cart/grouped.php</td>
-          </tr>
-        
-      </tbody>
-    </table>
-  </figure>
+  <!-- wp:paragraph -->
+  <p>There are no template changes in this release.</p>
+  <!-- /wp:paragraph -->
 
 
 <!-- wp:heading -->
@@ -157,5 +77,1471 @@
 <p>There are no deprecations in this release.</p>
 <!-- /wp:paragraph -->
 
-<!-- TODO CONTRIBUTORS TEMPLATE -->
+
+
+  
+  
+  
+    <h2>WooCommerce-Core</h2>
+  
+  <ul>
+    
+    
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/ObliviousHarmony" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/6451942?v=4" alt=""/>
+        </a>
+        <figcaption>ObliviousHarmony</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/jonathansadowski" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/363749?v=4" alt=""/>
+        </a>
+        <figcaption>jonathansadowski</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/moon0326" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/4723145?v=4" alt=""/>
+        </a>
+        <figcaption>moon0326</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/psealock" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1922453?v=4" alt=""/>
+        </a>
+        <figcaption>psealock</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+      
+        <!-- wp:columns -->
+        <div class="wp-block-columns">
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/chihsuan" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/4344253?v=4" alt=""/>
+        </a>
+        <figcaption>chihsuan</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/MrJnrman" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/20617038?v=4" alt=""/>
+        </a>
+        <figcaption>MrJnrman</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/vedanshujain" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/7571618?v=4" alt=""/>
+        </a>
+        <figcaption>vedanshujain</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/iamdharmesh" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/10613171?v=4" alt=""/>
+        </a>
+        <figcaption>iamdharmesh</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/saboanca" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/26661520?v=4" alt=""/>
+        </a>
+        <figcaption>saboanca</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/leskam" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/33346738?v=4" alt=""/>
+        </a>
+        <figcaption>leskam</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/masteradhoc" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/6242098?v=4" alt=""/>
+        </a>
+        <figcaption>masteradhoc</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/gigitux" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/4463174?v=4" alt=""/>
+        </a>
+        <figcaption>gigitux</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/Konamiman" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/937723?v=4" alt=""/>
+        </a>
+        <figcaption>Konamiman</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/frontdevde" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1562646?v=4" alt=""/>
+        </a>
+        <figcaption>frontdevde</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/davefx" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/292309?v=4" alt=""/>
+        </a>
+        <figcaption>davefx</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/MathiasReker" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/26626066?v=4" alt=""/>
+        </a>
+        <figcaption>MathiasReker</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/Grezvany13" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1245173?v=4" alt=""/>
+        </a>
+        <figcaption>Grezvany13</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/superdav42" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1534605?v=4" alt=""/>
+        </a>
+        <figcaption>superdav42</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/ilyasfoo" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/3747241?v=4" alt=""/>
+        </a>
+        <figcaption>ilyasfoo</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/joshuatf" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/10561050?v=4" alt=""/>
+        </a>
+        <figcaption>joshuatf</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/nigeljamesstevenson" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/105309450?v=4" alt=""/>
+        </a>
+        <figcaption>nigeljamesstevenson</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/rjchow" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/27843274?v=4" alt=""/>
+        </a>
+        <figcaption>rjchow</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/Dekadinious" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/37292177?v=4" alt=""/>
+        </a>
+        <figcaption>Dekadinious</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/pcarrier" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/8641?v=4" alt=""/>
+        </a>
+        <figcaption>pcarrier</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/roykho" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/2132595?v=4" alt=""/>
+        </a>
+        <figcaption>roykho</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/tomalec" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/17435?v=4" alt=""/>
+        </a>
+        <figcaption>tomalec</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/jorgeatorres" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/184724?v=4" alt=""/>
+        </a>
+        <figcaption>jorgeatorres</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/tammullen" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/24649833?v=4" alt=""/>
+        </a>
+        <figcaption>tammullen</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/AnnaMag" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/13561163?v=4" alt=""/>
+        </a>
+        <figcaption>AnnaMag</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/mhodge" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1082978?v=4" alt=""/>
+        </a>
+        <figcaption>mhodge</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/coreymckrill" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/916023?v=4" alt=""/>
+        </a>
+        <figcaption>coreymckrill</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/joelclimbsthings" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/444632?v=4" alt=""/>
+        </a>
+        <figcaption>joelclimbsthings</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/LuigiPulcini" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/7178054?v=4" alt=""/>
+        </a>
+        <figcaption>LuigiPulcini</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/noonanwebgroup" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/21362191?v=4" alt=""/>
+        </a>
+        <figcaption>noonanwebgroup</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/octaedro" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1314156?v=4" alt=""/>
+        </a>
+        <figcaption>octaedro</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/puntope" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/5908855?v=4" alt=""/>
+        </a>
+        <figcaption>puntope</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/louwie17" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/2240960?v=4" alt=""/>
+        </a>
+        <figcaption>louwie17</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/rodelgc" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/4509348?v=4" alt=""/>
+        </a>
+        <figcaption>rodelgc</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/lanej0" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/80276?v=4" alt=""/>
+        </a>
+        <figcaption>lanej0</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/rawdreeg" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/4209011?v=4" alt=""/>
+        </a>
+        <figcaption>rawdreeg</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/jacob-sewell" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/890809?v=4" alt=""/>
+        </a>
+        <figcaption>jacob-sewell</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/samueljseay" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1281828?v=4" alt=""/>
+        </a>
+        <figcaption>samueljseay</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/aezazs-multidots" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/72435501?v=4" alt=""/>
+        </a>
+        <figcaption>aezazs-multidots</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/rcstr" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/532402?v=4" alt=""/>
+        </a>
+        <figcaption>rcstr</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/nielslange" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/3323310?v=4" alt=""/>
+        </a>
+        <figcaption>nielslange</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/adrianduffell" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/9312929?v=4" alt=""/>
+        </a>
+        <figcaption>adrianduffell</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/thilinah" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1531403?v=4" alt=""/>
+        </a>
+        <figcaption>thilinah</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+      
+  </ul>  
+
+  
+  
+  
+  <ul>
+    
+    
+      
+  </ul>  
+
+  
+  
+  
+    <h2>WooCommerce-Blocks</h2>
+  
+  <ul>
+    
+    
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/opr" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/5656702?v=4" alt=""/>
+        </a>
+        <figcaption>opr</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/senadir" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/6165348?v=4" alt=""/>
+        </a>
+        <figcaption>senadir</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/gigitux" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/4463174?v=4" alt=""/>
+        </a>
+        <figcaption>gigitux</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/sunyatasattva" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1847066?v=4" alt=""/>
+        </a>
+        <figcaption>sunyatasattva</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+      
+        <!-- wp:columns -->
+        <div class="wp-block-columns">
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/Aljullu" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/3616980?v=4" alt=""/>
+        </a>
+        <figcaption>Aljullu</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/dinhtungdu" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/5423135?v=4" alt=""/>
+        </a>
+        <figcaption>dinhtungdu</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/alexflorisca" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/3966773?v=4" alt=""/>
+        </a>
+        <figcaption>alexflorisca</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/nielslange" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/3323310?v=4" alt=""/>
+        </a>
+        <figcaption>nielslange</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/frontdevde" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1562646?v=4" alt=""/>
+        </a>
+        <figcaption>frontdevde</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/tomasztunik" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/112270?v=4" alt=""/>
+        </a>
+        <figcaption>tomasztunik</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/wavvves" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/17236129?v=4" alt=""/>
+        </a>
+        <figcaption>wavvves</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/danieldudzic" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/905781?v=4" alt=""/>
+        </a>
+        <figcaption>danieldudzic</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/ralucaStan" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/1628454?v=4" alt=""/>
+        </a>
+        <figcaption>ralucaStan</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/ovidiul" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/537751?v=4" alt=""/>
+        </a>
+        <figcaption>ovidiul</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/masteradhoc" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/6242098?v=4" alt=""/>
+        </a>
+        <figcaption>masteradhoc</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/tarunvijwani" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/11503784?v=4" alt=""/>
+        </a>
+        <figcaption>tarunvijwani</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+        
+        
+					<!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+				
+      
+      
+      
+    
+         
+      <!-- wp:column -->      
+      <div class="wp-block-column">
+      <!-- wp:image {"sizeSlug":"large","linkDestination":"custom"} -->
+      <figure class="wp-block-image size-large">
+        <a href="https://github.com/albarin" target="_blank">
+          <img src="https://avatars.githubusercontent.com/u/186112?v=4" alt=""/>
+        </a>
+        <figcaption>albarin</figcaption>
+      </figure>
+      <!-- /wp:image --></div><!-- /wp:column -->
+      
+      
+      
+        </div>
+        <!-- /wp:columns -->
+      
+      
+  </ul>  
+ 
+
 

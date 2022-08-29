@@ -23,7 +23,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:heading -->
-<h2 id="what-s-new-in-%s">What's new in <%= displayVersion %>?</h2>
+<h2 id="what-s-new-in-<%= displayVersion %>">What's new in <%= displayVersion %>?</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -162,5 +162,5 @@
 <p>There are no deprecations in this release.</p>
 <!-- /wp:paragraph -->
 
-<!-- TODO CONTRIBUTORS TEMPLATE -->
+<%- include('contributors') %>
 

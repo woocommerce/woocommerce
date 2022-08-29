@@ -1,4 +1,11 @@
-export const processChanges = ( changes: unknown ) => {
+type AnalyzerChangeset = {
+	hooks: [ string[] ];
+	schema: Record< string, string >;
+	db: { functionVersion: string; functionName: string };
+	templates: Record< string, string >;
+};
+
+export const processChanges = ( changes: AnalyzerChangeset ) => {
 	const hooks = Object.entries( changes.hooks ).map( ( [ key, val ] ) => {
 		return { name: key, description: val[ 0 ][ 1 ][ 2 ] };
 	} );

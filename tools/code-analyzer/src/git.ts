@@ -8,12 +8,12 @@ import { tmpdir } from 'os';
 import { mkdirSync } from 'fs';
 import { simpleGit } from 'simple-git';
 import { v4 } from 'uuid';
+import { mkdir, rm } from 'fs/promises';
 
 /**
  * Internal dependencies
  */
 import { startWPEnv, stopWPEnv } from './utils';
-
 /**
  * Check if a string is a valid url.
  *
@@ -33,7 +33,7 @@ const isUrl = ( maybeURL: string ) => {
  * Clone a git repository.
  *
  * @param {string} repoPath - the path (either URL or file path) to the repo to clone.
- * @return {string} the path to the cloned repo.
+ * @return {Promise<string>} the path to the cloned repo.
  */
 export const cloneRepo = async ( repoPath: string ) => {
 	const folderPath = join( tmpdir(), 'code-analyzer-tmp', v4() );
@@ -53,17 +53,99 @@ export const cloneRepo = async ( repoPath: string ) => {
 	return folderPath;
 };
 
+export const sparseCheckoutRepo = async (
+	githubRepoUrl: string,
+	path: string,
+	filesOrDirectories: string[]
+) => {
+	const folderPath = join( tmpdir(), path );
+
+	// clean up if it already exists.
+	await rm( folderPath, { recursive: true, force: true } );
+	await mkdir( folderPath, { recursive: true } );
+
+	const git = simpleGit( { baseDir: folderPath } );
+
+	await git.clone( githubRepoUrl, folderPath );
+	await git.raw( 'sparse-checkout', 'init', { '--cone': null } );
+	await git.raw( 'sparse-checkout', 'set', filesOrDirectories.join( ' ' ) );
+
+	return folderPath;
+};
+
+export const checkoutRef = ( pathToRepo: string, ref: string ) => {
+	const git = simpleGit( { baseDir: pathToRepo } );
+	return git.checkout( ref );
+};
+
 /**
  * Do a git diff of 2 commit hashes (or branches)
  *
  * @param {string} baseDir - baseDir that the repo is in
  * @param {string} hashA   - either a git commit hash or a git branch
  * @param {string} hashB   - either a git commit hash or a git branch
- * @return {string} - diff of the changfiles between the 2 hashes
+ * @return {Promise<string>} - diff of the changfiles between the 2 hashes
  */
 export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
 	const git = simpleGit( { baseDir } );
 	return git.diff( [ `${ hashA }..${ hashB }` ] );
+};
+
+/**
+ * Get git commits between 2 commit refs
+ *
+ * @param {string} baseDir - Dir that the repo is in.
+ * @param {string} base    - a ref to start from.
+ * @param {string} head    - a ref to end at.
+ * @return {Promise<CommitResult>} - the commits between the 2 refs.
+ */
+export const getCommitsInRange = (
+	baseDir: string,
+	base: string,
+	head: string
+) => {
+	const git = simpleGit( { baseDir } );
+	return git.log( { from: base, to: head } );
+};
+
+const filterUniqBy = (
+	arr: Array< Record< string, unknown > >,
+	key: string
+) => {
+	const seen = new Set();
+	return arr.filter( ( item ) => {
+		const k = item[ key ];
+		if ( seen.has( k ) ) {
+			return false;
+		}
+		seen.add( k );
+		return true;
+	} );
+};
+
+export const getContributors = async (
+	baseDir: string,
+	base: string,
+	head: string
+) => {
+	const commits = await getCommitsInRange( baseDir, base, head );
+	const contributions = commits.all
+		.map(
+			// eslint-disable-next-line camelcase
+			( { author_name, author_email } ) => ( {
+				name: author_name,
+				email: author_email,
+			} )
+		)
+		// basic filtering out of known bots like renovate
+		.filter( ( { name, email } ) => {
+			return ! name.includes( 'bot' ) && ! email.includes( 'bot' );
+		} );
+
+	return filterUniqBy( contributions, 'email' ) as Array< {
+		name: string;
+		email: string;
+	} >;
 };
 
 /**
