@@ -709,7 +709,7 @@ importers:
       jest: ^25.1.0
       jest-circus: 25.1.0
       jest-each: 25.5.0
-      jest-puppeteer: ^4.4.0
+      jest-puppeteer: ^5.0.4
       ndb: ^1.1.5
       node-stream-zip: ^1.13.6
       puppeteer: 2.1.1
@@ -730,7 +730,7 @@ importers:
       jest: 25.5.4
       jest-circus: 25.1.0
       jest-each: 25.5.0
-      jest-puppeteer: 4.4.0_puppeteer@2.1.1
+      jest-puppeteer: 5.0.4_puppeteer@2.1.1
       node-stream-zip: 1.15.0
       puppeteer: 2.1.1
       readline-sync: 1.4.10
@@ -7977,18 +7977,20 @@ packages:
   /@hapi/address/2.1.4:
     resolution: {integrity: sha512-QD1PhQk+s31P1ixsX0H0Suoupp3VMXzIVMSwobR3F3MSUO2YCV0B7xqLcUw/Bh8yuvd3LhpyqLQWTNcRmp6IdQ==}
     deprecated: Moved to 'npm install @sideway/address'
+    dev: true
 
   /@hapi/bourne/1.3.2:
     resolution: {integrity: sha512-1dVNHT76Uu5N3eJNTYcvxee+jzX4Z9lfciqRRHCU27ihbUcYi+iSc2iml5Ke1LXe1SyJCLA0+14Jh4tXJgOppA==}
     deprecated: This version has been deprecated and is no longer supported or maintained
+    dev: true
 
   /@hapi/hoek/8.5.1:
     resolution: {integrity: sha512-yN7kbciD87WzLGc5539Tn0sApjyiGHAJgKvG9W8C7O+6c7qmoQMfVs0W4bX17eqz6C78QJqqFrtgdK5EWf6Qow==}
     deprecated: This version has been deprecated and is no longer supported or maintained
+    dev: true
 
   /@hapi/hoek/9.3.0:
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
-    dev: true
 
   /@hapi/joi/15.1.1:
     resolution: {integrity: sha512-entf8ZMOK8sc+8YfeOlM8pCfg3b5+WZIKBfUaaJT8UsjAAPjartzxIYm3TIbjvA4u+u++KbcXD38k682nVHDAQ==}
@@ -7998,18 +8000,19 @@ packages:
       '@hapi/bourne': 1.3.2
       '@hapi/hoek': 8.5.1
       '@hapi/topo': 3.1.6
+    dev: true
 
   /@hapi/topo/3.1.6:
     resolution: {integrity: sha512-tAag0jEcjwH+P2quUfipd7liWCNX2F8NvYjQp2wtInsZxnMlypdw0FtAOLxtvvkO+GSRRbmNi8m/5y42PQJYCQ==}
     deprecated: This version has been deprecated and is no longer supported or maintained
     dependencies:
       '@hapi/hoek': 8.5.1
+    dev: true
 
   /@hapi/topo/5.1.0:
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
     dependencies:
       '@hapi/hoek': 9.3.0
-    dev: true
 
   /@humanwhocodes/config-array/0.5.0:
     resolution: {integrity: sha512-FagtKFz74XrTl7y6HCzQpwDfXP0yhxe9lHLD1UZxjvZIcbyRz8zTFF/yYNfSfzU414eDwZ1SrO0Qvtyf+wFMQg==}
@@ -9546,15 +9549,12 @@ packages:
     resolution: {integrity: sha512-7vwq+rOHVWjyXxVlR76Agnvhy8I9rpzjosTESvmhNeXOXdZZB15Fl+TI9x1SiHZH5Jv2wTGduSxFDIaq0m3DUw==}
     dependencies:
       '@hapi/hoek': 9.3.0
-    dev: true
 
   /@sideway/formula/3.0.0:
     resolution: {integrity: sha512-vHe7wZ4NOXVfkoRb8T5otiENVlT7a3IAiw7H5M2+GO+9CDgcVUUsX1zalAztCmwyOr2RUTGJdgB+ZvSVqmdHmg==}
-    dev: true
 
   /@sideway/pinpoint/2.0.0:
     resolution: {integrity: sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==}
-    dev: true
 
   /@sindresorhus/is/2.1.1:
     resolution: {integrity: sha512-/aPsuoj/1Dw/kzhkgz+ES6TxG0zfTMGLwuK2ZG00k/iJzYHTLCE8mVU8EPqEOp/lmxPoq1C1C9RYToRKb2KEfg==}
@@ -20599,6 +20599,7 @@ packages:
     resolution: {integrity: sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==}
     deprecated: core-js@<3.4 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Please, upgrade your dependencies to the actual version of core-js.
     requiresBuild: true
+    dev: true
 
   /core-js/3.21.1:
     resolution: {integrity: sha512-FRq5b/VMrWlrmCzwRrpDYNxyHP9BcAZC+xHJaqTgIE5091ZV1NTmyh0sGOg5XqpnHvR0svdy0sv1gWA1zmhxig==}
@@ -23682,6 +23683,11 @@ packages:
 
   /expect-puppeteer/4.4.0:
     resolution: {integrity: sha512-6Ey4Xy2xvmuQu7z7YQtMsaMV0EHJRpVxIDOd5GRrm04/I3nkTKIutELfECsLp6le+b3SSa3cXhPiw6PgqzxYWA==}
+    dev: true
+
+  /expect-puppeteer/5.0.4:
+    resolution: {integrity: sha512-NV7jSiKhK+byocxg9A+0av+Q2RSCP9bcLVRz7zhHaESeCOkuomMvl9oD+uo1K+NdqRCXhNkQlUGWlmtbrpR1qw==}
+    dev: false
 
   /expect/24.9.0:
     resolution: {integrity: sha512-wvVAx8XIol3Z5m9zvZXiyZOQ+sRJqNTIm6sGjdWlaZIeupQGO3WbYI+15D/AmEwZywL6wtJkbAbJtzkOfBuR0Q==}
@@ -27699,6 +27705,7 @@ packages:
       wait-on: 3.3.0
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /jest-dev-server/5.0.3:
     resolution: {integrity: sha512-aJR3a5KdY18Lsz+VbREKwx2HM3iukiui+J9rlv9o6iYTwZCSsJazSTStcD9K1q0AIF3oA+FqLOKDyo/sc7+fJw==}
@@ -27713,7 +27720,6 @@ packages:
     transitivePeerDependencies:
       - debug
       - supports-color
-    dev: true
 
   /jest-diff/24.9.0:
     resolution: {integrity: sha512-qMfrTs8AdJE2iqrTp0hzh7kTd2PQWrsFyj9tORoKmu32xjPjeE4NyjVRDz8ybYwqS2ik8N4hsIpiVTyFeo2lBQ==}
@@ -27998,6 +28004,20 @@ packages:
       merge-deep: 3.0.3
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /jest-environment-puppeteer/5.0.4:
+    resolution: {integrity: sha512-wd4EDOD4QRi11QZ1IV8WsL1wlnnMUtcqtU0BNm+REzRtg78K2XHn3jS6YxGeXIOnsgrJeHxsD7DlRZ/GkFteLg==}
+    dependencies:
+      chalk: 4.1.2
+      cwd: 0.10.0
+      jest-dev-server: 5.0.3
+      jest-environment-node: 27.5.1
+      merge-deep: 3.0.3
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+    dev: false
 
   /jest-get-type/24.9.0:
     resolution: {integrity: sha512-lUseMzAley4LhIcpSP9Jf+fTrQ4a1yHQwLNeeVa2cEmbCGeoZAtYPOIv8JaxLD/sUpKxetKGP+gsHl8f8TSj8Q==}
@@ -28520,15 +28540,16 @@ packages:
       - supports-color
     dev: true
 
-  /jest-puppeteer/4.4.0_puppeteer@2.1.1:
-    resolution: {integrity: sha512-ZaiCTlPZ07B9HW0erAWNX6cyzBqbXMM7d2ugai4epBDKpKvRDpItlRQC6XjERoJELKZsPziFGS0OhhUvTvQAXA==}
+  /jest-puppeteer/5.0.4_puppeteer@2.1.1:
+    resolution: {integrity: sha512-IUOVKgHEaKsLqahZy/J/DvXB59SQx4AVpZKTRDvJzCdkvdGc3NVsNwUhovr6SK+HOK1TOiqAiXPTAPiIq3mkrg==}
     peerDependencies:
-      puppeteer: '>= 1.5.0 < 3'
+      puppeteer: '>= 1.5.0 < 10'
     dependencies:
-      expect-puppeteer: 4.4.0
-      jest-environment-puppeteer: 4.4.0
+      expect-puppeteer: 5.0.4
+      jest-environment-puppeteer: 5.0.4
       puppeteer: 2.1.1
     transitivePeerDependencies:
+      - debug
       - supports-color
     dev: false
 
@@ -29475,7 +29496,6 @@ packages:
       '@sideway/address': 4.1.4
       '@sideway/formula': 3.0.0
       '@sideway/pinpoint': 2.0.0
-    dev: true
 
   /js-base64/2.6.4:
     resolution: {integrity: sha512-pZe//GGmwJndub7ZghVHz7vjb2LgC1m8B07Au3eYqeqv9emhESByMXxaEgkUkEqJe87oBbSniGYoQNIBklc7IQ==}
@@ -36108,6 +36128,7 @@ packages:
 
   /rx/4.1.0:
     resolution: {integrity: sha1-pfE/957zt0D+MKqAP7CfmIBdR4I=}
+    dev: true
 
   /rxjs/6.6.7:
     resolution: {integrity: sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==}
@@ -36808,6 +36829,7 @@ packages:
       wait-port: 0.2.9
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /spawnd/5.0.0:
     resolution: {integrity: sha512-28+AJr82moMVWolQvlAIv3JcYDkjkFTEmfDc503wxrF5l2rQ3dFz6DpbXp3kD4zmgGGldfM4xM4v1sFj/ZaIOA==}
@@ -36818,7 +36840,6 @@ packages:
       wait-port: 0.2.9
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /spdx-correct/3.1.1:
     resolution: {integrity: sha512-cOYcUWwhCuHCXi49RhFRCyJEK3iPj1Ziz9DpViV3tbZOwXD49QzIN3MpOLJNxh2qwq2lJJZaKMVw9qNi4jTC0w==}
@@ -39679,6 +39700,7 @@ packages:
       minimist: 1.2.5
       request: 2.88.2
       rx: 4.1.0
+    dev: true
 
   /wait-on/5.3.0:
     resolution: {integrity: sha512-DwrHrnTK+/0QFaB9a8Ol5Lna3k7WvUR4jzSKmz0YaPBpuN2sACyiPVKVfj6ejnjcajAcvn3wlbTyMIn9AZouOg==}
@@ -39692,7 +39714,6 @@ packages:
       rxjs: 6.6.7
     transitivePeerDependencies:
       - debug
-    dev: true
 
   /wait-port/0.2.9:
     resolution: {integrity: sha512-hQ/cVKsNqGZ/UbZB/oakOGFqic00YAMM5/PEj3Bt4vKarv2jWIWzDbqlwT94qMs/exAQAsvMOq99sZblV92zxQ==}
