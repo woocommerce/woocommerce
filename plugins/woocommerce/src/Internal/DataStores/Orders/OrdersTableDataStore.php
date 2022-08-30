@@ -1515,7 +1515,9 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$coupon_held_keys = $this->get_coupon_held_keys( $order );
 		if ( is_array( $coupon_held_keys ) ) {
 			foreach ( $coupon_held_keys as $coupon_id => $meta_key ) {
-				delete_post_meta( $coupon_id, $meta_key );
+				$coupon = new \WC_Coupon( $coupon_id );
+				$coupon->delete_meta_data( $meta_key );
+				$coupon->save_meta_data();
 			}
 		}
 		$order->delete_meta_data( '_coupon_held_keys' );
@@ -1523,7 +1525,9 @@ LEFT JOIN {$operational_data_clauses['join']}
 		$coupon_held_keys_for_users = $this->get_coupon_held_keys_for_users( $order );
 		if ( is_array( $coupon_held_keys_for_users ) ) {
 			foreach ( $coupon_held_keys_for_users as $coupon_id => $meta_key ) {
-				delete_post_meta( $coupon_id, $meta_key );
+				$coupon = new \WC_Coupon( $coupon_id );
+				$coupon->delete_meta_data( $meta_key );
+				$coupon->save_meta_data();
 			}
 		}
 		$order->delete_meta_data( '_coupon_held_keys_for_users' );
