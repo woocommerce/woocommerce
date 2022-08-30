@@ -78,7 +78,15 @@ class WC_Mobile_Messaging_Handler {
 		$order_is_not_paid     = ! $order->is_paid();
 		$order_is_not_refunded = ! empty( $order->get_refunds() );
 
-		return $has_status && $has_payment_method && $store_is_eligible && $order_is_not_paid && $order_is_not_refunded;
+		$order_has_no_subscription_products = true;
+		foreach ( $order->get_items() as $item ) {
+			if ( $item->get_type() === 'subscription' ) {
+				$order_has_no_subscription_products = false;
+				break;
+			}
+		}
+
+		return $has_status && $has_payment_method && $store_is_eligible && $order_is_not_paid && $order_is_not_refunded && $order_has_no_subscription_products;
 	}
 
 	/**
