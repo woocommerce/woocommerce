@@ -270,9 +270,9 @@ class WC_Email extends WC_Settings_API {
 		wc_get_template(
 			'emails/email-mobile-messaging.php',
 			array(
-				'order_id' => ( $this->object )->get_id(),
-				'blog_id'  => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
-				'now'      => new DateTime(),
+				'order'   => $this->object,
+				'blog_id' => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+				'now'     => new DateTime(),
 			)
 		);
 	}
