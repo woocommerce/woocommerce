@@ -156,7 +156,7 @@ class WC_Mobile_Messaging_Handler {
 				)
 			),
 			esc_url( $deep_link_url ),
-			esc_url( 'https://woocommerce.com/in-person-payments/' )
+			'https://woocommerce.com/in-person-payments/'
 		);
 	}
 
@@ -203,7 +203,7 @@ class WC_Mobile_Messaging_Handler {
 					'woocommerce'
 				)
 			),
-			esc_url( 'https://woocommerce.com/mobile/' )
+			'https://woocommerce.com/mobile/'
 		);
 	}
 }
