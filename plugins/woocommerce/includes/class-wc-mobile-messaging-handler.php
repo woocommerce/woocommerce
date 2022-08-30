@@ -75,12 +75,14 @@ class WC_Mobile_Messaging_Handler {
 		$has_status            = in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true );
 		$has_payment_method    = in_array( $order->get_payment_method(), array( 'cod', 'woocommerce_payments', 'none' ), true );
 		$store_is_eligible     = self::is_store_in_person_payment_eligible();
-		$order_is_not_paid     = ! $order->is_paid();
-		$order_is_not_refunded = ! empty( $order->get_refunds() );
+		$order_is_not_paid     = null === $order->get_date_paid();
+		$order_is_not_refunded = empty( $order->get_refunds() );
 
 		$order_has_no_subscription_products = true;
 		foreach ( $order->get_items() as $item ) {
-			if ( $item->get_type() === 'subscription' ) {
+			$product = $item->get_product();
+
+			if ( $product->is_type( 'subscription' ) ) {
 				$order_has_no_subscription_products = false;
 				break;
 			}
