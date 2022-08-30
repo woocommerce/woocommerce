@@ -267,14 +267,16 @@ class WC_Email extends WC_Settings_API {
 			return;
 		}
 
-		wc_get_template(
-			'emails/email-mobile-messaging.php',
-			array(
-				'order'   => $this->object,
-				'blog_id' => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
-				'now'     => new DateTime(),
-			)
-		);
+		if ( null !== $this->object ) {
+			wc_get_template(
+				'emails/email-mobile-messaging.php',
+				array(
+					'order'   => $this->object,
+					'blog_id' => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+					'now'     => new DateTime(),
+				)
+			);
+		}
 	}
 
 	/**
