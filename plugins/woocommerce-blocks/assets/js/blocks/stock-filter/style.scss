@@ -9,7 +9,23 @@
 	}
 }
 
+.wc-block-stock-filter__title {
+	&.show-loading-state {
+		@include placeholder();
+		background-color: $gray-400 !important;
+		border-radius: em(26px);
+		box-shadow: none;
+		width: max-content;
+	}
+}
+
 .wc-block-stock-filter {
+	&.show-loading-state {
+		@include placeholder();
+		box-shadow: none;
+		border-radius: em(4px) !important;
+	}
+
 	margin-bottom: $gap-large;
 
 	.wc-block-stock-filter-list {

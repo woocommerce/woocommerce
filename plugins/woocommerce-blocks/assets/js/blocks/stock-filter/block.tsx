@@ -26,6 +26,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { isBoolean, objectHasProp } from '@woocommerce/types';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl, PREFIX_QUERY_ARG_FILTER_TYPE } from '@woocommerce/utils';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -339,14 +340,11 @@ const StockStatusFilterBlock = ( {
 		[ checked, displayedOptions ]
 	);
 
-	if ( displayedOptions.length === 0 ) {
-		return null;
-	}
-
 	const TagName =
 		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
 	const isLoading =
-		! blockAttributes.isPreview && ! STOCK_STATUS_OPTIONS.current;
+		( ! blockAttributes.isPreview && ! STOCK_STATUS_OPTIONS.current ) ||
+		displayedOptions.length === 0;
 	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
 
 	const hasFilterableProducts = getSettingWithCoercion(
@@ -362,11 +360,19 @@ const StockStatusFilterBlock = ( {
 	return (
 		<>
 			{ ! isEditor && blockAttributes.heading && (
-				<TagName className="wc-block-stock-filter__title">
+				<TagName
+					className={ classnames( 'wc-block-stock-filter__title', {
+						'show-loading-state': isLoading,
+					} ) }
+				>
 					{ blockAttributes.heading }
 				</TagName>
 			) }
-			<div className="wc-block-stock-filter">
+			<div
+				className={ classnames( 'wc-block-stock-filter', {
+					'show-loading-state': isLoading,
+				} ) }
+			>
 				<CheckboxList
 					className={ 'wc-block-stock-filter-list' }
 					options={ displayedOptions }
@@ -375,27 +381,29 @@ const StockStatusFilterBlock = ( {
 					isLoading={ isLoading }
 					isDisabled={ isDisabled }
 				/>
-				<div className="wc-block-stock-filter__actions">
-					{ checked.length > 0 && (
-						<FilterResetButton
-							onClick={ () => {
-								setChecked( [] );
-								onSubmit( [] );
-							} }
-							screenReaderLabel={ __(
-								'Reset stock filter',
-								'woo-gutenberg-products-block'
-							) }
-						/>
-					) }
-					{ blockAttributes.showFilterButton && (
-						<FilterSubmitButton
-							className="wc-block-stock-filter__button"
-							disabled={ isLoading || isDisabled }
-							onClick={ () => onSubmit( checked ) }
-						/>
-					) }
-				</div>
+				{ ! isLoading && (
+					<div className="wc-block-stock-filter__actions">
+						{ checked.length > 0 && (
+							<FilterResetButton
+								onClick={ () => {
+									setChecked( [] );
+									onSubmit( [] );
+								} }
+								screenReaderLabel={ __(
+									'Reset stock filter',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+						) }
+						{ blockAttributes.showFilterButton && (
+							<FilterSubmitButton
+								className="wc-block-stock-filter__button"
+								disabled={ isLoading || isDisabled }
+								onClick={ () => onSubmit( checked ) }
+							/>
+						) }
+					</div>
+				) }
 			</div>
 		</>
 	);
