@@ -1,35 +1,34 @@
 /**
+ * External dependencies
+ */
+
+import type { Reducer } from 'redux';
+
+/**
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { Action } from './actions';
+import { NoteState, Note } from './types';
 
-const notesReducer = (
+const reducer: Reducer< NoteState, Action > = (
 	state = {
 		errors: {},
 		noteQueries: {},
 		notes: {},
 		requesting: {},
 	},
-	{
-		error,
-		isRequesting,
-		isUpdating,
-		noteFields,
-		noteId,
-		noteIds,
-		notes,
-		query,
-		selector,
-		type,
-	}
+	action
 ) => {
-	switch ( type ) {
+	switch ( action.type ) {
 		case TYPES.SET_NOTES:
 			state = {
 				...state,
 				notes: {
 					...state.notes,
-					...notes.reduce( ( acc, item ) => {
+					...action.notes.reduce< {
+						[ id: string ]: Note;
+					} >( ( acc, item ) => {
 						acc[ item.id ] = item;
 						return acc;
 					}, {} ),
@@ -41,7 +40,7 @@ const notesReducer = (
 				...state,
 				noteQueries: {
 					...state.noteQueries,
-					[ JSON.stringify( query ) ]: noteIds,
+					[ JSON.stringify( action.query ) ]: action.noteIds,
 				},
 			};
 			break;
@@ -50,7 +49,7 @@ const notesReducer = (
 				...state,
 				errors: {
 					...state.errors,
-					[ selector ]: error,
+					[ action.selector ]: action.error,
 				},
 			};
 			break;
@@ -59,7 +58,7 @@ const notesReducer = (
 				...state,
 				notes: {
 					...state.notes,
-					[ noteId ]: noteFields,
+					[ action.noteId ]: action.noteFields,
 				},
 			};
 			break;
@@ -68,9 +67,9 @@ const notesReducer = (
 				...state,
 				notes: {
 					...state.notes,
-					[ noteId ]: {
-						...state.notes[ noteId ],
-						isUpdating,
+					[ action.noteId ]: {
+						...state.notes[ action.noteId ],
+						isUpdating: action.isUpdating,
 					},
 				},
 			};
@@ -80,7 +79,7 @@ const notesReducer = (
 				...state,
 				requesting: {
 					...state.requesting,
-					[ selector ]: isRequesting,
+					[ action.selector ]: action.isRequesting,
 				},
 			};
 			break;
@@ -88,4 +87,5 @@ const notesReducer = (
 	return state;
 };
 
-export default notesReducer;
+export default reducer;
+export type State = ReturnType< typeof reducer >;

@@ -99,6 +99,8 @@ class UsageModal extends Component {
 
 		// Bail if site has already opted in to tracking
 		if ( allowTracking ) {
+			onClose();
+			onContinue();
 			return null;
 		}
 
@@ -158,8 +160,6 @@ class UsageModal extends Component {
 							onClick={ () => {
 								this.setState( { selectedAction: 'accept' } );
 								this.updateTracking( { allowTracking: true } );
-								onClose();
-								onContinue();
 							} }
 						>
 							{ acceptActionText }

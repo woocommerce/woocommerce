@@ -307,7 +307,7 @@ class ProductsReportTable extends Component {
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: _n( 'Orders', 'Orders', ordersCount, 'woocommerce' ),
+				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];

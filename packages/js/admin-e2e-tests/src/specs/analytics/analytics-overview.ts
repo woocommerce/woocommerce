@@ -1,13 +1,14 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+/**
  * Internal dependencies
  */
 import { AnalyticsOverview } from '../../pages/AnalyticsOverview';
 import { Login } from '../../pages/Login';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
-
-const testAdminAnalyticsOverview = () => {
+export const testAdminAnalyticsOverview = () => {
 	describe( 'Analytics pages', () => {
 		const analyticsPage = new AnalyticsOverview( page );
 		const login = new Login( page );
@@ -94,5 +95,3 @@ const testAdminAnalyticsOverview = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminAnalyticsOverview };

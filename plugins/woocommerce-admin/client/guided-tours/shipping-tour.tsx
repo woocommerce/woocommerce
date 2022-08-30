@@ -59,6 +59,7 @@ const useShowShippingTour = () => {
 	return {
 		isLoading,
 		show:
+			window.wcAdminFeatures[ 'shipping-setting-tour' ] &&
 			! isLoading &&
 			hasCreatedDefaultShippingZones &&
 			! hasReviewedDefaultShippingOptions,
@@ -197,7 +198,9 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 	);
 };
 
-export const ShippingTour = () => {
+export const ShippingTour: React.FC< {
+	showShippingRecommendationsStep: boolean;
+} > = ( { showShippingRecommendationsStep } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { show: showTour } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
@@ -277,10 +280,6 @@ export const ShippingTour = () => {
 
 	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
 
-	const isShippingRecommendationsPresent = document.querySelector(
-		SHIPPING_RECOMMENDATIONS_SELECTOR
-	);
-
 	if ( isWcsSectionPresent ) {
 		tourConfig.steps.push( {
 			referenceElements: {
@@ -299,7 +298,7 @@ export const ShippingTour = () => {
 		} );
 	}
 
-	if ( isShippingRecommendationsPresent ) {
+	if ( showShippingRecommendationsStep ) {
 		tourConfig.steps.push( {
 			referenceElements: {
 				desktop: SHIPPING_RECOMMENDATIONS_SELECTOR,
