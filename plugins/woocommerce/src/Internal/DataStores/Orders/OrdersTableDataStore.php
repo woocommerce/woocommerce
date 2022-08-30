@@ -1290,6 +1290,8 @@ FROM $order_meta_table
 	protected function persist_order_to_db( \WC_Order &$order, bool $force_all_fields = false ) {
 		global $wpdb;
 
+		$this->update_post_meta( $order );
+
 		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
 		$data_sync = wc_get_container()->get( DataSynchronizer::class );
 
@@ -1700,11 +1702,6 @@ FROM $order_meta_table
 			$order->set_date_modified( time() );
 		}
 
-		$this->update_post_meta( $order );
-
-		// Update with latest changes.
-		$changes = $order->get_changes();
-
 		$this->persist_order_to_db( $order );
 		$order->save_meta_data();
 
@@ -2081,8 +2078,14 @@ CREATE TABLE $meta_table (
 	 * @return array List of keys.
 	 */
 	protected function get_internal_data_store_keys() {
-		// Add keys here that don't have getter/setter in the CPT store, but are internal anyway.
-		return array();
+		// Add keys here that don't have getter/setter in the order class, but are internal anyway.
+		return array(
+			'order_stock_reduced',
+			'download_permissions_granted',
+			'new_order_email_sent',
+			'recorded_sales',
+			'recorded_coupon_usage_counts',
+		);
 	}
 
 }
