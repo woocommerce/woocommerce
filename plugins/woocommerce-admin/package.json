@@ -9,6 +9,7 @@
 		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
 	"scripts": {
+		"changelog": "pnpm run changelog --filter=woocommerce --",
 		"turbo:build": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"turbo:test": "pnpm run test:client",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
