@@ -8,7 +8,7 @@ import {
 	useEffect,
 	useState,
 } from '@wordpress/element';
-import { DragEvent, DragEventHandler } from 'react';
+import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
 import { throttle } from 'lodash';
 
 /**
@@ -98,12 +98,58 @@ export const Sortable = ( {
 		[]
 	);
 
+	const handleKeyDown = (
+		event: KeyboardEvent< HTMLLIElement >,
+		index: number
+	) => {
+		const { key } = event;
+
+		if ( key === ' ' ) {
+			if ( dragIndex === null || dropIndex === null ) {
+				setDragIndex( index );
+				setDropIndex( index );
+				return;
+			}
+
+			const nextItems = moveIndex( dragIndex, dropIndex, items );
+			setItems( nextItems as JSX.Element[] );
+			onOrderChange( nextItems );
+
+			setTimeout( () => {
+				setDragIndex( null );
+				setDropIndex( null );
+			}, THROTTLE_TIME );
+		}
+
+		if ( key === 'ArrowUp' ) {
+			if ( dragIndex === null || dropIndex === null ) {
+				return;
+			}
+			setDropIndex( Math.max( 0, dropIndex - 1 ) );
+		}
+
+		if ( key === 'ArrowDown' ) {
+			if ( dragIndex === null || dropIndex === null ) {
+				return;
+			}
+			setDropIndex( Math.min( items.length, dropIndex + 1 ) );
+		}
+
+		if ( key === 'Escape' ) {
+			setTimeout( () => {
+				setDragIndex( null );
+				setDropIndex( null );
+			}, THROTTLE_TIME );
+		}
+	};
+
 	return (
 		<ul
 			className={ classnames( 'woocommerce-sortable', {
 				'is-dragging': dragIndex !== null,
 				'is-horizontal': isHorizontal,
 			} ) }
+			role="listbox"
 		>
 			{ items.map( ( child, index ) => {
 				const isDragging = index === dragIndex;
@@ -139,6 +185,7 @@ export const Sortable = ( {
 							event.preventDefault();
 							throttledHandleDragOver( event, index );
 						} }
+						onKeyDown={ ( event ) => handleKeyDown( event, index ) }
 					>
 						{ child }
 					</SortableItem>
