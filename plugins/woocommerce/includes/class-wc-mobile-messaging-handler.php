@@ -58,7 +58,10 @@ class WC_Mobile_Messaging_Handler {
 	 * @return true if store is eligible, false otherwise
 	 */
 	private static function is_store_in_person_payment_eligible(): bool {
-		return self::has_store_specified_country_currency( 'US', 'USD' ) || self::has_store_specified_country_currency( 'CA', 'CAD' );
+		$is_store_usa_based    = self::has_store_specified_country_currency( 'US', 'USD' );
+		$is_store_canada_based = self::has_store_specified_country_currency( 'CA', 'CAD' );
+
+		return $is_store_usa_based || $is_store_canada_based;
 	}
 
 	/**
@@ -69,13 +72,13 @@ class WC_Mobile_Messaging_Handler {
 	 * @return true if order is eligible, false otherwise
 	 */
 	private static function is_order_in_person_payment_eligible( WC_Order $order ): bool {
-		return in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true ) &&
-			   in_array( $order->get_payment_method(), array( 'cod', 'woocommerce_payments', 'none' ), true ) && // phpcs:ignore WordPress.WhiteSpace.PrecisionAlignment.Found
-			   self::is_store_in_person_payment_eligible() && // phpcs:ignore WordPress.WhiteSpace.PrecisionAlignment.Found
-			   ! $order->is_paid() && // phpcs:ignore WordPress.WhiteSpace.PrecisionAlignment.Found
-			! empty(
-				$order->get_refunds()
-			);
+		$has_status            = in_array( $order->get_status(), array( 'pending', 'on-hold', 'processing' ), true );
+		$has_payment_method    = in_array( $order->get_payment_method(), array( 'cod', 'woocommerce_payments', 'none' ), true );
+		$store_is_eligible     = self::is_store_in_person_payment_eligible();
+		$order_is_not_paid     = ! $order->is_paid();
+		$order_is_not_refunded = ! empty( $order->get_refunds() );
+
+		return $has_status && $has_payment_method && $store_is_eligible && $order_is_not_paid && $order_is_not_refunded;
 	}
 
 	/**
