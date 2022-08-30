@@ -507,7 +507,7 @@ class InstalledExtensions {
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=integration-with-salesforce' );
 			$data['docsUrl']     = 'https://woocommerce.com/document/salesforce-integration/';
-			$data['supportUrl']  = 'https://wpswings.com/submit-query/?utm_source=wpswings-salesforce-woo&utm_medium=woo-backend&utm_campaign=submit-query';
+			$data['supportUrl']  = 'https://wpswings.com/submit-query/';
 		}
 
 		return $data;
