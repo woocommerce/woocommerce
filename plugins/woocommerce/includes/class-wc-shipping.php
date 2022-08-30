@@ -255,6 +255,14 @@ class WC_Shipping {
 			return array();
 		}
 
+		/**
+		 * Allow to perform action before calculate shipping.
+		 * 
+		 * This hook can be used to performa any action before calculate shipping.
+		 *
+		 */
+		do_action( 'woocommerce_before_calculate_shipping', $packages );
+
 		// Calculate costs for passed packages.
 		foreach ( $packages as $package_key => $package ) {
 			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
