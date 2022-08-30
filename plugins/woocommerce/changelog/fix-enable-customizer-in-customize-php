@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Allow accessing WooCommerce Customizer panels directly from customizer.php in block themes
