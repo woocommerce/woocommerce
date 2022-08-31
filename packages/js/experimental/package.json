@@ -37,7 +37,8 @@
 		"gridicons": "^3.4.0",
 		"moment": "^2.29.1",
 		"react-transition-group": "^4.4.2",
-		"react-visibility-sensor": "^5.1.1"
+		"react-visibility-sensor": "^5.1.1",
+		"react-with-direction": "^1.1.0"
 	},
 	"publishConfig": {
 		"access": "public"

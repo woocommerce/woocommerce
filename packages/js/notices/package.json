@@ -23,9 +23,11 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
+		"@babel/preset-env": "^7.1.6",
 		"@wordpress/a11y": "^3.5.0",
 		"@wordpress/data": "^6.15.0",
-		"@wordpress/notices": "^3.3.2"
+		"@wordpress/notices": "^3.3.2",
+		"react-native": "*"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0",

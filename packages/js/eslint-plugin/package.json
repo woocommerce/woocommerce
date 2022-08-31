@@ -30,6 +30,7 @@
 		"@wordpress/eslint-plugin": "^11.0.0",
 		"eslint-plugin-react-hooks": "^4.3.0",
 		"eslint-plugin-testing-library": "^5.1.0",
+		"prettier": ">=2.0.0",
 		"requireindex": "^1.2.0"
 	},
 	"publishConfig": {

@@ -90,6 +90,7 @@
 		"react-router-dom": "^6.3.0",
 		"react-transition-group": "^4.4.2",
 		"react-visibility-sensor": "^5.1.1",
+		"react-with-direction": "^1.1.0",
 		"redux": "^4.1.2"
 	},
 	"devDependencies": {
@@ -116,6 +117,7 @@
 		"@types/jest": "^27.4.1",
 		"@types/lodash": "^4.14.179",
 		"@types/puppeteer": "^4.0.2",
+		"@types/qs": "^6.9.7",
 		"@types/react": "^17.0.0",
 		"@types/react-router-dom": "^5.3.3",
 		"@types/react-transition-group": "^4.4.4",
@@ -126,7 +128,6 @@
 		"@types/wordpress__data-controls": "^2.2.0",
 		"@types/wordpress__notices": "^3.3.0",
 		"@types/wordpress__plugins": "^3.0.0",
-		"@types/qs": "^6.9.7",
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
 		"@typescript-eslint/parser": "^5.14.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",

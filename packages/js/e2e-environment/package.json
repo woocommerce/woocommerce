@@ -36,6 +36,7 @@
 		"jest-puppeteer": "^5.0.4",
 		"node-stream-zip": "^1.13.6",
 		"puppeteer": "2.1.1",
+		"react-native": "*",
 		"readline-sync": "^1.4.10",
 		"request": "^2.88.2",
 		"sprintf-js": "^1.1.2"
