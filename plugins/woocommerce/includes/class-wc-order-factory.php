@@ -31,8 +31,8 @@ class WC_Order_Factory {
 			return false;
 		}
 
-		$using_cot = OrderUtil::custom_orders_table_usage_is_enabled();
-		if ( $using_cot ) {
+		$use_orders_cache = OrderUtil::should_use_orders_cache();
+		if ( $use_orders_cache ) {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order       = $order_cache->get( $order_id );
 			if ( ! is_null( $order ) ) {
@@ -47,7 +47,7 @@ class WC_Order_Factory {
 
 		try {
 			$order = new $classname( $order_id );
-			if ( $using_cot ) {
+			if ( $use_orders_cache ) {
 				$order_cache->set( $order, $order_id );
 			}
 			return $order;
@@ -71,8 +71,8 @@ class WC_Order_Factory {
 		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
 
 		$already_cached_orders = array();
-		$using_cot             = OrderUtil::custom_orders_table_usage_is_enabled();
-		if ( $using_cot ) {
+		$use_orders_cache      = OrderUtil::should_use_orders_cache();
+		if ( $use_orders_cache ) {
 			$uncached_order_ids = array();
 			$order_cache        = wc_get_container()->get( OrderCache::class );
 			foreach ( $order_ids as $order_id ) {
@@ -132,7 +132,7 @@ class WC_Order_Factory {
 		// restore the sort order.
 		$result = array_values( array_replace( array_flip( $order_ids ), $result ) );
 
-		if ( $using_cot ) {
+		if ( $use_orders_cache ) {
 			foreach ( $result as $order ) {
 				$order_cache->set( $order );
 			}

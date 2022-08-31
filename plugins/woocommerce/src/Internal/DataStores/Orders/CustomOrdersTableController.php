@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -85,6 +86,13 @@ class CustomOrdersTableController {
 	 * @var OrderCache
 	 */
 	private $order_cache;
+
+	/**
+	 * The orders cache controller object to use.
+	 *
+	 * @var OrderCacheController
+	 */
+	private $order_cache_controller;
 
 	/**
 	 * Class constructor.
@@ -211,13 +219,21 @@ class CustomOrdersTableController {
 	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
 	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 * @param OrderCache                 $order_cache The order cache engine to use.
+	 * @param OrderCacheController       $order_cache_controller The order cache controller to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, OrdersTableRefundDataStore $refund_data_store, BatchProcessingController $batch_processing_controller, OrderCache $order_cache ) {
+	final public function init(
+		OrdersTableDataStore $data_store,
+		DataSynchronizer $data_synchronizer,
+		OrdersTableRefundDataStore $refund_data_store,
+		BatchProcessingController $batch_processing_controller,
+		OrderCache $order_cache,
+		OrderCacheController $order_cache_controller ) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
 		$this->refund_data_store           = $refund_data_store;
 		$this->order_cache                 = $order_cache;
+		$this->order_cache_controller      = $order_cache_controller;
 	}
 
 	/**
@@ -473,6 +489,19 @@ class CustomOrdersTableController {
 				'options' => array_combine( $isolation_level_names, $isolation_level_names ),
 				'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
 			);
+
+			if ( $this->custom_orders_table_usage_is_enabled() ) {
+				$desc_tip   = $this->order_cache_controller->orders_cache_usage_is_temporarly_disabled() ?
+					__( 'The orders cache is temporarily disabled while synchronization is in progress and will be automatically re-enabled once it finishes', 'woocommerce' )
+					: '';
+				$settings[] = array(
+					'desc'     => __( 'Enable the orders cache', 'woocommerce' ),
+					'desc_tip' => $desc_tip,
+					'id'       => OrderCacheController::ORDERS_CACHE_USAGE_ENABLED_OPTION,
+					'type'     => 'checkbox',
+					'disabled' => $this->order_cache_controller->orders_cache_usage_is_temporarly_disabled(),
+				);
+			}
 		} else {
 			$settings[] = array(
 				'title' => __( 'Custom orders tables', 'woocommerce' ),
@@ -506,6 +535,15 @@ class CustomOrdersTableController {
 	}
 
 	/**
+	 * Helper function to get whether the orders cache should be used or not.
+	 *
+	 * @return bool True if the orders cache should be used, false otherwise.
+	 */
+	public function should_use_orders_cache(): bool {
+		return $this->order_cache->custom_orders_table_usage_is_enabled() && $this->order_cache->orders_cache_usage_is_enabled();
+	}
+
+	/**
 	 * Handler for the individual setting updated hook.
 	 *
 	 * @param string $option Setting name.
@@ -529,6 +567,11 @@ class CustomOrdersTableController {
 	 * @throws \Exception Attempt to change the authoritative orders table while orders sync is pending.
 	 */
 	private function process_pre_update_option( $option, $old_value, $value ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && $value !== $old_value ) {
+			$this->order_cache->flush();
+			return $value;
+		}
+
 		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $option || $value === $old_value || false === $old_value ) {
 			return $value;
 		}
@@ -633,7 +676,7 @@ class CustomOrdersTableController {
 	 * @param int $order_id The id of the order deleted or trashed.
 	 */
 	private function after_order_deleted_or_trashed( int $order_id ): void {
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( $this->should_use_orders_cache() ) {
 			$this->order_cache->remove( $order_id );
 		}
 	}

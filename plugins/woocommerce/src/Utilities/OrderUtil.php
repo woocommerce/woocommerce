@@ -35,6 +35,15 @@ final class OrderUtil {
 	}
 
 	/**
+	 * Helper function to get whether the orders cache should be used or not.
+	 *
+	 * @return bool True if the orders cache should be used, false otherwise.
+	 */
+	public static function should_use_orders_cache() : bool {
+		return wc_get_container()->get( CustomOrdersTableController::class )->should_use_orders_cache();
+	}
+
+	/**
 	 * Checks if posts and order custom table sync is enabled and there are no pending orders.
 	 *
 	 * @return bool
