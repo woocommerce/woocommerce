@@ -7,11 +7,12 @@ import { createElement } from 'react';
  * Internal dependencies
  */
 import Tag from '../tag';
+import { getItemLabelType, getItemValueType } from './types';
 
 type SelectedItemsProps< ItemType > = {
 	items: ItemType[];
-	getItemLabel: ( item: ItemType | null ) => string;
-	getItemValue: ( item: ItemType | null ) => string;
+	getItemLabel: getItemLabelType< ItemType >;
+	getItemValue: getItemValueType< ItemType >;
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore These are the types provided by Downshift.
 	getSelectedItemProps: ( { selectedItem: any, index: any } ) => {

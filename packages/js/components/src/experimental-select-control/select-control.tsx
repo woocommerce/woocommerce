@@ -9,7 +9,12 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ChildrenType, DefaultItemType } from './types';
+import {
+	ChildrenType,
+	DefaultItemType,
+	getItemLabelType,
+	getItemValueType,
+} from './types';
 import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
@@ -25,8 +30,8 @@ type SelectControlProps< ItemType > = {
 	items: ItemType[];
 	label: string;
 	initialSelectedItems?: ItemType[];
-	getItemLabel?: ( item: ItemType | null ) => string;
-	getItemValue?: ( item: ItemType | null ) => string;
+	getItemLabel?: getItemLabelType< ItemType >;
+	getItemValue?: getItemValueType< ItemType >;
 	getFilteredItems?: (
 		allItems: ItemType[],
 		inputValue: string,
