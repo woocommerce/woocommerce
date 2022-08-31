@@ -20,9 +20,9 @@ import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import { MenuItem } from './menu-item';
 import {
-	getItemLabel as defaultGetItemLabel,
-	getItemValue as defaultGetItemValue,
-	getFilteredItems as defaultGetFilteredItems,
+	defaultGetItemLabel,
+	defaultGetItemValue,
+	defaultGetFilteredItems,
 } from './utils';
 
 type SelectControlProps< ItemType > = {
@@ -35,7 +35,8 @@ type SelectControlProps< ItemType > = {
 	getFilteredItems?: (
 		allItems: ItemType[],
 		inputValue: string,
-		selectedItems: ItemType[]
+		selectedItems: ItemType[],
+		getItemLabel: getItemLabelType< ItemType >
 	) => ItemType[];
 	multiple?: boolean;
 	onInputChange?: ( value: string | undefined ) => void;
@@ -88,7 +89,12 @@ export const SelectControl = < ItemType = DefaultItemType, >( {
 	selectedItems = Array.isArray( selectedItems )
 		? selectedItems
 		: [ selectedItems ].filter( Boolean );
-	const filteredItems = getFilteredItems( items, inputValue, selectedItems );
+	const filteredItems = getFilteredItems(
+		items,
+		inputValue,
+		selectedItems,
+		getItemLabel
+	);
 
 	const {
 		isOpen,

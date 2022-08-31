@@ -1,15 +1,17 @@
-export const getItemLabel = < ItemType >( item: ItemType | null ) => {
+import { getItemLabelType } from './types';
+export const defaultGetItemLabel = < ItemType >( item: ItemType | null ) => {
 	return item ? item.label : '';
 };
 
-export const getItemValue = < ItemType >( item: ItemType | null ) => {
+export const defaultGetItemValue = < ItemType >( item: ItemType | null ) => {
 	return item ? item.value : '';
 };
 
-export const getFilteredItems = < ItemType >(
+export const defaultGetFilteredItems = < ItemType >(
 	allItems: ItemType[],
 	inputValue: string,
-	selectedItems: ItemType[]
+	selectedItems: ItemType[],
+	getItemLabel: getItemLabelType< ItemType >
 ) => {
 	return allItems.filter(
 		( item ) =>

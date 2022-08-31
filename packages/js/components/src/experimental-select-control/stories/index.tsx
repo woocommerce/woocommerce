@@ -231,6 +231,69 @@ export const CustomRender: React.FC = () => {
 	);
 };
 
+type CustomItemType = {
+	itemId: number;
+	user: {
+		name: string;
+		email?: string;
+		id: number;
+	};
+};
+
+const customItems: CustomItemType[] = [
+	{
+		itemId: 1,
+		user: {
+			name: 'Joe',
+			email: 'joe@a8c.com',
+			id: 32,
+		},
+	},
+	{
+		itemId: 2,
+		user: {
+			name: 'Jen',
+			id: 16,
+		},
+	},
+	{
+		itemId: 3,
+		user: {
+			name: 'Jared',
+			id: 112,
+		},
+	},
+];
+
+export const CustomItemType: React.FC = () => {
+	const [ selected, setSelected ] =
+		useState< SelectedType< Array< CustomItemType > > >( null );
+
+	return (
+		<>
+			Selected: { JSON.stringify( selected ) }
+			<SelectControl< CustomItemType >
+				multiple
+				items={ customItems }
+				label="CustomItemType value"
+				selected={ selected }
+				onSelect={ ( item ) =>
+					setSelected(
+						Array.isArray( selected )
+							? [ ...selected, item ]
+							: [ item ]
+					)
+				}
+				onRemove={ ( item ) =>
+					setSelected( selected.filter( ( i ) => i !== item ) )
+				}
+				getItemLabel={ ( item ) => item?.user.name }
+				getItemValue={ ( item ) => String( item?.itemId ) }
+			/>
+		</>
+	);
+};
+
 export default {
 	title: 'WooCommerce Admin/experimental/SelectControl',
 	component: SelectControl,
