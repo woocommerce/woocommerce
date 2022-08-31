@@ -60,6 +60,7 @@ export const SortableItem = ( {
 
 	return (
 		<li
+			aria-label={ __( 'Press spacebar to reorder', 'woocommerce' ) }
 			aria-selected={ isSelected }
 			className={ classnames( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
@@ -68,11 +69,6 @@ export const SortableItem = ( {
 			id={ `woocommerce-sortable__item-${ id }` }
 			onDragOver={ onDragOver }
 			role="option"
-			// eslint-disable-next-line jsx-a11y/aria-props
-			aria-description={ __(
-				'Press spacebar to reorder',
-				'woocommerce'
-			) }
 			onKeyDown={ onKeyDown }
 			ref={ ref }
 			tabIndex={ isSelected ? 0 : -1 }
