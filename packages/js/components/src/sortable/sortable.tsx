@@ -63,6 +63,13 @@ export const Sortable = ( {
 		setItems( Array.isArray( children ) ? children : [ children ] );
 	}, [ children ] );
 
+	const resetIndexes = () => {
+		setTimeout( () => {
+			setDragIndex( null );
+			setDropIndex( null );
+		}, THROTTLE_TIME );
+	};
+
 	const persistItemOrder = () => {
 		if (
 			dropIndex !== null &&
@@ -73,11 +80,7 @@ export const Sortable = ( {
 			setItems( nextItems as JSX.Element[] );
 			onOrderChange( nextItems );
 		}
-
-		setTimeout( () => {
-			setDragIndex( null );
-			setDropIndex( null );
-		}, THROTTLE_TIME );
+		resetIndexes();
 	};
 
 	const handleDragStart = (
@@ -210,10 +213,7 @@ export const Sortable = ( {
 		}
 
 		if ( key === 'Escape' ) {
-			setTimeout( () => {
-				setDragIndex( null );
-				setDropIndex( null );
-			}, THROTTLE_TIME );
+			resetIndexes();
 			speak(
 				__(
 					'Reordering cancelled. Restoring the original list order',
