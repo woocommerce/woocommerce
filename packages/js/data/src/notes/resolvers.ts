@@ -11,19 +11,20 @@ import { sanitize } from 'dompurify';
  */
 import { NAMESPACE } from '../constants';
 import { setNotes, setNotesQuery, setError } from './actions';
+import { NoteQuery, Note } from './types';
 
 let notesExceededWarningShown = false;
 
-export function* getNotes( query = {} ) {
+export function* getNotes( query: NoteQuery = {} ) {
 	const url = addQueryArgs( `${ NAMESPACE }/admin/notes`, query );
 
 	try {
-		const notes = yield apiFetch( {
+		const notes: Note[] = yield apiFetch( {
 			path: url,
 		} );
 
 		if ( ! notesExceededWarningShown ) {
-			const noteNames = notes.reduce( ( filtered, note ) => {
+			const noteNames = notes.reduce< string[] >( ( filtered, note ) => {
 				const content = sanitize( note.content, {
 					ALLOWED_TAGS: [],
 				} );

@@ -845,6 +845,86 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the `get_order_count()` method.
+	 */
+	public function test_get_order_count(): void {
+		$number_of_orders_by_status = array(
+			'wc-completed'  => 4,
+			'wc-processing' => 2,
+			'wc-pending'    => 4,
+		);
+
+		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
+			foreach ( range( 1, $number_of_orders ) as $_ ) {
+				$o = new \WC_Order();
+				$this->switch_data_store( $o, $this->sut );
+				$o->set_status( $order_status );
+				$o->save();
+			}
+		}
+
+		// Count all orders.
+		$expected_count = array_sum( array_values( $number_of_orders_by_status ) );
+		$actual_count   = ( new OrdersTableQuery( array( 'limit' => '-1' ) ) )->found_orders;
+		$this->assertEquals( $expected_count, $actual_count );
+
+		// Count orders by status.
+		foreach ( $number_of_orders_by_status as $order_status => $number_of_orders ) {
+			$this->assertEquals( $number_of_orders, $this->sut->get_order_count( $order_status ) );
+		}
+	}
+
+	/**
+	 * Test `get_unpaid_orders()`.
+	 */
+	public function test_get_unpaid_orders(): void {
+		$now = current_time( 'timestamp' );
+
+		// Create a few orders.
+		$orders_by_status = array( 'wc-completed' => 3, 'wc-pending' => 2 );
+		$unpaid_ids       = array();
+		foreach ( $orders_by_status as $order_status => $order_count ) {
+			foreach ( range( 1, $order_count ) as $_ ) {
+				$order = new \WC_Order();
+				$this->switch_data_store( $order, $this->sut );
+				$order->set_status( $order_status );
+				$order->set_date_modified( $now - DAY_IN_SECONDS );
+				$order->save();
+
+				if ( ! $order->is_paid() ) {
+					$unpaid_ids[] = $order->get_id();
+				}
+			}
+		}
+
+		// Confirm not all orders are unpaid.
+		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count('wc-completed') );
+
+		// Find unpaid orders.
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now - HOUR_IN_SECONDS ) );
+
+		// No unpaid orders from before yesterday.
+		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now - WEEK_IN_SECONDS ) );
+
+	}
+
+	/**
+	 * Test `get_order_id_by_order_key()`.
+	 *
+	 * @return void
+	 */
+	public function test_get_order_id_by_order_key() {
+		$order = new \WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_order_key( 'an_order_key' );
+		$order->save();
+
+		$this->assertEquals( $order->get_id(), $this->sut->get_order_id_by_order_key( 'an_order_key' ) );
+		$this->assertEquals( 0, $this->sut->get_order_id_by_order_key( 'other_order_key' ) );
+	}
+
+	/**
 	 * Helper function to delete all meta for post.
 	 *
 	 * @param int $post_id Post ID to delete data for.

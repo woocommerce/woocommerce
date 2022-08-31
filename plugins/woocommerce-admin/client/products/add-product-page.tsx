@@ -12,7 +12,9 @@ import { Product } from '@woocommerce/data';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
+import { PricingSection } from './sections/pricing-section';
 import './product-page.scss';
+import { validate } from './product-validation';
 
 const AddProductPage: React.FC = () => {
 	useEffect( () => {
@@ -21,10 +23,14 @@ const AddProductPage: React.FC = () => {
 
 	return (
 		<div className="woocommerce-add-product">
-			<Form< Partial< Product > > initialValues={ {} } errors={ {} }>
+			<Form< Partial< Product > >
+				initialValues={ {} }
+				errors={ {} }
+				validate={ validate }
+			>
 				<ProductFormLayout>
 					<ProductDetailsSection />
-
+					<PricingSection />
 					<ProductFormActions />
 				</ProductFormLayout>
 			</Form>
