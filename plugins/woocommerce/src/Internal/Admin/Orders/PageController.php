@@ -233,7 +233,9 @@ class PageController {
 	 * @return string
 	 */
 	public function get_new_page_url() : string {
-		return esc_url( admin_url( 'admin.php?page=wc-orders&action=new' ) );
+		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
+			admin_url( 'admin.php?page=wc-orders&action=new' ) :
+			admin_url( 'post-new.php?post_type=shop_order' );
 	}
 
 }

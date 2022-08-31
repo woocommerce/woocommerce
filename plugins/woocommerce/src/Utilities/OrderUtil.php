@@ -112,9 +112,7 @@ final class OrderUtil {
 	 * @return string Admin url for an order.
 	 */
 	public static function get_order_admin_edit_url( int $order_id ) : string {
-		return self::custom_orders_table_usage_is_enabled() ?
-			wc_get_container()->get( PageController::class )->get_edit_url( $order_id ) :
-			esc_url( admin_url( 'post.php?post=' . absint( $order_id ) . '&action=edit' ) );
+		return wc_get_container()->get( PageController::class )->get_edit_url( $order_id );
 	}
 
 	/**
@@ -123,8 +121,6 @@ final class OrderUtil {
 	 * @return string Link for new order.
 	 */
 	public static function get_order_admin_new_url() : string {
-		return self::custom_orders_table_usage_is_enabled() ?
-			wc_get_container()->get( PageController::class )->get_new_page_url() :
-			esc_url( admin_url( 'post-new.php?post_type=shop_order' ) );
+		return wc_get_container()->get( PageController::class )->get_new_page_url();
 	}
 }
