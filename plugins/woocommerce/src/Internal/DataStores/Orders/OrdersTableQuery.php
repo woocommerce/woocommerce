@@ -594,7 +594,7 @@ class OrdersTableQuery {
 
 		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
 			list( $offset, $row_count ) = $this->limits;
-			$row_count                  = $row_count === -1 ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
+			$row_count                  = -1 === $row_count ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
 			$limits                     = 'LIMIT ' . (int) $offset . ', ' . $row_count;
 		}
 
@@ -912,11 +912,11 @@ class OrdersTableQuery {
 		$offset    = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
 
 		// Bool false indicates no limit was specified; less than -1 means an invalid value was passed (such as -3).
-		if ( $row_count === false || $row_count < -1 ) {
+		if ( false === $row_count || $row_count < -1 ) {
 			return;
 		}
 
-		if ( $offset === false && $row_count > -1 ) {
+		if ( false === $offset && $row_count > -1 ) {
 			$offset = (int) ( ( $page - 1 ) * $row_count );
 		}
 
