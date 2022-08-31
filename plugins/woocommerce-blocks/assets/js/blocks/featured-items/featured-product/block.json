@@ -4,14 +4,18 @@
 	"title": "Featured Product",
 	"description": "Visually highlight a product or variation and encourage prompt action.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"color": {
 			"background": true,
-			"text": true,
-			"__experimentalDuotone": ".wc-block-featured-product__background-image"
+			"text": true
 		},
 		"spacing": {
 			"padding": true,
@@ -112,5 +116,6 @@
 		}
 	},
 	"textdomain": "woo-gutenberg-products-block",
-	"apiVersion": 2
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
