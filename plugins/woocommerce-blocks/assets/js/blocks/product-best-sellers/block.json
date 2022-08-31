@@ -88,7 +88,7 @@
 				"title",
 				"menu_order"
 			],
-			"default": "date"
+			"default": "popularity"
 		}
 	},
 	"textdomain": "woo-gutenberg-products-block",
