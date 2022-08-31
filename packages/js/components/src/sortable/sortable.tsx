@@ -139,7 +139,7 @@ export const Sortable = ( {
 					sprintf(
 						/** Translators: Selected item label */
 						__(
-							'%s selected. Use up and down arrow keys to reorder',
+							'%s selected, use up and down arrow keys to reorder',
 							'woocommerce'
 						),
 						selectedLabel
@@ -156,7 +156,7 @@ export const Sortable = ( {
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
 					__(
-						'%1$s dropped. Position in list: %2$d of %3$d',
+						'%1$s dropped, position in list: %2$d of %3$d',
 						'woocommerce'
 					),
 					selectedLabel,
@@ -183,7 +183,7 @@ export const Sortable = ( {
 			speak(
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
-					__( '%1$s. Position in list: %2$d of %3$d', 'woocommerce' ),
+					__( '%1$s, position in list: %2$d of %3$d', 'woocommerce' ),
 					selectedLabel,
 					previousDropIndex + 1,
 					items.length
@@ -202,7 +202,7 @@ export const Sortable = ( {
 			speak(
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
-					__( '%1$s. Position in list: %2$d of %3$d', 'woocommerce' ),
+					__( '%1$s, position in list: %2$d of %3$d', 'woocommerce' ),
 					selectedLabel,
 					nextDropIndex + 1,
 					items.length
