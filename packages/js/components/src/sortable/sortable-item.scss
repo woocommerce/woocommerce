@@ -8,6 +8,7 @@ $place-holder-size: 3px;
     &.is-dragging {
         opacity: 0;
         height: 0;
+        width: 0;
     }
 
     &:before,
