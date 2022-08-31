@@ -18,10 +18,8 @@ import { throttle } from 'lodash';
  * Internal dependencies
  */
 import {
-	getNextDropIndex,
-	getPreviousDropIndex,
-	getNextSelectedIndex,
-	getPreviousSelectedIndex,
+	getNextIndex,
+	getPreviousIndex,
 	isBefore,
 	isDraggingOverAfter,
 	isDraggingOverBefore,
@@ -104,14 +102,24 @@ export const Sortable = ( {
 		event: DragEvent< HTMLLIElement >,
 		index: number
 	) => {
-		const targetIndex = isBefore( event, isHorizontal ) ? index : index + 1;
+		if ( dragIndex === null ) {
+			return;
+		}
+
+		// Items before the current item cause a one off error when
+		// removed from the old array and spliced into the new array.
+		let targetIndex = dragIndex < index ? index : index + 1;
+		if ( isBefore( event, isHorizontal ) ) {
+			targetIndex--;
+		}
+
 		setDropIndex( targetIndex );
 		onDragOver( event );
 	};
 
 	const throttledHandleDragOver = useCallback(
 		throttle( handleDragOver, THROTTLE_TIME ),
-		[]
+		[ dragIndex ]
 	);
 
 	const handleKeyDown = (
@@ -139,13 +147,11 @@ export const Sortable = ( {
 					'assertive'
 				);
 				setDragIndex( selectedIndex );
-				setDropIndex( selectedIndex + 1 );
+				setDropIndex( selectedIndex );
 				return;
 			}
 
-			setSelectedIndex(
-				dropIndex > selectedIndex ? dropIndex - 1 : dropIndex
-			);
+			setSelectedIndex( dropIndex );
 			speak(
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
@@ -154,7 +160,7 @@ export const Sortable = ( {
 						'woocommerce'
 					),
 					selectedLabel,
-					dropIndex,
+					dropIndex + 1,
 					items.length
 				),
 				'assertive'
@@ -165,13 +171,12 @@ export const Sortable = ( {
 		if ( key === 'ArrowUp' ) {
 			if ( isSelecting ) {
 				setSelectedIndex(
-					getPreviousSelectedIndex( selectedIndex, items.length )
+					getPreviousIndex( selectedIndex, items.length )
 				);
 				return;
 			}
-			const previousDropIndex = getPreviousDropIndex(
+			const previousDropIndex = getPreviousIndex(
 				dropIndex,
-				dragIndex,
 				items.length
 			);
 			setDropIndex( previousDropIndex );
@@ -180,7 +185,7 @@ export const Sortable = ( {
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
 					__( '%1$s. Position in list: %2$d of %3$d', 'woocommerce' ),
 					selectedLabel,
-					previousDropIndex,
+					previousDropIndex + 1,
 					items.length
 				),
 				'assertive'
@@ -189,23 +194,17 @@ export const Sortable = ( {
 
 		if ( key === 'ArrowDown' ) {
 			if ( isSelecting ) {
-				setSelectedIndex(
-					getNextSelectedIndex( selectedIndex, items.length )
-				);
+				setSelectedIndex( getNextIndex( selectedIndex, items.length ) );
 				return;
 			}
-			const nextDropIndex = getNextDropIndex(
-				dropIndex,
-				dragIndex,
-				items.length
-			);
+			const nextDropIndex = getNextIndex( dropIndex, items.length );
 			setDropIndex( nextDropIndex );
 			speak(
 				sprintf(
 					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
 					__( '%1$s. Position in list: %2$d of %3$d', 'woocommerce' ),
 					selectedLabel,
-					nextDropIndex,
+					nextDropIndex + 1,
 					items.length
 				),
 				'assertive'
