@@ -605,6 +605,55 @@ class OrdersTableQuery {
 	}
 
 	/**
+	 * Returns the table alias for a given table mapping.
+	 *
+	 * @param string $mapping_id The mapping name (e.g. 'orders' or 'operational_data').
+	 * @return string Table alias.
+	 *
+	 * @since 7.0.0
+	 */
+	public function get_core_mapping_alias( string $mapping_id ): string {
+		return in_array( $mapping_id, array( 'billing_address', 'shipping_address' ), true )
+			? $mapping_id
+			: $this->tables[ $mapping_id ];
+	}
+
+	/**
+	 * Returns an SQL JOIN clause that can be used to join the main orders table with another order table.
+	 *
+	 * @param string $mapping_id The mapping name (e.g. 'orders' or 'operational_data').
+	 * @return string The JOIN clause.
+	 *
+	 * @since 7.0.0
+	 */
+	public function get_core_mapping_join( string $mapping_id ): string {
+		global $wpdb;
+
+		if ( 'orders' === $mapping_id ) {
+			return '';
+		}
+
+		$is_address_mapping = in_array( $mapping_id, array( 'billing_address', 'shipping_address' ), true );
+
+		$alias   = $this->get_core_mapping_alias( $mapping_id );
+		$table   = $is_address_mapping ? $this->tables['addresses'] : $this->tables[ $mapping_id ];
+		$join    = '';
+		$join_on = '';
+
+		$join .= "INNER JOIN {$table}" . ( $alias !== $table ? " AS {$alias}" : '' );
+
+		if ( isset( $this->mappings[ $mapping_id ]['order_id'] ) ) {
+			$join_on .= "{$this->tables['orders']}.id = {$alias}.order_id";
+		}
+
+		if ( $is_address_mapping ) {
+			$join_on .= $wpdb->prepare( " AND {$alias}.address_type = %s", substr( $mapping_id, 0, -8 ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+
+		return $join . ( $join_on ? " ON ( {$join_on} )" : '' );
+	}
+
+	/**
 	 * JOINs the main orders table with another table.
 	 *
 	 * @param string  $table      Table name (including prefix).
@@ -1004,6 +1053,75 @@ class OrdersTableQuery {
 		}
 
 		return $this->tables[ $table_id ];
+	}
+
+	/**
+	 * Finds table and mapping information about a field or column.
+	 *
+	 * @param string $field Field to look for in `<mapping|field_name>.<column|field_name>` format or just `<field_name>`.
+	 * @return false|array {
+	 *     @type string $table      Full table name where the field is located.
+	 *     @type string $mapping_id Unprefixed table or mapping name.
+	 *     @type string $field_name Name of the corresponding order field.
+	 *     @type string $column     Column in $table that corresponds to the field.
+	 *     @type string $type       Field type.
+	 * }
+	 */
+	public function get_field_mapping_info( $field ) {
+		global $wpdb;
+
+		$result = array(
+			'table'       => '',
+			'mapping_id'  => '',
+			'field_name'  => '',
+			'column'      => '',
+			'column_type' => '',
+		);
+
+		$mappings_to_search = array();
+
+		if ( false !== strstr( $field, '.' ) ) {
+			list( $mapping_or_table, $field_name_or_col ) = explode( '.', $field );
+
+			$mapping_or_table = substr( $mapping_or_table, 0, strlen( $wpdb->prefix ) ) === $wpdb->prefix ? substr( $mapping_or_table, strlen( $wpdb->prefix ) ) : $mapping_or_table;
+			$mapping_or_table = 'wc_' === substr( $mapping_or_table, 0, 3 ) ? substr( $mapping_or_table, 3 ) : $mapping_or_table;
+
+			if ( isset( $this->mappings[ $mapping_or_table ] ) ) {
+				if ( isset( $this->mappings[ $mapping_or_table ][ $field_name_or_col ] ) ) {
+					$result['mapping_id'] = $mapping_or_table;
+					$result['column']     = $field_name_or_col;
+				} else {
+					$mappings_to_search = array( $mapping_or_table );
+				}
+			}
+		} else {
+			$field_name_or_col  = $field;
+			$mappings_to_search = array_keys( $this->mappings );
+		}
+
+		foreach ( $mappings_to_search as $mapping_id ) {
+			foreach ( $this->mappings[ $mapping_id ] as $column_name => $column_data ) {
+				if ( isset( $column_data['name'] ) && $column_data['name'] === $field_name_or_col ) {
+					$result['mapping_id'] = $mapping_id;
+					$result['column']     = $column_name;
+					break 2;
+				}
+			}
+		}
+
+		if ( ! $result['mapping_id'] || ! $result['column'] ) {
+			return false;
+		}
+
+		$field_info = $this->mappings[ $result['mapping_id'] ][ $result['column'] ];
+
+		$result['field_name']  = $field_info['name'];
+		$result['column_type'] = $field_info['type'];
+		$result['table']       = ( in_array( $result['mapping_id'], array( 'billing_address', 'shipping_address' ), true ) )
+								? $this->tables['addresses']
+								: $this->tables[ $result['mapping_id'] ];
+
+		return $result;
 	}
 
 }
