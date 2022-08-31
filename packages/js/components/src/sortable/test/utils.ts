@@ -133,10 +133,6 @@ describe( 'isBefore', () => {
 	} );
 } );
 
-// index: number,
-// dragIndex: number | null,
-// dropIndex: number | null
-
 describe( 'isDraggingOverAfter', () => {
 	it( 'should return true when the drop index is immediately after this item', () => {
 		expect( isDraggingOverAfter( 0, 1, 1 ) ).toBeTruthy();
