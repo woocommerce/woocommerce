@@ -1,15 +1,18 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import {
 	createElement,
 	useCallback,
 	useEffect,
+	useRef,
 	useState,
 } from '@wordpress/element';
 import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
-import { drop, throttle } from 'lodash';
+import { speak } from '@wordpress/a11y';
+import { throttle } from 'lodash';
 
 /**
  * Internal dependencies
@@ -47,6 +50,7 @@ export const Sortable = ( {
 	onDragStart = () => null,
 	onOrderChange = () => null,
 }: SortableProps ) => {
+	const ref = useRef< HTMLOListElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
 	const [ selectedIndex, setSelectedIndex ] = useState< number >( 0 );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
@@ -113,9 +117,24 @@ export const Sortable = ( {
 	) => {
 		const { key } = event;
 		const isSelecting = dragIndex === null || dropIndex === null;
+		const selectedLabel =
+			ref.current &&
+			selectedIndex !== null &&
+			ref.current.childNodes[ selectedIndex ].textContent;
 
 		if ( key === ' ' ) {
 			if ( isSelecting ) {
+				speak(
+					sprintf(
+						/** Translators: Selected item label */
+						__(
+							'%s selected. Use up and down arrow keys to reorder',
+							'woocommerce'
+						),
+						selectedLabel
+					),
+					'assertive'
+				);
 				setDragIndex( selectedIndex );
 				setDropIndex( selectedIndex + 1 );
 				return;
@@ -123,6 +142,19 @@ export const Sortable = ( {
 
 			setSelectedIndex(
 				dropIndex > selectedIndex ? dropIndex - 1 : dropIndex
+			);
+			speak(
+				sprintf(
+					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
+					__(
+						'%1$s dropped. Position in list: %2$d of %3$d',
+						'woocommerce'
+					),
+					selectedLabel,
+					dropIndex,
+					items.length
+				),
+				'assertive'
 			);
 			persistItemOrder();
 		}
@@ -134,8 +166,21 @@ export const Sortable = ( {
 				);
 				return;
 			}
-			setDropIndex(
-				getPreviousDropIndex( dropIndex, dragIndex, items.length )
+			const previousDropIndex = getPreviousDropIndex(
+				dropIndex,
+				dragIndex,
+				items.length
+			);
+			setDropIndex( previousDropIndex );
+			speak(
+				sprintf(
+					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
+					__( '%1$s. Position in list: %2$d of %3$d', 'woocommerce' ),
+					selectedLabel,
+					previousDropIndex,
+					items.length
+				),
+				'assertive'
 			);
 		}
 
@@ -146,8 +191,21 @@ export const Sortable = ( {
 				);
 				return;
 			}
-			setDropIndex(
-				getNextDropIndex( dropIndex, dragIndex, items.length )
+			const nextDropIndex = getNextDropIndex(
+				dropIndex,
+				dragIndex,
+				items.length
+			);
+			setDropIndex( nextDropIndex );
+			speak(
+				sprintf(
+					/* translators: %1$s: Selected item label, %2$d: Current position in list, %3$d: List total length */
+					__( '%1$s. Position in list: %2$d of %3$d', 'woocommerce' ),
+					selectedLabel,
+					nextDropIndex,
+					items.length
+				),
+				'assertive'
 			);
 		}
 
@@ -156,6 +214,13 @@ export const Sortable = ( {
 				setDragIndex( null );
 				setDropIndex( null );
 			}, THROTTLE_TIME );
+			speak(
+				__(
+					'Reordering cancelled. Restoring the original list order',
+					'woocommerce'
+				),
+				'assertive'
+			);
 		}
 	};
 
@@ -165,6 +230,7 @@ export const Sortable = ( {
 				'is-dragging': dragIndex !== null,
 				'is-horizontal': isHorizontal,
 			} ) }
+			ref={ ref }
 			role="listbox"
 		>
 			{ items.map( ( child, index ) => {
