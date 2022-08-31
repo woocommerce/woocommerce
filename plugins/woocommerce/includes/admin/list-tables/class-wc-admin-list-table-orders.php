@@ -45,7 +45,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->orders_list_table = new ListTable();
+		$this->orders_list_table = wc_get_container()->get( ListTable::class );
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 		add_action( 'admin_footer', array( $this, 'order_preview_template' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
