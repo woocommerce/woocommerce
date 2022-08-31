@@ -1,13 +1,12 @@
-/**
- * Internal dependencies
- */
-import { ItemType, SelectedType } from './types';
-
-export const itemToString = ( item: ItemType | null ) => {
+export const getItemLabel = < ItemType >( item: ItemType | null ) => {
 	return item ? item.label : '';
 };
 
-export const getFilteredItems = (
+export const getItemValue = < ItemType >( item: ItemType | null ) => {
+	return item ? item.value : '';
+};
+
+export const getFilteredItems = < ItemType >(
 	allItems: ItemType[],
 	inputValue: string,
 	selectedItems: ItemType[]
@@ -15,6 +14,8 @@ export const getFilteredItems = (
 	return allItems.filter(
 		( item ) =>
 			selectedItems.indexOf( item ) < 0 &&
-			item.label.toLowerCase().startsWith( inputValue.toLowerCase() )
+			getItemLabel( item )
+				.toLowerCase()
+				.startsWith( inputValue.toLowerCase() )
 	);
 };

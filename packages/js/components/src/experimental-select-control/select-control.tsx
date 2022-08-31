@@ -4,27 +4,29 @@
 import classnames from 'classnames';
 import { createElement } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
-import { useState, Fragment } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { ChildrenType, ItemType } from './types';
+import { ChildrenType, DefaultItemType } from './types';
 import { SelectedItems } from './selected-items';
 import { ComboBox } from './combo-box';
 import { Menu } from './menu';
 import { MenuItem } from './menu-item';
 import {
-	itemToString as defaultItemToString,
+	getItemLabel as defaultGetItemLabel,
+	getItemValue as defaultGetItemValue,
 	getFilteredItems as defaultGetFilteredItems,
 } from './utils';
 
-type SelectControlProps = {
-	children?: ChildrenType;
+type SelectControlProps< ItemType > = {
+	children?: ChildrenType< ItemType >;
 	items: ItemType[];
 	label: string;
 	initialSelectedItems?: ItemType[];
-	itemToString?: ( item: ItemType | null ) => string;
+	getItemLabel?: ( item: ItemType | null ) => string;
+	getItemValue?: ( item: ItemType | null ) => string;
 	getFilteredItems?: (
 		allItems: ItemType[],
 		inputValue: string,
@@ -38,7 +40,7 @@ type SelectControlProps = {
 	selected: ItemType | ItemType[] | null;
 };
 
-export const SelectControl = ( {
+export const SelectControl = < ItemType = DefaultItemType, >( {
 	children = ( {
 		items,
 		highlightedIndex,
@@ -50,13 +52,13 @@ export const SelectControl = ( {
 			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
 				{ items.map( ( item, index: number ) => (
 					<MenuItem
-						key={ `${ item.value }${ index }` }
+						key={ `${ getItemValue( item ) }${ index }` }
 						index={ index }
 						isActive={ highlightedIndex === index }
 						item={ item }
 						getItemProps={ getItemProps }
 					>
-						{ item.label }
+						{ getItemLabel( item ) }
 					</MenuItem>
 				) ) }
 			</Menu>
@@ -65,14 +67,15 @@ export const SelectControl = ( {
 	multiple = false,
 	items,
 	label,
-	itemToString = defaultItemToString,
+	getItemLabel = defaultGetItemLabel,
+	getItemValue = defaultGetItemValue,
 	getFilteredItems = defaultGetFilteredItems,
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
 	placeholder,
 	selected,
-}: SelectControlProps ) => {
+}: SelectControlProps< ItemType > ) => {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
 	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
@@ -93,7 +96,7 @@ export const SelectControl = ( {
 	} = useCombobox( {
 		inputValue,
 		items: filteredItems,
-		itemToString,
+		itemToString: getItemLabel,
 		selectedItem: null,
 		onStateChange: ( { inputValue: value, type, selectedItem } ) => {
 			switch ( type ) {
@@ -108,7 +111,7 @@ export const SelectControl = ( {
 					if ( selectedItem ) {
 						onSelect( selectedItem );
 						setInputValue(
-							multiple ? '' : itemToString( selectedItem )
+							multiple ? '' : getItemLabel( selectedItem )
 						);
 					}
 
@@ -133,7 +136,8 @@ export const SelectControl = ( {
 				{ multiple && (
 					<SelectedItems
 						items={ selectedItems }
-						itemToString={ itemToString }
+						getItemLabel={ getItemLabel }
+						getItemValue={ getItemValue }
 						getSelectedItemProps={ getSelectedItemProps }
 						onRemove={ onRemove }
 					/>

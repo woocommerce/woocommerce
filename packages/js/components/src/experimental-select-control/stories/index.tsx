@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { CheckboxControl, Spinner } from '@wordpress/components';
-import React, { createElement } from 'react';
+import React from 'react';
 import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { ItemType, SelectedType } from '../types';
+import { SelectedType, DefaultItemType } from '../types';
 import { MenuItem } from '../menu-item';
 import { SelectControl } from '../';
 import { Menu } from '../menu';
@@ -22,7 +22,8 @@ const sampleItems = [
 ];
 
 export const Single: React.FC = () => {
-	const [ selected, setSelected ] = useState< SelectedType >( null );
+	const [ selected, setSelected ] =
+		useState< SelectedType< DefaultItemType > >( null );
 
 	return (
 		<>
@@ -39,7 +40,7 @@ export const Single: React.FC = () => {
 };
 
 export const Multiple: React.FC = () => {
-	const [ selected, setSelected ] = useState< ItemType[] >( [] );
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
 
 	return (
 		<>
@@ -61,12 +62,12 @@ export const Multiple: React.FC = () => {
 };
 
 export const FuzzyMatching: React.FC = () => {
-	const [ selected, setSelected ] = useState< ItemType[] >( [] );
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
 
 	const getFilteredItems = (
-		allItems: ItemType[],
+		allItems: DefaultItemType[],
 		inputValue: string,
-		selectedItems: ItemType[]
+		selectedItems: DefaultItemType[]
 	) => {
 		const pattern =
 			'.*' + inputValue.toLowerCase().split( '' ).join( '.*' ) + '.*';
@@ -96,8 +97,11 @@ export const FuzzyMatching: React.FC = () => {
 };
 
 export const Async: React.FC = () => {
-	const [ selectedItem, setSelectedItem ] = useState< SelectedType >( null );
-	const [ fetchedItems, setFetchedItems ] = useState< ItemType[] >( [] );
+	const [ selectedItem, setSelectedItem ] =
+		useState< SelectedType< DefaultItemType > >( null );
+	const [ fetchedItems, setFetchedItems ] = useState< DefaultItemType[] >(
+		[]
+	);
 	const [ isFetching, setIsFetching ] = useState( false );
 
 	const fetchItems = ( value: string | undefined ) => {
@@ -153,7 +157,7 @@ export const Async: React.FC = () => {
 };
 
 export const CustomRender: React.FC = () => {
-	const [ selected, setSelected ] = useState< ItemType[] >( [] );
+	const [ selected, setSelected ] = useState< DefaultItemType[] >( [] );
 
 	const onRemove = ( item ) => {
 		setSelected( selected.filter( ( i ) => i !== item ) );
