@@ -7,7 +7,7 @@
 	"main": "Gruntfile.js",
 	"scripts": {
 		"turbo:build": "grunt assets",
-		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build -- --",
+		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build --",
 		"lint": "grunt eslint stylelint --force"
 	},
 	"devDependencies": {

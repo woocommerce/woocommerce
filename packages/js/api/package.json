@@ -28,13 +28,13 @@
 	"scripts": {
 		"turbo:build": "pnpm run clean && npm run compile",
 		"turbo:test": "jest",
-		"test": "pnpm --filter=$npm_package_name -w exec turbo run turbo:test -- --",
+		"test": "pnpm --filter=$npm_package_name -w exec turbo run turbo:test --",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
 		"compile": "tsc -b",
 		"prepack": "pnpm run build",
-		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build -- --",
+		"build": "pnpm --filter=$npm_package_name -w exec turbo run turbo:build --",
 		"lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},
