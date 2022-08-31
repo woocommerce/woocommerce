@@ -7,11 +7,13 @@ import { DragEvent } from 'react';
  * Internal dependencies
  */
 import {
-	moveIndex,
+	getNextIndex,
+	getPreviousIndex,
 	isBefore,
 	isDraggingOverAfter,
 	isDraggingOverBefore,
 	isLastDroppable,
+	moveIndex,
 } from '../utils';
 
 describe( 'moveIndex', () => {
@@ -172,5 +174,25 @@ describe( 'isLastDroppable', () => {
 
 	it( 'should return true on the second to last item when the last item is being dragged', () => {
 		expect( isLastDroppable( 3, 4, 5 ) ).toBeTruthy();
+	} );
+} );
+
+describe( 'getNextIndex', () => {
+	it( 'should return the next index when one exists', () => {
+		expect( getNextIndex( 1, 5 ) ).toBe( 2 );
+	} );
+
+	it( 'should return 0 when the end of the list has been reached', () => {
+		expect( getNextIndex( 4, 5 ) ).toBe( 0 );
+	} );
+} );
+
+describe( 'getPreviousIndex', () => {
+	it( 'should return the previous index when one exists', () => {
+		expect( getPreviousIndex( 3, 5 ) ).toBe( 2 );
+	} );
+
+	it( 'should return the last index when the beginning of the list has been reached', () => {
+		expect( getPreviousIndex( 0, 5 ) ).toBe( 4 );
 	} );
 } );
