@@ -15,7 +15,6 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_tracker_reports_only_android_usage() {
 		$now = new DateTime( '2022-08-05T00:00:00+00:00' );
-
 		update_option(
 			'woocommerce_mobile_app_usage',
 			array(
@@ -32,4 +31,23 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 			$mobile_message
 		);
 	}
+
+	/**
+	 * Tests if SUT returns correct message when there are no mobile app usages reported
+	 */
+	public function test_show_get_app_message_when_no_mobile_reports_at_all() {
+		$now = new DateTime( '2022-08-05T00:00:00+00:00' );
+		update_option(
+			'woocommerce_mobile_app_usage',
+			array()
+		);
+
+		$mobile_message = WC_Mobile_Messaging_Handler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now );
+
+		$this->assertEquals(
+			'Process your orders on the go. <a href="https://woocommerce.com/mobile/">Get the app</a>.',
+			$mobile_message
+		);
+	}
+
 }

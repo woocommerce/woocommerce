@@ -31,7 +31,7 @@ class WC_Mobile_Messaging_Handler {
 		try {
 			$last_mobile_used = self::get_closer_mobile_usage_date();
 
-			$used_app_in_last_month = $last_mobile_used->diff( $now )->days <= self::OPEN_ORDER_INTERVAL_DAYS;
+			$used_app_in_last_month = null !== $last_mobile_used && $last_mobile_used->diff( $now )->days <= self::OPEN_ORDER_INTERVAL_DAYS;
 			$has_jetpack            = null !== $blog_id;
 
 			if ( $used_app_in_last_month && $has_jetpack ) {
@@ -98,6 +98,10 @@ class WC_Mobile_Messaging_Handler {
 	 */
 	private static function get_closer_mobile_usage_date(): ?DateTime {
 		$mobile_usage = WC_Tracker::get_woocommerce_mobile_usage();
+
+		if ( ! $mobile_usage ) {
+			return null;
+		}
 
 		$last_ios_used     = self::get_last_used_or_null( 'ios', $mobile_usage );
 		$last_android_used = self::get_last_used_or_null( 'android', $mobile_usage );
