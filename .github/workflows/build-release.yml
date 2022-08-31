@@ -14,7 +14,7 @@ jobs:
           workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
 
       - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
+        run: npm install -g pnpm@^7.9.5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
