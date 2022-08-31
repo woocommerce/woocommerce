@@ -9,12 +9,16 @@ import {
 	useState,
 } from '@wordpress/element';
 import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
-import { throttle } from 'lodash';
+import { drop, throttle } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import {
+	getNextDropIndex,
+	getPreviousDropIndex,
+	getNextSelectedIndex,
+	getPreviousSelectedIndex,
 	isBefore,
 	isDraggingOverAfter,
 	isDraggingOverBefore,
@@ -104,17 +108,20 @@ export const Sortable = ( {
 		index: number
 	) => {
 		const { key } = event;
+		const isSelecting = dragIndex === null || dropIndex === null;
 
 		if ( key === ' ' ) {
-			if ( dragIndex === null || dropIndex === null ) {
+			if ( isSelecting ) {
 				setDragIndex( selectedIndex );
-				setDropIndex( selectedIndex );
+				setDropIndex( selectedIndex + 1 );
 				return;
 			}
 
 			const nextItems = moveIndex( dragIndex, dropIndex, items );
 			setItems( nextItems as JSX.Element[] );
-			setSelectedIndex( dropIndex );
+			setSelectedIndex(
+				dropIndex > selectedIndex ? dropIndex - 1 : dropIndex
+			);
 			onOrderChange( nextItems );
 
 			setTimeout( () => {
@@ -124,21 +131,27 @@ export const Sortable = ( {
 		}
 
 		if ( key === 'ArrowUp' ) {
-			if ( dragIndex === null || dropIndex === null ) {
-				setSelectedIndex( Math.max( 0, selectedIndex - 1 ) );
-				return;
-			}
-			setDropIndex( Math.max( 0, dropIndex - 1 ) );
-		}
-
-		if ( key === 'ArrowDown' ) {
-			if ( dragIndex === null || dropIndex === null ) {
+			if ( isSelecting ) {
 				setSelectedIndex(
-					Math.min( items.length - 1, selectedIndex + 1 )
+					getPreviousSelectedIndex( selectedIndex, items.length )
 				);
 				return;
 			}
-			setDropIndex( Math.min( items.length, dropIndex + 1 ) );
+			setDropIndex(
+				getPreviousDropIndex( dropIndex, dragIndex, items.length )
+			);
+		}
+
+		if ( key === 'ArrowDown' ) {
+			if ( isSelecting ) {
+				setSelectedIndex(
+					getNextSelectedIndex( selectedIndex, items.length )
+				);
+				return;
+			}
+			setDropIndex(
+				getNextDropIndex( dropIndex, dragIndex, items.length )
+			);
 		}
 
 		if ( key === 'Escape' ) {
