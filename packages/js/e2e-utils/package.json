@@ -15,7 +15,8 @@
 		"@wordpress/deprecated": "^3.2.3",
 		"@wordpress/e2e-test-utils": "wp-5.8",
 		"config": "3.3.3",
-		"fishery": "^1.2.0"
+		"fishery": "^1.2.0",
+		"react-native": "*"
 	},
 	"devDependencies": {
 		"@babel/cli": "7.12.8",

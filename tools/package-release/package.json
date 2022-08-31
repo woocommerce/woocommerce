@@ -23,6 +23,10 @@
 		"@types/semver": "^7.3.10",
 		"semver": "^7.3.2"
 	},
+	"peerDependencies": {
+		"mem-fs": "^2.0.0",
+		"mem-fs-editor": "^9.0.0"
+	},
 	"devDependencies": {
 		"@types/node": "^16.9.4",
 		"@woocommerce/eslint-plugin": "workspace:*",
