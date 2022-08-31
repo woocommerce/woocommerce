@@ -145,9 +145,8 @@ export const PricingSection: React.FC = () => {
 			</div>
 
 			<div className="woocommerce-product-form__custom-label-input">
-				<label htmlFor="sale_price">{ salePriceTitle }</label>
 				<InputControl
-					hideLabelFromVision={ true }
+					label={ salePriceTitle }
 					id="sale_price"
 					placeholder={ __( '8.59', 'woocommerce' ) }
 					{ ...getInputControlProps( {
