@@ -59,7 +59,7 @@ export const Sortable = ( {
 		setItems( Array.isArray( children ) ? children : [ children ] );
 	}, [ children ] );
 
-	const updateItemOrder = () => {
+	const persistItemOrder = () => {
 		if (
 			dropIndex !== null &&
 			dragIndex !== null &&
@@ -89,7 +89,7 @@ export const Sortable = ( {
 		event: DragEvent< HTMLDivElement >,
 		index: number
 	) => {
-		updateItemOrder();
+		persistItemOrder();
 		onDragEnd( event );
 	};
 
@@ -124,7 +124,7 @@ export const Sortable = ( {
 			setSelectedIndex(
 				dropIndex > selectedIndex ? dropIndex - 1 : dropIndex
 			);
-			updateItemOrder();
+			persistItemOrder();
 		}
 
 		if ( key === 'ArrowUp' ) {
