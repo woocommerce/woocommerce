@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Initialize order dates in the COT datastore using the correct timezone.

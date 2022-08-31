@@ -885,6 +885,11 @@ class WC_Shop_Customizer {
 	}
 }
 
-if ( ! wc_current_theme_is_fse_theme() ) {
+global $pagenow;
+if (
+	$pagenow === 'customize.php' ||
+	isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	! wc_current_theme_is_fse_theme()
+) {
 	new WC_Shop_Customizer();
 }

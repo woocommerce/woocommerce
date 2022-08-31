@@ -20,7 +20,9 @@ import { useParams } from 'react-router-dom';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormActions } from './product-form-actions';
 import { ProductDetailsSection } from './sections/product-details-section';
+import { PricingSection } from './sections/pricing-section';
 import './product-page.scss';
+import { validate } from './product-validation';
 
 const EditProductPage: React.FC = () => {
 	const { productId } = useParams();
@@ -117,10 +119,12 @@ const EditProductPage: React.FC = () => {
 					<Form< Partial< Product > >
 						ref={ formRef }
 						initialValues={ product || {} }
+						validate={ validate }
 						errors={ {} }
 					>
 						<ProductFormLayout>
 							<ProductDetailsSection />
+							<PricingSection />
 
 							<ProductFormActions />
 						</ProductFormLayout>

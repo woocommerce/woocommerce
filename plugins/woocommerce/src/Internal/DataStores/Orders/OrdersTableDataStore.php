@@ -828,11 +828,18 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 				if ( ! isset( $prop_details['name'] ) ) {
 					continue;
 				}
+
+				$prop_value = $order_data->{$prop_details['name']};
+
+				if ( 'date' === $prop_details['type'] ) {
+					$prop_value = $this->string_to_timestamp( $prop_value );
+				}
+
 				$prop_setter_function_name = "set_{$prop_details['name']}";
 				if ( is_callable( array( $order, $prop_setter_function_name ) ) ) {
-					$order->{$prop_setter_function_name}( $order_data->{$prop_details['name']} );
+					$order->{$prop_setter_function_name}( $prop_value );
 				} elseif ( is_callable( array( $this, $prop_setter_function_name ) ) ) {
-					$this->{$prop_setter_function_name}( $order, $order_data->{$prop_details['name']}, false );
+					$this->{$prop_setter_function_name}( $order, $prop_value, false );
 				}
 			}
 		}

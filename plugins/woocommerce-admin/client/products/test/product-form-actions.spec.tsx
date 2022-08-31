@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { ProductFormActions } from '../product-form-actions';
+import { validate } from '../product-validation';
 
 const createProductWithStatus = jest.fn();
 const updateProductWithStatus = jest.fn();
@@ -415,5 +416,72 @@ describe( 'ProductFormActions', () => {
 				expect( copyProductWithStatus ).toHaveBeenCalledWith( product )
 			);
 		} );
+	} );
+} );
+
+describe( 'Validations', () => {
+	it( 'should not allow an empty product name', () => {
+		const nameErrorMessage = 'This field is required.';
+		const priceErrorMessage =
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
+		const salePriceErrorMessage =
+			'Please enter a price with one monetary decimal point without thousand separators and currency symbols.';
+		const productWithoutName: Partial< Product > = {
+			name: '',
+		};
+		const productPriceWithText: Partial< Product > = {
+			name: 'My Product',
+			regular_price: 'text',
+		};
+		const productPriceWithNotAllowedCharacters: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '%&@#¢∞¬÷200',
+		};
+		const productPriceWithSpaces: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '2 0 0',
+		};
+		const productSalePriceWithText: Partial< Product > = {
+			name: 'My Product',
+			sale_price: 'text',
+		};
+		const productSalePriceWithNotAllowedCharacters: Partial< Product > = {
+			name: 'My Product',
+			sale_price: '%&@#¢∞¬÷200',
+		};
+		const productSalePriceWithSpaces: Partial< Product > = {
+			name: 'My Product',
+			sale_price: '2 0 0',
+		};
+		const validProduct: Partial< Product > = {
+			name: 'My Product',
+			regular_price: '200',
+			sale_price: '199',
+		};
+		expect( validate( productWithoutName ) ).toEqual( {
+			name: nameErrorMessage,
+		} );
+		expect( validate( productPriceWithText ) ).toEqual( {
+			regular_price: priceErrorMessage,
+		} );
+		expect( validate( productPriceWithNotAllowedCharacters ) ).toEqual( {
+			regular_price: priceErrorMessage,
+		} );
+		expect( validate( productPriceWithSpaces ) ).toEqual( {
+			regular_price: priceErrorMessage,
+		} );
+
+		expect( validate( productSalePriceWithText ) ).toEqual( {
+			sale_price: salePriceErrorMessage,
+		} );
+		expect( validate( productSalePriceWithNotAllowedCharacters ) ).toEqual(
+			{
+				sale_price: salePriceErrorMessage,
+			}
+		);
+		expect( validate( productSalePriceWithSpaces ) ).toEqual( {
+			sale_price: salePriceErrorMessage,
+		} );
+		expect( validate( validProduct ) ).toEqual( {} );
 	} );
 } );

@@ -166,6 +166,9 @@ export class StoreDetails extends Component {
 		const profileItemsToUpdate = {
 			is_agree_marketing: values.isAgreeMarketing,
 			store_email: values.storeEmail,
+			is_store_country_set:
+				typeof values.countryState === 'string' &&
+				values.countryState !== '',
 		};
 
 		const region = getCurrencyRegion( values.countryState );
@@ -464,12 +467,12 @@ export default compose(
 		errorsRef.current = {
 			settings: getSettingsError( 'general' ),
 		};
-		// Check if a store address is set so that we don't default
-		// to WooCommerce's default country of the UK.
-		const countryState =
-			( settings.woocommerce_store_address &&
-				settings.woocommerce_default_country ) ||
-			'';
+		// Check if a store country is set so that we don't default
+		// to WooCommerce's default country of the US:CA.
+		const countryState = profileItems.is_store_country_set
+			? settings.woocommerce_default_country
+			: '';
+
 		getCountries();
 		getLocales();
 
