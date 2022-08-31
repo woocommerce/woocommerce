@@ -130,6 +130,13 @@ class OrdersTableQuery {
 	private $found_orders = 0;
 
 	/**
+	 * Field query parser.
+	 *
+	 * @var OrdersTableFieldQuery
+	 */
+	private $field_query = null;
+
+	/**
 	 * Meta query parser.
 	 *
 	 * @var OrdersTableMetaQuery
@@ -527,6 +534,14 @@ class OrdersTableQuery {
 	private function build_query(): void {
 		$this->maybe_remap_args();
 
+		// Field queries.
+		if ( ! empty( $this->args['field_query'] ) ) {
+			$this->field_query = new OrdersTableFieldQuery( $this );
+			$sql               = $this->field_query->get_sql_clauses();
+			$this->join        = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
+			$this->where       = $sql['where'] ? array_merge( $this->where, $sql['where'] ) : $this->where;
+		}
+
 		// Build query.
 		$this->process_date_args();
 		$this->process_orders_table_query_args();
@@ -578,7 +593,7 @@ class OrdersTableQuery {
 		}
 
 		// JOIN.
-		$join = implode( ' ', $this->join );
+		$join = implode( ' ', array_unique( array_filter( array_map( 'trim', $this->join ) ) ) );
 
 		// WHERE.
 		$where = '1=1';
