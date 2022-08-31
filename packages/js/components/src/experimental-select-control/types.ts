@@ -38,6 +38,8 @@ export type ChildrenProps< ItemType > = {
 	highlightedIndex: number;
 	getItemProps: getItemPropsType< ItemType >;
 	getMenuProps: getMenuPropsType;
+	getItemLabel: getItemLabelType< ItemType >;
+	getItemValue: getItemValueType< ItemType >;
 };
 
 export type ChildrenType< ItemType > = ( {

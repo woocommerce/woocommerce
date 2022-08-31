@@ -172,6 +172,8 @@ export const SelectControl = < ItemType = DefaultItemType, >( {
 				getItemProps,
 				getMenuProps,
 				isOpen,
+				getItemLabel,
+				getItemValue,
 			} ) }
 		</div>
 	);
