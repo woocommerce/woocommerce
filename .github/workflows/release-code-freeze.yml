@@ -80,7 +80,7 @@ jobs:
           tools: composer
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: "Run the script to enforce the code freeze"
         id: freeze

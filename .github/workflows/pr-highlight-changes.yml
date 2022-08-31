@@ -13,7 +13,7 @@ jobs:
               run: |
                   npm install -g pnpm@^7.9.5
                   npm -g i @wordpress/env@5.1.0
-                  pnpm install --filter code-analyzer
+                  pnpm --filter code-analyzer install --no-frozen-lockfile
             - name: Run analyzer
               id: run
               run: |

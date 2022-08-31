@@ -43,7 +43,7 @@ jobs:
         run: git checkout -b ${{ format( 'update/{0}-changelog', inputs.releaseVersion ) }}
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: "Generate the changelog file"
         run: pnpm --filter=woocommerce changelog -- write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}

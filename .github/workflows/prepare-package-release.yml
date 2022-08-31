@@ -26,7 +26,7 @@ jobs:
               run: npm install -g pnpm@^7.9.5
 
             - name: Install dependencies
-              run: pnpm install
+              run: pnpm install --no-frozen-lockfile
 
             - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}
