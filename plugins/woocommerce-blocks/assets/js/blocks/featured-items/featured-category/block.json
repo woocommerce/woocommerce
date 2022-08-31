@@ -3,15 +3,19 @@
 	"version": "1.0.0",
 	"title": "Featured Category",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"description": "Visually highlight a product category and encourage prompt action.",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"color": {
 			"background": true,
-			"text": true,
-			"__experimentalDuotone": ".wc-block-featured-category__background-image"
+			"text": true
 		},
 		"spacing": {
 			"padding": true,
@@ -106,5 +110,6 @@
 		}
 	},
 	"textdomain": "woo-gutenberg-products-block",
-	"apiVersion": 2
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
