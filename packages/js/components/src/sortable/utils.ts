@@ -111,3 +111,65 @@ export const isLastDroppable = (
 
 	return false;
 };
+
+export const getNextDropIndex = (
+	currentIndex: number,
+	dragIndex: number,
+	itemCount: number
+) => {
+	let index = currentIndex + 1;
+
+	if ( dragIndex === index ) {
+		index++;
+	}
+
+	if ( index > itemCount ) {
+		index = 0;
+	}
+
+	return index;
+};
+
+export const getPreviousDropIndex = (
+	currentIndex: number,
+	dragIndex: number,
+	itemCount: number
+) => {
+	let index = currentIndex - 1;
+
+	if ( dragIndex === index ) {
+		index--;
+	}
+
+	if ( index < 0 ) {
+		index = itemCount;
+	}
+
+	return index;
+};
+
+export const getNextSelectedIndex = (
+	currentIndex: number,
+	itemCount: number
+) => {
+	let index = currentIndex + 1;
+
+	if ( index > itemCount - 1 ) {
+		index = 0;
+	}
+
+	return index;
+};
+
+export const getPreviousSelectedIndex = (
+	currentIndex: number,
+	itemCount: number
+) => {
+	let index = currentIndex - 1;
+
+	if ( index < 0 ) {
+		index = itemCount - 1;
+	}
+
+	return index;
+};
