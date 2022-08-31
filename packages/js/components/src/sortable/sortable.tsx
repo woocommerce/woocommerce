@@ -59,19 +59,7 @@ export const Sortable = ( {
 		setItems( Array.isArray( children ) ? children : [ children ] );
 	}, [ children ] );
 
-	const handleDragStart = (
-		event: DragEvent< HTMLDivElement >,
-		index: number
-	) => {
-		setDropIndex( index );
-		setDragIndex( index );
-		onDragStart( event );
-	};
-
-	const handleDragEnd = (
-		event: DragEvent< HTMLDivElement >,
-		index: number
-	) => {
+	const updateItemOrder = () => {
 		if (
 			dropIndex !== null &&
 			dragIndex !== null &&
@@ -85,8 +73,24 @@ export const Sortable = ( {
 		setTimeout( () => {
 			setDragIndex( null );
 			setDropIndex( null );
-			onDragEnd( event );
 		}, THROTTLE_TIME );
+	};
+
+	const handleDragStart = (
+		event: DragEvent< HTMLDivElement >,
+		index: number
+	) => {
+		setDropIndex( index );
+		setDragIndex( index );
+		onDragStart( event );
+	};
+
+	const handleDragEnd = (
+		event: DragEvent< HTMLDivElement >,
+		index: number
+	) => {
+		updateItemOrder();
+		onDragEnd( event );
 	};
 
 	const handleDragOver = (
@@ -117,17 +121,10 @@ export const Sortable = ( {
 				return;
 			}
 
-			const nextItems = moveIndex( dragIndex, dropIndex, items );
-			setItems( nextItems as JSX.Element[] );
 			setSelectedIndex(
 				dropIndex > selectedIndex ? dropIndex - 1 : dropIndex
 			);
-			onOrderChange( nextItems );
-
-			setTimeout( () => {
-				setDragIndex( null );
-				setDropIndex( null );
-			}, THROTTLE_TIME );
+			updateItemOrder();
 		}
 
 		if ( key === 'ArrowUp' ) {
