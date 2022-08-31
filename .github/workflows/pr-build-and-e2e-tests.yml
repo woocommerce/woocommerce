@@ -28,7 +28,7 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=woocommerce
+              run: pnpm --filter=woocommerce env:test
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -88,7 +88,7 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=woocommerce
+              run: pnpm --filter=woocommerce env:test
 
             - name: Run tests command.
               working-directory: plugins/woocommerce
@@ -129,8 +129,8 @@ jobs:
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               run: |
-                pnpm env:dev --filter=woocommerce
-                pnpm env:performance-init --filter=woocommerce
+                pnpm --filter=woocommerce env:dev
+                pnpm --filter=woocommerce env:performance-init
 
             - name: Install k6
               run: |

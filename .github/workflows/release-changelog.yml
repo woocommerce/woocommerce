@@ -46,7 +46,7 @@ jobs:
         run: pnpm install
 
       - name: "Generate the changelog file"
-        run: pnpm changelog --filter=woocommerce -- write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
+        run: pnpm --filter=woocommerce changelog -- write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
         
       - name: "git rm deleted files"
         run: git rm $(git ls-files --deleted)

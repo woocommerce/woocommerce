@@ -36,4 +36,4 @@ jobs:
         run: pnpm install
 
       - name: Run changelog validation
-        run: pnpm changelog --filter=* -- validate
+        run: pnpm --filter=* changelog -- validate
