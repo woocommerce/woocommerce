@@ -3,6 +3,10 @@
  */
 import ora, { Ora } from 'ora';
 import chalk from 'chalk';
+
+/**
+ * Internal dependencies
+ */
 import { getEnvVar } from './environment';
 
 const { log, error, warn } = console;

@@ -15,7 +15,8 @@ import { processChanges } from '../lib/process-changes';
 import { createWpComDraftPost } from '../lib/draft-post';
 import { generateContributors } from '../lib/contributors';
 import { Logger } from '../lib/logger';
-import { getEnvVar } from '../lib/environment';
+
+const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
 const VERSION_VALIDATION_REGEX =
 	/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
@@ -102,16 +103,13 @@ program
 			} else {
 				Logger.startTask( 'Publishing draft release post' );
 
-				const response = await createWpComDraftPost(
-					'96396764',
-					getEnvVar( 'WCCOM_TOKEN', true ),
+				const { URL } = await createWpComDraftPost(
+					DEVELOPER_WOOCOMMERCE_SITE_ID,
 					title,
 					html
 				);
 
-				Logger.notice(
-					`Published draft release post at ${ response.URL }`
-				);
+				Logger.notice( `Published draft release post at ${ URL }` );
 				Logger.endTask();
 			}
 		} else {
