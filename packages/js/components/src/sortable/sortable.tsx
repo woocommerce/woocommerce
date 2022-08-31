@@ -44,6 +44,7 @@ export const Sortable = ( {
 	onOrderChange = () => null,
 }: SortableProps ) => {
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
+	const [ selectedIndex, setSelectedIndex ] = useState< number >( 0 );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
 	const [ dropIndex, setDropIndex ] = useState< number | null >( null );
 
@@ -106,13 +107,14 @@ export const Sortable = ( {
 
 		if ( key === ' ' ) {
 			if ( dragIndex === null || dropIndex === null ) {
-				setDragIndex( index );
-				setDropIndex( index );
+				setDragIndex( selectedIndex );
+				setDropIndex( selectedIndex );
 				return;
 			}
 
 			const nextItems = moveIndex( dragIndex, dropIndex, items );
 			setItems( nextItems as JSX.Element[] );
+			setSelectedIndex( dropIndex );
 			onOrderChange( nextItems );
 
 			setTimeout( () => {
@@ -123,6 +125,7 @@ export const Sortable = ( {
 
 		if ( key === 'ArrowUp' ) {
 			if ( dragIndex === null || dropIndex === null ) {
+				setSelectedIndex( Math.max( 0, selectedIndex - 1 ) );
 				return;
 			}
 			setDropIndex( Math.max( 0, dropIndex - 1 ) );
@@ -130,6 +133,9 @@ export const Sortable = ( {
 
 		if ( key === 'ArrowDown' ) {
 			if ( dragIndex === null || dropIndex === null ) {
+				setSelectedIndex(
+					Math.min( items.length - 1, selectedIndex + 1 )
+				);
 				return;
 			}
 			setDropIndex( Math.min( items.length, dropIndex + 1 ) );
@@ -144,7 +150,7 @@ export const Sortable = ( {
 	};
 
 	return (
-		<ul
+		<ol
 			className={ classnames( 'woocommerce-sortable', {
 				'is-dragging': dragIndex !== null,
 				'is-horizontal': isHorizontal,
@@ -177,6 +183,7 @@ export const Sortable = ( {
 						id={ index }
 						index={ index }
 						isDragging={ isDragging }
+						isSelected={ selectedIndex === index }
 						onDragEnd={ ( event ) => handleDragEnd( event, index ) }
 						onDragStart={ ( event ) =>
 							handleDragStart( event, index )
@@ -191,6 +198,6 @@ export const Sortable = ( {
 					</SortableItem>
 				);
 			} ) }
-		</ul>
+		</ol>
 	);
 };
