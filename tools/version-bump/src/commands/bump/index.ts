@@ -46,7 +46,7 @@ export default class VersionBump extends Command {
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( VersionBump );
 
-		const nextVersion = flags.version;
+		let nextVersion = flags.version;
 
 		if ( ! valid( nextVersion ) ) {
 			this.error(
@@ -62,16 +62,40 @@ export default class VersionBump extends Command {
 			);
 		}
 
-		const isPrerelease = !! prerelease( nextVersion );
+		const prereleaseParameters = prerelease( nextVersion );
+		const isPrerelease = !! prereleaseParameters;
+		const isDevVersionBump = prereleaseParameters[ 0 ] === 'dev';
 
 		this.updatePluginFile( nextVersion );
 
-		if ( isPrerelease ) {
+		if ( isPrerelease && ! isDevVersionBump ) {
+			// Prereleases such as beta or rc only bump the plugin file.
 			return;
+		}
+
+		if ( isDevVersionBump ) {
+			nextVersion = nextVersion.replace( '-dev', '' );
+		}
+
+		this.updateComposerJSON( nextVersion );
+	}
+
+	private updateComposerJSON( nextVersion: string ): void {
+		try {
+			const composerJson = JSON.parse(
+				readFileSync( 'plugins/woocommerce/composer.json', 'utf8' )
+			);
+			composerJson.version = nextVersion;
+			writeFileSync(
+				'plugins/woocommerce/composer.json',
+				JSON.stringify( composerJson, null, '\t' ) + '\n'
+			);
+		} catch ( e ) {
+			this.error( 'Unable to update composer.json' );
 		}
 	}
 
-	private updatePluginFile( nextVersion: string ): boolean {
+	private updatePluginFile( nextVersion: string ): void {
 		try {
 			const pluginFileContents = readFileSync(
 				'plugins/woocommerce/woocommerce.php',
@@ -86,9 +110,8 @@ export default class VersionBump extends Command {
 				'plugins/woocommerce/woocommerce.php',
 				updatedPluginFileContenst
 			);
-			return true;
 		} catch ( e ) {
-			this.error( 'Unable to read current version.' );
+			this.error( 'Unable to update plugin file.' );
 		}
 	}
 
