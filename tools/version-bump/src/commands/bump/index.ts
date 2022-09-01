@@ -77,10 +77,56 @@ export default class VersionBump extends Command {
 		if ( isDevVersionBump ) {
 			// When updating to a dev version, only the plugin file gets the '-dev'.
 			nextVersion = nextVersion.replace( '-dev', '' );
+			// Bumping the dev version means updating the readme's changelog.
+			//@todo: do we do this for minor bumps too?
+			this.updateReadmeChangelog( nextVersion );
 		}
 
 		this.updateComposerJSON( nextVersion );
 		this.updateClassPluginFile( nextVersion );
+		this.updateReadmeStableTag( nextVersion );
+	}
+
+	private updateReadmeStableTag( nextVersion: string ): void {
+		try {
+			const readmeContents = readFileSync(
+				'plugins/woocommerce/readme.txt',
+				'utf8'
+			);
+
+			const updatedReadmeContents = readmeContents.replace(
+				/Stable tag: \d.\d.\d\n/m,
+				`Stable tag: ${ nextVersion }\n`
+			);
+
+			writeFileSync(
+				'plugins/woocommerce/readme.txt',
+				updatedReadmeContents
+			);
+		} catch ( e ) {
+			this.error( 'Unable to update readme stable tag' );
+		}
+	}
+
+	private updateReadmeChangelog( nextVersion: string ): void {
+		try {
+			const readmeContents = readFileSync(
+				'plugins/woocommerce/readme.txt',
+				'utf8'
+			);
+
+			const updatedReadmeContents = readmeContents.replace(
+				/= \d.\d.\d \d\d\d\d-XX-XX =\n/m,
+				`= ${ nextVersion } ${ new Date().getFullYear() }-XX-XX =\n`
+			);
+
+			writeFileSync(
+				'plugins/woocommerce/readme.txt',
+				updatedReadmeContents
+			);
+		} catch ( e ) {
+			this.error( 'Unable to update readme changelog' );
+		}
 	}
 
 	private updateClassPluginFile( nextVersion: string ): void {
