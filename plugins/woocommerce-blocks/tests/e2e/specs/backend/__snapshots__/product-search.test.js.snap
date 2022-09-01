@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Product Search Block can change field labels in editor 1`] = `"<!-- wp:woocommerce/product-search {\\"label\\":\\"The Label\\",\\"placeholder\\":\\"The Placeholder\\",\\"formId\\":\\"wc-block-product-search-1\\"} /-->"`;

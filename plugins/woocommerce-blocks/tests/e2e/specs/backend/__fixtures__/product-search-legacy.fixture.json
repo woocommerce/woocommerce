@@ -1,0 +1,4 @@
+{
+	"title": "Product Search Legacy Block",
+	"pageContent": "<!-- wp:woocommerce/product-search {\"formId\":\"wc-block-product-search-1\"} /-->"
+}
