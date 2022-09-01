@@ -34,6 +34,7 @@ register( store );
 
 const isEditor = !! wpDataSelect( 'core/editor' );
 
+// This is needed to ensure that the payment methods are displayed in the editor
 if ( isEditor ) {
 	subscribe( async () => {
 		await checkPaymentMethodsCanPay();
