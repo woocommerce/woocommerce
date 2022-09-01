@@ -213,6 +213,7 @@ importers:
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
+      '@wordpress/a11y': ^3.5.0
       '@wordpress/api-fetch': ^6.0.1
       '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
@@ -274,6 +275,7 @@ importers:
       '@woocommerce/data': link:../data
       '@woocommerce/date': link:../date
       '@woocommerce/navigation': link:../navigation
+      '@wordpress/a11y': 3.10.0
       '@wordpress/api-fetch': 6.1.1
       '@wordpress/components': 19.6.1_lxraipvdfcmyzw3sdzk3k7kygu
       '@wordpress/compose': 5.2.1_react@17.0.2
@@ -553,7 +555,15 @@ importers:
       react-dom: 17.0.2_react@17.0.2
       rememo: 4.0.0
     devDependencies:
+<<<<<<< HEAD
       '@automattic/data-stores': 2.0.1_cyzxlbsx4glw2vpbppibjtng3m
+=======
+<<<<<<< HEAD
+      '@automattic/data-stores': 2.0.1_@wordpress+data@6.15.0
+=======
+      '@automattic/data-stores': 2.0.1_4e9f2eb1990cd169a2e8e4c557ab0cbc
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
       '@babel/core': 7.17.8
       '@babel/runtime': 7.17.7
       '@testing-library/react': 12.1.4_sfoxds7t5ydpegc3knd667wn6m
@@ -1138,6 +1148,7 @@ importers:
       typescript: ^4.6.2
     dependencies:
       '@wordpress/a11y': 3.5.0
+<<<<<<< HEAD
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/notices': 3.4.1_react@17.0.2
       lodash: 4.17.21
@@ -1145,6 +1156,19 @@ importers:
       react-dom: 17.0.2_react@17.0.2
     devDependencies:
       '@automattic/data-stores': 2.0.1_cyzxlbsx4glw2vpbppibjtng3m
+=======
+<<<<<<< HEAD
+      '@wordpress/data': 6.15.0
+      '@wordpress/notices': 3.4.1
+    devDependencies:
+      '@automattic/data-stores': 2.0.1_@wordpress+data@6.15.0
+=======
+      '@wordpress/data': 6.4.1_react@17.0.2
+      '@wordpress/notices': 3.4.1_react@17.0.2
+    devDependencies:
+      '@automattic/data-stores': 2.0.1_3e680851ac4c44045923121481015704
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
       '@babel/core': 7.17.8
       '@types/lodash': 4.14.182
       '@types/wordpress__data': 6.0.0
@@ -1715,11 +1739,27 @@ importers:
     dependencies:
       '@types/prop-types': 15.7.4
       '@woocommerce/data': link:../../packages/js/data
+<<<<<<< HEAD
       '@wordpress/api-fetch': 3.23.1_react-native@0.70.0
       '@wordpress/components': 12.0.9_hwlqtremp5axtc7oh3yr6fpizy
       '@wordpress/compose': 3.25.3_react@16.14.0
       '@wordpress/data': 4.27.3_react@16.14.0
       '@wordpress/data-controls': 1.21.3_3lfrqxmbuwi67co5eklk724ov4
+=======
+<<<<<<< HEAD
+      '@wordpress/api-fetch': 3.23.1
+      '@wordpress/components': 12.0.9_@wordpress+data@4.27.3
+      '@wordpress/compose': 3.25.3
+      '@wordpress/data': 4.27.3
+      '@wordpress/data-controls': 1.21.3
+=======
+      '@wordpress/api-fetch': 3.23.1_react-native@0.69.5
+      '@wordpress/components': 12.0.9_266e5dce892d02b961be550a41924436
+      '@wordpress/compose': 3.25.3_react@16.14.0
+      '@wordpress/data': 4.27.3_react@16.14.0
+      '@wordpress/data-controls': 1.21.3_d5134ed3a1c9c71e56954003c42e022d
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
       '@wordpress/element': 2.20.3
       '@wordpress/hooks': 2.12.3
       prop-types: 15.8.1
@@ -2096,9 +2136,45 @@ packages:
       '@wordpress/deprecated': 2.12.3
       '@wordpress/url': 2.22.2
       fast-json-stable-stringify: 2.1.0
+<<<<<<< HEAD
       i18n-calypso: 5.0.0_react@17.0.2
       qs: 6.10.3
       react: 17.0.2
+=======
+<<<<<<< HEAD
+      i18n-calypso: 5.0.0
+      qs: 6.10.3
+=======
+      i18n-calypso: 5.0.0_react@17.0.2
+      qs: 6.10.3
+      react: 17.0.2
+      redux: 4.2.0
+      tslib: 2.3.1
+      utility-types: 3.10.0
+      validator: 13.7.0
+    transitivePeerDependencies:
+      - react-native
+      - supports-color
+    dev: true
+
+  /@automattic/data-stores/2.0.1_4e9f2eb1990cd169a2e8e4c557ab0cbc:
+    resolution: {integrity: sha512-tUuWSb5iIzZpHpqCSeXw89+lX6Gpkz/Puh+FWrMyWe4ohgK/WrrAnMqEsA5O/UpEzHNtkuqVmo8haCJKL27mwg==}
+    peerDependencies:
+      '@wordpress/data': ^4
+      react: ^16.8
+    dependencies:
+      '@automattic/format-currency': 1.0.0-alpha.0
+      '@wordpress/api-fetch': 3.23.1_react-native@0.69.5
+      '@wordpress/data': 6.4.1_react@17.0.2
+      '@wordpress/data-controls': 1.21.3_react-native@0.69.5+react@17.0.2
+      '@wordpress/deprecated': 2.12.3
+      '@wordpress/url': 2.22.2_react-native@0.69.5
+      fast-json-stable-stringify: 2.1.0
+      i18n-calypso: 5.0.0_react@17.0.2
+      qs: 6.10.3
+      react: 17.0.2
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
       redux: 4.2.0
       tslib: 2.3.1
       utility-types: 3.10.0
@@ -6592,13 +6668,34 @@ packages:
     resolution: {integrity: sha512-igX9a37DR2ZPGYtV6suZ6whr8pTFtyHL3K/oLUotxpSVO2ASaprmAe2Dkq7tBo7CRY7MMDrAa9nuQP9/YG8FxQ==}
     dev: false
 
+<<<<<<< HEAD
   /@emotion/native/10.0.27_peeplpcor766cv2dor4ihhuuki:
+=======
+<<<<<<< HEAD
+  /@emotion/native/10.0.27_@emotion+core@10.3.1:
+=======
+  /@emotion/native/10.0.27_049b84742a9472c154122ef3fe8c6d04:
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-3qxR2XFizGfABKKbX9kAYc0PHhKuCEuyxshoq3TaMEbi9asWHdQVChg32ULpblm4XAf9oxaitAU7J9SfdwFxtw==}
     peerDependencies:
       react-native: '>=0.14.0 <1'
     dependencies:
+<<<<<<< HEAD
       '@emotion/primitives-core': 10.0.27_qzeatvug73zaio2r3dlvejynye
+<<<<<<< HEAD
       react-native: 0.70.0_z264xedublairnjtgpe7xwxvmm
+=======
+      react-native: 0.70.0_wahjskecmqaqgpksn6xwa65wrm
+=======
+<<<<<<< HEAD
+      '@emotion/primitives-core': 10.0.27_@emotion+core@10.3.1
+=======
+      '@emotion/primitives-core': 10.0.27_864809d686fef2043b51d8d752270dc1
+      react-native: 0.69.5_a19cca988bed9f49dd76674cd1829b53
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
+>>>>>>> 35af637ea3 (Update lock file)
     transitivePeerDependencies:
       - '@emotion/core'
       - react
@@ -8510,27 +8607,45 @@ packages:
   /@popperjs/core/2.11.4:
     resolution: {integrity: sha512-q/ytXxO5NKvyT37pmisQAItCFqA7FD/vNb8dgaJy3/630Fsc+Mz9/9f2SziBoIZ30TJooXyTwZmhi1zjXmObYg==}
 
+<<<<<<< HEAD
   /@react-native-community/cli-clean/9.1.0:
     resolution: {integrity: sha512-3HznNw8EBQtLsVyV8b8+h76M9EeJcJgYn5wZVGQ5mghAOhqnSWVbwRvpDdb8ITXaiTIXFGNOxXnGKMXsu0CYTw==}
     dependencies:
       '@react-native-community/cli-tools': 9.1.0
+=======
+<<<<<<< HEAD
+=======
+  /@react-native-community/cli-clean/8.0.4:
+    resolution: {integrity: sha512-IwS1M1NHg6+qL8PThZYMSIMYbZ6Zbx+lIck9PLBskbosFo24M3lCOflOl++Bggjakp6mR+sRXxLMexid/GeOsQ==}
+    dependencies:
+      '@react-native-community/cli-tools': 8.0.4
+>>>>>>> 278457e8b8 (Update lock file)
       chalk: 4.1.2
       execa: 1.0.0
       prompts: 2.4.2
     transitivePeerDependencies:
       - encoding
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-config/9.1.0:
     resolution: {integrity: sha512-6G9d5weedQ6EMz37ZYXrFHCU2DG3yqvdLs4Jo2383cSxal+oO+kggaTgqLBKoMETz/S80KsMeC/l+MoRjc1pzw==}
     dependencies:
       '@react-native-community/cli-tools': 9.1.0
+=======
+
+  /@react-native-community/cli-config/8.0.6:
+    resolution: {integrity: sha512-mjVpVvdh8AviiO8xtqeX+BkjqE//NMDnISwsLWSJUfNCwTAPmdR8PGbhgP5O4hWHyJ3WkepTopl0ya7Tfi3ifw==}
+    dependencies:
+      '@react-native-community/cli-tools': 8.0.4
+>>>>>>> 278457e8b8 (Update lock file)
       cosmiconfig: 5.2.1
       deepmerge: 3.3.0
       glob: 7.2.0
       joi: 17.6.0
     transitivePeerDependencies:
       - encoding
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-debugger-ui/9.0.0:
@@ -8547,6 +8662,22 @@ packages:
       '@react-native-community/cli-config': 9.1.0
       '@react-native-community/cli-platform-ios': 9.1.0
       '@react-native-community/cli-tools': 9.1.0
+=======
+
+  /@react-native-community/cli-debugger-ui/8.0.0:
+    resolution: {integrity: sha512-u2jq06GZwZ9sRERzd9FIgpW6yv4YOW4zz7Ym/B8eSzviLmy3yI/8mxJtvlGW+J8lBsfMcQoqJpqI6Rl1nZy9yQ==}
+    dependencies:
+      serve-static: 1.14.1
+    transitivePeerDependencies:
+      - supports-color
+
+  /@react-native-community/cli-doctor/8.0.6:
+    resolution: {integrity: sha512-ZQqyT9mJMVeFEVIwj8rbDYGCA2xXjJfsQjWk2iTRZ1CFHfhPSUuUiG8r6mJmTinAP9t+wYcbbIYzNgdSUKnDMw==}
+    dependencies:
+      '@react-native-community/cli-config': 8.0.6
+      '@react-native-community/cli-platform-ios': 8.0.6
+      '@react-native-community/cli-tools': 8.0.4
+>>>>>>> 278457e8b8 (Update lock file)
       chalk: 4.1.2
       command-exists: 1.2.9
       envinfo: 7.8.1
@@ -8562,6 +8693,7 @@ packages:
       wcwidth: 1.0.1
     transitivePeerDependencies:
       - encoding
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-hermes/9.1.0:
@@ -8569,25 +8701,47 @@ packages:
     dependencies:
       '@react-native-community/cli-platform-android': 9.1.0
       '@react-native-community/cli-tools': 9.1.0
+=======
+
+  /@react-native-community/cli-hermes/8.0.5:
+    resolution: {integrity: sha512-Zm0wM6SfgYAEX1kfJ1QBvTayabvh79GzmjHyuSnEROVNPbl4PeCG4WFbwy489tGwOP9Qx9fMT5tRIFCD8bp6/g==}
+    dependencies:
+      '@react-native-community/cli-platform-android': 8.0.5
+      '@react-native-community/cli-tools': 8.0.4
+>>>>>>> 278457e8b8 (Update lock file)
       chalk: 4.1.2
       hermes-profile-transformer: 0.0.6
       ip: 1.1.5
     transitivePeerDependencies:
       - encoding
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-platform-android/9.1.0:
     resolution: {integrity: sha512-OZ/Krq0wH6T7LuAvwFdJYe47RrHG8IOcoab47H4QQdYGTmJgTS3SlVkr6gn79pZyBGyp7xVizD30QJrIIyDjnw==}
     dependencies:
       '@react-native-community/cli-tools': 9.1.0
+=======
+
+  /@react-native-community/cli-platform-android/8.0.5:
+    resolution: {integrity: sha512-z1YNE4T1lG5o9acoQR1GBvf7mq6Tzayqo/za5sHVSOJAC9SZOuVN/gg/nkBa9a8n5U7qOMFXfwhTMNqA474gXA==}
+    dependencies:
+      '@react-native-community/cli-tools': 8.0.4
+>>>>>>> 278457e8b8 (Update lock file)
       chalk: 4.1.2
       execa: 1.0.0
       fs-extra: 8.1.0
       glob: 7.2.0
+<<<<<<< HEAD
+=======
+      jetifier: 1.6.8
+      lodash: 4.17.21
+>>>>>>> 278457e8b8 (Update lock file)
       logkitty: 0.7.1
       slash: 3.0.0
     transitivePeerDependencies:
       - encoding
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-platform-ios/9.1.0:
@@ -8617,10 +8771,42 @@ packages:
       readline: 1.3.0
     transitivePeerDependencies:
       - '@babel/core'
+=======
+
+  /@react-native-community/cli-platform-ios/8.0.6:
+    resolution: {integrity: sha512-CMR6mu/LVx6JVfQRDL9uULsMirJT633bODn+IrYmrwSz250pnhON16We8eLPzxOZHyDjm7JPuSgHG3a/BPiRuQ==}
+    dependencies:
+      '@react-native-community/cli-tools': 8.0.4
+      chalk: 4.1.2
+      execa: 1.0.0
+      glob: 7.2.0
+      js-yaml: 3.14.1
+      lodash: 4.17.21
+      ora: 5.4.1
+      plist: 3.0.6
+    transitivePeerDependencies:
+      - encoding
+
+  /@react-native-community/cli-plugin-metro/8.0.4:
+    resolution: {integrity: sha512-UWzY1eMcEr/6262R2+d0Is5M3L/7Y/xXSDIFMoc5Rv5Wucl3hJM/TxHXmByvHpuJf6fJAfqOskyt4bZCvbI+wQ==}
+    dependencies:
+      '@react-native-community/cli-server-api': 8.0.4
+      '@react-native-community/cli-tools': 8.0.4
+      chalk: 4.1.2
+      metro: 0.70.3
+      metro-config: 0.70.3
+      metro-core: 0.70.3
+      metro-react-native-babel-transformer: 0.70.3
+      metro-resolver: 0.70.3
+      metro-runtime: 0.70.3
+      readline: 1.3.0
+    transitivePeerDependencies:
+>>>>>>> 278457e8b8 (Update lock file)
       - bufferutil
       - encoding
       - supports-color
       - utf-8-validate
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-server-api/9.1.0:
@@ -8628,27 +8814,50 @@ packages:
     dependencies:
       '@react-native-community/cli-debugger-ui': 9.0.0
       '@react-native-community/cli-tools': 9.1.0
+=======
+
+  /@react-native-community/cli-server-api/8.0.4:
+    resolution: {integrity: sha512-Orr14njx1E70CVrUA8bFdl+mrnbuXUjf1Rhhm0RxUadFpvkHuOi5dh8Bryj2MKtf8eZrpEwZ7tuQPhJEULW16A==}
+    dependencies:
+      '@react-native-community/cli-debugger-ui': 8.0.0
+      '@react-native-community/cli-tools': 8.0.4
+>>>>>>> 278457e8b8 (Update lock file)
       compression: 1.7.4
       connect: 3.7.0
       errorhandler: 1.5.1
       nocache: 3.0.4
       pretty-format: 26.6.2
+<<<<<<< HEAD
       serve-static: 1.15.0
+=======
+      serve-static: 1.14.1
+>>>>>>> 278457e8b8 (Update lock file)
       ws: 7.5.5
     transitivePeerDependencies:
       - bufferutil
       - encoding
       - supports-color
       - utf-8-validate
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-tools/9.1.0:
     resolution: {integrity: sha512-07Z1hyy4cYty84P9cGq+Xf8Vb0S/0ffxLVdVQEMmLjU71sC9YTUv1anJdZyt6f9uUPvA9+e/YIXw5Bu0rvuXIw==}
+=======
+
+  /@react-native-community/cli-tools/8.0.4:
+    resolution: {integrity: sha512-ePN9lGxh6LRFiotyddEkSmuqpQhnq2iw9oiXYr4EFWpIEy0yCigTuSTiDF68+c8M9B+7bTwkRpz/rMPC4ViO5Q==}
+>>>>>>> 278457e8b8 (Update lock file)
     dependencies:
       appdirsjs: 1.2.7
       chalk: 4.1.2
       find-up: 5.0.0
+<<<<<<< HEAD
       mime: 2.6.0
+=======
+      lodash: 4.17.21
+      mime: 2.5.2
+>>>>>>> 278457e8b8 (Update lock file)
       node-fetch: 2.6.7
       open: 6.4.0
       ora: 5.4.1
@@ -8656,6 +8865,7 @@ packages:
       shell-quote: 1.7.3
     transitivePeerDependencies:
       - encoding
+<<<<<<< HEAD
     dev: false
 
   /@react-native-community/cli-types/9.1.0:
@@ -8680,18 +8890,55 @@ packages:
       '@react-native-community/cli-types': 9.1.0
       chalk: 4.1.2
       commander: 9.4.0
+=======
+
+  /@react-native-community/cli-types/8.0.0:
+    resolution: {integrity: sha512-1lZS1PEvMlFaN3Se1ksyoFWzMjk+YfKi490GgsqKJln9gvFm8tqVPdnXttI5Uf2DQf3BMse8Bk8dNH4oV6Ewow==}
+    dependencies:
+      joi: 17.6.0
+
+  /@react-native-community/cli/8.0.6_react-native@0.69.5:
+    resolution: {integrity: sha512-E36hU/if3quQCfJHGWVkpsCnwtByRCwORuAX0r6yr1ebKktpKeEO49zY9PAu/Z1gfyxCtgluXY0HfRxjKRFXTg==}
+    engines: {node: '>=12'}
+    hasBin: true
+    peerDependencies:
+      react-native: '*'
+    dependencies:
+      '@react-native-community/cli-clean': 8.0.4
+      '@react-native-community/cli-config': 8.0.6
+      '@react-native-community/cli-debugger-ui': 8.0.0
+      '@react-native-community/cli-doctor': 8.0.6
+      '@react-native-community/cli-hermes': 8.0.5
+      '@react-native-community/cli-plugin-metro': 8.0.4
+      '@react-native-community/cli-server-api': 8.0.4
+      '@react-native-community/cli-tools': 8.0.4
+      '@react-native-community/cli-types': 8.0.0
+      chalk: 4.1.2
+      commander: 2.20.3
+>>>>>>> 278457e8b8 (Update lock file)
       execa: 1.0.0
       find-up: 4.1.0
       fs-extra: 8.1.0
       graceful-fs: 4.2.9
+<<<<<<< HEAD
       prompts: 2.4.2
       semver: 6.3.0
     transitivePeerDependencies:
       - '@babel/core'
+=======
+      leven: 3.1.0
+      lodash: 4.17.21
+      minimist: 1.2.5
+      prompts: 2.4.2
+      react-native: 0.69.5_a19cca988bed9f49dd76674cd1829b53
+      semver: 6.3.0
+    transitivePeerDependencies:
+>>>>>>> 278457e8b8 (Update lock file)
       - bufferutil
       - encoding
       - supports-color
       - utf-8-validate
+<<<<<<< HEAD
     dev: false
 
   /@react-native/assets/1.0.0:
@@ -8706,6 +8953,19 @@ packages:
     resolution: {integrity: sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==}
     dev: false
 
+=======
+
+  /@react-native/assets/1.0.0:
+    resolution: {integrity: sha512-KrwSpS1tKI70wuKl68DwJZYEvXktDHdZMG0k2AXD/rJVSlB23/X2CB2cutVR0HwNMJIal9HOUOBB2rVfa6UGtQ==}
+
+  /@react-native/normalize-color/2.0.0:
+    resolution: {integrity: sha512-Wip/xsc5lw8vsBlmY2MO/gFLp3MvuZ2baBZjDeTjjndMgM0h5sxz7AZR62RDPGgstp8Np7JzjvVqVT7tpFZqsw==}
+
+  /@react-native/polyfills/2.0.0:
+    resolution: {integrity: sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==}
+
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
   /@react-spring/animated/9.4.4_react@17.0.2:
     resolution: {integrity: sha512-e9xnuBaUTD+NolKikUmrGWjX8AVCPyj1GcEgjgq9E+0sXKv46UY7cm2EmB6mUDTxWIDVKebARY++xT4nGDraBQ==}
     peerDependencies:
@@ -14050,17 +14310,32 @@ packages:
       '@wordpress/url': 2.22.2
     transitivePeerDependencies:
       - react-native
+<<<<<<< HEAD
     dev: true
 
   /@wordpress/api-fetch/3.23.1_react-native@0.70.0:
+=======
+<<<<<<< HEAD
+=======
+    dev: true
+
+  /@wordpress/api-fetch/3.23.1_react-native@0.69.5:
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-dmeigLuvqYAzpQ2hWUQT1P5VQAjkj9hS1z7PgNi1CcULFPbY8BWW+KiBETUu6Wm+rlSbUL2dC8qrA4JDv9ja5A==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@wordpress/i18n': 3.20.0
+<<<<<<< HEAD
       '@wordpress/url': 2.22.2_react-native@0.70.0
     transitivePeerDependencies:
       - react-native
     dev: false
+=======
+      '@wordpress/url': 2.22.2_react-native@0.69.5
+    transitivePeerDependencies:
+      - react-native
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
 
   /@wordpress/api-fetch/4.0.0:
     resolution: {integrity: sha512-4nWH/gEpG7/VnEJbjbOWS0AWBnX5snPc3ZaKcXNZsLQlv9YgsS8idL/BNkUl9/ylZeez/UX4lJLVkOR5clvg8A==}
@@ -14070,17 +14345,32 @@ packages:
       '@wordpress/url': 2.22.2
     transitivePeerDependencies:
       - react-native
+<<<<<<< HEAD
     dev: true
 
   /@wordpress/api-fetch/4.0.0_react-native@0.70.0:
+=======
+<<<<<<< HEAD
+=======
+    dev: true
+
+  /@wordpress/api-fetch/4.0.0_react-native@0.69.5:
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-4nWH/gEpG7/VnEJbjbOWS0AWBnX5snPc3ZaKcXNZsLQlv9YgsS8idL/BNkUl9/ylZeez/UX4lJLVkOR5clvg8A==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@wordpress/i18n': 3.20.0
+<<<<<<< HEAD
       '@wordpress/url': 2.22.2_react-native@0.70.0
     transitivePeerDependencies:
       - react-native
     dev: false
+=======
+      '@wordpress/url': 2.22.2_react-native@0.69.5
+    transitivePeerDependencies:
+      - react-native
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
 
   /@wordpress/api-fetch/5.2.6:
     resolution: {integrity: sha512-AG8KdCHwtYJWR38AAU7nEI+UbumUSqSBthQj3rShLUVyFbYGkQdpwXJJG6vFj7FjIp41zljiyj3K1Fh3cqdaAw==}
@@ -14315,14 +14605,32 @@ packages:
     resolution: {integrity: sha512-UH0Ifmm4tEjVPOtiqH6yxDvk2EKtqSAhnyhyfSIb0wUnEoGsWTjREZjzuhgjt/I2nTqfg+0gUSzL5D0yQH6wDQ==}
     engines: {node: '>=12'}
 
+<<<<<<< HEAD
   /@wordpress/components/12.0.9_hwlqtremp5axtc7oh3yr6fpizy:
+=======
+<<<<<<< HEAD
+  /@wordpress/components/12.0.9_@wordpress+data@4.27.3:
+=======
+  /@wordpress/components/12.0.9_266e5dce892d02b961be550a41924436:
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-J6uM20Jpchr/NywQmAeVqx/LohwKizi2F8HylqN1Xt2mYzuOrDirlEhQT1wmfqiEqEt0l+mefZEBlxeknMfBag==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@emotion/core': 10.3.1_react@16.14.0
       '@emotion/css': 10.0.27
+<<<<<<< HEAD
       '@emotion/native': 10.0.27_peeplpcor766cv2dor4ihhuuki
       '@emotion/styled': 10.3.0_qzeatvug73zaio2r3dlvejynye
+=======
+<<<<<<< HEAD
+      '@emotion/native': 10.0.27_@emotion+core@10.3.1
+      '@emotion/styled': 10.3.0_@emotion+core@10.3.1
+=======
+      '@emotion/native': 10.0.27_049b84742a9472c154122ef3fe8c6d04
+      '@emotion/styled': 10.3.0_864809d686fef2043b51d8d752270dc1
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
       '@wordpress/a11y': 2.15.3
       '@wordpress/compose': 3.25.3_react@16.14.0
       '@wordpress/date': 3.15.1
@@ -14674,6 +14982,32 @@ packages:
       use-memo-one: 1.1.2_react@17.0.2
     transitivePeerDependencies:
       - react
+<<<<<<< HEAD
+=======
+    dev: false
+
+<<<<<<< HEAD
+  /@wordpress/compose/5.14.0:
+    resolution: {integrity: sha512-DSERuUJtz76r+genM0mbMMhHUN57K5V028WBacLrU0bOh8CQ3frgsn5vvogTXvf/Eaib/Mx2F/mpcDX3KMId6Q==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@types/lodash': 4.14.184
+      '@types/mousetrap': 1.6.9
+      '@wordpress/deprecated': 3.16.0
+      '@wordpress/dom': 3.16.0
+      '@wordpress/element': 4.14.0
+      '@wordpress/is-shallow-equal': 4.16.0
+      '@wordpress/keycodes': 3.16.0
+      '@wordpress/priority-queue': 2.16.0
+      change-case: 4.1.2
+      clipboard: 2.0.10
+      lodash: 4.17.21
+      mousetrap: 1.6.5
+      use-memo-one: 1.1.2
+>>>>>>> 278457e8b8 (Update lock file)
 
   /@wordpress/compose/5.14.0_react@17.0.2:
     resolution: {integrity: sha512-DSERuUJtz76r+genM0mbMMhHUN57K5V028WBacLrU0bOh8CQ3frgsn5vvogTXvf/Eaib/Mx2F/mpcDX3KMId6Q==}
@@ -14696,7 +15030,37 @@ packages:
       mousetrap: 1.6.5
       react: 17.0.2
       use-memo-one: 1.1.2_react@17.0.2
+<<<<<<< HEAD
+=======
+    dev: false
 
+  /@wordpress/compose/5.2.1:
+=======
+  /@wordpress/compose/5.2.1_react@17.0.2:
+>>>>>>> 039288fff9 (Update lock file)
+    resolution: {integrity: sha512-0l5UOiq5tDFeuIsdSVsWzNETHZagTnSBSTdGsxDmKIi5NC7vf1pXs4rlrEA45vUdFm/SbpIA9gp+NFzfpVKIXw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@types/lodash': 4.14.180
+      '@types/mousetrap': 1.6.9
+      '@wordpress/deprecated': 3.4.1
+      '@wordpress/dom': 3.4.1
+      '@wordpress/element': 4.8.0
+      '@wordpress/is-shallow-equal': 4.4.1
+      '@wordpress/keycodes': 3.4.1
+      '@wordpress/priority-queue': 2.4.1
+      clipboard: 2.0.10
+      lodash: 4.17.21
+      mousetrap: 1.6.5
+      react-resize-aware: 3.1.1
+      use-memo-one: 1.1.2
+    dev: false
+>>>>>>> 278457e8b8 (Update lock file)
+
+<<<<<<< HEAD
   /@wordpress/compose/5.2.1_react@17.0.2:
     resolution: {integrity: sha512-0l5UOiq5tDFeuIsdSVsWzNETHZagTnSBSTdGsxDmKIi5NC7vf1pXs4rlrEA45vUdFm/SbpIA9gp+NFzfpVKIXw==}
     engines: {node: '>=12'}
@@ -14720,6 +15084,8 @@ packages:
       use-memo-one: 1.1.2_react@17.0.2
     dev: false
 
+=======
+>>>>>>> 039288fff9 (Update lock file)
   /@wordpress/compose/5.8.0_react@17.0.2:
     resolution: {integrity: sha512-GeXtrLvLhPfQEprcsKeDCtzj2Ew8TTtoAZ7NDAJrNZRqElBs7MAeZkXQ+64u42J8K0dhDQ6v4lCR/Z0f5cMfng==}
     engines: {node: '>=12'}
@@ -14776,11 +15142,22 @@ packages:
       webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
+<<<<<<< HEAD
   /@wordpress/data-controls/1.21.3_3lfrqxmbuwi67co5eklk724ov4:
     resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
     dependencies:
       '@babel/runtime': 7.17.7
       '@wordpress/api-fetch': 4.0.0_react-native@0.70.0
+=======
+<<<<<<< HEAD
+  /@wordpress/data-controls/1.21.3:
+=======
+  /@wordpress/data-controls/1.21.3_d5134ed3a1c9c71e56954003c42e022d:
+    resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/api-fetch': 4.0.0_react-native@0.69.5
+>>>>>>> 278457e8b8 (Update lock file)
       '@wordpress/data': 4.27.3_react@16.14.0
       '@wordpress/deprecated': 2.12.3
     transitivePeerDependencies:
@@ -14788,7 +15165,24 @@ packages:
       - react-native
     dev: false
 
+<<<<<<< HEAD
   /@wordpress/data-controls/1.21.3_react@17.0.2:
+=======
+  /@wordpress/data-controls/1.21.3_react-native@0.69.5+react@17.0.2:
+    resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/api-fetch': 4.0.0_react-native@0.69.5
+      '@wordpress/data': 4.27.3_react@17.0.2
+      '@wordpress/deprecated': 2.12.3
+    transitivePeerDependencies:
+      - react
+      - react-native
+    dev: true
+
+  /@wordpress/data-controls/1.21.3_react@17.0.2:
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-aLpx/HvKaxCQfWSLGIz699SB9Guyq8Yoq5XLlH8eNWnf/8HkQg8hQ6yagDY8BinV/t8HScc5A7a6n6pvZNGtjg==}
     dependencies:
       '@babel/runtime': 7.17.7
@@ -14847,8 +15241,17 @@ packages:
       - react
     dev: false
 
+<<<<<<< HEAD
   /@wordpress/data/4.27.3_react@17.0.2:
     resolution: {integrity: sha512-5763NgNV9IIa1CC3Q80dAvrH6108tJtj3IrHfUCZmUk1atSNsOMBCkLdQ7tGTTi2JFejeGEMg1LJI22JD5zM6Q==}
+=======
+<<<<<<< HEAD
+  /@wordpress/data/6.15.0:
+    resolution: {integrity: sha512-EReq6QQ3ASWPcB60q18GLfDBhQQrf2Ru9Vvkid/tk7tn4ttqy/axn09/ck/GQ1uwi9BoSRyydPOnQCsluPAgNA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+>>>>>>> 278457e8b8 (Update lock file)
     dependencies:
       '@babel/runtime': 7.17.7
       '@wordpress/compose': 3.25.3_react@17.0.2
@@ -14870,6 +15273,10 @@ packages:
 
   /@wordpress/data/6.15.0_react@17.0.2:
     resolution: {integrity: sha512-EReq6QQ3ASWPcB60q18GLfDBhQQrf2Ru9Vvkid/tk7tn4ttqy/axn09/ck/GQ1uwi9BoSRyydPOnQCsluPAgNA==}
+=======
+  /@wordpress/data/6.10.0_react@17.0.2:
+    resolution: {integrity: sha512-kLylD1AI+RqigRhqJ0aWBUUhro348w7y7UQj/8PBRFKkyywG44856JpOJYQgSU/tY+yOCgG9w3sDWmgzcOihLA==}
+>>>>>>> 039288fff9 (Update lock file)
     engines: {node: '>=12'}
     peerDependencies:
       react: ^17.0.0
@@ -14890,6 +15297,7 @@ packages:
       turbo-combine-reducers: 1.0.2
       use-memo-one: 1.1.2_react@17.0.2
 
+<<<<<<< HEAD
   /@wordpress/data/6.4.1_react@17.0.2:
     resolution: {integrity: sha512-pDTQl+cmVvwyGuGo6DtWkSGtIz6FTJw87XxtRkOeuQlEqsfHoyXSA4da7cBY5o22Ss5P5408hXjR0SAIqEBhmg==}
     engines: {node: '>=12'}
@@ -14912,6 +15320,8 @@ packages:
       use-memo-one: 1.1.2_react@17.0.2
     dev: false
 
+=======
+>>>>>>> 039288fff9 (Update lock file)
   /@wordpress/date/3.15.1:
     resolution: {integrity: sha512-SuHiObvjbegL8RpaSQ6JqFnG+QyGP+oUhx1FZDMdt1nOQA9HE7D5ssVlZFlMEAdo6iS8xMuW+4SgJN3Eo1fb4w==}
     dependencies:
@@ -15700,6 +16110,22 @@ packages:
       '@wordpress/i18n': 4.15.0
     dev: false
 
+<<<<<<< HEAD
+=======
+  /@wordpress/notices/3.4.1:
+    resolution: {integrity: sha512-Y7e2GLlB5wjLOtxsXzJd3jg/p6LV2GeeUnk+reURqUbb/4rlVlXQuMPOboTxLRB/0eTMNwWFI/MIr+NKbuY7MQ==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.17.7
+      '@wordpress/a11y': 3.5.0
+      '@wordpress/data': 6.4.1
+      lodash: 4.17.21
+    dev: false
+
+<<<<<<< HEAD
+>>>>>>> 278457e8b8 (Update lock file)
   /@wordpress/notices/3.4.1_react@17.0.2:
     resolution: {integrity: sha512-Y7e2GLlB5wjLOtxsXzJd3jg/p6LV2GeeUnk+reURqUbb/4rlVlXQuMPOboTxLRB/0eTMNwWFI/MIr+NKbuY7MQ==}
     engines: {node: '>=12'}
@@ -15713,7 +16139,13 @@ packages:
       react: 17.0.2
     dev: false
 
+<<<<<<< HEAD
   /@wordpress/npm-package-json-lint-config/3.1.0_ngbyqqcq5j4itme2ewj5k5pf2y:
+=======
+=======
+>>>>>>> 039288fff9 (Update lock file)
+  /@wordpress/npm-package-json-lint-config/3.1.0_npm-package-json-lint@5.4.2:
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-SYRWpzpQaSsBUiRO+ssqg6AHjgCF4j2npstGTGaKdVs/B720fLFzeyONuMmo1ZtMb9v6MyEWxVz5ON6dDgmVYg==}
     engines: {node: '>=8'}
     peerDependencies:
@@ -15928,13 +16360,27 @@ packages:
       react: ^17.0.0
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/a11y': 3.4.1
+      '@wordpress/a11y': 3.10.0
       '@wordpress/compose': 5.2.1_react@17.0.2
+<<<<<<< HEAD
       '@wordpress/data': 6.15.0_react@17.0.2
       '@wordpress/element': 4.14.0
       '@wordpress/escape-html': 2.15.0
       '@wordpress/i18n': 4.16.0
       '@wordpress/keycodes': 3.16.0
+=======
+      '@wordpress/data': 6.4.1_react@17.0.2
+<<<<<<< HEAD
+      '@wordpress/element': 4.14.0
+      '@wordpress/escape-html': 2.15.0
+      '@wordpress/i18n': 4.4.1
+=======
+      '@wordpress/element': 4.2.1
+      '@wordpress/escape-html': 2.4.1
+      '@wordpress/i18n': 4.15.0
+>>>>>>> 039288fff9 (Update lock file)
+      '@wordpress/keycodes': 3.4.1
+>>>>>>> 278457e8b8 (Update lock file)
       lodash: 4.17.21
       memize: 1.1.0
       react: 17.0.2
@@ -16166,16 +16612,30 @@ packages:
     transitivePeerDependencies:
       - react-native
 
+<<<<<<< HEAD
   /@wordpress/url/2.22.2_react-native@0.70.0:
+=======
+<<<<<<< HEAD
+=======
+  /@wordpress/url/2.22.2_react-native@0.69.5:
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-aqpYKQXzyzkCOm+GzZRYlLb+wh58g0cwR1PaKAl0UXaBS4mdS+X6biMriylb4P8CVC/RR7CSw5XI20JC24KDwQ==}
     dependencies:
       '@babel/runtime': 7.17.7
       lodash: 4.17.21
+<<<<<<< HEAD
       react-native-url-polyfill: 1.3.0_react-native@0.70.0
     transitivePeerDependencies:
       - react-native
     dev: false
 
+=======
+      react-native-url-polyfill: 1.3.0_react-native@0.69.5
+    transitivePeerDependencies:
+      - react-native
+
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
   /@wordpress/url/3.16.0:
     resolution: {integrity: sha512-5hlT8KfioKrmfqQAHihj2pWqc8oMUFNae3n5/Wlu8H60Btf5h+cBfxr6eiOXPEVX9Ko9NskLjmAqCxxoiNviqg==}
     engines: {node: '>=12'}
@@ -25308,9 +25768,20 @@ packages:
       interpolate-components: 1.1.1
       lodash: 4.17.21
       lru: 3.1.0
+<<<<<<< HEAD
       react: 17.0.2
       tannin: 1.2.0
       use-subscription: 1.6.0_react@17.0.2
+=======
+<<<<<<< HEAD
+      tannin: 1.2.0
+      use-subscription: 1.6.0
+=======
+      react: 17.0.2
+      tannin: 1.2.0
+      use-subscription: 1.6.0_react@17.0.2
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -33394,12 +33865,22 @@ packages:
       asap: 2.0.6
     dev: true
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> 278457e8b8 (Update lock file)
   /promise/8.2.0:
     resolution: {integrity: sha512-+CMAlLHqwRYwBMXKCP+o8ns7DN+xHDUiI+0nArsiJ9y+kJVPLFxEaSw6Ha9s9H0tftxg2Yzl25wqj9G7m5wLZg==}
     dependencies:
       asap: 2.0.6
+<<<<<<< HEAD
     dev: false
 
+=======
+
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
   /promptly/3.2.0:
     resolution: {integrity: sha512-WnR9obtgW+rG4oUV3hSnNGl1pHm3V1H/qD9iJBumGSmVsSC5HpZOLuu8qdMb6yCItGfT7dcRszejr/5P3i9Pug==}
     dependencies:
@@ -34158,8 +34639,19 @@ packages:
       moment: 2.29.1
     dev: false
 
+<<<<<<< HEAD
   /react-native-codegen/0.70.4:
+=======
+<<<<<<< HEAD
+  /react-native-codegen/0.70.4_@babel+preset-env@7.16.11:
+>>>>>>> 35af637ea3 (Update lock file)
     resolution: {integrity: sha512-bPyd5jm840omfx24VRyMP+KPzAefpRDwE18w5ywMWHCWZBSqLn1qI9WgBPnavlIrjTEuzxznWQNcaA26lw8AMQ==}
+=======
+<<<<<<< HEAD
+=======
+  /react-native-codegen/0.69.2_@babel+preset-env@7.16.11:
+    resolution: {integrity: sha512-yPcgMHD4mqLbckqnWjFBaxomDnBREfRjDi2G/WxNyPBQLD+PXUEmZTkDx6QoOXN+Bl2SkpnNOSsLE2+/RUHoPw==}
+>>>>>>> 278457e8b8 (Update lock file)
     dependencies:
       '@babel/parser': 7.17.8
       flow-parser: 0.121.0
@@ -34168,12 +34660,20 @@ packages:
     transitivePeerDependencies:
       - '@babel/preset-env'
       - supports-color
+<<<<<<< HEAD
     dev: false
 
   /react-native-gradle-plugin/0.70.2:
     resolution: {integrity: sha512-k7d+CVh0fs/VntA2WaKD58cFB2rtiSLBHYlciH18ncaT4N/B3A4qOGv9pSCEHfQikELm6vAf98KMbE3c8KnH1A==}
     dev: false
 
+=======
+
+  /react-native-gradle-plugin/0.0.7:
+    resolution: {integrity: sha512-+4JpbIx42zGTONhBTIXSyfyHICHC29VTvhkkoUOJAh/XHPEixpuBduYgf6Y4y9wsN1ARlQhBBoptTvXvAFQf5g==}
+
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
   /react-native-url-polyfill/1.3.0:
     resolution: {integrity: sha512-w9JfSkvpqqlix9UjDvJjm1EjSt652zVQ6iwCIj1cVVkwXf4jQhQgTNXY6EVTwuAmUjg6BC6k9RHCBynoLFo3IQ==}
     peerDependencies:
@@ -34181,12 +34681,24 @@ packages:
     dependencies:
       whatwg-url-without-unicode: 8.0.0-3
 
+<<<<<<< HEAD
   /react-native-url-polyfill/1.3.0_react-native@0.70.0:
+=======
+<<<<<<< HEAD
+  /react-outside-click-handler/1.3.0:
+=======
+  /react-native-url-polyfill/1.3.0_react-native@0.69.5:
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-w9JfSkvpqqlix9UjDvJjm1EjSt652zVQ6iwCIj1cVVkwXf4jQhQgTNXY6EVTwuAmUjg6BC6k9RHCBynoLFo3IQ==}
     peerDependencies:
       react-native: '*'
     dependencies:
+<<<<<<< HEAD
       react-native: 0.70.0_z264xedublairnjtgpe7xwxvmm
+=======
+<<<<<<< HEAD
+      react-native: 0.70.0_wahjskecmqaqgpksn6xwa65wrm
+>>>>>>> 35af637ea3 (Update lock file)
       whatwg-url-without-unicode: 8.0.0-3
     dev: false
 
@@ -34201,6 +34713,22 @@ packages:
       '@react-native-community/cli': 9.1.1_@babel+core@7.17.8
       '@react-native-community/cli-platform-android': 9.1.0
       '@react-native-community/cli-platform-ios': 9.1.0
+=======
+      react-native: 0.69.5_a19cca988bed9f49dd76674cd1829b53
+      whatwg-url-without-unicode: 8.0.0-3
+
+  /react-native/0.69.5_a19cca988bed9f49dd76674cd1829b53:
+    resolution: {integrity: sha512-4Psrj1nDMLQjBXVH8n3UikzOHQc8+sa6NbxZQR0XKtpx8uC3HiJBgX+/FIum/RWxfi5J/Dt/+A2gLGmq2Hps8g==}
+    engines: {node: '>=14'}
+    hasBin: true
+    peerDependencies:
+      react: 18.0.0
+    dependencies:
+      '@jest/create-cache-key-function': 27.5.1
+      '@react-native-community/cli': 8.0.6_react-native@0.69.5
+      '@react-native-community/cli-platform-android': 8.0.5
+      '@react-native-community/cli-platform-ios': 8.0.6
+>>>>>>> 278457e8b8 (Update lock file)
       '@react-native/assets': 1.0.0
       '@react-native/normalize-color': 2.0.0
       '@react-native/polyfills': 2.0.0
@@ -34208,38 +34736,70 @@ packages:
       anser: 1.4.10
       base64-js: 1.5.1
       event-target-shim: 5.0.1
+<<<<<<< HEAD
       invariant: 2.2.4
       jsc-android: 250230.2.1
       memoize-one: 5.2.1
       metro-react-native-babel-transformer: 0.72.1_@babel+core@7.17.8
       metro-runtime: 0.72.1
       metro-source-map: 0.72.1
+=======
+      hermes-engine: 0.11.0
+      invariant: 2.2.4
+      jsc-android: 250230.2.1
+      memoize-one: 5.2.1
+      metro-react-native-babel-transformer: 0.70.3
+      metro-runtime: 0.70.3
+      metro-source-map: 0.70.3
+>>>>>>> 278457e8b8 (Update lock file)
       mkdirp: 0.5.5
       nullthrows: 1.1.1
       pretty-format: 26.6.2
       promise: 8.2.0
       react: 16.14.0
       react-devtools-core: 4.24.0
+<<<<<<< HEAD
       react-native-codegen: 0.70.4
+=======
+<<<<<<< HEAD
+      react-native-codegen: 0.70.4_@babel+preset-env@7.16.11
+>>>>>>> 35af637ea3 (Update lock file)
       react-native-gradle-plugin: 0.70.2
       react-refresh: 0.4.3
       react-shallow-renderer: 16.15.0_react@16.14.0
       regenerator-runtime: 0.13.9
       scheduler: 0.22.0
+=======
+      react-native-codegen: 0.69.2_@babel+preset-env@7.16.11
+      react-native-gradle-plugin: 0.0.7
+      react-refresh: 0.4.3
+      react-shallow-renderer: 16.15.0_react@16.14.0
+      regenerator-runtime: 0.13.9
+      scheduler: 0.21.0
+>>>>>>> 278457e8b8 (Update lock file)
       stacktrace-parser: 0.1.10
       use-sync-external-store: 1.2.0_react@16.14.0
       whatwg-fetch: 3.6.2
       ws: 6.2.2
     transitivePeerDependencies:
+<<<<<<< HEAD
       - '@babel/core'
+=======
+>>>>>>> 278457e8b8 (Update lock file)
       - '@babel/preset-env'
       - bufferutil
       - encoding
       - supports-color
       - utf-8-validate
+<<<<<<< HEAD
     dev: false
 
   /react-outside-click-handler/1.3.0_react@17.0.2:
+=======
+
+  /react-outside-click-handler/1.3.0_react-dom@16.14.0+react@16.14.0:
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-Te/7zFU0oHpAnctl//pP3hEAeobfeHMyygHB8MnjP6sX5OR8KHT1G3jmLsV3U9RnIYo+Yn+peJYWu+D5tUS8qQ==}
     peerDependencies:
       react: ^0.14 || >=15
@@ -34381,8 +34941,28 @@ packages:
       react: ^16.8.0 || 17.x
     dependencies:
       react: 17.0.2
+<<<<<<< HEAD
 
   /react-router-dom/6.2.2_sfoxds7t5ydpegc3knd667wn6m:
+=======
+    dev: false
+
+<<<<<<< HEAD
+  /react-router-dom/6.2.2:
+    resolution: {integrity: sha512-AtYEsAST7bDD4dLSQHDnk/qxWLJdad5t1HFa1qJyUrCeGgEuCSw0VB/27ARbF9Fi/W5598ujvJOm3ujUCVzuYQ==}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      history: 5.3.0
+      react-router: 6.2.2
+    dev: true
+
+  /react-router-dom/6.2.2_react@17.0.2:
+=======
+  /react-router-dom/6.2.2_react-dom@16.14.0+react@17.0.2:
+>>>>>>> 039288fff9 (Update lock file)
+>>>>>>> 278457e8b8 (Update lock file)
     resolution: {integrity: sha512-AtYEsAST7bDD4dLSQHDnk/qxWLJdad5t1HFa1qJyUrCeGgEuCSw0VB/27ARbF9Fi/W5598ujvJOm3ujUCVzuYQ==}
     peerDependencies:
       react: '>=16.8'
@@ -39283,7 +39863,20 @@ packages:
       react: ^16.8.0 || ^17.0.0
     dependencies:
       react: 17.0.2
+<<<<<<< HEAD
+=======
+    dev: false
 
+<<<<<<< HEAD
+  /use-subscription/1.6.0:
+    resolution: {integrity: sha512-0Y/cTLlZfw547tJhJMoRA16OUbVqRm6DmvGpiGbmLST6BIA5KU5cKlvlz8DVMrACnWpyEjCkgmhLatthP4jUbA==}
+    peerDependencies:
+      react: ^18.0.0
+    dev: true
+>>>>>>> 278457e8b8 (Update lock file)
+
+=======
+>>>>>>> 039288fff9 (Update lock file)
   /use-subscription/1.6.0_react@16.14.0:
     resolution: {integrity: sha512-0Y/cTLlZfw547tJhJMoRA16OUbVqRm6DmvGpiGbmLST6BIA5KU5cKlvlz8DVMrACnWpyEjCkgmhLatthP4jUbA==}
     peerDependencies:
@@ -39298,6 +39891,7 @@ packages:
       react: ^18.0.0
     dependencies:
       react: 17.0.2
+<<<<<<< HEAD
 
   /use-sync-external-store/1.2.0_react@16.14.0:
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
@@ -39305,7 +39899,19 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 16.14.0
+=======
+<<<<<<< HEAD
+>>>>>>> 278457e8b8 (Update lock file)
     dev: false
+=======
+
+  /use-sync-external-store/1.2.0_react@16.14.0:
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 16.14.0
+>>>>>>> 039288fff9 (Update lock file)
 
   /use/3.1.1:
     resolution: {integrity: sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==}
