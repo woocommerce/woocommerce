@@ -491,9 +491,17 @@ class CustomOrdersTableController {
 			);
 
 			if ( $this->custom_orders_table_usage_is_enabled() ) {
-				$desc_tip   = $this->order_cache_controller->orders_cache_usage_is_temporarly_disabled() ?
-					__( 'The orders cache is temporarily disabled while synchronization is in progress and will be automatically re-enabled once it finishes', 'woocommerce' )
-					: '';
+				$order_cache_usage_backup_value = $this->order_cache_controller->orders_cache_usage_backup_value();
+
+				// Beware! Don't use 'switch' here: we need strict comparisons and 'switch' does loose comparions.
+				if ( true === $order_cache_usage_backup_value ) {
+					$desc_tip = __( 'The orders cache is temporarily disabled while synchronization is in progress and will be automatically re-enabled once it finishes', 'woocommerce' );
+				} elseif ( false === $order_cache_usage_backup_value ) {
+					$desc_tip = __( "The orders cache can't be enabled while synchronization is in progress", 'woocommerce' );
+				} else {
+						$desc_tip = '';
+				}
+
 				$settings[] = array(
 					'desc'     => __( 'Enable the orders cache', 'woocommerce' ),
 					'desc_tip' => $desc_tip,
@@ -540,7 +548,9 @@ class CustomOrdersTableController {
 	 * @return bool True if the orders cache should be used, false otherwise.
 	 */
 	public function should_use_orders_cache(): bool {
-		return $this->order_cache->custom_orders_table_usage_is_enabled() && $this->order_cache->orders_cache_usage_is_enabled();
+		return $this->custom_orders_table_usage_is_enabled() &&
+			! $this->order_cache_controller->orders_cache_usage_is_temporarly_disabled() &&
+			$this->order_cache_controller->orders_cache_usage_is_enabled();
 	}
 
 	/**

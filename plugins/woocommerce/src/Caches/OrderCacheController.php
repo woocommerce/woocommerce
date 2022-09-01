@@ -31,11 +31,16 @@ class OrderCacheController {
 	/**
 	 * Set the value of the order cache usage setting.
 	 *
-	 * @param bool $enabled True if the order cache should be used, false if not.
+	 * @param bool $enable True if the order cache should be used, false if not.
+	 * @throws \Exception Attempt to enable the orders cache usage while it's temporarily disabled.
 	 */
-	public function set_orders_cache_usage( bool $enabled ): void {
+	public function set_orders_cache_usage( bool $enable ): void {
+		if ( $enable && $this->orders_cache_usage_is_temporarly_disabled() ) {
+			throw new \Exception( "OrderCacheController::set_orders_cache_usage: cache usage can't be enabled while it's temporarily disabled, run maybe_restore_orders_cache_usage first." );
+		}
+
 		$this->order_cache->flush();
-		update_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION, $enabled ? 'yes' : 'no' );
+		update_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION, $enable ? 'yes' : 'no' );
 	}
 
 	/**
@@ -50,16 +55,17 @@ class OrderCacheController {
 	/**
 	 * Temporarily disable the order cache if it's enabled.
 	 *
-	 * If the cache is enabled when this method is executed,
-	 * a flag is stored indicating that, and then the cache is disabled.
+	 * A backup option is created with the current value of the cache usage enable setting,
+	 * and then the setting is disabled. If the backup option already exists nothing is done.
+	 * The original setting value can be restored with maybe_restore_orders_cache_usage.
 	 */
 	public function temporarily_disable_orders_cache_usage(): void {
 		$this->order_cache->flush();
-		if ( ! $this->orders_cache_usage_is_enabled() ) {
+		if ( $this->orders_cache_usage_is_temporarly_disabled() ) {
 			return;
 		}
 
-		update_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION, 'yes' );
+		update_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION, get_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION ) );
 
 		$this->set_orders_cache_usage( false );
 	}
@@ -70,19 +76,36 @@ class OrderCacheController {
 	 * @return bool True if the order cache is currently temporarily disabled.
 	 */
 	public function orders_cache_usage_is_temporarly_disabled(): bool {
-		return ! $this->orders_cache_usage_is_enabled() && false !== get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
+		return false !== get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
+	}
+
+	/**
+	 * Get the value of the order cache usage enable backup option.
+	 *
+	 * @return bool|null True if the option has value 'yes', false if it has value 'no', null if the option doesn't exist.
+	 */
+	public function orders_cache_usage_backup_value(): ?bool {
+		$backup_option_value = get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
+		if ( false === $backup_option_value ) {
+			return null;
+		} else {
+			return 'yes' === $backup_option_value;
+		}
 	}
 
 	/**
 	 * Restore the order cache usage that had been temporarily disabled.
 	 *
-	 * If the flag set by temporarily_disable_orders_cache_usage is found,
-	 * the order cache usage is enabled and the flag is deleted.
+	 * The cache usage enable setting is set to the value of the backup option
+	 * that had been created by temporarily_disable_orders_cache_usage,
+	 * then the backup option is deleted.
+	 * If the backup option doesn't exist nothing is done.
 	 */
 	public function maybe_restore_orders_cache_usage(): void {
 		$this->order_cache->flush();
-		if ( false !== get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION ) ) {
-			$this->set_orders_cache_usage( 'yes' );
+		$backup_option_value = get_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
+		if ( false !== $backup_option_value ) {
+			update_option( self::ORDERS_CACHE_USAGE_ENABLED_OPTION, $backup_option_value );
 			delete_option( self::ORDERS_CACHE_USAGE_ENABLED_BACKUP_OPTION );
 		}
 	}
