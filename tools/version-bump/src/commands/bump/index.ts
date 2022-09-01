@@ -96,9 +96,8 @@ export default class VersionBump extends Command {
 					`public $version = '${ nextVersion }';\n`
 				);
 
-			console.log( updatedClassPluginFileContents );
 			writeFileSync(
-				'plugins/woocommerce/woocommerce.php',
+				'plugins/woocommerce/includes/class-woocommerce.php',
 				updatedClassPluginFileContents
 			);
 		} catch ( e ) {
