@@ -20,7 +20,7 @@ export type DateTimePickerControlProps = {
 	disabled?: boolean;
 	is12Hour?: boolean;
 	onChange: ( date: string ) => void;
-} & React.HTMLAttributes< HTMLDivElement >;
+} & Omit< React.HTMLAttributes< HTMLDivElement >, 'onChange' >;
 
 export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 	currentDate,
