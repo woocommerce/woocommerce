@@ -75,10 +75,33 @@ export default class VersionBump extends Command {
 		}
 
 		if ( isDevVersionBump ) {
+			// When updating to a dev version, only the plugin file gets the '-dev'.
 			nextVersion = nextVersion.replace( '-dev', '' );
 		}
 
 		this.updateComposerJSON( nextVersion );
+		this.updateClassPluginFile( nextVersion );
+	}
+
+	private updateClassPluginFile( nextVersion: string ): void {
+		try {
+			const classPluginFileContents = readFileSync(
+				'plugins/woocommerce/includes/class-woocommerce.php',
+				'utf8'
+			);
+
+			const updatedClassPluginFileContents =
+				classPluginFileContents.replace(
+					/"version": "\d.\d.\d",\n/m,
+					`"version": "${ nextVersion }",\n`
+				);
+			writeFileSync(
+				'plugins/woocommerce/woocommerce.php',
+				updatedClassPluginFileContents
+			);
+		} catch ( e ) {
+			this.error( 'Unable to update plugin file.' );
+		}
 	}
 
 	private updateComposerJSON( nextVersion: string ): void {
@@ -103,13 +126,13 @@ export default class VersionBump extends Command {
 				'utf8'
 			);
 
-			const updatedPluginFileContenst = pluginFileContents.replace(
+			const updatedPluginFileContents = pluginFileContents.replace(
 				/Version: \d.\d.\d.*\n/m,
 				`Version: ${ nextVersion }\n`
 			);
 			writeFileSync(
 				'plugins/woocommerce/woocommerce.php',
-				updatedPluginFileContenst
+				updatedPluginFileContents
 			);
 		} catch ( e ) {
 			this.error( 'Unable to update plugin file.' );
