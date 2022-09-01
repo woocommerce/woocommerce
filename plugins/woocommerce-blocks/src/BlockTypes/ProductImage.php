@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductImage class.
  */
@@ -48,12 +50,156 @@ class ProductImage extends AbstractBlock {
 	}
 
 	/**
-	 * Register script and style assets for the block type before it is registered.
-	 *
-	 * This registers the scripts; it does not enqueue them.
+	 * It is necessary to register and enqueues assets during the render phase because we want to load assets only if the block has the content.
 	 */
 	protected function register_block_type_assets() {
-		parent::register_block_type_assets();
-		$this->register_chunk_translations( [ $this->block_name ] );
+		return null;
+	}
+
+	/**
+	 * Register the context.
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'query', 'queryId', 'postId' ];
+	}
+
+	/**
+	 * Get the block's attributes.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return array  Block attributes merged with defaults.
+	 */
+	private function parse_attributes( $attributes ) {
+		// These should match what's set in JS `registerBlockType`.
+		$defaults = array(
+			'showProductLink'         => true,
+			'showSaleBadge'           => true,
+			'saleBadgeAlign'          => 'right',
+			'imageSizing'             => 'full-size',
+			'productId'               => 'number',
+			'isDescendentOfQueryLoop' => 'false',
+		);
+
+		return wp_parse_args( $attributes, $defaults );
+	}
+
+	/**
+	 * Render on Sale Badge.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param array       $attributes Attributes.
+	 * @return string
+	 */
+	private function render_on_sale_badge( $product, $attributes ) {
+		if ( ! $product->is_on_sale() || false === $attributes['showSaleBadge'] ) {
+			return '';
+		}
+
+		$font_size = StyleAttributesUtils::get_font_size_class_and_style( $attributes );
+
+		$on_sale_badge = sprintf(
+			'
+		<div class="wc-block-components-product-sale-badge wc-block-components-product-sale-badge--align-%s wc-block-grid__product-onsale %s" style="%s">
+			<span aria-hidden="true">%s</span>
+			<span class="screen-reader-text">Product on sale</span>
+		</div>
+	',
+			$attributes['saleBadgeAlign'],
+			isset( $font_size['class'] ) ? $font_size['class'] : '',
+			isset( $font_size['style'] ) ? $font_size['style'] : '',
+			esc_html__( 'Sale', 'woo-gutenberg-products-block' )
+		);
+		return $on_sale_badge;
+	}
+
+	/**
+	 * Render anchor.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param array       $attributes Attributes.
+	 * @return string
+	 */
+	private function render_anchor( $product, $attributes ) {
+		$product_permalink = $product->get_permalink();
+
+		$border_radius = StyleAttributesUtils::get_border_radius_class_and_style( $attributes );
+
+		$pointer_events = false === $attributes['showProductLink'] ? 'pointer-events: none;' : '';
+
+		return sprintf( '<a href="%s" style="%s">', $product_permalink, $pointer_events, isset( $border_radius['style'] ) ? $border_radius['style'] : '' );
+	}
+
+
+	/**
+	 * Render Image.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return string
+	 */
+	private function render_image( $product ) {
+		$image_info = wp_get_attachment_image_src( get_post_thumbnail_id( $product->get_id() ), 'woocommerce_thumbnail' );
+
+		if ( ! isset( $image_info[0] ) ) {
+			return sprintf( '<img src="%s" alt="" width="500 height="500" />', woocommerce_placeholder_img_src( 'woocommerce_thumbnail' ) );
+		}
+
+		return sprintf(
+			'<img data-testid="product-image" alt="%s" src="%s">',
+			$product->get_title(),
+			$image_info[0]
+		);
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		$this->asset_data_registry->add( 'is_block_theme_enabled', wp_is_block_theme(), false );
+	}
+
+
+	/**
+	 * Include and render the block
+	 *
+	 * @param array    $attributes Block attributes. Default empty array.
+	 * @param string   $content    Block content. Default empty string.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		if ( ! empty( $content ) ) {
+			parent::register_block_type_assets();
+			$this->register_chunk_translations( [ $this->block_name ] );
+			return $content;
+		}
+		$parsed_attributes = $this->parse_attributes( $attributes );
+
+		$border_radius = StyleAttributesUtils::get_border_radius_class_and_style( $attributes );
+		$margin        = StyleAttributesUtils::get_margin_class_and_style( $attributes );
+
+		$post_id = $block->context['postId'];
+		$product = wc_get_product( $post_id );
+
+		if ( $product ) {
+			return sprintf(
+				'
+			<div class="wc-block-components-product-image wc-block-grid__product-image" style="%s %s">
+				 	%s
+				 	%s
+					%s
+				</a>
+			</div>',
+				isset( $border_radius['style'] ) ? $border_radius['style'] : '',
+				isset( $margin['style'] ) ? $margin['style'] : '',
+				$this->render_anchor( $product, $parsed_attributes ),
+				$this->render_on_sale_badge( $product, $parsed_attributes ),
+				$this->render_image( $product )
+			);
+
+		}
 	}
 }

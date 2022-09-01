@@ -90,11 +90,12 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Render the featured item block.
 	 *
-	 * @param array  $attributes Block attributes.
-	 * @param string $content    Block content.
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render( $attributes, $content ) {
+	protected function render( $attributes, $content, $block ) {
 		$item = $this->get_item( $attributes );
 		if ( ! $item ) {
 			return '';

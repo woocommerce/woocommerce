@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
+import { useStoreProducts } from '@woocommerce/base-context/hooks';
 import {
 	ProductDataContextProvider,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
-import { useState, useEffect } from '@wordpress/element';
 
 /**
  * Loads the product from the API and adds to the context provider.
@@ -14,41 +13,32 @@ import { useState, useEffect } from '@wordpress/element';
  * @param {Object} props Component props.
  */
 const OriginalComponentWithContext = ( props ) => {
-	const { productId, OriginalComponent } = props;
-	const [ product, setProduct ] = useState( null );
-	const [ isLoading, setIsLoading ] = useState( true );
+	const { productId, OriginalComponent, postId, product } = props;
 
-	useEffect( () => {
-		if ( !! props.product ) {
-			setProduct( props.product );
-			setIsLoading( false );
-		}
-	}, [ props.product ] );
+	const id = props?.isDescendentOfQueryLoop ? postId : productId;
 
-	useEffect( () => {
-		if ( productId > 0 ) {
-			setIsLoading( true );
-			apiFetch( {
-				path: `/wc/store/v1/products/${ productId }`,
-			} )
-				.then( ( receivedProduct ) => {
-					setProduct( receivedProduct );
-				} )
-				.catch( async () => {
-					setProduct( null );
-				} )
-				.finally( () => {
-					setIsLoading( false );
-				} );
-		}
-	}, [ productId ] );
+	const { products, productsLoading } = useStoreProducts( {
+		include: id,
+	} );
 
-	if ( ! isLoading && ! product ) {
-		return null;
+	const productFromAPI = {
+		product: id > 0 && products.length > 0 ? products[ 0 ] : null,
+		isLoading: productsLoading,
+	};
+
+	if ( product ) {
+		return (
+			<ProductDataContextProvider product={ product } isLoading={ false }>
+				<OriginalComponent { ...props } />
+			</ProductDataContextProvider>
+		);
 	}
 
 	return (
-		<ProductDataContextProvider product={ product } isLoading={ isLoading }>
+		<ProductDataContextProvider
+			product={ productFromAPI.product }
+			isLoading={ productFromAPI.isLoading }
+		>
 			<OriginalComponent { ...props } />
 		</ProductDataContextProvider>
 	);
