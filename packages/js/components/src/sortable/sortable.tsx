@@ -18,6 +18,7 @@ import { throttle } from 'lodash';
  * Internal dependencies
  */
 import {
+	getItemName,
 	getNextIndex,
 	getPreviousIndex,
 	isBefore,
@@ -128,10 +129,7 @@ export const Sortable = ( {
 	) => {
 		const { key } = event;
 		const isSelecting = dragIndex === null || dropIndex === null;
-		const selectedLabel =
-			ref.current &&
-			selectedIndex !== null &&
-			ref.current.childNodes[ selectedIndex ].textContent;
+		const selectedLabel = getItemName( ref.current, selectedIndex );
 
 		if ( key === ' ' ) {
 			if ( isSelecting ) {
