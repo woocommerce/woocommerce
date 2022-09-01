@@ -125,7 +125,7 @@ class WC_Mobile_Messaging_Handler_Test extends WC_Unit_Test_Case {
 	/**
 	 * @return WC_Order returns an empty Order, eligible for In-Person Payment
 	 */
-	private function generate_ipp_eligible_order(): WC_Order {
+	public static function generate_ipp_eligible_order(): WC_Order {
 		$ipp_eligible_order = new WC_Order();
 		$ipp_eligible_order->set_status( 'pending' );
 		try {
