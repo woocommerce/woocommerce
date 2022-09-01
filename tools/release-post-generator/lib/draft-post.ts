@@ -25,12 +25,16 @@ export const createWpComDraftPost = async (
 ) => {
 	const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
 	const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
+	const redirectUri =
+		getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
+		'http://localhost:3000/oauth';
 
 	try {
 		const authToken = await getWordpressComAuthToken(
 			clientId,
 			clientSecret,
 			siteId,
+			redirectUri,
 			'posts'
 		);
 
@@ -49,6 +53,11 @@ export const createWpComDraftPost = async (
 				} ),
 			}
 		);
+
+		if ( post.status !== 200 ) {
+			const text = await post.text();
+			throw new Error( `Error creating draft post: ${ text }` );
+		}
 
 		return post.json();
 	} catch ( e: unknown ) {

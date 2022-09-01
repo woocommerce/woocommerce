@@ -103,14 +103,20 @@ program
 			} else {
 				Logger.startTask( 'Publishing draft release post' );
 
-				const { URL } = await createWpComDraftPost(
-					DEVELOPER_WOOCOMMERCE_SITE_ID,
-					title,
-					html
-				);
+				try {
+					const { URL } = await createWpComDraftPost(
+						DEVELOPER_WOOCOMMERCE_SITE_ID,
+						title,
+						html
+					);
 
-				Logger.notice( `Published draft release post at ${ URL }` );
-				Logger.endTask();
+					Logger.notice( `Published draft release post at ${ URL }` );
+					Logger.endTask();
+				} catch ( error: unknown ) {
+					if ( error instanceof Error ) {
+						Logger.error( error.message );
+					}
+				}
 			}
 		} else {
 			throw new Error(
