@@ -43,7 +43,6 @@ export const emitProcessingEvent: emitProcessingEventType = (
 	currentObserver,
 	setValidationErrors
 ) => {
-	// TODO: Fix this type after we move to validation store
 	return ( { dispatch, registry } ) => {
 		const { createErrorNotice, removeNotice } =
 			registry.dispatch( 'core/notices' );

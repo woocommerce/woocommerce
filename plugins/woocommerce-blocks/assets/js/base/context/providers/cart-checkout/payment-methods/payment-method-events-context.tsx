@@ -62,8 +62,6 @@ export const PaymentMethodDataProvider = ( {
 
 		return {
 			currentStatus: store.getCurrentStatus(),
-			activeSavedPaymentMethods: store.getActiveSavedPaymentMethods(),
-			paymentMethodsInitialized: store.paymentMethodsInitialized(),
 		};
 	} );
 
