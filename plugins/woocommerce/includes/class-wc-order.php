@@ -1688,7 +1688,13 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_edit_order_url() {
-		return apply_filters( 'woocommerce_get_edit_order_url', get_admin_url( null, 'post.php?post=' . $this->get_id() . '&action=edit' ), $this );
+		$edit_url = \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_edit_url( $this->get_id() );
+		/**
+		 * Filter the URL to edit the order in the backend.
+		 *
+		 * @since 3.3.0
+		 */
+		return apply_filters( 'woocommerce_get_edit_order_url', $edit_url, $this );
 	}
 
 	/*
