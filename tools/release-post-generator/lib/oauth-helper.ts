@@ -13,7 +13,7 @@ const getCode = (
 	redirectUri: string,
 	scope: string
 ) => {
-	return new Promise( async ( resolve, reject ) => {
+	return new Promise( async ( resolve ) => {
 		open(
 			`https://public-api.wordpress.com/oauth2/authorize?client_id=${ clientId }&client_secret=${ clientSecret }&redirect_uri=${ redirectUri }&scope=${ scope }&blog=${ siteId }&response_type=code`
 		);
