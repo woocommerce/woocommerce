@@ -13,7 +13,6 @@ use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificati
 use \Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
 use \Automattic\WooCommerce\Internal\Admin\Notes\AddingAndManangingProducts;
 use \Automattic\WooCommerce\Internal\Admin\Notes\ChoosingTheme;
-use \Automattic\WooCommerce\Internal\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
@@ -79,7 +78,6 @@ class Events {
 		AddFirstProduct::class,
 		AddingAndManangingProducts::class,
 		ChoosingTheme::class,
-		CompleteStoreDetails::class,
 		CustomizeStoreWithBlocks::class,
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,

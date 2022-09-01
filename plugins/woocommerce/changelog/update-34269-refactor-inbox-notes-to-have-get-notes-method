@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Refactor inbox notes to have get_note method

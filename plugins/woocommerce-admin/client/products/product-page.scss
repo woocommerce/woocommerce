@@ -3,6 +3,45 @@
 	.woocommerce-product-form-actions {
 		margin-top: $gap-largest + $gap-smaller;
 	}
+	.woocommerce-product__checkbox,
+	.components-toggle-control {
+		& > * {
+			margin-bottom: 0;
+			height: $gap-large + $gap-smallest;
+		}
+	}
+	.components-input-control {
+		&__prefix {
+			margin-left: $gap-smaller;
+		}
+		&__suffix {
+			margin-right: $gap-smaller;
+		}
+	}
+	.woocommerce-product-form {
+		&__custom-label-input {
+			display: flex;
+			flex-direction: column;
+			label {
+				display: block;
+				margin-bottom: $gap-smaller;
+			}
+		}
+		&__optional-input {
+			color: $gray-700;
+		}
+		&__secondary-text {
+			font-size: 12px;
+			color: $gray-700;
+			margin-top: $gap-smaller;
+		}
+	}
+	.has-error {
+		.components-base-control__help {
+			color: $studio-red-50;
+			margin-bottom: 0;
+		}
+	}
 }
 
 .woocommerce-edit-product {
@@ -26,8 +65,3 @@
 	}
 }
 
-.woocommerce-enriched-label__checkbox {
-	& > * {
-		margin-bottom: 0;
-	}
-}
