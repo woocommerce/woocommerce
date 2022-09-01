@@ -48,7 +48,7 @@ class ListTable extends WP_List_Table {
 	 */
 	public function setup(): void {
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ) );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'get_columns' ), 0 );
 		add_filter( 'set_screen_option_edit_orders_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 
