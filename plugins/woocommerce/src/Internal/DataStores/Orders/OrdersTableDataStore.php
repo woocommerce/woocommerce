@@ -835,7 +835,7 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			if ( $data_sync_enabled ) {
+			if ( $data_sync_enabled && ! in_array( $order->get_status(), array( 'draft', 'auto-draft' ) ) ) {
 				$order_post = $posts[ $order_id ][0];
 				$this->maybe_sync_order( $order, $order_post );
 			}
@@ -878,8 +878,17 @@ SELECT type FROM {$this->get_orders_table_name()} WHERE id = %d;
 			return;
 		}
 
+		// Modified dates can be empty when the order is created but never updated again. Fallback to created date in those cases.
+		try {
+			$order_modified_date = $order->get_date_modified() ?? $order->get_date_created();
+			$order_modified_date = $order_modified_date->getTimestamp();
+			$post_modified_date  = get_post_modified_time( 'U', true, $post ) ?? get_post_datetime( $post, 'date', 'gmt' )->getTimestamp();
+		} catch ( \Exception $e ) {
+			echo 'break here.';
+		}
+
 		// If we are here, it means that the order and post are different. We need to sync them.
-		if ( $order->get_date_modified()->getTimestamp() > get_post_modified_time( 'U', true, $post ) ) {
+		if ( $order_modified_date > $post_modified_date ) {
 			$this->backfill_post_record( $order );
 		} else {
 			$this->migrate_post_record( $order, $post_order );
