@@ -76,11 +76,12 @@ class Cart extends AbstractBlock {
 	/**
 	 * Append frontend scripts when rendering the Cart block.
 	 *
-	 * @param array  $attributes Block attributes.
-	 * @param string $content    Block content.
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render( $attributes, $content ) {
+	protected function render( $attributes, $content, $block ) {
 		// Deregister core cart scripts and styles.
 		wp_dequeue_script( 'wc-cart' );
 		wp_dequeue_script( 'wc-password-strength-meter' );

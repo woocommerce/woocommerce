@@ -1,4 +1,4 @@
-export const blockAttributes = {
+export const attributes = {
 	showProductLink: {
 		type: 'boolean',
 		default: true,
@@ -19,6 +19,8 @@ export const blockAttributes = {
 		type: 'number',
 		default: 0,
 	},
+	isDescendentOfQueryLoop: {
+		type: 'boolean',
+		default: false,
+	},
 };
-
-export default blockAttributes;

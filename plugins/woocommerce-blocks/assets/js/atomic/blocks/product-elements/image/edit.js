@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { createInterpolateElement } from '@wordpress/element';
-import { getAdminLink } from '@woocommerce/settings';
+import { createInterpolateElement, useEffect } from '@wordpress/element';
+import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
+import { isBoolean } from '@woocommerce/types';
 import {
 	Disabled,
 	PanelBody,
@@ -19,14 +20,31 @@ import {
  * Internal dependencies
  */
 import Block from './block';
-import withProductSelector from '../shared/with-product-selector';
-import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 
-const Edit = ( { attributes, setAttributes } ) => {
+const Edit = ( { attributes, setAttributes, context } ) => {
 	const { showProductLink, imageSizing, showSaleBadge, saleBadgeAlign } =
 		attributes;
 
 	const blockProps = useBlockProps();
+
+	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+
+	useEffect(
+		() => setAttributes( { isDescendentOfQueryLoop } ),
+		[ setAttributes, isDescendentOfQueryLoop ]
+	);
+
+	const isBlockThemeEnabled = getSettingWithCoercion(
+		'is_block_theme_enabled',
+		false,
+		isBoolean
+	);
+
+	useEffect( () => {
+		if ( isBlockThemeEnabled && attributes.imageSizing !== 'full-size' ) {
+			setAttributes( { imageSizing: 'full-size' } );
+		}
+	}, [ attributes.imageSizing, isBlockThemeEnabled, setAttributes ] );
 
 	return (
 		<div { ...blockProps }>
@@ -100,63 +118,58 @@ const Edit = ( { attributes, setAttributes } ) => {
 							/>
 						</ToggleGroupControl>
 					) }
-					<ToggleGroupControl
-						label={ __(
-							'Image Sizing',
-							'woo-gutenberg-products-block'
-						) }
-						help={ createInterpolateElement(
-							__(
-								'Product image cropping can be modified in the <a>Customizer</a>.',
+					{ ! isBlockThemeEnabled && (
+						<ToggleGroupControl
+							label={ __(
+								'Image Sizing',
 								'woo-gutenberg-products-block'
-							),
-							{
-								a: (
-									// eslint-disable-next-line jsx-a11y/anchor-has-content
-									<a
-										href={ `${ getAdminLink(
-											'customize.php'
-										) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
-										target="_blank"
-										rel="noopener noreferrer"
-									/>
+							) }
+							help={ createInterpolateElement(
+								__(
+									'Product image cropping can be modified in the <a>Customizer</a>.',
+									'woo-gutenberg-products-block'
 								),
+								{
+									a: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content
+										<a
+											href={ `${ getAdminLink(
+												'customize.php'
+											) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
+											target="_blank"
+											rel="noopener noreferrer"
+										/>
+									),
+								}
+							) }
+							value={ imageSizing }
+							onChange={ ( value ) =>
+								setAttributes( { imageSizing: value } )
 							}
-						) }
-						value={ imageSizing }
-						onChange={ ( value ) =>
-							setAttributes( { imageSizing: value } )
-						}
-					>
-						<ToggleGroupControlOption
-							value="full-size"
-							label={ __(
-								'Full Size',
-								'woo-gutenberg-products-block'
-							) }
-						/>
-						<ToggleGroupControlOption
-							value="cropped"
-							label={ __(
-								'Cropped',
-								'woo-gutenberg-products-block'
-							) }
-						/>
-					</ToggleGroupControl>
+						>
+							<ToggleGroupControlOption
+								value="full-size"
+								label={ __(
+									'Full Size',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+							<ToggleGroupControlOption
+								value="cropped"
+								label={ __(
+									'Cropped',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+						</ToggleGroupControl>
+					) }
 				</PanelBody>
 			</InspectorControls>
 			<Disabled>
-				<Block { ...attributes } />
+				<Block { ...{ ...attributes, ...context } } />
 			</Disabled>
 		</div>
 	);
 };
 
-export default withProductSelector( {
-	icon: BLOCK_ICON,
-	label: BLOCK_TITLE,
-	description: __(
-		'Choose a product to display its image.',
-		'woo-gutenberg-products-block'
-	),
-} )( Edit );
+export default Edit;
