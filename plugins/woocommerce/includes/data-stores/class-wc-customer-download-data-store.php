@@ -297,6 +297,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
 		}
 
+		$query .= ')';
+
 		$wpdb->query(
 			$wpdb->prepare( $query, $value ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		);
