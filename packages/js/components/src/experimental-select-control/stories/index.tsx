@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { CheckboxControl, Spinner } from '@wordpress/components';
-import React from 'react';
+import React, { createElement } from 'react';
 import { useState } from '@wordpress/element';
 
 /**

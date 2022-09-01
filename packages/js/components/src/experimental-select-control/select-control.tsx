@@ -46,9 +46,11 @@ type SelectControlProps< ItemType > = {
 	selected: ItemType | ItemType[] | null;
 };
 
-export const SelectControl = < ItemType = DefaultItemType, >( {
+function SelectControl< ItemType = DefaultItemType >( {
+	getItemLabel = defaultGetItemLabel,
+	getItemValue = defaultGetItemValue,
 	children = ( {
-		items,
+		items: renderItems,
 		highlightedIndex,
 		getItemProps,
 		getMenuProps,
@@ -56,7 +58,7 @@ export const SelectControl = < ItemType = DefaultItemType, >( {
 	} ) => {
 		return (
 			<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
-				{ items.map( ( item, index: number ) => (
+				{ renderItems.map( ( item, index: number ) => (
 					<MenuItem
 						key={ `${ getItemValue( item ) }${ index }` }
 						index={ index }
@@ -73,15 +75,13 @@ export const SelectControl = < ItemType = DefaultItemType, >( {
 	multiple = false,
 	items,
 	label,
-	getItemLabel = defaultGetItemLabel,
-	getItemValue = defaultGetItemValue,
 	getFilteredItems = defaultGetFilteredItems,
 	onInputChange = () => null,
 	onRemove = () => null,
 	onSelect = () => null,
 	placeholder,
 	selected,
-}: SelectControlProps< ItemType > ) => {
+}: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
 	const { getSelectedItemProps, getDropdownProps } = useMultipleSelection();
@@ -177,4 +177,6 @@ export const SelectControl = < ItemType = DefaultItemType, >( {
 			} ) }
 		</div>
 	);
-};
+}
+
+export { SelectControl };
