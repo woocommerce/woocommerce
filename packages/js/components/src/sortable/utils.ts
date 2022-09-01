@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { DragEvent } from 'react';
 
 /**
@@ -119,4 +120,30 @@ export const getPreviousIndex = ( currentIndex: number, itemCount: number ) => {
 	}
 
 	return index;
+};
+
+export const getItemName = (
+	parentNode: HTMLOListElement | null,
+	index: number
+) => {
+	const listItemNode = parentNode?.childNodes[ index ] as HTMLLIElement;
+
+	if ( index === null || ! listItemNode ) {
+		return null;
+	}
+
+	if ( listItemNode.querySelector( '[aria-label]' ) ) {
+		return listItemNode.querySelector( '[aria-label]' )?.ariaLabel;
+	}
+
+	if ( listItemNode.textContent ) {
+		return listItemNode.textContent;
+	}
+
+	if ( listItemNode.querySelector( '[alt]' ) ) {
+		return ( listItemNode.querySelector( '[alt]' ) as HTMLImageElement )
+			.alt;
+	}
+
+	return __( 'Item', 'woocommerce' );
 };
