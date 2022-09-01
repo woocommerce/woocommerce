@@ -213,7 +213,7 @@
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "^6.3.0"
+		"@wordpress/data": "^6.15.0"
 	},
 	"lint-staged": {
 		"*.scss": [

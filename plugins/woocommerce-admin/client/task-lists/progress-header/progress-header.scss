@@ -3,6 +3,18 @@ $progress-complete-color: #007cba;
 .woocommerce-task-progress-header {
 	position: relative;
 	min-height: 28px;
+	padding: $gap;
+	margin-bottom: $gap-smaller;
+	background: #fff;
+	border: 1px solid $gray-200;
+
+	.woocommerce-task-progress-header__title {
+		padding-top: 4px;
+	}
+
+	.woocommerce-ellipsis-menu {
+		display: none;
+	}
 
 	@at-root .woocommerce-setup-panel & h1 {
 		font-size: 16px;

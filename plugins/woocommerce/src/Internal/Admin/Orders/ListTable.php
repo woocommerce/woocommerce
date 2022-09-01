@@ -27,6 +27,13 @@ class ListTable extends WP_List_Table {
 	private $has_filter = false;
 
 	/**
+	 * Page controller instance for this request.
+	 *
+	 * @var PageController
+	 */
+	private $page_controller;
+
+	/**
 	 * Sets up the admin list table for orders (specifically, for orders managed by the OrdersTableDataStore).
 	 *
 	 * @see WC_Admin_List_Table_Orders for the corresponding class used in relation to the traditional WP Post store.
@@ -39,6 +46,16 @@ class ListTable extends WP_List_Table {
 				'ajax'     => false,
 			)
 		);
+	}
+
+	/**
+	 * Init method, invoked by DI container.
+	 *
+	 * @internal This method is not intended to be used directly (except for testing).
+	 * @param PageController $page_controller Page controller instance for this request.
+	 */
+	final public function init( PageController $page_controller ) {
+		$this->page_controller = $page_controller;
 	}
 
 	/**
@@ -88,16 +105,18 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function display() {
-		$title   = esc_html__( 'Orders', 'woocommerce' );
-		$add_new = esc_html__( 'Add Order', 'woocommerce' );
+		$title         = esc_html__( 'Orders', 'woocommerce' );
+		$add_new       = esc_html__( 'Add Order', 'woocommerce' );
+		$new_page_link = $this->page_controller->get_new_page_url();
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo "
+		echo wp_kses_post(
+			"
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
-				<a href='/to-implement' class='page-title-action'>{$add_new}</a>
-				<hr class='wp-header-end'>
-		";
+				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				<hr class='wp-header-end'>"
+		);
 
 		if ( $this->has_items() || $this->has_filter ) {
 			$this->views();
@@ -575,12 +594,10 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @param WC_Order $order Order object.
 	 *
-	 * @return mixed|string Edit link for the order.
+	 * @return string Edit link for the order.
 	 */
-	private function get_order_edit_link( WC_Order $order ) {
-		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
-			admin_url( 'admin.php?page=wc-orders&id=' . absint( $order->get_id() ) ) . '&action=edit' :
-			admin_url( 'post.php?post=' . absint( $order->get_id() ) ) . '&action=edit';
+	private function get_order_edit_link( WC_Order $order ) : string {
+		return $this->page_controller->get_edit_url( $order->get_id() );
 	}
 
 	/**

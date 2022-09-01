@@ -12,7 +12,6 @@ import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
-import classnames from 'classnames';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -21,6 +20,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import './product-details-section.scss';
 import { ProductSectionLayout } from '../layout/product-section-layout';
 import { EditProductLinkModal } from '../shared/edit-product-link-modal';
+import { getCheckboxProps, getTextControlProps } from './utils';
 
 const PRODUCT_DETAILS_SLUG = 'product-details';
 
@@ -42,76 +42,44 @@ export const ProductDetailsSection: React.FC = () => {
 		}
 	);
 
-	const getCheckboxProps = ( item: string ) => {
-		const { checked, className, onChange, onBlur } =
-			getInputProps< boolean >( item );
-		return {
-			checked,
-			className: classnames(
-				'woocommerce-add-product__checkbox',
-				className
-			),
-			onChange: ( isChecked: boolean ) => {
-				recordEvent( `add_product_checkbox_${ item }`, {
-					checked: isChecked,
-				} );
-				return onChange( isChecked );
-			},
-			onBlur,
-		};
-	};
-	const getTextControlProps = ( item: string ) => {
-		const {
-			className,
-			onBlur,
-			onChange,
-			value = '',
-		} = getInputProps< string >( item );
-		return {
-			value,
-			className: classnames(
-				'woocommerce-add-product__checkbox',
-				className
-			),
-			onChange,
-			onBlur,
-		};
-	};
-
 	return (
 		<ProductSectionLayout
-			title={ __( 'Product details', 'woocommerce' ) }
+			title={ __( 'Product info', 'woocommerce' ) }
 			description={ __(
 				'This info will be displayed on the product page, category pages, social media, and search results.',
 				'woocommerce'
 			) }
 		>
-			<TextControl
-				label={ __( 'Name', 'woocommerce' ) }
-				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
-				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-				{ ...getTextControlProps( 'name' ) }
-			/>
-			{ values.id && permalinkPrefix && (
-				<div className="product-details-section__product-link">
-					{ __( 'Product link', 'woocommerce' ) }:&nbsp;
-					<a
-						href={ values.permalink }
-						target="_blank"
-						rel="noreferrer"
-					>
-						{ permalinkPrefix }
-						{ values.slug || cleanForSlug( values.name ) }
-						{ permalinkSuffix }
-					</a>
-					<Button
-						variant="link"
-						onClick={ () => setShowProductLinkEditModal( true ) }
-					>
-						{ __( 'Edit', 'woocommerce' ) }
-					</Button>
-				</div>
-			) }
+			<div>
+				<TextControl
+					label={ __( 'Name', 'woocommerce' ) }
+					name={ `${ PRODUCT_DETAILS_SLUG }-name` }
+					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
+					{ ...getTextControlProps( getInputProps( 'name' ) ) }
+				/>
+				{ values.id && permalinkPrefix && (
+					<div className="product-details-section__product-link">
+						{ __( 'Product link', 'woocommerce' ) }:&nbsp;
+						<a
+							href={ values.permalink }
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ permalinkPrefix }
+							{ values.slug || cleanForSlug( values.name ) }
+							{ permalinkSuffix }
+						</a>
+						<Button
+							variant="link"
+							onClick={ () =>
+								setShowProductLinkEditModal( true )
+							}
+						>
+							{ __( 'Edit', 'woocommerce' ) }
+						</Button>
+					</div>
+				) }
+			</div>
 			<CheckboxControl
 				label={
 					<EnrichedLabel
@@ -128,7 +96,11 @@ export const ProductDetailsSection: React.FC = () => {
 						}
 					/>
 				}
-				{ ...getCheckboxProps( 'featured' ) }
+				{ ...getCheckboxProps( {
+					...getInputProps( 'featured' ),
+					name: 'featured',
+					className: 'product-details-section__feature-checkbox',
+				} ) }
 			/>
 			{ showProductLinkEditModal && (
 				<EditProductLinkModal

@@ -1159,6 +1159,7 @@ return array(
 		'TL' => __( 'Telenești', 'woocommerce' ),
 		'UN' => __( 'Ungheni', 'woocommerce' ),
 	),
+	'MF' => array(),
 	'MQ' => array(),
 	'MT' => array(),
 	'MX' => array( // Mexican states.

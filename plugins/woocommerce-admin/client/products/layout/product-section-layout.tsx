@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Children, isValidElement } from '@wordpress/element';
+import { FormSection } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -11,7 +12,7 @@ import { ProductFieldLayout } from './product-field-layout';
 
 type ProductSectionLayoutProps = {
 	title: string;
-	description: string;
+	description: string | JSX.Element;
 };
 
 export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
@@ -20,28 +21,20 @@ export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
 	children,
 } ) => {
 	return (
-		<div className="product-form-layout__category product-category-layout">
-			<div className="product-category-layout__header">
-				<h3 className="product-category-layout__title">{ title }</h3>
-				<div>
-					<p>{ description }</p>
-				</div>
-			</div>
-			<div className="product-category-layout__fields">
-				{ Children.map( children, ( child ) => {
-					if ( isValidElement( child ) && child.props.onChange ) {
-						return (
-							<ProductFieldLayout
-								fieldName={ child.props.name }
-								categoryName={ title }
-							>
-								{ child }
-							</ProductFieldLayout>
-						);
-					}
-					return child;
-				} ) }
-			</div>
-		</div>
+		<FormSection title={ title } description={ description }>
+			{ Children.map( children, ( child ) => {
+				if ( isValidElement( child ) && child.props.onChange ) {
+					return (
+						<ProductFieldLayout
+							fieldName={ child.props.name }
+							categoryName={ title }
+						>
+							{ child }
+						</ProductFieldLayout>
+					);
+				}
+				return child;
+			} ) }
+		</FormSection>
 	);
 };
