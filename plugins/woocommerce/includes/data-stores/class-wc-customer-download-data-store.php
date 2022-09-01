@@ -241,21 +241,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		global $wpdb;
 
 		$download_id = $download->get_id();
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				WHERE permission_id = %d",
-				$download_id
-			)
-		);
-		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_download_log
-				WHERE permission_id = %d",
-				$download_id
-			)
-		);
+		$this->delete_by_id( $download_id );
 
 		$download->set_id( 0 );
 	}
@@ -285,6 +271,38 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	}
 
 	/**
+	 * Delete download_log related to download permission via $field with value $value.
+	 *
+	 * @param string           $field Field used to query download permission table with.
+	 * @param string|int|float $value Value to filter the field by.
+	 *
+	 * @return void
+	 */
+	private function delete_download_log_by_field_value( $field, $value ) {
+		global $wpdb;
+
+		$query = "DELETE FROM {$wpdb->prefix}wc_download_log
+					WHERE permission_id IN (
+					    SELECT permission_id
+					    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+					    WHERE {$field} = ";
+
+		if ( is_int( $value ) ) {
+			$query .= '%d';
+		} elseif ( is_string( $value ) ) {
+			$query .= '%s';
+		} elseif ( is_float( $value ) ) {
+			$query .= '%f';
+		} else {
+			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
+		}
+
+		$wpdb->query(
+			$wpdb->prepare( $query, $value ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		);
+	}
+
+	/**
 	 * Method to delete a download permission from the database by order ID.
 	 *
 	 * @param int $id Order ID of the downloads that will be deleted.
@@ -292,17 +310,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function delete_by_order_id( $id ) {
 		global $wpdb;
 		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_download_log
-				WHERE permission_id IN (
-				    SELECT permission_id
-				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				    WHERE order_id = %d
-				)",
-				$id
-			)
-		);
+		$this->delete_download_log_by_field_value( 'order_id', $id );
+
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -320,17 +329,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function delete_by_download_id( $id ) {
 		global $wpdb;
 		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_download_log
-				WHERE permission_id IN (
-				    SELECT permission_id
-				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				    WHERE download_id = %s
-				)",
-				$id
-			)
-		);
+		$this->delete_download_log_by_field_value( 'download_id', $id );
+
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -350,17 +350,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function delete_by_user_id( $id ) {
 		global $wpdb;
 		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_download_log
-				WHERE permission_id IN (
-				    SELECT permission_id
-				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				    WHERE user_id = %d
-				)",
-				$id
-			)
-		);
+		$this->delete_download_log_by_field_value( 'user_id', $id );
+
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -380,17 +371,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function delete_by_user_email( $email ) {
 		global $wpdb;
 		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_download_log
-				WHERE permission_id IN (
-				    SELECT permission_id
-				    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				    WHERE user_email = %s
-				)",
-				$email
-			)
-		);
+		$this->delete_download_log_by_field_value( 'user_email', $email );
+
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
