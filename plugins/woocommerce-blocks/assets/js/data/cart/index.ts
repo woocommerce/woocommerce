@@ -33,6 +33,12 @@ const registeredStore = registerStore< State >( STORE_KEY, {
 
 registeredStore.subscribe( pushChanges );
 registeredStore.subscribe( async () => {
+	const isInitialized =
+		wpDataSelect( STORE_KEY ).hasFinishedResolution( 'getCartData' );
+
+	if ( ! isInitialized ) {
+		return;
+	}
 	await checkPaymentMethodsCanPay();
 	await checkPaymentMethodsCanPay( true );
 } );
