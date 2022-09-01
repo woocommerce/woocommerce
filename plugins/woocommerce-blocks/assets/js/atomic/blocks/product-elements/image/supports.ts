@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { hasSpacingStyleSupport } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
-import { hasSpacingStyleSupport } from '../../../../utils/global-style';
 
 export const supports = {
+	html: false,
 	...( isFeaturePluginBuild() && {
 		__experimentalBorder: {
 			radius: true,

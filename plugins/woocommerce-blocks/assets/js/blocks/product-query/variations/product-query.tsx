@@ -10,7 +10,7 @@ import { sparkles } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { QUERY_DEFAULT_ATTRIBUTES } from '../constants';
+import { INNER_BLOCKS_TEMPLATE, QUERY_DEFAULT_ATTRIBUTES } from '../constants';
 
 if ( isExperimentalBuild() ) {
 	registerBlockVariation( 'core/query', {
@@ -36,15 +36,7 @@ if ( isExperimentalBuild() ) {
 				name: 'product-query',
 			},
 		},
-		innerBlocks: [
-			[
-				'core/post-template',
-				{},
-				[ [ 'core/post-title' ], [ 'core/post-featured-image' ] ],
-			],
-			[ 'core/query-pagination' ],
-			[ 'core/query-no-results' ],
-		],
+		innerBlocks: INNER_BLOCKS_TEMPLATE,
 		scope: [ 'block', 'inserter' ],
 	} );
 }

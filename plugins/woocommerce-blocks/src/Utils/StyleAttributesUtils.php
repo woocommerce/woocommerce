@@ -348,6 +348,26 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for margin from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_margin_class_and_style( $attributes ) {
+		$margin = isset( $attributes['style']['spacing']['margin'] ) ? $attributes['style']['spacing']['margin'] : null;
+
+		if ( ! $margin ) {
+			return null;
+		}
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'margin: %s;', implode( ' ', $margin ) ),
+		);
+	}
+
+	/**
 	 * Get classes and styles from attributes.
 	 *
 	 * @param array $attributes Block attributes.
@@ -368,6 +388,7 @@ class StyleAttributesUtils {
 			'border_radius'    => self::get_border_radius_class_and_style( $attributes ),
 			'border_width'     => self::get_border_width_class_and_style( $attributes ),
 			'padding'          => self::get_padding_class_and_style( $attributes ),
+			'margin'           => self::get_margin_class_and_style( $attributes ),
 		);
 
 		if ( ! empty( $properties ) ) {
