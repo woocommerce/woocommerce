@@ -35,7 +35,7 @@ export const generateContributors = async (
 	const repoPath = await sparseCheckoutRepo(
 		'https://github.com/woocommerce/woocommerce.git',
 		'woocommerce',
-		[ 'plugins/woocommerce/composer.json' ]
+		[ 'plugins/woocommerce' ]
 	);
 
 	await checkoutRef( repoPath, currentVersion );

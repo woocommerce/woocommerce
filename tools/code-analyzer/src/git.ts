@@ -57,15 +57,15 @@ export const cloneRepo = async ( repoPath: string ) => {
 /**
  * Do a minimal sparse checkout of a github repo.
  *
- * @param {string}        githubRepoUrl      -     the URL to the repo to checkout.
- * @param {string}        path               - the path to checkout to.
- * @param {Array<string>} filesOrDirectories - the files or directories to checkout.
+ * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        path          - the path to checkout to.
+ * @param {Array<string>} directories   - the files or directories to checkout.
  * @return {Promise<string>}  the path to the cloned repo.
  */
 export const sparseCheckoutRepo = async (
 	githubRepoUrl: string,
 	path: string,
-	filesOrDirectories: string[]
+	directories: string[]
 ) => {
 	const folderPath = join( tmpdir(), path );
 
@@ -77,7 +77,7 @@ export const sparseCheckoutRepo = async (
 
 	await git.clone( githubRepoUrl, folderPath );
 	await git.raw( 'sparse-checkout', 'init', { '--cone': null } );
-	await git.raw( 'sparse-checkout', 'set', filesOrDirectories.join( ' ' ) );
+	await git.raw( 'sparse-checkout', 'set', directories.join( ' ' ) );
 
 	return folderPath;
 };
