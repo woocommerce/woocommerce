@@ -64,7 +64,8 @@ export default class VersionBump extends Command {
 
 		const prereleaseParameters = prerelease( nextVersion );
 		const isPrerelease = !! prereleaseParameters;
-		const isDevVersionBump = prereleaseParameters[ 0 ] === 'dev';
+		const isDevVersionBump =
+			prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
 
 		this.updatePluginFile( nextVersion );
 
