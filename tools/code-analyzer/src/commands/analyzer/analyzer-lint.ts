@@ -1,119 +1,157 @@
 /**
  * External dependencies
  */
-import { program } from 'commander';
-// program
-//   .name('pm')
-//   .version('0.1.0')
-//   .command('install [name]', 'install one or more packages')
-//   .command('search [query]', 'search with optional query')
-//   .command('update', 'update installed packages', { executableFile: 'myUpdateSubCommand' })
-//   .command('list', 'list packages installed', { isDefault: true });
-program
-	.name( 'analyzer' )
-	.version( '0.0.1' )
-	.command( 'lint', { isDefault: true } )
-	.command( 'analyze' );
+import { Command } from '@commander-js/extra-typings';
+import { Logger } from 'cli-core/src/logger';
+import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
+import { promisify } from 'util';
+import { exec } from 'child_process';
+import { join } from 'path';
+const execAsync = promisify( exec );
+// program.option( '-f, --force', 'force installation' );
+// const pkgs = program.args;
+
+const program = new Command()
+
+	.argument(
+		'<compare>',
+		'GitHub branch or commit hash to compare against the base branch/commit.'
+	)
+	.argument(
+		'<sinceVersion>',
+		'Specify the version used to determine which changes are included (version listed in @since code doc).'
+	)
+	.option(
+		'-b, --base <base>',
+		'GitHub base branch or commit hash.',
+		'trunk'
+	)
+	.option(
+		'-s, --source <source>',
+		'Git repo url or local path to a git repo.',
+		process.cwd()
+	)
+	.option(
+		'-f, --fileName <fileName>',
+		'Filename for the generated change JSON',
+		'changes.json'
+	)
+	.option(
+		'-ss, --skipSchemaCheck',
+		'Skip the schema check, enable this if you are not analyzing WooCommerce'
+	)
+	.action( async ( compare, sinceVersion, options ) => {
+		const { fileName, skipSchemaCheck, source, base } = options;
+
+		Logger.startTask( `Making temporary clone of ${ source }...` );
+		const tmpRepoPath = await cloneRepo( source );
+		Logger.endTask();
+		Logger.notice(
+			`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+		);
+
+		const diff = await generateDiff();
+
+		const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
+
+		if ( ! skipSchemaCheck ) {
+			const build = async () => {
+				// Note doing the minimal work to get a DB scan to work, avoiding full build for speed.
+				await execAsync( 'composer install', { cwd: pluginPath } );
+				await execAsync(
+					'pnpm run build:feature-config --filter=woocommerce',
+					{
+						cwd: pluginPath,
+					}
+				);
+			};
+
+			Logger.startTask( 'Generating schema diff...' );
+			const schemaDiff = await generateSchemaDiff(
+				tmpRepoPath,
+				compare,
+				base,
+				build,
+				Logger.error
+			);
+			Logger.endTask();
+		}
+
+		// console.log( 'compare', compare );
+		// console.log( 'sinceVersion', sinceVersion );
+	} );
+
+program.parse( process.argv );
+
+/**
+ * Analyzer class
+ */
+// class Analyzer extends Command {
+// /**
+//  * CLI description
+//  */
+// static description = 'Analyze code changes in WooCommerce Monorepo.';
 
 // /**
-//  * External dependencies
+//  * CLI arguments
 //  */
-// import { CliUx, Command, Flags } from '@oclif/core';
-// import { join } from 'path';
-// import { rmSync } from 'fs';
+// static args = [
+// 	{
+// 		name: 'compare',
+// 		description:
+// 			'GitHub branch or commit hash to compare against the base branch/commit.',
+// 		required: true,
+// 	},
+// 	{
+// 		name: 'sinceVersion',
+// 		description:
+// 			'Specify the version used to determine which changes are included (version listed in @since code doc).',
+// 		required: true,
+// 	},
+// ];
 
-// /**
-//  * Internal dependencies
-//  */
-// import {
-// 	printTemplateResults,
-// 	printHookResults,
-// 	printSchemaChange,
-// 	printDatabaseUpdates,
-// } from '../../print';
-// import {
-// 	getVersionRegex,
-// 	getFilename,
-// 	getPatches,
-// 	getHookName,
-// 	areSchemasEqual,
-// 	getHookDescription,
-// 	getHookChangeType,
-// 	generateJSONFile,
-// } from '../../utils';
-// import { cloneRepo, generateDiff, generateSchemaDiff } from '../../git';
-// import { execSync } from 'child_process';
-// import { OutputFlags } from '@oclif/core/lib/interfaces';
+/**
+ * CLI flags.
+ */
+// static flags = {
+// 	base: Flags.string( {
+// 		char: 'b',
+// 		description: 'GitHub base branch or commit hash.',
+// 		default: 'trunk',
+// 	} ),
+// 	output: Flags.string( {
+// 		char: 'o',
+// 		description: 'Output styling.',
+// 		options: [ 'console', 'github' ],
+// 		default: 'console',
+// 	} ),
+// 	source: Flags.string( {
+// 		char: 's',
+// 		description: 'Git repo url or local path to a git repo.',
+// 		default: process.cwd(),
+// 	} ),
+// 	file: Flags.string( {
+// 		char: 'f',
+// 		description: 'Filename for change description JSON.',
+// 		default: 'changes.json',
+// 	} ),
+// 	plugin: Flags.string( {
+// 		char: 'p',
+// 		description: 'Plugin to check for',
+// 		options: [ 'core', 'admin', 'beta' ],
+// 		default: 'core',
+// 	} ),
+// 	'is-woocommerce': Flags.boolean( {
+// 		char: 'w',
+// 		description:
+// 			'Analyzing WooCommerce? (Will scan for DB schema changes).',
+// 		default: true,
+// 	} ),
+// };
 
-// /**
-//  * Analyzer class
-//  */
-// export default class Analyzer extends Command {
-// 	/**
-// 	 * CLI description
-// 	 */
-// 	static description = 'Analyze code changes in WooCommerce Monorepo.';
-
-// 	/**
-// 	 * CLI arguments
-// 	 */
-// 	static args = [
-// 		{
-// 			name: 'compare',
-// 			description:
-// 				'GitHub branch or commit hash to compare against the base branch/commit.',
-// 			required: true,
-// 		},
-// 		{
-// 			name: 'sinceVersion',
-// 			description:
-// 				'Specify the version used to determine which changes are included (version listed in @since code doc).',
-// 			required: true,
-// 		},
-// 	];
-
-// 	/**
-// 	 * CLI flags.
-// 	 */
-// 	static flags = {
-// 		base: Flags.string( {
-// 			char: 'b',
-// 			description: 'GitHub base branch or commit hash.',
-// 			default: 'trunk',
-// 		} ),
-// 		output: Flags.string( {
-// 			char: 'o',
-// 			description: 'Output styling.',
-// 			options: [ 'console', 'github' ],
-// 			default: 'console',
-// 		} ),
-// 		source: Flags.string( {
-// 			char: 's',
-// 			description: 'Git repo url or local path to a git repo.',
-// 			default: process.cwd(),
-// 		} ),
-// 		file: Flags.string( {
-// 			char: 'f',
-// 			description: 'Filename for change description JSON.',
-// 			default: 'changes.json',
-// 		} ),
-// 		plugin: Flags.string( {
-// 			char: 'p',
-// 			description: 'Plugin to check for',
-// 			options: [ 'core', 'admin', 'beta' ],
-// 			default: 'core',
-// 		} ),
-// 		'is-woocommerce': Flags.boolean( {
-// 			char: 'w',
-// 			description:
-// 				'Analyzing WooCommerce? (Will scan for DB schema changes).',
-// 			default: true,
-// 		} ),
-// 	};
-
-// 	/**
-// 	 * This method is called to execute the command
-// 	 */
+/**
+ * This method is called to execute the command
+ */
 // 	async run(): Promise< void > {
 // 		const { args, flags } = await this.parse( Analyzer );
 

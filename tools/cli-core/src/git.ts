@@ -264,7 +264,7 @@ export const generateSchemaDiff = async (
 	tmpRepoPath: string,
 	compare: string,
 	base: string,
-	build: () => Promise< void > | void,
+	build: () => void,
 	error: ( s: string ) => void
 ): Promise< {
 	[ key: string ]: {
@@ -284,7 +284,7 @@ export const generateSchemaDiff = async (
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( base, [ '--force' ] );
-	await build();
+	build();
 	const baseSchema = await getSchema(
 		tmpRepoPath,
 		( errorMessage: string ) => {
@@ -299,7 +299,7 @@ export const generateSchemaDiff = async (
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( compare, [ '--force' ] );
-	await build();
+	build();
 	const compareSchema = await getSchema(
 		tmpRepoPath,
 		( errorMessage: string ) => {

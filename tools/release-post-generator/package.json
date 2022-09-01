@@ -4,7 +4,7 @@
 	"description": "Automate release post generation for Wordpress plugins",
 	"main": " ",
 	"scripts": {},
-	"author": "",
+	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@tsconfig/node16": "^1.0.3",
