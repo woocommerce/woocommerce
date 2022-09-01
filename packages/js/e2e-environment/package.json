@@ -33,7 +33,7 @@
 		"jest": "^25.1.0",
 		"jest-circus": "25.1.0",
 		"jest-each": "25.5.0",
-		"jest-puppeteer": "^4.4.0",
+		"jest-puppeteer": "^5.0.4",
 		"node-stream-zip": "^1.13.6",
 		"puppeteer": "2.1.1",
 		"readline-sync": "^1.4.10",

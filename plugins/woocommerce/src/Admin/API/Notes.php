@@ -816,6 +816,12 @@ class Notes extends \WC_REST_CRUD_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'is_read'           => array(
+					'description' => __( 'Registers whether the note is read or not', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 			),
 		);
 		return $this->add_additional_fields_schema( $schema );

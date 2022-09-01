@@ -60,10 +60,14 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > = ( {
 				<DateInput
 					disabled={ disabled }
 					value={ inputString }
-					onChange={ ( { target } ) =>
+					onChange={ ( {
+						target,
+					}: React.ChangeEvent< HTMLInputElement > ) =>
 						setInputString( target.value )
 					}
-					onBlur={ ( event ) => {
+					onBlur={ (
+						event: React.FocusEvent< HTMLInputElement >
+					) => {
 						if ( ! isOpen ) {
 							return;
 						}
