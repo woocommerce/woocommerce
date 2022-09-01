@@ -92,9 +92,11 @@ export default class VersionBump extends Command {
 
 			const updatedClassPluginFileContents =
 				classPluginFileContents.replace(
-					/"version": "\d.\d.\d",\n/m,
-					`"version": "${ nextVersion }",\n`
+					/public \$version = '\d.\d.\d';\n/m,
+					`public $version = '${ nextVersion }';\n`
 				);
+
+			console.log( updatedClassPluginFileContents );
 			writeFileSync(
 				'plugins/woocommerce/woocommerce.php',
 				updatedClassPluginFileContents
