@@ -1144,16 +1144,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		/**
-		 * Filter the sorted attributes by variation ID.
-		 *
-		 * @param  array      $sorted_meta The sorted attributes by variation ID.
-		 * @param  array      $attributes  The attributes used to build the $sorted_meta.
-		 * @param  WC_Product $product     The variable product.
-		 * @return array
-		 */
-		$sorted_meta = apply_filters( 'woocommerce_sorted_attributes_by_variation_id', $sorted_meta, $attributes, $product );
-
-		/**
 		 * Check each variation to find the one that matches the $match_attributes.
 		 *
 		 * Note: Not all meta fields will be set which is why we check existence.
