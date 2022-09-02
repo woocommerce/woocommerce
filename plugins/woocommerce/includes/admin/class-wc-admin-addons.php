@@ -238,7 +238,7 @@ class WC_Admin_Addons {
 		if ( false === ( $addon_sections ) ) {
 			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
 			$raw_sections     = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories' . $parameter_string
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories' . $parameter_string,
 				array(
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
