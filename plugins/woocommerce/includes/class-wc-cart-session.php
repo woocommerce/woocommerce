@@ -128,14 +128,12 @@ final class WC_Cart_Session {
 				continue;
 			}
 
-			$update_cart_session = false;
-
 			/**
 			 * Allow 3rd parties to validate this item before it's added to cart and add their own notices.
 			 *
 			 * @since 3.6.0
 			 *
-			 * @param bool $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
+			 * @param bool       $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
 			 * @param string     $key Cart item key.
 			 * @param array      $values Cart item values e.g. quantity and product_id.
 			 * @param WC_Product $product The product being added to the cart.
@@ -147,7 +145,6 @@ final class WC_Cart_Session {
 				 *
 				 * @since 3.6.0
 				 *
-				 * @param bool       $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
 				 * @param string     $key Cart item key.
 				 * @param array      $values Cart item values e.g. quantity and product_id.
 				 * @param WC_Product $product The product being added to the cart.
@@ -157,7 +154,7 @@ final class WC_Cart_Session {
 			/**
 			 * Allow 3rd parties to override this item's is_puchasable() result with cart item data.
 			 *
-			 * @since 4.1.0
+			 * @since 7.0.0
 			 *
 			 * @param bool $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
 			 * @param string $key Cart item key.
