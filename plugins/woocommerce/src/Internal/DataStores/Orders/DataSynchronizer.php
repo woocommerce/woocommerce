@@ -151,9 +151,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 			$missing_orders_count_sql = "
 SELECT COUNT(1) FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
-WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
- AND orders.status not in ( 'auto-draft' )
-";
+WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 			$operator                 = '>';
 		} else {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
@@ -244,9 +242,7 @@ WHERE
 				$sql = "
 SELECT posts.ID FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
-WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
-AND orders.status not in ( 'auto-draft' )
-";
+WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'";
 				break;
 			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
 				$operator = $this->custom_orders_table_is_authoritative() ? '>' : '<';
@@ -257,8 +253,7 @@ SELECT orders.id FROM $orders_table orders
 JOIN $wpdb->posts posts on posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholders)
-  AND orders.date_updated_gmt $operator posts.post_modified_gmt
-",
+  AND orders.date_updated_gmt $operator posts.post_modified_gmt",
 					$order_post_types
 				);
 				// phpcs:enable
