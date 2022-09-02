@@ -13,7 +13,7 @@ import { mkdir, rm } from 'fs/promises';
 /**
  * Internal dependencies
  */
-import { startWPEnv, stopWPEnv } from './utils';
+import { execAsync, startWPEnv, stopWPEnv } from './utils';
 
 /**
  * Check if a string is a valid url.
@@ -222,7 +222,7 @@ export const getSchema = async (
 			'wp-content/plugins/woocommerce/bin/wc-get-schema.php';
 
 		// Get the WooCommerce schema from wp cli
-		const schema = execSync(
+		const schemaOutput = await execAsync(
 			`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
 			{
 				cwd: pluginPath,
@@ -231,7 +231,7 @@ export const getSchema = async (
 		);
 
 		// Get the OrdersTableDataStore schema.
-		const OrdersTableDataStore = execSync(
+		const ordersTableOutput = await execAsync(
 			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
 			{
 				cwd: pluginPath,
@@ -240,8 +240,8 @@ export const getSchema = async (
 		);
 
 		return {
-			schema,
-			OrdersTableDataStore,
+			schema: schemaOutput.stdout,
+			OrdersTableDataStore: ordersTableOutput.stdout,
 		};
 	} catch ( e ) {
 		if ( e instanceof Error ) {
@@ -280,8 +280,6 @@ export const generateSchemaDiff = async (
 	// Be sure the wp-env engine is started.
 	await startWPEnv( tmpRepoPath, error );
 
-	CliUx.ux.action.start( `Gathering schema from ${ base }` );
-
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( base, [ '--force' ] );
 	await build();
@@ -293,9 +291,6 @@ export const generateSchemaDiff = async (
 			);
 		}
 	);
-	// CliUx.ux.action.stop();
-
-	// CliUx.ux.action.start( `Gathering schema from ${ compare }` );
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( compare, [ '--force' ] );

@@ -6,6 +6,16 @@ export type SchemaDiff = {
 		method: string;
 		areEqual: boolean;
 	};
-} | null;
+};
 
-export const scanForSchemaChanges = ( schemaDiff: SchemaDiff ) => {};
+export const scanForSchemaChanges = ( schemaDiff: SchemaDiff ) => {
+	const diff: Record< string, string > = {};
+
+	Object.keys( schemaDiff ).forEach( ( key ) => {
+		if ( ! schemaDiff[ key ].areEqual ) {
+			diff[ key ] = schemaDiff[ key ].method;
+		}
+	} );
+
+	return diff;
+};

@@ -280,8 +280,6 @@ export const generateSchemaDiff = async (
 	// Be sure the wp-env engine is started.
 	await startWPEnv( tmpRepoPath, error );
 
-	CliUx.ux.action.start( `Gathering schema from ${ base }` );
-
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( base, [ '--force' ] );
 	build();
@@ -293,9 +291,6 @@ export const generateSchemaDiff = async (
 			);
 		}
 	);
-	CliUx.ux.action.stop();
-
-	CliUx.ux.action.start( `Gathering schema from ${ compare }` );
 
 	// Force checkout because sometimes a build will generate a lockfile change.
 	await git.checkout( compare, [ '--force' ] );
@@ -308,7 +303,6 @@ export const generateSchemaDiff = async (
 			);
 		}
 	);
-	CliUx.ux.action.stop();
 
 	stopWPEnv( tmpRepoPath, error );
 

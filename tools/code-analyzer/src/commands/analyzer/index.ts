@@ -15,16 +15,16 @@ program
 	.command( 'lint', { isDefault: true } )
 	.command( 'analyze' );
 
-// /**
-//  * External dependencies
-//  */
-// import { CliUx, Command, Flags } from '@oclif/core';
-// import { join } from 'path';
-// import { rmSync } from 'fs';
+/**
+ * External dependencies
+ */
+import { CliUx, Command, Flags } from '@oclif/core';
+import { join } from 'path';
+import { rmSync } from 'fs';
 
-// /**
-//  * Internal dependencies
-//  */
+/**
+ * Internal dependencies
+ */
 // import {
 // 	printTemplateResults,
 // 	printHookResults,
