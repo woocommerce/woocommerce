@@ -14,7 +14,10 @@ import { Logger } from './logger';
  * @param plugin plugin to update
  * @param nextVersion version to bump to
  */
-const updateReadmeStableTag = ( plugin: string, nextVersion: string ): void => {
+export const updateReadmeStableTag = (
+	plugin: string,
+	nextVersion: string
+): void => {
 	const filePath = `plugins/${ plugin }/readme.txt`;
 	try {
 		const readmeContents = readFileSync( filePath, 'utf8' );
@@ -36,7 +39,10 @@ const updateReadmeStableTag = ( plugin: string, nextVersion: string ): void => {
  * @param plugin plugin to update
  * @param nextVersion version to bump to
  */
-const updateReadmeChangelog = ( plugin: string, nextVersion: string ): void => {
+export const updateReadmeChangelog = (
+	plugin: string,
+	nextVersion: string
+): void => {
 	const filePath = `plugins/${ plugin }/readme.txt`;
 	try {
 		const readmeContents = readFileSync( filePath, 'utf8' );
@@ -58,7 +64,10 @@ const updateReadmeChangelog = ( plugin: string, nextVersion: string ): void => {
  * @param plugin plugin to update
  * @param nextVersion version to bump to
  */
-const updateClassPluginFile = ( plugin: string, nextVersion: string ): void => {
+export const updateClassPluginFile = (
+	plugin: string,
+	nextVersion: string
+): void => {
 	const filePath = `plugins/${ plugin }/includes/class-${ plugin }.php`;
 
 	if ( ! existsSync( filePath ) ) {
@@ -85,7 +94,10 @@ const updateClassPluginFile = ( plugin: string, nextVersion: string ): void => {
  * @param plugin plugin to update
  * @param nextVersion version to bump to
  */
-const updateComposerJSON = ( plugin: string, nextVersion: string ): void => {
+export const updateComposerJSON = (
+	plugin: string,
+	nextVersion: string
+): void => {
 	const filePath = `plugins/${ plugin }/composer.json`;
 	try {
 		const composerJson = JSON.parse( readFileSync( filePath, 'utf8' ) );
@@ -105,7 +117,10 @@ const updateComposerJSON = ( plugin: string, nextVersion: string ): void => {
  * @param plugin plugin to update
  * @param nextVersion version to bump to
  */
-const updatePluginFile = ( plugin: string, nextVersion: string ): void => {
+export const updatePluginFile = (
+	plugin: string,
+	nextVersion: string
+): void => {
 	const filePath = `plugins/${ plugin }/${ plugin }.php`;
 	try {
 		const pluginFileContents = readFileSync( filePath, 'utf8' );
