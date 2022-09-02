@@ -22,8 +22,8 @@
 		position: relative;
 		display: flex;
 		gap: $gap;
-		border-radius: inherit;
-		border-color: inherit;
+		border: 1px solid $gray-700;
+		border-radius: 4px;
 		align-items: flex-start;
 
 		.wc-block-components-filter-submit-button {
@@ -67,8 +67,8 @@
 	}
 
 	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
-		border: 1px solid $gray-700;
-		border-radius: 4px;
+		border: 0;
+		width: calc(100% - 50px);
 		padding: $gap-smaller;
 
 		.components-form-token-field__input::placeholder {
